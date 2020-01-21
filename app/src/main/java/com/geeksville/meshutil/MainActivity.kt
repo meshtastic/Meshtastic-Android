@@ -42,6 +42,8 @@ class MainActivity : AppCompatActivity() {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
         }
+
+        SoftwareUpdateService.enqueueWork(this, SoftwareUpdateService.scanDevicesIntent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

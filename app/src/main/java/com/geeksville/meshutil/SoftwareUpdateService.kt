@@ -9,6 +9,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.JobIntentService
+import java.io.InputStream
 import java.util.*
 
 
@@ -36,13 +37,17 @@ class SoftwareUpdateService : JobIntentService() {
     lateinit var updateGatt: BluetoothGatt // the gatt api used to talk to our device
     lateinit var updateService: BluetoothGattService // The service we are currently talking to to do the update
     lateinit var totalSizeDesc: BluetoothGattCharacteristic
+    lateinit var dataDesc: BluetoothGattCharacteristic
+    lateinit var firmwareStream: InputStream
 
     fun startUpdate() {
         if (updateService != null) {
             totalSizeDesc = updateService.getCharacteristic(SW_UPDATE_TOTALSIZE_CHARACTER)!!
 
+            firmwareStream = assets.open("firmware.bin")!!
+
             // Start the update by writing the # of bytes in the image
-            val numBytes = 45
+            val numBytes = firmwareStream.available()
             assert(totalSizeDesc.setValue(numBytes, BluetoothGattCharacteristic.FORMAT_UINT32, 0))
             assert(updateGatt.writeCharacteristic(totalSizeDesc))
             assert(updateGatt.readCharacteristic(totalSizeDesc))
@@ -51,7 +56,24 @@ class SoftwareUpdateService : JobIntentService() {
 
     // Send the next block of our file to the device
     fun sendNextBlock() {
+        if(firmwareStream.available() > 0) {
+            var blockSize = 512
 
+            if (blockSize > firmwareStream.available())
+                blockSize = firmwareStream.available()
+            val buffer = ByteArray(blockSize)
+
+            // slightly expensive to keep reallocing this buffer, but whatever
+            assert(firmwareStream.read(buffer) == blockSize)
+
+            dataDesc = updateService.getCharacteristic(SW_UPDATE_DATA_CHARACTER)!!
+            // updateGatt.beginReliableWrite()
+            dataDesc.value = buffer
+            assert(updateGatt.writeCharacteristic(dataDesc))
+        }
+        else {
+            assert(false) // fixme
+        }
     }
 
     // For each device that appears in our scan, ask for its GATT, when the gatt arrives,
@@ -75,16 +97,11 @@ class SoftwareUpdateService : JobIntentService() {
                         //intentAction = ACTION_GATT_CONNECTED
                         //connectionState = STATE_CONNECTED
                         // broadcastUpdate(intentAction)
-                        Log.i(AppCompatActivity.TAG, "Connected to GATT server.")
-                        Log.i(
-                            AppCompatActivity.TAG, "Attempting to start service discovery: "
-                        )
                         assert(bluetoothGatt.discoverServices())
                     }
                     BluetoothProfile.STATE_DISCONNECTED -> {
                         //intentAction = ACTION_GATT_DISCONNECTED
                         //connectionState = STATE_DISCONNECTED
-                        Log.i(AppCompatActivity.TAG, "Disconnected from GATT server.")
                         // broadcastUpdate(intentAction)
                     }
                 }
@@ -127,6 +144,18 @@ class SoftwareUpdateService : JobIntentService() {
 
                 // broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic)
             }
+
+            override fun onCharacteristicWrite(
+                gatt: BluetoothGatt?,
+                characteristic: BluetoothGattCharacteristic?,
+                status: Int
+            ) {
+                assert(status == BluetoothGatt.GATT_SUCCESS)
+
+                if (characteristic == dataDesc) {
+                    enqueueWork(this@SoftwareUpdateService, sendNextBlockIntent)
+                }
+            }
         }
         bluetoothGatt = device.connectGatt(this, false, gattCallback)!!
     }
@@ -157,6 +186,13 @@ class SoftwareUpdateService : JobIntentService() {
             label = intent.toString()
         }
         toast("Executing: $label")
+
+        when(intent.action) {
+            scanDevicesIntent.action -> scanLeDevice(true)
+            startUpdateIntent.action -> startUpdate()
+            sendNextBlockIntent.action -> sendNextBlock()
+            else -> assert(false)
+        }
 
         Log.i(
             "SimpleJobIntentService",
