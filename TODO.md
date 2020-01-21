@@ -2,6 +2,7 @@
 
 # Medium priority
 
+* add crash reporting
 * remove example code boilerplate from the service
 * add analytics (make them optional)
 
