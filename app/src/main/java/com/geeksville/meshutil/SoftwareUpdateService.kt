@@ -1,9 +1,11 @@
 package com.geeksville.meshutil
 
 import android.bluetooth.*
+import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
+import android.os.ParcelUuid
 import android.os.SystemClock
 import android.util.Log
 import android.widget.Toast
@@ -76,89 +78,101 @@ class SoftwareUpdateService : JobIntentService() {
         }
     }
 
-    // For each device that appears in our scan, ask for its GATT, when the gatt arrives,
-    // check if it is an eligable device and store it in our list of candidates
-    // if that device later disconnects remove it as a candidate
-    private val leScanCallback = BluetoothAdapter.LeScanCallback { device, _, _ ->
-        lateinit var bluetoothGatt: BluetoothGatt // late init so we can declare our callback and use this there
-
-        //var connectionState = STATE_DISCONNECTED
-
-        // Various callback methods defined by the BLE API.
-        val gattCallback = object : BluetoothGattCallback() {
-            override fun onConnectionStateChange(
-                gatt: BluetoothGatt,
-                status: Int,
-                newState: Int
-            ) {
-                //val intentAction: String
-                when (newState) {
-                    BluetoothProfile.STATE_CONNECTED -> {
-                        //intentAction = ACTION_GATT_CONNECTED
-                        //connectionState = STATE_CONNECTED
-                        // broadcastUpdate(intentAction)
-                        assert(bluetoothGatt.discoverServices())
-                    }
-                    BluetoothProfile.STATE_DISCONNECTED -> {
-                        //intentAction = ACTION_GATT_DISCONNECTED
-                        //connectionState = STATE_DISCONNECTED
-                        // broadcastUpdate(intentAction)
-                    }
-                }
-            }
-
-            // New services discovered
-            override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-                assert(status == BluetoothGatt.GATT_SUCCESS)
-
-                // broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED)
-
-                val service = gatt.services.find { it.uuid == SW_UPDATE_UUID }
-                if (service != null) {
-                    // FIXME instead of slamming in the target device here, instead make it a param for startUpdate
-                    updateService = service
-                    // FIXME instead of keeping the connection open, make start update just reconnect (needed once user can choose devices)
-                    updateGatt = bluetoothGatt
-                    enqueueWork(this@SoftwareUpdateService, startUpdateIntent)
-                } else {
-                    // drop our connection - we don't care about this device
-                    bluetoothGatt.disconnect()
-                }
-            }
-
-            // Result of a characteristic read operation
-            override fun onCharacteristicRead(
-                gatt: BluetoothGatt,
-                characteristic: BluetoothGattCharacteristic,
-                status: Int
-            ) {
-                assert(status == BluetoothGatt.GATT_SUCCESS)
-
-                if (characteristic == totalSizeDesc) {
-                    // Our read of this has completed, either fail or continue updating
-                    val readvalue =
-                        characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0)
-                    assert(readvalue != 0) // FIXME - handle this case
-                    enqueueWork(this@SoftwareUpdateService, sendNextBlockIntent)
-                }
-
-                // broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic)
-            }
-
-            override fun onCharacteristicWrite(
-                gatt: BluetoothGatt?,
-                characteristic: BluetoothGattCharacteristic?,
-                status: Int
-            ) {
-                assert(status == BluetoothGatt.GATT_SUCCESS)
-
-                if (characteristic == dataDesc) {
-                    enqueueWork(this@SoftwareUpdateService, sendNextBlockIntent)
-                }
-            }
+    private val scanCallback = object : ScanCallback() {
+        override fun onScanFailed(errorCode: Int) {
+            throw NotImplementedError()
         }
-        bluetoothGatt = device.connectGatt(this, false, gattCallback)!!
+
+        // For each device that appears in our scan, ask for its GATT, when the gatt arrives,
+        // check if it is an eligable device and store it in our list of candidates
+        // if that device later disconnects remove it as a candidate
+        override fun onScanResult(callbackType: Int, result: ScanResult) {
+
+            // We don't need any more results now
+            bluetoothAdapter.bluetoothLeScanner.stopScan(this)
+
+            lateinit var bluetoothGatt: BluetoothGatt // late init so we can declare our callback and use this there
+
+            //var connectionState = STATE_DISCONNECTED
+
+            // Various callback methods defined by the BLE API.
+            val gattCallback = object : BluetoothGattCallback() {
+                override fun onConnectionStateChange(
+                    gatt: BluetoothGatt,
+                    status: Int,
+                    newState: Int
+                ) {
+                    //val intentAction: String
+                    when (newState) {
+                        BluetoothProfile.STATE_CONNECTED -> {
+                            //intentAction = ACTION_GATT_CONNECTED
+                            //connectionState = STATE_CONNECTED
+                            // broadcastUpdate(intentAction)
+                            assert(bluetoothGatt.discoverServices())
+                        }
+                        BluetoothProfile.STATE_DISCONNECTED -> {
+                            //intentAction = ACTION_GATT_DISCONNECTED
+                            //connectionState = STATE_DISCONNECTED
+                            // broadcastUpdate(intentAction)
+                        }
+                    }
+                }
+
+                // New services discovered
+                override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
+                    assert(status == BluetoothGatt.GATT_SUCCESS)
+
+                    // broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED)
+
+                    val service = gatt.services.find { it.uuid == SW_UPDATE_UUID }
+                    if (service != null) {
+                        // FIXME instead of slamming in the target device here, instead make it a param for startUpdate
+                        updateService = service
+                        // FIXME instead of keeping the connection open, make start update just reconnect (needed once user can choose devices)
+                        updateGatt = bluetoothGatt
+                        enqueueWork(this@SoftwareUpdateService, startUpdateIntent)
+                    } else {
+                        // drop our connection - we don't care about this device
+                        bluetoothGatt.disconnect()
+                    }
+                }
+
+                // Result of a characteristic read operation
+                override fun onCharacteristicRead(
+                    gatt: BluetoothGatt,
+                    characteristic: BluetoothGattCharacteristic,
+                    status: Int
+                ) {
+                    assert(status == BluetoothGatt.GATT_SUCCESS)
+
+                    if (characteristic == totalSizeDesc) {
+                        // Our read of this has completed, either fail or continue updating
+                        val readvalue =
+                            characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0)
+                        assert(readvalue != 0) // FIXME - handle this case
+                        enqueueWork(this@SoftwareUpdateService, sendNextBlockIntent)
+                    }
+
+                    // broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic)
+                }
+
+                override fun onCharacteristicWrite(
+                    gatt: BluetoothGatt?,
+                    characteristic: BluetoothGattCharacteristic?,
+                    status: Int
+                ) {
+                    assert(status == BluetoothGatt.GATT_SUCCESS)
+
+                    if (characteristic == dataDesc) {
+                        enqueueWork(this@SoftwareUpdateService, sendNextBlockIntent)
+                    }
+                }
+            }
+            bluetoothGatt = result.device.connectGatt(this@SoftwareUpdateService, false, gattCallback)!!
+        }
     }
+
+
 
     private fun scanLeDevice(enable: Boolean) {
         when (enable) {
@@ -169,11 +183,21 @@ class SoftwareUpdateService : JobIntentService() {
                     bluetoothAdapter.stopLeScan(leScanCallback)
                 }, SCAN_PERIOD)
                 mScanning = true */
-                assert(bluetoothAdapter.startLeScan(leScanCallback))
+
+                val scanner = bluetoothAdapter.bluetoothLeScanner
+
+                // filter and only accept devices that have a sw update service
+                val filter = ScanFilter.Builder().setServiceUuid(ParcelUuid(SW_UPDATE_UUID)).build()
+                val settings = ScanSettings.Builder().
+                    setScanMode(ScanSettings.SCAN_MODE_BALANCED).
+                    setMatchMode(ScanSettings.MATCH_NUM_ONE_ADVERTISEMENT).
+                    setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH).
+                    build()
+                scanner.startScan(listOf(filter), settings, scanCallback)
             }
             else -> {
                 // mScanning = false
-                bluetoothAdapter.stopLeScan(leScanCallback)
+                // bluetoothAdapter.stopLeScan(leScanCallback)
             }
         }
     }
