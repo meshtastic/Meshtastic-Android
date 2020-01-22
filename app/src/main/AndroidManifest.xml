@@ -12,17 +12,35 @@
 
     <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- for job intent service -->
 
+    <!--
+    This permission is required to allow the application to send
+    events and properties to Mixpanel.
+    -->
+    <uses-permission
+        android:name="android.permission.INTERNET" />
+
+    <!--
+      This permission is optional but recommended so we can be smart
+      about when to send data.
+     -->
+    <uses-permission
+        android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="true" />
 
     <application
+        android:name=".MeshUtilApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <meta-data android:name="com.mixpanel.android.MPConfig.DisableViewCrawler"
+            android:value="true" />
 
         <!-- we need bind job service for oreo -->
         <service

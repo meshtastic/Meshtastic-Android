@@ -1,8 +1,7 @@
 apply plugin: 'com.android.application'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.google.gms.google-services'
 
 android {
     compileSdkVersion 29
@@ -54,6 +53,11 @@ dependencies {
     implementation 'androidx.ui:ui-tooling:0.1.0-dev02'
     implementation 'androidx.ui:ui-layout:0.1.0-dev02'
     implementation 'androidx.ui:ui-material:0.1.0-dev02'
+
+    // add the Firebase SDK for Google Analytics
+
+    // add SDKs for any other desired Firebase products
+    // https://firebase.google.com/docs/android/setup#available-libraries
 
     implementation project(':geeksville-androidlib')
 }

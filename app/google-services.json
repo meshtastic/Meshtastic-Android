@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "484268767777",
+    "firebase_url": "https://meshutil.firebaseio.com",
+    "project_id": "meshutil",
+    "storage_bucket": "meshutil.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:484268767777:android:341f38a29ecbe9b0334160",
+        "android_client_info": {
+          "package_name": "com.geeksville.meshutil"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "484268767777-hqiigdj947ih0otlcs4snj347g4hhgbj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDP5YQqMCXx08xLFm3sIK9kDcIxI7qwL-c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "484268767777-hqiigdj947ih0otlcs4snj347g4hhgbj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
