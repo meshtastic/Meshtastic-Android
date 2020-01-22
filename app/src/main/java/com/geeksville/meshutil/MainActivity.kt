@@ -13,12 +13,19 @@ import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.compose.Composable
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.ui.core.Text
+import androidx.ui.core.dp
+import androidx.ui.core.setContent
+import androidx.ui.layout.Column
+import androidx.ui.layout.Spacing
+import androidx.ui.material.Button
+import androidx.ui.material.MaterialTheme
+import androidx.ui.tooling.preview.Preview
 import com.geeksville.android.Logging
 
-import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
 
 
 class MainActivity : AppCompatActivity(), Logging {
@@ -66,22 +73,31 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
+    @Composable
+    fun composeView() {
+        MaterialTheme {
+            Column {
+                Text(text = "MeshUtil Ugly UI", modifier = Spacing(16.dp))
+
+                Button(text = "Start scan",
+                    onClick = {
+                        if (bluetoothAdapter != null) {
+                            SoftwareUpdateService.enqueueWork(this@MainActivity, SoftwareUpdateService.scanDevicesIntent)
+                        }
+                    })
+            }
+        }}
+
+    @Preview
+    @Composable
+    fun defaultPreview() {
+        composeView()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
-
-        fab.setOnClickListener { _ ->
-            /* Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show() */
-
-            // test crash reporting
-            // logAssert(false)
-            // throw NotImplementedError("I like crap")
-
-            if(bluetoothAdapter != null) {
-                SoftwareUpdateService.enqueueWork(this, SoftwareUpdateService.scanDevicesIntent)
-            }
+        setContent {
+            composeView()
         }
 
         // Ensures Bluetooth is available on the device and it is enabled. If not,

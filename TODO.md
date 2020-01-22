@@ -1,6 +1,6 @@
 
 
-* make frontend using https://developer.android.com/jetpack/compose/tutorial
+* use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
 *fix bluetooth
 
 # Medium priority
@@ -23,3 +23,5 @@ Don't leave device discoverable.  Don't let unpaired users do thing with device
 * assert() is apparently a noop - change to use my version of assert
 * DONE add crash reporting
 * DONE add analytics (make them optional)
+* make frontend using https://developer.android.com/jetpack/compose/tutorial
+

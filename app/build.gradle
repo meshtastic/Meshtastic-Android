@@ -26,7 +26,7 @@ android {
 
     buildFeatures {
         // Enables Jetpack Compose for this module
-        compose false // FIXME, if true main app crashes
+        compose true // NOTE, if true main app crashes if you use regular view layout functions
     }
 
     // Set both the Java and Kotlin compilers to target Java 8.
