@@ -1,4 +1,6 @@
 
+* assert() is apparently a noop - change to use my version of assert
+* make frontend using https://developer.android.com/jetpack/compose/tutorial
 
 # Medium priority
 

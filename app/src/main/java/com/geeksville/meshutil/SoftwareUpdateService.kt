@@ -43,17 +43,15 @@ class SoftwareUpdateService : JobIntentService() {
     lateinit var firmwareStream: InputStream
 
     fun startUpdate() {
-        if (updateService != null) {
             totalSizeDesc = updateService.getCharacteristic(SW_UPDATE_TOTALSIZE_CHARACTER)!!
 
-            firmwareStream = assets.open("firmware.bin")!!
+            firmwareStream = assets.open("firmware.bin")
 
             // Start the update by writing the # of bytes in the image
             val numBytes = firmwareStream.available()
             assert(totalSizeDesc.setValue(numBytes, BluetoothGattCharacteristic.FORMAT_UINT32, 0))
             assert(updateGatt.writeCharacteristic(totalSizeDesc))
             assert(updateGatt.readCharacteristic(totalSizeDesc))
-        }
     }
 
     // Send the next block of our file to the device
