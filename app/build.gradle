@@ -54,4 +54,6 @@ dependencies {
     implementation 'androidx.ui:ui-tooling:0.1.0-dev02'
     implementation 'androidx.ui:ui-layout:0.1.0-dev02'
     implementation 'androidx.ui:ui-material:0.1.0-dev02'
+
+    implementation project(':geeksville-androidlib')
 }
