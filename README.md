@@ -15,3 +15,5 @@ for verbose logging
 adb shell setprop log.tag.FA VERBOSE
 adb shell setprop log.tag.FA-SVC VERBOSE
 
+To see crash logs:
+https://console.firebase.google.com/u/0/project/meshutil/crashlytics/app/android:com.geeksville.meshutil/issues?state=open&time=last-seven-days&type=crash
