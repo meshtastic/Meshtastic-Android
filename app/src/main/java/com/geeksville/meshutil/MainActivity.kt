@@ -12,6 +12,7 @@ import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
@@ -26,9 +27,9 @@ class MainActivity : AppCompatActivity() {
         const val DID_REQUEST_PERM = 11
     }
 
-    private val bluetoothAdapter: BluetoothAdapter by lazy(LazyThreadSafetyMode.NONE) {
+    private val bluetoothAdapter: BluetoothAdapter? by lazy(LazyThreadSafetyMode.NONE) {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        bluetoothManager.adapter!!
+        bluetoothManager.adapter
     }
 
     fun requestPermission() {
@@ -59,7 +60,6 @@ class MainActivity : AppCompatActivity() {
             // result of the request.
         } else {
             // Permission has already been granted
-            SoftwareUpdateService.enqueueWork(this, SoftwareUpdateService.scanDevicesIntent)
         }
     }
 
@@ -68,16 +68,25 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+        fab.setOnClickListener { _ ->
+            /* Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show() */
+
+            if(bluetoothAdapter != null) {
+                SoftwareUpdateService.enqueueWork(this, SoftwareUpdateService.scanDevicesIntent)
+            }
         }
 
         // Ensures Bluetooth is available on the device and it is enabled. If not,
         // displays a dialog requesting user permission to enable Bluetooth.
-        bluetoothAdapter.takeIf { !it.isEnabled }?.apply {
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+        if(bluetoothAdapter != null) {
+            bluetoothAdapter!!.takeIf { !it.isEnabled }?.apply {
+                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+            }
+        }
+        else {
+            Toast.makeText(this, "Error - this app requires bluetooth", Toast.LENGTH_LONG).show()
         }
 
         requestPermission()

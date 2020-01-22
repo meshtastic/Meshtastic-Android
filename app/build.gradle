@@ -23,7 +23,7 @@ android {
 
     buildFeatures {
         // Enables Jetpack Compose for this module
-        compose true
+        compose false // FIXME, if true main app crashes
     }
 
     // Set both the Java and Kotlin compilers to target Java 8.
@@ -50,9 +50,15 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     // You also need to include the following Compose toolkit dependencies.
-    implementation 'androidx.ui:ui-tooling:0.1.0-dev02'
-    implementation 'androidx.ui:ui-layout:0.1.0-dev02'
-    implementation 'androidx.ui:ui-material:0.1.0-dev02'
+    implementation("androidx.compose:compose-runtime:$compose_version")
+    implementation("androidx.ui:ui-framework:$compose_version")
+    implementation("androidx.ui:ui-layout:$compose_version")
+    implementation("androidx.ui:ui-material:$compose_version")
+    implementation("androidx.ui:ui-foundation:$compose_version")
+    implementation("androidx.ui:ui-animation:$compose_version")
+    implementation "androidx.ui:ui-tooling:$compose_version"
+    androidTestImplementation("androidx.ui:ui-platform:$compose_version")
+    androidTestImplementation("androidx.ui:ui-test:$compose_version")
 
     // add the Firebase SDK for Google Analytics
 
