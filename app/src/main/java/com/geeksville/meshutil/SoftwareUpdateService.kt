@@ -7,10 +7,10 @@ import android.content.Intent
 import android.os.Handler
 import android.os.ParcelUuid
 import android.os.SystemClock
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.JobIntentService
+import com.geeksville.android.Logging
 import java.io.InputStream
 import java.util.*
 
@@ -29,7 +29,7 @@ import java.util.*
  * FIXME - broadcast when we found devices, made progress sending blocks or when the update is complete
  * FIXME - make the user decide to start an update on a particular device
  */
-class SoftwareUpdateService : JobIntentService() {
+class SoftwareUpdateService : JobIntentService(), Logging {
 
     private val bluetoothAdapter: BluetoothAdapter by lazy(LazyThreadSafetyMode.NONE) {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -49,9 +49,9 @@ class SoftwareUpdateService : JobIntentService() {
 
             // Start the update by writing the # of bytes in the image
             val numBytes = firmwareStream.available()
-            assert(totalSizeDesc.setValue(numBytes, BluetoothGattCharacteristic.FORMAT_UINT32, 0))
-            assert(updateGatt.writeCharacteristic(totalSizeDesc))
-            assert(updateGatt.readCharacteristic(totalSizeDesc))
+            logAssert(totalSizeDesc.setValue(numBytes, BluetoothGattCharacteristic.FORMAT_UINT32, 0))
+            logAssert(updateGatt.writeCharacteristic(totalSizeDesc))
+            logAssert(updateGatt.readCharacteristic(totalSizeDesc))
     }
 
     // Send the next block of our file to the device
@@ -64,15 +64,15 @@ class SoftwareUpdateService : JobIntentService() {
             val buffer = ByteArray(blockSize)
 
             // slightly expensive to keep reallocing this buffer, but whatever
-            assert(firmwareStream.read(buffer) == blockSize)
+            logAssert(firmwareStream.read(buffer) == blockSize)
 
             dataDesc = updateService.getCharacteristic(SW_UPDATE_DATA_CHARACTER)!!
             // updateGatt.beginReliableWrite()
             dataDesc.value = buffer
-            assert(updateGatt.writeCharacteristic(dataDesc))
+            logAssert(updateGatt.writeCharacteristic(dataDesc))
         }
         else {
-            assert(false) // fixme
+            logAssert(false) // fixme
         }
     }
 
@@ -110,7 +110,7 @@ class SoftwareUpdateService : JobIntentService() {
                             //intentAction = ACTION_GATT_CONNECTED
                             //connectionState = STATE_CONNECTED
                             // broadcastUpdate(intentAction)
-                            assert(bluetoothGatt.discoverServices())
+                            logAssert(bluetoothGatt.discoverServices())
                         }
                         BluetoothProfile.STATE_DISCONNECTED -> {
                             //intentAction = ACTION_GATT_DISCONNECTED
@@ -122,7 +122,7 @@ class SoftwareUpdateService : JobIntentService() {
 
                 // New services discovered
                 override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-                    assert(status == BluetoothGatt.GATT_SUCCESS)
+                    logAssert(status == BluetoothGatt.GATT_SUCCESS)
 
                     // broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED)
 
@@ -142,13 +142,13 @@ class SoftwareUpdateService : JobIntentService() {
                     characteristic: BluetoothGattCharacteristic,
                     status: Int
                 ) {
-                    assert(status == BluetoothGatt.GATT_SUCCESS)
+                    logAssert(status == BluetoothGatt.GATT_SUCCESS)
 
                     if (characteristic == totalSizeDesc) {
                         // Our read of this has completed, either fail or continue updating
                         val readvalue =
                             characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0)
-                        assert(readvalue != 0) // FIXME - handle this case
+                        logAssert(readvalue != 0) // FIXME - handle this case
                         enqueueWork(this@SoftwareUpdateService, sendNextBlockIntent)
                     }
 
@@ -160,7 +160,7 @@ class SoftwareUpdateService : JobIntentService() {
                     characteristic: BluetoothGattCharacteristic?,
                     status: Int
                 ) {
-                    assert(status == BluetoothGatt.GATT_SUCCESS)
+                    logAssert(status == BluetoothGatt.GATT_SUCCESS)
 
                     if (characteristic == dataDesc) {
                         enqueueWork(this@SoftwareUpdateService, sendNextBlockIntent)
@@ -169,7 +169,7 @@ class SoftwareUpdateService : JobIntentService() {
             }
             bluetoothGatt = result.device.connectGatt(this@SoftwareUpdateService, false, gattCallback)!!
             toast("FISH " + bluetoothGatt)
-            assert(bluetoothGatt.discoverServices())
+            logAssert(bluetoothGatt.discoverServices())
         }
     }
 
@@ -209,7 +209,7 @@ class SoftwareUpdateService : JobIntentService() {
 
     override fun onHandleWork(intent: Intent) { // We have received work to do.  The system or framework is already
 // holding a wake lock for us at this point, so we can just go.
-        Log.i("SimpleJobIntentService", "Executing work: $intent")
+        info("Executing work: $intent")
         var label = intent.getStringExtra("label")
         if (label == null) {
             label = intent.toString()
@@ -220,12 +220,10 @@ class SoftwareUpdateService : JobIntentService() {
             scanDevicesIntent.action -> scanLeDevice(true)
             startUpdateIntent.action -> startUpdate()
             sendNextBlockIntent.action -> sendNextBlock()
-            else -> assert(false)
+            else -> logAssert(false)
         }
 
-        Log.i(
-            "SimpleJobIntentService",
-            "Completed service @ " + SystemClock.elapsedRealtime()
+        info("Completed service @ " + SystemClock.elapsedRealtime()
         )
     }
 

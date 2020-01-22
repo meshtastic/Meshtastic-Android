@@ -15,12 +15,13 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.geeksville.android.Logging
 
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), Logging {
 
     companion object {
         const val REQUEST_ENABLE_BT = 10
@@ -33,6 +34,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun requestPermission() {
+        debug("Checking permissions")
+
         val perms = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_BACKGROUND_LOCATION,
             Manifest.permission.BLUETOOTH,
@@ -72,7 +75,10 @@ class MainActivity : AppCompatActivity() {
             /* Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show() */
 
+            // test crash reporting
+            // logAssert(false)
             // throw NotImplementedError("I like crap")
+
             if(bluetoothAdapter != null) {
                 SoftwareUpdateService.enqueueWork(this, SoftwareUpdateService.scanDevicesIntent)
             }
