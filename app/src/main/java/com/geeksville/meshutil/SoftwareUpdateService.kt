@@ -83,6 +83,10 @@ class SoftwareUpdateService : JobIntentService() {
             throw NotImplementedError()
         }
 
+        override fun onBatchScanResults(results: MutableList<ScanResult>?) {
+            throw NotImplementedError()
+        }
+
         // For each device that appears in our scan, ask for its GATT, when the gatt arrives,
         // check if it is an eligable device and store it in our list of candidates
         // if that device later disconnects remove it as a candidate
@@ -131,9 +135,6 @@ class SoftwareUpdateService : JobIntentService() {
                         // FIXME instead of keeping the connection open, make start update just reconnect (needed once user can choose devices)
                         updateGatt = bluetoothGatt
                         enqueueWork(this@SoftwareUpdateService, startUpdateIntent)
-                    } else {
-                        // drop our connection - we don't care about this device
-                        bluetoothGatt.disconnect()
                     }
                 }
 
@@ -169,6 +170,8 @@ class SoftwareUpdateService : JobIntentService() {
                 }
             }
             bluetoothGatt = result.device.connectGatt(this@SoftwareUpdateService, false, gattCallback)!!
+            toast("FISH " + bluetoothGatt)
+            assert(bluetoothGatt.discoverServices())
         }
     }
 
@@ -188,10 +191,14 @@ class SoftwareUpdateService : JobIntentService() {
 
                 // filter and only accept devices that have a sw update service
                 val filter = ScanFilter.Builder().setServiceUuid(ParcelUuid(SW_UPDATE_UUID)).build()
+
+                /* ScanSettings.CALLBACK_TYPE_FIRST_MATCH seems to trigger a bug returning an error of
+                SCAN_FAILED_OUT_OF_HARDWARE_RESOURCES (error #5)
+                 */
                 val settings = ScanSettings.Builder().
-                    setScanMode(ScanSettings.SCAN_MODE_BALANCED).
-                    setMatchMode(ScanSettings.MATCH_NUM_ONE_ADVERTISEMENT).
-                    setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH).
+                    setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).
+                    // setMatchMode(ScanSettings.MATCH_NUM_ONE_ADVERTISEMENT).
+                    // setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH).
                     build()
                 scanner.startScan(listOf(filter), settings, scanCallback)
             }
