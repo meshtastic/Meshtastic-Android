@@ -12,6 +12,7 @@ import androidx.core.app.JobIntentService
 import com.geeksville.android.Logging
 import java.io.InputStream
 import java.util.*
+import java.util.zip.CRC32
 
 
 /**
@@ -38,6 +39,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
     fun startUpdate() {
         info("starting update")
         firmwareStream = assets.open("firmware.bin")
+        firmwareCrc.reset()
 
         // Start the update by writing the # of bytes in the image
         val numBytes = firmwareStream.available()
@@ -57,12 +59,15 @@ class SoftwareUpdateService : JobIntentService(), Logging {
 
             // slightly expensive to keep reallocing this buffer, but whatever
             logAssert(firmwareStream.read(buffer) == blockSize)
+            firmwareCrc.update(buffer)
 
             // updateGatt.beginReliableWrite()
             dataDesc.value = buffer
             logAssert(updateGatt.writeCharacteristic(dataDesc))
         } else {
-            logAssert(false) // fixme
+            // We have finished sending all our blocks, so post the CRC so our state machine can advance
+            logAssert(crc32Desc.setValue(firmwareCrc.value.toInt(), BluetoothGattCharacteristic.FORMAT_UINT32, 0))
+            logAssert(updateGatt.writeCharacteristic(crc32Desc))
         }
     }
 
@@ -126,7 +131,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 characteristic: BluetoothGattCharacteristic,
                 status: Int
             ) {
-                debug("onCharacteristicRead")
+                debug("onCharacteristicRead $characteristic")
                 logAssert(status == BluetoothGatt.GATT_SUCCESS)
 
                 if (characteristic == totalSizeDesc) {
@@ -135,6 +140,11 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                         characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0)
                     logAssert(readvalue != 0) // FIXME - handle this case
                     enqueueWork(this@SoftwareUpdateService, sendNextBlockIntent)
+                } else  if (characteristic == updateResultDesc) {
+                    // we just read the update result if !0 we have an error
+                    val readvalue =
+                        characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0)
+                    logAssert(readvalue == 0) // FIXME - handle this case
                 }
                 else {
                     warn("Unexpected read: $characteristic")
@@ -148,7 +158,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 characteristic: BluetoothGattCharacteristic?,
                 status: Int
             ) {
-                debug("onCharacteristicWrite")
+                debug("onCharacteristicWrite $characteristic")
                 logAssert(status == BluetoothGatt.GATT_SUCCESS)
 
                 if(characteristic == totalSizeDesc) {
@@ -156,6 +166,9 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                     logAssert(updateGatt.readCharacteristic(totalSizeDesc))
                 } else if (characteristic == dataDesc) {
                     enqueueWork(this@SoftwareUpdateService, sendNextBlockIntent)
+                } else if (characteristic == crc32Desc) {
+                    // Now that we wrote the CRC, we should read the result code
+                    logAssert(updateGatt.readCharacteristic(updateResultDesc))
                 }
                 else {
                     warn("Unexpected write: $characteristic")
@@ -273,7 +286,6 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         val scanDevicesIntent = Intent("com.geeksville.com.geeeksville.mesh.SCAN_DEVICES")
         val startUpdateIntent = Intent("com.geeksville.com.geeeksville.mesh.START_UPDATE")
         private val sendNextBlockIntent = Intent("com.geeksville.com.geeeksville.mesh.SEND_NEXT_BLOCK")
-        private val finishUpdateIntent = Intent("com.geeksville.com.geeeksville.mesh.FINISH_UPDATE")
 
         private const val SCAN_PERIOD: Long = 10000
 
@@ -303,6 +315,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         lateinit var crc32Desc: BluetoothGattCharacteristic
         lateinit var updateResultDesc: BluetoothGattCharacteristic
         lateinit var firmwareStream: InputStream
+        val firmwareCrc = CRC32()
 
         /**
          * Convenience method for enqueuing work in to this service.
