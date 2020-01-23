@@ -1,8 +1,11 @@
 
+* test reg reading/writing directly via bt to device
 * fix bluetooth update
 * add real messaging code/protobufs
 * use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
 * connect to bluetooth device automatically using minimum power
+
+protoc -I=. --java_out /tmp ./mesh.proto
 
 # Medium priority
 

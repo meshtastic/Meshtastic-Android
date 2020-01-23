@@ -6,6 +6,9 @@ apply plugin: 'com.google.gms.google-services'
 // Apply the Crashlytics Gradle plugin
 apply plugin: 'com.google.firebase.crashlytics'
 
+// protobuf
+apply plugin: 'com.google.protobuf'
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
@@ -41,6 +44,22 @@ android {
     }
 }
 
+// per protobuf-gradle-plugin docs, this is recommended for android
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:3.9.0'
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                    option "lite"
+                }
+            }
+        }
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -51,6 +70,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    // You need to depend on the lite runtime library, not protobuf-java
+    implementation 'com.google.protobuf:protobuf-javalite:3.8.0'
 
     // You also need to include the following Compose toolkit dependencies.
     implementation("androidx.compose:compose-runtime:$compose_version")
