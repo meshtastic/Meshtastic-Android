@@ -80,8 +80,8 @@ class MainActivity : AppCompatActivity(), Logging {
     @Composable
     fun composeView() {
         MaterialTheme {
-            Column {
-                Text(text = "Meshtastic Ugly UI", modifier = Spacing(8.dp))
+            Column(modifier = Spacing(8.dp)) {
+                Text(text = "Meshtastic", modifier = Spacing(8.dp))
 
                 Button(text = "Start scan",
                     onClick = {

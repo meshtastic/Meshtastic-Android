@@ -20,6 +20,7 @@ https://jpa.kapsi.fi/nanopb/docs/
 nanopb binaries available here: https://jpa.kapsi.fi/nanopb/download/ use nanopb 0.4.0
 # Medium priority
 
+* use platform theme (dark or light)
 * remove mixpanel analytics
 * require user auth to pair with the device (i.e. press button on device to allow a new phone to pair with it).
 Don't leave device discoverable.  Don't let unpaired users do thing with device
