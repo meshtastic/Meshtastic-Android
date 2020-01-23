@@ -8,9 +8,38 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:484268767777:android:341f38a29ecbe9b0334160",
+        "mobilesdk_app_id": "1:484268767777:android:cfd54d15b56763ad334160",
         "android_client_info": {
           "package_name": "com.geeksville.mesh"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "484268767777-hqiigdj947ih0otlcs4snj347g4hhgbj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDP5YQqMCXx08xLFm3sIK9kDcIxI7qwL-c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "484268767777-hqiigdj947ih0otlcs4snj347g4hhgbj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:484268767777:android:341f38a29ecbe9b0334160",
+        "android_client_info": {
+          "package_name": "com.geeksville.meshutil"
         }
       },
       "oauth_client": [

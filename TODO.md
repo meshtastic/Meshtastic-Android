@@ -1,8 +1,10 @@
 
 * test reg reading/writing directly via bt to device
 * fix bluetooth update
-* add broadcasters for use by signal (node changes and packet received)
+* get signal running under debugger
+* DONE add broadcasters for use by signal (node changes and packet received)
 * make test implementation of server (doesn't use bluetooth)
+* make a test client of the android service
 * add real messaging code/protobufs
 * use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
 * connect to bluetooth device automatically using minimum power
@@ -18,10 +20,9 @@ https://jpa.kapsi.fi/nanopb/docs/
 nanopb binaries available here: https://jpa.kapsi.fi/nanopb/download/ use nanopb 0.4.0
 # Medium priority
 
-* remove secret google settings json before open sourcing
+* remove mixpanel analytics
 * require user auth to pair with the device (i.e. press button on device to allow a new phone to pair with it).
 Don't leave device discoverable.  Don't let unpaired users do thing with device
-
 * remove example code boilerplate from the service
 
 

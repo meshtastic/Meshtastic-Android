@@ -6,6 +6,7 @@ Questions? kevinh@geeksville.com
 
 ## Analytics setup
 
+analytics is currently on, before beta is over I'll make it optional
 on dev devices
 adb shell setprop debug.firebase.analytics.app com.geeeksville.mesh
 

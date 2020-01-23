@@ -10,7 +10,7 @@ class MeshService : Service(), Logging {
     val prefix = "com.geeksville.mesh"
 
     /*
-    see com.geeksville.com.geeeksville.mesh broadcast intents
+    see com.geeksville.mesh broadcast intents
     // RECEIVED_OPAQUE  for data received from other nodes
     // NODE_CHANGE  for new IDs appearing or disappearing
     // CONNECTION_CHANGED for losing/gaining connection to the packet radio

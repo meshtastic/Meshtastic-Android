@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity(), Logging {
     fun composeView() {
         MaterialTheme {
             Column {
-                Text(text = "MeshUtil Ugly UI", modifier = Spacing(8.dp))
+                Text(text = "Meshtastic Ugly UI", modifier = Spacing(8.dp))
 
                 Button(text = "Start scan",
                     onClick = {
