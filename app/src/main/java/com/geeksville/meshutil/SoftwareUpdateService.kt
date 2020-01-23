@@ -36,27 +36,18 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         bluetoothManager.adapter!!
     }
 
-    lateinit var updateGatt: BluetoothGatt // the gatt api used to talk to our device
-    lateinit var updateService: BluetoothGattService // The service we are currently talking to to do the update
-    lateinit var totalSizeDesc: BluetoothGattCharacteristic
-    lateinit var dataDesc: BluetoothGattCharacteristic
-    lateinit var firmwareStream: InputStream
-
     fun startUpdate() {
-            totalSizeDesc = updateService.getCharacteristic(SW_UPDATE_TOTALSIZE_CHARACTER)!!
+        firmwareStream = assets.open("firmware.bin")
 
-            firmwareStream = assets.open("firmware.bin")
-
-            // Start the update by writing the # of bytes in the image
-            val numBytes = firmwareStream.available()
-            logAssert(totalSizeDesc.setValue(numBytes, BluetoothGattCharacteristic.FORMAT_UINT32, 0))
-            logAssert(updateGatt.writeCharacteristic(totalSizeDesc))
-            logAssert(updateGatt.readCharacteristic(totalSizeDesc))
+        // Start the update by writing the # of bytes in the image
+        val numBytes = firmwareStream.available()
+        logAssert(totalSizeDesc.setValue(numBytes, BluetoothGattCharacteristic.FORMAT_UINT32, 0))
+        logAssert(updateGatt.writeCharacteristic(totalSizeDesc))
     }
 
     // Send the next block of our file to the device
     fun sendNextBlock() {
-        if(firmwareStream.available() > 0) {
+        if (firmwareStream.available() > 0) {
             var blockSize = 512
 
             if (blockSize > firmwareStream.available())
@@ -66,12 +57,10 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             // slightly expensive to keep reallocing this buffer, but whatever
             logAssert(firmwareStream.read(buffer) == blockSize)
 
-            dataDesc = updateService.getCharacteristic(SW_UPDATE_DATA_CHARACTER)!!
             // updateGatt.beginReliableWrite()
             dataDesc.value = buffer
             logAssert(updateGatt.writeCharacteristic(dataDesc))
-        }
-        else {
+        } else {
             logAssert(false) // fixme
         }
     }
@@ -99,11 +88,13 @@ class SoftwareUpdateService : JobIntentService(), Logging {
 
             // Various callback methods defined by the BLE API.
             val gattCallback = object : BluetoothGattCallback() {
+
                 override fun onConnectionStateChange(
                     gatt: BluetoothGatt,
                     status: Int,
                     newState: Int
                 ) {
+                    info("new bluetooth connection state $newState")
                     //val intentAction: String
                     when (newState) {
                         BluetoothProfile.STATE_CONNECTED -> {
@@ -130,6 +121,11 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                     if (service != null) {
                         // FIXME instead of slamming in the target device here, instead make it a param for startUpdate
                         updateService = service
+                        totalSizeDesc = service.getCharacteristic(SW_UPDATE_TOTALSIZE_CHARACTER)
+                        dataDesc = service.getCharacteristic(SW_UPDATE_DATA_CHARACTER)
+                        crc32Desc = service.getCharacteristic(SW_UPDATE_CRC32_CHARACTER)
+                        updateResultDesc = service.getCharacteristic(SW_UPDATE_RESULT_CHARACTER)
+
                         // FIXME instead of keeping the connection open, make start update just reconnect (needed once user can choose devices)
                         updateGatt = bluetoothGatt
                         enqueueWork(this@SoftwareUpdateService, startUpdateIntent)
@@ -162,17 +158,22 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 ) {
                     logAssert(status == BluetoothGatt.GATT_SUCCESS)
 
-                    if (characteristic == dataDesc) {
+                    if(characteristic == totalSizeDesc) {
+                        // Our write completed, queue up a readback
+                        logAssert(updateGatt.readCharacteristic(totalSizeDesc))
+                    } else if (characteristic == dataDesc) {
                         enqueueWork(this@SoftwareUpdateService, sendNextBlockIntent)
                     }
                 }
             }
-            bluetoothGatt = result.device.connectGatt(this@SoftwareUpdateService, false, gattCallback)!!
+            bluetoothGatt =
+                result.device.connectGatt(this@SoftwareUpdateService.applicationContext, true, gattCallback)!!
             toast("FISH " + bluetoothGatt)
-            logAssert(bluetoothGatt.discoverServices())
+
+            // too early to do this here
+            // logAssert(bluetoothGatt.discoverServices())
         }
     }
-
 
 
     private fun scanLeDevice(enable: Boolean) {
@@ -193,11 +194,11 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 /* ScanSettings.CALLBACK_TYPE_FIRST_MATCH seems to trigger a bug returning an error of
                 SCAN_FAILED_OUT_OF_HARDWARE_RESOURCES (error #5)
                  */
-                val settings = ScanSettings.Builder().
-                    setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).
-                    // setMatchMode(ScanSettings.MATCH_NUM_ONE_ADVERTISEMENT).
-                    // setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH).
-                    build()
+                val settings =
+                    ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).
+                        // setMatchMode(ScanSettings.MATCH_NUM_ONE_ADVERTISEMENT).
+                        // setCallbackType(ScanSettings.CALLBACK_TYPE_FIRST_MATCH).
+                        build()
                 scanner.startScan(listOf(filter), settings, scanCallback)
             }
             else -> {
@@ -216,14 +217,15 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         }
         toast("Executing: $label")
 
-        when(intent.action) {
+        when (intent.action) {
             scanDevicesIntent.action -> scanLeDevice(true)
             startUpdateIntent.action -> startUpdate()
             sendNextBlockIntent.action -> sendNextBlock()
             else -> logAssert(false)
         }
 
-        info("Completed service @ " + SystemClock.elapsedRealtime()
+        info(
+            "Completed service @ " + SystemClock.elapsedRealtime()
         )
     }
 
@@ -268,6 +270,17 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             UUID.fromString("4826129c-c22a-43a3-b066-ce8f0d5bacc6") //  write               crc32, write last - writing this will complete the OTA operation, now you can read result
         private val SW_UPDATE_RESULT_CHARACTER =
             UUID.fromString("5e134862-7411-4424-ac4a-210937432c77") // read|notify         result code, readable but will notify when the OTA operation completes
+
+        // FIXME - this is state that really more properly goes with the serice instance, but
+        // it can go away if our work queue gets empty.  So we keep it here instead. Not sure
+        // if there is a better approach?
+        lateinit var updateGatt: BluetoothGatt // the gatt api used to talk to our device
+        lateinit var updateService: BluetoothGattService // The service we are currently talking to to do the update
+        lateinit var totalSizeDesc: BluetoothGattCharacteristic
+        lateinit var dataDesc: BluetoothGattCharacteristic
+        lateinit var crc32Desc: BluetoothGattCharacteristic
+        lateinit var updateResultDesc: BluetoothGattCharacteristic
+        lateinit var firmwareStream: InputStream
 
         /**
          * Convenience method for enqueuing work in to this service.

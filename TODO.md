@@ -1,7 +1,8 @@
 
-
+* fix bluetooth update
+* add real messaging code/protobufs
 * use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
-*fix bluetooth
+* connect to bluetooth device automatically using minimum power
 
 # Medium priority
 

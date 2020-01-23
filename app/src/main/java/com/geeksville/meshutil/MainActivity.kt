@@ -27,7 +27,6 @@ import androidx.ui.tooling.preview.Preview
 import com.geeksville.android.Logging
 
 
-
 class MainActivity : AppCompatActivity(), Logging {
 
     companion object {
@@ -43,13 +42,20 @@ class MainActivity : AppCompatActivity(), Logging {
     fun requestPermission() {
         debug("Checking permissions")
 
-        val perms = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,
+        val perms = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_BACKGROUND_LOCATION,
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.WAKE_LOCK)
+            Manifest.permission.WAKE_LOCK
+        )
 
-        val missingPerms = perms.filter { ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED }
+        val missingPerms = perms.filter {
+            ContextCompat.checkSelfPermission(
+                this,
+                it
+            ) != PackageManager.PERMISSION_GRANTED
+        }
         if (missingPerms.isNotEmpty()) {
             missingPerms.forEach {
                 // Permission is not granted
@@ -73,25 +79,24 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
+    @Preview
     @Composable
     fun composeView() {
         MaterialTheme {
             Column {
-                Text(text = "MeshUtil Ugly UI", modifier = Spacing(16.dp))
+                Text(text = "MeshUtil Ugly UI", modifier = Spacing(8.dp))
 
                 Button(text = "Start scan",
                     onClick = {
                         if (bluetoothAdapter != null) {
-                            SoftwareUpdateService.enqueueWork(this@MainActivity, SoftwareUpdateService.scanDevicesIntent)
+                            SoftwareUpdateService.enqueueWork(
+                                this@MainActivity,
+                                SoftwareUpdateService.scanDevicesIntent
+                            )
                         }
                     })
             }
-        }}
-
-    @Preview
-    @Composable
-    fun defaultPreview() {
-        composeView()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -102,13 +107,12 @@ class MainActivity : AppCompatActivity(), Logging {
 
         // Ensures Bluetooth is available on the device and it is enabled. If not,
         // displays a dialog requesting user permission to enable Bluetooth.
-        if(bluetoothAdapter != null) {
+        if (bluetoothAdapter != null) {
             bluetoothAdapter!!.takeIf { !it.isEnabled }?.apply {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
             }
-        }
-        else {
+        } else {
             Toast.makeText(this, "Error - this app requires bluetooth", Toast.LENGTH_LONG).show()
         }
 
