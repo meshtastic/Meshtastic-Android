@@ -10,10 +10,104 @@ import android.os.SystemClock
 import android.widget.Toast
 import androidx.core.app.JobIntentService
 import com.geeksville.android.Logging
+import java.io.IOException
 import java.io.InputStream
 import java.util.*
 import java.util.zip.CRC32
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
+/**
+ * Uses coroutines to safely access a bluetooth GATT device with a synchronous API
+ *
+ * The BTLE API on android is dumb.  You can only have one outstanding operation in flight to
+ * the device.  If you try to do something when something is pending, the operation just returns
+ * false.  You are expected to chain your operations from the results callbacks.
+ *
+ * This class fixes the API by using coroutines to let you safely do a series of BTLE operations.
+ */
+class SyncBluetoothDevice(context: Context, device: BluetoothDevice) : Logging {
+
+    private val gattCallback = object : BluetoothGattCallback() {
+        override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
+            logAssert(pendingServiceDesc != null)
+            if (status != 0)
+                pendingServiceDesc!!.resumeWithException(IOException("Bluetooth status=$status"))
+            else
+                pendingServiceDesc!!.resume(Unit)
+        }
+
+        override fun onCharacteristicRead(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            status: Int
+        ) {
+            logAssert(pendingReadC != null)
+            if (status != 0)
+                pendingReadC!!.resumeWithException(IOException("Bluetooth status=$status"))
+            else
+                pendingReadC!!.resume(characteristic)
+        }
+
+        override fun onCharacteristicWrite(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic,
+            status: Int
+        ) {
+            logAssert(pendingWriteC != null)
+            if (status != 0)
+                pendingWriteC!!.resumeWithException(IOException("Bluetooth status=$status"))
+            else
+                pendingWriteC!!.resume(Unit)
+        }
+
+        override fun onMtuChanged(gatt: BluetoothGatt, mtu: Int, status: Int) {
+            logAssert(pendingMtu != null)
+            if (status != 0)
+                pendingMtu!!.resumeWithException(IOException("Bluetooth status=$status"))
+            else
+                pendingMtu!!.resume(mtu)
+        }
+    }
+
+    /// Users can access the GATT directly as needed
+    val gatt = device.connectGatt(context, true, gattCallback)!!
+
+    private var pendingServiceDesc: Continuation<Unit>? = null
+    private var pendingMtu: Continuation<Int>? = null
+    private var pendingWriteC: Continuation<Unit>? = null
+    private var pendingReadC: Continuation<BluetoothGattCharacteristic>? = null
+
+    suspend fun discoverServices(c: BluetoothGattCharacteristic) =
+        suspendCoroutine<Unit> { cont ->
+            pendingServiceDesc = cont
+            logAssert(gatt.discoverServices())
+        }
+
+    /// Returns the actual MTU size used
+    suspend fun requestMtu(len: Int) = suspendCoroutine<Int> { cont ->
+        pendingMtu = cont
+        logAssert(gatt.requestMtu(len))
+    }
+
+    suspend fun writeCharacteristic(c: BluetoothGattCharacteristic) =
+        suspendCoroutine<Unit> { cont ->
+            pendingWriteC = cont
+            logAssert(gatt.writeCharacteristic(c))
+        }
+
+    suspend fun readCharacteristic(c: BluetoothGattCharacteristic) =
+        suspendCoroutine<BluetoothGattCharacteristic> { cont ->
+            pendingReadC = cont
+            logAssert(gatt.readCharacteristic(c))
+        }
+
+    fun disconnect() {
+        gatt.disconnect()
+    }
+}
 
 /**
  * typical flow
@@ -52,8 +146,8 @@ class SoftwareUpdateService : JobIntentService(), Logging {
     fun sendNextBlock() {
 
         if (firmwareNumSent < firmwareSize) {
-            info("sending block ${ firmwareNumSent * 100 / firmwareSize }%")
-            var blockSize = 512-3 // Max size MTU excluding framing
+            info("sending block ${firmwareNumSent * 100 / firmwareSize}%")
+            var blockSize = 512 - 3 // Max size MTU excluding framing
 
             if (blockSize > firmwareStream.available())
                 blockSize = firmwareStream.available()
@@ -135,7 +229,13 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 logAssert(status == BluetoothGatt.GATT_SUCCESS)
 
                 // Start the update by writing the # of bytes in the image
-                logAssert(totalSizeDesc.setValue(firmwareSize, BluetoothGattCharacteristic.FORMAT_UINT32, 0))
+                logAssert(
+                    totalSizeDesc.setValue(
+                        firmwareSize,
+                        BluetoothGattCharacteristic.FORMAT_UINT32,
+                        0
+                    )
+                )
                 logAssert(updateGatt.writeCharacteristic(totalSizeDesc))
             }
 
@@ -154,13 +254,12 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                         characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0)
                     logAssert(readvalue != 0) // FIXME - handle this case
                     enqueueWork(this@SoftwareUpdateService, sendNextBlockIntent)
-                } else  if (characteristic == updateResultDesc) {
+                } else if (characteristic == updateResultDesc) {
                     // we just read the update result if !0 we have an error
                     val readvalue =
                         characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0)
                     logAssert(readvalue == 0) // FIXME - handle this case
-                }
-                else {
+                } else {
                     warn("Unexpected read: $characteristic")
                 }
 
@@ -175,7 +274,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 debug("onCharacteristicWrite $characteristic")
                 logAssert(status == BluetoothGatt.GATT_SUCCESS)
 
-                if(characteristic == totalSizeDesc) {
+                if (characteristic == totalSizeDesc) {
                     // Our write completed, queue up a readback
                     logAssert(updateGatt.readCharacteristic(totalSizeDesc))
                 } else if (characteristic == dataDesc) {
@@ -183,8 +282,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 } else if (characteristic == crc32Desc) {
                     // Now that we wrote the CRC, we should read the result code
                     logAssert(updateGatt.readCharacteristic(updateResultDesc))
-                }
-                else {
+                } else {
                     warn("Unexpected write: $characteristic")
                 }
             }
@@ -260,10 +358,6 @@ class SoftwareUpdateService : JobIntentService(), Logging {
     override fun onHandleWork(intent: Intent) { // We have received work to do.  The system or framework is already
 // holding a wake lock for us at this point, so we can just go.
         debug("Executing work: $intent")
-        var label = intent.getStringExtra("label")
-        if (label == null) {
-            label = intent.toString()
-        }
         when (intent.action) {
             scanDevicesIntent.action -> connectToTestDevice() // FIXME scanLeDevice(true)
             startUpdateIntent.action -> startUpdate()
@@ -297,7 +391,8 @@ class SoftwareUpdateService : JobIntentService(), Logging {
 
         val scanDevicesIntent = Intent("com.geeksville.com.geeeksville.mesh.SCAN_DEVICES")
         val startUpdateIntent = Intent("com.geeksville.com.geeeksville.mesh.START_UPDATE")
-        private val sendNextBlockIntent = Intent("com.geeksville.com.geeeksville.mesh.SEND_NEXT_BLOCK")
+        private val sendNextBlockIntent =
+            Intent("com.geeksville.com.geeeksville.mesh.SEND_NEXT_BLOCK")
 
         private const val SCAN_PERIOD: Long = 10000
 
