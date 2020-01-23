@@ -4,6 +4,7 @@
 * get signal running under debugger
 * DONE add broadcasters for use by signal (node changes and packet received)
 * make test implementation of server (doesn't use bluetooth)
+* make compose based access show mesh state
 * make a test client of the android service
 * add real messaging code/protobufs
 * use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
@@ -21,6 +22,7 @@ nanopb binaries available here: https://jpa.kapsi.fi/nanopb/download/ use nanopb
 
 # Medium priority
 
+* change info() log strings to debug()
 * use platform theme (dark or light)
 * remove mixpanel analytics
 * require user auth to pair with the device (i.e. press button on device to allow a new phone to pair with it).

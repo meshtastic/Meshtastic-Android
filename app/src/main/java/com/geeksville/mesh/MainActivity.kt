@@ -155,12 +155,16 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     private fun bindMeshService() {
-        info("Binding to mesh service!")
+        debug("Binding to mesh service!")
         // we bind using the well known name, to make sure 3rd party apps could also
         logAssert(meshService == null)
+        // FIXME - finding by string does work
         val intent = Intent(this, MeshService::class.java)
         intent.action = IMeshService::class.java.name
-        intent.setPackage("com.geeksville.mesh");
+
+        // This is the remote version that does not work! FIXME
+        //val intent = Intent(IMeshService::class.java.name)
+        //intent.setPackage("com.geeksville.mesh");
         isBound = bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
         logAssert(isBound)
     }
@@ -170,7 +174,7 @@ class MainActivity : AppCompatActivity(), Logging {
         // it, then now is the time to unregister.
         // if we never connected, do nothing
         if(isBound) {
-            info("Unbinding from mesh service!")
+            debug("Unbinding from mesh service!")
             unbindService(serviceConnection)
             meshService = null
         }
