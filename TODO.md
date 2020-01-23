@@ -5,8 +5,14 @@
 * use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
 * connect to bluetooth device automatically using minimum power
 
-protoc -I=. --java_out /tmp ./mesh.proto
+protobuf notes
+protoc -I=. --java_out /tmp mesh.proto
 
+to generate nanopb c code
+/home/kevinh/packages/nanopb-0.4.0-linux-x86/generator-bin/protoc --nanopb_out=/tmp -I=app/src/main/proto mesh.proto 
+https://jpa.kapsi.fi/nanopb/docs/
+
+nanopb binaries available here: https://jpa.kapsi.fi/nanopb/download/ use nanopb 0.4.0
 # Medium priority
 
 * remove secret google settings json before open sourcing

@@ -1,29 +1,162 @@
-syntax = "proto2";
+syntax = "proto3";
+// per https://developers.google.com/protocol-buffers/docs/proto3
 
-package tutorial;
+package mesh;
 
 option java_package = "com.geeksville.meshutil";
 option java_outer_classname = "MeshProtos";
 
-message Person {
-  required string name = 1;
-  required int32 id = 2;
-  optional string email = 3;
+/**
+MESH RADIO PROTOCOL
 
-  enum PhoneType {
-    MOBILE = 0;
-    HOME = 1;
-    WORK = 2;
-  }
+Old TODO notes on the mesh radio protocol, merge into real docs below...
 
-  message PhoneNumber {
-    required string number = 1;
-    optional PhoneType type = 2 [default = HOME];
-  }
+for each named group we have a preshared key known by all group members and wrapped around the device.  you can only be in one group at a time (FIXME?!)
+To join the group we read a qr code with the preshared key and ParamsCodeEnum.  that gets sent via bluetooth to the device.  ParamsCodeEnum maps to a set of various radio params (regulatory region, center freq, SF, bandwidth, bitrate, power etc...) so all members of the mesh can have their radios set the same way.
 
-  repeated PhoneNumber phones = 4;
+once in that group, we can talk between 254 node numbers.
+to get our node number (and announce our presence in the channel) we pick a random node number and broadcast as that node with WANT-NODENUM(my globally unique name).  If anyone on the channel has seen someone _else_ using that name within the last 24 hrs(?) they reply with DENY-NODENUM.  Note: we might receive multiple denies.  Note: this allows others to speak up for some other node that might be saving battery right now.
+Any time we hear from another node (for any message type), we add that node number to the unpickable list.  To dramatically decrease the odds a node number we request is already used by someone.
+If no one denies within TBD seconds, we assume that we have that node number.  As long as we keep talking to folks at least once every 24 hrs, others should remember we have it.
+
+Once we have a node number we can broadcast POSITION-UPDATE(my globally unique name, lat, lon, alt, amt battery remaining).  All receivers will use this to a) update the mapping of who is at what node nums, b) the time of last rx, c) position.  If we haven't heard from that node in a while we reply to that node (only) with our current POSITION_UPDATE state - so that node (presumably just rejoined the network) can build a map of all participants.
+
+We will periodically broadcast POSITION-UPDATE as needed based on distance moved or a periodic minimum heartbeat.
+
+If user wants to send a text they can SEND_TEXT(dest user, short text message).  Dest user is a node number, or 0xff for broadcast.
+*/
+
+// a gps position
+message Position {
+  double latitude = 1;
+  double longitude = 2;
+  int32 altitude = 3;
 }
 
-message AddressBook {
-  repeated Person people = 1;
+// Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)
+// sent to the phone (so the phone can know exact time of reception)
+message Time {
+  uint64 msecs = 1; // msecs since 1970
+}
+
+// A message sent from a device outside of the mesh, in a form the mesh does not understand
+// i.e. a Signal app level message.
+message Opaque {
+  bytes payload = 1;
+}
+
+// a simple text message, which even the little micros in the mesh can understand and show on their screen
+message Text {
+  string text = 1;
+}
+
+// Sent from the phone over bluetooth to set the user id for the owner of this node.
+// Also sent from nodes to each other when a new node signs on (so all clients can have this info)
+message User {
+  string id = 1; // a globally unique ID string for this user.  In the case of Signal that would mean +16504442323
+  string long_name = 2; // A full name for this user, i.e. "Kevin Hester"
+  string short_name = 3; // A VERY short name, ideally two characters.  Suitable for a tiny OLED screen
+}
+
+// Broadcast when a newly powered mesh node wants to find a node num it can use (see document for more
+// details)
+message WantNodeNum {
+  // No payload, just its existence is sufficent (desired node num will be in the from field)
+}
+
+// Sent to a node which has requested a nodenum when it is told it can't have it
+message DenyNodeNum {
+}
+
+// A single packet might have a series of SubPacket included
+message SubPacket {
+  oneof variant {
+    Position position = 1;
+    Time time = 2;
+    Text text = 3;
+    Opaque opaque = 4;
+    User user = 5;
+    WantNodeNum want_node = 6;
+    DenyNodeNum deny_node = 7;
+  }
+}
+
+
+// A packet sent over our mesh.
+// NOTE: this raw payload does not include the from and to addresses, which are stripped off
+// and passed into the mesh library code separately.
+message MeshPayload {
+  repeated SubPacket subPackets = 3;
+}
+
+// A full packet sent/received over the mesh
+message MeshPacket {
+  int32 from = 1;
+  int32 to = 2;
+  MeshPayload payload = 3;
+}
+
+// Full settings (center freq, spread factor, preshared secret key etc...) needed to configure a radio
+message RadioConfig {
+  // FIXME
+}
+
+/**
+
+The bluetooth to device link:
+
+Old BTLE protocol docs from TODO, merge in above and make real docs...
+
+use protocol buffers, and nanopb
+
+messages from device to phone:
+POSITION_UPDATE (..., time)
+TEXT_RECEIVED(from, text, time)
+OPAQUE_RECEIVED(from, payload, time) (for signal messages or other applications)
+
+messages from phone to device:
+SET_MYID(id, human readable long, human readable short) (send down the unique ID string used for this node, a human readable string shown for that id, and a very short human readable string suitable for oled screen)
+SEND_OPAQUE(dest, payload) (for signal messages or other applications)
+SEND_TEXT(dest, text)
+Get all nodes() (returns list of nodes, with full info, last time seen, loc, battery level etc)
+SET_CONFIG (switches device to a new set of radio params and preshared key, drops all existing nodes, force our node to rejoin this new group)
+
+*/
+
+// Full information about a node on the mesh
+message NodeInfo {
+  int32 num = 1; // the node number
+  User user = 2;
+  int32 battery_level = 3; // 0-100
+  Position position = 4;
+  Time last_seen = 5;
+}
+
+// packets from the radio to the phone will appear on the fromRadio characteristic.  It will support
+// READ and NOTIFY.  When a new packet arrives the device will notify?  possibly identify instead?
+// it will sit in that descriptor until consumed by the phone, at which point the next item in the FIFO
+// will be populated.  FIXME
+message FromRadio {
+  oneof variant {
+    MeshPacket packet = 1;
+    NodeInfo node_info = 2;
+  }
+}
+
+// packets/commands to the radio will be written (reliably) to the toRadio characteristic.  Once the
+// write completes the phone can assume it is handled.
+message ToRadio {
+
+  // If sent to the radio, the radio will send the phone its full node DB (NodeInfo records)
+  // Used to populate network info the first time the phone connects to the radio
+  message WantNodes {
+    // Empty
+  }
+
+  oneof variant {
+    MeshPacket packet = 1; // send this packet on the mesh
+    RadioConfig set_radio = 2; // set the radio provisioning for this node
+    User set_owner = 3; // Set the owner for this node
+    WantNodes want_nodes = 4; // phone wants radio to send full node db to the phone
+  }
 }
