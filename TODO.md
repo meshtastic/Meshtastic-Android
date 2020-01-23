@@ -1,7 +1,7 @@
 
 * test reg reading/writing directly via bt to device
 * fix bluetooth update
-* add broadcasters for use by signal
+* add broadcasters for use by signal (node changes and packet received)
 * make test implementation of server (doesn't use bluetooth)
 * add real messaging code/protobufs
 * use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state

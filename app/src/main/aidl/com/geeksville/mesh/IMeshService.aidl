@@ -17,7 +17,7 @@ interface IMeshService {
     /**
     Get the IDs of everyone on the mesh.  You should also subscribe for NODE_CHANGE broadcasts.
     */
-    void getOnline(out String[] ids);
+    String[] getOnline();
 
     /**
     Is the packet radio currently connected to the phone?
