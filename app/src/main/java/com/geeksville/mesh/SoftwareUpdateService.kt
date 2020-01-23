@@ -1,4 +1,4 @@
-package com.geeksville.meshutil
+package com.geeksville.mesh
 
 import android.bluetooth.*
 import android.bluetooth.le.*
@@ -8,7 +8,6 @@ import android.os.Handler
 import android.os.ParcelUuid
 import android.os.SystemClock
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.JobIntentService
 import com.geeksville.android.Logging
 import java.io.InputStream
@@ -248,10 +247,10 @@ class SoftwareUpdateService : JobIntentService(), Logging {
          */
         const val JOB_ID = 1000
 
-        val scanDevicesIntent = Intent("com.geeksville.meshutil.SCAN_DEVICES")
-        val startUpdateIntent = Intent("com.geeksville.meshutil.START_UPDATE")
-        private val sendNextBlockIntent = Intent("com.geeksville.meshutil.SEND_NEXT_BLOCK")
-        private val finishUpdateIntent = Intent("com.geeksville.meshutil.FINISH_UPDATE")
+        val scanDevicesIntent = Intent("com.geeksville.com.geeeksville.mesh.SCAN_DEVICES")
+        val startUpdateIntent = Intent("com.geeksville.com.geeeksville.mesh.START_UPDATE")
+        private val sendNextBlockIntent = Intent("com.geeksville.com.geeeksville.mesh.SEND_NEXT_BLOCK")
+        private val finishUpdateIntent = Intent("com.geeksville.com.geeeksville.mesh.FINISH_UPDATE")
 
         private const val SCAN_PERIOD: Long = 10000
 

@@ -6,6 +6,7 @@
 * add real messaging code/protobufs
 * use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
 * connect to bluetooth device automatically using minimum power
+* have signal declare receivers: https://developer.android.com/guide/components/broadcasts#manifest-declared-receivers
 
 protobuf notes
 protoc -I=. --java_out /tmp mesh.proto

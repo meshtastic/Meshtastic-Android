@@ -1,4 +1,4 @@
-package com.geeksville.meshutil
+package com.geeksville.mesh
 
 import org.junit.Test
 

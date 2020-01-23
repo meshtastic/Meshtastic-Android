@@ -1,4 +1,4 @@
-package com.geeksville.meshutil
+package com.geeksville.mesh
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.geeksville.meshutil", appContext.packageName)
+        assertEquals("com.geeksville.com.geeeksville.mesh", appContext.packageName)
     }
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.geeksville.meshutil"
+    package="com.geeksville.mesh"
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="GoogleAppIndexingWarning">
 
@@ -31,7 +31,7 @@
         android:required="true" />
 
     <application
-        android:name=".MeshUtilApplication"
+        android:name="com.geeksville.mesh.MeshUtilApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -44,18 +44,18 @@
 
         <!-- we need bind job service for oreo -->
         <service
-            android:name=".SoftwareUpdateService"
+            android:name="com.geeksville.mesh.SoftwareUpdateService"
             android:enabled="true"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <service
-            android:name=".MeshService"
+            android:name="com.geeksville.mesh.MeshService"
             android:enabled="true"
             android:exported="true" />
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.geeksville.mesh.MainActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -65,7 +65,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".BootCompleteReceiver">
+        <receiver android:name="com.geeksville.mesh.BootCompleteReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>

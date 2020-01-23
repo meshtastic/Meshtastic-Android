@@ -1,4 +1,4 @@
-package com.geeksville.meshutil
+package com.geeksville.mesh
 
 import android.app.Service
 import android.content.Intent

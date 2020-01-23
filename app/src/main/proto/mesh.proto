@@ -3,7 +3,7 @@ syntax = "proto3";
 
 package mesh;
 
-option java_package = "com.geeksville.meshutil";
+option java_package = "com.geeksville.com.geeeksville.mesh";
 option java_outer_classname = "MeshProtos";
 
 /**
