@@ -36,22 +36,24 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         bluetoothManager.adapter!!
     }
 
+
     fun startUpdate() {
         info("starting update")
         firmwareStream = assets.open("firmware.bin")
         firmwareCrc.reset()
+        firmwareNumSent = 0
+        firmwareSize = firmwareStream.available()
 
-        // Start the update by writing the # of bytes in the image
-        val numBytes = firmwareStream.available()
-        logAssert(totalSizeDesc.setValue(numBytes, BluetoothGattCharacteristic.FORMAT_UINT32, 0))
-        logAssert(updateGatt.writeCharacteristic(totalSizeDesc))
+        // we begin by setting our MTU size as high as it can go
+        logAssert(updateGatt.requestMtu(512))
     }
 
     // Send the next block of our file to the device
     fun sendNextBlock() {
-        info("sending next block")
-        if (firmwareStream.available() > 0) {
-            var blockSize = 512
+
+        if (firmwareNumSent < firmwareSize) {
+            info("sending block ${ firmwareNumSent * 100 / firmwareSize }%")
+            var blockSize = 512-3 // Max size MTU excluding framing
 
             if (blockSize > firmwareStream.available())
                 blockSize = firmwareStream.available()
@@ -64,9 +66,12 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             // updateGatt.beginReliableWrite()
             dataDesc.value = buffer
             logAssert(updateGatt.writeCharacteristic(dataDesc))
+            firmwareNumSent += blockSize
         } else {
             // We have finished sending all our blocks, so post the CRC so our state machine can advance
-            logAssert(crc32Desc.setValue(firmwareCrc.value.toInt(), BluetoothGattCharacteristic.FORMAT_UINT32, 0))
+            val c = firmwareCrc.value
+            info("Sent all blocks, crc is $c")
+            logAssert(crc32Desc.setValue(c.toInt(), BluetoothGattCharacteristic.FORMAT_UINT32, 0))
             logAssert(updateGatt.writeCharacteristic(crc32Desc))
         }
     }
@@ -123,6 +128,15 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 // FIXME instead of keeping the connection open, make start update just reconnect (needed once user can choose devices)
                 updateGatt = bluetoothGatt
                 enqueueWork(this@SoftwareUpdateService, startUpdateIntent)
+            }
+
+            override fun onMtuChanged(gatt: BluetoothGatt, mtu: Int, status: Int) {
+                debug("onMtuChanged $mtu")
+                logAssert(status == BluetoothGatt.GATT_SUCCESS)
+
+                // Start the update by writing the # of bytes in the image
+                logAssert(totalSizeDesc.setValue(firmwareSize, BluetoothGattCharacteristic.FORMAT_UINT32, 0))
+                logAssert(updateGatt.writeCharacteristic(totalSizeDesc))
             }
 
             // Result of a characteristic read operation
@@ -245,13 +259,11 @@ class SoftwareUpdateService : JobIntentService(), Logging {
 
     override fun onHandleWork(intent: Intent) { // We have received work to do.  The system or framework is already
 // holding a wake lock for us at this point, so we can just go.
-        info("Executing work: $intent")
+        debug("Executing work: $intent")
         var label = intent.getStringExtra("label")
         if (label == null) {
             label = intent.toString()
         }
-        toast("Executing: $label")
-
         when (intent.action) {
             scanDevicesIntent.action -> connectToTestDevice() // FIXME scanLeDevice(true)
             startUpdateIntent.action -> startUpdate()
@@ -259,14 +271,14 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             else -> logAssert(false)
         }
 
-        info(
+        debug(
             "Completed service @ " + SystemClock.elapsedRealtime()
         )
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        toast("All work complete")
+        // toast("All work complete")
     }
 
     val mHandler = Handler()
@@ -316,6 +328,8 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         lateinit var updateResultDesc: BluetoothGattCharacteristic
         lateinit var firmwareStream: InputStream
         val firmwareCrc = CRC32()
+        var firmwareNumSent = 0
+        var firmwareSize = 0
 
         /**
          * Convenience method for enqueuing work in to this service.

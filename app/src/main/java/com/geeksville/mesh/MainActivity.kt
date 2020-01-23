@@ -105,8 +105,9 @@ class MainActivity : AppCompatActivity(), Logging {
                 Button(text = "Start scan",
                     onClick = {
                         if (bluetoothAdapter != null) {
-                            SoftwareUpdateService.enqueueWork(
-                                this@MainActivity,
+                            // Note: We don't want this service to die just because our activity goes away (because it is doing a software update)
+                            // So we use the application context instead of the activity
+                            SoftwareUpdateService.enqueueWork(applicationContext,
                                 SoftwareUpdateService.scanDevicesIntent
                             )
                         }

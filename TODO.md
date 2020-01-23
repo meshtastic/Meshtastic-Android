@@ -1,7 +1,9 @@
 
 * test reg reading/writing directly via bt to device
 * fix bluetooth update
+* refactor sw update code to share with my other bluetooth service
 * get signal running under debugger
+* handle failures in onCharWrite, instead of logAssert - because they can happen if device goes away
 * DONE add broadcasters for use by signal (node changes and packet received)
 * make test implementation of server (doesn't use bluetooth)
 * make compose based access show mesh state
@@ -42,4 +44,5 @@ Don't leave device discoverable.  Don't let unpaired users do thing with device
 * DONE add crash reporting
 * DONE add analytics (make them optional)
 * make frontend using https://developer.android.com/jetpack/compose/tutorial
+* change bluetooth mtu length to 512 (default is only 20)
 
