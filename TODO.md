@@ -18,6 +18,7 @@ to generate nanopb c code
 https://jpa.kapsi.fi/nanopb/docs/
 
 nanopb binaries available here: https://jpa.kapsi.fi/nanopb/download/ use nanopb 0.4.0
+
 # Medium priority
 
 * use platform theme (dark or light)

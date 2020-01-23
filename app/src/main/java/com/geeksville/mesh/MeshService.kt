@@ -5,9 +5,14 @@ import android.content.Intent
 import android.os.IBinder
 import com.geeksville.android.Logging
 
+/**
+ * Note: this service will go away once all clients are unbound from it.
+ */
 class MeshService : Service(), Logging {
 
-    val prefix = "com.geeksville.mesh"
+    companion object {
+        const val prefix = "com.geeksville.mesh"
+    }
 
     /*
     see com.geeksville.mesh broadcast intents

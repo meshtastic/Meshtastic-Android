@@ -2,15 +2,20 @@ package com.geeksville.mesh
 
 import android.Manifest
 import android.bluetooth.*
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.IBinder
+import android.os.RemoteException
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.compose.Composable
+import androidx.compose.Model
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.ui.core.Text
@@ -30,6 +35,10 @@ class MainActivity : AppCompatActivity(), Logging {
         const val REQUEST_ENABLE_BT = 10
         const val DID_REQUEST_PERM = 11
     }
+
+    @Model
+    class MeshServiceState(var connected: Boolean = false, public var onlineIds: Array<String> = arrayOf())
+    val meshServiceState = MeshServiceState()
 
     private val bluetoothAdapter: BluetoothAdapter? by lazy(LazyThreadSafetyMode.NONE) {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -78,10 +87,20 @@ class MainActivity : AppCompatActivity(), Logging {
 
     @Preview
     @Composable
-    fun composeView() {
+    fun previewView() {
+        composeView(meshServiceState)
+    }
+
+    @Composable
+    fun composeView(meshServiceState: MeshServiceState) {
         MaterialTheme {
             Column(modifier = Spacing(8.dp)) {
                 Text(text = "Meshtastic", modifier = Spacing(8.dp))
+
+                Text("Radio connected: ${meshServiceState.connected}")
+                meshServiceState.onlineIds.forEach {
+                    Text("User: $it")
+                }
 
                 Button(text = "Start scan",
                     onClick = {
@@ -99,7 +118,7 @@ class MainActivity : AppCompatActivity(), Logging {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            composeView()
+            composeView(meshServiceState)
         }
 
         // Ensures Bluetooth is available on the device and it is enabled. If not,
@@ -114,6 +133,59 @@ class MainActivity : AppCompatActivity(), Logging {
         }
 
         requestPermission()
+    }
+
+    var meshService: IMeshService? = null
+    var isBound = false
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName, service: IBinder) {
+            meshService = IMeshService.Stub.asInterface(service)
+
+            // FIXME this doesn't work because the model has already been copied into compose land?
+            runOnUiThread { // FIXME - this can be removed?
+                meshServiceState.connected = meshService!!.isConnected
+                meshServiceState.onlineIds = meshService!!.online
+            }
+        }
+
+        override fun onServiceDisconnected(name: ComponentName) {
+            meshService = null;
+        }
+    }
+
+    private fun bindMeshService() {
+        info("Binding to mesh service!")
+        // we bind using the well known name, to make sure 3rd party apps could also
+        logAssert(meshService == null)
+        val intent = Intent(this, MeshService::class.java)
+        intent.action = IMeshService::class.java.name
+        intent.setPackage("com.geeksville.mesh");
+        isBound = bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+        logAssert(isBound)
+    }
+
+    private fun unbindMeshService() {
+        // If we have received the service, and hence registered with
+        // it, then now is the time to unregister.
+        // if we never connected, do nothing
+        if(isBound) {
+            info("Unbinding from mesh service!")
+            unbindService(serviceConnection)
+            meshService = null
+        }
+    }
+
+    override fun onPause() {
+        unbindMeshService()
+
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        bindMeshService()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
