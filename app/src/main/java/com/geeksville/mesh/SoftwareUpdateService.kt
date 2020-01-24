@@ -10,12 +10,10 @@ import android.os.SystemClock
 import android.widget.Toast
 import androidx.core.app.JobIntentService
 import com.geeksville.android.Logging
-import kotlinx.coroutines.*
 import java.io.IOException
 import java.io.InputStream
 import java.util.*
 import java.util.zip.CRC32
-import kotlin.coroutines.*
 
 /**
  * typical flow
@@ -29,7 +27,7 @@ import kotlin.coroutines.*
  * FIXME - broadcast when we found devices, made progress sending blocks or when the update is complete
  * FIXME - make the user decide to start an update on a particular device
  */
-class SoftwareUpdateService : JobIntentService(), Logging, CoroutineScope by MainScope() {
+class SoftwareUpdateService : JobIntentService(), Logging {
 
     private val bluetoothAdapter: BluetoothAdapter by lazy(LazyThreadSafetyMode.NONE) {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -41,8 +39,6 @@ class SoftwareUpdateService : JobIntentService(), Logging, CoroutineScope by Mai
     fun startUpdate() {
         info("starting update")
 
-        // FIXME, is this the right scope to use?  I want it to block in the job queue
-        launch {
             val sync = SyncBluetoothDevice(this@SoftwareUpdateService, device)
 
             val firmwareStream = assets.open("firmware.bin")
@@ -110,7 +106,6 @@ class SoftwareUpdateService : JobIntentService(), Logging, CoroutineScope by Mai
             logAssert(updateResult == 0) // FIXME - handle this case
 
             // FIXME perhaps ask device to reboot
-        }
     }
 
 
@@ -192,7 +187,6 @@ class SoftwareUpdateService : JobIntentService(), Logging, CoroutineScope by Mai
     }
 
     override fun onDestroy() {
-        cancel() // Stop the CoroutineScope
         super.onDestroy()
         // toast("All work complete")
     }

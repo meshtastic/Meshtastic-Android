@@ -4,10 +4,8 @@ import android.bluetooth.*
 import android.content.Context
 import com.geeksville.android.Logging
 import java.io.IOException
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
+import com.geeksville.concurrent.SyncContinuation
+import com.geeksville.concurrent.suspend
 
 
 /**
@@ -19,13 +17,14 @@ import kotlin.coroutines.suspendCoroutine
  *
  * This class fixes the API by using coroutines to let you safely do a series of BTLE operations.
  */
-class SyncBluetoothDevice(private val context: Context, private val device: BluetoothDevice) : Logging {
+class SyncBluetoothDevice(private val context: Context, private val device: BluetoothDevice) :
+    Logging {
 
-    private var pendingServiceDesc: Continuation<Unit>? = null
-    private var pendingMtu: Continuation<kotlin.Int>? = null
-    private var pendingWriteC: Continuation<Unit>? = null
-    private var pendingReadC: Continuation<BluetoothGattCharacteristic>? = null
-    private var pendingConnect: Continuation<Unit>? = null
+    private var pendingServiceDesc: SyncContinuation<Unit>? = null
+    private var pendingMtu: SyncContinuation<kotlin.Int>? = null
+    private var pendingWriteC: SyncContinuation<Unit>? = null
+    private var pendingReadC: SyncContinuation<BluetoothGattCharacteristic>? = null
+    private var pendingConnect: SyncContinuation<Unit>? = null
 
     private val gattCallback = object : BluetoothGattCallback() {
 
@@ -37,7 +36,7 @@ class SyncBluetoothDevice(private val context: Context, private val device: Blue
             info("new bluetooth connection state $newState")
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> {
-                    if(pendingConnect != null) { // If someone was waiting to connect unblock them
+                    if (pendingConnect != null) { // If someone was waiting to connect unblock them
                         pendingConnect!!.resume(Unit)
                         pendingConnect = null
                     }
@@ -91,32 +90,32 @@ class SyncBluetoothDevice(private val context: Context, private val device: Blue
     /// Users can access the GATT directly as needed
     lateinit var gatt: BluetoothGatt
 
-    suspend fun connect() =
-        suspendCoroutine<Unit> { cont ->
+    fun connect() =
+        suspend<Unit> { cont ->
             pendingConnect = cont
             gatt = device.connectGatt(context, false, gattCallback)!!
         }
 
-    suspend fun discoverServices() =
-        suspendCoroutine<Unit> { cont ->
+    fun discoverServices() =
+        suspend<Unit> { cont ->
             pendingServiceDesc = cont
             logAssert(gatt.discoverServices())
         }
 
     /// Returns the actual MTU size used
-    suspend fun requestMtu(len: Int): kotlin.Int = suspendCoroutine { cont ->
+    fun requestMtu(len: Int) = suspend<kotlin.Int> { cont ->
         pendingMtu = cont
         logAssert(gatt.requestMtu(len))
     }
 
-    suspend fun writeCharacteristic(c: BluetoothGattCharacteristic) =
-        suspendCoroutine<Unit> { cont ->
+    fun writeCharacteristic(c: BluetoothGattCharacteristic) =
+        suspend<Unit> { cont ->
             pendingWriteC = cont
             logAssert(gatt.writeCharacteristic(c))
         }
 
-    suspend fun readCharacteristic(c: BluetoothGattCharacteristic) =
-        suspendCoroutine<BluetoothGattCharacteristic> { cont ->
+    fun readCharacteristic(c: BluetoothGattCharacteristic) =
+        suspend<BluetoothGattCharacteristic> { cont ->
             pendingReadC = cont
             logAssert(gatt.readCharacteristic(c))
         }
