@@ -72,7 +72,8 @@ class SoftwareUpdateService : JobIntentService(), Logging {
 // Our write completed, queue up a readback
             val totalSizeReadback = sync.readCharacteristic(totalSizeDesc)
                 .getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0)
-            logAssert(totalSizeReadback != 0) // FIXME - handle this case
+            if(totalSizeReadback == 0) // FIXME - handle this case
+                throw Exception("Device rejected file size")
 
             // Send all the blocks
             while (firmwareNumSent < firmwareSize) {
@@ -103,7 +104,8 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             val updateResult =
                 sync.readCharacteristic(updateResultDesc)
                     .getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0)
-            logAssert(updateResult == 0) // FIXME - handle this case
+            if(updateResult != 0) // FIXME - handle this case
+                throw Exception("Device update failed, reason=$updateResult")
 
             // FIXME perhaps ask device to reboot
     }
@@ -209,10 +211,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         val startUpdateIntent = Intent("com.geeksville.com.geeeksville.mesh.START_UPDATE")
 
         private const val SCAN_PERIOD: Long = 10000
-
-        //const val ACTION_GATT_CONNECTED = "com.example.bluetooth.le.ACTION_GATT_CONNECTED"
-        //const val ACTION_GATT_DISCONNECTED = "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED"
-
+        
         private val TAG =
             MainActivity::class.java.simpleName // FIXME - use my logging class instead
 

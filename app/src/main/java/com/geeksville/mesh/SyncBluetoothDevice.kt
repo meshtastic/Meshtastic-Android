@@ -21,19 +21,21 @@ class SyncBluetoothDevice(private val context: Context, private val device: Blue
     Logging {
 
     private var pendingServiceDesc: SyncContinuation<Unit>? = null
-    private var pendingMtu: SyncContinuation<kotlin.Int>? = null
+    private var pendingMtu: SyncContinuation<Int>? = null
     private var pendingWriteC: SyncContinuation<Unit>? = null
     private var pendingReadC: SyncContinuation<BluetoothGattCharacteristic>? = null
     private var pendingConnect: SyncContinuation<Unit>? = null
 
-    private val gattCallback = object : BluetoothGattCallback() {
+    var state = BluetoothProfile.STATE_DISCONNECTED
 
+    private val gattCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(
             gatt: BluetoothGatt,
             status: Int,
             newState: Int
         ) {
             info("new bluetooth connection state $newState")
+            state = newState
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> {
                     if (pendingConnect != null) { // If someone was waiting to connect unblock them
@@ -42,7 +44,12 @@ class SyncBluetoothDevice(private val context: Context, private val device: Blue
                     }
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
-                    TODO("handle loss of connection")
+                    // cancel any ops
+
+                    val pendings = listOf(pendingMtu, pendingServiceDesc, pendingWriteC, pendingReadC, pendingConnect)
+                    pendings.filterNotNull().forEach {
+                        it.resumeWithException(IOException("Lost connection"))
+                    }
                 }
             }
         }
@@ -103,7 +110,7 @@ class SyncBluetoothDevice(private val context: Context, private val device: Blue
         }
 
     /// Returns the actual MTU size used
-    fun requestMtu(len: Int) = suspend<kotlin.Int> { cont ->
+    fun requestMtu(len: Int) = suspend<Int> { cont ->
         pendingMtu = cont
         logAssert(gatt.requestMtu(len))
     }
