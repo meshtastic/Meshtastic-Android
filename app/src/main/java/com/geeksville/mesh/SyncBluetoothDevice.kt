@@ -3,9 +3,9 @@ package com.geeksville.mesh
 import android.bluetooth.*
 import android.content.Context
 import com.geeksville.android.Logging
-import java.io.IOException
 import com.geeksville.concurrent.SyncContinuation
 import com.geeksville.concurrent.suspend
+import java.io.IOException
 
 
 /**
@@ -46,7 +46,13 @@ class SyncBluetoothDevice(private val context: Context, private val device: Blue
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     // cancel any ops
 
-                    val pendings = listOf(pendingMtu, pendingServiceDesc, pendingWriteC, pendingReadC, pendingConnect)
+                    val pendings = listOf(
+                        pendingMtu,
+                        pendingServiceDesc,
+                        pendingWriteC,
+                        pendingReadC,
+                        pendingConnect
+                    )
                     pendings.filterNotNull().forEach {
                         it.resumeWithException(IOException("Lost connection"))
                     }

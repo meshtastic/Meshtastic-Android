@@ -1,20 +1,19 @@
 package com.geeksville.mesh
 
 import android.Manifest
-import android.bluetooth.*
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Debug
 import android.os.IBinder
-import android.os.RemoteException
-import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
 import androidx.compose.Model
 import androidx.core.app.ActivityCompat
@@ -38,7 +37,11 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     @Model
-    class MeshServiceState(var connected: Boolean = false, public var onlineIds: Array<String> = arrayOf())
+    class MeshServiceState(
+        var connected: Boolean = false,
+        var onlineIds: Array<String> = arrayOf()
+    )
+
     val meshServiceState = MeshServiceState()
 
     private val bluetoothAdapter: BluetoothAdapter? by lazy(LazyThreadSafetyMode.NONE) {
@@ -108,7 +111,8 @@ class MainActivity : AppCompatActivity(), Logging {
                         if (bluetoothAdapter != null) {
                             // Note: We don't want this service to die just because our activity goes away (because it is doing a software update)
                             // So we use the application context instead of the activity
-                            SoftwareUpdateService.enqueueWork(applicationContext,
+                            SoftwareUpdateService.enqueueWork(
+                                applicationContext,
                                 SoftwareUpdateService.startUpdateIntent
                             )
                         }
@@ -145,14 +149,15 @@ class MainActivity : AppCompatActivity(), Logging {
             meshService = IMeshService.Stub.asInterface(service)
 
             // FIXME this doesn't work because the model has already been copied into compose land?
-            runOnUiThread { // FIXME - this can be removed?
+            runOnUiThread {
+                // FIXME - this can be removed?
                 meshServiceState.connected = meshService!!.isConnected
                 meshServiceState.onlineIds = meshService!!.online
             }
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
-            meshService = null;
+            meshService = null
         }
     }
 
@@ -175,7 +180,7 @@ class MainActivity : AppCompatActivity(), Logging {
         // If we have received the service, and hence registered with
         // it, then now is the time to unregister.
         // if we never connected, do nothing
-        if(isBound) {
+        if (isBound) {
             debug("Unbinding from mesh service!")
             unbindService(serviceConnection)
             meshService = null

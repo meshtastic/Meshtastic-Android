@@ -1,7 +1,13 @@
 package com.geeksville.mesh
 
-import android.bluetooth.*
-import android.bluetooth.le.*
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothManager
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanFilter
+import android.bluetooth.le.ScanResult
+import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.Intent
 import android.os.Handler
@@ -10,8 +16,6 @@ import android.os.SystemClock
 import android.widget.Toast
 import androidx.core.app.JobIntentService
 import com.geeksville.android.Logging
-import java.io.IOException
-import java.io.InputStream
 import java.util.*
 import java.util.zip.CRC32
 
@@ -39,75 +43,75 @@ class SoftwareUpdateService : JobIntentService(), Logging {
     fun startUpdate() {
         info("starting update")
 
-            val sync = SyncBluetoothDevice(this@SoftwareUpdateService, device)
+        val sync = SyncBluetoothDevice(this@SoftwareUpdateService, device)
 
-            val firmwareStream = assets.open("firmware.bin")
-            val firmwareCrc = CRC32()
-            var firmwareNumSent = 0
-            val firmwareSize = firmwareStream.available()
+        val firmwareStream = assets.open("firmware.bin")
+        val firmwareCrc = CRC32()
+        var firmwareNumSent = 0
+        val firmwareSize = firmwareStream.available()
 
-            sync.connect()
-            sync.discoverServices() // Get our services
+        sync.connect()
+        sync.discoverServices() // Get our services
 
-            val service = sync.gatt.services.find { it.uuid == SW_UPDATE_UUID }!!
+        val service = sync.gatt.services.find { it.uuid == SW_UPDATE_UUID }!!
 
-            val totalSizeDesc = service.getCharacteristic(SW_UPDATE_TOTALSIZE_CHARACTER)
-            val dataDesc = service.getCharacteristic(SW_UPDATE_DATA_CHARACTER)
-            val crc32Desc = service.getCharacteristic(SW_UPDATE_CRC32_CHARACTER)
-            val updateResultDesc = service.getCharacteristic(SW_UPDATE_RESULT_CHARACTER)
+        val totalSizeDesc = service.getCharacteristic(SW_UPDATE_TOTALSIZE_CHARACTER)
+        val dataDesc = service.getCharacteristic(SW_UPDATE_DATA_CHARACTER)
+        val crc32Desc = service.getCharacteristic(SW_UPDATE_CRC32_CHARACTER)
+        val updateResultDesc = service.getCharacteristic(SW_UPDATE_RESULT_CHARACTER)
 
-            // we begin by setting our MTU size as high as it can go
-            sync.requestMtu(512)
+        // we begin by setting our MTU size as high as it can go
+        sync.requestMtu(512)
 
-            // Start the update by writing the # of bytes in the image
-            logAssert(
-                totalSizeDesc.setValue(
-                    firmwareSize,
-                    BluetoothGattCharacteristic.FORMAT_UINT32,
-                    0
-                )
+        // Start the update by writing the # of bytes in the image
+        logAssert(
+            totalSizeDesc.setValue(
+                firmwareSize,
+                BluetoothGattCharacteristic.FORMAT_UINT32,
+                0
             )
-            sync.writeCharacteristic(totalSizeDesc)
+        )
+        sync.writeCharacteristic(totalSizeDesc)
 
 // Our write completed, queue up a readback
-            val totalSizeReadback = sync.readCharacteristic(totalSizeDesc)
-                .getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0)
-            if(totalSizeReadback == 0) // FIXME - handle this case
-                throw Exception("Device rejected file size")
+        val totalSizeReadback = sync.readCharacteristic(totalSizeDesc)
+            .getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0)
+        if (totalSizeReadback == 0) // FIXME - handle this case
+            throw Exception("Device rejected file size")
 
-            // Send all the blocks
-            while (firmwareNumSent < firmwareSize) {
-                info("sending block ${firmwareNumSent * 100 / firmwareSize}%")
-                var blockSize = 512 - 3 // Max size MTU excluding framing
+        // Send all the blocks
+        while (firmwareNumSent < firmwareSize) {
+            info("sending block ${firmwareNumSent * 100 / firmwareSize}%")
+            var blockSize = 512 - 3 // Max size MTU excluding framing
 
-                if (blockSize > firmwareStream.available())
-                    blockSize = firmwareStream.available()
-                val buffer = ByteArray(blockSize)
+            if (blockSize > firmwareStream.available())
+                blockSize = firmwareStream.available()
+            val buffer = ByteArray(blockSize)
 
-                // slightly expensive to keep reallocing this buffer, but whatever
-                logAssert(firmwareStream.read(buffer) == blockSize)
-                firmwareCrc.update(buffer)
+            // slightly expensive to keep reallocing this buffer, but whatever
+            logAssert(firmwareStream.read(buffer) == blockSize)
+            firmwareCrc.update(buffer)
 
-                // updateGatt.beginReliableWrite()
-                dataDesc.value = buffer
-                sync.writeCharacteristic(dataDesc)
-                firmwareNumSent += blockSize
-            }
+            // updateGatt.beginReliableWrite()
+            dataDesc.value = buffer
+            sync.writeCharacteristic(dataDesc)
+            firmwareNumSent += blockSize
+        }
 
-            // We have finished sending all our blocks, so post the CRC so our state machine can advance
-            val c = firmwareCrc.value
-            info("Sent all blocks, crc is $c")
-            logAssert(crc32Desc.setValue(c.toInt(), BluetoothGattCharacteristic.FORMAT_UINT32, 0))
-            sync.writeCharacteristic(crc32Desc)
+        // We have finished sending all our blocks, so post the CRC so our state machine can advance
+        val c = firmwareCrc.value
+        info("Sent all blocks, crc is $c")
+        logAssert(crc32Desc.setValue(c.toInt(), BluetoothGattCharacteristic.FORMAT_UINT32, 0))
+        sync.writeCharacteristic(crc32Desc)
 
-            // we just read the update result if !0 we have an error
-            val updateResult =
-                sync.readCharacteristic(updateResultDesc)
-                    .getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0)
-            if(updateResult != 0) // FIXME - handle this case
-                throw Exception("Device update failed, reason=$updateResult")
+        // we just read the update result if !0 we have an error
+        val updateResult =
+            sync.readCharacteristic(updateResultDesc)
+                .getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0)
+        if (updateResult != 0) // FIXME - handle this case
+            throw Exception("Device update failed, reason=$updateResult")
 
-            // FIXME perhaps ask device to reboot
+        // FIXME perhaps ask device to reboot
     }
 
 
@@ -188,11 +192,6 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         )
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        // toast("All work complete")
-    }
-
     val mHandler = Handler()
     // Helper for showing tests
     fun toast(text: CharSequence?) {
@@ -211,7 +210,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         val startUpdateIntent = Intent("com.geeksville.com.geeeksville.mesh.START_UPDATE")
 
         private const val SCAN_PERIOD: Long = 10000
-        
+
         private val TAG =
             MainActivity::class.java.simpleName // FIXME - use my logging class instead
 
