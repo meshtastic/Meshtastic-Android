@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Debug
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.appcompat.app.AppCompatActivity
@@ -108,7 +109,7 @@ class MainActivity : AppCompatActivity(), Logging {
                             // Note: We don't want this service to die just because our activity goes away (because it is doing a software update)
                             // So we use the application context instead of the activity
                             SoftwareUpdateService.enqueueWork(applicationContext,
-                                SoftwareUpdateService.scanDevicesIntent
+                                SoftwareUpdateService.startUpdateIntent
                             )
                         }
                     })
