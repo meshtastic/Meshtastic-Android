@@ -1,11 +1,11 @@
 
 
-* handle failures in onCharWrite, instead of logAssert - because they can happen if device goes away
+* use android service from Signal
+* DONE handle failures in onCharWrite, instead of logAssert - because they can happen if device goes away
 * make test implementation of android service (doesn't use bluetooth)
 * clean up sw update code in device side
 * DONE add broadcasters for use by signal (node changes and packet received)
 * make compose based access show mesh state
-* use android service from Signal
 * add real messaging code/protobufs
 * use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
 * connect to bluetooth device automatically using minimum power
@@ -35,7 +35,7 @@ Don't leave device discoverable.  Don't let unpaired users do thing with device
 
 * make analytics optional
 * possibly use finotes for analytics https://finotes.com/
- * also add a receiver that fires after a new update was installed from the play stoe
+* also add a receiver that fires after a new update was installed from the play stoe
 
 # Done
 

@@ -53,13 +53,28 @@ message Time {
     uint64 msecs = 1; // msecs since 1970
 }
 
-// A message sent from a device outside of the mesh, in a form the mesh does not understand
-// i.e. a Signal app level message.
-message Opaque {
-    bytes payload = 1;
+// a data message to forward to an external app
+message Data {
+    enum Type {
+        /// A message sent from a device outside of the mesh, in a form the mesh does not understand
+        SIGNAL_OPAQUE = 0; // NOTE: This must be 0, because it is documented in IMeshService.aidl to be so
+
+        /// a simple UTF-8 text message, which even the little micros in the mesh can understand and show on their screen
+        /// eventually in some circumstances even signal might send messages in this form (see below)
+        SIMPLE_TEXT = 1;
+
+        /// a message receive acknowledgement, sent in cleartext - allows radio to show user that a message has been read by the recpient, optional
+        CLEAR_READACK = 2;
+
+        /// Not yet used but eventually:
+        /// SIGNAL_CLEAR_OPAQUE = 3; // Unencrypted at the signal level, relying on the radio crypt only (to keep size small), but contains Signal control data radios don't care about (or non ascii text)
+    }
+
+    Type typ = 1; // required
+    bytes payload = 2; // required
 }
 
-// a simple text message, which even the little micros in the mesh can understand and show on their screen
+
 message Text {
     string text = 1;
 }
@@ -87,11 +102,10 @@ message SubPacket {
     oneof variant {
         Position position = 1;
         Time time = 2;
-        Text text = 3;
-        Opaque opaque = 4;
-        User user = 5;
-        WantNodeNum want_node = 6;
-        DenyNodeNum deny_node = 7;
+        Data data = 3;
+        User user = 4;
+        WantNodeNum want_node = 5;
+        DenyNodeNum deny_node = 6;
     }
 }
 

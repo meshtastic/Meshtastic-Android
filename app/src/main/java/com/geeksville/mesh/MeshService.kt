@@ -10,6 +10,7 @@ import com.geeksville.android.Logging
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
 import com.google.protobuf.ByteString
+import java.nio.charset.Charset
 
 /**
  * Handles all the communication with android apps.  Also keeps an internal model
@@ -115,9 +116,8 @@ class MeshService : Service(), Logging {
     private fun toNodeID(n: Int) = toNodeInfo(n).user?.id
 
     /// given a nodenum, return a db entry - creating if necessary
-    private
-
-    fun getOrCreateNodeInfo(n: Int) = nodeDBbyNodeNum.getOrPut(n) { -> NodeInfo(n) }
+    private fun getOrCreateNodeInfo(n: Int) =
+        nodeDBbyNodeNum.getOrPut(n) { -> NodeInfo(n) }
 
     /// Map a userid to a node/ node num, or throw an exception if not found
     private fun toNodeInfo(id: String) = nodeDBbyID.getValue(id)
@@ -138,6 +138,38 @@ class MeshService : Service(), Logging {
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified recipient
     private fun newMeshPacketTo(id: String) = newMeshPacketTo(toNodeNum(id))
+
+    /// Update our model and resend as needed for a MeshPacket we just received from the radio
+    private fun handleReceivedData(fromNum: Int, data: MeshProtos.Data) {
+        val bytes = data.payload.toByteArray()
+        val fromId = toNodeID(fromNum)
+
+        /// the sending node ID if possible, else just its number
+        val fromString = fromId ?: fromId.toString()
+
+        when (data.typValue) {
+            MeshProtos.Data.Type.SIMPLE_TEXT_VALUE ->
+                warn(
+                    "TODO ignoring SIMPLE_TEXT from $fromString: ${bytes.toString(
+                        Charset.forName("UTF-8")
+                    )}"
+                )
+
+            MeshProtos.Data.Type.CLEAR_READACK_VALUE ->
+                warn(
+                    "TODO ignoring CLEAR_READACK from $fromString"
+                )
+
+            MeshProtos.Data.Type.SIGNAL_OPAQUE_VALUE ->
+                if (fromId == null)
+                    error("Ignoring opaque from $fromNum because we don't yet know its ID")
+                else {
+                    debug("Received opaque from $fromId ${bytes.size}")
+                    broadcastReceivedOpaque(fromId, bytes)
+                }
+            else -> TODO()
+        }
+    }
 
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
@@ -162,19 +194,9 @@ class MeshService : Service(), Logging {
                     updateNodeInfo(fromNum) {
                         it.lastSeen = p.time.msecs
                     }
-                MeshProtos.SubPacket.TEXT_FIELD_NUMBER -> {
-                    debug("TODO Ignoring TEXT from $fromNum ${p.text.text}")
-                }
-                MeshProtos.SubPacket.OPAQUE_FIELD_NUMBER -> {
-                    val opaque = p.opaque.payload.toByteArray()
-                    val fromId = toNodeID(fromNum)
-                    if (fromId == null)
-                        error("Ignoring opaque from $fromNum because we don't yet know its ID")
-                    else {
-                        debug("Received opaque from $fromId ${opaque.size}")
-                        broadcastReceivedOpaque(fromId, opaque)
-                    }
-                }
+                MeshProtos.SubPacket.DATA_FIELD_NUMBER ->
+                    handleReceivedData(fromNum, p.data)
+
                 MeshProtos.SubPacket.USER_FIELD_NUMBER ->
                     updateNodeInfo(fromNum) {
                         it.user = MeshUser(p.user.id, p.user.longName, p.user.shortName)
@@ -195,6 +217,10 @@ class MeshService : Service(), Logging {
         }
     }
 
+    private fun handleReceivedNodeInfo(info: MeshProtos.NodeInfo) {
+        TODO()
+    }
+
     /**
      * Receives messages from our BT radio service and processes them to update our model
      * and send to clients as needed.
@@ -206,7 +232,7 @@ class MeshService : Service(), Logging {
             info("Received from radio service: $proto")
             when (proto.variantCase.number) {
                 MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(proto.packet)
-                MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> TODO()
+                MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleReceivedNodeInfo(proto.nodeInfo)
                 else -> TODO("Unexpected FromRadio variant")
             }
         }
@@ -217,15 +243,16 @@ class MeshService : Service(), Logging {
             error("TODO setOwner $myId : $longName : $shortName")
         }
 
-        override fun sendOpaque(destId: String, payloadIn: ByteArray) {
+        override fun sendOpaque(destId: String, payloadIn: ByteArray, typ: Int) {
             info("sendOpaque $destId <- ${payloadIn.size}")
 
             // encapsulate our payload in the proper protobufs and fire it off
             val packet = newMeshPacketTo(destId).apply {
                 payload = MeshProtos.MeshPayload.newBuilder().apply {
                     addSubPackets(MeshProtos.SubPacket.newBuilder().apply {
-                        opaque = MeshProtos.Opaque.newBuilder().apply {
-                            payload = ByteString.copyFrom(payloadIn)
+                        data = MeshProtos.Data.newBuilder().also {
+                            it.typ = MeshProtos.Data.Type.SIGNAL_OPAQUE
+                            it.payload = ByteString.copyFrom(payloadIn)
                         }.build()
                     }.build())
                 }.build()
