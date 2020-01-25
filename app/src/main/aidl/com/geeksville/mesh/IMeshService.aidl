@@ -1,4 +1,4 @@
-// com.geeksville.com.geeeksville.mesh.IMeshService.aidl
+// com.geeksville.mesh.IMeshService.aidl
 package com.geeksville.mesh;
 
 // Declare any non-default types here with import statements
@@ -24,7 +24,7 @@ interface IMeshService {
     */
     boolean isConnected();
 
-    // see com.geeksville.com.geeeksville.mesh broadcast intents
+    // see com.geeksville.com.geeksville.mesh broadcast intents
     // RECEIVED_OPAQUE  for data received from other nodes
     // NODE_CHANGE  for new IDs appearing or disappearing
     // CONNECTION_CHANGED for losing/gaining connection to the packet radio

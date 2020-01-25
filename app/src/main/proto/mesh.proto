@@ -3,7 +3,7 @@ syntax = "proto3";
 
 package mesh;
 
-option java_package = "com.geeksville.com.geeeksville.mesh";
+option java_package = "com.geeksville.mesh";
 option java_outer_classname = "MeshProtos";
 
 /**
@@ -42,40 +42,40 @@ node number, or 0xff for broadcast.
 
 // a gps position
 message Position {
-  double latitude = 1;
-  double longitude = 2;
-  int32 altitude = 3;
+    double latitude = 1;
+    double longitude = 2;
+    int32 altitude = 3;
 }
 
 // Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)
 // sent to the phone (so the phone can know exact time of reception)
 message Time {
-  uint64 msecs = 1; // msecs since 1970
+    uint64 msecs = 1; // msecs since 1970
 }
 
 // A message sent from a device outside of the mesh, in a form the mesh does not understand
 // i.e. a Signal app level message.
 message Opaque {
-  bytes payload = 1;
+    bytes payload = 1;
 }
 
 // a simple text message, which even the little micros in the mesh can understand and show on their screen
 message Text {
-  string text = 1;
+    string text = 1;
 }
 
 // Sent from the phone over bluetooth to set the user id for the owner of this node.
 // Also sent from nodes to each other when a new node signs on (so all clients can have this info)
 message User {
-  string id = 1; // a globally unique ID string for this user.  In the case of Signal that would mean +16504442323
-  string long_name = 2; // A full name for this user, i.e. "Kevin Hester"
-  string short_name = 3; // A VERY short name, ideally two characters.  Suitable for a tiny OLED screen
+    string id = 1; // a globally unique ID string for this user.  In the case of Signal that would mean +16504442323
+    string long_name = 2; // A full name for this user, i.e. "Kevin Hester"
+    string short_name = 3; // A VERY short name, ideally two characters.  Suitable for a tiny OLED screen
 }
 
 // Broadcast when a newly powered mesh node wants to find a node num it can use (see document for more
 // details)
 message WantNodeNum {
-  // No payload, just its existence is sufficent (desired node num will be in the from field)
+    // No payload, just its existence is sufficent (desired node num will be in the from field)
 }
 
 // Sent to a node which has requested a nodenum when it is told it can't have it
@@ -84,35 +84,34 @@ message DenyNodeNum {
 
 // A single packet might have a series of SubPacket included
 message SubPacket {
-  oneof variant {
-    Position position = 1;
-    Time time = 2;
-    Text text = 3;
-    Opaque opaque = 4;
-    User user = 5;
-    WantNodeNum want_node = 6;
-    DenyNodeNum deny_node = 7;
-  }
+    oneof variant {
+        Position position = 1;
+        Time time = 2;
+        Text text = 3;
+        Opaque opaque = 4;
+        User user = 5;
+        WantNodeNum want_node = 6;
+        DenyNodeNum deny_node = 7;
+    }
 }
-
 
 // A packet sent over our mesh.
 // NOTE: this raw payload does not include the from and to addresses, which are stripped off
 // and passed into the mesh library code separately.
 message MeshPayload {
-  repeated SubPacket subPackets = 3;
+    repeated SubPacket subPackets = 3;
 }
 
 // A full packet sent/received over the mesh
 message MeshPacket {
-  int32 from = 1;
-  int32 to = 2;
-  MeshPayload payload = 3;
+    int32 from = 1;
+    int32 to = 2;
+    MeshPayload payload = 3;
 }
 
 // Full settings (center freq, spread factor, preshared secret key etc...) needed to configure a radio
 message RadioConfig {
-  // FIXME
+    // FIXME
 }
 
 /**
@@ -139,11 +138,11 @@ SET_CONFIG (switches device to a new set of radio params and preshared key, drop
 
 // Full information about a node on the mesh
 message NodeInfo {
-  int32 num = 1; // the node number
-  User user = 2;
-  int32 battery_level = 3; // 0-100
-  Position position = 4;
-  Time last_seen = 5;
+    int32 num = 1; // the node number
+    User user = 2;
+    int32 battery_level = 3; // 0-100
+    Position position = 4;
+    Time last_seen = 5;
 }
 
 // packets from the radio to the phone will appear on the fromRadio characteristic.  It will support
@@ -151,27 +150,27 @@ message NodeInfo {
 // it will sit in that descriptor until consumed by the phone, at which point the next item in the FIFO
 // will be populated.  FIXME
 message FromRadio {
-  oneof variant {
-    MeshPacket packet = 1;
-    NodeInfo node_info = 2;
-  }
+    oneof variant {
+        MeshPacket packet = 1;
+        NodeInfo node_info = 2;
+    }
 }
 
 // packets/commands to the radio will be written (reliably) to the toRadio characteristic.  Once the
 // write completes the phone can assume it is handled.
 message ToRadio {
 
-  // If sent to the radio, the radio will send the phone its full node DB (NodeInfo records)
-  // Used to populate network info the first time the phone connects to the radio
-  message WantNodes {
-    // Empty
-  }
+    // If sent to the radio, the radio will send the phone its full node DB (NodeInfo records)
+    // Used to populate network info the first time the phone connects to the radio
+    message WantNodes {
+        // Empty
+    }
 
-  oneof variant {
-    MeshPacket packet = 1; // send this packet on the mesh
-    RadioConfig set_radio = 2; // set the radio provisioning for this node
-    User set_owner = 3; // Set the owner for this node
-    WantNodes want_nodes = 4; // phone wants radio to send full node db to the phone
-  }
+    oneof variant {
+        MeshPacket packet = 1; // send this packet on the mesh
+        RadioConfig set_radio = 2; // set the radio provisioning for this node
+        User set_owner = 3; // Set the owner for this node
+        WantNodes want_nodes = 4; // phone wants radio to send full node db to the phone
+    }
 }
 

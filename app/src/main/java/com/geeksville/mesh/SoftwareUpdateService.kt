@@ -10,10 +10,7 @@ import android.bluetooth.le.ScanResult
 import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.Intent
-import android.os.Handler
 import android.os.ParcelUuid
-import android.os.SystemClock
-import android.widget.Toast
 import androidx.core.app.JobIntentService
 import com.geeksville.android.Logging
 import java.util.*
@@ -184,19 +181,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 connectToTestDevice() // FIXME, pass in as an intent arg instead
                 startUpdate()
             }
-            else -> logAssert(false)
-        }
-
-        debug(
-            "Completed service @ " + SystemClock.elapsedRealtime()
-        )
-    }
-
-    val mHandler = Handler()
-    // Helper for showing tests
-    fun toast(text: CharSequence?) {
-        mHandler.post {
-            Toast.makeText(this@SoftwareUpdateService, text, Toast.LENGTH_SHORT).show()
+            else -> TODO("Unhandled case")
         }
     }
 
@@ -204,10 +189,10 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         /**
          * Unique job ID for this service.  Must be the same for all work.
          */
-        const val JOB_ID = 1000
+        private const val JOB_ID = 1000
 
-        val scanDevicesIntent = Intent("com.geeksville.com.geeeksville.mesh.SCAN_DEVICES")
-        val startUpdateIntent = Intent("com.geeksville.com.geeeksville.mesh.START_UPDATE")
+        val scanDevicesIntent = Intent("$prefix.SCAN_DEVICES")
+        val startUpdateIntent = Intent("$prefix.START_UPDATE")
 
         private const val SCAN_PERIOD: Long = 10000
 

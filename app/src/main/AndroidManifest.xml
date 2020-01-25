@@ -16,15 +16,13 @@
     This permission is required to allow the application to send
     events and properties to Mixpanel.
     -->
-    <uses-permission
-        android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!--
       This permission is optional but recommended so we can be smart
       about when to send data.
      -->
-    <uses-permission
-        android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <uses-feature
         android:name="android.hardware.bluetooth_le"
@@ -39,7 +37,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <meta-data android:name="com.mixpanel.android.MPConfig.DisableViewCrawler"
+        <meta-data
+            android:name="com.mixpanel.android.MPConfig.DisableViewCrawler"
             android:value="true" />
 
         <!-- we need bind job service for oreo -->
@@ -49,10 +48,17 @@
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
+        <!-- This is the public API for doing mesh radio operations from android apps -->
         <service
             android:name="com.geeksville.mesh.MeshService"
             android:enabled="true"
             android:exported="true" />
+
+        <!-- This is a private service which just does direct communication to the radio -->
+        <service
+            android:name="com.geeksville.mesh.RadioInterfaceService"
+            android:enabled="true"
+            android:exported="false" />
 
         <activity
             android:name="com.geeksville.mesh.MainActivity"
@@ -67,7 +73,7 @@
 
         <receiver android:name="com.geeksville.mesh.BootCompleteReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
     </application>
