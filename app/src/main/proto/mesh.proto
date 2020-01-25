@@ -74,11 +74,6 @@ message Data {
     bytes payload = 2; // required
 }
 
-
-message Text {
-    string text = 1;
-}
-
 // Sent from the phone over bluetooth to set the user id for the owner of this node.
 // Also sent from nodes to each other when a new node signs on (so all clients can have this info)
 message User {
