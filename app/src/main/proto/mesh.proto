@@ -53,7 +53,7 @@ message Time {
     uint64 msecs = 1; // msecs since 1970
 }
 
-// a data message to forward to an external app
+// a data message to forward to an external app (or possibly also be consumed internally in the case of CLEAR_TEXT and CLEAR_READACK
 message Data {
     enum Type {
         /// A message sent from a device outside of the mesh, in a form the mesh does not understand
@@ -61,7 +61,7 @@ message Data {
 
         /// a simple UTF-8 text message, which even the little micros in the mesh can understand and show on their screen
         /// eventually in some circumstances even signal might send messages in this form (see below)
-        SIMPLE_TEXT = 1;
+        CLEAR_TEXT = 1;
 
         /// a message receive acknowledgement, sent in cleartext - allows radio to show user that a message has been read by the recpient, optional
         CLEAR_READACK = 2;

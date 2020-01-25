@@ -150,9 +150,9 @@ class MeshService : Service(), Logging {
         val fromString = fromId ?: fromId.toString()
 
         when (data.typValue) {
-            MeshProtos.Data.Type.SIMPLE_TEXT_VALUE ->
+            MeshProtos.Data.Type.CLEAR_TEXT_VALUE ->
                 warn(
-                    "TODO ignoring SIMPLE_TEXT from $fromString: ${bytes.toString(
+                    "TODO ignoring CLEAR_TEXT from $fromString: ${bytes.toString(
                         Charset.forName("UTF-8")
                     )}"
                 )
