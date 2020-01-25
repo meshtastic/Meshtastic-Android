@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Debug
 import android.os.IBinder
 import android.view.Menu
 import android.view.MenuItem
@@ -27,6 +28,7 @@ import androidx.ui.material.Button
 import androidx.ui.material.MaterialTheme
 import androidx.ui.tooling.preview.Preview
 import com.geeksville.android.Logging
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 
 class MainActivity : AppCompatActivity(), Logging {
@@ -124,6 +126,12 @@ class MainActivity : AppCompatActivity(), Logging {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // We default to off in the manifest, FIXME turn on only if user approves
+        // leave off when running in the debugger
+        if (false && !Debug.isDebuggerConnected())
+            FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
+
         setContent {
             composeView(meshServiceState)
         }
@@ -147,14 +155,20 @@ class MainActivity : AppCompatActivity(), Logging {
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
-            meshService = IMeshService.Stub.asInterface(service)
+            val m = IMeshService.Stub.asInterface(service)
+            meshService = m
+
+            // Do some test operations
+            m.setOwner("+16508675309", "Kevin Xter", "kx")
+            val testPayload = "hello world".toByteArray()
+            m.sendData("+16508675310", testPayload, MeshProtos.Data.Type.SIGNAL_OPAQUE_VALUE)
+            m.sendData("+16508675310", testPayload, MeshProtos.Data.Type.CLEAR_TEXT_VALUE)
 
             // FIXME this doesn't work because the model has already been copied into compose land?
-            runOnUiThread {
-                // FIXME - this can be removed?
-                meshServiceState.connected = meshService!!.isConnected
-                meshServiceState.onlineIds = meshService!!.online
-            }
+            // runOnUiThread { // FIXME - this can be removed?
+            meshServiceState.connected = m.isConnected
+            meshServiceState.onlineIds = m.online
+            // }
         }
 
         override fun onServiceDisconnected(name: ComponentName) {

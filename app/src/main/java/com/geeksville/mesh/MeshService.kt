@@ -9,6 +9,8 @@ import android.os.IBinder
 import com.geeksville.android.Logging
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
+import com.geeksville.util.exceptionReporter
+import com.geeksville.util.exceptionsToStrings
 import com.google.protobuf.ByteString
 import java.nio.charset.Charset
 
@@ -19,6 +21,11 @@ import java.nio.charset.Charset
  * Note: this service will go away once all clients are unbound from it.
  */
 class MeshService : Service(), Logging {
+
+    companion object {
+        class IdNotFoundException(id: String) : Exception("ID not found $id")
+        class NodeNumNotFoundException(id: Int) : Exception("NodeNum not found $id")
+    }
 
     /*
     see com.geeksville.mesh broadcast intents
@@ -61,6 +68,7 @@ class MeshService : Service(), Logging {
     override fun onCreate() {
         super.onCreate()
 
+        info("Creating mesh service")
         val filter = IntentFilter(RadioInterfaceService.RECEIVE_FROMRADIO_ACTION)
         registerReceiver(radioInterfaceReceiver, filter)
 
@@ -73,6 +81,7 @@ class MeshService : Service(), Logging {
     }
 
     override fun onDestroy() {
+        info("Destroying mesh service")
         unregisterReceiver(radioInterfaceReceiver)
         super.onDestroy()
     }
@@ -112,7 +121,7 @@ class MeshService : Service(), Logging {
     ///
 
     /// Map a nodenum to a node, or throw an exception if not found
-    private fun toNodeInfo(n: Int) = nodeDBbyNodeNum.getValue(n)
+    private fun toNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: throw NodeNumNotFoundException(n)
 
     /// Map a nodenum to the nodeid string, or throw an exception if not present
     private fun toNodeID(n: Int) = toNodeInfo(n).user?.id
@@ -122,7 +131,7 @@ class MeshService : Service(), Logging {
         nodeDBbyNodeNum.getOrPut(n) { -> NodeInfo(n) }
 
     /// Map a userid to a node/ node num, or throw an exception if not found
-    private fun toNodeInfo(id: String) = nodeDBbyID.getValue(id)
+    private fun toNodeInfo(id: String) = nodeDBbyID[id] ?: throw IdNotFoundException(id)
 
     private fun toNodeNum(id: String) = toNodeInfo(id).num
 
@@ -140,6 +149,18 @@ class MeshService : Service(), Logging {
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified recipient
     private fun newMeshPacketTo(id: String) = newMeshPacketTo(toNodeNum(id))
+
+    // Helper to make it easy to build a subpacket in the proper protobufs
+    private fun buildMeshPacket(
+        destId: String,
+        initFn: MeshProtos.SubPacket.Builder.() -> Unit
+    ): MeshPacket = newMeshPacketTo(destId).apply {
+        payload = MeshProtos.MeshPayload.newBuilder().apply {
+            addSubPackets(MeshProtos.SubPacket.newBuilder().also {
+                initFn(it)
+            }.build())
+        }.build()
+    }.build()
 
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedData(fromNum: Int, data: MeshProtos.Data) {
@@ -173,6 +194,16 @@ class MeshService : Service(), Logging {
         }
     }
 
+    /// Update our DB of users based on someone sending out a User subpacket
+    private fun handleReceivedUser(fromNum: Int, p: MeshProtos.User) {
+        updateNodeInfo(fromNum) {
+            it.user = MeshUser(p.id, p.longName, p.shortName)
+
+            // This might have been the first time we know an ID for this node, so also update the by ID map
+            nodeDBbyID[p.id] = it
+        }
+    }
+
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
         val fromNum = packet.from
@@ -200,12 +231,7 @@ class MeshService : Service(), Logging {
                     handleReceivedData(fromNum, p.data)
 
                 MeshProtos.SubPacket.USER_FIELD_NUMBER ->
-                    updateNodeInfo(fromNum) {
-                        it.user = MeshUser(p.user.id, p.user.longName, p.user.shortName)
-
-                        // This might have been the first time we know an ID for this node, so also update the by ID map
-                        nodeDBbyID.set(p.user.id, it)
-                    }
+                    handleReceivedUser(fromNum, p.user)
                 MeshProtos.SubPacket.WANT_NODE_FIELD_NUMBER -> {
                     // This is managed by the radio on its own
                     debug("Ignoring WANT_NODE from $fromNum")
@@ -241,41 +267,57 @@ class MeshService : Service(), Logging {
     }
 
     private val binder = object : IMeshService.Stub() {
-        override fun setOwner(myId: String, longName: String, shortName: String) {
-            error("TODO setOwner $myId : $longName : $shortName")
-        }
+        // Note: bound methods don't get properly exception caught/logged, so do that with a wrapper
+        // per https://blog.classycode.com/dealing-with-exceptions-in-aidl-9ba904c6d63
 
-        override fun sendOpaque(destId: String, payloadIn: ByteArray, typ: Int) {
-            info("sendOpaque $destId <- ${payloadIn.size}")
+        override fun setOwner(myId: String, longName: String, shortName: String) =
+            exceptionsToStrings {
+                error("TODO setOwner $myId : $longName : $shortName")
 
-            // encapsulate our payload in the proper protobufs and fire it off
-            val packet = newMeshPacketTo(destId).apply {
-                payload = MeshProtos.MeshPayload.newBuilder().apply {
-                    addSubPackets(MeshProtos.SubPacket.newBuilder().apply {
-                        data = MeshProtos.Data.newBuilder().also {
-                            it.typ = MeshProtos.Data.Type.SIGNAL_OPAQUE
-                            it.payload = ByteString.copyFrom(payloadIn)
-                        }.build()
-                    }.build())
+                val user = MeshProtos.User.newBuilder().also {
+                    it.id = myId
+                    it.longName = longName
+                    it.shortName = shortName
                 }.build()
-            }.build()
 
-            sendToRadio(ToRadio.newBuilder().apply {
-                this.packet = packet
-            })
-        }
+                // Also update our own map for our nodenum, by handling the packet just like packets from other users
+                if (ourNodeNum != -1) {
+                    handleReceivedUser(ourNodeNum, user)
+                }
 
-        override fun getOnline(): Array<String> {
+                sendToRadio(ToRadio.newBuilder().apply {
+                    this.setOwner = user
+                })
+            }
+
+        override fun sendData(destId: String, payloadIn: ByteArray, typ: Int) =
+            exceptionsToStrings {
+                info("sendData $destId <- ${payloadIn.size} bytes")
+
+                // encapsulate our payload in the proper protobufs and fire it off
+                val packet = buildMeshPacket(destId) {
+                    data = MeshProtos.Data.newBuilder().also {
+                        it.typ = MeshProtos.Data.Type.SIGNAL_OPAQUE
+                        it.payload = ByteString.copyFrom(payloadIn)
+                    }.build()
+                }
+
+                sendToRadio(ToRadio.newBuilder().apply {
+                    this.packet = packet
+                })
+            }
+
+        override fun getOnline(): Array<String> = exceptionReporter {
             val r = nodeDBbyID.keys.toTypedArray()
             info("in getOnline, count=${r.size}")
             // return arrayOf("+16508675309")
-            return r
+            r
         }
 
-        override fun isConnected(): Boolean {
+        override fun isConnected(): Boolean = exceptionReporter {
             val r = this@MeshService.isConnected
             info("in isConnected=r")
-            return r
+            r
         }
     }
 }

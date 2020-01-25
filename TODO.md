@@ -1,5 +1,5 @@
 
-
+* test mesh service from activity
 * use android service from Signal
 * DONE handle failures in onCharWrite, instead of logAssert - because they can happen if device goes away
 * make test implementation of android service (doesn't use bluetooth)
@@ -11,6 +11,7 @@
 * connect to bluetooth device automatically using minimum power
 * have signal declare receivers: https://developer.android.com/guide/components/broadcasts#manifest-declared-receivers
 * fix BT device scanning 
+* call crashlytics from exceptionReporter!!!  currently not logging failures caught there
 
 protobuf notes
 protoc -I=. --java_out /tmp mesh.proto

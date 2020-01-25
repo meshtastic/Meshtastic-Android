@@ -11,7 +11,7 @@ MESH RADIO PROTOCOL
 
 Old TODO notes on the mesh radio protocol, merge into real docs below...
 
-for each named group we have a preshared key known by all group members and wrapped around the device.
+for each named group we have a pre-shared key known by all group members and wrapped around the device.
 you can only be in one group at a time (FIXME?!)
 To join the group we read a qr code with the preshared key and ParamsCodeEnum.  that gets sent via
 bluetooth to the device.  ParamsCodeEnum maps to a set of various radio params (regulatory region,
@@ -63,11 +63,11 @@ message Data {
         /// eventually in some circumstances even signal might send messages in this form (see below)
         CLEAR_TEXT = 1;
 
-        /// a message receive acknowledgement, sent in cleartext - allows radio to show user that a message has been read by the recpient, optional
+        /// a message receive acknowledgement, sent in cleartext - allows radio to show user that a message has been read by the recipient, optional
         CLEAR_READACK = 2;
 
         /// Not yet used but eventually:
-        /// SIGNAL_CLEAR_OPAQUE = 3; // Unencrypted at the signal level, relying on the radio crypt only (to keep size small), but contains Signal control data radios don't care about (or non ascii text)
+        /// SIGNAL_CLEAR_DATA = 3; // Unencrypted at the signal level, relying on the radio crypt only (to keep size small), but contains Signal control data radios don't care about (ie non text)
     }
 
     Type typ = 1; // required
@@ -85,7 +85,7 @@ message User {
 // Broadcast when a newly powered mesh node wants to find a node num it can use (see document for more
 // details)
 message WantNodeNum {
-    // No payload, just its existence is sufficent (desired node num will be in the from field)
+    // No payload, just its existence is sufficient (desired node num will be in the from field)
 }
 
 // Sent to a node which has requested a nodenum when it is told it can't have it
@@ -118,7 +118,7 @@ message MeshPacket {
     MeshPayload payload = 3;
 }
 
-// Full settings (center freq, spread factor, preshared secret key etc...) needed to configure a radio
+// Full settings (center freq, spread factor, pre-shared secret key etc...) needed to configure a radio
 message RadioConfig {
     // FIXME
 }
@@ -129,7 +129,7 @@ The bluetooth to device link:
 
 Old BTLE protocol docs from TODO, merge in above and make real docs...
 
-use protocol buffers, and nanopb
+use protocol buffers, and NanoPB
 
 messages from device to phone:
 POSITION_UPDATE (..., time)

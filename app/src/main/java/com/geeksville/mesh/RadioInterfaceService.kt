@@ -7,13 +7,6 @@ import com.geeksville.android.DebugLogFile
 import com.geeksville.android.Logging
 import com.google.protobuf.util.JsonFormat
 
-const val EXTRA_CONNECTED = "$prefix.Connected"
-const val EXTRA_PAYLOAD = "$prefix.Payload"
-const val EXTRA_SENDER = "$prefix.Sender"
-const val EXTRA_ID = "$prefix.Id"
-const val EXTRA_ONLINE = "$prefix.Online"
-const val EXTRA_TYP = "$prefix.Typ"
-
 /**
  * Handles the bluetooth link with a mesh radio device.  Does not cache any device state,
  * just does bluetooth comms etc...
@@ -42,8 +35,7 @@ class RadioInterfaceService : JobIntentService(), Logging {
          * Payload will be the raw bytes which were contained within a MeshProtos.FromRadio protobuf
          */
         const val RECEIVE_FROMRADIO_ACTION = "$prefix.RECEIVE_FROMRADIO"
-
-
+        
         /**
          * Convenience method for enqueuing work in to this service.
          */
@@ -80,7 +72,7 @@ class RadioInterfaceService : JobIntentService(), Logging {
     }
 
     /// Send a packet/command out the radio link
-    private fun sendToRadio(p: ByteArray) {
+    private fun handleSendToRadio(p: ByteArray) {
 
         // For debugging/logging purposes ONLY we convert back into a protobuf for readability
         val proto = MeshProtos.ToRadio.parseFrom(p)
@@ -109,7 +101,7 @@ class RadioInterfaceService : JobIntentService(), Logging {
         // holding a wake lock for us at this point, so we can just go.
         debug("Executing work: $intent")
         when (intent.action) {
-            SEND_TORADIO_ACTION -> sendToRadio(intent.getByteArrayExtra(EXTRA_PAYLOAD)!!)
+            SEND_TORADIO_ACTION -> handleSendToRadio(intent.getByteArrayExtra(EXTRA_PAYLOAD)!!)
             else -> TODO("Unhandled case")
         }
     }

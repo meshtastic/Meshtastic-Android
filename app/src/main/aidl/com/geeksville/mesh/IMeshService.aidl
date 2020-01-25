@@ -6,15 +6,19 @@ package com.geeksville.mesh;
 interface IMeshService {
     /**
     * Set the ID info for this node
+
+    @return null for success, or an error message for failure
     */
-    void setOwner(String myId, String longName, String shortName);
+    String setOwner(String myId, String longName, String shortName);
 
     /*
     Send an opaque packet to a specified node name
 
     typ is defined in mesh.proto Data.Type.  For now juse use 0 to mean opaque bytes.
+
+    @return null for success, or an error message for failure
     */
-    void sendOpaque(String destId, in byte[] payload, int typ);
+    String sendData(String destId, in byte[] payload, int typ);
 
     /**
     Get the IDs of everyone on the mesh.  You should also subscribe for NODE_CHANGE broadcasts.
