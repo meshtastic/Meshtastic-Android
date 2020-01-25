@@ -74,42 +74,126 @@ class MeshService : Service(), Logging {
         super.onDestroy()
     }
 
+    // model objects that directly map to the corresponding protobufs
+    data class MeshUser(val id: String, val longName: String, val shortName: String)
+
+    data class Position(val latitude: Double, val longitude: Double, val altitude: Int)
+    data class NodeInfo(
+        val num: Int, // This is immutable, and used as a key
+        var user: MeshUser? = null,
+        var position: Position? = null,
+        var lastSeen: Long? = null
+    )
+
+    ///
+    /// BEGINNING OF MODEL - FIXME, move elsewhere
+    ///
+
     /// Is our radio connected to the phone?
     private var isConnected = false
 
     /// We learn this from the node db sent by the device - it is stable for the entire session
     private var ourNodeNum = -1
 
-    // model objects that directly map to the corresponding protobufs
-    data class MeshUser(val id: String, val longName: String, val shortName: String)
-
-    data class Position(val latitude: Double, val longitude: Double, val altitude: Int)
-    data class NodeInfo(
-        val num: Int,
-        val user: MeshUser,
-        val position: Position,
-        val lastSeen: Long
-    )
-
     // The database of active nodes, index is the node number
     private val nodeDBbyNodeNum = mutableMapOf<Int, NodeInfo>()
 
     /// The database of active nodes, index is the node user ID string
+    /// NOTE: some NodeInfos might be in only nodeDBbyNodeNum (because we don't yet know
+    /// an ID).  But if a NodeInfo is in both maps, it must be one instance shared by
+    /// both datastructures.
     private val nodeDBbyID = mutableMapOf<String, NodeInfo>()
 
-    /// Map a userid to a node num, or throw an exception if not found
-    private fun idToNodeNum(id: String) = nodeDBbyID.getValue(id).num
+    ///
+    /// END OF MODEL
+    ///
 
-    /// Generate a new mesh packet builder with our node as the sender, and the specified node num
+    /// Map a nodenum to a node, or throw an exception if not found
+    private fun toNodeInfo(n: Int) = nodeDBbyNodeNum.getValue(n)
+
+    /// Map a nodenum to the nodeid string, or throw an exception if not present
+    private fun toNodeID(n: Int) = toNodeInfo(n).user?.id
+
+    /// given a nodenum, return a db entry - creating if necessary
     private
 
-    fun newMeshPacketTo(idNum: Int) = MeshPacket.newBuilder().apply {
+    fun getOrCreateNodeInfo(n: Int) = nodeDBbyNodeNum.getOrPut(n) { -> NodeInfo(n) }
+
+    /// Map a userid to a node/ node num, or throw an exception if not found
+    private fun toNodeInfo(id: String) = nodeDBbyID.getValue(id)
+
+    private fun toNodeNum(id: String) = toNodeInfo(id).num
+
+    /// A helper function that makes it easy to update node info objects
+    private fun updateNodeInfo(nodeNum: Int, updatefn: (NodeInfo) -> Unit) {
+        val info = getOrCreateNodeInfo(nodeNum)
+        updatefn(info)
+    }
+
+    /// Generate a new mesh packet builder with our node as the sender, and the specified node num
+    private fun newMeshPacketTo(idNum: Int) = MeshPacket.newBuilder().apply {
         from = ourNodeNum
         to = idNum
     }
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified recipient
-    private fun newMeshPacketTo(id: String) = newMeshPacketTo(idToNodeNum(id))
+    private fun newMeshPacketTo(id: String) = newMeshPacketTo(toNodeNum(id))
+
+    /// Update our model and resend as needed for a MeshPacket we just received from the radio
+    private fun handleReceivedMeshPacket(packet: MeshPacket) {
+        val fromNum = packet.from
+
+        // FIXME, perhaps we could learn our node ID by looking at any to packets the radio
+        // decided to pass through to us (except for broadcast packets)
+        val toNum = packet.to
+
+        val payload = packet.payload
+        payload.subPacketsList.forEach { p ->
+            when (p.variantCase.number) {
+                MeshProtos.SubPacket.POSITION_FIELD_NUMBER ->
+                    updateNodeInfo(fromNum) {
+                        it.position = Position(
+                            p.position.latitude,
+                            p.position.longitude,
+                            p.position.altitude
+                        )
+                    }
+                MeshProtos.SubPacket.TIME_FIELD_NUMBER ->
+                    updateNodeInfo(fromNum) {
+                        it.lastSeen = p.time.msecs
+                    }
+                MeshProtos.SubPacket.TEXT_FIELD_NUMBER -> {
+                    debug("TODO Ignoring TEXT from $fromNum ${p.text.text}")
+                }
+                MeshProtos.SubPacket.OPAQUE_FIELD_NUMBER -> {
+                    val opaque = p.opaque.payload.toByteArray()
+                    val fromId = toNodeID(fromNum)
+                    if (fromId == null)
+                        error("Ignoring opaque from $fromNum because we don't yet know its ID")
+                    else {
+                        debug("Received opaque from $fromId ${opaque.size}")
+                        broadcastReceivedOpaque(fromId, opaque)
+                    }
+                }
+                MeshProtos.SubPacket.USER_FIELD_NUMBER ->
+                    updateNodeInfo(fromNum) {
+                        it.user = MeshUser(p.user.id, p.user.longName, p.user.shortName)
+
+                        // This might have been the first time we know an ID for this node, so also update the by ID map
+                        nodeDBbyID.set(p.user.id, it)
+                    }
+                MeshProtos.SubPacket.WANT_NODE_FIELD_NUMBER -> {
+                    // This is managed by the radio on its own
+                    debug("Ignoring WANT_NODE from $fromNum")
+                }
+                MeshProtos.SubPacket.DENY_NODE_FIELD_NUMBER -> {
+                    // This is managed by the radio on its own
+                    debug("Ignoring DENY_NODE from $fromNum to $toNum")
+                }
+                else -> TODO("Unexpected SubPacket variant")
+            }
+        }
+    }
 
     /**
      * Receives messages from our BT radio service and processes them to update our model
@@ -119,10 +203,14 @@ class MeshService : Service(), Logging {
 
         override fun onReceive(context: Context, intent: Intent) {
             val proto = MeshProtos.FromRadio.parseFrom(intent.getByteArrayExtra(EXTRA_PAYLOAD)!!)
-            TODO("FIXME - update model and send messages as needed")
+            info("Received from radio service: $proto")
+            when (proto.variantCase.number) {
+                MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(proto.packet)
+                MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> TODO()
+                else -> TODO("Unexpected FromRadio variant")
+            }
         }
     }
-
 
     private val binder = object : IMeshService.Stub() {
         override fun setOwner(myId: String, longName: String, shortName: String) {
