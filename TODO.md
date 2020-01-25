@@ -1,7 +1,5 @@
 
-* receive fake packets at power on to built initial state (for debugging, pretend there are a couple of nodes out there)
-* learn our node number
-* test mesh service from activity
+
 * use android service from Signal
 * DONE handle failures in onCharWrite, instead of logAssert - because they can happen if device goes away
 * make test implementation of android service (doesn't use bluetooth)
@@ -52,4 +50,6 @@ Don't leave device discoverable.  Don't let unpaired users do thing with device
 * change bluetooth mtu length to 512 (default is only 20)
 * DONE get signal running under debugger
 * Find good Signal hooks
-
+* receive fake packets at power on to built initial state (for debugging, pretend there are a couple of nodes out there)
+* learn our node number
+* test mesh service from activity

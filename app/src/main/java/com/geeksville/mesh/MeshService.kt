@@ -26,6 +26,14 @@ class MeshService : Service(), Logging {
     companion object {
         class IdNotFoundException(id: String) : Exception("ID not found $id")
         class NodeNumNotFoundException(id: Int) : Exception("NodeNum not found $id")
+        class NotInMeshException() : Exception("We are not yet in a mesh")
+        class RadioNotConnectedException() : Exception("Can't find radio")
+
+        /// If we haven't yet received a node number from the radio
+        private const val NODE_NUM_UNKNOWN = -2
+
+        /// If the radio hasn't yet joined a mesh (i.e. no nodenum assigned)
+        private const val NODE_NUM_NO_MESH = -1
     }
 
     /*
@@ -74,6 +82,9 @@ class MeshService : Service(), Logging {
         registerReceiver(radioInterfaceReceiver, filter)
 
         // FIXME - don't do this until after we see that the radio is connected to the phone
+        val sim = SimRadio(this)
+        sim.start() // Fake up our node id info and some past packets from other nodes
+
         // Ask for the current node DB
         sendToRadio(ToRadio.newBuilder().apply {
             wantNodes = ToRadio.WantNodes.newBuilder().build()
@@ -106,7 +117,7 @@ class MeshService : Service(), Logging {
     private var isConnected = false
 
     /// We learn this from the node db sent by the device - it is stable for the entire session
-    private var ourNodeNum = -1
+    private var ourNodeNum = NODE_NUM_UNKNOWN
 
     // The database of active nodes, index is the node number
     private val nodeDBbyNodeNum = mutableMapOf<Int, NodeInfo>()
@@ -147,6 +158,12 @@ class MeshService : Service(), Logging {
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
     private fun newMeshPacketTo(idNum: Int) = MeshPacket.newBuilder().apply {
         from = ourNodeNum
+
+        if (from == NODE_NUM_NO_MESH)
+            throw NotInMeshException()
+        else if (from == NODE_NUM_UNKNOWN)
+            throw RadioNotConnectedException()
+
         to = idNum
     }
 
@@ -264,6 +281,7 @@ class MeshService : Service(), Logging {
             when (proto.variantCase.number) {
                 MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(proto.packet)
                 MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleReceivedNodeInfo(proto.nodeInfo)
+                MeshProtos.FromRadio.MY_NODE_NUM_FIELD_NUMBER -> ourNodeNum = proto.myNodeNum
                 else -> TODO("Unexpected FromRadio variant")
             }
         }
@@ -284,7 +302,7 @@ class MeshService : Service(), Logging {
                 }.build()
 
                 // Also update our own map for our nodenum, by handling the packet just like packets from other users
-                if (ourNodeNum != -1) {
+                if (ourNodeNum >= 0) {
                     handleReceivedUser(ourNodeNum, user)
                 }
 

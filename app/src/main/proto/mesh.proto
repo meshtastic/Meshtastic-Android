@@ -161,7 +161,12 @@ message NodeInfo {
 message FromRadio {
     oneof variant {
         MeshPacket packet = 1;
-        NodeInfo node_info = 2;
+
+        /// Tells the phone what our node number is, can be -1 if we've not yet joined a mesh.
+        sint32 my_node_num = 2;
+
+        /// One packet is sent for each node in the on radio DB
+        NodeInfo node_info = 3;
     }
 }
 
@@ -177,9 +182,18 @@ message ToRadio {
 
     oneof variant {
         MeshPacket packet = 1; // send this packet on the mesh
-        RadioConfig set_radio = 2; // set the radio provisioning for this node
-        User set_owner = 3; // Set the owner for this node
-        WantNodes want_nodes = 4; // phone wants radio to send full node db to the phone
+
+        //
+        // Rare operations
+        //
+
+        /// phone wants radio to send full node db to the phone, This is typically the first packet sent
+        /// to the radio when the phone gets a bluetooth connection.
+        /// The radio will respond by sending back a FromRadio.my_node_num and a series of FromRadio.node_info
+        WantNodes want_nodes = 100;
+
+        RadioConfig set_radio = 101; // set the radio provisioning for this node
+        User set_owner = 102; // Set the owner for this node
     }
 }
 
