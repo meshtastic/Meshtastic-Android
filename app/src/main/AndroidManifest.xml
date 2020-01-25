@@ -24,6 +24,9 @@
      -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- Only for debug log writing, disable for production FIXME -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="true" />

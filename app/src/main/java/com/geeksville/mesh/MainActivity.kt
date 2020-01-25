@@ -57,7 +57,8 @@ class MainActivity : AppCompatActivity(), Logging {
             Manifest.permission.ACCESS_BACKGROUND_LOCATION,
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.WAKE_LOCK
+            Manifest.permission.WAKE_LOCK,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
 
         val missingPerms = perms.filter {

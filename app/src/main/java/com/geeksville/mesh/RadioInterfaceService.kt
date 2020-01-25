@@ -3,6 +3,7 @@ package com.geeksville.mesh
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.JobIntentService
+import com.geeksville.android.DebugLogFile
 import com.geeksville.android.Logging
 
 const val EXTRA_CONNECTED = "$prefix.Connected"
@@ -59,6 +60,8 @@ class RadioInterfaceService : JobIntentService(), Logging {
         }
     }
 
+    val sentPacketsLog = DebugLogFile(this, "sent_log.json")
+
     private fun broadcastReceivedFromRadio(payload: ByteArray) {
         val intent = Intent(RECEIVE_FROMRADIO_ACTION)
         intent.putExtra("$prefix.Payload", payload)
@@ -73,12 +76,21 @@ class RadioInterfaceService : JobIntentService(), Logging {
 
     /// Send a packet/command out the radio link
     private fun sendToRadio(p: ByteArray) {
-        info("Simulating sending to radio size=$p.size")
+
+        // For debugging/logging purposes ONLY we convert back into a protobuf for readability
+        val proto = MeshProtos.ToRadio.parseFrom(p)
+        info("TODO sending to radio: $proto")
+        sentPacketsLog.log("FIXME JSON")
     }
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
     private fun handleFromRadio(p: ByteArray) {
         broadcastReceivedFromRadio(p)
+    }
+
+    override fun onDestroy() {
+        sentPacketsLog.close()
+        super.onDestroy()
     }
 
     override fun onHandleWork(intent: Intent) { // We have received work to do.  The system or framework is already
