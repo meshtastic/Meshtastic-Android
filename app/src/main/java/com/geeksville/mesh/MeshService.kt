@@ -7,7 +7,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.IBinder
 import com.geeksville.android.Logging
-
+import com.geeksville.mesh.MeshProtos.MeshPacket
+import com.geeksville.mesh.MeshProtos.ToRadio
+import com.google.protobuf.ByteString
 
 /**
  * Handles all the communication with android apps.  Also keeps an internal model
@@ -43,6 +45,11 @@ class MeshService : Service(), Logging {
         sendBroadcast(intent)
     }
 
+    /// Send a command/packet to our radio
+    private fun sendToRadio(p: ToRadio.Builder) {
+        RadioInterfaceService.sendToRadio(this, p.build().toByteArray())
+    }
+
     override fun onBind(intent: Intent): IBinder {
         // Return the interface
         return binder
@@ -53,12 +60,56 @@ class MeshService : Service(), Logging {
 
         val filter = IntentFilter(RadioInterfaceService.RECEIVE_FROMRADIO_ACTION)
         registerReceiver(radioInterfaceReceiver, filter)
+
+        // FIXME - don't do this until after we see that the radio is connected to the phone
+        // Ask for the current node DB
+        sendToRadio(ToRadio.newBuilder().apply {
+            wantNodes = ToRadio.WantNodes.newBuilder().build()
+        })
+
     }
 
     override fun onDestroy() {
         unregisterReceiver(radioInterfaceReceiver)
         super.onDestroy()
     }
+
+    /// Is our radio connected to the phone?
+    private var isConnected = false
+
+    /// We learn this from the node db sent by the device - it is stable for the entire session
+    private var ourNodeNum = -1
+
+    // model objects that directly map to the corresponding protobufs
+    data class MeshUser(val id: String, val longName: String, val shortName: String)
+
+    data class Position(val latitude: Double, val longitude: Double, val altitude: Int)
+    data class NodeInfo(
+        val num: Int,
+        val user: MeshUser,
+        val position: Position,
+        val lastSeen: Long
+    )
+
+    // The database of active nodes, index is the node number
+    private val nodeDBbyNodeNum = mutableMapOf<Int, NodeInfo>()
+
+    /// The database of active nodes, index is the node user ID string
+    private val nodeDBbyID = mutableMapOf<String, NodeInfo>()
+
+    /// Map a userid to a node num, or throw an exception if not found
+    private fun idToNodeNum(id: String) = nodeDBbyID.getValue(id).num
+
+    /// Generate a new mesh packet builder with our node as the sender, and the specified node num
+    private
+
+    fun newMeshPacketTo(idNum: Int) = MeshPacket.newBuilder().apply {
+        from = ourNodeNum
+        to = idNum
+    }
+
+    /// Generate a new mesh packet builder with our node as the sender, and the specified recipient
+    private fun newMeshPacketTo(id: String) = newMeshPacketTo(idToNodeNum(id))
 
     /**
      * Receives messages from our BT radio service and processes them to update our model
@@ -72,23 +123,40 @@ class MeshService : Service(), Logging {
         }
     }
 
+
     private val binder = object : IMeshService.Stub() {
         override fun setOwner(myId: String, longName: String, shortName: String) {
             error("TODO setOwner $myId : $longName : $shortName")
         }
 
-        override fun sendOpaque(destId: String, payload: ByteArray) {
-            error("TODO sendOpaque $destId <- ${payload.size}")
+        override fun sendOpaque(destId: String, payloadIn: ByteArray) {
+            info("sendOpaque $destId <- ${payloadIn.size}")
+
+            // encapsulate our payload in the proper protobufs and fire it off
+            val packet = newMeshPacketTo(destId).apply {
+                payload = MeshProtos.MeshPayload.newBuilder().apply {
+                    addSubPackets(MeshProtos.SubPacket.newBuilder().apply {
+                        opaque = MeshProtos.Opaque.newBuilder().apply {
+                            payload = ByteString.copyFrom(payloadIn)
+                        }.build()
+                    }.build())
+                }.build()
+            }.build()
+
+            sendToRadio(ToRadio.newBuilder().apply {
+                this.packet = packet
+            })
         }
 
         override fun getOnline(): Array<String> {
-            error("TODO getOnline")
-            return arrayOf("+16508675309")
+            info("getOnline")
+            // return arrayOf("+16508675309")
+            return nodeDBbyID.keys.toTypedArray()
         }
 
         override fun isConnected(): Boolean {
-            error("TODO isConnected")
-            return true
+            info("isConnected")
+            return isConnected
         }
     }
 }

@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.core.app.JobIntentService
 import com.geeksville.android.DebugLogFile
 import com.geeksville.android.Logging
+import com.google.protobuf.util.JsonFormat
 
 const val EXTRA_CONNECTED = "$prefix.Connected"
 const val EXTRA_PAYLOAD = "$prefix.Payload"
@@ -58,9 +59,12 @@ class RadioInterfaceService : JobIntentService(), Logging {
             i.putExtra(EXTRA_PAYLOAD, a)
             enqueueWork(context, i)
         }
+
+        // for debug logging only
+        private val jsonPrinter = JsonFormat.printer()
     }
 
-    val sentPacketsLog = DebugLogFile(this, "sent_log.json")
+    lateinit var sentPacketsLog: DebugLogFile // inited in onCreate
 
     private fun broadcastReceivedFromRadio(payload: ByteArray) {
         val intent = Intent(RECEIVE_FROMRADIO_ACTION)
@@ -80,12 +84,19 @@ class RadioInterfaceService : JobIntentService(), Logging {
         // For debugging/logging purposes ONLY we convert back into a protobuf for readability
         val proto = MeshProtos.ToRadio.parseFrom(p)
         info("TODO sending to radio: $proto")
-        sentPacketsLog.log("FIXME JSON")
+        val json = jsonPrinter.print(proto).replace('\n', ' ')
+        sentPacketsLog.log(json)
     }
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
     private fun handleFromRadio(p: ByteArray) {
         broadcastReceivedFromRadio(p)
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+
+        sentPacketsLog = DebugLogFile(this, "sent_log.json")
     }
 
     override fun onDestroy() {
