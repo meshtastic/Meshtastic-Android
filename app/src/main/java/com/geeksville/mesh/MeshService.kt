@@ -149,14 +149,16 @@ class MeshService : Service(), Logging {
         }
 
         override fun getOnline(): Array<String> {
-            info("getOnline")
+            val r = nodeDBbyID.keys.toTypedArray()
+            info("in getOnline, count=${r.size}")
             // return arrayOf("+16508675309")
-            return nodeDBbyID.keys.toTypedArray()
+            return r
         }
 
         override fun isConnected(): Boolean {
-            info("isConnected")
-            return isConnected
+            val r = this@MeshService.isConnected
+            info("in isConnected=r")
+            return r
         }
     }
 }
