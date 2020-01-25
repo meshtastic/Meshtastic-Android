@@ -11,6 +11,7 @@ import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.util.exceptionReporter
 import com.geeksville.util.exceptionsToStrings
+import com.geeksville.util.toOneLineString
 import com.google.protobuf.ByteString
 import java.nio.charset.Charset
 
@@ -131,7 +132,9 @@ class MeshService : Service(), Logging {
         nodeDBbyNodeNum.getOrPut(n) { -> NodeInfo(n) }
 
     /// Map a userid to a node/ node num, or throw an exception if not found
-    private fun toNodeInfo(id: String) = nodeDBbyID[id] ?: throw IdNotFoundException(id)
+    private fun toNodeInfo(id: String) =
+        nodeDBbyID[id]
+            ?: getOrCreateNodeInfo(10) // FIXME hack for now -  throw IdNotFoundException(id)
 
     private fun toNodeNum(id: String) = toNodeInfo(id).num
 
@@ -257,7 +260,7 @@ class MeshService : Service(), Logging {
 
         override fun onReceive(context: Context, intent: Intent) {
             val proto = MeshProtos.FromRadio.parseFrom(intent.getByteArrayExtra(EXTRA_PAYLOAD)!!)
-            info("Received from radio service: $proto")
+            info("Received from radio service: ${proto.toOneLineString()}")
             when (proto.variantCase.number) {
                 MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(proto.packet)
                 MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleReceivedNodeInfo(proto.nodeInfo)

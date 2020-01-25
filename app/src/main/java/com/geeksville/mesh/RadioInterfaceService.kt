@@ -35,7 +35,7 @@ class RadioInterfaceService : JobIntentService(), Logging {
          * Payload will be the raw bytes which were contained within a MeshProtos.FromRadio protobuf
          */
         const val RECEIVE_FROMRADIO_ACTION = "$prefix.RECEIVE_FROMRADIO"
-        
+
         /**
          * Convenience method for enqueuing work in to this service.
          */
@@ -55,6 +55,42 @@ class RadioInterfaceService : JobIntentService(), Logging {
 
         // for debug logging only
         private val jsonPrinter = JsonFormat.printer()
+        private val jsonParser = JsonFormat.parser()
+
+        /**
+         * When simulating we parse these MeshPackets as if they arrived at startup
+         * Send broadcast them after we receive a ToRadio.WantNodes message.
+         *
+         * Our fake net has three nodes
+         *
+         * +16508675309, nodenum 9 - our node
+         * +16508675310, nodenum 10 - some other node, name Bob One/BO
+         * (eventually) +16508675311, nodenum 11 - some other node
+         */
+        /*
+
+2020-01-25 11:02:05.279 1162-1280/com.geeksville.mesh D/com.geeksville.mesh.RadioInterfaceService: Executing work: Intent { act=com.geeksville.mesh.SEND_TORADIO (has extras) }
+2020-01-25 11:02:05.282 1162-1273/com.geeksville.mesh D/EGL_emulation: eglMakeCurrent: 0xebb2b500: ver 2 0 (tinfo 0xc9748bc0)
+2020-01-25 11:02:05.449 1162-1280/com.geeksville.mesh I/com.geeksville.mesh.RadioInterfaceService: TODO sending to radio: {   "wantNodes": {   } }
+2020-01-25 11:02:05.452 1162-1280/com.geeksville.mesh D/com.geeksville.mesh.RadioInterfaceService: Executing work: Intent { act=com.geeksville.mesh.SEND_TORADIO (has extras) }
+2020-01-25 11:02:05.479 1162-1280/com.geeksville.mesh I/com.geeksville.mesh.RadioInterfaceService: TODO sending to radio: {   "setOwner": {     "id": "+16508675309",     "longName": "Kevin Xter",     "shortName": "kx"   } }
+2020-01-25 11:02:05.480 1162-1280/com.geeksville.mesh D/com.geeksville.mesh.RadioInterfaceService: Executing work: Intent { act=com.geeksville.mesh.SEND_TORADIO (has extras) }
+2020-01-25 11:02:05.504 1162-1280/com.geeksville.mesh I/com.geeksville.mesh.RadioInterfaceService: TODO sending to radio: {   "packet": {     "from": -1,     "to": 10,     "payload": {       "subPackets": [{         "data": {           "payload": "aGVsbG8gd29ybGQ="         }       }]     }   } }
+2020-01-25 11:02:05.505 1162-1280/com.geeksville.mesh D/com.geeksville.mesh.RadioInterfaceService: Executing work: Intent { act=com.geeksville.mesh.SEND_TORADIO (has extras) }
+2020-01-25 11:02:05.510 1162-1280/com.geeksville.mesh I/com.geeksville.mesh.RadioInterfaceService: TODO sending to radio: {   "packet": {     "from": -1,     "to": 10,     "payload": {       "subPackets": [{         "data": {           "payload": "aGVsbG8gd29ybGQ="         }       }]     }   } }
+2020-01-25 11:02:08.232 1162-1273/com.geeksville.mesh D/EGL_emulation: eglMakeCurrent: 0xebb2b500: ver 2 0 (tinfo 0xc9748bc0)
+
+         */
+        val simInitPackets =
+            arrayOf(
+                """ { "from": 10, "to": 9, "payload": {  "subPackets": [{ "user": { "id": "+16508675310", "longName": "Bob One", "shortName": "BO" }}]}}  """,
+                """ { "from": 10, "to": 9, "payload": {  "subPackets": [{ "data": { "payload": "aGVsbG8gd29ybGQ=", "typ": 0 }}]}}  """, // SIGNAL_OPAQUE
+                """ { "from": 10, "to": 9, "payload": {  "subPackets": [{ "data": { "payload": "aGVsbG8gd29ybGQ=", "typ": 1 }}]}}  """, // CLEAR_TEXT
+                """ { "from": 10, "to": 9, "payload": {  "subPackets": [{ "data": { "payload": "", "typ": 2 }}]}}  """ // CLEAR_READACK
+            )
+
+        // FIXME, move into a subclass?
+        val isSimulating = true
     }
 
     lateinit var sentPacketsLog: DebugLogFile // inited in onCreate
@@ -76,9 +112,21 @@ class RadioInterfaceService : JobIntentService(), Logging {
 
         // For debugging/logging purposes ONLY we convert back into a protobuf for readability
         val proto = MeshProtos.ToRadio.parseFrom(p)
-        info("TODO sending to radio: $proto")
+
         val json = jsonPrinter.print(proto).replace('\n', ' ')
+        info("TODO sending to radio: $json")
         sentPacketsLog.log(json)
+
+        if (isSimulating)
+            simInitPackets.forEach { json ->
+                val fromRadio = MeshProtos.FromRadio.newBuilder().apply {
+                    packet = MeshProtos.MeshPacket.newBuilder().apply {
+                        jsonParser.merge(json, this)
+                    }.build()
+                }.build()
+
+                broadcastReceivedFromRadio(fromRadio.toByteArray())
+            }
     }
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
