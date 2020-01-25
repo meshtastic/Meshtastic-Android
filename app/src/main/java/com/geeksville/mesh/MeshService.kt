@@ -31,15 +31,17 @@ class MeshService : Service(), Logging {
      * The RECEIVED_OPAQUE:
      * Payload will be the raw bytes which were contained within a MeshPacket.Opaque field
      * Sender will be a user ID string
+     * Type will be the Data.Type enum code for this payload
      */
-    fun broadcastReceivedOpaque(senderId: String, payload: ByteArray) {
+    private fun broadcastReceivedOpaque(senderId: String, payload: ByteArray, typ: Int) {
         val intent = Intent("$prefix.RECEIVED_OPAQUE")
         intent.putExtra(EXTRA_SENDER, senderId)
         intent.putExtra(EXTRA_PAYLOAD, payload)
+        intent.putExtra(EXTRA_TYP, typ)
         sendBroadcast(intent)
     }
 
-    fun broadcastNodeChange(nodeId: String, isOnline: Boolean) {
+    private fun broadcastNodeChange(nodeId: String, isOnline: Boolean) {
         val intent = Intent("$prefix.NODE_CHANGE")
         intent.putExtra(EXTRA_ID, nodeId)
         intent.putExtra(EXTRA_ONLINE, isOnline)
@@ -165,7 +167,7 @@ class MeshService : Service(), Logging {
                     error("Ignoring opaque from $fromNum because we don't yet know its ID")
                 else {
                     debug("Received opaque from $fromId ${bytes.size}")
-                    broadcastReceivedOpaque(fromId, bytes)
+                    broadcastReceivedOpaque(fromId, bytes, data.typValue)
                 }
             else -> TODO()
         }
