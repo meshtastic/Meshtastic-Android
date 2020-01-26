@@ -13,8 +13,10 @@ Once this project is public, I'll happily let collaborators have access to the c
 * To see analytics: https://console.firebase.google.com/u/0/project/meshutil/analytics/app/android:com.geeksville.mesh/overview
 * To see crash logs: https://console.firebase.google.com/u/0/project/meshutil/crashlytics/app/android:com.geeksville.mesh/issues?state=open&time=last-seven-days&type=crash
 
-for verbose logging
+for verbose logging:
+```aidl
 adb shell setprop log.tag.FA VERBOSE
-adb shell setprop log.tag.FA-SVC VERBOSE
+```
+
 
 

@@ -2,6 +2,7 @@
 
 * use android service from Signal
 * DONE handle failures in onCharWrite, instead of logAssert - because they can happen if device goes away
+* explictly broadcast towards signal https://developer.android.com/guide/components/broadcasts
 * make test implementation of android service (doesn't use bluetooth)
 * clean up sw update code in device side
 * DONE add broadcasters for use by signal (node changes and packet received)

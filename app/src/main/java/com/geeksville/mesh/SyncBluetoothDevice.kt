@@ -26,6 +26,9 @@ class SyncBluetoothDevice(private val context: Context, private val device: Blue
     private var pendingReadC: SyncContinuation<BluetoothGattCharacteristic>? = null
     private var pendingConnect: SyncContinuation<Unit>? = null
 
+    /// Timeout before we declare a bluetooth operation failed
+    private val timeoutMsec = 30 * 1000L
+
     var state = BluetoothProfile.STATE_DISCONNECTED
 
     private val gattCallback = object : BluetoothGattCallback() {
@@ -104,31 +107,31 @@ class SyncBluetoothDevice(private val context: Context, private val device: Blue
     lateinit var gatt: BluetoothGatt
 
     fun connect() =
-        suspend<Unit> { cont ->
+        suspend<Unit>(timeoutMsec) { cont ->
             pendingConnect = cont
             gatt = device.connectGatt(context, false, gattCallback)!!
         }
 
     fun discoverServices() =
-        suspend<Unit> { cont ->
+        suspend<Unit>(timeoutMsec) { cont ->
             pendingServiceDesc = cont
             logAssert(gatt.discoverServices())
         }
 
     /// Returns the actual MTU size used
-    fun requestMtu(len: Int) = suspend<Int> { cont ->
+    fun requestMtu(len: Int) = suspend<Int>(timeoutMsec) { cont ->
         pendingMtu = cont
         logAssert(gatt.requestMtu(len))
     }
 
     fun writeCharacteristic(c: BluetoothGattCharacteristic) =
-        suspend<Unit> { cont ->
+        suspend<Unit>(timeoutMsec) { cont ->
             pendingWriteC = cont
             logAssert(gatt.writeCharacteristic(c))
         }
 
     fun readCharacteristic(c: BluetoothGattCharacteristic) =
-        suspend<BluetoothGattCharacteristic> { cont ->
+        suspend<BluetoothGattCharacteristic>(timeoutMsec) { cont ->
             pendingReadC = cont
             logAssert(gatt.readCharacteristic(c))
         }
