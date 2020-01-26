@@ -1,10 +1,12 @@
 
 
 * use android service from Signal
-* DONE handle failures in onCharWrite, instead of logAssert - because they can happen if device goes away
-* DONE explictly broadcast towards signal https://developer.android.com/guide/components/broadcasts
-* make test implementation of android service (doesn't use bluetooth)
+* send signal message type over wire
+* fix // FIXME hack for now -  throw IdNotFoundException(id) in MeshService
+* undo base64
+* optionally turn off crypto in signal
 * clean up sw update code in device side
+* change signal package ID
 * DONE add broadcasters for use by signal (node changes and packet received)
 * make compose based access show mesh state
 * add real messaging code/protobufs
@@ -54,3 +56,6 @@ Don't leave device discoverable.  Don't let unpaired users do thing with device
 * receive fake packets at power on to built initial state (for debugging, pretend there are a couple of nodes out there)
 * learn our node number
 * test mesh service from activity
+* DONE handle failures in onCharWrite, instead of logAssert - because they can happen if device goes away
+* DONE explictly broadcast towards signal https://developer.android.com/guide/components/broadcasts
+* make test implementation of android service (doesn't use bluetooth)
