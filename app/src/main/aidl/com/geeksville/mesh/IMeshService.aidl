@@ -7,6 +7,9 @@ package com.geeksville.mesh;
 * Note - these calls might throw RemoteException to indicate mesh error states
 */
 interface IMeshService {
+    /// Tell the service where to send its broadcasts of received packets
+    void subscribeReceiver(String packageName, String receiverName);
+
     /**
     * Set the ID info for this node
 

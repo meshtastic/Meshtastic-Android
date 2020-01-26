@@ -157,7 +157,7 @@ class MainActivity : AppCompatActivity(), Logging {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             val m = IMeshService.Stub.asInterface(service)
             meshService = m
-
+            
             // Do some test operations
             m.setOwner("+16508675309", "Kevin Xter", "kx")
             val testPayload = "hello world".toByteArray()

@@ -1,10 +1,13 @@
 package com.geeksville.mesh
 
+import android.app.Activity
+import android.app.ActivityManager
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Binder
 import android.os.IBinder
 import com.geeksville.android.Logging
 import com.geeksville.mesh.MeshProtos.MeshPacket
@@ -13,6 +16,7 @@ import com.geeksville.util.toOneLineString
 import com.geeksville.util.toRemoteExceptions
 import com.google.protobuf.ByteString
 import java.nio.charset.Charset
+
 
 /**
  * Handles all the communication with android apps.  Also keeps an internal model
@@ -35,12 +39,23 @@ class MeshService : Service(), Logging {
         private const val NODE_NUM_NO_MESH = -1
     }
 
+
+    /// A mapping of receiver class name to package name - used for explicit broadcasts
+    private val clientPackages = mutableMapOf<String, String>()
+
     /*
     see com.geeksville.mesh broadcast intents
     // RECEIVED_OPAQUE  for data received from other nodes
     // NODE_CHANGE  for new IDs appearing or disappearing
     // CONNECTION_CHANGED for losing/gaining connection to the packet radio
      */
+
+    private fun explicitBroadcast(intent: Intent) {
+        clientPackages.forEach {
+            intent.setClassName(it.value, it.key)
+            sendBroadcast(intent)
+        }
+    }
 
     /**
      * The RECEIVED_OPAQUE:
@@ -53,14 +68,14 @@ class MeshService : Service(), Logging {
         intent.putExtra(EXTRA_SENDER, senderId)
         intent.putExtra(EXTRA_PAYLOAD, payload)
         intent.putExtra(EXTRA_TYP, typ)
-        sendBroadcast(intent)
+        explicitBroadcast(intent)
     }
 
     private fun broadcastNodeChange(nodeId: String, isOnline: Boolean) {
         val intent = Intent("$prefix.NODE_CHANGE")
         intent.putExtra(EXTRA_ID, nodeId)
         intent.putExtra(EXTRA_ONLINE, isOnline)
-        sendBroadcast(intent)
+        explicitBroadcast(intent)
     }
 
     /// Send a command/packet to our radio
@@ -68,8 +83,25 @@ class MeshService : Service(), Logging {
         RadioInterfaceService.sendToRadio(this, p.build().toByteArray())
     }
 
-    override fun onBind(intent: Intent): IBinder {
-        // Return the interface
+    /**
+     * We track everyone who has bound to us, so when we can explicitly broadcast to them
+     * per new restrictions in android api 26 https://developer.android.com/guide/components/broadcasts#receiving-broadcasts
+     */
+    private fun recordNewClient() {
+        val pid = Binder.getCallingPid()
+
+        val activityManager = getSystemService(Activity.ACTIVITY_SERVICE) as ActivityManager
+        val procs = activityManager.runningAppProcesses.filter {
+            it.pid == pid
+        }
+        val packages = procs.flatMap {
+            it.pkgList.asList()
+        }
+
+        clientPackages.addAll(packages)
+    }
+
+    override fun onBind(intent: Intent?): IBinder? {
         return binder
     }
 
@@ -289,6 +321,10 @@ class MeshService : Service(), Logging {
     private val binder = object : IMeshService.Stub() {
         // Note: bound methods don't get properly exception caught/logged, so do that with a wrapper
         // per https://blog.classycode.com/dealing-with-exceptions-in-aidl-9ba904c6d63
+        override fun subscribeReceiver(packageName: String, receiverName: String) =
+            toRemoteExceptions {
+                clientPackages[receiverName] = packageName
+            }
 
         override fun setOwner(myId: String, longName: String, shortName: String) =
             toRemoteExceptions {

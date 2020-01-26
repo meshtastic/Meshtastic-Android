@@ -2,7 +2,7 @@
 
 * use android service from Signal
 * DONE handle failures in onCharWrite, instead of logAssert - because they can happen if device goes away
-* explictly broadcast towards signal https://developer.android.com/guide/components/broadcasts
+* DONE explictly broadcast towards signal https://developer.android.com/guide/components/broadcasts
 * make test implementation of android service (doesn't use bluetooth)
 * clean up sw update code in device side
 * DONE add broadcasters for use by signal (node changes and packet received)
@@ -10,7 +10,7 @@
 * add real messaging code/protobufs
 * use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
 * connect to bluetooth device automatically using minimum power
-* have signal declare receivers: https://developer.android.com/guide/components/broadcasts#manifest-declared-receivers
+* DONE have signal declare receivers: https://developer.android.com/guide/components/broadcasts#manifest-declared-receivers
 * fix BT device scanning 
 * call crashlytics from exceptionReporter!!!  currently not logging failures caught there
 
