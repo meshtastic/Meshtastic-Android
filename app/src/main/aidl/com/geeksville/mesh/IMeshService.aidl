@@ -3,22 +3,22 @@ package com.geeksville.mesh;
 
 // Declare any non-default types here with import statements
 
+/**
+* Note - these calls might throw RemoteException to indicate mesh error states
+*/
 interface IMeshService {
     /**
     * Set the ID info for this node
 
-    @return null for success, or an error message for failure
     */
-    String setOwner(String myId, String longName, String shortName);
+    void setOwner(String myId, String longName, String shortName);
 
     /*
     Send an opaque packet to a specified node name
 
     typ is defined in mesh.proto Data.Type.  For now juse use 0 to mean opaque bytes.
-
-    @return null for success, or an error message for failure
     */
-    String sendData(String destId, in byte[] payload, int typ);
+    void sendData(String destId, in byte[] payload, int typ);
 
     /**
     Get the IDs of everyone on the mesh.  You should also subscribe for NODE_CHANGE broadcasts.

@@ -9,9 +9,8 @@ import android.os.IBinder
 import com.geeksville.android.Logging
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
-import com.geeksville.util.exceptionReporter
-import com.geeksville.util.exceptionsToStrings
 import com.geeksville.util.toOneLineString
+import com.geeksville.util.toRemoteExceptions
 import com.google.protobuf.ByteString
 import java.nio.charset.Charset
 
@@ -292,7 +291,7 @@ class MeshService : Service(), Logging {
         // per https://blog.classycode.com/dealing-with-exceptions-in-aidl-9ba904c6d63
 
         override fun setOwner(myId: String, longName: String, shortName: String) =
-            exceptionsToStrings {
+            toRemoteExceptions {
                 error("TODO setOwner $myId : $longName : $shortName")
 
                 val user = MeshProtos.User.newBuilder().also {
@@ -312,7 +311,7 @@ class MeshService : Service(), Logging {
             }
 
         override fun sendData(destId: String, payloadIn: ByteArray, typ: Int) =
-            exceptionsToStrings {
+            toRemoteExceptions {
                 info("sendData $destId <- ${payloadIn.size} bytes")
 
                 // encapsulate our payload in the proper protobufs and fire it off
@@ -328,14 +327,14 @@ class MeshService : Service(), Logging {
                 })
             }
 
-        override fun getOnline(): Array<String> = exceptionReporter {
+        override fun getOnline(): Array<String> = toRemoteExceptions {
             val r = nodeDBbyID.keys.toTypedArray()
             info("in getOnline, count=${r.size}")
             // return arrayOf("+16508675309")
             r
         }
 
-        override fun isConnected(): Boolean = exceptionReporter {
+        override fun isConnected(): Boolean = toRemoteExceptions {
             val r = this@MeshService.isConnected
             info("in isConnected=r")
             r
