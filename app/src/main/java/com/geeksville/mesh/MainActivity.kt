@@ -180,13 +180,15 @@ class MainActivity : AppCompatActivity(), Logging {
         debug("Binding to mesh service!")
         // we bind using the well known name, to make sure 3rd party apps could also
         logAssert(meshService == null)
-        // FIXME - finding by string does work
-        val intent = Intent(this, MeshService::class.java)
-        intent.action = IMeshService::class.java.name
 
-        // This is the remote version that does not work! FIXME
-        //val intent = Intent(IMeshService::class.java.name)
-        //intent.setPackage("com.geeksville.mesh");
+        // bind to our service using the same mechanism an external client would use (for testing coverage)
+        val intent = Intent()
+        intent.setClassName("com.geeksville.mesh", "com.geeksville.mesh.MeshService")
+
+        // The following would work for us, but not external users
+        //val intent = Intent(this, MeshService::class.java)
+        //intent.action = IMeshService::class.java.name
+
         isBound = bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
         logAssert(isBound)
     }

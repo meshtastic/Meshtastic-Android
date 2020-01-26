@@ -53,13 +53,17 @@
             android:name="com.geeksville.mesh.SoftwareUpdateService"
             android:enabled="true"
             android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+            android:permission="android.permission.BIND_JOB_SERVICE"></service>
 
         <!-- This is the public API for doing mesh radio operations from android apps -->
         <service
             android:name="com.geeksville.mesh.MeshService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.geeksville.mesh.Service" />
+            </intent-filter>
+        </service>
 
         <!-- This is a private service which just does direct communication to the radio -->
         <service
