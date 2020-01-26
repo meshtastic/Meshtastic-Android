@@ -155,7 +155,9 @@ class MeshService : Service(), Logging {
     /// Map a userid to a node/ node num, or throw an exception if not found
     private fun toNodeInfo(id: String) =
         nodeDBbyID[id]
-            ?: getOrCreateNodeInfo(10) // FIXME hack for now -  throw IdNotFoundException(id)
+            ?: throw IdNotFoundException(id)
+
+    // ?: getOrCreateNodeInfo(10) // FIXME hack for now -  throw IdNotFoundException(id)
 
     private fun toNodeNum(id: String) = toNodeInfo(id).num
 

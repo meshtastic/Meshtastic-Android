@@ -1,18 +1,16 @@
 
 
-* use android service from Signal
-* send signal message type over wire
+# High priority
 * fix // FIXME hack for now -  throw IdNotFoundException(id) in MeshService
-* undo base64
+* make signal work when there is no internet up
+* make Signal rx path work
 * optionally turn off crypto in signal
 * clean up sw update code in device side
 * change signal package ID
-* DONE add broadcasters for use by signal (node changes and packet received)
 * make compose based access show mesh state
 * add real messaging code/protobufs
 * use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
 * connect to bluetooth device automatically using minimum power
-* DONE have signal declare receivers: https://developer.android.com/guide/components/broadcasts#manifest-declared-receivers
 * fix BT device scanning 
 * call crashlytics from exceptionReporter!!!  currently not logging failures caught there
 
@@ -59,3 +57,10 @@ Don't leave device discoverable.  Don't let unpaired users do thing with device
 * DONE handle failures in onCharWrite, instead of logAssert - because they can happen if device goes away
 * DONE explictly broadcast towards signal https://developer.android.com/guide/components/broadcasts
 * make test implementation of android service (doesn't use bluetooth)
+* undo base64
+* use android service from Signal
+* send signal message type over wire
+
+* DONE add broadcasters for use by signal (node changes and packet received)
+
+* DONE have signal declare receivers: https://developer.android.com/guide/components/broadcasts#manifest-declared-receivers
