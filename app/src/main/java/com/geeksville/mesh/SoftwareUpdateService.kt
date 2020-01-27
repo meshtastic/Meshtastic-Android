@@ -40,7 +40,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
     fun startUpdate() {
         info("starting update")
 
-        val sync = SyncBluetoothDevice(this@SoftwareUpdateService, device)
+        val sync = SafeBluetooth(this@SoftwareUpdateService, device)
 
         val firmwareStream = assets.open("firmware.bin")
         val firmwareCrc = CRC32()

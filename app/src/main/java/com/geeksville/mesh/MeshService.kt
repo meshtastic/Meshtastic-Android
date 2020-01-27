@@ -36,7 +36,6 @@ class MeshService : Service(), Logging {
         private const val NODE_NUM_NO_MESH = -1
     }
 
-
     /// A mapping of receiver class name to package name - used for explicit broadcasts
     private val clientPackages = mutableMapOf<String, String>()
 

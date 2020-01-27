@@ -45,6 +45,7 @@ message Position {
     double latitude = 1;
     double longitude = 2;
     int32 altitude = 3;
+    int32 battery_level = 4; // 0-100
 }
 
 // Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)
@@ -121,6 +122,12 @@ message MeshPacket {
 // Full settings (center freq, spread factor, pre-shared secret key etc...) needed to configure a radio
 message RadioConfig {
     // FIXME
+
+    // If true, radio should not try to be smart about what packets to queue to the phone
+    bool keep_all_packets = 100;
+
+    // If true, we will try to capture all the packets sent on the mesh, not just the ones destined to our node.
+    bool promiscuous_mode = 101;
 }
 
 /**
@@ -149,7 +156,6 @@ SET_CONFIG (switches device to a new set of radio params and preshared key, drop
 message NodeInfo {
     int32 num = 1; // the node number
     User user = 2;
-    int32 battery_level = 3; // 0-100
     Position position = 4;
     Time last_seen = 5;
 }
@@ -159,14 +165,17 @@ message NodeInfo {
 // it will sit in that descriptor until consumed by the phone, at which point the next item in the FIFO
 // will be populated.  FIXME
 message FromRadio {
+    // The packet num, used to allow the phone to request missing read packets from the FIFO, see our bluetooth docs
+    uint32 num = 1;
+
     oneof variant {
-        MeshPacket packet = 1;
+        MeshPacket packet = 2;
 
         /// Tells the phone what our node number is, can be -1 if we've not yet joined a mesh.
-        sint32 my_node_num = 2;
+        sint32 my_node_num = 3;
 
         /// One packet is sent for each node in the on radio DB
-        NodeInfo node_info = 3;
+        NodeInfo node_info = 4;
     }
 }
 
