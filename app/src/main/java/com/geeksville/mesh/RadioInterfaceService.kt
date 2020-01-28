@@ -4,13 +4,13 @@ import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
-import android.bluetooth.BluetoothGattCharacteristic.PERMISSION_WRITE
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import com.geeksville.android.DebugLogFile
 import com.geeksville.android.Logging
+import com.geeksville.concurrent.DeferredExecution
 import com.google.protobuf.util.JsonFormat
 import java.util.*
 
@@ -113,6 +113,14 @@ class RadioInterfaceService : Service(), Logging {
     // for debug logging only
     private val jsonPrinter = JsonFormat.printer()
 
+    // We have talked to our device and consumed all of the FromRadio packets it had initially
+    // waiting for us
+    private var initCompleted = false
+
+    /// Work that users of our service want done, which might get deferred until after
+    /// we have completed our initial connection
+    private val clientOperations = DeferredExecution()
+
     fun broadcastConnectionChanged(isConnected: Boolean) {
         val intent = Intent("$prefix.CONNECTION_CHANGED")
         intent.putExtra(EXTRA_CONNECTED, isConnected)
@@ -146,9 +154,18 @@ class RadioInterfaceService : Service(), Logging {
 
                 // Queue up another read, until we run out of packets
                 doReadFromRadio()
-            } else
+            } else {
                 debug("Done reading from radio, fromradio is empty")
+                initCompleted = true
+                doClientOperations()
+            }
         }
+    }
+
+    /// If we are inited send any client requests
+    private fun doClientOperations() {
+        if (initCompleted)
+            clientOperations.run()
     }
 
     override fun onCreate() {
@@ -211,21 +228,19 @@ class RadioInterfaceService : Service(), Logging {
         override fun sendToRadio(a: ByteArray) {
             debug("queuing ${a.size} bytes to radio")
 
-            // Note: we generate a new characteristic each time, because we are about to
-            // change the data and we want the data stored in the closure
-            val toRadio = BluetoothGattCharacteristic(
-                BTM_FROMRADIO_CHARACTER,
-                BluetoothGattCharacteristic.PROPERTY_WRITE,
-                PERMISSION_WRITE
-            )
+            clientOperations.add {
+                // Note: we generate a new characteristic each time, because we are about to
+                // change the data and we want the data stored in the closure
+                val toRadio = service.getCharacteristic(BTM_TORADIO_CHARACTER)
+                toRadio.value = a
 
-            toRadio.value = a
-            if (true)
                 safe.asyncWriteCharacteristic(toRadio) {
                     it.getOrThrow() // FIXME, handle the error better
+                    debug("ToRadio write of ${a.size} bytes completed")
                 }
-            else
-                error("FIXME ignoring writes for now - because they slide in before discovery - bad bad")
+            }
+
+            doClientOperations()
         }
     }
 }
