@@ -151,12 +151,14 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     var meshService: IMeshService? = null
-    var isBound = false
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             val m = IMeshService.Stub.asInterface(service)
             meshService = m
+
+            // FIXME - don't do these operations until we are informed we have a connection, otherwise
+            // the radio interface service might not yet be connected to the mesh service
             
             // Do some test operations
             m.setOwner("+16508675309", "Kevin Xter", "kx")
@@ -189,19 +191,16 @@ class MainActivity : AppCompatActivity(), Logging {
         //val intent = Intent(this, MeshService::class.java)
         //intent.action = IMeshService::class.java.name
 
-        isBound = bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-        logAssert(isBound)
+        logAssert(bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE))
     }
 
     private fun unbindMeshService() {
         // If we have received the service, and hence registered with
         // it, then now is the time to unregister.
         // if we never connected, do nothing
-        if (isBound) {
-            debug("Unbinding from mesh service!")
-            unbindService(serviceConnection)
-            meshService = null
-        }
+        debug("Unbinding from mesh service!")
+        unbindService(serviceConnection)
+        meshService = null
     }
 
     override fun onPause() {

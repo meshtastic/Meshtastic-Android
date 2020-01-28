@@ -133,7 +133,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         if (status != 0)
             work.completion.resumeWithException(IOException("Bluetooth status=$status"))
         else
-            work.completion.resume(Result.success(res) as Result<Nothing>) // FIXME, will this work?
+            work.completion.resume(Result.success(res) as Result<Nothing>)
     }
 
     /**

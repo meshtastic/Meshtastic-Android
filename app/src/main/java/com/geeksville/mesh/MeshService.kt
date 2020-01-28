@@ -1,10 +1,7 @@
 package com.geeksville.mesh
 
 import android.app.Service
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.os.IBinder
 import com.geeksville.android.Logging
 import com.geeksville.mesh.MeshProtos.MeshPacket
@@ -38,6 +35,8 @@ class MeshService : Service(), Logging {
 
     /// A mapping of receiver class name to package name - used for explicit broadcasts
     private val clientPackages = mutableMapOf<String, String>()
+
+    private var radioService: IRadioInterfaceService? = null
 
     /*
     see com.geeksville.mesh broadcast intents
@@ -76,34 +75,59 @@ class MeshService : Service(), Logging {
 
     /// Send a command/packet to our radio
     private fun sendToRadio(p: ToRadio.Builder) {
-        RadioInterfaceService.sendToRadio(this, p.build().toByteArray())
+        radioService!!.sendToRadio(p.build().toByteArray())
     }
 
     override fun onBind(intent: Intent?): IBinder? {
         return binder
     }
 
+    private val radioConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val filter = IntentFilter(RadioInterfaceService.RECEIVE_FROMRADIO_ACTION)
+            registerReceiver(radioInterfaceReceiver, filter)
+            radioReceiverRegistered = true
+
+            val m = IRadioInterfaceService.Stub.asInterface(service)
+            radioService = m
+
+            // FIXME - don't do this until after we see that the radio is connected to the phone
+            val sim = SimRadio(this@MeshService)
+            sim.start() // Fake up our node id info and some past packets from other nodes
+
+            // Ask for the current node DB
+            sendToRadio(ToRadio.newBuilder().apply {
+                wantNodes = ToRadio.WantNodes.newBuilder().build()
+            })
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            radioService = null
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
 
         info("Creating mesh service")
-        val filter = IntentFilter(RadioInterfaceService.RECEIVE_FROMRADIO_ACTION)
-        registerReceiver(radioInterfaceReceiver, filter)
 
-        // FIXME - don't do this until after we see that the radio is connected to the phone
-        val sim = SimRadio(this)
-        sim.start() // Fake up our node id info and some past packets from other nodes
+        // We in turn need to use the radiointerface service
+        val intent = Intent(this, RadioInterfaceService::class.java)
+        // intent.action = IMeshService::class.java.name
+        logAssert(bindService(intent, radioConnection, Context.BIND_AUTO_CREATE))
 
-        // Ask for the current node DB
-        sendToRadio(ToRadio.newBuilder().apply {
-            wantNodes = ToRadio.WantNodes.newBuilder().build()
-        })
-
+        // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
+
+    private var radioReceiverRegistered = false
 
     override fun onDestroy() {
         info("Destroying mesh service")
-        unregisterReceiver(radioInterfaceReceiver)
+        if (radioReceiverRegistered)
+            unregisterReceiver(radioInterfaceReceiver)
+        unbindService(radioConnection)
+        radioService = null
+
         super.onDestroy()
     }
 
