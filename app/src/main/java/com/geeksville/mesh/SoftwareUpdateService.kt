@@ -48,6 +48,10 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         val firmwareSize = firmwareStream.available()
 
         sync.connect()
+
+        // we begin by setting our MTU size as high as it can go
+        sync.requestMtu(512)
+
         sync.discoverServices() // Get our services
 
         val service = sync.gatt.services.find { it.uuid == SW_UPDATE_UUID }!!
@@ -56,9 +60,6 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         val dataDesc = service.getCharacteristic(SW_UPDATE_DATA_CHARACTER)
         val crc32Desc = service.getCharacteristic(SW_UPDATE_CRC32_CHARACTER)
         val updateResultDesc = service.getCharacteristic(SW_UPDATE_RESULT_CHARACTER)
-
-        // we begin by setting our MTU size as high as it can go
-        sync.requestMtu(512)
 
         // Start the update by writing the # of bytes in the image
         logAssert(

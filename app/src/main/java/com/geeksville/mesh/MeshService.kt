@@ -75,7 +75,11 @@ class MeshService : Service(), Logging {
 
     /// Send a command/packet to our radio
     private fun sendToRadio(p: ToRadio.Builder) {
-        radioService!!.sendToRadio(p.build().toByteArray())
+        val s = radioService
+        if (s != null)
+            s.sendToRadio(p.build().toByteArray())
+        else
+            error("FIXME! dropped sent packet because radio interface not yet fully connected")
     }
 
     override fun onBind(intent: Intent?): IBinder? {

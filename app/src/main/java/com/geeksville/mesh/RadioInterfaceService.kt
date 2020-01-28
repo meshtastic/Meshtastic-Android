@@ -102,8 +102,9 @@ class RadioInterfaceService : Service(), Logging {
     private lateinit var device: BluetoothDevice
     private lateinit var safe: SafeBluetooth
 
+    val service get() = safe.gatt.services.find { it.uuid == BTM_SERVICE_UUID }!!
+
     private lateinit var fromRadio: BluetoothGattCharacteristic
-    private lateinit var toRadio: BluetoothGattCharacteristic
     private lateinit var fromNum: BluetoothGattCharacteristic
 
     lateinit var sentPacketsLog: DebugLogFile // inited in onCreate
@@ -136,7 +137,16 @@ class RadioInterfaceService : Service(), Logging {
     /// Attempt to read from the fromRadio mailbox, if data is found broadcast it to android apps
     private fun doReadFromRadio() {
         safe.asyncReadCharacteristic(fromRadio) {
-            logAssert(it.isSuccess) // FIXME, handle failure
+            val b = it.getOrThrow().value
+
+            if (b.isNotEmpty()) {
+                debug("Received ${b.size} bytes from radio")
+                handleFromRadio(b)
+
+                // Queue up another read, until we run out of packets
+                doReadFromRadio()
+            } else
+                debug("Done reading from radio, fromradio is empty")
         }
     }
 
@@ -159,15 +169,12 @@ class RadioInterfaceService : Service(), Logging {
         safe.asyncConnect(true) { connRes ->
             // This callback is invoked after we are connected 
 
-            logAssert(connRes.isSuccess) // FIXME, instead just try to reconnect?
+            connRes.getOrThrow() // FIXME, instead just try to reconnect?
 
             safe.asyncDiscoverServices { discRes ->
-                logAssert(discRes.isSuccess) // IXME, instead just try to reconnect?
-                
-                val service = safe.gatt.services.find { it.uuid == BTM_SERVICE_UUID }!!
+                discRes.getOrThrow() // FIXME, instead just try to reconnect?
 
                 fromRadio = service.getCharacteristic(BTM_FROMRADIO_CHARACTER)
-                toRadio = service.getCharacteristic(BTM_FROMRADIO_CHARACTER)
                 fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)
 
                 doReadFromRadio()
@@ -188,7 +195,15 @@ class RadioInterfaceService : Service(), Logging {
 
     private val binder = object : IRadioInterfaceService.Stub() {
         override fun sendToRadio(a: ByteArray) {
-            handleFromRadio(a)
+            debug("queuing ${a.size} bytes to radio")
+
+            // Note: we generate a new characteristic each time, because we are about to
+            // change the data and we want the data stored in the closure
+            val toRadio = service.getCharacteristic(BTM_FROMRADIO_CHARACTER)
+            toRadio.value = a
+            safe.asyncWriteCharacteristic(toRadio) {
+                it.getOrThrow() // FIXME, handle the error better
+            }
         }
     }
 }
