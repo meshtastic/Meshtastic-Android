@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.*
 import android.os.IBinder
 import com.geeksville.android.Logging
+import com.geeksville.concurrent.DeferredExecution
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.util.toOneLineString
@@ -73,13 +74,18 @@ class MeshService : Service(), Logging {
         explicitBroadcast(intent)
     }
 
-    /// Send a command/packet to our radio
+    private val toRadioDeferred = DeferredExecution()
+
+    /// Send a command/packet to our radio.  But cope with the possiblity that we might start up
+    /// before we are fully bound to the RadioInterfaceService
     private fun sendToRadio(p: ToRadio.Builder) {
+        val b = p.build().toByteArray()
+
         val s = radioService
         if (s != null)
-            s.sendToRadio(p.build().toByteArray())
+            s.sendToRadio(b)
         else
-            error("FIXME! dropped sent packet because radio interface not yet fully connected")
+            toRadioDeferred.add { radioService!!.sendToRadio(b) }
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -103,6 +109,9 @@ class MeshService : Service(), Logging {
             sendToRadio(ToRadio.newBuilder().apply {
                 wantNodes = ToRadio.WantNodes.newBuilder().build()
             })
+
+            // Now send any packets which had previously been queued for clients
+            toRadioDeferred.run()
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {

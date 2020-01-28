@@ -98,6 +98,24 @@ class MainActivity : AppCompatActivity(), Logging {
         composeView(meshServiceState)
     }
 
+    private fun sendTestPackets() {
+        val m = meshService!!
+
+        // Do some test operations
+        m.setOwner("+16508675309", "Kevin Xter", "kx")
+        val testPayload = "hello world".toByteArray()
+        m.sendData(
+            "+16508675310",
+            testPayload,
+            MeshProtos.Data.Type.SIGNAL_OPAQUE_VALUE
+        )
+        m.sendData(
+            "+16508675310",
+            testPayload,
+            MeshProtos.Data.Type.CLEAR_TEXT_VALUE
+        )
+    }
+
     @Composable
     fun composeView(meshServiceState: MeshServiceState) {
         MaterialTheme {
@@ -122,25 +140,7 @@ class MainActivity : AppCompatActivity(), Logging {
                     })
 
                 Button(text = "send packets",
-                    onClick = {
-                        // FIXME - don't do these operations until we are informed we have a connection, otherwise
-                        // the radio interface service might not yet be connected to the mesh service
-                        val m = meshService!!
-
-                        // Do some test operations
-                        m.setOwner("+16508675309", "Kevin Xter", "kx")
-                        val testPayload = "hello world".toByteArray()
-                        m.sendData(
-                            "+16508675310",
-                            testPayload,
-                            MeshProtos.Data.Type.SIGNAL_OPAQUE_VALUE
-                        )
-                        m.sendData(
-                            "+16508675310",
-                            testPayload,
-                            MeshProtos.Data.Type.CLEAR_TEXT_VALUE
-                        )
-                    })
+                    onClick = { sendTestPackets() })
             }
         }
     }
@@ -177,6 +177,11 @@ class MainActivity : AppCompatActivity(), Logging {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             val m = IMeshService.Stub.asInterface(service)
             meshService = m
+
+            // FIXME: this still can't work this early because the send to +6508675310
+            // requires a DB lookup which isn't yet populated (until the sim test packets
+            // from the radio arrive)
+            // sendTestPackets() // send some traffic ASAP
 
             // FIXME this doesn't work because the model has already been copied into compose land?
             // runOnUiThread { // FIXME - this can be removed?
