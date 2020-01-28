@@ -35,13 +35,17 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
      * a schedulable bit of bluetooth work, includes both the closure to call to start the operation
      * and the completion (either async or sync) to call when it completes
      */
-    class BluetoothContinuation(
+    private class BluetoothContinuation(
+        val tag: String,
         val completion: com.geeksville.concurrent.Continuation<*>,
-        private val startWorkFn: () -> Boolean
-    ) {
+        val startWorkFn: () -> Boolean
+    ) : Logging {
 
         /// Start running a queued bit of work, return true for success or false for fatal bluetooth error
-        fun startWork() = startWorkFn()
+        fun startWork(): Boolean {
+            debug("Starting work: $tag")
+            return startWorkFn()
+        }
     }
 
     private val gattCallback = object : BluetoothGattCallback() {
@@ -99,14 +103,15 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         if (workQueue.isNotEmpty()) {
             val newWork = workQueue.removeAt(0)
             currentWork = newWork
-            newWork.startWork()
+            logAssert(newWork.startWork())
         }
     }
 
-    private fun <T> queueWork(cont: Continuation<T>, initFn: () -> Boolean) {
-        val btCont = BluetoothContinuation(cont, initFn)
+    private fun <T> queueWork(tag: String, cont: Continuation<T>, initFn: () -> Boolean) {
+        val btCont = BluetoothContinuation(tag, cont, initFn)
 
         synchronized(workQueue) {
+            debug("Enqueuing work: ${btCont.tag}")
             workQueue.add(btCont)
 
             // if we don't have any outstanding operations, run first item in queue
@@ -161,7 +166,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     // more info.
     // Otherwise if you pass in false, it will try to connect now and will timeout and fail in 30 seconds.
     private fun queueConnect(autoConnect: Boolean = false, cont: Continuation<Unit>) {
-        queueWork(cont) {
+        queueWork("connect", cont) {
             val g = device.connectGatt(context, autoConnect, gattCallback)
             if (g != null)
                 gatt = g
@@ -170,6 +175,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     }
 
     fun asyncConnect(autoConnect: Boolean = false, cb: (Result<Unit>) -> Unit) {
+        logAssert(workQueue.isEmpty() && currentWork == null) // I don't think anything should be able to sneak in front
         queueConnect(autoConnect, CallbackContinuation(cb))
     }
 
@@ -178,7 +184,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private fun queueReadCharacteristic(
         c: BluetoothGattCharacteristic,
         cont: Continuation<BluetoothGattCharacteristic>
-    ) = queueWork(cont) { gatt.readCharacteristic(c) }
+    ) = queueWork("readc", cont) { gatt.readCharacteristic(c) }
 
     fun asyncReadCharacteristic(
         c: BluetoothGattCharacteristic,
@@ -189,12 +195,13 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         makeSync { queueReadCharacteristic(c, it) }
 
     private fun queueDiscoverServices(cont: Continuation<Unit>) {
-        queueWork(cont) {
+        queueWork("discover", cont) {
             gatt.discoverServices()
         }
     }
 
     fun asyncDiscoverServices(cb: (Result<Unit>) -> Unit) {
+        logAssert(workQueue.isEmpty() && currentWork == null) // I don't think anything should be able to sneak in front
         queueDiscoverServices(CallbackContinuation(cb))
     }
 
@@ -203,12 +210,15 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private fun queueRequestMtu(
         len: Int,
         cont: Continuation<Int>
-    ) = queueWork(cont) { gatt.requestMtu(len) }
+    ) = queueWork("reqMtu", cont) { gatt.requestMtu(len) }
 
     fun asyncRequestMtu(
         len: Int,
         cb: (Result<Int>) -> Unit
-    ) = queueRequestMtu(len, CallbackContinuation(cb))
+    ) {
+        logAssert(workQueue.isEmpty() && currentWork == null) // I don't think anything should be able to sneak in front
+        queueRequestMtu(len, CallbackContinuation(cb))
+    }
 
     fun requestMtu(len: Int): Int =
         makeSync { queueRequestMtu(len, it) }
@@ -216,7 +226,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private fun queueWriteCharacteristic(
         c: BluetoothGattCharacteristic,
         cont: Continuation<BluetoothGattCharacteristic>
-    ) = queueWork(cont) { gatt.writeCharacteristic(c) }
+    ) = queueWork("writec", cont) { gatt.writeCharacteristic(c) }
 
     fun asyncWriteCharacteristic(
         c: BluetoothGattCharacteristic,
@@ -228,5 +238,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     fun disconnect() {
         gatt.disconnect()
+        failAllWork(Exception("SafeBluetooth disconnected"))
     }
 }
+

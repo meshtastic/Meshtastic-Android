@@ -178,11 +178,13 @@ class RadioInterfaceService : Service(), Logging {
             // FIXME - no need to discover services, instead just hardwire the characteristics (like we do for toRadio)
             safe.asyncDiscoverServices { discRes ->
                 discRes.getOrThrow() // FIXME, instead just try to reconnect?
+                debug("Discovered services!")
 
                 // we begin by setting our MTU size as high as it can go
                 safe.asyncRequestMtu(512) { mtuRes ->
+                    debug("requested MTU result=$mtuRes")
                     mtuRes.getOrThrow()
-                    
+
                     fromRadio = service.getCharacteristic(BTM_FROMRADIO_CHARACTER)
                     fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)
 
@@ -197,6 +199,7 @@ class RadioInterfaceService : Service(), Logging {
     override fun onDestroy() {
         info("Destroying radio interface service")
         sentPacketsLog.close()
+        safe.disconnect()
         super.onDestroy()
     }
 
@@ -217,9 +220,12 @@ class RadioInterfaceService : Service(), Logging {
             )
 
             toRadio.value = a
-            safe.asyncWriteCharacteristic(toRadio) {
-                it.getOrThrow() // FIXME, handle the error better
-            }
+            if (true)
+                safe.asyncWriteCharacteristic(toRadio) {
+                    it.getOrThrow() // FIXME, handle the error better
+                }
+            else
+                error("FIXME ignoring writes for now - because they slide in before discovery - bad bad")
         }
     }
 }
