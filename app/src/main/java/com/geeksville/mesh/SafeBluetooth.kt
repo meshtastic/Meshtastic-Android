@@ -60,8 +60,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                     completeWork(status, Unit)
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
-                    // cancel any ops
-                    failAllWork(IOException("Lost connection"))
+                    // cancel any queued ops?  for now I think it is best to keep them around
+                    // failAllWork(IOException("Lost connection"))
                 }
             }
         }

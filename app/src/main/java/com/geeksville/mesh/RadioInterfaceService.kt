@@ -4,6 +4,7 @@ import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattCharacteristic.PERMISSION_WRITE
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
@@ -153,6 +154,8 @@ class RadioInterfaceService : Service(), Logging {
     override fun onCreate() {
         super.onCreate()
 
+        info("Creating radio interface service")
+
         // FIXME, let user GUI select which device we are talking to
 
         // Note: this call does no comms, it just creates the device object (even if the
@@ -170,14 +173,21 @@ class RadioInterfaceService : Service(), Logging {
             // This callback is invoked after we are connected 
 
             connRes.getOrThrow() // FIXME, instead just try to reconnect?
+            info("Connected to radio!")
 
+            // FIXME - no need to discover services, instead just hardwire the characteristics (like we do for toRadio)
             safe.asyncDiscoverServices { discRes ->
                 discRes.getOrThrow() // FIXME, instead just try to reconnect?
 
-                fromRadio = service.getCharacteristic(BTM_FROMRADIO_CHARACTER)
-                fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)
+                // we begin by setting our MTU size as high as it can go
+                safe.asyncRequestMtu(512) { mtuRes ->
+                    mtuRes.getOrThrow()
+                    
+                    fromRadio = service.getCharacteristic(BTM_FROMRADIO_CHARACTER)
+                    fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)
 
-                doReadFromRadio()
+                    doReadFromRadio()
+                }
             }
         }
 
@@ -185,6 +195,7 @@ class RadioInterfaceService : Service(), Logging {
     }
 
     override fun onDestroy() {
+        info("Destroying radio interface service")
         sentPacketsLog.close()
         super.onDestroy()
     }
@@ -199,7 +210,12 @@ class RadioInterfaceService : Service(), Logging {
 
             // Note: we generate a new characteristic each time, because we are about to
             // change the data and we want the data stored in the closure
-            val toRadio = service.getCharacteristic(BTM_FROMRADIO_CHARACTER)
+            val toRadio = BluetoothGattCharacteristic(
+                BTM_FROMRADIO_CHARACTER,
+                BluetoothGattCharacteristic.PROPERTY_WRITE,
+                PERMISSION_WRITE
+            )
+
             toRadio.value = a
             safe.asyncWriteCharacteristic(toRadio) {
                 it.getOrThrow() // FIXME, handle the error better

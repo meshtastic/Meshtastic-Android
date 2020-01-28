@@ -120,6 +120,27 @@ class MainActivity : AppCompatActivity(), Logging {
                             )
                         }
                     })
+
+                Button(text = "send packets",
+                    onClick = {
+                        // FIXME - don't do these operations until we are informed we have a connection, otherwise
+                        // the radio interface service might not yet be connected to the mesh service
+                        val m = meshService!!
+
+                        // Do some test operations
+                        m.setOwner("+16508675309", "Kevin Xter", "kx")
+                        val testPayload = "hello world".toByteArray()
+                        m.sendData(
+                            "+16508675310",
+                            testPayload,
+                            MeshProtos.Data.Type.SIGNAL_OPAQUE_VALUE
+                        )
+                        m.sendData(
+                            "+16508675310",
+                            testPayload,
+                            MeshProtos.Data.Type.CLEAR_TEXT_VALUE
+                        )
+                    })
             }
         }
     }
@@ -156,15 +177,6 @@ class MainActivity : AppCompatActivity(), Logging {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             val m = IMeshService.Stub.asInterface(service)
             meshService = m
-
-            // FIXME - don't do these operations until we are informed we have a connection, otherwise
-            // the radio interface service might not yet be connected to the mesh service
-            
-            // Do some test operations
-            m.setOwner("+16508675309", "Kevin Xter", "kx")
-            val testPayload = "hello world".toByteArray()
-            m.sendData("+16508675310", testPayload, MeshProtos.Data.Type.SIGNAL_OPAQUE_VALUE)
-            m.sendData("+16508675310", testPayload, MeshProtos.Data.Type.CLEAR_TEXT_VALUE)
 
             // FIXME this doesn't work because the model has already been copied into compose land?
             // runOnUiThread { // FIXME - this can be removed?
