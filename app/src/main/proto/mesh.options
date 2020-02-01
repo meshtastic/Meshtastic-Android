@@ -1,0 +1,21 @@
+# options for nanopb
+# https://jpa.kapsi.fi/nanopb/docs/reference.html#proto-file-options
+
+*macaddr max_size:6 # macaddrs
+*id max_size:16 # node id strings
+
+*User.long_name max_size:40
+*User.short_name max_size:4
+
+# FIXME pick a higher number someday? or do dynamic alloc in nanopb?
+*DeviceState.node_db max_count:32
+*DeviceState.receive_queue max_count:32
+
+# FIXME, something more like 200? And do fragmentation and reassembly (for larger payloads) at the Android layer, not the esp32 layer.
+*Data.payload max_size:100
+
+*MeshPayload.subPackets max_count:4
+
+
+# MyMessage.name         max_size:40 
+# or fixed_length or fixed_count, or max_count

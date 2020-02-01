@@ -1,6 +1,7 @@
 
-
 # High priority
+
+* watch for ntofies of numread changing
 * implement android side of mesh radio bluetooth link
 * investigate the Signal SMS message flow path, see if I could just make Mesh a third peer to signal & sms?
 * make signal work when there is no internet up
@@ -9,12 +10,14 @@
   public static final int PREKEY_TYPE                 = 3;
   public static final int SENDERKEY_TYPE              = 4;
   public static final int SENDERKEY_DISTRIBUTION_TYPE = 5;"
+* don't do mesh based algoritm for node id assignment (initially) - instead just store in flash - possibly even in the initial alpha release do this hack
+* use the lora net code on my current protoboard
+* investigate a 16 bit node number.  If possible it would make collisions super rare.  Much easier to just pick a nodenum and go.
+* add large packet reassembly?
 * optionally turn off crypto in signal
-* clean up sw update code in device side
-
 * change signal package ID
-* make compose based access show mesh state
-* add real messaging code/protobufs
+* good tips on which bands might be more free https://github.com/TheThingsNetwork/ttn/issues/119
+* make my android app show mesh state
 * use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
 * connect to bluetooth device automatically using minimum power
 * fix BT device scanning 
@@ -71,3 +74,5 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 
 * DONE have signal declare receivers: https://developer.android.com/guide/components/broadcasts#manifest-declared-receivers
 * fix // FIXME hack for now -  throw IdNotFoundException(id) in MeshService
+* clean up sw update code in device side
+* add real messaging code/protobufs

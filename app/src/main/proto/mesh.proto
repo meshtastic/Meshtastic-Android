@@ -81,16 +81,22 @@ message User {
     string id = 1; // a globally unique ID string for this user.  In the case of Signal that would mean +16504442323
     string long_name = 2; // A full name for this user, i.e. "Kevin Hester"
     string short_name = 3; // A VERY short name, ideally two characters.  Suitable for a tiny OLED screen
+    string macaddr = 4; // This is the addr of the radio.  Not populated by the phone, but added by the esp32 when broadcasting
 }
 
 // Broadcast when a newly powered mesh node wants to find a node num it can use (see document for more
 // details)
+// FIXME in the initial proof of concept we just skip the entire want/deny flow and just hand pick node numbers at first.
 message WantNodeNum {
-    // No payload, just its existence is sufficient (desired node num will be in the from field)
+    uint32 desired_nodenum = 1; // The node number we want (note: these WantNodeNum packets are sent from a few special 'unassigned' nodenumbers)
+    string macaddr = 2; // the unique ID of my node, so that others can descriminate between anyone else who is also accidentially using the same unassigned node number
 }
 
 // Sent to a node which has requested a nodenum when it is told it can't have it
+// FIXME, should denials be sent as a broadcast also?
+// FIXME, how do we handle someone missing the denial and assuming it has the nodenum?
 message DenyNodeNum {
+    string macaddr = 1; // the macaddr of the node we are sending this denial to (so that the recipient can be sure the packet really as desined to them)
 }
 
 // A single packet might have a series of SubPacket included
@@ -158,6 +164,20 @@ message NodeInfo {
     User user = 2;
     Position position = 4;
     Time last_seen = 5;
+}
+
+// This message is never sent over the wire, but it is used for serializing DB state to flash in the device code
+// FIXME, since we write this each time we enter deep sleep (and have infinite flash) it would be better to use some sort of append only data
+// structure for the receive queue and use the preferences store for the other stuff
+message DeviceState {
+    RadioConfig radio = 1;
+    repeated NodeInfo node_db = 2;
+
+    /// Received packets saved for delivery to the phone 
+    repeated MeshPacket receive_queue = 3;
+
+    /// Tells the phone what our node number is, can be -1 if we've not yet joined a mesh.
+    sint32 my_node_num = 4;
 }
 
 // packets from the radio to the phone will appear on the fromRadio characteristic.  It will support
