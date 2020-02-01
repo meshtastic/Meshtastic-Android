@@ -1,7 +1,8 @@
 syntax = "proto3";
 // per https://developers.google.com/protocol-buffers/docs/proto3
 
-package mesh;
+// We are not placing any of these defs inside a package, because if you do the resulting nanopb version is super verbose
+// package mesh;
 
 option java_package = "com.geeksville.mesh";
 option java_outer_classname = "MeshProtos";
@@ -46,6 +47,9 @@ message Position {
     double longitude = 2;
     int32 altitude = 3;
     int32 battery_level = 4; // 0-100
+
+    /// true if this position came from the GPS inside the esp32 board, false if it was from a helper app on the phone
+    bool  from_hardware = 5;
 }
 
 // Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)

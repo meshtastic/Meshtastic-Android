@@ -1,7 +1,7 @@
 # options for nanopb
 # https://jpa.kapsi.fi/nanopb/docs/reference.html#proto-file-options
 
-*macaddr max_size:6 # macaddrs
+*macaddr max_size:6 fixed_length:true # macaddrs
 *id max_size:16 # node id strings
 
 *User.long_name max_size:40
