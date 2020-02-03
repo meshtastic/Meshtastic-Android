@@ -41,6 +41,18 @@ If user wants to send a text they can SEND_TEXT(dest user, short text message). 
 node number, or 0xff for broadcast.
 */
 
+/*
+Protobuf build instructions:
+
+protoc -I=. --java_out /tmp mesh.proto
+
+To generate Nanopb c code
+/home/kevinh/packages/nanopb-0.4.0-linux-x86/generator-bin/protoc --nanopb_out=/tmp -I=app/src/main/proto mesh.proto
+
+Nanopb binaries available here: https://jpa.kapsi.fi/nanopb/download/ use nanopb 0.4.0
+
+*/
+
 // a gps position
 message Position {
     double latitude = 1;
@@ -49,7 +61,7 @@ message Position {
     int32 battery_level = 4; // 0-100
 
     /// true if this position came from the GPS inside the esp32 board, false if it was from a helper app on the phone
-    bool  from_hardware = 5;
+    bool from_hardware = 5;
 }
 
 // Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)
@@ -128,7 +140,7 @@ message SubPacket {
 message MeshPacket {
     int32 from = 1;
     int32 to = 2;
-    
+
     // See note above:
     // MeshPayload payloads = 4;
     SubPacket payload = 3;
