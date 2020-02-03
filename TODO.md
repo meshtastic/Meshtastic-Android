@@ -1,7 +1,7 @@
-
 # High priority
 
-* watch for notfies of numread changing
+* when notified phone should download messages
+* have phone use our local node number as its node number (instead of hardwired)
 * investigate the Signal SMS message flow path, see if I could just make Mesh a third peer to signal & sms?
 * make signal work when there is no internet up
 * make Signal rx path work

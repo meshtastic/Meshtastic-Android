@@ -150,6 +150,22 @@ message MeshPacket {
 message RadioConfig {
     // FIXME
 
+    // We should send our position this often (but only if it has changed significantly)
+    uint32 position_broadcast_msec = 1;
+
+    // If we haven't broadcasted anything in a while, we should send our position (and User?) at least this often.
+    uint32 min_broadcast_msec = 2;
+
+    int32 tx_power = 3;
+
+    float center_freq = 4;
+
+    uint32 bandwidth = 5;
+
+    int32 spread_factor = 6;
+
+    int32 coding_rate = 7;
+
     // If true, radio should not try to be smart about what packets to queue to the phone
     bool keep_all_packets = 100;
 
@@ -185,6 +201,9 @@ message NodeInfo {
     User user = 2;
     Position position = 4;
     Time last_seen = 5;
+
+    // FIXME - some sort of notion of the level of rx power we measured when we last received a packet from this node 
+    int32 rx_power = 6;
 }
 
 // This message is never sent over the wire, but it is used for serializing DB state to flash in the device code
@@ -198,7 +217,21 @@ message DeviceState {
     repeated MeshPacket receive_queue = 3;
 
     /// Tells the phone what our node number is, can be -1 if we've not yet joined a mesh.
-    sint32 my_node_num = 4;
+    int32 my_node_num = 4;
+}
+
+/**
+Unique local debugging info for this node
+
+Note: we don't include position or the user info, because that will come in the 
+
+Sent to the phone in response to WantNodes.
+*/
+message MyNodeInfo {
+    /// Tells the phone what our node number is, can be -1 if we've not yet joined a mesh.
+    int32 my_node_num = 1;
+
+    /// FIXME - add useful debugging state (queue depths etc)
 }
 
 // packets from the radio to the phone will appear on the fromRadio characteristic.  It will support
@@ -213,7 +246,7 @@ message FromRadio {
         MeshPacket packet = 2;
 
         /// Tells the phone what our node number is, can be -1 if we've not yet joined a mesh.
-        sint32 my_node_num = 3;
+        MyNodeInfo my_info = 3;
 
         /// One packet is sent for each node in the on radio DB
         NodeInfo node_info = 4;
