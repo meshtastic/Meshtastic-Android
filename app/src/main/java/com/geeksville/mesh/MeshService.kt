@@ -223,10 +223,8 @@ class MeshService : Service(), Logging {
         destId: String,
         initFn: MeshProtos.SubPacket.Builder.() -> Unit
     ): MeshPacket = newMeshPacketTo(destId).apply {
-        payload = MeshProtos.MeshPayload.newBuilder().apply {
-            addSubPackets(MeshProtos.SubPacket.newBuilder().also {
-                initFn(it)
-            }.build())
+        payload = MeshProtos.SubPacket.newBuilder().also {
+            initFn(it)
         }.build()
     }.build()
 
@@ -280,36 +278,34 @@ class MeshService : Service(), Logging {
         // decided to pass through to us (except for broadcast packets)
         val toNum = packet.to
 
-        val payload = packet.payload
-        payload.subPacketsList.forEach { p ->
-            when (p.variantCase.number) {
-                MeshProtos.SubPacket.POSITION_FIELD_NUMBER ->
-                    updateNodeInfo(fromNum) {
-                        it.position = Position(
-                            p.position.latitude,
-                            p.position.longitude,
-                            p.position.altitude
-                        )
-                    }
-                MeshProtos.SubPacket.TIME_FIELD_NUMBER ->
-                    updateNodeInfo(fromNum) {
-                        it.lastSeen = p.time.msecs
-                    }
-                MeshProtos.SubPacket.DATA_FIELD_NUMBER ->
-                    handleReceivedData(fromNum, p.data)
+        val p = packet.payload
+        when (p.variantCase.number) {
+            MeshProtos.SubPacket.POSITION_FIELD_NUMBER ->
+                updateNodeInfo(fromNum) {
+                    it.position = Position(
+                        p.position.latitude,
+                        p.position.longitude,
+                        p.position.altitude
+                    )
+                }
+            MeshProtos.SubPacket.TIME_FIELD_NUMBER ->
+                updateNodeInfo(fromNum) {
+                    it.lastSeen = p.time.msecs
+                }
+            MeshProtos.SubPacket.DATA_FIELD_NUMBER ->
+                handleReceivedData(fromNum, p.data)
 
-                MeshProtos.SubPacket.USER_FIELD_NUMBER ->
-                    handleReceivedUser(fromNum, p.user)
-                MeshProtos.SubPacket.WANT_NODE_FIELD_NUMBER -> {
-                    // This is managed by the radio on its own
-                    debug("Ignoring WANT_NODE from $fromNum")
-                }
-                MeshProtos.SubPacket.DENY_NODE_FIELD_NUMBER -> {
-                    // This is managed by the radio on its own
-                    debug("Ignoring DENY_NODE from $fromNum to $toNum")
-                }
-                else -> TODO("Unexpected SubPacket variant")
+            MeshProtos.SubPacket.USER_FIELD_NUMBER ->
+                handleReceivedUser(fromNum, p.user)
+            MeshProtos.SubPacket.WANT_NODE_FIELD_NUMBER -> {
+                // This is managed by the radio on its own
+                debug("Ignoring WANT_NODE from $fromNum")
             }
+            MeshProtos.SubPacket.DENY_NODE_FIELD_NUMBER -> {
+                // This is managed by the radio on its own
+                debug("Ignoring DENY_NODE from $fromNum to $toNum")
+            }
+            else -> TODO("Unexpected SubPacket variant")
         }
     }
 

@@ -103,7 +103,7 @@ message DenyNodeNum {
     string macaddr = 1; // the macaddr of the node we are sending this denial to (so that the recipient can be sure the packet really as desined to them)
 }
 
-// A single packet might have a series of SubPacket included
+// The payload portion fo a packet, this is the actual bytes that are sent inside a radio packet (because from/to are broken out by the comms library)
 message SubPacket {
     oneof variant {
         Position position = 1;
@@ -115,18 +115,23 @@ message SubPacket {
     }
 }
 
+// Note: For simplicity reasons (and that we want to keep over the radio packets very small, we now assume that there is only _one_
+// SubPacket in each MeshPacket).  That might change in the far future, but for now that's the case.
 // A packet sent over our mesh.
 // NOTE: this raw payload does not include the from and to addresses, which are stripped off
 // and passed into the mesh library code separately.
-message MeshPayload {
-    repeated SubPacket subPackets = 3;
-}
+//message MeshPayload {
+//    repeated SubPacket subPackets = 3;
+//}
 
 // A full packet sent/received over the mesh
 message MeshPacket {
     int32 from = 1;
     int32 to = 2;
-    MeshPayload payload = 3;
+    
+    // See note above:
+    // MeshPayload payloads = 4;
+    SubPacket payload = 3;
 }
 
 // Full settings (center freq, spread factor, pre-shared secret key etc...) needed to configure a radio
