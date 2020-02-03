@@ -18,10 +18,10 @@ class SimRadio(private val context: Context) {
      */
     private val simInitPackets =
         arrayOf(
-            """ { "from": 10, "to": 9, "payload": {  "subPackets": [{ "user": { "id": "+16508675310", "longName": "Bob One", "shortName": "BO" }}]}}  """,
-            """ { "from": 10, "to": 9, "payload": {  "subPackets": [{ "data": { "payload": "aGVsbG8gd29ybGQ=", "typ": 0 }}]}}  """, // SIGNAL_OPAQUE
-            """ { "from": 10, "to": 9, "payload": {  "subPackets": [{ "data": { "payload": "aGVsbG8gd29ybGQ=", "typ": 1 }}]}}  """, // CLEAR_TEXT
-            """ { "from": 10, "to": 9, "payload": {  "subPackets": [{ "data": { "payload": "", "typ": 2 }}]}}  """ // CLEAR_READACK
+            """ { "from": 10, "to": 9, "payload": { "user": { "id": "+16508675310", "longName": "Bob One", "shortName": "BO" }}}  """,
+            """ { "from": 10, "to": 9, "payload": { "data": { "payload": "aGVsbG8gd29ybGQ=", "typ": 0 }}}  """, // SIGNAL_OPAQUE
+            """ { "from": 10, "to": 9, "payload": { "data": { "payload": "aGVsbG8gd29ybGQ=", "typ": 1 }}}  """, // CLEAR_TEXT
+            """ { "from": 10, "to": 9, "payload": { "data": { "payload": "", "typ": 2 }}}  """ // CLEAR_READACK
         )
 
     fun start() {
