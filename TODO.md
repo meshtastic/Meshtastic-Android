@@ -24,6 +24,8 @@
 
 # Medium priority
 
+* test with oldest android
+* stop using a foreground service
 * change info() log strings to debug()
 * use platform theme (dark or light)
 * remove mixpanel analytics

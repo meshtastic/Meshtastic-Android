@@ -150,6 +150,7 @@ class RadioInterfaceService : Service(), Logging {
     private val clientOperations = DeferredExecution()
 
     private fun broadcastConnectionChanged(isConnected: Boolean) {
+        debug("Broadcasting connection=$isConnected")
         val intent = Intent(CONNECTCHANGED_ACTION)
         intent.putExtra(EXTRA_CONNECTED, isConnected)
         sendBroadcast(intent)
@@ -195,14 +196,14 @@ class RadioInterfaceService : Service(), Logging {
     override fun onCreate() {
         super.onCreate()
 
-        info("Creating radio interface service")
-
         // FIXME, let user GUI select which device we are talking to
 
         // Note: this call does no comms, it just creates the device object (even if the
         // device is off/not connected)
         val usetbeam = false
         val address = if (usetbeam) "B4:E6:2D:EA:32:B7" else "24:6F:28:96:C9:2A"
+        info("Creating radio interface service.  device=$address")
+
         device = bluetoothAdapter.getRemoteDevice(address)
         // Note this constructor also does no comm
         safe = SafeBluetooth(this, device)

@@ -1,15 +1,25 @@
 package com.geeksville.mesh
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.content.*
+import android.graphics.Color
+import android.os.Build
 import android.os.IBinder
+import androidx.annotation.RequiresApi
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationCompat.PRIORITY_MIN
 import com.geeksville.android.Logging
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
+import com.geeksville.util.exceptionReporter
 import com.geeksville.util.toOneLineString
 import com.geeksville.util.toRemoteExceptions
 import com.google.protobuf.ByteString
 import java.nio.charset.Charset
+
 
 class RadioNotConnectedException() : Exception("Can't find radio")
 
@@ -106,13 +116,74 @@ class MeshService : Service(), Logging {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createNotificationChannel(): String {
+        val channelId = "my_service"
+        val channelName = "My Background Service"
+        val chan = NotificationChannel(
+            channelId,
+            channelName, NotificationManager.IMPORTANCE_HIGH
+        )
+        chan.lightColor = Color.BLUE
+        chan.importance = NotificationManager.IMPORTANCE_NONE
+        chan.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+        val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        service.createNotificationChannel(chan)
+        return channelId
+    }
+
+    private fun startForeground() {
+
+        val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val channelId =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                createNotificationChannel()
+            } else {
+                // If earlier version channel ID is not used
+                // https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html#NotificationCompat.Builder(android.content.Context)
+                ""
+            }
+
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+        val notification = notificationBuilder.setOngoing(true)
+            .setPriority(PRIORITY_MIN)
+            .setCategory(Notification.CATEGORY_SERVICE)
+            .setSmallIcon(android.R.drawable.stat_sys_data_bluetooth)
+            //.setContentTitle("Meshtastic") // leave this off for now so our notification looks smaller
+            //.setContentText("Listening for mesh...")
+            .build()
+        startForeground(101, notification)
+    }
+
     override fun onCreate() {
         super.onCreate()
 
         info("Creating mesh service")
 
+        /*
+        // This intent will be used if the user clicks on the item in the status bar
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0,
+            notificationIntent, 0
+        )
+
+        val notification: Notification = NotificationCompat.Builder(this)
+            .setSmallIcon(android.R.drawable.stat_sys_data_bluetooth)
+            .setContentTitle("Meshtastic")
+            .setContentText("Listening for mesh...")
+            .setContentIntent(pendingIntent).build()
+
+        // We are required to call this within a few seconds of create
+        startForeground(1337, notification)
+
+         */
+        startForeground()
+
         // we listen for messages from the radio receiver _before_ trying to create the service
-        val filter = IntentFilter(RadioInterfaceService.RECEIVE_FROMRADIO_ACTION)
+        val filter = IntentFilter()
+        filter.addAction(RadioInterfaceService.RECEIVE_FROMRADIO_ACTION)
+        filter.addAction(RadioInterfaceService.CONNECTCHANGED_ACTION)
         registerReceiver(radioInterfaceReceiver, filter)
 
         // We in turn need to use the radiointerface service
@@ -303,6 +374,7 @@ class MeshService : Service(), Logging {
 
     /// Called when we gain/lose connection to our radio
     private fun onConnectionChanged(c: Boolean) {
+        debug("onConnectionChanged connected=$c")
         isConnected = c
         if (c) {
             // Do our startup init
@@ -342,7 +414,6 @@ class MeshService : Service(), Logging {
                 infoBytes = connectedRadio.readNodeInfo()
             }
         }
-        TODO("FIXME - set our owner, get node infos, set our local nodenum, dont process received packets until we have the full node db")
     }
 
     /**
@@ -351,8 +422,10 @@ class MeshService : Service(), Logging {
      */
     private val radioInterfaceReceiver = object : BroadcastReceiver() {
 
-        override fun onReceive(context: Context, intent: Intent) {
+        // Important to never throw exceptions out of onReceive
+        override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
 
+            debug("Received broadcast ${intent.action}")
             when (intent.action) {
                 RadioInterfaceService.CONNECTCHANGED_ACTION -> {
                     onConnectionChanged(intent.getBooleanExtra(EXTRA_CONNECTED, false))
@@ -428,7 +501,7 @@ class MeshService : Service(), Logging {
 
         override fun isConnected(): Boolean = toRemoteExceptions {
             val r = this@MeshService.isConnected
-            info("in isConnected=r")
+            info("in isConnected=$r")
             r
         }
     }

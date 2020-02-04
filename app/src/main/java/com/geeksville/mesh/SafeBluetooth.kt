@@ -135,6 +135,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                 w
             }
 
+        debug("work ${work.tag} is completed, resuming with status $status")
         if (status != 0)
             work.completion.resumeWithException(IOException("Bluetooth status=$status"))
         else

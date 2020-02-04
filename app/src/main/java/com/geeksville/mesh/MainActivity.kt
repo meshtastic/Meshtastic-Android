@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.Debug
 import android.os.IBinder
@@ -171,9 +172,10 @@ class MainActivity : AppCompatActivity(), Logging {
         requestPermission()
     }
 
-    var meshService: IMeshService? = null
+    private var meshService: IMeshService? = null
+    private var isBound = false
 
-    private val serviceConnection = object : ServiceConnection {
+    private var serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) {
             val m = IMeshService.Stub.asInterface(service)
             meshService = m
@@ -201,14 +203,25 @@ class MainActivity : AppCompatActivity(), Logging {
         logAssert(meshService == null)
 
         // bind to our service using the same mechanism an external client would use (for testing coverage)
-        val intent = Intent()
-        intent.setClassName("com.geeksville.mesh", "com.geeksville.mesh.MeshService")
-
         // The following would work for us, but not external users
         //val intent = Intent(this, MeshService::class.java)
         //intent.action = IMeshService::class.java.name
+        val intent = Intent()
+        intent.setClassName("com.geeksville.mesh", "com.geeksville.mesh.MeshService")
 
+        // Before binding we want to explicitly create - so the service stays alive forever (so it can keep
+        // listening for the bluetooth packets arriving from the radio.  And when they arrive forward them
+        // to Signal or whatever.
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
+
+        // ALSO bind so we can use the api
         logAssert(bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE))
+        isBound = true;
     }
 
     private fun unbindMeshService() {
@@ -216,7 +229,8 @@ class MainActivity : AppCompatActivity(), Logging {
         // it, then now is the time to unregister.
         // if we never connected, do nothing
         debug("Unbinding from mesh service!")
-        unbindService(serviceConnection)
+        if (isBound)
+            unbindService(serviceConnection)
         meshService = null
     }
 
