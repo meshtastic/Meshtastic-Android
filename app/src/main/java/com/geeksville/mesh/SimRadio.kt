@@ -31,12 +31,13 @@ class SimRadio(private val context: Context) {
         // Instead a separate sim radio thing can come in at startup and force these broadcasts to happen
         // at the right time
         // Send a fake my_node_num response
+        /* FIXME - change to use new radio info message
         RadioInterfaceService.broadcastReceivedFromRadio(
             context,
             MeshProtos.FromRadio.newBuilder().apply {
                 myNodeNum = 9
             }.build().toByteArray()
-        )
+        ) */
 
         simInitPackets.forEach { json ->
             val fromRadio = MeshProtos.FromRadio.newBuilder().apply {

@@ -105,10 +105,10 @@ class MeshService : Service(), Logging {
             val sim = SimRadio(this@MeshService)
             sim.start() // Fake up our node id info and some past packets from other nodes
 
-            // Ask for the current node DB
-            sendToRadio(ToRadio.newBuilder().apply {
+            // Ask for the current node DB FIXME
+            /* sendToRadio(ToRadio.newBuilder().apply {
                 wantNodes = ToRadio.WantNodes.newBuilder().build()
-            })
+            }) */
 
             // Now send any packets which had previously been queued for clients
             toRadioDeferred.run()
@@ -290,7 +290,7 @@ class MeshService : Service(), Logging {
                 }
             MeshProtos.SubPacket.TIME_FIELD_NUMBER ->
                 updateNodeInfo(fromNum) {
-                    it.lastSeen = p.time.msecs
+                    it.lastSeen = p.time
                 }
             MeshProtos.SubPacket.DATA_FIELD_NUMBER ->
                 handleReceivedData(fromNum, p.data)
@@ -324,8 +324,12 @@ class MeshService : Service(), Logging {
             info("Received from radio service: ${proto.toOneLineString()}")
             when (proto.variantCase.number) {
                 MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(proto.packet)
+                /*
+                FIXME - handle node info and setting my protonum
                 MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleReceivedNodeInfo(proto.nodeInfo)
                 MeshProtos.FromRadio.MY_NODE_NUM_FIELD_NUMBER -> ourNodeNum = proto.myNodeNum
+
+                 */
                 else -> TODO("Unexpected FromRadio variant")
             }
         }
@@ -354,9 +358,11 @@ class MeshService : Service(), Logging {
                     handleReceivedUser(ourNodeNum, user)
                 }
 
+                /* FIXME - set my owner info
                 sendToRadio(ToRadio.newBuilder().apply {
                     this.setOwner = user
                 })
+                 */
             }
 
         override fun sendData(destId: String, payloadIn: ByteArray, typ: Int) =

@@ -51,6 +51,18 @@ callback was called, but before it arrives at the phone.  If the phone writes to
 When the esp32 advances fromnum, it will delay doing the notify by 100ms, in the hopes that the notify will never actally need to be sent if the phone is already pulling from fromradio.
   Note: that if the phone ever sees this number decrease, it means the esp32 has rebooted.
 
+meshMyNodeCharacteristic("ea9f3f82-8dc4-4733-9452-1f6da28892a2", BLECharacteristic::PROPERTY_READ)
+mynode - read/write this to access a MyNodeInfo protobuf
+
+meshNodeInfoCharacteristic("d31e02e0-c8ab-4d3f-9cc9-0b8466bdabe8", BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_READ),
+nodeinfo - read this to get a series of node infos (ending with a null empty record), write to this to restart the read statemachine that returns all the node infos
+
+meshRadioCharacteristic("b56786c8-839a-44a1-b98e-a1724c4a0262", BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_READ),
+radio - read/write this to access a RadioConfig protobuf
+
+meshOwnerCharacteristic("6ff1d8b6-e2de-41e3-8c0b-8fa384f64eb6", BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_READ)
+owner - read/write this to access a User protobuf
+
 Re: queue management
 Not all messages are kept in the fromradio queue (filtered based on SubPacket):
 * only the most recent Position and User messages for a particular node are kept
@@ -85,6 +97,22 @@ class RadioInterfaceService : Service(), Logging {
             UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
         private val BTM_FROMNUM_CHARACTER =
             UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
+
+        /// mynode - read/write this to access a MyNodeInfo protobuf
+        private val BTM_MYNODE_CHARACTER =
+            UUID.fromString("ea9f3f82-8dc4-4733-9452-1f6da28892a2")
+
+        /// nodeinfo - read this to get a series of node infos (ending with a null empty record), write to this to restart the read statemachine that returns all the node infos
+        private val BTM_NODEINFO_CHARACTER =
+            UUID.fromString("d31e02e0-c8ab-4d3f-9cc9-0b8466bdabe8")
+
+        /// radio - read/write this to access a RadioConfig protobuf
+        private val BTM_RADIO_CHARACTER =
+            UUID.fromString("b56786c8-839a-44a1-b98e-a1724c4a0262")
+
+        /// owner - read/write this to access a User protobuf
+        private val BTM_OWNER_CHARACTER =
+            UUID.fromString("6ff1d8b6-e2de-41e3-8c0b-8fa384f64eb6")
 
         /// This is public only so that SimRadio can bootstrap our message flow
         fun broadcastReceivedFromRadio(context: Context, payload: ByteArray) {
@@ -226,23 +254,51 @@ class RadioInterfaceService : Service(), Logging {
         return binder;
     }
 
-    private val binder = object : IRadioInterfaceService.Stub() {
-        override fun sendToRadio(a: ByteArray) {
-            debug("queuing ${a.size} bytes to radio")
+    /**
+     * We allow writes to bluetooth characteristics to be queued up until our init is completed.
+     */
+    private fun doAsyncWrite(uuid: UUID, a: ByteArray) {
+        debug("queuing ${a.size} bytes to $uuid")
 
-            clientOperations.add {
-                // Note: we generate a new characteristic each time, because we are about to
-                // change the data and we want the data stored in the closure
-                val toRadio = service.getCharacteristic(BTM_TORADIO_CHARACTER)
-                toRadio.value = a
+        clientOperations.add {
+            // Note: we generate a new characteristic each time, because we are about to
+            // change the data and we want the data stored in the closure
+            val toRadio = service.getCharacteristic(uuid)
+            toRadio.value = a
 
-                safe.asyncWriteCharacteristic(toRadio) {
-                    it.getOrThrow() // FIXME, handle the error better
-                    debug("ToRadio write of ${a.size} bytes completed")
-                }
+            safe.asyncWriteCharacteristic(toRadio) {
+                it.getOrThrow() // FIXME, handle the error better
+                debug("ToRadio write of ${a.size} bytes completed")
             }
+        }
 
-            doClientOperations()
+        doClientOperations()
+    }
+
+    private val binder = object : IRadioInterfaceService.Stub() {
+        // A write of any size to nodeinfo means restart reading
+        override fun restartNodeInfo() = doAsyncWrite(BTM_NODEINFO_CHARACTER, ByteArray(0))
+
+        override fun readMyNode(): ByteArray {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun sendToRadio(a: ByteArray) = doAsyncWrite(BTM_TORADIO_CHARACTER, a)
+
+        override fun readRadioConfig(): ByteArray {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun readOwner(): ByteArray {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun writeOwner(owner: ByteArray) = doAsyncWrite(BTM_OWNER_CHARACTER, owner)
+
+        override fun writeRadioConfig(config: ByteArray) = doAsyncWrite(BTM_RADIO_CHARACTER, config)
+
+        override fun readNodeInfo(): ByteArray {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
     }
 }
