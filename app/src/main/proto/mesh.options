@@ -5,7 +5,7 @@
 *id max_size:16 # node id strings
 
 *User.long_name max_size:40
-*User.short_name max_size:4
+*User.short_name max_size:5
 
 # FIXME pick a higher number someday? or do dynamic alloc in nanopb?
 *DeviceState.node_db max_count:32

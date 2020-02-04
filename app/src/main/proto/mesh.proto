@@ -64,12 +64,6 @@ message Position {
     bool from_hardware = 5;
 }
 
-// Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)
-// sent to the phone (so the phone can know exact time of reception)
-message Time {
-    uint64 msecs = 1; // msecs since 1970
-}
-
 // a data message to forward to an external app (or possibly also be consumed internally in the case of CLEAR_TEXT and CLEAR_READACK
 message Data {
     enum Type {
@@ -97,7 +91,7 @@ message User {
     string id = 1; // a globally unique ID string for this user.  In the case of Signal that would mean +16504442323
     string long_name = 2; // A full name for this user, i.e. "Kevin Hester"
     string short_name = 3; // A VERY short name, ideally two characters.  Suitable for a tiny OLED screen
-    string macaddr = 4; // This is the addr of the radio.  Not populated by the phone, but added by the esp32 when broadcasting
+    bytes macaddr = 4; // This is the addr of the radio.  Not populated by the phone, but added by the esp32 when broadcasting
 }
 
 // Broadcast when a newly powered mesh node wants to find a node num it can use (see document for more
@@ -105,21 +99,24 @@ message User {
 // FIXME in the initial proof of concept we just skip the entire want/deny flow and just hand pick node numbers at first.
 message WantNodeNum {
     uint32 desired_nodenum = 1; // The node number we want (note: these WantNodeNum packets are sent from a few special 'unassigned' nodenumbers)
-    string macaddr = 2; // the unique ID of my node, so that others can descriminate between anyone else who is also accidentially using the same unassigned node number
+    bytes macaddr = 2; // the unique ID of my node, so that others can descriminate between anyone else who is also accidentially using the same unassigned node number
 }
 
 // Sent to a node which has requested a nodenum when it is told it can't have it
 // FIXME, should denials be sent as a broadcast also?
 // FIXME, how do we handle someone missing the denial and assuming it has the nodenum?
 message DenyNodeNum {
-    string macaddr = 1; // the macaddr of the node we are sending this denial to (so that the recipient can be sure the packet really as desined to them)
+    bytes macaddr = 1; // the macaddr of the node we are sending this denial to (so that the recipient can be sure the packet really as desined to them)
 }
 
 // The payload portion fo a packet, this is the actual bytes that are sent inside a radio packet (because from/to are broken out by the comms library)
 message SubPacket {
     oneof variant {
         Position position = 1;
-        Time time = 2;
+
+	// Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)
+	// sent to the phone (so the phone can know exact time of reception)
+    	uint64 time = 2; // msecs since 1970
         Data data = 3;
         User user = 4;
         WantNodeNum want_node = 5;
@@ -199,11 +196,14 @@ SET_CONFIG (switches device to a new set of radio params and preshared key, drop
 message NodeInfo {
     int32 num = 1; // the node number
     User user = 2;
-    Position position = 4;
-    Time last_seen = 5;
+    Position position = 3;
+
+	// Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)
+	// sent to the phone (so the phone can know exact time of reception)
+	uint64 last_seen = 4; // msecs since 1970
 
     // FIXME - some sort of notion of the level of rx power we measured when we last received a packet from this node 
-    int32 rx_power = 6;
+    int32 rx_power = 5;
 }
 
 // This message is never sent over the wire, but it is used for serializing DB state to flash in the device code
@@ -246,10 +246,13 @@ message FromRadio {
         MeshPacket packet = 2;
 
         /// Tells the phone what our node number is, can be -1 if we've not yet joined a mesh.
-        MyNodeInfo my_info = 3;
+	// No longer sent in fromRadio, instead there is a mynodeinfo characteristic
+        // MyNodeInfo my_info = 3;
 
         /// One packet is sent for each node in the on radio DB
-        NodeInfo node_info = 4;
+	// Note: this is no longer in FromRadio because, there is now a bluetooth nodeinfo characteristic
+        // after sending wantnodes that characteristic starts over with the first node in our DB
+        // NodeInfo node_info = 4;
     }
 }
 
@@ -257,26 +260,21 @@ message FromRadio {
 // write completes the phone can assume it is handled.
 message ToRadio {
 
-    // If sent to the radio, the radio will send the phone its full node DB (NodeInfo records)
-    // Used to populate network info the first time the phone connects to the radio
-    message WantNodes {
-        // Empty
-    }
-
     oneof variant {
         MeshPacket packet = 1; // send this packet on the mesh
 
         //
         // Rare operations
         //
+	// All of these have been moved to unique writable bluetooth characteristics
 
         /// phone wants radio to send full node db to the phone, This is typically the first packet sent
         /// to the radio when the phone gets a bluetooth connection.
         /// The radio will respond by sending back a FromRadio.my_node_num and a series of FromRadio.node_info
-        WantNodes want_nodes = 100;
+        // WantNodes want_nodes = 100;
 
-        RadioConfig set_radio = 101; // set the radio provisioning for this node
-        User set_owner = 102; // Set the owner for this node
+        //RadioConfig set_radio = 101; // set the radio provisioning for this node
+        // User set_owner = 102; // Set the owner for this node
     }
 }
 
