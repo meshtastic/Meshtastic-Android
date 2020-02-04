@@ -11,6 +11,7 @@ import android.os.IBinder
 import com.geeksville.android.DebugLogFile
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.DeferredExecution
+import com.geeksville.util.toRemoteExceptions
 import com.google.protobuf.util.JsonFormat
 import java.util.*
 
@@ -89,6 +90,7 @@ class RadioInterfaceService : Service(), Logging {
          * Payload will be the raw bytes which were contained within a MeshProtos.FromRadio protobuf
          */
         const val RECEIVE_FROMRADIO_ACTION = "$prefix.RECEIVE_FROMRADIO"
+        const val CONNECTCHANGED_ACTION = "$prefix.CONNECT_CHANGED"
 
         private val BTM_SERVICE_UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
         private val BTM_FROMRADIO_CHARACTER =
@@ -141,16 +143,14 @@ class RadioInterfaceService : Service(), Logging {
     // for debug logging only
     private val jsonPrinter = JsonFormat.printer()
 
-    // We have talked to our device and consumed all of the FromRadio packets it had initially
-    // waiting for us
-    private var initCompleted = false
+    private var isConnected = false
 
     /// Work that users of our service want done, which might get deferred until after
     /// we have completed our initial connection
     private val clientOperations = DeferredExecution()
 
-    fun broadcastConnectionChanged(isConnected: Boolean) {
-        val intent = Intent("$prefix.CONNECTION_CHANGED")
+    private fun broadcastConnectionChanged(isConnected: Boolean) {
+        val intent = Intent(CONNECTCHANGED_ACTION)
         intent.putExtra(EXTRA_CONNECTED, isConnected)
         sendBroadcast(intent)
     }
@@ -173,28 +173,24 @@ class RadioInterfaceService : Service(), Logging {
 
     /// Attempt to read from the fromRadio mailbox, if data is found broadcast it to android apps
     private fun doReadFromRadio() {
-        safe.asyncReadCharacteristic(fromRadio) {
-            val b = it.getOrThrow().value
+        if (!isConnected)
+            warn("Abandoning fromradio read because we are not connected")
+        else
+            safe.asyncReadCharacteristic(fromRadio) {
+                val b = it.getOrThrow().value
 
-            if (b.isNotEmpty()) {
-                debug("Received ${b.size} bytes from radio")
-                handleFromRadio(b)
+                if (b.isNotEmpty()) {
+                    debug("Received ${b.size} bytes from radio")
+                    handleFromRadio(b)
 
-                // Queue up another read, until we run out of packets
-                doReadFromRadio()
-            } else {
-                debug("Done reading from radio, fromradio is empty")
-                initCompleted = true
-                doClientOperations()
+                    // Queue up another read, until we run out of packets
+                    doReadFromRadio()
+                } else {
+                    debug("Done reading from radio, fromradio is empty")
+                }
             }
-        }
     }
 
-    /// If we are inited send any client requests
-    private fun doClientOperations() {
-        if (initCompleted)
-            clientOperations.run()
-    }
 
     override fun onCreate() {
         super.onCreate()
@@ -235,6 +231,11 @@ class RadioInterfaceService : Service(), Logging {
                     fromRadio = service.getCharacteristic(BTM_FROMRADIO_CHARACTER)
                     fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)
 
+                    // Now tell clients they can (finally use the api)
+                    broadcastConnectionChanged(true)
+                    isConnected = true
+
+                    // Immediately broadcast any queued packets sitting on the device
                     doReadFromRadio()
                 }
             }
@@ -255,50 +256,60 @@ class RadioInterfaceService : Service(), Logging {
     }
 
     /**
-     * We allow writes to bluetooth characteristics to be queued up until our init is completed.
+     * do a synchronous write operation
      */
-    private fun doAsyncWrite(uuid: UUID, a: ByteArray) {
-        debug("queuing ${a.size} bytes to $uuid")
+    private fun doWrite(uuid: UUID, a: ByteArray) = toRemoteExceptions {
+        if (!isConnected)
+            throw RadioNotConnectedException()
+        else {
+            debug("queuing ${a.size} bytes to $uuid")
 
-        clientOperations.add {
             // Note: we generate a new characteristic each time, because we are about to
             // change the data and we want the data stored in the closure
             val toRadio = service.getCharacteristic(uuid)
             toRadio.value = a
 
-            safe.asyncWriteCharacteristic(toRadio) {
-                it.getOrThrow() // FIXME, handle the error better
-                debug("ToRadio write of ${a.size} bytes completed")
-            }
+            safe.writeCharacteristic(toRadio)
+            debug("write of ${a.size} bytes completed")
         }
+    }
 
-        doClientOperations()
+    /**
+     * do a synchronous read operation
+     */
+    private fun doRead(uuid: UUID): ByteArray? = toRemoteExceptions {
+        if (!isConnected)
+            throw RadioNotConnectedException()
+        else {
+            // Note: we generate a new characteristic each time, because we are about to
+            // change the data and we want the data stored in the closure
+            val toRadio = service.getCharacteristic(uuid)
+            var a = safe.readCharacteristic(toRadio).value
+            debug("Read of $uuid got ${a.size} bytes")
+
+            if (a.isEmpty()) // An empty bluetooth response is converted to a null response for our clients
+                a = null
+
+            a
+        }
     }
 
     private val binder = object : IRadioInterfaceService.Stub() {
         // A write of any size to nodeinfo means restart reading
-        override fun restartNodeInfo() = doAsyncWrite(BTM_NODEINFO_CHARACTER, ByteArray(0))
+        override fun restartNodeInfo() = doWrite(BTM_NODEINFO_CHARACTER, ByteArray(0))
 
-        override fun readMyNode(): ByteArray {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
+        override fun readMyNode() = doRead(BTM_MYNODE_CHARACTER)!!
 
-        override fun sendToRadio(a: ByteArray) = doAsyncWrite(BTM_TORADIO_CHARACTER, a)
+        override fun sendToRadio(a: ByteArray) = doWrite(BTM_TORADIO_CHARACTER, a)
 
-        override fun readRadioConfig(): ByteArray {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
+        override fun readRadioConfig() = doRead(BTM_RADIO_CHARACTER)!!
 
-        override fun readOwner(): ByteArray {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
+        override fun readOwner() = doRead(BTM_OWNER_CHARACTER)!!
 
-        override fun writeOwner(owner: ByteArray) = doAsyncWrite(BTM_OWNER_CHARACTER, owner)
+        override fun writeOwner(owner: ByteArray) = doWrite(BTM_OWNER_CHARACTER, owner)
 
-        override fun writeRadioConfig(config: ByteArray) = doAsyncWrite(BTM_RADIO_CHARACTER, config)
+        override fun writeRadioConfig(config: ByteArray) = doWrite(BTM_RADIO_CHARACTER, config)
 
-        override fun readNodeInfo(): ByteArray {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
+        override fun readNodeInfo() = doRead(BTM_NODEINFO_CHARACTER)
     }
 }

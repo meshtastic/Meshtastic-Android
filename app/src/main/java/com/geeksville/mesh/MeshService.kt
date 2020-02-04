@@ -4,7 +4,6 @@ import android.app.Service
 import android.content.*
 import android.os.IBinder
 import com.geeksville.android.Logging
-import com.geeksville.concurrent.DeferredExecution
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.util.toOneLineString
@@ -12,6 +11,7 @@ import com.geeksville.util.toRemoteExceptions
 import com.google.protobuf.ByteString
 import java.nio.charset.Charset
 
+class RadioNotConnectedException() : Exception("Can't find radio")
 
 /**
  * Handles all the communication with android apps.  Also keeps an internal model
@@ -25,7 +25,6 @@ class MeshService : Service(), Logging {
         class IdNotFoundException(id: String) : Exception("ID not found $id")
         class NodeNumNotFoundException(id: Int) : Exception("NodeNum not found $id")
         class NotInMeshException() : Exception("We are not yet in a mesh")
-        class RadioNotConnectedException() : Exception("Can't find radio")
 
         /// If we haven't yet received a node number from the radio
         private const val NODE_NUM_UNKNOWN = -2
@@ -74,18 +73,22 @@ class MeshService : Service(), Logging {
         explicitBroadcast(intent)
     }
 
-    private val toRadioDeferred = DeferredExecution()
+    /// Safely access the radio service, if not connected an exception will be thrown
+    private val connectedRadio: IRadioInterfaceService
+        get() {
+            val s = radioService
+            if (s == null || !isConnected)
+                throw RadioNotConnectedException()
+
+            return s
+        }
 
     /// Send a command/packet to our radio.  But cope with the possiblity that we might start up
     /// before we are fully bound to the RadioInterfaceService
     private fun sendToRadio(p: ToRadio.Builder) {
         val b = p.build().toByteArray()
 
-        val s = radioService
-        if (s != null)
-            s.sendToRadio(b)
-        else
-            toRadioDeferred.add { radioService!!.sendToRadio(b) }
+        connectedRadio.sendToRadio(b)
     }
 
     override fun onBind(intent: Intent?): IBinder? {
@@ -94,24 +97,8 @@ class MeshService : Service(), Logging {
 
     private val radioConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val filter = IntentFilter(RadioInterfaceService.RECEIVE_FROMRADIO_ACTION)
-            registerReceiver(radioInterfaceReceiver, filter)
-            radioReceiverRegistered = true
-
             val m = IRadioInterfaceService.Stub.asInterface(service)
             radioService = m
-
-            // FIXME - don't do this until after we see that the radio is connected to the phone
-            val sim = SimRadio(this@MeshService)
-            sim.start() // Fake up our node id info and some past packets from other nodes
-
-            // Ask for the current node DB FIXME
-            /* sendToRadio(ToRadio.newBuilder().apply {
-                wantNodes = ToRadio.WantNodes.newBuilder().build()
-            }) */
-
-            // Now send any packets which had previously been queued for clients
-            toRadioDeferred.run()
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -124,6 +111,10 @@ class MeshService : Service(), Logging {
 
         info("Creating mesh service")
 
+        // we listen for messages from the radio receiver _before_ trying to create the service
+        val filter = IntentFilter(RadioInterfaceService.RECEIVE_FROMRADIO_ACTION)
+        registerReceiver(radioInterfaceReceiver, filter)
+
         // We in turn need to use the radiointerface service
         val intent = Intent(this, RadioInterfaceService::class.java)
         // intent.action = IMeshService::class.java.name
@@ -132,12 +123,10 @@ class MeshService : Service(), Logging {
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
 
-    private var radioReceiverRegistered = false
 
     override fun onDestroy() {
         info("Destroying mesh service")
-        if (radioReceiverRegistered)
-            unregisterReceiver(radioInterfaceReceiver)
+        unregisterReceiver(radioInterfaceReceiver)
         unbindService(radioConnection)
         radioService = null
 
@@ -201,6 +190,11 @@ class MeshService : Service(), Logging {
     private fun updateNodeInfo(nodeNum: Int, updatefn: (NodeInfo) -> Unit) {
         val info = getOrCreateNodeInfo(nodeNum)
         updatefn(info)
+
+        // This might have been the first time we know an ID for this node, so also update the by ID map
+        val userId = info.user?.id
+        if (userId != null)
+            nodeDBbyID[userId] = info
     }
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
@@ -264,9 +258,6 @@ class MeshService : Service(), Logging {
     private fun handleReceivedUser(fromNum: Int, p: MeshProtos.User) {
         updateNodeInfo(fromNum) {
             it.user = MeshUser(p.id, p.longName, p.shortName)
-
-            // This might have been the first time we know an ID for this node, so also update the by ID map
-            nodeDBbyID[p.id] = it
         }
     }
 
@@ -309,8 +300,49 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private fun handleReceivedNodeInfo(info: MeshProtos.NodeInfo) {
-        TODO()
+
+    /// Called when we gain/lose connection to our radio
+    private fun onConnectionChanged(c: Boolean) {
+        isConnected = c
+        if (c) {
+            // Do our startup init
+
+            // FIXME - don't do this until after we see that the radio is connected to the phone
+            //val sim = SimRadio(this@MeshService)
+            //sim.start() // Fake up our node id info and some past packets from other nodes
+
+            val myInfo = MeshProtos.MyNodeInfo.parseFrom(connectedRadio.readMyNode())
+            ourNodeNum = myInfo.myNodeNum
+
+            // Ask for the current node DB 
+            connectedRadio.restartNodeInfo()
+
+            // read all the infos until we get back null
+            var infoBytes = connectedRadio.readNodeInfo()
+            while (infoBytes != null) {
+                val info = MeshProtos.NodeInfo.parseFrom(infoBytes)
+                debug("Received initial nodeinfo $info")
+
+                // Just replace/add any entry
+                updateNodeInfo(info.num) {
+                    if (info.hasUser())
+                        it.user = MeshUser(info.user.id, info.user.longName, info.user.shortName)
+
+                    if (info.hasPosition())
+                        it.position = Position(
+                            info.position.latitude,
+                            info.position.longitude,
+                            info.position.altitude
+                        )
+
+                    it.lastSeen = info.lastSeen
+                }
+
+                // advance to next
+                infoBytes = connectedRadio.readNodeInfo()
+            }
+        }
+        TODO("FIXME - set our owner, get node infos, set our local nodenum, dont process received packets until we have the full node db")
     }
 
     /**
@@ -320,17 +352,25 @@ class MeshService : Service(), Logging {
     private val radioInterfaceReceiver = object : BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
-            val proto = MeshProtos.FromRadio.parseFrom(intent.getByteArrayExtra(EXTRA_PAYLOAD)!!)
-            info("Received from radio service: ${proto.toOneLineString()}")
-            when (proto.variantCase.number) {
-                MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(proto.packet)
-                /*
-                FIXME - handle node info and setting my protonum
-                MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleReceivedNodeInfo(proto.nodeInfo)
-                MeshProtos.FromRadio.MY_NODE_NUM_FIELD_NUMBER -> ourNodeNum = proto.myNodeNum
 
-                 */
-                else -> TODO("Unexpected FromRadio variant")
+            when (intent.action) {
+                RadioInterfaceService.CONNECTCHANGED_ACTION -> {
+                    onConnectionChanged(intent.getBooleanExtra(EXTRA_CONNECTED, false))
+                    explicitBroadcast(intent) // forward the connection change message to anyone who is listening to us
+                }
+
+                RadioInterfaceService.RECEIVE_FROMRADIO_ACTION -> {
+                    val proto =
+                        MeshProtos.FromRadio.parseFrom(intent.getByteArrayExtra(EXTRA_PAYLOAD)!!)
+                    info("Received from radio service: ${proto.toOneLineString()}")
+                    when (proto.variantCase.number) {
+                        MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(proto.packet)
+
+                        else -> TODO("Unexpected FromRadio variant")
+                    }
+                }
+
+                else -> TODO("Unexpected radio interface broadcast")
             }
         }
     }
@@ -358,11 +398,8 @@ class MeshService : Service(), Logging {
                     handleReceivedUser(ourNodeNum, user)
                 }
 
-                /* FIXME - set my owner info
-                sendToRadio(ToRadio.newBuilder().apply {
-                    this.setOwner = user
-                })
-                 */
+                // set my owner info
+                connectedRadio.writeOwner(user.toByteArray())
             }
 
         override fun sendData(destId: String, payloadIn: ByteArray, typ: Int) =

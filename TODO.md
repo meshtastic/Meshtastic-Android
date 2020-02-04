@@ -1,6 +1,7 @@
 # High priority
 
 * fix startup race conditions in services, allow reads to block as needed
+* if radio disconnects, we need to requeue a new connect attempt in RadioService
 * when notified phone should download messages
 * have phone use our local node number as its node number (instead of hardwired)
 * investigate the Signal SMS message flow path, see if I could just make Mesh a third peer to signal & sms?
