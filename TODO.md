@@ -1,5 +1,9 @@
 # High priority
 
+* show nodeinfo list on gui - one card per node
+* when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname
+* all chat in the app defaults to group chat
+* show connection state on gui
 * when notified phone should download messages
 * at connect we might receive messages before finished downloading the nodeinfo.  In that case, process those messages later
 * investigate the Signal SMS message flow path, see if I could just make Mesh a third peer to signal & sms?
@@ -20,6 +24,7 @@
 * fix BT device scanning
 * call crashlytics from exceptionReporter!!!  currently not logging failures caught there
 * if nessary restart entire BT adapter with this tip from Michael https://stackoverflow.com/questions/35103701/ble-android-onconnectionstatechange-not-being-called
+* show direction and distance on the nodeinfo cards
 
 # Medium priority
 

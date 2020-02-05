@@ -29,6 +29,7 @@ import androidx.ui.material.Button
 import androidx.ui.material.MaterialTheme
 import androidx.ui.tooling.preview.Preview
 import com.geeksville.android.Logging
+import com.geeksville.util.exceptionReporter
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 
@@ -100,21 +101,23 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     private fun sendTestPackets() {
-        val m = meshService!!
+        exceptionReporter {
+            val m = meshService!!
 
-        // Do some test operations
-        m.setOwner("+16508675309", "Kevin Xter", "kx")
-        val testPayload = "hello world".toByteArray()
-        m.sendData(
-            "+16508675310",
-            testPayload,
-            MeshProtos.Data.Type.SIGNAL_OPAQUE_VALUE
-        )
-        m.sendData(
-            "+16508675310",
-            testPayload,
-            MeshProtos.Data.Type.CLEAR_TEXT_VALUE
-        )
+            // Do some test operations
+            m.setOwner("+16508675309", "Kevin Xter", "kx")
+            val testPayload = "hello world".toByteArray()
+            m.sendData(
+                "+16508675310",
+                testPayload,
+                MeshProtos.Data.Type.SIGNAL_OPAQUE_VALUE
+            )
+            m.sendData(
+                "+16508675310",
+                testPayload,
+                MeshProtos.Data.Type.CLEAR_TEXT_VALUE
+            )
+        }
     }
 
     @Composable
