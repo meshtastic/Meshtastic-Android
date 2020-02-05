@@ -193,6 +193,40 @@ class RadioInterfaceService : Service(), Logging {
     }
 
 
+    private fun onDisconnect() {
+        broadcastConnectionChanged(false)
+        isConnected = false
+    }
+
+    private fun onConnect(connRes: Result<Unit>) {
+        // This callback is invoked after we are connected
+
+        connRes.getOrThrow() // FIXME, instead just try to reconnect?
+        info("Connected to radio!")
+
+        // FIXME - no need to discover services more than once - instead use lazy() to use them in future attempts
+        safe.asyncDiscoverServices { discRes ->
+            discRes.getOrThrow() // FIXME, instead just try to reconnect?
+            debug("Discovered services!")
+
+            // we begin by setting our MTU size as high as it can go
+            safe.asyncRequestMtu(512) { mtuRes ->
+                debug("requested MTU result=$mtuRes")
+                mtuRes.getOrThrow() // FIXME - why sometimes is the result Unit!?!
+
+                fromRadio = service.getCharacteristic(BTM_FROMRADIO_CHARACTER)
+                fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)
+
+                // Now tell clients they can (finally use the api)
+                broadcastConnectionChanged(true)
+                isConnected = true
+
+                // Immediately broadcast any queued packets sitting on the device
+                doReadFromRadio()
+            }
+        }
+    }
+
     override fun onCreate() {
         super.onCreate()
 
@@ -212,35 +246,7 @@ class RadioInterfaceService : Service(), Logging {
         // comes in range (even if we made this connect call long ago when we got powered on)
         // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
         // more info
-        // FIXME, broadcast connection lost/gained via broadcastConnecionChanged
-        safe.asyncConnect(true) { connRes ->
-            // This callback is invoked after we are connected 
-
-            connRes.getOrThrow() // FIXME, instead just try to reconnect?
-            info("Connected to radio!")
-
-            // FIXME - no need to discover services, instead just hardwire the characteristics (like we do for toRadio)
-            safe.asyncDiscoverServices { discRes ->
-                discRes.getOrThrow() // FIXME, instead just try to reconnect?
-                debug("Discovered services!")
-
-                // we begin by setting our MTU size as high as it can go
-                safe.asyncRequestMtu(512) { mtuRes ->
-                    debug("requested MTU result=$mtuRes")
-                    mtuRes.getOrThrow()
-
-                    fromRadio = service.getCharacteristic(BTM_FROMRADIO_CHARACTER)
-                    fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)
-
-                    // Now tell clients they can (finally use the api)
-                    broadcastConnectionChanged(true)
-                    isConnected = true
-
-                    // Immediately broadcast any queued packets sitting on the device
-                    doReadFromRadio()
-                }
-            }
-        }
+        safe.asyncConnect(true, ::onConnect, ::onDisconnect)
 
         if (logSends)
             sentPacketsLog = BinaryLogFile(this, "sent_log.pb")

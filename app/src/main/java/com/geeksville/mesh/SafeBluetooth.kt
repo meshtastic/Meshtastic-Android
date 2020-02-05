@@ -35,6 +35,10 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private var currentWork: BluetoothContinuation? = null
     private val workQueue = mutableListOf<BluetoothContinuation>()
 
+    // Called for reconnection attemps
+    private var connectionCallback: ((Result<Unit>) -> Unit)? = null
+    private var lostConnectCallback: (() -> Unit)? = null
+
     /// When we see the BT stack getting disabled/renabled we handle that as a connect/disconnect event
     private val btStateReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
@@ -42,13 +46,18 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                 val newstate = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1)
                 when (newstate) {
                     // Simulate a disconnection if the user disables bluetooth entirely
-                    BluetoothAdapter.STATE_OFF -> if (gatt != null) gattCallback.onConnectionStateChange(
-                        gatt!!,
-                        0,
-                        BluetoothProfile.STATE_DISCONNECTED
-                    )
+                    BluetoothAdapter.STATE_OFF -> {
+                        if (state == BluetoothProfile.STATE_CONNECTED)
+                            gattCallback.onConnectionStateChange(
+                                gatt!!,
+                                0,
+                                BluetoothProfile.STATE_DISCONNECTED
+                            )
+                        else
+                            debug("We were not connected, so ignoring bluetooth shutdown")
+                    }
                     BluetoothAdapter.STATE_ON -> {
-                        warn("FIXME - requeue a connect anytime bluetooth is reenabled")
+                        warn("FIXME - requeue a connect anytime bluetooth is reenabled?")
                     }
                 }
             }
@@ -86,20 +95,51 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             g: BluetoothGatt,
             status: Int,
             newState: Int
-        ) {
-            info("new bluetooth connection state $newState")
-            state = newState
+        ) = exceptionReporter {
+            info("new bluetooth connection state $newState, status $status")
             when (newState) {
                 BluetoothProfile.STATE_CONNECTED -> {
+                    state =
+                        newState // we only care about connected/disconnected - not the transitional states
                     //logAssert(workQueue.isNotEmpty())
                     //val work = workQueue.removeAt(0)
                     completeWork(status, Unit)
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
-                    // cancel any queued ops?  for now I think it is best to keep them around
-                    // failAllWork(IOException("Lost connection"))
+                    // cancel any queued ops if we were already connected
+                    val oldstate = state
+                    state = newState
+                    if (oldstate == BluetoothProfile.STATE_CONNECTED) {
+                        info("Lost connection - aborting current work")
 
-                    gatt = null;
+
+                        /*
+                        Supposedly this reconnect attempt happens automatically
+                        "If the connection was established through an auto connect, Android will
+                        automatically try to reconnect to the remote device when it gets disconnected
+                        until you manually call disconnect() or close(). Once a connection established
+                        through direct connect disconnects, no attempt is made to reconnect to the remote device."
+                        https://stackoverflow.com/questions/37965337/what-exactly-does-androids-bluetooth-autoconnect-parameter-do?rq=1
+
+                        closeConnection()
+                        */
+                        failAllWork(IOException("Lost connection"))
+
+                        debug("calling lostConnect handler")
+                        lostConnectCallback?.invoke()
+
+                        // Queue a new connection attempt
+                        val cb = connectionCallback
+                        if (cb != null) {
+                            debug("queuing a reconnection callback")
+                            assert(currentWork == null)
+
+                            // note - we don't need an init fn (because that would normally redo the connectGatt call - which we don't need
+                            queueWork("reconnect", CallbackContinuation(cb)) { -> true }
+                        } else {
+                            debug("No connectionCallback registered")
+                        }
+                    }
                 }
             }
         }
@@ -169,7 +209,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                 w
             }
 
-        debug("work ${work.tag} is completed, resuming with status $status")
+        debug("work ${work.tag} is completed, resuming status=$status, res=$res")
         if (status != 0)
             work.completion.resumeWithException(IOException("Bluetooth status=$status"))
         else
@@ -185,6 +225,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                 it.completion.resumeWithException(ex)
             }
             workQueue.clear()
+            currentWork = null
         }
     }
 
@@ -210,8 +251,27 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         }
     }
 
-    fun asyncConnect(autoConnect: Boolean = false, cb: (Result<Unit>) -> Unit) {
+
+    /**
+     * start a connection attempt.
+     *
+     * Note: if autoConnect is true, the callback you provide will be kept around _even after the connection is complete.
+     * If we ever lose the connection, this class will immediately requque the attempt (after canceling
+     * any outstanding queued operations).
+     *
+     * So you should expect your callback might be called multiple times, each time to reestablish a new connection.
+     */
+    fun asyncConnect(
+        autoConnect: Boolean = false,
+        cb: (Result<Unit>) -> Unit,
+        lostConnectCb: () -> Unit
+    ) {
         logAssert(workQueue.isEmpty() && currentWork == null) // I don't think anything should be able to sneak in front
+        lostConnectCallback = lostConnectCb
+        connectionCallback = if (autoConnect)
+            cb
+        else
+            null
         queueConnect(autoConnect, CallbackContinuation(cb))
     }
 
@@ -272,12 +332,21 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     fun writeCharacteristic(c: BluetoothGattCharacteristic): BluetoothGattCharacteristic =
         makeSync { queueWriteCharacteristic(c, it) }
 
-    fun disconnect() {
-        if (gatt != null)
+    private fun closeConnection() {
+        failAllWork(IOException("Connection closing"))
+
+        if (gatt != null) {
+            info("Closing our GATT connection")
             gatt!!.disconnect()
+            gatt!!.close()
+            gatt = null
+        }
+    }
+
+    fun disconnect() {
+        closeConnection()
 
         context.unregisterReceiver(btStateReceiver)
-        failAllWork(Exception("SafeBluetooth disconnected"))
     }
 }
 

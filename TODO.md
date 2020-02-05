@@ -1,8 +1,7 @@
 # High priority
 
-* if radio disconnects, we need to requeue a new connect attempt in RadioService
 * when notified phone should download messages
-* fix startup race conditions in services, allow reads to block as needed
+* at connect we might receive messages before finished downloading the nodeinfo.  In that case, process those messages later
 * investigate the Signal SMS message flow path, see if I could just make Mesh a third peer to signal & sms?
 * make signal work when there is no internet up
 * make Signal rx path work
@@ -20,6 +19,7 @@
 * connect to bluetooth device automatically using minimum power, start looking at phone boot
 * fix BT device scanning
 * call crashlytics from exceptionReporter!!!  currently not logging failures caught there
+* if nessary restart entire BT adapter with this tip from Michael https://stackoverflow.com/questions/35103701/ble-android-onconnectionstatechange-not-being-called
 
 # Medium priority
 
@@ -69,3 +69,4 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * remove example code boilerplate from the service
 * switch from protobuf-java to protobuf-javalite - much faster and smaller, just no JSON debug printing
 * have phone use our local node number as its node number (instead of hardwired)
+* if radio disconnects, we need to requeue a new connect attempt in RadioService
