@@ -1,11 +1,15 @@
 package com.geeksville.mesh
 
 import android.bluetooth.*
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.CallbackContinuation
 import com.geeksville.concurrent.Continuation
 import com.geeksville.concurrent.SyncContinuation
+import com.geeksville.util.exceptionReporter
 import java.io.IOException
 
 
@@ -25,11 +29,38 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     var timeoutMsec = 5 * 1000L
 
     /// Users can access the GATT directly as needed
-    lateinit var gatt: BluetoothGatt
+    var gatt: BluetoothGatt? = null
 
     var state = BluetoothProfile.STATE_DISCONNECTED
     private var currentWork: BluetoothContinuation? = null
     private val workQueue = mutableListOf<BluetoothContinuation>()
+
+    /// When we see the BT stack getting disabled/renabled we handle that as a connect/disconnect event
+    private val btStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
+            if (intent.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
+                val newstate = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1)
+                when (newstate) {
+                    // Simulate a disconnection if the user disables bluetooth entirely
+                    BluetoothAdapter.STATE_OFF -> if (gatt != null) gattCallback.onConnectionStateChange(
+                        gatt!!,
+                        0,
+                        BluetoothProfile.STATE_DISCONNECTED
+                    )
+                    BluetoothAdapter.STATE_ON -> {
+                        warn("FIXME - requeue a connect anytime bluetooth is reenabled")
+                    }
+                }
+            }
+        }
+    }
+
+    init {
+        context.registerReceiver(
+            btStateReceiver,
+            IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+        )
+    }
 
     /**
      * a schedulable bit of bluetooth work, includes both the closure to call to start the operation
@@ -48,10 +79,11 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         }
     }
 
+
     private val gattCallback = object : BluetoothGattCallback() {
 
         override fun onConnectionStateChange(
-            gatt: BluetoothGatt,
+            g: BluetoothGatt,
             status: Int,
             newState: Int
         ) {
@@ -66,6 +98,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     // cancel any queued ops?  for now I think it is best to keep them around
                     // failAllWork(IOException("Lost connection"))
+
+                    gatt = null;
                 }
             }
         }
@@ -167,6 +201,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     // more info.
     // Otherwise if you pass in false, it will try to connect now and will timeout and fail in 30 seconds.
     private fun queueConnect(autoConnect: Boolean = false, cont: Continuation<Unit>) {
+        assert(gatt == null);
         queueWork("connect", cont) {
             val g = device.connectGatt(context, autoConnect, gattCallback)
             if (g != null)
@@ -185,7 +220,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private fun queueReadCharacteristic(
         c: BluetoothGattCharacteristic,
         cont: Continuation<BluetoothGattCharacteristic>
-    ) = queueWork("readc", cont) { gatt.readCharacteristic(c) }
+    ) = queueWork("readc", cont) { gatt!!.readCharacteristic(c) }
 
     fun asyncReadCharacteristic(
         c: BluetoothGattCharacteristic,
@@ -197,7 +232,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     private fun queueDiscoverServices(cont: Continuation<Unit>) {
         queueWork("discover", cont) {
-            gatt.discoverServices()
+            gatt!!.discoverServices()
         }
     }
 
@@ -211,7 +246,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private fun queueRequestMtu(
         len: Int,
         cont: Continuation<Int>
-    ) = queueWork("reqMtu", cont) { gatt.requestMtu(len) }
+    ) = queueWork("reqMtu", cont) { gatt!!.requestMtu(len) }
 
     fun asyncRequestMtu(
         len: Int,
@@ -227,7 +262,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private fun queueWriteCharacteristic(
         c: BluetoothGattCharacteristic,
         cont: Continuation<BluetoothGattCharacteristic>
-    ) = queueWork("writec", cont) { gatt.writeCharacteristic(c) }
+    ) = queueWork("writec", cont) { gatt!!.writeCharacteristic(c) }
 
     fun asyncWriteCharacteristic(
         c: BluetoothGattCharacteristic,
@@ -238,7 +273,10 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         makeSync { queueWriteCharacteristic(c, it) }
 
     fun disconnect() {
-        gatt.disconnect()
+        if (gatt != null)
+            gatt!!.disconnect()
+
+        context.unregisterReceiver(btStateReceiver)
         failAllWork(Exception("SafeBluetooth disconnected"))
     }
 }

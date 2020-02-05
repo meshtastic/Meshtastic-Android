@@ -1,9 +1,8 @@
 # High priority
 
-* fix startup race conditions in services, allow reads to block as needed
 * if radio disconnects, we need to requeue a new connect attempt in RadioService
 * when notified phone should download messages
-* have phone use our local node number as its node number (instead of hardwired)
+* fix startup race conditions in services, allow reads to block as needed
 * investigate the Signal SMS message flow path, see if I could just make Mesh a third peer to signal & sms?
 * make signal work when there is no internet up
 * make Signal rx path work
@@ -69,3 +68,4 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * investigate a 16 bit node number.  If possible it would make collisions super rare.  Much easier to just pick a nodenum and go.
 * remove example code boilerplate from the service
 * switch from protobuf-java to protobuf-javalite - much faster and smaller, just no JSON debug printing
+* have phone use our local node number as its node number (instead of hardwired)

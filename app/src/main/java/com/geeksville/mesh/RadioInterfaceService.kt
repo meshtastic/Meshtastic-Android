@@ -132,11 +132,12 @@ class RadioInterfaceService : Service(), Logging {
     private lateinit var device: BluetoothDevice
     private lateinit var safe: SafeBluetooth
 
-    val service get() = safe.gatt.services.find { it.uuid == BTM_SERVICE_UUID }!!
+    val service get() = safe.gatt!!.services.find { it.uuid == BTM_SERVICE_UUID }!!
 
     private lateinit var fromRadio: BluetoothGattCharacteristic
     private lateinit var fromNum: BluetoothGattCharacteristic
 
+    private val logSends = false
     lateinit var sentPacketsLog: BinaryLogFile // inited in onCreate
 
     private var isConnected = false
@@ -160,8 +161,10 @@ class RadioInterfaceService : Service(), Logging {
 
         debug("sending to radio")
         doWrite(BTM_TORADIO_CHARACTER, p)
-        sentPacketsLog.write(p)
-        sentPacketsLog.flush()
+        if (logSends) {
+            sentPacketsLog.write(p)
+            sentPacketsLog.flush()
+        }
     }
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
@@ -239,12 +242,14 @@ class RadioInterfaceService : Service(), Logging {
             }
         }
 
-        sentPacketsLog = BinaryLogFile(this, "sent_log.pb")
+        if (logSends)
+            sentPacketsLog = BinaryLogFile(this, "sent_log.pb")
     }
 
     override fun onDestroy() {
         info("Destroying radio interface service")
-        sentPacketsLog.close()
+        if (logSends)
+            sentPacketsLog.close()
         safe.disconnect()
         super.onDestroy()
     }
