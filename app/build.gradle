@@ -54,7 +54,7 @@ protobuf {
             task.builtins {
                 java {
                     // turned off for now so I can use json printing
-                    // option "lite"
+                    option "lite"
                 }
             }
         }
@@ -74,9 +74,9 @@ dependencies {
 
     // You need to depend on the lite runtime library, not protobuf-java
     // For now I'm not using javalite, because I want JSON printing
-    implementation 'com.google.protobuf:protobuf-java:3.11.1'
-    implementation 'com.google.protobuf:protobuf-java-util:3.11.1'
-    // implementation 'com.google.protobuf:protobuf-javalite:3.11.1'
+    //implementation 'com.google.protobuf:protobuf-java:3.11.1'
+    //implementation 'com.google.protobuf:protobuf-java-util:3.11.1'
+    implementation 'com.google.protobuf:protobuf-javalite:3.11.1'
 
     // You also need to include the following Compose toolkit dependencies.
     implementation("androidx.compose:compose-runtime:$compose_version")

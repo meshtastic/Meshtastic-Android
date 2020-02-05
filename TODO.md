@@ -31,8 +31,6 @@
 * remove mixpanel analytics
 * require user auth to pair with the device (i.e. press button on device to allow a new phone to pair with it).
 Don't leave device discoverable.  Don't let unpaired users do things with device
-* remove example code boilerplate from the service
-* switch from protobuf-java to protobuf-javalite - much faster and smaller, just no JSON debug printing
 * if the rxpacket queue on the device overflows (because android hasn't connected in a while) send a special packet to android which means 'X packets have been dropped because you were offline' -drop oldest packets first
 
 # Low priority
@@ -69,3 +67,5 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * implement android side of mesh radio bluetooth link
 * use the lora net code on my current protoboard
 * investigate a 16 bit node number.  If possible it would make collisions super rare.  Much easier to just pick a nodenum and go.
+* remove example code boilerplate from the service
+* switch from protobuf-java to protobuf-javalite - much faster and smaller, just no JSON debug printing

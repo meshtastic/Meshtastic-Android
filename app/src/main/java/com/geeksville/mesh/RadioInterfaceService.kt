@@ -8,11 +8,10 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import com.geeksville.android.DebugLogFile
+import com.geeksville.android.BinaryLogFile
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.DeferredExecution
 import com.geeksville.util.toRemoteExceptions
-import com.google.protobuf.util.JsonFormat
 import java.util.*
 
 /* Info for the esp32 device side code.  See that source for the 'gold' standard docs on this interface.
@@ -138,10 +137,7 @@ class RadioInterfaceService : Service(), Logging {
     private lateinit var fromRadio: BluetoothGattCharacteristic
     private lateinit var fromNum: BluetoothGattCharacteristic
 
-    lateinit var sentPacketsLog: DebugLogFile // inited in onCreate
-
-    // for debug logging only
-    private val jsonPrinter = JsonFormat.printer()
+    lateinit var sentPacketsLog: BinaryLogFile // inited in onCreate
 
     private var isConnected = false
 
@@ -160,11 +156,12 @@ class RadioInterfaceService : Service(), Logging {
     private fun handleSendToRadio(p: ByteArray) {
 
         // For debugging/logging purposes ONLY we convert back into a protobuf for readability
-        val proto = MeshProtos.ToRadio.parseFrom(p)
+        // al proto = MeshProtos.ToRadio.parseFrom(p)
 
-        val json = jsonPrinter.print(proto).replace('\n', ' ')
-        info("TODO sending to radio: $json")
-        sentPacketsLog.log(json)
+        debug("sending to radio")
+        doWrite(BTM_TORADIO_CHARACTER, p)
+        sentPacketsLog.write(p)
+        sentPacketsLog.flush()
     }
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
@@ -242,7 +239,7 @@ class RadioInterfaceService : Service(), Logging {
             }
         }
 
-        sentPacketsLog = DebugLogFile(this, "sent_log.json")
+        sentPacketsLog = BinaryLogFile(this, "sent_log.pb")
     }
 
     override fun onDestroy() {
@@ -301,7 +298,7 @@ class RadioInterfaceService : Service(), Logging {
 
         override fun readMyNode() = doRead(BTM_MYNODE_CHARACTER)!!
 
-        override fun sendToRadio(a: ByteArray) = doWrite(BTM_TORADIO_CHARACTER, a)
+        override fun sendToRadio(a: ByteArray) = handleSendToRadio(a)
 
         override fun readRadioConfig() = doRead(BTM_RADIO_CHARACTER)!!
 
