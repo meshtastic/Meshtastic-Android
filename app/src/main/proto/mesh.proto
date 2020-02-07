@@ -206,20 +206,6 @@ message NodeInfo {
     int32 rx_power = 5;
 }
 
-// This message is never sent over the wire, but it is used for serializing DB state to flash in the device code
-// FIXME, since we write this each time we enter deep sleep (and have infinite flash) it would be better to use some sort of append only data
-// structure for the receive queue and use the preferences store for the other stuff
-message DeviceState {
-    RadioConfig radio = 1;
-    repeated NodeInfo node_db = 2;
-
-    /// Received packets saved for delivery to the phone 
-    repeated MeshPacket receive_queue = 3;
-
-    /// Tells the phone what our node number is, can be -1 if we've not yet joined a mesh.
-    int32 my_node_num = 4;
-}
-
 /**
 Unique local debugging info for this node
 
@@ -233,6 +219,24 @@ message MyNodeInfo {
 
     /// FIXME - add useful debugging state (queue depths etc)
 }
+
+
+// This message is never sent over the wire, but it is used for serializing DB state to flash in the device code
+// FIXME, since we write this each time we enter deep sleep (and have infinite flash) it would be better to use some sort of append only data
+// structure for the receive queue and use the preferences store for the other stuff
+message DeviceState {
+    RadioConfig radio = 1;
+
+    /// Tells the phone what our node number is, can be -1 if we've not yet joined a mesh.
+    MyNodeInfo my_node = 2;
+
+    repeated NodeInfo node_db = 3;
+
+    /// Received packets saved for delivery to the phone 
+    repeated MeshPacket receive_queue = 4;
+}
+
+
 
 // packets from the radio to the phone will appear on the fromRadio characteristic.  It will support
 // READ and NOTIFY.  When a new packet arrives the device will notify?  possibly identify instead?
