@@ -14,5 +14,8 @@
 # FIXME, something more like 200? And do fragmentation and reassembly (for larger payloads) at the Android layer, not the esp32 layer.
 *Data.payload max_size:100
 
+# 256 bit psk key
+*RadioConfig.psk max_size:32
+
 # MyMessage.name         max_size:40 
 # or fixed_length or fixed_count, or max_count

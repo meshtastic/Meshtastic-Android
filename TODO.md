@@ -4,6 +4,7 @@
 * when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname
 * all chat in the app defaults to group chat
 * show connection state on gui
+* make my android app show mesh state
 * when notified phone should download messages
 * at connect we might receive messages before finished downloading the nodeinfo.  In that case, process those messages later
 * investigate the Signal SMS message flow path, see if I could just make Mesh a third peer to signal & sms?
@@ -18,17 +19,16 @@
 * optionally turn off crypto in signal - preferably though see if there is a nice way to be a peer of signal/sms and now mesh.
 * change signal package ID - if distributing modified binary
 * good tips on which bands might be more free https://github.com/TheThingsNetwork/ttn/issues/119
-* make my android app show mesh state
 * use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
 * connect to bluetooth device automatically using minimum power, start looking at phone boot
 * fix BT device scanning
 * call crashlytics from exceptionReporter!!!  currently not logging failures caught there
 * if nessary restart entire BT adapter with this tip from Michael https://stackoverflow.com/questions/35103701/ble-android-onconnectionstatechange-not-being-called
 * show direction and distance on the nodeinfo cards
+* test with oldest android
 
 # Medium priority
 
-* test with oldest android
 * stop using a foreground service
 * change info() log strings to debug()
 * use platform theme (dark or light)
@@ -39,7 +39,7 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 
 # Low priority
 
-* make analytics optional
+** make analytics optional
 * also add a receiver that fires after a new update was installed from the play store
 
 # Done

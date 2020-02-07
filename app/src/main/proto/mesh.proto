@@ -114,9 +114,9 @@ message SubPacket {
     oneof variant {
         Position position = 1;
 
-	// Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)
-	// sent to the phone (so the phone can know exact time of reception)
-    	uint64 time = 2; // msecs since 1970
+        // Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)
+        // sent to the phone (so the phone can know exact time of reception)
+        uint64 time = 2; // msecs since 1970
         Data data = 3;
         User user = 4;
         WantNodeNum want_node = 5;
@@ -145,7 +145,6 @@ message MeshPacket {
 
 // Full settings (center freq, spread factor, pre-shared secret key etc...) needed to configure a radio
 message RadioConfig {
-    // FIXME
 
     // We should send our position this often (but only if it has changed significantly)
     uint32 position_broadcast_msec = 1;
@@ -157,11 +156,24 @@ message RadioConfig {
 
     float center_freq = 4;
 
-    uint32 bandwidth = 5;
+    enum ModemConfig {
+        // Note: these mappings must match ModemConfigChoice in the device code.
+        Bw125Cr45Sf128 = 0; ///< Bw = 125 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on. Default medium range
+        Bw500Cr45Sf128 = 1; ///< Bw = 500 kHz, Cr = 4/5, Sf = 128chips/symbol, CRC on. Fast+short range
+        Bw31_25Cr48Sf512 = 2; ///< Bw = 31.25 kHz, Cr = 4/8, Sf = 512chips/symbol, CRC on. Slow+long range
+        Bw125Cr48Sf4096 = 3; ///< Bw = 125 kHz, Cr = 4/8, Sf = 4096chips/symbol, CRC on. Slow+long range
+    }
 
-    int32 spread_factor = 6;
+    /// This value replaces bandwidth/spread_factor/coding_rate.  If you'd like to experiment with other options
+    /// add them to MeshRadio.cpp in the device code.
+    ModemConfig modem_config = 5;
+    // uint32 bandwidth = 5;
+    // int32 spread_factor = 6;
+    // int32 coding_rate = 7;
 
-    int32 coding_rate = 7;
+    /// A simple preshared key for now for crypto.  At first I'm using 256 bit (32 byte) block for the Speck crypto
+    /// but for beta we'll want something more carefully thought through.
+    bytes psk = 8;
 
     // If true, radio should not try to be smart about what packets to queue to the phone
     bool keep_all_packets = 100;
@@ -198,9 +210,9 @@ message NodeInfo {
     User user = 2;
     Position position = 3;
 
-	// Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)
-	// sent to the phone (so the phone can know exact time of reception)
-	uint64 last_seen = 4; // msecs since 1970
+    // Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)
+    // sent to the phone (so the phone can know exact time of reception)
+    uint64 last_seen = 4; // msecs since 1970
 
     // FIXME - some sort of notion of the level of rx power we measured when we last received a packet from this node 
     int32 rx_power = 5;
@@ -220,7 +232,6 @@ message MyNodeInfo {
     /// FIXME - add useful debugging state (queue depths etc)
 }
 
-
 // This message is never sent over the wire, but it is used for serializing DB state to flash in the device code
 // FIXME, since we write this each time we enter deep sleep (and have infinite flash) it would be better to use some sort of append only data
 // structure for the receive queue and use the preferences store for the other stuff
@@ -236,8 +247,6 @@ message DeviceState {
     repeated MeshPacket receive_queue = 4;
 }
 
-
-
 // packets from the radio to the phone will appear on the fromRadio characteristic.  It will support
 // READ and NOTIFY.  When a new packet arrives the device will notify?  possibly identify instead?
 // it will sit in that descriptor until consumed by the phone, at which point the next item in the FIFO
@@ -250,11 +259,11 @@ message FromRadio {
         MeshPacket packet = 2;
 
         /// Tells the phone what our node number is, can be -1 if we've not yet joined a mesh.
-	// No longer sent in fromRadio, instead there is a mynodeinfo characteristic
+        // No longer sent in fromRadio, instead there is a mynodeinfo characteristic
         // MyNodeInfo my_info = 3;
 
         /// One packet is sent for each node in the on radio DB
-	// Note: this is no longer in FromRadio because, there is now a bluetooth nodeinfo characteristic
+        // Note: this is no longer in FromRadio because, there is now a bluetooth nodeinfo characteristic
         // after sending wantnodes that characteristic starts over with the first node in our DB
         // NodeInfo node_info = 4;
     }
@@ -270,7 +279,7 @@ message ToRadio {
         //
         // Rare operations
         //
-	// All of these have been moved to unique writable bluetooth characteristics
+        // All of these have been moved to unique writable bluetooth characteristics
 
         /// phone wants radio to send full node db to the phone, This is typically the first packet sent
         /// to the radio when the phone gets a bluetooth connection.
