@@ -241,10 +241,29 @@ message DeviceState {
     /// Tells the phone what our node number is, can be -1 if we've not yet joined a mesh.
     MyNodeInfo my_node = 2;
 
-    repeated NodeInfo node_db = 3;
+    /// My owner info
+    User owner = 3;
+
+    repeated NodeInfo node_db = 4;
 
     /// Received packets saved for delivery to the phone 
-    repeated MeshPacket receive_queue = 4;
+    repeated MeshPacket receive_queue = 5;
+
+    enum Version {
+        option allow_alias = true;
+        
+        /// default value for old files before we added version.
+        Unset = 0; 
+
+        /// We bump up the integer values in this enum to indicate minimum levels of encodings for saved files
+        /// if your file is below the Minimum you should discard it.
+        Minimum = 1;
+
+        /// The current value we are using for saved files
+        Current = 1;
+    };
+
+    Version version = 6;
 }
 
 // packets from the radio to the phone will appear on the fromRadio characteristic.  It will support

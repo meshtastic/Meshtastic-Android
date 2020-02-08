@@ -11,8 +11,8 @@
 *DeviceState.node_db max_count:32
 *DeviceState.receive_queue max_count:32
 
-# FIXME, something more like 200? And do fragmentation and reassembly (for larger payloads) at the Android layer, not the esp32 layer.
-*Data.payload max_size:100
+# FIXME, max out based on total SubPacket size And do fragmentation and reassembly (for larger payloads) at the Android layer, not the esp32 layer.
+*Data.payload max_size:200
 
 # 256 bit psk key
 *RadioConfig.psk max_size:32
