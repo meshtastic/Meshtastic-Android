@@ -359,14 +359,6 @@ class MeshService : Service(), Logging {
 
             MeshProtos.SubPacket.USER_FIELD_NUMBER ->
                 handleReceivedUser(fromNum, p.user)
-            MeshProtos.SubPacket.WANT_NODE_FIELD_NUMBER -> {
-                // This is managed by the radio on its own
-                debug("Ignoring WANT_NODE from $fromNum")
-            }
-            MeshProtos.SubPacket.DENY_NODE_FIELD_NUMBER -> {
-                // This is managed by the radio on its own
-                debug("Ignoring DENY_NODE from $fromNum to $toNum")
-            }
             else -> TODO("Unexpected SubPacket variant")
         }
     }
