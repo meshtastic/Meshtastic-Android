@@ -3,10 +3,7 @@ package com.geeksville.mesh
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
+import android.content.*
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -31,6 +28,8 @@ import androidx.ui.tooling.preview.Preview
 import com.geeksville.android.Logging
 import com.geeksville.util.exceptionReporter
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import java.nio.charset.Charset
+import java.util.*
 
 
 class MainActivity : AppCompatActivity(), Logging {
@@ -173,15 +172,78 @@ class MainActivity : AppCompatActivity(), Logging {
         }
 
         requestPermission()
+
+        val filter = IntentFilter()
+        filter.addAction("")
+        registerReceiver(meshServiceReceiver, filter)
+    }
+
+    override fun onDestroy() {
+        unregisterReceiver(meshServiceReceiver)
+        super.onDestroy()
+    }
+
+    /// A map from nodeid to to nodeinfo
+    private val nodes = mutableMapOf<String, NodeInfo>()
+
+    data class TextMessage(val date: Date, val from: String, val text: String)
+
+    private val messages = mutableListOf<TextMessage>()
+
+    /// Are we connected to our radio device
+    private var isConnected = false
+
+    private val utf8 = Charset.forName("UTF-8")
+
+    private val meshServiceReceiver = object : BroadcastReceiver() {
+
+        override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
+            debug("Received from mesh service $intent")
+
+            when (intent.action) {
+                MeshService.ACTION_NODE_CHANGE -> {
+                    warn("TODO nodechange")
+                    val info: NodeInfo = intent.getParcelableExtra(EXTRA_NODEINFO)!!
+
+                    // We only care about nodes that have user info
+                    info.user?.id?.let {
+                        nodes[it] = info
+                    }
+                }
+                MeshService.ACTION_RECEIVED_DATA -> {
+                    warn("TODO rxopaqe")
+                    val sender = intent.getStringExtra(EXTRA_SENDER)!!
+                    val payload = intent.getByteArrayExtra(EXTRA_PAYLOAD)!!
+                    val typ = intent.getIntExtra(EXTRA_TYP, -1)!!
+
+                    when (typ) {
+                        MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
+                            // FIXME - use the real time from the packet
+                            messages.add(TextMessage(Date(), sender, payload.toString(utf8)))
+                        }
+                        else -> TODO()
+                    }
+                }
+                RadioInterfaceService.CONNECTCHANGED_ACTION -> {
+                    isConnected = intent.getBooleanExtra(EXTRA_CONNECTED, false)
+                    debug("connchange $isConnected")
+                }
+                else -> TODO()
+            }
+        }
     }
 
     private var meshService: IMeshService? = null
     private var isBound = false
 
     private var serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, service: IBinder) {
+        override fun onServiceConnected(name: ComponentName, service: IBinder) = exceptionReporter {
             val m = IMeshService.Stub.asInterface(service)
             meshService = m
+
+            // FIXME - do actions for when we connect to the service
+            // FIXME - do actions for when we connect to the service
+            debug("did connect")
 
             // FIXME: this still can't work this early because the send to +6508675310
             // requires a DB lookup which isn't yet populated (until the sim test packets

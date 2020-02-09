@@ -8,6 +8,7 @@ import android.content.*
 import android.graphics.Color
 import android.os.Build
 import android.os.IBinder
+import android.os.Parcelable
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_MIN
@@ -18,10 +19,28 @@ import com.geeksville.util.exceptionReporter
 import com.geeksville.util.toOneLineString
 import com.geeksville.util.toRemoteExceptions
 import com.google.protobuf.ByteString
+import kotlinx.android.parcel.Parcelize
 import java.nio.charset.Charset
 
 
 class RadioNotConnectedException() : Exception("Can't find radio")
+
+// model objects that directly map to the corresponding protobufs
+@Parcelize
+data class MeshUser(val id: String, val longName: String, val shortName: String) :
+    Parcelable
+
+@Parcelize
+data class Position(val latitude: Double, val longitude: Double, val altitude: Int) :
+    Parcelable
+
+@Parcelize
+data class NodeInfo(
+    val num: Int, // This is immutable, and used as a key
+    var user: MeshUser? = null,
+    var position: Position? = null,
+    var lastSeen: Long? = null
+) : Parcelable
 
 /**
  * Handles all the communication with android apps.  Also keeps an internal model
@@ -32,6 +51,11 @@ class RadioNotConnectedException() : Exception("Can't find radio")
 class MeshService : Service(), Logging {
 
     companion object {
+
+        /// Intents broadcast by MeshService
+        const val ACTION_RECEIVED_DATA = "$prefix.RECEIVED_DATA"
+        const val ACTION_NODE_CHANGE = "$prefix.NODE_CHANGE"
+
         class IdNotFoundException(id: String) : Exception("ID not found $id")
         class NodeNumNotFoundException(id: Int) : Exception("NodeNum not found $id")
         class NotInMeshException() : Exception("We are not yet in a mesh")
@@ -41,6 +65,8 @@ class MeshService : Service(), Logging {
 
         /// If the radio hasn't yet joined a mesh (i.e. no nodenum assigned)
         private const val NODE_NUM_NO_MESH = -1
+
+
     }
 
     /// A mapping of receiver class name to package name - used for explicit broadcasts
@@ -56,6 +82,7 @@ class MeshService : Service(), Logging {
      */
 
     private fun explicitBroadcast(intent: Intent) {
+        sendBroadcast(intent) // We also do a regular (not explicit broadcast) so any context-registered rceivers will work
         clientPackages.forEach {
             intent.setClassName(it.value, it.key)
             sendBroadcast(intent)
@@ -68,18 +95,18 @@ class MeshService : Service(), Logging {
      * Sender will be a user ID string
      * Type will be the Data.Type enum code for this payload
      */
-    private fun broadcastReceivedOpaque(senderId: String, payload: ByteArray, typ: Int) {
-        val intent = Intent("$prefix.RECEIVED_OPAQUE")
+    private fun broadcastReceivedData(senderId: String, payload: ByteArray, typ: Int) {
+        val intent = Intent(ACTION_RECEIVED_DATA)
         intent.putExtra(EXTRA_SENDER, senderId)
         intent.putExtra(EXTRA_PAYLOAD, payload)
         intent.putExtra(EXTRA_TYP, typ)
         explicitBroadcast(intent)
     }
 
-    private fun broadcastNodeChange(nodeId: String, isOnline: Boolean) {
-        val intent = Intent("$prefix.NODE_CHANGE")
-        intent.putExtra(EXTRA_ID, nodeId)
-        intent.putExtra(EXTRA_ONLINE, isOnline)
+    private fun broadcastNodeChange(info: NodeInfo) {
+        debug("Broadcasting node change $info")
+        val intent = Intent(ACTION_NODE_CHANGE)
+        intent.putExtra(EXTRA_NODEINFO, info)
         explicitBroadcast(intent)
     }
 
@@ -134,7 +161,7 @@ class MeshService : Service(), Logging {
 
     private fun startForeground() {
 
-        val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        // val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channelId =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 createNotificationChannel()
@@ -204,17 +231,6 @@ class MeshService : Service(), Logging {
         super.onDestroy()
     }
 
-    // model objects that directly map to the corresponding protobufs
-    data class MeshUser(val id: String, val longName: String, val shortName: String)
-
-    data class Position(val latitude: Double, val longitude: Double, val altitude: Int)
-    data class NodeInfo(
-        val num: Int, // This is immutable, and used as a key
-        var user: MeshUser? = null,
-        var position: Position? = null,
-        var lastSeen: Long? = null
-    )
-
     ///
     /// BEGINNING OF MODEL - FIXME, move elsewhere
     ///
@@ -266,6 +282,8 @@ class MeshService : Service(), Logging {
         val userId = info.user?.id
         if (userId != null)
             nodeDBbyID[userId] = info
+
+        broadcastNodeChange(info)
     }
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
@@ -301,13 +319,24 @@ class MeshService : Service(), Logging {
         /// the sending node ID if possible, else just its number
         val fromString = fromId ?: fromId.toString()
 
+        fun forwardData() {
+            if (fromId == null)
+                warn("Ignoring data from $fromNum because we don't yet know its ID")
+            else {
+                debug("Received data from $fromId ${bytes.size}")
+                broadcastReceivedData(fromId, bytes, data.typValue)
+            }
+        }
+
         when (data.typValue) {
-            MeshProtos.Data.Type.CLEAR_TEXT_VALUE ->
-                warn(
-                    "TODO ignoring CLEAR_TEXT from $fromString: ${bytes.toString(
+            MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
+                debug(
+                    "FIXME - don't long this: Received CLEAR_TEXT from $fromString: ${bytes.toString(
                         Charset.forName("UTF-8")
                     )}"
                 )
+                forwardData()
+            }
 
             MeshProtos.Data.Type.CLEAR_READACK_VALUE ->
                 warn(
@@ -315,12 +344,8 @@ class MeshService : Service(), Logging {
                 )
 
             MeshProtos.Data.Type.SIGNAL_OPAQUE_VALUE ->
-                if (fromId == null)
-                    error("Ignoring opaque from $fromNum because we don't yet know its ID")
-                else {
-                    debug("Received opaque from $fromId ${bytes.size}")
-                    broadcastReceivedOpaque(fromId, bytes, data.typValue)
-                }
+                forwardData()
+
             else -> TODO()
         }
     }
@@ -341,6 +366,14 @@ class MeshService : Service(), Logging {
         val toNum = packet.to
 
         val p = packet.payload
+
+        // Update our last seen based on any valid timestamps
+        if (packet.rxTime != 0L) {
+            updateNodeInfo(fromNum) {
+                it.lastSeen = packet.rxTime
+            }
+        }
+
         when (p.variantCase.number) {
             MeshProtos.SubPacket.POSITION_FIELD_NUMBER ->
                 updateNodeInfo(fromNum) {
@@ -349,10 +382,6 @@ class MeshService : Service(), Logging {
                         p.position.longitude,
                         p.position.altitude
                     )
-                }
-            MeshProtos.SubPacket.TIME_FIELD_NUMBER ->
-                updateNodeInfo(fromNum) {
-                    it.lastSeen = p.time
                 }
             MeshProtos.SubPacket.DATA_FIELD_NUMBER ->
                 handleReceivedData(fromNum, p.data)
@@ -378,7 +407,7 @@ class MeshService : Service(), Logging {
             val myInfo = MeshProtos.MyNodeInfo.parseFrom(connectedRadio.readMyNode())
             ourNodeNum = myInfo.myNodeNum
 
-            // Ask for the current node DB 
+            // Ask for the current node DB
             connectedRadio.restartNodeInfo()
 
             // read all the infos until we get back null
@@ -390,7 +419,8 @@ class MeshService : Service(), Logging {
                 // Just replace/add any entry
                 updateNodeInfo(info.num) {
                     if (info.hasUser())
-                        it.user = MeshUser(info.user.id, info.user.longName, info.user.shortName)
+                        it.user =
+                            MeshUser(info.user.id, info.user.longName, info.user.shortName)
 
                     if (info.hasPosition())
                         it.position = Position(
@@ -429,7 +459,9 @@ class MeshService : Service(), Logging {
                         MeshProtos.FromRadio.parseFrom(intent.getByteArrayExtra(EXTRA_PAYLOAD)!!)
                     info("Received from radio service: ${proto.toOneLineString()}")
                     when (proto.variantCase.number) {
-                        MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(proto.packet)
+                        MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(
+                            proto.packet
+                        )
 
                         else -> TODO("Unexpected FromRadio variant")
                     }

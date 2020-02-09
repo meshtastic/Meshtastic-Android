@@ -89,6 +89,10 @@ class RadioInterfaceService : Service(), Logging {
          * Payload will be the raw bytes which were contained within a MeshProtos.FromRadio protobuf
          */
         const val RECEIVE_FROMRADIO_ACTION = "$prefix.RECEIVE_FROMRADIO"
+
+        /**
+         * This is broadcast when connection state changed (it is also rebroadcast by the MeshService)
+         */
         const val CONNECTCHANGED_ACTION = "$prefix.CONNECT_CHANGED"
 
         private val BTM_SERVICE_UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")

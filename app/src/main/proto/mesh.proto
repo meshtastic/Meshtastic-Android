@@ -116,9 +116,6 @@ message SubPacket {
     oneof variant {
         Position position = 1;
 
-        // Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)
-        // sent to the phone (so the phone can know exact time of reception)
-        uint64 time = 2; // msecs since 1970
         Data data = 3;
         User user = 4;
     }
@@ -141,6 +138,11 @@ message MeshPacket {
     // See note above:
     // MeshPayload payloads = 4;
     SubPacket payload = 3;
+
+    /// The time this message was received by the esp32 (msecs since 1970).  Note: this field is _never_ sent on the radio link itself (to save space)
+    /// Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)
+    /// sent to the phone (so the phone can know exact time of reception)
+    uint64 rx_time = 4;
 }
 
 // Full settings (center freq, spread factor, pre-shared secret key etc...) needed to configure a radio

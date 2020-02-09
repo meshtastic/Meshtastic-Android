@@ -8,6 +8,8 @@ package com.geeksville.mesh;
 */
 interface IMeshService {
     /// Tell the service where to send its broadcasts of received packets
+    /// This call is only required for manifest declared receivers.  If your receiver is context-registered
+    /// you don't need this.
     void subscribeReceiver(String packageName, String receiverName);
 
     /**
