@@ -14,14 +14,12 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
-import androidx.compose.Model
+import androidx.compose.mutableStateOf
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.ui.core.Text
-import androidx.ui.core.dp
 import androidx.ui.core.setContent
 import androidx.ui.layout.Column
-import androidx.ui.layout.Spacing
 import androidx.ui.material.Button
 import androidx.ui.material.MaterialTheme
 import androidx.ui.tooling.preview.Preview
@@ -39,13 +37,18 @@ class MainActivity : AppCompatActivity(), Logging {
         const val DID_REQUEST_PERM = 11
     }
 
-    @Model
-    class MeshServiceState(
-        var connected: Boolean = false,
-        var onlineIds: Array<String> = arrayOf()
-    )
+    /// A map from nodeid to to nodeinfo
+    private val nodes = mutableStateOf(mapOf<String, NodeInfo>())
 
-    val meshServiceState = MeshServiceState()
+    data class TextMessage(val date: Date, val from: String, val text: String)
+
+    private val messages = mutableStateOf(listOf<TextMessage>())
+
+    /// Are we connected to our radio device
+    private var isConnected = mutableStateOf(false)
+
+    private val utf8 = Charset.forName("UTF-8")
+
 
     private val bluetoothAdapter: BluetoothAdapter? by lazy(LazyThreadSafetyMode.NONE) {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -96,7 +99,7 @@ class MainActivity : AppCompatActivity(), Logging {
     @Preview
     @Composable
     fun previewView() {
-        composeView(meshServiceState)
+        composeView()
     }
 
     private fun sendTestPackets() {
@@ -120,14 +123,20 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     @Composable
-    fun composeView(meshServiceState: MeshServiceState) {
+    fun composeView() {
         MaterialTheme {
-            Column(modifier = Spacing(8.dp)) {
-                Text(text = "Meshtastic", modifier = Spacing(8.dp))
+            // modifier = Spacing(8.dp)
+            Column() {
+                Text(text = "Meshtastic")
 
-                Text("Radio connected: ${meshServiceState.connected}")
-                meshServiceState.onlineIds.forEach {
-                    Text("User: $it")
+                Text("Radio connected: ${isConnected.value}")
+
+                nodes.value.values.forEach {
+                    Text("Node: $it")
+                }
+
+                messages.value.forEach {
+                    Text("Text: $it")
                 }
 
                 Button(text = "Start scan",
@@ -157,7 +166,7 @@ class MainActivity : AppCompatActivity(), Logging {
             FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
 
         setContent {
-            composeView(meshServiceState)
+            composeView()
         }
 
         // Ensures Bluetooth is available on the device and it is enabled. If not,
@@ -183,17 +192,6 @@ class MainActivity : AppCompatActivity(), Logging {
         super.onDestroy()
     }
 
-    /// A map from nodeid to to nodeinfo
-    private val nodes = mutableMapOf<String, NodeInfo>()
-
-    data class TextMessage(val date: Date, val from: String, val text: String)
-
-    private val messages = mutableListOf<TextMessage>()
-
-    /// Are we connected to our radio device
-    private var isConnected = false
-
-    private val utf8 = Charset.forName("UTF-8")
 
     private val meshServiceReceiver = object : BroadcastReceiver() {
 
@@ -207,25 +205,30 @@ class MainActivity : AppCompatActivity(), Logging {
 
                     // We only care about nodes that have user info
                     info.user?.id?.let {
-                        nodes[it] = info
+                        val newnodes = nodes.value.toMutableMap()
+                        newnodes[it] = info
+                        nodes.value = newnodes
                     }
                 }
+
                 MeshService.ACTION_RECEIVED_DATA -> {
                     warn("TODO rxopaqe")
                     val sender = intent.getStringExtra(EXTRA_SENDER)!!
                     val payload = intent.getByteArrayExtra(EXTRA_PAYLOAD)!!
-                    val typ = intent.getIntExtra(EXTRA_TYP, -1)!!
+                    val typ = intent.getIntExtra(EXTRA_TYP, -1)
 
                     when (typ) {
                         MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
                             // FIXME - use the real time from the packet
-                            messages.add(TextMessage(Date(), sender, payload.toString(utf8)))
+                            val modded = messages.value.toMutableList()
+                            modded.add(TextMessage(Date(), sender, payload.toString(utf8)))
+                            messages.value = modded
                         }
                         else -> TODO()
                     }
                 }
                 RadioInterfaceService.CONNECTCHANGED_ACTION -> {
-                    isConnected = intent.getBooleanExtra(EXTRA_CONNECTED, false)
+                    isConnected.value = intent.getBooleanExtra(EXTRA_CONNECTED, false)
                     debug("connchange $isConnected")
                 }
                 else -> TODO()
@@ -245,16 +248,12 @@ class MainActivity : AppCompatActivity(), Logging {
             // FIXME - do actions for when we connect to the service
             debug("did connect")
 
-            // FIXME: this still can't work this early because the send to +6508675310
-            // requires a DB lookup which isn't yet populated (until the sim test packets
-            // from the radio arrive)
-            // sendTestPackets() // send some traffic ASAP
+            isConnected.value = m.isConnected
 
-            // FIXME this doesn't work because the model has already been copied into compose land?
-            // runOnUiThread { // FIXME - this can be removed?
-            meshServiceState.connected = m.isConnected
-            meshServiceState.onlineIds = m.online
-            // }
+            // make some placeholder nodeinfos
+            val pairs = m.online.toList().map { it to NodeInfo(0, MeshUser(it, "unknown", "unk")) }
+                .toTypedArray()
+            nodes.value = mapOf(*pairs)
         }
 
         override fun onServiceDisconnected(name: ComponentName) {

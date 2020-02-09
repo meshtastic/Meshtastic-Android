@@ -44,6 +44,7 @@ android {
     }
 }
 
+
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
     protoc {
