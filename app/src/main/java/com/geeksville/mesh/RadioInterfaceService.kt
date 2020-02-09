@@ -14,6 +14,7 @@ import com.geeksville.concurrent.DeferredExecution
 import com.geeksville.util.toRemoteExceptions
 import java.util.*
 
+
 /* Info for the esp32 device side code.  See that source for the 'gold' standard docs on this interface.
 
 MeshBluetoothService UUID 6ba1b218-15a8-461f-9fa8-5dcae273eafd
@@ -134,7 +135,6 @@ class RadioInterfaceService : Service(), Logging {
 
     val service get() = safe.gatt!!.services.find { it.uuid == BTM_SERVICE_UUID }!!
 
-    private lateinit var fromRadio: BluetoothGattCharacteristic
     private lateinit var fromNum: BluetoothGattCharacteristic
 
     private val logSends = false
@@ -176,7 +176,8 @@ class RadioInterfaceService : Service(), Logging {
     private fun doReadFromRadio() {
         if (!isConnected)
             warn("Abandoning fromradio read because we are not connected")
-        else
+        else {
+            val fromRadio = service.getCharacteristic(BTM_FROMRADIO_CHARACTER)
             safe.asyncReadCharacteristic(fromRadio) {
                 val b = it.getOrThrow().value
 
@@ -190,6 +191,7 @@ class RadioInterfaceService : Service(), Logging {
                     debug("Done reading from radio, fromradio is empty")
                 }
             }
+        }
     }
 
 
@@ -214,8 +216,12 @@ class RadioInterfaceService : Service(), Logging {
                 debug("requested MTU result=$mtuRes")
                 mtuRes.getOrThrow() // FIXME - why sometimes is the result Unit!?!
 
-                fromRadio = service.getCharacteristic(BTM_FROMRADIO_CHARACTER)
                 fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)
+
+                safe.setNotify(fromNum, true) {
+                    debug("fromNum changed, so we are reading new messages")
+                    doReadFromRadio()
+                }
 
                 // Now tell clients they can (finally use the api)
                 broadcastConnectionChanged(true)

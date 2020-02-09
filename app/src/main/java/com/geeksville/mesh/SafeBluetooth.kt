@@ -11,6 +11,7 @@ import com.geeksville.concurrent.Continuation
 import com.geeksville.concurrent.SyncContinuation
 import com.geeksville.util.exceptionReporter
 import java.io.IOException
+import java.util.*
 
 
 /**
@@ -26,7 +27,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     Logging {
 
     /// Timeout before we declare a bluetooth operation failed
-    var timeoutMsec = 5 * 1000L
+    var timeoutMsec = 30 * 1000L
 
     /// Users can access the GATT directly as needed
     var gatt: BluetoothGatt? = null
@@ -38,6 +39,9 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     // Called for reconnection attemps
     private var connectionCallback: ((Result<Unit>) -> Unit)? = null
     private var lostConnectCallback: (() -> Unit)? = null
+
+    /// from characteristic UUIDs to the handler function for notfies
+    private val notifyHandlers = mutableMapOf<UUID, (BluetoothGattCharacteristic) -> Unit>()
 
     /// When we see the BT stack getting disabled/renabled we handle that as a connect/disconnect event
     private val btStateReceiver = object : BroadcastReceiver() {
@@ -64,6 +68,10 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         }
     }
 
+    // 0x2902 org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
+    private val configurationDescriptorUUID =
+        UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
+
     init {
         context.registerReceiver(
             btStateReceiver,
@@ -88,7 +96,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         }
     }
 
-
     private val gattCallback = object : BluetoothGattCallback() {
 
         override fun onConnectionStateChange(
@@ -112,7 +119,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                     if (oldstate == BluetoothProfile.STATE_CONNECTED) {
                         info("Lost connection - aborting current work")
 
-
                         /*
                         Supposedly this reconnect attempt happens automatically
                         "If the connection was established through an auto connect, Android will
@@ -124,6 +130,9 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                         closeConnection()
                         */
                         failAllWork(IOException("Lost connection"))
+
+                        // Cancel any notifications - because when the device comes back it might have forgotten about us
+                        notifyHandlers.clear()
 
                         debug("calling lostConnect handler")
                         lostConnectCallback?.invoke()
@@ -166,6 +175,59 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
         override fun onMtuChanged(gatt: BluetoothGatt, mtu: Int, status: Int) {
             completeWork(status, mtu)
+        }
+
+        /**
+         * Callback triggered as a result of a remote characteristic notification.
+         *
+         * @param gatt GATT client the characteristic is associated with
+         * @param characteristic Characteristic that has been updated as a result of a remote
+         * notification event.
+         */
+        override fun onCharacteristicChanged(
+            gatt: BluetoothGatt,
+            characteristic: BluetoothGattCharacteristic
+        ) {
+            val handler = notifyHandlers.get(characteristic.uuid)
+            if (handler == null)
+                warn("Received notification from $characteristic, but no handler registered")
+            else {
+                exceptionReporter {
+                    handler(characteristic)
+                }
+            }
+        }
+
+        /**
+         * Callback indicating the result of a descriptor write operation.
+         *
+         * @param gatt GATT client invoked [BluetoothGatt.writeDescriptor]
+         * @param descriptor Descriptor that was writte to the associated remote device.
+         * @param status The result of the write operation [BluetoothGatt.GATT_SUCCESS] if the
+         * operation succeeds.
+         */
+        override fun onDescriptorWrite(
+            gatt: BluetoothGatt,
+            descriptor: BluetoothGattDescriptor,
+            status: Int
+        ) {
+            completeWork(status, descriptor)
+        }
+
+        /**
+         * Callback reporting the result of a descriptor read operation.
+         *
+         * @param gatt GATT client invoked [BluetoothGatt.readDescriptor]
+         * @param descriptor Descriptor that was read from the associated remote device.
+         * @param status [BluetoothGatt.GATT_SUCCESS] if the read operation was completed
+         * successfully
+         */
+        override fun onDescriptorRead(
+            gatt: BluetoothGatt,
+            descriptor: BluetoothGattDescriptor,
+            status: Int
+        ) {
+            completeWork(status, descriptor)
         }
     }
 
@@ -251,7 +313,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         }
     }
 
-
     /**
      * start a connection attempt.
      *
@@ -322,7 +383,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private fun queueWriteCharacteristic(
         c: BluetoothGattCharacteristic,
         cont: Continuation<BluetoothGattCharacteristic>
-    ) = queueWork("writec", cont) { gatt!!.writeCharacteristic(c) }
+    ) = queueWork("writeC", cont) { gatt!!.writeCharacteristic(c) }
 
     fun asyncWriteCharacteristic(
         c: BluetoothGattCharacteristic,
@@ -331,6 +392,17 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     fun writeCharacteristic(c: BluetoothGattCharacteristic): BluetoothGattCharacteristic =
         makeSync { queueWriteCharacteristic(c, it) }
+
+    private fun queueWriteDescriptor(
+        c: BluetoothGattDescriptor,
+        cont: Continuation<BluetoothGattDescriptor>
+    ) = queueWork("writeD", cont) { gatt!!.writeDescriptor(c) }
+
+    fun asyncWriteDescriptor(
+        c: BluetoothGattDescriptor,
+        cb: (Result<BluetoothGattDescriptor>) -> Unit
+    ) = queueWriteDescriptor(c, CallbackContinuation(cb))
+
 
     private fun closeConnection() {
         failAllWork(IOException("Connection closing"))
@@ -347,6 +419,27 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         closeConnection()
 
         context.unregisterReceiver(btStateReceiver)
+    }
+
+
+    /// asyncronously turn notification on/off for a characteristic
+    fun setNotify(
+        c: BluetoothGattCharacteristic,
+        enable: Boolean,
+        onChanged: (BluetoothGattCharacteristic) -> Unit
+    ) {
+        debug("starting setNotify(${c.uuid}, $enable)")
+        notifyHandlers[c.uuid] = onChanged
+        // c.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+        gatt!!.setCharacteristicNotification(c, enable)
+
+        // per https://stackoverflow.com/questions/27068673/subscribe-to-a-ble-gatt-notification-android
+        val descriptor: BluetoothGattDescriptor = c.getDescriptor(configurationDescriptorUUID)!!
+        descriptor.value =
+            if (enable) BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE else BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
+        asyncWriteDescriptor(descriptor) {
+            debug("Notify enable=$enable completed")
+        }
     }
 }
 
