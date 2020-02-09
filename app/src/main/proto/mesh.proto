@@ -214,8 +214,19 @@ message NodeInfo {
     // sent to the phone (so the phone can know exact time of reception)
     uint64 last_seen = 4; // msecs since 1970
 
-    // FIXME - some sort of notion of the level of rx power we measured when we last received a packet from this node 
-    int32 rx_power = 5;
+    /// Returns the Signal-to-noise ratio (SNR) of the last received message, as measured
+    /// by the receiver.
+    /// return SNR of the last received message in dB
+    int32 snr = 5;
+
+    /// Returns the last measured frequency error.
+    /// The LoRa receiver estimates the frequency offset between the receiver centre frequency
+    /// and that of the received LoRa signal. This function returns the estimates offset (in Hz) 
+    /// of the last received message. Caution: this measurement is not absolute, but is measured 
+    /// relative to the local receiver's oscillator. 
+    /// Apparent errors may be due to the transmitter, the receiver or both.
+    /// \return The estimated centre frequency offset in Hz of the last received message. 
+    int32 frequency_error = 6;
 }
 
 /**
@@ -257,10 +268,10 @@ message DeviceState {
 
         /// We bump up the integer values in this enum to indicate minimum levels of encodings for saved files
         /// if your file is below the Minimum you should discard it.
-        Minimum = 2;
+        Minimum = 4;
 
         /// The current value we are using for saved files
-        Current = 2;
+        Current = 4;
     };
 
     Version version = 6;
