@@ -2,7 +2,6 @@ package com.geeksville.mesh
 
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothManager
 import android.content.Context
@@ -124,16 +123,15 @@ class RadioInterfaceService : Service(), Logging {
         }
     }
 
-    private val bluetoothAdapter: BluetoothAdapter by lazy(LazyThreadSafetyMode.NONE) {
+    private val bluetoothAdapter: BluetoothAdapter? by lazy(LazyThreadSafetyMode.NONE) {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        bluetoothManager.adapter!!
+        bluetoothManager.adapter
     }
 
     // Both of these are created in onCreate()
-    private lateinit var device: BluetoothDevice
-    private lateinit var safe: SafeBluetooth
+    private var safe: SafeBluetooth? = null
 
-    val service get() = safe.gatt!!.services.find { it.uuid == BTM_SERVICE_UUID }!!
+    val service get() = safe!!.gatt!!.services.find { it.uuid == BTM_SERVICE_UUID }!!
 
     private lateinit var fromNum: BluetoothGattCharacteristic
 
@@ -178,7 +176,7 @@ class RadioInterfaceService : Service(), Logging {
             warn("Abandoning fromradio read because we are not connected")
         else {
             val fromRadio = service.getCharacteristic(BTM_FROMRADIO_CHARACTER)
-            safe.asyncReadCharacteristic(fromRadio) {
+            safe!!.asyncReadCharacteristic(fromRadio) {
                 val b = it.getOrThrow().value
 
                 if (b.isNotEmpty()) {
@@ -207,18 +205,18 @@ class RadioInterfaceService : Service(), Logging {
         info("Connected to radio!")
 
         // FIXME - no need to discover services more than once - instead use lazy() to use them in future attempts
-        safe.asyncDiscoverServices { discRes ->
+        safe!!.asyncDiscoverServices { discRes ->
             discRes.getOrThrow() // FIXME, instead just try to reconnect?
             debug("Discovered services!")
 
             // we begin by setting our MTU size as high as it can go
-            safe.asyncRequestMtu(512) { mtuRes ->
+            safe!!.asyncRequestMtu(512) { mtuRes ->
                 debug("requested MTU result=$mtuRes")
                 mtuRes.getOrThrow() // FIXME - why sometimes is the result Unit!?!
 
                 fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)
 
-                safe.setNotify(fromNum, true) {
+                safe!!.setNotify(fromNum, true) {
                     debug("fromNum changed, so we are reading new messages")
                     doReadFromRadio()
                 }
@@ -242,17 +240,23 @@ class RadioInterfaceService : Service(), Logging {
         // device is off/not connected)
         val usetbeam = false
         val address = if (usetbeam) "B4:E6:2D:EA:32:B7" else "24:6F:28:96:C9:2A"
-        info("Creating radio interface service.  device=$address")
 
-        device = bluetoothAdapter.getRemoteDevice(address)
-        // Note this constructor also does no comm
-        safe = SafeBluetooth(this, device)
+        val device = bluetoothAdapter?.getRemoteDevice(address)
+        if (device != null) {
+            info("Creating radio interface service.  device=$address")
 
-        // FIXME, pass in true for autoconnect - so we will autoconnect whenever the radio
-        // comes in range (even if we made this connect call long ago when we got powered on)
-        // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
-        // more info
-        safe.asyncConnect(true, ::onConnect, ::onDisconnect)
+            // Note this constructor also does no comm
+            val s = SafeBluetooth(this, device)
+            safe = s
+
+            // FIXME, pass in true for autoconnect - so we will autoconnect whenever the radio
+            // comes in range (even if we made this connect call long ago when we got powered on)
+            // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
+            // more info
+            s.asyncConnect(true, ::onConnect, ::onDisconnect)
+        } else {
+            error("Bluetooth adapter not found, assuming running on the emulator!")
+        }
 
         if (logSends)
             sentPacketsLog = BinaryLogFile(this, "sent_log.pb")
@@ -262,7 +266,7 @@ class RadioInterfaceService : Service(), Logging {
         info("Destroying radio interface service")
         if (logSends)
             sentPacketsLog.close()
-        safe.disconnect()
+        safe?.disconnect()
         super.onDestroy()
     }
 
@@ -284,7 +288,7 @@ class RadioInterfaceService : Service(), Logging {
             val toRadio = service.getCharacteristic(uuid)
             toRadio.value = a
 
-            safe.writeCharacteristic(toRadio)
+            safe!!.writeCharacteristic(toRadio)
             debug("write of ${a.size} bytes completed")
         }
     }
@@ -299,7 +303,7 @@ class RadioInterfaceService : Service(), Logging {
             // Note: we generate a new characteristic each time, because we are about to
             // change the data and we want the data stored in the closure
             val toRadio = service.getCharacteristic(uuid)
-            var a = safe.readCharacteristic(toRadio).value
+            var a = safe!!.readCharacteristic(toRadio).value
             debug("Read of $uuid got ${a.size} bytes")
 
             if (a.isEmpty()) // An empty bluetooth response is converted to a null response for our clients
