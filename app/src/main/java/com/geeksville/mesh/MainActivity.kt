@@ -35,14 +35,34 @@ class MainActivity : AppCompatActivity(), Logging {
     companion object {
         const val REQUEST_ENABLE_BT = 10
         const val DID_REQUEST_PERM = 11
+
+        private val testPositions = arrayOf(
+            Position(32.776665, -96.796989, 35), // dallas
+            Position(32.960758, -96.733521, 35), // richardson
+            Position(32.912901, -96.781776, 35) // north dallas
+        )
+
+        private val testNodes = testPositions.mapIndexed { index, it ->
+            NodeInfo(
+                9 + index,
+                MeshUser("+65087653%02d".format(9 + index), "Kevin Mester$index", "KM$index"),
+                it,
+                12345
+            )
+        }
+
+        data class TextMessage(val date: Date, val from: String, val text: String)
+
+        private val testTexts = listOf(
+            TextMessage(Date(), "+6508675310", "I found the cache"),
+            TextMessage(Date(), "+6508675311", "Help! I've fallen and I can't get up.")
+        )
     }
 
     /// A map from nodeid to to nodeinfo
-    private val nodes = mutableStateOf(mapOf<String, NodeInfo>())
+    private val nodes = mutableStateOf(testNodes.map { it.user!!.id to it }.toMap())
 
-    data class TextMessage(val date: Date, val from: String, val text: String)
-
-    private val messages = mutableStateOf(listOf<TextMessage>())
+    private val messages = mutableStateOf(testTexts)
 
     /// Are we connected to our radio device
     private var isConnected = mutableStateOf(false)
@@ -251,9 +271,8 @@ class MainActivity : AppCompatActivity(), Logging {
             isConnected.value = m.isConnected
 
             // make some placeholder nodeinfos
-            val pairs = m.online.toList().map { it to NodeInfo(0, MeshUser(it, "unknown", "unk")) }
-                .toTypedArray()
-            nodes.value = mapOf(*pairs)
+            nodes.value =
+                m.online.toList().map { it to NodeInfo(0, MeshUser(it, "unknown", "unk")) }.toMap()
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
@@ -326,4 +345,5 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 }
+
 

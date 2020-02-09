@@ -283,7 +283,8 @@ class MeshService : Service(), Logging {
         if (userId != null)
             nodeDBbyID[userId] = info
 
-        // FIXME broadcastNodeChange(info)
+        // parcelable is busted
+        // broadcastNodeChange(info)
     }
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
