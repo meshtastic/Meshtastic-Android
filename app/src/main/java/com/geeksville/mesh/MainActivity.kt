@@ -12,22 +12,54 @@ import android.os.IBinder
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
+import androidx.compose.Model
 import androidx.compose.mutableStateOf
+import androidx.compose.state
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.ui.animation.Crossfade
+import androidx.ui.core.Modifier
 import androidx.ui.core.Text
+import androidx.ui.core.WithDensity
 import androidx.ui.core.setContent
-import androidx.ui.layout.Column
-import androidx.ui.material.Button
-import androidx.ui.material.MaterialTheme
+import androidx.ui.foundation.Clickable
+import androidx.ui.foundation.VerticalScroller
+import androidx.ui.foundation.shape.corner.RoundedCornerShape
+import androidx.ui.graphics.Color
+import androidx.ui.graphics.vector.DrawVector
+import androidx.ui.layout.*
+import androidx.ui.material.*
+import androidx.ui.material.ripple.Ripple
+import androidx.ui.material.surface.Surface
+import androidx.ui.res.vectorResource
 import androidx.ui.tooling.preview.Preview
+import androidx.ui.unit.dp
 import com.geeksville.android.Logging
 import com.geeksville.util.exceptionReporter
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import java.nio.charset.Charset
 import java.util.*
+
+// defines the screens we have in the app
+sealed class Screen {
+    object Home : Screen()
+    object Settings : Screen()
+}
+
+@Model
+object AppStatus {
+    var currentScreen: Screen = Screen.Home
+}
+
+/**
+ * Temporary solution pending navigation support.
+ */
+fun navigateTo(destination: Screen) {
+    AppStatus.currentScreen = destination
+}
 
 
 class MainActivity : AppCompatActivity(), Logging {
@@ -143,39 +175,207 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     @Composable
-    fun composeView() {
-        MaterialTheme {
-            // modifier = Spacing(8.dp)
-            Column() {
-                Text(text = "Meshtastic")
+    fun composeNodeInfo(it: NodeInfo) {
+        Text("Node: ${it.user?.longName}")
+    }
 
-                Text("Radio connected: ${isConnected.value}")
-
-                nodes.value.values.forEach {
-                    Text("Node: $it")
-                }
-
-                messages.value.forEach {
-                    Text("Text: $it")
-                }
-
-                Button(text = "Start scan",
-                    onClick = {
-                        if (bluetoothAdapter != null) {
-                            // Note: We don't want this service to die just because our activity goes away (because it is doing a software update)
-                            // So we use the application context instead of the activity
-                            SoftwareUpdateService.enqueueWork(
-                                applicationContext,
-                                SoftwareUpdateService.startUpdateIntent
-                            )
-                        }
-                    })
-
-                Button(text = "send packets",
-                    onClick = { sendTestPackets() })
+    @Composable
+    fun VectorImageButton(@DrawableRes id: Int, onClick: () -> Unit) {
+        Ripple(bounded = false) {
+            Clickable(onClick = onClick) {
+                VectorImage(id = id)
             }
         }
     }
+
+    @Composable
+    fun VectorImage(
+        modifier: Modifier = Modifier.None, @DrawableRes id: Int,
+        tint: Color = Color.Transparent
+    ) {
+        val vector = vectorResource(id)
+        WithDensity {
+            Container(
+                modifier = modifier + LayoutSize(
+                    vector.defaultWidth,
+                    vector.defaultHeight
+                )
+            ) {
+                DrawVector(vector, tint)
+            }
+        }
+    }
+
+    @Composable
+    fun HomeScreen(openDrawer: () -> Unit) {
+        Column {
+            TopAppBar(
+                title = { Text(text = "Meshtastic") },
+                navigationIcon = {
+                    VectorImageButton(R.drawable.ic_launcher_foreground) {
+                        openDrawer()
+                    }
+                }
+            )
+            VerticalScroller(modifier = LayoutFlexible(1f)) {
+                Column {
+                    Text(text = "Meshtastic")
+
+                    Text("Radio connected: ${isConnected.value}")
+
+                    nodes.value.values.forEach {
+                        composeNodeInfo(it)
+                    }
+
+                    messages.value.forEach {
+                        Text("Text: ${it.text}")
+                    }
+
+                    Button(text = "Start scan",
+                        onClick = {
+                            if (bluetoothAdapter != null) {
+                                // Note: We don't want this service to die just because our activity goes away (because it is doing a software update)
+                                // So we use the application context instead of the activity
+                                SoftwareUpdateService.enqueueWork(
+                                    applicationContext,
+                                    SoftwareUpdateService.startUpdateIntent
+                                )
+                            }
+                        })
+
+                    Button(text = "send packets",
+                        onClick = { sendTestPackets() })
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun composeView() {
+        val (drawerState, onDrawerStateChange) = state { DrawerState.Closed }
+
+        MaterialTheme {
+            ModalDrawerLayout(
+                drawerState = drawerState,
+                onStateChange = onDrawerStateChange,
+                gesturesEnabled = drawerState == DrawerState.Opened,
+                drawerContent = {
+
+                    AppDrawer(
+                        currentScreen = AppStatus.currentScreen,
+                        closeDrawer = { onDrawerStateChange(DrawerState.Closed) }
+                    )
+
+                    /*
+                    // modifier = Spacing(8.dp)
+                    Column() {
+
+
+                     */
+                }, bodyContent = { AppContent { onDrawerStateChange(DrawerState.Opened) } })
+        }
+    }
+
+    @Composable
+    private fun AppContent(openDrawer: () -> Unit) {
+        Crossfade(AppStatus.currentScreen) { screen ->
+            Surface(color = (MaterialTheme.colors()).background) {
+                when (screen) {
+                    is Screen.Home -> HomeScreen { openDrawer() }
+                    /* is Screen.Interests -> InterestsScreen { openDrawer() }
+                    is Screen.Article -> ArticleScreen(postId = screen.postId) */
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun AppDrawer(
+        currentScreen: Screen,
+        closeDrawer: () -> Unit
+    ) {
+        Column(modifier = LayoutSize.Fill) {
+            Spacer(LayoutHeight(24.dp))
+            Row(modifier = LayoutPadding(16.dp)) {
+                VectorImage(
+                    id = R.drawable.ic_launcher_foreground,
+                    tint = (MaterialTheme.colors()).primary
+                )
+                Spacer(LayoutWidth(8.dp))
+                VectorImage(id = R.drawable.ic_launcher_foreground)
+            }
+            Divider(color = Color(0x14333333))
+            DrawerButton(
+                icon = R.drawable.ic_launcher_foreground,
+                label = "Home",
+                isSelected = currentScreen == Screen.Home
+            ) {
+                navigateTo(Screen.Home)
+                closeDrawer()
+            }
+
+            /*
+            DrawerButton(
+                icon = R.drawable.ic_interests,
+                label = "Interests",
+                isSelected = currentScreen == Screen.Interests
+            ) {
+                navigateTo(Screen.Interests)
+                closeDrawer()
+            }
+             */
+        }
+    }
+
+    @Composable
+    private fun DrawerButton(
+        modifier: Modifier = Modifier.None,
+        @DrawableRes icon: Int,
+        label: String,
+        isSelected: Boolean,
+        action: () -> Unit
+    ) {
+        val colors = MaterialTheme.colors()
+        val textIconColor = if (isSelected) {
+            colors.primary
+        } else {
+            colors.onSurface.copy(alpha = 0.6f)
+        }
+        val backgroundColor = if (isSelected) {
+            colors.primary.copy(alpha = 0.12f)
+        } else {
+            colors.surface
+        }
+
+        Surface(
+            modifier = modifier + LayoutPadding(
+                left = 8.dp,
+                top = 8.dp,
+                right = 8.dp,
+                bottom = 0.dp
+            ),
+            color = backgroundColor,
+            shape = RoundedCornerShape(4.dp)
+        ) {
+            Button(onClick = action, style = TextButtonStyle()) {
+                Row {
+                    VectorImage(
+                        modifier = LayoutGravity.Center,
+                        id = icon,
+                        tint = textIconColor
+                    )
+                    Spacer(LayoutWidth(16.dp))
+                    Text(
+                        text = label,
+                        style = (MaterialTheme.typography()).body2.copy(
+                            color = textIconColor
+                        )
+                    )
+                }
+            }
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -42,8 +42,17 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    composeOptions {
+        kotlinCompilerVersion "1.3.61-dev-withExperimentalGoogleExtensions-20200129"
+        kotlinCompilerExtensionVersion "0.1.0-dev04"
+    }
 }
 
+
+androidExtensions {
+    experimental = true
+}
 
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
@@ -81,11 +90,11 @@ dependencies {
 
     // You also need to include the following Compose toolkit dependencies.
     implementation("androidx.compose:compose-runtime:$compose_version")
-    implementation("androidx.ui:ui-framework:$compose_version")
+    implementation("androidx.ui:ui-graphics:$compose_version")
     implementation("androidx.ui:ui-layout:$compose_version")
     implementation("androidx.ui:ui-material:$compose_version")
-    implementation("androidx.ui:ui-foundation:$compose_version")
-    implementation("androidx.ui:ui-animation:$compose_version")
+    implementation("androidx.ui:ui-unit:$compose_version")
+    implementation("androidx.ui:ui-util:$compose_version")
     implementation "androidx.ui:ui-tooling:$compose_version"
     androidTestImplementation("androidx.ui:ui-platform:$compose_version")
     androidTestImplementation("androidx.ui:ui-test:$compose_version")

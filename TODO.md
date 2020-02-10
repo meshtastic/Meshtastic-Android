@@ -2,6 +2,7 @@
 
 * show nodeinfo list on gui - one card per node
 * when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname
+* parcels are busted
 * all chat in the app defaults to group chat
 * show connection state on gui
 * make my android app show mesh state
