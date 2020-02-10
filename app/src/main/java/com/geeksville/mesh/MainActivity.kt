@@ -17,6 +17,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.ui.core.setContent
 import com.geeksville.android.Logging
+import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.MeshApp
 import com.geeksville.mesh.ui.TextMessage
 import com.geeksville.mesh.ui.UIState
@@ -175,7 +176,7 @@ class MainActivity : AppCompatActivity(), Logging {
                         else -> TODO()
                     }
                 }
-                RadioInterfaceService.CONNECTCHANGED_ACTION -> {
+                MeshService.ACTION_MESH_CONNECTED -> {
                     UIState.isConnected.value = intent.getBooleanExtra(EXTRA_CONNECTED, false)
                     debug("connchange ${UIState.isConnected.value}")
                 }
@@ -200,7 +201,12 @@ class MainActivity : AppCompatActivity(), Logging {
 
             // make some placeholder nodeinfos
             UIState.nodes.value =
-                m.online.toList().map { it to NodeInfo(0, MeshUser(it, "unknown", "unk")) }.toMap()
+                m.online.toList().map {
+                    it to NodeInfo(
+                        0,
+                        MeshUser(it, "unknown", "unk")
+                    )
+                }.toMap()
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
@@ -218,7 +224,7 @@ class MainActivity : AppCompatActivity(), Logging {
         //val intent = Intent(this, MeshService::class.java)
         //intent.action = IMeshService::class.java.name
         val intent = Intent()
-        intent.setClassName("com.geeksville.mesh", "com.geeksville.mesh.MeshService")
+        intent.setClassName("com.geeksville.mesh", "com.geeksville.mesh.service.MeshService")
 
         // Before binding we want to explicitly create - so the service stays alive forever (so it can keep
         // listening for the bluetooth packets arriving from the radio.  And when they arrive forward them

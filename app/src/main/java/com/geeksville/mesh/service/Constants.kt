@@ -1,4 +1,4 @@
-package com.geeksville.mesh
+package com.geeksville.mesh.service
 
 const val prefix = "com.geeksville.mesh"
 

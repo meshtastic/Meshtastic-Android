@@ -1,4 +1,4 @@
-package com.geeksville.mesh
+package com.geeksville.mesh.service
 
 import android.content.BroadcastReceiver
 import android.content.Context

@@ -1,4 +1,4 @@
-package com.geeksville.mesh
+package com.geeksville.mesh.service
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -13,6 +13,7 @@ import android.content.Intent
 import android.os.ParcelUuid
 import androidx.core.app.JobIntentService
 import com.geeksville.android.Logging
+import com.geeksville.mesh.MainActivity
 import java.util.*
 import java.util.zip.CRC32
 
@@ -40,7 +41,11 @@ class SoftwareUpdateService : JobIntentService(), Logging {
     fun startUpdate() {
         info("starting update")
 
-        val sync = SafeBluetooth(this@SoftwareUpdateService, device)
+        val sync =
+            SafeBluetooth(
+                this@SoftwareUpdateService,
+                device
+            )
 
         val firmwareStream = assets.open("firmware.bin")
         val firmwareCrc = CRC32()
@@ -216,7 +221,8 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         fun enqueueWork(context: Context, work: Intent) {
             enqueueWork(
                 context,
-                SoftwareUpdateService::class.java, JOB_ID, work
+                SoftwareUpdateService::class.java,
+                JOB_ID, work
             )
         }
     }

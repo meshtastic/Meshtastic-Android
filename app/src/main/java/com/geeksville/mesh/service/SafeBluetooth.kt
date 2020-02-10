@@ -1,4 +1,4 @@
-package com.geeksville.mesh
+package com.geeksville.mesh.service
 
 import android.bluetooth.*
 import android.content.BroadcastReceiver
@@ -244,7 +244,12 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     }
 
     private fun <T> queueWork(tag: String, cont: Continuation<T>, initFn: () -> Boolean) {
-        val btCont = BluetoothContinuation(tag, cont, initFn)
+        val btCont =
+            BluetoothContinuation(
+                tag,
+                cont,
+                initFn
+            )
 
         synchronized(workQueue) {
             debug("Enqueuing work: ${btCont.tag}")
@@ -341,7 +346,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private fun queueReadCharacteristic(
         c: BluetoothGattCharacteristic,
         cont: Continuation<BluetoothGattCharacteristic>
-    ) = queueWork("readc", cont) { gatt!!.readCharacteristic(c) }
+    ) = queueWork("readC ${c.uuid}", cont) { gatt!!.readCharacteristic(c) }
 
     fun asyncReadCharacteristic(
         c: BluetoothGattCharacteristic,
@@ -383,7 +388,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private fun queueWriteCharacteristic(
         c: BluetoothGattCharacteristic,
         cont: Continuation<BluetoothGattCharacteristic>
-    ) = queueWork("writeC", cont) { gatt!!.writeCharacteristic(c) }
+    ) = queueWork("writeC ${c.uuid}", cont) { gatt!!.writeCharacteristic(c) }
 
     fun asyncWriteCharacteristic(
         c: BluetoothGattCharacteristic,

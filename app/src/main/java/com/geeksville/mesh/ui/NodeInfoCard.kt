@@ -9,8 +9,8 @@ import androidx.ui.material.MaterialTheme
 import androidx.ui.material.ProvideEmphasis
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
-import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
+import com.geeksville.mesh.service.NodeInfo
 
 
 @Composable

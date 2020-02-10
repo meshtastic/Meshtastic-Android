@@ -1,4 +1,4 @@
-package com.geeksville.mesh
+package com.geeksville.mesh.service
 
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
@@ -10,6 +10,7 @@ import android.os.IBinder
 import com.geeksville.android.BinaryLogFile
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.DeferredExecution
+import com.geeksville.mesh.IRadioInterfaceService
 import com.geeksville.util.toRemoteExceptions
 import java.util.*
 
@@ -91,9 +92,9 @@ class RadioInterfaceService : Service(), Logging {
         const val RECEIVE_FROMRADIO_ACTION = "$prefix.RECEIVE_FROMRADIO"
 
         /**
-         * This is broadcast when connection state changed (it is also rebroadcast by the MeshService)
+         * This is broadcast when connection state changed
          */
-        const val CONNECTCHANGED_ACTION = "$prefix.CONNECT_CHANGED"
+        const val RADIO_CONNECTED_ACTION = "$prefix.CONNECT_CHANGED"
 
         private val BTM_SERVICE_UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
         private val BTM_FROMRADIO_CHARACTER =
@@ -150,7 +151,7 @@ class RadioInterfaceService : Service(), Logging {
 
     private fun broadcastConnectionChanged(isConnected: Boolean) {
         debug("Broadcasting connection=$isConnected")
-        val intent = Intent(CONNECTCHANGED_ACTION)
+        val intent = Intent(RADIO_CONNECTED_ACTION)
         intent.putExtra(EXTRA_CONNECTED, isConnected)
         sendBroadcast(intent)
     }
@@ -171,7 +172,10 @@ class RadioInterfaceService : Service(), Logging {
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
     private fun handleFromRadio(p: ByteArray) {
-        broadcastReceivedFromRadio(this, p)
+        broadcastReceivedFromRadio(
+            this,
+            p
+        )
     }
 
     /// Attempt to read from the fromRadio mailbox, if data is found broadcast it to android apps

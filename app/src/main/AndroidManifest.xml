@@ -53,14 +53,14 @@
 
         <!-- we need bind job service for oreo -->
         <service
-            android:name="com.geeksville.mesh.SoftwareUpdateService"
+            android:name="com.geeksville.mesh.service.SoftwareUpdateService"
             android:enabled="true"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE"></service>
 
         <!-- This is the public API for doing mesh radio operations from android apps -->
         <service
-            android:name="com.geeksville.mesh.MeshService"
+            android:name="com.geeksville.mesh.service.MeshService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -70,7 +70,7 @@
 
         <!-- This is a private service which just does direct communication to the radio -->
         <service
-            android:name="com.geeksville.mesh.RadioInterfaceService"
+            android:name="com.geeksville.mesh.service.RadioInterfaceService"
             android:enabled="true"
             android:exported="false" />
 
@@ -85,7 +85,7 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name="com.geeksville.mesh.BootCompleteReceiver">
+        <receiver android:name="com.geeksville.mesh.service.BootCompleteReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
