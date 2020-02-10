@@ -1,13 +1,26 @@
 # High priority
+MVP features required for first public alpha 
 
 * show nodeinfo list on gui - one card per node
 * when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname
-* parcels are busted
+* parcels are busted - something wrong with the Parcelize kotlin magic
 * all chat in the app defaults to group chat
-* show connection state on gui
 * make my android app show mesh state
-* when notified phone should download messages
+* when notified phone should automatically download messages
 * at connect we might receive messages before finished downloading the nodeinfo.  In that case, process those messages later
+* use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
+* connect to bluetooth device automatically using minimum power - start looking at phone boot
+* fix BT device scanning
+* call crashlytics from exceptionReporter!!!  currently not logging failures caught there
+* show direction and distance on the nodeinfo cards
+* test with oldest compatible android in emulator (see below for testing with hardware)
+
+# Signal alpha release
+Do this "Signal app compatible" release relatively soon after the alpha release of the android app.
+
+* add large packet reassembly?
+* optionally turn off crypto in signal - preferably though see if there is a nice way to be a peer of signal/sms and now mesh.
+* change signal package ID - if distributing modified binary
 * investigate the Signal SMS message flow path, see if I could just make Mesh a third peer to signal & sms?
 * make signal work when there is no internet up
 * make Signal rx path work
@@ -15,21 +28,13 @@
   public static final int PREKEY_TYPE                 = 3;
   public static final int SENDERKEY_TYPE              = 4;
   public static final int SENDERKEY_DISTRIBUTION_TYPE = 5;"
-* don't do mesh based algoritm for node id assignment (initially) - instead just store in flash - possibly even in the initial alpha release do this hack
-* add large packet reassembly?
-* optionally turn off crypto in signal - preferably though see if there is a nice way to be a peer of signal/sms and now mesh.
-* change signal package ID - if distributing modified binary
-* good tips on which bands might be more free https://github.com/TheThingsNetwork/ttn/issues/119
-* use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
-* connect to bluetooth device automatically using minimum power, start looking at phone boot
-* fix BT device scanning
-* call crashlytics from exceptionReporter!!!  currently not logging failures caught there
-* if nessary restart entire BT adapter with this tip from Michael https://stackoverflow.com/questions/35103701/ble-android-onconnectionstatechange-not-being-called
-* show direction and distance on the nodeinfo cards
-* test with oldest android
-
+  
 # Medium priority
+Things for the betaish period.
 
+* let user change radio params and share radio join info via QR code or text message (use an encoded app specific URL - to autoprompt for app installation as needed)
+* test with an oldish android release using real hardware
+* if necessary restart entire BT adapter with this tip from Michael https://stackoverflow.com/questions/35103701/ble-android-onconnectionstatechange-not-being-called
 * stop using a foreground service
 * change info() log strings to debug()
 * use platform theme (dark or light)
@@ -76,3 +81,5 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * switch from protobuf-java to protobuf-javalite - much faster and smaller, just no JSON debug printing
 * have phone use our local node number as its node number (instead of hardwired)
 * if radio disconnects, we need to requeue a new connect attempt in RadioService
+* don't do mesh based algoritm for node id assignment (initially) - instead just store in flash - possibly even in the initial alpha release do this hack
+* show connection state on gui
