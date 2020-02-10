@@ -148,11 +148,6 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    @Preview
-    @Composable
-    fun previewView() {
-        composeView()
-    }
 
     private fun sendTestPackets() {
         exceptionReporter {
@@ -207,6 +202,38 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     @Composable
+    fun HomeContent() {
+        Column {
+            Text(text = "Meshtastic")
+
+            Text("Radio connected: ${isConnected.value}")
+
+            nodes.value.values.forEach {
+                composeNodeInfo(it)
+            }
+
+            messages.value.forEach {
+                Text("Text: ${it.text}")
+            }
+
+            Button(text = "Start scan",
+                onClick = {
+                    if (bluetoothAdapter != null) {
+                        // Note: We don't want this service to die just because our activity goes away (because it is doing a software update)
+                        // So we use the application context instead of the activity
+                        SoftwareUpdateService.enqueueWork(
+                            applicationContext,
+                            SoftwareUpdateService.startUpdateIntent
+                        )
+                    }
+                })
+
+            Button(text = "send packets",
+                onClick = { sendTestPackets() })
+        }
+    }
+
+    @Composable
     fun HomeScreen(openDrawer: () -> Unit) {
         Column {
             TopAppBar(
@@ -218,34 +245,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 }
             )
             VerticalScroller(modifier = LayoutFlexible(1f)) {
-                Column {
-                    Text(text = "Meshtastic")
-
-                    Text("Radio connected: ${isConnected.value}")
-
-                    nodes.value.values.forEach {
-                        composeNodeInfo(it)
-                    }
-
-                    messages.value.forEach {
-                        Text("Text: ${it.text}")
-                    }
-
-                    Button(text = "Start scan",
-                        onClick = {
-                            if (bluetoothAdapter != null) {
-                                // Note: We don't want this service to die just because our activity goes away (because it is doing a software update)
-                                // So we use the application context instead of the activity
-                                SoftwareUpdateService.enqueueWork(
-                                    applicationContext,
-                                    SoftwareUpdateService.startUpdateIntent
-                                )
-                            }
-                        })
-
-                    Button(text = "send packets",
-                        onClick = { sendTestPackets() })
-                }
+                HomeContent()
             }
         }
     }
@@ -274,6 +274,13 @@ class MainActivity : AppCompatActivity(), Logging {
                      */
                 }, bodyContent = { AppContent { onDrawerStateChange(DrawerState.Opened) } })
         }
+    }
+
+    @Preview
+    @Composable
+    fun previewView() {
+        // It seems modaldrawerlayout not yet supported in preview
+        HomeContent()
     }
 
     @Composable
