@@ -12,54 +12,18 @@ import android.os.IBinder
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
-import androidx.annotation.DrawableRes
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.Composable
-import androidx.compose.Model
-import androidx.compose.mutableStateOf
-import androidx.compose.state
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.ui.animation.Crossfade
-import androidx.ui.core.Modifier
-import androidx.ui.core.Text
-import androidx.ui.core.WithDensity
 import androidx.ui.core.setContent
-import androidx.ui.foundation.Clickable
-import androidx.ui.foundation.VerticalScroller
-import androidx.ui.foundation.shape.corner.RoundedCornerShape
-import androidx.ui.graphics.Color
-import androidx.ui.graphics.vector.DrawVector
-import androidx.ui.layout.*
-import androidx.ui.material.*
-import androidx.ui.material.ripple.Ripple
-import androidx.ui.material.surface.Surface
-import androidx.ui.res.vectorResource
-import androidx.ui.tooling.preview.Preview
-import androidx.ui.unit.dp
 import com.geeksville.android.Logging
+import com.geeksville.mesh.ui.MeshApp
+import com.geeksville.mesh.ui.TextMessage
+import com.geeksville.mesh.ui.UIState
 import com.geeksville.util.exceptionReporter
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import java.nio.charset.Charset
 import java.util.*
-
-// defines the screens we have in the app
-sealed class Screen {
-    object Home : Screen()
-    object Settings : Screen()
-}
-
-@Model
-object AppStatus {
-    var currentScreen: Screen = Screen.Home
-}
-
-/**
- * Temporary solution pending navigation support.
- */
-fun navigateTo(destination: Screen) {
-    AppStatus.currentScreen = destination
-}
 
 
 class MainActivity : AppCompatActivity(), Logging {
@@ -67,37 +31,8 @@ class MainActivity : AppCompatActivity(), Logging {
     companion object {
         const val REQUEST_ENABLE_BT = 10
         const val DID_REQUEST_PERM = 11
-
-        private val testPositions = arrayOf(
-            Position(32.776665, -96.796989, 35), // dallas
-            Position(32.960758, -96.733521, 35), // richardson
-            Position(32.912901, -96.781776, 35) // north dallas
-        )
-
-        private val testNodes = testPositions.mapIndexed { index, it ->
-            NodeInfo(
-                9 + index,
-                MeshUser("+65087653%02d".format(9 + index), "Kevin Mester$index", "KM$index"),
-                it,
-                12345
-            )
-        }
-
-        data class TextMessage(val date: Date, val from: String, val text: String)
-
-        private val testTexts = listOf(
-            TextMessage(Date(), "+6508675310", "I found the cache"),
-            TextMessage(Date(), "+6508675311", "Help! I've fallen and I can't get up.")
-        )
     }
 
-    /// A map from nodeid to to nodeinfo
-    private val nodes = mutableStateOf(testNodes.map { it.user!!.id to it }.toMap())
-
-    private val messages = mutableStateOf(testTexts)
-
-    /// Are we connected to our radio device
-    private var isConnected = mutableStateOf(false)
 
     private val utf8 = Charset.forName("UTF-8")
 
@@ -169,220 +104,6 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    @Composable
-    fun composeNodeInfo(it: NodeInfo) {
-        Text("Node: ${it.user?.longName}")
-    }
-
-    @Composable
-    fun VectorImageButton(@DrawableRes id: Int, onClick: () -> Unit) {
-        Ripple(bounded = false) {
-            Clickable(onClick = onClick) {
-                VectorImage(id = id)
-            }
-        }
-    }
-
-    @Composable
-    fun VectorImage(
-        modifier: Modifier = Modifier.None, @DrawableRes id: Int,
-        tint: Color = Color.Transparent
-    ) {
-        val vector = vectorResource(id)
-        WithDensity {
-            Container(
-                modifier = modifier + LayoutSize(
-                    vector.defaultWidth,
-                    vector.defaultHeight
-                )
-            ) {
-                DrawVector(vector, tint)
-            }
-        }
-    }
-
-    @Composable
-    fun HomeContent() {
-        Column {
-            Text(text = "Meshtastic")
-
-            Text("Radio connected: ${isConnected.value}")
-
-            nodes.value.values.forEach {
-                composeNodeInfo(it)
-            }
-
-            messages.value.forEach {
-                Text("Text: ${it.text}")
-            }
-
-            Button(text = "Start scan",
-                onClick = {
-                    if (bluetoothAdapter != null) {
-                        // Note: We don't want this service to die just because our activity goes away (because it is doing a software update)
-                        // So we use the application context instead of the activity
-                        SoftwareUpdateService.enqueueWork(
-                            applicationContext,
-                            SoftwareUpdateService.startUpdateIntent
-                        )
-                    }
-                })
-
-            Button(text = "send packets",
-                onClick = { sendTestPackets() })
-        }
-    }
-
-    @Composable
-    fun HomeScreen(openDrawer: () -> Unit) {
-        Column {
-            TopAppBar(
-                title = { Text(text = "Meshtastic") },
-                navigationIcon = {
-                    VectorImageButton(R.drawable.ic_launcher_foreground) {
-                        openDrawer()
-                    }
-                }
-            )
-            VerticalScroller(modifier = LayoutFlexible(1f)) {
-                HomeContent()
-            }
-        }
-    }
-
-    @Composable
-    fun composeView() {
-        val (drawerState, onDrawerStateChange) = state { DrawerState.Closed }
-
-        MaterialTheme {
-            ModalDrawerLayout(
-                drawerState = drawerState,
-                onStateChange = onDrawerStateChange,
-                gesturesEnabled = drawerState == DrawerState.Opened,
-                drawerContent = {
-
-                    AppDrawer(
-                        currentScreen = AppStatus.currentScreen,
-                        closeDrawer = { onDrawerStateChange(DrawerState.Closed) }
-                    )
-
-                    /*
-                    // modifier = Spacing(8.dp)
-                    Column() {
-
-
-                     */
-                }, bodyContent = { AppContent { onDrawerStateChange(DrawerState.Opened) } })
-        }
-    }
-
-    @Preview
-    @Composable
-    fun previewView() {
-        // It seems modaldrawerlayout not yet supported in preview
-        HomeContent()
-    }
-
-    @Composable
-    private fun AppContent(openDrawer: () -> Unit) {
-        Crossfade(AppStatus.currentScreen) { screen ->
-            Surface(color = (MaterialTheme.colors()).background) {
-                when (screen) {
-                    is Screen.Home -> HomeScreen { openDrawer() }
-                    /* is Screen.Interests -> InterestsScreen { openDrawer() }
-                    is Screen.Article -> ArticleScreen(postId = screen.postId) */
-                }
-            }
-        }
-    }
-
-    @Composable
-    private fun AppDrawer(
-        currentScreen: Screen,
-        closeDrawer: () -> Unit
-    ) {
-        Column(modifier = LayoutSize.Fill) {
-            Spacer(LayoutHeight(24.dp))
-            Row(modifier = LayoutPadding(16.dp)) {
-                VectorImage(
-                    id = R.drawable.ic_launcher_foreground,
-                    tint = (MaterialTheme.colors()).primary
-                )
-                Spacer(LayoutWidth(8.dp))
-                VectorImage(id = R.drawable.ic_launcher_foreground)
-            }
-            Divider(color = Color(0x14333333))
-            DrawerButton(
-                icon = R.drawable.ic_launcher_foreground,
-                label = "Home",
-                isSelected = currentScreen == Screen.Home
-            ) {
-                navigateTo(Screen.Home)
-                closeDrawer()
-            }
-
-            /*
-            DrawerButton(
-                icon = R.drawable.ic_interests,
-                label = "Interests",
-                isSelected = currentScreen == Screen.Interests
-            ) {
-                navigateTo(Screen.Interests)
-                closeDrawer()
-            }
-             */
-        }
-    }
-
-    @Composable
-    private fun DrawerButton(
-        modifier: Modifier = Modifier.None,
-        @DrawableRes icon: Int,
-        label: String,
-        isSelected: Boolean,
-        action: () -> Unit
-    ) {
-        val colors = MaterialTheme.colors()
-        val textIconColor = if (isSelected) {
-            colors.primary
-        } else {
-            colors.onSurface.copy(alpha = 0.6f)
-        }
-        val backgroundColor = if (isSelected) {
-            colors.primary.copy(alpha = 0.12f)
-        } else {
-            colors.surface
-        }
-
-        Surface(
-            modifier = modifier + LayoutPadding(
-                left = 8.dp,
-                top = 8.dp,
-                right = 8.dp,
-                bottom = 0.dp
-            ),
-            color = backgroundColor,
-            shape = RoundedCornerShape(4.dp)
-        ) {
-            Button(onClick = action, style = TextButtonStyle()) {
-                Row {
-                    VectorImage(
-                        modifier = LayoutGravity.Center,
-                        id = icon,
-                        tint = textIconColor
-                    )
-                    Spacer(LayoutWidth(16.dp))
-                    Text(
-                        text = label,
-                        style = (MaterialTheme.typography()).body2.copy(
-                            color = textIconColor
-                        )
-                    )
-                }
-            }
-        }
-    }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -393,7 +114,7 @@ class MainActivity : AppCompatActivity(), Logging {
             FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
 
         setContent {
-            composeView()
+            MeshApp()
         }
 
         // Ensures Bluetooth is available on the device and it is enabled. If not,
@@ -432,9 +153,9 @@ class MainActivity : AppCompatActivity(), Logging {
 
                     // We only care about nodes that have user info
                     info.user?.id?.let {
-                        val newnodes = nodes.value.toMutableMap()
+                        val newnodes = UIState.nodes.value.toMutableMap()
                         newnodes[it] = info
-                        nodes.value = newnodes
+                        UIState.nodes.value = newnodes
                     }
                 }
 
@@ -447,16 +168,16 @@ class MainActivity : AppCompatActivity(), Logging {
                     when (typ) {
                         MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
                             // FIXME - use the real time from the packet
-                            val modded = messages.value.toMutableList()
+                            val modded = UIState.messages.value.toMutableList()
                             modded.add(TextMessage(Date(), sender, payload.toString(utf8)))
-                            messages.value = modded
+                            UIState.messages.value = modded
                         }
                         else -> TODO()
                     }
                 }
                 RadioInterfaceService.CONNECTCHANGED_ACTION -> {
-                    isConnected.value = intent.getBooleanExtra(EXTRA_CONNECTED, false)
-                    debug("connchange $isConnected")
+                    UIState.isConnected.value = intent.getBooleanExtra(EXTRA_CONNECTED, false)
+                    debug("connchange ${UIState.isConnected.value}")
                 }
                 else -> TODO()
             }
@@ -475,10 +196,10 @@ class MainActivity : AppCompatActivity(), Logging {
             // FIXME - do actions for when we connect to the service
             debug("did connect")
 
-            isConnected.value = m.isConnected
+            UIState.isConnected.value = m.isConnected
 
             // make some placeholder nodeinfos
-            nodes.value =
+            UIState.nodes.value =
                 m.online.toList().map { it to NodeInfo(0, MeshUser(it, "unknown", "unk")) }.toMap()
         }
 

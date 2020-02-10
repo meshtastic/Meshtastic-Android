@@ -6,6 +6,7 @@ MVP features required for first public alpha
 * parcels are busted - something wrong with the Parcelize kotlin magic
 * all chat in the app defaults to group chat
 * make my android app show mesh state
+* add app icon
 * when notified phone should automatically download messages
 * at connect we might receive messages before finished downloading the nodeinfo.  In that case, process those messages later
 * use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
@@ -14,6 +15,7 @@ MVP features required for first public alpha
 * call crashlytics from exceptionReporter!!!  currently not logging failures caught there
 * show direction and distance on the nodeinfo cards
 * test with oldest compatible android in emulator (see below for testing with hardware)
+* make playstore entry
 
 # Signal alpha release
 Do this "Signal app compatible" release relatively soon after the alpha release of the android app.
