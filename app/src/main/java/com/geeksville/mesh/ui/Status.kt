@@ -29,6 +29,13 @@ object UIState {
         Position(32.912901, -96.781776, 35) // north dallas
     )
 
+    val testNodeNoPosition = NodeInfo(
+        8,
+        MeshUser("+6508765308".format(8), "Kevin MesterNoLoc", "KLO"),
+        null,
+        12345
+    )
+
     val testNodes = testPositions.mapIndexed { index, it ->
         NodeInfo(
             9 + index,

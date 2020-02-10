@@ -63,7 +63,7 @@ fun HomeScreen(openDrawer: () -> Unit) {
         TopAppBar(
             title = { Text(text = "Meshtastic") },
             navigationIcon = {
-                VectorImageButton(R.drawable.ic_launcher_foreground) {
+                VectorImageButton(R.drawable.ic_launcher_new_foreground) {
                     openDrawer()
                 }
             }
@@ -129,15 +129,15 @@ private fun AppDrawer(
         Spacer(LayoutHeight(24.dp))
         Row(modifier = LayoutPadding(16.dp)) {
             VectorImage(
-                id = R.drawable.ic_launcher_foreground,
+                id = R.drawable.ic_launcher_new_foreground,
                 tint = (MaterialTheme.colors()).primary
             )
             Spacer(LayoutWidth(8.dp))
-            VectorImage(id = R.drawable.ic_launcher_foreground)
+            VectorImage(id = R.drawable.ic_launcher_new_foreground)
         }
         Divider(color = Color(0x14333333))
         DrawerButton(
-            icon = R.drawable.ic_launcher_foreground,
+            icon = R.drawable.ic_launcher_new_foreground,
             label = "Home",
             isSelected = currentScreen == Screen.Home
         ) {

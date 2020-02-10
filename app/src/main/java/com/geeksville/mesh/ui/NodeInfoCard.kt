@@ -31,10 +31,14 @@ fun NodeIcon(modifier: Modifier = Modifier.None, node: NodeInfo) {
 @Composable
 fun CompassHeading(modifier: Modifier = Modifier.None, node: NodeInfo) {
     Column {
-        Container(modifier = modifier + LayoutSize(40.dp, 40.dp)) {
-            VectorImage(id = R.drawable.navigation)
+        if (node.position != null) {
+            Container(modifier = modifier + LayoutSize(40.dp, 40.dp)) {
+                VectorImage(id = R.drawable.navigation)
+            }
+            Text("2.3 km")
+        } else Container(modifier = modifier + LayoutSize(40.dp, 40.dp)) {
+            VectorImage(id = R.drawable.help)
         }
-        Text("2.3 km")
     }
 }
 
@@ -74,5 +78,8 @@ fun NodeInfoCard(node: NodeInfo) {
 @Preview
 @Composable
 fun nodeInfoPreview() {
-    NodeInfoCard(UIState.testNodes[0])
+    Column {
+        NodeInfoCard(UIState.testNodes[0])
+        NodeInfoCard(UIState.testNodeNoPosition)
+    }
 }
