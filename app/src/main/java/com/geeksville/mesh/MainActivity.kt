@@ -193,11 +193,9 @@ class MainActivity : AppCompatActivity(), Logging {
             val m = IMeshService.Stub.asInterface(service)
             meshService = m
 
-            // FIXME - do actions for when we connect to the service
-            // FIXME - do actions for when we connect to the service
-            debug("did connect")
-
             UIState.isConnected.value = m.isConnected
+
+            debug("connected to mesh service, isConnected=${UIState.isConnected.value}")
 
             // make some placeholder nodeinfos
             UIState.nodes.value =
