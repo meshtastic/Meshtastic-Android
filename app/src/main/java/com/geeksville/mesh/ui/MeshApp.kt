@@ -22,7 +22,14 @@ fun HomeContent() {
     Column {
         Text(text = "Meshtastic")
 
-        Text("Radio connected: ${UIState.isConnected.value}")
+
+        Row {
+            Container(LayoutSize(40.dp, 40.dp)) {
+                VectorImage(id = if (UIState.isConnected.value) R.drawable.cloud_on else R.drawable.cloud_off)
+            }
+
+            Text(if (UIState.isConnected.value) "Connected" else "Not Connected")
+        }
 
         UIState.nodes.value.values.forEach {
             NodeInfoCard(it)
