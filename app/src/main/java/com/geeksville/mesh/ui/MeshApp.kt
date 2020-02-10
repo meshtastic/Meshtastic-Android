@@ -74,11 +74,12 @@ fun HomeScreen(openDrawer: () -> Unit) {
     }
 }
 
+
 @Composable
 fun MeshApp() {
     val (drawerState, onDrawerStateChange) = state { DrawerState.Closed }
 
-    MaterialTheme {
+    MaterialTheme(colors = darkColorPalette()) {
         ModalDrawerLayout(
             drawerState = drawerState,
             onStateChange = onDrawerStateChange,
@@ -90,12 +91,6 @@ fun MeshApp() {
                     closeDrawer = { onDrawerStateChange(DrawerState.Closed) }
                 )
 
-                /*
-                // modifier = Spacing(8.dp)
-                Column() {
-
-
-                 */
             }, bodyContent = { AppContent { onDrawerStateChange(DrawerState.Opened) } })
     }
 }
@@ -104,7 +99,9 @@ fun MeshApp() {
 @Composable
 fun previewView() {
     // It seems modaldrawerlayout not yet supported in preview
-    HomeContent()
+    MaterialTheme(colors = darkColorPalette()) {
+        HomeContent()
+    }
 }
 
 @Composable
