@@ -3,6 +3,8 @@ package com.geeksville.mesh;
 
 // Declare any non-default types here with import statements
 
+parcelable NodeInfo;
+
 /**
 * Note - these calls might throw RemoteException to indicate mesh error states
 */
@@ -28,7 +30,7 @@ interface IMeshService {
     /**
     Get the IDs of everyone on the mesh.  You should also subscribe for NODE_CHANGE broadcasts.
     */
-    String[] getOnline();
+    NodeInfo[] getNodes();
 
     /**
     Is the packet radio currently connected to the phone?

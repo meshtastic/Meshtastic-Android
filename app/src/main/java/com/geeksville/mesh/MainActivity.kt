@@ -151,8 +151,8 @@ class MainActivity : AppCompatActivity(), Logging {
 
             when (intent.action) {
                 MeshService.ACTION_NODE_CHANGE -> {
-                    warn("TODO nodechange")
                     val info: NodeInfo = intent.getParcelableExtra(EXTRA_NODEINFO)!!
+                    debug("UI nodechange $info")
 
                     // We only care about nodes that have user info
                     info.user?.id?.let {
@@ -163,7 +163,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 }
 
                 MeshService.ACTION_RECEIVED_DATA -> {
-                    warn("TODO rxdata")
+                    debug("TODO rxdata")
                     val sender = intent.getStringExtra(EXTRA_SENDER)!!
                     val payload = intent.getByteArrayExtra(EXTRA_PAYLOAD)!!
                     val typ = intent.getIntExtra(EXTRA_TYP, -1)
@@ -201,11 +201,8 @@ class MainActivity : AppCompatActivity(), Logging {
 
             // make some placeholder nodeinfos
             UIState.nodes.value =
-                m.online.toList().map {
-                    it to NodeInfo(
-                        0,
-                        MeshUser(it, "unknown", "unk")
-                    )
+                m.nodes.toList().map {
+                    it.user?.id!! to it
                 }.toMap()
         }
 

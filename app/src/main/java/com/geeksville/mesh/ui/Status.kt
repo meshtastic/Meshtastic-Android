@@ -2,9 +2,9 @@ package com.geeksville.mesh.ui
 
 import androidx.compose.Model
 import androidx.compose.mutableStateOf
-import com.geeksville.mesh.service.MeshUser
-import com.geeksville.mesh.service.NodeInfo
-import com.geeksville.mesh.service.Position
+import com.geeksville.mesh.MeshUser
+import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.Position
 import java.util.*
 
 // defines the screens we have in the app
