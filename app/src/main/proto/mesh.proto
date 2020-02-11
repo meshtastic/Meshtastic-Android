@@ -145,18 +145,13 @@ message MeshPacket {
     uint64 rx_time = 4;
 }
 
-// Full settings (center freq, spread factor, pre-shared secret key etc...) needed to configure a radio
-message RadioConfig {
+// Full settings (center freq, spread factor, pre-shared secret key etc...) needed to configure a radio for speaking on a particlar channel
+// This information can be encoded as a QRcode/url so that other users can configure their radio to join the same channel.
+message ChannelSettings {
+    int32 tx_power = 1;
 
-    // We should send our position this often (but only if it has changed significantly)
-    uint32 position_broadcast_msec = 1;
-
-    // If we haven't broadcasted anything in a while, we should send our position (and User?) at least this often.
-    uint32 min_broadcast_msec = 2;
-
-    int32 tx_power = 3;
-
-    float center_freq = 4;
+    // FIXME - change this to an integer for easier user comprehension and smaller bitsize
+    uint32 channel_num = 2;
 
     enum ModemConfig {
         // Note: these mappings must match ModemConfigChoice in the device code.
@@ -168,20 +163,36 @@ message RadioConfig {
 
     /// This value replaces bandwidth/spread_factor/coding_rate.  If you'd like to experiment with other options
     /// add them to MeshRadio.cpp in the device code.
-    ModemConfig modem_config = 5;
+    ModemConfig modem_config = 3;
     // uint32 bandwidth = 5;
     // int32 spread_factor = 6;
     // int32 coding_rate = 7;
 
-    /// A simple preshared key for now for crypto.  At first I'm using 256 bit (32 byte) block for the Speck crypto
-    /// but for beta we'll want something more carefully thought through.
-    bytes psk = 8;
+    /// A simple preshared key for now for crypto.  At first I'm using 128 bit (16 byte) block for the Speck crypto
+    /// but for beta we'll want something more carefully thought through.  I want to keep the QR code small
+    bytes psk = 4;
+}
 
-    // If true, radio should not try to be smart about what packets to queue to the phone
-    bool keep_all_packets = 100;
+// The entire set of user settable/readable settings for our radio device.  Includes both the current channel settings
+// and any preferences the user has set for behavior of their node
+message RadioConfig {
 
-    // If true, we will try to capture all the packets sent on the mesh, not just the ones destined to our node.
-    bool promiscuous_mode = 101;
+    message UserPreferences {
+        // We should send our position this often (but only if it has changed significantly)
+        uint32 position_broadcast_msec = 1;
+
+        // If we haven't broadcasted anything in a while, we should send our position (and User?) at least this often.
+        uint32 min_broadcast_msec = 2;
+
+        // If true, radio should not try to be smart about what packets to queue to the phone
+        bool keep_all_packets = 100;
+
+        // If true, we will try to capture all the packets sent on the mesh, not just the ones destined to our node.
+        bool promiscuous_mode = 101;
+    }
+
+    UserPreferences preferences = 1;
+    ChannelSettings channel_settings = 2;
 }
 
 /**
@@ -273,10 +284,10 @@ message DeviceState {
 
         /// We bump up the integer values in this enum to indicate minimum levels of encodings for saved files
         /// if your file is below the Minimum you should discard it.
-        Minimum = 4;
+        Minimum = 5;
 
         /// The current value we are using for saved files
-        Current = 4;
+        Current = 5;
     };
 
     Version version = 6;

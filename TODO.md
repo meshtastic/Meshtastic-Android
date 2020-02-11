@@ -2,6 +2,7 @@
 MVP features required for first public alpha 
 
 * do setOwner every time we connect to the radio, use our settings
+* include a background behind our cloud graphics, so redraws work properly
 * send location data for devices that don't have a GPS - https://developer.android.com/training/location/change-location-settings
 * make nodeinfo card not look like ass
 * when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname

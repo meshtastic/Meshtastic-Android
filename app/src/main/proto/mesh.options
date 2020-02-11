@@ -14,8 +14,8 @@
 # FIXME, max out based on total SubPacket size And do fragmentation and reassembly (for larger payloads) at the Android layer, not the esp32 layer.
 *Data.payload max_size:200
 
-# 256 bit psk key
-*RadioConfig.psk max_size:32
+# 128 bit psk key (we don't use 256 bit yet because we want to keep our QR code small)
+*ChannelSettings.psk max_size:16 fixed_length:true
 
 # MyMessage.name         max_size:40 
 # or fixed_length or fixed_count, or max_count
