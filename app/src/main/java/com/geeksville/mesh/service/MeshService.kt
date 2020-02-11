@@ -506,7 +506,7 @@ class MeshService : Service(), Logging {
 
         override fun setOwner(myId: String, longName: String, shortName: String) =
             toRemoteExceptions {
-                error("TODO setOwner $myId : $longName : $shortName")
+                debug("TetOwner $myId : $longName : $shortName")
 
                 val user = MeshProtos.User.newBuilder().also {
                     it.id = myId

@@ -1,6 +1,7 @@
 package com.geeksville.mesh
 
 import android.Manifest
+import android.accounts.AccountManager
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.*
@@ -9,6 +10,8 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Debug
 import android.os.IBinder
+import android.provider.ContactsContract
+import android.provider.ContactsContract.CommonDataKinds.Phone
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -27,7 +30,8 @@ import java.nio.charset.Charset
 import java.util.*
 
 
-class MainActivity : AppCompatActivity(), Logging {
+class MainActivity : AppCompatActivity(), Logging,
+    ActivityCompat.OnRequestPermissionsResultCallback {
 
     companion object {
         const val REQUEST_ENABLE_BT = 10
@@ -43,7 +47,7 @@ class MainActivity : AppCompatActivity(), Logging {
         bluetoothManager.adapter
     }
 
-    fun requestPermission() {
+    private fun requestPermission() {
         debug("Checking permissions")
 
         val perms = arrayOf(
@@ -52,7 +56,9 @@ class MainActivity : AppCompatActivity(), Logging {
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN,
             Manifest.permission.WAKE_LOCK,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_CONTACTS,
+            Manifest.permission.GET_ACCOUNTS
         )
 
         val missingPerms = perms.filter {
@@ -85,12 +91,54 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+
+    private fun setOwner() {
+        try {
+            if (false) {
+                val SELF_PROJECTION =
+                    arrayOf(Phone._ID, Phone.DISPLAY_NAME, Phone.PHOTO_THUMBNAIL_URI)
+
+                val cursor = contentResolver.query(
+                    ContactsContract.Profile.CONTENT_URI,
+                    SELF_PROJECTION,
+                    null,
+                    null,
+                    null
+                )
+
+                if (cursor == null || !cursor.moveToFirst())
+                    error("Can't get owner contact")
+                else {
+                    info("me: ${cursor.getString(1)}/${cursor.getString(2)}")
+                }
+            }
+            val am = AccountManager.get(this) // "this" references the current Context
+
+            val accounts = am.getAccountsByType("com.google")
+            accounts.forEach {
+                info("acct ${it.name} ${it.type}")
+
+            }
+        } catch (e: Throwable) {
+            error("getting owner failed: $e")
+        }
+
+        meshService!!.setOwner("+16508675309", "Kevin Xter", "kx")
+    }
+
     private fun sendTestPackets() {
         exceptionReporter {
             val m = meshService!!
 
             // Do some test operations
-            m.setOwner("+16508675309", "Kevin Xter", "kx")
             val testPayload = "hello world".toByteArray()
             m.sendData(
                 "+16508675310",
@@ -130,19 +178,41 @@ class MainActivity : AppCompatActivity(), Logging {
         }
 
         requestPermission()
+    }
 
+    override fun onDestroy() {
+        unregisterMeshReceiver()
+        super.onDestroy()
+    }
+
+    private var receiverRegistered = false
+
+    private fun registerMeshReceiver() {
+        logAssert(!receiverRegistered)
         val filter = IntentFilter()
         filter.addAction(MeshService.ACTION_MESH_CONNECTED)
         filter.addAction(MeshService.ACTION_NODE_CHANGE)
         filter.addAction(MeshService.ACTION_RECEIVED_DATA)
         registerReceiver(meshServiceReceiver, filter)
+
     }
 
-    override fun onDestroy() {
-        unregisterReceiver(meshServiceReceiver)
-        super.onDestroy()
+    private fun unregisterMeshReceiver() {
+        if (receiverRegistered) {
+            receiverRegistered = false
+            unregisterReceiver(meshServiceReceiver)
+        }
     }
 
+    /// Called when we gain/lose a connection to our mesh radio
+    private fun onMeshConnectionChanged(connected: Boolean) {
+        UIState.isConnected.value = connected
+        debug("connchange ${UIState.isConnected.value}")
+        if (connected) {
+            // everytime the radio reconnects, we slam in our current owner data
+            setOwner()
+        }
+    }
 
     private val meshServiceReceiver = object : BroadcastReceiver() {
 
@@ -179,8 +249,8 @@ class MainActivity : AppCompatActivity(), Logging {
                     }
                 }
                 MeshService.ACTION_MESH_CONNECTED -> {
-                    UIState.isConnected.value = intent.getBooleanExtra(EXTRA_CONNECTED, false)
-                    debug("connchange ${UIState.isConnected.value}")
+                    val connected = intent.getBooleanExtra(EXTRA_CONNECTED, false)
+                    onMeshConnectionChanged(connected)
                 }
                 else -> TODO()
             }
@@ -195,7 +265,11 @@ class MainActivity : AppCompatActivity(), Logging {
             val m = IMeshService.Stub.asInterface(service)
             meshService = m
 
-            UIState.isConnected.value = m.isConnected
+            // We don't start listening for packets until after we are connected to the service
+            registerMeshReceiver()
+
+            // We won't receive a notify for the initial state of connection, so we force an update here
+            onMeshConnectionChanged(m.isConnected)
 
             debug("connected to mesh service, isConnected=${UIState.isConnected.value}")
 
@@ -207,6 +281,8 @@ class MainActivity : AppCompatActivity(), Logging {
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
+            warn("The mesh service has disconnected")
+            unregisterMeshReceiver()
             meshService = null
         }
     }
@@ -249,6 +325,7 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     override fun onPause() {
+        unregisterMeshReceiver() // No point in receiving updates while the GUI is gone, we'll get them when the user launches the activity
         unbindMeshService()
 
         super.onPause()

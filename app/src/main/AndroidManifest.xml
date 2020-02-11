@@ -12,6 +12,9 @@
 
     <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- for job intent service -->
 
+    <uses-permission android:name="android.permission.READ_CONTACTS " /> <!-- to get the owner's name so we can set it in the radio -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+
     <!--
     This permission is required to allow the application to send
     events and properties to Mixpanel.

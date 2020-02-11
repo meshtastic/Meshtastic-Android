@@ -242,6 +242,9 @@ message MyNodeInfo {
     /// Tells the phone what our node number is, can be -1 if we've not yet joined a mesh.
     int32 my_node_num = 1;
 
+    /// if false it would be great if the phone can help provide gps coordinates
+    bool has_gps = 2;
+
     /// FIXME - add useful debugging state (queue depths etc)
 }
 
