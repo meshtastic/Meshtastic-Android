@@ -132,7 +132,9 @@ class MainActivity : AppCompatActivity(), Logging {
         requestPermission()
 
         val filter = IntentFilter()
-        filter.addAction("")
+        filter.addAction(MeshService.ACTION_MESH_CONNECTED)
+        filter.addAction(MeshService.ACTION_NODE_CHANGE)
+        filter.addAction(MeshService.ACTION_RECEIVED_DATA)
         registerReceiver(meshServiceReceiver, filter)
     }
 
@@ -161,7 +163,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 }
 
                 MeshService.ACTION_RECEIVED_DATA -> {
-                    warn("TODO rxopaqe")
+                    warn("TODO rxdata")
                     val sender = intent.getStringExtra(EXTRA_SENDER)!!
                     val payload = intent.getByteArrayExtra(EXTRA_PAYLOAD)!!
                     val typ = intent.getIntExtra(EXTRA_TYP, -1)

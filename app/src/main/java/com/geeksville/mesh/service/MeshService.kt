@@ -8,6 +8,7 @@ import android.content.*
 import android.graphics.Color
 import android.os.Build
 import android.os.IBinder
+import android.os.Parcel
 import android.os.Parcelable
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
@@ -22,28 +23,108 @@ import com.geeksville.util.exceptionReporter
 import com.geeksville.util.toOneLineString
 import com.geeksville.util.toRemoteExceptions
 import com.google.protobuf.ByteString
-import kotlinx.android.parcel.Parcelize
 import java.nio.charset.Charset
 
 
 class RadioNotConnectedException() : Exception("Can't find radio")
 
 // model objects that directly map to the corresponding protobufs
-@Parcelize
 data class MeshUser(val id: String, val longName: String, val shortName: String) :
-    Parcelable
+    Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readString()!!,
+        parcel.readString()!!,
+        parcel.readString()!!
+    ) {
+    }
 
-@Parcelize
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeString(id)
+        parcel.writeString(longName)
+        parcel.writeString(shortName)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<MeshUser> {
+        override fun createFromParcel(parcel: Parcel): MeshUser {
+            return MeshUser(parcel)
+        }
+
+        override fun newArray(size: Int): Array<MeshUser?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
+
 data class Position(val latitude: Double, val longitude: Double, val altitude: Int) :
-    Parcelable
+    Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readDouble(),
+        parcel.readDouble(),
+        parcel.readInt()
+    ) {
+    }
 
-@Parcelize
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeDouble(latitude)
+        parcel.writeDouble(longitude)
+        parcel.writeInt(altitude)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<Position> {
+        override fun createFromParcel(parcel: Parcel): Position {
+            return Position(parcel)
+        }
+
+        override fun newArray(size: Int): Array<Position?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
+
+
 data class NodeInfo(
     val num: Int, // This is immutable, and used as a key
     var user: MeshUser? = null,
     var position: Position? = null,
     var lastSeen: Long? = null
-) : Parcelable
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readInt(),
+        parcel.readParcelable(MeshUser::class.java.classLoader),
+        parcel.readParcelable(Position::class.java.classLoader),
+        parcel.readValue(Long::class.java.classLoader) as? Long
+    ) {
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeInt(num)
+        parcel.writeParcelable(user, flags)
+        parcel.writeParcelable(position, flags)
+        parcel.writeValue(lastSeen)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<NodeInfo> {
+        override fun createFromParcel(parcel: Parcel): NodeInfo {
+            return NodeInfo(parcel)
+        }
+
+        override fun newArray(size: Int): Array<NodeInfo?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
 
 /**
  * Handles all the communication with android apps.  Also keeps an internal model
@@ -113,6 +194,16 @@ class MeshService : Service(), Logging {
     private fun broadcastNodeChange(info: NodeInfo) {
         debug("Broadcasting node change $info")
         val intent = Intent(ACTION_NODE_CHANGE)
+
+        /*
+        if (info.user == null)
+            info.user = MeshUser("x", "y", "z")
+
+        if (info.position == null)
+            info.position = Position(1.5, 1.6, 3)
+
+        */
+
         intent.putExtra(EXTRA_NODEINFO, info)
         explicitBroadcast(intent)
     }
@@ -298,7 +389,7 @@ class MeshService : Service(), Logging {
             nodeDBbyID[userId] = info
 
         // parcelable is busted
-        // broadcastNodeChange(info)
+        broadcastNodeChange(info)
     }
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num

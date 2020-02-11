@@ -1,9 +1,8 @@
 # High priority
 MVP features required for first public alpha 
 
-* show nodeinfo list on gui - one card per node
+* make nodeinfo card not look like ass
 * when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname
-* parcels are busted - something wrong with the Parcelize kotlin magic
 * all chat in the app defaults to group chat
 * make my android app show mesh state
 * add app icon
@@ -85,3 +84,4 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * if radio disconnects, we need to requeue a new connect attempt in RadioService
 * don't do mesh based algoritm for node id assignment (initially) - instead just store in flash - possibly even in the initial alpha release do this hack
 * show connection state on gui
+* parcels are busted - something wrong with the Parcelize kotlin magic
