@@ -70,13 +70,13 @@ data class NodeInfo(
     val num: Int, // This is immutable, and used as a key
     var user: MeshUser? = null,
     var position: Position? = null,
-    var lastSeen: Long? = null
+    var lastSeen: Int? = null
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
         parcel.readParcelable(MeshUser::class.java.classLoader),
         parcel.readParcelable(Position::class.java.classLoader),
-        parcel.readValue(Long::class.java.classLoader) as? Long
+        parcel.readValue(Int::class.java.classLoader) as? Int
     ) {
     }
 

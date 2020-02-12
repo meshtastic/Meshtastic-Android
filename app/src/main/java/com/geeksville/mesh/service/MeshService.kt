@@ -377,7 +377,7 @@ class MeshService : Service(), Logging {
         val p = packet.payload
 
         // Update our last seen based on any valid timestamps
-        if (packet.rxTime != 0L) {
+        if (packet.rxTime != 0) {
             updateNodeInfo(fromNum) {
                 it.lastSeen = packet.rxTime
             }
@@ -542,7 +542,7 @@ class MeshService : Service(), Logging {
             }
 
         override fun getRadioConfig(): ByteArray = toRemoteExceptions {
-            return connectedRadio.readRadioConfig()
+            connectedRadio.readRadioConfig()
         }
 
         override fun setRadioConfig(payload: ByteArray) = toRemoteExceptions {
