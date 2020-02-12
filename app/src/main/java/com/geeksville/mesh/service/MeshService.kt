@@ -33,7 +33,7 @@ class RadioNotConnectedException() : Exception("Can't find radio")
  */
 class MeshService : Service(), Logging {
 
-    companion object {
+    companion object : Logging {
 
         /// Intents broadcast by MeshService
         const val ACTION_RECEIVED_DATA = "$prefix.RECEIVED_DATA"
@@ -50,7 +50,38 @@ class MeshService : Service(), Logging {
         /// If the radio hasn't yet joined a mesh (i.e. no nodenum assigned)
         private const val NODE_NUM_NO_MESH = -1
 
+        /// Helper function to start running our service, returns the intent used to reach it
+        /// or null if the service could not be started (no bluetooth or no bonded device set)
+        fun startService(context: Context): Intent? {
+            if (RadioInterfaceService.getBondedDeviceAddress(context) == null) {
+                warn("No mesh radio is bonded, not starting service")
+                return null
+            } else {
+                // bind to our service using the same mechanism an external client would use (for testing coverage)
+                // The following would work for us, but not external users
+                //val intent = Intent(this, MeshService::class.java)
+                //intent.action = IMeshService::class.java.name
+                val intent = Intent()
+                intent.setClassName(
+                    "com.geeksville.mesh",
+                    "com.geeksville.mesh.service.MeshService"
+                )
 
+                // Before binding we want to explicitly create - so the service stays alive forever (so it can keep
+                // listening for the bluetooth packets arriving from the radio.  And when they arrive forward them
+                // to Signal or whatever.
+
+                logAssert(
+                    (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        context.startForegroundService(intent)
+                    } else {
+                        context.startService(intent)
+                    }) != null
+                )
+
+                return intent
+            }
+        }
     }
 
     /// A mapping of receiver class name to package name - used for explicit broadcasts

@@ -6,9 +6,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.*
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.os.Debug
 import android.os.IBinder
 import android.provider.ContactsContract
 import android.provider.ContactsContract.CommonDataKinds.Phone
@@ -25,7 +23,6 @@ import com.geeksville.mesh.ui.MeshApp
 import com.geeksville.mesh.ui.TextMessage
 import com.geeksville.mesh.ui.UIState
 import com.geeksville.util.exceptionReporter
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import java.nio.charset.Charset
 import java.util.*
 
@@ -157,11 +154,6 @@ class MainActivity : AppCompatActivity(), Logging,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // We default to off in the manifest, FIXME turn on only if user approves
-        // leave off when running in the debugger
-        if (false && !Debug.isDebuggerConnected())
-            FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
-
         setContent {
             MeshApp()
         }
@@ -176,6 +168,11 @@ class MainActivity : AppCompatActivity(), Logging,
         } else {
             Toast.makeText(this, "Error - this app requires bluetooth", Toast.LENGTH_LONG).show()
         }
+
+        /* Do this better FIXME */
+        val usetbeam = false
+        val address = if (usetbeam) "B4:E6:2D:EA:32:B7" else "24:6F:28:96:C9:2A"
+        RadioInterfaceService.setBondedDeviceAddress(this, address)
 
         requestPermission()
     }
@@ -292,26 +289,12 @@ class MainActivity : AppCompatActivity(), Logging,
         // we bind using the well known name, to make sure 3rd party apps could also
         logAssert(meshService == null)
 
-        // bind to our service using the same mechanism an external client would use (for testing coverage)
-        // The following would work for us, but not external users
-        //val intent = Intent(this, MeshService::class.java)
-        //intent.action = IMeshService::class.java.name
-        val intent = Intent()
-        intent.setClassName("com.geeksville.mesh", "com.geeksville.mesh.service.MeshService")
-
-        // Before binding we want to explicitly create - so the service stays alive forever (so it can keep
-        // listening for the bluetooth packets arriving from the radio.  And when they arrive forward them
-        // to Signal or whatever.
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(intent)
-        } else {
-            startService(intent)
+        val intent = MeshService.startService(this)
+        if (intent != null) {
+            // ALSO bind so we can use the api
+            logAssert(bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE))
+            isBound = true;
         }
-
-        // ALSO bind so we can use the api
-        logAssert(bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE))
-        isBound = true;
     }
 
     private fun unbindMeshService() {

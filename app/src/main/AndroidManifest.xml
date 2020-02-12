@@ -33,6 +33,9 @@
     <!-- We run our mesh code as a foreground service - FIXME, find a way to stop doing this -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
+    <!-- Needed to open our bluetooth connection to our paired device (after reboot) -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="true" />
@@ -108,7 +111,15 @@
 
         <receiver android:name="com.geeksville.mesh.service.BootCompleteReceiver">
             <intent-filter>
+                <category android:name="android.intent.category.DEFAULT" />
+
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <!--For HTC devices per https://stackoverflow.com/questions/20441308/boot-completed-not-working-android/46294732#46294732 -->
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+
+                <!-- for testing -->
+                <action android:name="com.geeksville.mesh.SIM_BOOT" />
             </intent-filter>
         </receiver>
     </application>

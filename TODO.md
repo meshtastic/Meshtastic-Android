@@ -1,11 +1,13 @@
 # High priority
 MVP features required for first public alpha 
 
+* start bt receive on boot
 * when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname
 * let the user type texts somewhere
 * include a background behind our cloud graphics, so redraws work properly
 * show direction and distance on the nodeinfo cards
 * show radio config screen, it shows past channels (and the current one)
+* use this for preferences? https://developer.android.com/guide/topics/ui/settings/
 * do setOwner every time we connect to the radio, use our settings, radio should ignore if unchanged
 * send location data for devices that don't have a GPS - https://developer.android.com/training/location/change-location-settings
 * make nodeinfo card not look like ass
