@@ -171,6 +171,9 @@ message ChannelSettings {
     /// A simple preshared key for now for crypto.  At first I'm using 128 bit (16 byte) block for the Speck crypto
     /// but for beta we'll want something more carefully thought through.  I want to keep the QR code small
     bytes psk = 4;
+
+    /// A SHORT name that will be packed into the URL.  Less than 12 bytes.  Something for end users to call the channel
+    string name = 5;
 }
 
 // The entire set of user settable/readable settings for our radio device.  Includes both the current channel settings

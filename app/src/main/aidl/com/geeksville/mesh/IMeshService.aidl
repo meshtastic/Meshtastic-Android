@@ -32,6 +32,14 @@ interface IMeshService {
     */
     NodeInfo[] getNodes();
 
+    /// This method is only intended for use in our GUI, so the user can set radio options
+    /// It returns a RadioConfig protobuf.
+    byte []getRadioConfig();
+
+    /// This method is only intended for use in our GUI, so the user can set radio options
+    /// It sets a RadioConfig protobuf
+    void setRadioConfig(in byte []payload);
+
     /**
     Is the packet radio currently connected to the phone?
     */

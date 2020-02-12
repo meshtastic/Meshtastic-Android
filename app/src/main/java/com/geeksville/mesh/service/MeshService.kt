@@ -541,6 +541,14 @@ class MeshService : Service(), Logging {
                 })
             }
 
+        override fun getRadioConfig(): ByteArray = toRemoteExceptions {
+            return connectedRadio.readRadioConfig()
+        }
+
+        override fun setRadioConfig(payload: ByteArray) = toRemoteExceptions {
+            connectedRadio.writeRadioConfig(payload)
+        }
+
         override fun getNodes(): Array<NodeInfo> = toRemoteExceptions {
             val r = nodeDBbyID.values.toTypedArray()
             info("in getOnline, count=${r.size}")

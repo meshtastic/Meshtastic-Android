@@ -1,23 +1,20 @@
 # High priority
 MVP features required for first public alpha 
 
-* do setOwner every time we connect to the radio, use our settings
+* when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname
+* let the user type texts somewhere
 * include a background behind our cloud graphics, so redraws work properly
+* show direction and distance on the nodeinfo cards
+* show radio config screen, it shows past channels (and the current one)
+* do setOwner every time we connect to the radio, use our settings, radio should ignore if unchanged
 * send location data for devices that don't have a GPS - https://developer.android.com/training/location/change-location-settings
 * make nodeinfo card not look like ass
-* when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname
-* all chat in the app defaults to group chat
-* make my android app show mesh state
-* add app icon
-* when notified phone should automatically download messages
 * at connect we might receive messages before finished downloading the nodeinfo.  In that case, process those messages later
-* use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
 * connect to bluetooth device automatically using minimum power - start looking at phone boot
 * fix BT device scanning
 * call crashlytics from exceptionReporter!!!  currently not logging failures caught there
-* show direction and distance on the nodeinfo cards
 * test with oldest compatible android in emulator (see below for testing with hardware)
-* make playstore entry
+* make playstore entry, first public alpha
 
 # Signal alpha release
 Do this "Signal app compatible" release relatively soon after the alpha release of the android app.
@@ -36,6 +33,9 @@ Do this "Signal app compatible" release relatively soon after the alpha release 
 # Medium priority
 Things for the betaish period.
 
+* make my android app show mesh state
+* show qr code for each channel https://medium.com/@aanandshekharroy/generate-barcode-in-android-app-using-zxing-64c076a5d83a
+* register app link for our URLs https://developer.android.com/studio/write/app-link-indexing.html
 * let user change radio params and share radio join info via QR code or text message (use an encoded app specific URL - to autoprompt for app installation as needed)
 * test with an oldish android release using real hardware
 * if necessary restart entire BT adapter with this tip from Michael https://stackoverflow.com/questions/35103701/ble-android-onconnectionstatechange-not-being-called
@@ -88,3 +88,7 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * don't do mesh based algoritm for node id assignment (initially) - instead just store in flash - possibly even in the initial alpha release do this hack
 * show connection state on gui
 * parcels are busted - something wrong with the Parcelize kotlin magic
+* add app icon
+* when notified phone should automatically download messages
+* use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
+* all chat in the app defaults to group chat

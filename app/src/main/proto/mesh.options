@@ -16,6 +16,7 @@
 
 # 128 bit psk key (we don't use 256 bit yet because we want to keep our QR code small)
 *ChannelSettings.psk max_size:16 fixed_length:true
+*ChannelSettings.name max_size:12
 
 # MyMessage.name         max_size:40 
 # or fixed_length or fixed_count, or max_count
