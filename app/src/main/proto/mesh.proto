@@ -145,6 +145,14 @@ message MeshPacket {
     uint64 rx_time = 4;
 }
 
+/// Shared constants between device and phone
+enum Constants {
+    Unused = 0; // First enum must be zero, and we are just using this enum to pass int constants between two very different environments
+
+    /// # of legal channels
+    NumChannels = 13;
+}
+
 // Full settings (center freq, spread factor, pre-shared secret key etc...) needed to configure a radio for speaking on a particlar channel
 // This information can be encoded as a QRcode/url so that other users can configure their radio to join the same channel.
 message ChannelSettings {
@@ -182,10 +190,10 @@ message RadioConfig {
 
     message UserPreferences {
         // We should send our position this often (but only if it has changed significantly)
-        uint32 position_broadcast_msec = 1;
+        uint32 position_broadcast_secs = 1;
 
-        // If we haven't broadcasted anything in a while, we should send our position (and User?) at least this often.
-        uint32 min_broadcast_msec = 2;
+        // Send our owner info at least this often (also we always send once at boot - to rejoin the mesh)
+        uint32 send_owner_secs = 2;
 
         // If true, radio should not try to be smart about what packets to queue to the phone
         bool keep_all_packets = 100;
@@ -228,7 +236,7 @@ message NodeInfo {
 
     // Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)
     // sent to the phone (so the phone can know exact time of reception)
-    uint64 last_seen = 4; // msecs since 1970
+    uint32 last_seen = 4; // seconds since 1970
 
     /// Returns the Signal-to-noise ratio (SNR) of the last received message, as measured
     /// by the receiver.
@@ -287,10 +295,10 @@ message DeviceState {
 
         /// We bump up the integer values in this enum to indicate minimum levels of encodings for saved files
         /// if your file is below the Minimum you should discard it.
-        Minimum = 5;
+        Minimum = 11;
 
         /// The current value we are using for saved files
-        Current = 5;
+        Current = 11;
     };
 
     Version version = 6;
