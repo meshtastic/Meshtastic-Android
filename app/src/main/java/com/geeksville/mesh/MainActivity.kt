@@ -172,7 +172,7 @@ class MainActivity : AppCompatActivity(), Logging,
         /* Do this better FIXME */
         val usetbeam = false
         val address = if (usetbeam) "B4:E6:2D:EA:32:B7" else "24:6F:28:96:C9:2A"
-        RadioInterfaceService.setBondedDeviceAddress(this, address)
+        RadioInterfaceService.setBondedDeviceAddress(this, null)
 
         requestPermission()
     }

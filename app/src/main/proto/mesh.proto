@@ -301,7 +301,11 @@ message DeviceState {
         Current = 11;
     };
 
+    /// A version integer used to invalidate old save files when we make incompatible changes
     Version version = 6;
+
+    /// We keep the last received text message (only) stored in the device flash, so we can show it on the screen.  Might be null
+    MeshPacket rx_text_message = 7;
 }
 
 // packets from the radio to the phone will appear on the fromRadio characteristic.  It will support

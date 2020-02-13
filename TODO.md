@@ -1,7 +1,8 @@
 # High priority
 MVP features required for first public alpha 
 
-* start bt receive on boot
+* test bt boot behavior
+* fix BT device scanning - make a setup screen
 * when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname
 * let the user type texts somewhere
 * include a background behind our cloud graphics, so redraws work properly
@@ -13,7 +14,6 @@ MVP features required for first public alpha
 * make nodeinfo card not look like ass
 * at connect we might receive messages before finished downloading the nodeinfo.  In that case, process those messages later
 * connect to bluetooth device automatically using minimum power - start looking at phone boot
-* fix BT device scanning
 * call crashlytics from exceptionReporter!!!  currently not logging failures caught there
 * test with oldest compatible android in emulator (see below for testing with hardware)
 * make playstore entry, first public alpha
@@ -94,3 +94,4 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * when notified phone should automatically download messages
 * use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
 * all chat in the app defaults to group chat
+* start bt receive on boot

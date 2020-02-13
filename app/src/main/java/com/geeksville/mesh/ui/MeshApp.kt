@@ -20,9 +20,6 @@ import com.geeksville.mesh.R
 @Composable
 fun HomeContent() {
     Column {
-        Text(text = "Meshtastic")
-
-
         Row {
             Container(LayoutSize(40.dp, 40.dp)) {
                 VectorImage(id = if (UIState.isConnected.value) R.drawable.cloud_on else R.drawable.cloud_off)
@@ -54,23 +51,6 @@ fun HomeContent() {
 
         Button(text = "send packets",
             onClick = { sendTestPackets() }) */
-    }
-}
-
-@Composable
-fun HomeScreen(openDrawer: () -> Unit) {
-    Column {
-        TopAppBar(
-            title = { Text(text = "Meshtastic") },
-            navigationIcon = {
-                VectorImageButton(R.drawable.ic_launcher_new_foreground) {
-                    openDrawer()
-                }
-            }
-        )
-        VerticalScroller(modifier = LayoutFlexible(1f)) {
-            HomeContent()
-        }
     }
 }
 
@@ -108,10 +88,26 @@ fun previewView() {
 private fun AppContent(openDrawer: () -> Unit) {
     Crossfade(AppStatus.currentScreen) { screen ->
         Surface(color = (MaterialTheme.colors()).background) {
-            when (screen) {
-                is Screen.Home -> HomeScreen { openDrawer() }
-                /* is Screen.Interests -> InterestsScreen { openDrawer() }
-                is Screen.Article -> ArticleScreen(postId = screen.postId) */
+
+            Column {
+                TopAppBar(
+                    title = { Text(text = "Meshtastic") },
+                    navigationIcon = {
+                        VectorImageButton(R.drawable.ic_launcher_new_foreground) {
+                            openDrawer()
+                        }
+                    }
+                )
+
+                VerticalScroller(modifier = LayoutFlexible(1f)) {
+                    when (screen) {
+                        is Screen.Home -> HomeContent()
+                        is Screen.SelectRadio -> BTScanScreen()
+                        // Question: how to get hooks invoked when this screen gets shown/removed?
+                        // i.e. I need to start/stop a bluetooth scan operation. depending on the
+                        // appearance/disappearance of this screen.
+                    }
+                }
             }
         }
     }
@@ -133,25 +129,21 @@ private fun AppDrawer(
             VectorImage(id = R.drawable.ic_launcher_new_foreground)
         }
         Divider(color = Color(0x14333333))
-        DrawerButton(
-            icon = R.drawable.ic_launcher_new_foreground,
-            label = "Home",
-            isSelected = currentScreen == Screen.Home
-        ) {
-            navigateTo(Screen.Home)
-            closeDrawer()
+
+        @Composable
+        fun ScreenButton(icon: Int, label: String, screen: Screen) {
+            DrawerButton(
+                icon = icon,
+                label = label,
+                isSelected = currentScreen == screen
+            ) {
+                navigateTo(screen)
+                closeDrawer()
+            }
         }
 
-        /*
-        DrawerButton(
-            icon = R.drawable.ic_interests,
-            label = "Interests",
-            isSelected = currentScreen == Screen.Interests
-        ) {
-            navigateTo(Screen.Interests)
-            closeDrawer()
-        }
-         */
+        ScreenButton(R.drawable.ic_launcher_new_foreground, "Home", Screen.Home)
+        ScreenButton(R.drawable.ic_launcher_new_foreground, "Setup", Screen.SelectRadio)
     }
 }
 

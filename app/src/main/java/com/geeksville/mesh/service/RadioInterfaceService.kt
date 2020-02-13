@@ -97,7 +97,9 @@ class RadioInterfaceService : Service(), Logging {
          */
         const val RADIO_CONNECTED_ACTION = "$prefix.CONNECT_CHANGED"
 
-        private val BTM_SERVICE_UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
+        /// this service UUID is publically visible for scanning
+        val BTM_SERVICE_UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
+
         private val BTM_FROMRADIO_CHARACTER =
             UUID.fromString("8ba2bcc2-ee02-4a55-a531-c525c5e454d5")
         private val BTM_TORADIO_CHARACTER =
@@ -131,11 +133,19 @@ class RadioInterfaceService : Service(), Logging {
         private fun getPrefs(context: Context) =
             context.getSharedPreferences("radio-prefs", Context.MODE_PRIVATE)
 
-        /// Return the device we are configured to use, or null for none
-        fun getBondedDeviceAddress(context: Context) = getPrefs(context).getString("devAddr", null)
+        private const val DEVADDR_KEY = "devAddr"
 
-        fun setBondedDeviceAddress(context: Context, addr: String) =
-            getPrefs(context).edit(commit = true) { putString("devAddr", addr) }
+        /// Return the device we are configured to use, or null for none
+        fun getBondedDeviceAddress(context: Context) =
+            getPrefs(context).getString(DEVADDR_KEY, null)
+
+        fun setBondedDeviceAddress(context: Context, addr: String?) =
+            getPrefs(context).edit(commit = true) {
+                if (addr == null)
+                    this.remove(DEVADDR_KEY)
+                else
+                    putString(DEVADDR_KEY, addr)
+            }
     }
 
     private val bluetoothAdapter: BluetoothAdapter? by lazy(LazyThreadSafetyMode.NONE) {

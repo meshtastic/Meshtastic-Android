@@ -10,7 +10,7 @@ import java.util.*
 // defines the screens we have in the app
 sealed class Screen {
     object Home : Screen()
-    // object Settings : Screen()
+    object SelectRadio : Screen()
 }
 
 @Model
@@ -22,7 +22,7 @@ data class TextMessage(val date: Date, val from: String, val text: String)
 
 /// FIXME - figure out how to merge this staate with the AppStatus Model
 object UIState {
-
+    
     private val testPositions = arrayOf(
         Position(32.776665, -96.796989, 35), // dallas
         Position(32.960758, -96.733521, 35), // richardson
