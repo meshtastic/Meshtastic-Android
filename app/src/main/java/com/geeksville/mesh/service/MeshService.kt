@@ -314,8 +314,8 @@ class MeshService : Service(), Logging {
         updatefn(info)
 
         // This might have been the first time we know an ID for this node, so also update the by ID map
-        val userId = info.user?.id
-        if (userId != null)
+        val userId = info.user?.id.orEmpty()
+        if (userId.isNotEmpty())
             nodeDBbyID[userId] = info
 
         // parcelable is busted
@@ -535,12 +535,13 @@ class MeshService : Service(), Logging {
                 clientPackages[receiverName] = packageName
             }
 
-        override fun setOwner(myId: String, longName: String, shortName: String) =
+        override fun setOwner(myId: String?, longName: String, shortName: String) =
             toRemoteExceptions {
-                debug("TetOwner $myId : $longName : $shortName")
+                debug("SetOwner $myId : $longName : $shortName")
 
                 val user = MeshProtos.User.newBuilder().also {
-                    it.id = myId
+                    if (myId != null)  // Only set the id if it was provided
+                        it.id = myId
                     it.longName = longName
                     it.shortName = shortName
                 }.build()

@@ -105,7 +105,7 @@ A few nodenums are reserved and will never be requested:
 
 */
 message User {
-    string id = 1; // a globally unique ID string for this user.  In the case of Signal that would mean +16504442323
+    string id = 1; // a globally unique ID string for this user.  In the case of Signal that would mean +16504442323, for the default macaddr derived id it would be !<6 hexidecimal bytes>
     string long_name = 2; // A full name for this user, i.e. "Kevin Hester"
     string short_name = 3; // A VERY short name, ideally two characters.  Suitable for a tiny OLED screen
     bytes macaddr = 4; // This is the addr of the radio.  Not populated by the phone, but added by the esp32 when broadcasting

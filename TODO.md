@@ -1,6 +1,11 @@
 # High priority
 MVP features required for first public alpha 
 
+* use google signin to get user name (later give other options)
+* always set a _unique_ owner id (if changed)
+* stop scan when we start the service
+* set the radio by using the service
+* startforegroundservice only if we have a valid radio
 * if no radio is selected, launch app on the radio select screen
 * when we select a new radio, restart the service
 * show bt scan progress centered and towards the bottom of the screen
@@ -47,6 +52,7 @@ Do this "Signal app compatible" release relatively soon after the alpha release 
 # Medium priority
 Things for the betaish period.
 
+* let user pick/specify a name through ways other than google signin (for the privacy concerned, or devices without Play API)
 * make my android app show mesh state
 * show qr code for each channel https://medium.com/@aanandshekharroy/generate-barcode-in-android-app-using-zxing-64c076a5d83a
 * register app link for our URLs https://developer.android.com/studio/write/app-link-indexing.html
