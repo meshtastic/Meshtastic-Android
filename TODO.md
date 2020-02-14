@@ -1,6 +1,14 @@
 # High priority
 MVP features required for first public alpha 
 
+* if no radio is selected, launch app on the radio select screen
+* warn user to bt pair
+* show bt scan progress centered and towards the bottom of the screen
+* get rid of green bar at top
+* change titlebar based off which screen we are showing
+* fix app icon in title bar
+* add alphatest screen at boot
+* prompt user to turnon bluetooth and bind
 * test bt boot behavior
 * fix BT device scanning - make a setup screen
 * when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname
@@ -17,6 +25,8 @@ MVP features required for first public alpha
 * call crashlytics from exceptionReporter!!!  currently not logging failures caught there
 * test with oldest compatible android in emulator (see below for testing with hardware)
 * make playstore entry, first public alpha
+* tell Compose geeks 
+* tell various vendors & post in forum
 
 # Signal alpha release
 Do this "Signal app compatible" release relatively soon after the alpha release of the android app.
