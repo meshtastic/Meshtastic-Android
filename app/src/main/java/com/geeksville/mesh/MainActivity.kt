@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.content.*
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
 import android.view.Menu
@@ -49,14 +50,16 @@ class MainActivity : AppCompatActivity(), Logging,
     private fun requestPermission() {
         debug("Checking permissions")
 
-        val perms = arrayOf(
+        val perms = mutableListOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN,
             Manifest.permission.WAKE_LOCK,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
+
+        if (Build.VERSION.SDK_INT >= 29) // only added later
+            perms.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
 
         val missingPerms = perms.filter {
             ContextCompat.checkSelfPermission(
