@@ -51,6 +51,7 @@ Do this "Signal app compatible" release relatively soon after the alpha release 
 # Medium priority
 Things for the betaish period.
 
+* fix slow rendering warnings in play console
 * use google signin to get user name 
 * use Firebase Test Lab
 * let user pick/specify a name through ways other than google signin (for the privacy concerned, or devices without Play API)
