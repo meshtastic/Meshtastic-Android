@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanFilter
@@ -12,6 +13,8 @@ import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Text
 import androidx.ui.layout.Column
 import androidx.ui.material.CircularProgressIndicator
+import androidx.ui.material.EmphasisLevels
+import androidx.ui.material.ProvideEmphasis
 import androidx.ui.material.RadioGroup
 import androidx.ui.tooling.preview.Preview
 import com.geeksville.android.Logging
@@ -27,7 +30,7 @@ object ScanState {
 }
 
 @Model
-data class BTScanEntry(val name: String, val macAddress: String) {
+data class BTScanEntry(val name: String, val macAddress: String, val bonded: Boolean) {
     val isSelected get() = macAddress == ScanState.selectedMacAddr
 }
 
@@ -45,6 +48,7 @@ fun BTScanScreen() {
     ScanState.selectedMacAddr = RadioInterfaceService.getBondedDeviceAddress(context)
 
     fun changeSelection(newAddr: String) {
+        BTLog.info("Changing BT device to $newAddr")
         ScanState.selectedMacAddr = newAddr
         RadioInterfaceService.setBondedDeviceAddress(context, newAddr)
     }
@@ -55,8 +59,8 @@ fun BTScanScreen() {
             BTLog.warn("No bluetooth adapter.  Running under emulation?")
 
             val testnodes = listOf(
-                BTScanEntry("Meshtastic_ab12", "xx"),
-                BTScanEntry("Meshtastic_32ac", "xb")
+                BTScanEntry("Meshtastic_ab12", "xx", false),
+                BTScanEntry("Meshtastic_32ac", "xb", true)
             )
 
             devices.putAll(testnodes.map { it.macAddress to it })
@@ -81,13 +85,20 @@ fun BTScanScreen() {
                 override fun onScanResult(callbackType: Int, result: ScanResult) {
 
                     val addr = result.device.address
-                    BTLog.debug("onScanResult ${addr}")
-                    devices[addr] =
-                        BTScanEntry(result.device.name, addr)
+                    // prevent logspam because weill get get lots of redundant scan results
+                    if (!devices.contains(addr)) {
+                        val entry = BTScanEntry(
+                            result.device.name,
+                            addr,
+                            result.device.bondState == BluetoothDevice.BOND_BONDED
+                        )
+                        BTLog.debug("onScanResult ${entry}")
+                        devices[addr] = entry
 
-                    // If nothing was selected, by default select the first thing we see
-                    if (ScanState.selectedMacAddr == null)
-                        changeSelection(addr)
+                        // If nothing was selected, by default select the first thing we see
+                        if (ScanState.selectedMacAddr == null && entry.bonded)
+                            changeSelection(addr)
+                    }
                 }
             }
 
@@ -116,36 +127,47 @@ fun BTScanScreen() {
         if (ScanState.errorText != null) {
             Text("An unexpected error was encountered.  Please file a bug on our github: ${ScanState.errorText}")
         } else {
-            if (devices.isEmpty())
+            if (devices.isEmpty()) {
                 Text("Looking for Meshtastic devices... (zero found)")
-            else {
-                val allPaired = bluetoothAdapter?.bondedDevices.orEmpty().map { it.address }
 
-                // Only let user select paired devices
+                CircularProgressIndicator() // Show that we are searching still
+            } else {
+                // val allPaired = bluetoothAdapter?.bondedDevices.orEmpty().map { it.address }.toSet()
+
+                /* Only let user select paired devices
                 val paired = devices.values.filter { allPaired.contains(it.macAddress) }
                 if (paired.size < devices.size) {
                     Text(
                         "Warning: there are nearby Meshtastic devices that are not paired with this phone.  Before you can select a device, you will need to pair it in Bluetooth Settings."
                     )
-                }
+                } */
 
                 RadioGroup {
                     Column {
-                        paired.forEach {
+                        devices.values.forEach {
                             // disabled pending https://issuetracker.google.com/issues/149528535
-                            //ProvideEmphasis(emphasis = if (allPaired.contains(it.macAddress)) EmphasisLevels().medium else EmphasisLevels().disabled) {
-                            RadioGroupTextItem(
-                                selected = (it.isSelected),
-                                onSelect = { changeSelection(it.macAddress) },
-                                text = it.name
-                            )
-                            //}
+                            ProvideEmphasis(emphasis = if (it.bonded) EmphasisLevels().high else EmphasisLevels().disabled) {
+                                RadioGroupTextItem(
+                                    selected = (it.isSelected),
+                                    onSelect = {
+                                        // If the device is paired, let user select it, otherwise start the pairing flow
+                                        if (it.bonded)
+                                            changeSelection(it.macAddress)
+                                        else {
+                                            BTLog.info("Starting bonding for $it")
+
+                                            // We ignore missing BT adapters, because it lets us run on the emulator
+                                            bluetoothAdapter?.getRemoteDevice(it.macAddress)
+                                                ?.createBond()
+                                        }
+                                    },
+                                    text = it.name
+                                )
+                            }
                         }
                     }
                 }
             }
-
-            CircularProgressIndicator() // Show that we are searching still
         }
     }
 }

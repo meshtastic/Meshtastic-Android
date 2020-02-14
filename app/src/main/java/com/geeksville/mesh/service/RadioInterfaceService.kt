@@ -135,9 +135,26 @@ class RadioInterfaceService : Service(), Logging {
 
         private const val DEVADDR_KEY = "devAddr"
 
+        /// Get our bluetooth adapter (should always succeed except on emulator
+        private fun getBluetoothAdapter(context: Context): BluetoothAdapter? {
+            val bluetoothManager =
+                context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+            return bluetoothManager.adapter
+        }
+
         /// Return the device we are configured to use, or null for none
-        fun getBondedDeviceAddress(context: Context) =
-            getPrefs(context).getString(DEVADDR_KEY, null)
+        fun getBondedDeviceAddress(context: Context): String? {
+
+            val allPaired =
+                getBluetoothAdapter(context)?.bondedDevices.orEmpty().map { it.address }.toSet()
+
+            // If the user has unpaired our device, treat things as if we don't have one
+            val addr = getPrefs(context).getString(DEVADDR_KEY, null)
+            return if (!allPaired.contains(addr))
+                null
+            else
+                addr
+        }
 
         fun setBondedDeviceAddress(context: Context, addr: String?) =
             getPrefs(context).edit(commit = true) {
@@ -148,10 +165,6 @@ class RadioInterfaceService : Service(), Logging {
             }
     }
 
-    private val bluetoothAdapter: BluetoothAdapter? by lazy(LazyThreadSafetyMode.NONE) {
-        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        bluetoothManager.adapter
-    }
 
     // Both of these are created in onCreate()
     private var safe: SafeBluetooth? = null
@@ -270,7 +283,7 @@ class RadioInterfaceService : Service(), Logging {
         else {
             // Note: this call does no comms, it just creates the device object (even if the
             // device is off/not connected)
-            val device = bluetoothAdapter?.getRemoteDevice(address)
+            val device = getBluetoothAdapter(this)?.getRemoteDevice(address)
             if (device != null) {
                 info("Creating radio interface service.  device=$address")
 

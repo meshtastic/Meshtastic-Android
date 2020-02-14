@@ -2,7 +2,7 @@
 MVP features required for first public alpha 
 
 * if no radio is selected, launch app on the radio select screen
-* warn user to bt pair
+* when we select a new radio, restart the service
 * show bt scan progress centered and towards the bottom of the screen
 * get rid of green bar at top
 * change titlebar based off which screen we are showing
@@ -105,3 +105,4 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * use https://codelabs.developers.google.com/codelabs/jetpack-compose-basics/#4 to show service state
 * all chat in the app defaults to group chat
 * start bt receive on boot
+* warn user to bt pair
