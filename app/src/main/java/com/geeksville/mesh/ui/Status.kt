@@ -5,6 +5,7 @@ import androidx.compose.mutableStateOf
 import com.geeksville.mesh.MeshUser
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.Position
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import java.util.*
 
 // defines the screens we have in the app
@@ -22,7 +23,10 @@ data class TextMessage(val date: Date, val from: String, val text: String)
 
 /// FIXME - figure out how to merge this staate with the AppStatus Model
 object UIState {
-    
+
+    /// Kinda ugly - created in the activity but used from Compose - figure out if there is a cleaner way GIXME
+    lateinit var googleSignInClient: GoogleSignInClient
+
     private val testPositions = arrayOf(
         Position(32.776665, -96.796989, 35), // dallas
         Position(32.960758, -96.733521, 35), // richardson

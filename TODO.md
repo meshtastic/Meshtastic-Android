@@ -1,8 +1,7 @@
 # High priority
 MVP features required for first public alpha 
 
-* use google signin to get user name (later give other options)
-* always set a _unique_ owner id (if changed)
+* let user set name and shortname
 * stop scan when we start the service
 * set the radio by using the service
 * startforegroundservice only if we have a valid radio
@@ -52,6 +51,8 @@ Do this "Signal app compatible" release relatively soon after the alpha release 
 # Medium priority
 Things for the betaish period.
 
+* use google signin to get user name 
+* use Firebase Test Lab
 * let user pick/specify a name through ways other than google signin (for the privacy concerned, or devices without Play API)
 * make my android app show mesh state
 * show qr code for each channel https://medium.com/@aanandshekharroy/generate-barcode-in-android-app-using-zxing-64c076a5d83a
@@ -114,3 +115,4 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * all chat in the app defaults to group chat
 * start bt receive on boot
 * warn user to bt pair
+* suppress logging output if running a release build (required for play store)

@@ -2,6 +2,7 @@ package com.geeksville.mesh
 
 import android.os.Debug
 import com.geeksville.android.GeeksvilleApplication
+import com.geeksville.android.Logging
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 
@@ -9,6 +10,8 @@ class MeshUtilApplication : GeeksvilleApplication(null, "58e72ccc361883ea502510b
 
     override fun onCreate() {
         super.onCreate()
+
+        Logging.showLogs = BuildConfig.DEBUG
 
         // We default to off in the manifest, FIXME turn on only if user approves
         // leave off when running in the debugger

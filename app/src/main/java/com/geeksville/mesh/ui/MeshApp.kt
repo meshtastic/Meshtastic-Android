@@ -36,6 +36,22 @@ fun HomeContent() {
             Text("Text: ${it.text}")
         }
 
+        /* FIXME - doens't work yet - probably because I'm not using release keys
+        // If account is null, then show the signin button, otherwise
+        val context = ambient(ContextAmbient)
+        val account = GoogleSignIn.getLastSignedInAccount(context)
+        if (account != null)
+            Text("We have an account")
+        else {
+            Text("No account yet")
+            if (context is Activity) {
+                Button("Google sign-in", onClick = {
+                    val signInIntent: Intent = UIState.googleSignInClient.signInIntent
+                    context.startActivityForResult(signInIntent, MainActivity.RC_SIGN_IN)
+                })
+            }
+        } */
+
         /*
         Button(text = "Start scan",
             onClick = {

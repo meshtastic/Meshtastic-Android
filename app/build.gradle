@@ -14,10 +14,10 @@ android {
     buildToolsVersion "29.0.2"
     defaultConfig {
         applicationId "com.geeksville.mesh"
-        minSdkVersion 21
+        minSdkVersion 22 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -98,6 +98,9 @@ dependencies {
     implementation "androidx.ui:ui-tooling:$compose_version"
     androidTestImplementation("androidx.ui:ui-platform:$compose_version")
     androidTestImplementation("androidx.ui:ui-test:$compose_version")
+
+    // For Google Sign-In (owner name accesss)
+    implementation 'com.google.android.gms:play-services-auth:17.0.0'
 
     // Add the Firebase SDK for Crashlytics.
     implementation 'com.google.firebase:firebase-crashlytics:17.0.0-beta01'
