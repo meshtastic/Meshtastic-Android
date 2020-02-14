@@ -168,12 +168,7 @@ class MainActivity : AppCompatActivity(), Logging,
         } else {
             Toast.makeText(this, "Error - this app requires bluetooth", Toast.LENGTH_LONG).show()
         }
-
-        /* Do this better FIXME */
-        val usetbeam = false
-        val address = if (usetbeam) "B4:E6:2D:EA:32:B7" else "24:6F:28:96:C9:2A"
-        RadioInterfaceService.setBondedDeviceAddress(this, null)
-
+        
         requestPermission()
     }
 
