@@ -4,18 +4,34 @@ import androidx.annotation.DrawableRes
 import androidx.compose.Composable
 import androidx.compose.state
 import androidx.ui.animation.Crossfade
+import androidx.ui.core.Clip
 import androidx.ui.core.Modifier
 import androidx.ui.core.Text
+import androidx.ui.core.TextField
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
+import androidx.ui.input.ImeAction
 import androidx.ui.layout.*
 import androidx.ui.material.*
 import androidx.ui.material.surface.Surface
+import androidx.ui.text.TextStyle
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
+import com.geeksville.android.Logging
 import com.geeksville.mesh.R
 
+
+object UILog : Logging
+
+/// Given a human name, strip out the first letter of the first three words and return that as the initials for
+/// that user.
+fun getInitials(name: String): String {
+    val words = name.split(Regex("\\s+")).filter { it.isNotEmpty() }.take(3).map { it.first() }
+        .joinToString("")
+
+    return words
+}
 
 @Composable
 fun HomeContent() {
@@ -35,6 +51,51 @@ fun HomeContent() {
         UIState.messages.value.forEach {
             Text("Text: ${it.text}")
         }
+
+        val message = state { "text message" }
+        Surface(color = Color.Yellow) {
+            Row {
+                Clip(shape = RoundedCornerShape(15.dp)) {
+                    Padding(padding = 15.dp) {
+                        TextField(
+                            value = message.value,
+                            onValueChange = { message.value = it },
+                            textStyle = TextStyle(
+                                color = Color.DarkGray
+                            ),
+                            imeAction = ImeAction.Send,
+                            onImeActionPerformed = {
+                                UILog.info("did IME action")
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        val state = state { "fixme bob" }
+        Surface(color = Color.LightGray) {
+            Row {
+                Clip(shape = RoundedCornerShape(15.dp)) {
+                    Padding(padding = 15.dp) {
+                        TextField(
+                            value = state.value,
+                            onValueChange = { state.value = it },
+                            textStyle = TextStyle(
+                                color = Color.DarkGray
+                            ),
+                            imeAction = ImeAction.Done,
+                            onImeActionPerformed = {
+                                UILog.info("did IME action")
+                            }
+                        )
+                    }
+                }
+
+                Text(text = getInitials(state.value))
+            }
+        }
+
 
         /* FIXME - doens't work yet - probably because I'm not using release keys
         // If account is null, then show the signin button, otherwise

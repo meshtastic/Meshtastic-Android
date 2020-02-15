@@ -295,10 +295,10 @@ message DeviceState {
 
         /// We bump up the integer values in this enum to indicate minimum levels of encodings for saved files
         /// if your file is below the Minimum you should discard it.
-        Minimum = 11;
+        Minimum = 12;
 
         /// The current value we are using for saved files
-        Current = 11;
+        Current = 12;
     };
 
     /// A version integer used to invalidate old save files when we make incompatible changes

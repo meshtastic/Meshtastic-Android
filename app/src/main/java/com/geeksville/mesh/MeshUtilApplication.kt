@@ -15,8 +15,7 @@ class MeshUtilApplication : GeeksvilleApplication(null, "58e72ccc361883ea502510b
 
         // We default to off in the manifest, FIXME turn on only if user approves
         // leave off when running in the debugger
-        if (false && !Debug.isDebuggerConnected())
+        if (!BuildConfig.DEBUG || !Debug.isDebuggerConnected())
             FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
-
     }
 }

@@ -1,8 +1,11 @@
 # Meshtastic-Android
 
-This is a tool for using Android with mesh radios.  You probably don't want it yet ;-).
+This is a tool for using Android with mesh radios.  
 
-Questions? kevinh@geeksville.com
+This project is currently pre-alpha, but if you have questions please join our chat [![Join the chat at https://gitter.im/Meshtastic/community](https://badges.gitter.im/Meshtastic/community.svg)](https://gitter.im/Meshtastic/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge).
+
+Soon our first alpha release of will be released here:
+[![Download at https://play.google.com/store/apps/details?id=com.geeksville.mesh](https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png)](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dappgit%26anid%3Dadmob)
 
 ## Analytics setup
 

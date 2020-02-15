@@ -12,6 +12,7 @@
 *DeviceState.receive_queue max_count:32
 
 # FIXME, max out based on total SubPacket size And do fragmentation and reassembly (for larger payloads) at the Android layer, not the esp32 layer.
+# note: this payload length is ONLY the bytes that are sent inside of the radiohead packet
 *Data.payload max_size:251
 
 # 128 bit psk key (we don't use 256 bit yet because we want to keep our QR code small)
@@ -20,3 +21,4 @@
 
 # MyMessage.name         max_size:40 
 # or fixed_length or fixed_count, or max_count
+

@@ -6,6 +6,8 @@ MVP features required for first public alpha
 * set the radio by using the service
 * startforegroundservice only if we have a valid radio
 * if no radio is selected, launch app on the radio select screen
+* provide gps location for devices that don't have it
+* let user send texts
 * when we select a new radio, restart the service
 * show bt scan progress centered and towards the bottom of the screen
 * get rid of green bar at top
@@ -14,6 +16,7 @@ MVP features required for first public alpha
 * treat macaddrs as the unique id, not the app layer user id
 * on onStop somehow stop the BT scan (to prevent burning battery)
 * add alphatest screen at boot
+* have the foreground service's notification show a summary of network status, add (individually maskable) notifications for received texts or new positions
 * prompt user to turnon bluetooth and bind
 * test bt boot behavior
 * fix BT device scanning - make a setup screen
@@ -32,7 +35,8 @@ MVP features required for first public alpha
 * test with oldest compatible android in emulator (see below for testing with hardware)
 * make playstore entry, first public alpha
 * tell Compose geeks 
-* tell various vendors & post in forum
+* tell various vendors & post in forums
+* add play store link with https://developers.google.com/analytics/devguides/collection/android/v4/campaigns#google-play-url-builder and the play icon
 
 # Signal alpha release
 Do this "Signal app compatible" release relatively soon after the alpha release of the android app.
