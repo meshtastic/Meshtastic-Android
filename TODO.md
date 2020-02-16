@@ -55,6 +55,8 @@ Do this "Signal app compatible" release relatively soon after the alpha release 
 # Medium priority
 Things for the betaish period.
 
+* only publish gps positions once every 5 mins while we are connected to our radio _and_ someone else is in the mesh
+* Do PRIORITY_BALANCED_POWER_ACCURACY for our gps updates when no one in the mesh is nearer than 200 meters
 * fix slow rendering warnings in play console
 * use google signin to get user name 
 * use Firebase Test Lab

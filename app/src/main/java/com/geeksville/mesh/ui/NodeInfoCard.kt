@@ -1,7 +1,6 @@
 package com.geeksville.mesh.ui
 
 import androidx.compose.Composable
-import androidx.ui.core.Modifier
 import androidx.ui.core.Text
 import androidx.ui.layout.*
 import androidx.ui.material.EmphasisLevels
@@ -11,34 +10,35 @@ import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
+import androidx.ui.core.Modifier as Modifier1
 
 
 @Composable
-fun NodeIcon(modifier: Modifier = Modifier.None, node: NodeInfo) {
+fun NodeIcon(modifier: Modifier1 = Modifier1.None, node: NodeInfo) {
     Column {
         Container(modifier = modifier + LayoutSize(40.dp, 40.dp)) {
             VectorImage(id = if (node.user?.shortName != null) R.drawable.person else R.drawable.help)
         }
 
         // Show our shortname if possible
-        node.user?.shortName?.let {
+        /* node.user?.shortName?.let {
             Text(it)
-        }
+        } */
 
     }
 }
 
 @Composable
-fun CompassHeading(modifier: Modifier = Modifier.None, node: NodeInfo) {
+fun CompassHeading(modifier: Modifier1 = Modifier1.None, node: NodeInfo) {
     Column {
         if (node.position != null) {
             Container(modifier = modifier + LayoutSize(40.dp, 40.dp)) {
                 VectorImage(id = R.drawable.navigation)
             }
-            Text("2.3 km")
         } else Container(modifier = modifier + LayoutSize(40.dp, 40.dp)) {
             VectorImage(id = R.drawable.help)
         }
+        Text("2.3 km") // always reserve space for the distance even if we aren't showing it
     }
 }
 

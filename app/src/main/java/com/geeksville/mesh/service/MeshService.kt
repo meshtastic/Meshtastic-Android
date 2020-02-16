@@ -1,5 +1,6 @@
 package com.geeksville.mesh.service
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -16,8 +17,11 @@ import com.geeksville.mesh.*
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.util.exceptionReporter
+import com.geeksville.util.reportException
 import com.geeksville.util.toOneLineString
 import com.geeksville.util.toRemoteExceptions
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
 import com.google.protobuf.ByteString
 import java.nio.charset.Charset
 
@@ -43,12 +47,6 @@ class MeshService : Service(), Logging {
         class IdNotFoundException(id: String) : Exception("ID not found $id")
         class NodeNumNotFoundException(id: Int) : Exception("NodeNum not found $id")
         class NotInMeshException() : Exception("We are not yet in a mesh")
-
-        /// If we haven't yet received a node number from the radio
-        private const val NODE_NUM_UNKNOWN = -2
-
-        /// If the radio hasn't yet joined a mesh (i.e. no nodenum assigned)
-        private const val NODE_NUM_NO_MESH = -1
 
         /// Helper function to start running our service, returns the intent used to reach it
         /// or null if the service could not be started (no bluetooth or no bonded device set)
@@ -106,6 +104,85 @@ class MeshService : Service(), Logging {
         }
     }
 
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(locationResult: LocationResult) {
+            super.onLocationResult(locationResult)
+            var l = locationResult.lastLocation
+
+            // Docs say lastLocation should always be !null if there are any locations, but that's not the case
+            if (l == null) {
+                // try to only look at the accurate locations
+                val locs =
+                    locationResult.locations.filter { !it.hasAccuracy() || it.accuracy < 200 }
+                l = locs.lastOrNull()
+            }
+            if (l != null) {
+                info("got location $l")
+                if (l.hasAccuracy() && l.accuracy >= 200) // if more than 200 meters off we won't use it
+                    warn("accuracy ${l.accuracy} is too poor to use")
+                else {
+                    sendPosition(l.latitude, l.longitude, l.altitude.toInt())
+                }
+            }
+
+        }
+    }
+
+    private var fusedLocationClient: FusedLocationProviderClient? = null
+
+    /**
+     * start our location requests
+     *
+     * per https://developer.android.com/training/location/change-location-settings
+     */
+    @SuppressLint("MissingPermission")
+    private fun startLocationRequests() {
+        val request = LocationRequest.create().apply {
+            interval =
+                60 * 1000 // FIXME, do more like once every 5 mins while we are connected to our radio _and_ someone else is in the mesh
+
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(request)
+        val locationClient = LocationServices.getSettingsClient(this)
+        val locationSettingsResponse = locationClient.checkLocationSettings(builder.build())
+
+        locationSettingsResponse.addOnSuccessListener {
+            debug("We are now successfully listening to the GPS")
+        }
+
+        locationSettingsResponse.addOnFailureListener { exception ->
+            error("Failed to listen to GPS")
+            if (exception is ResolvableApiException) {
+                exceptionReporter {
+                    // Location settings are not satisfied, but this can be fixed
+                    // by showing the user a dialog.
+
+                    // FIXME
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    /* exception.startResolutionForResult(
+                        this@MainActivity,
+                        REQUEST_CHECK_SETTINGS
+                    ) */
+                }
+            } else
+                reportException(exception)
+        }
+
+        val client = LocationServices.getFusedLocationProviderClient(this)
+
+
+        // FIXME - should we use Looper.myLooper() in the third param per https://github.com/android/location-samples/blob/432d3b72b8c058f220416958b444274ddd186abd/LocationUpdatesForegroundService/app/src/main/java/com/google/android/gms/location/sample/locationupdatesforegroundservice/LocationUpdatesService.java
+        client.requestLocationUpdates(request, locationCallback, null)
+
+        fusedLocationClient = client
+    }
+
+    private fun stopLocationRequests() {
+        fusedLocationClient?.removeLocationUpdates(locationCallback)
+        fusedLocationClient = null
+    }
 
     /**
      * The RECEIVED_OPAQUE:
@@ -265,12 +342,16 @@ class MeshService : Service(), Logging {
     /// BEGINNING OF MODEL - FIXME, move elsewhere
     ///
 
+    /// special broadcast address
+    val NODENUM_BROADCAST = 255
+
+    // MyNodeInfo sent via special protobuf from radio
+    data class MyNodeInfo(val myNodeNum: Int, val hasGPS: Boolean)
+
+    var myNodeInfo: MyNodeInfo? = null
+
     /// Is our radio connected to the phone?
     private var isConnected = false
-
-    /// We learn this from the node db sent by the device - it is stable for the entire session
-    private var ourNodeNum =
-        NODE_NUM_UNKNOWN
 
     // The database of active nodes, index is the node number
     private val nodeDBbyNodeNum = mutableMapOf<Int, NodeInfo>()
@@ -324,13 +405,10 @@ class MeshService : Service(), Logging {
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
     private fun newMeshPacketTo(idNum: Int) = MeshPacket.newBuilder().apply {
-        from = ourNodeNum
-
-        if (from == NODE_NUM_NO_MESH)
-            throw NotInMeshException()
-        else if (from == NODE_NUM_UNKNOWN)
+        if (myNodeInfo == null)
             throw RadioNotConnectedException()
 
+        from = myNodeInfo!!.myNodeNum
         to = idNum
     }
 
@@ -397,6 +475,17 @@ class MeshService : Service(), Logging {
         }
     }
 
+    /// Update our DB of users based on someone sending out a Position subpacket
+    private fun handleReceivedPosition(fromNum: Int, p: MeshProtos.Position) {
+        updateNodeInfo(fromNum) {
+            it.position = Position(
+                p.latitude,
+                p.longitude,
+                p.altitude
+            )
+        }
+    }
+
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
         val fromNum = packet.from
@@ -416,13 +505,8 @@ class MeshService : Service(), Logging {
 
         when (p.variantCase.number) {
             MeshProtos.SubPacket.POSITION_FIELD_NUMBER ->
-                updateNodeInfo(fromNum) {
-                    it.position = Position(
-                        p.position.latitude,
-                        p.position.longitude,
-                        p.position.altitude
-                    )
-                }
+                handleReceivedPosition(fromNum, p.position)
+
             MeshProtos.SubPacket.DATA_FIELD_NUMBER ->
                 handleReceivedData(fromNum, p.data)
 
@@ -447,7 +531,10 @@ class MeshService : Service(), Logging {
             val myInfo = MeshProtos.MyNodeInfo.parseFrom(
                 connectedRadio.readMyNode()
             )
-            ourNodeNum = myInfo.myNodeNum
+
+
+            val mynodeinfo = MyNodeInfo(myInfo.myNodeNum, myInfo.hasGps)
+            myNodeInfo = mynodeinfo
 
             // Ask for the current node DB
             connectedRadio.restartNodeInfo()
@@ -482,6 +569,15 @@ class MeshService : Service(), Logging {
                 // advance to next
                 infoBytes = connectedRadio.readNodeInfo()
             }
+
+            // we don't ask for GPS locations from android if our device has a built in GPS
+            if (!mynodeinfo.hasGPS)
+                startLocationRequests()
+            else
+                debug("Our radio has a built in GPS, so not reading GPS in phone")
+        } else {
+            // lost radio connection, therefore no need to keep listening to GPS
+            stopLocationRequests()
         }
     }
 
@@ -527,6 +623,34 @@ class MeshService : Service(), Logging {
         }
     }
 
+    /// Send a position (typically from our built in GPS) into the mesh
+    private fun sendPosition(lat: Double, lon: Double, alt: Int) {
+        debug("Sending our position into mesh lat=$lat, lon=$lon, alt=$alt")
+
+        val destNum = NODENUM_BROADCAST
+
+        val position = MeshProtos.Position.newBuilder().also {
+            it.latitude = lat
+            it.longitude = lon
+            it.altitude = alt
+        }.build()
+
+        // encapsulate our payload in the proper protobufs and fire it off
+        val packet = newMeshPacketTo(destNum)
+
+        packet.payload = MeshProtos.SubPacket.newBuilder().also {
+            it.position = position
+        }.build()
+
+        // Also update our own map for our nodenum, by handling the packet just like packets from other users
+        handleReceivedPosition(myNodeInfo!!.myNodeNum, position)
+
+        // send the packet into the mesh
+        sendToRadio(ToRadio.newBuilder().apply {
+            this.packet = packet.build()
+        })
+    }
+
     private val binder = object : IMeshService.Stub() {
         // Note: bound methods don't get properly exception caught/logged, so do that with a wrapper
         // per https://blog.classycode.com/dealing-with-exceptions-in-aidl-9ba904c6d63
@@ -547,8 +671,8 @@ class MeshService : Service(), Logging {
                 }.build()
 
                 // Also update our own map for our nodenum, by handling the packet just like packets from other users
-                if (ourNodeNum >= 0) {
-                    handleReceivedUser(ourNodeNum, user)
+                if (myNodeInfo != null) {
+                    handleReceivedUser(myNodeInfo!!.myNodeNum, user)
                 }
 
                 // set my owner info
