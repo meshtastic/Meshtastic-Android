@@ -197,7 +197,7 @@ class RadioInterfaceService : Service(), Logging {
         // al proto = MeshProtos.ToRadio.parseFrom(p)
 
         debug("sending to radio")
-        doWrite(BTM_TORADIO_CHARACTER, p)
+        doAsyncWrite(BTM_TORADIO_CHARACTER, p)
         if (logSends) {
             sentPacketsLog.write(p)
             sentPacketsLog.flush()
@@ -334,6 +334,27 @@ class RadioInterfaceService : Service(), Logging {
 
             safe!!.writeCharacteristic(toRadio)
             debug("write of ${a.size} bytes completed")
+        }
+    }
+
+    /**
+     * do an asynchronous write operation
+     * Any error responses will be ignored (other than log messages)
+     */
+    private fun doAsyncWrite(uuid: UUID, a: ByteArray) = toRemoteExceptions {
+        if (!isConnected)
+            throw RadioNotConnectedException()
+        else {
+            debug("queuing ${a.size} bytes to $uuid")
+
+            // Note: we generate a new characteristic each time, because we are about to
+            // change the data and we want the data stored in the closure
+            val toRadio = service.getCharacteristic(uuid)
+            toRadio.value = a
+
+            safe!!.asyncWriteCharacteristic(toRadio) {
+                debug("asyncwrite of ${a.size} bytes completed")
+            }
         }
     }
 
