@@ -3,22 +3,25 @@ package com.geeksville.mesh.ui
 import android.util.Base64
 import androidx.compose.Model
 import androidx.compose.mutableStateOf
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.MeshUser
-import com.geeksville.mesh.NodeInfo
-import com.geeksville.mesh.Position
+import com.geeksville.mesh.*
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import java.util.*
 
+
+data class ScreenInfo(val icon: Int, val label: String)
+
 // defines the screens we have in the app
-sealed class Screen {
-    object Home : Screen()
-    object SelectRadio : Screen()
+object Screen {
+    val settings = ScreenInfo(R.drawable.ic_twotone_settings_applications_24, "Settings")
+    val channel = ScreenInfo(R.drawable.ic_twotone_contactless_24, "Channel")
+    val users = ScreenInfo(R.drawable.ic_twotone_people_24, "Users")
+    val messages = ScreenInfo(R.drawable.ic_twotone_message_24, "Messages")
 }
+
 
 @Model
 object AppStatus {
-    var currentScreen: Screen = Screen.Home
+    var currentScreen: ScreenInfo = Screen.messages
 }
 
 data class TextMessage(val date: Date, val from: String, val text: String)
@@ -96,6 +99,6 @@ object UIState {
 /**
  * Temporary solution pending navigation support.
  */
-fun navigateTo(destination: Screen) {
+fun navigateTo(destination: ScreenInfo) {
     AppStatus.currentScreen = destination
 }

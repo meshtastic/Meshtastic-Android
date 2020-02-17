@@ -42,23 +42,23 @@ title.
 
 Fragments:
 
-SettingsFragment shows
+SettingsFragment shows "Settings"
   username
   shortname
   bluetooth pairing list
   (eventually misc device settings that are not channel related)
 
-Channel fragment
+Channel fragment "Channel"
   qr code, copy link button
   ch number
   misc other settings
   (eventually a way of choosing between past channels)
 
-ChatFragment
+ChatFragment "Messages"
   a text box to enter new texts
   a scrolling list of rows.  each row is a text and a sender info layout
 
-NodeListFragment
+NodeListFragment "Users"
   a node info row for every node
 
 ViewModels:

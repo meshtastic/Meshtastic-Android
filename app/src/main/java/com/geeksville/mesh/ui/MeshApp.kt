@@ -152,13 +152,22 @@ fun MeshApp() {
     }
 }
 
-@Preview
+// @Preview
 @Composable
 fun previewView() {
     // It seems modaldrawerlayout not yet supported in preview
     MaterialTheme(colors = darkColorPalette()) {
         HomeContent()
     }
+}
+
+@Preview
+@Composable
+fun previewDrawer() {
+    AppDrawer(
+        currentScreen = AppStatus.currentScreen,
+        closeDrawer = { }
+    )
 }
 
 @Composable
@@ -178,11 +187,9 @@ private fun AppContent(openDrawer: () -> Unit) {
 
                 VerticalScroller(modifier = LayoutFlexible(1f)) {
                     when (screen) {
-                        is Screen.Home -> HomeContent()
-                        is Screen.SelectRadio -> BTScanScreen()
-                        // Question: how to get hooks invoked when this screen gets shown/removed?
-                        // i.e. I need to start/stop a bluetooth scan operation. depending on the
-                        // appearance/disappearance of this screen.
+                        Screen.messages -> HomeContent()
+                        Screen.settings -> BTScanScreen()
+                        else -> TODO()
                     }
                 }
             }
@@ -192,7 +199,7 @@ private fun AppContent(openDrawer: () -> Unit) {
 
 @Composable
 private fun AppDrawer(
-    currentScreen: Screen,
+    currentScreen: ScreenInfo,
     closeDrawer: () -> Unit
 ) {
     Column(modifier = LayoutSize.Fill) {
@@ -203,15 +210,15 @@ private fun AppDrawer(
                 tint = (MaterialTheme.colors()).primary
             )
             Spacer(LayoutWidth(8.dp))
-            VectorImage(id = R.drawable.ic_launcher_new_foreground)
+            // VectorImage(id = R.drawable.ic_launcher_new_foreground)
         }
         Divider(color = Color(0x14333333))
 
         @Composable
-        fun ScreenButton(icon: Int, label: String, screen: Screen) {
+        fun ScreenButton(screen: ScreenInfo) {
             DrawerButton(
-                icon = icon,
-                label = label,
+                icon = screen.icon,
+                label = screen.label,
                 isSelected = currentScreen == screen
             ) {
                 navigateTo(screen)
@@ -219,8 +226,10 @@ private fun AppDrawer(
             }
         }
 
-        ScreenButton(R.drawable.ic_launcher_new_foreground, "Home", Screen.Home)
-        ScreenButton(R.drawable.ic_launcher_new_foreground, "Setup", Screen.SelectRadio)
+        ScreenButton(Screen.messages)
+        ScreenButton(Screen.users)
+        ScreenButton(Screen.channel)
+        ScreenButton(Screen.settings)
     }
 }
 
