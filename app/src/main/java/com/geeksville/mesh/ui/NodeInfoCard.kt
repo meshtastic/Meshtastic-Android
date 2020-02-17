@@ -13,6 +13,7 @@ import com.geeksville.mesh.R
 import androidx.ui.core.Modifier as Modifier1
 
 
+/*
 @Composable
 fun NodeIcon(modifier: Modifier1 = Modifier1.None, node: NodeInfo) {
     Column {
@@ -27,6 +28,7 @@ fun NodeIcon(modifier: Modifier1 = Modifier1.None, node: NodeInfo) {
 
     }
 }
+ */
 
 @Composable
 fun CompassHeading(modifier: Modifier1 = Modifier1.None, node: NodeInfo) {
@@ -56,26 +58,24 @@ fun NodeHeading(node: NodeInfo) {
 /**
  * An info card for a node:
  *
- * on left, the icon for the user (or shortname if that is all we have)
+ * on left, the icon for the user (or shortname if that is all we have) (this includes user's distance and heading arrow)
  *
  * Middle is users fullname
- *
- * on right a compass rose with a pointer to the user and distance
  *
  */
 @Composable
 fun NodeInfoCard(node: NodeInfo) {
     // Text("Node: ${it.user?.longName}")
     Row(modifier = LayoutPadding(16.dp)) {
-        NodeIcon(
+        UserIcon(
             modifier = LayoutPadding(left = 0.dp, top = 0.dp, right = 0.dp, bottom = 0.dp),
-            node = node
+            user = node
         )
 
         NodeHeading(node)
 
         // FIXME - show compass instead
-        CompassHeading(node = node)
+        // CompassHeading(node = node)
     }
 }
 

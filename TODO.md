@@ -8,6 +8,7 @@ MVP features required for first public alpha
 * let user set name and shortname
 * take video
 
+* show pointer arrow on the outside of the user icons, always pointing towoards them
 * stop scan when we start the service
 * set the radio by using the service
 * startforegroundservice only if we have a valid radio

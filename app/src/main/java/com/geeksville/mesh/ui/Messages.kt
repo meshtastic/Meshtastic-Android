@@ -9,10 +9,7 @@ import androidx.ui.core.TextField
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.input.ImeAction
-import androidx.ui.layout.Column
-import androidx.ui.layout.LayoutPadding
-import androidx.ui.layout.LayoutSize
-import androidx.ui.layout.Row
+import androidx.ui.layout.*
 import androidx.ui.material.Emphasis
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.ProvideEmphasis
@@ -21,7 +18,6 @@ import androidx.ui.text.TextStyle
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import com.geeksville.android.Logging
-import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.MessagesState.messages
 import java.text.SimpleDateFormat
 import java.util.*
@@ -58,6 +54,7 @@ val TimestampEmphasis = object : Emphasis {
     override fun emphasize(color: Color) = color.copy(alpha = 0.12f)
 }
 
+
 /**
  * A pretty version the text, with user icon to the left, name and time of arrival (copy slack look and feel)
  */
@@ -66,9 +63,9 @@ fun MessageCard(msg: TextMessage, modifier: Modifier = Modifier.None) {
 
 
     Row(modifier = modifier) {
-        VectorImage(id = R.drawable.ic_twotone_person_24, tint = palette.onSecondary)
+        UserIcon(null)
 
-        Column {
+        Column(modifier = LayoutPadding(left = 12.dp)) {
             Row {
                 val nodes = NodeDB.nodes.value
 
@@ -100,23 +97,23 @@ fun MessagesContent() {
         val sidePad = 8.dp
         val topPad = 4.dp
 
-        messages.value.forEach {
-            MessageCard(
-                it, modifier = LayoutPadding(
-                    left = sidePad,
-                    right = sidePad,
-                    top = topPad,
-                    bottom = topPad
+        Column(modifier = LayoutGravity.Start) {
+            messages.value.forEach {
+                MessageCard(
+                    it, modifier = LayoutPadding(
+                        left = sidePad,
+                        right = sidePad,
+                        top = topPad,
+                        bottom = topPad
+                    )
                 )
-            )
+            }
         }
 
         val message = state { "text message" }
-
         val backgroundColor = palette.secondary.copy(alpha = 0.12f)
-
         Surface(
-            modifier = LayoutPadding(8.dp),
+            modifier = LayoutPadding(8.dp) + LayoutSize.Min(40.dp, 40.dp) + LayoutGravity.End,
             color = backgroundColor,
             shape = RoundedCornerShape(4.dp)
         ) {
