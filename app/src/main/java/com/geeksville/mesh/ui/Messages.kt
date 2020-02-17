@@ -7,11 +7,13 @@ import androidx.ui.core.Modifier
 import androidx.ui.core.Text
 import androidx.ui.core.TextField
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
+import androidx.ui.graphics.Color
 import androidx.ui.input.ImeAction
 import androidx.ui.layout.Column
 import androidx.ui.layout.LayoutPadding
 import androidx.ui.layout.LayoutSize
 import androidx.ui.layout.Row
+import androidx.ui.material.Emphasis
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.ProvideEmphasis
 import androidx.ui.material.surface.Surface
@@ -39,10 +41,22 @@ object MessagesState : Logging {
 
     // If the following (unused otherwise) line is commented out, the IDE preview window works.
     // if left in the preview always renders as empty.
-    val messages = mutableStateOf(MessagesState.testTexts)
+    val messages = mutableStateOf(MessagesState.testTexts, { a, b ->
+        a.size == b.size // If the # of messages changes, consider it important for rerender
+    })
+
+    fun addMessage(m: TextMessage) {
+        val l = messages.value.toMutableList()
+        l.add(m)
+        messages.value = l
+    }
 }
 
 private val dateFormat = SimpleDateFormat("h:mm a")
+
+val TimestampEmphasis = object : Emphasis {
+    override fun emphasize(color: Color) = color.copy(alpha = 0.12f)
+}
 
 /**
  * A pretty version the text, with user icon to the left, name and time of arrival (copy slack look and feel)
@@ -63,7 +77,7 @@ fun MessageCard(msg: TextMessage, modifier: Modifier = Modifier.None) {
                 val user = node?.user
                 val senderName = user?.longName ?: msg.from
                 Text(text = senderName)
-                ProvideEmphasis(emphasis = MaterialTheme.emphasisLevels().disabled) {
+                ProvideEmphasis(emphasis = TimestampEmphasis) {
                     Text(
                         text = dateFormat.format(msg.date),
                         modifier = LayoutPadding(left = 8.dp),
@@ -115,6 +129,7 @@ fun MessagesContent() {
                 imeAction = ImeAction.Send,
                 onImeActionPerformed = {
                     MessagesState.info("did IME action")
+                    MessagesState.addMessage(TextMessage("fixme", message.value))
                 },
                 modifier = LayoutPadding(4.dp)
             )

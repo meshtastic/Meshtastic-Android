@@ -1,9 +1,10 @@
 # High priority
 MVP features required for first public alpha 
 
+* show real ID of me when I sent texts
+* keep text entry box at bottom of screen
 * show user icons in chat
-* show sent messages in chat
-* make chat pretty and functional
+* when I enter texts, send them to the device
 * let user set name and shortname
 * take video
 
