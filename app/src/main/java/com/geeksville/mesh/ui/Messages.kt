@@ -9,7 +9,10 @@ import androidx.ui.core.TextField
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.input.ImeAction
-import androidx.ui.layout.*
+import androidx.ui.layout.Column
+import androidx.ui.layout.LayoutPadding
+import androidx.ui.layout.LayoutSize
+import androidx.ui.layout.Row
 import androidx.ui.material.Emphasis
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.ProvideEmphasis
@@ -97,7 +100,7 @@ fun MessagesContent() {
         val sidePad = 8.dp
         val topPad = 4.dp
 
-        Column(modifier = LayoutGravity.Start) {
+        Column(modifier = LayoutFlexible(1.0f)) {
             messages.value.forEach {
                 MessageCard(
                     it, modifier = LayoutPadding(
@@ -113,7 +116,7 @@ fun MessagesContent() {
         val message = state { "text message" }
         val backgroundColor = palette.secondary.copy(alpha = 0.12f)
         Surface(
-            modifier = LayoutPadding(8.dp) + LayoutSize.Min(40.dp, 40.dp) + LayoutGravity.End,
+            modifier = LayoutPadding(8.dp),
             color = backgroundColor,
             shape = RoundedCornerShape(4.dp)
         ) {
