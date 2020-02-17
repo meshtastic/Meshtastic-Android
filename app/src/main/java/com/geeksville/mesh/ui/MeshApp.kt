@@ -104,12 +104,14 @@ fun HomeContent() {
     }
 }
 
+val palette = lightColorPalette() // darkColorPalette()
+
 
 @Composable
 fun MeshApp() {
     val (drawerState, onDrawerStateChange) = state { DrawerState.Closed }
 
-    MaterialTheme(colors = darkColorPalette()) {
+    MaterialTheme(colors = palette) {
         ModalDrawerLayout(
             drawerState = drawerState,
             onStateChange = onDrawerStateChange,
@@ -129,7 +131,7 @@ fun MeshApp() {
 @Composable
 fun previewView() {
     // It seems modaldrawerlayout not yet supported in preview
-    MaterialTheme(colors = darkColorPalette()) {
+    MaterialTheme(colors = palette) {
         HomeContent()
     }
 }

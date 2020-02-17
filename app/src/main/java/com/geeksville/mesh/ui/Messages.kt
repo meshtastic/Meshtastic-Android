@@ -11,7 +11,6 @@ import androidx.ui.layout.Column
 import androidx.ui.layout.LayoutPadding
 import androidx.ui.layout.LayoutSize
 import androidx.ui.material.MaterialTheme
-import androidx.ui.material.darkColorPalette
 import androidx.ui.material.surface.Surface
 import androidx.ui.text.TextStyle
 import androidx.ui.tooling.preview.Preview
@@ -57,7 +56,7 @@ fun MessagesContent() {
         val message = state { "text message" }
 
         val colors = MaterialTheme.colors()
-        val backgroundColor = colors.surface.copy(alpha = 0.12f)
+        val backgroundColor = colors.secondary.copy(alpha = 0.12f)
 
         Surface(
             modifier = LayoutPadding(8.dp),
@@ -68,7 +67,7 @@ fun MessagesContent() {
                 value = message.value,
                 onValueChange = { message.value = it },
                 textStyle = TextStyle(
-                    color = colors.onSurface.copy(alpha = 0.8f)
+                    color = colors.onSecondary.copy(alpha = 0.8f)
                 ),
                 imeAction = ImeAction.Send,
                 onImeActionPerformed = {
@@ -85,7 +84,7 @@ fun MessagesContent() {
 @Composable
 fun previewMessagesView() {
     // another bug? It seems modaldrawerlayout not yet supported in preview
-    MaterialTheme(colors = darkColorPalette()) {
+    MaterialTheme(colors = palette) {
         MessagesContent()
     }
 }
