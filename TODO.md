@@ -8,6 +8,7 @@ MVP features required for first public alpha
 * let user set name and shortname
 * take video
 
+* when we connect to radio, distances to nodes in the chat log should automatically redraw
 * show pointer arrow on the outside of the user icons, always pointing towoards them
 * stop scan when we start the service
 * set the radio by using the service

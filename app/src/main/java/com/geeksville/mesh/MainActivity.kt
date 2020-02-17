@@ -320,14 +320,9 @@ class MainActivity : AppCompatActivity(), Logging,
                         MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
                             // FIXME - use the real time from the packet
                             // FIXME - don't just slam in a new list each time, it probably causes extra drawing.  Figure out how to be Compose smarter...
-                            val modded = MessagesState.messages.value.toMutableList()
-                            modded.add(
-                                TextMessage(
-                                    sender,
-                                    payload.toString(utf8)
-                                )
-                            )
-                            MessagesState.messages.value = modded
+                            val msg = TextMessage(sender, payload.toString(utf8))
+
+                            MessagesState.addMessage(msg)
                         }
                         else -> TODO()
                     }

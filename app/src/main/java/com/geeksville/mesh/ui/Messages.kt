@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+import android.os.RemoteException
 import androidx.compose.Composable
 import androidx.compose.state
 import androidx.ui.core.Modifier
@@ -118,11 +119,15 @@ fun MessagesContent() {
                     var error: String? = null
                     val service = UIState.meshService
                     if (service != null)
-                        service.sendData(
-                            null,
-                            str.toByteArray(utf8),
-                            MeshProtos.Data.Type.CLEAR_TEXT_VALUE
-                        )
+                        try {
+                            service.sendData(
+                                null,
+                                str.toByteArray(utf8),
+                                MeshProtos.Data.Type.CLEAR_TEXT_VALUE
+                            )
+                        } catch (ex: RemoteException) {
+                            error = "Error: ${ex.message}"
+                        }
                     else
                         error = "Error: No Mesh service"
 

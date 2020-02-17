@@ -28,7 +28,7 @@ fun UserIcon(user: NodeInfo? = null, modifier: Modifier = Modifier.None) {
             modifier = LayoutGravity.Center
         )
         val ourNodeInfo = NodeDB.ourNodeInfo
-        val distance = ourNodeInfo.distanceStr(user)
+        val distance = ourNodeInfo?.distanceStr(user)
         if (distance != null)
             Text(distance, modifier = LayoutGravity.Center)
     }

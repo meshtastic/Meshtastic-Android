@@ -26,7 +26,7 @@ import com.google.protobuf.ByteString
 import java.nio.charset.Charset
 
 
-class RadioNotConnectedException() : Exception("Can't find radio")
+class RadioNotConnectedException() : Exception("Not connected to radio")
 
 
 /**
