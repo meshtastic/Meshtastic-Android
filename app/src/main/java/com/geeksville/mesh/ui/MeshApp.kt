@@ -48,31 +48,6 @@ fun HomeContent() {
             NodeInfoCard(it)
         }
 
-        UIState.messages.value.forEach {
-            Text("Text: ${it.text}")
-        }
-
-        val message = state { "text message" }
-        Surface(color = Color.Yellow) {
-            Row {
-                Clip(shape = RoundedCornerShape(15.dp)) {
-                    Padding(padding = 15.dp) {
-                        TextField(
-                            value = message.value,
-                            onValueChange = { message.value = it },
-                            textStyle = TextStyle(
-                                color = Color.DarkGray
-                            ),
-                            imeAction = ImeAction.Send,
-                            onImeActionPerformed = {
-                                UILog.info("did IME action")
-                            }
-                        )
-                    }
-                }
-            }
-        }
-
         val state = state { "fixme bob" }
         Surface(color = Color.LightGray) {
             Row {
@@ -187,7 +162,7 @@ private fun AppContent(openDrawer: () -> Unit) {
 
                 VerticalScroller(modifier = LayoutFlexible(1f)) {
                     when (screen) {
-                        Screen.messages -> HomeContent()
+                        Screen.messages -> MessagesContent()
                         Screen.settings -> BTScanScreen()
                         Screen.users -> HomeContent()
                         Screen.channel -> HomeContent()

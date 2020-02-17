@@ -17,10 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.ui.core.setContent
 import com.geeksville.android.Logging
 import com.geeksville.mesh.service.*
-import com.geeksville.mesh.ui.MeshApp
-import com.geeksville.mesh.ui.TextMessage
-import com.geeksville.mesh.ui.UIState
-import com.geeksville.mesh.ui.getInitials
+import com.geeksville.mesh.ui.*
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -315,9 +312,10 @@ class MainActivity : AppCompatActivity(), Logging,
                     when (typ) {
                         MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
                             // FIXME - use the real time from the packet
-                            val modded = UIState.messages.value.toMutableList()
+                            // FIXME - don't just slam in a new list each time, it probably causes extra drawing.  Figure out how to be Compose smarter...
+                            val modded = MessagesState.messages.value.toMutableList()
                             modded.add(TextMessage(Date(), sender, payload.toString(utf8)))
-                            UIState.messages.value = modded
+                            MessagesState.messages.value = modded
                         }
                         else -> TODO()
                     }

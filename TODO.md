@@ -55,6 +55,7 @@ Do this "Signal app compatible" release relatively soon after the alpha release 
 # Medium priority
 Things for the betaish period.
 
+* spend some quality power consumption tuning with https://developer.android.com/studio/profile/energy-profiler and https://developer.android.com/topic/performance/power/battery-historian
 * only publish gps positions once every 5 mins while we are connected to our radio _and_ someone else is in the mesh
 * Do PRIORITY_BALANCED_POWER_ACCURACY for our gps updates when no one in the mesh is nearer than 200 meters
 * fix slow rendering warnings in play console

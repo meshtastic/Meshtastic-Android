@@ -45,7 +45,11 @@ fun CompassHeading(modifier: Modifier1 = Modifier1.None, node: NodeInfo) {
 @Composable
 fun NodeHeading(node: NodeInfo) {
     ProvideEmphasis(emphasis = EmphasisLevels().high) {
-        Text(node.user?.longName ?: "unknown", style = MaterialTheme.typography().subtitle1)
+        Text(
+            node.user?.longName ?: "unknown",
+            style = MaterialTheme.typography().subtitle1
+            //modifier = LayoutWidth.Fill
+        )
     }
 }
 

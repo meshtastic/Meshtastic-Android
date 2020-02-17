@@ -11,16 +11,27 @@ import androidx.ui.layout.Container
 import androidx.ui.layout.LayoutSize
 import androidx.ui.material.ripple.Ripple
 import androidx.ui.res.vectorResource
+import androidx.ui.unit.dp
 
 
 @Composable
 fun VectorImageButton(@DrawableRes id: Int, onClick: () -> Unit) {
     Ripple(bounded = false) {
         Clickable(onClick = onClick) {
-            VectorImage(id = id)
+            VectorImage(id = id, modifier = LayoutSize(40.dp, 40.dp))
         }
     }
 }
+
+/* fun AppBarIcon(icon: Image, onClick: () -> Unit) {
+    Container(width = ActionIconDiameter, height = ActionIconDiameter) {
+        Ripple(bounded = false) {
+            Clickable(onClick = onClick) {
+                SimpleImage(icon)
+            }
+        }
+    }
+} */
 
 @Composable
 fun VectorImage(

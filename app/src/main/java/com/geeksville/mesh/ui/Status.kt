@@ -5,7 +5,6 @@ import androidx.compose.Model
 import androidx.compose.mutableStateOf
 import com.geeksville.mesh.*
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import java.util.*
 
 
 data class ScreenInfo(val icon: Int, val label: String)
@@ -23,8 +22,6 @@ object Screen {
 object AppStatus {
     var currentScreen: ScreenInfo = Screen.messages
 }
-
-data class TextMessage(val date: Date, val from: String, val text: String)
 
 /// FIXME - figure out how to merge this staate with the AppStatus Model
 object UIState {
@@ -66,15 +63,9 @@ object UIState {
         )
     }
 
-    val testTexts = listOf(
-        TextMessage(Date(), "+6508675310", "I found the cache"),
-        TextMessage(Date(), "+6508675311", "Help! I've fallen and I can't get up.")
-    )
 
     /// A map from nodeid to to nodeinfo
     val nodes = mutableStateOf(testNodes.map { it.user!!.id to it }.toMap())
-
-    val messages = mutableStateOf(testTexts)
 
     /// Are we connected to our radio device
     val isConnected = mutableStateOf(false)
