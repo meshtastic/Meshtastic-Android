@@ -5,10 +5,14 @@ import androidx.compose.state
 import androidx.ui.core.Modifier
 import androidx.ui.core.Text
 import androidx.ui.core.TextField
+import androidx.ui.foundation.VerticalScroller
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.input.ImeAction
-import androidx.ui.layout.*
+import androidx.ui.layout.Column
+import androidx.ui.layout.LayoutPadding
+import androidx.ui.layout.LayoutSize
+import androidx.ui.layout.Row
 import androidx.ui.material.Emphasis
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.ProvideEmphasis
@@ -70,21 +74,24 @@ fun MessagesContent() {
         val sidePad = 8.dp
         val topPad = 4.dp
 
-        // modifier = LayoutFlexible(1.0f)
-        Column {
-            messages.value.forEach { msg ->
-                MessageCard(
-                    msg, modifier = LayoutPadding(
-                        left = sidePad,
-                        right = sidePad,
-                        top = topPad,
-                        bottom = topPad
+        VerticalScroller(
+            modifier = LayoutFlexible(1f)
+        ) {
+            Column {
+                messages.value.forEach { msg ->
+                    MessageCard(
+                        msg, modifier = LayoutPadding(
+                            left = sidePad,
+                            right = sidePad,
+                            top = topPad,
+                            bottom = topPad
+                        )
                     )
-                )
+                }
             }
         }
 
-        Spacer(LayoutFlexible(1f))
+        // Spacer(LayoutFlexible(1f))
 
         val message = state { "text message" }
         val backgroundColor = palette.secondary.copy(alpha = 0.12f)
