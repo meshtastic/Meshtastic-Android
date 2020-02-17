@@ -1,7 +1,9 @@
 package com.geeksville.mesh.ui
 
+import android.util.Base64
 import androidx.compose.Model
 import androidx.compose.mutableStateOf
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshUser
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.Position
@@ -72,8 +74,23 @@ object UIState {
     val messages = mutableStateOf(testTexts)
 
     /// Are we connected to our radio device
-    var isConnected = mutableStateOf(false)
+    val isConnected = mutableStateOf(false)
 
+    /// various radio settings (including the channel)
+    val radioConfig = mutableStateOf(MeshProtos.RadioConfig.getDefaultInstance())
+
+    /// our name in hte radio
+    /// Note, we generate owner initials automatically for now
+    val ownerName = mutableStateOf("fixme readfromprefs")
+
+    /// Return an URL that represents the current channel values
+    val channelUrl
+        get(): String {
+            val channelBytes = radioConfig.value.channelSettings.toByteArray()
+            val enc = Base64.encodeToString(channelBytes, Base64.URL_SAFE + Base64.NO_WRAP)
+
+            return "https://www.meshtastic.org/c/$enc"
+        }
 }
 
 /**

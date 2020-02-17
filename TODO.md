@@ -1,12 +1,14 @@
 # High priority
 MVP features required for first public alpha 
 
+* make chat pretty and functional
 * let user set name and shortname
+* take video
+
 * stop scan when we start the service
 * set the radio by using the service
 * startforegroundservice only if we have a valid radio
 * if no radio is selected, launch app on the radio select screen
-* provide gps location for devices that don't have it
 * let user send texts
 * when we select a new radio, restart the service
 * show bt scan progress centered and towards the bottom of the screen
@@ -17,14 +19,12 @@ MVP features required for first public alpha
 * on onStop somehow stop the BT scan (to prevent burning battery)
 * add alphatest screen at boot
 * have the foreground service's notification show a summary of network status, add (individually maskable) notifications for received texts or new positions
-* prompt user to turnon bluetooth and bind
 * test bt boot behavior
 * fix BT device scanning - make a setup screen
 * when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname
 * let the user type texts somewhere
 * include a background behind our cloud graphics, so redraws work properly
 * show direction and distance on the nodeinfo cards
-* show radio config screen, it shows past channels (and the current one)
 * use this for preferences? https://developer.android.com/guide/topics/ui/settings/
 * do setOwner every time we connect to the radio, use our settings, radio should ignore if unchanged
 * send location data for devices that don't have a GPS - https://developer.android.com/training/location/change-location-settings
@@ -123,3 +123,5 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * start bt receive on boot
 * warn user to bt pair
 * suppress logging output if running a release build (required for play store)
+* provide gps location for devices that don't have it
+* prompt user to turnon bluetooth and bind

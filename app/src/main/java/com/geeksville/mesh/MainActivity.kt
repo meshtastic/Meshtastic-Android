@@ -20,6 +20,7 @@ import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.MeshApp
 import com.geeksville.mesh.ui.TextMessage
 import com.geeksville.mesh.ui.UIState
+import com.geeksville.mesh.ui.getInitials
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -152,7 +153,8 @@ class MainActivity : AppCompatActivity(), Logging,
 
     private fun setOwner() {
         // Note: we are careful to not set a new unique ID
-        meshService!!.setOwner(null, "Kevin Xter", "kx")
+        val name = UIState.ownerName.value
+        meshService!!.setOwner(null, name, getInitials(name))
     }
 
     private fun sendTestPackets() {
@@ -263,12 +265,25 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
+    /// Read the config bytes from the radio so we can show them in our GUI, the radio's copy is ground truth
+    private fun readRadioConfig() {
+        val bytes = meshService!!.radioConfig
+
+        val config = MeshProtos.RadioConfig.parseFrom(bytes)
+        UIState.radioConfig.value = config
+
+        debug("Read config from radio, channel URL ${UIState.channelUrl}")
+    }
+
     /// Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(connected: Boolean) {
         UIState.isConnected.value = connected
         debug("connchange ${UIState.isConnected.value}")
         if (connected) {
-            // everytime the radio reconnects, we slam in our current owner data
+            // always get the current radio config when we connect
+            readRadioConfig()
+
+            // everytime the radio reconnects, we slam in our current owner data, the radio is smart enough to only broadcast if needed
             setOwner()
         }
     }
