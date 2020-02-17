@@ -8,10 +8,7 @@ import androidx.ui.core.TextField
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.input.ImeAction
-import androidx.ui.layout.Column
-import androidx.ui.layout.LayoutPadding
-import androidx.ui.layout.LayoutSize
-import androidx.ui.layout.Row
+import androidx.ui.layout.*
 import androidx.ui.material.Emphasis
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.ProvideEmphasis
@@ -38,8 +35,6 @@ val TimestampEmphasis = object : Emphasis {
  */
 @Composable
 fun MessageCard(msg: TextMessage, modifier: Modifier = Modifier.None) {
-
-
     Row(modifier = modifier) {
         UserIcon(null)
 
@@ -75,10 +70,11 @@ fun MessagesContent() {
         val sidePad = 8.dp
         val topPad = 4.dp
 
-        Column(modifier = LayoutFlexible(1.0f)) {
-            messages.value.forEach {
+        // modifier = LayoutFlexible(1.0f)
+        Column {
+            messages.value.forEach { msg ->
                 MessageCard(
-                    it, modifier = LayoutPadding(
+                    msg, modifier = LayoutPadding(
                         left = sidePad,
                         right = sidePad,
                         top = topPad,
@@ -87,6 +83,8 @@ fun MessagesContent() {
                 )
             }
         }
+
+        Spacer(LayoutFlexible(1f))
 
         val message = state { "text message" }
         val backgroundColor = palette.secondary.copy(alpha = 0.12f)

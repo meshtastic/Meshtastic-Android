@@ -6,7 +6,6 @@ import androidx.ui.animation.Crossfade
 import androidx.ui.core.Clip
 import androidx.ui.core.Text
 import androidx.ui.core.TextField
-import androidx.ui.foundation.VerticalScroller
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.input.ImeAction
@@ -153,15 +152,16 @@ private fun AppContent(openDrawer: () -> Unit) {
                     }
                 )
 
-                VerticalScroller(modifier = LayoutFlexible(1f)) {
-                    when (screen) {
-                        Screen.messages -> MessagesContent()
-                        Screen.settings -> BTScanScreen()
-                        Screen.users -> HomeContent()
-                        Screen.channel -> HomeContent()
-                        else -> TODO()
-                    }
+                // VerticalScroller breaks flexible layouts - because verticalscrollers have 'infinite' height
+                // VerticalScroller(modifier = LayoutFlexible(1f)) {
+                when (screen) {
+                    Screen.messages -> MessagesContent()
+                    Screen.settings -> BTScanScreen()
+                    Screen.users -> HomeContent()
+                    Screen.channel -> HomeContent()
+                    else -> TODO()
                 }
+                //}
             }
         }
     }
