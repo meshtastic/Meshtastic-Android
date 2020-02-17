@@ -189,6 +189,8 @@ private fun AppContent(openDrawer: () -> Unit) {
                     when (screen) {
                         Screen.messages -> HomeContent()
                         Screen.settings -> BTScanScreen()
+                        Screen.users -> HomeContent()
+                        Screen.channel -> HomeContent()
                         else -> TODO()
                     }
                 }
@@ -275,7 +277,8 @@ private fun DrawerButton(
                     text = label,
                     style = (MaterialTheme.typography()).body2.copy(
                         color = textIconColor
-                    )
+                    ),
+                    modifier = LayoutWidth.Fill
                 )
             }
         }
