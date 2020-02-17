@@ -42,7 +42,7 @@ fun HomeContent() {
             Text(if (UIState.isConnected.value) "Connected" else "Not Connected")
         }
 
-        UIState.nodes.value.values.forEach {
+        NodeDB.nodes.value.values.forEach {
             NodeInfoCard(it)
         }
 
@@ -105,7 +105,6 @@ fun HomeContent() {
 }
 
 val palette = lightColorPalette() // darkColorPalette()
-
 
 @Composable
 fun MeshApp() {

@@ -1,7 +1,8 @@
 # High priority
 MVP features required for first public alpha 
 
-( show username icons in the next window)
+* show user icons in chat
+* show sent messages in chat
 * make chat pretty and functional
 * let user set name and shortname
 * take video

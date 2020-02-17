@@ -21,11 +21,9 @@ import com.geeksville.mesh.ui.*
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import java.nio.charset.Charset
-import java.util.*
 
 
 /*
@@ -195,6 +193,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
         requestPermission()
 
+        /*  not yet working
         // Configure sign-in to request the user's ID, email address, and basic
 // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         // Configure sign-in to request the user's ID, email address, and basic
@@ -206,6 +205,8 @@ class MainActivity : AppCompatActivity(), Logging,
 
         // Build a GoogleSignInClient with the options specified by gso.
         UIState.googleSignInClient = GoogleSignIn.getClient(this, gso);
+
+         */
     }
 
     override fun onDestroy() {
@@ -297,9 +298,9 @@ class MainActivity : AppCompatActivity(), Logging,
 
                     // We only care about nodes that have user info
                     info.user?.id?.let {
-                        val newnodes = UIState.nodes.value.toMutableMap()
+                        val newnodes = NodeDB.nodes.value.toMutableMap()
                         newnodes[it] = info
-                        UIState.nodes.value = newnodes
+                        NodeDB.nodes.value = newnodes
                     }
                 }
 
@@ -314,7 +315,7 @@ class MainActivity : AppCompatActivity(), Logging,
                             // FIXME - use the real time from the packet
                             // FIXME - don't just slam in a new list each time, it probably causes extra drawing.  Figure out how to be Compose smarter...
                             val modded = MessagesState.messages.value.toMutableList()
-                            modded.add(TextMessage(Date(), sender, payload.toString(utf8)))
+                            modded.add(TextMessage(sender, payload.toString(utf8)))
                             MessagesState.messages.value = modded
                         }
                         else -> TODO()
@@ -347,7 +348,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 debug("connected to mesh service, isConnected=${UIState.isConnected.value}")
 
                 // make some placeholder nodeinfos
-                UIState.nodes.value =
+                NodeDB.nodes.value =
                     m.nodes.toList().map {
                         it.user?.id!! to it
                     }.toMap()

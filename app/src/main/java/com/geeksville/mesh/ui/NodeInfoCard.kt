@@ -83,7 +83,7 @@ fun NodeInfoCard(node: NodeInfo) {
 @Composable
 fun nodeInfoPreview() {
     Column {
-        NodeInfoCard(UIState.testNodes[0])
-        NodeInfoCard(UIState.testNodeNoPosition)
+        NodeInfoCard(NodeDB.testNodes[0])
+        NodeInfoCard(NodeDB.testNodeNoPosition)
     }
 }

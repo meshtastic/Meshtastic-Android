@@ -4,7 +4,6 @@ import android.util.Base64
 import androidx.compose.Model
 import androidx.compose.mutableStateOf
 import com.geeksville.mesh.*
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
 
 
 data class ScreenInfo(val icon: Int, val label: String)
@@ -23,12 +22,7 @@ object AppStatus {
     var currentScreen: ScreenInfo = Screen.messages
 }
 
-/// FIXME - figure out how to merge this staate with the AppStatus Model
-object UIState {
-
-    /// Kinda ugly - created in the activity but used from Compose - figure out if there is a cleaner way GIXME
-    lateinit var googleSignInClient: GoogleSignInClient
-
+object NodeDB {
     private val testPositions = arrayOf(
         Position(32.776665, -96.796989, 35), // dallas
         Position(32.960758, -96.733521, 35), // richardson
@@ -66,6 +60,14 @@ object UIState {
 
     /// A map from nodeid to to nodeinfo
     val nodes = mutableStateOf(testNodes.map { it.user!!.id to it }.toMap())
+}
+
+/// FIXME - figure out how to merge this staate with the AppStatus Model
+object UIState {
+
+    /// Kinda ugly - created in the activity but used from Compose - figure out if there is a cleaner way GIXME
+    // lateinit var googleSignInClient: GoogleSignInClient
+
 
     /// Are we connected to our radio device
     val isConnected = mutableStateOf(false)
