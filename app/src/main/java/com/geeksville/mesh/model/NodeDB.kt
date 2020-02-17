@@ -45,4 +45,6 @@ object NodeDB {
 
     /// A map from nodeid to to nodeinfo
     val nodes = mutableStateOf(testNodes.map { it.user!!.id to it }.toMap())
+
+    val ourNodeInfo get() = nodes.value[myId.value!!] ?: error("our node not found")
 }

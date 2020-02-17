@@ -13,11 +13,11 @@ data class TextMessage(val from: String, val text: String, val date: Date = Date
 object MessagesState : Logging {
     val testTexts = listOf(
         TextMessage(
-            "+16508675310",
+            "+16508765310",
             "I found the cache"
         ),
         TextMessage(
-            "+16508675311",
+            "+16508765311",
             "Help! I've fallen and I can't get up."
         )
     )
