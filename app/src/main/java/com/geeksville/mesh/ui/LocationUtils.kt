@@ -96,7 +96,10 @@ fun addDistance(
     return doubleArrayOf(lat + dLat, longitude + dLong)
 }
 
-fun LatLongToMeter(
+/**
+ * @return distance in meters along the surface of the earth (ish)
+ */
+fun latLongToMeter(
     lat_a: Double,
     lng_a: Double,
     lat_b: Double,

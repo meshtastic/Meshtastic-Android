@@ -36,7 +36,7 @@ val TimestampEmphasis = object : Emphasis {
 @Composable
 fun MessageCard(msg: TextMessage, modifier: Modifier = Modifier.None) {
     Row(modifier = modifier) {
-        UserIcon(null)
+        UserIcon(NodeDB.nodes.value[msg.from])
 
         Column(modifier = LayoutPadding(left = 12.dp)) {
             Row {

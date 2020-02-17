@@ -2,6 +2,8 @@ package com.geeksville.mesh
 
 import android.os.Parcel
 import android.os.Parcelable
+import com.geeksville.mesh.ui.bearing
+import com.geeksville.mesh.ui.latLongToMeter
 
 
 // model objects that directly map to the corresponding protobufs
@@ -44,6 +46,12 @@ data class Position(val latitude: Double, val longitude: Double, val altitude: I
     ) {
     }
 
+    /// @return distance in meters to some other node (or null if unknown)
+    fun distance(o: Position) = latLongToMeter(latitude, longitude, o.latitude, o.longitude)
+
+    /// @return bearing to the other position in degrees
+    fun bearing(o: Position) = bearing(latitude, longitude, o.latitude, o.longitude)
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeDouble(latitude)
         parcel.writeDouble(longitude)
@@ -78,6 +86,24 @@ data class NodeInfo(
         parcel.readParcelable(Position::class.java.classLoader),
         parcel.readValue(Int::class.java.classLoader) as? Int
     ) {
+    }
+
+    /// @return distance in meters to some other node (or null if unknown)
+    fun distance(o: NodeInfo?): Double? {
+        val p = position
+        val op = o?.position
+        return if (p != null && op != null)
+            p.distance(op)
+        else
+            null
+    }
+
+    /// @return a nice human readable string for the distance, or null for unknown
+    fun distanceStr(o: NodeInfo?) = distance(o)?.let { dist ->
+        if (dist < 1000)
+            "%.0f m".format(dist)
+        else
+            "%.1f km".format(dist / 1000)
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
