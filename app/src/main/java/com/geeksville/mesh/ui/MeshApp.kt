@@ -1,11 +1,9 @@
 package com.geeksville.mesh.ui
 
-import androidx.annotation.DrawableRes
 import androidx.compose.Composable
 import androidx.compose.state
 import androidx.ui.animation.Crossfade
 import androidx.ui.core.Clip
-import androidx.ui.core.Modifier
 import androidx.ui.core.Text
 import androidx.ui.core.TextField
 import androidx.ui.foundation.VerticalScroller
@@ -127,7 +125,7 @@ fun MeshApp() {
     }
 }
 
-// @Preview
+@Preview
 @Composable
 fun previewView() {
     // It seems modaldrawerlayout not yet supported in preview
@@ -136,14 +134,6 @@ fun previewView() {
     }
 }
 
-@Preview
-@Composable
-fun previewDrawer() {
-    AppDrawer(
-        currentScreen = AppStatus.currentScreen,
-        closeDrawer = { }
-    )
-}
 
 @Composable
 private fun AppContent(openDrawer: () -> Unit) {
@@ -169,92 +159,6 @@ private fun AppContent(openDrawer: () -> Unit) {
                         else -> TODO()
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun AppDrawer(
-    currentScreen: ScreenInfo,
-    closeDrawer: () -> Unit
-) {
-    Column(modifier = LayoutSize.Fill) {
-        Spacer(LayoutHeight(24.dp))
-        Row(modifier = LayoutPadding(16.dp)) {
-            VectorImage(
-                id = R.drawable.ic_launcher_new_foreground,
-                tint = (MaterialTheme.colors()).primary
-            )
-            Spacer(LayoutWidth(8.dp))
-            // VectorImage(id = R.drawable.ic_launcher_new_foreground)
-        }
-        Divider(color = Color(0x14333333))
-
-        @Composable
-        fun ScreenButton(screen: ScreenInfo) {
-            DrawerButton(
-                icon = screen.icon,
-                label = screen.label,
-                isSelected = currentScreen == screen
-            ) {
-                navigateTo(screen)
-                closeDrawer()
-            }
-        }
-
-        ScreenButton(Screen.messages)
-        ScreenButton(Screen.users)
-        ScreenButton(Screen.channel)
-        ScreenButton(Screen.settings)
-    }
-}
-
-@Composable
-private fun DrawerButton(
-    modifier: Modifier = Modifier.None,
-    @DrawableRes icon: Int,
-    label: String,
-    isSelected: Boolean,
-    action: () -> Unit
-) {
-    val colors = MaterialTheme.colors()
-    val textIconColor = if (isSelected) {
-        colors.primary
-    } else {
-        colors.onSurface.copy(alpha = 0.6f)
-    }
-    val backgroundColor = if (isSelected) {
-        colors.primary.copy(alpha = 0.12f)
-    } else {
-        colors.surface
-    }
-
-    Surface(
-        modifier = modifier + LayoutPadding(
-            left = 8.dp,
-            top = 8.dp,
-            right = 8.dp,
-            bottom = 0.dp
-        ),
-        color = backgroundColor,
-        shape = RoundedCornerShape(4.dp)
-    ) {
-        Button(onClick = action, style = TextButtonStyle()) {
-            Row {
-                VectorImage(
-                    modifier = LayoutGravity.Center,
-                    id = icon,
-                    tint = textIconColor
-                )
-                Spacer(LayoutWidth(16.dp))
-                Text(
-                    text = label,
-                    style = (MaterialTheme.typography()).body2.copy(
-                        color = textIconColor
-                    ),
-                    modifier = LayoutWidth.Fill
-                )
             }
         }
     }

@@ -3,15 +3,13 @@ package com.geeksville.mesh.ui
 import androidx.compose.Composable
 import androidx.compose.mutableStateOf
 import androidx.compose.state
-import androidx.ui.core.Clip
 import androidx.ui.core.Text
 import androidx.ui.core.TextField
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
-import androidx.ui.graphics.Color
 import androidx.ui.input.ImeAction
 import androidx.ui.layout.Column
-import androidx.ui.layout.Padding
-import androidx.ui.layout.Row
+import androidx.ui.layout.LayoutPadding
+import androidx.ui.layout.LayoutSize
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.darkColorPalette
 import androidx.ui.material.surface.Surface
@@ -23,7 +21,7 @@ import com.geeksville.mesh.ui.MessagesState.messages
 import java.util.*
 
 
-data class TextMessage(val date: Date, val from: String, val text: String)
+data class TextMessage(val date: Date, val from: String, val text: String, val time: Date? = null)
 
 
 object MessagesState : Logging {
@@ -39,33 +37,45 @@ object MessagesState : Logging {
 
 @Composable
 fun MessagesContent() {
-    Column {
+    Column(modifier = LayoutSize.Fill) {
 
-        Text("hi")
+        val sidePad = 8.dp
+        val topPad = 4.dp
 
         messages.value.forEach {
-            Text("Text: ${it.text}")
+            Text(
+                text = "Text: ${it.text}",
+                modifier = LayoutPadding(
+                    left = sidePad,
+                    right = sidePad,
+                    top = topPad,
+                    bottom = topPad
+                )
+            )
         }
 
         val message = state { "text message" }
-        Surface(color = Color.Yellow) {
-            Row {
-                Clip(shape = RoundedCornerShape(15.dp)) {
-                    Padding(padding = 15.dp) {
-                        TextField(
-                            value = message.value,
-                            onValueChange = { message.value = it },
-                            textStyle = TextStyle(
-                                color = Color.DarkGray
-                            ),
-                            imeAction = ImeAction.Send,
-                            onImeActionPerformed = {
-                                MessagesState.info("did IME action")
-                            }
-                        )
-                    }
-                }
-            }
+
+        val colors = MaterialTheme.colors()
+        val backgroundColor = colors.surface.copy(alpha = 0.12f)
+
+        Surface(
+            modifier = LayoutPadding(8.dp),
+            color = backgroundColor,
+            shape = RoundedCornerShape(4.dp)
+        ) {
+            TextField(
+                value = message.value,
+                onValueChange = { message.value = it },
+                textStyle = TextStyle(
+                    color = colors.onSurface.copy(alpha = 0.8f)
+                ),
+                imeAction = ImeAction.Send,
+                onImeActionPerformed = {
+                    MessagesState.info("did IME action")
+                },
+                modifier = LayoutPadding(4.dp)
+            )
         }
     }
 }
