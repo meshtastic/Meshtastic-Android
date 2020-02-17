@@ -418,12 +418,21 @@ class MeshService : Service(), Logging {
         to = idNum
     }
 
-    /// Generate a new mesh packet builder with our node as the sender, and the specified recipient
-    private fun newMeshPacketTo(id: String) = newMeshPacketTo(toNodeNum(id))
+    /**
+     * Generate a new mesh packet builder with our node as the sender, and the specified recipient
+     *
+     * If id is null we assume a broadcast message
+     */
+    private fun newMeshPacketTo(id: String?) =
+        newMeshPacketTo(if (id != null) toNodeNum(id) else NODENUM_BROADCAST)
 
-    // Helper to make it easy to build a subpacket in the proper protobufs
+    /**
+     * Helper to make it easy to build a subpacket in the proper protobufs
+     *
+     * If destId is null we assume a broadcast message
+     */
     private fun buildMeshPacket(
-        destId: String,
+        destId: String?,
         initFn: MeshProtos.SubPacket.Builder.() -> Unit
     ): MeshPacket = newMeshPacketTo(destId).apply {
         payload = MeshProtos.SubPacket.newBuilder().also {
@@ -687,9 +696,9 @@ class MeshService : Service(), Logging {
                 connectedRadio.writeOwner(user.toByteArray())
             }
 
-        override fun sendData(destId: String, payloadIn: ByteArray, typ: Int) =
+        override fun sendData(destId: String?, payloadIn: ByteArray, typ: Int) =
             toRemoteExceptions {
-                info("sendData $destId <- ${payloadIn.size} bytes")
+                info("sendData dest=$destId <- ${payloadIn.size} bytes")
 
                 // encapsulate our payload in the proper protobufs and fire it off
                 val packet = buildMeshPacket(destId) {

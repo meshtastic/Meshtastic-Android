@@ -20,10 +20,13 @@ import androidx.ui.material.surface.Surface
 import androidx.ui.text.TextStyle
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.model.MessagesState
 import com.geeksville.mesh.model.MessagesState.messages
 import com.geeksville.mesh.model.NodeDB
 import com.geeksville.mesh.model.TextMessage
+import com.geeksville.mesh.model.UIState
+import com.geeksville.mesh.utf8
 import java.text.SimpleDateFormat
 
 
@@ -58,11 +61,11 @@ fun MessageCard(msg: TextMessage, modifier: Modifier = Modifier.None) {
                         style = MaterialTheme.typography().caption
                     )
                 }
-
             }
-            Text(
-                text = msg.text
-            )
+            if (msg.errorMessage != null)
+                Text(text = msg.errorMessage, style = TextStyle(color = palette.error))
+            else
+                Text(text = msg.text)
         }
     }
 }
@@ -109,10 +112,25 @@ fun MessagesContent() {
                 imeAction = ImeAction.Send,
                 onImeActionPerformed = {
                     MessagesState.info("did IME action")
+
+                    val str = message.value
+
+                    var error: String? = null
+                    val service = UIState.meshService
+                    if (service != null)
+                        service.sendData(
+                            null,
+                            str.toByteArray(utf8),
+                            MeshProtos.Data.Type.CLEAR_TEXT_VALUE
+                        )
+                    else
+                        error = "Error: No Mesh service"
+
                     MessagesState.addMessage(
                         TextMessage(
-                            "fixme",
-                            message.value
+                            NodeDB.myId.value,
+                            str,
+                            errorMessage = error
                         )
                     )
                 },

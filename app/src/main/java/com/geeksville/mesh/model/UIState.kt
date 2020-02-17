@@ -2,6 +2,7 @@ package com.geeksville.mesh.model
 
 import android.util.Base64
 import androidx.compose.mutableStateOf
+import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
 
 /// FIXME - figure out how to merge this staate with the AppStatus Model
@@ -10,6 +11,7 @@ object UIState {
     /// Kinda ugly - created in the activity but used from Compose - figure out if there is a cleaner way GIXME
     // lateinit var googleSignInClient: GoogleSignInClient
 
+    var meshService: IMeshService? = null
 
     /// Are we connected to our radio device
     val isConnected = mutableStateOf(false)

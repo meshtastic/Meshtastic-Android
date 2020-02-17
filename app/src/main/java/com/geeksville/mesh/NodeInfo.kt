@@ -89,21 +89,22 @@ data class NodeInfo(
     }
 
     /// @return distance in meters to some other node (or null if unknown)
-    fun distance(o: NodeInfo?): Double? {
+    fun distance(o: NodeInfo?): Int? {
         val p = position
         val op = o?.position
         return if (p != null && op != null)
-            p.distance(op)
+            p.distance(op).toInt()
         else
             null
     }
 
     /// @return a nice human readable string for the distance, or null for unknown
     fun distanceStr(o: NodeInfo?) = distance(o)?.let { dist ->
-        if (dist < 1000)
-            "%.0f m".format(dist)
-        else
-            "%.1f km".format(dist / 1000)
+        when {
+            dist == 0 -> null // same point
+            dist < 1000 -> "%.0f m".format(dist)
+            else -> "%.1f km".format(dist / 1000.0)
+        }
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {

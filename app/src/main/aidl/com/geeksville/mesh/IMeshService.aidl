@@ -28,6 +28,8 @@ interface IMeshService {
     Send an opaque packet to a specified node name
 
     typ is defined in mesh.proto Data.Type.  For now juse use 0 to mean opaque bytes.
+
+    destId can be null to indicate "broadcast message"
     */
     void sendData(String destId, in byte[] payload, int typ);
 

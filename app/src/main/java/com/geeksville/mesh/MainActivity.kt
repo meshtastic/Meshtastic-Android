@@ -80,6 +80,9 @@ eventually:
   make a custom theme: https://github.com/material-components/material-components-android/tree/master/material-theme-builder
 */
 
+val utf8 = Charset.forName("UTF-8")
+
+
 class MainActivity : AppCompatActivity(), Logging,
     ActivityCompat.OnRequestPermissionsResultCallback {
 
@@ -89,8 +92,6 @@ class MainActivity : AppCompatActivity(), Logging,
         const val RC_SIGN_IN = 12 // google signin completed
     }
 
-
-    private val utf8 = Charset.forName("UTF-8")
 
     private val bluetoothAdapter: BluetoothAdapter? by lazy(LazyThreadSafetyMode.NONE) {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -154,12 +155,12 @@ class MainActivity : AppCompatActivity(), Logging,
     private fun setOwner() {
         // Note: we are careful to not set a new unique ID
         val name = UIState.ownerName.value
-        meshService!!.setOwner(null, name, getInitials(name))
+        UIState.meshService!!.setOwner(null, name, getInitials(name))
     }
 
     private fun sendTestPackets() {
         exceptionReporter {
-            val m = meshService!!
+            val m = UIState.meshService!!
 
             // Do some test operations
             val testPayload = "hello world".toByteArray()
@@ -270,7 +271,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
     /// Read the config bytes from the radio so we can show them in our GUI, the radio's copy is ground truth
     private fun readRadioConfig() {
-        val bytes = meshService!!.radioConfig
+        val bytes = UIState.meshService!!.radioConfig
 
         val config = MeshProtos.RadioConfig.parseFrom(bytes)
         UIState.radioConfig.value = config
@@ -340,14 +341,13 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    private var meshService: IMeshService? = null
     private var isBound = false
 
     private var serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName, service: IBinder) =
             exceptionReporter {
                 val m = IMeshService.Stub.asInterface(service)
-                meshService = m
+                UIState.meshService = m
 
                 // We don't start listening for packets until after we are connected to the service
                 registerMeshReceiver()
@@ -367,14 +367,14 @@ class MainActivity : AppCompatActivity(), Logging,
         override fun onServiceDisconnected(name: ComponentName) {
             warn("The mesh service has disconnected")
             unregisterMeshReceiver()
-            meshService = null
+            UIState.meshService = null
         }
     }
 
     private fun bindMeshService() {
         debug("Binding to mesh service!")
         // we bind using the well known name, to make sure 3rd party apps could also
-        logAssert(meshService == null)
+        logAssert(UIState.meshService == null)
 
         val intent = MeshService.startService(this)
         if (intent != null) {
@@ -391,7 +391,7 @@ class MainActivity : AppCompatActivity(), Logging,
         debug("Unbinding from mesh service!")
         if (isBound)
             unbindService(serviceConnection)
-        meshService = null
+        UIState.meshService = null
     }
 
     override fun onPause() {

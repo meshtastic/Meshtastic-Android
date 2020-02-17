@@ -6,8 +6,15 @@ import java.util.*
 
 /**
  * the model object for a text message
+ *
+ * if errorMessage is set then we had a problem sending this message
  */
-data class TextMessage(val from: String, val text: String, val date: Date = Date())
+data class TextMessage(
+    val from: String,
+    val text: String,
+    val date: Date = Date(),
+    val errorMessage: String? = null
+)
 
 
 object MessagesState : Logging {
