@@ -403,12 +403,18 @@ class MeshService : Service(), Logging {
         broadcastNodeChange(info)
     }
 
+    /// My node num
+    private val myNodeNum get() = myNodeInfo!!.myNodeNum
+
+    /// My node ID string
+    private val myNodeID get() = toNodeID(myNodeNum)
+
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
     private fun newMeshPacketTo(idNum: Int) = MeshPacket.newBuilder().apply {
         if (myNodeInfo == null)
             throw RadioNotConnectedException()
 
-        from = myNodeInfo!!.myNodeNum
+        from = myNodeNum
         to = idNum
     }
 
@@ -658,6 +664,8 @@ class MeshService : Service(), Logging {
             toRemoteExceptions {
                 clientPackages[receiverName] = packageName
             }
+
+        override fun getMyId() = toRemoteExceptions { myNodeID }
 
         override fun setOwner(myId: String?, longName: String, shortName: String) =
             toRemoteExceptions {

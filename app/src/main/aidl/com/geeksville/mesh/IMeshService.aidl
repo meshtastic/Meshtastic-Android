@@ -21,6 +21,9 @@ interface IMeshService {
     */
     void setOwner(String myId, String longName, String shortName);
 
+    /// Return my unique user ID string
+    String getMyId();
+
     /*
     Send an opaque packet to a specified node name
 
