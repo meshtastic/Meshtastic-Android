@@ -18,6 +18,8 @@ import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import com.geeksville.android.Logging
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.NodeDB
+import com.geeksville.mesh.model.UIState
 
 
 object UILog : Logging

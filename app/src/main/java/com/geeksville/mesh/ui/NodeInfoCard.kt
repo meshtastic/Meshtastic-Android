@@ -10,6 +10,7 @@ import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.NodeDB
 import androidx.ui.core.Modifier as Modifier1
 
 

@@ -1,7 +1,6 @@
 package com.geeksville.mesh.ui
 
 import androidx.compose.Composable
-import androidx.compose.mutableStateOf
 import androidx.compose.state
 import androidx.ui.core.Modifier
 import androidx.ui.core.Text
@@ -20,36 +19,12 @@ import androidx.ui.material.surface.Surface
 import androidx.ui.text.TextStyle
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
-import com.geeksville.android.Logging
-import com.geeksville.mesh.ui.MessagesState.messages
+import com.geeksville.mesh.model.MessagesState
+import com.geeksville.mesh.model.MessagesState.messages
+import com.geeksville.mesh.model.NodeDB
+import com.geeksville.mesh.model.TextMessage
 import java.text.SimpleDateFormat
-import java.util.*
 
-
-/**
- * the model object for a text message
- */
-data class TextMessage(val from: String, val text: String, val date: Date = Date())
-
-
-object MessagesState : Logging {
-    val testTexts = listOf(
-        TextMessage("+6508675310", "I found the cache"),
-        TextMessage("+6508675311", "Help! I've fallen and I can't get up.")
-    )
-
-    // If the following (unused otherwise) line is commented out, the IDE preview window works.
-    // if left in the preview always renders as empty.
-    val messages = mutableStateOf(MessagesState.testTexts, { a, b ->
-        a.size == b.size // If the # of messages changes, consider it important for rerender
-    })
-
-    fun addMessage(m: TextMessage) {
-        val l = messages.value.toMutableList()
-        l.add(m)
-        messages.value = l
-    }
-}
 
 private val dateFormat = SimpleDateFormat("h:mm a")
 
@@ -129,7 +104,12 @@ fun MessagesContent() {
                 imeAction = ImeAction.Send,
                 onImeActionPerformed = {
                     MessagesState.info("did IME action")
-                    MessagesState.addMessage(TextMessage("fixme", message.value))
+                    MessagesState.addMessage(
+                        TextMessage(
+                            "fixme",
+                            message.value
+                        )
+                    )
                 },
                 modifier = LayoutPadding(4.dp)
             )
