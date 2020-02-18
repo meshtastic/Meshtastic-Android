@@ -2,10 +2,7 @@ package com.geeksville.mesh.ui
 
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanFilter
-import android.bluetooth.le.ScanResult
-import android.bluetooth.le.ScanSettings
+import android.bluetooth.le.*
 import android.os.ParcelUuid
 import androidx.compose.*
 import androidx.compose.frames.modelMapOf
@@ -20,18 +17,70 @@ import androidx.ui.tooling.preview.Preview
 import com.geeksville.android.Logging
 import com.geeksville.mesh.service.RadioInterfaceService
 
-object BTLog : Logging
-
 
 @Model
-object ScanState {
+object ScanUIState {
     var selectedMacAddr: String? = null
     var errorText: String? = null
+
+    val devices = modelMapOf<String, BTScanEntry>()
+
+    val scanCallback = object : ScanCallback() {
+        override fun onScanFailed(errorCode: Int) {
+            val msg = "Unexpected bluetooth scan failure: $errorCode"
+            ScanUIState.errorText = msg
+            ScanState.reportError(msg)
+        }
+
+        // For each device that appears in our scan, ask for its GATT, when the gatt arrives,
+        // check if it is an eligable device and store it in our list of candidates
+        // if that device later disconnects remove it as a candidate
+        override fun onScanResult(callbackType: Int, result: ScanResult) {
+
+            val addr = result.device.address
+            // prevent logspam because weill get get lots of redundant scan results
+            if (!devices.contains(addr)) {
+                val entry = BTScanEntry(
+                    result.device.name,
+                    addr,
+                    result.device.bondState == BluetoothDevice.BOND_BONDED
+                )
+                ScanState.debug("onScanResult ${entry}")
+                devices[addr] = entry
+
+                // If nothing was selected, by default select the first thing we see
+                if (ScanUIState.selectedMacAddr == null && entry.bonded)
+                    changeSelection(addr)
+            }
+        }
+    }
+
+    /// Change to a new macaddr selection, updating GUI and radio
+    fun changeSelection(newAddr: String) {
+        ScanState.info("Changing BT device to $newAddr")
+        val context = ambient(ContextAmbient)
+        selectedMacAddr = newAddr
+        RadioInterfaceService.setBondedDeviceAddress(context, newAddr)
+    }
+}
+
+/// FIXME, remove once compose has better lifecycle management
+object ScanState : Logging {
+    var scanner: BluetoothLeScanner? = null
+    var callback: ScanCallback? = null // SUPER NASTY FIXME
+
+    fun stopScan() {
+        if (callback != null) {
+            debug("stopping scan")
+            scanner!!.stopScan(callback)
+        } else
+            debug("not stopping bt scanner")
+    }
 }
 
 @Model
 data class BTScanEntry(val name: String, val macAddress: String, val bonded: Boolean) {
-    val isSelected get() = macAddress == ScanState.selectedMacAddr
+    val isSelected get() = macAddress == ScanUIState.selectedMacAddr
 }
 
 
@@ -41,68 +90,29 @@ fun BTScanScreen() {
 
     /// Note: may be null on platforms without a bluetooth driver (ie. the emulator)
     val bluetoothAdapter =
-        (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?)?.adapter
-
-    val devices = modelMapOf<String, BTScanEntry>()
-
-    ScanState.selectedMacAddr = RadioInterfaceService.getBondedDeviceAddress(context)
-
-    fun changeSelection(newAddr: String) {
-        BTLog.info("Changing BT device to $newAddr")
-        ScanState.selectedMacAddr = newAddr
-        RadioInterfaceService.setBondedDeviceAddress(context, newAddr)
-    }
+        (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager)?.adapter
 
     onActive {
+        ScanUIState.selectedMacAddr = RadioInterfaceService.getBondedDeviceAddress(context)
 
         if (bluetoothAdapter == null) {
-            BTLog.warn("No bluetooth adapter.  Running under emulation?")
+            ScanState.warn("No bluetooth adapter.  Running under emulation?")
 
             val testnodes = listOf(
                 BTScanEntry("Meshtastic_ab12", "xx", false),
                 BTScanEntry("Meshtastic_32ac", "xb", true)
             )
 
-            devices.putAll(testnodes.map { it.macAddress to it })
+            ScanUIState.devices.putAll(testnodes.map { it.macAddress to it })
 
             // If nothing was selected, by default select the first thing we see
-            if (ScanState.selectedMacAddr == null)
-                changeSelection(testnodes.first().macAddress)
+            if (ScanUIState.selectedMacAddr == null)
+                ScanUIState.changeSelection(testnodes.first().macAddress)
         } else {
-            val scanner = bluetoothAdapter.bluetoothLeScanner
+            val s = bluetoothAdapter.bluetoothLeScanner
             // ScanState.scanner = scanner
 
-            val scanCallback = object : ScanCallback() {
-                override fun onScanFailed(errorCode: Int) {
-                    val msg = "Unexpected bluetooth scan failure: $errorCode"
-                    ScanState.errorText = msg
-                    BTLog.reportError(msg)
-                }
-
-                // For each device that appears in our scan, ask for its GATT, when the gatt arrives,
-                // check if it is an eligable device and store it in our list of candidates
-                // if that device later disconnects remove it as a candidate
-                override fun onScanResult(callbackType: Int, result: ScanResult) {
-
-                    val addr = result.device.address
-                    // prevent logspam because weill get get lots of redundant scan results
-                    if (!devices.contains(addr)) {
-                        val entry = BTScanEntry(
-                            result.device.name,
-                            addr,
-                            result.device.bondState == BluetoothDevice.BOND_BONDED
-                        )
-                        BTLog.debug("onScanResult ${entry}")
-                        devices[addr] = entry
-
-                        // If nothing was selected, by default select the first thing we see
-                        if (ScanState.selectedMacAddr == null && entry.bonded)
-                            changeSelection(addr)
-                    }
-                }
-            }
-
-            BTLog.debug("starting scan")
+            ScanState.debug("starting scan")
 
             // filter and only accept devices that have a sw update service
             val filter =
@@ -112,22 +122,21 @@ fun BTScanScreen() {
 
             val settings =
                 ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
-            scanner.startScan(listOf(filter), settings, scanCallback)
+            s.startScan(listOf(filter), settings, ScanUIState.scanCallback)
+            ScanState.scanner = s
+            ScanState.callback = ScanUIState.scanCallback
+        }
 
-            onDispose {
-                BTLog.debug("stopping scan")
-                scanner.stopScan(scanCallback)
-            }
+        onDispose {
+            ScanState.stopScan()
         }
     }
 
-
-
     Column {
-        if (ScanState.errorText != null) {
-            Text("An unexpected error was encountered.  Please file a bug on our github: ${ScanState.errorText}")
+        if (ScanUIState.errorText != null) {
+            Text("An unexpected error was encountered.  Please file a bug on our github: ${ScanUIState.errorText}")
         } else {
-            if (devices.isEmpty()) {
+            if (ScanUIState.devices.isEmpty()) {
                 Text("Looking for Meshtastic devices... (zero found)")
 
                 CircularProgressIndicator() // Show that we are searching still
@@ -144,7 +153,7 @@ fun BTScanScreen() {
 
                 RadioGroup {
                     Column {
-                        devices.values.forEach {
+                        ScanUIState.devices.values.forEach {
                             // disabled pending https://issuetracker.google.com/issues/149528535
                             ProvideEmphasis(emphasis = if (it.bonded) EmphasisLevels().high else EmphasisLevels().disabled) {
                                 RadioGroupTextItem(
@@ -152,12 +161,13 @@ fun BTScanScreen() {
                                     onSelect = {
                                         // If the device is paired, let user select it, otherwise start the pairing flow
                                         if (it.bonded)
-                                            changeSelection(it.macAddress)
+                                            ScanUIState.changeSelection(it.macAddress)
                                         else {
-                                            BTLog.info("Starting bonding for $it")
+                                            ScanState.info("Starting bonding for $it")
 
                                             // We ignore missing BT adapters, because it lets us run on the emulator
-                                            bluetoothAdapter?.getRemoteDevice(it.macAddress)
+                                            bluetoothAdapter
+                                                ?.getRemoteDevice(it.macAddress)
                                                 ?.createBond()
                                         }
                                     },

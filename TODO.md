@@ -1,8 +1,12 @@
 # High priority
 MVP features required for first public alpha 
 
+* describe user experience: devices always point to each other and show distance, you can send texts between nodes
+the channel is encrypted, you can share the the channel key with others by qr code or by sharing a special link
+
 * let user set name and shortname
 * take video
+* make a working currently vs not working list
 
 * when we connect to radio, distances to nodes in the chat log should automatically redraw
 * show pointer arrow on the outside of the user icons, always pointing towoards them
