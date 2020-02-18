@@ -1,6 +1,7 @@
 package com.geeksville.mesh.model
 
 import android.content.Context
+import android.os.RemoteException
 import android.util.Base64
 import androidx.compose.mutableStateOf
 import androidx.core.content.edit
@@ -24,7 +25,8 @@ object UIState {
 
     /// our name in hte radio
     /// Note, we generate owner initials automatically for now
-    var ownerName: String = "fixme readfromprefs"
+    /// our activity will read this from prefs or set it to the empty string
+    var ownerName: String = "MrInIDE Ownername"
 
     /// Return an URL that represents the current channel values
     val channelUrl
@@ -37,9 +39,11 @@ object UIState {
 
     // clean up all this nasty owner state management FIXME
     fun setOwner(context: Context, s: String? = null) {
-        
+
         if (s != null) {
             ownerName = s
+
+            // note: we allow an empty userstring to be written to prefs
             val prefs = context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
             prefs.edit(commit = true) {
                 putString("owner", s)
@@ -47,6 +51,15 @@ object UIState {
         }
 
         // Note: we are careful to not set a new unique ID
-        meshService!!.setOwner(null, ownerName, getInitials(ownerName))
+        if (ownerName.isNotEmpty())
+            try {
+                meshService?.setOwner(
+                    null,
+                    ownerName,
+                    getInitials(ownerName)
+                ) // Note: we use ?. here because we might be running in the emulator
+            } catch (ex: RemoteException) {
+                error("Can't set username on device, is device offline? ${ex.message}")
+            }
     }
 }

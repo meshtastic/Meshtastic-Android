@@ -4,9 +4,7 @@ import androidx.compose.Composable
 import androidx.compose.state
 import androidx.ui.core.Modifier
 import androidx.ui.core.Text
-import androidx.ui.core.TextField
 import androidx.ui.foundation.VerticalScroller
-import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.input.ImeAction
 import androidx.ui.layout.Column
@@ -16,7 +14,6 @@ import androidx.ui.layout.Row
 import androidx.ui.material.Emphasis
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.ProvideEmphasis
-import androidx.ui.material.surface.Surface
 import androidx.ui.text.TextStyle
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
@@ -47,7 +44,7 @@ fun MessageCard(msg: TextMessage, modifier: Modifier = Modifier.None) {
                 val nodes = NodeDB.nodes
 
                 // If we can't find the sender, just use the ID
-                val node = nodes?.get(msg.from)
+                val node = nodes.get(msg.from)
                 val user = node?.user
                 val senderName = user?.longName ?: msg.from
                 Text(text = senderName)
@@ -66,6 +63,7 @@ fun MessageCard(msg: TextMessage, modifier: Modifier = Modifier.None) {
         }
     }
 }
+
 
 @Composable
 fun MessagesContent() {
@@ -93,30 +91,23 @@ fun MessagesContent() {
 
         // Spacer(LayoutFlexible(1f))
 
-        val message = state { "text message" }
-        val backgroundColor = palette.secondary.copy(alpha = 0.12f)
-        Surface(
-            modifier = LayoutPadding(8.dp),
-            color = backgroundColor,
-            shape = RoundedCornerShape(4.dp)
-        ) {
-            TextField(
-                value = message.value,
-                onValueChange = { message.value = it },
-                textStyle = TextStyle(
-                    color = palette.onSecondary.copy(alpha = 0.8f)
-                ),
-                imeAction = ImeAction.Send,
-                onImeActionPerformed = {
-                    MessagesState.info("did IME action")
+        val message = state { "" }
+        StyledTextField(
+            value = message.value,
+            onValueChange = { message.value = it },
+            textStyle = TextStyle(
+                color = palette.onSecondary.copy(alpha = 0.8f)
+            ),
+            imeAction = ImeAction.Send,
+            onImeActionPerformed = {
+                MessagesState.info("did IME action")
 
-                    val str = message.value
-                    MessagesState.sendMessage(str)
-                    message.value = "" // blow away the string the user just entered
-                },
-                modifier = LayoutPadding(4.dp)
-            )
-        }
+                val str = message.value
+                MessagesState.sendMessage(str)
+                message.value = "" // blow away the string the user just entered
+            },
+            hintText = "Type your message here..."
+        )
     }
 }
 
