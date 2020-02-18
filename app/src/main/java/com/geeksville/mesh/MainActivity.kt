@@ -23,11 +23,9 @@ import com.geeksville.mesh.model.UIState
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.MeshApp
 import com.geeksville.mesh.ui.ScanState
-import com.geeksville.mesh.ui.getInitials
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import java.nio.charset.Charset
 
@@ -153,12 +151,6 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
 
-    private fun setOwner() {
-        // Note: we are careful to not set a new unique ID
-        val name = UIState.ownerName.value
-        UIState.meshService!!.setOwner(null, name, getInitials(name))
-    }
-
     private fun sendTestPackets() {
         exceptionReporter {
             val m = UIState.meshService!!
@@ -182,9 +174,8 @@ class MainActivity : AppCompatActivity(), Logging,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContent {
-            MeshApp()
-        }
+        val prefs = getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
+        UIState.ownerName = prefs.getString("owner", "Unknown Owner")!!
 
         // Ensures Bluetooth is available on the device and it is enabled. If not,
         // displays a dialog requesting user permission to enable Bluetooth.
@@ -199,6 +190,10 @@ class MainActivity : AppCompatActivity(), Logging,
         }
 
         requestPermission()
+
+        setContent {
+            MeshApp()
+        }
 
         /*  not yet working
         // Configure sign-in to request the user's ID, email address, and basic
@@ -229,7 +224,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode === RC_SIGN_IN) {
+        if (requestCode == RC_SIGN_IN) {
             // The Task returned from this call is always completed, no need to attach
             // a listener.
             val task: Task<GoogleSignInAccount> =
@@ -239,16 +234,16 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
     private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
+        /*
         try {
-            val account =
-                completedTask.getResult(ApiException::class.java)
+            val account = completedTask.getResult(ApiException::class.java)
             // Signed in successfully, show authenticated UI.
             //updateUI(account)
         } catch (e: ApiException) { // The ApiException status code indicates the detailed failure reason.
 // Please refer to the GoogleSignInStatusCodes class reference for more information.
             warn("signInResult:failed code=" + e.statusCode)
             //updateUI(null)
-        }
+        } */
     }
 
     private var receiverRegistered = false
@@ -289,7 +284,7 @@ class MainActivity : AppCompatActivity(), Logging,
             readRadioConfig()
 
             // everytime the radio reconnects, we slam in our current owner data, the radio is smart enough to only broadcast if needed
-            setOwner()
+            UIState.setOwner(this)
         }
     }
 

@@ -42,6 +42,7 @@ object ScanState : Logging {
         if (callback != null) {
             debug("stopping scan")
             scanner!!.stopScan(callback)
+            callback = null
         } else
             debug("not stopping bt scanner")
     }
@@ -59,7 +60,7 @@ fun BTScanScreen() {
 
     /// Note: may be null on platforms without a bluetooth driver (ie. the emulator)
     val bluetoothAdapter =
-        (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager)?.adapter
+        (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?)?.adapter
 
     onActive {
         ScanUIState.selectedMacAddr = RadioInterfaceService.getBondedDeviceAddress(context)
@@ -67,6 +68,7 @@ fun BTScanScreen() {
         val scanCallback = object : ScanCallback() {
             override fun onScanFailed(errorCode: Int) {
                 val msg = "Unexpected bluetooth scan failure: $errorCode"
+                // error code2 seeems to be indicate hung bluetooth stack
                 ScanUIState.errorText = msg
                 ScanState.reportError(msg)
             }

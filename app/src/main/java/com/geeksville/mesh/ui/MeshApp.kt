@@ -130,9 +130,12 @@ private fun AppContent(openDrawer: () -> Unit) {
 
                 // VerticalScroller breaks flexible layouts - because verticalscrollers have 'infinite' height
                 // VerticalScroller(modifier = LayoutFlexible(1f)) {
+                //if (screen != Screen.settings)
+                //    ScanState.stopScan() // Nasty hack to teardown the bt scanner
+
                 when (screen) {
                     Screen.messages -> MessagesContent()
-                    Screen.settings -> BTScanScreen()
+                    Screen.settings -> SettingsContent()
                     Screen.users -> HomeContent()
                     Screen.channel -> ChannelContent()
                     else -> TODO()
