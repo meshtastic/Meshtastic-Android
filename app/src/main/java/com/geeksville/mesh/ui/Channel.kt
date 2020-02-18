@@ -2,16 +2,21 @@ package com.geeksville.mesh.ui
 
 import androidx.compose.Composable
 import androidx.ui.core.Text
+import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.DrawImage
 import androidx.ui.layout.*
 import androidx.ui.material.MaterialTheme
+import androidx.ui.material.ripple.Ripple
 import androidx.ui.res.imageResource
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
+import com.geeksville.android.Logging
 import com.geeksville.mesh.R
 
 /// The Compose IDE preview doesn't like the protobufs
 data class Channel(val name: String, val num: Int)
+
+object ChannelLog : Logging
 
 @Composable
 fun ChannelContent(channel: Channel = Channel("Default", 7)) {
@@ -30,11 +35,17 @@ fun ChannelContent(channel: Channel = Channel("Default", 7)) {
                 DrawImage(image = image)
             }
 
-            VectorImage(
-                id = R.drawable.ic_twotone_share_24,
-                modifier = LayoutGravity.Center + LayoutPadding(left = 8.dp),
-                tint = palette.onBackground
-            )
+            Ripple(bounded = false) {
+                Clickable(onClick = {
+                    TODO()
+                }) {
+                    VectorImage(
+                        id = R.drawable.ic_twotone_share_24,
+                        modifier = LayoutGravity.Center + LayoutPadding(left = 8.dp),
+                        tint = palette.onBackground
+                    )
+                }
+            }
         }
 
         Text(
