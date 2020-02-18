@@ -615,12 +615,17 @@ class MeshService : Service(), Logging {
             debug("Received broadcast ${intent.action}")
             when (intent.action) {
                 RadioInterfaceService.RADIO_CONNECTED_ACTION -> {
-                    onConnectionChanged(intent.getBooleanExtra(EXTRA_CONNECTED, false))
+                    try {
+                        onConnectionChanged(intent.getBooleanExtra(EXTRA_CONNECTED, false))
 
-                    // forward the connection change message to anyone who is listening to us. but change the action
-                    // to prevent an infinite loop from us receiving our own broadcast. ;-)
-                    intent.action = ACTION_MESH_CONNECTED
-                    explicitBroadcast(intent)
+                        // forward the connection change message to anyone who is listening to us. but change the action
+                        // to prevent an infinite loop from us receiving our own broadcast. ;-)
+                        intent.action = ACTION_MESH_CONNECTED
+                        explicitBroadcast(intent)
+                    } catch (ex: RemoteException) {
+                        // This can happen sometimes (especially if the device is slowly dying due to killing power, don't report to crashlytics
+                        warn("Abandoning reconnect attempt, due to errors during init: ${ex.message}")
+                    }
                 }
 
                 RadioInterfaceService.RECEIVE_FROMRADIO_ACTION -> {

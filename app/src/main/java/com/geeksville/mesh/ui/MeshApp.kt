@@ -3,16 +3,13 @@ package com.geeksville.mesh.ui
 import androidx.compose.Composable
 import androidx.compose.state
 import androidx.ui.animation.Crossfade
-import androidx.ui.core.Clip
 import androidx.ui.core.Text
-import androidx.ui.core.TextField
-import androidx.ui.foundation.shape.corner.RoundedCornerShape
-import androidx.ui.graphics.Color
-import androidx.ui.input.ImeAction
-import androidx.ui.layout.*
+import androidx.ui.layout.Column
+import androidx.ui.layout.Container
+import androidx.ui.layout.LayoutSize
+import androidx.ui.layout.Row
 import androidx.ui.material.*
 import androidx.ui.material.surface.Surface
-import androidx.ui.text.TextStyle
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import com.geeksville.android.Logging
@@ -46,30 +43,6 @@ fun HomeContent() {
         NodeDB.nodes.value.values.forEach {
             NodeInfoCard(it)
         }
-
-        val state = state { "fixme bob" }
-        Surface(color = Color.LightGray) {
-            Row {
-                Clip(shape = RoundedCornerShape(15.dp)) {
-                    Padding(padding = 15.dp) {
-                        TextField(
-                            value = state.value,
-                            onValueChange = { state.value = it },
-                            textStyle = TextStyle(
-                                color = Color.DarkGray
-                            ),
-                            imeAction = ImeAction.Done,
-                            onImeActionPerformed = {
-                                UILog.info("did IME action")
-                            }
-                        )
-                    }
-                }
-
-                Text(text = getInitials(state.value))
-            }
-        }
-
 
         /* FIXME - doens't work yet - probably because I'm not using release keys
         // If account is null, then show the signin button, otherwise
@@ -158,7 +131,7 @@ private fun AppContent(openDrawer: () -> Unit) {
                     Screen.messages -> MessagesContent()
                     Screen.settings -> BTScanScreen()
                     Screen.users -> HomeContent()
-                    Screen.channel -> HomeContent()
+                    Screen.channel -> ChannelContent()
                     else -> TODO()
                 }
                 //}
