@@ -9,6 +9,7 @@ import android.content.*
 import android.graphics.Color
 import android.os.Build
 import android.os.IBinder
+import android.os.RemoteException
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_MIN
@@ -538,58 +539,64 @@ class MeshService : Service(), Logging {
         isConnected = c
         if (c) {
             // Do our startup init
+            try {
+                // FIXME - don't do this until after we see that the radio is connected to the phone
+                //val sim = SimRadio(this@MeshService)
+                //sim.start() // Fake up our node id info and some past packets from other nodes
 
-            // FIXME - don't do this until after we see that the radio is connected to the phone
-            //val sim = SimRadio(this@MeshService)
-            //sim.start() // Fake up our node id info and some past packets from other nodes
+                val myInfo = MeshProtos.MyNodeInfo.parseFrom(
+                    connectedRadio.readMyNode()
+                )
 
-            val myInfo = MeshProtos.MyNodeInfo.parseFrom(
-                connectedRadio.readMyNode()
-            )
+                val mynodeinfo = MyNodeInfo(myInfo.myNodeNum, myInfo.hasGps)
+                myNodeInfo = mynodeinfo
 
+                // Ask for the current node DB
+                connectedRadio.restartNodeInfo()
 
-            val mynodeinfo = MyNodeInfo(myInfo.myNodeNum, myInfo.hasGps)
-            myNodeInfo = mynodeinfo
+                // read all the infos until we get back null
+                var infoBytes = connectedRadio.readNodeInfo()
+                while (infoBytes != null) {
+                    val info =
+                        MeshProtos.NodeInfo.parseFrom(infoBytes)
+                    debug("Received initial nodeinfo $info")
 
-            // Ask for the current node DB
-            connectedRadio.restartNodeInfo()
+                    // Just replace/add any entry
+                    updateNodeInfo(info.num) {
+                        if (info.hasUser())
+                            it.user =
+                                MeshUser(
+                                    info.user.id,
+                                    info.user.longName,
+                                    info.user.shortName
+                                )
 
-            // read all the infos until we get back null
-            var infoBytes = connectedRadio.readNodeInfo()
-            while (infoBytes != null) {
-                val info =
-                    MeshProtos.NodeInfo.parseFrom(infoBytes)
-                debug("Received initial nodeinfo $info")
-
-                // Just replace/add any entry
-                updateNodeInfo(info.num) {
-                    if (info.hasUser())
-                        it.user =
-                            MeshUser(
-                                info.user.id,
-                                info.user.longName,
-                                info.user.shortName
+                        if (info.hasPosition())
+                            it.position = Position(
+                                info.position.latitude,
+                                info.position.longitude,
+                                info.position.altitude
                             )
 
-                    if (info.hasPosition())
-                        it.position = Position(
-                            info.position.latitude,
-                            info.position.longitude,
-                            info.position.altitude
-                        )
+                        it.lastSeen = info.lastSeen
+                    }
 
-                    it.lastSeen = info.lastSeen
+                    // advance to next
+                    infoBytes = connectedRadio.readNodeInfo()
                 }
 
-                // advance to next
-                infoBytes = connectedRadio.readNodeInfo()
+                // we don't ask for GPS locations from android if our device has a built in GPS
+                if (!mynodeinfo.hasGPS)
+                    startLocationRequests()
+                else
+                    debug("Our radio has a built in GPS, so not reading GPS in phone")
+            } catch (ex: RemoteException) {
+                // It seems that when the ESP32 goes offline it can briefly come back for a 100ms ish which
+                // causes the phone to try and reconnect.  If we fail downloading our initial radio state we don't want to
+                // claim we have a valid connection still
+                isConnected = false;
+                throw ex; // Important to rethrow so that we don't tell the app all is well
             }
-
-            // we don't ask for GPS locations from android if our device has a built in GPS
-            if (!mynodeinfo.hasGPS)
-                startLocationRequests()
-            else
-                debug("Our radio has a built in GPS, so not reading GPS in phone")
         } else {
             // lost radio connection, therefore no need to keep listening to GPS
             stopLocationRequests()
@@ -703,8 +710,7 @@ class MeshService : Service(), Logging {
                 // encapsulate our payload in the proper protobufs and fire it off
                 val packet = buildMeshPacket(destId) {
                     data = MeshProtos.Data.newBuilder().also {
-                        it.typ =
-                            MeshProtos.Data.Type.SIGNAL_OPAQUE
+                        it.typ = MeshProtos.Data.Type.forNumber(typ)
                         it.payload = ByteString.copyFrom(payloadIn)
                     }.build()
                 }

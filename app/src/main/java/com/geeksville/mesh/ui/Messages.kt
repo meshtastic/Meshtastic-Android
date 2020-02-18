@@ -1,6 +1,5 @@
 package com.geeksville.mesh.ui
 
-import android.os.RemoteException
 import androidx.compose.Composable
 import androidx.compose.state
 import androidx.ui.core.Modifier
@@ -21,20 +20,17 @@ import androidx.ui.material.surface.Surface
 import androidx.ui.text.TextStyle
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.model.MessagesState
 import com.geeksville.mesh.model.MessagesState.messages
 import com.geeksville.mesh.model.NodeDB
 import com.geeksville.mesh.model.TextMessage
-import com.geeksville.mesh.model.UIState
-import com.geeksville.mesh.utf8
 import java.text.SimpleDateFormat
 
 
 private val dateFormat = SimpleDateFormat("h:mm a")
 
 val TimestampEmphasis = object : Emphasis {
-    override fun emphasize(color: Color) = color.copy(alpha = 0.12f)
+    override fun emphasize(color: Color) = color.copy(alpha = 0.25f)
 }
 
 
@@ -115,29 +111,8 @@ fun MessagesContent() {
                     MessagesState.info("did IME action")
 
                     val str = message.value
-
-                    var error: String? = null
-                    val service = UIState.meshService
-                    if (service != null)
-                        try {
-                            service.sendData(
-                                null,
-                                str.toByteArray(utf8),
-                                MeshProtos.Data.Type.CLEAR_TEXT_VALUE
-                            )
-                        } catch (ex: RemoteException) {
-                            error = "Error: ${ex.message}"
-                        }
-                    else
-                        error = "Error: No Mesh service"
-
-                    MessagesState.addMessage(
-                        TextMessage(
-                            NodeDB.myId.value,
-                            str,
-                            errorMessage = error
-                        )
-                    )
+                    MessagesState.sendMessage(str)
+                    message.value = "" // blow away the string the user just entered
                 },
                 modifier = LayoutPadding(4.dp)
             )

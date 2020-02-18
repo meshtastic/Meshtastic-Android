@@ -1,10 +1,6 @@
 # High priority
 MVP features required for first public alpha 
 
-* show real ID of me when I sent texts
-* keep text entry box at bottom of screen
-* show user icons in chat
-* when I enter texts, send them to the device
 * let user set name and shortname
 * take video
 
@@ -60,6 +56,8 @@ Do this "Signal app compatible" release relatively soon after the alpha release 
 # Medium priority
 Things for the betaish period.
 
+* show user icons in chat
+* keep past messages in db, one db per channel
 * spend some quality power consumption tuning with https://developer.android.com/studio/profile/energy-profiler and https://developer.android.com/topic/performance/power/battery-historian
 * only publish gps positions once every 5 mins while we are connected to our radio _and_ someone else is in the mesh
 * Do PRIORITY_BALANCED_POWER_ACCURACY for our gps updates when no one in the mesh is nearer than 200 meters
@@ -131,3 +129,6 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * suppress logging output if running a release build (required for play store)
 * provide gps location for devices that don't have it
 * prompt user to turnon bluetooth and bind
+* show real ID of me when I sent texts
+* keep text entry box at bottom of screen
+* when I enter texts, send them to the device

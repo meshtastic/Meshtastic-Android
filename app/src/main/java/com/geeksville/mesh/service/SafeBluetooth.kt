@@ -265,22 +265,25 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
      * Called from our big GATT callback, completes the current job and then schedules a new one
      */
     private fun <T : Any> completeWork(status: Int, res: T) {
+        exceptionReporter {
+            // We might unexpectedly fail inside here, but we don't want to pass that exception back up to the bluetooth GATT layer
 
-        // startup next job in queue before calling the completion handler
-        val work =
-            synchronized(workQueue) {
-                val w = currentWork!! // will throw if null, which is helpful
-                currentWork = null // We are now no longer working on anything
+            // startup next job in queue before calling the completion handler
+            val work =
+                synchronized(workQueue) {
+                    val w = currentWork!! // will throw if null, which is helpful
+                    currentWork = null // We are now no longer working on anything
 
-                startNewWork()
-                w
-            }
+                    startNewWork()
+                    w
+                }
 
-        debug("work ${work.tag} is completed, resuming status=$status, res=$res")
-        if (status != 0)
-            work.completion.resumeWithException(IOException("Bluetooth status=$status"))
-        else
-            work.completion.resume(Result.success(res) as Result<Nothing>)
+            debug("work ${work.tag} is completed, resuming status=$status, res=$res")
+            if (status != 0)
+                work.completion.resumeWithException(IOException("Bluetooth status=$status while doing ${work.tag}"))
+            else
+                work.completion.resume(Result.success(res) as Result<Nothing>)
+        }
     }
 
     /**

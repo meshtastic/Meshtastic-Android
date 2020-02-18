@@ -259,7 +259,7 @@ class MainActivity : AppCompatActivity(), Logging,
         filter.addAction(MeshService.ACTION_NODE_CHANGE)
         filter.addAction(MeshService.ACTION_RECEIVED_DATA)
         registerReceiver(meshServiceReceiver, filter)
-
+        receiverRegistered = true;
     }
 
     private fun unregisterMeshReceiver() {

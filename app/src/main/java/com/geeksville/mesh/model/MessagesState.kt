@@ -1,7 +1,10 @@
 package com.geeksville.mesh.model
 
+import android.os.RemoteException
 import androidx.compose.mutableStateOf
 import com.geeksville.android.Logging
+import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.utf8
 import java.util.*
 
 /**
@@ -35,9 +38,36 @@ object MessagesState : Logging {
         a.size == b.size // If the # of messages changes, consider it important for rerender
     })
 
+    /// add a message our GUI list of past msgs
     fun addMessage(m: TextMessage) {
         val l = messages.value.toMutableList()
         l.add(m)
         messages.value = l
+    }
+
+    /// Send a message and added it to our GUI log
+    fun sendMessage(str: String, dest: String? = null) {
+        var error: String? = null
+        val service = UIState.meshService
+        if (service != null)
+            try {
+                service.sendData(
+                    dest,
+                    str.toByteArray(utf8),
+                    MeshProtos.Data.Type.CLEAR_TEXT_VALUE
+                )
+            } catch (ex: RemoteException) {
+                error = "Error: ${ex.message}"
+            }
+        else
+            error = "Error: No Mesh service"
+
+        MessagesState.addMessage(
+            TextMessage(
+                NodeDB.myId.value,
+                str,
+                errorMessage = error
+            )
+        )
     }
 }
