@@ -1,7 +1,7 @@
 package com.geeksville.mesh.model
 
 import android.os.RemoteException
-import androidx.compose.mutableStateOf
+import androidx.compose.frames.modelListOf
 import com.geeksville.android.Logging
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.utf8
@@ -21,7 +21,7 @@ data class TextMessage(
 
 
 object MessagesState : Logging {
-    val testTexts = listOf(
+    private val testTexts = arrayOf(
         TextMessage(
             "+16508765310",
             "I found the cache"
@@ -34,15 +34,11 @@ object MessagesState : Logging {
 
     // If the following (unused otherwise) line is commented out, the IDE preview window works.
     // if left in the preview always renders as empty.
-    val messages = mutableStateOf(testTexts, { a, b ->
-        a.size == b.size // If the # of messages changes, consider it important for rerender
-    })
+    val messages = modelListOf(*testTexts)
 
     /// add a message our GUI list of past msgs
     fun addMessage(m: TextMessage) {
-        val l = messages.value.toMutableList()
-        l.add(m)
-        messages.value = l
+        messages.add(m)
     }
 
     /// Send a message and added it to our GUI log

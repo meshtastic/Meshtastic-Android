@@ -304,9 +304,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
                     // We only care about nodes that have user info
                     info.user?.id?.let {
-                        val newnodes = NodeDB.nodes.value.toMutableMap()
-                        newnodes[it] = info
-                        NodeDB.nodes.value = newnodes
+                        NodeDB.nodes[it] = info
                     }
                 }
 
@@ -352,11 +350,13 @@ class MainActivity : AppCompatActivity(), Logging,
 
                 debug("connected to mesh service, isConnected=${UIState.isConnected.value}")
 
-                // make some placeholder nodeinfos
-                NodeDB.nodes.value =
-                    m.nodes.toList().map {
+                // Update our nodeinfos based on data from the device
+                NodeDB.nodes.clear()
+                NodeDB.nodes.putAll(
+                    m.nodes.map {
                         it.user?.id!! to it
-                    }.toMap()
+                    }
+                )
             }
 
         override fun onServiceDisconnected(name: ComponentName) {

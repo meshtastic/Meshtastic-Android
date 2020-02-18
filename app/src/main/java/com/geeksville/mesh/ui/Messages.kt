@@ -40,11 +40,11 @@ val TimestampEmphasis = object : Emphasis {
 @Composable
 fun MessageCard(msg: TextMessage, modifier: Modifier = Modifier.None) {
     Row(modifier = modifier) {
-        UserIcon(NodeDB.nodes.value[msg.from])
+        UserIcon(NodeDB.nodes[msg.from])
 
         Column(modifier = LayoutPadding(left = 12.dp)) {
             Row {
-                val nodes = NodeDB.nodes.value
+                val nodes = NodeDB.nodes
 
                 // If we can't find the sender, just use the ID
                 val node = nodes?.get(msg.from)
@@ -78,7 +78,7 @@ fun MessagesContent() {
             modifier = LayoutFlexible(1f)
         ) {
             Column {
-                messages.value.forEach { msg ->
+                messages.forEach { msg ->
                     MessageCard(
                         msg, modifier = LayoutPadding(
                             left = sidePad,

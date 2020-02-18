@@ -40,7 +40,7 @@ fun HomeContent() {
             Text(if (UIState.isConnected.value) "Connected" else "Not Connected")
         }
 
-        NodeDB.nodes.value.values.forEach {
+        NodeDB.nodes.values.forEach {
             NodeInfoCard(it)
         }
 
