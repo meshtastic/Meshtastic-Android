@@ -24,11 +24,17 @@ fun ChannelContent(channel: Channel = Channel("Default", 7)) {
             style = typography.h4
         )
 
-        Row {
+        Row(modifier = LayoutGravity.Center) {
             val image = imageResource(id = R.drawable.qrcode)
-            Container(modifier = LayoutGravity.Center + LayoutSize.Min(320.dp, 320.dp)) {
+            Container(modifier = LayoutGravity.Center + LayoutSize.Min(200.dp, 200.dp)) {
                 DrawImage(image = image)
             }
+
+            VectorImage(
+                id = R.drawable.ic_twotone_share_24,
+                modifier = LayoutGravity.Center + LayoutPadding(left = 8.dp),
+                tint = palette.onBackground
+            )
         }
 
         Text(
