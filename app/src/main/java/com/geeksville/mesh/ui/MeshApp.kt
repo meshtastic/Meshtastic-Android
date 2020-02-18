@@ -34,7 +34,10 @@ fun HomeContent() {
     Column {
         Row {
             Container(LayoutSize(40.dp, 40.dp)) {
-                VectorImage(id = if (UIState.isConnected.value) R.drawable.cloud_on else R.drawable.cloud_off)
+                VectorImage(
+                    id = if (UIState.isConnected.value) R.drawable.cloud_on else R.drawable.cloud_off,
+                    tint = palette.onBackground
+                )
             }
 
             Text(if (UIState.isConnected.value) "Connected" else "Not Connected")

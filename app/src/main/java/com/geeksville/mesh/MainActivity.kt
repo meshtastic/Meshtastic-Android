@@ -22,6 +22,7 @@ import com.geeksville.mesh.model.TextMessage
 import com.geeksville.mesh.model.UIState
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.MeshApp
+import com.geeksville.mesh.ui.ScanState
 import com.geeksville.mesh.ui.getInitials
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -389,15 +390,16 @@ class MainActivity : AppCompatActivity(), Logging,
         UIState.meshService = null
     }
 
-    override fun onPause() {
+    override fun onStop() {
+        ScanState.stopScan()
         unregisterMeshReceiver() // No point in receiving updates while the GUI is gone, we'll get them when the user launches the activity
         unbindMeshService()
 
-        super.onPause()
+        super.onStop()
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
 
         bindMeshService()
     }
