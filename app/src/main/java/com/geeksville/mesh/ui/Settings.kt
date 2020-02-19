@@ -20,7 +20,7 @@ object SettingsLog : Logging
 
 @Composable
 fun SettingsContent() {
-    val typography = MaterialTheme.typography()
+    //val typography = MaterialTheme.typography()
 
     val context = ambient(ContextAmbient)
     Column(modifier = LayoutSize.Fill + LayoutPadding(16.dp)) {

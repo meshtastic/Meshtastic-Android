@@ -4,24 +4,23 @@ MVP features required for first public alpha
 * describe user experience: devices always point to each other and show distance, you can send texts between nodes
 the channel is encrypted, you can share the the channel key with others by qr code or by sharing a special link
 
-* let user set name and shortname
 * take video
 * make a working currently vs not working list
 
+* make node list view not look like ass
+* record analytics events when radio connects/disconnects, include # of nodes in mesh
+* make channel button look like a button
+* generate real channel QR codes
 * when we connect to radio, distances to nodes in the chat log should automatically redraw
 * show pointer arrow on the outside of the user icons, always pointing towoards them
 * stop scan when we start the service
 * set the radio by using the service
 * startforegroundservice only if we have a valid radio
 * if no radio is selected, launch app on the radio select screen
-* let user send texts
 * when we select a new radio, restart the service
 * show bt scan progress centered and towards the bottom of the screen
-* get rid of green bar at top
-* change titlebar based off which screen we are showing
 * fix app icon in title bar
 * treat macaddrs as the unique id, not the app layer user id
-* on onStop somehow stop the BT scan (to prevent burning battery)
 * add alphatest screen at boot
 * have the foreground service's notification show a summary of network status, add (individually maskable) notifications for received texts or new positions
 * test bt boot behavior
@@ -60,6 +59,7 @@ Do this "Signal app compatible" release relatively soon after the alpha release 
 # Medium priority
 Things for the betaish period.
 
+* MeshService.reinitFromRadio can take 300 ms, run it in a worker thread instead
 * show user icons in chat
 * keep past messages in db, one db per channel
 * spend some quality power consumption tuning with https://developer.android.com/studio/profile/energy-profiler and https://developer.android.com/topic/performance/power/battery-historian
@@ -136,3 +136,8 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * show real ID of me when I sent texts
 * keep text entry box at bottom of screen
 * when I enter texts, send them to the device
+* let user set name and shortname
+* let user send texts
+* get rid of green bar at top
+* change titlebar based off which screen we are showing
+* on onStop somehow stop the BT scan (to prevent burning battery)

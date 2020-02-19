@@ -148,9 +148,6 @@ message MeshPacket {
 /// Shared constants between device and phone
 enum Constants {
     Unused = 0; // First enum must be zero, and we are just using this enum to pass int constants between two very different environments
-
-    /// # of legal channels
-    NumChannels = 13;
 }
 
 // Full settings (center freq, spread factor, pre-shared secret key etc...) needed to configure a radio for speaking on a particlar channel
@@ -267,6 +264,9 @@ message MyNodeInfo {
     /// if false it would be great if the phone can help provide gps coordinates
     bool has_gps = 2;
 
+    /// # of legal channels (set at build time in the device flash image)
+    int32 num_channels = 3;
+
     /// FIXME - add useful debugging state (queue depths etc)
 }
 
@@ -295,10 +295,10 @@ message DeviceState {
 
         /// We bump up the integer values in this enum to indicate minimum levels of encodings for saved files
         /// if your file is below the Minimum you should discard it.
-        Minimum = 12;
+        Minimum = 13;
 
         /// The current value we are using for saved files
-        Current = 12;
+        Current = 13;
     };
 
     /// A version integer used to invalidate old save files when we make incompatible changes

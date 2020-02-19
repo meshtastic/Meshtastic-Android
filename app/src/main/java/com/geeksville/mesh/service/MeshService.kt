@@ -532,6 +532,51 @@ class MeshService : Service(), Logging {
         }
     }
 
+    /// We are reconnecting to a radio, redownload the full state.  This operation might take hundreds of milliseconds
+    private fun reinitFromRadio() {
+        // Read the MyNodeInfo object
+        val myInfo = MeshProtos.MyNodeInfo.parseFrom(
+            connectedRadio.readMyNode()
+        )
+
+        val mynodeinfo = MyNodeInfo(myInfo.myNodeNum, myInfo.hasGps)
+        myNodeInfo = mynodeinfo
+
+        // Ask for the current node DB
+        connectedRadio.restartNodeInfo()
+
+        // read all the infos until we get back null
+        var infoBytes = connectedRadio.readNodeInfo()
+        while (infoBytes != null) {
+            val info =
+                MeshProtos.NodeInfo.parseFrom(infoBytes)
+            debug("Received initial nodeinfo $info")
+
+            // Just replace/add any entry
+            updateNodeInfo(info.num) {
+                if (info.hasUser())
+                    it.user =
+                        MeshUser(
+                            info.user.id,
+                            info.user.longName,
+                            info.user.shortName
+                        )
+
+                if (info.hasPosition())
+                    it.position = Position(
+                        info.position.latitude,
+                        info.position.longitude,
+                        info.position.altitude
+                    )
+
+                it.lastSeen = info.lastSeen
+            }
+
+            // advance to next
+            infoBytes = connectedRadio.readNodeInfo()
+        }
+    }
+
 
     /// Called when we gain/lose connection to our radio
     private fun onConnectionChanged(c: Boolean) {
@@ -540,53 +585,10 @@ class MeshService : Service(), Logging {
         if (c) {
             // Do our startup init
             try {
-                // FIXME - don't do this until after we see that the radio is connected to the phone
-                //val sim = SimRadio(this@MeshService)
-                //sim.start() // Fake up our node id info and some past packets from other nodes
-
-                val myInfo = MeshProtos.MyNodeInfo.parseFrom(
-                    connectedRadio.readMyNode()
-                )
-
-                val mynodeinfo = MyNodeInfo(myInfo.myNodeNum, myInfo.hasGps)
-                myNodeInfo = mynodeinfo
-
-                // Ask for the current node DB
-                connectedRadio.restartNodeInfo()
-
-                // read all the infos until we get back null
-                var infoBytes = connectedRadio.readNodeInfo()
-                while (infoBytes != null) {
-                    val info =
-                        MeshProtos.NodeInfo.parseFrom(infoBytes)
-                    debug("Received initial nodeinfo $info")
-
-                    // Just replace/add any entry
-                    updateNodeInfo(info.num) {
-                        if (info.hasUser())
-                            it.user =
-                                MeshUser(
-                                    info.user.id,
-                                    info.user.longName,
-                                    info.user.shortName
-                                )
-
-                        if (info.hasPosition())
-                            it.position = Position(
-                                info.position.latitude,
-                                info.position.longitude,
-                                info.position.altitude
-                            )
-
-                        it.lastSeen = info.lastSeen
-                    }
-
-                    // advance to next
-                    infoBytes = connectedRadio.readNodeInfo()
-                }
+                reinitFromRadio()
 
                 // we don't ask for GPS locations from android if our device has a built in GPS
-                if (!mynodeinfo.hasGPS)
+                if (!myNodeInfo!!.hasGPS)
                     startLocationRequests()
                 else
                     debug("Our radio has a built in GPS, so not reading GPS in phone")

@@ -47,5 +47,5 @@ object NodeDB {
     val nodes = mutableMapOf(* testNodes.map { it.user!!.id to it }.toTypedArray())
 
     /// Could be null if we haven't received our node DB yet
-    val ourNodeInfo get() = nodes[myId.value!!]
+    val ourNodeInfo get() = nodes[myId.value]
 }
