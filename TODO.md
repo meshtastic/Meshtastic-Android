@@ -46,6 +46,7 @@ the channel is encrypted, you can share the the channel key with others by qr co
 # Signal alpha release
 Do this "Signal app compatible" release relatively soon after the alpha release of the android app.
 
+* call onNodeDBChanged after we haven't heard a packet from the mesh in a while - because that's how we decide we have less than 2 nodes in the mesh and should stop listening to the local GPS
 * add large packet reassembly?
 * optionally turn off crypto in signal - preferably though see if there is a nice way to be a peer of signal/sms and now mesh.
 * change signal package ID - if distributing modified binary

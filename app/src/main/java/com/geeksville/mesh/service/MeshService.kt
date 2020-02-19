@@ -141,7 +141,7 @@ class MeshService : Service(), Logging {
         if (fusedLocationClient == null) {
             val request = LocationRequest.create().apply {
                 interval =
-                    20 * 1000 // FIXME, do more like once every 5 mins while we are connected to our radio _and_ someone else is in the mesh
+                    10 * 1000 // FIXME, do more like once every 5 mins while we are connected to our radio _and_ someone else is in the mesh
 
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
             }
