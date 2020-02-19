@@ -62,6 +62,9 @@ message Position {
 
     /// true if this position came from the GPS inside the esp32 board, false if it was from a helper app on the phone
     bool from_hardware = 5;
+
+    /// This is usually not sent over the mesh (to save space), but it is sent from the phone so that the local device can set its RTC
+    uint32 time = 6; // seconds since 1970
 }
 
 // a data message to forward to an external app (or possibly also be consumed internally in the case of CLEAR_TEXT and CLEAR_READACK
@@ -192,6 +195,9 @@ message RadioConfig {
         // Send our owner info at least this often (also we always send once at boot - to rejoin the mesh)
         uint32 send_owner_secs = 2;
 
+        /// If we miss this many owner messages from a node, we declare the node offline (defaults to 3 - to allow for some lost packets)
+        uint32 num_missed_to_fail = 3;
+
         // If true, radio should not try to be smart about what packets to queue to the phone
         bool keep_all_packets = 100;
 
@@ -229,11 +235,9 @@ SET_CONFIG (switches device to a new set of radio params and preshared key, drop
 message NodeInfo {
     int32 num = 1; // the node number
     User user = 2;
-    Position position = 3;
 
-    // Times are typically not sent over the mesh, but they will be added to any Packet (chain of SubPacket)
-    // sent to the phone (so the phone can know exact time of reception)
-    uint32 last_seen = 4; // seconds since 1970
+    /// This position data will also contain a time last seen
+    Position position = 3;
 
     /// Returns the Signal-to-noise ratio (SNR) of the last received message, as measured
     /// by the receiver.
@@ -295,10 +299,10 @@ message DeviceState {
 
         /// We bump up the integer values in this enum to indicate minimum levels of encodings for saved files
         /// if your file is below the Minimum you should discard it.
-        Minimum = 13;
+        Minimum = 15;
 
         /// The current value we are using for saved files
-        Current = 13;
+        Current = 15;
     };
 
     /// A version integer used to invalidate old save files when we make incompatible changes

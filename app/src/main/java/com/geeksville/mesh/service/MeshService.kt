@@ -132,57 +132,62 @@ class MeshService : Service(), Logging {
     private var fusedLocationClient: FusedLocationProviderClient? = null
 
     /**
-     * start our location requests
+     * start our location requests (if they weren't already running)
      *
      * per https://developer.android.com/training/location/change-location-settings
      */
     @SuppressLint("MissingPermission")
     private fun startLocationRequests() {
-        val request = LocationRequest.create().apply {
-            interval =
-                60 * 1000 // FIXME, do more like once every 5 mins while we are connected to our radio _and_ someone else is in the mesh
+        if (fusedLocationClient == null) {
+            val request = LocationRequest.create().apply {
+                interval =
+                    20 * 1000 // FIXME, do more like once every 5 mins while we are connected to our radio _and_ someone else is in the mesh
 
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            }
+            val builder = LocationSettingsRequest.Builder().addLocationRequest(request)
+            val locationClient = LocationServices.getSettingsClient(this)
+            val locationSettingsResponse = locationClient.checkLocationSettings(builder.build())
+
+            locationSettingsResponse.addOnSuccessListener {
+                debug("We are now successfully listening to the GPS")
+            }
+
+            locationSettingsResponse.addOnFailureListener { exception ->
+                error("Failed to listen to GPS")
+                if (exception is ResolvableApiException) {
+                    exceptionReporter {
+                        // Location settings are not satisfied, but this can be fixed
+                        // by showing the user a dialog.
+
+                        // FIXME
+                        // Show the dialog by calling startResolutionForResult(),
+                        // and check the result in onActivityResult().
+                        /* exception.startResolutionForResult(
+                            this@MainActivity,
+                            REQUEST_CHECK_SETTINGS
+                        ) */
+                    }
+                } else
+                    reportException(exception)
+            }
+
+            val client = LocationServices.getFusedLocationProviderClient(this)
+
+
+            // FIXME - should we use Looper.myLooper() in the third param per https://github.com/android/location-samples/blob/432d3b72b8c058f220416958b444274ddd186abd/LocationUpdatesForegroundService/app/src/main/java/com/google/android/gms/location/sample/locationupdatesforegroundservice/LocationUpdatesService.java
+            client.requestLocationUpdates(request, locationCallback, null)
+
+            fusedLocationClient = client
         }
-        val builder = LocationSettingsRequest.Builder().addLocationRequest(request)
-        val locationClient = LocationServices.getSettingsClient(this)
-        val locationSettingsResponse = locationClient.checkLocationSettings(builder.build())
-
-        locationSettingsResponse.addOnSuccessListener {
-            debug("We are now successfully listening to the GPS")
-        }
-
-        locationSettingsResponse.addOnFailureListener { exception ->
-            error("Failed to listen to GPS")
-            if (exception is ResolvableApiException) {
-                exceptionReporter {
-                    // Location settings are not satisfied, but this can be fixed
-                    // by showing the user a dialog.
-
-                    // FIXME
-                    // Show the dialog by calling startResolutionForResult(),
-                    // and check the result in onActivityResult().
-                    /* exception.startResolutionForResult(
-                        this@MainActivity,
-                        REQUEST_CHECK_SETTINGS
-                    ) */
-                }
-            } else
-                reportException(exception)
-        }
-
-        val client = LocationServices.getFusedLocationProviderClient(this)
-
-
-        // FIXME - should we use Looper.myLooper() in the third param per https://github.com/android/location-samples/blob/432d3b72b8c058f220416958b444274ddd186abd/LocationUpdatesForegroundService/app/src/main/java/com/google/android/gms/location/sample/locationupdatesforegroundservice/LocationUpdatesService.java
-        client.requestLocationUpdates(request, locationCallback, null)
-
-        fusedLocationClient = client
     }
 
     private fun stopLocationRequests() {
-        fusedLocationClient?.removeLocationUpdates(locationCallback)
-        fusedLocationClient = null
+        if (fusedLocationClient != null) {
+            debug("Stopping location requests")
+            fusedLocationClient?.removeLocationUpdates(locationCallback)
+            fusedLocationClient = null
+        }
     }
 
     /**
@@ -386,7 +391,11 @@ class MeshService : Service(), Logging {
                 id
             )
 
-    // ?: getOrCreateNodeInfo(10) // FIXME hack for now -  throw IdNotFoundException(id)
+
+    /**
+     * How many nodes are currently online (including our local node)
+     */
+    private val numOnlineNodes get() = nodeDBbyNodeNum.values.count { it.isOnline }
 
     private fun toNodeNum(id: String) = toNodeInfo(id).num
 
@@ -497,7 +506,9 @@ class MeshService : Service(), Logging {
             it.position = Position(
                 p.latitude,
                 p.longitude,
-                p.altitude
+                p.altitude,
+                if (p.time != 0) p.time else it.position?.time
+                    ?: 0 // if this position didn't include time, just keep our old one
             )
         }
     }
@@ -512,11 +523,11 @@ class MeshService : Service(), Logging {
 
         val p = packet.payload
 
-        // Update our last seen based on any valid timestamps
-        if (packet.rxTime != 0) {
-            updateNodeInfo(fromNum) {
-                it.lastSeen = packet.rxTime
-            }
+        // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
+        val lastSeen =
+            if (packet.rxTime != 0) packet.rxTime else (System.currentTimeMillis() / 1000).toInt()
+        updateNodeInfo(fromNum) {
+            it.position = it.position?.copy(time = lastSeen)
         }
 
         when (p.variantCase.number) {
@@ -530,6 +541,8 @@ class MeshService : Service(), Logging {
                 handleReceivedUser(fromNum, p.user)
             else -> TODO("Unexpected SubPacket variant")
         }
+
+        onNodeDBChanged()
     }
 
     /// We are reconnecting to a radio, redownload the full state.  This operation might take hundreds of milliseconds
@@ -566,17 +579,32 @@ class MeshService : Service(), Logging {
                     it.position = Position(
                         info.position.latitude,
                         info.position.longitude,
-                        info.position.altitude
+                        info.position.altitude,
+                        info.position.time
                     )
 
-                it.lastSeen = info.lastSeen
             }
 
             // advance to next
             infoBytes = connectedRadio.readNodeInfo()
         }
+
+        onNodeDBChanged()
     }
 
+    /// If we just changed our nodedb, we might want to do somethings
+    private fun onNodeDBChanged() {
+        // we don't ask for GPS locations from android if our device has a built in GPS
+        if (!myNodeInfo!!.hasGPS) {
+            // If we have at least one other person in the mesh, send our GPS position otherwise stop listening to GPS
+
+            if (numOnlineNodes >= 2)
+                startLocationRequests()
+            else
+                stopLocationRequests()
+        } else
+            debug("Our radio has a built in GPS, so not reading GPS in phone")
+    }
 
     /// Called when we gain/lose connection to our radio
     private fun onConnectionChanged(c: Boolean) {
@@ -586,12 +614,6 @@ class MeshService : Service(), Logging {
             // Do our startup init
             try {
                 reinitFromRadio()
-
-                // we don't ask for GPS locations from android if our device has a built in GPS
-                if (!myNodeInfo!!.hasGPS)
-                    startLocationRequests()
-                else
-                    debug("Our radio has a built in GPS, so not reading GPS in phone")
             } catch (ex: RemoteException) {
                 // It seems that when the ESP32 goes offline it can briefly come back for a 100ms ish which
                 // causes the phone to try and reconnect.  If we fail downloading our initial radio state we don't want to
@@ -662,6 +684,7 @@ class MeshService : Service(), Logging {
             it.latitude = lat
             it.longitude = lon
             it.altitude = alt
+            it.time = (System.currentTimeMillis() / 1000).toInt() // Include our current timestamp
         }.build()
 
         // encapsulate our payload in the proper protobufs and fire it off

@@ -7,6 +7,7 @@ the channel is encrypted, you can share the the channel key with others by qr co
 * take video
 * make a working currently vs not working list
 
+* show offline nodes as greyed out
 * make node list view not look like ass
 * record analytics events when radio connects/disconnects, include # of nodes in mesh
 * make channel button look like a button

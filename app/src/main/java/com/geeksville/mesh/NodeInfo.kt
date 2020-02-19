@@ -37,11 +37,17 @@ data class MeshUser(val id: String, val longName: String, val shortName: String)
     }
 }
 
-data class Position(val latitude: Double, val longitude: Double, val altitude: Int) :
+data class Position(
+    val latitude: Double,
+    val longitude: Double,
+    val altitude: Int,
+    val time: Int = (System.currentTimeMillis() / 1000).toInt() // default to current time in secs
+) :
     Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readDouble(),
         parcel.readDouble(),
+        parcel.readInt(),
         parcel.readInt()
     ) {
     }
@@ -56,6 +62,7 @@ data class Position(val latitude: Double, val longitude: Double, val altitude: I
         parcel.writeDouble(latitude)
         parcel.writeDouble(longitude)
         parcel.writeInt(altitude)
+        parcel.writeInt(time)
     }
 
     override fun describeContents(): Int {
@@ -77,16 +84,31 @@ data class Position(val latitude: Double, val longitude: Double, val altitude: I
 data class NodeInfo(
     val num: Int, // This is immutable, and used as a key
     var user: MeshUser? = null,
-    var position: Position? = null,
-    var lastSeen: Int? = null
+    var position: Position? = null
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
         parcel.readParcelable(MeshUser::class.java.classLoader),
-        parcel.readParcelable(Position::class.java.classLoader),
-        parcel.readValue(Int::class.java.classLoader) as? Int
+        parcel.readParcelable(Position::class.java.classLoader)
     ) {
     }
+
+    /// Return the last time we've seen this node in secs since 1970
+    val lastSeen get() = position?.time ?: 0
+
+    /**
+     * true if the device was heard from recently
+     *
+     * Note: if a node has never had its time set, it will have a time of zero.  In that
+     * case assume it is online - so that we will start sending GPS updates
+     */
+    val isOnline: Boolean
+        get() {
+            val now = System.currentTimeMillis() / 1000
+            // FIXME - use correct timeout from the device settings
+            val timeout = 5 * 60
+            return (now - lastSeen <= timeout) || lastSeen == 0
+        }
 
     /// @return distance in meters to some other node (or null if unknown)
     fun distance(o: NodeInfo?): Int? {
@@ -111,7 +133,6 @@ data class NodeInfo(
         parcel.writeInt(num)
         parcel.writeParcelable(user, flags)
         parcel.writeParcelable(position, flags)
-        parcel.writeValue(lastSeen)
     }
 
     override fun describeContents(): Int {

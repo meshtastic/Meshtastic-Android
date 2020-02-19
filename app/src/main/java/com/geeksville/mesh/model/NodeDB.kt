@@ -23,8 +23,7 @@ object NodeDB {
             "Kevin MesterNoLoc",
             "KLO"
         ),
-        null,
-        12345
+        null
     )
 
     val testNodes = testPositions.mapIndexed { index, it ->
@@ -35,8 +34,7 @@ object NodeDB {
                 "Kevin Mester$index",
                 "KM$index"
             ),
-            it,
-            12345
+            it
         )
     }
 
