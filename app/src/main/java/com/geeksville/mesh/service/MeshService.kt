@@ -523,11 +523,17 @@ class MeshService : Service(), Logging {
 
         val p = packet.payload
 
-        // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
-        val lastSeen =
-            if (packet.rxTime != 0) packet.rxTime else (System.currentTimeMillis() / 1000).toInt()
+        // Update last seen for the node that sent the packet, but also for _our node_ because anytime a packet passes
+        // through our node on the way to the phone that means that local node is also alive in the mesh
         updateNodeInfo(fromNum) {
+            // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
+            val lastSeen =
+                if (packet.rxTime != 0) packet.rxTime else currentSecond()
+
             it.position = it.position?.copy(time = lastSeen)
+        }
+        updateNodeInfo(myNodeNum) {
+            it.position = it.position?.copy(time = currentSecond())
         }
 
         when (p.variantCase.number) {
@@ -544,6 +550,8 @@ class MeshService : Service(), Logging {
 
         onNodeDBChanged()
     }
+
+    private fun currentSecond() = (System.currentTimeMillis() / 1000).toInt()
 
     /// We are reconnecting to a radio, redownload the full state.  This operation might take hundreds of milliseconds
     private fun reinitFromRadio() {
@@ -575,14 +583,19 @@ class MeshService : Service(), Logging {
                             info.user.shortName
                         )
 
-                if (info.hasPosition())
+                if (info.hasPosition()) {
+                    // For the local node, it might not be able to update its times because it doesn't have a valid GPS reading yet
+                    // so if the info is for _our_ node we always assume time is current
+                    val time =
+                        if (it.num == mynodeinfo.myNodeNum) currentSecond() else info.position.time
+
                     it.position = Position(
                         info.position.latitude,
                         info.position.longitude,
                         info.position.altitude,
-                        info.position.time
+                        time
                     )
-
+                }
             }
 
             // advance to next
@@ -684,7 +697,7 @@ class MeshService : Service(), Logging {
             it.latitude = lat
             it.longitude = lon
             it.altitude = alt
-            it.time = (System.currentTimeMillis() / 1000).toInt() // Include our current timestamp
+            it.time = currentSecond() // Include our current timestamp
         }.build()
 
         // encapsulate our payload in the proper protobufs and fire it off
