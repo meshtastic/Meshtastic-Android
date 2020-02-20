@@ -122,6 +122,10 @@ message SubPacket {
         Data data = 3;
         User user = 4;
     }
+
+    /// Not normally used, but for testing a sender can request that recipient responds in kind (i.e. if it received a position, it should unicast back its position).  
+    // Note: that if you set this on a broadcast you will receive many replies.
+    bool want_response = 5;
 }
 
 // Note: For simplicity reasons (and that we want to keep over the radio packets very small, we now assume that there is only _one_

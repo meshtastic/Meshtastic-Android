@@ -106,6 +106,8 @@ class MeshService : Service(), Logging {
     }
 
     private val locationCallback = object : LocationCallback() {
+        private var lastSendMsec = 0L
+
         override fun onLocationResult(locationResult: LocationResult) {
             super.onLocationResult(locationResult)
             var l = locationResult.lastLocation
@@ -122,7 +124,17 @@ class MeshService : Service(), Logging {
                 if (l.hasAccuracy() && l.accuracy >= 200) // if more than 200 meters off we won't use it
                     warn("accuracy ${l.accuracy} is too poor to use")
                 else {
-                    sendPosition(l.latitude, l.longitude, l.altitude.toInt())
+                    val now = System.currentTimeMillis()
+
+                    // we limit our sends onto the lora net to a max one once every FIXME
+                    val sendLora = (now - lastSendMsec >= 30 * 1000)
+                    if (sendLora)
+                        lastSendMsec = now
+                    sendPosition(
+                        l.latitude, l.longitude, l.altitude.toInt(),
+                        destNum = if (sendLora) NODENUM_BROADCAST else myNodeNum,
+                        wantResponse = sendLora
+                    )
                 }
             }
 
@@ -688,10 +700,14 @@ class MeshService : Service(), Logging {
     }
 
     /// Send a position (typically from our built in GPS) into the mesh
-    private fun sendPosition(lat: Double, lon: Double, alt: Int) {
-        debug("Sending our position into mesh lat=$lat, lon=$lon, alt=$alt")
-
-        val destNum = NODENUM_BROADCAST
+    private fun sendPosition(
+        lat: Double,
+        lon: Double,
+        alt: Int,
+        destNum: Int = NODENUM_BROADCAST,
+        wantResponse: Boolean = false
+    ) {
+        debug("Sending our position to=$destNum lat=$lat, lon=$lon, alt=$alt")
 
         val position = MeshProtos.Position.newBuilder().also {
             it.latitude = lat
@@ -705,6 +721,7 @@ class MeshService : Service(), Logging {
 
         packet.payload = MeshProtos.SubPacket.newBuilder().also {
             it.position = position
+            it.wantResponse = wantResponse
         }.build()
 
         // Also update our own map for our nodenum, by handling the packet just like packets from other users
