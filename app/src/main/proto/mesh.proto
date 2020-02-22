@@ -197,10 +197,20 @@ message RadioConfig {
         uint32 position_broadcast_secs = 1;
 
         // Send our owner info at least this often (also we always send once at boot - to rejoin the mesh)
-        uint32 send_owner_secs = 2;
+        uint32 send_owner_interval = 2;
 
         /// If we miss this many owner messages from a node, we declare the node offline (defaults to 3 - to allow for some lost packets)
         uint32 num_missed_to_fail = 3;
+
+        /// see sw-design.md
+        uint32 wait_bluetooth_secs = 4;
+        uint32 screen_on_secs = 5;
+        uint32 phone_timeout_secs = 6;
+        uint32 phone_sds_timeout_sec = 7;
+        uint32 mesh_sds_timeout_secs = 8;
+        uint32 sds_secs = 9;
+        uint32 ls_secs = 10;
+        uint32 min_wake_secs = 11;
 
         // If true, radio should not try to be smart about what packets to queue to the phone
         bool keep_all_packets = 100;
@@ -303,10 +313,10 @@ message DeviceState {
 
         /// We bump up the integer values in this enum to indicate minimum levels of encodings for saved files
         /// if your file is below the Minimum you should discard it.
-        Minimum = 15;
+        Minimum = 17;
 
         /// The current value we are using for saved files
-        Current = 15;
+        Current = 17;
     };
 
     /// A version integer used to invalidate old save files when we make incompatible changes
