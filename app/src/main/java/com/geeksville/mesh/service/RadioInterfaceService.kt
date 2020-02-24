@@ -310,7 +310,7 @@ class RadioInterfaceService : Service(), Logging {
         info("Destroying radio interface service")
         if (logSends)
             sentPacketsLog.close()
-        safe?.disconnect()
+        safe?.close()
         super.onDestroy()
     }
 

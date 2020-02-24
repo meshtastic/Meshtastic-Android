@@ -10,9 +10,13 @@ import com.geeksville.concurrent.CallbackContinuation
 import com.geeksville.concurrent.Continuation
 import com.geeksville.concurrent.SyncContinuation
 import com.geeksville.util.exceptionReporter
+import java.io.Closeable
 import java.io.IOException
 import java.util.*
 
+
+/// Return a standard BLE 128 bit UUID from the short 16 bit versions
+fun longBLEUUID(hexFour: String) = UUID.fromString("0000$hexFour-0000-1000-8000-00805f9b34fb")
 
 /**
  * Uses coroutines to safely access a bluetooth GATT device with a synchronous API
@@ -24,7 +28,7 @@ import java.util.*
  * This class fixes the API by using coroutines to let you safely do a series of BTLE operations.
  */
 class SafeBluetooth(private val context: Context, private val device: BluetoothDevice) :
-    Logging {
+    Logging, Closeable {
 
     /// Timeout before we declare a bluetooth operation failed
     var timeoutMsec = 30 * 1000L
@@ -70,7 +74,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     // 0x2902 org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
     private val configurationDescriptorUUID =
-        UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
+        longBLEUUID("2902")
 
     init {
         context.registerReceiver(
@@ -423,7 +427,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         }
     }
 
-    fun disconnect() {
+    override fun close() {
         closeConnection()
 
         context.unregisterReceiver(btStateReceiver)
