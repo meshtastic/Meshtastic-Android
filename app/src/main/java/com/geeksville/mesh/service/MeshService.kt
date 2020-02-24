@@ -17,8 +17,8 @@ import com.geeksville.android.Logging
 import com.geeksville.mesh.*
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
+import com.geeksville.util.Exceptions
 import com.geeksville.util.exceptionReporter
-import com.geeksville.util.reportException
 import com.geeksville.util.toOneLineString
 import com.geeksville.util.toRemoteExceptions
 import com.google.android.gms.common.api.ResolvableApiException
@@ -181,7 +181,7 @@ class MeshService : Service(), Logging {
                         ) */
                     }
                 } else
-                    reportException(exception)
+                    Exceptions.report(exception)
             }
 
             val client = LocationServices.getFusedLocationProviderClient(this)
