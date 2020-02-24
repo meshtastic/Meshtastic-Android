@@ -1,8 +1,10 @@
 package com.geeksville.mesh.ui
 
 import androidx.compose.Composable
+import androidx.compose.ambient
 import androidx.compose.state
 import androidx.ui.animation.Crossfade
+import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Text
 import androidx.ui.layout.Column
 import androidx.ui.layout.Container
@@ -16,6 +18,8 @@ import com.geeksville.android.Logging
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.NodeDB
 import com.geeksville.mesh.model.UIState
+import com.geeksville.mesh.service.RadioInterfaceService
+import com.geeksville.mesh.service.SoftwareUpdateService
 
 
 object UILog : Logging
@@ -40,12 +44,32 @@ fun HomeContent() {
                 )
             }
 
-            Text(if (UIState.isConnected.value) "Connected" else "Not Connected")
+            if (UIState.isConnected.value) {
+                Column {
+                    Text("Connected")
+
+                    /// Create a software update button
+                    val context = ambient(ContextAmbient)
+                    RadioInterfaceService.getBondedDeviceAddress(context)?.let { macAddress ->
+                        Button(text = "Update firmware",
+                            onClick = {
+                                SoftwareUpdateService.enqueueWork(
+                                    context,
+                                    SoftwareUpdateService.startUpdateIntent(macAddress)
+                                )
+                            }
+                        )
+                    }
+                }
+            } else {
+                Text("Not Connected")
+            }
         }
 
         NodeDB.nodes.values.forEach {
             NodeInfoCard(it)
         }
+
 
         /* FIXME - doens't work yet - probably because I'm not using release keys
         // If account is null, then show the signin button, otherwise
@@ -62,22 +86,6 @@ fun HomeContent() {
                 })
             }
         } */
-
-        /*
-        Button(text = "Start scan",
-            onClick = {
-                if (bluetoothAdapter != null) {
-                    // Note: We don't want this service to die just because our activity goes away (because it is doing a software update)
-                    // So we use the application context instead of the activity
-                    SoftwareUpdateService.enqueueWork(
-                        applicationContext,
-                        SoftwareUpdateService.startUpdateIntent
-                    )
-                }
-            })
-
-        Button(text = "send packets",
-            onClick = { sendTestPackets() }) */
     }
 }
 

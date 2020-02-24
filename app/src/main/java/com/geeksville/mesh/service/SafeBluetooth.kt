@@ -178,7 +178,9 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         }
 
         override fun onMtuChanged(gatt: BluetoothGatt, mtu: Int, status: Int) {
-            completeWork(status, mtu)
+            // Alas, passing back an Int mtu isn't working and since I don't really care what MTU
+            // the device was willing to let us have I'm just punting and returning Unit
+            completeWork(status, Unit)
         }
 
         /**
@@ -378,19 +380,18 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     private fun queueRequestMtu(
         len: Int,
-        cont: Continuation<Int>
+        cont: Continuation<Unit>
     ) = queueWork("reqMtu", cont) { gatt!!.requestMtu(len) }
 
     fun asyncRequestMtu(
         len: Int,
-        cb: (Result<Int>) -> Unit
+        cb: (Result<Unit>) -> Unit
     ) {
         logAssert(workQueue.isEmpty() && currentWork == null) // I don't think anything should be able to sneak in front
         queueRequestMtu(len, CallbackContinuation(cb))
     }
 
-    fun requestMtu(len: Int): Int =
-        makeSync { queueRequestMtu(len, it) }
+    fun requestMtu(len: Int): Unit = makeSync { queueRequestMtu(len, it) }
 
     private fun queueWriteCharacteristic(
         c: BluetoothGattCharacteristic,
