@@ -21,4 +21,7 @@ interface IRadioInterfaceService {
     /// owner - read/write this to access a User protobuf
     byte []readOwner();
     void writeOwner(in byte [] owner);
+
+    /// If true we will try to talk to our device, if false we will shutdown.  Useful during software update.
+    void enableLink(boolean enable);
 }

@@ -1,6 +1,7 @@
 # High priority
 MVP features required for first public alpha 
 
+* "new bluetooth connection state 0, status 22" loss of connection
 * make a boot screen explaining this is an early alpha
 * describe user experience: devices always point to each other and show distance, you can send texts between nodes
 the channel is encrypted, you can share the the channel key with others by qr code or by sharing a special link
@@ -62,6 +63,7 @@ Do this "Signal app compatible" release relatively soon after the alpha release 
 # Medium priority
 Things for the betaish period.
 
+* make sw update work while node is connected to mesh (at least shutdown the other bluetooth services)
 * Use LocationRequest.setSmallestDisplacement to save battery and decrease net activity
 * MeshService.reinitFromRadio can take 300 ms, run it in a worker thread instead
 * show user icons in chat

@@ -153,7 +153,7 @@ class MeshService : Service(), Logging {
         if (fusedLocationClient == null) {
             val request = LocationRequest.create().apply {
                 interval =
-                    10 * 1000 // FIXME, do more like once every 5 mins while we are connected to our radio _and_ someone else is in the mesh
+                    5 * 60 * 1000 // FIXME, do more like once every 5 mins while we are connected to our radio _and_ someone else is in the mesh
 
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
             }
@@ -185,7 +185,6 @@ class MeshService : Service(), Logging {
             }
 
             val client = LocationServices.getFusedLocationProviderClient(this)
-
 
             // FIXME - should we use Looper.myLooper() in the third param per https://github.com/android/location-samples/blob/432d3b72b8c058f220416958b444274ddd186abd/LocationUpdatesForegroundService/app/src/main/java/com/google/android/gms/location/sample/locationupdatesforegroundservice/LocationUpdatesService.java
             client.requestLocationUpdates(request, locationCallback, null)

@@ -275,47 +275,54 @@ class RadioInterfaceService : Service(), Logging {
 
     override fun onCreate() {
         super.onCreate()
-
-        // FIXME, let user GUI select which device we are talking to
-
-        val address = getBondedDeviceAddress(this)
-        if (address == null)
-            error("No bonded mesh radio, can't create service")
-        else {
-            // Note: this call does no comms, it just creates the device object (even if the
-            // device is off/not connected)
-            val device = getBluetoothAdapter(this)?.getRemoteDevice(address)
-            if (device != null) {
-                info("Creating radio interface service.  device=$address")
-
-                // Note this constructor also does no comm
-                val s = SafeBluetooth(this, device)
-                safe = s
-
-                // FIXME, pass in true for autoconnect - so we will autoconnect whenever the radio
-                // comes in range (even if we made this connect call long ago when we got powered on)
-                // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
-                // more info
-                s.asyncConnect(true, ::onConnect, ::onDisconnect)
-            } else {
-                error("Bluetooth adapter not found, assuming running on the emulator!")
-            }
-
-            if (logSends)
-                sentPacketsLog = BinaryLogFile(this, "sent_log.pb")
-        }
+        setEnabled(true)
     }
 
     override fun onDestroy() {
-        info("Destroying radio interface service")
-        if (logSends)
-            sentPacketsLog.close()
-        safe?.close()
+        setEnabled(false)
         super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
         return binder;
+    }
+
+    /// Open or close a bluetooth connection to our device
+    private fun setEnabled(on: Boolean) {
+        if (on) {
+            val address = getBondedDeviceAddress(this)
+            if (address == null)
+                error("No bonded mesh radio, can't create service")
+            else {
+                // Note: this call does no comms, it just creates the device object (even if the
+                // device is off/not connected)
+                val device = getBluetoothAdapter(this)?.getRemoteDevice(address)
+                if (device != null) {
+                    info("Creating radio interface service.  device=$address")
+
+                    // Note this constructor also does no comm
+                    val s = SafeBluetooth(this, device)
+                    safe = s
+
+                    // FIXME, pass in true for autoconnect - so we will autoconnect whenever the radio
+                    // comes in range (even if we made this connect call long ago when we got powered on)
+                    // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
+                    // more info
+                    s.asyncConnect(true, ::onConnect, ::onDisconnect)
+                } else {
+                    error("Bluetooth adapter not found, assuming running on the emulator!")
+                }
+
+                if (logSends)
+                    sentPacketsLog = BinaryLogFile(this, "sent_log.pb")
+            }
+        } else {
+            info("Closing radio interface service")
+            if (logSends)
+                sentPacketsLog.close()
+            safe?.close()
+            safe = null
+        }
     }
 
     /**
@@ -379,6 +386,10 @@ class RadioInterfaceService : Service(), Logging {
     }
 
     private val binder = object : IRadioInterfaceService.Stub() {
+        override fun enableLink(enable: Boolean) = toRemoteExceptions {
+            setEnabled(enable)
+        }
+
         // A write of any size to nodeinfo means restart reading
         override fun restartNodeInfo() = doWrite(BTM_NODEINFO_CHARACTER, ByteArray(0))
 
