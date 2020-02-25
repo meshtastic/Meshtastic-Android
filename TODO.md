@@ -1,16 +1,12 @@
 # High priority
 MVP features required for first public alpha 
 
-* don't show test texts when not under emulator
 * make a boot screen explaining this is an early alpha, tell user to go to settings if they have a radio, otherwise go to website
 * show offline nodes as greyed out
-* make node list view not look like ass
 * when we connect to radio, distances to nodes in the chat log should automatically redraw
 * show pointer arrow on the outside of the user icons, always pointing towoards them
 * fix app icon in title bar
-* show direction and distance on the nodeinfo cards
-* include tent on cloud graphics, so redraws work properly
-* test bt boot behavior
+* show direction on the nodeinfo cards
 * have the foreground service's notification show a summary of network status, add (individually maskable) notifications for received texts or new positions
 * add screenshots and text to play store entry
 * make hackaday page
@@ -19,6 +15,7 @@ MVP features required for first public alpha
 # Medium priority
 Features for future builds
 
+* ditch compose and use https://github.com/zsmb13/MaterialDrawerKt + https://github.com/Kotlin/anko/wiki/Anko-Layouts
 * describe user experience: devices always point to each other and show distance, you can send texts between nodes
 the channel is encrypted, you can share the the channel key with others by qr code or by sharing a special link
 * be smarter about sharing GPS location with the device (to save power), integrate with new network scheduler 
@@ -154,3 +151,7 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * do setOwner every time we connect to the radio, use our settings, radio should ignore if unchanged
 * send location data for devices that don't have a GPS - https://developer.android.com/training/location/change-location-settings
 * if necessary restart entire BT adapter with this tip from Michael https://stackoverflow.com/questions/35103701/ble-android-onconnectionstatechange-not-being-called
+* don't show test texts when not under emulator
+* make node list view not look like ass
+* test bt boot behavior
+* include tent on cloud graphics, so redraws work properly

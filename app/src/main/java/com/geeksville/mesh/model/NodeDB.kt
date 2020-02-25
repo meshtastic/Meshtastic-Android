@@ -1,5 +1,6 @@
 package com.geeksville.mesh.model
 
+import androidx.compose.frames.modelMapOf
 import androidx.compose.mutableStateOf
 import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.mesh.MeshUser
@@ -46,7 +47,7 @@ object NodeDB {
 
     /// A map from nodeid to to nodeinfo
     val nodes =
-        mutableMapOf(* (if (isEmulator) testNodes else listOf()).map { it.user!!.id to it }.toTypedArray())
+        modelMapOf(* (if (isEmulator) testNodes else listOf()).map { it.user!!.id to it }.toTypedArray())
 
     /// Could be null if we haven't received our node DB yet
     val ourNodeInfo get() = nodes[myId.value]
