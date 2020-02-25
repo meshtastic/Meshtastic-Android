@@ -1,47 +1,44 @@
 # High priority
 MVP features required for first public alpha 
 
-* "new bluetooth connection state 0, status 22" loss of connection
-* make a boot screen explaining this is an early alpha
-* describe user experience: devices always point to each other and show distance, you can send texts between nodes
-the channel is encrypted, you can share the the channel key with others by qr code or by sharing a special link
-
-* take video
-* make a working currently vs not working list
-
+* make a boot screen explaining this is an early alpha, tell user to go to settings if they have a radio, otherwise go to website
 * show offline nodes as greyed out
 * make node list view not look like ass
+* when we connect to radio, distances to nodes in the chat log should automatically redraw
+* show pointer arrow on the outside of the user icons, always pointing towoards them
+* fix app icon in title bar
+* show direction and distance on the nodeinfo cards
+* include tent on cloud graphics, so redraws work properly
+* test bt boot behavior
+* have the foreground service's notification show a summary of network status, add (individually maskable) notifications for received texts or new positions
+* add screenshots and text to play store entry
+
+# Medium priority
+
+Features for future builds
+
+* describe user experience: devices always point to each other and show distance, you can send texts between nodes
+the channel is encrypted, you can share the the channel key with others by qr code or by sharing a special link
+* be smarter about sharing GPS location with the device (to save power), integrate with new network scheduler 
+* take video of the app
+* make a working currently vs not working list
 * record analytics events when radio connects/disconnects, include # of nodes in mesh
 * make channel button look like a button
 * generate real channel QR codes
-* when we connect to radio, distances to nodes in the chat log should automatically redraw
-* show pointer arrow on the outside of the user icons, always pointing towoards them
+* let users change & share channels (but no saving them yet)
 * stop scan when we start the service
 * set the radio by using the service
 * startforegroundservice only if we have a valid radio
 * if no radio is selected, launch app on the radio select screen
 * when we select a new radio, restart the service
 * show bt scan progress centered and towards the bottom of the screen
-* fix app icon in title bar
 * treat macaddrs as the unique id, not the app layer user id
-* add alphatest screen at boot
-* have the foreground service's notification show a summary of network status, add (individually maskable) notifications for received texts or new positions
-* test bt boot behavior
-* fix BT device scanning - make a setup screen
 * when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname
 * let the user type texts somewhere
-* include a background behind our cloud graphics, so redraws work properly
-* show direction and distance on the nodeinfo cards
 * use this for preferences? https://developer.android.com/guide/topics/ui/settings/
-* do setOwner every time we connect to the radio, use our settings, radio should ignore if unchanged
-* send location data for devices that don't have a GPS - https://developer.android.com/training/location/change-location-settings
-* make nodeinfo card not look like ass
 * at connect we might receive messages before finished downloading the nodeinfo.  In that case, process those messages later
 * connect to bluetooth device automatically using minimum power - start looking at phone boot
-* call crashlytics from exceptionReporter!!!  currently not logging failures caught there
 * test with oldest compatible android in emulator (see below for testing with hardware)
-* make playstore entry, first public alpha
-* tell Compose geeks 
 * tell various vendors & post in forums
 * add play store link with https://developers.google.com/analytics/devguides/collection/android/v4/campaigns#google-play-url-builder and the play icon
 
@@ -63,6 +60,7 @@ Do this "Signal app compatible" release relatively soon after the alpha release 
 # Medium priority
 Things for the betaish period.
 
+* let users save old channels
 * make sw update work while node is connected to mesh (at least shutdown the other bluetooth services)
 * Use LocationRequest.setSmallestDisplacement to save battery and decrease net activity
 * MeshService.reinitFromRadio can take 300 ms, run it in a worker thread instead
@@ -147,3 +145,9 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * get rid of green bar at top
 * change titlebar based off which screen we are showing
 * on onStop somehow stop the BT scan (to prevent burning battery)
+* "new bluetooth connection state 0, status 22" loss of connection
+* fix BT device scanning - make a setup screen
+* tell Compose geeks 
+* call crashlytics from exceptionReporter!!!  currently not logging failures caught there
+* do setOwner every time we connect to the radio, use our settings, radio should ignore if unchanged
+* send location data for devices that don't have a GPS - https://developer.android.com/training/location/change-location-settings
