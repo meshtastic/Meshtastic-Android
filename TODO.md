@@ -12,6 +12,8 @@ MVP features required for first public alpha
 * test bt boot behavior
 * have the foreground service's notification show a summary of network status, add (individually maskable) notifications for received texts or new positions
 * add screenshots and text to play store entry
+* make hackaday page
+* test using firebase testlab
 
 # Medium priority
 Features for future builds

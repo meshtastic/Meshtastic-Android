@@ -3,11 +3,13 @@ package com.geeksville.mesh
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.IBinder
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -16,6 +18,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.ui.core.setContent
 import com.geeksville.android.Logging
+import com.geeksville.android.ServiceClient
 import com.geeksville.mesh.model.MessagesState
 import com.geeksville.mesh.model.NodeDB
 import com.geeksville.mesh.model.TextMessage
@@ -330,33 +333,32 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    private var isBound = false
 
-    private var serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName, service: IBinder) =
-            exceptionReporter {
-                val m = IMeshService.Stub.asInterface(service)
-                UIState.meshService = m
+    private val mesh = object : ServiceClient<com.geeksville.mesh.IMeshService>({
+        com.geeksville.mesh.IMeshService.Stub.asInterface(it)
+    }) {
+        override fun onConnected(m: com.geeksville.mesh.IMeshService) {
+            UIState.meshService = m
 
-                // We don't start listening for packets until after we are connected to the service
-                registerMeshReceiver()
+            // We don't start listening for packets until after we are connected to the service
+            registerMeshReceiver()
 
-                // We won't receive a notify for the initial state of connection, so we force an update here
-                onMeshConnectionChanged(m.isConnected)
+            // We won't receive a notify for the initial state of connection, so we force an update here
+            onMeshConnectionChanged(m.isConnected)
 
-                debug("connected to mesh service, isConnected=${UIState.isConnected.value}")
+            debug("connected to mesh service, isConnected=${UIState.isConnected.value}")
 
-                // Update our nodeinfos based on data from the device
-                NodeDB.nodes.clear()
-                NodeDB.nodes.putAll(
-                    m.nodes.map {
-                        it.user?.id!! to it
-                    }
-                )
-            }
+            // Update our nodeinfos based on data from the device
+            NodeDB.nodes.clear()
+            NodeDB.nodes.putAll(
+                m.nodes.map
+                {
+                    it.user?.id!! to it
+                }
+            )
+        }
 
-        override fun onServiceDisconnected(name: ComponentName) {
-            warn("The mesh service has disconnected")
+        override fun onDisconnected() {
             unregisterMeshReceiver()
             UIState.meshService = null
         }
@@ -367,11 +369,9 @@ class MainActivity : AppCompatActivity(), Logging,
         // we bind using the well known name, to make sure 3rd party apps could also
         logAssert(UIState.meshService == null)
 
-        val intent = MeshService.startService(this)
-        if (intent != null) {
+        MeshService.startService(this)?.let { intent ->
             // ALSO bind so we can use the api
-            logAssert(bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE))
-            isBound = true;
+            mesh.connect(this, intent, Context.BIND_AUTO_CREATE)
         }
     }
 
@@ -380,8 +380,7 @@ class MainActivity : AppCompatActivity(), Logging,
         // it, then now is the time to unregister.
         // if we never connected, do nothing
         debug("Unbinding from mesh service!")
-        if (isBound)
-            unbindService(serviceConnection)
+        mesh.close()
         UIState.meshService = null
     }
 

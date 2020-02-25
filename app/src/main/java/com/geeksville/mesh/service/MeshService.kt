@@ -5,7 +5,10 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Build
 import android.os.IBinder
@@ -14,6 +17,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_MIN
 import com.geeksville.android.Logging
+import com.geeksville.android.ServiceClient
 import com.geeksville.mesh.*
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
@@ -86,7 +90,9 @@ class MeshService : Service(), Logging {
     /// A mapping of receiver class name to package name - used for explicit broadcasts
     private val clientPackages = mutableMapOf<String, String>()
 
-    private var radioService: IRadioInterfaceService? = null
+    val radio = ServiceClient {
+        IRadioInterfaceService.Stub.asInterface(it)
+    }
 
     /*
     see com.geeksville.mesh broadcast intents
@@ -225,29 +231,14 @@ class MeshService : Service(), Logging {
     private fun broadcastNodeChange(info: NodeInfo) {
         debug("Broadcasting node change $info")
         val intent = Intent(ACTION_NODE_CHANGE)
-
-        /*
-        if (info.user == null)
-            info.user = MeshUser("x", "y", "z")
-
-        if (info.position == null)
-            info.position = Position(1.5, 1.6, 3)
-
-        */
-
+        
         intent.putExtra(EXTRA_NODEINFO, info)
         explicitBroadcast(intent)
     }
 
     /// Safely access the radio service, if not connected an exception will be thrown
     private val connectedRadio: IRadioInterfaceService
-        get() {
-            val s = radioService
-            if (s == null || !isConnected)
-                throw RadioNotConnectedException()
-
-            return s
-        }
+        get() = (if (isConnected) radio.serviceP else null) ?: throw RadioNotConnectedException()
 
     /// Send a command/packet to our radio.  But cope with the possiblity that we might start up
     /// before we are fully bound to the RadioInterfaceService
@@ -259,19 +250,6 @@ class MeshService : Service(), Logging {
 
     override fun onBind(intent: Intent?): IBinder? {
         return binder
-    }
-
-    private val radioConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-            val m = IRadioInterfaceService.Stub.asInterface(
-                service
-            )
-            radioService = m
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            radioService = null
-        }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -347,7 +325,7 @@ class MeshService : Service(), Logging {
         // We in turn need to use the radiointerface service
         val intent = Intent(this, RadioInterfaceService::class.java)
         // intent.action = IMeshService::class.java.name
-        logAssert(bindService(intent, radioConnection, Context.BIND_AUTO_CREATE))
+        radio.connect(this, intent, Context.BIND_AUTO_CREATE)
 
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
@@ -356,11 +334,11 @@ class MeshService : Service(), Logging {
     override fun onDestroy() {
         info("Destroying mesh service")
         unregisterReceiver(radioInterfaceReceiver)
-        unbindService(radioConnection)
-        radioService = null
+        radio.close()
 
         super.onDestroy()
     }
+
 
     ///
     /// BEGINNING OF MODEL - FIXME, move elsewhere
