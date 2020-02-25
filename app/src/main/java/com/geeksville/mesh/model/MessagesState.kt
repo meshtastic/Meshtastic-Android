@@ -2,6 +2,7 @@ package com.geeksville.mesh.model
 
 import android.os.RemoteException
 import androidx.compose.frames.modelListOf
+import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.android.Logging
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.utf8
@@ -34,7 +35,7 @@ object MessagesState : Logging {
 
     // If the following (unused otherwise) line is commented out, the IDE preview window works.
     // if left in the preview always renders as empty.
-    val messages = modelListOf(*testTexts)
+    val messages = modelListOf(* if (isEmulator) testTexts else arrayOf())
 
     /// add a message our GUI list of past msgs
     fun addMessage(m: TextMessage) {

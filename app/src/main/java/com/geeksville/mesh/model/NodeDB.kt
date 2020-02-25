@@ -1,6 +1,7 @@
 package com.geeksville.mesh.model
 
 import androidx.compose.mutableStateOf
+import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.mesh.MeshUser
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.Position
@@ -38,11 +39,14 @@ object NodeDB {
         )
     }
 
+    private val seedWithTestNodes = isEmulator
+
     /// The unique ID of our node
-    val myId = mutableStateOf("+16508765309")
+    val myId = mutableStateOf(if (isEmulator) "+16508765309" else "invalid")
 
     /// A map from nodeid to to nodeinfo
-    val nodes = mutableMapOf(* testNodes.map { it.user!!.id to it }.toTypedArray())
+    val nodes =
+        mutableMapOf(* (if (isEmulator) testNodes else listOf()).map { it.user!!.id to it }.toTypedArray())
 
     /// Could be null if we haven't received our node DB yet
     val ourNodeInfo get() = nodes[myId.value]

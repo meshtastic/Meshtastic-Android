@@ -115,7 +115,7 @@ data class NodeInfo(
     fun distance(o: NodeInfo?): Int? {
         val p = position
         val op = o?.position
-        return if (p != null && op != null)
+        return if (p != null && op != null && p.latitude != 0.0 && op.longitude != 0.0)
             p.distance(op).toInt()
         else
             null
