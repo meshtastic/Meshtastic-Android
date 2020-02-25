@@ -14,6 +14,7 @@ import androidx.ui.unit.dp
 import com.geeksville.android.Logging
 import com.geeksville.mesh.model.MessagesState
 import com.geeksville.mesh.model.UIState
+import com.geeksville.mesh.service.RadioInterfaceService
 
 
 object SettingsLog : Logging
@@ -48,6 +49,26 @@ fun SettingsContent() {
         }
 
         BTScanScreen()
+
+        val context = ambient(ContextAmbient)
+
+        val bonded = RadioInterfaceService.getBondedDeviceAddress(context) != null
+        if (!bonded) {
+
+            val typography = MaterialTheme.typography()
+            val context = ambient(ContextAmbient)
+
+            Text(
+                text =
+                """
+            You haven't yet paired a Meshtastic compatible radio with this phone.
+            
+            This application is an early alpha release, if you find problems please post on our website chat.
+            
+            For more information see our web page - www.meshtastic.org.
+        """.trimIndent(), style = typography.body2
+            )
+        }
     }
 }
 

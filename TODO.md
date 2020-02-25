@@ -1,27 +1,24 @@
 # High priority
 MVP features required for first public alpha 
 
-* make a boot screen explaining this is an early alpha, tell user to go to settings if they have a radio, otherwise go to website
+* have the foreground service's notification show a summary of network status, add (individually maskable) notifications for received texts or new positions
 * show offline nodes as greyed out
-* when we connect to radio, distances to nodes in the chat log should automatically redraw
+* show time since last contact on the node info card
 * show pointer arrow on the outside of the user icons, always pointing towoards them
 * fix app icon in title bar
 * show direction on the nodeinfo cards
-* have the foreground service's notification show a summary of network status, add (individually maskable) notifications for received texts or new positions
-* add screenshots and text to play store entry
 * make hackaday page
 * test using firebase testlab
 
 # Medium priority
 Features for future builds
 
-* ditch compose and use https://github.com/zsmb13/MaterialDrawerKt + https://github.com/Kotlin/anko/wiki/Anko-Layouts
+* ditch compose and use https://github.com/zsmb13/MaterialDrawerKt + https://github.com/Kotlin/anko/wiki/Anko-Layouts?
 * describe user experience: devices always point to each other and show distance, you can send texts between nodes
 the channel is encrypted, you can share the the channel key with others by qr code or by sharing a special link
 * be smarter about sharing GPS location with the device (to save power), integrate with new network scheduler 
 * take video of the app
 * make a working currently vs not working list
-* record analytics events when radio connects/disconnects, include # of nodes in mesh
 * make channel button look like a button
 * generate real channel QR codes
 * let users change & share channels (but no saving them yet)
@@ -155,3 +152,7 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * make node list view not look like ass
 * test bt boot behavior
 * include tent on cloud graphics, so redraws work properly
+* record analytics events when radio connects/disconnects, include # of nodes in mesh
+* make a boot screen explaining this is an early alpha, tell user to go to settings if they have a radio, otherwise go to website
+* when we connect to radio, distances to nodes in the chat log should automatically redraw
+* add screenshots and text to play store entry

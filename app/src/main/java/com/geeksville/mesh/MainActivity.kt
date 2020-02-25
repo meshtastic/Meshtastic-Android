@@ -24,8 +24,10 @@ import com.geeksville.mesh.model.NodeDB
 import com.geeksville.mesh.model.TextMessage
 import com.geeksville.mesh.model.UIState
 import com.geeksville.mesh.service.*
+import com.geeksville.mesh.ui.AppStatus
 import com.geeksville.mesh.ui.MeshApp
 import com.geeksville.mesh.ui.ScanState
+import com.geeksville.mesh.ui.Screen
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -401,6 +403,10 @@ class MainActivity : AppCompatActivity(), Logging,
         super.onStart()
 
         bindMeshService()
+
+        val bonded = RadioInterfaceService.getBondedDeviceAddress(this) != null
+        if (!bonded)
+            AppStatus.currentScreen = Screen.settings
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
