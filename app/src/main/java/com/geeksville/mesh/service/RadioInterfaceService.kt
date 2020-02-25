@@ -170,7 +170,12 @@ class RadioInterfaceService : Service(), Logging {
     // Both of these are created in onCreate()
     private var safe: SafeBluetooth? = null
 
-    val service get() = safe!!.gatt!!.services.find { it.uuid == BTM_SERVICE_UUID }!!
+    /// Our BLE device
+    val device get() = safe!!.gatt!!
+
+    /// Our service
+    val service get() = device.getService(BTM_SERVICE_UUID)
+    //.services.find { it.uuid == BTM_SERVICE_UUID }!!
 
     private lateinit var fromNum: BluetoothGattCharacteristic
 
