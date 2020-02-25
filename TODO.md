@@ -80,7 +80,6 @@ rules at the BluetoothDevice level.  Either make SafeBluetooth lock at the devic
 * register app link for our URLs https://developer.android.com/studio/write/app-link-indexing.html
 * let user change radio params and share radio join info via QR code or text message (use an encoded app specific URL - to autoprompt for app installation as needed)
 * test with an oldish android release using real hardware
-* if necessary restart entire BT adapter with this tip from Michael https://stackoverflow.com/questions/35103701/ble-android-onconnectionstatechange-not-being-called
 * stop using a foreground service
 * change info() log strings to debug()
 * use platform theme (dark or light)
@@ -153,3 +152,4 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * call crashlytics from exceptionReporter!!!  currently not logging failures caught there
 * do setOwner every time we connect to the radio, use our settings, radio should ignore if unchanged
 * send location data for devices that don't have a GPS - https://developer.android.com/training/location/change-location-settings
+* if necessary restart entire BT adapter with this tip from Michael https://stackoverflow.com/questions/35103701/ble-android-onconnectionstatechange-not-being-called

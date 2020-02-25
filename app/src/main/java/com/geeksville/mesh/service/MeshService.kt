@@ -16,6 +16,8 @@ import android.os.RemoteException
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_MIN
+import com.geeksville.analytics.DataPair
+import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
 import com.geeksville.mesh.*
@@ -163,6 +165,8 @@ class MeshService : Service(), Logging {
     @SuppressLint("MissingPermission")
     private fun startLocationRequests() {
         if (fusedLocationClient == null) {
+            GeeksvilleApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
+
             val request = LocationRequest.create().apply {
                 interval =
                     5 * 60 * 1000 // FIXME, do more like once every 5 mins while we are connected to our radio _and_ someone else is in the mesh
@@ -209,6 +213,7 @@ class MeshService : Service(), Logging {
     private fun stopLocationRequests() {
         if (fusedLocationClient != null) {
             debug("Stopping location requests")
+            GeeksvilleApplication.analytics.track("location_stop")
             fusedLocationClient?.removeLocationUpdates(locationCallback)
             fusedLocationClient = null
         }
@@ -231,7 +236,7 @@ class MeshService : Service(), Logging {
     private fun broadcastNodeChange(info: NodeInfo) {
         debug("Broadcasting node change $info")
         val intent = Intent(ACTION_NODE_CHANGE)
-        
+
         intent.putExtra(EXTRA_NODEINFO, info)
         explicitBroadcast(intent)
     }
@@ -387,6 +392,8 @@ class MeshService : Service(), Logging {
                 id
             )
 
+
+    private val numNodes get() = nodeDBbyNodeNum.size
 
     /**
      * How many nodes are currently online (including our local node)
@@ -623,6 +630,12 @@ class MeshService : Service(), Logging {
             // Do our startup init
             try {
                 reinitFromRadio()
+
+                GeeksvilleApplication.analytics.track(
+                    "mesh_connect",
+                    DataPair("num_nodes", numNodes),
+                    DataPair("num_online", numOnlineNodes)
+                )
             } catch (ex: RemoteException) {
                 // It seems that when the ESP32 goes offline it can briefly come back for a 100ms ish which
                 // causes the phone to try and reconnect.  If we fail downloading our initial radio state we don't want to
@@ -633,6 +646,12 @@ class MeshService : Service(), Logging {
         } else {
             // lost radio connection, therefore no need to keep listening to GPS
             stopLocationRequests()
+
+            GeeksvilleApplication.analytics.track(
+                "mesh_disconnect",
+                DataPair("num_nodes", numNodes),
+                DataPair("num_online", numOnlineNodes)
+            )
         }
     }
 

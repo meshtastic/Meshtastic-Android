@@ -224,7 +224,8 @@ class RadioInterfaceService : Service(), Logging {
         else {
             val fromRadio = service.getCharacteristic(BTM_FROMRADIO_CHARACTER)
             safe!!.asyncReadCharacteristic(fromRadio) {
-                val b = it.getOrThrow().value
+                val b = it.getOrThrow()
+                    .value.clone() // We clone the array just in case, I'm not sure if they keep reusing the array
 
                 if (b.isNotEmpty()) {
                     debug("Received ${b.size} bytes from radio")
@@ -380,13 +381,14 @@ class RadioInterfaceService : Service(), Logging {
             // Note: we generate a new characteristic each time, because we are about to
             // change the data and we want the data stored in the closure
             val toRadio = service.getCharacteristic(uuid)
-            var a = safe!!.readCharacteristic(toRadio).value
+            var a = safe!!.readCharacteristic(toRadio)
+                .value.clone() // we copy the bluetooth array because it might still be in use
             debug("Read of $uuid got ${a.size} bytes")
 
             if (a.isEmpty()) // An empty bluetooth response is converted to a null response for our clients
-                a = null
-
-            a
+                null
+            else
+                a
         }
     }
 

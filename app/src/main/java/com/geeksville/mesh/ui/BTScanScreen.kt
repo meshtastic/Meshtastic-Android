@@ -43,8 +43,7 @@ object ScanState : Logging {
             debug("stopping scan")
             scanner!!.stopScan(callback)
             callback = null
-        } else
-            debug("not stopping bt scanner")
+        }
     }
 }
 

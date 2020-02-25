@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Handler
+import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.CallbackContinuation
 import com.geeksville.concurrent.Continuation
@@ -65,7 +67,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                             debug("We were not connected, so ignoring bluetooth shutdown")
                     }
                     BluetoothAdapter.STATE_ON -> {
-                        warn("FIXME - requeue a connect anytime bluetooth is reenabled?")
+                        warn("requeue a connect anytime bluetooth is reenabled")
+                        reconnect()
                     }
                 }
             }
@@ -97,6 +100,35 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         fun startWork(): Boolean {
             debug("Starting work: $tag")
             return startWorkFn()
+        }
+    }
+
+    /**
+     * skanky hack to restart BLE if it says it is hosed
+     * https://stackoverflow.com/questions/35103701/ble-android-onconnectionstatechange-not-being-called
+     */
+    var mHandler: Handler = Handler()
+
+    fun restartBle() {
+        GeeksvilleApplication.analytics.track("ble_restart") // record # of times we needed to use this nasty hack
+        error("Doing emergency BLE restart")
+        val mgr =
+            context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val adp = mgr.adapter
+        if (null != adp) {
+            if (adp.isEnabled) {
+                adp.disable()
+                // TODO: display some kind of UI about restarting BLE
+                mHandler.postDelayed(object : Runnable {
+                    override fun run() {
+                        if (!adp.isEnabled) {
+                            adp.enable()
+                        } else {
+                            mHandler.postDelayed(this, 2500)
+                        }
+                    }
+                }, 2500)
+            }
         }
     }
 
@@ -152,6 +184,11 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                         } else {
                             debug("No connectionCallback registered")
                         }
+                    }
+
+                    if (status == 257) { // mystery error code when phone is hung
+                        //throw Exception("Mystery bluetooth failure - debug me")
+                        restartBle()
                     }
                 }
             }
@@ -348,6 +385,13 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         else
             null
         queueConnect(autoConnect, CallbackContinuation(cb))
+    }
+
+    /// Restart any previous connect attempts
+    private fun reconnect() {
+        connectionCallback?.let { cb ->
+            queueConnect(true, CallbackContinuation(cb))
+        }
     }
 
     fun connect(autoConnect: Boolean = false) = makeSync<Unit> { queueConnect(autoConnect, it) }
