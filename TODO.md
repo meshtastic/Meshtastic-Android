@@ -14,7 +14,6 @@ MVP features required for first public alpha
 * add screenshots and text to play store entry
 
 # Medium priority
-
 Features for future builds
 
 * describe user experience: devices always point to each other and show distance, you can send texts between nodes
@@ -61,7 +60,8 @@ Do this "Signal app compatible" release relatively soon after the alpha release 
 Things for the betaish period.
 
 * let users save old channels
-* make sw update work while node is connected to mesh (at least shutdown the other bluetooth services)
+* make sw update work while node is connected to mesh - the problem is there are _two_ instances of SafeBluetooth at that moment and therefore we violate undocumented android mutex 
+rules at the BluetoothDevice level.  Either make SafeBluetooth lock at the device level or (not as good) make SafeBluetooth a singleton.
 * Use LocationRequest.setSmallestDisplacement to save battery and decrease net activity
 * MeshService.reinitFromRadio can take 300 ms, run it in a worker thread instead
 * show user icons in chat

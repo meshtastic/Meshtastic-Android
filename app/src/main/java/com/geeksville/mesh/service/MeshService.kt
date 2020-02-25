@@ -109,35 +109,41 @@ class MeshService : Service(), Logging {
         private var lastSendMsec = 0L
 
         override fun onLocationResult(locationResult: LocationResult) {
-            super.onLocationResult(locationResult)
-            var l = locationResult.lastLocation
+            exceptionReporter {
+                super.onLocationResult(locationResult)
+                var l = locationResult.lastLocation
 
-            // Docs say lastLocation should always be !null if there are any locations, but that's not the case
-            if (l == null) {
-                // try to only look at the accurate locations
-                val locs =
-                    locationResult.locations.filter { !it.hasAccuracy() || it.accuracy < 200 }
-                l = locs.lastOrNull()
-            }
-            if (l != null) {
-                info("got location $l")
-                if (l.hasAccuracy() && l.accuracy >= 200) // if more than 200 meters off we won't use it
-                    warn("accuracy ${l.accuracy} is too poor to use")
-                else {
-                    val now = System.currentTimeMillis()
+                // Docs say lastLocation should always be !null if there are any locations, but that's not the case
+                if (l == null) {
+                    // try to only look at the accurate locations
+                    val locs =
+                        locationResult.locations.filter { !it.hasAccuracy() || it.accuracy < 200 }
+                    l = locs.lastOrNull()
+                }
+                if (l != null) {
+                    info("got location $l")
+                    if (l.hasAccuracy() && l.accuracy >= 200) // if more than 200 meters off we won't use it
+                        warn("accuracy ${l.accuracy} is too poor to use")
+                    else {
+                        val now = System.currentTimeMillis()
 
-                    // we limit our sends onto the lora net to a max one once every FIXME
-                    val sendLora = (now - lastSendMsec >= 30 * 1000)
-                    if (sendLora)
-                        lastSendMsec = now
-                    sendPosition(
-                        l.latitude, l.longitude, l.altitude.toInt(),
-                        destNum = if (sendLora) NODENUM_BROADCAST else myNodeNum,
-                        wantResponse = sendLora
-                    )
+                        // we limit our sends onto the lora net to a max one once every FIXME
+                        val sendLora = (now - lastSendMsec >= 30 * 1000)
+                        if (sendLora)
+                            lastSendMsec = now
+                        try {
+                            sendPosition(
+                                l.latitude, l.longitude, l.altitude.toInt(),
+                                destNum = if (sendLora) NODENUM_BROADCAST else myNodeNum,
+                                wantResponse = sendLora
+                            )
+                        } catch (ex: RadioNotConnectedException) {
+                            warn("Lost connection to radio, stopping location requests")
+                            onConnectionChanged(false)
+                        }
+                    }
                 }
             }
-
         }
     }
 
