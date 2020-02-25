@@ -495,8 +495,9 @@ class MeshService : Service(), Logging {
     /// Update our DB of users based on someone sending out a User subpacket
     private fun handleReceivedUser(fromNum: Int, p: MeshProtos.User) {
         updateNodeInfo(fromNum) {
+            val oldId = it.user?.id.orEmpty()
             it.user = MeshUser(
-                p.id,
+                if (p.id.isNotEmpty()) p.id else oldId, // If the new update doesn't contain an ID keep our old value
                 p.longName,
                 p.shortName
             )

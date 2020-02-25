@@ -48,17 +48,19 @@ fun HomeContent() {
                 Column {
                     Text("Connected")
 
-                    /// Create a software update button
-                    val context = ambient(ContextAmbient)
-                    RadioInterfaceService.getBondedDeviceAddress(context)?.let { macAddress ->
-                        Button(text = "Update firmware",
-                            onClick = {
-                                SoftwareUpdateService.enqueueWork(
-                                    context,
-                                    SoftwareUpdateService.startUpdateIntent(macAddress)
-                                )
-                            }
-                        )
+                    if (false) { // hide the firmware update button for now, it is kinda ugly and users don't need it yet
+                        /// Create a software update button
+                        val context = ambient(ContextAmbient)
+                        RadioInterfaceService.getBondedDeviceAddress(context)?.let { macAddress ->
+                            Button(text = "Update firmware",
+                                onClick = {
+                                    SoftwareUpdateService.enqueueWork(
+                                        context,
+                                        SoftwareUpdateService.startUpdateIntent(macAddress)
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             } else {

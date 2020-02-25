@@ -288,6 +288,20 @@ class MainActivity : AppCompatActivity(), Logging,
 
             // everytime the radio reconnects, we slam in our current owner data, the radio is smart enough to only broadcast if needed
             UIState.setOwner(this)
+
+            val m = UIState.meshService!!
+
+            // Pull down our real node ID
+            NodeDB.myId.value = m.myId
+
+            // Update our nodeinfos based on data from the device
+            NodeDB.nodes.clear()
+            NodeDB.nodes.putAll(
+                m.nodes.map
+                {
+                    it.user?.id!! to it
+                }
+            )
         }
     }
 
@@ -347,15 +361,6 @@ class MainActivity : AppCompatActivity(), Logging,
             onMeshConnectionChanged(m.isConnected)
 
             debug("connected to mesh service, isConnected=${UIState.isConnected.value}")
-
-            // Update our nodeinfos based on data from the device
-            NodeDB.nodes.clear()
-            NodeDB.nodes.putAll(
-                m.nodes.map
-                {
-                    it.user?.id!! to it
-                }
-            )
         }
 
         override fun onDisconnected() {

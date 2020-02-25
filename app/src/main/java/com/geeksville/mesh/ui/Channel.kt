@@ -1,6 +1,8 @@
 package com.geeksville.mesh.ui
 
 import androidx.compose.Composable
+import androidx.compose.ambient
+import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Text
 import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.DrawImage
@@ -10,7 +12,9 @@ import androidx.ui.material.ripple.Ripple
 import androidx.ui.res.imageResource
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
+import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
+import com.geeksville.android.toast
 import com.geeksville.mesh.R
 
 /// The Compose IDE preview doesn't like the protobufs
@@ -21,6 +25,7 @@ object ChannelLog : Logging
 @Composable
 fun ChannelContent(channel: Channel = Channel("Default", 7)) {
     val typography = MaterialTheme.typography()
+    val context = ambient(ContextAmbient)
 
     Column(modifier = LayoutSize.Fill + LayoutPadding(16.dp)) {
         Text(
@@ -37,7 +42,8 @@ fun ChannelContent(channel: Channel = Channel("Default", 7)) {
 
             Ripple(bounded = false) {
                 Clickable(onClick = {
-                    TODO()
+                    GeeksvilleApplication.analytics.track("channel_share") // track how many times users share channels
+                    context.toast("Channel sharing is not yet implemented")
                 }) {
                     VectorImage(
                         id = R.drawable.ic_twotone_share_24,

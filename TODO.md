@@ -1,6 +1,7 @@
 # High priority
 MVP features required for first public alpha 
 
+* don't show test texts when not under emulator
 * make a boot screen explaining this is an early alpha, tell user to go to settings if they have a radio, otherwise go to website
 * show offline nodes as greyed out
 * make node list view not look like ass
