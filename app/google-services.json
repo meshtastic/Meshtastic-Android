@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "XXX",
+    "firebase_url": "https://meshutil.firebaseio.com",
+    "project_id": "meshutil",
+    "storage_bucket": "meshutil.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:XXX:android:XXX",
+        "android_client_info": {
+          "package_name": "com.geeksville.mesh"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "XXX-XXX.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "XXX"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "XXX-XXX.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
