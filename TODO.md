@@ -1,14 +1,21 @@
 # High priority
-MVP features required for first public alpha 
+Work items for soon alpha builds
 
+* change info() log strings to debug()
 * have the foreground service's notification show a summary of network status, add (individually maskable) notifications for received texts or new positions
 * show offline nodes as greyed out
 * show time since last contact on the node info card
 * show pointer arrow on the outside of the user icons, always pointing towoards them
 * fix app icon in title bar
 * show direction on the nodeinfo cards
-* make hackaday page
-* test using firebase testlab
+* take video of the app
+* make channel button look like a button
+* generate real channel QR codes
+* register app link for our URLs https://developer.android.com/studio/write/app-link-indexing.html
+* let users change & share channels (but no saving them yet)
+* treat macaddrs as the unique id, not the app layer user id
+* Have play store entry ask users to report if their android version is too old to allow install
+* only publish gps positions once every 5 mins while we are connected to our radio _and_ someone else is in the mesh
 
 # Medium priority
 Features for future builds
@@ -17,25 +24,16 @@ Features for future builds
 * describe user experience: devices always point to each other and show distance, you can send texts between nodes
 the channel is encrypted, you can share the the channel key with others by qr code or by sharing a special link
 * be smarter about sharing GPS location with the device (to save power), integrate with new network scheduler 
-* take video of the app
-* make a working currently vs not working list
-* make channel button look like a button
-* generate real channel QR codes
-* let users change & share channels (but no saving them yet)
-* stop scan when we start the service
-* set the radio by using the service
+* stop scan when we start the service - I think this is done, but check
+* set the radio macaddr by using the service (not by slamming bytes into the Preferences)
 * startforegroundservice only if we have a valid radio
-* if no radio is selected, launch app on the radio select screen
 * when we select a new radio, restart the service
 * show bt scan progress centered and towards the bottom of the screen
-* treat macaddrs as the unique id, not the app layer user id
 * when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname
 * let the user type texts somewhere
 * use this for preferences? https://developer.android.com/guide/topics/ui/settings/
 * at connect we might receive messages before finished downloading the nodeinfo.  In that case, process those messages later
-* connect to bluetooth device automatically using minimum power - start looking at phone boot
 * test with oldest compatible android in emulator (see below for testing with hardware)
-* tell various vendors & post in forums
 * add play store link with https://developers.google.com/analytics/devguides/collection/android/v4/campaigns#google-play-url-builder and the play icon
 
 # Signal alpha release
@@ -64,7 +62,6 @@ rules at the BluetoothDevice level.  Either make SafeBluetooth lock at the devic
 * show user icons in chat
 * keep past messages in db, one db per channel
 * spend some quality power consumption tuning with https://developer.android.com/studio/profile/energy-profiler and https://developer.android.com/topic/performance/power/battery-historian
-* only publish gps positions once every 5 mins while we are connected to our radio _and_ someone else is in the mesh
 * Do PRIORITY_BALANCED_POWER_ACCURACY for our gps updates when no one in the mesh is nearer than 200 meters
 * fix slow rendering warnings in play console
 * use google signin to get user name 
@@ -72,11 +69,9 @@ rules at the BluetoothDevice level.  Either make SafeBluetooth lock at the devic
 * let user pick/specify a name through ways other than google signin (for the privacy concerned, or devices without Play API)
 * make my android app show mesh state
 * show qr code for each channel https://medium.com/@aanandshekharroy/generate-barcode-in-android-app-using-zxing-64c076a5d83a
-* register app link for our URLs https://developer.android.com/studio/write/app-link-indexing.html
 * let user change radio params and share radio join info via QR code or text message (use an encoded app specific URL - to autoprompt for app installation as needed)
 * test with an oldish android release using real hardware
 * stop using a foreground service
-* change info() log strings to debug()
 * use platform theme (dark or light)
 * remove mixpanel analytics
 * require user auth to pair with the device (i.e. press button on device to allow a new phone to pair with it).
@@ -156,3 +151,6 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * make a boot screen explaining this is an early alpha, tell user to go to settings if they have a radio, otherwise go to website
 * when we connect to radio, distances to nodes in the chat log should automatically redraw
 * add screenshots and text to play store entry
+* if no radio is selected, launch app on the radio select screen
+* connect to bluetooth device automatically using minimum power - start looking at phone boot
+* tell various vendors & post in forums
