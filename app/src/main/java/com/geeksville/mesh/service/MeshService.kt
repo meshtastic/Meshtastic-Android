@@ -306,7 +306,6 @@ class MeshService : Service(), Logging {
      * Generate a new version of our notification - reflecting current app state
      */
     private fun createNotification(): Notification {
-        val shortContent = "FIXME Include nearest node or text message info"
 
         val builder = notificationBuilder.setOngoing(true)
             .setPriority(PRIORITY_MIN)
@@ -316,8 +315,8 @@ class MeshService : Service(), Logging {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(openAppIntent)
 
-        if(shortContent != null)
-            builder.setContentText(shortContent)
+        // FIXME, show information about the nearest node
+        // if(shortContent != null) builder.setContentText(shortContent)
 
         // If a text message arrived include it with our notification
         recentReceivedText?.let { msg ->
@@ -508,6 +507,7 @@ class MeshService : Service(), Logging {
                 debug("Received CLEAR_TEXT from $fromString")
 
                 recentReceivedText = TextMessage(fromString, text)
+                updateNotification()
                 forwardData()
             }
 
@@ -642,6 +642,8 @@ class MeshService : Service(), Logging {
 
     /// If we just changed our nodedb, we might want to do somethings
     private fun onNodeDBChanged() {
+        updateNotification()
+        
         // we don't ask for GPS locations from android if our device has a built in GPS
         if (!myNodeInfo!!.hasGPS) {
             // If we have at least one other person in the mesh, send our GPS position otherwise stop listening to GPS
