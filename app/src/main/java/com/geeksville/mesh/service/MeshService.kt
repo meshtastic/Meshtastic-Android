@@ -84,6 +84,9 @@ class MeshService : Service(), Logging {
                 return intent
             }
         }
+
+        /// A model object for a Text message
+        data class TextMessage(val fromId: String, val text: String)
     }
 
     /// A mapping of receiver class name to package name - used for explicit broadcasts
@@ -284,9 +287,12 @@ class MeshService : Service(), Logging {
             ""
         }
 
-    var mainAppIntent = Intent(this, MainActivity::class.java)
-    val openAppIntent = PendingIntent.getActivity(this, 0, mainAppIntent, 0)
-    val notificationBuilder = NotificationCompat.Builder(this, channelId)
+    private val mainAppIntent = Intent(this, MainActivity::class.java)
+    private val openAppIntent = PendingIntent.getActivity(this, 0, mainAppIntent, 0)
+    private val notificationBuilder = NotificationCompat.Builder(this, channelId)
+
+    /// A text message that has a arrived since the last notification update
+    private var recentReceivedText: TextMessage? = null
 
     val summaryString
         get() = if (!isConnected)
@@ -300,13 +306,11 @@ class MeshService : Service(), Logging {
      * Generate a new version of our notification - reflecting current app state
      */
     private fun createNotification(): Notification {
-        val recentMessage = "FIXME a recent text message"
-
         val shortContent = "FIXME Include nearest node or text message info"
 
         val builder = notificationBuilder.setOngoing(true)
             .setPriority(PRIORITY_MIN)
-            .setCategory(if (recentMessage != null) Notification.CATEGORY_SERVICE else Notification.CATEGORY_MESSAGE)
+            .setCategory(if (recentReceivedText != null) Notification.CATEGORY_SERVICE else Notification.CATEGORY_MESSAGE)
             .setSmallIcon(android.R.drawable.stat_sys_data_bluetooth)
             .setContentTitle("Meshtastic: $summaryString") // leave this off for now so our notification looks smaller
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -315,11 +319,15 @@ class MeshService : Service(), Logging {
         if(shortContent != null)
             builder.setContentText(shortContent)
 
-        if (recentMessage != null)
+        // If a text message arrived include it with our notification
+        recentReceivedText?.let { msg ->
+            builder.setContentText("Message from ${msg.fromId}")
+
             builder.setStyle(
                 NotificationCompat.BigTextStyle()
-                    .bigText(recentMessage)
+                    .bigText(msg.text)
             )
+        }
 
         return builder.build()
     }
@@ -495,11 +503,11 @@ class MeshService : Service(), Logging {
 
         when (data.typValue) {
             MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
-                debug(
-                    "FIXME - don't long this: Received CLEAR_TEXT from $fromString: ${bytes.toString(
-                        Charset.forName("UTF-8")
-                    )}"
-                )
+                val text = bytes.toString(Charset.forName("UTF-8"))
+
+                debug("Received CLEAR_TEXT from $fromString")
+
+                recentReceivedText = TextMessage(fromString, text)
                 forwardData()
             }
 
