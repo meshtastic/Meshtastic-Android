@@ -1,8 +1,9 @@
 # High priority
 Work items for soon alpha builds
 
-* change info() log strings to debug()
-* have the foreground service's notification show a summary of network status, add (individually maskable) notifications for received texts or new positions
+* fix notification setSmallIcon parameter
+* have the foreground service's notification show a summary of network status "connected/disconnected, 5 of 6 nodes, nearest: kevin 5km", 
+* have notification (individually maskable) notifications for received texts - use file:///home/kevinh/packages/android-sdk-linux/docs/reference/android/support/v4/app/NotificationCompat.BigTextStyle.html
 * show offline nodes as greyed out
 * show time since last contact on the node info card
 * show pointer arrow on the outside of the user icons, always pointing towoards them
@@ -54,6 +55,8 @@ Do this "Signal app compatible" release relatively soon after the alpha release 
 # Medium priority
 Things for the betaish period.
 
+* Use setLargeIcon to show user icons in the notification: file:///home/kevinh/packages/android-sdk-linux/docs/design/patterns/notifications.html
+* Our notification about messages should use VISIBLITY_PRIVATE + setPublicVersion per file:///home/kevinh/packages/android-sdk-linux/docs/guide/topics/ui/notifiers/notifications.html
 * let users save old channels
 * make sw update work while node is connected to mesh - the problem is there are _two_ instances of SafeBluetooth at that moment and therefore we violate undocumented android mutex 
 rules at the BluetoothDevice level.  Either make SafeBluetooth lock at the device level or (not as good) make SafeBluetooth a singleton.
@@ -154,3 +157,4 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * if no radio is selected, launch app on the radio select screen
 * connect to bluetooth device automatically using minimum power - start looking at phone boot
 * tell various vendors & post in forums
+* change info() log strings to debug()

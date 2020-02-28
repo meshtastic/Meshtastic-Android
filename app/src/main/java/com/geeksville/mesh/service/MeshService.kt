@@ -1,10 +1,7 @@
 package com.geeksville.mesh.service
 
 import android.annotation.SuppressLint
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.Service
+import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -273,52 +270,78 @@ class MeshService : Service(), Logging {
         return channelId
     }
 
-    private fun startForeground() {
+    private val notifyId = 101
+    val notificationManager: NotificationManager by lazy() {
+        getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    }
 
-        // val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val channelId =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                createNotificationChannel()
-            } else {
-                // If earlier version channel ID is not used
-                // https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html#NotificationCompat.Builder(android.content.Context)
-                ""
-            }
+    val channelId =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel()
+        } else {
+            // If earlier version channel ID is not used
+            // https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html#NotificationCompat.Builder(android.content.Context)
+            ""
+        }
 
-        val notificationBuilder = NotificationCompat.Builder(this, channelId)
-        val notification = notificationBuilder.setOngoing(true)
+    var mainAppIntent = Intent(this, MainActivity::class.java)
+    val openAppIntent = PendingIntent.getActivity(this, 0, mainAppIntent, 0)
+    val notificationBuilder = NotificationCompat.Builder(this, channelId)
+
+    val summaryString
+        get() = if (!isConnected)
+            "No radio connected"
+        else
+            "Connected $numOnlineNodes / $numNodes online"
+
+    override fun toString() = summaryString
+
+    /**
+     * Generate a new version of our notification - reflecting current app state
+     */
+    private fun createNotification(): Notification {
+        val recentMessage = "FIXME a recent text message"
+
+        val shortContent = "FIXME Include nearest node or text message info"
+
+        val builder = notificationBuilder.setOngoing(true)
             .setPriority(PRIORITY_MIN)
-            .setCategory(Notification.CATEGORY_SERVICE)
+            .setCategory(if (recentMessage != null) Notification.CATEGORY_SERVICE else Notification.CATEGORY_MESSAGE)
             .setSmallIcon(android.R.drawable.stat_sys_data_bluetooth)
-            //.setContentTitle("Meshtastic") // leave this off for now so our notification looks smaller
-            //.setContentText("Listening for mesh...")
-            .build()
-        startForeground(101, notification)
+            .setContentTitle("Meshtastic: $summaryString") // leave this off for now so our notification looks smaller
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setContentIntent(openAppIntent)
+
+        if(shortContent != null)
+            builder.setContentText(shortContent)
+
+        if (recentMessage != null)
+            builder.setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(recentMessage)
+            )
+
+        return builder.build()
+    }
+
+    /**
+     * Update our notification with latest data
+     */
+    private fun updateNotification() {
+        notificationManager.notify(notifyId, createNotification())
+    }
+
+    /**
+     * tell android not to kill us
+     */
+    private fun startForeground() {
+        startForeground(notifyId, createNotification())
     }
 
     override fun onCreate() {
         super.onCreate()
 
         info("Creating mesh service")
-
-        /*
-        // This intent will be used if the user clicks on the item in the status bar
-        val notificationIntent = Intent(this, MainActivity::class.java)
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0,
-            notificationIntent, 0
-        )
-
-        val notification: Notification = NotificationCompat.Builder(this)
-            .setSmallIcon(android.R.drawable.stat_sys_data_bluetooth)
-            .setContentTitle("Meshtastic")
-            .setContentText("Listening for mesh...")
-            .setContentIntent(pendingIntent).build()
-
-        // We are required to call this within a few seconds of create
-        startForeground(1337, notification)
-
-         */
         startForeground()
 
         // we listen for messages from the radio receiver _before_ trying to create the service
@@ -654,6 +677,8 @@ class MeshService : Service(), Logging {
                 DataPair("num_online", numOnlineNodes)
             )
         }
+
+        updateNotification()
     }
 
     /**
