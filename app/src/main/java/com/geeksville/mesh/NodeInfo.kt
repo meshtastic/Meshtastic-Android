@@ -125,7 +125,7 @@ data class NodeInfo(
     fun distanceStr(o: NodeInfo?) = distance(o)?.let { dist ->
         when {
             dist == 0 -> null // same point
-            dist < 1000 -> "%.0f m".format(dist)
+            dist < 1000 -> "%.0f m".format(dist.toDouble())
             else -> "%.1f km".format(dist / 1000.0)
         }
     }
