@@ -7,7 +7,9 @@ import androidx.ui.core.Text
 import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.DrawImage
 import androidx.ui.layout.*
+import androidx.ui.material.Button
 import androidx.ui.material.MaterialTheme
+import androidx.ui.material.OutlinedButton
 import androidx.ui.material.ripple.Ripple
 import androidx.ui.res.imageResource
 import androidx.ui.tooling.preview.Preview
@@ -41,13 +43,13 @@ fun ChannelContent(channel: Channel = Channel("Default", 7)) {
             }
 
             Ripple(bounded = false) {
-                Clickable(onClick = {
+                OutlinedButton(modifier = LayoutGravity.Center + LayoutPadding(left = 24.dp),
+                    onClick = {
                     GeeksvilleApplication.analytics.track("channel_share") // track how many times users share channels
                     context.toast("Channel sharing is not yet implemented")
                 }) {
                     VectorImage(
                         id = R.drawable.ic_twotone_share_24,
-                        modifier = LayoutGravity.Center + LayoutPadding(left = 8.dp),
                         tint = palette.onBackground
                     )
                 }
