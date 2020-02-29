@@ -7,8 +7,10 @@ import android.os.ParcelUuid
 import androidx.compose.*
 import androidx.compose.frames.modelMapOf
 import androidx.ui.core.ContextAmbient
+import androidx.ui.core.LayoutModifier
 import androidx.ui.core.Text
 import androidx.ui.layout.Column
+import androidx.ui.layout.LayoutGravity
 import androidx.ui.material.CircularProgressIndicator
 import androidx.ui.material.EmphasisLevels
 import androidx.ui.material.ProvideEmphasis
@@ -136,7 +138,7 @@ fun BTScanScreen() {
             Text("An unexpected error was encountered.  Please file a bug on our github: ${ScanUIState.errorText}")
         } else {
             if (ScanUIState.devices.isEmpty()) {
-                Text("Looking for Meshtastic devices... (zero found)")
+                Text(text = "Looking for Meshtastic devices... (zero found)", modifier = LayoutGravity.Center)
 
                 CircularProgressIndicator() // Show that we are searching still
             } else {
