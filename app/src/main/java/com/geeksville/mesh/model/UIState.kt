@@ -5,12 +5,13 @@ import android.os.RemoteException
 import android.util.Base64
 import androidx.compose.mutableStateOf
 import androidx.core.content.edit
+import com.geeksville.android.Logging
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.ui.getInitials
 
 /// FIXME - figure out how to merge this staate with the AppStatus Model
-object UIState {
+object UIState: Logging {
 
     /// Kinda ugly - created in the activity but used from Compose - figure out if there is a cleaner way GIXME
     // lateinit var googleSignInClient: GoogleSignInClient
@@ -59,7 +60,7 @@ object UIState {
                     getInitials(ownerName)
                 ) // Note: we use ?. here because we might be running in the emulator
             } catch (ex: RemoteException) {
-                error("Can't set username on device, is device offline? ${ex.message}")
+                errormsg("Can't set username on device, is device offline? ${ex.message}")
             }
     }
 }

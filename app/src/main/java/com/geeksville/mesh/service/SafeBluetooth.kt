@@ -111,7 +111,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     fun restartBle() {
         GeeksvilleApplication.analytics.track("ble_restart") // record # of times we needed to use this nasty hack
-        error("Doing emergency BLE restart")
+        errormsg("Doing emergency BLE restart")
         val mgr =
             context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val adp = mgr.adapter

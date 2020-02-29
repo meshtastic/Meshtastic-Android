@@ -298,7 +298,7 @@ class RadioInterfaceService : Service(), Logging {
         if (on) {
             val address = getBondedDeviceAddress(this)
             if (address == null)
-                error("No bonded mesh radio, can't create service")
+                errormsg("No bonded mesh radio, can't create service")
             else {
                 // Note: this call does no comms, it just creates the device object (even if the
                 // device is off/not connected)
@@ -316,7 +316,7 @@ class RadioInterfaceService : Service(), Logging {
                     // more info
                     s.asyncConnect(true, ::onConnect, ::onDisconnect)
                 } else {
-                    error("Bluetooth adapter not found, assuming running on the emulator!")
+                    errormsg("Bluetooth adapter not found, assuming running on the emulator!")
                 }
 
                 if (logSends)
