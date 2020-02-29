@@ -1,9 +1,7 @@
 # High priority
 Work items for soon alpha builds
 
-* fix notification setSmallIcon parameter
-* have the foreground service's notification show a summary of network status "connected/disconnected, 5 of 6 nodes, nearest: kevin 5km", 
-* have notification (individually maskable) notifications for received texts - use file:///home/kevinh/packages/android-sdk-linux/docs/reference/android/support/v4/app/NotificationCompat.BigTextStyle.html
+* run services in sim mode on emulator
 * show offline nodes as greyed out
 * show time since last contact on the node info card
 * show pointer arrow on the outside of the user icons, always pointing towoards them
@@ -21,6 +19,7 @@ Work items for soon alpha builds
 # Medium priority
 Features for future builds
 
+* fix notification setSmallIcon parameter - change it to use the meshtastic icon
 * ditch compose and use https://github.com/zsmb13/MaterialDrawerKt + https://github.com/Kotlin/anko/wiki/Anko-Layouts?
 * describe user experience: devices always point to each other and show distance, you can send texts between nodes
 the channel is encrypted, you can share the the channel key with others by qr code or by sharing a special link
@@ -158,3 +157,5 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * connect to bluetooth device automatically using minimum power - start looking at phone boot
 * tell various vendors & post in forums
 * change info() log strings to debug()
+* have the foreground service's notification show a summary of network status "connected/disconnected, 5 of 6 nodes, nearest: kevin 5km", 
+* have notification (individually maskable) notifications for received texts - use file:///home/kevinh/packages/android-sdk-linux/docs/reference/android/support/v4/app/NotificationCompat.BigTextStyle.html

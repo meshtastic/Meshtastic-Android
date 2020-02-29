@@ -268,8 +268,7 @@ class MeshService : Service(), Logging {
         chan.lightColor = Color.BLUE
         chan.importance = NotificationManager.IMPORTANCE_NONE
         chan.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
-        val service = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        service.createNotificationChannel(chan)
+        notificationManager.createNotificationChannel(chan)
         return channelId
     }
 
@@ -278,7 +277,8 @@ class MeshService : Service(), Logging {
         getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
-    val channelId =
+    /// This must be lazy because we use Context
+    private val channelId: String by lazy() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel()
         } else {
@@ -286,10 +286,11 @@ class MeshService : Service(), Logging {
             // https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html#NotificationCompat.Builder(android.content.Context)
             ""
         }
+    }
 
-    private val mainAppIntent = Intent(this, MainActivity::class.java)
-    private val openAppIntent = PendingIntent.getActivity(this, 0, mainAppIntent, 0)
-    private val notificationBuilder = NotificationCompat.Builder(this, channelId)
+    private val openAppIntent: PendingIntent by lazy() {
+        PendingIntent.getActivity(this, 0, Intent(this, MainActivity::class.java), 0)
+    }
 
     /// A text message that has a arrived since the last notification update
     private var recentReceivedText: TextMessage? = null
@@ -298,7 +299,7 @@ class MeshService : Service(), Logging {
         get() = if (!isConnected)
             "No radio connected"
         else
-            "Connected $numOnlineNodes / $numNodes online"
+            "Connected: $numOnlineNodes of $numNodes online"
 
     override fun toString() = summaryString
 
@@ -307,11 +308,13 @@ class MeshService : Service(), Logging {
      */
     private fun createNotification(): Notification {
 
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+
         val builder = notificationBuilder.setOngoing(true)
             .setPriority(PRIORITY_MIN)
             .setCategory(if (recentReceivedText != null) Notification.CATEGORY_SERVICE else Notification.CATEGORY_MESSAGE)
             .setSmallIcon(android.R.drawable.stat_sys_data_bluetooth)
-            .setContentTitle("Meshtastic: $summaryString") // leave this off for now so our notification looks smaller
+            .setContentTitle(summaryString) // leave this off for now so our notification looks smaller
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(openAppIntent)
 
@@ -643,7 +646,7 @@ class MeshService : Service(), Logging {
     /// If we just changed our nodedb, we might want to do somethings
     private fun onNodeDBChanged() {
         updateNotification()
-        
+
         // we don't ask for GPS locations from android if our device has a built in GPS
         if (!myNodeInfo!!.hasGPS) {
             // If we have at least one other person in the mesh, send our GPS position otherwise stop listening to GPS
