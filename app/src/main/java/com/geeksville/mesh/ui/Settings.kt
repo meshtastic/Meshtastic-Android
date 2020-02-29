@@ -56,7 +56,6 @@ fun SettingsContent() {
         if (!bonded) {
 
             val typography = MaterialTheme.typography()
-            val context = ambient(ContextAmbient)
 
             Text(
                 text =

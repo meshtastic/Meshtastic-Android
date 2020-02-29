@@ -353,14 +353,14 @@ class MainActivity : AppCompatActivity(), Logging,
     private val mesh = object : ServiceClient<com.geeksville.mesh.IMeshService>({
         com.geeksville.mesh.IMeshService.Stub.asInterface(it)
     }) {
-        override fun onConnected(m: com.geeksville.mesh.IMeshService) {
-            UIState.meshService = m
+        override fun onConnected(service: com.geeksville.mesh.IMeshService) {
+            UIState.meshService = service
 
             // We don't start listening for packets until after we are connected to the service
             registerMeshReceiver()
 
             // We won't receive a notify for the initial state of connection, so we force an update here
-            onMeshConnectionChanged(m.isConnected)
+            onMeshConnectionChanged(service.isConnected)
 
             debug("connected to mesh service, isConnected=${UIState.isConnected.value}")
         }

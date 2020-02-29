@@ -557,7 +557,7 @@ class MeshService : Service(), Logging {
 
         // FIXME, perhaps we could learn our node ID by looking at any to packets the radio
         // decided to pass through to us (except for broadcast packets)
-        val toNum = packet.to
+        //val toNum = packet.to
 
         val p = packet.payload
 
