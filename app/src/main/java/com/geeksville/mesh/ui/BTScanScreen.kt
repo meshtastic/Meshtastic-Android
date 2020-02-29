@@ -110,22 +110,27 @@ fun BTScanScreen() {
             if (ScanUIState.selectedMacAddr == null)
                 ScanUIState.changeSelection(context, testnodes.first().macAddress)
         } else {
-            val s = bluetoothAdapter.bluetoothLeScanner
-            // ScanState.scanner = scanner
+            /// The following call might return null if the user doesn't have bluetooth access permissions
+            val s: BluetoothLeScanner? = bluetoothAdapter.bluetoothLeScanner
 
-            ScanState.debug("starting scan")
+            if(s == null) {
+                ScanUIState.errorText = "This application requires bluetooth access. Please grant access in android settings."
+            }
+            else {
+                ScanState.debug("starting scan")
 
-            // filter and only accept devices that have a sw update service
-            val filter =
-                ScanFilter.Builder()
-                    .setServiceUuid(ParcelUuid(RadioInterfaceService.BTM_SERVICE_UUID))
-                    .build()
+                // filter and only accept devices that have a sw update service
+                val filter =
+                    ScanFilter.Builder()
+                        .setServiceUuid(ParcelUuid(RadioInterfaceService.BTM_SERVICE_UUID))
+                        .build()
 
-            val settings =
-                ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
-            s.startScan(listOf(filter), settings, scanCallback)
-            ScanState.scanner = s
-            ScanState.callback = scanCallback
+                val settings =
+                    ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
+                s.startScan(listOf(filter), settings, scanCallback)
+                ScanState.scanner = s
+                ScanState.callback = scanCallback
+            }
         }
 
         onDispose {
