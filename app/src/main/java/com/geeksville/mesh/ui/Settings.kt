@@ -23,7 +23,7 @@ object SettingsLog : Logging
 fun SettingsContent() {
     //val typography = MaterialTheme.typography()
 
-    val context = ambient(ContextAmbient)
+    val context = ContextAmbient.current
     Column(modifier = LayoutSize.Fill + LayoutPadding(16.dp)) {
 
         Row {
@@ -49,8 +49,6 @@ fun SettingsContent() {
         }
 
         BTScanScreen()
-
-        val context = ambient(ContextAmbient)
 
         val bonded = RadioInterfaceService.getBondedDeviceAddress(context) != null
         if (!bonded) {

@@ -25,7 +25,7 @@ object ChannelLog : Logging
 @Composable
 fun ChannelContent(channel: Channel = Channel("Default", 7)) {
     val typography = MaterialTheme.typography()
-    val context = ambient(ContextAmbient)
+    val context = ContextAmbient.current
 
     Column(modifier = LayoutSize.Fill + LayoutPadding(16.dp)) {
         Text(
