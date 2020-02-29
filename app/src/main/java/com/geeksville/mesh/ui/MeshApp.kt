@@ -50,16 +50,18 @@ fun HomeContent() {
 
                     if (false) { // hide the firmware update button for now, it is kinda ugly and users don't need it yet
                         /// Create a software update button
-                        val context = ambient(ContextAmbient)
+                        val context = ContextAmbient.current
                         RadioInterfaceService.getBondedDeviceAddress(context)?.let { macAddress ->
-                            Button(text = "Update firmware",
+                            Button(
                                 onClick = {
                                     SoftwareUpdateService.enqueueWork(
                                         context,
                                         SoftwareUpdateService.startUpdateIntent(macAddress)
                                     )
                                 }
-                            )
+                            ) {
+                                Text(text = "Update firmware")
+                            }
                         }
                     }
                 }
