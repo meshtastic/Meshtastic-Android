@@ -1,6 +1,6 @@
 # Meshtastic-Android
 
-This is a tool for using Android with open-source mesh radios.  For more information see our webpage: [meshtastic.org](https://www.meshtastic.org).  If you are looking for the the device side code, see [here](https://github.com/geeksville/Meshtastic-esp32).
+This is a tool for using Android with open-source mesh radios.  For more information see our webpage: [meshtastic.org](https://www.meshtastic.org).  If you are looking for the the device side code, see [here](https://github.com/meshtastic/Meshtastic-esp32).
 
 This project is currently early-alpha, if you have questions or feedback please join our chat [![Join the chat at https://gitter.im/Meshtastic/community](https://badges.gitter.im/Meshtastic/community.svg)](https://gitter.im/Meshtastic/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge).  We would love to hear from you.
 
@@ -29,5 +29,6 @@ for verbose logging:
 adb shell setprop log.tag.FA VERBOSE
 ```
 
+Copyright 2018, S. Kevin Hester-Chow, kevinh@geeksville.com. GPL V3 license
 
 
