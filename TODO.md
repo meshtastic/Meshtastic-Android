@@ -1,6 +1,7 @@
 # High priority
 Work items for soon alpha builds
 
+* use git subtree for androidlib and the protobufs
 * run services in sim mode on emulator
 * show offline nodes as greyed out
 * show time since last contact on the node info card
@@ -26,8 +27,6 @@ the channel is encrypted, you can share the the channel key with others by qr co
 * be smarter about sharing GPS location with the device (to save power), integrate with new network scheduler 
 * stop scan when we start the service - I think this is done, but check
 * set the radio macaddr by using the service (not by slamming bytes into the Preferences)
-* startforegroundservice only if we have a valid radio
-* when we select a new radio, restart the service
 * show bt scan progress centered and towards the bottom of the screen
 * when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname
 * let the user type texts somewhere
@@ -159,3 +158,5 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * change info() log strings to debug()
 * have the foreground service's notification show a summary of network status "connected/disconnected, 5 of 6 nodes, nearest: kevin 5km", 
 * have notification (individually maskable) notifications for received texts - use file:///home/kevinh/packages/android-sdk-linux/docs/reference/android/support/v4/app/NotificationCompat.BigTextStyle.html
+* startforegroundservice only if we have a valid radio
+* when we select a new radio, restart the service

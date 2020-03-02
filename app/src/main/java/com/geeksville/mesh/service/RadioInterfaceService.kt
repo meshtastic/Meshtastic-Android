@@ -123,6 +123,11 @@ class RadioInterfaceService : Service(), Logging {
         private val BTM_OWNER_CHARACTER =
             UUID.fromString("6ff1d8b6-e2de-41e3-8c0b-8fa384f64eb6")
 
+        private const val DEVADDR_KEY = "devAddr"
+
+        /// If our service is currently running, this pointer can be used to reach it (in case setBondedDeviceAddress is called)
+        private var runningService: RadioInterfaceService? = null
+
         /// This is public only so that SimRadio can bootstrap our message flow
         fun broadcastReceivedFromRadio(context: Context, payload: ByteArray) {
             val intent = Intent(RECEIVE_FROMRADIO_ACTION)
@@ -132,8 +137,6 @@ class RadioInterfaceService : Service(), Logging {
 
         private fun getPrefs(context: Context) =
             context.getSharedPreferences("radio-prefs", Context.MODE_PRIVATE)
-
-        private const val DEVADDR_KEY = "devAddr"
 
         /// Get our bluetooth adapter (should always succeed except on emulator
         private fun getBluetoothAdapter(context: Context): BluetoothAdapter? {
@@ -157,13 +160,18 @@ class RadioInterfaceService : Service(), Logging {
                 addr
         }
 
-        fun setBondedDeviceAddress(context: Context, addr: String?) =
+        fun setBondedDeviceAddress(context: Context, addr: String?) {
             getPrefs(context).edit(commit = true) {
                 if (addr == null)
                     this.remove(DEVADDR_KEY)
                 else
                     putString(DEVADDR_KEY, addr)
             }
+
+            runningService?.let {
+                it.setEnabled(addr != null)
+            }
+        }
     }
 
 
@@ -280,12 +288,14 @@ class RadioInterfaceService : Service(), Logging {
     }
 
     override fun onCreate() {
+        runningService = this
         super.onCreate()
         setEnabled(true)
     }
 
     override fun onDestroy() {
         setEnabled(false)
+        runningService = null
         super.onDestroy()
     }
 
@@ -296,31 +306,35 @@ class RadioInterfaceService : Service(), Logging {
     /// Open or close a bluetooth connection to our device
     private fun setEnabled(on: Boolean) {
         if (on) {
-            val address = getBondedDeviceAddress(this)
-            if (address == null)
-                errormsg("No bonded mesh radio, can't create service")
-            else {
-                // Note: this call does no comms, it just creates the device object (even if the
-                // device is off/not connected)
-                val device = getBluetoothAdapter(this)?.getRemoteDevice(address)
-                if (device != null) {
-                    info("Creating radio interface service.  device=$address")
+            if (safe != null) {
+                info("Skipping radio enable, it is already on")
+            } else {
+                val address = getBondedDeviceAddress(this)
+                if (address == null)
+                    errormsg("No bonded mesh radio, can't create service")
+                else {
+                    // Note: this call does no comms, it just creates the device object (even if the
+                    // device is off/not connected)
+                    val device = getBluetoothAdapter(this)?.getRemoteDevice(address)
+                    if (device != null) {
+                        info("Creating radio interface service.  device=$address")
 
-                    // Note this constructor also does no comm
-                    val s = SafeBluetooth(this, device)
-                    safe = s
+                        // Note this constructor also does no comm
+                        val s = SafeBluetooth(this, device)
+                        safe = s
 
-                    // FIXME, pass in true for autoconnect - so we will autoconnect whenever the radio
-                    // comes in range (even if we made this connect call long ago when we got powered on)
-                    // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
-                    // more info
-                    s.asyncConnect(true, ::onConnect, ::onDisconnect)
-                } else {
-                    errormsg("Bluetooth adapter not found, assuming running on the emulator!")
+                        // FIXME, pass in true for autoconnect - so we will autoconnect whenever the radio
+                        // comes in range (even if we made this connect call long ago when we got powered on)
+                        // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
+                        // more info
+                        s.asyncConnect(true, ::onConnect, ::onDisconnect)
+                    } else {
+                        errormsg("Bluetooth adapter not found, assuming running on the emulator!")
+                    }
+
+                    if (logSends)
+                        sentPacketsLog = BinaryLogFile(this, "sent_log.pb")
                 }
-
-                if (logSends)
-                    sentPacketsLog = BinaryLogFile(this, "sent_log.pb")
             }
         } else {
             info("Closing radio interface service")
