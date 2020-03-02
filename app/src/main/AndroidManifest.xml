@@ -100,7 +100,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="http"
+                    android:scheme="https"
                     android:host="www.meshtastic.org"
                     android:pathPrefix="/c/" />
             </intent-filter>

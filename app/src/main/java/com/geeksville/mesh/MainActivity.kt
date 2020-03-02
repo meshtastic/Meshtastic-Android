@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Menu
@@ -215,6 +216,25 @@ class MainActivity : AppCompatActivity(), Logging,
         UIState.googleSignInClient = GoogleSignIn.getClient(this, gso);
 
          */
+
+        // Handle any intent
+        handleIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    /// Handle any itents that were passed into us
+    private fun handleIntent(intent: Intent) {
+        val appLinkAction = intent.action
+        val appLinkData: Uri? = intent.data
+
+        // Were we asked to open one our channel URLs?
+        if (Intent.ACTION_VIEW == appLinkAction && appLinkData != null) {
+            debug("Asked to open a channel URL")
+        }
     }
 
     override fun onDestroy() {
