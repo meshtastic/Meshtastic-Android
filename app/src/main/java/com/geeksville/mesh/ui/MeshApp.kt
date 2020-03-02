@@ -1,7 +1,6 @@
 package com.geeksville.mesh.ui
 
 import androidx.compose.Composable
-import androidx.compose.ambient
 import androidx.compose.state
 import androidx.ui.animation.Crossfade
 import androidx.ui.core.ContextAmbient
@@ -37,12 +36,10 @@ fun getInitials(name: String): String {
 fun HomeContent() {
     Column {
         Row {
-            Container(LayoutSize(40.dp, 40.dp)) {
-                VectorImage(
-                    id = if (UIState.isConnected.value) R.drawable.cloud_on else R.drawable.cloud_off,
-                    tint = palette.onBackground
-                )
-            }
+            VectorImage(
+                id = if (UIState.isConnected.value) R.drawable.cloud_on else R.drawable.cloud_off,
+                tint = palette.onBackground // , modifier = LayoutSize(40.dp, 40.dp)
+            )
 
             if (UIState.isConnected.value) {
                 Column {
@@ -134,8 +131,10 @@ private fun AppContent(openDrawer: () -> Unit) {
                 TopAppBar(
                     title = { Text(text = "Meshtastic") },
                     navigationIcon = {
-                        VectorImageButton(R.drawable.ic_launcher_new_foreground) {
-                            openDrawer()
+                        Container(LayoutSize(40.dp, 40.dp)) {
+                            VectorImageButton(R.drawable.ic_launcher_new_foreground) {
+                                openDrawer()
+                            }
                         }
                     }
                 )
