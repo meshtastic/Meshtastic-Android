@@ -1,7 +1,7 @@
 # High priority
 Work items for soon alpha builds
 
-* use git subtree for androidlib and the protobufs
+* use git submodule for androidlib
 * run services in sim mode on emulator
 * show offline nodes as greyed out
 * show time since last contact on the node info card
