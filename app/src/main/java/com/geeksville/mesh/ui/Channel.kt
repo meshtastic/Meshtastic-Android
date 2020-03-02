@@ -1,27 +1,24 @@
 package com.geeksville.mesh.ui
 
+import android.content.Intent
 import android.graphics.Bitmap
-import android.os.Build
 import androidx.compose.Composable
-import androidx.compose.ambient
 import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Text
-import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.DrawImage
-import androidx.ui.graphics.*
+import androidx.ui.graphics.Image
+import androidx.ui.graphics.ImageConfig
+import androidx.ui.graphics.NativeImage
 import androidx.ui.graphics.colorspace.ColorSpace
 import androidx.ui.graphics.colorspace.ColorSpaces
 import androidx.ui.layout.*
-import androidx.ui.material.Button
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.OutlinedButton
 import androidx.ui.material.ripple.Ripple
-import androidx.ui.res.imageResource
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
-import com.geeksville.android.toast
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIState
 
@@ -88,7 +85,7 @@ fun ChannelContent(channel: Channel = Channel("Default", 7)) {
         Row(modifier = LayoutGravity.Center) {
             // simulated qr code
             // val image = imageResource(id = R.drawable.qrcode)
-            val image = AndroidImage(UIState.channelQR)
+            val image = AndroidImage(UIState.getChannelQR(context))
 
             Container(modifier = LayoutGravity.Center + LayoutSize.Min(200.dp, 200.dp)) {
                 DrawImage(image = image)
@@ -97,9 +94,18 @@ fun ChannelContent(channel: Channel = Channel("Default", 7)) {
             Ripple(bounded = false) {
                 OutlinedButton(modifier = LayoutGravity.Center + LayoutPadding(left = 24.dp),
                     onClick = {
-                    GeeksvilleApplication.analytics.track("channel_share") // track how many times users share channels
-                    context.toast("Channel sharing is not yet implemented")
-                }) {
+                        GeeksvilleApplication.analytics.track("channel_share") // track how many times users share channels
+
+                        val sendIntent: Intent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, UIState.getChannelUrl(context))
+                            putExtra(Intent.EXTRA_TITLE, "A URL for joining a Meshtastic mesh")
+                            type = "text/plain"
+                        }
+
+                        val shareIntent = Intent.createChooser(sendIntent, null)
+                        context.startActivity(shareIntent)
+                    }) {
                     VectorImage(
                         id = R.drawable.ic_twotone_share_24,
                         tint = palette.onBackground

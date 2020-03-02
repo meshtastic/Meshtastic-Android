@@ -9,8 +9,6 @@ Work items for soon alpha builds
 * fix app icon in title bar
 * show direction on the nodeinfo cards
 * take video of the app
-* make channel button look like a button
-* generate real channel QR codes
 * register app link for our URLs https://developer.android.com/studio/write/app-link-indexing.html
 * let users change & share channels (but no saving them yet)
 * treat macaddrs as the unique id, not the app layer user id
@@ -160,3 +158,5 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * have notification (individually maskable) notifications for received texts - use file:///home/kevinh/packages/android-sdk-linux/docs/reference/android/support/v4/app/NotificationCompat.BigTextStyle.html
 * startforegroundservice only if we have a valid radio
 * when we select a new radio, restart the service
+* make channel button look like a button
+* generate real channel QR codes

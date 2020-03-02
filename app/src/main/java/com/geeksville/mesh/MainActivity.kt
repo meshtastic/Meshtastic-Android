@@ -179,7 +179,7 @@ class MainActivity : AppCompatActivity(), Logging,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val prefs = getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
+        val prefs = UIState.getPreferences(this)
         UIState.ownerName = prefs.getString("owner", "")!!
         UIState.meshService = null
 
@@ -276,9 +276,9 @@ class MainActivity : AppCompatActivity(), Logging,
         val bytes = UIState.meshService!!.radioConfig
 
         val config = MeshProtos.RadioConfig.parseFrom(bytes)
-        UIState.radioConfig.value = config
+        UIState.setRadioConfig(this, config)
 
-        debug("Read config from radio, channel URL ${UIState.channelUrl}")
+        debug("Read config from radio")
     }
 
     /// Called when we gain/lose a connection to our mesh radio
