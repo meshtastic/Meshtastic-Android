@@ -233,7 +233,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
         // Were we asked to open one our channel URLs?
         if (Intent.ACTION_VIEW == appLinkAction && appLinkData != null) {
-            debug("Asked to open a channel URL")
+            debug("Asked to open a channel URL - FIXME, ask user if they want to switch to that channel.  If so send the config to the radio")
         }
     }
 

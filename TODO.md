@@ -12,7 +12,6 @@ Work items for soon alpha builds
 * register app link for our URLs https://developer.android.com/studio/write/app-link-indexing.html
 * let users change & share channels (but no saving them yet)
 * treat macaddrs as the unique id, not the app layer user id
-* Have play store entry ask users to report if their android version is too old to allow install
 * only publish gps positions once every 5 mins while we are connected to our radio _and_ someone else is in the mesh
 
 # Medium priority
@@ -160,3 +159,4 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * when we select a new radio, restart the service
 * make channel button look like a button
 * generate real channel QR codes
+* Have play store entry ask users to report if their android version is too old to allow install
