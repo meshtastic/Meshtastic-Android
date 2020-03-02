@@ -1,7 +1,6 @@
 # High priority
 Work items for soon alpha builds
 
-* use git submodule for androidlib
 * run services in sim mode on emulator
 * show offline nodes as greyed out
 * show time since last contact on the node info card
@@ -160,3 +159,4 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * make channel button look like a button
 * generate real channel QR codes
 * Have play store entry ask users to report if their android version is too old to allow install
+* use git submodule for androidlib
