@@ -355,7 +355,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     // more info.
     // Otherwise if you pass in false, it will try to connect now and will timeout and fail in 30 seconds.
     private fun queueConnect(autoConnect: Boolean = false, cont: Continuation<Unit>) {
-        assert(gatt == null);
+        // assert(gatt == null) this now might be !null with our new reconnect support
         queueWork("connect", cont) {
             val g = device.connectGatt(context, autoConnect, gattCallback)
             if (g != null)
