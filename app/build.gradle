@@ -114,5 +114,9 @@ dependencies {
     // add SDKs for any other desired Firebase products
     // https://firebase.google.com/docs/android/setup#available-libraries
 
+    // barcode support
+    implementation('com.google.zxing:core:3.4.0')
+    implementation('com.journeyapps:zxing-android-embedded:3.2.0@aar')
+
     implementation project(':geeksville-androidlib')
 }

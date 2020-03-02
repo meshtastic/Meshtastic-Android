@@ -1,11 +1,16 @@
 package com.geeksville.mesh.ui
 
+import android.graphics.Bitmap
+import android.os.Build
 import androidx.compose.Composable
 import androidx.compose.ambient
 import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Text
 import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.DrawImage
+import androidx.ui.graphics.*
+import androidx.ui.graphics.colorspace.ColorSpace
+import androidx.ui.graphics.colorspace.ColorSpaces
 import androidx.ui.layout.*
 import androidx.ui.material.Button
 import androidx.ui.material.MaterialTheme
@@ -18,11 +23,55 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.toast
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.UIState
 
 /// The Compose IDE preview doesn't like the protobufs
 data class Channel(val name: String, val num: Int)
 
 object ChannelLog : Logging
+
+/// Borrowed from Compose
+class AndroidImage(val bitmap: Bitmap) : Image {
+
+    /**
+     * @see Image.width
+     */
+    override val width: Int
+        get() = bitmap.width
+
+    /**
+     * @see Image.height
+     */
+    override val height: Int
+        get() = bitmap.height
+
+    override val config: ImageConfig get() = ImageConfig.Argb8888
+
+    /**
+     * @see Image.colorSpace
+     */
+    override val colorSpace: ColorSpace
+        get() = ColorSpaces.Srgb
+
+    /**
+     * @see Image.hasAlpha
+     */
+    override val hasAlpha: Boolean
+        get() = bitmap.hasAlpha()
+
+    /**
+     * @see Image.nativeImage
+     */
+    override val nativeImage: NativeImage
+        get() = bitmap
+
+    /**
+     * @see
+     */
+    override fun prepareToDraw() {
+        bitmap.prepareToDraw()
+    }
+}
 
 @Composable
 fun ChannelContent(channel: Channel = Channel("Default", 7)) {
@@ -37,7 +86,10 @@ fun ChannelContent(channel: Channel = Channel("Default", 7)) {
         )
 
         Row(modifier = LayoutGravity.Center) {
-            val image = imageResource(id = R.drawable.qrcode)
+            // simulated qr code
+            // val image = imageResource(id = R.drawable.qrcode)
+            val image = AndroidImage(UIState.channelQR)
+
             Container(modifier = LayoutGravity.Center + LayoutSize.Min(200.dp, 200.dp)) {
                 DrawImage(image = image)
             }

@@ -225,6 +225,7 @@ class RadioInterfaceService : Service(), Logging {
             receivedPacketsLog.write(p)
             receivedPacketsLog.flush()
         }
+
         broadcastReceivedFromRadio(
             this,
             p
