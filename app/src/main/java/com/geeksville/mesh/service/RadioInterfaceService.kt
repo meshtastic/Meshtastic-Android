@@ -188,7 +188,9 @@ class RadioInterfaceService : Service(), Logging {
     private lateinit var fromNum: BluetoothGattCharacteristic
 
     private val logSends = false
+    private val logReceives = false
     lateinit var sentPacketsLog: BinaryLogFile // inited in onCreate
+    lateinit var receivedPacketsLog: BinaryLogFile
 
     private var isConnected = false
 
@@ -219,6 +221,10 @@ class RadioInterfaceService : Service(), Logging {
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
     private fun handleFromRadio(p: ByteArray) {
+        if(logReceives) {
+            receivedPacketsLog.write(p)
+            receivedPacketsLog.flush()
+        }
         broadcastReceivedFromRadio(
             this,
             p
@@ -334,12 +340,16 @@ class RadioInterfaceService : Service(), Logging {
 
                     if (logSends)
                         sentPacketsLog = BinaryLogFile(this, "sent_log.pb")
+                    if (logReceives)
+                        receivedPacketsLog = BinaryLogFile(this, "receive_log.pb")
                 }
             }
         } else {
             info("Closing radio interface service")
             if (logSends)
                 sentPacketsLog.close()
+            if(logReceives)
+                receivedPacketsLog.close()
             safe?.close()
             safe = null
         }
