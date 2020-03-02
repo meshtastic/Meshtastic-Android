@@ -57,7 +57,7 @@ data class BTScanEntry(val name: String, val macAddress: String, val bonded: Boo
 
 @Composable
 fun BTScanScreen() {
-    val context = ambient(ContextAmbient)
+    val context = ContextAmbient.current
 
     /// Note: may be null on platforms without a bluetooth driver (ie. the emulator)
     val bluetoothAdapter =

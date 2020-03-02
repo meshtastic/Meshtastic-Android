@@ -33,6 +33,9 @@
     <!-- Needed to open our bluetooth connection to our paired device (after reboot) -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- the xing library will try to bring this permission in but we don't want it -->
+    <uses-permission android:name="android.permission.CAMERA" tools:node="remove" />
+
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="true" />
