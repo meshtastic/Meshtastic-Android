@@ -2,8 +2,8 @@ package com.geeksville.mesh.ui
 
 import androidx.annotation.DrawableRes
 import androidx.compose.Composable
+import androidx.ui.core.DensityAmbient
 import androidx.ui.core.Modifier
-import androidx.ui.core.WithDensity
 import androidx.ui.foundation.Clickable
 import androidx.ui.graphics.Color
 import androidx.ui.graphics.vector.DrawVector
@@ -18,7 +18,7 @@ import androidx.ui.unit.dp
 fun VectorImageButton(@DrawableRes id: Int, onClick: () -> Unit) {
     Ripple(bounded = false) {
         Clickable(onClick = onClick) {
-            VectorImage(id = id, modifier = LayoutSize(40.dp, 40.dp))
+            VectorImage(id = id /* , modifier = LayoutSize(40.dp, 40.dp) */)
         }
     }
 }
@@ -39,7 +39,7 @@ fun VectorImage(
     tint: Color = Color.Transparent
 ) {
     val vector = vectorResource(id)
-    WithDensity {
+    // WithDensity {
         Container(
             modifier = modifier + LayoutSize(
                 vector.defaultWidth,
@@ -48,5 +48,5 @@ fun VectorImage(
         ) {
             DrawVector(vector, tint)
         }
-    }
+    // }
 }
