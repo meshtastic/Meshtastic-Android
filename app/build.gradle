@@ -16,8 +16,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 22 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 8
-        versionName "0.0.8"
+        versionCode 9
+        versionName "0.0.9"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -115,8 +115,8 @@ dependencies {
     // https://firebase.google.com/docs/android/setup#available-libraries
 
     // barcode support
-    implementation('com.google.zxing:core:3.4.0')
-    implementation('com.journeyapps:zxing-android-embedded:3.2.0@aar')
+    // implementation('com.google.zxing:core:3.4.0')
+    implementation('com.journeyapps:zxing-android-embedded:3.6.0')
 
     implementation project(':geeksville-androidlib')
 }
