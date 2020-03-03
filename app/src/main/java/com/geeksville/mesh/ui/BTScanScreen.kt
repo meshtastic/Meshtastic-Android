@@ -43,7 +43,11 @@ object ScanState : Logging {
     fun stopScan() {
         if (callback != null) {
             debug("stopping scan")
-            scanner!!.stopScan(callback)
+            try {
+                scanner!!.stopScan(callback)
+            } catch(ex: Throwable) {
+                warn("Ignoring error stopping scan, probably BT adapter was disabled suddenly: ${ex.message}")
+            }
             callback = null
         }
     }
