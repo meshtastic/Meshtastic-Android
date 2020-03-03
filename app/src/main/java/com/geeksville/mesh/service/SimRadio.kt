@@ -1,10 +1,9 @@
 package com.geeksville.mesh
 
 import android.content.Context
-import com.google.protobuf.util.JsonFormat
+import com.geeksville.mesh.service.RadioInterfaceService
 
 class SimRadio(private val context: Context) {
-    private val jsonParser = JsonFormat.parser()
 
     /**
      * When simulating we parse these MeshPackets as if they arrived at startup
@@ -42,7 +41,7 @@ class SimRadio(private val context: Context) {
         simInitPackets.forEach { json ->
             val fromRadio = MeshProtos.FromRadio.newBuilder().apply {
                 packet = MeshProtos.MeshPacket.newBuilder().apply {
-                    jsonParser.merge(json, this)
+                    // jsonParser.merge(json, this)
                 }.build()
             }.build()
 
