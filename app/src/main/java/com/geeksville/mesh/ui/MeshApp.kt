@@ -33,6 +33,8 @@ fun getInitials(name: String): String {
 
 @Composable
 fun HomeContent() {
+    analyticsScreen(name = "settings")
+
     Column {
         Row {
             VectorImage(

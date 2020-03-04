@@ -67,6 +67,8 @@ fun MessageCard(msg: TextMessage, modifier: Modifier = Modifier.None) {
 
 @Composable
 fun MessagesContent() {
+    analyticsScreen(name = "messages")
+
     Column(modifier = LayoutSize.Fill) {
 
         val sidePad = 8.dp

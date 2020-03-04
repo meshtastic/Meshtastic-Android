@@ -73,6 +73,8 @@ class AndroidImage(val bitmap: Bitmap) : Image {
 
 @Composable
 fun ChannelContent(channel: Channel = Channel("Default", 7)) {
+    analyticsScreen(name = "channel")
+
     val typography = MaterialTheme.typography()
     val context = ContextAmbient.current
 
