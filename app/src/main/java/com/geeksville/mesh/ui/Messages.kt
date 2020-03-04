@@ -17,7 +17,6 @@ import androidx.ui.material.ProvideEmphasis
 import androidx.ui.text.TextStyle
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
-import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.mesh.model.MessagesState
 import com.geeksville.mesh.model.MessagesState.messages
 import com.geeksville.mesh.model.NodeDB
@@ -106,7 +105,6 @@ fun MessagesContent() {
                 val str = message.value
                 MessagesState.sendMessage(str)
                 message.value = "" // blow away the string the user just entered
-                GeeksvilleApplication.analytics.track("send_text") // track how many times users share channels
             },
             hintText = "Type your message here..."
         )

@@ -524,6 +524,8 @@ class MeshService : Service(), Logging {
 
             else -> TODO()
         }
+
+        GeeksvilleApplication.analytics.track("data_receive")
     }
 
     /// Update our DB of users based on someone sending out a User subpacket
@@ -820,6 +822,8 @@ class MeshService : Service(), Logging {
                 sendToRadio(ToRadio.newBuilder().apply {
                     this.packet = packet
                 })
+
+                GeeksvilleApplication.analytics.track("data_send")
             }
 
         override fun getRadioConfig(): ByteArray = toRemoteExceptions {
