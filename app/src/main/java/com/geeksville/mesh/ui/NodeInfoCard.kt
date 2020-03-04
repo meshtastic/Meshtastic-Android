@@ -69,7 +69,7 @@ fun NodeInfoCard(node: NodeInfo) {
     // Text("Node: ${it.user?.longName}")
     Row(modifier = LayoutPadding(16.dp)) {
         UserIcon(
-            modifier = LayoutPadding(left = 0.dp, top = 0.dp, right = 0.dp, bottom = 0.dp),
+            modifier = LayoutPadding(start = 0.dp, top = 0.dp, end = 0.dp, bottom = 0.dp),
             user = node
         )
 

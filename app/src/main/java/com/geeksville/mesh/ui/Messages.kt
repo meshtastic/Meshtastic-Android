@@ -39,7 +39,7 @@ fun MessageCard(msg: TextMessage, modifier: Modifier = Modifier.None) {
     Row(modifier = modifier) {
         UserIcon(NodeDB.nodes[msg.from])
 
-        Column(modifier = LayoutPadding(left = 12.dp)) {
+        Column(modifier = LayoutPadding(start = 12.dp)) {
             Row {
                 val nodes = NodeDB.nodes
 
@@ -51,7 +51,7 @@ fun MessageCard(msg: TextMessage, modifier: Modifier = Modifier.None) {
                 ProvideEmphasis(emphasis = TimestampEmphasis) {
                     Text(
                         text = dateFormat.format(msg.date),
-                        modifier = LayoutPadding(left = 8.dp),
+                        modifier = LayoutPadding(start = 8.dp),
                         style = MaterialTheme.typography().caption
                     )
                 }
@@ -79,8 +79,8 @@ fun MessagesContent() {
                 messages.forEach { msg ->
                     MessageCard(
                         msg, modifier = LayoutPadding(
-                            left = sidePad,
-                            right = sidePad,
+                            start = sidePad,
+                            end = sidePad,
                             top = topPad,
                             bottom = topPad
                         )

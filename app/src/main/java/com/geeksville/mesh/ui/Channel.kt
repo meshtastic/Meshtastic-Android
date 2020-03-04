@@ -5,7 +5,7 @@ import android.graphics.Bitmap
 import androidx.compose.Composable
 import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Text
-import androidx.ui.foundation.DrawImage
+import androidx.ui.foundation.SimpleImage
 import androidx.ui.graphics.Image
 import androidx.ui.graphics.ImageConfig
 import androidx.ui.graphics.NativeImage
@@ -88,12 +88,12 @@ fun ChannelContent(channel: Channel = Channel("Default", 7)) {
             // val image = imageResource(id = R.drawable.qrcode)
             val image = AndroidImage(UIState.getChannelQR(context))
 
-            Container(modifier = LayoutGravity.Center + LayoutSize.Min(200.dp, 200.dp)) {
-                DrawImage(image = image)
-            }
+            //Container(modifier = LayoutGravity.Center + LayoutSize.Min(200.dp, 200.dp)) {
+            SimpleImage(image = image)
+            //}
 
             Ripple(bounded = false) {
-                OutlinedButton(modifier = LayoutGravity.Center + LayoutPadding(left = 24.dp),
+                OutlinedButton(modifier = LayoutGravity.Center + LayoutPadding(start = 24.dp),
                     onClick = {
                         GeeksvilleApplication.analytics.track(
                             "share",

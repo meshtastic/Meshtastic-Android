@@ -3,9 +3,9 @@ package com.geeksville.mesh.ui
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.*
+import android.content.Context
 import android.os.ParcelUuid
 import androidx.compose.Composable
-import androidx.compose.Context
 import androidx.compose.Model
 import androidx.compose.frames.modelMapOf
 import androidx.compose.onCommit
