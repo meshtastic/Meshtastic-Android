@@ -4,10 +4,12 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.*
 import android.os.ParcelUuid
-import androidx.compose.*
+import androidx.compose.Composable
+import androidx.compose.Context
+import androidx.compose.Model
 import androidx.compose.frames.modelMapOf
+import androidx.compose.onCommit
 import androidx.ui.core.ContextAmbient
-import androidx.ui.core.LayoutModifier
 import androidx.ui.core.Text
 import androidx.ui.layout.Column
 import androidx.ui.layout.LayoutGravity
@@ -63,7 +65,8 @@ fun BTScanScreen() {
     val bluetoothAdapter =
         (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?)?.adapter
 
-    onActive {
+    onCommit(AppStatus.currentScreen) {
+        ScanState.debug("BTScan component active")
         ScanUIState.selectedMacAddr = RadioInterfaceService.getBondedDeviceAddress(context)
 
         val scanCallback = object : ScanCallback() {
@@ -113,10 +116,10 @@ fun BTScanScreen() {
             /// The following call might return null if the user doesn't have bluetooth access permissions
             val s: BluetoothLeScanner? = bluetoothAdapter.bluetoothLeScanner
 
-            if(s == null) {
-                ScanUIState.errorText = "This application requires bluetooth access. Please grant access in android settings."
-            }
-            else {
+            if (s == null) {
+                ScanUIState.errorText =
+                    "This application requires bluetooth access. Please grant access in android settings."
+            } else {
                 ScanState.debug("starting scan")
 
                 // filter and only accept devices that have a sw update service
@@ -134,6 +137,7 @@ fun BTScanScreen() {
         }
 
         onDispose {
+            ScanState.debug("BTScan component deactivated")
             ScanState.stopScan()
         }
     }
@@ -143,7 +147,10 @@ fun BTScanScreen() {
             Text("An unexpected error was encountered.  Please file a bug on our github: ${ScanUIState.errorText}")
         } else {
             if (ScanUIState.devices.isEmpty()) {
-                Text(text = "Looking for Meshtastic devices... (zero found)", modifier = LayoutGravity.Center)
+                Text(
+                    text = "Looking for Meshtastic devices... (zero found)",
+                    modifier = LayoutGravity.Center
+                )
 
                 CircularProgressIndicator() // Show that we are searching still
             } else {
