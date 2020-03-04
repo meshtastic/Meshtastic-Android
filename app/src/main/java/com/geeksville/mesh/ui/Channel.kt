@@ -17,6 +17,7 @@ import androidx.ui.material.OutlinedButton
 import androidx.ui.material.ripple.Ripple
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
+import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.mesh.R
@@ -94,7 +95,10 @@ fun ChannelContent(channel: Channel = Channel("Default", 7)) {
             Ripple(bounded = false) {
                 OutlinedButton(modifier = LayoutGravity.Center + LayoutPadding(left = 24.dp),
                     onClick = {
-                        GeeksvilleApplication.analytics.track("channel_share") // track how many times users share channels
+                        GeeksvilleApplication.analytics.track(
+                            "share",
+                            DataPair("content_type", "channel")
+                        ) // track how many times users share channels
 
                         val sendIntent: Intent = Intent().apply {
                             action = Intent.ACTION_SEND
