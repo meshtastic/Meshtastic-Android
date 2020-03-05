@@ -33,7 +33,7 @@ fun getInitials(name: String): String {
 
 @Composable
 fun HomeContent() {
-    analyticsScreen(name = "settings")
+    analyticsScreen(name = "users")
 
     Column {
         Row {
