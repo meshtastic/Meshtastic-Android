@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -29,6 +30,7 @@ import com.geeksville.mesh.ui.AppStatus
 import com.geeksville.mesh.ui.MeshApp
 import com.geeksville.mesh.ui.ScanState
 import com.geeksville.mesh.ui.Screen
+import com.geeksville.util.Exceptions
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -325,6 +327,18 @@ class MainActivity : AppCompatActivity(), Logging,
                     it.user?.id!! to it
                 }
             )
+        }
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        return try {
+            super.dispatchTouchEvent(ev)
+        } catch (ex: IllegalStateException) {
+            Exceptions.report(
+                ex,
+                "dispatchTouchEvent"
+            ) // hide this Compose error from the user but report to the mothership
+            false
         }
     }
 
