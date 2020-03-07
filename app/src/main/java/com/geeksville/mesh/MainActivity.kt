@@ -241,6 +241,8 @@ class MainActivity : AppCompatActivity(), Logging,
 
     override fun onDestroy() {
         unregisterMeshReceiver()
+        UIState.meshService =
+            null // When our activity goes away make sure we don't keep a ptr around to the service
         super.onDestroy()
     }
 
