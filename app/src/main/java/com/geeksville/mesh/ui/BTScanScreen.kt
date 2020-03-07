@@ -45,7 +45,11 @@ object ScanState : Logging {
     fun stopScan() {
         if (callback != null) {
             debug("stopping scan")
-            scanner!!.stopScan(callback)
+            try {
+                scanner!!.stopScan(callback)
+            } catch (ex: IllegalStateException) {
+                warn("Ignoring error stopping scan, user probably disabled bluetooth: $ex")
+            }
             callback = null
         }
     }
