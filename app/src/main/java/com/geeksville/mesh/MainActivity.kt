@@ -411,7 +411,8 @@ class MainActivity : AppCompatActivity(), Logging,
     private fun bindMeshService() {
         debug("Binding to mesh service!")
         // we bind using the well known name, to make sure 3rd party apps could also
-        logAssert(UIState.meshService == null)
+        if (UIState.meshService != null)
+            Exceptions.reportError("meshService was supposed to be null, ignoring (but reporting a bug)")
 
         MeshService.startService(this)?.let { intent ->
             // ALSO bind so we can use the api
