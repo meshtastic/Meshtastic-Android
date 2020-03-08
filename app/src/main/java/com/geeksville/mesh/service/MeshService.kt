@@ -525,7 +525,11 @@ class MeshService : Service(), Logging {
             else -> TODO()
         }
 
-        GeeksvilleApplication.analytics.track("data_receive")
+        GeeksvilleApplication.analytics.track(
+            "data_receive",
+            DataPair("num_bytes", bytes.size),
+            DataPair("type", data.typValue)
+        )
     }
 
     /// Update our DB of users based on someone sending out a User subpacket
@@ -675,6 +679,11 @@ class MeshService : Service(), Logging {
                     DataPair("num_nodes", numNodes),
                     DataPair("num_online", numOnlineNodes)
                 )
+
+                // Once someone connects to hardware start tracking the approximate number of nodes in their mesh
+                // this allows us to collect stats on what typical mesh size is and to tell difference between users who just
+                // downloaded the app, vs has connected it to some hardware.
+                GeeksvilleApplication.analytics.setUserInfo(DataPair("num_nodes", numNodes))
             } catch (ex: RemoteException) {
                 // It seems that when the ESP32 goes offline it can briefly come back for a 100ms ish which
                 // causes the phone to try and reconnect.  If we fail downloading our initial radio state we don't want to
@@ -823,7 +832,11 @@ class MeshService : Service(), Logging {
                     this.packet = packet
                 })
 
-                GeeksvilleApplication.analytics.track("data_send")
+                GeeksvilleApplication.analytics.track(
+                    "data_send",
+                    DataPair("num_bytes", payloadIn.size),
+                    DataPair("type", typ)
+                )
             }
 
         override fun getRadioConfig(): ByteArray = toRemoteExceptions {
