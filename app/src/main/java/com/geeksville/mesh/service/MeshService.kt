@@ -386,7 +386,7 @@ class MeshService : Service(), Logging {
     val NODENUM_BROADCAST = 255
 
     // MyNodeInfo sent via special protobuf from radio
-    data class MyNodeInfo(val myNodeNum: Int, val hasGPS: Boolean)
+    data class MyNodeInfo(val myNodeNum: Int, val hasGPS: Boolean, val hwModel: String)
 
     var myNodeInfo: MyNodeInfo? = null
 
@@ -604,7 +604,7 @@ class MeshService : Service(), Logging {
             connectedRadio.readMyNode()
         )
 
-        val mynodeinfo = MyNodeInfo(myInfo.myNodeNum, myInfo.hasGps)
+        val mynodeinfo = MyNodeInfo(myInfo.myNodeNum, myInfo.hasGps, myInfo.hwModel)
         myNodeInfo = mynodeinfo
 
         // Ask for the current node DB
@@ -674,16 +674,21 @@ class MeshService : Service(), Logging {
             try {
                 reinitFromRadio()
 
+                val radioModel = DataPair("radio_model", myNodeInfo?.hwModel ?: "unknown")
                 GeeksvilleApplication.analytics.track(
                     "mesh_connect",
                     DataPair("num_nodes", numNodes),
-                    DataPair("num_online", numOnlineNodes)
+                    DataPair("num_online", numOnlineNodes),
+                    radioModel
                 )
 
                 // Once someone connects to hardware start tracking the approximate number of nodes in their mesh
                 // this allows us to collect stats on what typical mesh size is and to tell difference between users who just
                 // downloaded the app, vs has connected it to some hardware.
-                GeeksvilleApplication.analytics.setUserInfo(DataPair("num_nodes", numNodes))
+                GeeksvilleApplication.analytics.setUserInfo(
+                    DataPair("num_nodes", numNodes),
+                    radioModel
+                )
             } catch (ex: RemoteException) {
                 // It seems that when the ESP32 goes offline it can briefly come back for a 100ms ish which
                 // causes the phone to try and reconnect.  If we fail downloading our initial radio state we don't want to
