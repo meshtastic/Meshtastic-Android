@@ -335,7 +335,7 @@ class MainActivity : AppCompatActivity(), Logging,
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         return try {
             super.dispatchTouchEvent(ev)
-        } catch (ex: IllegalStateException) {
+        } catch (ex: Throwable) {
             Exceptions.report(
                 ex,
                 "dispatchTouchEvent"
