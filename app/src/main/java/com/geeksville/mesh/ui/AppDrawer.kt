@@ -47,6 +47,7 @@ fun AppDrawer(
 
         ScreenButton(Screen.messages)
         ScreenButton(Screen.users)
+        ScreenButton(Screen.map)
         ScreenButton(Screen.channel)
         ScreenButton(Screen.settings)
     }

@@ -146,6 +146,7 @@ private fun AppContent(openDrawer: () -> Unit) {
                 Screen.settings -> SettingsContent()
                 Screen.users -> HomeContent()
                 Screen.channel -> ChannelContent()
+                Screen.map -> MapContent()
                 else -> TODO()
             }
         }

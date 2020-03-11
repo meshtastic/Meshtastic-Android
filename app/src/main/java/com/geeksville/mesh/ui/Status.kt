@@ -12,6 +12,7 @@ object Screen {
     val channel = ScreenInfo(R.drawable.ic_twotone_contactless_24, "Channel")
     val users = ScreenInfo(R.drawable.ic_twotone_people_24, "Users")
     val messages = ScreenInfo(R.drawable.ic_twotone_message_24, "Messages")
+    val map = ScreenInfo(R.drawable.ic_twotone_map_24, "Map")
 }
 
 
