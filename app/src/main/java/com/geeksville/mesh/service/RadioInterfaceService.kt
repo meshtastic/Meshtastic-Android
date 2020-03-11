@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.IBinder
 import androidx.core.content.edit
 import com.geeksville.android.BinaryLogFile
+import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.DeferredExecution
 import com.geeksville.mesh.IRadioInterfaceService
@@ -168,6 +169,12 @@ class RadioInterfaceService : Service(), Logging {
                     putString(DEVADDR_KEY, addr)
             }
 
+            // Record that this use has configured a radio
+            GeeksvilleApplication.analytics.track(
+                "mesh_bond"
+            )
+
+            // Force the service to reconnect
             runningService?.let {
                 it.setEnabled(addr != null)
             }
