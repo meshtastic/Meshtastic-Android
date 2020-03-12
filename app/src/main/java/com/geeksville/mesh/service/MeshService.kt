@@ -386,7 +386,13 @@ class MeshService : Service(), Logging {
     val NODENUM_BROADCAST = 255
 
     // MyNodeInfo sent via special protobuf from radio
-    data class MyNodeInfo(val myNodeNum: Int, val hasGPS: Boolean, val hwModel: String)
+    data class MyNodeInfo(
+        val myNodeNum: Int,
+        val hasGPS: Boolean,
+        val region: String,
+        val model: String,
+        val firmwareVersion: String
+    )
 
     var myNodeInfo: MyNodeInfo? = null
 
@@ -604,8 +610,19 @@ class MeshService : Service(), Logging {
             connectedRadio.readMyNode()
         )
 
-        val mynodeinfo = MyNodeInfo(myInfo.myNodeNum, myInfo.hasGps, myInfo.hwModel)
-        myNodeInfo = mynodeinfo
+        val mi = with(myInfo) {
+            MyNodeInfo(myNodeNum, hasGps, region, hwModel, firmwareVersion)
+        }
+
+        myNodeInfo = mi
+
+        /// Track types of devices and firmware versions in use
+        GeeksvilleApplication.analytics.setUserInfo(
+            DataPair("region", mi.region),
+            DataPair("firmware", mi.firmwareVersion),
+            DataPair("has_gps", mi.hasGPS),
+            DataPair("hw_model", mi.model)
+        )
 
         // Ask for the current node DB
         connectedRadio.restartNodeInfo()
@@ -631,7 +648,7 @@ class MeshService : Service(), Logging {
                     // For the local node, it might not be able to update its times because it doesn't have a valid GPS reading yet
                     // so if the info is for _our_ node we always assume time is current
                     val time =
-                        if (it.num == mynodeinfo.myNodeNum) currentSecond() else info.position.time
+                        if (it.num == mi.myNodeNum) currentSecond() else info.position.time
 
                     it.position = Position(
                         info.position.latitude,
@@ -648,6 +665,7 @@ class MeshService : Service(), Logging {
 
         onNodeDBChanged()
     }
+
 
     /// If we just changed our nodedb, we might want to do somethings
     private fun onNodeDBChanged() {
@@ -674,7 +692,7 @@ class MeshService : Service(), Logging {
             try {
                 reinitFromRadio()
 
-                val radioModel = DataPair("radio_model", myNodeInfo?.hwModel ?: "unknown")
+                val radioModel = DataPair("radio_model", myNodeInfo?.model ?: "unknown")
                 GeeksvilleApplication.analytics.track(
                     "mesh_connect",
                     DataPair("num_nodes", numNodes),
