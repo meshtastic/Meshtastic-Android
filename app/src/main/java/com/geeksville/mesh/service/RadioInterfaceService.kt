@@ -221,7 +221,7 @@ class RadioInterfaceService : Service(), Logging {
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
     private fun handleFromRadio(p: ByteArray) {
-        if(logReceives) {
+        if (logReceives) {
             receivedPacketsLog.write(p)
             receivedPacketsLog.flush()
         }
@@ -279,6 +279,9 @@ class RadioInterfaceService : Service(), Logging {
 
                 fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)
 
+                // We must set this to true before broadcasting connectionChanged
+                isConnected = true
+
                 safe!!.setNotify(fromNum, true) {
                     debug("fromNum changed, so we are reading new messages")
                     doReadFromRadio()
@@ -286,7 +289,6 @@ class RadioInterfaceService : Service(), Logging {
 
                 // Now tell clients they can (finally use the api)
                 broadcastConnectionChanged(true)
-                isConnected = true
 
                 // Immediately broadcast any queued packets sitting on the device
                 doReadFromRadio()
@@ -349,7 +351,7 @@ class RadioInterfaceService : Service(), Logging {
             info("Closing radio interface service")
             if (logSends)
                 sentPacketsLog.close()
-            if(logReceives)
+            if (logReceives)
                 receivedPacketsLog.close()
             safe?.close()
             safe = null

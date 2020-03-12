@@ -7,7 +7,6 @@ import androidx.ui.core.Text
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
-import androidx.ui.material.Button
 import androidx.ui.material.Divider
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.TextButton
@@ -75,9 +74,9 @@ private fun DrawerButton(
 
     Surface(
         modifier = modifier + LayoutPadding(
-            left = 8.dp,
+            start = 8.dp,
             top = 8.dp,
-            right = 8.dp,
+            end = 8.dp,
             bottom = 0.dp
         ),
         color = backgroundColor,

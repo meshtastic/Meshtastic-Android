@@ -13,6 +13,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -29,6 +30,7 @@ import com.geeksville.mesh.ui.AppStatus
 import com.geeksville.mesh.ui.MeshApp
 import com.geeksville.mesh.ui.ScanState
 import com.geeksville.mesh.ui.Screen
+import com.geeksville.util.Exceptions
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -239,6 +241,8 @@ class MainActivity : AppCompatActivity(), Logging,
 
     override fun onDestroy() {
         unregisterMeshReceiver()
+        UIState.meshService =
+            null // When our activity goes away make sure we don't keep a ptr around to the service
         super.onDestroy()
     }
 
@@ -328,6 +332,18 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        return try {
+            super.dispatchTouchEvent(ev)
+        } catch (ex: Throwable) {
+            Exceptions.report(
+                ex,
+                "dispatchTouchEvent"
+            ) // hide this Compose error from the user but report to the mothership
+            false
+        }
+    }
+
     private val meshServiceReceiver = object : BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
@@ -395,7 +411,8 @@ class MainActivity : AppCompatActivity(), Logging,
     private fun bindMeshService() {
         debug("Binding to mesh service!")
         // we bind using the well known name, to make sure 3rd party apps could also
-        logAssert(UIState.meshService == null)
+        if (UIState.meshService != null)
+            Exceptions.reportError("meshService was supposed to be null, ignoring (but reporting a bug)")
 
         MeshService.startService(this)?.let { intent ->
             // ALSO bind so we can use the api

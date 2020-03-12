@@ -2,7 +2,6 @@ package com.geeksville.mesh.ui
 
 import androidx.compose.Composable
 import androidx.compose.state
-import androidx.ui.animation.Crossfade
 import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Text
 import androidx.ui.layout.Column
@@ -34,6 +33,8 @@ fun getInitials(name: String): String {
 
 @Composable
 fun HomeContent() {
+    analyticsScreen(name = "users")
+
     Column {
         Row {
             VectorImage(
@@ -124,35 +125,30 @@ fun previewView() {
 
 @Composable
 private fun AppContent(openDrawer: () -> Unit) {
-    Crossfade(AppStatus.currentScreen) { screen ->
-        Surface(color = (MaterialTheme.colors()).background) {
+    // crossfade breaks onCommit behavior because it keeps old views around
+    //Crossfade(AppStatus.currentScreen) { screen ->
+    Surface(color = (MaterialTheme.colors()).background) {
 
-            Column {
-                TopAppBar(
-                    title = { Text(text = "Meshtastic") },
-                    navigationIcon = {
-                        Container(LayoutSize(40.dp, 40.dp)) {
-                            VectorImageButton(R.drawable.ic_launcher_new_foreground) {
-                                openDrawer()
-                            }
+        Column {
+            TopAppBar(
+                title = { Text(text = "Meshtastic") },
+                navigationIcon = {
+                    Container(LayoutSize(40.dp, 40.dp)) {
+                        VectorImageButton(R.drawable.ic_launcher_new_foreground) {
+                            openDrawer()
                         }
                     }
-                )
-
-                // VerticalScroller breaks flexible layouts - because verticalscrollers have 'infinite' height
-                // VerticalScroller(modifier = LayoutFlexible(1f)) {
-                //if (screen != Screen.settings)
-                //    ScanState.stopScan() // Nasty hack to teardown the bt scanner
-
-                when (screen) {
-                    Screen.messages -> MessagesContent()
-                    Screen.settings -> SettingsContent()
-                    Screen.users -> HomeContent()
-                    Screen.channel -> ChannelContent()
-                    else -> TODO()
                 }
-                //}
+            )
+
+            when (AppStatus.currentScreen) {
+                Screen.messages -> MessagesContent()
+                Screen.settings -> SettingsContent()
+                Screen.users -> HomeContent()
+                Screen.channel -> ChannelContent()
+                else -> TODO()
             }
         }
     }
+    //}
 }

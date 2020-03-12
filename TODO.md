@@ -1,6 +1,7 @@
 # High priority
 Work items for soon alpha builds
 
+* update play store listing for public beta
 * run services in sim mode on emulator
 * show offline nodes as greyed out
 * show time since last contact on the node info card
