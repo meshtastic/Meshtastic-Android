@@ -5,7 +5,6 @@ Work items for soon alpha builds
 * make link sharing work
 * finish map view
 * run services in sim mode on emulator
-* track radio brands/regions as a user property (include no-radio as an option)
 * show offline nodes as greyed out
 * show time since last contact on the node info card
 * show pointer arrow on the outside of the user icons, always pointing towoards them
@@ -213,4 +212,6 @@ Transition powerFSM transition=Screen-on timeout, from=ON to=DARK
 
 NOTE: no debug messages on device, though we see in radio interface service we are repeatedly reading FromRadio and getting
 the same seven bytes.  It sure seems like the old service is still sort of alive...
+
+* track radio brands/regions as a user property (include no-radio as an option)
 
