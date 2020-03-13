@@ -164,6 +164,7 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * Have play store entry ask users to report if their android version is too old to allow install
 * use git submodule for androidlib
 * update play store listing for public beta
+* track radio brands/regions as a user property (include no-radio as an option)
 
 Rare bug reproduced:
 
@@ -213,5 +214,4 @@ Transition powerFSM transition=Screen-on timeout, from=ON to=DARK
 NOTE: no debug messages on device, though we see in radio interface service we are repeatedly reading FromRadio and getting
 the same seven bytes.  It sure seems like the old service is still sort of alive...
 
-* track radio brands/regions as a user property (include no-radio as an option)
 
