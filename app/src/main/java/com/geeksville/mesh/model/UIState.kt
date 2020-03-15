@@ -10,10 +10,36 @@ import androidx.core.content.edit
 import com.geeksville.android.Logging
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.MeshProtos.ChannelSettings.ModemConfig
 import com.geeksville.mesh.ui.getInitials
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
+
+data class Channel(
+    val name: String,
+    val num: Int,
+    val modemConfig: ModemConfig = ModemConfig.Bw125Cr45Sf128
+) {
+    companion object {
+        // Placeholder when emulating
+        val emulated = Channel("Default", 7)
+    }
+
+    constructor(c: MeshProtos.ChannelSettings) : this(c.name, c.channelNum, c.modemConfig) {
+    }
+}
+
+/**
+ * a nice readable description of modem configs
+ */
+fun ModemConfig.toHumanString(): String = when (this) {
+    ModemConfig.Bw125Cr45Sf128 -> "Medium range (but fast)"
+    ModemConfig.Bw500Cr45Sf128 -> "Short range (but fast)"
+    ModemConfig.Bw31_25Cr48Sf512 -> "Long range (but slower)"
+    ModemConfig.Bw125Cr48Sf4096 -> "Very long range (but slow)"
+    else -> this.toString()
+}
 
 /// FIXME - figure out how to merge this staate with the AppStatus Model
 object UIState : Logging {
@@ -34,6 +60,8 @@ object UIState : Logging {
     /// our activity will read this from prefs or set it to the empty string
     var ownerName: String = "MrInIDE Ownername"
 
+    fun getChannel() = radioConfig.value?.channelSettings?.let { Channel(it) }
+
     /// Return an URL that represents the current channel values
     fun getChannelUrl(context: Context): String {
         // If we have a valid radio config use it, othterwise use whatever we have saved in the prefs
@@ -52,8 +80,7 @@ object UIState : Logging {
         }
     }
 
-    fun getChannelQR(context: Context): Bitmap
-    {
+    fun getChannelQR(context: Context): Bitmap {
         val multiFormatWriter = MultiFormatWriter()
 
         val bitMatrix =
