@@ -73,7 +73,6 @@ rules at the BluetoothDevice level.  Either make SafeBluetooth lock at the devic
 * test with an oldish android release using real hardware
 * stop using a foreground service
 * use platform theme (dark or light)
-* remove mixpanel analytics
 * require user auth to pair with the device (i.e. press button on device to allow a new phone to pair with it).
 Don't leave device discoverable.  Don't let unpaired users do things with device
 * if the rxpacket queue on the device overflows (because android hasn't connected in a while) send a special packet to android which means 'X packets have been dropped because you were offline' -drop oldest packets first
@@ -165,6 +164,7 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * use git submodule for androidlib
 * update play store listing for public beta
 * track radio brands/regions as a user property (include no-radio as an option)
+* remove mixpanel analytics
 
 Rare bug reproduced:
 
