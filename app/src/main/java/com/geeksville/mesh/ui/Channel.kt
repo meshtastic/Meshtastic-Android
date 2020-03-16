@@ -4,10 +4,10 @@ import android.content.Intent
 import androidx.compose.Composable
 import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Text
+import androidx.ui.input.ImeAction
 import androidx.ui.layout.*
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.OutlinedButton
-import androidx.ui.material.ripple.Ripple
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import com.geeksville.analytics.DataPair
@@ -31,24 +31,65 @@ fun ChannelContent(channel: Channel?) {
 
     Column(modifier = LayoutSize.Fill + LayoutPadding(16.dp)) {
         if (channel != null) {
+            Row(modifier = LayoutGravity.Center) {
+
+                Text(text = "Channel ", modifier = LayoutGravity.Center)
+
+                if (channel.editable) {
+                    // FIXME - limit to max length
+                    StyledTextField(
+                        value = channel.name,
+                        onValueChange = { channel.name = it },
+                        textStyle = typography.h4.copy(
+                            color = palette.onSecondary.copy(alpha = 0.8f)
+                        ),
+                        imeAction = ImeAction.Send,
+                        onImeActionPerformed = {
+                            TODO()
+                        }
+                    )
+                } else {
+                    Text(
+                        text = channel.name,
+                        style = typography.h4
+                    )
+                }
+            }
+
+            // simulated qr code
+            // val image = imageResource(id = R.drawable.qrcode)
+            val image = AndroidImage(UIState.getChannelQR(context))
+
+            ScaledImage(
+                image = image,
+                modifier = LayoutGravity.Center + LayoutSize.Min(200.dp, 200.dp)
+            )
+
             Text(
-                text = "Channel: ${channel.name}",
-                modifier = LayoutGravity.Center,
-                style = typography.h4
+                text = "Mode: ${channel.modemConfig.toHumanString()}",
+                modifier = LayoutGravity.Center + LayoutPadding(bottom = 16.dp)
             )
 
             Row(modifier = LayoutGravity.Center) {
-                // simulated qr code
-                // val image = imageResource(id = R.drawable.qrcode)
-                val image = AndroidImage(UIState.getChannelQR(context))
 
-                ScaledImage(
-                    image = image,
-                    modifier = LayoutGravity.Center + LayoutSize.Min(200.dp, 200.dp)
-                )
+                OutlinedButton(onClick = {
+                    channel.editable = !channel.editable
+                }) {
+                    if (channel.editable)
+                        VectorImage(
+                            id = R.drawable.ic_twotone_lock_open_24,
+                            tint = palette.onBackground
+                        )
+                    else
+                        VectorImage(
+                            id = R.drawable.ic_twotone_lock_24,
+                            tint = palette.onBackground
+                        )
+                }
 
-                Ripple(bounded = false) {
-                    OutlinedButton(modifier = LayoutGravity.Center + LayoutPadding(start = 24.dp),
+                // Only show the share buttone once we are locked
+                if (!channel.editable)
+                    OutlinedButton(modifier = LayoutPadding(start = 24.dp),
                         onClick = {
                             GeeksvilleApplication.analytics.track(
                                 "share",
@@ -58,7 +99,10 @@ fun ChannelContent(channel: Channel?) {
                             val sendIntent: Intent = Intent().apply {
                                 action = Intent.ACTION_SEND
                                 putExtra(Intent.EXTRA_TEXT, UIState.getChannelUrl(context))
-                                putExtra(Intent.EXTRA_TITLE, "A URL for joining a Meshtastic mesh")
+                                putExtra(
+                                    Intent.EXTRA_TITLE,
+                                    "A URL for joining a Meshtastic mesh"
+                                )
                                 type = "text/plain"
                             }
 
@@ -70,17 +114,7 @@ fun ChannelContent(channel: Channel?) {
                             tint = palette.onBackground
                         )
                     }
-                }
             }
-
-            Text(
-                text = "Number: ${channel.num}",
-                modifier = LayoutGravity.Center
-            )
-            Text(
-                text = "Mode: ${channel.modemConfig.toHumanString()}",
-                modifier = LayoutGravity.Center
-            )
         }
     }
 }

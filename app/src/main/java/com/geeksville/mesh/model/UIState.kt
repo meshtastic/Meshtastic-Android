@@ -5,8 +5,10 @@ import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.os.RemoteException
 import android.util.Base64
+import androidx.compose.Model
 import androidx.compose.mutableStateOf
 import androidx.core.content.edit
+import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.android.Logging
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
@@ -16,18 +18,21 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
 
+@Model
 data class Channel(
-    val name: String,
-    val num: Int,
-    val modemConfig: ModemConfig = ModemConfig.Bw125Cr45Sf128
+    var name: String,
+    var modemConfig: ModemConfig
 ) {
     companion object {
         // Placeholder when emulating
-        val emulated = Channel("Default", 7)
+        val emulated = Channel("Default", ModemConfig.Bw125Cr45Sf128)
     }
 
-    constructor(c: MeshProtos.ChannelSettings) : this(c.name, c.channelNum, c.modemConfig) {
+    constructor(c: MeshProtos.ChannelSettings) : this(c.name, c.modemConfig) {
     }
+
+    /// Can this channel be changed right now?
+    var editable = false
 }
 
 /**
@@ -60,7 +65,19 @@ object UIState : Logging {
     /// our activity will read this from prefs or set it to the empty string
     var ownerName: String = "MrInIDE Ownername"
 
-    fun getChannel() = radioConfig.value?.channelSettings?.let { Channel(it) }
+    /**
+     * Return the current channel info
+     * FIXME, we should sim channels at the MeshService level if we are running on an emulator,
+     * for now I just fake it by returning a canned channel.
+     */
+    fun getChannel(): Channel? {
+        val channel = radioConfig.value?.channelSettings?.let { Channel(it) }
+
+        return if (channel == null && isEmulator)
+            Channel.emulated
+        else
+            channel
+    }
 
     /// Return an URL that represents the current channel values
     fun getChannelUrl(context: Context): String {
