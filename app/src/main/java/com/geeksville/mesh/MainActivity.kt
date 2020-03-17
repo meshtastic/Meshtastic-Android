@@ -200,9 +200,6 @@ class MainActivity : AppCompatActivity(), Logging,
 
         requestPermission()
 
-        setContent {
-            MeshApp()
-        }
 
         /*  not yet working
         // Configure sign-in to request the user's ID, email address, and basic
@@ -221,6 +218,10 @@ class MainActivity : AppCompatActivity(), Logging,
 
         // Handle any intent
         handleIntent(intent)
+
+        setContent {
+            MeshApp()
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -233,9 +234,12 @@ class MainActivity : AppCompatActivity(), Logging,
         val appLinkAction = intent.action
         val appLinkData: Uri? = intent.data
 
+        UIState.requestedChannelUrl = null // assume none
+
         // Were we asked to open one our channel URLs?
-        if (Intent.ACTION_VIEW == appLinkAction && appLinkData != null) {
+        if (Intent.ACTION_VIEW == appLinkAction) {
             debug("Asked to open a channel URL - FIXME, ask user if they want to switch to that channel.  If so send the config to the radio")
+            UIState.requestedChannelUrl = appLinkData
         }
     }
 

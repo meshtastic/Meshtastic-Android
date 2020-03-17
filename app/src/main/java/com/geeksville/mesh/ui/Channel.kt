@@ -15,7 +15,6 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Channel
-import com.geeksville.mesh.model.UIState
 import com.geeksville.mesh.model.toHumanString
 
 
@@ -43,7 +42,7 @@ fun ChannelContent(channel: Channel?) {
                         textStyle = typography.h4.copy(
                             color = palette.onSecondary.copy(alpha = 0.8f)
                         ),
-                        imeAction = ImeAction.Send,
+                        imeAction = ImeAction.Done,
                         onImeActionPerformed = {
                             TODO()
                         }
@@ -58,7 +57,7 @@ fun ChannelContent(channel: Channel?) {
 
             // simulated qr code
             // val image = imageResource(id = R.drawable.qrcode)
-            val image = AndroidImage(UIState.getChannelQR(context))
+            val image = AndroidImage(channel.getChannelQR())
 
             ScaledImage(
                 image = image,
@@ -98,7 +97,7 @@ fun ChannelContent(channel: Channel?) {
 
                             val sendIntent: Intent = Intent().apply {
                                 action = Intent.ACTION_SEND
-                                putExtra(Intent.EXTRA_TEXT, UIState.getChannelUrl(context))
+                                putExtra(Intent.EXTRA_TEXT, channel.getChannelUrl())
                                 putExtra(
                                     Intent.EXTRA_TITLE,
                                     "A URL for joining a Meshtastic mesh"

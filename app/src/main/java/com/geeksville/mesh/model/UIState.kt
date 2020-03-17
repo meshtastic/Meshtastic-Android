@@ -3,6 +3,7 @@ package com.geeksville.mesh.model
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Bitmap
+import android.net.Uri
 import android.os.RemoteException
 import android.util.Base64
 import androidx.compose.Model
@@ -17,23 +18,60 @@ import com.geeksville.mesh.ui.getInitials
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
+import java.net.MalformedURLException
 
 @Model
 data class Channel(
     var name: String,
-    var modemConfig: ModemConfig
+    var modemConfig: ModemConfig,
+    var settings: MeshProtos.ChannelSettings? = null
 ) {
     companion object {
         // Placeholder when emulating
         val emulated = Channel("Default", ModemConfig.Bw125Cr45Sf128)
+
+        const val prefix = "https://www.meshtastic.org/c/"
+
+        private const val base64Flags = Base64.URL_SAFE + Base64.NO_WRAP
+
+        private fun urlToSettings(url: Uri): MeshProtos.ChannelSettings {
+            val urlStr = url.toString()
+            val pathRegex = Regex("$prefix(.*)")
+            val (base64) = pathRegex.find(urlStr)?.destructured
+                ?: throw MalformedURLException("Not a meshtastic URL")
+            val bytes = Base64.decode(base64, base64Flags)
+
+            return MeshProtos.ChannelSettings.parseFrom(bytes)
+        }
     }
 
-    constructor(c: MeshProtos.ChannelSettings) : this(c.name, c.modemConfig) {
-    }
+    constructor(c: MeshProtos.ChannelSettings) : this(c.name, c.modemConfig, c)
+
+    constructor(url: Uri) : this(urlToSettings(url))
 
     /// Can this channel be changed right now?
     var editable = false
+
+    /// Return an URL that represents the current channel values
+    fun getChannelUrl(): String {
+        // If we have a valid radio config use it, othterwise use whatever we have saved in the prefs
+
+        val channelBytes = settings?.toByteArray() ?: ByteArray(0) // if unset just use empty
+        val enc = Base64.encodeToString(channelBytes, base64Flags)
+
+        return "$prefix$enc"
+    }
+
+    fun getChannelQR(): Bitmap {
+        val multiFormatWriter = MultiFormatWriter()
+
+        val bitMatrix =
+            multiFormatWriter.encode(getChannelUrl(), BarcodeFormat.QR_CODE, 192, 192);
+        val barcodeEncoder = BarcodeEncoder()
+        return barcodeEncoder.createBitmap(bitMatrix)
+    }
 }
+
 
 /**
  * a nice readable description of modem configs
@@ -65,6 +103,9 @@ object UIState : Logging {
     /// our activity will read this from prefs or set it to the empty string
     var ownerName: String = "MrInIDE Ownername"
 
+    /// If the app was launched because we received a new channel intent, the Url will be here
+    var requestedChannelUrl: Uri? = null
+
     /**
      * Return the current channel info
      * FIXME, we should sim channels at the MeshService level if we are running on an emulator,
@@ -79,33 +120,6 @@ object UIState : Logging {
             channel
     }
 
-    /// Return an URL that represents the current channel values
-    fun getChannelUrl(context: Context): String {
-        // If we have a valid radio config use it, othterwise use whatever we have saved in the prefs
-        val radio = radioConfig.value
-        if (radio != null) {
-            val settings = radio.channelSettings
-            val channelBytes = settings.toByteArray()
-            val enc = Base64.encodeToString(channelBytes, Base64.URL_SAFE + Base64.NO_WRAP)
-
-            return "https://www.meshtastic.org/c/$enc"
-        } else {
-            return getPreferences(context).getString(
-                "owner",
-                "https://www.meshtastic.org/c/unset"
-            )!!
-        }
-    }
-
-    fun getChannelQR(context: Context): Bitmap {
-        val multiFormatWriter = MultiFormatWriter()
-
-        val bitMatrix =
-            multiFormatWriter.encode(getChannelUrl(context), BarcodeFormat.QR_CODE, 192, 192);
-        val barcodeEncoder = BarcodeEncoder()
-        return barcodeEncoder.createBitmap(bitMatrix)
-    }
-
     fun getPreferences(context: Context): SharedPreferences =
         context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
 
@@ -114,7 +128,7 @@ object UIState : Logging {
         radioConfig.value = c
 
         getPreferences(context).edit(commit = true) {
-            this.putString("channel-url", getChannelUrl(context))
+            this.putString("channel-url", getChannel()!!.getChannelUrl())
         }
     }
 
