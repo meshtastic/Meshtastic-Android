@@ -24,11 +24,14 @@ import java.net.MalformedURLException
 data class Channel(
     var name: String,
     var modemConfig: ModemConfig,
-    var settings: MeshProtos.ChannelSettings? = null
+    var settings: MeshProtos.ChannelSettings? = MeshProtos.ChannelSettings.getDefaultInstance()
 ) {
     companion object {
         // Placeholder when emulating
-        val emulated = Channel("Default", ModemConfig.Bw125Cr45Sf128)
+        val emulated = Channel(
+            MeshProtos.ChannelSettings.newBuilder().setName("Default")
+                .setModemConfig(ModemConfig.Bw125Cr45Sf128).build()
+        )
 
         const val prefix = "https://www.meshtastic.org/c/"
 
@@ -53,20 +56,20 @@ data class Channel(
     var editable = false
 
     /// Return an URL that represents the current channel values
-    fun getChannelUrl(): String {
+    fun getChannelUrl(): Uri {
         // If we have a valid radio config use it, othterwise use whatever we have saved in the prefs
 
         val channelBytes = settings?.toByteArray() ?: ByteArray(0) // if unset just use empty
         val enc = Base64.encodeToString(channelBytes, base64Flags)
 
-        return "$prefix$enc"
+        return Uri.parse("$prefix$enc")
     }
 
     fun getChannelQR(): Bitmap {
         val multiFormatWriter = MultiFormatWriter()
 
         val bitMatrix =
-            multiFormatWriter.encode(getChannelUrl(), BarcodeFormat.QR_CODE, 192, 192);
+            multiFormatWriter.encode(getChannelUrl().toString(), BarcodeFormat.QR_CODE, 192, 192);
         val barcodeEncoder = BarcodeEncoder()
         return barcodeEncoder.createBitmap(bitMatrix)
     }
@@ -128,7 +131,7 @@ object UIState : Logging {
         radioConfig.value = c
 
         getPreferences(context).edit(commit = true) {
-            this.putString("channel-url", getChannel()!!.getChannelUrl())
+            this.putString("channel-url", getChannel()!!.getChannelUrl().toString())
         }
     }
 
