@@ -621,8 +621,22 @@ class MeshService : Service(), Logging {
             DataPair("region", mi.region),
             DataPair("firmware", mi.firmwareVersion),
             DataPair("has_gps", mi.hasGPS),
-            DataPair("hw_model", mi.model)
+            DataPair("hw_model", mi.model),
+            DataPair("dev_error_count", myInfo.errorCount)
         )
+
+        if (myInfo.errorCode != 0) {
+            GeeksvilleApplication.analytics.track(
+                "dev_error",
+                DataPair("code", myInfo.errorCode),
+                DataPair("address", myInfo.errorAddress),
+
+                // We also include this info, because it is required to correctly decode address from the map file
+                DataPair("firmware", mi.firmwareVersion),
+                DataPair("hw_model", mi.model),
+                DataPair("region", mi.region)
+            )
+        }
 
         // Ask for the current node DB
         connectedRadio.restartNodeInfo()
