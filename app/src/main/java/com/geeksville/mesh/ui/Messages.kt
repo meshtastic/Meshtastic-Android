@@ -75,7 +75,7 @@ fun MessagesContent() {
         val topPad = 4.dp
 
         VerticalScroller(
-            modifier = LayoutFlexible(1f)
+            modifier = LayoutWeight(1f)
         ) {
             Column {
                 messages.forEach { msg ->

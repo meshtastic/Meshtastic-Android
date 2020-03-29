@@ -5,7 +5,7 @@ import androidx.compose.Composable
 import androidx.ui.core.Modifier
 import androidx.ui.foundation.Icon
 import androidx.ui.graphics.Color
-import androidx.ui.graphics.vector.DrawVector
+import androidx.ui.graphics.vector.drawVector
 import androidx.ui.layout.Container
 import androidx.ui.layout.LayoutSize
 import androidx.ui.material.IconButton
@@ -42,9 +42,8 @@ fun VectorImage(
         modifier = modifier + LayoutSize(
             vector.defaultWidth,
             vector.defaultHeight
-        )
+        ) + drawVector(vector, tint)
     ) {
-        DrawVector(vector, tint)
     }
     // }
 }

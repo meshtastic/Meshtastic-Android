@@ -23,6 +23,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.annotation.LayoutRes
 import androidx.compose.Composable
+import androidx.ui.core.ContextAmbient
 
 /**
  * Composes an Android [View] given a layout resource [resId]. The method handles the inflation
@@ -35,10 +36,11 @@ import androidx.compose.Composable
 @Composable
 // TODO(popam): support modifiers here
 fun AndroidView(@LayoutRes resId: Int, postInflationCallback: (View) -> Unit = { _ -> }) {
-    AndroidViewHolder(
-        postInflationCallback = postInflationCallback,
-        resId = resId
-    )
+    val context = ContextAmbient.current
+
+    val r = AndroidViewHolder(context)
+    r.postInflationCallback = postInflationCallback
+    r.resId = resId
 }
 
 private class AndroidViewHolder(context: Context) : ViewGroup(context) {

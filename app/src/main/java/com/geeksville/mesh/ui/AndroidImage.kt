@@ -5,10 +5,9 @@ import androidx.compose.Composable
 import androidx.ui.core.DensityAmbient
 import androidx.ui.core.DrawModifier
 import androidx.ui.core.Modifier
-import androidx.ui.core.toModifier
+import androidx.ui.core.asModifier
 import androidx.ui.foundation.Box
 import androidx.ui.graphics.*
-import androidx.ui.graphics.colorspace.ColorSpace
 import androidx.ui.graphics.colorspace.ColorSpaces
 import androidx.ui.graphics.painter.ImagePainter
 import androidx.ui.unit.Density
@@ -31,12 +30,12 @@ private object ClipModifier : DrawModifier {
 /// Stolen from the Compose SimpleImage, replace with their real Image component someday
 @Composable
 fun ScaledImage(
-    image: Image,
+    image: ImageAsset,
     modifier: Modifier = Modifier.None,
     tint: Color? = null
 ) {
     with(DensityAmbient.current) {
-        val imageModifier = ImagePainter(image).toModifier(
+        val imageModifier = ImagePainter(image).asModifier(
             scaleFit = ScaleFit.FillMaxDimension,
             colorFilter = tint?.let { ColorFilter(it, BlendMode.srcIn) }
         )
@@ -46,7 +45,7 @@ fun ScaledImage(
 
 
 /// Borrowed from Compose
-class AndroidImage(val bitmap: Bitmap) : Image {
+class AndroidImage(val bitmap: Bitmap) : ImageAsset {
 
     /**
      * @see Image.width
@@ -60,12 +59,12 @@ class AndroidImage(val bitmap: Bitmap) : Image {
     override val height: Int
         get() = bitmap.height
 
-    override val config: ImageConfig get() = ImageConfig.Argb8888
+    override val config: ImageAssetConfig get() = ImageAssetConfig.Argb8888
 
     /**
      * @see Image.colorSpace
      */
-    override val colorSpace: ColorSpace
+    override val colorSpace: androidx.ui.graphics.colorspace.ColorSpace
         get() = ColorSpaces.Srgb
 
     /**
@@ -77,7 +76,7 @@ class AndroidImage(val bitmap: Bitmap) : Image {
     /**
      * @see Image.nativeImage
      */
-    override val nativeImage: NativeImage
+    override val nativeImage: NativeImageAsset
         get() = bitmap
 
     /**

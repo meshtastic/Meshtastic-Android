@@ -11,9 +11,9 @@ import androidx.ui.input.KeyboardType
 import androidx.ui.input.VisualTransformation
 import androidx.ui.layout.LayoutPadding
 import androidx.ui.material.Emphasis
-import androidx.ui.material.EmphasisLevels
+import androidx.ui.material.MaterialTheme
 import androidx.ui.material.ProvideEmphasis
-import androidx.ui.material.surface.Surface
+import androidx.ui.material.Surface
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.dp
 
@@ -30,7 +30,7 @@ fun StyledTextField(
     value: String,
     modifier: Modifier = Modifier.None,
     onValueChange: (String) -> Unit = {},
-    textStyle: TextStyle? = null,
+    textStyle: TextStyle = TextStyle.Default,
     keyboardType: KeyboardType = KeyboardType.Text,
     imeAction: ImeAction = ImeAction.Unspecified,
     onFocus: () -> Unit = {},
@@ -47,7 +47,7 @@ fun StyledTextField(
         shape = RoundedCornerShape(4.dp)
     ) {
         val showingHint = state { value.isEmpty() }
-        val level = if (showingHint.value) HintEmphasis else EmphasisLevels().medium
+        val level = if (showingHint.value) HintEmphasis else MaterialTheme.emphasisLevels().medium
 
         ProvideEmphasis(level) {
             TextField(

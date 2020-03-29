@@ -3,7 +3,6 @@ package com.geeksville.mesh.ui
 import androidx.compose.Composable
 import androidx.ui.core.Text
 import androidx.ui.layout.*
-import androidx.ui.material.EmphasisLevels
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.ProvideEmphasis
 import androidx.ui.tooling.preview.Preview
@@ -47,7 +46,7 @@ fun CompassHeading(modifier: Modifier1 = Modifier1.None, node: NodeInfo) {
 
 @Composable
 fun NodeHeading(node: NodeInfo) {
-    ProvideEmphasis(emphasis = EmphasisLevels().high) {
+    ProvideEmphasis(emphasis = MaterialTheme.emphasisLevels().high) {
         Text(
             node.user?.longName ?: "unknown",
             style = MaterialTheme.typography().subtitle1

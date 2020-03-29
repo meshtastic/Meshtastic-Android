@@ -14,7 +14,7 @@ import androidx.ui.core.Text
 import androidx.ui.layout.Column
 import androidx.ui.layout.LayoutGravity
 import androidx.ui.material.CircularProgressIndicator
-import androidx.ui.material.EmphasisLevels
+import androidx.ui.material.MaterialTheme
 import androidx.ui.material.ProvideEmphasis
 import androidx.ui.material.RadioGroup
 import androidx.ui.tooling.preview.Preview
@@ -173,7 +173,7 @@ fun BTScanScreen() {
                     Column {
                         ScanUIState.devices.values.forEach {
                             // disabled pending https://issuetracker.google.com/issues/149528535
-                            ProvideEmphasis(emphasis = if (it.bonded) EmphasisLevels().high else EmphasisLevels().disabled) {
+                            ProvideEmphasis(emphasis = if (it.bonded) MaterialTheme.emphasisLevels().high else MaterialTheme.emphasisLevels().disabled) {
                                 RadioGroupTextItem(
                                     selected = (it.isSelected),
                                     onSelect = {

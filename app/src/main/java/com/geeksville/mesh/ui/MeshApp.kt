@@ -9,7 +9,6 @@ import androidx.ui.layout.Container
 import androidx.ui.layout.LayoutSize
 import androidx.ui.layout.Row
 import androidx.ui.material.*
-import androidx.ui.material.surface.Surface
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import com.geeksville.android.Logging
