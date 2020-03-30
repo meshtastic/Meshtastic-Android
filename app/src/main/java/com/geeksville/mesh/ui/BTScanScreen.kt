@@ -89,11 +89,13 @@ fun BTScanScreen() {
 
                 val addr = result.device.address
                 // prevent logspam because weill get get lots of redundant scan results
-                if (!ScanUIState.devices.contains(addr)) {
+                val isBonded = result.device.bondState == BluetoothDevice.BOND_BONDED
+                val oldEntry = ScanUIState.devices[addr]
+                if (oldEntry == null || oldEntry.bonded != isBonded) {
                     val entry = BTScanEntry(
                         result.device.name,
                         addr,
-                        result.device.bondState == BluetoothDevice.BOND_BONDED
+                        isBonded
                     )
                     ScanState.debug("onScanResult ${entry}")
                     ScanUIState.devices[addr] = entry
