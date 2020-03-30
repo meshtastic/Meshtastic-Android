@@ -29,6 +29,6 @@ for verbose logging:
 adb shell setprop log.tag.FA VERBOSE
 ```
 
-Copyright 2018, S. Kevin Hester-Chow, kevinh@geeksville.com. GPL V3 license
+Copyright 2019, Geeksville Industries, LLC. GPL V3 license
 
 
