@@ -13,7 +13,9 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.DeferredExecution
 import com.geeksville.mesh.IRadioInterfaceService
+import com.geeksville.util.exceptionReporter
 import com.geeksville.util.toRemoteExceptions
+import java.lang.reflect.Method
 import java.util.*
 
 
@@ -268,11 +270,26 @@ class RadioInterfaceService : Service(), Logging {
         isConnected = false
     }
 
+    /**
+     * Android caches old services.  But our service is still changing often, so force it to reread the service definitions every
+     * time
+     */
+    private fun forceServiceRefresh() {
+        exceptionReporter {
+            // BluetoothGatt gatt
+            val gatt = safe!!.gatt!!
+            val refresh: Method = gatt.javaClass.getMethod("refresh")
+            refresh.invoke(gatt)
+        }
+    }
+
     private fun onConnect(connRes: Result<Unit>) {
         // This callback is invoked after we are connected
 
         connRes.getOrThrow() // FIXME, instead just try to reconnect?
         info("Connected to radio!")
+
+        forceServiceRefresh()
 
         // FIXME - no need to discover services more than once - instead use lazy() to use them in future attempts
         safe!!.asyncDiscoverServices { discRes ->
@@ -434,13 +451,16 @@ class RadioInterfaceService : Service(), Logging {
         // A write of any size to nodeinfo means restart reading
         override fun restartNodeInfo() = doWrite(BTM_NODEINFO_CHARACTER, ByteArray(0))
 
-        override fun readMyNode() = doRead(BTM_MYNODE_CHARACTER)!!
+        override fun readMyNode() =
+            doRead(BTM_MYNODE_CHARACTER) ?: throw Exception("Device returned empty MyNodeInfo")
 
         override fun sendToRadio(a: ByteArray) = handleSendToRadio(a)
 
-        override fun readRadioConfig() = doRead(BTM_RADIO_CHARACTER)!!
+        override fun readRadioConfig() =
+            doRead(BTM_RADIO_CHARACTER) ?: throw Exception("Device returned empty RadioConfig")
 
-        override fun readOwner() = doRead(BTM_OWNER_CHARACTER)!!
+        override fun readOwner() =
+            doRead(BTM_OWNER_CHARACTER) ?: throw Exception("Device returned empty Owner")
 
         override fun writeOwner(owner: ByteArray) = doWrite(BTM_OWNER_CHARACTER, owner)
 
