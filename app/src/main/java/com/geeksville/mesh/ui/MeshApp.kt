@@ -126,28 +126,27 @@ fun previewView() {
 private fun AppContent(openDrawer: () -> Unit) {
     // crossfade breaks onCommit behavior because it keeps old views around
     //Crossfade(AppStatus.currentScreen) { screen ->
-    Surface(color = (MaterialTheme.colors()).background) {
+    //Surface(color = (MaterialTheme.colors()).background) {
 
-        Column {
-            TopAppBar(
-                title = { Text(text = "Meshtastic") },
-                navigationIcon = {
-                    Container(LayoutSize(40.dp, 40.dp)) {
-                        VectorImageButton(R.drawable.ic_launcher_new_foreground) {
-                            openDrawer()
-                        }
+    Scaffold(topAppBar = {
+        TopAppBar(
+            title = { Text(text = "Meshtastic") },
+            navigationIcon = {
+                Container(LayoutSize(40.dp, 40.dp)) {
+                    VectorImageButton(R.drawable.ic_launcher_new_foreground) {
+                        openDrawer()
                     }
                 }
-            )
-
-            when (AppStatus.currentScreen) {
-                Screen.messages -> MessagesContent()
-                Screen.settings -> SettingsContent()
-                Screen.users -> HomeContent()
-                Screen.channel -> ChannelContent(UIState.getChannel())
-                Screen.map -> MapContent()
-                else -> TODO()
             }
+        )
+    }) {
+        when (AppStatus.currentScreen) {
+            Screen.messages -> MessagesContent()
+            Screen.settings -> SettingsContent()
+            Screen.users -> HomeContent()
+            Screen.channel -> ChannelContent(UIState.getChannel())
+            Screen.map -> MapContent()
+            else -> TODO()
         }
     }
     //}
