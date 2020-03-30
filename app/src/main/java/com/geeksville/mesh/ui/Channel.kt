@@ -97,7 +97,7 @@ fun ChannelContent(channel: Channel?) {
 
                             val sendIntent: Intent = Intent().apply {
                                 action = Intent.ACTION_SEND
-                                putExtra(Intent.EXTRA_TEXT, channel.getChannelUrl())
+                                putExtra(Intent.EXTRA_TEXT, channel.getChannelUrl().toString())
                                 putExtra(
                                     Intent.EXTRA_TITLE,
                                     "A URL for joining a Meshtastic mesh"
