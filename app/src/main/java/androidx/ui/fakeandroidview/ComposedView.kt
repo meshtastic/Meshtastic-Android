@@ -18,6 +18,7 @@ package androidx.ui.fakeandroidview
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -62,6 +63,10 @@ private class AndroidViewHolder(context: Context) : ViewGroup(context) {
             }
         }
 
+    init {
+        isClickable = true
+    }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         view?.measure(widthMeasureSpec, heightMeasureSpec)
         setMeasuredDimension(view?.measuredWidth ?: 0, view?.measuredHeight ?: 0)
@@ -73,5 +78,27 @@ private class AndroidViewHolder(context: Context) : ViewGroup(context) {
 
     override fun getLayoutParams(): LayoutParams? {
         return view?.layoutParams ?: LayoutParams(MATCH_PARENT, MATCH_PARENT)
+    }
+
+    /**
+     * Implement this method to handle touch screen motion events.
+     *
+     *
+     * If this method is used to detect click actions, it is recommended that
+     * the actions be performed by implementing and calling
+     * [.performClick]. This will ensure consistent system behavior,
+     * including:
+     *
+     *  * obeying click sound preferences
+     *  * dispatching OnClickListener calls
+     *  * handling [ACTION_CLICK][AccessibilityNodeInfo.ACTION_CLICK] when
+     * accessibility features are enabled
+     *
+     *
+     * @param event The motion event.
+     * @return True if the event was handled, false otherwise.
+     */
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        return super.onTouchEvent(event)
     }
 }
