@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package androidx.ui.androidview
+package androidx.ui.fakeandroidview
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -41,7 +41,11 @@ fun AndroidView(@LayoutRes resId: Int, postInflationCallback: (View) -> Unit = {
     val r = AndroidViewHolder(context)
     r.postInflationCallback = postInflationCallback
     r.resId = resId
+
+    // Hmm - how is merely creating an AndroidViewHolder sufficient to have it end up in the
+    // activities view hierarchy?
 }
+
 
 private class AndroidViewHolder(context: Context) : ViewGroup(context) {
     var view: View? = null

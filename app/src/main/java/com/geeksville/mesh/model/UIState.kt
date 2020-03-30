@@ -3,6 +3,7 @@ package com.geeksville.mesh.model
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Bundle
 import android.os.RemoteException
 import androidx.compose.mutableStateOf
 import androidx.core.content.edit
@@ -33,6 +34,8 @@ object UIState : Logging {
 
     /// If the app was launched because we received a new channel intent, the Url will be here
     var requestedChannelUrl: Uri? = null
+
+    var savedInstanceState: Bundle? = null
 
     /**
      * Return the current channel info

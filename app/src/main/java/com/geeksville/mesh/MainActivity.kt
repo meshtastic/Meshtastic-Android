@@ -185,6 +185,7 @@ class MainActivity : AppCompatActivity(), Logging,
         val prefs = UIState.getPreferences(this)
         UIState.ownerName = prefs.getString("owner", "")!!
         UIState.meshService = null
+        UIState.savedInstanceState = savedInstanceState
 
         // Ensures Bluetooth is available on the device and it is enabled. If not,
         // displays a dialog requesting user permission to enable Bluetooth.

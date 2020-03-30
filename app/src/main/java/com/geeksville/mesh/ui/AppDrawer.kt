@@ -47,7 +47,7 @@ fun AppDrawer(
 
         ScreenButton(Screen.messages)
         ScreenButton(Screen.users)
-        // ScreenButton(Screen.map) // turn off for now
+        ScreenButton(Screen.map) // turn off for now
         ScreenButton(Screen.channel)
         ScreenButton(Screen.settings)
     }
