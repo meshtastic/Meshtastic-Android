@@ -23,7 +23,6 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.annotation.LayoutRes
 import androidx.compose.Composable
-import androidx.ui.core.ContextAmbient
 
 /**
  * Composes an Android [View] given a layout resource [resId]. The method handles the inflation
@@ -36,14 +35,7 @@ import androidx.ui.core.ContextAmbient
 @Composable
 // TODO(popam): support modifiers here
 fun AndroidView(@LayoutRes resId: Int, postInflationCallback: (View) -> Unit = { _ -> }) {
-    val context = ContextAmbient.current
-
-    val r = AndroidViewHolder(context)
-    r.postInflationCallback = postInflationCallback
-    r.resId = resId
-
-    // Hmm - how is merely creating an AndroidViewHolder sufficient to have it end up in the
-    // activities view hierarchy?
+    AndroidViewHolder(postInflationCallback = postInflationCallback, resId = resId)
 }
 
 
