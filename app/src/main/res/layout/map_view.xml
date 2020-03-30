@@ -6,7 +6,4 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     mapbox:mapbox_uiZoomGestures="true"
-    mapbox:mapbox_uiScrollGestures="true"
-    mapbox:mapbox_cameraTargetLat="-32.557013"
-    mapbox:mapbox_cameraTargetLng="-56.149056"
-    mapbox:mapbox_cameraZoom="5.526846"></com.mapbox.mapboxsdk.maps.MapView>
+    mapbox:mapbox_uiScrollGestures="true"></com.mapbox.mapboxsdk.maps.MapView>

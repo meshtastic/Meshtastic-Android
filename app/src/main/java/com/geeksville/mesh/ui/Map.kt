@@ -16,6 +16,9 @@ import com.geeksville.mesh.model.UIState
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
+import com.mapbox.mapboxsdk.camera.CameraPosition
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
+import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.layers.Property
@@ -125,6 +128,14 @@ fun MapContent() {
                 style.addImage(markerImageId, markerIcon)
                 style.addSource(nodePositions)
                 style.addLayer(nodeLayer)
+            }
+
+            // Center on the user's position (if we have it)
+            NodeDB.ourNodeInfo?.position?.let {
+                val cameraPos = CameraPosition.Builder().target(
+                    LatLng(it.latitude, it.longitude)
+                ).zoom(8.0).build()
+                map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPos), 1000)
             }
         }
     }
