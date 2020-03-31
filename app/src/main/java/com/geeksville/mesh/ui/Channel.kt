@@ -44,7 +44,7 @@ fun ChannelContent(channel: Channel?) {
                         ),
                         imeAction = ImeAction.Done,
                         onImeActionPerformed = {
-                            TODO()
+                            ChannelLog.errormsg("FIXME, implement channel edit button")
                         }
                     )
                 } else {
