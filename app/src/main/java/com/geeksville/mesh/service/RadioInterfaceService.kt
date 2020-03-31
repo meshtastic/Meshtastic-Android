@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
+import android.os.RemoteException
 import androidx.core.content.edit
 import com.geeksville.android.BinaryLogFile
 import com.geeksville.android.GeeksvilleApplication
@@ -177,8 +178,15 @@ class RadioInterfaceService : Service(), Logging {
             )
 
             // Force the service to reconnect
-            runningService?.let {
-                it.setEnabled(addr != null)
+            val s = runningService
+            if (s != null) {
+                info("Setting enable on the running radio service")
+                s.setEnabled(addr != null)
+            } else {
+                if (addr != null) {
+                    info("We have a device addr now, starting mesh service")
+                    MeshService.startService(context)
+                }
             }
         }
     }
@@ -452,15 +460,17 @@ class RadioInterfaceService : Service(), Logging {
         override fun restartNodeInfo() = doWrite(BTM_NODEINFO_CHARACTER, ByteArray(0))
 
         override fun readMyNode() =
-            doRead(BTM_MYNODE_CHARACTER) ?: throw Exception("Device returned empty MyNodeInfo")
+            doRead(BTM_MYNODE_CHARACTER)
+                ?: throw RemoteException("Device returned empty MyNodeInfo")
 
         override fun sendToRadio(a: ByteArray) = handleSendToRadio(a)
 
         override fun readRadioConfig() =
-            doRead(BTM_RADIO_CHARACTER) ?: throw Exception("Device returned empty RadioConfig")
+            doRead(BTM_RADIO_CHARACTER)
+                ?: throw RemoteException("Device returned empty RadioConfig")
 
         override fun readOwner() =
-            doRead(BTM_OWNER_CHARACTER) ?: throw Exception("Device returned empty Owner")
+            doRead(BTM_OWNER_CHARACTER) ?: throw RemoteException("Device returned empty Owner")
 
         override fun writeOwner(owner: ByteArray) = doWrite(BTM_OWNER_CHARACTER, owner)
 
