@@ -16,8 +16,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 22 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 104
-        versionName "0.1.4"
+        versionCode 121
+        versionName "0.2.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -45,7 +45,7 @@ android {
 
     composeOptions {
         kotlinCompilerVersion "1.3.61-dev-withExperimentalGoogleExtensions-20200129"
-        kotlinCompilerExtensionVersion "0.1.0-dev06"
+        kotlinCompilerExtensionVersion "0.1.0-dev07"
     }
 }
 
@@ -87,6 +87,9 @@ dependencies {
     //implementation 'com.google.protobuf:protobuf-java:3.11.1'
     //implementation 'com.google.protobuf:protobuf-java-util:3.11.1'
     implementation 'com.google.protobuf:protobuf-javalite:3.11.1'
+
+    // mapbox
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.0.0'
 
     // You also need to include the following Compose toolkit dependencies.
     implementation("androidx.compose:compose-runtime:$compose_version")

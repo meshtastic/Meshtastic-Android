@@ -9,8 +9,8 @@ import androidx.ui.graphics.Color
 import androidx.ui.layout.*
 import androidx.ui.material.Divider
 import androidx.ui.material.MaterialTheme
+import androidx.ui.material.Surface
 import androidx.ui.material.TextButton
-import androidx.ui.material.surface.Surface
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import com.geeksville.mesh.R
@@ -47,6 +47,7 @@ fun AppDrawer(
 
         ScreenButton(Screen.messages)
         ScreenButton(Screen.users)
+        ScreenButton(Screen.map) // turn off for now
         ScreenButton(Screen.channel)
         ScreenButton(Screen.settings)
     }

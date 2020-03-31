@@ -5,6 +5,8 @@
       <module name="app" target="1.8" />
       <module name="geeksville-androidlib" target="1.7" />
       <module name="Mesh Util-geeksville-androidlib" target="1.7" />
+      <module name="Mesh_Util.app" target="1.8" />
+      <module name="Mesh_Util.geeksville-androidlib" target="1.7" />
     </bytecodeTargetLevel>
   </component>
 </project>

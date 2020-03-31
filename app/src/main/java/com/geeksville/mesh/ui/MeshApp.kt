@@ -9,7 +9,6 @@ import androidx.ui.layout.Container
 import androidx.ui.layout.LayoutSize
 import androidx.ui.layout.Row
 import androidx.ui.material.*
-import androidx.ui.material.surface.Surface
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import com.geeksville.android.Logging
@@ -127,27 +126,27 @@ fun previewView() {
 private fun AppContent(openDrawer: () -> Unit) {
     // crossfade breaks onCommit behavior because it keeps old views around
     //Crossfade(AppStatus.currentScreen) { screen ->
-    Surface(color = (MaterialTheme.colors()).background) {
+    //Surface(color = (MaterialTheme.colors()).background) {
 
-        Column {
-            TopAppBar(
-                title = { Text(text = "Meshtastic") },
-                navigationIcon = {
-                    Container(LayoutSize(40.dp, 40.dp)) {
-                        VectorImageButton(R.drawable.ic_launcher_new_foreground) {
-                            openDrawer()
-                        }
+    Scaffold(topAppBar = {
+        TopAppBar(
+            title = { Text(text = "Meshtastic") },
+            navigationIcon = {
+                Container(LayoutSize(40.dp, 40.dp)) {
+                    VectorImageButton(R.drawable.ic_launcher_new_foreground) {
+                        openDrawer()
                     }
                 }
-            )
-
-            when (AppStatus.currentScreen) {
-                Screen.messages -> MessagesContent()
-                Screen.settings -> SettingsContent()
-                Screen.users -> HomeContent()
-                Screen.channel -> ChannelContent()
-                else -> TODO()
             }
+        )
+    }) {
+        when (AppStatus.currentScreen) {
+            Screen.messages -> MessagesContent()
+            Screen.settings -> SettingsContent()
+            Screen.users -> HomeContent()
+            Screen.channel -> ChannelContent(UIState.getChannel())
+            Screen.map -> MapContent()
+            else -> TODO()
         }
     }
     //}

@@ -6,9 +6,10 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.util.Exceptions
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.mapbox.mapboxsdk.Mapbox
 
 
-class MeshUtilApplication : GeeksvilleApplication(null, "58e72ccc361883ea502510baa46580e3") {
+class MeshUtilApplication : GeeksvilleApplication() {
 
     override fun onCreate() {
         super.onCreate()
@@ -26,5 +27,8 @@ class MeshUtilApplication : GeeksvilleApplication(null, "58e72ccc361883ea502510b
                 crashlytics.recordException(exception)
             }
         }
+
+        // Mapbox Access token
+        Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
     }
 }

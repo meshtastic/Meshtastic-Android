@@ -2,18 +2,16 @@ package com.geeksville.mesh.model
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Bundle
 import android.os.RemoteException
-import android.util.Base64
 import androidx.compose.mutableStateOf
 import androidx.core.content.edit
+import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.android.Logging
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.ui.getInitials
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.MultiFormatWriter
-import com.journeyapps.barcodescanner.BarcodeEncoder
 
 /// FIXME - figure out how to merge this staate with the AppStatus Model
 object UIState : Logging {
@@ -34,32 +32,23 @@ object UIState : Logging {
     /// our activity will read this from prefs or set it to the empty string
     var ownerName: String = "MrInIDE Ownername"
 
-    /// Return an URL that represents the current channel values
-    fun getChannelUrl(context: Context): String {
-        // If we have a valid radio config use it, othterwise use whatever we have saved in the prefs
-        val radio = radioConfig.value
-        if (radio != null) {
-            val settings = radio.channelSettings
-            val channelBytes = settings.toByteArray()
-            val enc = Base64.encodeToString(channelBytes, Base64.URL_SAFE + Base64.NO_WRAP)
+    /// If the app was launched because we received a new channel intent, the Url will be here
+    var requestedChannelUrl: Uri? = null
 
-            return "https://www.meshtastic.org/c/$enc"
-        } else {
-            return getPreferences(context).getString(
-                "owner",
-                "https://www.meshtastic.org/c/unset"
-            )!!
-        }
-    }
+    var savedInstanceState: Bundle? = null
 
-    fun getChannelQR(context: Context): Bitmap
-    {
-        val multiFormatWriter = MultiFormatWriter()
+    /**
+     * Return the current channel info
+     * FIXME, we should sim channels at the MeshService level if we are running on an emulator,
+     * for now I just fake it by returning a canned channel.
+     */
+    fun getChannel(): Channel? {
+        val channel = radioConfig.value?.channelSettings?.let { Channel(it) }
 
-        val bitMatrix =
-            multiFormatWriter.encode(getChannelUrl(context), BarcodeFormat.QR_CODE, 192, 192);
-        val barcodeEncoder = BarcodeEncoder()
-        return barcodeEncoder.createBitmap(bitMatrix)
+        return if (channel == null && isEmulator)
+            Channel.emulated
+        else
+            channel
     }
 
     fun getPreferences(context: Context): SharedPreferences =
@@ -70,7 +59,7 @@ object UIState : Logging {
         radioConfig.value = c
 
         getPreferences(context).edit(commit = true) {
-            this.putString("channel-url", getChannelUrl(context))
+            this.putString("channel-url", getChannel()!!.getChannelUrl().toString())
         }
     }
 
