@@ -3,7 +3,10 @@ package com.geeksville.mesh.ui
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.*
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.ParcelUuid
 import androidx.compose.Composable
 import androidx.compose.Model
@@ -20,6 +23,7 @@ import androidx.ui.material.RadioGroup
 import androidx.ui.tooling.preview.Preview
 import com.geeksville.android.Logging
 import com.geeksville.mesh.service.RadioInterfaceService
+import com.geeksville.util.exceptionReporter
 
 
 @Model
@@ -184,6 +188,34 @@ fun BTScanScreen() {
                                             ScanUIState.changeSelection(context, it.macAddress)
                                         } else {
                                             ScanState.info("Starting bonding for $it")
+
+                                            // We need this receiver to get informed when the bond attempt finished
+                                            val bondChangedReceiver = object : BroadcastReceiver() {
+
+                                                override fun onReceive(
+                                                    context: Context,
+                                                    intent: Intent
+                                                ) = exceptionReporter {
+                                                    val state =
+                                                        intent.getIntExtra(
+                                                            BluetoothDevice.EXTRA_BOND_STATE,
+                                                            -1
+                                                        )
+                                                    ScanState.debug("Received bond state changed $state")
+                                                    context.unregisterReceiver(this)
+                                                    if (state == BluetoothDevice.BOND_BONDED || state == BluetoothDevice.BOND_BONDING) {
+                                                        ScanState.debug("Bonding completed, connecting service")
+                                                        ScanUIState.changeSelection(
+                                                            context,
+                                                            it.macAddress
+                                                        )
+                                                    }
+                                                }
+                                            }
+
+                                            val filter = IntentFilter()
+                                            filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+                                            context.registerReceiver(bondChangedReceiver, filter)
 
                                             // We ignore missing BT adapters, because it lets us run on the emulator
                                             bluetoothAdapter
