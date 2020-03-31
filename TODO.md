@@ -30,7 +30,6 @@ the channel is encrypted, you can share the the channel key with others by qr co
 * when a text arrives, move that node info card to the bottom on the window - put the text to the left of the card.  with a small arrow/distance/shortname
 * let the user type texts somewhere
 * use this for preferences? https://developer.android.com/guide/topics/ui/settings/
-* at connect we might receive messages before finished downloading the nodeinfo.  In that case, process those messages later
 * test with oldest compatible android in emulator (see below for testing with hardware)
 * add play store link with https://developers.google.com/analytics/devguides/collection/android/v4/campaigns#google-play-url-builder and the play icon
 
@@ -165,53 +164,5 @@ Don't leave device discoverable.  Don't let unpaired users do things with device
 * update play store listing for public beta
 * track radio brands/regions as a user property (include no-radio as an option)
 * remove mixpanel analytics
-
-Rare bug reproduced:
-
-D/com.geeksville.mesh.service.SafeBluetooth: work readC 8ba2bcc2-ee02-4a55-a531-c525c5e454d5 is completed, resuming status=0, res=android.bluetooth.BluetoothGattCharacteristic@f6eb84e
-D/com.geeksville.mesh.service.RadioInterfaceService: Received 9 bytes from radio
-D/com.geeksville.mesh.service.SafeBluetooth: Enqueuing work: readC 8ba2bcc2-ee02-4a55-a531-c525c5e454d5
-D/com.geeksville.mesh.service.SafeBluetooth$BluetoothContinuation: Starting work: readC 8ba2bcc2-ee02-4a55-a531-c525c5e454d5
-D/com.geeksville.mesh.service.MeshService: Received broadcast com.geeksville.mesh.RECEIVE_FROMRADIO
-E/com.geeksville.util.Exceptions: exceptionReporter Uncaught Exception
-    com.google.protobuf.InvalidProtocolBufferException: Protocol message contained an invalid tag (zero).
-        at com.google.protobuf.GeneratedMessageLite.parsePartialFrom(GeneratedMessageLite.java:1566)
-        at com.google.protobuf.GeneratedMessageLite.parseFrom(GeneratedMessageLite.java:1655)
-        at com.geeksville.mesh.MeshProtos$FromRadio.parseFrom(MeshProtos.java:9097)
-        at com.geeksville.mesh.service.MeshService$radioInterfaceReceiver$1$onReceive$1.invoke(MeshService.kt:742)
-        at com.geeksville.mesh.service.MeshService$radioInterfaceReceiver$1$onReceive$1.invoke(Unknown Source:0)
-        at com.geeksville.util.ExceptionsKt.exceptionReporter(Exceptions.kt:31)
-        at com.geeksville.mesh.service.MeshService$radioInterfaceReceiver$1.onReceive(MeshService.kt:722)
-        at android.app.LoadedApk$ReceiverDispatcher$Args.lambda$getRunnable$0$LoadedApk$ReceiverDispatcher$Args(LoadedApk.java:1550)
-        at android.app.-$$Lambda$LoadedApk$ReceiverDispatcher$Args$_BumDX2UKsnxLVrE6UJsJZkotuA.run(Unknown Source:2)
-        at android.os.Handler.handleCallback(Handler.java:883)
-        at android.os.Handler.dispatchMessage(Handler.java:100)
-        at android.os.Looper.loop(Looper.java:214)
-        at android.app.ActivityThread.main(ActivityThread.java:7356)
-        at java.lang.reflect.Method.invoke(Native Method)
-        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:492)
-        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:930)
-D/com.geeksville.mesh.service.SafeBluetooth: work readC 8ba2bcc2-ee02-4a55-a531-c525c5e454d5 is completed, resuming status=0, res=android.bluetooth.BluetoothGattCharacteristic@f6eb84e
-D/com.geeksville.mesh.service.RadioInterfaceService: Received 9 bytes from radio
-D/com.geeksville.mesh.service.SafeBluetooth: Enqueuing work: readC 8ba2bcc2-ee02-4a55-a531-c525c5e454d5
-D/com.geeksville.mesh.service.SafeBluetooth$BluetoothContinuation: Starting work: readC 8ba2bcc2-ee02-4a55-a531-c525c5e454d5
-D/com.geeksville.mesh.service.MeshService: Received broadcast com.geeksville.mesh.RECEIVE_FROMRADIO
-
-
-Transition powerFSM transition=Press, from=DARK to=ON
-pressing
-sending owner !246f28b5367c/Bob use/Bu
-Update DB node 0x7c for variant 4, rx_time=0
-old user !246f28b5367c/Bob use/Bu
-updating changed=0 user !246f28b5367c/Bob use/Bu
-immedate send on mesh (txGood=32,rxGood=0,rxBad=0)
-Trigger powerFSM 1
-Transition powerFSM transition=Press, from=ON to=ON
-Setting fast framerate
-Setting idle framerate
-Transition powerFSM transition=Screen-on timeout, from=ON to=DARK
-
-NOTE: no debug messages on device, though we see in radio interface service we are repeatedly reading FromRadio and getting
-the same seven bytes.  It sure seems like the old service is still sort of alive...
-
+* at connect we might receive messages before finished downloading the nodeinfo.  In that case, process those messages later
 

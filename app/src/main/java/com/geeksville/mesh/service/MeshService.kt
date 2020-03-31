@@ -399,6 +399,9 @@ class MeshService : Service(), Logging {
     /// Is our radio connected to the phone?
     private var isConnected = false
 
+    /// True after we've done our initial node db init
+    private var haveNodeDB = false
+
     // The database of active nodes, index is the node number
     private val nodeDBbyNodeNum = mutableMapOf<Int, NodeInfo>()
 
@@ -563,8 +566,28 @@ class MeshService : Service(), Logging {
         }
     }
 
+    /// If packets arrive before we have our node DB, we delay parsing them until the DB is ready
+    private val earlyPackets = mutableListOf<MeshPacket>()
+
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
+        if (haveNodeDB) {
+            processReceivedMeshPacket(packet)
+            onNodeDBChanged()
+        } else {
+            earlyPackets.add(packet)
+            logAssert(earlyPackets.size < 128) // The max should normally be about 32, but if the device is messed up it might try to send forever
+        }
+    }
+
+    /// Process any packets that showed up too early
+    private fun processEarlyPackets() {
+        earlyPackets.forEach { processReceivedMeshPacket(it) }
+        earlyPackets.clear()
+    }
+
+    /// Update our model and resend as needed for a MeshPacket we just received from the radio
+    private fun processReceivedMeshPacket(packet: MeshPacket) {
         val fromNum = packet.from
 
         // FIXME, perhaps we could learn our node ID by looking at any to packets the radio
@@ -597,8 +620,6 @@ class MeshService : Service(), Logging {
                 handleReceivedUser(fromNum, p.user)
             else -> TODO("Unexpected SubPacket variant")
         }
-
-        onNodeDBChanged()
     }
 
     private fun currentSecond() = (System.currentTimeMillis() / 1000).toInt()
@@ -677,9 +698,11 @@ class MeshService : Service(), Logging {
             infoBytes = connectedRadio.readNodeInfo()
         }
 
+        haveNodeDB = true // we've done our initial node db initialization
+        processEarlyPackets() // handle any packets that showed up while we were booting
+
         onNodeDBChanged()
     }
-
 
     /// If we just changed our nodedb, we might want to do somethings
     private fun onNodeDBChanged() {
