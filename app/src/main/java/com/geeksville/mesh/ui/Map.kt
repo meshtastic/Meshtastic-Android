@@ -42,23 +42,23 @@ private val mapLifecycleCallbacks = object : Application.ActivityLifecycleCallba
     var view: MapView? = null
 
     override fun onActivityPaused(activity: Activity) {
-        view!!.onPause()
+        view?.onPause()
     }
 
     override fun onActivityStarted(activity: Activity) {
-        view!!.onStart()
+        view?.onStart()
     }
 
     override fun onActivityDestroyed(activity: Activity) {
-        view!!.onDestroy()
+        view?.onDestroy()
     }
 
     override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
-        view!!.onSaveInstanceState(outState)
+        view?.onSaveInstanceState(outState)
     }
 
     override fun onActivityStopped(activity: Activity) {
-        view!!.onStop()
+        view?.onStop()
     }
 
     /**
@@ -68,7 +68,7 @@ private val mapLifecycleCallbacks = object : Application.ActivityLifecycleCallba
     }
 
     override fun onActivityResumed(activity: Activity) {
-        view!!.onResume()
+        view?.onResume()
     }
 }
 
