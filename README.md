@@ -1,5 +1,7 @@
 # Meshtastic-Android
 
+![Android CI](https://github.com/meshtastic/Meshtastic-Android/workflows/Android%20CI/badge.svg?branch=master)
+
 This is a tool for using Android with open-source mesh radios.  For more information see our webpage: [meshtastic.org](https://www.meshtastic.org).  If you are looking for the the device side code, see [here](https://github.com/meshtastic/Meshtastic-esp32).
 
 This project is currently early-alpha, if you have questions or feedback please [Join our discussion forum](https://meshtastic.discourse.group/).  We would love to hear from you.
