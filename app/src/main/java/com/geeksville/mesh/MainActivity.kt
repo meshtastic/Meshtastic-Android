@@ -311,10 +311,10 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
     /// Called when we gain/lose a connection to our mesh radio
-    private fun onMeshConnectionChanged(connected: Boolean) {
+    private fun onMeshConnectionChanged(connected: MeshService.ConnectionState) {
         UIState.isConnected.value = connected
         debug("connchange ${UIState.isConnected.value}")
-        if (connected) {
+        if (connected == MeshService.ConnectionState.CONNECTED) {
             // always get the current radio config when we connect
             readRadioConfig()
 
@@ -383,7 +383,8 @@ class MainActivity : AppCompatActivity(), Logging,
                     }
                 }
                 MeshService.ACTION_MESH_CONNECTED -> {
-                    val connected = intent.getBooleanExtra(EXTRA_CONNECTED, false)
+                    val connected =
+                        MeshService.ConnectionState.valueOf(intent.getStringExtra(EXTRA_CONNECTED)!!)
                     onMeshConnectionChanged(connected)
                 }
                 else -> TODO()
@@ -402,7 +403,8 @@ class MainActivity : AppCompatActivity(), Logging,
             registerMeshReceiver()
 
             // We won't receive a notify for the initial state of connection, so we force an update here
-            onMeshConnectionChanged(service.isConnected)
+            val connectionState = MeshService.ConnectionState.valueOf(service.connectionState())
+            onMeshConnectionChanged(connectionState)
 
             debug("connected to mesh service, isConnected=${UIState.isConnected.value}")
         }

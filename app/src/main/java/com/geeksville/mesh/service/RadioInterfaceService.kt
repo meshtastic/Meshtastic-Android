@@ -301,7 +301,8 @@ class RadioInterfaceService : Service(), Logging {
         info("Connected to radio!")
 
         if (!hasForcedRefresh) {
-            hasForcedRefresh = true
+            // FIXME - for some reason we need to refresh _everytime_.  It is almost as if we've cached wrong descriptor fieldnums forever
+            // hasForcedRefresh = true
             forceServiceRefresh()
         }
 

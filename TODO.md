@@ -1,7 +1,11 @@
 # High priority
 Work items for soon alpha builds
 
-* use states for meshservice: disconnected -> connected -> deviceasleep -> disconnected
+Document the following in application behavior
+*change ls_secs is 1 hr normally, which is fine because if there are other nodes in the mesh and they send us a packet we will wake any time during ls_secs and update app state
+* use states for meshservice: disconnected -> connected-> devsleep -> disconnected (3 states)
+* when device enters LS state radiointerfaceservice publishes "Broadcasting connection=false", meshservice should then enter devicesleepstate for ls_secs + 30s (to allow for some margin)
+
 
 * use compose on each page, but not for the outer wrapper
 * one view per page: https://developer.android.com/guide/navigation/navigation-swipe-view-2

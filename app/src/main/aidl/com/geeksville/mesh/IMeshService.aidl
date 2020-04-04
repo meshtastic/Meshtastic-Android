@@ -30,8 +30,11 @@ interface IMeshService {
     typ is defined in mesh.proto Data.Type.  For now juse use 0 to mean opaque bytes.
 
     destId can be null to indicate "broadcast message"
+
+    Returns true if the packet has been sent into the mesh, or false if it was merely queued
+    inside the service - and will be delivered to mesh the next time we hear from our radio.
     */
-    void sendData(String destId, in byte[] payload, int typ);
+    boolean sendData(String destId, in byte[] payload, int typ);
 
     /**
     Get the IDs of everyone on the mesh.  You should also subscribe for NODE_CHANGE broadcasts.
@@ -47,9 +50,9 @@ interface IMeshService {
     void setRadioConfig(in byte []payload);
 
     /**
-    Is the packet radio currently connected to the phone?
+    Is the packet radio currently connected to the phone?  Returns a ConnectionState string.
     */
-    boolean isConnected();
+    String connectionState();
 
     // see com.geeksville.com.geeksville.mesh broadcast intents
     // RECEIVED_OPAQUE  for data received from other nodes

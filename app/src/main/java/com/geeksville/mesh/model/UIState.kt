@@ -11,6 +11,7 @@ import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.android.Logging
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.getInitials
 
 /// FIXME - figure out how to merge this staate with the AppStatus Model
@@ -22,7 +23,7 @@ object UIState : Logging {
     var meshService: IMeshService? = null
 
     /// Are we connected to our radio device
-    val isConnected = mutableStateOf(false)
+    val isConnected = mutableStateOf(MeshService.ConnectionState.DISCONNECTED)
 
     /// various radio settings (including the channel)
     private val radioConfig = mutableStateOf<MeshProtos.RadioConfig?>(null)
