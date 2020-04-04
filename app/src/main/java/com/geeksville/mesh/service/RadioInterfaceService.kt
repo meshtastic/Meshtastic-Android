@@ -291,13 +291,19 @@ class RadioInterfaceService : Service(), Logging {
         }
     }
 
+    /// We only force service refresh the _first_ time we connect to the device.  Thereafter it is assumed the firmware didn't change
+    private var hasForcedRefresh = false
+
     private fun onConnect(connRes: Result<Unit>) {
         // This callback is invoked after we are connected
 
         connRes.getOrThrow() // FIXME, instead just try to reconnect?
         info("Connected to radio!")
 
-        forceServiceRefresh()
+        if (!hasForcedRefresh) {
+            hasForcedRefresh = true
+            forceServiceRefresh()
+        }
 
         // FIXME - no need to discover services more than once - instead use lazy() to use them in future attempts
         safe!!.asyncDiscoverServices { discRes ->
