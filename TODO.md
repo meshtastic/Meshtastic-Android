@@ -1,6 +1,12 @@
 # High priority
 Work items for soon alpha builds
 
+* use states for meshservice: disconnected -> connected -> deviceasleep -> disconnected
+
+* use compose on each page, but not for the outer wrapper
+* one view per page: https://developer.android.com/guide/navigation/navigation-swipe-view-2
+* use viewgroup with a unique ID https://developer.android.com/reference/kotlin/androidx/ui/core/package-summary#(android.view.ViewGroup).setContent(kotlin.Function0)
+
 * let channel be editited
 * make link sharing work
 * finish map view
@@ -19,6 +25,8 @@ Work items for soon alpha builds
 # Medium priority
 Features for future builds
 
+* use coroutines in the services, to ensure low latency for both API calls and GUI operations https://developer.android.com/kotlin/coroutines & 
+https://medium.com/@kenkyee/android-kotlin-coroutine-best-practices-bc033fed62e7 & https://codelabs.developers.google.com/codelabs/kotlin-coroutines/#5
 * fix notification setSmallIcon parameter - change it to use the meshtastic icon
 * ditch compose and use https://github.com/zsmb13/MaterialDrawerKt + https://github.com/Kotlin/anko/wiki/Anko-Layouts?
 * describe user experience: devices always point to each other and show distance, you can send texts between nodes

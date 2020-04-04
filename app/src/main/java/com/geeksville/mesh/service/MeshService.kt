@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.annotation.RequiresApi
+import androidx.annotation.UiThread
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_MIN
 import com.geeksville.analytics.DataPair
@@ -27,11 +28,25 @@ import com.geeksville.util.toRemoteExceptions
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.protobuf.ByteString
+import kotlinx.coroutines.*
 import java.nio.charset.Charset
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 
 class RadioNotConnectedException() : Exception("Not connected to radio")
 
+
+private val errorHandler = CoroutineExceptionHandler { _, exception ->
+    Exceptions.report(exception, "MeshService-coroutine", "coroutine-exception")
+}
+
+/// Wrap launch with an exception handler, FIXME, move into a utility lib
+fun CoroutineScope.handledLaunch(
+    context: CoroutineContext = EmptyCoroutineContext,
+    start: CoroutineStart = CoroutineStart.DEFAULT,
+    block: suspend CoroutineScope.() -> Unit
+) = this.launch(context = context + errorHandler, start = start, block = block)
 
 /**
  * Handles all the communication with android apps.  Also keeps an internal model
@@ -96,6 +111,9 @@ class MeshService : Service(), Logging {
         IRadioInterfaceService.Stub.asInterface(it)
     }
 
+    private val serviceJob = Job()
+    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
+
     /*
     see com.geeksville.mesh broadcast intents
     // RECEIVED_OPAQUE  for data received from other nodes
@@ -117,7 +135,7 @@ class MeshService : Service(), Logging {
         private var lastSendMsec = 0L
 
         override fun onLocationResult(locationResult: LocationResult) {
-            exceptionReporter {
+            serviceScope.handledLaunch {
                 super.onLocationResult(locationResult)
                 var l = locationResult.lastLocation
 
@@ -163,6 +181,7 @@ class MeshService : Service(), Logging {
      * per https://developer.android.com/training/location/change-location-settings
      */
     @SuppressLint("MissingPermission")
+    @UiThread
     private fun startLocationRequests() {
         if (fusedLocationClient == null) {
             GeeksvilleApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
@@ -375,6 +394,7 @@ class MeshService : Service(), Logging {
         radio.close()
 
         super.onDestroy()
+        serviceJob.cancel()
     }
 
 
@@ -712,13 +732,16 @@ class MeshService : Service(), Logging {
         if (!myNodeInfo!!.hasGPS) {
             // If we have at least one other person in the mesh, send our GPS position otherwise stop listening to GPS
 
-            if (numOnlineNodes >= 2)
-                startLocationRequests()
-            else
-                stopLocationRequests()
+            serviceScope.handledLaunch(Dispatchers.Main) {
+                if (numOnlineNodes >= 2)
+                    startLocationRequests()
+                else
+                    stopLocationRequests()
+            }
         } else
             debug("Our radio has a built in GPS, so not reading GPS in phone")
     }
+
 
     /// Called when we gain/lose connection to our radio
     private fun onConnectionChanged(c: Boolean) {
@@ -773,41 +796,42 @@ class MeshService : Service(), Logging {
 
         // Important to never throw exceptions out of onReceive
         override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
+            serviceScope.handledLaunch {
+                debug("Received broadcast ${intent.action}")
+                when (intent.action) {
+                    RadioInterfaceService.RADIO_CONNECTED_ACTION -> {
+                        try {
+                            onConnectionChanged(intent.getBooleanExtra(EXTRA_CONNECTED, false))
 
-            debug("Received broadcast ${intent.action}")
-            when (intent.action) {
-                RadioInterfaceService.RADIO_CONNECTED_ACTION -> {
-                    try {
-                        onConnectionChanged(intent.getBooleanExtra(EXTRA_CONNECTED, false))
-
-                        // forward the connection change message to anyone who is listening to us. but change the action
-                        // to prevent an infinite loop from us receiving our own broadcast. ;-)
-                        intent.action = ACTION_MESH_CONNECTED
-                        explicitBroadcast(intent)
-                    } catch (ex: RemoteException) {
-                        // This can happen sometimes (especially if the device is slowly dying due to killing power, don't report to crashlytics
-                        warn("Abandoning reconnect attempt, due to errors during init: ${ex.message}")
+                            // forward the connection change message to anyone who is listening to us. but change the action
+                            // to prevent an infinite loop from us receiving our own broadcast. ;-)
+                            intent.action = ACTION_MESH_CONNECTED
+                            explicitBroadcast(intent)
+                        } catch (ex: RemoteException) {
+                            // This can happen sometimes (especially if the device is slowly dying due to killing power, don't report to crashlytics
+                            warn("Abandoning reconnect attempt, due to errors during init: ${ex.message}")
+                        }
                     }
-                }
 
-                RadioInterfaceService.RECEIVE_FROMRADIO_ACTION -> {
-                    val proto =
-                        MeshProtos.FromRadio.parseFrom(
-                            intent.getByteArrayExtra(
-                                EXTRA_PAYLOAD
-                            )!!
-                        )
-                    info("Received from radio service: ${proto.toOneLineString()}")
-                    when (proto.variantCase.number) {
-                        MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(
-                            proto.packet
-                        )
+                    RadioInterfaceService.RECEIVE_FROMRADIO_ACTION -> {
+                        val proto =
+                            MeshProtos.FromRadio.parseFrom(
+                                intent.getByteArrayExtra(
+                                    EXTRA_PAYLOAD
+                                )!!
+                            )
+                        info("Received from radio service: ${proto.toOneLineString()}")
+                        when (proto.variantCase.number) {
+                            MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(
+                                proto.packet
+                            )
 
-                        else -> TODO("Unexpected FromRadio variant")
+                            else -> TODO("Unexpected FromRadio variant")
+                        }
                     }
-                }
 
-                else -> TODO("Unexpected radio interface broadcast")
+                    else -> TODO("Unexpected radio interface broadcast")
+                }
             }
         }
     }
