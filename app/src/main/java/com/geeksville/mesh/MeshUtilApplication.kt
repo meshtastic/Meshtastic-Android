@@ -21,6 +21,7 @@ class MeshUtilApplication : GeeksvilleApplication() {
         if (!isEmulator && (!BuildConfig.DEBUG || !Debug.isDebuggerConnected())) {
             val crashlytics = FirebaseCrashlytics.getInstance()
             crashlytics.setCrashlyticsCollectionEnabled(true)
+            crashlytics.setCustomKey("debug_build", BuildConfig.DEBUG)
 
             // Attach to our exception wrapper
             Exceptions.reporter = { exception, _, _ ->
