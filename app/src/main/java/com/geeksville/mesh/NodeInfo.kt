@@ -111,11 +111,17 @@ data class NodeInfo(
             return (now - lastSeen <= timeout) || lastSeen == 0
         }
 
+    /// return the position if it is valid, else null
+    val validPosition: Position?
+        get() {
+            return position?.takeIf { it.latitude != 0.0 || it.longitude != 0.0 }
+        }
+
     /// @return distance in meters to some other node (or null if unknown)
     fun distance(o: NodeInfo?): Int? {
-        val p = position
-        val op = o?.position
-        return if (p != null && op != null && p.latitude != 0.0 && op.longitude != 0.0)
+        val p = validPosition
+        val op = o?.validPosition
+        return if (p != null && op != null)
             p.distance(op).toInt()
         else
             null

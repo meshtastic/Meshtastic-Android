@@ -17,16 +17,15 @@ import com.geeksville.mesh.model.UIState
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
-import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
+import com.mapbox.mapboxsdk.geometry.LatLngBounds
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.Style
 import com.mapbox.mapboxsdk.style.expressions.Expression
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.Property.TEXT_ANCHOR_TOP
 import com.mapbox.mapboxsdk.style.layers.Property.TEXT_JUSTIFY_AUTO
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
@@ -91,19 +90,21 @@ fun MapContent() {
     }
 
     // Find all nodes with valid locations
-    val locations = NodeDB.nodes.values.mapNotNull { node ->
-        val p = node.position
-        if (p != null && (p.latitude != 0.0 || p.longitude != 0.0)) {
-            val f = Feature.fromGeometry(
-                Point.fromLngLat(
-                    p.longitude,
-                    p.latitude
-                )
+    val nodesWithPosition = NodeDB.nodes.values.filter { it.validPosition != null }
+    val locations = nodesWithPosition.map { node ->
+        val p = node.position!!
+        mapLog.debug("Showing on map: $node")
+
+        val f = Feature.fromGeometry(
+            Point.fromLngLat(
+                p.longitude,
+                p.latitude
             )
-            node.user?.let { f.addStringProperty("name", it.longName) }
-            f
-        } else
-            null
+        )
+        node.user?.let {
+            f.addStringProperty("name", it.longName)
+        }
+        f
     }
     val nodeSourceId = "node-positions"
     val nodeLayerId = "node-layer"
@@ -116,8 +117,9 @@ fun MapContent() {
     val markerIcon = context.getDrawable(R.drawable.ic_twotone_person_pin_24)!!
 
     val nodeLayer = SymbolLayer(nodeLayerId, nodeSourceId).withProperties(
-        PropertyFactory.iconImage(markerImageId),
-        PropertyFactory.iconAnchor(Property.ICON_ANCHOR_BOTTOM)
+        iconImage(markerImageId),
+        iconAnchor(Property.ICON_ANCHOR_BOTTOM),
+        iconAllowOverlap(true)
     )
 
     val labelLayer = SymbolLayer(labelLayerId, nodeSourceId).withProperties(
@@ -125,7 +127,8 @@ fun MapContent() {
         textSize(12f),
         textColor(Color.RED),
         textVariableAnchor(arrayOf(TEXT_ANCHOR_TOP)),
-        textJustify(TEXT_JUSTIFY_AUTO)
+        textJustify(TEXT_JUSTIFY_AUTO),
+        textAllowOverlap(true)
     )
 
     AndroidView(R.layout.map_view) { view ->
@@ -148,12 +151,21 @@ fun MapContent() {
             //map.uiSettings.isScrollGesturesEnabled = true
             //map.uiSettings.isZoomGesturesEnabled = true
 
-            // Center on the user's position (if we have it)
+            // Zoom in on our set of markers
+            /* old code jsut zooomed in on the user
             NodeDB.ourNodeInfo?.position?.let {
                 val cameraPos = CameraPosition.Builder().target(
                     LatLng(it.latitude, it.longitude)
                 ).zoom(9.0).build()
                 map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPos), 1000)
+            } */
+            if (nodesWithPosition.isNotEmpty()) {
+                val bounds = LatLngBounds.Builder()
+
+                // Add all positions
+                bounds.includes(nodesWithPosition.map { it.position!! }
+                    .map { LatLng(it.latitude, it.longitude) })
+                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 100))
             }
         }
     }
