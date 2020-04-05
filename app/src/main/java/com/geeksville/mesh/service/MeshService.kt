@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.annotation.RequiresApi
+import androidx.annotation.UiThread
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_MIN
 import com.geeksville.analytics.DataPair
@@ -27,11 +28,25 @@ import com.geeksville.util.toRemoteExceptions
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.protobuf.ByteString
+import kotlinx.coroutines.*
 import java.nio.charset.Charset
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 
 
 class RadioNotConnectedException() : Exception("Not connected to radio")
 
+
+private val errorHandler = CoroutineExceptionHandler { _, exception ->
+    Exceptions.report(exception, "MeshService-coroutine", "coroutine-exception")
+}
+
+/// Wrap launch with an exception handler, FIXME, move into a utility lib
+fun CoroutineScope.handledLaunch(
+    context: CoroutineContext = EmptyCoroutineContext,
+    start: CoroutineStart = CoroutineStart.DEFAULT,
+    block: suspend CoroutineScope.() -> Unit
+) = this.launch(context = context + errorHandler, start = start, block = block)
 
 /**
  * Handles all the communication with android apps.  Also keeps an internal model
@@ -89,12 +104,24 @@ class MeshService : Service(), Logging {
         data class TextMessage(val fromId: String, val text: String)
     }
 
+    public enum class ConnectionState {
+        DISCONNECTED,
+        CONNECTED,
+        DEVICE_SLEEP // device is in LS sleep state, it will reconnected to us over bluetooth once it has data
+    }
+
     /// A mapping of receiver class name to package name - used for explicit broadcasts
     private val clientPackages = mutableMapOf<String, String>()
 
     val radio = ServiceClient {
         IRadioInterfaceService.Stub.asInterface(it)
     }
+
+    private val serviceJob = Job()
+    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
+
+    /// The current state of our connection
+    private var connectionState = ConnectionState.DISCONNECTED
 
     /*
     see com.geeksville.mesh broadcast intents
@@ -117,7 +144,7 @@ class MeshService : Service(), Logging {
         private var lastSendMsec = 0L
 
         override fun onLocationResult(locationResult: LocationResult) {
-            exceptionReporter {
+            serviceScope.handledLaunch {
                 super.onLocationResult(locationResult)
                 var l = locationResult.lastLocation
 
@@ -147,7 +174,7 @@ class MeshService : Service(), Logging {
                             )
                         } catch (ex: RadioNotConnectedException) {
                             warn("Lost connection to radio, stopping location requests")
-                            onConnectionChanged(false)
+                            onConnectionChanged(ConnectionState.DEVICE_SLEEP)
                         }
                     }
                 }
@@ -163,6 +190,7 @@ class MeshService : Service(), Logging {
      * per https://developer.android.com/training/location/change-location-settings
      */
     @SuppressLint("MissingPermission")
+    @UiThread
     private fun startLocationRequests() {
         if (fusedLocationClient == null) {
             GeeksvilleApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
@@ -243,7 +271,8 @@ class MeshService : Service(), Logging {
 
     /// Safely access the radio service, if not connected an exception will be thrown
     private val connectedRadio: IRadioInterfaceService
-        get() = (if (isConnected) radio.serviceP else null) ?: throw RadioNotConnectedException()
+        get() = (if (connectionState == ConnectionState.CONNECTED) radio.serviceP else null)
+            ?: throw RadioNotConnectedException()
 
     /// Send a command/packet to our radio.  But cope with the possiblity that we might start up
     /// before we are fully bound to the RadioInterfaceService
@@ -295,11 +324,13 @@ class MeshService : Service(), Logging {
     /// A text message that has a arrived since the last notification update
     private var recentReceivedText: TextMessage? = null
 
-    val summaryString
-        get() = if (!isConnected)
-            "No radio connected"
-        else
-            "Connected: $numOnlineNodes of $numNodes online"
+    private val summaryString
+        get() = when (connectionState) {
+            ConnectionState.CONNECTED -> "Connected: $numOnlineNodes of $numNodes online"
+            ConnectionState.DISCONNECTED -> "Disconnected"
+            ConnectionState.DEVICE_SLEEP -> "Device sleeping"
+        }
+
 
     override fun toString() = summaryString
 
@@ -375,6 +406,7 @@ class MeshService : Service(), Logging {
         radio.close()
 
         super.onDestroy()
+        serviceJob.cancel()
     }
 
 
@@ -396,8 +428,7 @@ class MeshService : Service(), Logging {
 
     var myNodeInfo: MyNodeInfo? = null
 
-    /// Is our radio connected to the phone?
-    private var isConnected = false
+    private var radioConfig: MeshProtos.RadioConfig? = null
 
     /// True after we've done our initial node db init
     private var haveNodeDB = false
@@ -567,7 +598,10 @@ class MeshService : Service(), Logging {
     }
 
     /// If packets arrive before we have our node DB, we delay parsing them until the DB is ready
-    private val earlyPackets = mutableListOf<MeshPacket>()
+    private val earlyReceivedPackets = mutableListOf<MeshPacket>()
+
+    /// If apps try to send packets when our radio is sleeping, we queue them here instead
+    private val offlineSentPackets = mutableListOf<MeshPacket>()
 
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
@@ -575,16 +609,20 @@ class MeshService : Service(), Logging {
             processReceivedMeshPacket(packet)
             onNodeDBChanged()
         } else {
-            earlyPackets.add(packet)
-            logAssert(earlyPackets.size < 128) // The max should normally be about 32, but if the device is messed up it might try to send forever
+            earlyReceivedPackets.add(packet)
+            logAssert(earlyReceivedPackets.size < 128) // The max should normally be about 32, but if the device is messed up it might try to send forever
         }
     }
 
     /// Process any packets that showed up too early
     private fun processEarlyPackets() {
-        earlyPackets.forEach { processReceivedMeshPacket(it) }
-        earlyPackets.clear()
+        earlyReceivedPackets.forEach { processReceivedMeshPacket(it) }
+        earlyReceivedPackets.clear()
+
+        offlineSentPackets.forEach { sendMeshPacket(it) }
+        offlineSentPackets.clear()
     }
+
 
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun processReceivedMeshPacket(packet: MeshPacket) {
@@ -624,6 +662,7 @@ class MeshService : Service(), Logging {
 
     private fun currentSecond() = (System.currentTimeMillis() / 1000).toInt()
 
+
     /// We are reconnecting to a radio, redownload the full state.  This operation might take hundreds of milliseconds
     private fun reinitFromRadio() {
         // Read the MyNodeInfo object
@@ -636,6 +675,8 @@ class MeshService : Service(), Logging {
         }
 
         myNodeInfo = mi
+
+        radioConfig = MeshProtos.RadioConfig.parseFrom(connectedRadio.readRadioConfig())
 
         /// Track types of devices and firmware versions in use
         GeeksvilleApplication.analytics.setUserInfo(
@@ -712,19 +753,53 @@ class MeshService : Service(), Logging {
         if (!myNodeInfo!!.hasGPS) {
             // If we have at least one other person in the mesh, send our GPS position otherwise stop listening to GPS
 
-            if (numOnlineNodes >= 2)
-                startLocationRequests()
-            else
-                stopLocationRequests()
+            serviceScope.handledLaunch(Dispatchers.Main) {
+                if (numOnlineNodes >= 2)
+                    startLocationRequests()
+                else
+                    stopLocationRequests()
+            }
         } else
             debug("Our radio has a built in GPS, so not reading GPS in phone")
     }
 
+
+    private var sleepTimeout: Job? = null
+
     /// Called when we gain/lose connection to our radio
-    private fun onConnectionChanged(c: Boolean) {
-        debug("onConnectionChanged connected=$c")
-        isConnected = c
-        if (c) {
+    private fun onConnectionChanged(c: ConnectionState) {
+        debug("onConnectionChanged=$c")
+
+        /// Perform all the steps needed once we start waiting for device sleep to complete
+        fun startDeviceSleep() {
+            // lost radio connection, therefore no need to keep listening to GPS
+            stopLocationRequests()
+
+            // Have our timeout fire in the approprate number of seconds
+            sleepTimeout = serviceScope.handledLaunch {
+                try {
+                    // If we have a valid timeout, wait that long (+30 seconds) otherwise, just wait 30 seconds
+                    val timeout = (radioConfig?.preferences?.lsSecs ?: 0) + 30
+
+                    debug("Waiting for sleeping device, timeout=$timeout secs")
+                    delay(timeout * 1000L)
+                    warn("Device timeout out, setting disconnected")
+                    onConnectionChanged(ConnectionState.DISCONNECTED)
+                } catch (ex: CancellationException) {
+                    debug("device sleep timeout cancelled")
+                }
+            }
+        }
+
+        fun startDisconnect() {
+            GeeksvilleApplication.analytics.track(
+                "mesh_disconnect",
+                DataPair("num_nodes", numNodes),
+                DataPair("num_online", numOnlineNodes)
+            )
+        }
+
+        fun startConnect() {
             // Do our startup init
             try {
                 reinitFromRadio()
@@ -748,20 +823,37 @@ class MeshService : Service(), Logging {
                 // It seems that when the ESP32 goes offline it can briefly come back for a 100ms ish which
                 // causes the phone to try and reconnect.  If we fail downloading our initial radio state we don't want to
                 // claim we have a valid connection still
-                isConnected = false;
+                connectionState = ConnectionState.DEVICE_SLEEP
+                startDeviceSleep()
                 throw ex; // Important to rethrow so that we don't tell the app all is well
             }
-        } else {
-            // lost radio connection, therefore no need to keep listening to GPS
-            stopLocationRequests()
-
-            GeeksvilleApplication.analytics.track(
-                "mesh_disconnect",
-                DataPair("num_nodes", numNodes),
-                DataPair("num_online", numOnlineNodes)
-            )
         }
 
+        // Cancel any existing timeouts
+        sleepTimeout?.let {
+            it.cancel()
+            sleepTimeout = null
+        }
+
+        connectionState = c
+        when (c) {
+            ConnectionState.CONNECTED ->
+                startConnect()
+            ConnectionState.DEVICE_SLEEP ->
+                startDeviceSleep()
+            ConnectionState.DISCONNECTED ->
+                startDisconnect()
+        }
+
+        // broadcast an intent with our new connection state
+        val intent = Intent(ACTION_MESH_CONNECTED)
+        intent.putExtra(
+            EXTRA_CONNECTED,
+            connectionState.toString()
+        )
+        explicitBroadcast(intent)
+
+        // Update the android notification in the status bar
         updateNotification()
     }
 
@@ -773,41 +865,42 @@ class MeshService : Service(), Logging {
 
         // Important to never throw exceptions out of onReceive
         override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
-
-            debug("Received broadcast ${intent.action}")
-            when (intent.action) {
-                RadioInterfaceService.RADIO_CONNECTED_ACTION -> {
-                    try {
-                        onConnectionChanged(intent.getBooleanExtra(EXTRA_CONNECTED, false))
-
-                        // forward the connection change message to anyone who is listening to us. but change the action
-                        // to prevent an infinite loop from us receiving our own broadcast. ;-)
-                        intent.action = ACTION_MESH_CONNECTED
-                        explicitBroadcast(intent)
-                    } catch (ex: RemoteException) {
-                        // This can happen sometimes (especially if the device is slowly dying due to killing power, don't report to crashlytics
-                        warn("Abandoning reconnect attempt, due to errors during init: ${ex.message}")
+            serviceScope.handledLaunch {
+                debug("Received broadcast ${intent.action}")
+                when (intent.action) {
+                    RadioInterfaceService.RADIO_CONNECTED_ACTION -> {
+                        try {
+                            onConnectionChanged(
+                                if (intent.getBooleanExtra(EXTRA_CONNECTED, false))
+                                    ConnectionState.CONNECTED
+                                else
+                                    ConnectionState.DEVICE_SLEEP
+                            )
+                        } catch (ex: RemoteException) {
+                            // This can happen sometimes (especially if the device is slowly dying due to killing power, don't report to crashlytics
+                            warn("Abandoning reconnect attempt, due to errors during init: ${ex.message}")
+                        }
                     }
-                }
 
-                RadioInterfaceService.RECEIVE_FROMRADIO_ACTION -> {
-                    val proto =
-                        MeshProtos.FromRadio.parseFrom(
-                            intent.getByteArrayExtra(
-                                EXTRA_PAYLOAD
-                            )!!
-                        )
-                    info("Received from radio service: ${proto.toOneLineString()}")
-                    when (proto.variantCase.number) {
-                        MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(
-                            proto.packet
-                        )
+                    RadioInterfaceService.RECEIVE_FROMRADIO_ACTION -> {
+                        val proto =
+                            MeshProtos.FromRadio.parseFrom(
+                                intent.getByteArrayExtra(
+                                    EXTRA_PAYLOAD
+                                )!!
+                            )
+                        info("Received from radio service: ${proto.toOneLineString()}")
+                        when (proto.variantCase.number) {
+                            MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(
+                                proto.packet
+                            )
 
-                        else -> TODO("Unexpected FromRadio variant")
+                            else -> TODO("Unexpected FromRadio variant")
+                        }
                     }
-                }
 
-                else -> TODO("Unexpected radio interface broadcast")
+                    else -> TODO("Unexpected radio interface broadcast")
+                }
             }
         }
     }
@@ -846,6 +939,15 @@ class MeshService : Service(), Logging {
         })
     }
 
+    /**
+     * Send a mesh packet to the radio, if the radio is not currently connected this function will throw NotConnectedException
+     */
+    private fun sendMeshPacket(packet: MeshPacket) {
+        sendToRadio(ToRadio.newBuilder().apply {
+            this.packet = packet
+        })
+    }
+
     private val binder = object : IMeshService.Stub() {
         // Note: bound methods don't get properly exception caught/logged, so do that with a wrapper
         // per https://blog.classycode.com/dealing-with-exceptions-in-aidl-9ba904c6d63
@@ -876,9 +978,9 @@ class MeshService : Service(), Logging {
                 connectedRadio.writeOwner(user.toByteArray())
             }
 
-        override fun sendData(destId: String?, payloadIn: ByteArray, typ: Int) =
+        override fun sendData(destId: String?, payloadIn: ByteArray, typ: Int): Boolean =
             toRemoteExceptions {
-                info("sendData dest=$destId <- ${payloadIn.size} bytes")
+                info("sendData dest=$destId <- ${payloadIn.size} bytes (connectionState=$connectionState)")
 
                 // encapsulate our payload in the proper protobufs and fire it off
                 val packet = buildMeshPacket(destId) {
@@ -887,24 +989,33 @@ class MeshService : Service(), Logging {
                         it.payload = ByteString.copyFrom(payloadIn)
                     }.build()
                 }
-
-                sendToRadio(ToRadio.newBuilder().apply {
-                    this.packet = packet
-                })
+                // If radio is sleeping, queue the packet
+                when (connectionState) {
+                    ConnectionState.DEVICE_SLEEP ->
+                        offlineSentPackets.add(packet)
+                    else ->
+                        sendMeshPacket(packet)
+                }
 
                 GeeksvilleApplication.analytics.track(
                     "data_send",
                     DataPair("num_bytes", payloadIn.size),
                     DataPair("type", typ)
                 )
+
+                connectionState == ConnectionState.CONNECTED
             }
 
         override fun getRadioConfig(): ByteArray = toRemoteExceptions {
-            connectedRadio.readRadioConfig()
+            this@MeshService.radioConfig?.toByteArray() ?: throw RadioNotConnectedException()
         }
 
         override fun setRadioConfig(payload: ByteArray) = toRemoteExceptions {
+            // Update our device
             connectedRadio.writeRadioConfig(payload)
+
+            // Update our cached copy
+            this@MeshService.radioConfig = MeshProtos.RadioConfig.parseFrom(payload)
         }
 
         override fun getNodes(): Array<NodeInfo> = toRemoteExceptions {
@@ -914,10 +1025,10 @@ class MeshService : Service(), Logging {
             r
         }
 
-        override fun isConnected(): Boolean = toRemoteExceptions {
-            val r = this@MeshService.isConnected
-            info("in isConnected=$r")
-            r
+        override fun connectionState(): String = toRemoteExceptions {
+            val r = this@MeshService.connectionState
+            info("in connectionState=$r")
+            r.toString()
         }
     }
 }

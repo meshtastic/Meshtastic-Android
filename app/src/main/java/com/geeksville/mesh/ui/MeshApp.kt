@@ -4,10 +4,7 @@ import androidx.compose.Composable
 import androidx.compose.state
 import androidx.ui.core.ContextAmbient
 import androidx.ui.core.Text
-import androidx.ui.layout.Column
-import androidx.ui.layout.Container
-import androidx.ui.layout.LayoutSize
-import androidx.ui.layout.Row
+import androidx.ui.layout.*
 import androidx.ui.material.*
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
@@ -15,6 +12,7 @@ import com.geeksville.android.Logging
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.NodeDB
 import com.geeksville.mesh.model.UIState
+import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.RadioInterfaceService
 import com.geeksville.mesh.service.SoftwareUpdateService
 
@@ -36,34 +34,40 @@ fun HomeContent() {
 
     Column {
         Row {
+            fun connected() = UIState.isConnected.value != MeshService.ConnectionState.DISCONNECTED
             VectorImage(
-                id = if (UIState.isConnected.value) R.drawable.cloud_on else R.drawable.cloud_off,
-                tint = palette.onBackground // , modifier = LayoutSize(40.dp, 40.dp)
+                id = if (connected()) R.drawable.cloud_on else R.drawable.cloud_off,
+                tint = palette.onBackground,
+                modifier = LayoutPadding(start = 8.dp)
             )
 
-            if (UIState.isConnected.value) {
-                Column {
-                    Text("Connected")
+            Column {
 
-                    if (false) { // hide the firmware update button for now, it is kinda ugly and users don't need it yet
-                        /// Create a software update button
-                        val context = ContextAmbient.current
-                        RadioInterfaceService.getBondedDeviceAddress(context)?.let { macAddress ->
-                            Button(
-                                onClick = {
-                                    SoftwareUpdateService.enqueueWork(
-                                        context,
-                                        SoftwareUpdateService.startUpdateIntent(macAddress)
-                                    )
-                                }
-                            ) {
-                                Text(text = "Update firmware")
+                Text(
+                    when (UIState.isConnected.value) {
+                        MeshService.ConnectionState.CONNECTED -> "Connected"
+                        MeshService.ConnectionState.DISCONNECTED -> "Disconnected"
+                        MeshService.ConnectionState.DEVICE_SLEEP -> "Power Saving"
+                    },
+                    modifier = LayoutPadding(start = 8.dp)
+                )
+
+                if (false) { // hide the firmware update button for now, it is kinda ugly and users don't need it yet
+                    /// Create a software update button
+                    val context = ContextAmbient.current
+                    RadioInterfaceService.getBondedDeviceAddress(context)?.let { macAddress ->
+                        Button(
+                            onClick = {
+                                SoftwareUpdateService.enqueueWork(
+                                    context,
+                                    SoftwareUpdateService.startUpdateIntent(macAddress)
+                                )
                             }
+                        ) {
+                            Text(text = "Update firmware")
                         }
                     }
                 }
-            } else {
-                Text("Not Connected")
             }
         }
 
