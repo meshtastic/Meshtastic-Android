@@ -17,6 +17,7 @@ import com.geeksville.mesh.model.UIState
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
+import com.mapbox.mapboxsdk.camera.CameraPosition
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
@@ -151,21 +152,26 @@ fun MapContent() {
             //map.uiSettings.isScrollGesturesEnabled = true
             //map.uiSettings.isZoomGesturesEnabled = true
 
-            // Zoom in on our set of markers
-            /* old code jsut zooomed in on the user
-            NodeDB.ourNodeInfo?.position?.let {
-                val cameraPos = CameraPosition.Builder().target(
-                    LatLng(it.latitude, it.longitude)
-                ).zoom(9.0).build()
-                map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPos), 1000)
-            } */
             if (nodesWithPosition.isNotEmpty()) {
-                val bounds = LatLngBounds.Builder()
+                val update = if (nodesWithPosition.size >= 2) {
+                    // Multiple nodes, make them all fit on the map view
+                    val bounds = LatLngBounds.Builder()
 
-                // Add all positions
-                bounds.includes(nodesWithPosition.map { it.position!! }
-                    .map { LatLng(it.latitude, it.longitude) })
-                map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), 100))
+                    // Add all positions
+                    bounds.includes(nodesWithPosition.map { it.position!! }
+                        .map { LatLng(it.latitude, it.longitude) })
+
+                    CameraUpdateFactory.newLatLngBounds(bounds.build(), 100)
+                } else {
+                    // Only one node, just zoom in on it
+                    val it = nodesWithPosition[0].position!!
+
+                    val cameraPos = CameraPosition.Builder().target(
+                        LatLng(it.latitude, it.longitude)
+                    ).zoom(9.0).build()
+                    CameraUpdateFactory.newCameraPosition(cameraPos)
+                }
+                map.animateCamera(update, 1000)
             }
         }
     }
