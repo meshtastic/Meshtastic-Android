@@ -2,12 +2,9 @@ package com.geeksville.mesh.ui
 
 import androidx.compose.Composable
 import androidx.compose.state
-import androidx.ui.core.Text
-import androidx.ui.layout.Container
-import androidx.ui.layout.LayoutSize
+import androidx.ui.foundation.Text
 import androidx.ui.material.*
 import androidx.ui.tooling.preview.Preview
-import androidx.ui.unit.dp
 import com.geeksville.android.Logging
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIState
@@ -57,11 +54,11 @@ private fun AppContent(openDrawer: () -> Unit) {
         TopAppBar(
             title = { Text(text = "Meshtastic") },
             navigationIcon = {
-                Container(LayoutSize(40.dp, 40.dp)) {
-                    VectorImageButton(R.drawable.ic_launcher_new_foreground) {
-                        openDrawer()
-                    }
+                //Container(LayoutSize(40.dp, 40.dp)) {
+                VectorImageButton(R.drawable.ic_launcher_new_foreground) {
+                    openDrawer()
                 }
+                //}
             }
         )
     }) {

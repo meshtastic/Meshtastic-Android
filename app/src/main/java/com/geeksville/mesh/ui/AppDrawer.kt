@@ -3,7 +3,7 @@ package com.geeksville.mesh.ui
 import androidx.annotation.DrawableRes
 import androidx.compose.Composable
 import androidx.ui.core.Modifier
-import androidx.ui.core.Text
+import androidx.ui.foundation.Text
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
@@ -26,7 +26,7 @@ fun AppDrawer(
         Row(modifier = LayoutPadding(16.dp)) {
             VectorImage(
                 id = R.drawable.ic_launcher_new_foreground,
-                tint = (MaterialTheme.colors()).primary
+                tint = MaterialTheme.colors.primary
             )
             Spacer(LayoutWidth(8.dp))
             // VectorImage(id = R.drawable.ic_launcher_new_foreground)
@@ -61,7 +61,7 @@ private fun DrawerButton(
     isSelected: Boolean,
     action: () -> Unit
 ) {
-    val colors = MaterialTheme.colors()
+    val colors = MaterialTheme.colors
     val textIconColor = if (isSelected) {
         colors.primary
     } else {
@@ -93,7 +93,7 @@ private fun DrawerButton(
                 Spacer(LayoutWidth(16.dp))
                 Text(
                     text = label,
-                    style = (MaterialTheme.typography()).body2.copy(
+                    style = (MaterialTheme.typography).body2.copy(
                         color = textIconColor
                     ),
                     modifier = LayoutWidth.Fill

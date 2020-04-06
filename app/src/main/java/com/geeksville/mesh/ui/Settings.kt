@@ -3,7 +3,7 @@ package com.geeksville.mesh.ui
 import androidx.compose.Composable
 import androidx.compose.state
 import androidx.ui.core.ContextAmbient
-import androidx.ui.core.Text
+import androidx.ui.foundation.Text
 import androidx.ui.input.ImeAction
 import androidx.ui.layout.*
 import androidx.ui.material.MaterialTheme
@@ -52,7 +52,7 @@ fun SettingsContent() {
         val bonded = RadioInterfaceService.getBondedDeviceAddress(context) != null
         if (!bonded) {
 
-            val typography = MaterialTheme.typography()
+            val typography = MaterialTheme.typography
 
             Text(
                 text =

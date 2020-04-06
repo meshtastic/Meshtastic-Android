@@ -3,7 +3,7 @@ package com.geeksville.mesh.ui
 import androidx.compose.Composable
 import androidx.compose.state
 import androidx.ui.core.Modifier
-import androidx.ui.core.Text
+import androidx.ui.foundation.Text
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.graphics.Color
 import androidx.ui.input.ImeAction
@@ -52,7 +52,7 @@ fun MessageCard(msg: TextMessage, modifier: Modifier = Modifier.None) {
                     Text(
                         text = dateFormat.format(msg.date),
                         modifier = LayoutPadding(start = 8.dp),
-                        style = MaterialTheme.typography().caption
+                        style = MaterialTheme.typography.caption
                     )
                 }
             }

@@ -2,7 +2,7 @@ package com.geeksville.mesh.ui
 
 import androidx.compose.Composable
 import androidx.ui.core.ContextAmbient
-import androidx.ui.core.Text
+import androidx.ui.foundation.Text
 import androidx.ui.layout.Column
 import androidx.ui.layout.LayoutPadding
 import androidx.ui.layout.Row

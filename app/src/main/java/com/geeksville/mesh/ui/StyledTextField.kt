@@ -3,7 +3,7 @@ package com.geeksville.mesh.ui
 import androidx.compose.Composable
 import androidx.compose.state
 import androidx.ui.core.Modifier
-import androidx.ui.core.TextField
+import androidx.ui.foundation.TextField
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.graphics.Color
 import androidx.ui.input.ImeAction
@@ -47,7 +47,7 @@ fun StyledTextField(
         shape = RoundedCornerShape(4.dp)
     ) {
         val showingHint = state { value.isEmpty() }
-        val level = if (showingHint.value) HintEmphasis else MaterialTheme.emphasisLevels().medium
+        val level = if (showingHint.value) HintEmphasis else MaterialTheme.emphasisLevels.medium
 
         ProvideEmphasis(level) {
             TextField(

@@ -77,7 +77,6 @@ private val mapLifecycleCallbacks = object : Application.ActivityLifecycleCallba
 fun MapContent() {
     analyticsScreen(name = "map")
 
-    val typography = MaterialTheme.typography()
     val context = ContextAmbient.current
 
     onCommit(AppStatus.currentScreen) {
@@ -161,7 +160,7 @@ fun MapContent() {
                     bounds.includes(nodesWithPosition.map { it.position!! }
                         .map { LatLng(it.latitude, it.longitude) })
 
-                    CameraUpdateFactory.newLatLngBounds(bounds.build(), 100)
+                    CameraUpdateFactory.newLatLngBounds(bounds.build(), 150)
                 } else {
                     // Only one node, just zoom in on it
                     val it = nodesWithPosition[0].position!!

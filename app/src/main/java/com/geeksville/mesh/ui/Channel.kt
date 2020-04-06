@@ -3,7 +3,7 @@ package com.geeksville.mesh.ui
 import android.content.Intent
 import androidx.compose.Composable
 import androidx.ui.core.ContextAmbient
-import androidx.ui.core.Text
+import androidx.ui.foundation.Text
 import androidx.ui.input.ImeAction
 import androidx.ui.layout.*
 import androidx.ui.material.MaterialTheme
@@ -25,7 +25,7 @@ object ChannelLog : Logging
 fun ChannelContent(channel: Channel?) {
     analyticsScreen(name = "channel")
 
-    val typography = MaterialTheme.typography()
+    val typography = MaterialTheme.typography
     val context = ContextAmbient.current
 
     Column(modifier = LayoutSize.Fill + LayoutPadding(16.dp)) {
