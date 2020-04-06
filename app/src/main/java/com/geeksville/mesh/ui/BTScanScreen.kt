@@ -155,7 +155,7 @@ fun BTScanScreen() {
 
     Column {
         if (ScanUIState.errorText != null) {
-            Text("An unexpected error was encountered.  Please file a bug on our github: ${ScanUIState.errorText}")
+            Text(text = ScanUIState.errorText!!)
         } else {
             if (ScanUIState.devices.isEmpty()) {
                 Text(
