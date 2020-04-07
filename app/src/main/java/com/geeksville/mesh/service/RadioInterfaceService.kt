@@ -316,7 +316,7 @@ class RadioInterfaceService : Service(), Logging {
                 debug("requested MTU result=$mtuRes")
                 mtuRes.getOrThrow() // FIXME - why sometimes is the result Unit!?!
 
-                fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)
+                fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)!!
 
                 // We must set this to true before broadcasting connectionChanged
                 isConnected = true

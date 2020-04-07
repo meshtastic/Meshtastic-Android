@@ -301,6 +301,8 @@ class MainActivity : AppCompatActivity(), Logging,
         val tab_layout = findViewById<TabLayout>(R.id.tab_layout)
         val pager = findViewById<ViewPager2>(R.id.pager)
         pager.adapter = tabsAdapter
+        pager.isUserInputEnabled =
+            false // Gestures for screen switching doesn't work so good with the map view
         TabLayoutMediator(tab_layout, pager) { tab, position ->
             // tab.text = tabInfos[position].text // I think it looks better with icons only
             tab.icon = getDrawable(tabInfos[position].icon)

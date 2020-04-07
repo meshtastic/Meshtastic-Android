@@ -30,9 +30,7 @@
                 Screen.settings -> SettingsContent()
                 Screen.users -> UsersContent()
                 Screen.channel -> ChannelContent(UIState.getChannel())
-                Screen.map -> MapContent() -->
-
-            /--
+                Screen.map -> MapContent()
 
             <com.google.android.material.tabs.TabItem
                 android:icon="@drawable/ic_twotone_message_24"
