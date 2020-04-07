@@ -23,7 +23,6 @@ object ChannelLog : Logging
 
 @Composable
 fun ChannelContent(channel: Channel?) {
-    analyticsScreen(name = "channel")
 
     val typography = MaterialTheme.typography
     val context = ContextAmbient.current

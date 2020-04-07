@@ -73,8 +73,8 @@ fun BTScanScreen() {
     val bluetoothAdapter =
         (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?)?.adapter
 
-    analyticsScreen(name = "settings")
-    onCommit(AppStatus.currentScreen) {
+    // FIXME - remove onCommit now that we have a fragement to run in
+    onCommit() {
         ScanState.debug("BTScan component active")
         ScanUIState.selectedMacAddr = RadioInterfaceService.getBondedDeviceAddress(context)
 

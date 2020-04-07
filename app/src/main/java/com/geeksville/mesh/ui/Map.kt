@@ -75,11 +75,10 @@ private val mapLifecycleCallbacks = object : Application.ActivityLifecycleCallba
 
 @Composable
 fun MapContent() {
-    analyticsScreen(name = "map")
-
     val context = ContextAmbient.current
 
-    onCommit(AppStatus.currentScreen) {
+    // FIXME - remove onCommit
+    onCommit() {
         onDispose {
             // We no longer care about activity lifecycle
             (context.applicationContext as Application).unregisterActivityLifecycleCallbacks(

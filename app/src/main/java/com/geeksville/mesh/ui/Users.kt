@@ -27,8 +27,6 @@ fun getInitials(name: String): String {
 
 @Composable
 fun UsersContent() {
-    analyticsScreen(name = "users")
-
     Column {
         Row {
             fun connected() = UIState.isConnected.value != MeshService.ConnectionState.DISCONNECTED

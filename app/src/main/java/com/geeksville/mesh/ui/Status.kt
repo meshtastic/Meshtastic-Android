@@ -1,9 +1,6 @@
 package com.geeksville.mesh.ui
 
-import androidx.compose.Model
-import com.geeksville.mesh.R
-
-
+/*
 data class ScreenInfo(val icon: Int, val label: String)
 
 // defines the screens we have in the app
@@ -28,3 +25,4 @@ object AppStatus {
 fun navigateTo(destination: ScreenInfo) {
     AppStatus.currentScreen = destination
 }
+*/

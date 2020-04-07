@@ -21,9 +21,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.ui.core.setContent
-import androidx.ui.foundation.Text
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
+import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
 import com.geeksville.mesh.model.MessagesState
@@ -31,7 +31,7 @@ import com.geeksville.mesh.model.NodeDB
 import com.geeksville.mesh.model.TextMessage
 import com.geeksville.mesh.model.UIState
 import com.geeksville.mesh.service.*
-import com.geeksville.mesh.ui.ScanState
+import com.geeksville.mesh.ui.*
 import com.geeksville.util.Exceptions
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -109,23 +109,31 @@ fun androidx.fragment.app.Fragment.setComposable(
         }
     }
 
-class ComposeFragment(id: Int, private val content: @Composable() () -> Unit) : Fragment(),
+/**
+ * A fragment that represents a current 'screen' in our app.
+ *
+ * Useful for tracking analytics
+ */
+open class ScreenFragment(private val screenName: String) : Fragment() {
+    override fun onResume() {
+        super.onResume()
+        GeeksvilleApplication.analytics.sendScreenView(screenName)
+    }
+
+    override fun onPause() {
+        GeeksvilleApplication.analytics.endScreenView()
+        super.onPause()
+    }
+}
+
+class ComposeFragment(screenName: String, id: Int, private val content: @Composable() () -> Unit) :
+    ScreenFragment(screenName),
     Logging {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? =
         setComposable(id, content)
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        debug("view w=${view.width}, h=${view.height}")
-    }
-
-    override fun onStart() {
-        super.onStart()
-        debug("view w=${view?.width}, h=${view?.height}")
-    }
 }
 
 
@@ -144,9 +152,56 @@ class MainActivity : AppCompatActivity(), Logging,
         bluetoothManager.adapter
     }
 
-    private val tabsAdapter = object : FragmentStateAdapter(this) {
+    /*
+            <!--             Screen.messages -> MessagesContent()
+            Screen.settings -> SettingsContent()
+            Screen.users -> UsersContent()
+            Screen.channel -> ChannelContent(UIState.getChannel())
+            Screen.map -> MapContent() -->
 
-        override fun getItemCount(): Int = 2
+        /--
+        <com.google.android.material.tabs.TabItem
+            android:icon="@drawable/ic_twotone_message_24"
+            android:text="Messages"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content" />
+
+        <com.google.android.material.tabs.TabItem
+            android:icon="@drawable/ic_twotone_settings_applications_24"
+            android:text="Settings"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content" />  -->
+ */
+    data class TabInfo(val text: String, val icon: Int, val content: Fragment)
+
+    // private val tabIndexes = generateSequence(0) { it + 1 } FIXME, instead do withIndex or zip? to get the ids below, also stop duplicating strings
+    private val tabInfos = arrayOf(
+        TabInfo(
+            "Messages",
+            R.drawable.ic_twotone_message_24,
+            ComposeFragment("Messages", 1) { MessagesContent() }),
+        TabInfo(
+            "Settings",
+            R.drawable.ic_twotone_settings_applications_24,
+            ComposeFragment("Settings", 2) { SettingsContent() }),
+        TabInfo(
+            "Users",
+            R.drawable.ic_twotone_people_24,
+            ComposeFragment("Users", 3) { UsersContent() }),
+        TabInfo(
+            "Channel",
+            R.drawable.ic_twotone_contactless_24,
+            ComposeFragment("Channel", 4) { ChannelContent(UIState.getChannel()) }),
+        TabInfo(
+            "Map",
+            R.drawable.ic_twotone_map_24,
+            ComposeFragment("Map", 5) { MapContent() })
+    )
+
+    private
+    val tabsAdapter = object : FragmentStateAdapter(this) {
+
+        override fun getItemCount(): Int = tabInfos.size
 
         override fun createFragment(position: Int): Fragment {
             // Return a NEW fragment instance in createFragment(int)
@@ -155,9 +210,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 // Our object is just an integer :-P
                 putInt(ARG_OBJECT, position + 1)
             } */
-            return ComposeFragment(position + 1) {
-                Text("Jetpack Compose")
-            }
+            return tabInfos[position].content
         }
     }
 
@@ -255,7 +308,11 @@ class MainActivity : AppCompatActivity(), Logging,
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
             }
         } else {
-            Toast.makeText(this, "Error - this app requires bluetooth", Toast.LENGTH_LONG)
+            Toast.makeText(
+                this,
+                "Error - this app requires bluetooth",
+                Toast.LENGTH_LONG
+            )
                 .show()
         }
 
@@ -289,7 +346,8 @@ class MainActivity : AppCompatActivity(), Logging,
         val pager = findViewById<ViewPager2>(R.id.pager)
         pager.adapter = tabsAdapter
         TabLayoutMediator(tab_layout, pager) { tab, position ->
-            tab.text = "OBJECT ${(position + 1)}"
+            tab.text = tabInfos[position].text
+            tab.icon = getDrawable(tabInfos[position].icon)
         }.attach()
     }
 
@@ -323,7 +381,11 @@ class MainActivity : AppCompatActivity(), Logging,
     /**
      * Dispatch incoming result to the correct fragment.
      */
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
         super.onActivityResult(requestCode, resultCode, data)
 
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
@@ -350,7 +412,8 @@ class MainActivity : AppCompatActivity(), Logging,
         } */
     }
 
-    private var receiverRegistered = false
+    private
+    var receiverRegistered = false
 
     private fun registerMeshReceiver() {
         logAssert(!receiverRegistered)
@@ -418,57 +481,67 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    private val meshServiceReceiver = object : BroadcastReceiver() {
+    private
+    val meshServiceReceiver = object : BroadcastReceiver() {
 
-        override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
-            debug("Received from mesh service $intent")
+        override fun onReceive(context: Context, intent: Intent) =
+            exceptionReporter {
+                debug("Received from mesh service $intent")
 
-            when (intent.action) {
-                MeshService.ACTION_NODE_CHANGE -> {
-                    val info: NodeInfo = intent.getParcelableExtra(EXTRA_NODEINFO)!!
-                    debug("UI nodechange $info")
+                when (intent.action) {
+                    MeshService.ACTION_NODE_CHANGE -> {
+                        val info: NodeInfo =
+                            intent.getParcelableExtra(EXTRA_NODEINFO)!!
+                        debug("UI nodechange $info")
 
-                    // We only care about nodes that have user info
-                    info.user?.id?.let {
-                        NodeDB.nodes[it] = info
-                    }
-                }
-
-                MeshService.ACTION_RECEIVED_DATA -> {
-                    debug("TODO rxdata")
-                    val sender = intent.getStringExtra(EXTRA_SENDER)!!
-                    val payload = intent.getByteArrayExtra(EXTRA_PAYLOAD)!!
-                    val typ = intent.getIntExtra(EXTRA_TYP, -1)
-
-                    when (typ) {
-                        MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
-                            // FIXME - use the real time from the packet
-                            // FIXME - don't just slam in a new list each time, it probably causes extra drawing.  Figure out how to be Compose smarter...
-                            val msg = TextMessage(sender, payload.toString(utf8))
-
-                            MessagesState.addMessage(msg)
+                        // We only care about nodes that have user info
+                        info.user?.id?.let {
+                            NodeDB.nodes[it] = info
                         }
-                        else -> TODO()
                     }
+
+                    MeshService.ACTION_RECEIVED_DATA -> {
+                        debug("TODO rxdata")
+                        val sender =
+                            intent.getStringExtra(EXTRA_SENDER)!!
+                        val payload =
+                            intent.getByteArrayExtra(EXTRA_PAYLOAD)!!
+                        val typ = intent.getIntExtra(EXTRA_TYP, -1)
+
+                        when (typ) {
+                            MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
+                                // FIXME - use the real time from the packet
+                                // FIXME - don't just slam in a new list each time, it probably causes extra drawing.  Figure out how to be Compose smarter...
+                                val msg = TextMessage(
+                                    sender,
+                                    payload.toString(utf8)
+                                )
+
+                                MessagesState.addMessage(msg)
+                            }
+                            else -> TODO()
+                        }
+                    }
+                    MeshService.ACTION_MESH_CONNECTED -> {
+                        val connected =
+                            MeshService.ConnectionState.valueOf(
+                                intent.getStringExtra(
+                                    EXTRA_CONNECTED
+                                )!!
+                            )
+                        onMeshConnectionChanged(connected)
+                    }
+                    else -> TODO()
                 }
-                MeshService.ACTION_MESH_CONNECTED -> {
-                    val connected =
-                        MeshService.ConnectionState.valueOf(
-                            intent.getStringExtra(
-                                EXTRA_CONNECTED
-                            )!!
-                        )
-                    onMeshConnectionChanged(connected)
-                }
-                else -> TODO()
             }
-        }
     }
 
 
-    private val mesh = object : ServiceClient<com.geeksville.mesh.IMeshService>({
-        com.geeksville.mesh.IMeshService.Stub.asInterface(it)
-    }) {
+    private
+    val mesh = object :
+        ServiceClient<com.geeksville.mesh.IMeshService>({
+            com.geeksville.mesh.IMeshService.Stub.asInterface(it)
+        }) {
         override fun onConnected(service: com.geeksville.mesh.IMeshService) {
             UIState.meshService = service
 
@@ -476,7 +549,8 @@ class MainActivity : AppCompatActivity(), Logging,
             registerMeshReceiver()
 
             // We won't receive a notify for the initial state of connection, so we force an update here
-            val connectionState = MeshService.ConnectionState.valueOf(service.connectionState())
+            val connectionState =
+                MeshService.ConnectionState.valueOf(service.connectionState())
             onMeshConnectionChanged(connectionState)
 
             debug("connected to mesh service, isConnected=${UIState.isConnected.value}")
@@ -522,7 +596,8 @@ class MainActivity : AppCompatActivity(), Logging,
 
         bindMeshService()
 
-        val bonded = RadioInterfaceService.getBondedDeviceAddress(this) != null
+        val bonded =
+            RadioInterfaceService.getBondedDeviceAddress(this) != null
         /* FIXME - not yet working
         if (!bonded)
             AppStatus.currentScreen = Screen.settings
