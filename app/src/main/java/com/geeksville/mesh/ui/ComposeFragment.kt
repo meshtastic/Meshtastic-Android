@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.Composable
 import androidx.ui.core.setContent
-import com.geeksville.android.Logging
 
 fun androidx.fragment.app.Fragment.setComposable(
     id: Int,
@@ -27,9 +26,12 @@ fun androidx.fragment.app.Fragment.setComposable(
     }
 
 
-class ComposeFragment(screenName: String, id: Int, private val content: @Composable() () -> Unit) :
-    ScreenFragment(screenName),
-    Logging {
+open class ComposeFragment(
+    screenName: String,
+    id: Int,
+    private val content: @Composable() () -> Unit
+) :
+    ScreenFragment(screenName) {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?

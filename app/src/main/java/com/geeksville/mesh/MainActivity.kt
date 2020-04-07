@@ -134,10 +134,7 @@ class MainActivity : AppCompatActivity(), Logging,
             "Messages",
             R.drawable.ic_twotone_message_24,
             ComposeFragment("Messages", 1) { MessagesContent() }),
-        TabInfo(
-            "Settings",
-            R.drawable.ic_twotone_settings_applications_24,
-            ComposeFragment("Settings", 2) { SettingsContent() }),
+
         TabInfo(
             "Users",
             R.drawable.ic_twotone_people_24,
@@ -150,7 +147,11 @@ class MainActivity : AppCompatActivity(), Logging,
             "Map",
             R.drawable.ic_twotone_map_24,
             MapFragment()
-        )
+        ),
+        TabInfo(
+            "Settings",
+            R.drawable.ic_twotone_settings_applications_24,
+            BTScanFragment("Settings", 2) { SettingsContent() })
     )
 
     private
@@ -301,7 +302,7 @@ class MainActivity : AppCompatActivity(), Logging,
         val pager = findViewById<ViewPager2>(R.id.pager)
         pager.adapter = tabsAdapter
         TabLayoutMediator(tab_layout, pager) { tab, position ->
-            tab.text = tabInfos[position].text
+            // tab.text = tabInfos[position].text // I think it looks better with icons only
             tab.icon = getDrawable(tabInfos[position].icon)
         }.attach()
     }
@@ -539,7 +540,6 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
     override fun onStop() {
-        ScanState.stopScan()
         unregisterMeshReceiver() // No point in receiving updates while the GUI is gone, we'll get them when the user launches the activity
         unbindMeshService()
 

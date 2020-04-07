@@ -65,6 +65,15 @@ data class BTScanEntry(val name: String, val macAddress: String, val bonded: Boo
 }
 
 
+class BTScanFragment(screenName: String, id: Int, private val content: @Composable() () -> Unit) :
+    ComposeFragment(screenName, id, content) {
+
+    override fun onStop() {
+        ScanState.stopScan()
+        super.onStop()
+    }
+}
+
 @Composable
 fun BTScanScreen() {
     val context = ContextAmbient.current
@@ -145,11 +154,6 @@ fun BTScanScreen() {
                 ScanState.scanner = s
                 ScanState.callback = scanCallback
             }
-        }
-
-        onDispose {
-            ScanState.debug("BTScan component deactivated")
-            ScanState.stopScan()
         }
     }
 
