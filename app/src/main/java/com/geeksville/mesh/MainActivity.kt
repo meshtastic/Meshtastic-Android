@@ -1,5 +1,6 @@
 package com.geeksville.mesh
 
+// import kotlinx.android.synthetic.main.tabs.*
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -11,14 +12,18 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import android.view.MotionEvent
+import android.view.*
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.Composable
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.ui.core.setContent
+import androidx.ui.foundation.Text
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import androidx.viewpager2.widget.ViewPager2
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
 import com.geeksville.mesh.model.MessagesState
@@ -26,17 +31,15 @@ import com.geeksville.mesh.model.NodeDB
 import com.geeksville.mesh.model.TextMessage
 import com.geeksville.mesh.model.UIState
 import com.geeksville.mesh.service.*
-import com.geeksville.mesh.ui.AppStatus
-import com.geeksville.mesh.ui.MeshApp
 import com.geeksville.mesh.ui.ScanState
-import com.geeksville.mesh.ui.Screen
 import com.geeksville.util.Exceptions
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.tasks.Task
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import java.nio.charset.Charset
-
 
 /*
 UI design
@@ -89,6 +92,42 @@ eventually:
 
 val utf8 = Charset.forName("UTF-8")
 
+fun androidx.fragment.app.Fragment.setComposable(
+    id: Int,
+    content: @Composable() () -> Unit
+): View? =
+    context?.let {
+        FrameLayout(it).apply {
+            this.id =
+                id // Compose requires a unique ID for the containing view to make savedInstanceState work
+
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            setContent(content)
+        }
+    }
+
+class ComposeFragment(id: Int, private val content: @Composable() () -> Unit) : Fragment(),
+    Logging {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? =
+        setComposable(id, content)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        debug("view w=${view.width}, h=${view.height}")
+    }
+
+    override fun onStart() {
+        super.onStart()
+        debug("view w=${view?.width}, h=${view?.height}")
+    }
+}
+
 
 class MainActivity : AppCompatActivity(), Logging,
     ActivityCompat.OnRequestPermissionsResultCallback {
@@ -103,6 +142,23 @@ class MainActivity : AppCompatActivity(), Logging,
     private val bluetoothAdapter: BluetoothAdapter? by lazy(LazyThreadSafetyMode.NONE) {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothManager.adapter
+    }
+
+    private val tabsAdapter = object : FragmentStateAdapter(this) {
+
+        override fun getItemCount(): Int = 2
+
+        override fun createFragment(position: Int): Fragment {
+            // Return a NEW fragment instance in createFragment(int)
+            /*
+            fragment.arguments = Bundle().apply {
+                // Our object is just an integer :-P
+                putInt(ARG_OBJECT, position + 1)
+            } */
+            return ComposeFragment(position + 1) {
+                Text("Jetpack Compose")
+            }
+        }
     }
 
     private fun requestPermission() {
@@ -139,7 +195,11 @@ class MainActivity : AppCompatActivity(), Logging,
             }
 
             // Ask for all the missing perms
-            ActivityCompat.requestPermissions(this, missingPerms.toTypedArray(), DID_REQUEST_PERM)
+            ActivityCompat.requestPermissions(
+                this,
+                missingPerms.toTypedArray(),
+                DID_REQUEST_PERM
+            )
 
             // DID_REQUEST_PERM is an
             // app-defined int constant. The callback method gets the
@@ -220,10 +280,19 @@ class MainActivity : AppCompatActivity(), Logging,
         // Handle any intent
         handleIntent(intent)
 
-        setContent {
+        /* setContent {
             MeshApp()
-        }
+        } */
+        setContentView(R.layout.activity_main)
+
+        val tab_layout = findViewById<TabLayout>(R.id.tab_layout)
+        val pager = findViewById<ViewPager2>(R.id.pager)
+        pager.adapter = tabsAdapter
+        TabLayoutMediator(tab_layout, pager) { tab, position ->
+            tab.text = "OBJECT ${(position + 1)}"
+        }.attach()
     }
+
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -384,7 +453,11 @@ class MainActivity : AppCompatActivity(), Logging,
                 }
                 MeshService.ACTION_MESH_CONNECTED -> {
                     val connected =
-                        MeshService.ConnectionState.valueOf(intent.getStringExtra(EXTRA_CONNECTED)!!)
+                        MeshService.ConnectionState.valueOf(
+                            intent.getStringExtra(
+                                EXTRA_CONNECTED
+                            )!!
+                        )
                     onMeshConnectionChanged(connected)
                 }
                 else -> TODO()
@@ -450,8 +523,10 @@ class MainActivity : AppCompatActivity(), Logging,
         bindMeshService()
 
         val bonded = RadioInterfaceService.getBondedDeviceAddress(this) != null
+        /* FIXME - not yet working
         if (!bonded)
             AppStatus.currentScreen = Screen.settings
+        */
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
