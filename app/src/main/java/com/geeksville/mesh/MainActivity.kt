@@ -12,18 +12,16 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.*
-import android.widget.FrameLayout
+import android.view.Menu
+import android.view.MenuItem
+import android.view.MotionEvent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.Composable
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.ui.core.setContent
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
 import com.geeksville.mesh.model.MessagesState
@@ -92,50 +90,6 @@ eventually:
 
 val utf8 = Charset.forName("UTF-8")
 
-fun androidx.fragment.app.Fragment.setComposable(
-    id: Int,
-    content: @Composable() () -> Unit
-): View? =
-    context?.let {
-        FrameLayout(it).apply {
-            this.id =
-                id // Compose requires a unique ID for the containing view to make savedInstanceState work
-
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            setContent(content)
-        }
-    }
-
-/**
- * A fragment that represents a current 'screen' in our app.
- *
- * Useful for tracking analytics
- */
-open class ScreenFragment(private val screenName: String) : Fragment() {
-    override fun onResume() {
-        super.onResume()
-        GeeksvilleApplication.analytics.sendScreenView(screenName)
-    }
-
-    override fun onPause() {
-        GeeksvilleApplication.analytics.endScreenView()
-        super.onPause()
-    }
-}
-
-class ComposeFragment(screenName: String, id: Int, private val content: @Composable() () -> Unit) :
-    ScreenFragment(screenName),
-    Logging {
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? =
-        setComposable(id, content)
-}
-
 
 class MainActivity : AppCompatActivity(), Logging,
     ActivityCompat.OnRequestPermissionsResultCallback {
@@ -195,7 +149,8 @@ class MainActivity : AppCompatActivity(), Logging,
         TabInfo(
             "Map",
             R.drawable.ic_twotone_map_24,
-            ComposeFragment("Map", 5) { MapContent() })
+            MapFragment()
+        )
     )
 
     private
