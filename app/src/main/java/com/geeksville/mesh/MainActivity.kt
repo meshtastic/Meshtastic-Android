@@ -142,7 +142,8 @@ class MainActivity : AppCompatActivity(), Logging,
         TabInfo(
             "Channel",
             R.drawable.ic_twotone_contactless_24,
-            ComposeFragment("Channel", 4) { ChannelContent(UIState.getChannel()) }),
+            ChannelFragment()
+        ),
         TabInfo(
             "Map",
             R.drawable.ic_twotone_map_24,

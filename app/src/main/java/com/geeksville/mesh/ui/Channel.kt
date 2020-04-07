@@ -1,6 +1,10 @@
 package com.geeksville.mesh.ui
 
 import android.content.Intent
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.compose.Composable
 import androidx.ui.core.ContextAmbient
 import androidx.ui.foundation.Text
@@ -19,6 +23,20 @@ import com.geeksville.mesh.model.toHumanString
 
 
 object ChannelLog : Logging
+
+
+class ChannelFragment : ScreenFragment("Channel"), Logging {
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? = inflater.inflate(R.layout.channel_fragment, container, false)
+
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+    }
+}
 
 
 @Composable
