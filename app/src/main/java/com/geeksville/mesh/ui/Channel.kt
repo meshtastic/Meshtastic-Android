@@ -1,17 +1,22 @@
 package com.geeksville.mesh.ui
 
+import android.content.Intent
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import com.geeksville.analytics.DataPair
+import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
-import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.channel_fragment.*
+
 
 object ChannelLog : Logging
 
@@ -27,18 +32,69 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         return inflater.inflate(R.layout.channel_fragment, container, false)
     }
 
+    private fun onEditingChanged() {
+        val isEditing = editableCheckbox.isChecked
+
+        channelOptions.isEnabled = false // Not yet ready
+        shareButton.isEnabled = !isEditing
+        channelNameView.isEnabled = isEditing
+        qrView.visibility =
+            if (isEditing) View.INVISIBLE else View.VISIBLE // Don't show the user a stale QR code
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        onEditingChanged() // Set initial state
+
+        editableCheckbox.setOnCheckedChangeListener { _, checked ->
+            onEditingChanged()
+
+            if (!checked) {
+                // User just locked it, we should warn and then apply changes to radio FIXME not ready yet
+                Snackbar.make(
+                    editableCheckbox,
+                    "Changing channels is not yet supported",
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
+        }
+
         model.radioConfig.observe(viewLifecycleOwner, Observer { config ->
             val channel = UIViewModel.getChannel(config)
-            val channelNameEdit = view.findViewById<TextInputEditText>(R.id.channelNameEdit)
 
             if (channel != null) {
+                qrView.visibility = View.VISIBLE
                 channelNameEdit.visibility = View.VISIBLE
                 channelNameEdit.setText(channel.name)
+                editableCheckbox.isEnabled = true
+
+                val d = BitmapDrawable(resources, channel.getChannelQR())
+                qrView.setImageDrawable(d)
+                // Share this particular channel if someone clicks share
+                shareButton.setOnClickListener {
+                    GeeksvilleApplication.analytics.track(
+                        "share",
+                        DataPair("content_type", "channel")
+                    ) // track how many times users share channels
+
+                    val sendIntent: Intent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_TEXT, channel.getChannelUrl().toString())
+                        putExtra(
+                            Intent.EXTRA_TITLE,
+                            "A URL for joining a Meshtastic mesh"
+                        )
+                        type = "text/plain"
+                    }
+
+                    val shareIntent = Intent.createChooser(sendIntent, null)
+                    requireActivity().startActivity(shareIntent)
+                }
             } else {
+                qrView.visibility = View.INVISIBLE
                 channelNameEdit.visibility = View.INVISIBLE
+                editableCheckbox.isEnabled = false
             }
 
             val adapter = ArrayAdapter(
@@ -47,9 +103,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 arrayOf("Item 1", "Item 2", "Item 3", "Item 4")
             )
 
-            val editTextFilledExposedDropdown =
-                view.findViewById<AutoCompleteTextView>(R.id.filled_exposed_dropdown)
-            editTextFilledExposedDropdown.setAdapter(adapter)
+            filled_exposed_dropdown.setAdapter(adapter)
         })
     }
 }
@@ -123,23 +177,7 @@ fun ChannelContent(channel: Channel?) {
                 if (!channel.editable)
                     OutlinedButton(modifier = LayoutPadding(start = 24.dp),
                         onClick = {
-                            GeeksvilleApplication.analytics.track(
-                                "share",
-                                DataPair("content_type", "channel")
-                            ) // track how many times users share channels
 
-                            val sendIntent: Intent = Intent().apply {
-                                action = Intent.ACTION_SEND
-                                putExtra(Intent.EXTRA_TEXT, channel.getChannelUrl().toString())
-                                putExtra(
-                                    Intent.EXTRA_TITLE,
-                                    "A URL for joining a Meshtastic mesh"
-                                )
-                                type = "text/plain"
-                            }
-
-                            val shareIntent = Intent.createChooser(sendIntent, null)
-                            context.startActivity(shareIntent)
                         }) {
                         VectorImage(
                             id = R.drawable.ic_twotone_share_24,
