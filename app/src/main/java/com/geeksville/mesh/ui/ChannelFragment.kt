@@ -17,9 +17,6 @@ import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.channel_fragment.*
 
 
-object ChannelLog : Logging
-
-
 class ChannelFragment : ScreenFragment("Channel"), Logging {
 
     private val model: UIViewModel by activityViewModels()
@@ -67,7 +64,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 channelNameEdit.visibility = View.VISIBLE
                 channelNameEdit.setText(channel.name)
                 editableCheckbox.isEnabled = true
-                
+
                 qrView.setImageBitmap(channel.getChannelQR())
                 // Share this particular channel if someone clicks share
                 shareButton.setOnClickListener {

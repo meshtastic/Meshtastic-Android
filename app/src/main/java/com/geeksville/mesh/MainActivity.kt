@@ -30,6 +30,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.ChannelFragment
 import com.geeksville.mesh.ui.MapFragment
+import com.geeksville.mesh.ui.UsersFragment
 import com.geeksville.util.Exceptions
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -113,6 +114,11 @@ class MainActivity : AppCompatActivity(), Logging,
     // private val tabIndexes = generateSequence(0) { it + 1 } FIXME, instead do withIndex or zip? to get the ids below, also stop duplicating strings
     private val tabInfos = arrayOf(
         TabInfo(
+            "Users",
+            R.drawable.ic_twotone_people_24,
+            UsersFragment()
+        ),
+        TabInfo(
             "Channel",
             R.drawable.ic_twotone_contactless_24,
             ChannelFragment()
@@ -128,10 +134,7 @@ class MainActivity : AppCompatActivity(), Logging,
             R.drawable.ic_twotone_message_24,
             ComposeFragment("Messages", 1) { MessagesContent() }),
 
-        TabInfo(
-            "Users",
-            R.drawable.ic_twotone_people_24,
-            ComposeFragment("Users", 3) { UsersContent() }),
+
         TabInfo(
             "Settings",
             R.drawable.ic_twotone_settings_applications_24,
@@ -470,8 +473,11 @@ class MainActivity : AppCompatActivity(), Logging,
         ServiceClient<com.geeksville.mesh.IMeshService>({
             com.geeksville.mesh.IMeshService.Stub.asInterface(it)
         }) {
-        override fun onConnected(service: com.geeksville.mesh.IMeshService) {
+        override fun onConnected(service: com.geeksville.mesh.IMeshService) = exceptionReporter {
             model.meshService = service
+
+            debug("Getting latest radioconfig from service")
+            model.radioConfig.value = MeshProtos.RadioConfig.parseFrom(service.radioConfig)
 
             // We don't start listening for packets until after we are connected to the service
             registerMeshReceiver()

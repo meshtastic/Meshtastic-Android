@@ -28,4 +28,5 @@
         <item name="android:minHeight">48dp</item>
     </style>
 
+    <style name="Widget.App.CardView" parent="Widget.MaterialComponents.CardView"></style>
 </resources>

@@ -59,22 +59,6 @@ class UIViewModel : ViewModel(), Logging {
 
     /// various radio settings (including the channel)
     val radioConfig = object : MutableLiveData<MeshProtos.RadioConfig?>(null) {
-        /**
-         * Called when the number of active observers change to 1 from 0.
-         *
-         *
-         * This callback can be used to know that this LiveData is being used thus should be kept
-         * up to date.
-         */
-        override fun onActive() {
-            super.onActive()
-
-            // Get the current radio config from the service
-            meshService?.let {
-                debug("Getting latest radioconfig from service")
-                value = MeshProtos.RadioConfig.parseFrom(it.radioConfig)
-            }
-        }
     }
 
     override fun onCleared() {
