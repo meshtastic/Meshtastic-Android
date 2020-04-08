@@ -5,7 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import androidx.compose.Composable
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import androidx.ui.core.ContextAmbient
 import androidx.ui.foundation.Text
 import androidx.ui.input.ImeAction
@@ -19,22 +23,48 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.toHumanString
-
+import com.google.android.material.textfield.TextInputEditText
 
 object ChannelLog : Logging
 
 
 class ChannelFragment : ScreenFragment("Channel"), Logging {
 
+    private val model: UIViewModel by activityViewModels()
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.channel_fragment, container, false)
-
+    ): View? {
+        return inflater.inflate(R.layout.channel_fragment, container, false)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        model.radioConfig.observe(viewLifecycleOwner, Observer { config ->
+            val channel = UIViewModel.getChannel(config)
+            val channelNameEdit = view.findViewById<TextInputEditText>(R.id.channelNameEdit)
+
+            if (channel != null) {
+                channelNameEdit.visibility = View.VISIBLE
+                channelNameEdit.setText(channel.name)
+            } else {
+                channelNameEdit.visibility = View.INVISIBLE
+            }
+
+            val adapter = ArrayAdapter(
+                requireContext(),
+                R.layout.dropdown_menu_popup_item,
+                arrayOf("Item 1", "Item 2", "Item 3", "Item 4")
+            )
+
+            val editTextFilledExposedDropdown =
+                view.findViewById<AutoCompleteTextView>(R.id.filled_exposed_dropdown)
+            editTextFilledExposedDropdown.setAdapter(adapter)
+        })
     }
 }
 

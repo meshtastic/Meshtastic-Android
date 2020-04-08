@@ -7,12 +7,63 @@ import android.os.Bundle
 import android.os.RemoteException
 import androidx.compose.mutableStateOf
 import androidx.core.content.edit
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.android.Logging
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.getInitials
+
+class UIViewModel : ViewModel(), Logging {
+    init {
+        debug("ViewModel created")
+    }
+
+    companion object {
+        /**
+         * Return the current channel info
+         * FIXME, we should sim channels at the MeshService level if we are running on an emulator,
+         * for now I just fake it by returning a canned channel.
+         */
+        fun getChannel(c: MeshProtos.RadioConfig?): Channel? {
+            val channel = c?.channelSettings?.let { Channel(it) }
+
+            return if (channel == null && isEmulator)
+                Channel.emulated
+            else
+                channel
+        }
+
+        fun getPreferences(context: Context): SharedPreferences =
+            context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        debug("ViewModel cleared")
+    }
+
+    var meshService: IMeshService? = null
+
+    /// Are we connected to our radio device
+    val isConnected = MutableLiveData(MeshService.ConnectionState.DISCONNECTED)
+
+    /// various radio settings (including the channel)
+    val radioConfig = MutableLiveData<MeshProtos.RadioConfig?>(null)
+
+    /// Set the radio config (also updates our saved copy in preferences)
+    fun setRadioConfig(context: Context, c: MeshProtos.RadioConfig) {
+        debug("Setting new radio config!")
+        meshService?.radioConfig = c.toByteArray()
+        radioConfig.value = c
+
+        getPreferences(context).edit(commit = true) {
+            this.putString("channel-url", UIState.getChannel()!!.getChannelUrl().toString())
+        }
+    }
+}
 
 /// FIXME - figure out how to merge this staate with the AppStatus Model
 object UIState : Logging {
