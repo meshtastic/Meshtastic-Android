@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+/*
 import androidx.compose.Composable
 import androidx.compose.state
 import androidx.ui.core.ContextAmbient
@@ -68,12 +69,4 @@ fun SettingsContent() {
     }
 }
 
-
-@Preview
-@Composable
-fun previewSettings() {
-    // another bug? It seems modaldrawerlayout not yet supported in preview
-    MaterialTheme(colors = palette) {
-        SettingsContent()
-    }
-}
+*/

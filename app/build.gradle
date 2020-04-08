@@ -29,7 +29,7 @@ android {
 
     buildFeatures {
         // Enables Jetpack Compose for this module
-        compose true // NOTE, if true main app crashes if you use regular view layout functions
+        // compose true // NOTE, if true main app crashes if you use regular view layout functions
     }
 
     // Set both the Java and Kotlin compilers to target Java 8.
@@ -44,8 +44,8 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerVersion "1.3.61-dev-withExperimentalGoogleExtensions-20200129"
-        kotlinCompilerExtensionVersion "$compose_version"
+        //kotlinCompilerVersion "1.3.61-dev-withExperimentalGoogleExtensions-20200129"
+        //kotlinCompilerExtensionVersion "$compose_version"
     }
 }
 
@@ -98,17 +98,6 @@ dependencies {
 
     // mapbox
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.0.0'
-
-    // You also need to include the following Compose toolkit dependencies.
-    implementation("androidx.compose:compose-runtime:$compose_version")
-    implementation("androidx.ui:ui-graphics:$compose_version")
-    implementation("androidx.ui:ui-layout:$compose_version")
-    implementation("androidx.ui:ui-material:$compose_version")
-    implementation("androidx.ui:ui-unit:$compose_version")
-    implementation("androidx.ui:ui-util:$compose_version")
-    implementation "androidx.ui:ui-tooling:$compose_version"
-    androidTestImplementation("androidx.ui:ui-platform:$compose_version")
-    androidTestImplementation("androidx.ui:ui-test:$compose_version")
 
     // location services
     implementation 'com.google.android.gms:play-services-location:17.0.0'

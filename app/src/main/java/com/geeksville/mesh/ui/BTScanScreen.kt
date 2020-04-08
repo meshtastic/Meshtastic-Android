@@ -1,31 +1,7 @@
 package com.geeksville.mesh.ui
 
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothManager
-import android.bluetooth.le.*
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.os.ParcelUuid
-import androidx.compose.Composable
-import androidx.compose.Model
-import androidx.compose.frames.modelMapOf
-import androidx.compose.onCommit
-import androidx.ui.core.ContextAmbient
-import androidx.ui.foundation.Text
-import androidx.ui.layout.Column
-import androidx.ui.layout.LayoutGravity
-import androidx.ui.material.CircularProgressIndicator
-import androidx.ui.material.MaterialTheme
-import androidx.ui.material.ProvideEmphasis
-import androidx.ui.material.RadioGroup
-import androidx.ui.tooling.preview.Preview
-import com.geeksville.android.Logging
-import com.geeksville.mesh.service.RadioInterfaceService
-import com.geeksville.util.exceptionReporter
 
-
+/*
 @Model
 object ScanUIState {
     var selectedMacAddr: String? = null
@@ -171,14 +147,6 @@ fun BTScanScreen() {
             } else {
                 // val allPaired = bluetoothAdapter?.bondedDevices.orEmpty().map { it.address }.toSet()
 
-                /* Only let user select paired devices
-                val paired = devices.values.filter { allPaired.contains(it.macAddress) }
-                if (paired.size < devices.size) {
-                    Text(
-                        "Warning: there are nearby Meshtastic devices that are not paired with this phone.  Before you can select a device, you will need to pair it in Bluetooth Settings."
-                    )
-                } */
-
                 RadioGroup {
                     Column {
                         ScanUIState.devices.values.forEach {
@@ -237,10 +205,4 @@ fun BTScanScreen() {
         }
     }
 }
-
-
-@Preview
-@Composable
-fun btScanScreenPreview() {
-    BTScanScreen()
-}
+*/

@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import com.geeksville.android.Logging
+import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
-import com.geeksville.mesh.model.NodeDB
-import com.geeksville.mesh.model.UIState
+import com.geeksville.mesh.model.UIViewModel
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
@@ -29,6 +31,8 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource
 
 
 class MapFragment : ScreenFragment("Map"), Logging {
+
+    private val model: UIViewModel by activityViewModels()
 
     private val nodeSourceId = "node-positions"
     private val nodeLayerId = "node-layer"
@@ -52,56 +56,61 @@ class MapFragment : ScreenFragment("Map"), Logging {
         textAllowOverlap(true)
     )
 
-    private fun nodesWithPosition() = NodeDB.nodes.values.filter { it.validPosition != null }
 
-    /**
-     * Using the latest nodedb, generate geojson features
-     */
-    private fun getCurrentNodes(): FeatureCollection {
-        // Find all nodes with valid locations
+    private fun onNodesChanged(map: MapboxMap, nodes: Collection<NodeInfo>) {
+        val nodesWithPosition = nodes.filter { it.validPosition != null }
 
-        val locations = nodesWithPosition().map { node ->
-            val p = node.position!!
-            debug("Showing on map: $node")
+        /**
+         * Using the latest nodedb, generate geojson features
+         */
+        fun getCurrentNodes(): FeatureCollection {
+            // Find all nodes with valid locations
 
-            val f = Feature.fromGeometry(
-                Point.fromLngLat(
-                    p.longitude,
-                    p.latitude
+            val locations = nodesWithPosition.map { node ->
+                val p = node.position!!
+                debug("Showing on map: $node")
+
+                val f = Feature.fromGeometry(
+                    Point.fromLngLat(
+                        p.longitude,
+                        p.latitude
+                    )
                 )
-            )
-            node.user?.let {
-                f.addStringProperty("name", it.longName)
+                node.user?.let {
+                    f.addStringProperty("name", it.longName)
+                }
+                f
             }
-            f
+
+            return FeatureCollection.fromFeatures(locations)
         }
 
-        return FeatureCollection.fromFeatures(locations)
-    }
+        fun zoomToNodes(map: MapboxMap) {
+            if (nodesWithPosition.isNotEmpty()) {
+                val update = if (nodesWithPosition.size >= 2) {
+                    // Multiple nodes, make them all fit on the map view
+                    val bounds = LatLngBounds.Builder()
 
-    private fun zoomToNodes(map: MapboxMap) {
-        val nodes = nodesWithPosition()
-        if (nodes.isNotEmpty()) {
-            val update = if (nodes.size >= 2) {
-                // Multiple nodes, make them all fit on the map view
-                val bounds = LatLngBounds.Builder()
+                    // Add all positions
+                    bounds.includes(nodes.map { it.position!! }
+                        .map { LatLng(it.latitude, it.longitude) })
 
-                // Add all positions
-                bounds.includes(nodes.map { it.position!! }
-                    .map { LatLng(it.latitude, it.longitude) })
+                    CameraUpdateFactory.newLatLngBounds(bounds.build(), 150)
+                } else {
+                    // Only one node, just zoom in on it
+                    val it = nodesWithPosition[0].position!!
 
-                CameraUpdateFactory.newLatLngBounds(bounds.build(), 150)
-            } else {
-                // Only one node, just zoom in on it
-                val it = nodes[0].position!!
-
-                val cameraPos = CameraPosition.Builder().target(
-                    LatLng(it.latitude, it.longitude)
-                ).zoom(9.0).build()
-                CameraUpdateFactory.newCameraPosition(cameraPos)
+                    val cameraPos = CameraPosition.Builder().target(
+                        LatLng(it.latitude, it.longitude)
+                    ).zoom(9.0).build()
+                    CameraUpdateFactory.newCameraPosition(cameraPos)
+                }
+                map.animateCamera(update, 1000)
             }
-            map.animateCamera(update, 1000)
         }
+
+        nodePositions.setGeoJson(getCurrentNodes()) // Update node positions
+        zoomToNodes(map)
     }
 
     override fun onCreateView(
@@ -115,12 +124,12 @@ class MapFragment : ScreenFragment("Map"), Logging {
         super.onViewCreated(view, savedInstanceState)
 
         mapView = view.findViewById(R.id.mapView)
-        mapView.onCreate(UIState.savedInstanceState)
+        mapView.onCreate(savedInstanceState)
 
         mapView.getMapAsync { map ->
 
             // val markerIcon = BitmapFactory.decodeResource(context.resources, R.drawable.ic_twotone_person_pin_24)
-            val markerIcon = activity!!.getDrawable(R.drawable.ic_twotone_person_pin_24)!!
+            val markerIcon = requireActivity().getDrawable(R.drawable.ic_twotone_person_pin_24)!!
 
             map.setStyle(Style.OUTDOORS) { style ->
                 style.addSource(nodePositions)
@@ -128,6 +137,10 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 style.addLayer(nodeLayer)
                 style.addLayer(labelLayer)
             }
+
+            model.nodeDB.nodes.observe(viewLifecycleOwner, Observer { nodes ->
+                onNodesChanged(map, nodes.values)
+            })
 
             //map.uiSettings.isScrollGesturesEnabled = true
             //map.uiSettings.isZoomGesturesEnabled = true
@@ -152,11 +165,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     override fun onResume() {
         super.onResume()
         mapView.onResume()
-
-        mapView.getMapAsync { map ->
-            nodePositions.setGeoJson(getCurrentNodes()) // Update node positions
-            zoomToNodes(map)
-        }
     }
 
     override fun onDestroy() {

@@ -25,9 +25,11 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
-import com.geeksville.mesh.model.*
+import com.geeksville.mesh.model.TextMessage
+import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.*
-import com.geeksville.mesh.ui.*
+import com.geeksville.mesh.ui.ChannelFragment
+import com.geeksville.mesh.ui.MapFragment
 import com.geeksville.util.Exceptions
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -111,6 +113,17 @@ class MainActivity : AppCompatActivity(), Logging,
     // private val tabIndexes = generateSequence(0) { it + 1 } FIXME, instead do withIndex or zip? to get the ids below, also stop duplicating strings
     private val tabInfos = arrayOf(
         TabInfo(
+            "Channel",
+            R.drawable.ic_twotone_contactless_24,
+            ChannelFragment()
+        ),
+        TabInfo(
+            "Map",
+            R.drawable.ic_twotone_map_24,
+            MapFragment()
+        )
+        /*
+        TabInfo(
             "Messages",
             R.drawable.ic_twotone_message_24,
             ComposeFragment("Messages", 1) { MessagesContent() }),
@@ -120,19 +133,9 @@ class MainActivity : AppCompatActivity(), Logging,
             R.drawable.ic_twotone_people_24,
             ComposeFragment("Users", 3) { UsersContent() }),
         TabInfo(
-            "Channel",
-            R.drawable.ic_twotone_contactless_24,
-            ChannelFragment()
-        ),
-        TabInfo(
-            "Map",
-            R.drawable.ic_twotone_map_24,
-            MapFragment()
-        ),
-        TabInfo(
             "Settings",
             R.drawable.ic_twotone_settings_applications_24,
-            BTScanFragment("Settings", 2) { SettingsContent() })
+            BTScanFragment("Settings", 2) { SettingsContent() }) */
     )
 
     private
@@ -211,7 +214,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
     private fun sendTestPackets() {
         exceptionReporter {
-            val m = UIState.meshService!!
+            val m = model.meshService!!
 
             // Do some test operations
             val testPayload = "hello world".toByteArray()
@@ -232,10 +235,8 @@ class MainActivity : AppCompatActivity(), Logging,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val prefs = UIState.getPreferences(this)
-        UIState.ownerName = prefs.getString("owner", "")!!
-        UIState.meshService = null
-        UIState.savedInstanceState = savedInstanceState
+        val prefs = UIViewModel.getPreferences(this)
+        model.ownerName.value = prefs.getString("owner", "")!!
 
         // Ensures Bluetooth is available on the device and it is enabled. If not,
         // displays a dialog requesting user permission to enable Bluetooth.
@@ -301,19 +302,15 @@ class MainActivity : AppCompatActivity(), Logging,
         val appLinkAction = intent.action
         val appLinkData: Uri? = intent.data
 
-        UIState.requestedChannelUrl = null // assume none
-
         // Were we asked to open one our channel URLs?
         if (Intent.ACTION_VIEW == appLinkAction) {
             debug("Asked to open a channel URL - FIXME, ask user if they want to switch to that channel.  If so send the config to the radio")
-            UIState.requestedChannelUrl = appLinkData
+            val requestedChannelUrl = appLinkData
         }
     }
 
     override fun onDestroy() {
         unregisterMeshReceiver()
-        UIState.meshService =
-            null // When our activity goes away make sure we don't keep a ptr around to the service
         super.onDestroy()
     }
 
@@ -371,40 +368,27 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    /// Read the config bytes from the radio so we can show them in our GUI, the radio's copy is ground truth
-    private fun readRadioConfig() {
-        val bytes = UIState.meshService!!.radioConfig
-
-        val config = MeshProtos.RadioConfig.parseFrom(bytes)
-        UIState.setRadioConfig(this, config)
-
-        debug("Read config from radio")
-    }
 
     /// Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(connected: MeshService.ConnectionState) {
-        UIState.isConnected.value = connected
-        debug("connchange ${UIState.isConnected.value}")
+        model.isConnected.value = connected
+        debug("connchange ${model.isConnected.value}")
         if (connected == MeshService.ConnectionState.CONNECTED) {
-            // always get the current radio config when we connect
-            readRadioConfig()
 
             // everytime the radio reconnects, we slam in our current owner data, the radio is smart enough to only broadcast if needed
-            UIState.setOwner(this)
+            model.setOwner(this)
 
-            val m = UIState.meshService!!
+            val m = model.meshService!!
 
             // Pull down our real node ID
-            NodeDB.myId.value = m.myId
+            model.nodeDB.myId.value = m.myId
 
             // Update our nodeinfos based on data from the device
-            NodeDB.nodes.clear()
-            NodeDB.nodes.putAll(
-                m.nodes.map
-                {
-                    it.user?.id!! to it
-                }
-            )
+            val nodes = m.nodes.map {
+                it.user?.id!! to it
+            }.toMap()
+
+            model.nodeDB.nodes.value = nodes
         }
     }
 
@@ -435,7 +419,8 @@ class MainActivity : AppCompatActivity(), Logging,
 
                         // We only care about nodes that have user info
                         info.user?.id?.let {
-                            NodeDB.nodes[it] = info
+                            val newnodes = model.nodeDB.nodes.value!! + Pair(it, info)
+                            model.nodeDB.nodes.value = newnodes
                         }
                     }
 
@@ -456,7 +441,7 @@ class MainActivity : AppCompatActivity(), Logging,
                                     payload.toString(utf8)
                                 )
 
-                                MessagesState.addMessage(msg)
+                                model.messagesState.addMessage(msg)
                             }
                             else -> TODO()
                         }
@@ -482,7 +467,6 @@ class MainActivity : AppCompatActivity(), Logging,
             com.geeksville.mesh.IMeshService.Stub.asInterface(it)
         }) {
         override fun onConnected(service: com.geeksville.mesh.IMeshService) {
-            UIState.meshService = service
             model.meshService = service
 
             // We don't start listening for packets until after we are connected to the service
@@ -493,19 +477,19 @@ class MainActivity : AppCompatActivity(), Logging,
                 MeshService.ConnectionState.valueOf(service.connectionState())
             onMeshConnectionChanged(connectionState)
 
-            debug("connected to mesh service, isConnected=${UIState.isConnected.value}")
+            debug("connected to mesh service, isConnected=${model.isConnected.value}")
         }
 
         override fun onDisconnected() {
             unregisterMeshReceiver()
-            UIState.meshService = null
+            model.meshService = null
         }
     }
 
     private fun bindMeshService() {
         debug("Binding to mesh service!")
         // we bind using the well known name, to make sure 3rd party apps could also
-        if (UIState.meshService != null)
+        if (model.meshService != null)
             Exceptions.reportError("meshService was supposed to be null, ignoring (but reporting a bug)")
 
         MeshService.startService(this)?.let { intent ->
@@ -520,7 +504,7 @@ class MainActivity : AppCompatActivity(), Logging,
         // if we never connected, do nothing
         debug("Unbinding from mesh service!")
         mesh.close()
-        UIState.meshService = null
+        model.meshService = null
     }
 
     override fun onStop() {

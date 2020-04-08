@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+/*
 import androidx.compose.Composable
 import androidx.ui.core.ContextAmbient
 import androidx.ui.foundation.Text
@@ -16,14 +17,7 @@ import com.geeksville.mesh.service.RadioInterfaceService
 import com.geeksville.mesh.service.SoftwareUpdateService
 
 
-/// Given a human name, strip out the first letter of the first three words and return that as the initials for
-/// that user.
-fun getInitials(name: String): String {
-    val words = name.split(Regex("\\s+")).filter { it.isNotEmpty() }.take(3).map { it.first() }
-        .joinToString("")
 
-    return words
-}
 
 @Composable
 fun UsersContent() {
@@ -88,3 +82,5 @@ fun UsersContent() {
         } */
     }
 }
+
+*/

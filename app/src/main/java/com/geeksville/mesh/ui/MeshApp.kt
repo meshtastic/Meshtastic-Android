@@ -1,14 +1,13 @@
 package com.geeksville.mesh.ui
 
-import androidx.ui.material.lightColorPalette
 import com.geeksville.android.Logging
 
 
 object UILog : Logging
-
+/*
 val palette = lightColorPalette() // darkColorPalette()
 
-/*
+
 @Composable
 fun MeshApp() {
     val (drawerState, onDrawerStateChange) = state { DrawerState.Closed }

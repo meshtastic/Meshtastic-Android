@@ -1,7 +1,7 @@
 package com.geeksville.mesh.model
 
 import android.os.RemoteException
-import androidx.compose.frames.modelListOf
+import androidx.lifecycle.MutableLiveData
 import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.android.Logging
 import com.geeksville.mesh.MeshProtos
@@ -21,8 +21,8 @@ data class TextMessage(
 )
 
 
-object MessagesState : Logging {
-    private val testTexts = arrayOf(
+class MessagesState(private val ui: UIViewModel) : Logging {
+    private val testTexts = listOf(
         TextMessage(
             "+16508765310",
             "I found the cache"
@@ -35,17 +35,20 @@ object MessagesState : Logging {
 
     // If the following (unused otherwise) line is commented out, the IDE preview window works.
     // if left in the preview always renders as empty.
-    val messages = modelListOf(* if (isEmulator) testTexts else arrayOf())
+    val messages =
+        object : MutableLiveData<List<TextMessage>>(if (isEmulator) testTexts else listOf()) {
+
+        }
 
     /// add a message our GUI list of past msgs
     fun addMessage(m: TextMessage) {
-        messages.add(m)
+        messages.value = messages.value!! + m
     }
 
     /// Send a message and added it to our GUI log
     fun sendMessage(str: String, dest: String? = null) {
         var error: String? = null
-        val service = UIState.meshService
+        val service = ui.meshService
         if (service != null)
             try {
                 service.sendData(
@@ -59,9 +62,9 @@ object MessagesState : Logging {
         else
             error = "Error: No Mesh service"
 
-        MessagesState.addMessage(
+        addMessage(
             TextMessage(
-                NodeDB.myId.value,
+                ui.nodeDB.myId.value!!,
                 str,
                 errorMessage = error
             )

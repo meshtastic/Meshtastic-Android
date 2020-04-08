@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+/*
 import androidx.compose.Composable
 import androidx.ui.foundation.Text
 import androidx.ui.layout.*
@@ -13,22 +14,7 @@ import com.geeksville.mesh.model.NodeDB
 import androidx.ui.core.Modifier as Modifier1
 
 
-/*
-@Composable
-fun NodeIcon(modifier: Modifier1 = Modifier1.None, node: NodeInfo) {
-    Column {
-        Container(modifier = modifier + LayoutSize(40.dp, 40.dp)) {
-            VectorImage(id = if (node.user?.shortName != null) R.drawable.person else R.drawable.help)
-        }
 
-        // Show our shortname if possible
-        /* node.user?.shortName?.let {
-            Text(it)
-        } */
-
-    }
-}
- */
 
 @Composable
 fun CompassHeading(modifier: Modifier1 = Modifier1.None, node: NodeInfo) {
@@ -81,11 +67,4 @@ fun NodeInfoCard(node: NodeInfo) {
     }
 }
 
-@Preview
-@Composable
-fun nodeInfoPreview() {
-    Column {
-        NodeInfoCard(NodeDB.testNodes[0])
-        NodeInfoCard(NodeDB.testNodeNoPosition)
-    }
-}
+*/

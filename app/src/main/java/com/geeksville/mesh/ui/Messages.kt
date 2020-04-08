@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+/*
 import androidx.compose.Composable
 import androidx.compose.state
 import androidx.ui.core.Modifier
@@ -31,9 +32,7 @@ val TimestampEmphasis = object : Emphasis {
 }
 
 
-/**
- * A pretty version the text, with user icon to the left, name and time of arrival (copy slack look and feel)
- */
+/// A pretty version the text, with user icon to the left, name and time of arrival (copy slack look and feel)
 @Composable
 fun MessageCard(msg: TextMessage, modifier: Modifier = Modifier.None) {
     Row(modifier = modifier) {
@@ -112,11 +111,4 @@ fun MessagesContent() {
 }
 
 
-@Preview
-@Composable
-fun previewMessagesView() {
-    // another bug? It seems modaldrawerlayout not yet supported in preview
-    MaterialTheme(colors = palette) {
-        MessagesContent()
-    }
-}
+*/

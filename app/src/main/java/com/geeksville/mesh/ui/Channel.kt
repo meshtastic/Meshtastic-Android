@@ -1,30 +1,16 @@
 package com.geeksville.mesh.ui
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
-import androidx.compose.Composable
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.ui.core.ContextAmbient
-import androidx.ui.foundation.Text
-import androidx.ui.input.ImeAction
-import androidx.ui.layout.*
-import androidx.ui.material.MaterialTheme
-import androidx.ui.material.OutlinedButton
-import androidx.ui.tooling.preview.Preview
-import androidx.ui.unit.dp
-import com.geeksville.analytics.DataPair
-import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.mesh.R
-import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.model.toHumanString
 import com.google.android.material.textfield.TextInputEditText
 
 object ChannelLog : Logging
@@ -68,7 +54,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     }
 }
 
-
+/*
 @Composable
 fun ChannelContent(channel: Channel?) {
 
@@ -165,12 +151,4 @@ fun ChannelContent(channel: Channel?) {
     }
 }
 
-
-@Preview
-@Composable
-fun previewChannel() {
-    // another bug? It seems modaldrawerlayout not yet supported in preview
-    MaterialTheme(colors = palette) {
-        ChannelContent(Channel.emulated)
-    }
-}
+*/

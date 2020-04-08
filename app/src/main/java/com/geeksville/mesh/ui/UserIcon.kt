@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+/*
 import androidx.compose.Composable
 import androidx.ui.core.Modifier
 import androidx.ui.foundation.Text
@@ -34,11 +35,4 @@ fun UserIcon(user: NodeInfo? = null, modifier: Modifier = Modifier.None) {
     }
 }
 
-@Preview
-@Composable
-fun previewUserIcon() {
-    // another bug? It seems modaldrawerlayout not yet supported in preview
-    MaterialTheme(colors = palette) {
-        UserIcon(NodeDB.testNodes[1])
-    }
-}
+*/
