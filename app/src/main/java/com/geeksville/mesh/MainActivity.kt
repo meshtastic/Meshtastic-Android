@@ -292,8 +292,12 @@ class MainActivity : AppCompatActivity(), Logging,
         }.attach()
 
         model.isConnected.observe(this, Observer { connected ->
-            val image =
-                if (connected != MeshService.ConnectionState.DISCONNECTED) R.drawable.cloud_on else R.drawable.cloud_off
+            val image = when (connected) {
+                MeshService.ConnectionState.CONNECTED -> R.drawable.cloud_on
+                MeshService.ConnectionState.DEVICE_SLEEP -> R.drawable.ic_twotone_cloud_upload_24
+                MeshService.ConnectionState.DISCONNECTED -> R.drawable.cloud_off
+            }
+         
             connectStatusImage.setImageDrawable(getDrawable(image))
         })
     }

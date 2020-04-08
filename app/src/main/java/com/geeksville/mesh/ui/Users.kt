@@ -128,27 +128,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
 
 /*
-@Composable
-fun UsersContent() {
-    Column {
-        Row {
-            fun connected() = UIState.isConnected.value != MeshService.ConnectionState.DISCONNECTED
-            VectorImage(
-                id = if (connected()) R.drawable.cloud_on else R.drawable.cloud_off,
-                tint = palette.onBackground,
-                modifier = LayoutPadding(start = 8.dp)
-            )
 
-            Column {
-
-                Text(
-                    when (UIState.isConnected.value) {
-                        MeshService.ConnectionState.CONNECTED -> "Connected"
-                        MeshService.ConnectionState.DISCONNECTED -> "Disconnected"
-                        MeshService.ConnectionState.DEVICE_SLEEP -> "Power Saving"
-                    },
-                    modifier = LayoutPadding(start = 8.dp)
-                )
 
                 if (false) { // hide the firmware update button for now, it is kinda ugly and users don't need it yet
                     /// Create a software update button
@@ -169,9 +149,6 @@ fun UsersContent() {
             }
         }
 
-        NodeDB.nodes.values.forEach {
-            NodeInfoCard(it)
-        }
 
 
         /* FIXME - doens't work yet - probably because I'm not using release keys

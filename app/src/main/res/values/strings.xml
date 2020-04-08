@@ -8,4 +8,5 @@
     <string name="unset">Unset</string>
     <string name="connection_status">Connection status</string>
     <string name="application_icon">application icon</string>
+    <string name="unknown_username">Unknown Username</string>
 </resources>
