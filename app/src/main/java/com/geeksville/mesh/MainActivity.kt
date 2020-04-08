@@ -30,6 +30,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.ChannelFragment
 import com.geeksville.mesh.ui.MapFragment
+import com.geeksville.mesh.ui.MessagesFragment
 import com.geeksville.mesh.ui.UsersFragment
 import com.geeksville.util.Exceptions
 import com.geeksville.util.exceptionReporter
@@ -114,6 +115,11 @@ class MainActivity : AppCompatActivity(), Logging,
     // private val tabIndexes = generateSequence(0) { it + 1 } FIXME, instead do withIndex or zip? to get the ids below, also stop duplicating strings
     private val tabInfos = arrayOf(
         TabInfo(
+            "Messages",
+            R.drawable.ic_twotone_message_24,
+            MessagesFragment()
+        ),
+        TabInfo(
             "Users",
             R.drawable.ic_twotone_people_24,
             UsersFragment()
@@ -129,10 +135,7 @@ class MainActivity : AppCompatActivity(), Logging,
             MapFragment()
         )
         /*
-        TabInfo(
-            "Messages",
-            R.drawable.ic_twotone_message_24,
-            ComposeFragment("Messages", 1) { MessagesContent() }),
+
 
 
         TabInfo(
@@ -297,7 +300,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 MeshService.ConnectionState.DEVICE_SLEEP -> R.drawable.ic_twotone_cloud_upload_24
                 MeshService.ConnectionState.DISCONNECTED -> R.drawable.cloud_off
             }
-         
+
             connectStatusImage.setImageDrawable(getDrawable(image))
         })
     }

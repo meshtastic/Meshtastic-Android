@@ -9,4 +9,6 @@
     <string name="connection_status">Connection status</string>
     <string name="application_icon">application icon</string>
     <string name="unknown_username">Unknown Username</string>
+    <string name="user_avatar">User avatar</string>
+    <string name="sample_distance">2.13 km</string>
 </resources>

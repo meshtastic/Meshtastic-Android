@@ -25,6 +25,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     // Used to cache the views within the item layout for fast access
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val nodeNameView = itemView.nodeNameView
+        val distance_view = itemView.distance_view
     }
 
     private val nodesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
@@ -96,6 +97,15 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             val n = nodes[position]
 
             holder.nodeNameView.text = n.user?.longName ?: n.user?.id ?: "Unknown node"
+
+            val ourNodeInfo = model.nodeDB.ourNodeInfo
+            val distance = ourNodeInfo?.distanceStr(n)
+            if (distance != null) {
+                holder.distance_view.text = distance
+                holder.distance_view.visibility = View.VISIBLE
+            } else {
+                holder.distance_view.visibility = View.INVISIBLE
+            }
         }
 
         private var nodes = arrayOf<NodeInfo>()
