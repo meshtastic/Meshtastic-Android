@@ -16,6 +16,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -24,10 +25,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
-import com.geeksville.mesh.model.MessagesState
-import com.geeksville.mesh.model.NodeDB
-import com.geeksville.mesh.model.TextMessage
-import com.geeksville.mesh.model.UIState
+import com.geeksville.mesh.model.*
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
 import com.geeksville.util.Exceptions
@@ -106,26 +104,8 @@ class MainActivity : AppCompatActivity(), Logging,
         bluetoothManager.adapter
     }
 
-    /*
-            <!--             Screen.messages -> MessagesContent()
-            Screen.settings -> SettingsContent()
-            Screen.users -> UsersContent()
-            Screen.channel -> ChannelContent(UIState.getChannel())
-            Screen.map -> MapContent() -->
+    private val model: UIViewModel by viewModels()
 
-        /--
-        <com.google.android.material.tabs.TabItem
-            android:icon="@drawable/ic_twotone_message_24"
-            android:text="Messages"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content" />
-
-        <com.google.android.material.tabs.TabItem
-            android:icon="@drawable/ic_twotone_settings_applications_24"
-            android:text="Settings"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content" />  -->
- */
     data class TabInfo(val text: String, val icon: Int, val content: Fragment)
 
     // private val tabIndexes = generateSequence(0) { it + 1 } FIXME, instead do withIndex or zip? to get the ids below, also stop duplicating strings
@@ -503,6 +483,7 @@ class MainActivity : AppCompatActivity(), Logging,
         }) {
         override fun onConnected(service: com.geeksville.mesh.IMeshService) {
             UIState.meshService = service
+            model.meshService = service
 
             // We don't start listening for packets until after we are connected to the service
             registerMeshReceiver()

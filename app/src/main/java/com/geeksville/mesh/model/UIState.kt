@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.RemoteException
 import androidx.compose.mutableStateOf
 import androidx.core.content.edit
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.geeksville.android.BuildUtils.isEmulator
@@ -48,10 +49,45 @@ class UIViewModel : ViewModel(), Logging {
     var meshService: IMeshService? = null
 
     /// Are we connected to our radio device
-    val isConnected = MutableLiveData(MeshService.ConnectionState.DISCONNECTED)
+    val isConnected =
+        object : LiveData<MeshService.ConnectionState>(MeshService.ConnectionState.DISCONNECTED) {
+            /**
+             * Called when the number of active observers change to 1 from 0.
+             *
+             *
+             * This callback can be used to know that this LiveData is being used thus should be kept
+             * up to date.
+             */
+            override fun onActive() {
+                super.onActive()
+
+                // Get the current radio config from the service
+                meshService?.let {
+                    debug("Getting connection state from service")
+                    value = MeshService.ConnectionState.valueOf(it.connectionState())
+                }
+            }
+        }
 
     /// various radio settings (including the channel)
-    val radioConfig = MutableLiveData<MeshProtos.RadioConfig?>(null)
+    val radioConfig = object : MutableLiveData<MeshProtos.RadioConfig?>(null) {
+        /**
+         * Called when the number of active observers change to 1 from 0.
+         *
+         *
+         * This callback can be used to know that this LiveData is being used thus should be kept
+         * up to date.
+         */
+        override fun onActive() {
+            super.onActive()
+
+            // Get the current radio config from the service
+            meshService?.let {
+                debug("Getting latest radioconfig from service")
+                value = MeshProtos.RadioConfig.parseFrom(it.radioConfig)
+            }
+        }
+    }
 
     /// Set the radio config (also updates our saved copy in preferences)
     fun setRadioConfig(context: Context, c: MeshProtos.RadioConfig) {
