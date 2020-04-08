@@ -12,7 +12,7 @@
         android:layout_marginStart="64dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="64dp"
-        android:hint="Channel Name"
+        android:hint="@string/channel_name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -21,8 +21,8 @@
             android:id="@+id/channelNameEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="channel name"
-            android:text="Unset" />
+            android:hint="@string/channel_name"
+            android:text="@string/unset" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <ImageView
@@ -32,7 +32,7 @@
         android:layout_marginStart="96dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="96dp"
-        android:contentDescription="QR code"
+        android:contentDescription="@string/qr_code"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/channelNameView"
@@ -86,7 +86,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="96dp"
-        android:contentDescription="Share button"
+        android:contentDescription="@string/share_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/editableCheckbox"
         app:srcCompat="@drawable/ic_twotone_share_24" />
@@ -98,7 +98,7 @@
         android:layout_marginStart="64dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="64dp"
-        android:hint="Channel options"
+        android:hint="@string/channel_options"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -107,7 +107,8 @@
         <AutoCompleteTextView
             android:id="@+id/filled_exposed_dropdown"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:hint="@string/channel_options" />
     </com.google.android.material.textfield.TextInputLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

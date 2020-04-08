@@ -21,8 +21,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import androidx.viewpager2.widget.ViewPager2
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
 import com.geeksville.mesh.model.TextMessage
@@ -35,8 +35,8 @@ import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.tasks.Task
-import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.android.synthetic.main.activity_main.*
 import java.nio.charset.Charset
 
 /*
@@ -280,8 +280,6 @@ class MainActivity : AppCompatActivity(), Logging,
         } */
         setContentView(R.layout.activity_main)
 
-        val tab_layout = findViewById<TabLayout>(R.id.tab_layout)
-        val pager = findViewById<ViewPager2>(R.id.pager)
         pager.adapter = tabsAdapter
         pager.isUserInputEnabled =
             false // Gestures for screen switching doesn't work so good with the map view
@@ -289,6 +287,12 @@ class MainActivity : AppCompatActivity(), Logging,
             // tab.text = tabInfos[position].text // I think it looks better with icons only
             tab.icon = getDrawable(tabInfos[position].icon)
         }.attach()
+
+        model.isConnected.observe(this, Observer { connected ->
+            val image =
+                if (connected != MeshService.ConnectionState.DISCONNECTED) R.drawable.cloud_on else R.drawable.cloud_off
+            connectStatusImage.setImageDrawable(getDrawable(image))
+        })
     }
 
 

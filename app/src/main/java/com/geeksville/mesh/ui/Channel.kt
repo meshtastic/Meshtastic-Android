@@ -1,7 +1,6 @@
 package com.geeksville.mesh.ui
 
 import android.content.Intent
-import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -68,9 +67,8 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 channelNameEdit.visibility = View.VISIBLE
                 channelNameEdit.setText(channel.name)
                 editableCheckbox.isEnabled = true
-
-                val d = BitmapDrawable(resources, channel.getChannelQR())
-                qrView.setImageDrawable(d)
+                
+                qrView.setImageBitmap(channel.getChannelQR())
                 // Share this particular channel if someone clicks share
                 shareButton.setOnClickListener {
                     GeeksvilleApplication.analytics.track(

@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">Meshtastic</string>
     <string name="action_settings">Settings</string>
+    <string name="channel_name">Channel Name</string>
+    <string name="channel_options">Channel options</string>
+    <string name="share_button">Share button</string>
+    <string name="qr_code">QR code</string>
+    <string name="unset">Unset</string>
+    <string name="connection_status">Connection status</string>
+    <string name="application_icon">application icon</string>
 </resources>
