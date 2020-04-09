@@ -12,6 +12,7 @@ import com.geeksville.android.Logging
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.TextMessage
 import com.geeksville.mesh.model.UIViewModel
+import kotlinx.android.synthetic.main.adapter_message_layout.view.*
 import kotlinx.android.synthetic.main.messages_fragment.*
 
 
@@ -22,6 +23,8 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val username = itemView.username
+        val messageText = itemView.messageText
     }
 
     private val messagesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
@@ -55,7 +58,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             // Inflate the custom layout
 
             // Inflate the custom layout
-            val contactView: View = inflater.inflate(R.layout.adapter_node_layout, parent, false)
+            val contactView: View = inflater.inflate(R.layout.adapter_message_layout, parent, false)
 
             // Return a new holder instance
             return ViewHolder(contactView)
@@ -90,7 +93,21 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
          * @param position The position of the item within the adapter's data set.
          */
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val n = messages[position]
+            val msg = messages[position]
+
+            val nodes = model.nodeDB.nodes.value!!
+
+            // If we can't find the sender, just use the ID
+            val node = nodes.get(msg.from)
+            val user = node?.user
+            holder.username.text = user?.shortName ?: msg.from
+
+            if (msg.errorMessage != null) {
+                // FIXME, set the style to show a red error message
+                holder.messageText.text = msg.errorMessage
+            } else {
+                holder.messageText.text = msg.text
+            }
         }
 
         private var messages = arrayOf<TextMessage>()
