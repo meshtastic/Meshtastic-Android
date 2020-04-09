@@ -28,10 +28,7 @@ import com.geeksville.android.ServiceClient
 import com.geeksville.mesh.model.TextMessage
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.*
-import com.geeksville.mesh.ui.ChannelFragment
-import com.geeksville.mesh.ui.MapFragment
-import com.geeksville.mesh.ui.MessagesFragment
-import com.geeksville.mesh.ui.UsersFragment
+import com.geeksville.mesh.ui.*
 import com.geeksville.util.Exceptions
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -125,23 +122,20 @@ class MainActivity : AppCompatActivity(), Logging,
             UsersFragment()
         ),
         TabInfo(
+            "Map",
+            R.drawable.ic_twotone_map_24,
+            MapFragment()
+        ),
+        TabInfo(
             "Channel",
             R.drawable.ic_twotone_contactless_24,
             ChannelFragment()
         ),
         TabInfo(
-            "Map",
-            R.drawable.ic_twotone_map_24,
-            MapFragment()
-        )
-        /*
-
-
-
-        TabInfo(
             "Settings",
             R.drawable.ic_twotone_settings_applications_24,
-            BTScanFragment("Settings", 2) { SettingsContent() }) */
+            SettingsFragment()
+        )
     )
 
     private
