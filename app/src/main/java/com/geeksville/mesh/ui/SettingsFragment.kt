@@ -124,7 +124,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
             if (s == null) {
                 errorText.value =
-                    "This application requires bluetooth access. Please grant access in android settings."
+                    context.getString(R.string.requires_bluetooth)
             } else {
                 debug("starting scan")
 

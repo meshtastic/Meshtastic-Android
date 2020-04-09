@@ -21,4 +21,6 @@
     <string name="looking_for_meshtastic_devices">Looking for Meshtastic devices...</string>
     <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
     <string name="test_devname2" translatable="false">Meshtastic_1267</string>
+    <string name="requires_bluetooth">This application requires bluetooth access. Please grant access in android settings.</string>
+    <string name="error_bluetooth">Error - this app requires bluetooth</string>
 </resources>

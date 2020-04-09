@@ -248,7 +248,7 @@ class MainActivity : AppCompatActivity(), Logging,
         } else {
             Toast.makeText(
                 this,
-                "Error - this app requires bluetooth",
+                R.string.error_bluetooth,
                 Toast.LENGTH_LONG
             )
                 .show()
