@@ -92,7 +92,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     val bounds = LatLngBounds.Builder()
 
                     // Add all positions
-                    bounds.includes(nodes.map { it.position!! }
+                    bounds.includes(nodesWithPosition.map { it.position!! }
                         .map { LatLng(it.latitude, it.longitude) })
 
                     CameraUpdateFactory.newLatLngBounds(bounds.build(), 150)

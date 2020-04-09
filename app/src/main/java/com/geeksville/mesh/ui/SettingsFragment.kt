@@ -193,6 +193,9 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                             context,
                             it.macAddress
                         )
+
+                        // Force the GUI to redraw
+                        devices.value = devices.value
                     }
                 }
             }

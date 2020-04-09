@@ -387,17 +387,22 @@ class MainActivity : AppCompatActivity(), Logging,
             // everytime the radio reconnects, we slam in our current owner data, the radio is smart enough to only broadcast if needed
             model.setOwner(this)
 
-            val m = model.meshService!!
 
-            // Pull down our real node ID
-            model.nodeDB.myId.value = m.myId
+            model.meshService?.let { service ->
+                debug("Getting latest radioconfig from service")
+                model.radioConfig.value =
+                    MeshProtos.RadioConfig.parseFrom(model.meshService!!.radioConfig)
+                
+                // Pull down our real node ID
+                model.nodeDB.myId.value = service.myId
 
-            // Update our nodeinfos based on data from the device
-            val nodes = m.nodes.map {
-                it.user?.id!! to it
-            }.toMap()
+                // Update our nodeinfos based on data from the device
+                val nodes = service.nodes.map {
+                    it.user?.id!! to it
+                }.toMap()
 
-            model.nodeDB.nodes.value = nodes
+                model.nodeDB.nodes.value = nodes
+            }
         }
     }
 
@@ -477,9 +482,6 @@ class MainActivity : AppCompatActivity(), Logging,
         }) {
         override fun onConnected(service: com.geeksville.mesh.IMeshService) = exceptionReporter {
             model.meshService = service
-
-            debug("Getting latest radioconfig from service")
-            model.radioConfig.value = MeshProtos.RadioConfig.parseFrom(service.radioConfig)
 
             // We don't start listening for packets until after we are connected to the service
             registerMeshReceiver()
