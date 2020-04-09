@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Meshtastic</string>
+    <string name="app_name" translatable="false">Meshtastic</string>
     <string name="action_settings">Settings</string>
     <string name="channel_name">Channel Name</string>
     <string name="channel_options">Channel options</string>
@@ -10,7 +10,7 @@
     <string name="application_icon">application icon</string>
     <string name="unknown_username">Unknown Username</string>
     <string name="user_avatar">User avatar</string>
-    <string name="sample_distance">2.13 km</string>
+    <string name="sample_distance" translatable="false">2.13 km</string>
     <string name="sample_message">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
     <string name="some_username">Some Username</string>
     <string name="send_text">Send Text</string>
@@ -19,6 +19,6 @@
     <string name="your_name">Your Name</string>
     <string name="analytics_okay">Anonymous usage statistics and crash reports.</string>
     <string name="looking_for_meshtastic_devices">Looking for Meshtastic devices...</string>
-    <string name="test__devname1">Meshtastic_ac23</string>
-    <string name="test_devname2">Meshtastic_1267</string>
+    <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
+    <string name="test_devname2" translatable="false">Meshtastic_1267</string>
 </resources>

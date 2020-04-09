@@ -151,6 +151,8 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             val str = messageInputText.text.toString()
             model.messagesState.sendMessage(str)
             messageInputText.setText("") // blow away the string the user just entered
+
+            // requireActivity().hideKeyboard()
         }
 
         messageListView.adapter = messagesAdapter
