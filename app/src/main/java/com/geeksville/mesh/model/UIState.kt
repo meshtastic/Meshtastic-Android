@@ -1,12 +1,13 @@
 package com.geeksville.mesh.model
 
+import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.RemoteException
 import androidx.core.content.edit
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.android.Logging
 import com.geeksville.mesh.IMeshService
@@ -22,7 +23,7 @@ fun getInitials(name: String): String {
     return words
 }
 
-class UIViewModel : ViewModel(), Logging {
+class UIViewModel(app: Application) : AndroidViewModel(app), Logging {
     init {
         debug("ViewModel created")
     }
@@ -46,6 +47,8 @@ class UIViewModel : ViewModel(), Logging {
             context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
     }
 
+    private val context = app.applicationContext
+
     var meshService: IMeshService? = null
 
     val nodeDB = NodeDB(this)
@@ -67,13 +70,22 @@ class UIViewModel : ViewModel(), Logging {
     }
 
     /// Set the radio config (also updates our saved copy in preferences)
-    fun setRadioConfig(context: Context, c: MeshProtos.RadioConfig) {
+    fun setRadioConfig(c: MeshProtos.RadioConfig) {
         debug("Setting new radio config!")
         meshService?.radioConfig = c.toByteArray()
         radioConfig.value = c
 
         getPreferences(context).edit(commit = true) {
             this.putString("channel-url", getChannel(c)!!.getChannelUrl().toString())
+        }
+    }
+
+    /** Update just the channel settings portion of our config (both in the device and in saved preferences) */
+    fun setChannel(c: MeshProtos.ChannelSettings) {
+        // When running on the emulator, radio config might not really be available, in that case, just ignore attempts to change the config
+        radioConfig.value?.toBuilder()?.let { config ->
+            config.channelSettings = c
+            setRadioConfig(config.build())
         }
     }
 
@@ -91,7 +103,7 @@ class UIViewModel : ViewModel(), Logging {
     var requestedChannelUrl: Uri? = null
 
     // clean up all this nasty owner state management FIXME
-    fun setOwner(context: Context, s: String? = null) {
+    fun setOwner(s: String? = null) {
 
         if (s != null) {
             ownerName.value = s

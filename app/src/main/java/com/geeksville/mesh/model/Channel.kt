@@ -11,9 +11,7 @@ import java.net.MalformedURLException
 
 
 data class Channel(
-    var name: String,
-    var modemConfig: MeshProtos.ChannelSettings.ModemConfig,
-    var settings: MeshProtos.ChannelSettings? = MeshProtos.ChannelSettings.getDefaultInstance()
+    val settings: MeshProtos.ChannelSettings = MeshProtos.ChannelSettings.getDefaultInstance()
 ) {
     companion object {
         // Placeholder when emulating
@@ -37,9 +35,10 @@ data class Channel(
         }
     }
 
-    constructor(c: MeshProtos.ChannelSettings) : this(c.name, c.modemConfig, c)
-
     constructor(url: Uri) : this(urlToSettings(url))
+
+    val name: String get() = settings.name
+    val modemConfig: MeshProtos.ChannelSettings.ModemConfig get() = settings.modemConfig
 
     /// Can this channel be changed right now?
     var editable = false

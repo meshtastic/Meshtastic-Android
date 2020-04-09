@@ -254,7 +254,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             debug("did IME action")
             val n = usernameEditText.text.toString().trim()
             if (n.isNotEmpty())
-                model.setOwner(requireContext(), n)
+                model.setOwner(n)
 
             requireActivity().hideKeyboard()
         }

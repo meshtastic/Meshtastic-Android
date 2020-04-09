@@ -385,9 +385,8 @@ class MainActivity : AppCompatActivity(), Logging,
         if (connected == MeshService.ConnectionState.CONNECTED) {
 
             // everytime the radio reconnects, we slam in our current owner data, the radio is smart enough to only broadcast if needed
-            model.setOwner(this)
-
-
+            model.setOwner()
+            
             model.meshService?.let { service ->
                 debug("Getting latest radioconfig from service")
                 model.radioConfig.value =
