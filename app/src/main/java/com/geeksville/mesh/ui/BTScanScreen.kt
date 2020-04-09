@@ -241,10 +241,20 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        scanModel.errorText.observe(viewLifecycleOwner, Observer { errMsg ->
+            if (errMsg != null) {
+                scanStatusText.text = errMsg
+            }
+        })
+
         scanModel.devices.observe(viewLifecycleOwner, Observer { devices ->
             // Remove the old radio buttons and repopulate
             deviceRadioGroup.removeAllViews()
+
+            var hasBonded = false // Have any of our devices been bonded
             devices.values.forEach { device ->
+                hasBonded = hasBonded || device.bonded
+
                 val b = RadioButton(requireActivity())
                 b.text = device.name
                 b.id = View.generateViewId()
@@ -257,6 +267,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     b.isChecked = scanModel.onSelected(device)
                 }
             }
+
+            // get rid of the warning text once at least one device is paired
+            warningNotPaired.visibility = if (hasBonded) View.GONE else View.VISIBLE
         })
     }
 }
