@@ -12,7 +12,7 @@
     <string name="user_avatar">User avatar</string>
     <string name="sample_distance" translatable="false">2.13 km</string>
     <string name="sample_message">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
-    <string name="some_username">Some Username</string>
+    <string name="some_username" translatable="false">SKH</string>
     <string name="send_text">Send Text</string>
     <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in alpha-testing, if you find problems please post on our website chat.\n\nFor more information see our web page - www.meshtastic.org.</string>
     <string name="username_unset">Username unset</string>
@@ -23,4 +23,6 @@
     <string name="test_devname2" translatable="false">Meshtastic_1267</string>
     <string name="requires_bluetooth">This application requires bluetooth access. Please grant access in android settings.</string>
     <string name="error_bluetooth">Error - this app requires bluetooth</string>
+    <string name="starting_pairing">Starting pairing</string>
+    <string name="pairing_failed">Pairing failed</string>
 </resources>

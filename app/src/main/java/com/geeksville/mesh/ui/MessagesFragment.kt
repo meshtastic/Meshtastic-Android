@@ -16,6 +16,7 @@ import com.geeksville.mesh.model.TextMessage
 import com.geeksville.mesh.model.UIViewModel
 import kotlinx.android.synthetic.main.adapter_message_layout.view.*
 import kotlinx.android.synthetic.main.messages_fragment.*
+import java.text.SimpleDateFormat
 
 // Allows usage like email.on(EditorInfo.IME_ACTION_NEXT, { confirm() })
 fun EditText.on(actionId: Int, func: () -> Unit) {
@@ -38,6 +39,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val username = itemView.username
         val messageText = itemView.messageText
+        val messageTime = itemView.messageTime
     }
 
     private val messagesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
@@ -121,6 +123,8 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             } else {
                 holder.messageText.text = msg.text
             }
+
+            holder.messageTime.text = dateFormat.format(msg.date)
         }
 
         private var messages = arrayOf<TextMessage>()
@@ -164,21 +168,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             messagesAdapter.onMessagesChanged(it)
         })
     }
+
+    private val dateFormat = SimpleDateFormat("h:mm a")
 }
 
-/*
-
-private val dateFormat = SimpleDateFormat("h:mm a")
-
-
-
-                ProvideEmphasis(emphasis = TimestampEmphasis) {
-                    Text(
-                        text = dateFormat.format(msg.date),
-                        modifier = LayoutPadding(start = 8.dp),
-                        style = MaterialTheme.typography.caption
-                    )
-
-
-
-*/

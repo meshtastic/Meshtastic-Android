@@ -19,8 +19,10 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
+import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.RadioInterfaceService
@@ -82,7 +84,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
                 // If nothing was selected, by default select the first thing we see
                 if (selectedMacAddr == null && entry.bonded)
-                    changeSelection(context, addr)
+                    changeSelection(GeeksvilleApplication.currentActivity as MainActivity, addr)
 
                 devices.value = oldDevs + Pair(addr, entry) // trigger gui updates
             }
@@ -117,7 +119,10 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
             // If nothing was selected, by default select the first thing we see
             if (selectedMacAddr == null)
-                changeSelection(context, testnodes.first().macAddress)
+                changeSelection(
+                    GeeksvilleApplication.currentActivity as MainActivity,
+                    testnodes.first().macAddress
+                )
         } else {
             /// The following call might return null if the user doesn't have bluetooth access permissions
             val s: BluetoothLeScanner? = bluetoothAdapter.bluetoothLeScanner
@@ -168,7 +173,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     fun onSelected(it: BTScanEntry): Boolean {
         // If the device is paired, let user select it, otherwise start the pairing flow
         if (it.bonded) {
-            changeSelection(context, it.macAddress)
+            changeSelection(GeeksvilleApplication.currentActivity as MainActivity, it.macAddress)
             return true
         } else {
             info("Starting bonding for $it")
@@ -190,7 +195,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     if (state == BluetoothDevice.BOND_BONDED || state == BluetoothDevice.BOND_BONDING) {
                         debug("Bonding completed, connecting service")
                         changeSelection(
-                            context,
+                            GeeksvilleApplication.currentActivity as MainActivity,
                             it.macAddress
                         )
 
@@ -214,10 +219,14 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     }
 
     /// Change to a new macaddr selection, updating GUI and radio
-    fun changeSelection(context: Context, newAddr: String) {
+    fun changeSelection(context: MainActivity, newAddr: String) {
         info("Changing BT device to $newAddr")
         selectedMacAddr = newAddr
         RadioInterfaceService.setBondedDeviceAddress(context, newAddr)
+
+        // Super ugly hack.  we force the activity to reconnect FIXME, find a cleaner way
+        context.unbindMeshService()
+        context.bindMeshService()
     }
 }
 
@@ -275,7 +284,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 deviceRadioGroup.addView(b)
 
                 b.setOnClickListener {
-                    b.isChecked = scanModel.onSelected(device)
+                    scanProgressBar.visibility = View.INVISIBLE
+                    if (!device.bonded)
+                        scanStatusText.setText(R.string.starting_pairing)
+
+                    b.isSelected = scanModel.onSelected(device)
+
+                    if (!b.isSelected)
+                        scanStatusText.setText(R.string.pairing_failed)
                 }
             }
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="4dp"
@@ -18,7 +19,8 @@
             android:layout_marginTop="8dp"
             android:text="@string/some_username"
             app:chipIcon="@drawable/ic_twotone_person_24"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/messageTime"
+            app:layout_constraintStart_toStartOf="@+id/messageTime"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -32,6 +34,14 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/username"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/messageTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="3 min"
+            app:layout_constraintTop_toBottomOf="@+id/username"
+            tools:layout_editor_absoluteX="25dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

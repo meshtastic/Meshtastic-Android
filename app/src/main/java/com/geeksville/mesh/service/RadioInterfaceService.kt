@@ -180,13 +180,14 @@ class RadioInterfaceService : Service(), Logging {
             // Force the service to reconnect
             val s = runningService
             if (s != null) {
+                info("shutting down old service")
+                s.setEnabled(false) // nasty, needed to force the next setEnabled call to reconnect
                 info("Setting enable on the running radio service")
                 s.setEnabled(addr != null)
-            } else {
-                if (addr != null) {
-                    info("We have a device addr now, starting mesh service")
-                    MeshService.startService(context)
-                }
+            }
+            if (addr != null) {
+                info("We have a device addr now, starting mesh service")
+                MeshService.startService(context)
             }
         }
     }

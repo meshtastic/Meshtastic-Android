@@ -361,7 +361,7 @@ class MainActivity : AppCompatActivity(), Logging,
     var receiverRegistered = false
 
     private fun registerMeshReceiver() {
-        logAssert(!receiverRegistered)
+        unregisterMeshReceiver()
         val filter = IntentFilter()
         filter.addAction(MeshService.ACTION_MESH_CONNECTED)
         filter.addAction(MeshService.ACTION_NODE_CHANGE)
@@ -392,7 +392,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 debug("Getting latest radioconfig from service")
                 model.radioConfig.value =
                     MeshProtos.RadioConfig.parseFrom(model.meshService!!.radioConfig)
-                
+
                 // Pull down our real node ID
                 model.nodeDB.myId.value = service.myId
 
@@ -500,7 +500,7 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    private fun bindMeshService() {
+    fun bindMeshService() {
         debug("Binding to mesh service!")
         // we bind using the well known name, to make sure 3rd party apps could also
         if (model.meshService != null)
@@ -512,7 +512,7 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    private fun unbindMeshService() {
+    fun unbindMeshService() {
         // If we have received the service, and hence registered with
         // it, then now is the time to unregister.
         // if we never connected, do nothing
@@ -535,10 +535,8 @@ class MainActivity : AppCompatActivity(), Logging,
 
         val bonded =
             RadioInterfaceService.getBondedDeviceAddress(this) != null
-        /* FIXME - not yet working
         if (!bonded)
-            AppStatus.currentScreen = Screen.settings
-        */
+            pager.currentItem = 5
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
