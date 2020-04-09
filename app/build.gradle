@@ -29,7 +29,7 @@ android {
 
     buildFeatures {
         // Enables Jetpack Compose for this module
-        compose true // NOTE, if true main app crashes if you use regular view layout functions
+        // compose true // NOTE, if true main app crashes if you use regular view layout functions
     }
 
     // Set both the Java and Kotlin compilers to target Java 8.
@@ -44,8 +44,8 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerVersion "1.3.61-dev-withExperimentalGoogleExtensions-20200129"
-        kotlinCompilerExtensionVersion "$compose_version"
+        //kotlinCompilerVersion "1.3.61-dev-withExperimentalGoogleExtensions-20200129"
+        //kotlinCompilerExtensionVersion "$compose_version"
     }
 }
 
@@ -73,11 +73,17 @@ protobuf {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.core:core-ktx:1.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
-    implementation 'com.google.android.material:material:1.0.0'
+    implementation "androidx.fragment:fragment-ktx:1.2.4"
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
+    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'androidx.viewpager2:viewpager2:1.0.0'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.1.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.1.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
@@ -94,17 +100,6 @@ dependencies {
 
     // mapbox
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.0.0'
-
-    // You also need to include the following Compose toolkit dependencies.
-    implementation("androidx.compose:compose-runtime:$compose_version")
-    implementation("androidx.ui:ui-graphics:$compose_version")
-    implementation("androidx.ui:ui-layout:$compose_version")
-    implementation("androidx.ui:ui-material:$compose_version")
-    implementation("androidx.ui:ui-unit:$compose_version")
-    implementation("androidx.ui:ui-util:$compose_version")
-    implementation "androidx.ui:ui-tooling:$compose_version"
-    androidTestImplementation("androidx.ui:ui-platform:$compose_version")
-    androidTestImplementation("androidx.ui:ui-test:$compose_version")
 
     // location services
     implementation 'com.google.android.gms:play-services-location:17.0.0'

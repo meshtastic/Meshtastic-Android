@@ -34,7 +34,9 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- the xing library will try to bring this permission in but we don't want it -->
-    <uses-permission android:name="android.permission.CAMERA" tools:node="remove" />
+    <uses-permission
+        android:name="android.permission.CAMERA"
+        tools:node="remove" />
 
     <uses-feature
         android:name="android.hardware.bluetooth_le"
@@ -84,6 +86,7 @@
             android:name="com.geeksville.mesh.MainActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateAlwaysHidden"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

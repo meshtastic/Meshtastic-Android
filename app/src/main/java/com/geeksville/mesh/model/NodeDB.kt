@@ -1,13 +1,14 @@
 package com.geeksville.mesh.model
 
-import androidx.compose.frames.modelMapOf
-import androidx.compose.mutableStateOf
+import androidx.lifecycle.MutableLiveData
 import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.mesh.MeshUser
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.Position
 
-object NodeDB {
+
+/// NodeDB lives inside the UIViewModel, but it needs a backpointer to reach the service
+class NodeDB(private val ui: UIViewModel) {
     private val testPositions = arrayOf(
         Position(32.776665, -96.796989, 35), // dallas
         Position(32.960758, -96.733521, 35), // richardson
@@ -43,12 +44,14 @@ object NodeDB {
     private val seedWithTestNodes = isEmulator
 
     /// The unique ID of our node
-    val myId = mutableStateOf(if (isEmulator) "+16508765309" else "invalid")
+    val myId = object : MutableLiveData<String>(if (isEmulator) "+16508765309" else "invalid") {}
 
     /// A map from nodeid to to nodeinfo
     val nodes =
-        modelMapOf(* (if (isEmulator) testNodes else listOf()).map { it.user!!.id to it }.toTypedArray())
+        object :
+            MutableLiveData<Map<String, NodeInfo>>(mapOf(*(if (isEmulator) testNodes else listOf()).map { it.user!!.id to it }
+                .toTypedArray())) {}
 
     /// Could be null if we haven't received our node DB yet
-    val ourNodeInfo get() = nodes[myId.value]
+    val ourNodeInfo get() = nodes.value!![myId.value]
 }

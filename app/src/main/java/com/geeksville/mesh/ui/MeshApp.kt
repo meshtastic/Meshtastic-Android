@@ -1,18 +1,12 @@
 package com.geeksville.mesh.ui
 
-import androidx.compose.Composable
-import androidx.compose.state
-import androidx.ui.foundation.Text
-import androidx.ui.material.*
-import androidx.ui.tooling.preview.Preview
 import com.geeksville.android.Logging
-import com.geeksville.mesh.R
-import com.geeksville.mesh.model.UIState
 
 
 object UILog : Logging
-
+/*
 val palette = lightColorPalette() // darkColorPalette()
+
 
 @Composable
 fun MeshApp() {
@@ -73,3 +67,4 @@ private fun AppContent(openDrawer: () -> Unit) {
     }
     //}
 }
+*/

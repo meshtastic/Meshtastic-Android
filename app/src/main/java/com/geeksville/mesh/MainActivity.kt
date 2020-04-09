@@ -1,5 +1,6 @@
 package com.geeksville.mesh
 
+// import kotlinx.android.synthetic.main.tabs.*
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -15,28 +16,27 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.ui.core.setContent
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
-import com.geeksville.mesh.model.MessagesState
-import com.geeksville.mesh.model.NodeDB
 import com.geeksville.mesh.model.TextMessage
-import com.geeksville.mesh.model.UIState
+import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.*
-import com.geeksville.mesh.ui.AppStatus
-import com.geeksville.mesh.ui.MeshApp
-import com.geeksville.mesh.ui.ScanState
-import com.geeksville.mesh.ui.Screen
+import com.geeksville.mesh.ui.*
 import com.geeksville.util.Exceptions
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.tasks.Task
+import com.google.android.material.tabs.TabLayoutMediator
+import kotlinx.android.synthetic.main.activity_main.*
 import java.nio.charset.Charset
-
 
 /*
 UI design
@@ -105,6 +105,55 @@ class MainActivity : AppCompatActivity(), Logging,
         bluetoothManager.adapter
     }
 
+    private val model: UIViewModel by viewModels()
+
+    data class TabInfo(val text: String, val icon: Int, val content: Fragment)
+
+    // private val tabIndexes = generateSequence(0) { it + 1 } FIXME, instead do withIndex or zip? to get the ids below, also stop duplicating strings
+    private val tabInfos = arrayOf(
+        TabInfo(
+            "Messages",
+            R.drawable.ic_twotone_message_24,
+            MessagesFragment()
+        ),
+        TabInfo(
+            "Users",
+            R.drawable.ic_twotone_people_24,
+            UsersFragment()
+        ),
+        TabInfo(
+            "Map",
+            R.drawable.ic_twotone_map_24,
+            MapFragment()
+        ),
+        TabInfo(
+            "Channel",
+            R.drawable.ic_twotone_contactless_24,
+            ChannelFragment()
+        ),
+        TabInfo(
+            "Settings",
+            R.drawable.ic_twotone_settings_applications_24,
+            SettingsFragment()
+        )
+    )
+
+    private
+    val tabsAdapter = object : FragmentStateAdapter(this) {
+
+        override fun getItemCount(): Int = tabInfos.size
+
+        override fun createFragment(position: Int): Fragment {
+            // Return a NEW fragment instance in createFragment(int)
+            /*
+            fragment.arguments = Bundle().apply {
+                // Our object is just an integer :-P
+                putInt(ARG_OBJECT, position + 1)
+            } */
+            return tabInfos[position].content
+        }
+    }
+
     private fun requestPermission() {
         debug("Checking permissions")
 
@@ -139,7 +188,11 @@ class MainActivity : AppCompatActivity(), Logging,
             }
 
             // Ask for all the missing perms
-            ActivityCompat.requestPermissions(this, missingPerms.toTypedArray(), DID_REQUEST_PERM)
+            ActivityCompat.requestPermissions(
+                this,
+                missingPerms.toTypedArray(),
+                DID_REQUEST_PERM
+            )
 
             // DID_REQUEST_PERM is an
             // app-defined int constant. The callback method gets the
@@ -161,7 +214,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
     private fun sendTestPackets() {
         exceptionReporter {
-            val m = UIState.meshService!!
+            val m = model.meshService!!
 
             // Do some test operations
             val testPayload = "hello world".toByteArray()
@@ -182,10 +235,8 @@ class MainActivity : AppCompatActivity(), Logging,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val prefs = UIState.getPreferences(this)
-        UIState.ownerName = prefs.getString("owner", "")!!
-        UIState.meshService = null
-        UIState.savedInstanceState = savedInstanceState
+        val prefs = UIViewModel.getPreferences(this)
+        model.ownerName.value = prefs.getString("owner", "")!!
 
         // Ensures Bluetooth is available on the device and it is enabled. If not,
         // displays a dialog requesting user permission to enable Bluetooth.
@@ -195,7 +246,11 @@ class MainActivity : AppCompatActivity(), Logging,
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
             }
         } else {
-            Toast.makeText(this, "Error - this app requires bluetooth", Toast.LENGTH_LONG)
+            Toast.makeText(
+                this,
+                "Error - this app requires bluetooth",
+                Toast.LENGTH_LONG
+            )
                 .show()
         }
 
@@ -220,10 +275,31 @@ class MainActivity : AppCompatActivity(), Logging,
         // Handle any intent
         handleIntent(intent)
 
-        setContent {
+        /* setContent {
             MeshApp()
-        }
+        } */
+        setContentView(R.layout.activity_main)
+
+        pager.adapter = tabsAdapter
+        pager.isUserInputEnabled =
+            false // Gestures for screen switching doesn't work so good with the map view
+        // pager.offscreenPageLimit = 0 // Don't keep any offscreen pages around, because we want to make sure our bluetooth scanning stops
+        TabLayoutMediator(tab_layout, pager) { tab, position ->
+            // tab.text = tabInfos[position].text // I think it looks better with icons only
+            tab.icon = getDrawable(tabInfos[position].icon)
+        }.attach()
+
+        model.isConnected.observe(this, Observer { connected ->
+            val image = when (connected) {
+                MeshService.ConnectionState.CONNECTED -> R.drawable.cloud_on
+                MeshService.ConnectionState.DEVICE_SLEEP -> R.drawable.ic_twotone_cloud_upload_24
+                MeshService.ConnectionState.DISCONNECTED -> R.drawable.cloud_off
+            }
+
+            connectStatusImage.setImageDrawable(getDrawable(image))
+        })
     }
+
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -235,26 +311,26 @@ class MainActivity : AppCompatActivity(), Logging,
         val appLinkAction = intent.action
         val appLinkData: Uri? = intent.data
 
-        UIState.requestedChannelUrl = null // assume none
-
         // Were we asked to open one our channel URLs?
         if (Intent.ACTION_VIEW == appLinkAction) {
             debug("Asked to open a channel URL - FIXME, ask user if they want to switch to that channel.  If so send the config to the radio")
-            UIState.requestedChannelUrl = appLinkData
+            val requestedChannelUrl = appLinkData
         }
     }
 
     override fun onDestroy() {
         unregisterMeshReceiver()
-        UIState.meshService =
-            null // When our activity goes away make sure we don't keep a ptr around to the service
         super.onDestroy()
     }
 
     /**
      * Dispatch incoming result to the correct fragment.
      */
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(
+        requestCode: Int,
+        resultCode: Int,
+        data: Intent?
+    ) {
         super.onActivityResult(requestCode, resultCode, data)
 
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
@@ -281,7 +357,8 @@ class MainActivity : AppCompatActivity(), Logging,
         } */
     }
 
-    private var receiverRegistered = false
+    private
+    var receiverRegistered = false
 
     private fun registerMeshReceiver() {
         logAssert(!receiverRegistered)
@@ -300,40 +377,27 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    /// Read the config bytes from the radio so we can show them in our GUI, the radio's copy is ground truth
-    private fun readRadioConfig() {
-        val bytes = UIState.meshService!!.radioConfig
-
-        val config = MeshProtos.RadioConfig.parseFrom(bytes)
-        UIState.setRadioConfig(this, config)
-
-        debug("Read config from radio")
-    }
 
     /// Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(connected: MeshService.ConnectionState) {
-        UIState.isConnected.value = connected
-        debug("connchange ${UIState.isConnected.value}")
+        model.isConnected.value = connected
+        debug("connchange ${model.isConnected.value}")
         if (connected == MeshService.ConnectionState.CONNECTED) {
-            // always get the current radio config when we connect
-            readRadioConfig()
 
             // everytime the radio reconnects, we slam in our current owner data, the radio is smart enough to only broadcast if needed
-            UIState.setOwner(this)
+            model.setOwner(this)
 
-            val m = UIState.meshService!!
+            val m = model.meshService!!
 
             // Pull down our real node ID
-            NodeDB.myId.value = m.myId
+            model.nodeDB.myId.value = m.myId
 
             // Update our nodeinfos based on data from the device
-            NodeDB.nodes.clear()
-            NodeDB.nodes.putAll(
-                m.nodes.map
-                {
-                    it.user?.id!! to it
-                }
-            )
+            val nodes = m.nodes.map {
+                it.user?.id!! to it
+            }.toMap()
+
+            model.nodeDB.nodes.value = nodes
         }
     }
 
@@ -349,76 +413,95 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    private val meshServiceReceiver = object : BroadcastReceiver() {
+    private
+    val meshServiceReceiver = object : BroadcastReceiver() {
 
-        override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
-            debug("Received from mesh service $intent")
+        override fun onReceive(context: Context, intent: Intent) =
+            exceptionReporter {
+                debug("Received from mesh service $intent")
 
-            when (intent.action) {
-                MeshService.ACTION_NODE_CHANGE -> {
-                    val info: NodeInfo = intent.getParcelableExtra(EXTRA_NODEINFO)!!
-                    debug("UI nodechange $info")
+                when (intent.action) {
+                    MeshService.ACTION_NODE_CHANGE -> {
+                        val info: NodeInfo =
+                            intent.getParcelableExtra(EXTRA_NODEINFO)!!
+                        debug("UI nodechange $info")
 
-                    // We only care about nodes that have user info
-                    info.user?.id?.let {
-                        NodeDB.nodes[it] = info
-                    }
-                }
-
-                MeshService.ACTION_RECEIVED_DATA -> {
-                    debug("TODO rxdata")
-                    val sender = intent.getStringExtra(EXTRA_SENDER)!!
-                    val payload = intent.getByteArrayExtra(EXTRA_PAYLOAD)!!
-                    val typ = intent.getIntExtra(EXTRA_TYP, -1)
-
-                    when (typ) {
-                        MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
-                            // FIXME - use the real time from the packet
-                            // FIXME - don't just slam in a new list each time, it probably causes extra drawing.  Figure out how to be Compose smarter...
-                            val msg = TextMessage(sender, payload.toString(utf8))
-
-                            MessagesState.addMessage(msg)
+                        // We only care about nodes that have user info
+                        info.user?.id?.let {
+                            val newnodes = model.nodeDB.nodes.value!! + Pair(it, info)
+                            model.nodeDB.nodes.value = newnodes
                         }
-                        else -> TODO()
                     }
+
+                    MeshService.ACTION_RECEIVED_DATA -> {
+                        debug("TODO rxdata")
+                        val sender =
+                            intent.getStringExtra(EXTRA_SENDER)!!
+                        val payload =
+                            intent.getByteArrayExtra(EXTRA_PAYLOAD)!!
+                        val typ = intent.getIntExtra(EXTRA_TYP, -1)
+
+                        when (typ) {
+                            MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
+                                // FIXME - use the real time from the packet
+                                // FIXME - don't just slam in a new list each time, it probably causes extra drawing.  Figure out how to be Compose smarter...
+                                val msg = TextMessage(
+                                    sender,
+                                    payload.toString(utf8)
+                                )
+
+                                model.messagesState.addMessage(msg)
+                            }
+                            else -> TODO()
+                        }
+                    }
+                    MeshService.ACTION_MESH_CONNECTED -> {
+                        val connected =
+                            MeshService.ConnectionState.valueOf(
+                                intent.getStringExtra(
+                                    EXTRA_CONNECTED
+                                )!!
+                            )
+                        onMeshConnectionChanged(connected)
+                    }
+                    else -> TODO()
                 }
-                MeshService.ACTION_MESH_CONNECTED -> {
-                    val connected =
-                        MeshService.ConnectionState.valueOf(intent.getStringExtra(EXTRA_CONNECTED)!!)
-                    onMeshConnectionChanged(connected)
-                }
-                else -> TODO()
             }
-        }
     }
 
 
-    private val mesh = object : ServiceClient<com.geeksville.mesh.IMeshService>({
-        com.geeksville.mesh.IMeshService.Stub.asInterface(it)
-    }) {
-        override fun onConnected(service: com.geeksville.mesh.IMeshService) {
-            UIState.meshService = service
+    private
+    val mesh = object :
+        ServiceClient<com.geeksville.mesh.IMeshService>({
+            com.geeksville.mesh.IMeshService.Stub.asInterface(it)
+        }) {
+        override fun onConnected(service: com.geeksville.mesh.IMeshService) = exceptionReporter {
+            model.meshService = service
+
+            debug("Getting latest radioconfig from service")
+            model.radioConfig.value = MeshProtos.RadioConfig.parseFrom(service.radioConfig)
 
             // We don't start listening for packets until after we are connected to the service
             registerMeshReceiver()
 
             // We won't receive a notify for the initial state of connection, so we force an update here
-            val connectionState = MeshService.ConnectionState.valueOf(service.connectionState())
+            val connectionState =
+                MeshService.ConnectionState.valueOf(service.connectionState())
             onMeshConnectionChanged(connectionState)
 
-            debug("connected to mesh service, isConnected=${UIState.isConnected.value}")
+            debug("connected to mesh service, isConnected=${model.isConnected.value}")
         }
 
         override fun onDisconnected() {
             unregisterMeshReceiver()
-            UIState.meshService = null
+            model.meshService = null
         }
     }
 
     private fun bindMeshService() {
         debug("Binding to mesh service!")
         // we bind using the well known name, to make sure 3rd party apps could also
-        if (UIState.meshService != null)
+        if (model.meshService != null)
             Exceptions.reportError("meshService was supposed to be null, ignoring (but reporting a bug)")
 
         MeshService.startService(this)?.let { intent ->
@@ -433,11 +516,10 @@ class MainActivity : AppCompatActivity(), Logging,
         // if we never connected, do nothing
         debug("Unbinding from mesh service!")
         mesh.close()
-        UIState.meshService = null
+        model.meshService = null
     }
 
     override fun onStop() {
-        ScanState.stopScan()
         unregisterMeshReceiver() // No point in receiving updates while the GUI is gone, we'll get them when the user launches the activity
         unbindMeshService()
 
@@ -449,9 +531,12 @@ class MainActivity : AppCompatActivity(), Logging,
 
         bindMeshService()
 
-        val bonded = RadioInterfaceService.getBondedDeviceAddress(this) != null
+        val bonded =
+            RadioInterfaceService.getBondedDeviceAddress(this) != null
+        /* FIXME - not yet working
         if (!bonded)
             AppStatus.currentScreen = Screen.settings
+        */
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

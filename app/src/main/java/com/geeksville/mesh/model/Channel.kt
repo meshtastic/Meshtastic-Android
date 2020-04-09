@@ -3,7 +3,6 @@ package com.geeksville.mesh.model
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Base64
-import androidx.compose.Model
 import com.geeksville.mesh.MeshProtos
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
@@ -11,7 +10,6 @@ import com.journeyapps.barcodescanner.BarcodeEncoder
 import java.net.MalformedURLException
 
 
-@Model
 data class Channel(
     var name: String,
     var modemConfig: MeshProtos.ChannelSettings.ModemConfig,
