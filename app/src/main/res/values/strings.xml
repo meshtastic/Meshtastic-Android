@@ -13,4 +13,5 @@
     <string name="sample_distance">2.13 km</string>
     <string name="sample_message">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
     <string name="some_username">Some Username</string>
+    <string name="send_text">Send Text</string>
 </resources>

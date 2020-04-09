@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +17,17 @@ import com.geeksville.mesh.model.UIViewModel
 import kotlinx.android.synthetic.main.adapter_message_layout.view.*
 import kotlinx.android.synthetic.main.messages_fragment.*
 
+// Allows usage like email.on(EditorInfo.IME_ACTION_NEXT, { confirm() })
+fun EditText.on(actionId: Int, func: () -> Unit) {
+    setOnEditorActionListener { _, receivedActionId, _ ->
+
+        if (actionId == receivedActionId) {
+            func()
+        }
+
+        true
+    }
+}
 
 class MessagesFragment : ScreenFragment("Messages"), Logging {
 
@@ -116,6 +129,9 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         fun onMessagesChanged(nodesIn: Collection<TextMessage>) {
             messages = nodesIn.toTypedArray()
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all messages
+
+            // scroll to the last line
+            messageListView.scrollToPosition(this.itemCount - 1)
         }
     }
 
@@ -129,8 +145,18 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        messageInputText.on(EditorInfo.IME_ACTION_DONE) {
+            debug("did IME action")
+
+            val str = messageInputText.text.toString()
+            model.messagesState.sendMessage(str)
+            messageInputText.setText("") // blow away the string the user just entered
+        }
+
         messageListView.adapter = messagesAdapter
-        messageListView.layoutManager = LinearLayoutManager(requireContext())
+        val layoutManager = LinearLayoutManager(requireContext())
+        layoutManager.stackFromEnd = true // We want the last rows to always be shown
+        messageListView.layoutManager = layoutManager
 
         model.messagesState.messages.observe(viewLifecycleOwner, Observer { it ->
             messagesAdapter.onMessagesChanged(it)
