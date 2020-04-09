@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+import com.geeksville.mesh.model.getInitials
 import org.junit.Assert
 import org.junit.Test
 
