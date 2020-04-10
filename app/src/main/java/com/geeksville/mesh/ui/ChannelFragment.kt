@@ -130,12 +130,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 ).show() */
 
                 MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Change channel")
-                    .setMessage("Are you sure you want to change the channel? All communication with other nodes will stop until you share the new channel settings.")
-                    .setNeutralButton("Cancel") { _, _ ->
+                    .setTitle(R.string.change_channel)
+                    .setMessage(R.string.are_you_sure_channel)
+                    .setNeutralButton(R.string.cancel) { _, _ ->
                         setGUIfromModel()
                     }
-                    .setPositiveButton("Accept") { _, _ ->
+                    .setPositiveButton(getString(R.string.accept)) { _, _ ->
                         // Generate a new channel with only the changes the user can change in the GUI
                         UIViewModel.getChannel(model.radioConfig.value)?.let { old ->
                             val newSettings = old.settings.toBuilder()

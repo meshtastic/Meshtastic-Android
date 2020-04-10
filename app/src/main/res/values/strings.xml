@@ -26,4 +26,10 @@
     <string name="starting_pairing">Starting pairing</string>
     <string name="pairing_failed">Pairing failed</string>
     <string name="url_for_join">A URL for joining a Meshtastic mesh</string>
+    <string name="accept">Accept</string>
+    <string name="cancel">Cancel</string>
+    <string name="change_channel">Change channel</string>
+    <string name="are_you_sure_channel">Are you sure you want to change the channel? All communication with other nodes will stop until you share the new channel settings.</string>
+    <string name="new_channel_rcvd">New Channel URL received</string>
+    <string name="do_you_want_switch">Do you want to switch to the \'%s\' channel?</string>
 </resources>

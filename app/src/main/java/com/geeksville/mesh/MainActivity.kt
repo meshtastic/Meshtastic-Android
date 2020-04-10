@@ -25,6 +25,7 @@ import androidx.lifecycle.Observer
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
+import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.TextMessage
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.*
@@ -34,6 +35,7 @@ import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.tasks.Task
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.android.synthetic.main.activity_main.*
 import java.nio.charset.Charset
@@ -306,6 +308,8 @@ class MainActivity : AppCompatActivity(), Logging,
         handleIntent(intent)
     }
 
+    private var requestedChannelUrl: Uri? = null
+
     /// Handle any itents that were passed into us
     private fun handleIntent(intent: Intent) {
         val appLinkAction = intent.action
@@ -313,8 +317,14 @@ class MainActivity : AppCompatActivity(), Logging,
 
         // Were we asked to open one our channel URLs?
         if (Intent.ACTION_VIEW == appLinkAction) {
-            debug("Asked to open a channel URL - FIXME, ask user if they want to switch to that channel.  If so send the config to the radio")
-            val requestedChannelUrl = appLinkData
+            debug("Asked to open a channel URL - ask user if they want to switch to that channel.  If so send the config to the radio")
+            requestedChannelUrl = appLinkData
+
+            // if the device is connected already, process it now
+            if (model.isConnected == MeshService.ConnectionState.CONNECTED)
+                perhapsChangeChannel()
+
+            // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
         }
     }
 
@@ -386,7 +396,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
             // everytime the radio reconnects, we slam in our current owner data, the radio is smart enough to only broadcast if needed
             model.setOwner()
-            
+
             model.meshService?.let { service ->
                 debug("Getting latest radioconfig from service")
                 model.radioConfig.value =
@@ -401,7 +411,30 @@ class MainActivity : AppCompatActivity(), Logging,
                 }.toMap()
 
                 model.nodeDB.nodes.value = nodes
+
+                // we have a connection to our device now, do the channel change
+                perhapsChangeChannel()
             }
+        }
+    }
+
+    private fun perhapsChangeChannel() {
+        // If the is opening a channel URL, handle it now
+        requestedChannelUrl?.let { url ->
+            val channel = Channel(url)
+            requestedChannelUrl = null
+
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.new_channel_rcvd)
+                .setMessage(getString(R.string.do_you_want_switch).format(channel.name))
+                .setNeutralButton(R.string.cancel) { _, _ ->
+                    // Do nothing
+                }
+                .setPositiveButton(R.string.accept) { _, _ ->
+                    debug("Setting channel from URL")
+                    model.setChannel(channel.settings)
+                }
+                .show()
         }
     }
 
