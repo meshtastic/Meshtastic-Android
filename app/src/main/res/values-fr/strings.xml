@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?><!-- Contributed by @eriktheV-king -->
+<resources>
+    <string name="action_settings">Réglages</string>
+    <string name="channel_name">nom Canal</string>
+    <string name="channel_options">options Canal</string>
+    <string name="share_button">bouton Partage</string>
+    <string name="qr_code">code QR</string>
+    <string name="unset">Enlever</string>
+    <string name="connection_status">état Connection</string>
+    <string name="application_icon">icône Application</string>
+    <string name="unknown_username">Nom d\'Utilisateur inconnu</string>
+    <string name="user_avatar">avatar Utilisateur</string>
+    <string name="sample_message">Alo j\'ai trouvé la planque, c\'est près du grand tigre. J\'ai un peu peur.</string>
+    <string name="send_text">Envoyer Texte</string>
+    <string name="warning_not_paired">Aucune radio Meshtastic compatible n\'a été jumelée à ce téléphone. Jumelez un appareil et spécifiez votre nom d\'utilisateur.\n\nL\'application open-source est en test alpha, si vous rencontrez des problèmes postez au chat sur notre site web.\n\nPour plus d\'information visitez notre site web - www.meshtastic.org.</string>
+    <string name="username_unset">Enlever Nom d\'Utilisateur</string>
+    <string name="your_name">Votre Nom</string>
+    <string name="analytics_okay">Statistiques et rapports d\'erreur anonymes.</string>
+    <string name="looking_for_meshtastic_devices">Recherche d\'appareils Meshtastic…</string>
+    <string name="requires_bluetooth">L\'application a besoin d\'accès bluetooth. Donnez l\'accès dans les réglages android.</string>
+    <string name="error_bluetooth">Erreur de bluetooth</string>
+    <string name="starting_pairing">Démarre jumelage</string>
+    <string name="pairing_failed">Jumelage échoué</string>
+    <string name="url_for_join">Un URL pour rejoindre une toile Meshtastic</string>
+    <string name="accept">Accepter</string>
+    <string name="cancel">Annuler</string>
+    <string name="change_channel">Changer de canal</string>
+    <string name="are_you_sure_channel">Vous êtes sur de vouloir changer de canal? Toute communication aux autres noeuds va s\'arrêter jusqu\'à ce que vous partagez les nouveaux réglages.</string>
+    <string name="new_channel_rcvd">Nouveau URL canal reçu</string>
+    <string name="do_you_want_switch">Voulez-vous changer vers canal \'%s\' ?</string>
+</resources>
