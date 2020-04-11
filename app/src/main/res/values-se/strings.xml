@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?><!-- Translations contributed initially by @CycloMies -->
+<resources>
+    <string name="action_settings">Inställningar</string>
+    <string name="channel_name">Kanalens Namn</string>
+    <string name="channel_options">Kanalens egenskaper</string>
+    <string name="share_button">Dela knappen</string>
+    <string name="qr_code">QR kod</string>
+    <string name="unset">Urkoplat</string>
+    <string name="connection_status">Anslutningsstatus</string>
+    <string name="application_icon">applikationsikon</string>
+    <string name="unknown_username">Okänt användarnamn</string>
+    <string name="user_avatar">Användaravatar</string>
+    <string name="sample_message">Hej, jag hittade cachen, den är här bredvid den stora tigern. Jag är lite orolig.</string>
+    <string name="some_username">Något användarnamn</string>
+    <string name="send_text">Skicka text</string>
+    <string name="warning_not_paired">Du har ännu inte parat en Meshtastic-kompatibel radio med den här telefonen. Koppla ihop en enhet och ange ditt användarnamn.\n\nDetta öppna källkodsprogrammet (open source) är i alfatestning, om du hittar problem, vänligen publicera det på vår webbplatschatt.\n\nFör mer information se vår webbsida - www.meshtastic.org.</string>
+    <string name="username_unset">Användarnamn inte tillgänglig</string>
+    <string name="your_name">Ditt Namn</string>
+    <string name="analytics_okay">Anonym användningsstatistik och kraschrapporter.</string>
+    <string name="looking_for_meshtastic_devices">Letar efter Meshtastic-enheter...</string>
+    <string name="requires_bluetooth">Denna applikation kräver Bluetooth-åtkomst. Vänligen ge åtkomst i Android-inställningar.</string>
+    <string name="error_bluetooth">Fel - den här appen kräver Bluetooth</string>
+    <string name="starting_pairing">Börjar para ihop</string>
+    <string name="pairing_failed">Parning misslyckades</string>
+    <string name="url_for_join">En länk för att gå med i ett Meshtastic-nät</string>
+    <string name="accept">Acceptera</string>
+    <string name="cancel">Avbryt</string>
+    <string name="change_channel">Byt kanal</string>
+    <string name="are_you_sure_channel">Är du säker på att du vill byta kanal? All kommunikation med andra noder avbryts tills du delar de nya kanalinställningarna.</string>
+    <string name="new_channel_rcvd">Ny kanal-länk mottagen</string>
+    <string name="do_you_want_switch">Vill du växla till kanalen \'%s\' </string>
+</resources>
