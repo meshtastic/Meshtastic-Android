@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?><!-- Chinese contributed by @Mango-sauce -->
+<resources>
+    <string name="app_name" translatable="false">Mesh网络</string>
+    <string name="action_settings">设置</string>
+    <string name="channel_name">频道名称</string>
+    <string name="channel_options">频道选项</string>
+    <string name="share_button">分享</string>
+    <string name="qr_code">QR码</string>
+    <string name="unset">未设置</string>
+    <string name="connection_status">连接状态</string>
+    <string name="application_icon">应用图标</string>
+    <string name="unknown_username">未知用户名</string>
+    <string name="user_avatar">用户头像</string>
+    <string name="sample_message">在吗？我找到了快递，它就在一只大老虎旁边，我好害怕😨！</string>
+    <string name="send_text">在此发送信息</string>
+    <string name="warning_not_paired">Mesh设备未与此手机配对，请配对设备并设置好您的用户名.\n\n此开源应用程序正在进行alpha测试，如果您发现问题，请在我们的网站中发布.\n\n更多信息，请访问此网页 - www.meshtastic.org.</string>
+    <string name="username_unset">用户名未设置</string>
+    <string name="your_name">用户名</string>
+    <string name="analytics_okay">匿名使用情况统计信息和崩溃报告.</string>
+    <string name="looking_for_meshtastic_devices">Mesh设备扫描中...</string>
+    <string name="requires_bluetooth">此应用程序需要蓝牙权限.请在Android设置中授予权限.</string>
+    <string name="error_bluetooth">错误：此应用需要蓝牙</string>
+    <string name="starting_pairing">开始配对</string>
+    <string name="pairing_failed">配对失败</string>
+    <string name="url_for_join">用于连接Mesh网络的URL</string>
+    <string name="accept">接受</string>
+    <string name="cancel">取消</string>
+    <string name="change_channel">修改频道</string>
+    <string name="are_you_sure_channel">您确定要修改通信频道吗？这将会使你与其他节点断开通信. </string>
+    <string name="new_channel_rcvd">收到新的频道URL</string>
+    <string name="do_you_want_switch">您是否要切换到\'%s\'频道?</string>
+</resources>
