@@ -37,6 +37,7 @@ This project is the work of volunteers:
 
 * @CycloMies: Contributed Swedish and Finnish translations.
 * @Eugene: Contributed Russian translation.
+* @Ohcdh: Contributed Irish translation.
 
 Copyright 2019, Geeksville Industries, LLC. GPL V3 license
 
