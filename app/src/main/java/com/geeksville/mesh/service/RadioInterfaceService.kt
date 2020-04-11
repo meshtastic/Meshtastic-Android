@@ -180,8 +180,11 @@ class RadioInterfaceService : Service(), Logging {
             // Force the service to reconnect
             val s = runningService
             if (s != null) {
-                info("shutting down old service")
-                s.setEnabled(false) // nasty, needed to force the next setEnabled call to reconnect
+                // Ignore any errors that happen while closing old device
+                exceptionReporter {
+                    info("shutting down old service")
+                    s.setEnabled(false) // nasty, needed to force the next setEnabled call to reconnect
+                }
                 info("Setting enable on the running radio service")
                 s.setEnabled(addr != null)
             }
