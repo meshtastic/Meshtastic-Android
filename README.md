@@ -35,7 +35,7 @@ adb shell setprop log.tag.FA VERBOSE
 
 This project is the work of volunteers:
 
-* @CycloMies: Contributed Swedish and Finnish translations.
+* @CycloMies: Contributed Swedish, Finnish and German translations.
 * @Eugene: Contributed Russian translation.
 * @Ohcdh: Contributed Irish translation.
 
