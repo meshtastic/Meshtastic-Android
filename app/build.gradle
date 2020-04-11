@@ -34,6 +34,11 @@ android {
         // We have to list all translated languages here, because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
         resConfigs "en", "de", "fi", "fr", "ga", "it", "nl", "ru", "sv", "zh"
+
+        // Needed to make mapbox work inside the firebase testlab - FIXME, alas, still doesn't work
+        ndk {
+            // abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
     }
 
     buildFeatures {

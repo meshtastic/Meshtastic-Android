@@ -259,9 +259,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             requireActivity().hideKeyboard()
         }
 
+        // Set analytics checkbox
+        analyticsOkayCheckbox.isChecked =
+            (requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed
         analyticsOkayCheckbox.setOnCheckedChangeListener { _, isChecked ->
-            // FIXME, preserve this in settings
-            analyticsOkayCheckbox.isChecked = true // so users will complain and I'll fix the bug
+            debug("User changed analytics to $isChecked")
+            (requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed =
+                isChecked
         }
 
         scanModel.errorText.observe(viewLifecycleOwner, Observer { errMsg ->

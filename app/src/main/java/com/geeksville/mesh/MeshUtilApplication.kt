@@ -16,11 +16,11 @@ class MeshUtilApplication : GeeksvilleApplication() {
 
         Logging.showLogs = BuildConfig.DEBUG
 
-        // We default to off in the manifest, FIXME turn on only if user approves
+        // We default to off in the manifest - we turn on here if the user approves
         // leave off when running in the debugger
         if (!isEmulator && (!BuildConfig.DEBUG || !Debug.isDebuggerConnected())) {
             val crashlytics = FirebaseCrashlytics.getInstance()
-            crashlytics.setCrashlyticsCollectionEnabled(true)
+            crashlytics.setCrashlyticsCollectionEnabled(isAnalyticsAllowed)
             crashlytics.setCustomKey("debug_build", BuildConfig.DEBUG)
 
             // Attach to our exception wrapper
@@ -29,7 +29,6 @@ class MeshUtilApplication : GeeksvilleApplication() {
             }
         }
 
-        // Mapbox Access token
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
     }
 }

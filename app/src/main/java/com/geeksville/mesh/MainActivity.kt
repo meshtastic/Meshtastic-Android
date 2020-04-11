@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
 import com.geeksville.mesh.model.Channel
@@ -262,15 +263,18 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val prefs = UIViewModel.getPreferences(this)
         model.ownerName.value = prefs.getString("owner", "")!!
 
+        val isInTestLab = (application as GeeksvilleApplication).isInTestLab
+        
         // Ensures Bluetooth is available on the device and it is enabled. If not,
         // displays a dialog requesting user permission to enable Bluetooth.
-        if (bluetoothAdapter != null) {
+        if (bluetoothAdapter != null && !isInTestLab) {
             bluetoothAdapter!!.takeIf { !it.isEnabled }?.apply {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
@@ -284,8 +288,8 @@ class MainActivity : AppCompatActivity(), Logging,
                 .show()
         }
 
-        requestPermission()
-
+        if (isInTestLab)
+            requestPermission() // permissions don't work there
 
         /*  not yet working
         // Configure sign-in to request the user's ID, email address, and basic

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
@@ -116,64 +117,80 @@ class MapFragment : ScreenFragment("Map"), Logging {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.map_view, container, false)
+    ): View? {
+        // We can't allow mapbox if user doesn't want analytics
+        val id =
+            if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
+                // Mapbox Access token
+                R.layout.map_view
+            } else {
+                R.layout.map_not_allowed
+            }
 
-    lateinit var mapView: MapView
+        return inflater.inflate(id, container, false)
+    }
+
+    var mapView: MapView? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mapView = view.findViewById(R.id.mapView)
-        mapView.onCreate(savedInstanceState)
+        // We might not have a real mapview if running with analytics
+        if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
+            val v = view.findViewById<MapView>(R.id.mapView)
+            mapView = v
+            v.onCreate(savedInstanceState)
 
-        mapView.getMapAsync { map ->
+            v.getMapAsync { map ->
 
-            // val markerIcon = BitmapFactory.decodeResource(context.resources, R.drawable.ic_twotone_person_pin_24)
-            val markerIcon = requireActivity().getDrawable(R.drawable.ic_twotone_person_pin_24)!!
+                // val markerIcon = BitmapFactory.decodeResource(context.resources, R.drawable.ic_twotone_person_pin_24)
+                val markerIcon =
+                    requireActivity().getDrawable(R.drawable.ic_twotone_person_pin_24)!!
 
-            map.setStyle(Style.OUTDOORS) { style ->
-                style.addSource(nodePositions)
-                style.addImage(markerImageId, markerIcon)
-                style.addLayer(nodeLayer)
-                style.addLayer(labelLayer)
+                map.setStyle(Style.OUTDOORS) { style ->
+                    style.addSource(nodePositions)
+                    style.addImage(markerImageId, markerIcon)
+                    style.addLayer(nodeLayer)
+                    style.addLayer(labelLayer)
+                }
+
+                model.nodeDB.nodes.observe(viewLifecycleOwner, Observer { nodes ->
+                    onNodesChanged(map, nodes.values)
+                })
+
+                //map.uiSettings.isScrollGesturesEnabled = true
+                //map.uiSettings.isZoomGesturesEnabled = true
             }
-
-            model.nodeDB.nodes.observe(viewLifecycleOwner, Observer { nodes ->
-                onNodesChanged(map, nodes.values)
-            })
-
-            //map.uiSettings.isScrollGesturesEnabled = true
-            //map.uiSettings.isZoomGesturesEnabled = true
         }
     }
 
     override fun onPause() {
-        mapView.onPause()
+        mapView?.onPause()
         super.onPause()
     }
 
     override fun onStart() {
         super.onStart()
-        mapView.onStart()
+        mapView?.onStart()
     }
 
     override fun onStop() {
-        mapView.onStop()
+        mapView?.onStop()
         super.onStop()
     }
 
     override fun onResume() {
         super.onResume()
-        mapView.onResume()
+        mapView?.onResume()
     }
 
     override fun onDestroy() {
-        mapView.onDestroy()
+        mapView?.onDestroy()
         super.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        mapView.onSaveInstanceState(outState)
+        mapView?.onSaveInstanceState(outState)
         super.onSaveInstanceState(outState)
     }
 }
