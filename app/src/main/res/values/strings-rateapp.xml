@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- strings for the 'please rate on appstore dialog -->
+    <string name="rate_dialog_title_en" tools:override="true">Rate Meshtastic</string>
+    <string name="rate_dialog_message_en" tools:override="true">This is an application made by hobbyists, would you mind taking a moment to rate it? If you find bugs, please post in our forum. Thanks for your support!</string>
+    <string name="rate_dialog_ok_en" tools:override="true">Rate It Now</string>
+    <string name="rate_dialog_cancel_en" tools:override="true">Remind Me Later</string>
+    <string name="rate_dialog_no_en" tools:override="true">No, Thanks</string>
+</resources>

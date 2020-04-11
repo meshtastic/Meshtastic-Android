@@ -34,9 +34,13 @@ import com.geeksville.util.Exceptions
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.Task
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
+import com.vorlonsoft.android.rate.AppRate
+import com.vorlonsoft.android.rate.StoreType
 import kotlinx.android.synthetic.main.activity_main.*
 import java.nio.charset.Charset
 
@@ -234,6 +238,30 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
 
+    /// Ask user to rate in play store
+    private fun askToRate() {
+        AppRate.with(this)
+            .setInstallDays(10.toByte()) // default is 10, 0 means install day, 10 means app is launched 10 or more days later than installation
+            .setLaunchTimes(10.toByte()) // default is 10, 3 means app is launched 3 or more times
+            .setRemindInterval(1.toByte()) // default is 1, 1 means app is launched 1 or more days after neutral button clicked
+            .setRemindLaunchesNumber(1.toByte()) // default is 0, 1 means app is launched 1 or more times after neutral button clicked
+            .monitor() // Monitors the app launch times
+
+        // Only ask to rate if the user has a suitable store
+        if (AppRate.with(this).storeType == StoreType.GOOGLEPLAY) { // Checks that current app store type from library options is StoreType.GOOGLEPLAY
+            if (GoogleApiAvailability.getInstance()
+                    .isGooglePlayServicesAvailable(this) != ConnectionResult.SERVICE_MISSING
+            ) { // Checks that Google Play is available
+                AppRate.showRateDialogIfMeetsConditions(this) // Shows the Rate Dialog when conditions are met
+
+                // Force the dialog - for testing
+                // AppRate.with(this).showRateDialog(this)
+            }
+        } else {
+            AppRate.showRateDialogIfMeetsConditions(this);     // Shows the Rate Dialog when conditions are met
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -300,6 +328,8 @@ class MainActivity : AppCompatActivity(), Logging,
 
             connectStatusImage.setImageDrawable(getDrawable(image))
         })
+
+        askToRate()
     }
 
 
