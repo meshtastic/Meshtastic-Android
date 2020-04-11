@@ -14,7 +14,7 @@
     <string name="send_text">Seol Téacs</string>
     <string name="warning_not_paired">Níl raidió comhoiriúnach Meshtastic péireáilte leis an bhfón seo agat fós. Péireáil gléas le do thoil agus socraigh d’ainm úsáideora. Tá an feidhmchlár foinse oscailte seo faoi alfa-thástáil, má aimsíonn tú fadhbanna cuir leis an gcomhrá ar ár suíomh gréasáin iad le do thoil. Le haghaidh tuilleadh faisnéise féach ar ár leathanach gréasáin - www.meshtastic.org.</string>
     <string name="username_unset">Ainm úsáideora díshocraithe</string>
-    <string name="your_name">D'ainm</string>
+    <string name="your_name">D\'ainm</string>
     <string name="analytics_okay">Staitisticí úsáide gan ainm agus tuairiscí tuairteála.</string>
     <string name="looking_for_meshtastic_devices">Ag lorg gléasanna Meshtastic ...</string>
     <string name="requires_bluetooth">Éilíonn an feidhmchlár seo rochtain bluetooth. Tabhair rochtain i suíomhanna android le do thoil.</string>
