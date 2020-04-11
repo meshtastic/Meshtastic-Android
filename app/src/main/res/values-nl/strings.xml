@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?><!-- Contributed by @eriktheV-king -->
+<resources>
+    <string name="action_settings">Instellingen</string>
+    <string name="channel_name">Kanaal Naam</string>
+    <string name="channel_options">Kanaal opties</string>
+    <string name="share_button">Deel knop</string>
+    <string name="qr_code">QR code</string>
+    <string name="unset">Terugzetten</string>
+    <string name="connection_status">Verbindingsstatusstatus</string>
+    <string name="application_icon">Applicatie icoon</string>
+    <string name="unknown_username">Onbekende Gebruikersnaam</string>
+    <string name="user_avatar">Gebruikers avatar</string>
+    <string name="sample_message">hallo ik heb de schuilplaats gevonden, hier naast de tijger. Ik ben een beetje bang.</string>
+    <string name="send_text">Zend Tekst</string>
+    <string name="warning_not_paired">Je hebt nog geen Meshtastic compatibele radio met deze telefoon gekoppeld. Paar alstublieft een apparaat en voer je gebruikersnaam in.\n\nDeze open-source applicatie is in alpha-test, indien je een probleem vaststelt, kan je het posten op onze website chat.\n\nVoor meer informatie bezoek onze web pagina - www.meshtastic.org.</string>
+    <string name="username_unset">Gebruikersnaam terugzetten</string>
+    <string name="your_name">Je Naam</string>
+    <string name="analytics_okay">Anonieme gebruikersnaam en foutrapporten.</string>
+    <string name="looking_for_meshtastic_devices">Zoekt Meshtastic apparaten...</string>
+    <string name="requires_bluetooth">Deze applicatie vereist bluetooth toegang. Geef toegang in android settings.</string>
+    <string name="error_bluetooth">Fout - deze app vereist bluetooth</string>
+    <string name="starting_pairing">Start paring</string>
+    <string name="pairing_failed">Paring mislukt</string>
+    <string name="url_for_join">Een URL om te verbinden met een Meshtastic net</string>
+    <string name="accept">Bevestig</string>
+    <string name="cancel">Annuleer</string>
+    <string name="change_channel">Verander kanaal</string>
+    <string name="are_you_sure_channel">Ben je zeker van kanaal te willen veranderen? Alle communicatie met andere nodes wordt gestopt tot je de nieuwe instellingen deelt.</string>
+    <string name="new_channel_rcvd">Nieuw kanaal URL ontvangen</string>
+    <string name="do_you_want_switch">Wil je veranderen naar kanaal \'%s\' ?</string>
+</resources>
