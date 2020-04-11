@@ -16,8 +16,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 22 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 132
-        versionName "0.3.2"
+        versionCode 134
+        versionName "0.3.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -28,6 +28,12 @@ android {
         debug {
             pseudoLocalesEnabled true
         }
+    }
+
+    defaultConfig {
+        // We have to list all translated languages here, because some of our libs have bogus languages that google play
+        // doesn't like and we need to strip them (gr)
+        resConfigs "en", "de", "fi", "fr", "ga", "it", "nl", "ru", "sv", "zh"
     }
 
     buildFeatures {
