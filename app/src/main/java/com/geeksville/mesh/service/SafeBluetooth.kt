@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.Handler
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
@@ -357,7 +358,17 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private fun queueConnect(autoConnect: Boolean = false, cont: Continuation<Unit>) {
         // assert(gatt == null) this now might be !null with our new reconnect support
         queueWork("connect", cont) {
-            val g = device.connectGatt(context, autoConnect, gattCallback)
+            val g =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    device.connectGatt(
+                        context,
+                        autoConnect,
+                        gattCallback,
+                        BluetoothDevice.TRANSPORT_LE
+                    )
+                } else {
+                    device.connectGatt(context, autoConnect, gattCallback)
+                }
             if (g != null)
                 gatt = g
             g != null
