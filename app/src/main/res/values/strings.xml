@@ -35,4 +35,5 @@
     <string name="map_not_allowed">You have analytics disabled. Unfortunately our map provider (mapbox) requires analytics to be allowed for their \'free\' plan. So we have turned off the map view.\n\n
         If you would like to see the map, you\'ll need to turn on analytics in the Settings pane (also, for the time being you might need to force restart the application).\n\n
         If you are interested in us paying for mapbox (or switching to a different map provider), please post in our forum.</string>
+    <string name="permission_missing">A required permission is missing, Meshtastic won\'t be able to work properly.  Please enable in application settings.</string>
 </resources>

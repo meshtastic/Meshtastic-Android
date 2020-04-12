@@ -216,6 +216,14 @@ class MainActivity : AppCompatActivity(), Logging,
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (grantResults.contains(PackageManager.PERMISSION_DENIED)) {
+            Toast.makeText(
+                this,
+                getString(R.string.permission_missing),
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
 
@@ -271,7 +279,7 @@ class MainActivity : AppCompatActivity(), Logging,
         model.ownerName.value = prefs.getString("owner", "")!!
 
         val isInTestLab = (application as GeeksvilleApplication).isInTestLab
-        
+
         // Ensures Bluetooth is available on the device and it is enabled. If not,
         // displays a dialog requesting user permission to enable Bluetooth.
         if (bluetoothAdapter != null && !isInTestLab) {
@@ -288,7 +296,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 .show()
         }
 
-        if (isInTestLab)
+        if (!isInTestLab)
             requestPermission() // permissions don't work there
 
         /*  not yet working
