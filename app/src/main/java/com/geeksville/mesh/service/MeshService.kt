@@ -708,7 +708,7 @@ class MeshService : Service(), Logging {
         while (infoBytes != null) {
             val info =
                 MeshProtos.NodeInfo.parseFrom(infoBytes)
-            debug("Received initial nodeinfo $info")
+            debug("Received initial nodeinfo num=${info.num}, hasUser=${info.hasUser()}, hasPosition=${info.hasPosition()}")
 
             // Just replace/add any entry
             updateNodeInfo(info.num) {
