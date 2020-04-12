@@ -6,6 +6,14 @@ import com.geeksville.mesh.ui.bearing
 import com.geeksville.mesh.ui.latLongToMeter
 
 
+/**
+ * When printing strings to logs sometimes we want to print useful debugging information about users
+ * or positions.  But we don't want to leak things like usernames or locations.  So this function
+ * if given a string, will return a string which is a maximum of three characters long, taken from the tail
+ * of the string.  Which should effectively hide real usernames and locations, but still let us see if values were zero or empty.
+ */
+val Any.anonymized: String get() = this.toString().takeLast(3) + "..."
+
 // model objects that directly map to the corresponding protobufs
 data class MeshUser(val id: String, val longName: String, val shortName: String) :
     Parcelable {
@@ -34,6 +42,10 @@ data class MeshUser(val id: String, val longName: String, val shortName: String)
         override fun newArray(size: Int): Array<MeshUser?> {
             return arrayOfNulls(size)
         }
+    }
+
+    override fun toString(): String {
+        return "MeshUser(id=${id.anonymized}, longName=${longName.anonymized}, shortName=${shortName.anonymized})"
     }
 }
 
@@ -77,6 +89,10 @@ data class Position(
         override fun newArray(size: Int): Array<Position?> {
             return arrayOfNulls(size)
         }
+    }
+
+    override fun toString(): String {
+        return "Position(lat=${latitude.anonymized}, lon=${longitude.anonymized}, alt=${altitude.anonymized}, time=${time})"
     }
 }
 
