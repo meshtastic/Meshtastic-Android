@@ -116,7 +116,7 @@ dependencies {
     implementation 'com.google.protobuf:protobuf-javalite:3.11.1'
 
     // mapbox
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.0.0'
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.1.0'
 
     // location services
     implementation 'com.google.android.gms:play-services-location:17.0.0'
