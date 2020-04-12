@@ -76,7 +76,8 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
             val oldEntry = oldDevs[addr]
             if (oldEntry == null || oldEntry.bonded != isBonded) {
                 val entry = BTScanEntry(
-                    result.device.name,
+                    result.device.name
+                        ?: "unnamed-$addr", // autobug: some devices might not have a name, if someone is running really old device code?
                     addr,
                     isBonded
                 )
