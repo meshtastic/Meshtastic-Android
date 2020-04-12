@@ -134,8 +134,9 @@ dependencies {
     // https://firebase.google.com/docs/android/setup#available-libraries
 
     // barcode support
-    // implementation('com.google.zxing:core:3.4.0')
-    implementation('com.journeyapps:zxing-android-embedded:3.6.0')
+    // per https://github.com/journeyapps/zxing-android-embedded for support of android version 22
+    implementation('com.journeyapps:zxing-android-embedded:4.1.0') { transitive = false }
+    implementation 'com.google.zxing:core:3.3.0'
 
     implementation project(':geeksville-androidlib')
 }
