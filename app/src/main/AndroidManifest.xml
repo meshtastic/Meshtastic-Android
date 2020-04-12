@@ -45,6 +45,7 @@
         android:name="android.hardware.bluetooth_le"
         android:required="true" />
 
+    <!-- hardware acceleration is required for zxing barcode lib -->
     <application
         tools:replace="android:icon"
         android:name="com.geeksville.mesh.MeshUtilApplication"
@@ -53,6 +54,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_new_round"
         android:supportsRtl="true"
+        android:hardwareAccelerated="true"
         android:theme="@style/AppTheme">
 
         <meta-data
