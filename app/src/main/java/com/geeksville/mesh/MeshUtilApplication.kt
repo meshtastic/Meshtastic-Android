@@ -27,6 +27,16 @@ class MeshUtilApplication : GeeksvilleApplication() {
             Exceptions.reporter = { exception, _, _ ->
                 crashlytics.recordException(exception)
             }
+
+            if (isAnalyticsAllowed) {
+                val standardLogger = Logging.printlog
+
+                // send all log messages through crashyltics, so if we do crash we'll have those in the report
+                Logging.printlog = { level, tag, message ->
+                    crashlytics.log("$tag: $message")
+                    standardLogger(level, tag, message)
+                }
+            }
         }
 
         Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
