@@ -446,15 +446,15 @@ class MainActivity : AppCompatActivity(), Logging,
                 model.radioConfig.value =
                     MeshProtos.RadioConfig.parseFrom(model.meshService!!.radioConfig)
 
-                // Pull down our real node ID
-                model.nodeDB.myId.value = service.myId
-
                 // Update our nodeinfos based on data from the device
                 val nodes = service.nodes.map {
                     it.user?.id!! to it
                 }.toMap()
 
                 model.nodeDB.nodes.value = nodes
+
+                // Pull down our real node ID - This must be done AFTER reading the nodedb because we need the DB to find our nodeinof object
+                model.nodeDB.myId.value = service.myId
 
                 // we have a connection to our device now, do the channel change
                 perhapsChangeChannel()
@@ -592,9 +592,11 @@ class MainActivity : AppCompatActivity(), Logging,
         // If we have received the service, and hence registered with
         // it, then now is the time to unregister.
         // if we never connected, do nothing
-        debug("Unbinding from mesh service!")
-        mesh.close()
-        model.meshService = null
+        mesh?.let {
+            debug("Unbinding from mesh service!")
+            it.close()
+            model.meshService = null
+        }
     }
 
     override fun onStop() {
