@@ -298,8 +298,8 @@ class MainActivity : AppCompatActivity(), Logging,
                 .show()
         }
 
-        if (!isInTestLab)
-            requestPermission() // permissions don't work there
+        // if (!isInTestLab) - very important - even in test lab we must request permissions because we need location perms for some of our tests to pass
+        requestPermission()
 
         /*  not yet working
         // Configure sign-in to request the user's ID, email address, and basic
