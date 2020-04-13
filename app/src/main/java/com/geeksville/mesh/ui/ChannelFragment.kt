@@ -18,6 +18,7 @@ import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.service.MeshService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.channel_fragment.*
 
@@ -70,7 +71,11 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             qrView.visibility = View.VISIBLE
             channelNameEdit.visibility = View.VISIBLE
             channelNameEdit.setText(channel.name)
-            editableCheckbox.isEnabled = true
+
+            // For now, we only let the user edit/save channels while the radio is awake - because the service
+            // doesn't cache radioconfig writes.
+            val connected = model.isConnected.value == MeshService.ConnectionState.CONNECTED
+            editableCheckbox.isEnabled = connected
 
             qrView.setImageBitmap(channel.getChannelQR())
         } else {
@@ -156,7 +161,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             shareChannel()
         }
 
-        model.radioConfig.observe(viewLifecycleOwner, Observer { config ->
+        model.radioConfig.observe(viewLifecycleOwner, Observer {
+            setGUIfromModel()
+        })
+
+        // If connection state changes, we might need to enable/disable buttons
+        model.isConnected.observe(viewLifecycleOwner, Observer {
             setGUIfromModel()
         })
     }
