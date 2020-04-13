@@ -27,7 +27,7 @@
      -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Only for debug log writing, disable for production FIXME -->
+    <!-- Only for debug log writing, disable for production -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- We run our mesh code as a foreground service - FIXME, find a way to stop doing this -->

@@ -169,8 +169,10 @@ class MainActivity : AppCompatActivity(), Logging,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.WAKE_LOCK,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
+            Manifest.permission.WAKE_LOCK
+
+            // We only need this for logging to capture files for the simulator - turn off for most users
+            // Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
 
         if (Build.VERSION.SDK_INT >= 29) // only added later
