@@ -16,6 +16,10 @@ import com.geeksville.concurrent.DeferredExecution
 import com.geeksville.mesh.IRadioInterfaceService
 import com.geeksville.util.exceptionReporter
 import com.geeksville.util.toRemoteExceptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import java.lang.reflect.Method
 import java.util.*
 
@@ -215,6 +219,9 @@ class RadioInterfaceService : Service(), Logging {
 
     private var isConnected = false
 
+    private val serviceJob = Job()
+    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
+
     /// Work that users of our service want done, which might get deferred until after
     /// we have completed our initial connection
     private val clientOperations = DeferredExecution()
@@ -317,24 +324,27 @@ class RadioInterfaceService : Service(), Logging {
 
             // we begin by setting our MTU size as high as it can go
             safe!!.asyncRequestMtu(512) { mtuRes ->
-                debug("requested MTU result=$mtuRes")
-                mtuRes.getOrThrow() // FIXME - why sometimes is the result Unit!?!
+                serviceScope.handledLaunch {
+                    debug("requested MTU result=$mtuRes")
+                    mtuRes.getOrThrow() // FIXME - why sometimes is the result Unit!?!
+                    delay(500) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null
 
-                fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)!!
+                    fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)!!
 
-                // We must set this to true before broadcasting connectionChanged
-                isConnected = true
+                    // We must set this to true before broadcasting connectionChanged
+                    isConnected = true
 
-                safe!!.setNotify(fromNum, true) {
-                    debug("fromNum changed, so we are reading new messages")
+                    safe!!.setNotify(fromNum, true) {
+                        debug("fromNum changed, so we are reading new messages")
+                        doReadFromRadio()
+                    }
+
+                    // Now tell clients they can (finally use the api)
+                    broadcastConnectionChanged(true)
+
+                    // Immediately broadcast any queued packets sitting on the device
                     doReadFromRadio()
                 }
-
-                // Now tell clients they can (finally use the api)
-                broadcastConnectionChanged(true)
-
-                // Immediately broadcast any queued packets sitting on the device
-                doReadFromRadio()
             }
         }
     }
@@ -347,6 +357,7 @@ class RadioInterfaceService : Service(), Logging {
 
     override fun onDestroy() {
         setEnabled(false)
+        serviceJob.cancel()
         runningService = null
         super.onDestroy()
     }
