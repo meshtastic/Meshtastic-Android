@@ -156,7 +156,7 @@ class MeshService : Service(), Logging {
                     l = locs.lastOrNull()
                 }
                 if (l != null) {
-                    info("got location $l")
+                    info("got phone location")
                     if (l.hasAccuracy() && l.accuracy >= 200) // if more than 200 meters off we won't use it
                         warn("accuracy ${l.accuracy} is too poor to use")
                     else {
