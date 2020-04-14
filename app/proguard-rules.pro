@@ -24,3 +24,9 @@
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
 -keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
 -keepclassmembernames class kotlinx.** { volatile <fields>; }
+
+# Needed for protobufs
+-keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite { <fields>; }
+
+# Our app is opensource no need to obsfucate
+-dontobfuscate
