@@ -31,6 +31,20 @@ for verbose logging:
 adb shell setprop log.tag.FA VERBOSE
 ```
 
+## Build instructions
+FIXME
+
+Notes from @jeksys follow.
+Are there any special instructions for the project?
+I’m trying to build Android app, but I’m an Android dev, so probably I miss something.
+
+For now I have following issues:
+
+missing google-services.json -> created one
+missing mapbox_access_token string -> added a random string
+missing cur_firmware_version string -> added a random string
+I was able to run simulator after applying above fixes
+
 # Credits
 
 This project is the work of volunteers:
