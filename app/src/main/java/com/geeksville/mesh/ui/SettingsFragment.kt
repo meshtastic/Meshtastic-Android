@@ -171,10 +171,10 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
     /// Called by the GUI when a new device has been selected by the user
     /// Returns true if we were able to change to that item
-    fun onSelected(it: BTScanEntry): Boolean {
+    fun onSelected(activity: MainActivity, it: BTScanEntry): Boolean {
         // If the device is paired, let user select it, otherwise start the pairing flow
         if (it.bonded) {
-            changeSelection(GeeksvilleApplication.currentActivity as MainActivity, it.macAddress)
+            changeSelection(activity, it.macAddress)
             return true
         } else {
             info("Starting bonding for $it")
@@ -196,7 +196,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     if (state == BluetoothDevice.BOND_BONDED || state == BluetoothDevice.BOND_BONDING) {
                         debug("Bonding completed, connecting service")
                         changeSelection(
-                            GeeksvilleApplication.currentActivity as MainActivity,
+                            activity,
                             it.macAddress
                         )
 
@@ -293,7 +293,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     if (!device.bonded)
                         scanStatusText.setText(R.string.starting_pairing)
 
-                    b.isSelected = scanModel.onSelected(device)
+                    b.isSelected = scanModel.onSelected(requireActivity() as MainActivity, device)
 
                     if (!b.isSelected)
                         scanStatusText.setText(R.string.pairing_failed)
