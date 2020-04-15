@@ -73,7 +73,8 @@ class UIViewModel(app: Application) : AndroidViewModel(app), Logging {
     fun setRadioConfig(c: MeshProtos.RadioConfig) {
         debug("Setting new radio config!")
         meshService?.radioConfig = c.toByteArray()
-        radioConfig.value = c
+        radioConfig.value =
+            c // Must be done after calling the service, so we will will properly throw if the service failed (and therefore not cache invalid new settings)
 
         getPreferences(context).edit(commit = true) {
             this.putString("channel-url", getChannel(c)!!.getChannelUrl().toString())

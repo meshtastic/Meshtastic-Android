@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
 import android.os.Bundle
+import android.os.RemoteException
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,7 +20,9 @@ import com.geeksville.android.hideKeyboard
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.util.Exceptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.channel_fragment.*
 
 
@@ -128,12 +131,6 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         editableCheckbox.setOnCheckedChangeListener { _, checked ->
             if (!checked) {
                 // User just locked it, we should warn and then apply changes to radio
-                /* Snackbar.make(
-                    editableCheckbox,
-                    "Changing channels is not yet supported",
-                    Snackbar.LENGTH_SHORT
-                ).show() */
-
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.change_channel)
                     .setMessage(R.string.are_you_sure_channel)
@@ -146,8 +143,22 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                             val newSettings = old.settings.toBuilder()
                             newSettings.name = channelNameEdit.text.toString().trim()
                             // FIXME, regenerate a new preshared key!
-                            model.setChannel(newSettings.build())
-                            // Since we are writing to radioconfig, that will trigger the rest of the GUI update (QR code etc)
+
+                            // Try to change the radio, if it fails, tell the user why and throw away their redits
+                            try {
+                                model.setChannel(newSettings.build())
+                                // Since we are writing to radioconfig, that will trigger the rest of the GUI update (QR code etc)
+                            } catch (ex: RemoteException) {
+                                setGUIfromModel() // Throw away user edits
+                                
+                                // Tell the user to try again
+                                Snackbar.make(
+                                    editableCheckbox,
+                                    R.string.radio_sleeping,
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
+                                Exceptions.report(ex, "ignoring channel problem")
+                            }
                         }
                     }
                     .show()
