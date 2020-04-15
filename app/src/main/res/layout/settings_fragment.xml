@@ -11,6 +11,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
+        android:autoLink="web"
         android:ems="10"
         android:gravity="start|top"
         android:text="@string/warning_not_paired"
