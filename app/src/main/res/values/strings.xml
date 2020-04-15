@@ -14,8 +14,7 @@
     <string name="sample_message">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
     <string name="some_username" translatable="false">SKH</string>
     <string name="send_text">Send Text</string>
-    <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\n
-        This open-source application is in alpha-testing, if you find problems please post on our forum: meshtastic.discourse.group.\n\nFor more information see our web page - www.meshtastic.org.</string>
+    <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in alpha-testing, if you find problems please post on our forum: meshtastic.discourse.group.\n\nFor more information see our web page - www.meshtastic.org.</string>
     <string name="username_unset">Username unset</string>
     <string name="your_name">Your Name</string>
     <string name="analytics_okay">Anonymous usage statistics and crash reports.</string>
@@ -38,4 +37,8 @@
         If you are interested in us paying for mapbox (or switching to a different map provider), please post in meshtastic.discourse.group</string>
     <string name="permission_missing">A required permission is missing, Meshtastic won\'t be able to work properly.  Please enable in application settings.</string>
     <string name="radio_sleeping">Radio was sleeping, could not change channel</string>
+    <string name="report_bug">Report Bug</string>
+    <string name="report_a_bug">Report a bug</string>
+    <string name="report_bug_text">Are you sure you want to report a bug? After reporting, please post in meshtastic.discourse.group so we can match up the report with what you found.</string>
+    <string name="report">Report</string>
 </resources>
