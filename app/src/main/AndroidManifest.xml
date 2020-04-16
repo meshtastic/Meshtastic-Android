@@ -105,7 +105,7 @@
             an approximate example:
             http://www.meshtastic.org/s/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
             -->
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
