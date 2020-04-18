@@ -1,13 +1,14 @@
 package com.geeksville.mesh.ui
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.*
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.companion.AssociationRequest
+import android.companion.BluetoothDeviceFilter
+import android.companion.CompanionDeviceManager
+import android.content.*
 import android.os.Bundle
 import android.os.ParcelUuid
 import android.view.LayoutInflater
@@ -23,17 +24,19 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
 import com.geeksville.mesh.MainActivity
+import com.geeksville.mesh.MainActivity.Companion.RC_SELECT_DEVICE
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.RadioInterfaceService
 import com.geeksville.util.exceptionReporter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.settings_fragment.*
+import java.util.regex.Pattern
 
 object SLogging : Logging {}
 
 /// Change to a new macaddr selection, updating GUI and radio
-fun changeDeviceSelection(context: MainActivity, newAddr: String) {
+fun changeDeviceSelection(context: MainActivity, newAddr: String?) {
     RadioInterfaceService.setBondedDeviceAddress(context, newAddr)
 
     // Super ugly hack.  we force the activity to reconnect FIXME, find a cleaner way
@@ -249,10 +252,19 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 }
 
 
+@SuppressLint("NewApi")
 class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private val scanModel: BTScanModel by activityViewModels()
     private val model: UIViewModel by activityViewModels()
+
+    private val hasCompanionDeviceApi: Boolean by lazy {
+        RadioInterfaceService.hasCompanionDeviceApi(requireContext())
+    }
+
+    private val deviceManager: CompanionDeviceManager by lazy {
+        requireContext().getSystemService(CompanionDeviceManager::class.java)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -261,9 +273,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         return inflater.inflate(R.layout.settings_fragment, container, false)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
+    /// Setup the ui widgets unrelated to BLE scanning
+    private fun initCommonUI() {
         model.ownerName.observe(viewLifecycleOwner, Observer { name ->
             usernameEditText.setText(name)
         })
@@ -304,6 +315,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
             true
         }
+    }
+
+    /// Setup the GUI to do a classic (pre SDK 26 BLE scan)
+    private fun initClassicScan() {
+        // Turn off the widgets for the new API
+        scanProgressBar.visibility = View.VISIBLE
+        deviceRadioGroup.visibility = View.VISIBLE
+        changeRadioButton.visibility = View.GONE
 
         scanModel.errorText.observe(viewLifecycleOwner, Observer { errMsg ->
             if (errMsg != null) {
@@ -343,6 +362,84 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         })
     }
 
+    /// Start running the modern scan, once it has one result we enable the
+    private fun startBackgroundScan() {
+        // Disable the change button until our scan has some results
+        changeRadioButton.isEnabled = false
+
+        // To skip filtering based on name and supported feature flags (UUIDs),
+        // don't include calls to setNamePattern() and addServiceUuid(),
+        // respectively. This example uses Bluetooth.
+        val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
+            .setNamePattern(Pattern.compile("Meshtastic_.*"))
+            // .addServiceUuid(ParcelUuid(RadioInterfaceService.BTM_SERVICE_UUID), null)
+            .build()
+
+        // The argument provided in setSingleDevice() determines whether a single
+        // device name or a list of device names is presented to the user as
+        // pairing options.
+        val pairingRequest: AssociationRequest = AssociationRequest.Builder()
+            .addDeviceFilter(deviceFilter)
+            .setSingleDevice(false)
+            .build()
+
+        val mainActivity = requireActivity() as MainActivity
+
+        // When the app tries to pair with the Bluetooth device, show the
+        // appropriate pairing request dialog to the user.
+        deviceManager.associate(
+            pairingRequest,
+            object : CompanionDeviceManager.Callback() {
+
+                override fun onDeviceFound(chooserLauncher: IntentSender) {
+                    debug("Found one device - enabling button")
+                    changeRadioButton.isEnabled = true
+                    changeRadioButton.setOnClickListener {
+                        debug("User clicked BLE change button")
+                        startIntentSenderForResult(
+                            chooserLauncher,
+                            RC_SELECT_DEVICE, null, 0, 0, 0, null
+                        )
+                    }
+                }
+
+                override fun onFailure(error: CharSequence?) {
+                    warn("BLE selection service failed $error")
+                    // changeDeviceSelection(mainActivity, null) // deselect any device
+                }
+            }, null
+        )
+    }
+
+    private fun initModernScan() {
+        // Turn off the widgets for the classic API
+        scanProgressBar.visibility = View.GONE
+        deviceRadioGroup.visibility = View.GONE
+        changeRadioButton.visibility = View.VISIBLE
+
+        val curRadio = RadioInterfaceService.getBondedDeviceAddress(requireContext())
+
+        if (curRadio != null) {
+            scanStatusText.text = getString(R.string.current_pair).format(curRadio)
+            changeRadioButton.text = getString(R.string.change_radio)
+        } else {
+            scanStatusText.text = getString(R.string.not_paired_yet)
+            changeRadioButton.setText(R.string.select_radio)
+        }
+
+        startBackgroundScan()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        initCommonUI()
+        if (hasCompanionDeviceApi)
+            initModernScan()
+        else
+            initClassicScan()
+    }
+
     override fun onPause() {
         super.onPause()
         scanModel.stopScan()
@@ -350,7 +447,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     override fun onResume() {
         super.onResume()
-        scanModel.startScan()
+        if (!hasCompanionDeviceApi)
+            scanModel.startScan()
     }
 }
 

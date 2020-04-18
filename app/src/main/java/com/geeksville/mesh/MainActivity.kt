@@ -2,8 +2,12 @@ package com.geeksville.mesh
 
 // import kotlinx.android.synthetic.main.tabs.*
 import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
+import android.companion.CompanionDeviceManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -104,6 +108,7 @@ class MainActivity : AppCompatActivity(), Logging,
         const val REQUEST_ENABLE_BT = 10
         const val DID_REQUEST_PERM = 11
         const val RC_SIGN_IN = 12 // google signin completed
+        const val RC_SELECT_DEVICE = 65549 // seems to be hardwired in CompanionDeviceManager
     }
 
 
@@ -169,7 +174,9 @@ class MainActivity : AppCompatActivity(), Logging,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.WAKE_LOCK
+            Manifest.permission.WAKE_LOCK,
+            Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND,
+            Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND
 
             // We only need this for logging to capture files for the simulator - turn off for most users
             // Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -380,6 +387,7 @@ class MainActivity : AppCompatActivity(), Logging,
     /**
      * Dispatch incoming result to the correct fragment.
      */
+    @SuppressLint("InlinedApi")
     override fun onActivityResult(
         requestCode: Int,
         resultCode: Int,
@@ -389,12 +397,27 @@ class MainActivity : AppCompatActivity(), Logging,
 
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            // The Task returned from this call is always completed, no need to attach
-            // a listener.
-            val task: Task<GoogleSignInAccount> =
-                GoogleSignIn.getSignedInAccountFromIntent(data)
-            handleSignInResult(task)
+        when (requestCode) {
+            RC_SIGN_IN -> {
+                // The Task returned from this call is always completed, no need to attach
+                // a listener.
+                val task: Task<GoogleSignInAccount> =
+                    GoogleSignIn.getSignedInAccountFromIntent(data)
+                handleSignInResult(task)
+            }
+            RC_SELECT_DEVICE -> when (resultCode) {
+                Activity.RESULT_OK -> {
+                    // User has chosen to pair with the Bluetooth device.
+                    val device: BluetoothDevice =
+                        data!!.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)
+                    debug("Received BLE pairing ${device.address}")
+                    device.createBond()
+                    // ... Continue interacting with the paired device.
+                }
+
+                else ->
+                    warn("BLE device select intent failed")
+            }
         }
     }
 

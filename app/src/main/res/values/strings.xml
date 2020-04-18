@@ -41,4 +41,8 @@
     <string name="report_a_bug">Report a bug</string>
     <string name="report_bug_text">Are you sure you want to report a bug? After reporting, please post in meshtastic.discourse.group so we can match up the report with what you found.</string>
     <string name="report">Report</string>
+    <string name="select_radio">Select radio</string>
+    <string name="current_pair">You are currently paired with radio %s</string>
+    <string name="not_paired_yet">You have not paired a radio yet.</string>
+    <string name="change_radio">Change radio</string>
 </resources>

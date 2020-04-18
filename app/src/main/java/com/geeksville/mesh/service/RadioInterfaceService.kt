@@ -6,6 +6,8 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.content.edit
@@ -197,6 +199,18 @@ class RadioInterfaceService : Service(), Logging {
                 MeshService.startService(context)
             }
         }
+
+        /// Can we use the modern BLE scan API?
+        fun hasCompanionDeviceApi(context: Context): Boolean =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val res =
+                    context.packageManager.hasSystemFeature(PackageManager.FEATURE_COMPANION_DEVICE_SETUP)
+                debug("CompanionDevice API available=$res")
+                res
+            } else {
+                warn("CompanionDevice API not available, falling back to classic scan")
+                false
+            }
     }
 
 

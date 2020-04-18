@@ -36,6 +36,10 @@
     <!-- Needed to open our bluetooth connection to our paired device (after reboot) -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- For android >=26 we can use the new BLE scanning API, which allows auto launching our service when our device is seen -->
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND" />
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND" />
+
     <!-- the xing library will try to bring this permission in but we don't want it -->
     <uses-permission
         android:name="android.permission.CAMERA"
@@ -44,6 +48,11 @@
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="true" />
+
+    <!-- For the modern BLE scanning API -->
+    <uses-feature
+        android:name="android.software.companion_device_setup"
+        android:required="false" />
 
     <!-- hardware acceleration is required for zxing barcode lib -->
     <application

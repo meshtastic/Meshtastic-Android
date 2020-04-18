@@ -35,8 +35,8 @@
             android:id="@+id/usernameEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:imeOptions="actionDone" />
+            android:imeOptions="actionDone"
+            android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textview.MaterialTextView
@@ -66,7 +66,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/scanStatusText">
+        app:layout_constraintTop_toBottomOf="@+id/changeRadioButton">
 
         <RadioButton
             android:id="@+id/radioButton2"
@@ -104,6 +104,16 @@
         android:text="@string/report_bug"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/changeRadioButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/select_radio"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/scanStatusText" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
