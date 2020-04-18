@@ -30,6 +30,50 @@ import com.geeksville.util.exceptionReporter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.settings_fragment.*
 
+object SLogging : Logging {}
+
+/// Change to a new macaddr selection, updating GUI and radio
+fun changeDeviceSelection(context: MainActivity, newAddr: String) {
+    RadioInterfaceService.setBondedDeviceAddress(context, newAddr)
+
+    // Super ugly hack.  we force the activity to reconnect FIXME, find a cleaner way
+    context.unbindMeshService()
+    context.bindMeshService()
+}
+
+/// Show the UI asking the user to bond with a device, call changeSelection() if/when bonding completes
+private fun requestBonding(activity: MainActivity, device: BluetoothDevice, onSuccess: () -> Unit) {
+    SLogging.info("Starting bonding for $device")
+
+    // We need this receiver to get informed when the bond attempt finished
+    val bondChangedReceiver = object : BroadcastReceiver() {
+
+        override fun onReceive(
+            context: Context,
+            intent: Intent
+        ) = exceptionReporter {
+            val state =
+                intent.getIntExtra(
+                    BluetoothDevice.EXTRA_BOND_STATE,
+                    -1
+                )
+            SLogging.debug("Received bond state changed $state")
+            context.unregisterReceiver(this)
+            if (state == BluetoothDevice.BOND_BONDED || state == BluetoothDevice.BOND_BONDING) {
+                SLogging.debug("Bonding completed, connecting service")
+                onSuccess()
+            }
+        }
+    }
+
+    val filter = IntentFilter()
+    filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+    activity.registerReceiver(bondChangedReceiver, filter)
+
+    // We ignore missing BT adapters, because it lets us run on the emulator
+    device.createBond()
+}
+
 
 class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
@@ -86,7 +130,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
                 // If nothing was selected, by default select the first thing we see
                 if (selectedMacAddr == null && entry.bonded)
-                    changeSelection(GeeksvilleApplication.currentActivity as MainActivity, addr)
+                    changeScanSelection(GeeksvilleApplication.currentActivity as MainActivity, addr)
 
                 devices.value = oldDevs + Pair(addr, entry) // trigger gui updates
             }
@@ -121,7 +165,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
             // If nothing was selected, by default select the first thing we see
             if (selectedMacAddr == null)
-                changeSelection(
+                changeScanSelection(
                     GeeksvilleApplication.currentActivity as MainActivity,
                     testnodes.first().macAddress
                 )
@@ -175,60 +219,32 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     fun onSelected(activity: MainActivity, it: BTScanEntry): Boolean {
         // If the device is paired, let user select it, otherwise start the pairing flow
         if (it.bonded) {
-            changeSelection(activity, it.macAddress)
+            changeScanSelection(activity, it.macAddress)
             return true
         } else {
-            info("Starting bonding for $it")
-
-            // We need this receiver to get informed when the bond attempt finished
-            val bondChangedReceiver = object : BroadcastReceiver() {
-
-                override fun onReceive(
-                    context: Context,
-                    intent: Intent
-                ) = exceptionReporter {
-                    val state =
-                        intent.getIntExtra(
-                            BluetoothDevice.EXTRA_BOND_STATE,
-                            -1
-                        )
-                    debug("Received bond state changed $state")
-                    context.unregisterReceiver(this)
-                    if (state == BluetoothDevice.BOND_BONDED || state == BluetoothDevice.BOND_BONDING) {
-                        debug("Bonding completed, connecting service")
-                        changeSelection(
+            // We ignore missing BT adapters, because it lets us run on the emulator
+            bluetoothAdapter
+                ?.getRemoteDevice(it.macAddress)?.let { device ->
+                    requestBonding(activity, device) {
+                        changeScanSelection(
                             activity,
-                            it.macAddress
+                            device.address
                         )
 
                         // Force the GUI to redraw
                         devices.value = devices.value
                     }
                 }
-            }
-
-            val filter = IntentFilter()
-            filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-            context.registerReceiver(bondChangedReceiver, filter)
-
-            // We ignore missing BT adapters, because it lets us run on the emulator
-            bluetoothAdapter
-                ?.getRemoteDevice(it.macAddress)
-                ?.createBond()
 
             return false
         }
     }
 
     /// Change to a new macaddr selection, updating GUI and radio
-    fun changeSelection(context: MainActivity, newAddr: String) {
+    fun changeScanSelection(context: MainActivity, newAddr: String) {
         info("Changing BT device to $newAddr")
         selectedMacAddr = newAddr
-        RadioInterfaceService.setBondedDeviceAddress(context, newAddr)
-
-        // Super ugly hack.  we force the activity to reconnect FIXME, find a cleaner way
-        context.unbindMeshService()
-        context.bindMeshService()
+        changeDeviceSelection(context, newAddr)
     }
 }
 
