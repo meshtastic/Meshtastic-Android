@@ -474,6 +474,25 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
 
+    /// Pull our latest node db from the device
+    private fun updateNodesFromDevice() {
+        model.meshService?.let { service ->
+            // Update our nodeinfos based on data from the device
+            val nodes = service.nodes.map {
+                it.user?.id!! to it
+            }.toMap()
+
+            model.nodeDB.nodes.value = nodes
+
+            try {
+                // Pull down our real node ID - This must be done AFTER reading the nodedb because we need the DB to find our nodeinof object
+                model.nodeDB.myId.value = service.myId
+            } catch (ex: Exception) {
+                warn("Ignoring failure to get myId, service is probably just uninited... ${ex.message}")
+            }
+        }
+    }
+
     /// Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(connected: MeshService.ConnectionState) {
         model.isConnected.value = connected
@@ -486,17 +505,9 @@ class MainActivity : AppCompatActivity(), Logging,
             model.meshService?.let { service ->
                 debug("Getting latest radioconfig from service")
                 model.radioConfig.value =
-                    MeshProtos.RadioConfig.parseFrom(model.meshService!!.radioConfig)
+                    MeshProtos.RadioConfig.parseFrom(service.radioConfig)
 
-                // Update our nodeinfos based on data from the device
-                val nodes = service.nodes.map {
-                    it.user?.id!! to it
-                }.toMap()
-
-                model.nodeDB.nodes.value = nodes
-
-                // Pull down our real node ID - This must be done AFTER reading the nodedb because we need the DB to find our nodeinof object
-                model.nodeDB.myId.value = service.myId
+                updateNodesFromDevice()
 
                 // we have a connection to our device now, do the channel change
                 perhapsChangeChannel()
@@ -600,9 +611,15 @@ class MainActivity : AppCompatActivity(), Logging,
                 TextMessage(it)
             }
 
-            // We won't receive a notify for the initial state of connection, so we force an update here
             val connectionState =
                 MeshService.ConnectionState.valueOf(service.connectionState())
+
+            // if we are not connected, onMeshConnectionChange won't fetch nodes from the service
+            // in that case, we do it here - because the service certainly has a better idea of node db that we have
+            if (connectionState != MeshService.ConnectionState.CONNECTED)
+                updateNodesFromDevice()
+
+            // We won't receive a notify for the initial state of connection, so we force an update here
             onMeshConnectionChanged(connectionState)
 
             debug("connected to mesh service, isConnected=${model.isConnected.value}")
