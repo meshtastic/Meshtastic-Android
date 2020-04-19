@@ -647,17 +647,14 @@ class MeshService : Service(), Logging {
             it.position = it.position?.copy(time = currentSecond())
         }
 
-        when (p.variantCase.number) {
-            MeshProtos.SubPacket.POSITION_FIELD_NUMBER ->
-                handleReceivedPosition(fromNum, p.position)
+        if (p.hasPosition())
+            handleReceivedPosition(fromNum, p.position)
 
-            MeshProtos.SubPacket.DATA_FIELD_NUMBER ->
-                handleReceivedData(fromNum, p.data)
+        if (p.hasData())
+            handleReceivedData(fromNum, p.data)
 
-            MeshProtos.SubPacket.USER_FIELD_NUMBER ->
-                handleReceivedUser(fromNum, p.user)
-            else -> TODO("Unexpected SubPacket variant")
-        }
+        if (p.hasUser())
+            handleReceivedUser(fromNum, p.user)
     }
 
     private fun currentSecond() = (System.currentTimeMillis() / 1000).toInt()
