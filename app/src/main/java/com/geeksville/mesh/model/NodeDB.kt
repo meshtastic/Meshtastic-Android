@@ -44,7 +44,7 @@ class NodeDB(private val ui: UIViewModel) {
     private val seedWithTestNodes = isEmulator
 
     /// The unique ID of our node
-    val myId = object : MutableLiveData<String>(if (isEmulator) "+16508765309" else "invalid") {}
+    val myId = object : MutableLiveData<String?>(if (isEmulator) "+16508765309" else null) {}
 
     /// A map from nodeid to to nodeinfo
     val nodes =
@@ -53,5 +53,5 @@ class NodeDB(private val ui: UIViewModel) {
                 .toTypedArray())) {}
 
     /// Could be null if we haven't received our node DB yet
-    val ourNodeInfo get() = nodes.value!![myId.value]
+    val ourNodeInfo get() = nodes.value?.get(myId.value)
 }
