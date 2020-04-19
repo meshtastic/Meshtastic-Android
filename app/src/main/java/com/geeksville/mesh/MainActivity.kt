@@ -227,7 +227,20 @@ class MainActivity : AppCompatActivity(), Logging,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (grantResults.contains(PackageManager.PERMISSION_DENIED)) {
+        // Older versions of android don't know about these permissions - ignore failure to grant
+        val ignoredPermissions = arrayOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND,
+            Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND
+        )
+
+        val deniedPermissions = permissions.filterIndexed { index, name ->
+            grantResults[index] == PackageManager.PERMISSION_DENIED &&
+                    !ignoredPermissions.contains(name)
+        }
+
+        if (deniedPermissions.isNotEmpty()) {
+            warn("Denied permissions: ${deniedPermissions.joinToString(",")}")
             Toast.makeText(
                 this,
                 getString(R.string.permission_missing),
