@@ -354,7 +354,9 @@ class MeshService : Service(), Logging {
 
         // If a text message arrived include it with our notification
         recentReceivedText?.let { msg ->
-            builder.setContentText("Message from ${msg.fromId}")
+            // Try to show the human name of the sender if possible
+            val sender = nodeDBbyID[msg.fromId]?.user?.longName ?: msg.fromId
+            builder.setContentText("Message from $sender")
 
             builder.setStyle(
                 NotificationCompat.BigTextStyle()
