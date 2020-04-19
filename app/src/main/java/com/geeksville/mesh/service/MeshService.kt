@@ -574,8 +574,6 @@ class MeshService : Service(), Logging {
 
             when (data.typValue) {
                 MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
-                    val text = bytes.toString(utf8)
-
                     debug("Received CLEAR_TEXT from $fromId")
 
                     recentReceivedText = dataPacket

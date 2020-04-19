@@ -1,6 +1,5 @@
 package com.geeksville.mesh
 
-import android.os.Parcel
 import android.os.Parcelable
 import com.geeksville.mesh.ui.bearing
 import com.geeksville.mesh.ui.latLongToMeter
@@ -62,81 +61,27 @@ data class DataPacket(
     }
 }
 
+@Parcelize
 data class MeshUser(val id: String, val longName: String, val shortName: String) :
     Parcelable {
-    constructor(parcel: Parcel) : this(
-        parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString()!!
-    ) {
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(id)
-        parcel.writeString(longName)
-        parcel.writeString(shortName)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<MeshUser> {
-        override fun createFromParcel(parcel: Parcel): MeshUser {
-            return MeshUser(parcel)
-        }
-
-        override fun newArray(size: Int): Array<MeshUser?> {
-            return arrayOfNulls(size)
-        }
-    }
 
     override fun toString(): String {
         return "MeshUser(id=${id.anonymized}, longName=${longName.anonymized}, shortName=${shortName.anonymized})"
     }
 }
 
+@Parcelize
 data class Position(
     val latitude: Double,
     val longitude: Double,
     val altitude: Int,
     val time: Int = (System.currentTimeMillis() / 1000).toInt() // default to current time in secs
-) :
-    Parcelable {
-    constructor(parcel: Parcel) : this(
-        parcel.readDouble(),
-        parcel.readDouble(),
-        parcel.readInt(),
-        parcel.readInt()
-    ) {
-    }
-
+) : Parcelable {
     /// @return distance in meters to some other node (or null if unknown)
     fun distance(o: Position) = latLongToMeter(latitude, longitude, o.latitude, o.longitude)
 
     /// @return bearing to the other position in degrees
     fun bearing(o: Position) = bearing(latitude, longitude, o.latitude, o.longitude)
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeDouble(latitude)
-        parcel.writeDouble(longitude)
-        parcel.writeInt(altitude)
-        parcel.writeInt(time)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<Position> {
-        override fun createFromParcel(parcel: Parcel): Position {
-            return Position(parcel)
-        }
-
-        override fun newArray(size: Int): Array<Position?> {
-            return arrayOfNulls(size)
-        }
-    }
 
     override fun toString(): String {
         return "Position(lat=${latitude.anonymized}, lon=${longitude.anonymized}, alt=${altitude.anonymized}, time=${time})"
@@ -144,17 +89,12 @@ data class Position(
 }
 
 
+@Parcelize
 data class NodeInfo(
     val num: Int, // This is immutable, and used as a key
     var user: MeshUser? = null,
     var position: Position? = null
 ) : Parcelable {
-    constructor(parcel: Parcel) : this(
-        parcel.readInt(),
-        parcel.readParcelable(MeshUser::class.java.classLoader),
-        parcel.readParcelable(Position::class.java.classLoader)
-    ) {
-    }
 
     /// Return the last time we've seen this node in secs since 1970
     val lastSeen get() = position?.time ?: 0
@@ -196,26 +136,6 @@ data class NodeInfo(
             dist == 0 -> null // same point
             dist < 1000 -> "%.0f m".format(dist.toDouble())
             else -> "%.1f km".format(dist / 1000.0)
-        }
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeInt(num)
-        parcel.writeParcelable(user, flags)
-        parcel.writeParcelable(position, flags)
-    }
-
-    override fun describeContents(): Int {
-        return 0
-    }
-
-    companion object CREATOR : Parcelable.Creator<NodeInfo> {
-        override fun createFromParcel(parcel: Parcel): NodeInfo {
-            return NodeInfo(parcel)
-        }
-
-        override fun newArray(size: Int): Array<NodeInfo?> {
-            return arrayOfNulls(size)
         }
     }
 }
