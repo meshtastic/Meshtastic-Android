@@ -47,7 +47,7 @@ data class Channel(
     fun getChannelUrl(): Uri {
         // If we have a valid radio config use it, othterwise use whatever we have saved in the prefs
 
-        val channelBytes = settings?.toByteArray() ?: ByteArray(0) // if unset just use empty
+        val channelBytes = settings.toByteArray() ?: ByteArray(0) // if unset just use empty
         val enc = Base64.encodeToString(channelBytes, base64Flags)
 
         return Uri.parse("$prefix$enc")

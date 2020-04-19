@@ -359,6 +359,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 MeshService.ConnectionState.CONNECTED -> R.drawable.cloud_on
                 MeshService.ConnectionState.DEVICE_SLEEP -> R.drawable.ic_twotone_cloud_upload_24
                 MeshService.ConnectionState.DISCONNECTED -> R.drawable.cloud_off
+                else -> R.drawable.cloud_off
             }
 
             connectStatusImage.setImageDrawable(getDrawable(image))
@@ -386,7 +387,7 @@ class MainActivity : AppCompatActivity(), Logging,
             requestedChannelUrl = appLinkData
 
             // if the device is connected already, process it now
-            if (model.isConnected == MeshService.ConnectionState.CONNECTED)
+            if (model.isConnected.value == MeshService.ConnectionState.CONNECTED)
                 perhapsChangeChannel()
 
             // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
@@ -423,7 +424,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 Activity.RESULT_OK -> {
                     // User has chosen to pair with the Bluetooth device.
                     val device: BluetoothDevice =
-                        data!!.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)
+                        data?.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)!!
                     debug("Received BLE pairing ${device.address}")
                     if (device.bondState != BluetoothDevice.BOND_BONDED) {
                         device.createBond()
@@ -647,11 +648,9 @@ class MainActivity : AppCompatActivity(), Logging,
         // If we have received the service, and hence registered with
         // it, then now is the time to unregister.
         // if we never connected, do nothing
-        mesh?.let {
-            debug("Unbinding from mesh service!")
-            it.close()
-            model.meshService = null
-        }
+        debug("Unbinding from mesh service!")
+        mesh.close()
+        model.meshService = null
     }
 
     override fun onStop() {
