@@ -2,6 +2,7 @@
 package com.geeksville.mesh;
 
 // Declare any non-default types here with import statements
+// import com.geeksville.mesh.DataPacket;
 
 parcelable NodeInfo;
 
@@ -45,6 +46,9 @@ interface IMeshService {
     /// It returns a RadioConfig protobuf.
     byte []getRadioConfig();
 
+    /// Return an list of MeshPacket protobuf (byte arrays) which were received while your client app was offline (recent messages only)
+    List getOldMessages();
+
     /// This method is only intended for use in our GUI, so the user can set radio options
     /// It sets a RadioConfig protobuf
     void setRadioConfig(in byte []payload);
@@ -55,7 +59,7 @@ interface IMeshService {
     String connectionState();
 
     // see com.geeksville.com.geeksville.mesh broadcast intents
-    // RECEIVED_OPAQUE  for data received from other nodes
+    // RECEIVED_OPAQUE  for data received from other nodes.  payload will contain a DataPacket
     // NODE_CHANGE  for new IDs appearing or disappearing
     // CONNECTION_CHANGED for losing/gaining connection to the packet radio
 }

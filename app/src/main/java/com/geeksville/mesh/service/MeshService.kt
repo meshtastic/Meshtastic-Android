@@ -29,7 +29,6 @@ import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.protobuf.ByteString
 import kotlinx.coroutines.*
-import java.nio.charset.Charset
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -99,9 +98,6 @@ class MeshService : Service(), Logging {
                 return intent
             }
         }
-
-        /// A model object for a Text message
-        data class TextMessage(val fromId: String, val text: String)
     }
 
     public enum class ConnectionState {
@@ -249,15 +245,11 @@ class MeshService : Service(), Logging {
 
     /**
      * The RECEIVED_OPAQUE:
-     * Payload will be the raw bytes which were contained within a MeshPacket.Opaque field
-     * Sender will be a user ID string
-     * Type will be the Data.Type enum code for this payload
+     * Payload will be a DataPacket
      */
-    private fun broadcastReceivedData(senderId: String, payload: ByteArray, typ: Int) {
+    private fun broadcastReceivedData(payload: DataPacket) {
         val intent = Intent(ACTION_RECEIVED_DATA)
-        intent.putExtra(EXTRA_SENDER, senderId)
         intent.putExtra(EXTRA_PAYLOAD, payload)
-        intent.putExtra(EXTRA_TYP, typ)
         explicitBroadcast(intent)
     }
 
@@ -322,7 +314,7 @@ class MeshService : Service(), Logging {
     }
 
     /// A text message that has a arrived since the last notification update
-    private var recentReceivedText: TextMessage? = null
+    private var recentReceivedText: DataPacket? = null
 
     private val summaryString
         get() = when (connectionState) {
@@ -353,14 +345,14 @@ class MeshService : Service(), Logging {
         // if(shortContent != null) builder.setContentText(shortContent)
 
         // If a text message arrived include it with our notification
-        recentReceivedText?.let { msg ->
+        recentReceivedText?.let { packet ->
             // Try to show the human name of the sender if possible
-            val sender = nodeDBbyID[msg.fromId]?.user?.longName ?: msg.fromId
+            val sender = nodeDBbyID[packet.from]?.user?.longName ?: packet.from
             builder.setContentText("Message from $sender")
 
             builder.setStyle(
                 NotificationCompat.BigTextStyle()
-                    .bigText(msg.text)
+                    .bigText(packet.bytes.toString(utf8))
             )
         }
 
@@ -453,8 +445,8 @@ class MeshService : Service(), Logging {
         n
     )
 
-    /// Map a nodenum to the nodeid string, or throw an exception if not present
-    private fun toNodeID(n: Int) = toNodeInfo(n).user?.id
+    /// Map a nodenum to the nodeid string, or return null if not present or no id found
+    private fun toNodeID(n: Int) = nodeDBbyNodeNum[n]?.user?.id
 
     /// given a nodenum, return a db entry - creating if necessary
     private fun getOrCreateNodeInfo(n: Int) =
@@ -528,50 +520,86 @@ class MeshService : Service(), Logging {
         }.build()
     }.build()
 
-    /// Update our model and resend as needed for a MeshPacket we just received from the radio
-    private fun handleReceivedData(fromNum: Int, data: MeshProtos.Data) {
-        val bytes = data.payload.toByteArray()
-        val fromId = toNodeID(fromNum)
+    private val recentDataPackets = mutableListOf<DataPacket>()
 
-        /// the sending node ID if possible, else just its number
-        val fromString = fromId ?: fromId.toString()
+    /// Generate a DataPacket from a MeshPacket, or null if we didn't have enough data to do so
+    private fun toDataPacket(packet: MeshPacket): DataPacket? {
+        return if (!packet.hasPayload() || !packet.payload.hasData()) {
+            // We never convert packets that are not DataPackets
+            null
+        } else {
+            val data = packet.payload.data
+            val bytes = data.payload.toByteArray()
+            val fromId = toNodeID(packet.from)
+            val toId = toNodeID(packet.to)
+                ?: packet.to.toString() // FIXME, we don't currently have IDs specified for the broadcast address
 
-        fun forwardData() {
-            if (fromId == null)
-                warn("Ignoring data from $fromNum because we don't yet know its ID")
-            else {
-                debug("Received data from $fromId ${bytes.size}")
-                broadcastReceivedData(fromId, bytes, data.typValue)
-            }
-        }
+            // If the rxTime was not set by the device (because device software was old), guess at a time
+            val rxTime = if (packet.rxTime == 0) packet.rxTime else currentSecond()
 
-        when (data.typValue) {
-            MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
-                val text = bytes.toString(Charset.forName("UTF-8"))
-
-                debug("Received CLEAR_TEXT from $fromString")
-
-                recentReceivedText = TextMessage(fromString, text)
-                updateNotification()
-                forwardData()
-            }
-
-            MeshProtos.Data.Type.CLEAR_READACK_VALUE ->
-                warn(
-                    "TODO ignoring CLEAR_READACK from $fromString"
+            if (fromId != null) {
+                DataPacket(
+                    fromId,
+                    toId,
+                    rxTime * 1000L,
+                    packet.id,
+                    data.typValue,
+                    bytes
                 )
-
-            MeshProtos.Data.Type.SIGNAL_OPAQUE_VALUE ->
-                forwardData()
-
-            else -> TODO()
+            } else {
+                warn("Ignoring data from ${packet.from} because we don't yet know its ID")
+                null
+            }
         }
+    }
 
-        GeeksvilleApplication.analytics.track(
-            "data_receive",
-            DataPair("num_bytes", bytes.size),
-            DataPair("type", data.typValue)
-        )
+    private fun rememberDataPacket(dataPacket: DataPacket) {
+        // discard old messages if needed then add the new one
+        while (recentDataPackets.size > 20) // FIXME, we should instead serialize this list to flash on shutdown
+            recentDataPackets.removeAt(0)
+        recentDataPackets.add(dataPacket)
+    }
+
+    /// Update our model and resend as needed for a MeshPacket we just received from the radio
+    private fun handleReceivedData(packet: MeshPacket) {
+        val data = packet.payload.data
+        val bytes = data.payload.toByteArray()
+        val fromId = toNodeID(packet.from)
+        val dataPacket = toDataPacket(packet)
+
+        if (dataPacket != null) {
+            debug("Received data from $fromId ${bytes.size}")
+
+            rememberDataPacket(dataPacket)
+
+            when (data.typValue) {
+                MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
+                    val text = bytes.toString(utf8)
+
+                    debug("Received CLEAR_TEXT from $fromId")
+
+                    recentReceivedText = dataPacket
+                    updateNotification()
+                    broadcastReceivedData(dataPacket)
+                }
+
+                MeshProtos.Data.Type.CLEAR_READACK_VALUE ->
+                    warn(
+                        "TODO ignoring CLEAR_READACK from $fromId"
+                    )
+
+                MeshProtos.Data.Type.SIGNAL_OPAQUE_VALUE ->
+                    broadcastReceivedData(dataPacket)
+
+                else -> TODO()
+            }
+
+            GeeksvilleApplication.analytics.track(
+                "data_receive",
+                DataPair("num_bytes", bytes.size),
+                DataPair("type", data.typValue)
+            )
+        }
     }
 
     /// Update our DB of users based on someone sending out a User subpacket
@@ -636,12 +664,14 @@ class MeshService : Service(), Logging {
 
         val p = packet.payload
 
+        // If the rxTime was not set by the device (because device software was old), guess at a time
+        val rxTime = if (packet.rxTime == 0) packet.rxTime else currentSecond()
+
         // Update last seen for the node that sent the packet, but also for _our node_ because anytime a packet passes
         // through our node on the way to the phone that means that local node is also alive in the mesh
         updateNodeInfo(fromNum) {
             // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
-            val lastSeen =
-                if (packet.rxTime != 0) packet.rxTime else currentSecond()
+            val lastSeen = rxTime
 
             it.position = it.position?.copy(time = lastSeen)
         }
@@ -653,7 +683,7 @@ class MeshService : Service(), Logging {
             handleReceivedPosition(fromNum, p.position)
 
         if (p.hasData())
-            handleReceivedData(fromNum, p.data)
+            handleReceivedData(packet)
 
         if (p.hasUser())
             handleReceivedUser(fromNum, p.user)
@@ -955,6 +985,10 @@ class MeshService : Service(), Logging {
                 clientPackages[receiverName] = packageName
             }
 
+        override fun getOldMessages(): MutableList<DataPacket> {
+            return recentDataPackets
+        }
+
         override fun getMyId() = toRemoteExceptions { myNodeID }
 
         override fun setOwner(myId: String?, longName: String, shortName: String) =
@@ -988,6 +1022,11 @@ class MeshService : Service(), Logging {
                         it.payload = ByteString.copyFrom(payloadIn)
                     }.build()
                 }
+                // Keep a record of datapackets, so GUIs can show proper chat history
+                toDataPacket(packet)?.let {
+                    rememberDataPacket(it)
+                }
+
                 // If radio is sleeping, queue the packet
                 when (connectionState) {
                     ConnectionState.DEVICE_SLEEP ->

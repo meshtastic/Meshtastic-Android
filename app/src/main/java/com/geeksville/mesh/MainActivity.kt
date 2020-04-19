@@ -557,25 +557,16 @@ class MainActivity : AppCompatActivity(), Logging,
                     }
 
                     MeshService.ACTION_RECEIVED_DATA -> {
-                        debug("TODO rxdata")
-                        val sender =
-                            intent.getStringExtra(EXTRA_SENDER)!!
+                        debug("received new data from service")
                         val payload =
-                            intent.getByteArrayExtra(EXTRA_PAYLOAD)!!
-                        val typ = intent.getIntExtra(EXTRA_TYP, -1)
+                            intent.getParcelableExtra<DataPacket>(EXTRA_PAYLOAD)!!
 
-                        when (typ) {
+                        when (payload.dataType) {
                             MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
-                                // FIXME - use the real time from the packet
-                                // FIXME - don't just slam in a new list each time, it probably causes extra drawing.  Figure out how to be Compose smarter...
-                                val msg = TextMessage(
-                                    sender,
-                                    payload.toString(utf8)
-                                )
-
-                                model.messagesState.addMessage(msg)
+                                model.messagesState.addMessage(payload)
                             }
-                            else -> TODO()
+                            else ->
+                                errormsg("Unhandled dataType ${payload.dataType}")
                         }
                     }
                     MeshService.ACTION_MESH_CONNECTED -> {
@@ -603,6 +594,11 @@ class MainActivity : AppCompatActivity(), Logging,
 
             // We don't start listening for packets until after we are connected to the service
             registerMeshReceiver()
+
+            // Init our messages table with the service's record of past text messages
+            model.messagesState.messages.value = (service.oldMessages as List<DataPacket>).map {
+                TextMessage(it)
+            }
 
             // We won't receive a notify for the initial state of connection, so we force an update here
             val connectionState =
