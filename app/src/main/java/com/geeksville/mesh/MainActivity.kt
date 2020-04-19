@@ -596,7 +596,7 @@ class MainActivity : AppCompatActivity(), Logging,
             registerMeshReceiver()
 
             // Init our messages table with the service's record of past text messages
-            model.messagesState.messages.value = (service.oldMessages as List<DataPacket>).map {
+            model.messagesState.messages.value = service.oldMessages.map {
                 TextMessage(it)
             }
 

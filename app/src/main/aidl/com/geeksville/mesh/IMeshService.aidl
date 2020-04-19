@@ -2,8 +2,7 @@
 package com.geeksville.mesh;
 
 // Declare any non-default types here with import statements
-// import com.geeksville.mesh.DataPacket;
-
+parcelable DataPacket;
 parcelable NodeInfo;
 
 /**
@@ -40,14 +39,14 @@ interface IMeshService {
     /**
     Get the IDs of everyone on the mesh.  You should also subscribe for NODE_CHANGE broadcasts.
     */
-    NodeInfo[] getNodes();
+    List<NodeInfo> getNodes();
 
     /// This method is only intended for use in our GUI, so the user can set radio options
     /// It returns a RadioConfig protobuf.
     byte []getRadioConfig();
 
     /// Return an list of MeshPacket protobuf (byte arrays) which were received while your client app was offline (recent messages only)
-    List getOldMessages();
+    List<DataPacket> getOldMessages();
 
     /// This method is only intended for use in our GUI, so the user can set radio options
     /// It sets a RadioConfig protobuf

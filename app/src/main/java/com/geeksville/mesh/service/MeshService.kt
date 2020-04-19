@@ -1056,8 +1056,8 @@ class MeshService : Service(), Logging {
             this@MeshService.radioConfig = MeshProtos.RadioConfig.parseFrom(payload)
         }
 
-        override fun getNodes(): Array<NodeInfo> = toRemoteExceptions {
-            val r = nodeDBbyID.values.toTypedArray()
+        override fun getNodes(): MutableList<NodeInfo> = toRemoteExceptions {
+            val r = nodeDBbyID.values.toMutableList()
             info("in getOnline, count=${r.size}")
             // return arrayOf("+16508675309")
             r
