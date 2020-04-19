@@ -108,7 +108,8 @@ class MainActivity : AppCompatActivity(), Logging,
         const val REQUEST_ENABLE_BT = 10
         const val DID_REQUEST_PERM = 11
         const val RC_SIGN_IN = 12 // google signin completed
-        const val RC_SELECT_DEVICE = 65549 // seems to be hardwired in CompanionDeviceManager
+        const val RC_SELECT_DEVICE =
+            13 // seems to be hardwired in CompanionDeviceManager to add 65536
     }
 
 
@@ -405,14 +406,19 @@ class MainActivity : AppCompatActivity(), Logging,
                     GoogleSignIn.getSignedInAccountFromIntent(data)
                 handleSignInResult(task)
             }
-            RC_SELECT_DEVICE -> when (resultCode) {
+            (65536 + RC_SELECT_DEVICE) -> when (resultCode) {
                 Activity.RESULT_OK -> {
                     // User has chosen to pair with the Bluetooth device.
                     val device: BluetoothDevice =
                         data!!.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)
                     debug("Received BLE pairing ${device.address}")
-                    device.createBond()
+                    if (device.bondState != BluetoothDevice.BOND_BONDED) {
+                        device.createBond()
+                        // FIXME - wait for bond to complete
+                    }
+
                     // ... Continue interacting with the paired device.
+                    RadioInterfaceService.setBondedDeviceAddress(this, device.address)
                 }
 
                 else ->

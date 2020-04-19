@@ -1,13 +1,13 @@
 package com.geeksville.mesh.service
 
+import android.annotation.SuppressLint
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothManager
+import android.companion.CompanionDeviceManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.content.edit
@@ -156,32 +156,61 @@ class RadioInterfaceService : Service(), Logging {
         }
 
         /// Return the device we are configured to use, or null for none
-        fun getBondedDeviceAddress(context: Context): String? {
+        @SuppressLint("NewApi")
+        fun getBondedDeviceAddress(context: Context): String? =
+            if (hasCompanionDeviceApi(context)) {
+                // Use new companion API
 
-            val allPaired =
-                getBluetoothAdapter(context)?.bondedDevices.orEmpty().map { it.address }.toSet()
+                val deviceManager = context.getSystemService(CompanionDeviceManager::class.java)
+                val associations = deviceManager.associations
+                val result = associations.firstOrNull()
+                debug("reading bonded devices: $result")
+                result
+            } else {
+                // Use classic API and a preferences string
 
-            // If the user has unpaired our device, treat things as if we don't have one
-            val addr = getPrefs(context).getString(DEVADDR_KEY, null)
-            return if (addr != null && !allPaired.contains(addr)) {
-                warn("Ignoring stale bond to $addr")
-                null
-            } else
-                addr
-        }
+                val allPaired =
+                    getBluetoothAdapter(context)?.bondedDevices.orEmpty().map { it.address }.toSet()
 
-        fun setBondedDeviceAddress(context: Context, addr: String?) {
-            getPrefs(context).edit(commit = true) {
-                if (addr == null)
-                    this.remove(DEVADDR_KEY)
-                else
-                    putString(DEVADDR_KEY, addr)
+                // If the user has unpaired our device, treat things as if we don't have one
+                val address = getPrefs(context).getString(DEVADDR_KEY, null)
+
+                if (address != null && !allPaired.contains(address)) {
+                    warn("Ignoring stale bond to $address")
+                    null
+                } else
+                    address
             }
 
+
+        @SuppressLint("NewApi")
+        fun setBondedDeviceAddress(context: Context, addr: String?) {
             // Record that this use has configured a radio
             GeeksvilleApplication.analytics.track(
                 "mesh_bond"
             )
+
+            debug("Setting bonded device to $addr")
+            if (hasCompanionDeviceApi((context))) {
+                // We only keep an association to one device at a time...
+                if (addr != null) {
+                    val deviceManager = context.getSystemService(CompanionDeviceManager::class.java)
+
+                    deviceManager.associations.forEach { old ->
+                        if (addr != old) {
+                            debug("Forgetting old BLE association $old")
+                            deviceManager.disassociate(old)
+                        }
+                    }
+                }
+            } else {
+                getPrefs(context).edit(commit = true) {
+                    if (addr == null)
+                        this.remove(DEVADDR_KEY)
+                    else
+                        putString(DEVADDR_KEY, addr)
+                }
+            }
 
             // Force the service to reconnect
             val s = runningService
@@ -201,7 +230,7 @@ class RadioInterfaceService : Service(), Logging {
         }
 
         /// Can we use the modern BLE scan API?
-        fun hasCompanionDeviceApi(context: Context): Boolean =
+        fun hasCompanionDeviceApi(context: Context): Boolean = false /* ALAS - not ready for production yet
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val res =
                     context.packageManager.hasSystemFeature(PackageManager.FEATURE_COMPANION_DEVICE_SETUP)
@@ -210,7 +239,7 @@ class RadioInterfaceService : Service(), Logging {
             } else {
                 warn("CompanionDevice API not available, falling back to classic scan")
                 false
-            }
+            } */
     }
 
 

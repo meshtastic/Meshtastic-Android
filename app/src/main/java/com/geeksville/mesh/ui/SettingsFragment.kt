@@ -24,7 +24,6 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
 import com.geeksville.mesh.MainActivity
-import com.geeksville.mesh.MainActivity.Companion.RC_SELECT_DEVICE
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.RadioInterfaceService
@@ -396,9 +395,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     changeRadioButton.isEnabled = true
                     changeRadioButton.setOnClickListener {
                         debug("User clicked BLE change button")
+
+                        // Request code seems to be ignored anyways
                         startIntentSenderForResult(
                             chooserLauncher,
-                            RC_SELECT_DEVICE, null, 0, 0, 0, null
+                            MainActivity.RC_SELECT_DEVICE, null, 0, 0, 0, null
                         )
                     }
                 }
