@@ -21,6 +21,24 @@ import java.util.*
 /// Return a standard BLE 128 bit UUID from the short 16 bit versions
 fun longBLEUUID(hexFour: String) = UUID.fromString("0000$hexFour-0000-1000-8000-00805f9b34fb")
 
+
+/**
+ * A helper class to call onChanged when bluetooth is enabled or disabled
+ */
+class BluetoothStateReceiver(val onChanged: (Boolean) -> Unit) : BroadcastReceiver() {
+    val intent = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED) // Can be used for registering
+
+    override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
+        if (intent.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
+            when (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1)) {
+                // Simulate a disconnection if the user disables bluetooth entirely
+                BluetoothAdapter.STATE_OFF -> onChanged(false)
+                BluetoothAdapter.STATE_ON -> onChanged(true)
+            }
+        }
+    }
+}
+
 /**
  * Uses coroutines to safely access a bluetooth GATT device with a synchronous API
  *
@@ -51,28 +69,19 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private val notifyHandlers = mutableMapOf<UUID, (BluetoothGattCharacteristic) -> Unit>()
 
     /// When we see the BT stack getting disabled/renabled we handle that as a connect/disconnect event
-    private val btStateReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
-            if (intent.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
-                val newstate = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1)
-                when (newstate) {
-                    // Simulate a disconnection if the user disables bluetooth entirely
-                    BluetoothAdapter.STATE_OFF -> {
-                        if (state == BluetoothProfile.STATE_CONNECTED)
-                            gattCallback.onConnectionStateChange(
-                                gatt!!,
-                                0,
-                                BluetoothProfile.STATE_DISCONNECTED
-                            )
-                        else
-                            debug("We were not connected, so ignoring bluetooth shutdown")
-                    }
-                    BluetoothAdapter.STATE_ON -> {
-                        warn("requeue a connect anytime bluetooth is reenabled")
-                        reconnect()
-                    }
-                }
-            }
+    private val btStateReceiver = BluetoothStateReceiver { enabled ->
+        if (!enabled) {
+            if (state == BluetoothProfile.STATE_CONNECTED)
+                gattCallback.onConnectionStateChange(
+                    gatt!!,
+                    0,
+                    BluetoothProfile.STATE_DISCONNECTED
+                )
+            else
+                debug("We were not connected, so ignoring bluetooth shutdown")
+        } else {
+            warn("requeue a connect anytime bluetooth is reenabled")
+            reconnect()
         }
     }
 
@@ -83,7 +92,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     init {
         context.registerReceiver(
             btStateReceiver,
-            IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+            btStateReceiver.intent
         )
     }
 

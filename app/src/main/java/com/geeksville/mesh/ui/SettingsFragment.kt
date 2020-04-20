@@ -158,11 +158,14 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         }
     }
 
-    fun startScan() {
+    /**
+     * returns true if we could start scanning, false otherwise
+     */
+    fun startScan(): Boolean {
         debug("BTScan component active")
         selectedMacAddr = RadioInterfaceService.getBondedDeviceAddress(context)
 
-        if (bluetoothAdapter == null) {
+        return if (bluetoothAdapter == null) {
             warn("No bluetooth adapter.  Running under emulation?")
 
             val testnodes = listOf(
@@ -178,6 +181,8 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     GeeksvilleApplication.currentActivity as MainActivity,
                     testnodes.first().macAddress
                 )
+
+            true
         } else {
             /// The following call might return null if the user doesn't have bluetooth access permissions
             val s: BluetoothLeScanner? = bluetoothAdapter.bluetoothLeScanner
@@ -185,20 +190,28 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
             if (s == null) {
                 errorText.value =
                     context.getString(R.string.requires_bluetooth)
+
+                false
             } else {
-                debug("starting scan")
+                if (scanner == null) {
+                    debug("starting scan")
 
-                // filter and only accept devices that have a sw update service
-                val filter =
-                    ScanFilter.Builder()
-                        .setServiceUuid(ParcelUuid(RadioInterfaceService.BTM_SERVICE_UUID))
-                        .build()
+                    // filter and only accept devices that have a sw update service
+                    val filter =
+                        ScanFilter.Builder()
+                            .setServiceUuid(ParcelUuid(RadioInterfaceService.BTM_SERVICE_UUID))
+                            .build()
 
-                val settings =
-                    ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                        .build()
-                s.startScan(listOf(filter), settings, scanCallback)
-                scanner = s
+                    val settings =
+                        ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                            .build()
+                    s.startScan(listOf(filter), settings, scanCallback)
+                    scanner = s
+                } else {
+                    debug("scan already running")
+                }
+
+                true
             }
         }
     }
@@ -342,12 +355,24 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
+    /// Show the GUI for classic scanning
+    private fun showClassicWidgets(visible: Int) {
+        scanProgressBar.visibility = visible
+        deviceRadioGroup.visibility = visible
+    }
+
     /// Setup the GUI to do a classic (pre SDK 26 BLE scan)
     private fun initClassicScan() {
-        // Turn off the widgets for the new API
-        scanProgressBar.visibility = View.VISIBLE
-        deviceRadioGroup.visibility = View.VISIBLE
+        // Turn off the widgets for the new API (we turn on/off hte classic widgets when we start scanning
         changeRadioButton.visibility = View.GONE
+
+        model.bluetoothEnabled.observe(viewLifecycleOwner, Observer { enabled ->
+            showClassicWidgets(if (enabled) View.VISIBLE else View.GONE)
+            if (enabled)
+                scanModel.startScan()
+            else
+                scanModel.stopScan()
+        })
 
         scanModel.errorText.observe(viewLifecycleOwner, Observer { errMsg ->
             if (errMsg != null) {
@@ -359,24 +384,29 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             // Remove the old radio buttons and repopulate
             deviceRadioGroup.removeAllViews()
 
-            var hasShownOurDevice = false
-            devices.values.forEach { device ->
-                hasShownOurDevice =
-                    hasShownOurDevice || device.macAddress == scanModel.selectedMacAddr
-                addDeviceButton(device, true)
-            }
+            val adapter = scanModel.bluetoothAdapter!!
+            if (adapter.isEnabled) {
+                // This code requres BLE to be enabled
+                
+                var hasShownOurDevice = false
+                devices.values.forEach { device ->
+                    hasShownOurDevice =
+                        hasShownOurDevice || device.macAddress == scanModel.selectedMacAddr
+                    addDeviceButton(device, true)
+                }
 
-            // The device the user is already paired with is offline currently, still show it
-            // it in the list, but greyed out
-            val selectedAddr = scanModel.selectedMacAddr
-            if (!hasShownOurDevice && selectedAddr != null) {
-                val bDevice = scanModel.bluetoothAdapter!!.getRemoteDevice(selectedAddr)
-                val curDevice = BTScanModel.BTScanEntry(
-                    bDevice.name,
-                    bDevice.address,
-                    bDevice.bondState == BOND_BONDED
-                )
-                addDeviceButton(curDevice, false)
+                // The device the user is already paired with is offline currently, still show it
+                // it in the list, but greyed out
+                val selectedAddr = scanModel.selectedMacAddr
+                if (!hasShownOurDevice && selectedAddr != null) {
+                    val bDevice = scanModel.bluetoothAdapter!!.getRemoteDevice(selectedAddr)
+                    val curDevice = BTScanModel.BTScanEntry(
+                        bDevice.name,
+                        bDevice.address,
+                        bDevice.bondState == BOND_BONDED
+                    )
+                    addDeviceButton(curDevice, false)
+                }
             }
 
             val hasBonded =

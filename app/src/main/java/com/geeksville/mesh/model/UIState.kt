@@ -100,6 +100,10 @@ class UIViewModel(app: Application) : AndroidViewModel(app), Logging {
     }
 
 
+    val bluetoothEnabled = object : MutableLiveData<Boolean>(false) {
+    }
+
+
     /// If the app was launched because we received a new channel intent, the Url will be here
     var requestedChannelUrl: Uri? = null
 

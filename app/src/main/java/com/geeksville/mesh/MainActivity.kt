@@ -167,6 +167,10 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
+    private val btStateReceiver = BluetoothStateReceiver { enabled ->
+        model.bluetoothEnabled.value = enabled
+    }
+
     private fun requestPermission() {
         debug("Checking permissions")
 
@@ -298,6 +302,9 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
+    private val isInTestLab: Boolean by lazy {
+        (application as GeeksvilleApplication).isInTestLab
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -305,23 +312,13 @@ class MainActivity : AppCompatActivity(), Logging,
         val prefs = UIViewModel.getPreferences(this)
         model.ownerName.value = prefs.getString("owner", "")!!
 
-        val isInTestLab = (application as GeeksvilleApplication).isInTestLab
-
-        // Ensures Bluetooth is available on the device and it is enabled. If not,
-        // displays a dialog requesting user permission to enable Bluetooth.
-        if (bluetoothAdapter != null && !isInTestLab) {
-            bluetoothAdapter!!.takeIf { !it.isEnabled }?.apply {
-                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
-            }
-        } else {
-            Toast.makeText(
-                this,
-                R.string.error_bluetooth,
-                Toast.LENGTH_LONG
-            )
-                .show()
+        /// Set initial bluetooth state
+        bluetoothAdapter?.apply {
+            model.bluetoothEnabled.value = isEnabled
         }
+
+        /// We now want to be informed of bluetooth state
+        registerReceiver(btStateReceiver, btStateReceiver.intent)
 
         // if (!isInTestLab) - very important - even in test lab we must request permissions because we need location perms for some of our tests to pass
         requestPermission()
@@ -399,6 +396,8 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
     override fun onDestroy() {
+
+        unregisterReceiver(btStateReceiver)
         unregisterMeshReceiver()
         super.onDestroy()
     }
@@ -668,6 +667,15 @@ class MainActivity : AppCompatActivity(), Logging,
 
     override fun onStart() {
         super.onStart()
+
+        // Ensures Bluetooth is available on the device and it is enabled. If not,
+        // displays a dialog requesting user permission to enable Bluetooth.
+        if (!isInTestLab) {
+            bluetoothAdapter?.takeIf { !it.isEnabled }?.apply {
+                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+            }
+        }
 
         bindMeshService()
 

@@ -395,13 +395,23 @@ class RadioInterfaceService : Service(), Logging {
         }
     }
 
+    /**
+     * If the user turns on bluetooth after we start, make sure to try and reconnected then
+     */
+    private val bluetoothStateReceiver = BluetoothStateReceiver { enabled ->
+        if (enabled)
+            setEnabled(true)
+    }
+
     override fun onCreate() {
         runningService = this
         super.onCreate()
         setEnabled(true)
+        registerReceiver(bluetoothStateReceiver, bluetoothStateReceiver.intent)
     }
 
     override fun onDestroy() {
+        unregisterReceiver(bluetoothStateReceiver)
         setEnabled(false)
         serviceJob.cancel()
         runningService = null
