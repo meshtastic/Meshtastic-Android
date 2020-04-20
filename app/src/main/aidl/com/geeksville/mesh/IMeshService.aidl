@@ -57,8 +57,14 @@ interface IMeshService {
     */
     String connectionState();
 
+    /// If a macaddress we will try to talk to our device, if null we will be idle.
+    /// Users should not call this directly, only used internally by the MeshUtil activity
+    void setDeviceAddress(String deviceAddr);
+
     // see com.geeksville.com.geeksville.mesh broadcast intents
     // RECEIVED_OPAQUE  for data received from other nodes.  payload will contain a DataPacket
     // NODE_CHANGE  for new IDs appearing or disappearing
     // CONNECTION_CHANGED for losing/gaining connection to the packet radio
+
+
 }

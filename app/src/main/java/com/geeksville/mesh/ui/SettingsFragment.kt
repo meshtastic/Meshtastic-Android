@@ -36,15 +36,18 @@ object SLogging : Logging {}
 
 /// Change to a new macaddr selection, updating GUI and radio
 fun changeDeviceSelection(context: MainActivity, newAddr: String?) {
-    RadioInterfaceService.setBondedDeviceAddress(context, newAddr)
+    model.meshService?.let { service ->
+        service.setDeviceAddress(context, newAddr)
 
-    // Super ugly hack.  we force the activity to reconnect FIXME, find a cleaner way
-    context.unbindMeshService()
-    context.bindMeshService()
+    }
 }
 
 /// Show the UI asking the user to bond with a device, call changeSelection() if/when bonding completes
-private fun requestBonding(activity: MainActivity, device: BluetoothDevice, onSuccess: () -> Unit) {
+private fun requestBonding(
+    activity: MainActivity,
+    device: BluetoothDevice,
+    onSuccess: () -> Unit
+) {
     SLogging.info("Starting bonding for $device")
 
     // We need this receiver to get informed when the bond attempt finished
@@ -132,7 +135,10 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
                 // If nothing was selected, by default select the first thing we see
                 if (selectedMacAddr == null && entry.bonded)
-                    changeScanSelection(GeeksvilleApplication.currentActivity as MainActivity, addr)
+                    changeScanSelection(
+                        GeeksvilleApplication.currentActivity as MainActivity,
+                        addr
+                    )
 
                 devices.value = oldDevs + Pair(addr, entry) // trigger gui updates
             }
@@ -347,14 +353,16 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     if (!device.bonded)
                         scanStatusText.setText(R.string.starting_pairing)
 
-                    b.isSelected = scanModel.onSelected(requireActivity() as MainActivity, device)
+                    b.isSelected =
+                        scanModel.onSelected(requireActivity() as MainActivity, device)
 
                     if (!b.isSelected)
                         scanStatusText.setText(R.string.pairing_failed)
                 }
             }
 
-            val hasBonded = RadioInterfaceService.getBondedDeviceAddress(requireContext()) != null
+            val hasBonded =
+                RadioInterfaceService.getBondedDeviceAddress(requireContext()) != null
 
             // get rid of the warning text once at least one device is paired
             warningNotPaired.visibility = if (hasBonded) View.GONE else View.VISIBLE

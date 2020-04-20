@@ -37,7 +37,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 
-class RadioNotConnectedException() : Exception("Not connected to radio")
+class RadioNotConnectedException(message: String = "Not connected to radio") : Exception(message)
 
 
 private val errorHandler = CoroutineExceptionHandler { _, exception ->
@@ -73,35 +73,30 @@ class MeshService : Service(), Logging {
         /// Helper function to start running our service, returns the intent used to reach it
         /// or null if the service could not be started (no bluetooth or no bonded device set)
         fun startService(context: Context): Intent? {
-            if (RadioInterfaceService.getBondedDeviceAddress(context) == null) {
-                warn("No mesh radio is bonded, not starting service")
-                return null
-            } else {
-                // bind to our service using the same mechanism an external client would use (for testing coverage)
-                // The following would work for us, but not external users
-                //val intent = Intent(this, MeshService::class.java)
-                //intent.action = IMeshService::class.java.name
-                val intent = Intent()
-                intent.setClassName(
-                    "com.geeksville.mesh",
-                    "com.geeksville.mesh.service.MeshService"
-                )
+            // bind to our service using the same mechanism an external client would use (for testing coverage)
+            // The following would work for us, but not external users
+            //val intent = Intent(this, MeshService::class.java)
+            //intent.action = IMeshService::class.java.name
+            val intent = Intent()
+            intent.setClassName(
+                "com.geeksville.mesh",
+                "com.geeksville.mesh.service.MeshService"
+            )
 
-                // Before binding we want to explicitly create - so the service stays alive forever (so it can keep
-                // listening for the bluetooth packets arriving from the radio.  And when they arrive forward them
-                // to Signal or whatever.
+            // Before binding we want to explicitly create - so the service stays alive forever (so it can keep
+            // listening for the bluetooth packets arriving from the radio.  And when they arrive forward them
+            // to Signal or whatever.
 
-                logAssert(
-                    (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        // we have some samsung devices failing with https://issuetracker.google.com/issues/76112072#comment56 not sure what the fix is yet
-                        context.startForegroundService(intent)
-                    } else {
-                        context.startService(intent)
-                    }) != null
-                )
+            logAssert(
+                (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    // we have some samsung devices failing with https://issuetracker.google.com/issues/76112072#comment56 not sure what the fix is yet
+                    context.startForegroundService(intent)
+                } else {
+                    context.startService(intent)
+                }) != null
+            )
 
-                return intent
-            }
+            return intent
         }
     }
 
@@ -1069,6 +1064,12 @@ class MeshService : Service(), Logging {
     }
 
     private val binder = object : IMeshService.Stub() {
+
+        override fun setDeviceAddress(deviceAddr: String?) {
+            debug("Passing through device change to radio service: $deviceAddr")
+            connectedRadio.setDeviceAddress(deviceAddr)
+        }
+
         // Note: bound methods don't get properly exception caught/logged, so do that with a wrapper
         // per https://blog.classycode.com/dealing-with-exceptions-in-aidl-9ba904c6d63
         override fun subscribeReceiver(packageName: String, receiverName: String) =

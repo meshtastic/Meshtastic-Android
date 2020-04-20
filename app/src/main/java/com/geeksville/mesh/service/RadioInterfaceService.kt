@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.companion.CompanionDeviceManager
 import android.content.Context
@@ -184,52 +185,6 @@ class RadioInterfaceService : Service(), Logging {
             }
 
 
-        @SuppressLint("NewApi")
-        fun setBondedDeviceAddress(context: Context, addr: String?) {
-            // Record that this use has configured a radio
-            GeeksvilleApplication.analytics.track(
-                "mesh_bond"
-            )
-
-            debug("Setting bonded device to $addr")
-            if (hasCompanionDeviceApi((context))) {
-                // We only keep an association to one device at a time...
-                if (addr != null) {
-                    val deviceManager = context.getSystemService(CompanionDeviceManager::class.java)
-
-                    deviceManager.associations.forEach { old ->
-                        if (addr != old) {
-                            debug("Forgetting old BLE association $old")
-                            deviceManager.disassociate(old)
-                        }
-                    }
-                }
-            } else {
-                getPrefs(context).edit(commit = true) {
-                    if (addr == null)
-                        this.remove(DEVADDR_KEY)
-                    else
-                        putString(DEVADDR_KEY, addr)
-                }
-            }
-
-            // Force the service to reconnect
-            val s = runningService
-            if (s != null) {
-                // Ignore any errors that happen while closing old device
-                ignoreException {
-                    info("shutting down old service")
-                    s.setEnabled(false) // nasty, needed to force the next setEnabled call to reconnect
-                }
-                info("Setting enable on the running radio service")
-                s.setEnabled(addr != null)
-            }
-            if (addr != null) {
-                info("We have a device addr now, starting mesh service")
-                MeshService.startService(context)
-            }
-        }
-
         /// Can we use the modern BLE scan API?
         fun hasCompanionDeviceApi(context: Context): Boolean = false /* ALAS - not ready for production yet
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -250,8 +205,11 @@ class RadioInterfaceService : Service(), Logging {
     /// Our BLE device
     val device get() = safe!!.gatt!!
 
-    /// Our service
-    val service get() = device.getService(BTM_SERVICE_UUID)
+    /// Our service - note - it is possible to get back a null response for getService if the device services haven't yet been found
+    val service
+        get(): BluetoothGattService = device.getService(BTM_SERVICE_UUID)
+            ?: throw RadioNotConnectedException("BLE service not found")
+
     //.services.find { it.uuid == BTM_SERVICE_UUID }!!
 
     private lateinit var fromNum: BluetoothGattCharacteristic
@@ -324,6 +282,49 @@ class RadioInterfaceService : Service(), Logging {
                     debug("Done reading from radio, fromradio is empty")
                 }
             }
+        }
+    }
+
+
+    @SuppressLint("NewApi")
+    fun setBondedDeviceAddress(addr: String?) {
+        // Record that this use has configured a radio
+        GeeksvilleApplication.analytics.track(
+            "mesh_bond"
+        )
+
+        // Ignore any errors that happen while closing old device
+        ignoreException {
+            Companion.info("shutting down old service")
+            setEnabled(false) // nasty, needed to force the next setEnabled call to reconnect
+        }
+
+        debug("Setting bonded device to $addr")
+        if (hasCompanionDeviceApi(this)) {
+            // We only keep an association to one device at a time...
+            if (addr != null) {
+                val deviceManager = getSystemService(CompanionDeviceManager::class.java)
+
+                deviceManager.associations.forEach { old ->
+                    if (addr != old) {
+                        Companion.debug("Forgetting old BLE association $old")
+                        deviceManager.disassociate(old)
+                    }
+                }
+            }
+        } else {
+            getPrefs(this).edit(commit = true) {
+                if (addr == null)
+                    this.remove(DEVADDR_KEY)
+                else
+                    putString(DEVADDR_KEY, addr)
+            }
+        }
+
+        // Force the service to reconnect
+        if (addr != null) {
+            info("Setting enable on the running radio service")
+            setEnabled(true)
         }
     }
 
@@ -418,7 +419,7 @@ class RadioInterfaceService : Service(), Logging {
             } else {
                 val address = getBondedDeviceAddress(this)
                 if (address == null)
-                    errormsg("No bonded mesh radio, can't create service")
+                    errormsg("No bonded mesh radio, can't start service")
                 else {
                     // Note: this call does no comms, it just creates the device object (even if the
                     // device is off/not connected)
@@ -518,8 +519,9 @@ class RadioInterfaceService : Service(), Logging {
     }
 
     private val binder = object : IRadioInterfaceService.Stub() {
-        override fun enableLink(enable: Boolean) = toRemoteExceptions {
-            setEnabled(enable)
+
+        override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
+            setBondedDeviceAddress(deviceAddr)
         }
 
         // A write of any size to nodeinfo means restart reading

@@ -436,7 +436,9 @@ class MainActivity : AppCompatActivity(), Logging,
                     }
 
                     // ... Continue interacting with the paired device.
-                    RadioInterfaceService.setBondedDeviceAddress(this, device.address)
+                    model.meshService?.let { service ->
+                        service.setDeviceAddress(device.address)
+                    }
                 }
 
                 else ->
@@ -636,7 +638,7 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    fun bindMeshService() {
+    private fun bindMeshService() {
         debug("Binding to mesh service!")
         // we bind using the well known name, to make sure 3rd party apps could also
         if (model.meshService != null)
@@ -648,7 +650,7 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    fun unbindMeshService() {
+    private fun unbindMeshService() {
         // If we have received the service, and hence registered with
         // it, then now is the time to unregister.
         // if we never connected, do nothing

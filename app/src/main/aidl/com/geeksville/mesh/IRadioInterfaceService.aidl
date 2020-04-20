@@ -22,6 +22,7 @@ interface IRadioInterfaceService {
     byte []readOwner();
     void writeOwner(in byte [] owner);
 
-    /// If true we will try to talk to our device, if false we will shutdown.  Useful during software update.
-    void enableLink(boolean enable);
+    /// If a macaddress we will try to talk to our device, if null we will be idle.
+    /// Users should not call this directly, called only by MeshService
+    void setDeviceAddress(String deviceAddr);
 }
