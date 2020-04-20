@@ -354,7 +354,7 @@ class RadioInterfaceService : Service(), Logging {
     private fun onConnect(connRes: Result<Unit>) {
         // This callback is invoked after we are connected
 
-        connRes.getOrThrow() // FIXME, instead just try to reconnect?
+        connRes.getOrThrow()
         info("Connected to radio!")
 
         if (!hasForcedRefresh) {

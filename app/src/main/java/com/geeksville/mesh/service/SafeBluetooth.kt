@@ -154,9 +154,11 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                 BluetoothProfile.STATE_CONNECTED -> {
                     state =
                         newState // we only care about connected/disconnected - not the transitional states
-                    //logAssert(workQueue.isNotEmpty())
-                    //val work = workQueue.removeAt(0)
-                    completeWork(status, Unit)
+
+                    if (status != BluetoothGatt.GATT_SUCCESS) {
+                        errormsg("Connect attempt failed $status, not calling connect completion handler...")
+                    } else
+                        completeWork(status, Unit)
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     // cancel any queued ops if we were already connected
