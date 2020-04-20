@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.google.gms.google-services'
 
 // Apply the Crashlytics Gradle plugin
@@ -102,6 +103,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+
+    // kotlin serialization
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0"
 
     // rate this app
     implementation "com.vorlonsoft:androidrate:1.2.1"

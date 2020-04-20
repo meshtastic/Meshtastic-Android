@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.geeksville.mesh.ui.bearing
 import com.geeksville.mesh.ui.latLongToMeter
 import kotlinx.android.parcel.Parcelize
+import kotlinx.serialization.Serializable
 
 
 /**
@@ -23,6 +24,7 @@ val Any?.anonymized: String
 /**
  * A parcelable version of the protobuf MeshPacket + Data subpacket.
  */
+@Serializable
 @Parcelize
 data class DataPacket(
     val from: String, // a nodeID string
@@ -61,6 +63,7 @@ data class DataPacket(
     }
 }
 
+@Serializable
 @Parcelize
 data class MeshUser(val id: String, val longName: String, val shortName: String) :
     Parcelable {
@@ -70,6 +73,7 @@ data class MeshUser(val id: String, val longName: String, val shortName: String)
     }
 }
 
+@Serializable
 @Parcelize
 data class Position(
     val latitude: Double,
@@ -89,6 +93,7 @@ data class Position(
 }
 
 
+@Serializable
 @Parcelize
 data class NodeInfo(
     val num: Int, // This is immutable, and used as a key

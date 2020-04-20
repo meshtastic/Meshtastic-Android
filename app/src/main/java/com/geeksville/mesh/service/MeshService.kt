@@ -14,6 +14,7 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.UiThread
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_MIN
+import androidx.core.content.edit
 import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
@@ -29,6 +30,9 @@ import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.protobuf.ByteString
 import kotlinx.coroutines.*
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -100,7 +104,7 @@ class MeshService : Service(), Logging {
         }
     }
 
-    public enum class ConnectionState {
+    enum class ConnectionState {
         DISCONNECTED,
         CONNECTED,
         DEVICE_SLEEP // device is in LS sleep state, it will reconnected to us over bluetooth once it has data
@@ -379,18 +383,23 @@ class MeshService : Service(), Logging {
         info("Creating mesh service")
         startForeground()
 
-        // we listen for messages from the radio receiver _before_ trying to create the service
-        val filter = IntentFilter()
-        filter.addAction(RadioInterfaceService.RECEIVE_FROMRADIO_ACTION)
-        filter.addAction(RadioInterfaceService.RADIO_CONNECTED_ACTION)
-        registerReceiver(radioInterfaceReceiver, filter)
+        // Switch to the IO thread
+        serviceScope.handledLaunch {
+            loadSettings() // Load our last known node DB
 
-        // We in turn need to use the radiointerface service
-        val intent = Intent(this, RadioInterfaceService::class.java)
-        // intent.action = IMeshService::class.java.name
-        radio.connect(this, intent, Context.BIND_AUTO_CREATE)
+            // we listen for messages from the radio receiver _before_ trying to create the service
+            val filter = IntentFilter()
+            filter.addAction(RadioInterfaceService.RECEIVE_FROMRADIO_ACTION)
+            filter.addAction(RadioInterfaceService.RADIO_CONNECTED_ACTION)
+            registerReceiver(radioInterfaceReceiver, filter)
 
-        // the rest of our init will happen once we are in radioConnection.onServiceConnected
+            // We in turn need to use the radiointerface service
+            val intent = Intent(this@MeshService, RadioInterfaceService::class.java)
+            // intent.action = IMeshService::class.java.name
+            radio.connect(this@MeshService, intent, Context.BIND_AUTO_CREATE)
+
+            // the rest of our init will happen once we are in radioConnection.onServiceConnected
+        }
     }
 
 
@@ -398,6 +407,7 @@ class MeshService : Service(), Logging {
         info("Destroying mesh service")
         unregisterReceiver(radioInterfaceReceiver)
         radio.close()
+        saveSettings()
 
         super.onDestroy()
         serviceJob.cancel()
@@ -412,6 +422,7 @@ class MeshService : Service(), Logging {
     val NODENUM_BROADCAST = 255
 
     // MyNodeInfo sent via special protobuf from radio
+    @Serializable
     data class MyNodeInfo(
         val myNodeNum: Int,
         val hasGPS: Boolean,
@@ -419,6 +430,84 @@ class MeshService : Service(), Logging {
         val model: String,
         val firmwareVersion: String
     )
+
+    /// Our saved preferences as stored on disk
+    @Serializable
+    private data class SavedSettings(
+        val nodeDB: Array<NodeInfo>,
+        val myInfo: MyNodeInfo,
+        val messages: Array<DataPacket>
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as SavedSettings
+
+            if (!nodeDB.contentEquals(other.nodeDB)) return false
+            if (myInfo != other.myInfo) return false
+            if (!messages.contentEquals(other.messages)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = nodeDB.contentHashCode()
+            result = 31 * result + myInfo.hashCode()
+            result = 31 * result + messages.contentHashCode()
+            return result
+        }
+    }
+
+    private fun getPrefs() = getSharedPreferences("service-prefs", Context.MODE_PRIVATE)
+
+    /// Save information about our mesh to disk, so we will have it when we next start the service (even before we hear from our device)
+    private fun saveSettings() {
+        myNodeInfo?.let { myInfo ->
+            val settings = SavedSettings(
+                myInfo = myInfo,
+                nodeDB = nodeDBbyNodeNum.values.toTypedArray(),
+                messages = recentDataPackets.toTypedArray()
+            )
+            val json = Json(JsonConfiguration.Default)
+            val asString = json.stringify(SavedSettings.serializer(), settings)
+            debug("Saving settings as $asString")
+            getPrefs().edit(commit = true) {
+                // FIXME, not really ideal to store this bigish blob in preferences
+                putString("json", asString)
+            }
+        }
+    }
+
+    /// Load our saved DB state
+    private fun loadSettings() {
+        try {
+            getPrefs().getString("json", null)?.let { asString ->
+                val json = Json(JsonConfiguration.Default)
+                val settings = json.parse(SavedSettings.serializer(), asString)
+                myNodeInfo = settings.myInfo
+
+                // put our node array into our two different map representations
+                nodeDBbyNodeNum.clear()
+                nodeDBbyNodeNum.putAll(settings.nodeDB.map { Pair(it.num, it) })
+                nodeDBbyID.clear()
+                nodeDBbyID.putAll(settings.nodeDB.mapNotNull {
+                    it.user?.let { user -> // ignore records that don't have a valid user
+                        Pair(
+                            user.id,
+                            it
+                        )
+                    }
+                })
+                // Note: we do not haveNodeDB = true because that means we've got a valid db from a real device (rather than this possibly stale hint)
+
+                recentDataPackets.clear()
+                recentDataPackets.addAll(settings.messages)
+            }
+        } catch (ex: Exception) {
+            errormsg("Ignoring error loading saved state for service: ${ex.message}")
+        }
+    }
 
     var myNodeInfo: MyNodeInfo? = null
 
@@ -819,6 +908,9 @@ class MeshService : Service(), Logging {
         }
 
         fun startDisconnect() {
+            // Just in case the user uncleanly reboots the phone, save now (we normally save in onDestroy)
+            saveSettings()
+
             GeeksvilleApplication.analytics.track(
                 "mesh_disconnect",
                 DataPair("num_nodes", numNodes),

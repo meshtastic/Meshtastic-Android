@@ -28,5 +28,16 @@
 # Needed for protobufs
 -keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite { <fields>; }
 
+# for kotlinx.serialization
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.SerializationKt
+-keep,includedescriptorclasses class com.yourcompany.yourpackage.**$$serializer { *; } # <-- change package name to your app's
+-keepclassmembers class com.geeksville.mesh.** { # <-- change package name to your app's
+    *** Companion;
+}
+-keepclasseswithmembers class com.geeksville.mesh.** { # <-- change package name to your app's
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
 # Our app is opensource no need to obsfucate
 -dontobfuscate
