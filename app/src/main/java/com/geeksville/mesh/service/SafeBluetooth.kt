@@ -205,6 +205,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         }
 
         override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
+            // For testing lie and claim failure
             completeWork(status, Unit)
         }
 
@@ -324,7 +325,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             // startup next job in queue before calling the completion handler
             val work =
                 synchronized(workQueue) {
-                    val w = currentWork!! // will throw if null, which is helpful
+                    val w =
+                        currentWork!! // will throw if null, which is helpful (FIXME - throws in the field)
                     currentWork = null // We are now no longer working on anything
 
                     startNewWork()
