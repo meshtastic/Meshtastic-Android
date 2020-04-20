@@ -155,7 +155,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                     state =
                         newState // we only care about connected/disconnected - not the transitional states
 
-                    if (status != BluetoothGatt.GATT_SUCCESS) {
+                    // If autoconnect is on and this connect attempt failed, hopefully some future attempt will succeed
+                    if (status != BluetoothGatt.GATT_SUCCESS && autoConnect) {
                         errormsg("Connect attempt failed $status, not calling connect completion handler...")
                     } else
                         completeWork(status, Unit)
@@ -363,12 +364,17 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         return cont.await(timeoutMsec)
     }
 
+    // Is the gatt trying to repeatedly connect as needed?
+    private var autoConnect = false
+
     // FIXME, pass in true for autoconnect - so we will autoconnect whenever the radio
     // comes in range (even if we made this connect call long ago when we got powered on)
     // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
     // more info.
     // Otherwise if you pass in false, it will try to connect now and will timeout and fail in 30 seconds.
     private fun queueConnect(autoConnect: Boolean = false, cont: Continuation<Unit>) {
+        this.autoConnect = autoConnect
+
         // assert(gatt == null) this now might be !null with our new reconnect support
         queueWork("connect", cont) {
             val g =
