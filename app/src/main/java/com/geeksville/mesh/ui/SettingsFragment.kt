@@ -36,9 +36,9 @@ object SLogging : Logging {}
 
 /// Change to a new macaddr selection, updating GUI and radio
 fun changeDeviceSelection(context: MainActivity, newAddr: String?) {
-    model.meshService?.let { service ->
-        service.setDeviceAddress(context, newAddr)
-
+    // FIXME, this is a kinda yucky way to find the service
+    context.model.meshService?.let { service ->
+        service.setDeviceAddress(newAddr)
     }
 }
 
@@ -317,8 +317,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     reportError("Clicked Report A Bug")
                 }
                 .show()
-
-            true
         }
     }
 

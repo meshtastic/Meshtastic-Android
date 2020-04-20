@@ -479,14 +479,14 @@ class MeshService : Service(), Logging {
     private fun loadSettings() {
         try {
             getPrefs().getString("json", null)?.let { asString ->
+                discardNodeDB() // Get rid of any old state 
+                
                 val json = Json(JsonConfiguration.Default)
                 val settings = json.parse(SavedSettings.serializer(), asString)
                 myNodeInfo = settings.myInfo
 
                 // put our node array into our two different map representations
-                nodeDBbyNodeNum.clear()
                 nodeDBbyNodeNum.putAll(settings.nodeDB.map { Pair(it.num, it) })
-                nodeDBbyID.clear()
                 nodeDBbyID.putAll(settings.nodeDB.mapNotNull {
                     it.user?.let { user -> // ignore records that don't have a valid user
                         Pair(
@@ -497,12 +497,22 @@ class MeshService : Service(), Logging {
                 })
                 // Note: we do not haveNodeDB = true because that means we've got a valid db from a real device (rather than this possibly stale hint)
 
-                recentDataPackets.clear()
                 recentDataPackets.addAll(settings.messages)
             }
         } catch (ex: Exception) {
             errormsg("Ignoring error loading saved state for service: ${ex.message}")
         }
+    }
+
+    /**
+     * discard entire node db & message state - used when changing radio channels
+     */
+    private fun discardNodeDB() {
+        myNodeInfo = null
+        nodeDBbyNodeNum.clear()
+        nodeDBbyID.clear()
+        recentDataPackets.clear()
+        haveNodeDB = false
     }
 
     var myNodeInfo: MyNodeInfo? = null
@@ -1067,6 +1077,7 @@ class MeshService : Service(), Logging {
 
         override fun setDeviceAddress(deviceAddr: String?) {
             debug("Passing through device change to radio service: $deviceAddr")
+            discardNodeDB()
             connectedRadio.setDeviceAddress(deviceAddr)
         }
 

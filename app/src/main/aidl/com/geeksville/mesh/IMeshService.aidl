@@ -58,6 +58,7 @@ interface IMeshService {
     String connectionState();
 
     /// If a macaddress we will try to talk to our device, if null we will be idle.
+    /// Any current connection will be dropped (even if the device address is the same) before reconnecting.
     /// Users should not call this directly, only used internally by the MeshUtil activity
     void setDeviceAddress(String deviceAddr);
 

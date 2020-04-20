@@ -118,7 +118,7 @@ class MainActivity : AppCompatActivity(), Logging,
         bluetoothManager.adapter
     }
 
-    private val model: UIViewModel by viewModels()
+    val model: UIViewModel by viewModels()
 
     data class TabInfo(val text: String, val icon: Int, val content: Fragment)
 
@@ -176,7 +176,7 @@ class MainActivity : AppCompatActivity(), Logging,
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN,
             Manifest.permission.WAKE_LOCK
-            
+
             // We only need this for logging to capture files for the simulator - turn off for most users
             // Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
