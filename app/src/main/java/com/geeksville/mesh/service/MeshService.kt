@@ -168,7 +168,7 @@ class MeshService : Service(), Logging {
                                 destNum = if (sendLora) NODENUM_BROADCAST else myNodeNum,
                                 wantResponse = sendLora
                             )
-                        } catch (ex: RadioNotConnectedException) {
+                        } catch (ex: RemoteException) { // Really a RadioNotConnected exception, but it has changed into this type via remoting
                             warn("Lost connection to radio, stopping location requests")
                             onConnectionChanged(ConnectionState.DEVICE_SLEEP)
                         }
