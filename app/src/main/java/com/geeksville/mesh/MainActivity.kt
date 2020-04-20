@@ -175,16 +175,20 @@ class MainActivity : AppCompatActivity(), Logging,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN,
-            Manifest.permission.WAKE_LOCK,
-            Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND,
-            Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND
-
+            Manifest.permission.WAKE_LOCK
+            
             // We only need this for logging to capture files for the simulator - turn off for most users
             // Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
 
         if (Build.VERSION.SDK_INT >= 29) // only added later
             perms.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+
+        // Some old phones complain about requesting perms they don't understand
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            perms.add(Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND)
+            perms.add(Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND)
+        }
 
         val missingPerms = perms.filter {
             ContextCompat.checkSelfPermission(
