@@ -3,6 +3,7 @@ package com.geeksville.mesh.ui
 import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothDevice.BOND_BONDED
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.*
 import android.companion.AssociationRequest
@@ -320,6 +321,27 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
+    private fun addDeviceButton(device: BTScanModel.BTScanEntry, enabled: Boolean) {
+        val b = RadioButton(requireActivity())
+        b.text = device.name
+        b.id = View.generateViewId()
+        b.isEnabled = enabled
+        b.isChecked = device.macAddress == scanModel.selectedMacAddr
+        deviceRadioGroup.addView(b)
+
+        b.setOnClickListener {
+            scanProgressBar.visibility = View.INVISIBLE
+            if (!device.bonded) // If user just clicked on us, try to bond
+                scanStatusText.setText(R.string.starting_pairing)
+
+            b.isChecked =
+                scanModel.onSelected(requireActivity() as MainActivity, device)
+
+            if (!b.isSelected)
+                scanStatusText.setText(R.string.pairing_failed)
+        }
+    }
+
     /// Setup the GUI to do a classic (pre SDK 26 BLE scan)
     private fun initClassicScan() {
         // Turn off the widgets for the new API
@@ -337,26 +359,24 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             // Remove the old radio buttons and repopulate
             deviceRadioGroup.removeAllViews()
 
+            var hasShownOurDevice = false
             devices.values.forEach { device ->
-                val b = RadioButton(requireActivity())
-                b.text = device.name
-                b.id = View.generateViewId()
-                b.isEnabled =
-                    true // Now we always want to enable, if the user clicks we'll try to bond device.bonded
-                b.isSelected = device.macAddress == scanModel.selectedMacAddr
-                deviceRadioGroup.addView(b)
+                hasShownOurDevice =
+                    hasShownOurDevice || device.macAddress == scanModel.selectedMacAddr
+                addDeviceButton(device, true)
+            }
 
-                b.setOnClickListener {
-                    scanProgressBar.visibility = View.INVISIBLE
-                    if (!device.bonded)
-                        scanStatusText.setText(R.string.starting_pairing)
-
-                    b.isSelected =
-                        scanModel.onSelected(requireActivity() as MainActivity, device)
-
-                    if (!b.isSelected)
-                        scanStatusText.setText(R.string.pairing_failed)
-                }
+            // The device the user is already paired with is offline currently, still show it
+            // it in the list, but greyed out
+            val selectedAddr = scanModel.selectedMacAddr
+            if (!hasShownOurDevice && selectedAddr != null) {
+                val bDevice = scanModel.bluetoothAdapter!!.getRemoteDevice(selectedAddr)
+                val curDevice = BTScanModel.BTScanEntry(
+                    bDevice.name,
+                    bDevice.address,
+                    bDevice.bondState == BOND_BONDED
+                )
+                addDeviceButton(curDevice, false)
             }
 
             val hasBonded =
