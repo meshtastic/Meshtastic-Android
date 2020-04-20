@@ -51,6 +51,8 @@ class BluetoothStateReceiver(val onChanged: (Boolean) -> Unit) : BroadcastReceiv
 class SafeBluetooth(private val context: Context, private val device: BluetoothDevice) :
     Logging, Closeable {
 
+    class BLEException(msg: String) : IOException(msg)
+
     /// Timeout before we declare a bluetooth operation failed
     var timeoutMsec = 30 * 1000L
 
@@ -178,7 +180,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
                         closeConnection()
                         */
-                        failAllWork(IOException("Lost connection"))
+                        failAllWork(BLEException("Lost connection"))
 
                         // Cancel any notifications - because when the device comes back it might have forgotten about us
                         notifyHandlers.clear()
@@ -338,7 +340,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
             debug("work ${work.tag} is completed, resuming status=$status, res=$res")
             if (status != 0)
-                work.completion.resumeWithException(IOException("Bluetooth status=$status while doing ${work.tag}"))
+                work.completion.resumeWithException(BLEException("Bluetooth status=$status while doing ${work.tag}"))
             else
                 work.completion.resume(Result.success(res) as Result<Nothing>)
         }
@@ -492,7 +494,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
 
     private fun closeConnection() {
-        failAllWork(IOException("Connection closing"))
+        failAllWork(BLEException("Connection closing"))
 
         if (gatt != null) {
             info("Closing our GATT connection")
