@@ -17,6 +17,7 @@ import com.geeksville.android.Logging
 import com.geeksville.concurrent.DeferredExecution
 import com.geeksville.mesh.IRadioInterfaceService
 import com.geeksville.util.exceptionReporter
+import com.geeksville.util.ignoreException
 import com.geeksville.util.toRemoteExceptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -216,7 +217,7 @@ class RadioInterfaceService : Service(), Logging {
             val s = runningService
             if (s != null) {
                 // Ignore any errors that happen while closing old device
-                exceptionReporter {
+                ignoreException {
                     info("shutting down old service")
                     s.setEnabled(false) // nasty, needed to force the next setEnabled call to reconnect
                 }

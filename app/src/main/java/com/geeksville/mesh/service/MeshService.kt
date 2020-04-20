@@ -93,6 +93,7 @@ class MeshService : Service(), Logging {
 
                 logAssert(
                     (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        // we have some samsung devices failing with https://issuetracker.google.com/issues/76112072#comment56 not sure what the fix is yet
                         context.startForegroundService(intent)
                     } else {
                         context.startService(intent)
@@ -1014,11 +1015,11 @@ class MeshService : Service(), Logging {
                                 proto.packet
                             )
 
-                            else -> TODO("Unexpected FromRadio variant")
+                            else -> errormsg("Unexpected FromRadio variant")
                         }
                     }
 
-                    else -> TODO("Unexpected radio interface broadcast")
+                    else -> errormsg("Unexpected radio interface broadcast")
                 }
             }
         }
