@@ -1099,7 +1099,7 @@ class MeshService : Service(), Logging {
 
         override fun setOwner(myId: String?, longName: String, shortName: String) =
             toRemoteExceptions {
-                debug("SetOwner $myId : $longName : $shortName")
+                debug("SetOwner $myId : ${longName.anonymized} : $shortName")
 
                 val user = MeshProtos.User.newBuilder().also {
                     if (myId != null)  // Only set the id if it was provided
