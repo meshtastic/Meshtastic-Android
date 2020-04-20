@@ -480,7 +480,7 @@ class MeshService : Service(), Logging {
         try {
             getPrefs().getString("json", null)?.let { asString ->
                 discardNodeDB() // Get rid of any old state 
-                
+
                 val json = Json(JsonConfiguration.Default)
                 val settings = json.parse(SavedSettings.serializer(), asString)
                 myNodeInfo = settings.myInfo
@@ -995,11 +995,14 @@ class MeshService : Service(), Logging {
                 when (intent.action) {
                     RadioInterfaceService.RADIO_CONNECTED_ACTION -> {
                         try {
+                            val connected = intent.getBooleanExtra(EXTRA_CONNECTED, false)
+                            val permanent = intent.getBooleanExtra(EXTRA_PERMANENT, false)
                             onConnectionChanged(
-                                if (intent.getBooleanExtra(EXTRA_CONNECTED, false))
-                                    ConnectionState.CONNECTED
-                                else
-                                    ConnectionState.DEVICE_SLEEP
+                                when {
+                                    connected -> ConnectionState.CONNECTED
+                                    permanent -> ConnectionState.DISCONNECTED
+                                    else -> ConnectionState.DEVICE_SLEEP
+                                }
                             )
                         } catch (ex: RemoteException) {
                             // This can happen sometimes (especially if the device is slowly dying due to killing power, don't report to crashlytics

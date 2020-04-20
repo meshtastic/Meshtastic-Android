@@ -228,10 +228,11 @@ class RadioInterfaceService : Service(), Logging {
     /// we have completed our initial connection
     private val clientOperations = DeferredExecution()
 
-    private fun broadcastConnectionChanged(isConnected: Boolean) {
+    private fun broadcastConnectionChanged(isConnected: Boolean, isPermanent: Boolean) {
         debug("Broadcasting connection=$isConnected")
         val intent = Intent(RADIO_CONNECTED_ACTION)
         intent.putExtra(EXTRA_CONNECTED, isConnected)
+        intent.putExtra(EXTRA_PERMANENT, isPermanent)
         sendBroadcast(intent)
     }
 
@@ -329,8 +330,8 @@ class RadioInterfaceService : Service(), Logging {
     }
 
 
-    private fun onDisconnect() {
-        broadcastConnectionChanged(false)
+    private fun onDisconnect(isPermanent: Boolean) {
+        broadcastConnectionChanged(false, isPermanent)
         isConnected = false
     }
 
@@ -385,7 +386,7 @@ class RadioInterfaceService : Service(), Logging {
                     }
 
                     // Now tell clients they can (finally use the api)
-                    broadcastConnectionChanged(true)
+                    broadcastConnectionChanged(true, isPermanent = false)
 
                     // Immediately broadcast any queued packets sitting on the device
                     doReadFromRadio()
@@ -435,7 +436,9 @@ class RadioInterfaceService : Service(), Logging {
                         // comes in range (even if we made this connect call long ago when we got powered on)
                         // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
                         // more info
-                        s.asyncConnect(true, ::onConnect, ::onDisconnect)
+                        s.asyncConnect(true,
+                            cb = ::onConnect,
+                            lostConnectCb = { onDisconnect(isPermanent = false) })
                     } else {
                         errormsg("Bluetooth adapter not found, assuming running on the emulator!")
                     }
@@ -447,13 +450,18 @@ class RadioInterfaceService : Service(), Logging {
                 }
             }
         } else {
-            info("Closing radio interface service")
-            if (logSends)
-                sentPacketsLog.close()
-            if (logReceives)
-                receivedPacketsLog.close()
-            safe?.close()
-            safe = null
+            if (safe != null) {
+                info("Closing radio interface service")
+                if (logSends)
+                    sentPacketsLog.close()
+                if (logReceives)
+                    receivedPacketsLog.close()
+                safe?.close()
+                safe = null
+                onDisconnect(isPermanent = true) // Tell any clients we are now offline
+            } else {
+                debug("Radio was not connected, skipping disable")
+            }
         }
     }
 
