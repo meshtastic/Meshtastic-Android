@@ -1078,10 +1078,10 @@ class MeshService : Service(), Logging {
 
     private val binder = object : IMeshService.Stub() {
 
-        override fun setDeviceAddress(deviceAddr: String?) {
+        override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
             debug("Passing through device change to radio service: $deviceAddr")
             discardNodeDB()
-            connectedRadio.setDeviceAddress(deviceAddr)
+            radio.service.setDeviceAddress(deviceAddr)
         }
 
         // Note: bound methods don't get properly exception caught/logged, so do that with a wrapper
