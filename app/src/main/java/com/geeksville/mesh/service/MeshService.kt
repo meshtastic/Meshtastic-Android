@@ -403,7 +403,7 @@ class MeshService : Service(), Logging {
         ignoreException {
             unregisterReceiver(radioInterfaceReceiver)
         }
-        
+
         radio.close()
         saveSettings()
 
@@ -890,6 +890,9 @@ class MeshService : Service(), Logging {
 
     private var sleepTimeout: Job? = null
 
+    /// msecs since 1970 we started this connection
+    private var connectTimeMsec = 0L
+
     /// Called when we gain/lose connection to our radio
     private fun onConnectionChanged(c: ConnectionState) {
         debug("onConnectionChanged=$c")
@@ -898,6 +901,16 @@ class MeshService : Service(), Logging {
         fun startDeviceSleep() {
             // lost radio connection, therefore no need to keep listening to GPS
             stopLocationRequests()
+
+            if (connectTimeMsec != 0L) {
+                val now = System.currentTimeMillis()
+                connectTimeMsec = 0L
+
+                GeeksvilleApplication.analytics.track(
+                    "connected_seconds",
+                    DataPair((now - connectTimeMsec) / 1000.0)
+                )
+            }
 
             // Have our timeout fire in the approprate number of seconds
             sleepTimeout = serviceScope.handledLaunch {
@@ -924,12 +937,14 @@ class MeshService : Service(), Logging {
                 DataPair("num_nodes", numNodes),
                 DataPair("num_online", numOnlineNodes)
             )
+            GeeksvilleApplication.analytics.track("num_nodes", DataPair(numNodes))
         }
 
         fun startConnect() {
             // Do our startup init
             try {
                 reinitFromRadio()
+                connectTimeMsec = System.currentTimeMillis()
 
                 val radioModel = DataPair("radio_model", myNodeInfo?.model ?: "unknown")
                 GeeksvilleApplication.analytics.track(
