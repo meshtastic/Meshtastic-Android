@@ -384,10 +384,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             // Remove the old radio buttons and repopulate
             deviceRadioGroup.removeAllViews()
 
-            val adapter = scanModel.bluetoothAdapter!!
-            if (adapter.isEnabled) {
+            val adapter = scanModel.bluetoothAdapter
+            if (adapter != null && adapter.isEnabled) {
                 // This code requres BLE to be enabled
-                
+
                 var hasShownOurDevice = false
                 devices.values.forEach { device ->
                     hasShownOurDevice =
