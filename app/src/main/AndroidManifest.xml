@@ -70,8 +70,12 @@
             android:name="com.mixpanel.android.MPConfig.DisableViewCrawler"
             android:value="true" />
 
+        <!-- Default crash collection and analytics off until we (possibly) turn it on in application.onCreate -->
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="firebase_analytics_collection_enabled"
             android:value="false" />
 
         <!-- we need bind job service for oreo -->
