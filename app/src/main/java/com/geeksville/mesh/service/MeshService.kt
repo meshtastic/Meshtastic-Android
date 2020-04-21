@@ -22,10 +22,7 @@ import com.geeksville.android.ServiceClient
 import com.geeksville.mesh.*
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
-import com.geeksville.util.Exceptions
-import com.geeksville.util.exceptionReporter
-import com.geeksville.util.toOneLineString
-import com.geeksville.util.toRemoteExceptions
+import com.geeksville.util.*
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.protobuf.ByteString
@@ -401,7 +398,12 @@ class MeshService : Service(), Logging {
 
     override fun onDestroy() {
         info("Destroying mesh service")
-        unregisterReceiver(radioInterfaceReceiver)
+
+        // This might fail if we get destroyed before the handledLaunch completes
+        ignoreException {
+            unregisterReceiver(radioInterfaceReceiver)
+        }
+        
         radio.close()
         saveSettings()
 
