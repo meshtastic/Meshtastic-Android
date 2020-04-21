@@ -26,6 +26,7 @@ import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
+import com.geeksville.mesh.anonymized
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.RadioInterfaceService
 import com.geeksville.util.exceptionReporter
@@ -91,6 +92,10 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
     data class BTScanEntry(val name: String, val macAddress: String, val bonded: Boolean) {
         // val isSelected get() = macAddress == selectedMacAddr
+
+        override fun toString(): String {
+            return "BTScanEntry(name=${name.anonymized}, addr=${macAddress.anonymized})"
+        }
     }
 
     override fun onCleared() {
@@ -264,7 +269,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
     /// Change to a new macaddr selection, updating GUI and radio
     fun changeScanSelection(context: MainActivity, newAddr: String) {
-        info("Changing BT device to $newAddr")
+        info("Changing BT device to ${newAddr.anonymized}")
         selectedMacAddr = newAddr
         changeDeviceSelection(context, newAddr)
     }
