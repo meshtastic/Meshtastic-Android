@@ -264,7 +264,7 @@ class RadioInterfaceService : Service(), Logging {
     }
 
     /// Attempt to read from the fromRadio mailbox, if data is found broadcast it to android apps
-    private fun doReadFromRadio() {
+    private fun doReadFromRadio(firstRead: Boolean) {
         if (!isConnected)
             warn("Abandoning fromradio read because we are not connected")
         else {
@@ -278,9 +278,11 @@ class RadioInterfaceService : Service(), Logging {
                     handleFromRadio(b)
 
                     // Queue up another read, until we run out of packets
-                    doReadFromRadio()
+                    doReadFromRadio(firstRead)
                 } else {
                     debug("Done reading from radio, fromradio is empty")
+                    if (firstRead) // If we just finished our initial download, now we want to start listening for notifies
+                        startWatchingFromNum()
                 }
             }
         }
@@ -351,6 +353,13 @@ class RadioInterfaceService : Service(), Logging {
     /// We only force service refresh the _first_ time we connect to the device.  Thereafter it is assumed the firmware didn't change
     private var hasForcedRefresh = false
 
+    private fun startWatchingFromNum() {
+        safe!!.setNotify(fromNum, true) {
+            debug("fromNum changed, so we are reading new messages")
+            doReadFromRadio(false)
+        }
+    }
+
     private fun onConnect(connRes: Result<Unit>) {
         // This callback is invoked after we are connected
 
@@ -380,16 +389,11 @@ class RadioInterfaceService : Service(), Logging {
                     // We must set this to true before broadcasting connectionChanged
                     isConnected = true
 
-                    safe!!.setNotify(fromNum, true) {
-                        debug("fromNum changed, so we are reading new messages")
-                        doReadFromRadio()
-                    }
-
                     // Now tell clients they can (finally use the api)
                     broadcastConnectionChanged(true, isPermanent = false)
 
                     // Immediately broadcast any queued packets sitting on the device
-                    doReadFromRadio()
+                    doReadFromRadio(true)
                 }
             }
         }
