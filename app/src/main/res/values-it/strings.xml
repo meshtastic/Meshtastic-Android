@@ -28,4 +28,18 @@
     <string name="are_you_sure_channel">Sei sicuro di voler cambiare canale ? Tutte le comunicazioni con gli altri nodi termineranno fino a quando non condividi le impostazioni del nuovo canale.</string>
     <string name="new_channel_rcvd">Nuovo Canale URL ricevuto</string>
     <string name="do_you_want_switch">Vuoi passare al canale \'%s\' ?</string>
+    <string name="map_not_allowed">YL\'analisi è disabilitata. Sfortunatamente il nostro fornitore di mappe (mapbox) richiede che le analisi siano consentite per il loro piano \'gratuito \'.
+        Quindi abbiamo disattivato la visualizzazione della mappa. \n\n
+        Se desideri visualizzare la mappa, dovrai attivare l\'analisi nel riquadro Impostazioni (inoltre, per il momento potresti dover forzare il riavvio dell\'applicazione). \n\n
+        Se sei interessato a pagare per mapbox (o passare ad un altro fornitore di mappe), scrivi in meshtastic.discourse.group</string>
+    <string name="permission_missing">Manca un\'autorizzazione richiesta, Meshtastic non sarà in grado di funzionare correttamente. Si prega di abilitarlo nelle impostazioni dell\'applicazione.</string>
+    <string name="radio_sleeping">La radio dormiva, non poteva cambiare canale.</string>
+    <string name="report_bug">Segnala bug</string>
+    <string name="report_a_bug">Segnala un bug</string>
+    <string name="report_bug_text">Sei sicuro di voler segnalare un bug? Dopo averlo segnalato, si prega di postarlo in meshtastic.discourse.group in modo che possiamo abbinare la segnalazione con quello che hai trovato.</string>
+    <string name="report">Segnalazione</string>
+    <string name="select_radio">Selezione la radio</string>
+    <string name="current_pair">Attualmente sei associato alla radio %s</string>
+    <string name="not_paired_yet">Non hai ancora associato alcuna radio..</string>
+    <string name="change_radio">Cambia radio</string>
 </resources>
