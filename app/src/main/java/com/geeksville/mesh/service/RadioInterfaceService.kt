@@ -376,7 +376,7 @@ class RadioInterfaceService : Service(), Logging {
         // FIXME - no need to discover services more than once - instead use lazy() to use them in future attempts
         safe!!.asyncDiscoverServices { discRes ->
             discRes.getOrThrow() // FIXME, instead just try to reconnect?
-            debug("Discovered services! Service size=${service.characteristics.size}")
+            debug("Discovered services!")
 
             // we begin by setting our MTU size as high as it can go
             safe!!.asyncRequestMtu(512) { mtuRes ->
