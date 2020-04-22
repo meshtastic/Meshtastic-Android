@@ -172,7 +172,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         model.isConnected.observe(viewLifecycleOwner, Observer { connected ->
             // If we don't know our node ID and we are offline don't let user try to send
             textInputLayout.isEnabled =
-                connected != MeshService.ConnectionState.DISCONNECTED || model.nodeDB.myId.value != null
+                connected != MeshService.ConnectionState.DISCONNECTED && model.nodeDB.myId.value != null
         })
     }
 
