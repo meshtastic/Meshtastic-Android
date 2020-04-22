@@ -271,6 +271,15 @@ class MeshService : Service(), Logging {
         connectedRadio.sendToRadio(b)
     }
 
+    /**
+     * Send a mesh packet to the radio, if the radio is not currently connected this function will throw NotConnectedException
+     */
+    private fun sendMeshPacket(packet: MeshPacket) {
+        sendToRadio(ToRadio.newBuilder().apply {
+            this.packet = packet
+        })
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
         return binder
     }
@@ -690,6 +699,11 @@ class MeshService : Service(), Logging {
             }
 
             GeeksvilleApplication.analytics.track(
+                "num_data_receive",
+                DataPair(1)
+            )
+
+            GeeksvilleApplication.analytics.track(
                 "data_receive",
                 DataPair("num_bytes", bytes.size),
                 DataPair("type", data.typValue)
@@ -1079,18 +1093,7 @@ class MeshService : Service(), Logging {
         handleReceivedPosition(myNodeInfo!!.myNodeNum, position)
 
         // send the packet into the mesh
-        sendToRadio(ToRadio.newBuilder().apply {
-            this.packet = packet.build()
-        })
-    }
-
-    /**
-     * Send a mesh packet to the radio, if the radio is not currently connected this function will throw NotConnectedException
-     */
-    private fun sendMeshPacket(packet: MeshPacket) {
-        sendToRadio(ToRadio.newBuilder().apply {
-            this.packet = packet
-        })
+        sendMeshPacket(packet.build())
     }
 
     private val binder = object : IMeshService.Stub() {
@@ -1162,6 +1165,11 @@ class MeshService : Service(), Logging {
                     "data_send",
                     DataPair("num_bytes", payloadIn.size),
                     DataPair("type", typ)
+                )
+
+                GeeksvilleApplication.analytics.track(
+                    "num_data_sent",
+                    DataPair(1)
                 )
 
                 connectionState == ConnectionState.CONNECTED
