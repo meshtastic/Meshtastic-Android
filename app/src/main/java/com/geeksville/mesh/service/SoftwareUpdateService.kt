@@ -46,10 +46,10 @@ class SoftwareUpdateService : JobIntentService(), Logging {
 
         sync.connect()
         sync.use { _ ->
-            sync.discoverServices() // Get our services
-
             // we begin by setting our MTU size as high as it can go
             sync.requestMtu(512)
+
+            sync.discoverServices() // Get our services
 
             val service = sync.gatt!!.services.find { it.uuid == SW_UPDATE_UUID }!!
 
