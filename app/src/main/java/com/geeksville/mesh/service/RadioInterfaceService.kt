@@ -372,17 +372,18 @@ class RadioInterfaceService : Service(), Logging {
             // hasForcedRefresh = true
             forceServiceRefresh()
         }
-        
+
         // we begin by setting our MTU size as high as it can go
         safe!!.asyncRequestMtu(512) { mtuRes ->
             mtuRes.getOrThrow() // FIXME - why sometimes is the result Unit!?!
-            debug("requested MTU result=$mtuRes")
+            debug("MTU change attempted")
 
             // FIXME - no need to discover services more than once - instead use lazy() to use them in future attempts
             safe!!.asyncDiscoverServices { discRes ->
                 discRes.getOrThrow() // FIXME, instead just try to reconnect?
-                debug("Discovered services!")
+
                 serviceScope.handledLaunch {
+                    debug("Discovered services!")
                     delay(500) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null
 
                     fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)!!
