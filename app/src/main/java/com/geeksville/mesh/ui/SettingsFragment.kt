@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothDevice.BOND_BONDED
+import android.bluetooth.BluetoothDevice.BOND_BONDING
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.*
 import android.companion.AssociationRequest
@@ -48,7 +49,7 @@ fun changeDeviceSelection(context: MainActivity, newAddr: String?) {
 private fun requestBonding(
     activity: MainActivity,
     device: BluetoothDevice,
-    onSuccess: () -> Unit
+    onComplete: (Int) -> Unit
 ) {
     SLogging.info("Starting bonding for $device")
 
@@ -65,10 +66,13 @@ private fun requestBonding(
                     -1
                 )
             SLogging.debug("Received bond state changed $state")
-            context.unregisterReceiver(this)
-            if (state == BluetoothDevice.BOND_BONDED || state == BluetoothDevice.BOND_BONDING) {
-                SLogging.debug("Bonding completed, connecting service")
-                onSuccess()
+
+            if (state != BOND_BONDING) {
+                context.unregisterReceiver(this) // we stay registered until bonding completes (either with BONDED or NONE)
+                if (state == BOND_BONDED) {
+                    SLogging.debug("Bonding completed, state=$state")
+                    onComplete(state)
+                }
             }
         }
     }
@@ -252,11 +256,16 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
             // We ignore missing BT adapters, because it lets us run on the emulator
             bluetoothAdapter
                 ?.getRemoteDevice(it.macAddress)?.let { device ->
-                    requestBonding(activity, device) {
-                        changeScanSelection(
-                            activity,
-                            device.address
-                        )
+                    requestBonding(activity, device) { state ->
+                        if (state == BOND_BONDED) {
+                            errorText.value = activity.getString(R.string.pairing_completed)
+                            changeScanSelection(
+                                activity,
+                                device.address
+                            )
+                        } else {
+                            errorText.value = activity.getString(R.string.pairing_failed_try_again)
+                        }
 
                         // Force the GUI to redraw
                         devices.value = devices.value
@@ -356,7 +365,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 scanModel.onSelected(requireActivity() as MainActivity, device)
 
             if (!b.isSelected)
-                scanStatusText.setText(R.string.pairing_failed)
+                scanStatusText.setText(getString(R.string.please_pair))
         }
     }
 

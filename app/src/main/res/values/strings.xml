@@ -45,4 +45,7 @@
     <string name="current_pair">You are currently paired with radio %s</string>
     <string name="not_paired_yet">You have not paired a radio yet.</string>
     <string name="change_radio">Change radio</string>
+    <string name="please_pair">Please pair device in Android Settings.</string>
+    <string name="pairing_completed">Pairing completed, starting service</string>
+    <string name="pairing_failed_try_again">Pairing failed, please select again</string>
 </resources>
