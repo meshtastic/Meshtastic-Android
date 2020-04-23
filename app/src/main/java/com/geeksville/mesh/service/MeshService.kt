@@ -486,26 +486,35 @@ class MeshService : Service(), Logging {
         }
     }
 
+    /**
+     * Install a new node DB
+     */
+    private fun installNewNodeDB(newMyNodeInfo: MyNodeInfo, nodes: Array<NodeInfo>) {
+        discardNodeDB() // Get rid of any old state
+
+        myNodeInfo = newMyNodeInfo
+
+        // put our node array into our two different map representations
+        nodeDBbyNodeNum.putAll(nodes.map { Pair(it.num, it) })
+        nodeDBbyID.putAll(nodes.mapNotNull {
+            it.user?.let { user -> // ignore records that don't have a valid user
+                Pair(
+                    user.id,
+                    it
+                )
+            }
+        })
+    }
+
     /// Load our saved DB state
     private fun loadSettings() {
         try {
             getPrefs().getString("json", null)?.let { asString ->
-                discardNodeDB() // Get rid of any old state 
 
                 val json = Json(JsonConfiguration.Default)
                 val settings = json.parse(SavedSettings.serializer(), asString)
-                myNodeInfo = settings.myInfo
+                installNewNodeDB(settings.myInfo, settings.nodeDB)
 
-                // put our node array into our two different map representations
-                nodeDBbyNodeNum.putAll(settings.nodeDB.map { Pair(it.num, it) })
-                nodeDBbyID.putAll(settings.nodeDB.mapNotNull {
-                    it.user?.let { user -> // ignore records that don't have a valid user
-                        Pair(
-                            user.id,
-                            it
-                        )
-                    }
-                })
                 // Note: we do not haveNodeDB = true because that means we've got a valid db from a real device (rather than this possibly stale hint)
 
                 recentDataPackets.addAll(settings.messages)
@@ -590,7 +599,9 @@ class MeshService : Service(), Logging {
     }
 
     /// My node num
-    private val myNodeNum get() = myNodeInfo!!.myNodeNum
+    private val myNodeNum
+        get() = myNodeInfo?.myNodeNum
+            ?: throw RadioNotConnectedException("We don't yet have our myNodeInfo")
 
     /// My node ID string
     private val myNodeID get() = toNodeID(myNodeNum)
@@ -801,8 +812,11 @@ class MeshService : Service(), Logging {
     private fun currentSecond() = (System.currentTimeMillis() / 1000).toInt()
 
 
-    /// We are reconnecting to a radio, redownload the full state.  This operation might take hundreds of milliseconds
-    private fun reinitFromRadio() {
+    /**
+     * Note: this is the deprecated REV1 API way of getting the nodedb
+     * We are reconnecting to a radio, redownload the full state.  This operation might take hundreds of milliseconds
+     * */
+    private fun reinitFromRadioREV1() {
         // Read the MyNodeInfo object
         val myInfo = MeshProtos.MyNodeInfo.parseFrom(
             connectedRadio.readMyNode()
@@ -844,34 +858,8 @@ class MeshService : Service(), Logging {
         // read all the infos until we get back null
         var infoBytes = connectedRadio.readNodeInfo()
         while (infoBytes != null) {
-            val info =
-                MeshProtos.NodeInfo.parseFrom(infoBytes)
-            debug("Received initial nodeinfo num=${info.num}, hasUser=${info.hasUser()}, hasPosition=${info.hasPosition()}")
-
-            // Just replace/add any entry
-            updateNodeInfo(info.num) {
-                if (info.hasUser())
-                    it.user =
-                        MeshUser(
-                            info.user.id,
-                            info.user.longName,
-                            info.user.shortName
-                        )
-
-                if (info.hasPosition()) {
-                    // For the local node, it might not be able to update its times because it doesn't have a valid GPS reading yet
-                    // so if the info is for _our_ node we always assume time is current
-                    val time =
-                        if (it.num == mi.myNodeNum) currentSecond() else info.position.time
-
-                    it.position = Position(
-                        info.position.latitude,
-                        info.position.longitude,
-                        info.position.altitude,
-                        time
-                    )
-                }
-            }
+            val info = MeshProtos.NodeInfo.parseFrom(infoBytes)
+            installNodeInfo(info)
 
             // advance to next
             infoBytes = connectedRadio.readNodeInfo()
@@ -902,10 +890,33 @@ class MeshService : Service(), Logging {
     }
 
 
+    /**
+     * Send in analytics about mesh connection
+     */
+    private fun reportConnection() {
+        val radioModel = DataPair("radio_model", myNodeInfo?.model ?: "unknown")
+        GeeksvilleApplication.analytics.track(
+            "mesh_connect",
+            DataPair("num_nodes", numNodes),
+            DataPair("num_online", numOnlineNodes),
+            radioModel
+        )
+
+        // Once someone connects to hardware start tracking the approximate number of nodes in their mesh
+        // this allows us to collect stats on what typical mesh size is and to tell difference between users who just
+        // downloaded the app, vs has connected it to some hardware.
+        GeeksvilleApplication.analytics.setUserInfo(
+            DataPair("num_nodes", numNodes),
+            radioModel
+        )
+    }
+
     private var sleepTimeout: Job? = null
 
     /// msecs since 1970 we started this connection
     private var connectTimeMsec = 0L
+
+    private val useOldApi = false
 
     /// Called when we gain/lose connection to our radio
     private fun onConnectionChanged(c: ConnectionState) {
@@ -957,24 +968,13 @@ class MeshService : Service(), Logging {
         fun startConnect() {
             // Do our startup init
             try {
-                reinitFromRadio()
                 connectTimeMsec = System.currentTimeMillis()
+                if (useOldApi)
+                    reinitFromRadioREV1()
+                else
+                    startConfig()
 
-                val radioModel = DataPair("radio_model", myNodeInfo?.model ?: "unknown")
-                GeeksvilleApplication.analytics.track(
-                    "mesh_connect",
-                    DataPair("num_nodes", numNodes),
-                    DataPair("num_online", numOnlineNodes),
-                    radioModel
-                )
-
-                // Once someone connects to hardware start tracking the approximate number of nodes in their mesh
-                // this allows us to collect stats on what typical mesh size is and to tell difference between users who just
-                // downloaded the app, vs has connected it to some hardware.
-                GeeksvilleApplication.analytics.setUserInfo(
-                    DataPair("num_nodes", numNodes),
-                    radioModel
-                )
+                reportConnection()
             } catch (ex: RemoteException) {
                 // It seems that when the ESP32 goes offline it can briefly come back for a 100ms ish which
                 // causes the phone to try and reconnect.  If we fail downloading our initial radio state we don't want to
@@ -1054,6 +1054,16 @@ class MeshService : Service(), Logging {
                                 proto.packet
                             )
 
+                            MeshProtos.FromRadio.CONFIG_COMPLETE_ID_FIELD_NUMBER -> handleConfigComplete(
+                                proto.configCompleteId
+                            )
+
+                            MeshProtos.FromRadio.MY_INFO_FIELD_NUMBER -> handleMyInfo(proto.myInfo)
+
+                            MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleNodeInfo(proto.nodeInfo)
+
+                            MeshProtos.FromRadio.RADIO_FIELD_NUMBER -> handleRadioConfig(proto.radio)
+
                             else -> errormsg("Unexpected FromRadio variant")
                         }
                     }
@@ -1062,6 +1072,123 @@ class MeshService : Service(), Logging {
                 }
             }
         }
+    }
+
+    /// A provisional MyNodeInfo that we will install if all of our node config downloads go okay
+    private var newMyNodeInfo: MyNodeInfo? = null
+
+    /// provisional NodeInfos we will install if all goes well
+    private val newNodes = mutableListOf<MeshProtos.NodeInfo>()
+
+    /// Used to make sure we never get foold by old BLE packets
+    private var configNonce = 1
+
+
+    private fun handleRadioConfig(radio: MeshProtos.RadioConfig) {
+        radioConfig = radio
+    }
+
+    /**
+     * Convert a protobuf NodeInfo into our model objects and update our node DB
+     */
+    private fun installNodeInfo(info: MeshProtos.NodeInfo) {
+        val mi = myNodeInfo!! // It better be set by now
+
+        // Just replace/add any entry
+        updateNodeInfo(info.num) {
+            if (info.hasUser())
+                it.user =
+                    MeshUser(
+                        info.user.id,
+                        info.user.longName,
+                        info.user.shortName
+                    )
+
+            if (info.hasPosition()) {
+                // For the local node, it might not be able to update its times because it doesn't have a valid GPS reading yet
+                // so if the info is for _our_ node we always assume time is current
+                val time =
+                    if (it.num == mi.myNodeNum) currentSecond() else info.position.time
+
+                it.position = Position(
+                    info.position.latitude,
+                    info.position.longitude,
+                    info.position.altitude,
+                    time
+                )
+            }
+        }
+    }
+
+    private fun handleNodeInfo(info: MeshProtos.NodeInfo) {
+        debug("Received nodeinfo num=${info.num}, hasUser=${info.hasUser()}, hasPosition=${info.hasPosition()}")
+
+        logAssert(newNodes.size <= 256) // Sanity check to make sure a device bug can't fill this list forever
+        newNodes.add(info)
+    }
+
+
+    private fun handleMyInfo(myInfo: MeshProtos.MyNodeInfo) {
+        val mi = with(myInfo) {
+            MyNodeInfo(myNodeNum, hasGps, region, hwModel, firmwareVersion)
+        }
+
+        newMyNodeInfo = mi
+
+        /// Track types of devices and firmware versions in use
+        GeeksvilleApplication.analytics.setUserInfo(
+            DataPair("region", mi.region),
+            DataPair("firmware", mi.firmwareVersion),
+            DataPair("has_gps", mi.hasGPS),
+            DataPair("hw_model", mi.model),
+            DataPair("dev_error_count", myInfo.errorCount)
+        )
+
+        if (myInfo.errorCode != 0) {
+            GeeksvilleApplication.analytics.track(
+                "dev_error",
+                DataPair("code", myInfo.errorCode),
+                DataPair("address", myInfo.errorAddress),
+
+                // We also include this info, because it is required to correctly decode address from the map file
+                DataPair("firmware", mi.firmwareVersion),
+                DataPair("hw_model", mi.model),
+                DataPair("region", mi.region)
+            )
+        }
+    }
+
+    private fun handleConfigComplete(configCompleteId: Int) {
+        if (configCompleteId == configNonce) {
+            // This was our config request
+            if (newMyNodeInfo == null || newNodes.isEmpty())
+                reportError("Did not receive a valid config")
+            else {
+                debug("Installing new node DB")
+                discardNodeDB()
+                myNodeInfo = newMyNodeInfo
+
+                newNodes.forEach(::installNodeInfo)
+                newNodes.clear() // Just to save RAM ;-)
+
+                haveNodeDB = true // we now have nodes from real hardware
+                processEarlyPackets() // send receive any packets that were queued up
+                onNodeDBChanged()
+                reportConnection()
+            }
+        } else
+            warn("Ignoring stale config complete")
+    }
+
+    /**
+     * Start the modern (REV2) API configuration flow
+     */
+    private fun startConfig() {
+        configNonce += 1
+        newNodes.clear()
+        newMyNodeInfo = null
+
+        TODO("send cmd")
     }
 
     /// Send a position (typically from our built in GPS) into the mesh
