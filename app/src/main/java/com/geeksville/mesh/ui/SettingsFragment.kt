@@ -69,10 +69,8 @@ private fun requestBonding(
 
             if (state != BOND_BONDING) {
                 context.unregisterReceiver(this) // we stay registered until bonding completes (either with BONDED or NONE)
-                if (state == BOND_BONDED) {
-                    SLogging.debug("Bonding completed, state=$state")
-                    onComplete(state)
-                }
+                SLogging.debug("Bonding completed, state=$state")
+                onComplete(state)
             }
         }
     }
