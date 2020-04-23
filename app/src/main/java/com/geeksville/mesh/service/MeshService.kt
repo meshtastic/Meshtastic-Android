@@ -916,8 +916,6 @@ class MeshService : Service(), Logging {
     /// msecs since 1970 we started this connection
     private var connectTimeMsec = 0L
 
-    private val useOldApi = false
-
     /// Called when we gain/lose connection to our radio
     private fun onConnectionChanged(c: ConnectionState) {
         debug("onConnectionChanged=$c")
@@ -969,7 +967,7 @@ class MeshService : Service(), Logging {
             // Do our startup init
             try {
                 connectTimeMsec = System.currentTimeMillis()
-                if (useOldApi)
+                if (RadioInterfaceService.isOldApi!!)
                     reinitFromRadioREV1()
                 else
                     startConfig()
@@ -1231,7 +1229,7 @@ class MeshService : Service(), Logging {
         val parsed = MeshProtos.RadioConfig.parseFrom(payload)
 
         // Update our device
-        if (useOldApi)
+        if (RadioInterfaceService.isOldApi!!)
             connectedRadio.writeRadioConfig(payload)
         else
             sendToRadio(ToRadio.newBuilder().apply {
@@ -1261,7 +1259,7 @@ class MeshService : Service(), Logging {
         }
 
         // set my owner info
-        if (useOldApi)
+        if (RadioInterfaceService.isOldApi!!)
             connectedRadio.writeOwner(user.toByteArray())
         else sendToRadio(ToRadio.newBuilder().apply {
             this.setOwner = user

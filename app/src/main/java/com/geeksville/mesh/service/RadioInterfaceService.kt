@@ -141,6 +141,11 @@ class RadioInterfaceService : Service(), Logging {
         /// If our service is currently running, this pointer can be used to reach it (in case setBondedDeviceAddress is called)
         private var runningService: RadioInterfaceService? = null
 
+        /**
+         * Temp hack (until old API deprecated), we probe for old API at connected
+         */
+        var isOldApi: Boolean? = null
+
         /// This is public only so that SimRadio can bootstrap our message flow
         fun broadcastReceivedFromRadio(context: Context, payload: ByteArray) {
             val intent = Intent(RECEIVE_FROMRADIO_ACTION)
@@ -398,6 +403,9 @@ class RadioInterfaceService : Service(), Logging {
                 serviceScope.handledLaunch {
                     debug("Discovered services!")
                     delay(500) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null
+
+                    isOldApi = service.getCharacteristic(BTM_RADIO_CHARACTER) != null
+                    warn("Use oldAPI = $isOldApi")
 
                     fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)!!
 
