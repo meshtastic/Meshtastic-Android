@@ -237,17 +237,30 @@ class RadioInterfaceService : Service(), Logging {
         sendBroadcast(intent)
     }
 
+    /**
+     * With the new rev2 api, our first send is to start the configure readbacks.  In that case,
+     * rather than waiting for FromNum notifies - we try to just aggressively read all of the responses.
+     */
+    private var isFirstSend = true
+
     /// Send a packet/command out the radio link
     private fun handleSendToRadio(p: ByteArray) {
+        // Do this in the IO thread because it might take a while
+        serviceScope.handledLaunch {
+            debug("sending to radio")
+            doWrite(
+                BTM_TORADIO_CHARACTER,
+                p
+            ) // Do a synchronous write, so that we can then do our reads if needed
+            if (logSends) {
+                sentPacketsLog.write(p)
+                sentPacketsLog.flush()
+            }
 
-        // For debugging/logging purposes ONLY we convert back into a protobuf for readability
-        // al proto = MeshProtos.ToRadio.parseFrom(p)
-
-        debug("sending to radio")
-        doAsyncWrite(BTM_TORADIO_CHARACTER, p)
-        if (logSends) {
-            sentPacketsLog.write(p)
-            sentPacketsLog.flush()
+            if (isFirstSend) {
+                isFirstSend = false
+                doReadFromRadio(false)
+            }
         }
     }
 
@@ -390,6 +403,9 @@ class RadioInterfaceService : Service(), Logging {
 
                     // We must set this to true before broadcasting connectionChanged
                     isConnected = true
+
+                    // We treat the first send by a client as special
+                    isFirstSend = true
 
                     // Now tell clients they can (finally use the api)
                     broadcastConnectionChanged(true, isPermanent = false)

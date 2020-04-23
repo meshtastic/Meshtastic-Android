@@ -274,7 +274,7 @@ class MeshService : Service(), Logging {
     /**
      * Send a mesh packet to the radio, if the radio is not currently connected this function will throw NotConnectedException
      */
-    private fun sendMeshPacket(packet: MeshPacket) {
+    private fun sendToRadio(packet: MeshPacket) {
         sendToRadio(ToRadio.newBuilder().apply {
             this.packet = packet
         })
@@ -769,7 +769,7 @@ class MeshService : Service(), Logging {
         earlyReceivedPackets.forEach { processReceivedMeshPacket(it) }
         earlyReceivedPackets.clear()
 
-        offlineSentPackets.forEach { sendMeshPacket(it) }
+        offlineSentPackets.forEach { sendToRadio(it) }
         offlineSentPackets.clear()
     }
 
@@ -1188,7 +1188,9 @@ class MeshService : Service(), Logging {
         newNodes.clear()
         newMyNodeInfo = null
 
-        TODO("send cmd")
+        sendToRadio(ToRadio.newBuilder().apply {
+            this.wantConfigId = configNonce
+        })
     }
 
     /// Send a position (typically from our built in GPS) into the mesh
@@ -1220,7 +1222,7 @@ class MeshService : Service(), Logging {
         handleReceivedPosition(myNodeInfo!!.myNodeNum, position)
 
         // send the packet into the mesh
-        sendMeshPacket(packet.build())
+        sendToRadio(packet.build())
     }
 
     private val binder = object : IMeshService.Stub() {
@@ -1285,7 +1287,7 @@ class MeshService : Service(), Logging {
                     ConnectionState.DEVICE_SLEEP ->
                         offlineSentPackets.add(packet)
                     else ->
-                        sendMeshPacket(packet)
+                        sendToRadio(packet)
                 }
 
                 GeeksvilleApplication.analytics.track(
