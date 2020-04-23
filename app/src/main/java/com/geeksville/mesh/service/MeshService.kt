@@ -1225,6 +1225,50 @@ class MeshService : Service(), Logging {
         sendToRadio(packet.build())
     }
 
+    /** Set our radio config either with the new or old API
+     */
+    private fun setRadioConfig(payload: ByteArray) {
+        val parsed = MeshProtos.RadioConfig.parseFrom(payload)
+
+        // Update our device
+        if (useOldApi)
+            connectedRadio.writeRadioConfig(payload)
+        else
+            sendToRadio(ToRadio.newBuilder().apply {
+                this.setRadio = parsed
+            })
+
+        // Update our cached copy
+        this@MeshService.radioConfig = parsed
+    }
+
+    /**
+     * Set our owner with either the new or old API
+     */
+    fun setOwner(myId: String?, longName: String, shortName: String) {
+        debug("SetOwner $myId : ${longName.anonymized} : $shortName")
+
+        val user = MeshProtos.User.newBuilder().also {
+            if (myId != null)  // Only set the id if it was provided
+                it.id = myId
+            it.longName = longName
+            it.shortName = shortName
+        }.build()
+
+        // Also update our own map for our nodenum, by handling the packet just like packets from other users
+        if (myNodeInfo != null) {
+            handleReceivedUser(myNodeInfo!!.myNodeNum, user)
+        }
+
+        // set my owner info
+        if (useOldApi)
+            connectedRadio.writeOwner(user.toByteArray())
+        else sendToRadio(ToRadio.newBuilder().apply {
+            this.setOwner = user
+        })
+
+    }
+
     private val binder = object : IMeshService.Stub() {
 
         override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
@@ -1248,22 +1292,7 @@ class MeshService : Service(), Logging {
 
         override fun setOwner(myId: String?, longName: String, shortName: String) =
             toRemoteExceptions {
-                debug("SetOwner $myId : ${longName.anonymized} : $shortName")
-
-                val user = MeshProtos.User.newBuilder().also {
-                    if (myId != null)  // Only set the id if it was provided
-                        it.id = myId
-                    it.longName = longName
-                    it.shortName = shortName
-                }.build()
-
-                // Also update our own map for our nodenum, by handling the packet just like packets from other users
-                if (myNodeInfo != null) {
-                    handleReceivedUser(myNodeInfo!!.myNodeNum, user)
-                }
-
-                // set my owner info
-                connectedRadio.writeOwner(user.toByteArray())
+                this@MeshService.setOwner(myId, longName, shortName)
             }
 
         override fun sendData(destId: String?, payloadIn: ByteArray, typ: Int): Boolean =
@@ -1309,11 +1338,7 @@ class MeshService : Service(), Logging {
         }
 
         override fun setRadioConfig(payload: ByteArray) = toRemoteExceptions {
-            // Update our device
-            connectedRadio.writeRadioConfig(payload)
-
-            // Update our cached copy
-            this@MeshService.radioConfig = MeshProtos.RadioConfig.parseFrom(payload)
+            this@MeshService.setRadioConfig(payload)
         }
 
         override fun getNodes(): MutableList<NodeInfo> = toRemoteExceptions {
