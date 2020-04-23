@@ -29,6 +29,7 @@ import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.anonymized
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.RadioInterfaceService
 import com.geeksville.util.exceptionReporter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -308,6 +309,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private fun initCommonUI() {
         model.ownerName.observe(viewLifecycleOwner, Observer { name ->
             usernameEditText.setText(name)
+        })
+
+        // Only let user edit their name while connected to a radio
+        model.isConnected.observe(viewLifecycleOwner, Observer { connected ->
+            usernameView.isEnabled = connected == MeshService.ConnectionState.CONNECTED
         })
 
         usernameEditText.on(EditorInfo.IME_ACTION_DONE) {
