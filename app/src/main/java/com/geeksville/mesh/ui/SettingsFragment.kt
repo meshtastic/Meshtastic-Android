@@ -518,7 +518,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     override fun onResume() {
         super.onResume()
-        if (!hasCompanionDeviceApi)
+        if (!hasCompanionDeviceApi && model.bluetoothEnabled.value!!)
             scanModel.startScan()
     }
 }

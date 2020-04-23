@@ -167,8 +167,45 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
+
     private val btStateReceiver = BluetoothStateReceiver { enabled ->
+        updateBluetoothEnabled()
+    }
+
+
+    /**
+     * Don't tell our app we have bluetooth until we have bluetooth _and_ location access
+     */
+    private fun updateBluetoothEnabled() {
+        var enabled = false // assume failure
+
+        val requiredPerms = listOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN
+        )
+
+
+        if (getMissingPermissions(requiredPerms).isEmpty()) {
+            /// ask the adapter if we have access
+            bluetoothAdapter?.apply {
+                enabled = isEnabled
+            }
+        } else
+            errormsg("Still missing needed bluetooth permissions")
+
+        debug("Detected our bluetooth access=$enabled")
         model.bluetoothEnabled.value = enabled
+    }
+
+    /**
+     * return a list of the permissions we don't have
+     */
+    private fun getMissingPermissions(perms: List<String>) = perms.filter {
+        ContextCompat.checkSelfPermission(
+            this,
+            it
+        ) != PackageManager.PERMISSION_GRANTED
     }
 
     private fun requestPermission() {
@@ -194,12 +231,7 @@ class MainActivity : AppCompatActivity(), Logging,
             perms.add(Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND)
         }
 
-        val missingPerms = perms.filter {
-            ContextCompat.checkSelfPermission(
-                this,
-                it
-            ) != PackageManager.PERMISSION_GRANTED
-        }
+        val missingPerms = getMissingPermissions(perms)
         if (missingPerms.isNotEmpty()) {
             missingPerms.forEach {
                 // Permission is not granted
@@ -255,6 +287,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 Toast.LENGTH_LONG
             ).show()
         }
+        updateBluetoothEnabled()
     }
 
 
@@ -313,9 +346,7 @@ class MainActivity : AppCompatActivity(), Logging,
         model.ownerName.value = prefs.getString("owner", "")!!
 
         /// Set initial bluetooth state
-        bluetoothAdapter?.apply {
-            model.bluetoothEnabled.value = isEnabled
-        }
+        updateBluetoothEnabled()
 
         /// We now want to be informed of bluetooth state
         registerReceiver(btStateReceiver, btStateReceiver.intent)
