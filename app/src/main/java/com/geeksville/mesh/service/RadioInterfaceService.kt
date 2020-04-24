@@ -12,6 +12,7 @@ import android.content.Intent
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.content.edit
+import com.geeksville.analytics.DataPair
 import com.geeksville.android.BinaryLogFile
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
@@ -86,6 +87,11 @@ Not all messages are kept in the fromradio queue (filtered based on SubPacket):
 A variable keepAllPackets, if set to true will suppress this behavior and instead keep everything for forwarding to the phone (for debugging)
 
  */
+
+
+class RadioNotConnectedException(message: String = "Not connected to radio") :
+    BLEException(message)
+
 
 /**
  * Handles the bluetooth link with a mesh radio device.  Does not cache any device state,
@@ -287,7 +293,7 @@ class RadioInterfaceService : Service(), Logging {
         if (!isConnected)
             warn("Abandoning fromradio read because we are not connected")
         else {
-            val fromRadio = service.getCharacteristic(BTM_FROMRADIO_CHARACTER)
+            val fromRadio = getCharacteristic(BTM_FROMRADIO_CHARACTER)
             safe!!.asyncReadCharacteristic(fromRadio) {
                 val b = it.getOrThrow()
                     .value.clone() // We clone the array just in case, I'm not sure if they keep reusing the array
@@ -379,6 +385,8 @@ class RadioInterfaceService : Service(), Logging {
         }
     }
 
+    // private var isFirstTime = true
+
     private fun onConnect(connRes: Result<Unit>) {
         // This callback is invoked after we are connected
 
@@ -401,25 +409,52 @@ class RadioInterfaceService : Service(), Logging {
                 discRes.getOrThrow() // FIXME, instead just try to reconnect?
 
                 serviceScope.handledLaunch {
-                    debug("Discovered services!")
-                    delay(500) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null
+                    try {
+                        debug("Discovered services!")
+                        delay(500) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null
 
-                    isOldApi = service.getCharacteristic(BTM_RADIO_CHARACTER) != null
-                    warn("Use oldAPI = $isOldApi")
+                        // service could be null, test this by throwing BLEException and testing it on my machine
+                        isOldApi = service.getCharacteristic(BTM_RADIO_CHARACTER) != null
+                        warn("Use oldAPI = $isOldApi")
 
-                    fromNum = service.getCharacteristic(BTM_FROMNUM_CHARACTER)!!
+                        /* if (isFirstTime) {
+                            isFirstTime = false
+                            throw BLEException("Faking a BLE failure")
+                        } */
 
-                    // We must set this to true before broadcasting connectionChanged
-                    isConnected = true
+                        fromNum = getCharacteristic(BTM_FROMNUM_CHARACTER)
 
-                    // We treat the first send by a client as special
-                    isFirstSend = true
+                        // We must set this to true before broadcasting connectionChanged
+                        isConnected = true
 
-                    // Now tell clients they can (finally use the api)
-                    broadcastConnectionChanged(true, isPermanent = false)
+                        // We treat the first send by a client as special
+                        isFirstSend = true
 
-                    // Immediately broadcast any queued packets sitting on the device
-                    doReadFromRadio(true)
+                        // Now tell clients they can (finally use the api)
+                        broadcastConnectionChanged(true, isPermanent = false)
+
+                        // Immediately broadcast any queued packets sitting on the device
+                        doReadFromRadio(true)
+                    } catch (ex: BLEException) {
+                        // Track how often in the field we need this hack
+                        GeeksvilleApplication.analytics.track(
+                            "ble_reconnect_hack",
+                            DataPair(1)
+                        )
+
+                        errormsg(
+                            "Unexpected error in initial device enumeration, forcing disconnect",
+                            ex
+                        )
+                        warn("Forcing disconnect and hopefully device will comeback (disabling forced refresh)")
+                        hasForcedRefresh = true
+                        ignoreException {
+                            safe!!.closeConnection()
+                        }
+                        delay(500) // Give some nasty time for buggy BLE stacks to shutdown
+                        warn("Attempting reconnect")
+                        startConnect()
+                    }
                 }
             }
         }
@@ -452,6 +487,17 @@ class RadioInterfaceService : Service(), Logging {
         return binder;
     }
 
+    /// Start a connection attempt
+    private fun startConnect() {
+        // we pass in true for autoconnect - so we will autoconnect whenever the radio
+        // comes in range (even if we made this connect call long ago when we got powered on)
+        // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
+        // more info
+        safe!!.asyncConnect(true,
+            cb = ::onConnect,
+            lostConnectCb = { onDisconnect(isPermanent = false) })
+    }
+
     /// Open or close a bluetooth connection to our device
     private fun setEnabled(on: Boolean) {
         if (on) {
@@ -472,13 +518,7 @@ class RadioInterfaceService : Service(), Logging {
                         val s = SafeBluetooth(this, device)
                         safe = s
 
-                        // FIXME, pass in true for autoconnect - so we will autoconnect whenever the radio
-                        // comes in range (even if we made this connect call long ago when we got powered on)
-                        // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
-                        // more info
-                        s.asyncConnect(true,
-                            cb = ::onConnect,
-                            lostConnectCb = { onDisconnect(isPermanent = false) })
+                        startConnect()
                     } else {
                         errormsg("Bluetooth adapter not found, assuming running on the emulator!")
                     }
@@ -516,13 +556,19 @@ class RadioInterfaceService : Service(), Logging {
 
             // Note: we generate a new characteristic each time, because we are about to
             // change the data and we want the data stored in the closure
-            val toRadio = service.getCharacteristic(uuid)
+            val toRadio = getCharacteristic(uuid)
             toRadio.value = a
 
             safe!!.writeCharacteristic(toRadio)
             debug("write of ${a.size} bytes completed")
         }
     }
+
+    /**
+     * Get a chracteristic, but in a safe manner because some buggy BLE implementations might return null
+     */
+    private fun getCharacteristic(uuid: UUID) =
+        service.getCharacteristic(uuid) ?: throw BLEException("Can't get characteristic $uuid")
 
     /**
      * do an asynchronous write operation
@@ -536,7 +582,7 @@ class RadioInterfaceService : Service(), Logging {
 
             // Note: we generate a new characteristic each time, because we are about to
             // change the data and we want the data stored in the closure
-            val toRadio = service.getCharacteristic(uuid)
+            val toRadio = getCharacteristic(uuid)
             toRadio.value = a
 
             safe!!.asyncWriteCharacteristic(toRadio) {
@@ -554,7 +600,7 @@ class RadioInterfaceService : Service(), Logging {
         else {
             // Note: we generate a new characteristic each time, because we are about to
             // change the data and we want the data stored in the closure
-            val toRadio = service.getCharacteristic(uuid)
+            val toRadio = getCharacteristic(uuid)
             var a = safe!!.readCharacteristic(toRadio)
                 .value.clone() // we copy the bluetooth array because it might still be in use
             debug("Read of $uuid got ${a.size} bytes")

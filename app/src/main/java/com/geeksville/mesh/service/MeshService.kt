@@ -34,9 +34,6 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
 
-class RadioNotConnectedException(message: String = "Not connected to radio") : Exception(message)
-
-
 private val errorHandler = CoroutineExceptionHandler { _, exception ->
     Exceptions.report(exception, "MeshService-coroutine", "coroutine-exception")
 }

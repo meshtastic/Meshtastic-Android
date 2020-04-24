@@ -14,7 +14,6 @@ import com.geeksville.concurrent.Continuation
 import com.geeksville.concurrent.SyncContinuation
 import com.geeksville.util.exceptionReporter
 import java.io.Closeable
-import java.io.IOException
 import java.util.*
 
 
@@ -50,8 +49,6 @@ class BluetoothStateReceiver(val onChanged: (Boolean) -> Unit) : BroadcastReceiv
  */
 class SafeBluetooth(private val context: Context, private val device: BluetoothDevice) :
     Logging, Closeable {
-
-    class BLEException(msg: String) : IOException(msg)
 
     /// Timeout before we declare a bluetooth operation failed
     var timeoutMsec = 30 * 1000L
@@ -331,7 +328,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             val work =
                 synchronized(workQueue) {
                     val w =
-                        currentWork!! // will throw if null, which is helpful (FIXME - throws in the field)
+                        currentWork
+                            ?: throw Exception("currentWork was null") // will throw if null, which is helpful (FIXME - throws in the field)
                     currentWork = null // We are now no longer working on anything
 
                     startNewWork()
@@ -340,7 +338,11 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
             debug("work ${work.tag} is completed, resuming status=$status, res=$res")
             if (status != 0)
-                work.completion.resumeWithException(BLEException("Bluetooth status=$status while doing ${work.tag}"))
+                work.completion.resumeWithException(
+                    BLEException(
+                        "Bluetooth status=$status while doing ${work.tag}"
+                    )
+                )
             else
                 work.completion.resume(Result.success(res) as Result<Nothing>)
         }
@@ -493,7 +495,11 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     ) = queueWriteDescriptor(c, CallbackContinuation(cb))
 
 
-    private fun closeConnection() {
+    /**
+     * Close down any existing connection, any existing calls (including async connects will be
+     * cancelled and you'll need to recall connect to use this againt
+     */
+    fun closeConnection() {
         failAllWork(BLEException("Connection closing"))
 
         if (gatt != null) {
@@ -501,9 +507,14 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             gatt!!.disconnect()
             gatt!!.close()
             gatt = null
+            lostConnectCallback = null
+            connectionCallback = null
         }
     }
 
+    /**
+     * Close and destroy this SafeBluetooth instance.  You'll need to make a new instance before using it again
+     */
     override fun close() {
         closeConnection()
 
@@ -546,7 +557,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         at android.os.Binder.execTransact(Binder.java:994)
          */
         // per https://stackoverflow.com/questions/27068673/subscribe-to-a-ble-gatt-notification-android
-        val descriptor: BluetoothGattDescriptor = c.getDescriptor(configurationDescriptorUUID)!!
+        val descriptor: BluetoothGattDescriptor = c.getDescriptor(configurationDescriptorUUID)
+            ?: throw BLEException("Notify descriptor not found for ${c.uuid}") // This can happen on buggy BLE implementations
         descriptor.value =
             if (enable) BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE else BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE
         asyncWriteDescriptor(descriptor) {
