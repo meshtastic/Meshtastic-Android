@@ -387,6 +387,73 @@ class RadioInterfaceService : Service(), Logging {
 
     // private var isFirstTime = true
 
+    /**
+     * Some buggy BLE stacks can fail on initial connect, with either missing services or missing characteristics.  If that happens we
+     * disconnect and try again when the device reenumerates.
+     */
+    private suspend fun retryDueToException() {
+        // Track how often in the field we need this hack
+        GeeksvilleApplication.analytics.track(
+            "ble_reconnect_hack",
+            DataPair(1)
+        )
+
+        warn("Forcing disconnect and hopefully device will comeback (disabling forced refresh)")
+        hasForcedRefresh = true
+        ignoreException {
+            safe!!.closeConnection()
+        }
+        delay(1000) // Give some nasty time for buggy BLE stacks to shutdown (500ms was not enough)
+        warn("Attempting reconnect")
+        startConnect()
+    }
+
+    /// We only try to set MTU once, because some buggy implementations fail
+    private var shouldSetMtu = true
+
+    private fun doDiscoverServicesAndInit() {
+        // FIXME - no need to discover services more than once - instead use lazy() to use them in future attempts
+        safe!!.asyncDiscoverServices { discRes ->
+            discRes.getOrThrow() // FIXME, instead just try to reconnect?
+
+            serviceScope.handledLaunch {
+                try {
+                    debug("Discovered services!")
+                    delay(500) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null
+
+                    // service could be null, test this by throwing BLEException and testing it on my machine
+                    isOldApi = service.getCharacteristic(BTM_RADIO_CHARACTER) != null
+                    warn("Use oldAPI = $isOldApi")
+
+                    /* if (isFirstTime) {
+                    isFirstTime = false
+                    throw BLEException("Faking a BLE failure")
+                } */
+
+                    fromNum = getCharacteristic(BTM_FROMNUM_CHARACTER)
+
+                    // We must set this to true before broadcasting connectionChanged
+                    isConnected = true
+
+                    // We treat the first send by a client as special
+                    isFirstSend = true
+
+                    // Now tell clients they can (finally use the api)
+                    broadcastConnectionChanged(true, isPermanent = false)
+
+                    // Immediately broadcast any queued packets sitting on the device
+                    doReadFromRadio(true)
+                } catch (ex: BLEException) {
+                    errormsg(
+                        "Unexpected error in initial device enumeration, forcing disconnect",
+                        ex
+                    )
+                    retryDueToException()
+                }
+            }
+        }
+    }
+
     private fun onConnect(connRes: Result<Unit>) {
         // This callback is invoked after we are connected
 
@@ -399,65 +466,27 @@ class RadioInterfaceService : Service(), Logging {
             forceServiceRefresh()
         }
 
-        // we begin by setting our MTU size as high as it can go
-        safe!!.asyncRequestMtu(512) { mtuRes ->
-            mtuRes.getOrThrow() // FIXME - why sometimes is the result Unit!?!
-            debug("MTU change attempted")
+        // we begin by setting our MTU size as high as it can go (if we can)
+        if (shouldSetMtu)
+            safe!!.asyncRequestMtu(512) { mtuRes ->
+                try {
+                    mtuRes.getOrThrow() // FIXME - why sometimes is the result Unit!?!
+                    debug("MTU change attempted")
 
-            // FIXME - no need to discover services more than once - instead use lazy() to use them in future attempts
-            safe!!.asyncDiscoverServices { discRes ->
-                discRes.getOrThrow() // FIXME, instead just try to reconnect?
+                    // throw BLEException("Test MTU set failed")
 
-                serviceScope.handledLaunch {
-                    try {
-                        debug("Discovered services!")
-                        delay(500) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null
-
-                        // service could be null, test this by throwing BLEException and testing it on my machine
-                        isOldApi = service.getCharacteristic(BTM_RADIO_CHARACTER) != null
-                        warn("Use oldAPI = $isOldApi")
-
-                        /* if (isFirstTime) {
-                            isFirstTime = false
-                            throw BLEException("Faking a BLE failure")
-                        } */
-
-                        fromNum = getCharacteristic(BTM_FROMNUM_CHARACTER)
-
-                        // We must set this to true before broadcasting connectionChanged
-                        isConnected = true
-
-                        // We treat the first send by a client as special
-                        isFirstSend = true
-
-                        // Now tell clients they can (finally use the api)
-                        broadcastConnectionChanged(true, isPermanent = false)
-
-                        // Immediately broadcast any queued packets sitting on the device
-                        doReadFromRadio(true)
-                    } catch (ex: BLEException) {
-                        // Track how often in the field we need this hack
-                        GeeksvilleApplication.analytics.track(
-                            "ble_reconnect_hack",
-                            DataPair(1)
-                        )
-
-                        errormsg(
-                            "Unexpected error in initial device enumeration, forcing disconnect",
-                            ex
-                        )
-                        warn("Forcing disconnect and hopefully device will comeback (disabling forced refresh)")
-                        hasForcedRefresh = true
-                        ignoreException {
-                            safe!!.closeConnection()
-                        }
-                        delay(500) // Give some nasty time for buggy BLE stacks to shutdown
-                        warn("Attempting reconnect")
-                        startConnect()
-                    }
+                    doDiscoverServicesAndInit()
+                } catch (ex: BLEException) {
+                    errormsg(
+                        "Giving up on setting MTUs, forcing disconnect",
+                        ex
+                    )
+                    shouldSetMtu = false
+                    serviceScope.handledLaunch { retryDueToException() }
                 }
             }
-        }
+        else
+            doDiscoverServicesAndInit()
     }
 
     /**

@@ -84,6 +84,11 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         }
     }
 
+    /**
+     * A BLE status code based error
+     */
+    class BLEStatusException(val status: Int, msg: String) : BLEException(msg)
+
     // 0x2902 org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
     private val configurationDescriptorUUID =
         longBLEUUID("2902")
@@ -339,7 +344,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             debug("work ${work.tag} is completed, resuming status=$status, res=$res")
             if (status != 0)
                 work.completion.resumeWithException(
-                    BLEException(
+                    BLEStatusException(
+                        status,
                         "Bluetooth status=$status while doing ${work.tag}"
                     )
                 )
