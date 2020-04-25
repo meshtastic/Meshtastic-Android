@@ -10,6 +10,7 @@ import android.graphics.Color
 import android.os.Build
 import android.os.IBinder
 import android.os.RemoteException
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.annotation.UiThread
 import androidx.core.app.NotificationCompat
@@ -22,6 +23,7 @@ import com.geeksville.android.ServiceClient
 import com.geeksville.mesh.*
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
+import com.geeksville.mesh.R
 import com.geeksville.util.*
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -174,6 +176,14 @@ class MeshService : Service(), Logging {
 
     private var fusedLocationClient: FusedLocationProviderClient? = null
 
+    private fun warnUserAboutLocation() {
+        Toast.makeText(
+            this,
+            getString(R.string.location_disabled),
+            Toast.LENGTH_LONG
+        ).show()
+    }
+
     /**
      * start our location requests (if they weren't already running)
      *
@@ -202,18 +212,17 @@ class MeshService : Service(), Logging {
             locationSettingsResponse.addOnFailureListener { exception ->
                 errormsg("Failed to listen to GPS")
                 if (exception is ResolvableApiException) {
-                    Exceptions.report(exception) // FIXME, not yet implemented, report failure to mothership
+                    // Exceptions.report(exception) // FIXME, not yet implemented, report failure to mothership
                     exceptionReporter {
                         // Location settings are not satisfied, but this can be fixed
                         // by showing the user a dialog.
 
-                        // FIXME
                         // Show the dialog by calling startResolutionForResult(),
                         // and check the result in onActivityResult().
-                        /* exception.startResolutionForResult(
-                            this@MainActivity,
-                            REQUEST_CHECK_SETTINGS
-                        ) */
+                        // exception.startResolutionForResult(this@MainActivity, REQUEST_CHECK_SETTINGS)
+
+                        // For now just punt and show a dialog
+                        warnUserAboutLocation()
                     }
                 } else
                     Exceptions.report(exception)
