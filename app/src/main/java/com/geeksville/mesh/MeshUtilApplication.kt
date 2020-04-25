@@ -30,6 +30,7 @@ class MeshUtilApplication : GeeksvilleApplication() {
             // Attach to our exception wrapper
             Exceptions.reporter = { exception, _, _ ->
                 crashlytics.recordException(exception)
+                crashlytics.sendUnsentReports()
             }
 
             if (isAnalyticsAllowed) {
