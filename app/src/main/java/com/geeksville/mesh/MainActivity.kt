@@ -676,7 +676,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
         MeshService.startService(this)?.let { intent ->
             // ALSO bind so we can use the api
-            mesh.connect(this, intent, Context.BIND_AUTO_CREATE)
+            mesh.connect(this, intent, Context.BIND_AUTO_CREATE + Context.BIND_ABOVE_CLIENT)
         }
     }
 
