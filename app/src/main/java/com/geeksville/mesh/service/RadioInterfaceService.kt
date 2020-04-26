@@ -295,19 +295,27 @@ class RadioInterfaceService : Service(), Logging {
         else {
             val fromRadio = getCharacteristic(BTM_FROMRADIO_CHARACTER)
             safe!!.asyncReadCharacteristic(fromRadio) {
-                val b = it.getOrThrow()
-                    .value.clone() // We clone the array just in case, I'm not sure if they keep reusing the array
+                try {
+                    val b = it.getOrThrow()
+                        .value.clone() // We clone the array just in case, I'm not sure if they keep reusing the array
 
-                if (b.isNotEmpty()) {
-                    debug("Received ${b.size} bytes from radio")
-                    handleFromRadio(b)
+                    if (b.isNotEmpty()) {
+                        debug("Received ${b.size} bytes from radio")
+                        handleFromRadio(b)
 
-                    // Queue up another read, until we run out of packets
-                    doReadFromRadio(firstRead)
-                } else {
-                    debug("Done reading from radio, fromradio is empty")
-                    if (firstRead) // If we just finished our initial download, now we want to start listening for notifies
-                        startWatchingFromNum()
+                        // Queue up another read, until we run out of packets
+                        doReadFromRadio(firstRead)
+                    } else {
+                        debug("Done reading from radio, fromradio is empty")
+                        if (firstRead) // If we just finished our initial download, now we want to start listening for notifies
+                            startWatchingFromNum()
+                    }
+                } catch (ex: BLEException) {
+                    errormsg(
+                        "error during doReadFromRadio",
+                        ex
+                    )
+                    serviceScope.handledLaunch { retryDueToException() }
                 }
             }
         }

@@ -418,7 +418,9 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         cb: (Result<Unit>) -> Unit,
         lostConnectCb: () -> Unit
     ) {
-        logAssert(workQueue.isEmpty() && currentWork == null) // I don't think anything should be able to sneak in front
+        logAssert(workQueue.isEmpty())
+        logAssert(currentWork == null) // I don't think anything should be able to sneak in front
+        
         lostConnectCallback = lostConnectCb
         connectionCallback = if (autoConnect)
             cb
