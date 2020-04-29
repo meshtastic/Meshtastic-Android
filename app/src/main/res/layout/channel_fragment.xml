@@ -88,7 +88,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="96dp"
-        android:contentDescription="@string/share_button"
+        android:contentDescription="@string/share"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/editableCheckbox"
         app:srcCompat="@drawable/ic_twotone_share_24" />
