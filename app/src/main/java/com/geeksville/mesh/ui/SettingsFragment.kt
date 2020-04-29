@@ -418,12 +418,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 val selectedAddr = scanModel.selectedMacAddr
                 if (!hasShownOurDevice && selectedAddr != null) {
                     val bDevice = scanModel.bluetoothAdapter!!.getRemoteDevice(selectedAddr)
-                    val curDevice = BTScanModel.BTScanEntry(
-                        bDevice.name,
-                        bDevice.address,
-                        bDevice.bondState == BOND_BONDED
-                    )
-                    addDeviceButton(curDevice, false)
+                    if (bDevice.name != null) { // ignore nodes that node have a name, that means we've lost them since they appeared
+                        val curDevice = BTScanModel.BTScanEntry(
+                            bDevice.name,
+                            bDevice.address,
+                            bDevice.bondState == BOND_BONDED
+                        )
+                        addDeviceButton(curDevice, false)
+                    }
                 }
             }
 
