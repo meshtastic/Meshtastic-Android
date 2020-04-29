@@ -300,7 +300,7 @@ class MainActivity : AppCompatActivity(), Logging,
             m.sendData(
                 "+16508675310",
                 testPayload,
-                MeshProtos.Data.Type.SIGNAL_OPAQUE_VALUE
+                MeshProtos.Data.Type.OPAQUE_VALUE
             )
             m.sendData(
                 "+16508675310",

@@ -709,7 +709,7 @@ class MeshService : Service(), Logging {
                         "TODO ignoring CLEAR_READACK from $fromId"
                     )
 
-                MeshProtos.Data.Type.SIGNAL_OPAQUE_VALUE ->
+                MeshProtos.Data.Type.OPAQUE_VALUE ->
                     broadcastReceivedData(dataPacket)
 
                 else -> TODO()
