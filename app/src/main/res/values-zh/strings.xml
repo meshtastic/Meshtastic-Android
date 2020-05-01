@@ -29,4 +29,21 @@
     <string name="are_you_sure_channel">您确定要修改通信频道吗？这将会使你与其他节点断开通信. </string>
     <string name="new_channel_rcvd">收到新的频道URL</string>
     <string name="do_you_want_switch">您是否要切换到\'%s\'频道?</string>
+    <string name="map_not_allowed">您已禁用了分析功能，但是我们的地图提供商（mapbox）要求对其进行分析\'free\' 因此，这将会关闭地图视图.\n\n
+    如果您想看地图, 你将\'需要在设置中打开分析功能（此外，暂时可能需要强制重新启动应用）\n\n
+    如果您想切换到其他地图提供商，请在meshtastic.discourse.group中发布</string>
+    <string name="permission_missing">缺少必需的权限，Mesh网络将无法正常工作，请在应用程序设置中启用.</string>
+    <string name="radio_sleeping">LoRa模块正处于休眠之中，您暂时无法更改频道</string>
+    <string name="report_bug">反馈BUG</string>
+    <string name="report_a_bug">反馈一个BUG</string>
+    <string name="report_bug_text">您确定要报告错误吗？报告后，请发布在meshtastic.discourse.group中，以便我们将您的报告与您找到的内容进行匹配.</string>
+    <string name="report">报告</string>
+    <string name="select_radio">选择LoRa模块</string>
+    <string name="current_pair">您目前已与LoRa模块配对%s</string>
+    <string name="not_paired_yet">您尚未配对LoRa模块.</string>
+    <string name="change_radio">更换LoRa模块</string>
+    <string name="please_pair">请在Android设置中配对设备.</string>
+    <string name="pairing_completed">配对成功，服务以启动</string>
+    <string name="pairing_failed_try_again">配对失败，请再次选择</string>
+    <string name="location_disabled">位置访问已禁用，将无法为Mesh设备提供位置.</string>
 </resources>
