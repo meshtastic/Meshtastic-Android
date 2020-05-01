@@ -50,4 +50,7 @@
     <string name="pairing_failed_try_again">Pairing failed, please select again</string>
     <string name="location_disabled">Location access is disabled, can not provide position to the mesh.</string>
     <string name="share">Share</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="device_sleeping">Device sleeping</string>
+    <string name="connected_count">Connected: %s of %s online</string>
 </resources>
