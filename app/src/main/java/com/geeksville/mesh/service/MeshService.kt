@@ -746,13 +746,7 @@ class MeshService : Service(), Logging {
     /// Update our DB of users based on someone sending out a Position subpacket
     private fun handleReceivedPosition(fromNum: Int, p: MeshProtos.Position) {
         updateNodeInfo(fromNum) {
-            it.position = Position(
-                p.latitude,
-                p.longitude,
-                p.altitude,
-                if (p.time != 0) p.time else it.position?.time
-                    ?: 0 // if this position didn't include time, just keep our old one
-            )
+            it.position = Position(p, it.position?.time ?: 0)
         }
     }
 
@@ -1117,15 +1111,7 @@ class MeshService : Service(), Logging {
             if (info.hasPosition()) {
                 // For the local node, it might not be able to update its times because it doesn't have a valid GPS reading yet
                 // so if the info is for _our_ node we always assume time is current
-                val time =
-                    if (it.num == mi.myNodeNum) currentSecond() else info.position.time
-
-                it.position = Position(
-                    info.position.latitude,
-                    info.position.longitude,
-                    info.position.altitude,
-                    time
-                )
+                it.position = Position(info.position)
             }
         }
     }
@@ -1214,8 +1200,12 @@ class MeshService : Service(), Logging {
         debug("Sending our position to=$destNum lat=$lat, lon=$lon, alt=$alt")
 
         val position = MeshProtos.Position.newBuilder().also {
-            it.latitude = lat
-            it.longitude = lon
+            it.latitudeD = lat // Only old radios will use this variant, others will just ignore it
+            it.longitudeD = lon
+
+            it.longitudeI = Position.degI(lon)
+            it.latitudeI = Position.degI(lat)
+
             it.altitude = alt
             it.time = currentSecond() // Include our current timestamp
         }.build()
