@@ -360,8 +360,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         b.isChecked = device.macAddress == scanModel.selectedMacAddr
         deviceRadioGroup.addView(b)
 
+        // Once we have at least one device, don't show the "looking for" animation - it makes uers think
+        // something is busted
+        scanProgressBar.visibility = View.INVISIBLE
+
         b.setOnClickListener {
-            scanProgressBar.visibility = View.INVISIBLE
             if (!device.bonded) // If user just clicked on us, try to bond
                 scanStatusText.setText(R.string.starting_pairing)
 
