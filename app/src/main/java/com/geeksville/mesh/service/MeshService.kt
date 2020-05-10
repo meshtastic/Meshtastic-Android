@@ -641,7 +641,7 @@ class MeshService : Service(), Logging {
         destId: String?,
         initFn: MeshProtos.SubPacket.Builder.() -> Unit
     ): MeshPacket = newMeshPacketTo(destId).apply {
-        payload = MeshProtos.SubPacket.newBuilder().also {
+        decoded = MeshProtos.SubPacket.newBuilder().also {
             initFn(it)
         }.build()
     }.build()
@@ -650,11 +650,11 @@ class MeshService : Service(), Logging {
 
     /// Generate a DataPacket from a MeshPacket, or null if we didn't have enough data to do so
     private fun toDataPacket(packet: MeshPacket): DataPacket? {
-        return if (!packet.hasPayload() || !packet.payload.hasData()) {
+        return if (!packet.hasDecoded() || !packet.decoded.hasData()) {
             // We never convert packets that are not DataPackets
             null
         } else {
-            val data = packet.payload.data
+            val data = packet.decoded.data
             val bytes = data.payload.toByteArray()
             val fromId = toNodeID(packet.from)
             val toId = toNodeID(packet.to)
@@ -688,7 +688,7 @@ class MeshService : Service(), Logging {
 
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedData(packet: MeshPacket) {
-        val data = packet.payload.data
+        val data = packet.decoded.data
         val bytes = data.payload.toByteArray()
         val fromId = toNodeID(packet.from)
         val dataPacket = toDataPacket(packet)
@@ -785,7 +785,7 @@ class MeshService : Service(), Logging {
         // decided to pass through to us (except for broadcast packets)
         //val toNum = packet.to
 
-        val p = packet.payload
+        val p = packet.decoded
 
         // If the rxTime was not set by the device (because device software was old), guess at a time
         val rxTime = if (packet.rxTime == 0) packet.rxTime else currentSecond()
@@ -1213,7 +1213,7 @@ class MeshService : Service(), Logging {
         // encapsulate our payload in the proper protobufs and fire it off
         val packet = newMeshPacketTo(destNum)
 
-        packet.payload = MeshProtos.SubPacket.newBuilder().also {
+        packet.decoded = MeshProtos.SubPacket.newBuilder().also {
             it.position = position
             it.wantResponse = wantResponse
         }.build()
