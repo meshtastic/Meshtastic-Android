@@ -17,8 +17,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 22 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 162
-        versionName "0.6.2"
+        versionCode 163
+        versionName "0.6.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -79,7 +79,7 @@ protobuf {
         all().each { task ->
             task.builtins {
                 java {
-                    // turned off for now so I can use json printing
+                    // use the smaller android version of the library
                     option "lite"
                 }
             }
