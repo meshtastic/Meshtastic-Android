@@ -8,8 +8,7 @@ import com.geeksville.android.Logging
 
 class BootCompleteReceiver : BroadcastReceiver(), Logging {
     override fun onReceive(mContext: Context, intent: Intent) {
-        // FIXME - start listening for bluetooth messages from our device
-        info("Received boot complete announcement, starting mesh service")
-        MeshService.startService(mContext)
+        // start listening for bluetooth messages from our device
+        MeshService.startLater(mContext)
     }
 }

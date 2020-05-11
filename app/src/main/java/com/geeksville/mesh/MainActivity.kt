@@ -674,10 +674,10 @@ class MainActivity : AppCompatActivity(), Logging,
         if (model.meshService != null)
             Exceptions.reportError("meshService was supposed to be null, ignoring (but reporting a bug)")
 
-        MeshService.startService(this)?.let { intent ->
-            // ALSO bind so we can use the api
-            mesh.connect(this, intent, Context.BIND_AUTO_CREATE + Context.BIND_ABOVE_CLIENT)
-        }
+        MeshService.startService(this) // Start the service so it stays running even after we unbind
+
+        // ALSO bind so we can use the api
+        mesh.connect(this, MeshService.intent, Context.BIND_AUTO_CREATE + Context.BIND_ABOVE_CLIENT)
     }
 
     private fun unbindMeshService() {

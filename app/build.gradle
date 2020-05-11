@@ -146,5 +146,11 @@ dependencies {
     implementation('com.journeyapps:zxing-android-embedded:4.1.0') { transitive = false }
     implementation 'com.google.zxing:core:3.4.0'
 
+    def work_version = "2.3.4"
+
+    // Work Request - used to delay boot event handling
+    // implementation "androidx.work:work-runtime:$work_version"
+    implementation "androidx.work:work-runtime-ktx:$work_version"
+
     implementation project(':geeksville-androidlib')
 }

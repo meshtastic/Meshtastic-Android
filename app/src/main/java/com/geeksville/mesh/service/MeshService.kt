@@ -16,6 +16,7 @@ import androidx.annotation.UiThread
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.PRIORITY_MIN
 import androidx.core.content.edit
+import androidx.work.*
 import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
@@ -33,6 +34,7 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -67,33 +69,67 @@ class MeshService : Service(), Logging {
         class NodeNumNotFoundException(id: Int) : Exception("NodeNum not found $id")
         class NotInMeshException() : Exception("We are not yet in a mesh")
 
-        /// Helper function to start running our service, returns the intent used to reach it
-        /// or null if the service could not be started (no bluetooth or no bonded device set)
-        fun startService(context: Context): Intent? {
+        /** A little helper that just calls startService
+         */
+        class ServiceStarter(appContext: Context, workerParams: WorkerParameters) :
+            Worker(appContext, workerParams) {
+
+            override fun doWork(): Result = try {
+                startService(this.applicationContext)
+
+                // Indicate whether the task finished successfully with the Result
+                Result.success()
+            } catch (ex: Exception) {
+                errormsg("failure starting service, will retry", ex)
+                Result.retry()
+            }
+        }
+
+        /**
+         * Just after boot the android OS is super busy, so if we call startForegroundService then, our
+         * thread might be stalled long enough to expose this google/samsung bug:
+         * https://issuetracker.google.com/issues/76112072#comment56
+         */
+        fun startLater(context: Context) {
+            info("Received boot complete announcement, starting mesh service in one minute")
+            val delayRequest = OneTimeWorkRequestBuilder<ServiceStarter>()
+                .setInitialDelay(1, TimeUnit.MINUTES)
+                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
+                .addTag("startLater")
+                .build()
+
+            WorkManager.getInstance(context).enqueue(delayRequest)
+        }
+
+        val intent = Intent().apply {
+            setClassName(
+                "com.geeksville.mesh",
+                "com.geeksville.mesh.service.MeshService"
+            )
+        }
+
+        /// Helper function to start running our service
+        fun startService(context: Context) {
             // bind to our service using the same mechanism an external client would use (for testing coverage)
             // The following would work for us, but not external users
             //val intent = Intent(this, MeshService::class.java)
             //intent.action = IMeshService::class.java.name
-            val intent = Intent()
-            intent.setClassName(
-                "com.geeksville.mesh",
-                "com.geeksville.mesh.service.MeshService"
-            )
+
 
             // Before binding we want to explicitly create - so the service stays alive forever (so it can keep
             // listening for the bluetooth packets arriving from the radio.  And when they arrive forward them
             // to Signal or whatever.
 
-            logAssert(
+            info("Trying to start service")
+            val compName =
                 (if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    // we have some samsung devices failing with https://issuetracker.google.com/issues/76112072#comment56 not sure what the fix is yet
                     context.startForegroundService(intent)
                 } else {
                     context.startService(intent)
-                }) != null
-            )
+                })
 
-            return intent
+            if (compName == null)
+                throw Exception("Failed to start service")
         }
     }
 
