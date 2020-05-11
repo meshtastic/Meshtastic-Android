@@ -393,7 +393,6 @@ class RadioInterfaceService : Service(), Logging {
         }
     }
 
-    // private var isFirstTime = true
 
     /**
      * Some buggy BLE stacks can fail on initial connect, with either missing services or missing characteristics.  If that happens we
@@ -419,6 +418,9 @@ class RadioInterfaceService : Service(), Logging {
     /// We only try to set MTU once, because some buggy implementations fail
     private var shouldSetMtu = true
 
+    /// For testing
+    private var isFirstTime = true
+
     private fun doDiscoverServicesAndInit() {
         // FIXME - no need to discover services more than once - instead use lazy() to use them in future attempts
         safe!!.asyncDiscoverServices { discRes ->
@@ -434,9 +436,9 @@ class RadioInterfaceService : Service(), Logging {
                     warn("Use oldAPI = $isOldApi")
 
                     /* if (isFirstTime) {
-                    isFirstTime = false
-                    throw BLEException("Faking a BLE failure")
-                } */
+                        isFirstTime = false
+                        throw BLEException("Faking a BLE failure")
+                    } */
 
                     fromNum = getCharacteristic(BTM_FROMNUM_CHARACTER)
 
