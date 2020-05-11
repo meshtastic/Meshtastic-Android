@@ -28,6 +28,7 @@ import com.geeksville.util.*
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.protobuf.ByteString
+import com.google.protobuf.InvalidProtocolBufferException
 import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -976,9 +977,14 @@ class MeshService : Service(), Logging {
                     startConfig()
 
                 reportConnection()
+            } catch (ex: InvalidProtocolBufferException) {
+                errormsg(
+                    "Invalid protocol buffer sent by device - update device software and try again",
+                    ex
+                )
             } catch (ex: RadioNotConnectedException) {
                 // note: no need to call startDeviceSleep(), because this exception could only have reached us if it was already called
-                error("Lost connection to radio during init - waiting for reconnect")
+                errormsg("Lost connection to radio during init - waiting for reconnect")
             } catch (ex: RemoteException) {
                 // It seems that when the ESP32 goes offline it can briefly come back for a 100ms ish which
                 // causes the phone to try and reconnect.  If we fail downloading our initial radio state we don't want to
