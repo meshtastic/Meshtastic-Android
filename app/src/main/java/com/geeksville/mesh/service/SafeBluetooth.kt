@@ -187,8 +187,10 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                         // Cancel any notifications - because when the device comes back it might have forgotten about us
                         notifyHandlers.clear()
 
-                        debug("calling lostConnect handler")
-                        lostConnectCallback?.invoke()
+                        lostConnectCallback?.let {
+                            debug("calling lostConnect handler")
+                            it.invoke()
+                        }
 
                         // Queue a new connection attempt
                         val cb = connectionCallback
@@ -420,7 +422,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     ) {
         logAssert(workQueue.isEmpty())
         logAssert(currentWork == null) // I don't think anything should be able to sneak in front
-        
+
         lostConnectCallback = lostConnectCb
         connectionCallback = if (autoConnect)
             cb
@@ -508,6 +510,10 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
      * cancelled and you'll need to recall connect to use this againt
      */
     fun closeConnection() {
+        // Set these to null _before_ calling gatt.disconnect(), because we don't want the old lostConnectCallback to get called
+        lostConnectCallback = null
+        connectionCallback = null
+
         failAllWork(BLEException("Connection closing"))
 
         if (gatt != null) {
@@ -515,8 +521,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             gatt!!.disconnect()
             gatt!!.close()
             gatt = null
-            lostConnectCallback = null
-            connectionCallback = null
         }
     }
 
