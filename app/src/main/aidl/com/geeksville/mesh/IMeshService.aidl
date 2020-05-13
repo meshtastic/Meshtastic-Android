@@ -4,6 +4,7 @@ package com.geeksville.mesh;
 // Declare any non-default types here with import statements
 parcelable DataPacket;
 parcelable NodeInfo;
+parcelable MyNodeInfo;
 
 /**
 * Note - these calls might throw RemoteException to indicate mesh error states
@@ -61,6 +62,17 @@ interface IMeshService {
     /// Any current connection will be dropped (even if the device address is the same) before reconnecting.
     /// Users should not call this directly, only used internally by the MeshUtil activity
     void setDeviceAddress(String deviceAddr);
+
+    /// Get basic device hardware info about our connected radio
+    MyNodeInfo getMyNodeInfo();
+
+    /// Start updating the radios firmware
+    void startFirmwareUpdate();
+
+    /**
+    Return a number 0-100 for progress. -1 for completed and success, -2 for failure
+    */
+    int getUpdateStatus();
 
     // see com.geeksville.com.geeksville.mesh broadcast intents
     // RECEIVED_OPAQUE  for data received from other nodes.  payload will contain a DataPacket

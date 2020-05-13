@@ -27,13 +27,14 @@ import java.util.zip.CRC32
  */
 class SoftwareUpdateService : JobIntentService(), Logging {
 
+
     private val bluetoothAdapter: BluetoothAdapter by lazy(LazyThreadSafetyMode.NONE) {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothManager.adapter!!
     }
 
 
-    fun startUpdate(macaddr: String) {
+    private fun startUpdate(macaddr: String) {
         info("starting update to $macaddr")
 
         val device = bluetoothAdapter.getRemoteDevice(macaddr)
@@ -51,121 +52,17 @@ class SoftwareUpdateService : JobIntentService(), Logging {
 
             sync.discoverServices() // Get our services
 
-            val service = sync.gatt!!.services.find { it.uuid == SW_UPDATE_UUID }!!
-
-            fun doFirmwareUpdate(assetName: String) {
-
-                info("Starting firmware update for $assetName")
-
-                val totalSizeDesc = service.getCharacteristic(SW_UPDATE_TOTALSIZE_CHARACTER)
-                val dataDesc = service.getCharacteristic(SW_UPDATE_DATA_CHARACTER)
-                val crc32Desc = service.getCharacteristic(SW_UPDATE_CRC32_CHARACTER)
-                val updateResultDesc = service.getCharacteristic(SW_UPDATE_RESULT_CHARACTER)
-
-                assets.open(assetName).use { firmwareStream ->
-                    val firmwareCrc = CRC32()
-                    var firmwareNumSent = 0
-                    val firmwareSize = firmwareStream.available()
-
-                    // Start the update by writing the # of bytes in the image
-                    logAssert(
-                        totalSizeDesc.setValue(
-                            firmwareSize,
-                            BluetoothGattCharacteristic.FORMAT_UINT32,
-                            0
-                        )
-                    )
-                    sync.writeCharacteristic(totalSizeDesc)
-
-// Our write completed, queue up a readback
-                    val totalSizeReadback = sync.readCharacteristic(totalSizeDesc)
-                        .getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0)
-                    if (totalSizeReadback == 0) // FIXME - handle this case
-                        throw Exception("Device rejected file size")
-
-                    // Send all the blocks
-                    while (firmwareNumSent < firmwareSize) {
-                        debug("sending block ${firmwareNumSent * 100 / firmwareSize}%")
-                        var blockSize = 512 - 3 // Max size MTU excluding framing
-
-                        if (blockSize > firmwareStream.available())
-                            blockSize = firmwareStream.available()
-                        val buffer = ByteArray(blockSize)
-
-                        // slightly expensive to keep reallocing this buffer, but whatever
-                        logAssert(firmwareStream.read(buffer) == blockSize)
-                        firmwareCrc.update(buffer)
-
-                        // updateGatt.beginReliableWrite()
-                        dataDesc.value = buffer
-                        sync.writeCharacteristic(dataDesc)
-                        firmwareNumSent += blockSize
-                    }
-
-                    // We have finished sending all our blocks, so post the CRC so our state machine can advance
-                    val c = firmwareCrc.value
-                    info("Sent all blocks, crc is $c")
-                    logAssert(
-                        crc32Desc.setValue(
-                            c.toInt(),
-                            BluetoothGattCharacteristic.FORMAT_UINT32,
-                            0
-                        )
-                    )
-                    sync.writeCharacteristic(crc32Desc)
-
-                    // we just read the update result if !0 we have an error
-                    val updateResult =
-                        sync.readCharacteristic(updateResultDesc)
-                            .getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0)
-                    if (updateResult != 0) // FIXME - handle this case
-                        throw Exception("Device update failed, reason=$updateResult")
-
-                    // FIXME perhaps ask device to reboot
-                }
-            }
-
-            /// Return the filename this device needs to use as an update (or null if no update needed)
-            fun getUpdateFilename(): String? {
-                val hwVerDesc = service.getCharacteristic(HW_VERSION_CHARACTER)
-                val mfgDesc = service.getCharacteristic(MANUFACTURE_CHARACTER)
-                val swVerDesc = service.getCharacteristic(SW_VERSION_CHARACTER)
-
-                // looks like 1.0-US
-                val hwVer = sync.readCharacteristic(hwVerDesc).getStringValue(0)
-
-                // looks like HELTEC
-                val mfg = sync.readCharacteristic(mfgDesc).getStringValue(0)
-
-                // looks like 0.0.12
-                val swVer = sync.readCharacteristic(swVerDesc).getStringValue(0)
-
-                val curver = getString(R.string.cur_firmware_version)
-
-                // FIXME, instead compare version strings carefully to see if less than
-                val needsUpdate = (curver != swVer)
-
-                return if (!needsUpdate)
-                    null
-                else {
-                    val regionRegex = Regex(".+-(.+)")
-                    val (region) = regionRegex.find(hwVer)?.destructured
-                        ?: throw Exception("Malformed hw version")
-
-                    "firmware/firmware-$mfg-$region-$curver.bin"
-                }
-            }
-
-            val updateFilename = getUpdateFilename()
+            val updateFilename = getUpdateFilename(this, sync)
             if (updateFilename != null) {
-                doFirmwareUpdate(updateFilename)
+                doUpdate(this, sync, updateFilename)
             } else
                 warn("Device is already up-to-date no update needed.")
         }
     }
 
 
-    override fun onHandleWork(intent: Intent) { // We have received work to do.  The system or framework is already
+    override fun onHandleWork(intent: Intent) {
+        // We have received work to do.  The system or framework is already
 // holding a wake lock for us at this point, so we can just go.
 
         // Report failures but do not crash the app
@@ -182,7 +79,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         }
     }
 
-    companion object {
+    companion object : Logging {
         /**
          * Unique job ID for this service.  Must be the same for all work.
          */
@@ -219,6 +116,11 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         private val HW_VERSION_CHARACTER = longBLEUUID("2a27")
 
         /**
+         * % progress through the update
+         */
+        var progress = 0
+
+        /**
          * Convenience method for enqueuing work in to this service.
          */
         fun enqueueWork(context: Context, work: Intent) {
@@ -227,6 +129,147 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 SoftwareUpdateService::class.java,
                 JOB_ID, work
             )
+        }
+
+        /** Return true if we thing the firmwarte shoulde be updated
+         */
+        fun shouldUpdate(
+            context: Context,
+            swVer: String
+        ): Boolean {
+            val curver = context.getString(R.string.cur_firmware_version)
+
+            // If the user is running a development build we never do an automatic update
+            val isDevBuild = swVer.isEmpty() || swVer == "unset"
+
+            // FIXME, instead compare version strings carefully to see if less than
+            val needsUpdate = (curver != swVer)
+
+            return needsUpdate && !isDevBuild
+        }
+
+        /** Return the filename this device needs to use as an update (or null if no update needed)
+         */
+        fun getUpdateFilename(
+            context: Context,
+            hwVerIn: String,
+            swVer: String,
+            mfg: String
+        ): String {
+            val curver = context.getString(R.string.cur_firmware_version)
+
+            val regionRegex = Regex(".+-(.+)")
+
+            val hwVer = if (hwVerIn.isEmpty() || hwVerIn == "unset")
+                "1.0-US" else hwVerIn // lie and claim US, because that's what the device load will be doing without hwVer set
+
+            val (region) = regionRegex.find(hwVer)?.destructured
+                ?: throw Exception("Malformed hw version")
+
+            return "firmware/firmware-$mfg-$region-$curver.bin"
+        }
+
+        /** Return the filename this device needs to use as an update (or null if no update needed)
+         */
+        fun getUpdateFilename(context: Context, sync: SafeBluetooth): String? {
+            val service = sync.gatt!!.services.find { it.uuid == SW_UPDATE_UUID }!!
+
+            val hwVerDesc = service.getCharacteristic(HW_VERSION_CHARACTER)
+            val mfgDesc = service.getCharacteristic(MANUFACTURE_CHARACTER)
+            val swVerDesc = service.getCharacteristic(SW_VERSION_CHARACTER)
+
+            // looks like 1.0-US
+            var hwVer = sync.readCharacteristic(hwVerDesc).getStringValue(0)
+
+            // looks like HELTEC
+            val mfg = sync.readCharacteristic(mfgDesc).getStringValue(0)
+
+            // looks like 0.0.12
+            val swVer = sync.readCharacteristic(swVerDesc).getStringValue(0)
+
+            return getUpdateFilename(context, hwVer, swVer, mfg)
+        }
+
+        /**
+         * A public function so that if you have your own SafeBluetooth connection already open
+         * you can use it for the software update.
+         */
+        fun doUpdate(context: Context, sync: SafeBluetooth, assetName: String) {
+            val service = sync.gatt!!.services.find { it.uuid == SW_UPDATE_UUID }!!
+
+            info("Starting firmware update for $assetName")
+
+            val totalSizeDesc = service.getCharacteristic(SW_UPDATE_TOTALSIZE_CHARACTER)
+            val dataDesc = service.getCharacteristic(SW_UPDATE_DATA_CHARACTER)
+            val crc32Desc = service.getCharacteristic(SW_UPDATE_CRC32_CHARACTER)
+            val updateResultDesc = service.getCharacteristic(SW_UPDATE_RESULT_CHARACTER)
+
+            context.assets.open(assetName).use { firmwareStream ->
+                val firmwareCrc = CRC32()
+                var firmwareNumSent = 0
+                val firmwareSize = firmwareStream.available()
+
+                // Start the update by writing the # of bytes in the image
+                logAssert(
+                    totalSizeDesc.setValue(
+                        firmwareSize,
+                        BluetoothGattCharacteristic.FORMAT_UINT32,
+                        0
+                    )
+                )
+                sync.writeCharacteristic(totalSizeDesc)
+
+// Our write completed, queue up a readback
+                val totalSizeReadback = sync.readCharacteristic(totalSizeDesc)
+                    .getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0)
+                if (totalSizeReadback == 0) // FIXME - handle this case
+                    throw Exception("Device rejected file size")
+
+                // Send all the blocks
+                while (firmwareNumSent < firmwareSize) {
+                    progress = firmwareNumSent * 100 / firmwareSize
+                    debug("sending block ${progress}%")
+                    var blockSize = 512 - 3 // Max size MTU excluding framing
+
+                    if (blockSize > firmwareStream.available())
+                        blockSize = firmwareStream.available()
+                    val buffer = ByteArray(blockSize)
+
+                    // slightly expensive to keep reallocing this buffer, but whatever
+                    logAssert(firmwareStream.read(buffer) == blockSize)
+                    firmwareCrc.update(buffer)
+
+                    // updateGatt.beginReliableWrite()
+                    dataDesc.value = buffer
+                    sync.writeCharacteristic(dataDesc)
+                    firmwareNumSent += blockSize
+                }
+
+                // We have finished sending all our blocks, so post the CRC so our state machine can advance
+                val c = firmwareCrc.value
+                info("Sent all blocks, crc is $c")
+                logAssert(
+                    crc32Desc.setValue(
+                        c.toInt(),
+                        BluetoothGattCharacteristic.FORMAT_UINT32,
+                        0
+                    )
+                )
+                sync.writeCharacteristic(crc32Desc)
+
+                // we just read the update result if !0 we have an error
+                val updateResult =
+                    sync.readCharacteristic(updateResultDesc)
+                        .getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0)
+                if (updateResult != 0) {
+                    progress = -2
+                    throw Exception("Device update failed, reason=$updateResult")
+                }
+
+                // Device will now reboot
+
+                progress = -1 // success
+            }
         }
     }
 }

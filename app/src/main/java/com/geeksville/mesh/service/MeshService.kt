@@ -474,16 +474,6 @@ class MeshService : Service(), Logging {
     /// special broadcast address
     val NODENUM_BROADCAST = 255
 
-    // MyNodeInfo sent via special protobuf from radio
-    @Serializable
-    data class MyNodeInfo(
-        val myNodeNum: Int,
-        val hasGPS: Boolean,
-        val region: String,
-        val model: String,
-        val firmwareVersion: String
-    )
-
     /// Our saved preferences as stored on disk
     @Serializable
     private data class SavedSettings(
@@ -862,35 +852,10 @@ class MeshService : Service(), Logging {
             connectedRadio.readMyNode()
         )
 
-        val mi = with(myInfo) {
-            MyNodeInfo(myNodeNum, hasGps, region, hwModel, firmwareVersion)
-        }
-
-        myNodeInfo = mi
+        handleMyInfo(myInfo)
 
         radioConfig = MeshProtos.RadioConfig.parseFrom(connectedRadio.readRadioConfig())
 
-        /// Track types of devices and firmware versions in use
-        GeeksvilleApplication.analytics.setUserInfo(
-            DataPair("region", mi.region),
-            DataPair("firmware", mi.firmwareVersion),
-            DataPair("has_gps", mi.hasGPS),
-            DataPair("hw_model", mi.model),
-            DataPair("dev_error_count", myInfo.errorCount)
-        )
-
-        if (myInfo.errorCode != 0) {
-            GeeksvilleApplication.analytics.track(
-                "dev_error",
-                DataPair("code", myInfo.errorCode),
-                DataPair("address", myInfo.errorAddress),
-
-                // We also include this info, because it is required to correctly decode address from the map file
-                DataPair("firmware", mi.firmwareVersion),
-                DataPair("hw_model", mi.model),
-                DataPair("region", mi.region)
-            )
-        }
 
         // Ask for the current node DB
         connectedRadio.restartNodeInfo()
@@ -1168,7 +1133,15 @@ class MeshService : Service(), Logging {
 
     private fun handleMyInfo(myInfo: MeshProtos.MyNodeInfo) {
         val mi = with(myInfo) {
-            MyNodeInfo(myNodeNum, hasGps, region, hwModel, firmwareVersion)
+            MyNodeInfo(
+                myNodeNum,
+                hasGps,
+                region,
+                hwModel,
+                firmwareVersion,
+                false,
+                false
+            )
         }
 
         newMyNodeInfo = mi
@@ -1311,7 +1284,41 @@ class MeshService : Service(), Logging {
 
     }
 
-    private val binder = object : IMeshService.Stub() {
+    /***
+     * Return the filename we will install on the device
+     */
+    val firmwareUpdateFilename: String?
+        get() =
+            try {
+                myNodeInfo?.let {
+                    if (it.region != null && it.firmwareVersion != null && it.model != null)
+                        SoftwareUpdateService.getUpdateFilename(
+                            this,
+                            it.region,
+                            it.firmwareVersion,
+                            it.model
+                        )
+                    else
+                        null
+                }
+            } catch (ex: Exception) {
+                errormsg("Unable to update", ex)
+                null
+            }
+
+    private fun doFirmwareUpdate() {
+        // Run in the IO thread
+        val filename = firmwareUpdateFilename ?: throw Exception("No update filename")
+        val safe =
+            RadioInterfaceService.safe ?: throw Exception("Can't update - no bluetooth connected")
+
+        serviceScope.handledLaunch {
+            SoftwareUpdateService.doUpdate(this@MeshService, safe, filename)
+        }
+    }
+
+    private
+    val binder = object : IMeshService.Stub() {
 
         override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
             debug("Passing through device change to radio service: $deviceAddr")
@@ -1330,6 +1337,14 @@ class MeshService : Service(), Logging {
             return recentDataPackets
         }
 
+        override fun getUpdateStatus(): Int = SoftwareUpdateService.progress
+
+        override fun startFirmwareUpdate() = toRemoteExceptions {
+            doFirmwareUpdate()
+        }
+
+        override fun getMyNodeInfo(): MyNodeInfo? = this@MeshService.myNodeInfo
+
         override fun getMyId() = toRemoteExceptions { myNodeID }
 
         override fun setOwner(myId: String?, longName: String, shortName: String) =
@@ -1337,7 +1352,11 @@ class MeshService : Service(), Logging {
                 this@MeshService.setOwner(myId, longName, shortName)
             }
 
-        override fun sendData(destId: String?, payloadIn: ByteArray, typ: Int): Boolean =
+        override fun sendData(
+            destId: String?,
+            payloadIn: ByteArray,
+            typ: Int
+        ): Boolean =
             toRemoteExceptions {
                 info("sendData dest=$destId <- ${payloadIn.size} bytes (connectionState=$connectionState)")
 
@@ -1376,7 +1395,8 @@ class MeshService : Service(), Logging {
             }
 
         override fun getRadioConfig(): ByteArray = toRemoteExceptions {
-            this@MeshService.radioConfig?.toByteArray() ?: throw RadioNotConnectedException()
+            this@MeshService.radioConfig?.toByteArray()
+                ?: throw RadioNotConnectedException()
         }
 
         override fun setRadioConfig(payload: ByteArray) = toRemoteExceptions {

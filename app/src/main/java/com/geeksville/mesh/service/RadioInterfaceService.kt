@@ -208,11 +208,14 @@ class RadioInterfaceService : Service(), Logging {
                 warn("CompanionDevice API not available, falling back to classic scan")
                 false
             } */
+
+        /**
+         * this is created in onCreate()
+         * We do an ugly hack of keeping it in the singleton so we can share it for the rare software update case
+         */
+        var safe: SafeBluetooth? = null
     }
 
-
-    // Both of these are created in onCreate()
-    private var safe: SafeBluetooth? = null
 
     /// Our BLE device
     val device get() = safe!!.gatt!!
