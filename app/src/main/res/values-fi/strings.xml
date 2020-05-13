@@ -11,7 +11,6 @@
     <string name="unknown_username">Tuntematon käyttäjänimi</string>
     <string name="user_avatar">Käyttäjän kuvake</string>
     <string name="sample_message">Hei! Löysin kätkön. Se on täällä suuren tiikerin luona! Hieman jo hirvittää.</string>
-    <string name="some_username">Jokin käyttäjänimi</string>
     <string name="send_text">Lähetä teksti</string>
     <string name="warning_not_paired">Et ole vielä yhdistänyt Meshtastic -yhteensopivaa radiota tähän puhelimeen. Parita laitteesi tämän puhelimen kanssa ja aseta käyttäjänimesi.\n\nTämä avoimen lähdekoodin (open source) ohjelma on alpha-testausvaiheessa. Mikäli huomaat ongelmia, lähetäthän viestin verkkosivumme keskustelupalstalle.\n\nLisätietoja verkkosivuiltamme - www.meshtastic.org.</string>
     <string name="username_unset">Käyttäjänimi asettamatta</string>

@@ -13,7 +13,6 @@
     <string name="user_avatar">Avatar de usuario</string>
     <string name="sample_distance" translatable="false">2.13 km</string>
     <string name="sample_message">hey encontré el caché, está aquí al lado del gran tigre. Estoy un poco asustado..</string>
-    <string name="some_username" translatable="false">SKH</string>
     <string name="send_text">Enviar texto</string>
     <string name="warning_not_paired">Aún no ha emparejado un radio compatible con Meshtastic con este teléfono. Empareje un dispositivo y configure su nombre de usuario. \n\nEsta aplicación de código abierto está en prueba alfa; si encuentra problemas, publique en el chat de nuestro sitio web. \n \nPara obtener más información, visite nuestra página web - www.meshtastic.org.</string>
     <string name="username_unset">Nombre de usuario sin configurar</string>

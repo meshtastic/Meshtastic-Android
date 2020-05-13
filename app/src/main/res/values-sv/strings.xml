@@ -11,7 +11,6 @@
     <string name="unknown_username">Okänt användarnamn</string>
     <string name="user_avatar">Användaravatar</string>
     <string name="sample_message">Hej, jag hittade cachen, den är här bredvid den stora tigern. Jag är lite orolig.</string>
-    <string name="some_username">Något användarnamn</string>
     <string name="send_text">Skicka text</string>
     <string name="warning_not_paired">Du har ännu inte parat en Meshtastic-kompatibel radio med den här telefonen. Koppla ihop en enhet och ange ditt användarnamn.\n\nDetta öppna källkodsprogrammet (open source) är i alfatestning, om du hittar problem, vänligen publicera det på vår webbplatschatt.\n\nFör mer information se vår webbsida - www.meshtastic.org.</string>
     <string name="username_unset">Användarnamn inte tillgänglig</string>
