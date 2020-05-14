@@ -126,5 +126,15 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/scanStatusText" />
 
+    <ProgressBar
+        android:id="@+id/updateProgressBar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/updateFirmwareButton"
+        app:layout_constraintStart_toStartOf="@+id/updateFirmwareButton"
+        app:layout_constraintTop_toBottomOf="@+id/updateFirmwareButton" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

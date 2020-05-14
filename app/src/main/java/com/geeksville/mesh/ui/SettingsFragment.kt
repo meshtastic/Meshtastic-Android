@@ -319,8 +319,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             val info = model.myNodeInfo.value
             if (connected == MeshService.ConnectionState.CONNECTED && info != null && info.couldUpdate) {
                 updateFirmwareButton.visibility = View.VISIBLE
+                updateFirmwareButton.text =
+                    getString(R.string.update_to).format(getString(R.string.cur_firmware_version))
             } else {
                 updateFirmwareButton.visibility = View.GONE
+                updateProgressBar.visibility = View.GONE
             }
 
             when (connected) {
@@ -338,6 +341,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         updateFirmwareButton.setOnClickListener {
             debug("User started firmware update")
+            updateFirmwareButton.isEnabled = false // Disable until things complete
+            updateProgressBar.visibility = View.VISIBLE
+            model.meshService?.startFirmwareUpdate()
+            scanStatusText.text = "Updating firmware, wait up to eight minutes..."
         }
 
         usernameEditText.on(EditorInfo.IME_ACTION_DONE) {
