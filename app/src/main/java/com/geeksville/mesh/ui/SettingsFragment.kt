@@ -25,6 +25,7 @@ import androidx.lifecycle.Observer
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
+import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.anonymized
@@ -34,6 +35,10 @@ import com.geeksville.mesh.service.RadioInterfaceService
 import com.geeksville.util.exceptionReporter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.settings_fragment.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import java.util.regex.Pattern
 
 object SLogging : Logging {}
@@ -290,12 +295,44 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private val scanModel: BTScanModel by activityViewModels()
     private val model: UIViewModel by activityViewModels()
 
+    // FIXME - move this into a standard GUI helper class
+    private val guiJob = Job()
+    private val mainScope = CoroutineScope(Dispatchers.Main + guiJob)
+
+
     private val hasCompanionDeviceApi: Boolean by lazy {
         RadioInterfaceService.hasCompanionDeviceApi(requireContext())
     }
 
     private val deviceManager: CompanionDeviceManager by lazy {
         requireContext().getSystemService(CompanionDeviceManager::class.java)
+    }
+
+    override fun onDestroy() {
+        guiJob.cancel()
+        super.onDestroy()
+    }
+
+    private fun doFirmwareUpdate() {
+        model.meshService?.let { service ->
+
+            mainScope.handledLaunch {
+                debug("User started firmware update")
+                updateFirmwareButton.isEnabled = false // Disable until things complete
+                updateProgressBar.visibility = View.VISIBLE
+
+                scanStatusText.text = "Updating firmware, wait up to eight minutes..."
+                service.startFirmwareUpdate()
+                while (service.updateStatus >= 0) {
+                    updateProgressBar.progress = service.updateStatus
+                    delay(2000) // Only check occasionally
+                }
+                scanStatusText.text =
+                    if (service.updateStatus == -1) "Update successful" else "Update failed"
+                updateProgressBar.isEnabled = false
+                updateFirmwareButton.isEnabled = true
+            }
+        }
     }
 
     override fun onCreateView(
@@ -340,11 +377,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         })
 
         updateFirmwareButton.setOnClickListener {
-            debug("User started firmware update")
-            updateFirmwareButton.isEnabled = false // Disable until things complete
-            updateProgressBar.visibility = View.VISIBLE
-            model.meshService?.startFirmwareUpdate()
-            scanStatusText.text = "Updating firmware, wait up to eight minutes..."
+            doFirmwareUpdate()
         }
 
         usernameEditText.on(EditorInfo.IME_ACTION_DONE) {

@@ -17,6 +17,7 @@ import com.geeksville.android.BinaryLogFile
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.DeferredExecution
+import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.IRadioInterfaceService
 import com.geeksville.mesh.anonymized
 import com.geeksville.util.exceptionReporter

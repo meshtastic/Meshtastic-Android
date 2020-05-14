@@ -21,6 +21,7 @@ import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
+import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.*
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
@@ -35,20 +36,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 import java.util.concurrent.TimeUnit
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
-
-private val errorHandler = CoroutineExceptionHandler { _, exception ->
-    Exceptions.report(exception, "MeshService-coroutine", "coroutine-exception")
-}
-
-/// Wrap launch with an exception handler, FIXME, move into a utility lib
-fun CoroutineScope.handledLaunch(
-    context: CoroutineContext = EmptyCoroutineContext,
-    start: CoroutineStart = CoroutineStart.DEFAULT,
-    block: suspend CoroutineScope.() -> Unit
-) = this.launch(context = context + errorHandler, start = start, block = block)
 
 /**
  * Handles all the communication with android apps.  Also keeps an internal model
@@ -67,7 +55,7 @@ class MeshService : Service(), Logging {
 
         class IdNotFoundException(id: String) : Exception("ID not found $id")
         class NodeNumNotFoundException(id: Int) : Exception("NodeNum not found $id")
-        class NotInMeshException() : Exception("We are not yet in a mesh")
+        // class NotInMeshException() : Exception("We are not yet in a mesh")
 
         /** A little helper that just calls startService
          */
