@@ -311,10 +311,34 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             usernameEditText.setText(name)
         })
 
-        // Only let user edit their name while connected to a radio
+        // Only let user edit their name or set software update while connected to a radio
         model.isConnected.observe(viewLifecycleOwner, Observer { connected ->
             usernameView.isEnabled = connected == MeshService.ConnectionState.CONNECTED
+
+            // If actively connected possibly let the user update firmware
+            val info = model.myNodeInfo.value
+            if (connected == MeshService.ConnectionState.CONNECTED && info != null && info.couldUpdate) {
+                updateFirmwareButton.visibility = View.VISIBLE
+            } else {
+                updateFirmwareButton.visibility = View.GONE
+            }
+
+            when (connected) {
+                MeshService.ConnectionState.CONNECTED -> {
+                    val fwStr = info?.firmwareString ?: ""
+                    scanStatusText.text = getString(R.string.connected_to).format(fwStr)
+                }
+                MeshService.ConnectionState.DISCONNECTED ->
+                    scanStatusText.text = getString(R.string.not_connected)
+                MeshService.ConnectionState.DEVICE_SLEEP ->
+                    scanStatusText.text = getString(R.string.connected_sleeping)
+            }
+
         })
+
+        updateFirmwareButton.setOnClickListener {
+            debug("User started firmware update")
+        }
 
         usernameEditText.on(EditorInfo.IME_ACTION_DONE) {
             debug("did IME action")

@@ -12,6 +12,7 @@ import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.android.Logging
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.service.MeshService
 
 /// Given a human name, strip out the first letter of the first three words and return that as the initials for
@@ -63,6 +64,9 @@ class UIViewModel(app: Application) : AndroidViewModel(app), Logging {
     /// various radio settings (including the channel)
     val radioConfig = object : MutableLiveData<MeshProtos.RadioConfig?>(null) {
     }
+
+    /// hardware info about our local device
+    val myNodeInfo = object : MutableLiveData<MyNodeInfo>(null) {}
 
     override fun onCleared() {
         super.onCleared()

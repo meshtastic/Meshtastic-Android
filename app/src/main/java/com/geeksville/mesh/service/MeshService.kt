@@ -853,6 +853,7 @@ class MeshService : Service(), Logging {
         )
 
         handleMyInfo(myInfo)
+        myNodeInfo = newMyNodeInfo // Apply the changes from handleMyInfo right now
 
         radioConfig = MeshProtos.RadioConfig.parseFrom(connectedRadio.readRadioConfig())
 
@@ -1132,6 +1133,8 @@ class MeshService : Service(), Logging {
 
 
     private fun handleMyInfo(myInfo: MeshProtos.MyNodeInfo) {
+        setFirmwareUpdateFilename(myInfo)
+
         val mi = with(myInfo) {
             MyNodeInfo(
                 myNodeNum,
@@ -1139,8 +1142,8 @@ class MeshService : Service(), Logging {
                 region,
                 hwModel,
                 firmwareVersion,
-                false,
-                false
+                firmwareUpdateFilename != null,
+                SoftwareUpdateService.shouldUpdate(this@MeshService, firmwareVersion)
             )
         }
 
@@ -1284,27 +1287,27 @@ class MeshService : Service(), Logging {
 
     }
 
+    var firmwareUpdateFilename: String? = null
+
     /***
      * Return the filename we will install on the device
      */
-    val firmwareUpdateFilename: String?
-        get() =
-            try {
-                myNodeInfo?.let {
-                    if (it.region != null && it.firmwareVersion != null && it.model != null)
-                        SoftwareUpdateService.getUpdateFilename(
-                            this,
-                            it.region,
-                            it.firmwareVersion,
-                            it.model
-                        )
-                    else
-                        null
-                }
-            } catch (ex: Exception) {
-                errormsg("Unable to update", ex)
+    fun setFirmwareUpdateFilename(info: MeshProtos.MyNodeInfo) {
+        firmwareUpdateFilename = try {
+            if (info.region != null && info.firmwareVersion != null && info.hwModel != null)
+                SoftwareUpdateService.getUpdateFilename(
+                    this,
+                    info.region,
+                    info.firmwareVersion,
+                    info.hwModel
+                )
+            else
                 null
-            }
+        } catch (ex: Exception) {
+            errormsg("Unable to update", ex)
+            null
+        }
+    }
 
     private fun doFirmwareUpdate() {
         // Run in the IO thread

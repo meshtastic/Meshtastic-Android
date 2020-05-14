@@ -54,4 +54,8 @@
     <string name="device_sleeping">Device sleeping</string>
     <string name="connected_count">Connected: %s of %s online</string>
     <string name="list_of_nodes">A list of nodes in the network</string>
+    <string name="update_firmware">Update Firmware</string>
+    <string name="connected_to">Connected to radio (%s)</string>
+    <string name="not_connected">Not connected, select radio below</string>
+    <string name="connected_sleeping">Connected to radio, but it is sleeping</string>
 </resources>

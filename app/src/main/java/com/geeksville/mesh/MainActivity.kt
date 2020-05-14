@@ -544,6 +544,8 @@ class MainActivity : AppCompatActivity(), Logging,
                 model.radioConfig.value =
                     MeshProtos.RadioConfig.parseFrom(service.radioConfig)
 
+                model.myNodeInfo.value = service.myNodeInfo
+
                 updateNodesFromDevice()
 
                 // we have a connection to our device now, do the channel change
