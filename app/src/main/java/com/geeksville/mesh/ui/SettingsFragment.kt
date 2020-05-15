@@ -320,6 +320,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 debug("User started firmware update")
                 updateFirmwareButton.isEnabled = false // Disable until things complete
                 updateProgressBar.visibility = View.VISIBLE
+                updateProgressBar.progress = 0 // start from scratch
 
                 scanStatusText.text = "Updating firmware, wait up to eight minutes..."
                 service.startFirmwareUpdate()
@@ -342,6 +343,32 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         return inflater.inflate(R.layout.settings_fragment, container, false)
     }
 
+    private fun initNodeInfo() {
+        val connected = model.isConnected.value
+
+        // If actively connected possibly let the user update firmware
+        val info = model.myNodeInfo.value
+        if (connected == MeshService.ConnectionState.CONNECTED && info != null && info.shouldUpdate) {
+            updateFirmwareButton.visibility = View.VISIBLE
+            updateFirmwareButton.text =
+                getString(R.string.update_to).format(getString(R.string.cur_firmware_version))
+        } else {
+            updateFirmwareButton.visibility = View.GONE
+            updateProgressBar.visibility = View.GONE
+        }
+
+        when (connected) {
+            MeshService.ConnectionState.CONNECTED -> {
+                val fwStr = info?.firmwareString ?: ""
+                scanStatusText.text = getString(R.string.connected_to).format(fwStr)
+            }
+            MeshService.ConnectionState.DISCONNECTED ->
+                scanStatusText.text = getString(R.string.not_connected)
+            MeshService.ConnectionState.DEVICE_SLEEP ->
+                scanStatusText.text = getString(R.string.connected_sleeping)
+        }
+    }
+
     /// Setup the ui widgets unrelated to BLE scanning
     private fun initCommonUI() {
         model.ownerName.observe(viewLifecycleOwner, Observer { name ->
@@ -351,29 +378,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // Only let user edit their name or set software update while connected to a radio
         model.isConnected.observe(viewLifecycleOwner, Observer { connected ->
             usernameView.isEnabled = connected == MeshService.ConnectionState.CONNECTED
+            initNodeInfo()
+        })
 
-            // If actively connected possibly let the user update firmware
-            val info = model.myNodeInfo.value
-            if (connected == MeshService.ConnectionState.CONNECTED && info != null && info.couldUpdate) {
-                updateFirmwareButton.visibility = View.VISIBLE
-                updateFirmwareButton.text =
-                    getString(R.string.update_to).format(getString(R.string.cur_firmware_version))
-            } else {
-                updateFirmwareButton.visibility = View.GONE
-                updateProgressBar.visibility = View.GONE
-            }
-
-            when (connected) {
-                MeshService.ConnectionState.CONNECTED -> {
-                    val fwStr = info?.firmwareString ?: ""
-                    scanStatusText.text = getString(R.string.connected_to).format(fwStr)
-                }
-                MeshService.ConnectionState.DISCONNECTED ->
-                    scanStatusText.text = getString(R.string.not_connected)
-                MeshService.ConnectionState.DEVICE_SLEEP ->
-                    scanStatusText.text = getString(R.string.connected_sleeping)
-            }
-
+        // Also watch myNodeInfo because it might change later
+        model.myNodeInfo.observe(viewLifecycleOwner, Observer {
+            initNodeInfo()
         })
 
         updateFirmwareButton.setOnClickListener {

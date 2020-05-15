@@ -145,7 +145,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             // FIXME, instead compare version strings carefully to see if less than
             val needsUpdate = (curver != swVer)
 
-            return needsUpdate && !isDevBuild
+            return needsUpdate && !isDevBuild && false // temporarily disabled because it fails occasionally 
         }
 
         /** Return the filename this device needs to use as an update (or null if no update needed)
@@ -199,6 +199,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
 
             info("Starting firmware update for $assetName")
 
+            progress = 0
             val totalSizeDesc = service.getCharacteristic(SW_UPDATE_TOTALSIZE_CHARACTER)
             val dataDesc = service.getCharacteristic(SW_UPDATE_DATA_CHARACTER)
             val crc32Desc = service.getCharacteristic(SW_UPDATE_CRC32_CHARACTER)
@@ -219,7 +220,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 )
                 sync.writeCharacteristic(totalSizeDesc)
 
-// Our write completed, queue up a readback
+                // Our write completed, queue up a readback
                 val totalSizeReadback = sync.readCharacteristic(totalSizeDesc)
                     .getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0)
                 if (totalSizeReadback == 0) // FIXME - handle this case
@@ -238,8 +239,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                     // slightly expensive to keep reallocing this buffer, but whatever
                     logAssert(firmwareStream.read(buffer) == blockSize)
                     firmwareCrc.update(buffer)
-
-                    // updateGatt.beginReliableWrite()
+                    
                     dataDesc.value = buffer
                     sync.writeCharacteristic(dataDesc)
                     firmwareNumSent += blockSize
