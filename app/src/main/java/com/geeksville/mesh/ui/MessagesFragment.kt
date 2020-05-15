@@ -153,8 +153,9 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         messageInputText.on(EditorInfo.IME_ACTION_DONE) {
             debug("did IME action")
 
-            val str = messageInputText.text.toString()
-            model.messagesState.sendMessage(str)
+            val str = messageInputText.text.toString().trim()
+            if (str.isNotEmpty())
+                model.messagesState.sendMessage(str)
             messageInputText.setText("") // blow away the string the user just entered
 
             // requireActivity().hideKeyboard()
