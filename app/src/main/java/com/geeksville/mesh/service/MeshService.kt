@@ -654,8 +654,10 @@ class MeshService : Service(), Logging {
      */
     private fun buildMeshPacket(
         destId: String?,
+        wantAck: Boolean = false,
         initFn: MeshProtos.SubPacket.Builder.() -> Unit
     ): MeshPacket = newMeshPacketTo(destId).apply {
+        this.wantAck = wantAck
         decoded = MeshProtos.SubPacket.newBuilder().also {
             initFn(it)
         }.build()
@@ -1352,7 +1354,7 @@ class MeshService : Service(), Logging {
                 info("sendData dest=$destId <- ${payloadIn.size} bytes (connectionState=$connectionState)")
 
                 // encapsulate our payload in the proper protobufs and fire it off
-                val packet = buildMeshPacket(destId) {
+                val packet = buildMeshPacket(destId, wantAck = true) {
                     data = MeshProtos.Data.newBuilder().also {
                         it.typ = MeshProtos.Data.Type.forNumber(typ)
                         it.payload = ByteString.copyFrom(payloadIn)
