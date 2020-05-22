@@ -17,8 +17,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 22 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 164
-        versionName "0.6.4"
+        versionCode 165
+        versionName "0.6.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -95,7 +95,7 @@ dependencies {
     implementation "androidx.fragment:fragment-ktx:1.2.4"
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta5'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta6'
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
@@ -118,13 +118,13 @@ dependencies {
     // For now I'm not using javalite, because I want JSON printing
     //implementation 'com.google.protobuf:protobuf-java:3.11.1'
     //implementation 'com.google.protobuf:protobuf-java-util:3.11.1'
-    implementation 'com.google.protobuf:protobuf-javalite:3.11.4'
+    implementation 'com.google.protobuf:protobuf-javalite:3.12.1'
 
     // mapbox
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.1.0'
 
     // mapbox specifies a really old version of okhttp3 which causes lots of API warnings.  trying a newer version
-    implementation 'com.squareup.okhttp3:okhttp:4.6.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.7.2'
 
     // location services
     implementation 'com.google.android.gms:play-services-location:17.0.0'
