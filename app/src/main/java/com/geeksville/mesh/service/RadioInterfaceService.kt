@@ -149,9 +149,9 @@ class RadioInterfaceService : Service(), Logging {
         private var runningService: RadioInterfaceService? = null
 
         /**
-         * Temp hack (until old API deprecated), we probe for old API at connected
+         * Temp hack (until old API deprecated), we now hardwire for the new API, I'll delete the old code in about a week
          */
-        var isOldApi: Boolean? = null
+        var isOldApi: Boolean? = false
 
         /// This is public only so that SimRadio can bootstrap our message flow
         fun broadcastReceivedFromRadio(context: Context, payload: ByteArray) {
@@ -436,7 +436,7 @@ class RadioInterfaceService : Service(), Logging {
                     delay(500) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null
 
                     // service could be null, test this by throwing BLEException and testing it on my machine
-                    isOldApi = service.getCharacteristic(BTM_RADIO_CHARACTER) != null
+                    // isOldApi = service.getCharacteristic(BTM_RADIO_CHARACTER) != null
                     warn("Use oldAPI = $isOldApi")
 
                     /* if (isFirstTime) {
