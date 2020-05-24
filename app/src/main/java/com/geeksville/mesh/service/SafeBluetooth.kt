@@ -13,6 +13,7 @@ import com.geeksville.concurrent.CallbackContinuation
 import com.geeksville.concurrent.Continuation
 import com.geeksville.concurrent.SyncContinuation
 import com.geeksville.util.exceptionReporter
+import kotlinx.coroutines.*
 import java.io.Closeable
 import java.util.*
 
@@ -67,6 +68,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     /// from characteristic UUIDs to the handler function for notfies
     private val notifyHandlers = mutableMapOf<UUID, (BluetoothGattCharacteristic) -> Unit>()
 
+    private val serviceScope = CoroutineScope(Dispatchers.IO)
+
     /// When we see the BT stack getting disabled/renabled we handle that as a connect/disconnect event
     private val btStateReceiver = BluetoothStateReceiver { enabled ->
         if (!enabled) {
@@ -107,7 +110,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private class BluetoothContinuation(
         val tag: String,
         val completion: com.geeksville.concurrent.Continuation<*>,
-        val startWorkFn: () -> Boolean
+        val timeoutMillis: Long = 0, // If we want to timeout this operation at a certain time, use a non zero value
+        private val startWorkFn: () -> Boolean
     ) : Logging {
 
         /// Start running a queued bit of work, return true for success or false for fatal bluetooth error
@@ -145,6 +149,10 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             }
         }
     }
+
+    // Our own custom BLE status codes
+    private val STATUS_RELIABLE_WRITE_FAILED = 4403
+    private val STATUS_TIMEOUT = 4403
 
     private val gattCallback = object : BluetoothGattCallback() {
 
@@ -240,7 +248,10 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                 if (!characteristic.value.contentEquals(reliable)) {
                     errormsg("A reliable write failed!")
                     gatt.abortReliableWrite();
-                    completeWork(42, characteristic) // skanky code to indicate failure
+                    completeWork(
+                        STATUS_RELIABLE_WRITE_FAILED,
+                        characteristic
+                    ) // skanky code to indicate failure
                 } else {
                     logAssert(gatt.executeReliableWrite())
                     // After this execute reliable completes - we can continue with normal operations (see onReliableWriteCompleted)
@@ -310,6 +321,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     }
 
 
+    private var activeTimeout: Job? = null
+
     /// If we have work we can do, start doing it.
     private fun startNewWork() {
         logAssert(currentWork == null)
@@ -317,15 +330,35 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         if (workQueue.isNotEmpty()) {
             val newWork = workQueue.removeAt(0)
             currentWork = newWork
+
+            if (newWork.timeoutMillis != 0L) {
+
+                activeTimeout = serviceScope.launch {
+                    debug("Starting failsafe timer ${newWork.timeoutMillis}")
+                    delay(newWork.timeoutMillis)
+                    errormsg("Failsafe BLE timer expired!")
+                    completeWork(
+                        STATUS_TIMEOUT,
+                        Unit
+                    ) // Throw an exception in that work
+                }
+            }
+
             logAssert(newWork.startWork())
         }
     }
 
-    private fun <T> queueWork(tag: String, cont: Continuation<T>, initFn: () -> Boolean) {
+    private fun <T> queueWork(
+        tag: String,
+        cont: Continuation<T>,
+        timeout: Long = 0,
+        initFn: () -> Boolean
+    ) {
         val btCont =
             BluetoothContinuation(
                 tag,
                 cont,
+                timeout,
                 initFn
             )
 
@@ -337,6 +370,17 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             if (currentWork == null)
                 startNewWork()
         }
+    }
+
+    /**
+     * Stop any current work
+     */
+    private fun stopCurrentWork() {
+        activeTimeout?.let {
+            it.cancel()
+            activeTimeout = null
+        }
+        currentWork = null
     }
 
     /**
@@ -352,7 +396,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                     val w =
                         currentWork
                             ?: throw Exception("currentWork was null") // will throw if null, which is helpful (FIXME - throws in the field)
-                    currentWork = null // We are now no longer working on anything
+                    stopCurrentWork() // We are now no longer working on anything
 
                     startNewWork()
                     w
@@ -380,7 +424,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                 it.completion.resumeWithException(ex)
             }
             workQueue.clear()
-            currentWork = null
+            stopCurrentWork()
         }
     }
 
@@ -481,10 +525,13 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     fun discoverServices() = makeSync<Unit> { queueDiscoverServices(it) }
 
+    /**
+     * mtu operations seem to hang sometimes.  To cope with this we have a 5 second timeout before throwing an exception and cancelling the work
+     */
     private fun queueRequestMtu(
         len: Int,
         cont: Continuation<Unit>
-    ) = queueWork("reqMtu", cont) { gatt!!.requestMtu(len) }
+    ) = queueWork("reqMtu", cont, 5 * 1000) { gatt!!.requestMtu(len) }
 
     fun asyncRequestMtu(
         len: Int,
