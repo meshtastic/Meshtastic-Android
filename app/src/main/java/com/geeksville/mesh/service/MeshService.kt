@@ -875,7 +875,8 @@ class MeshService : Service(), Logging {
         updateNotification()
 
         // we don't ask for GPS locations from android if our device has a built in GPS
-        if (!myNodeInfo!!.hasGPS) {
+        // Note: myNodeInfo can go away if we lose connections, so it might be null
+        if (myNodeInfo?.hasGPS != true) {
             // If we have at least one other person in the mesh, send our GPS position otherwise stop listening to GPS
 
             serviceScope.handledLaunch(Dispatchers.Main) {
