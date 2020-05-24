@@ -219,7 +219,7 @@ class RadioInterfaceService : Service(), Logging {
 
 
     /// Our BLE device
-    val device get() = safe!!.gatt!!
+    val device get() = safe?.gatt ?: throw RadioNotConnectedException("No GATT")
 
     /// Our service - note - it is possible to get back a null response for getService if the device services haven't yet been found
     val service
