@@ -72,18 +72,21 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     /// When we see the BT stack getting disabled/renabled we handle that as a connect/disconnect event
     private val btStateReceiver = BluetoothStateReceiver { enabled ->
-        if (!enabled) {
-            if (state == BluetoothProfile.STATE_CONNECTED)
-                gattCallback.onConnectionStateChange(
-                    gatt!!,
-                    0,
-                    BluetoothProfile.STATE_DISCONNECTED
-                )
-            else
-                debug("We were not connected, so ignoring bluetooth shutdown")
-        } else {
-            warn("requeue a connect anytime bluetooth is reenabled")
-            reconnect()
+        // Sometimes we might not have a gatt object, while that is true, we don't care about BLE state changes
+        gatt?.let { g ->
+            if (!enabled) {
+                if (state == BluetoothProfile.STATE_CONNECTED)
+                    gattCallback.onConnectionStateChange(
+                        g,
+                        0,
+                        BluetoothProfile.STATE_DISCONNECTED
+                    )
+                else
+                    debug("We were not connected, so ignoring bluetooth shutdown")
+            } else {
+                warn("requeue a connect anytime bluetooth is reenabled")
+                reconnect()
+            }
         }
     }
 
