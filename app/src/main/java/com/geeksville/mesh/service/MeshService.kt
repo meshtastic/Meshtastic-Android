@@ -81,7 +81,7 @@ class MeshService : Service(), Logging {
         fun startLater(context: Context) {
             info("Received boot complete announcement, starting mesh service in one minute")
             val delayRequest = OneTimeWorkRequestBuilder<ServiceStarter>()
-                .setInitialDelay(2, TimeUnit.MINUTES)
+                .setInitialDelay(1, TimeUnit.MINUTES)
                 .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
                 .addTag("startLater")
                 .build()
