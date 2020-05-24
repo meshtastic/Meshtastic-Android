@@ -192,6 +192,9 @@ class MeshService : Service(), Logging {
                         } catch (ex: RemoteException) { // Really a RadioNotConnected exception, but it has changed into this type via remoting
                             warn("Lost connection to radio, stopping location requests")
                             onConnectionChanged(ConnectionState.DEVICE_SLEEP)
+                        } catch (ex: BLEException) { // Really a RadioNotConnected exception, but it has changed into this type via remoting
+                            warn("BLE exception, stopping location requests $ex")
+                            onConnectionChanged(ConnectionState.DEVICE_SLEEP)
                         }
                     }
                 }
