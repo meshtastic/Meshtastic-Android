@@ -263,7 +263,10 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         override fun onMtuChanged(gatt: BluetoothGatt, mtu: Int, status: Int) {
             // Alas, passing back an Int mtu isn't working and since I don't really care what MTU
             // the device was willing to let us have I'm just punting and returning Unit
-            completeWork(status, Unit)
+            if (isSettingMtu)
+                completeWork(status, Unit)
+            else
+                errormsg("Ignoring bogus onMtuChanged")
         }
 
         /**
@@ -344,6 +347,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                 }
             }
 
+            isSettingMtu =
+                false // Most work is not doing MTU stuff, the work that is will re set this flag
             logAssert(newWork.startWork())
         }
     }
@@ -395,7 +400,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                 synchronized(workQueue) {
                     val w =
                         currentWork
-                            ?: throw Exception("currentWork was null") // will throw if null, which is helpful (FIXME - throws in the field)
+                            ?: throw Exception("currentWork was null") // will throw if null, which is helpful (FIXME - throws in the field - because of a bogus mtu completion gatt call)
                     stopCurrentWork() // We are now no longer working on anything
 
                     startNewWork()
@@ -526,12 +531,20 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     fun discoverServices() = makeSync<Unit> { queueDiscoverServices(it) }
 
     /**
+     * On some phones we receive bogus mtu gatt callbacks, we need to ignore them if we weren't setting the mtu
+     */
+    private var isSettingMtu = false
+
+    /**
      * mtu operations seem to hang sometimes.  To cope with this we have a 5 second timeout before throwing an exception and cancelling the work
      */
     private fun queueRequestMtu(
         len: Int,
         cont: Continuation<Unit>
-    ) = queueWork("reqMtu", cont, 5 * 1000) { gatt!!.requestMtu(len) }
+    ) = queueWork("reqMtu", cont, 5 * 1000) {
+        isSettingMtu = true
+        gatt!!.requestMtu(len)
+    }
 
     fun asyncRequestMtu(
         len: Int,
