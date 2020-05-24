@@ -260,21 +260,25 @@ class RadioInterfaceService : Service(), Logging {
 
     /// Send a packet/command out the radio link
     private fun handleSendToRadio(p: ByteArray) {
-        // Do this in the IO thread because it might take a while
+        // Do this in the IO thread because it might take a while (and we don't care about the result code)
         serviceScope.handledLaunch {
-            debug("sending to radio")
-            doWrite(
-                BTM_TORADIO_CHARACTER,
-                p
-            ) // Do a synchronous write, so that we can then do our reads if needed
-            if (logSends) {
-                sentPacketsLog.write(p)
-                sentPacketsLog.flush()
-            }
+            try {
+                debug("sending to radio")
+                doWrite(
+                    BTM_TORADIO_CHARACTER,
+                    p
+                ) // Do a synchronous write, so that we can then do our reads if needed
+                if (logSends) {
+                    sentPacketsLog.write(p)
+                    sentPacketsLog.flush()
+                }
 
-            if (isFirstSend) {
-                isFirstSend = false
-                doReadFromRadio(false)
+                if (isFirstSend) {
+                    isFirstSend = false
+                    doReadFromRadio(false)
+                }
+            } catch (ex: Exception) {
+                errormsg("Ignoring sendToRadio exception: $ex")
             }
         }
     }
