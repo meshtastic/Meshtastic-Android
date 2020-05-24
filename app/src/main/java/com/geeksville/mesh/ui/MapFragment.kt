@@ -78,7 +78,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     )
                 )
                 node.user?.let {
-                    f.addStringProperty("name", it.longName)
+                    if (it.longName != null)
+                        f.addStringProperty("name", it.longName)
                 }
                 f
             }
