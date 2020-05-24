@@ -433,7 +433,7 @@ class RadioInterfaceService : Service(), Logging {
             serviceScope.handledLaunch {
                 try {
                     debug("Discovered services!")
-                    delay(500) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null
+                    delay(1000) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null
 
                     // service could be null, test this by throwing BLEException and testing it on my machine
                     // isOldApi = service.getCharacteristic(BTM_RADIO_CHARACTER) != null
