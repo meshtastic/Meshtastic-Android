@@ -18,13 +18,9 @@ But if you want the bleeding edge app now, we'd love to have your help testing. 
 
 ## Analytics setup
 
-Once this project is public, I'll happily let collaborators have access to the crash logs/analytics.
-
-* analytics is currently on, before beta is over I'll make it optional
+* analytics are included but can be disabled by the user on the settings screen
 * on dev devices "adb shell setprop debug.firebase.analytics.app com.geeksville.mesh"
 adb shell setprop log.tag.FirebaseCrashlytics DEBUG
-* To see analytics: https://console.firebase.google.com/u/0/project/meshutil/analytics/app/android:com.geeksville.mesh/overview
-* To see crash logs: https://console.firebase.google.com/u/0/project/meshutil/crashlytics/app/android:com.geeksville.mesh/issues?state=open&time=last-seven-days&type=crash
 
 for verbose logging:
 ```aidl
@@ -32,18 +28,26 @@ adb shell setprop log.tag.FA VERBOSE
 ```
 
 ## Build instructions
-FIXME
 
-Notes from @jeksys follow.
-Are there any special instructions for the project?
-I’m trying to build Android app, but I’m an Android dev, so probably I miss something.
+These build instructions are brief and should be improved, please send a PR if you can.
 
-For now I have following issues:
+* Use Android Studio 4.0 RC 1 to build/debug (other versions might work but no promises)
+* Use "git submodule update --init --recursive" to pull in the various submodules we depend on
+* There are a few config files which you'll need to copy from templates included in the project.
+Run the following commands to do so:
 
-missing google-services.json -> created one
-missing mapbox_access_token string -> added a random string
-missing cur_firmware_version string -> added a random string
-I was able to run simulator after applying above fixes
+```
+        rm ./app/google-services.json
+        cp ./app/google-services-example.json ./app/google-services.json
+        rm ./app/src/main/res/values/mapbox-token.xml
+        cp ./app/special/mapbox-token.xml ./app/src/main/res/values/
+        rm ./app/src/main/res/values/curfirmwareversion.xml
+        cp ./app/special/curfirmwareversion.xml ./app/src/main/res/values/
+```
+
+* Now you should be able to select "Run / Run" in the IDE and it will happily start running on your phone
+or the emulator.  Note: The emulators don't support bluetooth, so some features can not be used in
+that environment.
 
 # Credits
 
@@ -53,6 +57,7 @@ This project is the work of volunteers:
 * @CycloMies: Contributed Swedish, Finnish and German translations.
 * @eriktheV-king: Contributed Dutch and French translations.
 * @Eugene: Contributed Russian translation.
+* @Konradrundfunk: Contributed German fixes.
 * @Mango-sauce: Contributed Chinese translation.
 * @Ohcdh: Contributed Irish and Italian translations.
 
