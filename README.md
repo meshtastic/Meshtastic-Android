@@ -59,6 +59,7 @@ This project is the work of volunteers:
 * @Eugene: Contributed Russian translation.
 * @Konradrundfunk: Contributed German fixes.
 * @Mango-sauce: Contributed Chinese translation.
+* @NEKLAN: Contributed Japanese translation.
 * @Ohcdh: Contributed Irish and Italian translations.
 
 Copyright 2019, Geeksville Industries, LLC. GPL V3 license
