@@ -535,7 +535,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             .setSingleDevice(false)
             .build()
 
-        val mainActivity = requireActivity() as MainActivity
+        //val mainActivity = requireActivity() as MainActivity
 
         // When the app tries to pair with the Bluetooth device, show the
         // appropriate pairing request dialog to the user.

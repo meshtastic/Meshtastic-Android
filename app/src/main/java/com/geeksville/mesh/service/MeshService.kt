@@ -1098,8 +1098,6 @@ class MeshService : Service(), Logging {
      * Convert a protobuf NodeInfo into our model objects and update our node DB
      */
     private fun installNodeInfo(info: MeshProtos.NodeInfo) {
-        val mi = myNodeInfo!! // It better be set by now
-
         // Just replace/add any entry
         updateNodeInfo(info.num) {
             if (info.hasUser())
