@@ -59,5 +59,4 @@
     <string name="not_connected">Not connected, select radio below</string>
     <string name="connected_sleeping">Connected to radio, but it is sleeping</string>
     <string name="update_to">Update to %s</string>
-    <string name="default">Default</string>
 </resources>

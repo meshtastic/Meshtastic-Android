@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Base64
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.R
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
@@ -17,7 +16,8 @@ data class Channel(
     companion object {
         // Placeholder when emulating
         val emulated = Channel(
-            MeshProtos.ChannelSettings.newBuilder().setName(context.getString(R.string.default))
+            // Note: this string _SHOULD NOT BE LOCALIZED_ because it directly hashes to values used on the device for the default channel name.
+            MeshProtos.ChannelSettings.newBuilder().setName("Default")
                 .setModemConfig(MeshProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128).build()
         )
 
