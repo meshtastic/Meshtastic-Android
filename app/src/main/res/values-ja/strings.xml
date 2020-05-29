@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_settings">設定</string>
+    <string name="channel_name">チャンネル名</string>
+    <string name="channel_options">チャンネルオプション</string>
+    <string name="share_button">シェアボタン</string>
+    <string name="qr_code">QRコード</string>
+    <string name="unset">削除</string>
+    <string name="connection_status">接続状態</string>
+    <string name="application_icon">アプリアイコン</string>
+    <string name="unknown_username">Nanashisan</string>
+    <string name="user_avatar">プロフィール画像</string>
+    <string name="sample_message">拝啓 時下ますますのご清栄のこととお慶び申し上げます。</string>
+    <string name="send_text">メッセージを入力</string>
+    <string name="warning_not_paired">このスマートフォンはMeshtasticデバイスとペアリングされていません。デバイスとペアリングしてユーザー名を設定してください。\n\nこのオープンソースアプリケーションはアルファテスト中です。問題を発見した場合はBBSに書き込んでください。 meshtastic.discourse.group \n\n詳しくはWEBページをご覧ください。 www.meshtastic.org</string>
+    <string name="username_unset">ユーザー名削除</string>
+    <string name="your_name">ユーザー名</string>
+    <string name="analytics_okay">匿名の診断情報と不具合報告</string>
+    <string name="looking_for_meshtastic_devices">Meshtasticデバイスを検索中...</string>
+    <string name="requires_bluetooth">このアプリはBluetooth通信が必要です。無線とネットワーク設定によりBluetoothをオンにしてください。</string>
+    <string name="error_bluetooth">エラー - このアプリはBluetooth通信が必要です。</string>
+    <string name="starting_pairing">ペアとして設定中</string>
+    <string name="pairing_failed">ペアに設定できませんでした</string>
+    <string name="url_for_join">メッシュネットワーク参加URL</string>
+    <string name="accept">OK</string>
+    <string name="cancel">キャンセル</string>
+    <string name="change_channel">チャンネルの変更</string>
+    <string name="are_you_sure_channel">チャンネルを変更しますか？新しいチャンネル設定をシェアするまで他のノードとの通信はすべて停止します。</string>
+    <string name="new_channel_rcvd">新しいチャンネルURLを受信しました</string>
+    <string name="do_you_want_switch">\'%s\チャンネルに変更しますか？</string>
+    <string name="map_not_allowed">解析がオフになっています。残念ながら地図プロバイダ（mapbox）は無料プランの場合、解析をオンにする必要があります。マップビューをオフにしました。\n\n
+        マップを表示したい場合は設定パネルで解析をオンにする必要があります（また当分の間アプリを強制的に再起動する必要があります）。\n\n
+        mapboxの有償プラン（または代替地図プロバイダ）を検討される方は meshtastic.discourse.group に書き込んでください。</string>
+    <string name="permission_missing">必要なアクセス権限が拒否されているため、アプリが正常に動作しません。設定により権限を許可してください。</string>
+    <string name="radio_sleeping">Meshtasticデバイスはスリープ状態です。チャンネルを変更できませんでした。</string>
+    <string name="report_bug">バグ報告</string>
+    <string name="report_a_bug">バグの報告</string>
+    <string name="report_bug_text">不具合報告として診断情報を送信しますか？送信した場合は meshtastic.discourse.group に検証できる報告を書き込んでください。</string>
+    <string name="report">報告</string>
+    <string name="select_radio">Meshtasticデバイス選択</string>
+    <string name="current_pair">Meshtasticデバイスとペアリングされています。%s</string>
+    <string name="not_paired_yet">Meshtasticデバイスとペアリングされていません。</string>
+    <string name="change_radio">Meshtasticデバイス変更</string>
+    <string name="please_pair">MeshtasticデバイスをBluetooth設定によりペアリングしてください。</string>
+    <string name="pairing_completed">ペアリングが完了しました。サービスを開始します。</string>
+    <string name="pairing_failed_try_again">ペアに設定できませんでした。もう一度選択してください。</string>
+    <string name="location_disabled">位置情報が無効なため、メッシュネットワークで現在地を特定できません。</string>
+    <string name="share">シェア</string>
+    <string name="disconnected">切断</string>
+    <string name="device_sleeping">スリープ</string>
+    <string name="connected_count">接続済み：%s人中%sオンライン</string>
+    <string name="list_of_nodes">ネットワーク内のノードリスト</string>
+    <string name="update_firmware">ファームウェアアップデート</string>
+    <string name="connected_to">Meshtasticデバイスに接続しました。(%s)</string>
+    <string name="not_connected">接続されていません。下記のMeshtasticデバイスを選択してください。</string>
+    <string name="connected_sleeping">接続しましたが、Meshtasticデバイスはスリープ状態です。</string>
+    <string name="update_to">%s更新</string>
+</resources>
