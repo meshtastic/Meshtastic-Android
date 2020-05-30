@@ -149,9 +149,9 @@ class RadioInterfaceService : Service(), Logging {
         private var runningService: RadioInterfaceService? = null
 
         /**
-         * Temp hack (until old API deprecated), we now  probe for the API
+         * Temp hack (until old API deprecated), try using just the new API now
          */
-        var isOldApi: Boolean? = null
+        var isOldApi: Boolean? = false
 
         /// This is public only so that SimRadio can bootstrap our message flow
         fun broadcastReceivedFromRadio(context: Context, payload: ByteArray) {
