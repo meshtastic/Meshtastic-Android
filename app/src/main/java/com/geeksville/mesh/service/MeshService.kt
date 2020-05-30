@@ -1256,7 +1256,7 @@ class MeshService : Service(), Logging {
      * Set our owner with either the new or old API
      */
     fun setOwner(myId: String?, longName: String, shortName: String) {
-        debug("SetOwner $myId : ${longName.anonymized} : $shortName")
+        debug("SetOwner $myId : ${longName.anonymize} : $shortName")
 
         val user = MeshProtos.User.newBuilder().also {
             if (myId != null)  // Only set the id if it was provided

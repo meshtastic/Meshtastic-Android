@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +17,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.TextMessage
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
+import com.google.android.material.chip.Chip
 import kotlinx.android.synthetic.main.adapter_message_layout.view.*
 import kotlinx.android.synthetic.main.messages_fragment.*
 import java.text.SimpleDateFormat
@@ -38,9 +41,10 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val username = itemView.username
-        val messageText = itemView.messageText
-        val messageTime = itemView.messageTime
+        val username: Chip = itemView.username
+        val messageText: TextView = itemView.messageText
+        val messageTime: TextView = itemView.messageTime
+        val messageStatusIcon: ImageView = itemView.messageStatusIcon
     }
 
     private val messagesAdapter = object : RecyclerView.Adapter<ViewHolder>() {

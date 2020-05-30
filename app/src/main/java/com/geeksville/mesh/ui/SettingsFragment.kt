@@ -28,10 +28,10 @@ import com.geeksville.android.hideKeyboard
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
-import com.geeksville.mesh.anonymized
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.RadioInterfaceService
+import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.android.synthetic.main.settings_fragment.*
@@ -102,7 +102,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         // val isSelected get() = macAddress == selectedMacAddr
 
         override fun toString(): String {
-            return "BTScanEntry(name=${name.anonymized}, addr=${macAddress.anonymized})"
+            return "BTScanEntry(name=${name.anonymize}, addr=${macAddress.anonymize})"
         }
     }
 
@@ -282,7 +282,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
     /// Change to a new macaddr selection, updating GUI and radio
     fun changeScanSelection(context: MainActivity, newAddr: String) {
-        info("Changing BT device to ${newAddr.anonymized}")
+        info("Changing BT device to ${newAddr.anonymize}")
         selectedMacAddr = newAddr
         changeDeviceSelection(context, newAddr)
     }

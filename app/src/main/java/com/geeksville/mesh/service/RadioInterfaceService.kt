@@ -19,7 +19,7 @@ import com.geeksville.android.Logging
 import com.geeksville.concurrent.DeferredExecution
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.IRadioInterfaceService
-import com.geeksville.mesh.anonymized
+import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
 import com.geeksville.util.ignoreException
 import com.geeksville.util.toRemoteExceptions
@@ -191,7 +191,7 @@ class RadioInterfaceService : Service(), Logging {
                 val address = getPrefs(context).getString(DEVADDR_KEY, null)
 
                 if (address != null && !allPaired.contains(address)) {
-                    warn("Ignoring stale bond to ${address.anonymized}")
+                    warn("Ignoring stale bond to ${address.anonymize}")
                     null
                 } else
                     address
@@ -560,7 +560,7 @@ class RadioInterfaceService : Service(), Logging {
                     // device is off/not connected)
                     val device = getBluetoothAdapter(this)?.getRemoteDevice(address)
                     if (device != null) {
-                        info("Creating radio interface service.  device=${address.anonymized}")
+                        info("Creating radio interface service.  device=${address.anonymize}")
 
                         // Note this constructor also does no comm
                         val s = SafeBluetooth(this, device)
