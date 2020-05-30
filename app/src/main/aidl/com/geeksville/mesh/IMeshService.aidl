@@ -26,16 +26,16 @@ interface IMeshService {
     String getMyId();
 
     /*
-    Send an opaque packet to a specified node name
+    Send a packet to a specified node name
 
     typ is defined in mesh.proto Data.Type.  For now juse use 0 to mean opaque bytes.
 
     destId can be null to indicate "broadcast message"
 
-    Returns true if the packet has been sent into the mesh, or false if it was merely queued
-    inside the service - and will be delivered to mesh the next time we hear from our radio.
+    messageStatus and id of the provided message will be updated by this routine to indicate
+    message send status and the ID that can be used to locate the message in the future
     */
-    boolean sendData(String destId, in byte[] payload, int typ);
+    void send(inout DataPacket packet);
 
     /**
     Get the IDs of everyone on the mesh.  You should also subscribe for NODE_CHANGE broadcasts.
@@ -46,7 +46,8 @@ interface IMeshService {
     /// It returns a RadioConfig protobuf.
     byte []getRadioConfig();
 
-    /// Return an list of MeshPacket protobuf (byte arrays) which were received while your client app was offline (recent messages only)
+    /// Return an list of MeshPacket protobuf (byte arrays) which were received while your client app was offline (recent messages only).
+    /// Also includes any messages we have sent recently (useful for finding current message status)
     List<DataPacket> getOldMessages();
 
     /// This method is only intended for use in our GUI, so the user can set radio options
@@ -75,9 +76,9 @@ interface IMeshService {
     int getUpdateStatus();
 
     // see com.geeksville.com.geeksville.mesh broadcast intents
-    // RECEIVED_OPAQUE  for data received from other nodes.  payload will contain a DataPacket
+    // RECEIVED_DATA  for data received from other nodes.  payload will contain a DataPacket
     // NODE_CHANGE  for new IDs appearing or disappearing
     // CONNECTION_CHANGED for losing/gaining connection to the packet radio
-
+    // MESSAGE_STATUS_CHANGED for any message status changes (for sent messages only, other messages come via RECEIVED_DATA.  payload will contain a message ID and a MessageStatus)
 
 }

@@ -297,15 +297,19 @@ class MainActivity : AppCompatActivity(), Logging,
 
             // Do some test operations
             val testPayload = "hello world".toByteArray()
-            m.sendData(
-                "+16508675310",
-                testPayload,
-                MeshProtos.Data.Type.OPAQUE_VALUE
+            m.send(
+                DataPacket(
+                    "+16508675310",
+                    testPayload,
+                    MeshProtos.Data.Type.OPAQUE_VALUE
+                )
             )
-            m.sendData(
-                "+16508675310",
-                testPayload,
-                MeshProtos.Data.Type.CLEAR_TEXT_VALUE
+            m.send(
+                DataPacket(
+                    "+16508675310",
+                    testPayload,
+                    MeshProtos.Data.Type.CLEAR_TEXT_VALUE
+                )
             )
         }
     }

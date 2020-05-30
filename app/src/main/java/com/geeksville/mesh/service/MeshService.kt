@@ -395,7 +395,7 @@ class MeshService : Service(), Logging {
 
             builder.setStyle(
                 NotificationCompat.BigTextStyle()
-                    .bigText(packet.bytes.toString(utf8))
+                    .bigText(packet.bytes!!.toString(utf8))
             )
         }
 
@@ -588,7 +588,8 @@ class MeshService : Service(), Logging {
     )
 
     /// Map a nodenum to the nodeid string, or return null if not present or no id found
-    private fun toNodeID(n: Int) = nodeDBbyNodeNum[n]?.user?.id
+    private fun toNodeID(n: Int) =
+        if (n == NODENUM_BROADCAST) DataPacket.ID_BROADCAST else nodeDBbyNodeNum[n]?.user?.id
 
     /// given a nodenum, return a db entry - creating if necessary
     private fun getOrCreateNodeInfo(n: Int) =
@@ -609,7 +610,12 @@ class MeshService : Service(), Logging {
      */
     private val numOnlineNodes get() = nodeDBbyNodeNum.values.count { it.isOnline }
 
-    private fun toNodeNum(id: String) = toNodeInfo(id).num
+    private fun toNodeNum(id: String) =
+        when (id) {
+            DataPacket.ID_BROADCAST -> NODENUM_BROADCAST
+            DataPacket.ID_LOCAL -> myNodeNum
+            else -> toNodeInfo(id).num
+        }
 
     /// A helper function that makes it easy to update node info objects
     private fun updateNodeInfo(nodeNum: Int, updatefn: (NodeInfo) -> Unit) {
@@ -647,8 +653,8 @@ class MeshService : Service(), Logging {
      *
      * If id is null we assume a broadcast message
      */
-    private fun newMeshPacketTo(id: String?) =
-        newMeshPacketTo(if (id != null) toNodeNum(id) else NODENUM_BROADCAST)
+    private fun newMeshPacketTo(id: String) =
+        newMeshPacketTo(toNodeNum(id))
 
     /**
      * Helper to make it easy to build a subpacket in the proper protobufs
@@ -656,7 +662,7 @@ class MeshService : Service(), Logging {
      * If destId is null we assume a broadcast message
      */
     private fun buildMeshPacket(
-        destId: String?,
+        destId: String,
         wantAck: Boolean = false,
         initFn: MeshProtos.SubPacket.Builder.() -> Unit
     ): MeshPacket = newMeshPacketTo(destId).apply {
@@ -678,25 +684,42 @@ class MeshService : Service(), Logging {
             val bytes = data.payload.toByteArray()
             val fromId = toNodeID(packet.from)
             val toId = toNodeID(packet.to)
-                ?: packet.to.toString() // FIXME, we don't currently have IDs specified for the broadcast address
 
             // If the rxTime was not set by the device (because device software was old), guess at a time
             val rxTime = if (packet.rxTime == 0) packet.rxTime else currentSecond()
 
-            if (fromId != null) {
-                DataPacket(
-                    fromId,
-                    toId,
-                    rxTime * 1000L,
-                    packet.id,
-                    data.typValue,
-                    bytes
-                )
-            } else {
-                warn("Ignoring data from ${packet.from} because we don't yet know its ID")
-                null
+            when {
+                fromId == null -> {
+                    errormsg("Ignoring data from ${packet.from} because we don't yet know its ID")
+                    null
+                }
+                toId == null -> {
+                    errormsg("Ignoring data to ${packet.to} because we don't yet know its ID")
+                    null
+                }
+                else -> {
+                    DataPacket(
+                        from = fromId,
+                        to = toId,
+                        rxTime = rxTime * 1000L,
+                        id = packet.id,
+                        dataType = data.typValue,
+                        bytes = bytes
+                    )
+                }
             }
         }
+    }
+
+    private fun toMeshPacket(p: DataPacket): MeshPacket {
+        val packet = buildMeshPacket(p.to!!, wantAck = true) {
+            data = MeshProtos.Data.newBuilder().also {
+                it.typ = MeshProtos.Data.Type.forNumber(p.dataType)
+                it.payload = ByteString.copyFrom(p.bytes)
+            }.build()
+        }
+
+        return packet
     }
 
     private fun rememberDataPacket(dataPacket: DataPacket) {
@@ -716,6 +739,7 @@ class MeshService : Service(), Logging {
         if (dataPacket != null) {
             debug("Received data from $fromId ${bytes.size}")
 
+            dataPacket.status = MessageStatus.RECEIVED
             rememberDataPacket(dataPacket)
 
             when (data.typValue) {
@@ -774,7 +798,7 @@ class MeshService : Service(), Logging {
     private val earlyReceivedPackets = mutableListOf<MeshPacket>()
 
     /// If apps try to send packets when our radio is sleeping, we queue them here instead
-    private val offlineSentPackets = mutableListOf<MeshPacket>()
+    private val offlineSentPackets = mutableListOf<DataPacket>()
 
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
@@ -792,7 +816,12 @@ class MeshService : Service(), Logging {
         earlyReceivedPackets.forEach { processReceivedMeshPacket(it) }
         earlyReceivedPackets.clear()
 
-        offlineSentPackets.forEach { sendToRadio(it) }
+        offlineSentPackets.forEach { p ->
+            // encapsulate our payload in the proper protobufs and fire it off
+            val packet = toMeshPacket(p)
+            p.status = MessageStatus.ENROUTE
+            sendToRadio(packet)
+        }
         offlineSentPackets.clear()
     }
 
@@ -1347,38 +1376,41 @@ class MeshService : Service(), Logging {
                 this@MeshService.setOwner(myId, longName, shortName)
             }
 
-        override fun sendData(
-            destId: String?,
-            payloadIn: ByteArray,
-            typ: Int
-        ): Boolean =
+        override fun send(
+            p: DataPacket
+        ) {
             toRemoteExceptions {
-                info("sendData dest=$destId <- ${payloadIn.size} bytes (connectionState=$connectionState)")
+                info("sendData dest=${p.to} <- ${p.bytes!!.size} bytes (connectionState=$connectionState)")
 
-                // encapsulate our payload in the proper protobufs and fire it off
-                val packet = buildMeshPacket(destId, wantAck = true) {
-                    data = MeshProtos.Data.newBuilder().also {
-                        it.typ = MeshProtos.Data.Type.forNumber(typ)
-                        it.payload = ByteString.copyFrom(payloadIn)
-                    }.build()
+                // FIXME - init from and id in DataPacket
+                myNodeID?.let { myId ->
+                    if (p.from == DataPacket.ID_LOCAL)
+                        p.from = myId
                 }
+
+
                 // Keep a record of datapackets, so GUIs can show proper chat history
-                toDataPacket(packet)?.let {
-                    rememberDataPacket(it)
-                }
+                rememberDataPacket(p)
 
                 // If radio is sleeping, queue the packet
                 when (connectionState) {
-                    ConnectionState.DEVICE_SLEEP ->
-                        offlineSentPackets.add(packet)
-                    else ->
+                    ConnectionState.DEVICE_SLEEP -> {
+                        p.status = MessageStatus.QUEUED
+                        offlineSentPackets.add(p)
+                    }
+                    else -> {
+                        p.status = MessageStatus.ENROUTE
+
+                        // encapsulate our payload in the proper protobufs and fire it off
+                        val packet = toMeshPacket(p)
                         sendToRadio(packet)
+                    }
                 }
 
                 GeeksvilleApplication.analytics.track(
                     "data_send",
-                    DataPair("num_bytes", payloadIn.size),
-                    DataPair("type", typ)
+                    DataPair("num_bytes", p.bytes!!.size),
+                    DataPair("type", p.dataType)
                 )
 
                 GeeksvilleApplication.analytics.track(
@@ -1388,6 +1420,7 @@ class MeshService : Service(), Logging {
 
                 connectionState == ConnectionState.CONNECTED
             }
+        }
 
         override fun getRadioConfig(): ByteArray = toRemoteExceptions {
             this@MeshService.radioConfig?.toByteArray()

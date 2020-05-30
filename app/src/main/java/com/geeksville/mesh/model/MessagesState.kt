@@ -22,8 +22,8 @@ data class TextMessage(
 ) {
     /// We can auto init from data packets
     constructor(payload: DataPacket) : this(
-        payload.from,
-        payload.bytes.toString(utf8),
+        payload.from!!,
+        payload.bytes!!.toString(utf8),
         date = Date(payload.rxTime)
     )
 }
@@ -58,15 +58,17 @@ class MessagesState(private val ui: UIViewModel) : Logging {
     fun addMessage(payload: DataPacket) = addMessage(TextMessage(payload))
 
     /// Send a message and added it to our GUI log
-    fun sendMessage(str: String, dest: String? = null) {
+    fun sendMessage(str: String, dest: String = DataPacket.ID_BROADCAST) {
         var error: String? = null
         val service = ui.meshService
         if (service != null)
             try {
-                service.sendData(
-                    dest,
-                    str.toByteArray(utf8),
-                    MeshProtos.Data.Type.CLEAR_TEXT_VALUE
+                service.send(
+                    DataPacket(
+                        dest,
+                        str.toByteArray(utf8),
+                        MeshProtos.Data.Type.CLEAR_TEXT_VALUE
+                    )
                 )
             } catch (ex: RemoteException) {
                 error = "Error: ${ex.message}"
