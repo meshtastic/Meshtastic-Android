@@ -664,9 +664,11 @@ class MeshService : Service(), Logging {
     private fun buildMeshPacket(
         destId: String,
         wantAck: Boolean = false,
+        id: Int = 0,
         initFn: MeshProtos.SubPacket.Builder.() -> Unit
     ): MeshPacket = newMeshPacketTo(destId).apply {
         this.wantAck = wantAck
+        this.id = id
         decoded = MeshProtos.SubPacket.newBuilder().also {
             initFn(it)
         }.build()
@@ -712,14 +714,12 @@ class MeshService : Service(), Logging {
     }
 
     private fun toMeshPacket(p: DataPacket): MeshPacket {
-        val packet = buildMeshPacket(p.to!!, wantAck = true) {
+        return buildMeshPacket(p.to!!, id = p.id, wantAck = true) {
             data = MeshProtos.Data.newBuilder().also {
                 it.typ = MeshProtos.Data.Type.forNumber(p.dataType)
                 it.payload = ByteString.copyFrom(p.bytes)
             }.build()
         }
-
-        return packet
     }
 
     private fun rememberDataPacket(dataPacket: DataPacket) {
@@ -1153,6 +1153,9 @@ class MeshService : Service(), Logging {
     }
 
 
+    /**
+     * Update the nodeinfo (called from either new API version or the old one)
+     */
     private fun handleMyInfo(myInfo: MeshProtos.MyNodeInfo) {
         setFirmwareUpdateFilename(myInfo)
 
@@ -1164,7 +1167,10 @@ class MeshService : Service(), Logging {
                 hwModel,
                 firmwareVersion,
                 firmwareUpdateFilename != null,
-                SoftwareUpdateService.shouldUpdate(this@MeshService, firmwareVersion)
+                SoftwareUpdateService.shouldUpdate(this@MeshService, firmwareVersion),
+                currentPacketId.toLong() and 0xffffffffL,
+                nodeNumBits,
+                packetIdBits
             )
         }
 
@@ -1308,6 +1314,36 @@ class MeshService : Service(), Logging {
 
     }
 
+    /// Do not use directly, instead call generatePacketId()
+    private var currentPacketId = 0L
+
+    /**
+     * Generate a unique packet ID (if we know enough to do so - otherwise return 0 so the device will do it)
+     */
+    private fun generatePacketId(): Int {
+
+        myNodeInfo?.let {
+            val numPacketIds =
+                ((1L shl it.packetIdBits) - 1).toLong() // A mask for only the valid packet ID bits, either 255 or maxint
+
+            if (currentPacketId == 0L) {
+                logAssert(it.packetIdBits == 8 || it.packetIdBits == 32) // Only values I'm expecting (though we don't require this)
+
+                // Not inited - pick a number on the opposite side of what the device is using
+                currentPacketId = it.currentPacketId + numPacketIds / 2
+            } else {
+                currentPacketId++
+            }
+
+            currentPacketId = currentPacketId and 0xffffffff // keep from exceeding 32 bits
+
+            // Use modulus and +1 to ensure we skip 0 on any values we return
+            return ((currentPacketId % numPacketIds) + 1L).toInt()
+        }
+
+        return 0 // We don't have mynodeinfo yet, so just let the radio eventually assign an ID
+    }
+
     var firmwareUpdateFilename: String? = null
 
     /***
@@ -1382,10 +1418,13 @@ class MeshService : Service(), Logging {
             toRemoteExceptions {
                 info("sendData dest=${p.to} <- ${p.bytes!!.size} bytes (connectionState=$connectionState)")
 
-                // FIXME - init from and id in DataPacket
+                // Init from and id
                 myNodeID?.let { myId ->
                     if (p.from == DataPacket.ID_LOCAL)
                         p.from = myId
+
+                    if (p.id == 0)
+                        p.id = generatePacketId()
                 }
 
 
@@ -1409,7 +1448,7 @@ class MeshService : Service(), Logging {
 
                 GeeksvilleApplication.analytics.track(
                     "data_send",
-                    DataPair("num_bytes", p.bytes!!.size),
+                    DataPair("num_bytes", p.bytes.size),
                     DataPair("type", p.dataType)
                 )
 
