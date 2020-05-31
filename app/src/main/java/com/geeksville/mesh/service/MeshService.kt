@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Build
 import android.os.IBinder
+import android.os.Parcelable
 import android.os.RemoteException
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -52,6 +53,7 @@ class MeshService : Service(), Logging {
         const val ACTION_RECEIVED_DATA = "$prefix.RECEIVED_DATA"
         const val ACTION_NODE_CHANGE = "$prefix.NODE_CHANGE"
         const val ACTION_MESH_CONNECTED = "$prefix.MESH_CONNECTED"
+        const val ACTION_MESSAGE_STATUS = "$prefix.MESSAGE_STATUS"
 
         class IdNotFoundException(id: String) : Exception("ID not found $id")
         class NodeNumNotFoundException(id: Int) : Exception("NodeNum not found $id")
@@ -290,6 +292,19 @@ class MeshService : Service(), Logging {
 
         intent.putExtra(EXTRA_NODEINFO, info)
         explicitBroadcast(intent)
+    }
+
+    private fun broadcastMessageStatus(p: DataPacket) {
+        if (p.id == 0) {
+            debug("Ignoring anonymous packet status")
+        } else {
+            debug("Broadcasting message status $p")
+            val intent = Intent(ACTION_MESSAGE_STATUS)
+
+            intent.putExtra(EXTRA_PACKET_ID, p.id)
+            intent.putExtra(EXTRA_STATUS, p.status as Parcelable)
+            explicitBroadcast(intent)
+        }
     }
 
     /// Safely access the radio service, if not connected an exception will be thrown
@@ -703,7 +718,7 @@ class MeshService : Service(), Logging {
                     DataPacket(
                         from = fromId,
                         to = toId,
-                        rxTime = rxTime * 1000L,
+                        time = rxTime * 1000L,
                         id = packet.id,
                         dataType = data.typValue,
                         bytes = bytes
@@ -800,6 +815,9 @@ class MeshService : Service(), Logging {
     /// If apps try to send packets when our radio is sleeping, we queue them here instead
     private val offlineSentPackets = mutableListOf<DataPacket>()
 
+    /** Keep a record of recently sent packets, so we can properly handle ack/nak */
+    private val sentPackets = mutableMapOf<Int, DataPacket>()
+
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
         if (haveNodeDB) {
@@ -820,11 +838,24 @@ class MeshService : Service(), Logging {
             // encapsulate our payload in the proper protobufs and fire it off
             val packet = toMeshPacket(p)
             p.status = MessageStatus.ENROUTE
+            p.time =
+                System.currentTimeMillis() // update time to the actual time we started sending
             sendToRadio(packet)
+            broadcastMessageStatus(p)
         }
         offlineSentPackets.clear()
     }
 
+
+    /**
+     * Handle an ack/nak packet by updating sent message status
+     */
+    private fun handleAckNak(isAck: Boolean, id: Int) {
+        sentPackets.remove(id)?.let { p ->
+            p.status = if (isAck) MessageStatus.DELIVERED else MessageStatus.ERROR
+            broadcastMessageStatus(p)
+        }
+    }
 
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun processReceivedMeshPacket(packet: MeshPacket) {
@@ -859,6 +890,12 @@ class MeshService : Service(), Logging {
 
         if (p.hasUser())
             handleReceivedUser(fromNum, p.user)
+
+        if (p.successId != 0)
+            handleAckNak(true, p.successId)
+
+        if (p.failId != 0)
+            handleAckNak(false, p.failId)
     }
 
     private fun currentSecond() = (System.currentTimeMillis() / 1000).toInt()
@@ -1169,8 +1206,9 @@ class MeshService : Service(), Logging {
                 firmwareUpdateFilename != null,
                 SoftwareUpdateService.shouldUpdate(this@MeshService, firmwareVersion),
                 currentPacketId.toLong() and 0xffffffffL,
-                nodeNumBits,
-                packetIdBits
+                if (nodeNumBits == 0) 8 else nodeNumBits,
+                if (packetIdBits == 0) 8 else packetIdBits,
+                if (messageTimeoutMsec == 0) 5 * 60 * 1000 else messageTimeoutMsec // constants from current device code
             )
         }
 
@@ -1377,7 +1415,22 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private
+    /**
+     * Remove any sent packets that have been sitting around too long
+     *
+     * Note: we give each message what the timeout the device code is using, though in the normal
+     * case the device will fail after 3 retries much sooner than that (and it will provide a nak to us)
+     */
+    private fun deleteOldPackets() {
+        myNodeInfo?.apply {
+            val now = System.currentTimeMillis()
+            sentPackets.values.forEach { p ->
+                if (p.status == MessageStatus.ENROUTE && p.time + messageTimeoutMsec < now)
+                    handleAckNak(false, p.id)
+            }
+        }
+    }
+
     val binder = object : IMeshService.Stub() {
 
         override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
@@ -1416,8 +1469,6 @@ class MeshService : Service(), Logging {
             p: DataPacket
         ) {
             toRemoteExceptions {
-                info("sendData dest=${p.to} <- ${p.bytes!!.size} bytes (connectionState=$connectionState)")
-
                 // Init from and id
                 myNodeID?.let { myId ->
                     if (p.from == DataPacket.ID_LOCAL)
@@ -1427,9 +1478,15 @@ class MeshService : Service(), Logging {
                         p.id = generatePacketId()
                 }
 
+                info("sendData dest=${p.to}, id=${p.id} <- ${p.bytes!!.size} bytes (connectionState=$connectionState)")
 
                 // Keep a record of datapackets, so GUIs can show proper chat history
                 rememberDataPacket(p)
+
+                if (p.id != 0) { // If we have an ID we can wait for an ack or nak
+                    deleteOldPackets()
+                    sentPackets[p.id] = p
+                }
 
                 // If radio is sleeping, queue the packet
                 when (connectionState) {

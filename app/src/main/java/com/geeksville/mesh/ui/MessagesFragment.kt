@@ -13,14 +13,16 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.android.Logging
+import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
-import com.geeksville.mesh.model.TextMessage
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.google.android.material.chip.Chip
 import kotlinx.android.synthetic.main.adapter_message_layout.view.*
 import kotlinx.android.synthetic.main.messages_fragment.*
 import java.text.SimpleDateFormat
+import java.util.*
 
 // Allows usage like email.on(EditorInfo.IME_ACTION_NEXT, { confirm() })
 fun EditText.on(actionId: Int, func: () -> Unit) {
@@ -129,13 +131,27 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
                 holder.messageText.text = msg.text
             }
 
-            holder.messageTime.text = dateFormat.format(msg.date)
+            holder.messageTime.text = dateFormat.format(Date(msg.time))
+
+            val icon = when (msg.status) {
+                MessageStatus.QUEUED -> R.drawable.ic_twotone_cloud_upload_24
+                MessageStatus.DELIVERED -> R.drawable.cloud_on
+                MessageStatus.ENROUTE -> R.drawable.ic_twotone_cloud_24
+                MessageStatus.ERROR -> R.drawable.cloud_off
+                else -> null
+            }
+
+            if (icon != null) {
+                holder.messageStatusIcon.setImageResource(icon)
+                holder.messageStatusIcon.visibility = View.VISIBLE
+            } else
+                holder.messageStatusIcon.visibility = View.INVISIBLE
         }
 
-        private var messages = arrayOf<TextMessage>()
+        private var messages = arrayOf<DataPacket>()
 
         /// Called when our node DB changes
-        fun onMessagesChanged(nodesIn: Collection<TextMessage>) {
+        fun onMessagesChanged(nodesIn: Collection<DataPacket>) {
             messages = nodesIn.toTypedArray()
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all messages
 

@@ -15,3 +15,5 @@ const val EXTRA_PERMANENT = "$prefix.Permanent"
 
 const val EXTRA_PAYLOAD = "$prefix.Payload"
 const val EXTRA_NODEINFO = "$prefix.NodeInfo"
+const val EXTRA_PACKET_ID = "$prefix.PacketId"
+const val EXTRA_STATUS = "$prefix.Status"
