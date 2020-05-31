@@ -502,6 +502,7 @@ class MainActivity : AppCompatActivity(), Logging,
         filter.addAction(MeshService.ACTION_MESH_CONNECTED)
         filter.addAction(MeshService.ACTION_NODE_CHANGE)
         filter.addAction(MeshService.ACTION_RECEIVED_DATA)
+        filter.addAction((MeshService.ACTION_MESSAGE_STATUS))
         registerReceiver(meshServiceReceiver, filter)
         receiverRegistered = true;
     }

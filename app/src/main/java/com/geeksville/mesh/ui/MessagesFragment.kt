@@ -151,12 +151,13 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         private var messages = arrayOf<DataPacket>()
 
         /// Called when our node DB changes
-        fun onMessagesChanged(nodesIn: Collection<DataPacket>) {
-            messages = nodesIn.toTypedArray()
+        fun onMessagesChanged(msgIn: Collection<DataPacket>) {
+            messages = msgIn.toTypedArray()
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all messages
 
             // scroll to the last line
-            messageListView.scrollToPosition(this.itemCount - 1)
+            if (itemCount != 0)
+                messageListView.scrollToPosition(itemCount - 1)
         }
     }
 

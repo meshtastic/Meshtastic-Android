@@ -40,11 +40,14 @@ class MessagesState(private val ui: UIViewModel) : Logging {
         val msgs = messages.value!!
 
         msgs.find { it.id == id }?.let { p ->
-            if (p.status != status) {
-                p.status = status
-                // Trigger an expensive complete redraw FIXME
-                messages.value = msgs
-            }
+            // Note: it seems that the service is keeping only a reference to our original packet (so it has already updated p.status)
+            // This seems to be an AIDL optimization when both the service and the client are in the same process.  But we still want to trigger
+            // a GUI update
+            // if (p.status != status) {
+            p.status = status
+            // Trigger an expensive complete redraw FIXME
+            messages.value = msgs
+            // }
         }
     }
 

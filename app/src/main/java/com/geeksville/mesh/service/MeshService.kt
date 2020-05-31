@@ -36,7 +36,9 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
+import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.math.absoluteValue
 
 
 /**
@@ -746,47 +748,54 @@ class MeshService : Service(), Logging {
 
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedData(packet: MeshPacket) {
-        val data = packet.decoded.data
-        val bytes = data.payload.toByteArray()
-        val fromId = toNodeID(packet.from)
-        val dataPacket = toDataPacket(packet)
+        myNodeInfo?.let { myInfo ->
+            val data = packet.decoded.data
+            val bytes = data.payload.toByteArray()
+            val fromId = toNodeID(packet.from)
+            val dataPacket = toDataPacket(packet)
 
-        if (dataPacket != null) {
-            debug("Received data from $fromId ${bytes.size}")
+            if (dataPacket != null) {
 
-            dataPacket.status = MessageStatus.RECEIVED
-            rememberDataPacket(dataPacket)
+                if (myInfo.myNodeNum == packet.from)
+                    debug("Ignoring retransmission of our packet ${bytes.size}")
+                else {
+                    debug("Received data from $fromId ${bytes.size}")
 
-            when (data.typValue) {
-                MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
-                    debug("Received CLEAR_TEXT from $fromId")
+                    dataPacket.status = MessageStatus.RECEIVED
+                    rememberDataPacket(dataPacket)
 
-                    recentReceivedText = dataPacket
-                    updateNotification()
-                    broadcastReceivedData(dataPacket)
-                }
+                    when (data.typValue) {
+                        MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
+                            debug("Received CLEAR_TEXT from $fromId")
 
-                MeshProtos.Data.Type.CLEAR_READACK_VALUE ->
-                    warn(
-                        "TODO ignoring CLEAR_READACK from $fromId"
+                            recentReceivedText = dataPacket
+                            updateNotification()
+                            broadcastReceivedData(dataPacket)
+                        }
+
+                        MeshProtos.Data.Type.CLEAR_READACK_VALUE ->
+                            warn(
+                                "TODO ignoring CLEAR_READACK from $fromId"
+                            )
+
+                        MeshProtos.Data.Type.OPAQUE_VALUE ->
+                            broadcastReceivedData(dataPacket)
+
+                        else -> TODO()
+                    }
+
+                    GeeksvilleApplication.analytics.track(
+                        "num_data_receive",
+                        DataPair(1)
                     )
 
-                MeshProtos.Data.Type.OPAQUE_VALUE ->
-                    broadcastReceivedData(dataPacket)
-
-                else -> TODO()
+                    GeeksvilleApplication.analytics.track(
+                        "data_receive",
+                        DataPair("num_bytes", bytes.size),
+                        DataPair("type", data.typValue)
+                    )
+                }
             }
-
-            GeeksvilleApplication.analytics.track(
-                "num_data_receive",
-                DataPair(1)
-            )
-
-            GeeksvilleApplication.analytics.track(
-                "data_receive",
-                DataPair("num_bytes", bytes.size),
-                DataPair("type", data.typValue)
-            )
         }
     }
 
@@ -916,7 +925,6 @@ class MeshService : Service(), Logging {
 
         radioConfig = MeshProtos.RadioConfig.parseFrom(connectedRadio.readRadioConfig())
 
-
         // Ask for the current node DB
         connectedRadio.restartNodeInfo()
 
@@ -933,6 +941,9 @@ class MeshService : Service(), Logging {
         haveNodeDB = true // we've done our initial node db initialization
         processEarlyPackets() // handle any packets that showed up while we were booting
 
+        // broadcast an intent with our new connection state
+        broadcastConnection()
+        reportConnection() // this is just analytics
         onNodeDBChanged()
     }
 
@@ -1015,6 +1026,9 @@ class MeshService : Service(), Logging {
                     debug("device sleep timeout cancelled")
                 }
             }
+
+            // broadcast an intent with our new connection state
+            broadcastConnection()
         }
 
         fun startDisconnect() {
@@ -1027,6 +1041,9 @@ class MeshService : Service(), Logging {
                 DataPair("num_online", numOnlineNodes)
             )
             GeeksvilleApplication.analytics.track("num_nodes", DataPair(numNodes))
+
+            // broadcast an intent with our new connection state
+            broadcastConnection()
         }
 
         fun startConnect() {
@@ -1038,7 +1055,6 @@ class MeshService : Service(), Logging {
                 else
                     startConfig()
 
-                reportConnection()
             } catch (ex: InvalidProtocolBufferException) {
                 errormsg(
                     "Invalid protocol buffer sent by device - update device software and try again",
@@ -1073,16 +1089,20 @@ class MeshService : Service(), Logging {
                 startDisconnect()
         }
 
-        // broadcast an intent with our new connection state
+        // Update the android notification in the status bar
+        updateNotification()
+    }
+
+    /**
+     * broadcast our current connection status
+     */
+    private fun broadcastConnection() {
         val intent = Intent(ACTION_MESH_CONNECTED)
         intent.putExtra(
             EXTRA_CONNECTED,
             connectionState.toString()
         )
         explicitBroadcast(intent)
-
-        // Update the android notification in the status bar
-        updateNotification()
     }
 
     /**
@@ -1252,6 +1272,9 @@ class MeshService : Service(), Logging {
 
                 haveNodeDB = true // we now have nodes from real hardware
                 processEarlyPackets() // send receive any packets that were queued up
+
+                // broadcast an intent with our new connection state
+                broadcastConnection()
                 onNodeDBChanged()
                 reportConnection()
             }
@@ -1367,8 +1390,15 @@ class MeshService : Service(), Logging {
             if (currentPacketId == 0L) {
                 logAssert(it.packetIdBits == 8 || it.packetIdBits == 32) // Only values I'm expecting (though we don't require this)
 
+                val devicePacketId = if (it.currentPacketId == 0L) {
+                    // Old devices don't send their current packet ID, in that case just pick something random and it will probably be fine ;-)
+                    val random = Random(System.currentTimeMillis())
+                    random.nextLong().absoluteValue
+                } else
+                    it.currentPacketId
+
                 // Not inited - pick a number on the opposite side of what the device is using
-                currentPacketId = it.currentPacketId + numPacketIds / 2
+                currentPacketId = devicePacketId + numPacketIds / 2
             } else {
                 currentPacketId++
             }
