@@ -17,7 +17,8 @@ data class MyNodeInfo(
     val currentPacketId: Long,
     val nodeNumBits: Int,
     val packetIdBits: Int,
-    val messageTimeoutMsec: Int
+    val messageTimeoutMsec: Int,
+    val minAppVersion: Int
 ) : Parcelable {
     /** A human readable description of the software/hardware version */
     val firmwareString: String get() = "$model $region/$firmwareVersion"
@@ -31,6 +32,7 @@ data class MyNodeInfo(
         parcel.readByte() != 0.toByte(),
         parcel.readByte() != 0.toByte(),
         parcel.readLong(),
+        parcel.readInt(),
         parcel.readInt(),
         parcel.readInt(),
         parcel.readInt()
@@ -49,6 +51,7 @@ data class MyNodeInfo(
         parcel.writeInt(nodeNumBits)
         parcel.writeInt(packetIdBits)
         parcel.writeInt(messageTimeoutMsec)
+        parcel.writeInt(minAppVersion)
     }
 
     override fun describeContents(): Int {

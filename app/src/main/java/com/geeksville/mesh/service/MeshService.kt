@@ -1228,7 +1228,8 @@ class MeshService : Service(), Logging {
                 currentPacketId.toLong() and 0xffffffffL,
                 if (nodeNumBits == 0) 8 else nodeNumBits,
                 if (packetIdBits == 0) 8 else packetIdBits,
-                if (messageTimeoutMsec == 0) 5 * 60 * 1000 else messageTimeoutMsec // constants from current device code
+                if (messageTimeoutMsec == 0) 5 * 60 * 1000 else messageTimeoutMsec, // constants from current device code
+                minAppVersion
             )
         }
 
@@ -1543,8 +1544,6 @@ class MeshService : Service(), Logging {
                     "num_data_sent",
                     DataPair(1)
                 )
-
-                connectionState == ConnectionState.CONNECTED
             }
         }
 

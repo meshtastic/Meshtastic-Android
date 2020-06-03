@@ -5,9 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.android.Logging
 import com.geeksville.mesh.DataPacket
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MessageStatus
-import com.geeksville.mesh.utf8
 
 
 class MessagesState(private val ui: UIViewModel) : Logging {
@@ -31,12 +29,14 @@ class MessagesState(private val ui: UIViewModel) : Logging {
 
     /// add a message our GUI list of past msgs
     fun addMessage(m: DataPacket) {
+        debug("Adding message to view id=${m.id}")
         // FIXME - don't just slam in a new list each time, it probably causes extra drawing.
         messages.value = messages.value!! + m
     }
 
     fun updateStatus(id: Int, status: MessageStatus) {
         // Super inefficent but this is rare
+        debug("Handling message status change $id: $status")
         val msgs = messages.value!!
 
         msgs.find { it.id == id }?.let { p ->
@@ -55,11 +55,8 @@ class MessagesState(private val ui: UIViewModel) : Logging {
     fun sendMessage(str: String, dest: String = DataPacket.ID_BROADCAST) {
 
         val service = ui.meshService
-        val p = DataPacket(
-            dest,
-            str.toByteArray(utf8),
-            MeshProtos.Data.Type.CLEAR_TEXT_VALUE
-        )
+        val p = DataPacket(dest, str)
+
         if (service != null)
             try {
                 service.send(p)
@@ -69,6 +66,7 @@ class MessagesState(private val ui: UIViewModel) : Logging {
         else
             p.errorMessage = "Error: No Mesh service"
 
+        // FIXME - why is the first time we are called p is already in the list at this point?
         addMessage(p)
     }
 }

@@ -548,7 +548,18 @@ class MainActivity : AppCompatActivity(), Logging,
                 model.radioConfig.value =
                     MeshProtos.RadioConfig.parseFrom(service.radioConfig)
 
-                model.myNodeInfo.value = service.myNodeInfo
+                val info = service.myNodeInfo
+                model.myNodeInfo.value = info
+
+                val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
+                if (isOld)
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle(getString(R.string.app_too_old))
+                        .setMessage(getString(R.string.must_update))
+                        .setPositiveButton("Okay") { _, _ ->
+                            info("User acknowledged app is old")
+                        }
+                        .show()
 
                 updateNodesFromDevice()
 
