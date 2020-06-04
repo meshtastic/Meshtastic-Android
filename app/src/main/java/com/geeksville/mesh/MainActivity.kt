@@ -734,7 +734,7 @@ class MainActivity : AppCompatActivity(), Logging,
         bindMeshService()
 
         val bonded =
-            RadioInterfaceService.getBondedDeviceAddress(this) != null
+            BluetoothInterfaceService.getBondedDeviceAddress(this) != null
         if (!bonded)
             pager.currentItem = 5
     }

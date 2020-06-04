@@ -445,12 +445,12 @@ class MeshService : Service(), Logging {
 
             // we listen for messages from the radio receiver _before_ trying to create the service
             val filter = IntentFilter()
-            filter.addAction(RadioInterfaceService.RECEIVE_FROMRADIO_ACTION)
-            filter.addAction(RadioInterfaceService.RADIO_CONNECTED_ACTION)
+            filter.addAction(InterfaceService.RECEIVE_FROMRADIO_ACTION)
+            filter.addAction(InterfaceService.RADIO_CONNECTED_ACTION)
             registerReceiver(radioInterfaceReceiver, filter)
 
             // We in turn need to use the radiointerface service
-            val intent = Intent(this@MeshService, RadioInterfaceService::class.java)
+            val intent = Intent(this@MeshService, BluetoothInterfaceService::class.java)
             // intent.action = IMeshService::class.java.name
             radio.connect(this@MeshService, intent, Context.BIND_AUTO_CREATE)
 
@@ -1060,7 +1060,7 @@ class MeshService : Service(), Logging {
             // Do our startup init
             try {
                 connectTimeMsec = System.currentTimeMillis()
-                if (RadioInterfaceService.isOldApi!!)
+                if (BluetoothInterfaceService.isOldApi!!)
                     reinitFromRadioREV1()
                 else
                     startConfig()
@@ -1126,7 +1126,7 @@ class MeshService : Service(), Logging {
             serviceScope.handledLaunch {
                 debug("Received broadcast ${intent.action}")
                 when (intent.action) {
-                    RadioInterfaceService.RADIO_CONNECTED_ACTION -> {
+                    InterfaceService.RADIO_CONNECTED_ACTION -> {
                         try {
                             val connected = intent.getBooleanExtra(EXTRA_CONNECTED, false)
                             val permanent = intent.getBooleanExtra(EXTRA_PERMANENT, false)
@@ -1143,7 +1143,7 @@ class MeshService : Service(), Logging {
                         }
                     }
 
-                    RadioInterfaceService.RECEIVE_FROMRADIO_ACTION -> {
+                    InterfaceService.RECEIVE_FROMRADIO_ACTION -> {
                         val proto =
                             MeshProtos.FromRadio.parseFrom(
                                 intent.getByteArrayExtra(
@@ -1348,7 +1348,7 @@ class MeshService : Service(), Logging {
         val parsed = MeshProtos.RadioConfig.parseFrom(payload)
 
         // Update our device
-        if (RadioInterfaceService.isOldApi!!)
+        if (BluetoothInterfaceService.isOldApi!!)
             connectedRadio.writeRadioConfig(payload)
         else
             sendToRadio(ToRadio.newBuilder().apply {
@@ -1378,7 +1378,7 @@ class MeshService : Service(), Logging {
         }
 
         // set my owner info
-        if (RadioInterfaceService.isOldApi!!)
+        if (BluetoothInterfaceService.isOldApi!!)
             connectedRadio.writeOwner(user.toByteArray())
         else sendToRadio(ToRadio.newBuilder().apply {
             this.setOwner = user
@@ -1449,7 +1449,8 @@ class MeshService : Service(), Logging {
         // Run in the IO thread
         val filename = firmwareUpdateFilename ?: throw Exception("No update filename")
         val safe =
-            RadioInterfaceService.safe ?: throw Exception("Can't update - no bluetooth connected")
+            BluetoothInterfaceService.safe
+                ?: throw Exception("Can't update - no bluetooth connected")
 
         serviceScope.handledLaunch {
             SoftwareUpdateService.doUpdate(this@MeshService, safe, filename)

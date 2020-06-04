@@ -40,6 +40,9 @@
     <uses-permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND" />
     <uses-permission android:name="android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND" />
 
+    <!-- Uart access -->
+    <uses-permission android:name="com.google.android.things.permission.USE_PERIPHERAL_IO" />
+
     <!-- the xing library will try to bring this permission in but we don't want it -->
     <uses-permission
         android:name="android.permission.CAMERA"
@@ -97,9 +100,15 @@
 
         <!-- This is a private service which just does direct communication to the radio -->
         <service
-            android:name="com.geeksville.mesh.service.RadioInterfaceService"
+            android:name="com.geeksville.mesh.service.BluetoothInterfaceService"
             android:enabled="true"
             android:exported="false" />
+
+        <!-- This is a private service which just does direct communication to the radio -->
+        <!-- <service
+            android:name="com.geeksville.mesh.service.SerialInterfaceService"
+            android:enabled="true"
+            android:exported="false" /> -->
 
         <activity
             android:name="com.geeksville.mesh.MainActivity"

@@ -1,31 +1,21 @@
 package com.geeksville.mesh.service
 
 import android.annotation.SuppressLint
-import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.companion.CompanionDeviceManager
 import android.content.Context
-import android.content.Intent
-import android.os.IBinder
-import android.os.RemoteException
 import androidx.core.content.edit
 import com.geeksville.analytics.DataPair
-import com.geeksville.android.BinaryLogFile
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
-import com.geeksville.concurrent.DeferredExecution
 import com.geeksville.concurrent.handledLaunch
-import com.geeksville.mesh.IRadioInterfaceService
 import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
 import com.geeksville.util.ignoreException
 import com.geeksville.util.toRemoteExceptions
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import java.lang.reflect.Method
 import java.util.*
@@ -90,8 +80,6 @@ A variable keepAllPackets, if set to true will suppress this behavior and instea
  */
 
 
-class RadioNotConnectedException(message: String = "Not connected to radio") :
-    BLEException(message)
 
 
 /**
@@ -103,65 +91,20 @@ class RadioNotConnectedException(message: String = "Not connected to radio") :
  * Note - this class intentionally dumb.  It doesn't understand protobuf framing etc...
  * It is designed to be simple so it can be stubbed out with a simulated version as needed.
  */
-class RadioInterfaceService : Service(), Logging {
+class BluetoothInterfaceService : InterfaceService() {
 
     companion object : Logging {
-        /**
-         * The RECEIVED_FROMRADIO
-         * Payload will be the raw bytes which were contained within a MeshProtos.FromRadio protobuf
-         */
-        const val RECEIVE_FROMRADIO_ACTION = "$prefix.RECEIVE_FROMRADIO"
-
-        /**
-         * This is broadcast when connection state changed
-         */
-        const val RADIO_CONNECTED_ACTION = "$prefix.CONNECT_CHANGED"
 
         /// this service UUID is publically visible for scanning
         val BTM_SERVICE_UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
 
-        private val BTM_FROMRADIO_CHARACTER =
-            UUID.fromString("8ba2bcc2-ee02-4a55-a531-c525c5e454d5")
-        private val BTM_TORADIO_CHARACTER =
-            UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
-        private val BTM_FROMNUM_CHARACTER =
-            UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
-
-        /// mynode - read/write this to access a MyNodeInfo protobuf
-        private val BTM_MYNODE_CHARACTER =
-            UUID.fromString("ea9f3f82-8dc4-4733-9452-1f6da28892a2")
-
-        /// nodeinfo - read this to get a series of node infos (ending with a null empty record), write to this to restart the read statemachine that returns all the node infos
-        private val BTM_NODEINFO_CHARACTER =
-            UUID.fromString("d31e02e0-c8ab-4d3f-9cc9-0b8466bdabe8")
-
-        /// radio - read/write this to access a RadioConfig protobuf
-        private val BTM_RADIO_CHARACTER =
-            UUID.fromString("b56786c8-839a-44a1-b98e-a1724c4a0262")
-
-        /// owner - read/write this to access a User protobuf
-        private val BTM_OWNER_CHARACTER =
-            UUID.fromString("6ff1d8b6-e2de-41e3-8c0b-8fa384f64eb6")
-
-        private const val DEVADDR_KEY = "devAddr"
-
         /// If our service is currently running, this pointer can be used to reach it (in case setBondedDeviceAddress is called)
-        private var runningService: RadioInterfaceService? = null
+        private var runningService: BluetoothInterfaceService? = null
 
         /**
          * Temp hack (until old API deprecated), try using just the new API now
          */
         var isOldApi: Boolean? = false
-
-        /// This is public only so that SimRadio can bootstrap our message flow
-        fun broadcastReceivedFromRadio(context: Context, payload: ByteArray) {
-            val intent = Intent(RECEIVE_FROMRADIO_ACTION)
-            intent.putExtra(EXTRA_PAYLOAD, payload)
-            context.sendBroadcast(intent)
-        }
-
-        private fun getPrefs(context: Context) =
-            context.getSharedPreferences("radio-prefs", Context.MODE_PRIVATE)
 
         /// Get our bluetooth adapter (should always succeed except on emulator
         private fun getBluetoothAdapter(context: Context): BluetoothAdapter? {
@@ -226,31 +169,7 @@ class RadioInterfaceService : Service(), Logging {
         get(): BluetoothGattService = device.getService(BTM_SERVICE_UUID)
             ?: throw RadioNotConnectedException("BLE service not found")
 
-    //.services.find { it.uuid == BTM_SERVICE_UUID }!!
-
     private lateinit var fromNum: BluetoothGattCharacteristic
-
-    private val logSends = false
-    private val logReceives = false
-    lateinit var sentPacketsLog: BinaryLogFile // inited in onCreate
-    lateinit var receivedPacketsLog: BinaryLogFile
-
-    private var isConnected = false
-
-    private val serviceJob = Job()
-    private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
-
-    /// Work that users of our service want done, which might get deferred until after
-    /// we have completed our initial connection
-    private val clientOperations = DeferredExecution()
-
-    private fun broadcastConnectionChanged(isConnected: Boolean, isPermanent: Boolean) {
-        debug("Broadcasting connection=$isConnected")
-        val intent = Intent(RADIO_CONNECTED_ACTION)
-        intent.putExtra(EXTRA_CONNECTED, isConnected)
-        intent.putExtra(EXTRA_PERMANENT, isPermanent)
-        sendBroadcast(intent)
-    }
 
     /**
      * With the new rev2 api, our first send is to start the configure readbacks.  In that case,
@@ -259,7 +178,7 @@ class RadioInterfaceService : Service(), Logging {
     private var isFirstSend = true
 
     /// Send a packet/command out the radio link
-    private fun handleSendToRadio(p: ByteArray) {
+    override fun handleSendToRadio(p: ByteArray) {
         // Do this in the IO thread because it might take a while (and we don't care about the result code)
         serviceScope.handledLaunch {
             try {
@@ -283,18 +202,6 @@ class RadioInterfaceService : Service(), Logging {
         }
     }
 
-    // Handle an incoming packet from the radio, broadcasts it as an android intent
-    private fun handleFromRadio(p: ByteArray) {
-        if (logReceives) {
-            receivedPacketsLog.write(p)
-            receivedPacketsLog.flush()
-        }
-
-        broadcastReceivedFromRadio(
-            this,
-            p
-        )
-    }
 
     /// Attempt to read from the fromRadio mailbox, if data is found broadcast it to android apps
     private fun doReadFromRadio(firstRead: Boolean) {
@@ -331,7 +238,7 @@ class RadioInterfaceService : Service(), Logging {
 
 
     @SuppressLint("NewApi")
-    fun setBondedDeviceAddress(addr: String?) {
+    override fun setBondedDeviceAddress(addr: String?) {
         // Record that this use has configured a radio
         GeeksvilleApplication.analytics.track(
             "mesh_bond"
@@ -372,11 +279,6 @@ class RadioInterfaceService : Service(), Logging {
         }
     }
 
-
-    private fun onDisconnect(isPermanent: Boolean) {
-        broadcastConnectionChanged(false, isPermanent)
-        isConnected = false
-    }
 
     /**
      * Android caches old services.  But our service is still changing often, so force it to reread the service definitions every
@@ -519,21 +421,15 @@ class RadioInterfaceService : Service(), Logging {
     override fun onCreate() {
         runningService = this
         super.onCreate()
-        setEnabled(true)
         registerReceiver(bluetoothStateReceiver, bluetoothStateReceiver.intent)
     }
 
     override fun onDestroy() {
         unregisterReceiver(bluetoothStateReceiver)
-        setEnabled(false)
-        serviceJob.cancel()
         runningService = null
         super.onDestroy()
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return binder;
-    }
 
     /// Start a connection attempt
     private fun startConnect() {
@@ -547,7 +443,8 @@ class RadioInterfaceService : Service(), Logging {
     }
 
     /// Open or close a bluetooth connection to our device
-    private fun setEnabled(on: Boolean) {
+    override fun setEnabled(on: Boolean) {
+        super.setEnabled(on)
         if (on) {
             if (safe != null) {
                 info("Skipping radio enable, it is already on")
@@ -570,11 +467,6 @@ class RadioInterfaceService : Service(), Logging {
                     } else {
                         errormsg("Bluetooth adapter not found, assuming running on the emulator!")
                     }
-
-                    if (logSends)
-                        sentPacketsLog = BinaryLogFile(this, "sent_log.pb")
-                    if (logReceives)
-                        receivedPacketsLog = BinaryLogFile(this, "receive_log.pb")
                 }
             }
         } else {
@@ -584,12 +476,7 @@ class RadioInterfaceService : Service(), Logging {
                 safe =
                     null // We do this first, because if we throw we still want to mark that we no longer have a valid connection
 
-                if (logSends)
-                    sentPacketsLog.close()
-                if (logReceives)
-                    receivedPacketsLog.close()
                 s?.close()
-                onDisconnect(isPermanent = true) // Tell any clients we are now offline
             } else {
                 debug("Radio was not connected, skipping disable")
             }
@@ -599,7 +486,7 @@ class RadioInterfaceService : Service(), Logging {
     /**
      * do a synchronous write operation
      */
-    private fun doWrite(uuid: UUID, a: ByteArray) = toRemoteExceptions {
+    override fun doWrite(uuid: UUID, a: ByteArray) = toRemoteExceptions {
         if (!isConnected)
             throw RadioNotConnectedException()
         else {
@@ -625,7 +512,7 @@ class RadioInterfaceService : Service(), Logging {
      * do an asynchronous write operation
      * Any error responses will be ignored (other than log messages)
      */
-    private fun doAsyncWrite(uuid: UUID, a: ByteArray) = toRemoteExceptions {
+    override fun doAsyncWrite(uuid: UUID, a: ByteArray) = toRemoteExceptions {
         if (!isConnected)
             throw RadioNotConnectedException()
         else {
@@ -645,7 +532,7 @@ class RadioInterfaceService : Service(), Logging {
     /**
      * do a synchronous read operation
      */
-    private fun doRead(uuid: UUID): ByteArray? = toRemoteExceptions {
+    override fun doRead(uuid: UUID): ByteArray? = toRemoteExceptions {
         if (!isConnected)
             throw RadioNotConnectedException()
         else {
@@ -663,32 +550,4 @@ class RadioInterfaceService : Service(), Logging {
         }
     }
 
-    private val binder = object : IRadioInterfaceService.Stub() {
-
-        override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
-            setBondedDeviceAddress(deviceAddr)
-        }
-
-        // A write of any size to nodeinfo means restart reading
-        override fun restartNodeInfo() = doWrite(BTM_NODEINFO_CHARACTER, ByteArray(0))
-
-        override fun readMyNode() =
-            doRead(BTM_MYNODE_CHARACTER)
-                ?: throw RemoteException("Device returned empty MyNodeInfo")
-
-        override fun sendToRadio(a: ByteArray) = handleSendToRadio(a)
-
-        override fun readRadioConfig() =
-            doRead(BTM_RADIO_CHARACTER)
-                ?: throw RemoteException("Device returned empty RadioConfig")
-
-        override fun readOwner() =
-            doRead(BTM_OWNER_CHARACTER) ?: throw RemoteException("Device returned empty Owner")
-
-        override fun writeOwner(owner: ByteArray) = doWrite(BTM_OWNER_CHARACTER, owner)
-
-        override fun writeRadioConfig(config: ByteArray) = doWrite(BTM_RADIO_CHARACTER, config)
-
-        override fun readNodeInfo() = doRead(BTM_NODEINFO_CHARACTER)
-    }
 }

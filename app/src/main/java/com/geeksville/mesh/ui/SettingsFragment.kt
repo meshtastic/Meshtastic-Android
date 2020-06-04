@@ -29,8 +29,8 @@ import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.service.BluetoothInterfaceService
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.service.RadioInterfaceService
 import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -176,7 +176,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
      */
     fun startScan(): Boolean {
         debug("BTScan component active")
-        selectedMacAddr = RadioInterfaceService.getBondedDeviceAddress(context)
+        selectedMacAddr = BluetoothInterfaceService.getBondedDeviceAddress(context)
 
         return if (bluetoothAdapter == null) {
             warn("No bluetooth adapter.  Running under emulation?")
@@ -212,7 +212,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     // filter and only accept devices that have a sw update service
                     val filter =
                         ScanFilter.Builder()
-                            .setServiceUuid(ParcelUuid(RadioInterfaceService.BTM_SERVICE_UUID))
+                            .setServiceUuid(ParcelUuid(BluetoothInterfaceService.BTM_SERVICE_UUID))
                             .build()
 
                     val settings =
@@ -301,7 +301,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
 
     private val hasCompanionDeviceApi: Boolean by lazy {
-        RadioInterfaceService.hasCompanionDeviceApi(requireContext())
+        BluetoothInterfaceService.hasCompanionDeviceApi(requireContext())
     }
 
     private val deviceManager: CompanionDeviceManager by lazy {
@@ -507,7 +507,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
 
             val hasBonded =
-                RadioInterfaceService.getBondedDeviceAddress(requireContext()) != null
+                BluetoothInterfaceService.getBondedDeviceAddress(requireContext()) != null
 
             // get rid of the warning text once at least one device is paired
             warningNotPaired.visibility = if (hasBonded) View.GONE else View.VISIBLE
@@ -571,7 +571,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         deviceRadioGroup.visibility = View.GONE
         changeRadioButton.visibility = View.VISIBLE
 
-        val curRadio = RadioInterfaceService.getBondedDeviceAddress(requireContext())
+        val curRadio = BluetoothInterfaceService.getBondedDeviceAddress(requireContext())
 
         if (curRadio != null) {
             scanStatusText.text = getString(R.string.current_pair).format(curRadio)
