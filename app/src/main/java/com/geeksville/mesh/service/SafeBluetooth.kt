@@ -208,12 +208,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                                 it.invoke()
                             }
 
-                            // Note: To workaround https://issuetracker.google.com/issues/36995652
-                            // Always call BluetoothDevice#connectGatt() with autoConnect=false
-                            // (the race condition does not affect that case). If that connection times out
-                            // you will get a callback with status=133. Then call BluetoothGatt#connect()
-                            // to initiate a background connection.
-
                             // Queue a new connection attempt
                             val cb = connectionCallback
                             if (cb != null) {
@@ -224,6 +218,19 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                                 queueWork("reconnect", CallbackContinuation(cb)) { -> true }
                             } else {
                                 debug("No connectionCallback registered")
+                            }
+                        } else if (status == 133) {
+                            // We were not previously connected and we just failed with our non-auto connection attempt.  Therefore we now need
+                            // to do an autoconnection attempt.  When that attempt succeeds/fails the normal callbacks will be called
+
+                            // Note: To workaround https://issuetracker.google.com/issues/36995652
+                            // Always call BluetoothDevice#connectGatt() with autoConnect=false
+                            // (the race condition does not affect that case). If that connection times out
+                            // you will get a callback with status=133. Then call BluetoothGatt#connect()
+                            // to initiate a background connection.
+                            if (autoConnect) {
+                                warn("Failed on non-auto connect, falling back to auto connect attempt")
+                                lowLevelConnect(true)
                             }
                         }
 
@@ -458,6 +465,26 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     // Is the gatt trying to repeatedly connect as needed?
     private var autoConnect = false
 
+    private fun lowLevelConnect(autoNow: Boolean): BluetoothGatt? {
+        val g = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            device.connectGatt(
+                context,
+                autoNow,
+                gattCallback,
+                BluetoothDevice.TRANSPORT_LE
+            )
+        } else {
+            device.connectGatt(
+                context,
+                autoNow,
+                gattCallback
+            )
+        }
+
+        gatt = g
+        return g
+    }
+
     // FIXME, pass in true for autoconnect - so we will autoconnect whenever the radio
     // comes in range (even if we made this connect call long ago when we got powered on)
     // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
@@ -465,38 +492,19 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     // Otherwise if you pass in false, it will try to connect now and will timeout and fail in 30 seconds.
     private fun queueConnect(
         autoConnect: Boolean = false,
-        cont: Continuation<Unit>,
-        isFirstAttempt: Boolean
+        cont: Continuation<Unit>
     ) {
         this.autoConnect = autoConnect
 
         // assert(gatt == null) this now might be !null with our new reconnect support
         queueWork("connect", cont) {
-            
+
             // Note: To workaround https://issuetracker.google.com/issues/36995652
             // Always call BluetoothDevice#connectGatt() with autoConnect=false
             // (the race condition does not affect that case). If that connection times out
             // you will get a callback with status=133. Then call BluetoothGatt#connect()
             // to initiate a background connection.
-            val autoNow = if (isFirstAttempt) false else autoConnect
-
-            val g =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    device.connectGatt(
-                        context,
-                        autoNow,
-                        gattCallback,
-                        BluetoothDevice.TRANSPORT_LE
-                    )
-                } else {
-                    device.connectGatt(
-                        context,
-                        autoNow,
-                        gattCallback
-                    )
-                }
-            if (g != null)
-                gatt = g
+            val g = lowLevelConnect(false)
             g != null
         }
     }
@@ -523,18 +531,18 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             cb
         else
             null
-        queueConnect(autoConnect, CallbackContinuation(cb), true)
+        queueConnect(autoConnect, CallbackContinuation(cb))
     }
 
     /// Restart any previous connect attempts
     private fun reconnect() {
         connectionCallback?.let { cb ->
-            queueConnect(true, CallbackContinuation(cb), false)
+            queueConnect(true, CallbackContinuation(cb))
         }
     }
 
     fun connect(autoConnect: Boolean = false) =
-        makeSync<Unit> { queueConnect(autoConnect, it, true) }
+        makeSync<Unit> { queueConnect(autoConnect, it) }
 
     private fun queueReadCharacteristic(
         c: BluetoothGattCharacteristic,
