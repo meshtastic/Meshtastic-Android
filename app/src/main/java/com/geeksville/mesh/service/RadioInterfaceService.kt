@@ -580,12 +580,15 @@ class RadioInterfaceService : Service(), Logging {
         } else {
             if (safe != null) {
                 info("Closing radio interface service")
+                val s = safe
+                safe =
+                    null // We do this first, because if we throw we still want to mark that we no longer have a valid connection
+
                 if (logSends)
                     sentPacketsLog.close()
                 if (logReceives)
                     receivedPacketsLog.close()
-                safe?.close()
-                safe = null
+                s?.close()
                 onDisconnect(isPermanent = true) // Tell any clients we are now offline
             } else {
                 debug("Radio was not connected, skipping disable")
