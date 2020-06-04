@@ -541,7 +541,7 @@ class RadioInterfaceService : Service(), Logging {
         // comes in range (even if we made this connect call long ago when we got powered on)
         // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
         // more info
-        safe!!.asyncConnect(true,
+        safe!!.asyncConnect(true, // FIXME, sometimes this seems to not work or take a very long time!
             cb = ::onConnect,
             lostConnectCb = { onDisconnect(isPermanent = false) })
     }
