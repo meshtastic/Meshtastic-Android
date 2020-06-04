@@ -153,8 +153,8 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                         GeeksvilleApplication.currentActivity as MainActivity,
                         addr
                     )
-
-                devices.value = oldDevs + Pair(addr, entry) // trigger gui updates
+                oldDevs[addr] = entry // Add/replace entry
+                devices.value = oldDevs // trigger gui updates
             }
         }
     }
@@ -186,7 +186,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                 BTScanEntry("Meshtastic_32ac", "xb", true)
             )
 
-            devices.value = (testnodes.map { it.macAddress to it }).toMap()
+            devices.value = (testnodes.map { it.macAddress to it }).toMap().toMutableMap()
 
             // If nothing was selected, by default select the first thing we see
             if (selectedMacAddr == null)
@@ -229,7 +229,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         }
     }
 
-    val devices = object : MutableLiveData<Map<String, BTScanEntry>>(mapOf()) {
+    val devices = object : MutableLiveData<MutableMap<String, BTScanEntry>>(mutableMapOf()) {
 
 
         /**
