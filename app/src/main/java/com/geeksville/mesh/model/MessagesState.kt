@@ -23,7 +23,7 @@ class MessagesState(private val ui: UIViewModel) : Logging {
     // If the following (unused otherwise) line is commented out, the IDE preview window works.
     // if left in the preview always renders as empty.
     val messages =
-        object : MutableLiveData<List<DataPacket>>(if (isEmulator) testTexts else listOf()) {
+        object : MutableLiveData<List<DataPacket>>(if (isEmulator) testTexts else emptyList()) {
 
         }
 
@@ -31,7 +31,14 @@ class MessagesState(private val ui: UIViewModel) : Logging {
     fun addMessage(m: DataPacket) {
         debug("Adding message to view id=${m.id}")
         // FIXME - don't just slam in a new list each time, it probably causes extra drawing.
-        messages.value = messages.value!! + m
+
+        // FIXME - possible kotlin bug in 1.3.72 - it seems that if we start with the (globally shared) emptyList,
+        // then adding items are affecting that shared list rather than a copy.   This was causing aliasing of
+        // recentDataPackets with messages.value in the GUI.  So if the current list is empty we are careful to make a new list
+        messages.value = if (messages.value.isNullOrEmpty())
+            listOf(m)
+        else
+            messages.value!! + m
     }
 
     fun updateStatus(id: Int, status: MessageStatus) {
