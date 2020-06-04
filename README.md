@@ -6,30 +6,21 @@ This is a tool for using Android with open-source mesh radios.  For more informa
 
 This project is currently early-alpha, if you have questions or feedback please [Join our discussion forum](https://meshtastic.discourse.group/).  We would love to hear from you.
 
-Once out of alpha the companion Android application will be released here:
+The production version of our application is here:
 
 [![Download at https://play.google.com/store/apps/details?id=com.geeksville.mesh](https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png)](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dhomepage%26anid%3Dadmob)
 
-But if you want the bleeding edge app now, we'd love to have your help testing.  Three steps to opt-in to the alpha- test:
+But if you want the beta-test app now, we'd love to have your help testing.  Three steps to opt-in to the test:
 
-1. Join [this Google group](https://groups.google.com/forum/#!forum/meshtastic-alpha-testers) with the account you use in Google Play.
-2. Go to this [URL](https://play.google.com/apps/testing/com.geeksville.mesh) to opt-in to the alpha test.
-3. If you encounter any problems or have questions, post in our gitter chat and we'll help.
-
-## Analytics setup
-
-* analytics are included but can be disabled by the user on the settings screen
-* on dev devices "adb shell setprop debug.firebase.analytics.app com.geeksville.mesh"
-adb shell setprop log.tag.FirebaseCrashlytics DEBUG
-
-for verbose logging:
-```aidl
-adb shell setprop log.tag.FA VERBOSE
-```
+1. Join [this Google group](https://groups.google.com/forum/#!forum/meshtastic-alpha-testers) with the account you use in Google Play.  **Optional** - if you just want 'beta builds' 
+not bleeding edge alpha test builds skip to the next step.
+2. Go to this [URL](https://play.google.com/apps/testing/com.geeksville.mesh) to opt-in to the alpha/beta test.
+3. If you encounter any problems or have questions, [post in the forum](https://meshtastic.discourse.group/)t and we'll help.
 
 ## Build instructions
 
-These build instructions are brief and should be improved, please send a PR if you can.
+If you would like to develop this application we'd love your help!  These build instructions are brief 
+and should be improved, please send a PR if you can.
 
 * Use Android Studio 4.0 RC 1 to build/debug (other versions might work but no promises)
 * Use "git submodule update --init --recursive" to pull in the various submodules we depend on
@@ -48,6 +39,17 @@ Run the following commands to do so:
 * Now you should be able to select "Run / Run" in the IDE and it will happily start running on your phone
 or the emulator.  Note: The emulators don't support bluetooth, so some features can not be used in
 that environment.
+
+## Analytics setup
+
+* analytics are included but can be disabled by the user on the settings screen
+* on dev devices "adb shell setprop debug.firebase.analytics.app com.geeksville.mesh"
+adb shell setprop log.tag.FirebaseCrashlytics DEBUG
+
+for verbose logging:
+```aidl
+adb shell setprop log.tag.FA VERBOSE
+```
 
 # Credits
 
