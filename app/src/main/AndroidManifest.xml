@@ -69,6 +69,8 @@
         android:hardwareAccelerated="true"
         android:theme="@style/AppTheme">
 
+        <uses-library android:name="com.google.android.things" />
+
         <meta-data
             android:name="com.mixpanel.android.MPConfig.DisableViewCrawler"
             android:value="true" />
@@ -105,10 +107,10 @@
             android:exported="false" />
 
         <!-- This is a private service which just does direct communication to the radio -->
-        <!-- <service
+        <service
             android:name="com.geeksville.mesh.service.SerialInterfaceService"
             android:enabled="true"
-            android:exported="false" /> -->
+            android:exported="false" />
 
         <activity
             android:name="com.geeksville.mesh.MainActivity"

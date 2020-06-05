@@ -8,6 +8,7 @@ import android.os.RemoteException
 import com.geeksville.android.BinaryLogFile
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.DeferredExecution
+import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.IRadioInterfaceService
 import com.geeksville.util.toRemoteExceptions
 import kotlinx.coroutines.CoroutineScope
@@ -109,7 +110,7 @@ abstract class InterfaceService : Service(), Logging {
      */
     private var isFirstSend = true
 
-    /// Send a packet/command out the radio link
+    /// Send a packet/command out the radio link, this routine can block if it needs to
     protected abstract fun handleSendToRadio(p: ByteArray)
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
@@ -168,20 +169,28 @@ abstract class InterfaceService : Service(), Logging {
     /**
      * do a synchronous write operation
      */
-    protected abstract fun doWrite(uuid: UUID, a: ByteArray)
+    protected open fun doWrite(uuid: UUID, a: ByteArray) {
+        throw NotImplementedError("Only implemented temporarily until rev1 api is removed")
+    }
 
     /**
      * do an asynchronous write operation
      * Any error responses will be ignored (other than log messages)
      */
-    protected abstract fun doAsyncWrite(uuid: UUID, a: ByteArray)
+    protected open fun doAsyncWrite(uuid: UUID, a: ByteArray) {
+        throw NotImplementedError("Only implemented temporarily until rev1 api is removed")
+    }
 
-    protected abstract fun setBondedDeviceAddress(addr: String?)
+    protected open fun setBondedDeviceAddress(addr: String?) {
+        TODO()
+    }
 
     /**
      * do a synchronous read operation
      */
-    protected abstract fun doRead(uuid: UUID): ByteArray?
+    protected open fun doRead(uuid: UUID): ByteArray? {
+        throw NotImplementedError("Only implemented temporarily until rev1 api is removed")
+    }
 
     private val binder = object : IRadioInterfaceService.Stub() {
 
@@ -189,7 +198,10 @@ abstract class InterfaceService : Service(), Logging {
             setBondedDeviceAddress(deviceAddr)
         }
 
-        override fun sendToRadio(a: ByteArray) = handleSendToRadio(a)
+        override fun sendToRadio(a: ByteArray) {
+            // Do this in the IO thread because it might take a while (and we don't care about the result code)
+            serviceScope.handledLaunch { handleSendToRadio(a) }
+        }
 
         //
         // NOTE: the following methods are all deprecated and will be removed soon
