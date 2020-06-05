@@ -413,14 +413,20 @@ class RadioInterfaceService : Service(), Logging {
             DataPair(1)
         )
 
-        warn("Forcing disconnect and hopefully device will comeback (disabling forced refresh)")
-        hasForcedRefresh = true
-        ignoreException {
-            safe!!.closeConnection()
+        /// We gracefully handle safe being null because this can occur if someone has unpaired from our device - just abandon the reconnect attempt
+        val s = safe
+        if (s != null) {
+            warn("Forcing disconnect and hopefully device will comeback (disabling forced refresh)")
+            hasForcedRefresh = true
+            ignoreException {
+                s.closeConnection()
+            }
+            delay(1000) // Give some nasty time for buggy BLE stacks to shutdown (500ms was not enough)
+            warn("Attempting reconnect")
+            startConnect()
+        } else {
+            warn("Abandoning reconnect because safe==null, someone must have closed the device")
         }
-        delay(1000) // Give some nasty time for buggy BLE stacks to shutdown (500ms was not enough)
-        warn("Attempting reconnect")
-        startConnect()
     }
 
     /// We only try to set MTU once, because some buggy implementations fail
