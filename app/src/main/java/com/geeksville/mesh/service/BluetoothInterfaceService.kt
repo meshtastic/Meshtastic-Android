@@ -98,6 +98,13 @@ class BluetoothInterfaceService : InterfaceService() {
         /// this service UUID is publically visible for scanning
         val BTM_SERVICE_UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
 
+        val BTM_FROMRADIO_CHARACTER =
+            UUID.fromString("8ba2bcc2-ee02-4a55-a531-c525c5e454d5")
+        val BTM_TORADIO_CHARACTER =
+            UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
+        val BTM_FROMNUM_CHARACTER =
+            UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
+        
         /// If our service is currently running, this pointer can be used to reach it (in case setBondedDeviceAddress is called)
         private var runningService: BluetoothInterfaceService? = null
 
@@ -479,7 +486,7 @@ class BluetoothInterfaceService : InterfaceService() {
     /**
      * do a synchronous write operation
      */
-    override fun doWrite(uuid: UUID, a: ByteArray) = toRemoteExceptions {
+    private fun doWrite(uuid: UUID, a: ByteArray) = toRemoteExceptions {
         if (!isConnected)
             throw RadioNotConnectedException()
         else {
@@ -500,47 +507,5 @@ class BluetoothInterfaceService : InterfaceService() {
      */
     private fun getCharacteristic(uuid: UUID) =
         service.getCharacteristic(uuid) ?: throw BLEException("Can't get characteristic $uuid")
-
-    /**
-     * do an asynchronous write operation
-     * Any error responses will be ignored (other than log messages)
-     */
-    override fun doAsyncWrite(uuid: UUID, a: ByteArray) = toRemoteExceptions {
-        if (!isConnected)
-            throw RadioNotConnectedException()
-        else {
-            debug("queuing ${a.size} bytes to $uuid")
-
-            // Note: we generate a new characteristic each time, because we are about to
-            // change the data and we want the data stored in the closure
-            val toRadio = getCharacteristic(uuid)
-            toRadio.value = a
-
-            safe!!.asyncWriteCharacteristic(toRadio) {
-                debug("asyncwrite of ${a.size} bytes completed")
-            }
-        }
-    }
-
-    /**
-     * do a synchronous read operation
-     */
-    override fun doRead(uuid: UUID): ByteArray? = toRemoteExceptions {
-        if (!isConnected)
-            throw RadioNotConnectedException()
-        else {
-            // Note: we generate a new characteristic each time, because we are about to
-            // change the data and we want the data stored in the closure
-            val toRadio = getCharacteristic(uuid)
-            var a = safe!!.readCharacteristic(toRadio)
-                .value.clone() // we copy the bluetooth array because it might still be in use
-            debug("Read of $uuid got ${a.size} bytes")
-
-            if (a.isEmpty()) // An empty bluetooth response is converted to a null response for our clients
-                null
-            else
-                a
-        }
-    }
 
 }
