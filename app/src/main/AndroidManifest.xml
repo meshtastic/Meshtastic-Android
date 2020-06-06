@@ -41,7 +41,7 @@
     <uses-permission android:name="android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND" />
 
     <!-- Uart access -->
-    <uses-permission android:name="com.google.android.things.permission.USE_PERIPHERAL_IO" />
+
 
     <!-- the xing library will try to bring this permission in but we don't want it -->
     <uses-permission
@@ -68,8 +68,6 @@
         android:supportsRtl="true"
         android:hardwareAccelerated="true"
         android:theme="@style/AppTheme">
-
-        <uses-library android:name="com.google.android.things" />
 
         <meta-data
             android:name="com.mixpanel.android.MPConfig.DisableViewCrawler"
@@ -110,7 +108,14 @@
         <service
             android:name="com.geeksville.mesh.service.SerialInterfaceService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/device_filter" />
+        </service>
 
         <activity
             android:name="com.geeksville.mesh.MainActivity"
