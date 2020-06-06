@@ -920,43 +920,6 @@ class MeshService : Service(), Logging {
     private fun currentSecond() = (System.currentTimeMillis() / 1000).toInt()
 
 
-    /**
-     * Note: this is the deprecated REV1 API way of getting the nodedb
-     * We are reconnecting to a radio, redownload the full state.  This operation might take hundreds of milliseconds
-     * */
-    private fun reinitFromRadioREV1() {
-        // Read the MyNodeInfo object
-        val myInfo = MeshProtos.MyNodeInfo.parseFrom(
-            connectedRadio.readMyNode()
-        )
-
-        handleMyInfo(myInfo)
-        myNodeInfo = newMyNodeInfo // Apply the changes from handleMyInfo right now
-
-        radioConfig = MeshProtos.RadioConfig.parseFrom(connectedRadio.readRadioConfig())
-
-        // Ask for the current node DB
-        connectedRadio.restartNodeInfo()
-
-        // read all the infos until we get back null
-        var infoBytes = connectedRadio.readNodeInfo()
-        while (infoBytes != null) {
-            val info = MeshProtos.NodeInfo.parseFrom(infoBytes)
-            installNodeInfo(info)
-
-            // advance to next
-            infoBytes = connectedRadio.readNodeInfo()
-        }
-
-        haveNodeDB = true // we've done our initial node db initialization
-        processEarlyPackets() // handle any packets that showed up while we were booting
-
-        // broadcast an intent with our new connection state
-        broadcastConnection()
-        reportConnection() // this is just analytics
-        onNodeDBChanged()
-    }
-
     /// If we just changed our nodedb, we might want to do somethings
     private fun onNodeDBChanged() {
         updateNotification()
@@ -1060,10 +1023,7 @@ class MeshService : Service(), Logging {
             // Do our startup init
             try {
                 connectTimeMsec = System.currentTimeMillis()
-                if (BluetoothInterfaceService.isOldApi!!)
-                    reinitFromRadioREV1()
-                else
-                    startConfig()
+                startConfig()
 
             } catch (ex: InvalidProtocolBufferException) {
                 errormsg(
@@ -1348,12 +1308,9 @@ class MeshService : Service(), Logging {
         val parsed = MeshProtos.RadioConfig.parseFrom(payload)
 
         // Update our device
-        if (BluetoothInterfaceService.isOldApi!!)
-            connectedRadio.writeRadioConfig(payload)
-        else
-            sendToRadio(ToRadio.newBuilder().apply {
-                this.setRadio = parsed
-            })
+        sendToRadio(ToRadio.newBuilder().apply {
+            this.setRadio = parsed
+        })
 
         // Update our cached copy
         this@MeshService.radioConfig = parsed
@@ -1378,12 +1335,9 @@ class MeshService : Service(), Logging {
         }
 
         // set my owner info
-        if (BluetoothInterfaceService.isOldApi!!)
-            connectedRadio.writeOwner(user.toByteArray())
-        else sendToRadio(ToRadio.newBuilder().apply {
+        sendToRadio(ToRadio.newBuilder().apply {
             this.setOwner = user
         })
-
     }
 
     /// Do not use directly, instead call generatePacketId()

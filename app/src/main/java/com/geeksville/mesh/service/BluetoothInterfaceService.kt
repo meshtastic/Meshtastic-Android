@@ -101,11 +101,6 @@ class BluetoothInterfaceService : InterfaceService() {
         /// If our service is currently running, this pointer can be used to reach it (in case setBondedDeviceAddress is called)
         private var runningService: BluetoothInterfaceService? = null
 
-        /**
-         * Temp hack (until old API deprecated), try using just the new API now
-         */
-        var isOldApi: Boolean? = false
-
         /// Get our bluetooth adapter (should always succeed except on emulator
         private fun getBluetoothAdapter(context: Context): BluetoothAdapter? {
             val bluetoothManager =
@@ -343,11 +338,6 @@ class BluetoothInterfaceService : InterfaceService() {
                 try {
                     debug("Discovered services!")
                     delay(1000) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null
-
-                    // service could be null, test this by throwing BLEException and testing it on my machine
-                    if (isOldApi == null)
-                        isOldApi = service.getCharacteristic(BTM_RADIO_CHARACTER) != null
-                    warn("Use oldAPI = $isOldApi")
 
                     /* if (isFirstTime) {
                         isFirstTime = false

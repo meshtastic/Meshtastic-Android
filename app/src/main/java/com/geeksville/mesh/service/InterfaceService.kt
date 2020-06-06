@@ -4,7 +4,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import android.os.RemoteException
 import com.geeksville.android.BinaryLogFile
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.DeferredExecution
@@ -52,22 +51,6 @@ abstract class InterfaceService : Service(), Logging {
             UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
         val BTM_FROMNUM_CHARACTER =
             UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
-
-        /// mynode - read/write this to access a MyNodeInfo protobuf
-        val BTM_MYNODE_CHARACTER =
-            UUID.fromString("ea9f3f82-8dc4-4733-9452-1f6da28892a2")
-
-        /// nodeinfo - read this to get a series of node infos (ending with a null empty record), write to this to restart the read statemachine that returns all the node infos
-        val BTM_NODEINFO_CHARACTER =
-            UUID.fromString("d31e02e0-c8ab-4d3f-9cc9-0b8466bdabe8")
-
-        /// radio - read/write this to access a RadioConfig protobuf
-        val BTM_RADIO_CHARACTER =
-            UUID.fromString("b56786c8-839a-44a1-b98e-a1724c4a0262")
-
-        /// owner - read/write this to access a User protobuf
-        val BTM_OWNER_CHARACTER =
-            UUID.fromString("6ff1d8b6-e2de-41e3-8c0b-8fa384f64eb6")
 
         /// This is public only so that SimRadio can bootstrap our message flow
         fun broadcastReceivedFromRadio(context: Context, payload: ByteArray) {
@@ -202,28 +185,5 @@ abstract class InterfaceService : Service(), Logging {
             // Do this in the IO thread because it might take a while (and we don't care about the result code)
             serviceScope.handledLaunch { handleSendToRadio(a) }
         }
-
-        //
-        // NOTE: the following methods are all deprecated and will be removed soon
-        //
-
-        // A write of any size to nodeinfo means restart reading
-        override fun restartNodeInfo() = doWrite(BTM_NODEINFO_CHARACTER, ByteArray(0))
-
-        override fun readMyNode() =
-            doRead(BTM_MYNODE_CHARACTER)
-                ?: throw RemoteException("Device returned empty MyNodeInfo")
-
-        override fun readRadioConfig() =
-            doRead(BTM_RADIO_CHARACTER)
-                ?: throw RemoteException("Device returned empty RadioConfig")
-
-        override fun readOwner() =
-            doRead(BTM_OWNER_CHARACTER) ?: throw RemoteException("Device returned empty Owner")
-
-        override fun writeOwner(owner: ByteArray) = doWrite(BTM_OWNER_CHARACTER, owner)
-        override fun writeRadioConfig(config: ByteArray) = doWrite(BTM_RADIO_CHARACTER, config)
-
-        override fun readNodeInfo() = doRead(BTM_NODEINFO_CHARACTER)
     }
 }

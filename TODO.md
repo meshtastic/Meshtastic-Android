@@ -1,6 +1,11 @@
 # High priority
 Work items for soon alpha builds
 
+USBserial todo:
+
+* remove old api
+* refactor ble and serial into Interface subclasses, used by RadioInterfaceService.  Instanciate either a BLE or a serial interface as needed
+
 Document the following in application behavior
 *change ls_secs is 1 hr normally, which is fine because if there are other nodes in the mesh and they send us a packet we will wake any time during ls_secs and update app state
 * use states for meshservice: disconnected -> connected-> devsleep -> disconnected (3 states)
