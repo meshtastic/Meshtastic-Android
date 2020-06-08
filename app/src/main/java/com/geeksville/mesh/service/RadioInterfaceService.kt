@@ -190,7 +190,10 @@ class RadioInterfaceService : Service(), Logging {
                     'x' -> BluetoothInterface(this, rest)
                     's' -> SerialInterface(this, rest)
                     'n' -> nopIf
-                    else -> TODO("Unexpected radio interface type")
+                    else -> {
+                        errormsg("Unexpected radio interface type")
+                        nopIf
+                    }
                 }
             }
         }

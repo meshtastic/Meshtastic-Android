@@ -48,7 +48,7 @@ object SLogging : Logging {}
 fun changeDeviceSelection(context: MainActivity, newAddr: String?) {
     // FIXME, this is a kinda yucky way to find the service
     context.model.meshService?.let { service ->
-        service.setDeviceAddress(newAddr)
+        MeshService.changeDeviceAddress(context, service, newAddr)
     }
 }
 
@@ -165,7 +165,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                 if (selectedAddress == null && entry.bonded)
                     changeScanSelection(
                         GeeksvilleApplication.currentActivity as MainActivity,
-                        addr
+                        fullAddr
                     )
                 addDevice(entry) // Add/replace entry
             }
@@ -287,7 +287,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                             errorText.value = activity.getString(R.string.pairing_completed)
                             changeScanSelection(
                                 activity,
-                                device.address
+                                it.address
                             )
                         } else {
                             errorText.value = activity.getString(R.string.pairing_failed_try_again)
@@ -514,14 +514,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
                 // The device the user is already paired with is offline currently, still show it
                 // it in the list, but greyed out
-                val selectedAddr = scanModel.selectedAddress
-                if (!hasShownOurDevice && selectedAddr != null) {
+                if (!hasShownOurDevice && scanModel.selectedBluetooth != null) {
                     val bDevice =
                         scanModel.bluetoothAdapter!!.getRemoteDevice(scanModel.selectedBluetooth)
                     if (bDevice.name != null) { // ignore nodes that node have a name, that means we've lost them since they appeared
                         val curDevice = BTScanModel.DeviceListEntry(
                             bDevice.name,
-                            selectedAddr,
+                            scanModel.selectedAddress!!,
                             bDevice.bondState == BOND_BONDED
                         )
                         addDeviceButton(curDevice, false)

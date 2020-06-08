@@ -470,7 +470,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
                     // ... Continue interacting with the paired device.
                     model.meshService?.let { service ->
-                        service.setDeviceAddress(device.address)
+                        MeshService.changeDeviceAddress(this@MainActivity, service, device.address)
                     }
                 }
 

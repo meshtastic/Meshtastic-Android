@@ -81,25 +81,29 @@ class MeshService : Service(), Logging {
         }
 
         /**
+         * Talk to our running service and try to set a new device address.  And then immediately
+         * call start on the service to possibly promote our service to be a foreground service.
+         */
+        fun changeDeviceAddress(context: Context, service: IMeshService, address: String?) {
+            service.setDeviceAddress(address)
+            startService(context)
+        }
+
+        /**
          * Just after boot the android OS is super busy, so if we call startForegroundService then, our
          * thread might be stalled long enough to expose this google/samsung bug:
          * https://issuetracker.google.com/issues/76112072#comment56
          */
         fun startLater(context: Context) {
             // No point in even starting the service if the user doesn't have a device bonded
+            info("Received boot complete announcement, starting mesh service in one minute")
+            val delayRequest = OneTimeWorkRequestBuilder<ServiceStarter>()
+                .setInitialDelay(1, TimeUnit.MINUTES)
+                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
+                .addTag("startLater")
+                .build()
 
-            if (RadioInterfaceService.getBondedDeviceAddress(context) != null) {
-                info("Received boot complete announcement, starting mesh service in one minute")
-                val delayRequest = OneTimeWorkRequestBuilder<ServiceStarter>()
-                    .setInitialDelay(1, TimeUnit.MINUTES)
-                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
-                    .addTag("startLater")
-                    .build()
-
-                WorkManager.getInstance(context).enqueue(delayRequest)
-            } else {
-                debug("Booted: but not starting mesh service - we are unbonded")
-            }
+            WorkManager.getInstance(context).enqueue(delayRequest)
         }
 
         val intent = Intent().apply {
@@ -1458,7 +1462,6 @@ class MeshService : Service(), Logging {
             debug("Passing through device change to radio service: $deviceAddr")
             discardNodeDB()
             radio.service.setDeviceAddress(deviceAddr)
-            startForeground() // We might need to become foreground or background at this point
         }
 
         // Note: bound methods don't get properly exception caught/logged, so do that with a wrapper
