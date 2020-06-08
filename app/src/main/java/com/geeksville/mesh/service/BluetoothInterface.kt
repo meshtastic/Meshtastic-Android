@@ -1,13 +1,10 @@
 package com.geeksville.mesh.service
 
-import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
-import android.companion.CompanionDeviceManager
 import android.content.Context
-import androidx.core.content.edit
 import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
@@ -58,18 +55,6 @@ callback was called, but before it arrives at the phone.  If the phone writes to
 When the esp32 advances fromnum, it will delay doing the notify by 100ms, in the hopes that the notify will never actally need to be sent if the phone is already pulling from fromradio.
   Note: that if the phone ever sees this number decrease, it means the esp32 has rebooted.
 
-meshMyNodeCharacteristic("ea9f3f82-8dc4-4733-9452-1f6da28892a2", BLECharacteristic::PROPERTY_READ)
-mynode - read/write this to access a MyNodeInfo protobuf
-
-meshNodeInfoCharacteristic("d31e02e0-c8ab-4d3f-9cc9-0b8466bdabe8", BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_READ),
-nodeinfo - read this to get a series of node infos (ending with a null empty record), write to this to restart the read statemachine that returns all the node infos
-
-meshRadioCharacteristic("b56786c8-839a-44a1-b98e-a1724c4a0262", BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_READ),
-radio - read/write this to access a RadioConfig protobuf
-
-meshOwnerCharacteristic("6ff1d8b6-e2de-41e3-8c0b-8fa384f64eb6", BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_READ)
-owner - read/write this to access a User protobuf
-
 Re: queue management
 Not all messages are kept in the fromradio queue (filtered based on SubPacket):
 * only the most recent Position and User messages for a particular node are kept
@@ -91,7 +76,8 @@ A variable keepAllPackets, if set to true will suppress this behavior and instea
  * Note - this class intentionally dumb.  It doesn't understand protobuf framing etc...
  * It is designed to be simple so it can be stubbed out with a simulated version as needed.
  */
-class BluetoothInterfaceService : InterfaceService() {
+class BluetoothInterface(val service: RadioInterfaceService, val address: String) : IRadioInterface,
+    Logging {
 
     companion object : Logging {
 
@@ -104,9 +90,6 @@ class BluetoothInterfaceService : InterfaceService() {
             UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
         val BTM_FROMNUM_CHARACTER =
             UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
-        
-        /// If our service is currently running, this pointer can be used to reach it (in case setBondedDeviceAddress is called)
-        private var runningService: BluetoothInterfaceService? = null
 
         /// Get our bluetooth adapter (should always succeed except on emulator
         private fun getBluetoothAdapter(context: Context): BluetoothAdapter? {
@@ -115,7 +98,21 @@ class BluetoothInterfaceService : InterfaceService() {
             return bluetoothManager.adapter
         }
 
+        /** Return true if this address is still acceptable. For BLE that means, still bonded */
+        fun addressValid(context: Context, address: String): Boolean {
+            val allPaired =
+                getBluetoothAdapter(context)?.bondedDevices.orEmpty().map { it.address }.toSet()
+
+            return if (!allPaired.contains(address)) {
+                warn("Ignoring stale bond to ${address.anonymize}")
+                false
+            } else
+                true
+        }
+
+
         /// Return the device we are configured to use, or null for none
+        /*
         @SuppressLint("NewApi")
         fun getBondedDeviceAddress(context: Context): String? =
             if (hasCompanionDeviceApi(context)) {
@@ -133,7 +130,7 @@ class BluetoothInterfaceService : InterfaceService() {
                     getBluetoothAdapter(context)?.bondedDevices.orEmpty().map { it.address }.toSet()
 
                 // If the user has unpaired our device, treat things as if we don't have one
-                val address = getPrefs(context).getString(DEVADDR_KEY, null)
+                val address = InterfaceService.getPrefs(context).getString(DEVADDR_KEY, null)
 
                 if (address != null && !allPaired.contains(address)) {
                     warn("Ignoring stale bond to ${address.anonymize}")
@@ -141,7 +138,7 @@ class BluetoothInterfaceService : InterfaceService() {
                 } else
                     address
             }
-
+*/
 
         /// Can we use the modern BLE scan API?
         fun hasCompanionDeviceApi(context: Context): Boolean = false /* ALAS - not ready for production yet
@@ -155,6 +152,21 @@ class BluetoothInterfaceService : InterfaceService() {
                 false
             } */
 
+        /** FIXME - when adding companion device support back in, use this code to set companion device from setBondedDevice
+         *         if (BluetoothInterface.hasCompanionDeviceApi(this)) {
+        // We only keep an association to one device at a time...
+        if (addr != null) {
+        val deviceManager = getSystemService(CompanionDeviceManager::class.java)
+
+        deviceManager.associations.forEach { old ->
+        if (addr != old) {
+        BluetoothInterface.debug("Forgetting old BLE association $old")
+        deviceManager.disassociate(old)
+        }
+        }
+        }
+         */
+
         /**
          * this is created in onCreate()
          * We do an ugly hack of keeping it in the singleton so we can share it for the rare software update case
@@ -167,7 +179,7 @@ class BluetoothInterfaceService : InterfaceService() {
     val device get() = safe?.gatt ?: throw RadioNotConnectedException("No GATT")
 
     /// Our service - note - it is possible to get back a null response for getService if the device services haven't yet been found
-    val service
+    val bservice
         get(): BluetoothGattService = device.getService(BTM_SERVICE_UUID)
             ?: throw RadioNotConnectedException("BLE service not found")
 
@@ -179,6 +191,23 @@ class BluetoothInterfaceService : InterfaceService() {
      */
     private var isFirstSend = true
 
+    init {
+        // Note: this call does no comms, it just creates the device object (even if the
+        // device is off/not connected)
+        val device = getBluetoothAdapter(service)?.getRemoteDevice(address)
+        if (device != null) {
+            info("Creating radio interface service.  device=${address.anonymize}")
+
+            // Note this constructor also does no comm
+            val s = SafeBluetooth(service, device)
+            safe = s
+
+            startConnect()
+        } else {
+            errormsg("Bluetooth adapter not found, assuming running on the emulator!")
+        }
+    }
+
     /// Send a packet/command out the radio link
     override fun handleSendToRadio(p: ByteArray) {
         try {
@@ -187,10 +216,6 @@ class BluetoothInterfaceService : InterfaceService() {
                 BTM_TORADIO_CHARACTER,
                 p
             ) // Do a synchronous write, so that we can then do our reads if needed
-            if (logSends) {
-                sentPacketsLog.write(p)
-                sentPacketsLog.flush()
-            }
 
             if (isFirstSend) {
                 isFirstSend = false
@@ -204,18 +229,16 @@ class BluetoothInterfaceService : InterfaceService() {
 
     /// Attempt to read from the fromRadio mailbox, if data is found broadcast it to android apps
     private fun doReadFromRadio(firstRead: Boolean) {
-        if (!isConnected)
-            warn("Abandoning fromradio read because we are not connected")
-        else {
+        safe?.let { s ->
             val fromRadio = getCharacteristic(BTM_FROMRADIO_CHARACTER)
-            safe!!.asyncReadCharacteristic(fromRadio) {
+            s.asyncReadCharacteristic(fromRadio) {
                 try {
                     val b = it.getOrThrow()
                         .value.clone() // We clone the array just in case, I'm not sure if they keep reusing the array
 
                     if (b.isNotEmpty()) {
                         debug("Received ${b.size} bytes from radio")
-                        handleFromRadio(b)
+                        service.handleFromRadio(b)
 
                         // Queue up another read, until we run out of packets
                         doReadFromRadio(firstRead)
@@ -229,55 +252,11 @@ class BluetoothInterfaceService : InterfaceService() {
                         "error during doReadFromRadio",
                         ex
                     )
-                    serviceScope.handledLaunch { retryDueToException() }
+                    service.serviceScope.handledLaunch { retryDueToException() }
                 }
             }
         }
     }
-
-
-    @SuppressLint("NewApi")
-    override fun setBondedDeviceAddress(addr: String?) {
-        // Record that this use has configured a radio
-        GeeksvilleApplication.analytics.track(
-            "mesh_bond"
-        )
-
-        // Ignore any errors that happen while closing old device
-        ignoreException {
-            Companion.info("shutting down old service")
-            setEnabled(false) // nasty, needed to force the next setEnabled call to reconnect
-        }
-
-        debug("Setting bonded device to $addr")
-        if (hasCompanionDeviceApi(this)) {
-            // We only keep an association to one device at a time...
-            if (addr != null) {
-                val deviceManager = getSystemService(CompanionDeviceManager::class.java)
-
-                deviceManager.associations.forEach { old ->
-                    if (addr != old) {
-                        Companion.debug("Forgetting old BLE association $old")
-                        deviceManager.disassociate(old)
-                    }
-                }
-            }
-        } else {
-            getPrefs(this).edit(commit = true) {
-                if (addr == null)
-                    this.remove(DEVADDR_KEY)
-                else
-                    putString(DEVADDR_KEY, addr)
-            }
-        }
-
-        // Force the service to reconnect
-        if (addr != null) {
-            info("Setting enable on the running radio service")
-            setEnabled(true)
-        }
-    }
-
 
     /**
      * Android caches old services.  But our service is still changing often, so force it to reread the service definitions every
@@ -301,7 +280,6 @@ class BluetoothInterfaceService : InterfaceService() {
             doReadFromRadio(false)
         }
     }
-
 
     /**
      * Some buggy BLE stacks can fail on initial connect, with either missing services or missing characteristics.  If that happens we
@@ -341,7 +319,7 @@ class BluetoothInterfaceService : InterfaceService() {
         safe!!.asyncDiscoverServices { discRes ->
             discRes.getOrThrow() // FIXME, instead just try to reconnect?
 
-            serviceScope.handledLaunch {
+            service.serviceScope.handledLaunch {
                 try {
                     debug("Discovered services!")
                     delay(1000) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null
@@ -353,14 +331,11 @@ class BluetoothInterfaceService : InterfaceService() {
 
                     fromNum = getCharacteristic(BTM_FROMNUM_CHARACTER)
 
-                    // We must set this to true before broadcasting connectionChanged
-                    isConnected = true
-
                     // We treat the first send by a client as special
                     isFirstSend = true
 
                     // Now tell clients they can (finally use the api)
-                    broadcastConnectionChanged(true, isPermanent = false)
+                    service.broadcastConnectionChanged(true, isPermanent = false)
 
                     // Immediately broadcast any queued packets sitting on the device
                     doReadFromRadio(true)
@@ -403,33 +378,26 @@ class BluetoothInterfaceService : InterfaceService() {
                         ex
                     )
                     shouldSetMtu = false
-                    serviceScope.handledLaunch { retryDueToException() }
+                    service.serviceScope.handledLaunch { retryDueToException() }
                 }
             }
         else
             doDiscoverServicesAndInit()
     }
 
-    /**
-     * If the user turns on bluetooth after we start, make sure to try and reconnected then
-     */
-    private val bluetoothStateReceiver = BluetoothStateReceiver { enabled ->
-        if (enabled)
-            setEnabled(true)
-    }
 
-    override fun onCreate() {
-        runningService = this
-        super.onCreate()
-        registerReceiver(bluetoothStateReceiver, bluetoothStateReceiver.intent)
-    }
+    override fun close() {
+        if (safe != null) {
+            info("Closing radio interface service")
+            val s = safe
+            safe =
+                null // We do this first, because if we throw we still want to mark that we no longer have a valid connection
 
-    override fun onDestroy() {
-        unregisterReceiver(bluetoothStateReceiver)
-        runningService = null
-        super.onDestroy()
+            s?.close()
+        } else {
+            debug("Radio was not connected, skipping disable")
+        }
     }
-
 
     /// Start a connection attempt
     private fun startConnect() {
@@ -439,57 +407,14 @@ class BluetoothInterfaceService : InterfaceService() {
         // more info
         safe!!.asyncConnect(true, // FIXME, sometimes this seems to not work or take a very long time!
             cb = ::onConnect,
-            lostConnectCb = { onDisconnect(isPermanent = false) })
-    }
-
-    /// Open or close a bluetooth connection to our device
-    override fun setEnabled(on: Boolean) {
-        super.setEnabled(on)
-        if (on) {
-            if (safe != null) {
-                info("Skipping radio enable, it is already on")
-            } else {
-                val address = getBondedDeviceAddress(this)
-                if (address == null)
-                    errormsg("No bonded mesh radio, can't start service")
-                else {
-                    // Note: this call does no comms, it just creates the device object (even if the
-                    // device is off/not connected)
-                    val device = getBluetoothAdapter(this)?.getRemoteDevice(address)
-                    if (device != null) {
-                        info("Creating radio interface service.  device=${address.anonymize}")
-
-                        // Note this constructor also does no comm
-                        val s = SafeBluetooth(this, device)
-                        safe = s
-
-                        startConnect()
-                    } else {
-                        errormsg("Bluetooth adapter not found, assuming running on the emulator!")
-                    }
-                }
-            }
-        } else {
-            if (safe != null) {
-                info("Closing radio interface service")
-                val s = safe
-                safe =
-                    null // We do this first, because if we throw we still want to mark that we no longer have a valid connection
-
-                s?.close()
-            } else {
-                debug("Radio was not connected, skipping disable")
-            }
-        }
+            lostConnectCb = { service.onDisconnect(isPermanent = false) })
     }
 
     /**
      * do a synchronous write operation
      */
     private fun doWrite(uuid: UUID, a: ByteArray) = toRemoteExceptions {
-        if (!isConnected)
-            throw RadioNotConnectedException()
-        else {
+        safe?.let { s ->
             debug("queuing ${a.size} bytes to $uuid")
 
             // Note: we generate a new characteristic each time, because we are about to
@@ -497,7 +422,7 @@ class BluetoothInterfaceService : InterfaceService() {
             val toRadio = getCharacteristic(uuid)
             toRadio.value = a
 
-            safe!!.writeCharacteristic(toRadio)
+            s.writeCharacteristic(toRadio)
             debug("write of ${a.size} bytes completed")
         }
     }
@@ -506,6 +431,6 @@ class BluetoothInterfaceService : InterfaceService() {
      * Get a chracteristic, but in a safe manner because some buggy BLE implementations might return null
      */
     private fun getCharacteristic(uuid: UUID) =
-        service.getCharacteristic(uuid) ?: throw BLEException("Can't get characteristic $uuid")
+        bservice.getCharacteristic(uuid) ?: throw BLEException("Can't get characteristic $uuid")
 
 }

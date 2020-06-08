@@ -167,7 +167,7 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
 
-    private val btStateReceiver = BluetoothStateReceiver { enabled ->
+    private val btStateReceiver = BluetoothStateReceiver { _ ->
         updateBluetoothEnabled()
     }
 
@@ -638,7 +638,7 @@ class MainActivity : AppCompatActivity(), Logging,
                     MeshService.ACTION_MESSAGE_STATUS -> {
                         debug("received message status from service")
                         val id = intent.getIntExtra(EXTRA_PACKET_ID, 0)
-                        val status = intent.getParcelableExtra<MessageStatus>(EXTRA_STATUS)
+                        val status = intent.getParcelableExtra<MessageStatus>(EXTRA_STATUS)!!
 
                         model.messagesState.updateStatus(id, status)
                     }
@@ -733,8 +733,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
         bindMeshService()
 
-        val bonded =
-            BluetoothInterfaceService.getBondedDeviceAddress(this) != null
+        val bonded = RadioInterfaceService.getBondedDeviceAddress(this) != null
         if (!bonded)
             pager.currentItem = 5
     }

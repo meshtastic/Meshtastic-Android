@@ -1,7 +1,7 @@
 package com.geeksville.mesh
 
 import android.content.Context
-import com.geeksville.mesh.service.InterfaceService
+import com.geeksville.mesh.service.RadioInterfaceService
 
 class SimRadio(private val context: Context) {
 
@@ -45,7 +45,7 @@ class SimRadio(private val context: Context) {
                 }.build()
             }.build()
 
-            InterfaceService.broadcastReceivedFromRadio(context, fromRadio.toByteArray())
+            RadioInterfaceService.broadcastReceivedFromRadio(context, fromRadio.toByteArray())
         }
     }
 }

@@ -29,8 +29,9 @@ import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.service.BluetoothInterfaceService
+import com.geeksville.mesh.service.BluetoothInterface
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.service.RadioInterfaceService
 import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -98,11 +99,11 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         debug("BTScanModel created")
     }
 
-    data class BTScanEntry(val name: String, val macAddress: String, val bonded: Boolean) {
+    data class BTScanEntry(val name: String, val address: String, val bonded: Boolean) {
         // val isSelected get() = macAddress == selectedMacAddr
 
         override fun toString(): String {
-            return "BTScanEntry(name=${name.anonymize}, addr=${macAddress.anonymize})"
+            return "BTScanEntry(name=${name.anonymize}, addr=${address.anonymize})"
         }
     }
 
@@ -115,11 +116,21 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     val bluetoothAdapter =
         (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?)?.adapter
 
-    var selectedMacAddr: String? = null
+    var selectedAddress: String? = null
     val errorText = object : MutableLiveData<String?>(null) {}
 
 
     private var scanner: BluetoothLeScanner? = null
+
+    /// If this address is for a bluetooth device, return the macaddr portion, else null
+    val selectedBluetooth: String?
+        get() = selectedAddress?.let { a ->
+            if (a[0] == 'x')
+                a.substring(1)
+            else
+                null
+        }
+
 
     private val scanCallback = object : ScanCallback() {
         override fun onScanFailed(errorCode: Int) {
@@ -142,13 +153,13 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                 val entry = BTScanEntry(
                     result.device.name
                         ?: "unnamed-$addr", // autobug: some devices might not have a name, if someone is running really old device code?
-                    addr,
+                    "x$addr",
                     isBonded
                 )
                 debug("onScanResult ${entry}")
 
                 // If nothing was selected, by default select the first thing we see
-                if (selectedMacAddr == null && entry.bonded)
+                if (selectedAddress == null && entry.bonded)
                     changeScanSelection(
                         GeeksvilleApplication.currentActivity as MainActivity,
                         addr
@@ -176,23 +187,23 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
      */
     fun startScan(): Boolean {
         debug("BTScan component active")
-        selectedMacAddr = BluetoothInterfaceService.getBondedDeviceAddress(context)
+        selectedAddress = RadioInterfaceService.getBondedDeviceAddress(context)
 
         return if (bluetoothAdapter == null) {
             warn("No bluetooth adapter.  Running under emulation?")
 
             val testnodes = listOf(
-                BTScanEntry("Meshtastic_ab12", "xx", false),
-                BTScanEntry("Meshtastic_32ac", "xb", true)
+                BTScanEntry("Meshtastic_ab12", "xaa", false),
+                BTScanEntry("Meshtastic_32ac", "xbb", true)
             )
 
-            devices.value = (testnodes.map { it.macAddress to it }).toMap().toMutableMap()
+            devices.value = (testnodes.map { it.address to it }).toMap().toMutableMap()
 
             // If nothing was selected, by default select the first thing we see
-            if (selectedMacAddr == null)
+            if (selectedAddress == null)
                 changeScanSelection(
                     GeeksvilleApplication.currentActivity as MainActivity,
-                    testnodes.first().macAddress
+                    testnodes.first().address
                 )
 
             true
@@ -212,7 +223,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     // filter and only accept devices that have a sw update service
                     val filter =
                         ScanFilter.Builder()
-                            .setServiceUuid(ParcelUuid(BluetoothInterfaceService.BTM_SERVICE_UUID))
+                            .setServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID))
                             .build()
 
                     val settings =
@@ -254,12 +265,12 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     fun onSelected(activity: MainActivity, it: BTScanEntry): Boolean {
         // If the device is paired, let user select it, otherwise start the pairing flow
         if (it.bonded) {
-            changeScanSelection(activity, it.macAddress)
+            changeScanSelection(activity, it.address)
             return true
         } else {
             // We ignore missing BT adapters, because it lets us run on the emulator
             bluetoothAdapter
-                ?.getRemoteDevice(it.macAddress)?.let { device ->
+                ?.getRemoteDevice(it.address)?.let { device ->
                     requestBonding(activity, device) { state ->
                         if (state == BOND_BONDED) {
                             errorText.value = activity.getString(R.string.pairing_completed)
@@ -283,7 +294,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     /// Change to a new macaddr selection, updating GUI and radio
     fun changeScanSelection(context: MainActivity, newAddr: String) {
         info("Changing BT device to ${newAddr.anonymize}")
-        selectedMacAddr = newAddr
+        selectedAddress = newAddr
         changeDeviceSelection(context, newAddr)
     }
 }
@@ -301,7 +312,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
 
     private val hasCompanionDeviceApi: Boolean by lazy {
-        BluetoothInterfaceService.hasCompanionDeviceApi(requireContext())
+        BluetoothInterface.hasCompanionDeviceApi(requireContext())
     }
 
     private val deviceManager: CompanionDeviceManager by lazy {
@@ -431,7 +442,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         b.text = device.name
         b.id = View.generateViewId()
         b.isEnabled = enabled
-        b.isChecked = device.macAddress == scanModel.selectedMacAddr
+        b.isChecked = device.address == scanModel.selectedAddress
         deviceRadioGroup.addView(b)
 
         // Once we have at least one device, don't show the "looking for" animation - it makes uers think
@@ -486,13 +497,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 var hasShownOurDevice = false
                 devices.values.forEach { device ->
                     hasShownOurDevice =
-                        hasShownOurDevice || device.macAddress == scanModel.selectedMacAddr
+                        hasShownOurDevice || device.address == scanModel.selectedAddress
                     addDeviceButton(device, true)
                 }
 
                 // The device the user is already paired with is offline currently, still show it
                 // it in the list, but greyed out
-                val selectedAddr = scanModel.selectedMacAddr
+                val selectedAddr = scanModel.selectedBluetooth
                 if (!hasShownOurDevice && selectedAddr != null) {
                     val bDevice = scanModel.bluetoothAdapter!!.getRemoteDevice(selectedAddr)
                     if (bDevice.name != null) { // ignore nodes that node have a name, that means we've lost them since they appeared
@@ -507,7 +518,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
 
             val hasBonded =
-                BluetoothInterfaceService.getBondedDeviceAddress(requireContext()) != null
+                RadioInterfaceService.getBondedDeviceAddress(requireContext()) != null
 
             // get rid of the warning text once at least one device is paired
             warningNotPaired.visibility = if (hasBonded) View.GONE else View.VISIBLE
@@ -571,7 +582,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         deviceRadioGroup.visibility = View.GONE
         changeRadioButton.visibility = View.VISIBLE
 
-        val curRadio = BluetoothInterfaceService.getBondedDeviceAddress(requireContext())
+        val curRadio = RadioInterfaceService.getBondedDeviceAddress(requireContext())
 
         if (curRadio != null) {
             scanStatusText.text = getString(R.string.current_pair).format(curRadio)

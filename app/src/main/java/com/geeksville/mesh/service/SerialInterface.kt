@@ -2,25 +2,46 @@ package com.geeksville.mesh.service
 
 import android.content.Context
 import android.hardware.usb.UsbManager
+import com.geeksville.android.Logging
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
 
 
-class SerialInterfaceService : InterfaceService() {
+class SerialInterface(private val service: RadioInterfaceService, val address: String) : Logging,
+    IRadioInterface {
     companion object {
-        private val START1 = 0x94.toByte()
-        private val START2 = 0xc3.toByte()
-        private val MAX_TO_FROM_RADIO_SIZE = 512
+        private const val START1 = 0x94.toByte()
+        private const val START2 = 0xc3.toByte()
+        private const val MAX_TO_FROM_RADIO_SIZE = 512
     }
 
     private var uart: UsbSerialPort? = null
 
-
     private val manager: UsbManager by lazy {
-        getSystemService(Context.USB_SERVICE) as UsbManager
+        service.getSystemService(Context.USB_SERVICE) as UsbManager
     }
 
+    init {
+        val drivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager)
+
+        // Open a connection to the first available driver.
+        // Open a connection to the first available driver.
+        val driver: UsbSerialDriver = drivers[0]
+        val connection = manager.openDevice(driver.device)
+        if (connection == null) {
+            // FIXME add UsbManager.requestPermission(driver.getDevice(), ..) handling to activity
+            TODO()
+        } else {
+            val port = driver.ports[0] // Most devices have just one port (port 0)
+
+            port.open(connection)
+            port.setParameters(921600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
+            uart = port
+
+            // FIXME, start reading thread
+        }
+    }
 
     override fun handleSendToRadio(p: ByteArray) {
         uart?.apply {
@@ -78,7 +99,7 @@ class SerialInterfaceService : InterfaceService() {
                             if (packetLen <= MAX_TO_FROM_RADIO_SIZE) {
                                 val buf = ByteArray(packetLen)
                                 read(buf, 0)
-                                handleFromRadio(buf)
+                                service.handleFromRadio(buf)
                             }
                             nextPtr = 0 // Start parsing the next packet
                         }
@@ -91,33 +112,8 @@ class SerialInterfaceService : InterfaceService() {
         }
     }
 
-
-    override fun onCreate() {
-        super.onCreate()
-
-        val drivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager)
-
-        // Open a connection to the first available driver.
-        // Open a connection to the first available driver.
-        val driver: UsbSerialDriver = drivers[0]
-        val connection = manager.openDevice(driver.device)
-        if (connection == null) {
-            // FIXME add UsbManager.requestPermission(driver.getDevice(), ..) handling to activity
-            TODO()
-        } else {
-            val port = driver.ports[0] // Most devices have just one port (port 0)
-
-            port.open(connection)
-            port.setParameters(921600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
-            uart = port
-
-            // FIXME, start reading thread
-        }
-    }
-
-    override fun onDestroy() {
+    override fun close() {
         uart?.close()
         uart = null
-        super.onDestroy()
     }
 }

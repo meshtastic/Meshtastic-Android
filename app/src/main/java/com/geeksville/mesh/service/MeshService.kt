@@ -51,6 +51,9 @@ class MeshService : Service(), Logging {
 
     companion object : Logging {
 
+        /// special broadcast address
+        const val NODENUM_BROADCAST = (0xffffffff).toInt()
+
         /// Intents broadcast by MeshService
         const val ACTION_RECEIVED_DATA = "$prefix.RECEIVED_DATA"
         const val ACTION_NODE_CHANGE = "$prefix.NODE_CHANGE"
@@ -445,12 +448,12 @@ class MeshService : Service(), Logging {
 
             // we listen for messages from the radio receiver _before_ trying to create the service
             val filter = IntentFilter()
-            filter.addAction(InterfaceService.RECEIVE_FROMRADIO_ACTION)
-            filter.addAction(InterfaceService.RADIO_CONNECTED_ACTION)
+            filter.addAction(RadioInterfaceService.RECEIVE_FROMRADIO_ACTION)
+            filter.addAction(RadioInterfaceService.RADIO_CONNECTED_ACTION)
             registerReceiver(radioInterfaceReceiver, filter)
 
             // We in turn need to use the radiointerface service
-            val intent = Intent(this@MeshService, BluetoothInterfaceService::class.java)
+            val intent = Intent(this@MeshService, RadioInterfaceService::class.java)
             // intent.action = IMeshService::class.java.name
             radio.connect(this@MeshService, intent, Context.BIND_AUTO_CREATE)
 
@@ -478,9 +481,6 @@ class MeshService : Service(), Logging {
     ///
     /// BEGINNING OF MODEL - FIXME, move elsewhere
     ///
-
-    /// special broadcast address
-    val NODENUM_BROADCAST = 255
 
     /// Our saved preferences as stored on disk
     @Serializable
@@ -1086,7 +1086,7 @@ class MeshService : Service(), Logging {
             serviceScope.handledLaunch {
                 debug("Received broadcast ${intent.action}")
                 when (intent.action) {
-                    InterfaceService.RADIO_CONNECTED_ACTION -> {
+                    RadioInterfaceService.RADIO_CONNECTED_ACTION -> {
                         try {
                             val connected = intent.getBooleanExtra(EXTRA_CONNECTED, false)
                             val permanent = intent.getBooleanExtra(EXTRA_PERMANENT, false)
@@ -1103,7 +1103,7 @@ class MeshService : Service(), Logging {
                         }
                     }
 
-                    InterfaceService.RECEIVE_FROMRADIO_ACTION -> {
+                    RadioInterfaceService.RECEIVE_FROMRADIO_ACTION -> {
                         val proto =
                             MeshProtos.FromRadio.parseFrom(
                                 intent.getByteArrayExtra(
@@ -1403,7 +1403,7 @@ class MeshService : Service(), Logging {
         // Run in the IO thread
         val filename = firmwareUpdateFilename ?: throw Exception("No update filename")
         val safe =
-            BluetoothInterfaceService.safe
+            BluetoothInterface.safe
                 ?: throw Exception("Can't update - no bluetooth connected")
 
         serviceScope.handledLaunch {

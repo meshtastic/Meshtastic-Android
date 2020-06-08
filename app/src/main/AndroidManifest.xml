@@ -100,12 +100,12 @@
 
         <!-- This is a private service which just does direct communication to the radio -->
         <service
-            android:name="com.geeksville.mesh.service.BluetoothInterfaceService"
+            android:name="com.geeksville.mesh.service.RadioInterfaceService"
             android:enabled="true"
             android:exported="false" />
 
         <!-- This is a private service which just does direct communication to the radio -->
-        <service
+        <!-- <service
             android:name="com.geeksville.mesh.service.SerialInterfaceService"
             android:enabled="true"
             android:exported="false">
@@ -115,7 +115,7 @@
             <meta-data
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
-        </service>
+        </service> -->
 
         <activity
             android:name="com.geeksville.mesh.MainActivity"
