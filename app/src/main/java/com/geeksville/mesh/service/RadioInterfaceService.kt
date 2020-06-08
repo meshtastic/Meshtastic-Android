@@ -212,7 +212,7 @@ class RadioInterfaceService : Service(), Logging {
             receivedPacketsLog.close()
 
         // Don't broadcast disconnects if we were just using the nop device
-        if (radioIf != nopIf)
+        if (r != nopIf)
             onDisconnect(isPermanent = true) // Tell any clients we are now offline
     }
 
