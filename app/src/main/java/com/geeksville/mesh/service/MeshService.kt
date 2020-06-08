@@ -443,9 +443,11 @@ class MeshService : Service(), Logging {
         val wantForeground = RadioInterfaceService.getBondedDeviceAddress(this) != null
 
         info("Requesting foreground service=$wantForeground")
-        if (wantForeground)
-            startForeground(notifyId, createNotification())
-        else
+
+        // We always start foreground because that's how our service is always started (if we didn't then android would kill us)
+        // but if we don't really need forground we immediately stop it.
+        startForeground(notifyId, createNotification())
+        if (!wantForeground)
             stopForeground(true)
     }
 

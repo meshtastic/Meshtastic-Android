@@ -100,11 +100,18 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     }
 
     data class DeviceListEntry(val name: String, val address: String, val bonded: Boolean) {
-        // val isSelected get() = macAddress == selectedMacAddr
+        val bluetoothAddress
+            get() =
+                if (address[0] == 'x')
+                    address.substring(1)
+                else
+                    null
+
 
         override fun toString(): String {
             return "DeviceListEntry(name=${name.anonymize}, addr=${address.anonymize})"
         }
+
     }
 
     override fun onCleared() {
@@ -281,7 +288,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         } else {
             // We ignore missing BT adapters, because it lets us run on the emulator
             bluetoothAdapter
-                ?.getRemoteDevice(it.address)?.let { device ->
+                ?.getRemoteDevice(it.bluetoothAddress)?.let { device ->
                     requestBonding(activity, device) { state ->
                         if (state == BOND_BONDED) {
                             errorText.value = activity.getString(R.string.pairing_completed)
