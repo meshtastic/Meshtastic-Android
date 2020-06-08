@@ -2,6 +2,7 @@ package com.geeksville.mesh.ui
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.app.PendingIntent
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothDevice.BOND_BONDED
 import android.bluetooth.BluetoothDevice.BOND_BONDING
@@ -11,6 +12,8 @@ import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
 import android.content.*
+import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.os.ParcelUuid
 import android.view.LayoutInflater
@@ -32,6 +35,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.BluetoothInterface
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.RadioInterfaceService
+import com.geeksville.mesh.service.SerialInterface
 import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -105,6 +109,9 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         override fun toString(): String {
             return "DeviceListEntry(name=${name.anonymize}, addr=${address.anonymize})"
         }
+
+        val isBluetooth: Boolean get() = name[0] == 'x'
+        val isSerial: Boolean get() = name[0] == 's'
     }
 
     override fun onCleared() {
@@ -116,9 +123,10 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     val bluetoothAdapter =
         (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?)?.adapter
 
+    private val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
+
     var selectedAddress: String? = null
     val errorText = object : MutableLiveData<String?>(null) {}
-
 
     private var scanner: BluetoothLeScanner? = null
 
@@ -231,6 +239,17 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     // Include a placeholder for "None"
                     addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
 
+                    SerialInterface.findDrivers(context).forEach { d ->
+                        val hasPerms = usbManager.hasPermission(d.device)
+                        addDevice(
+                            DeviceListEntry(
+                                d.device.deviceName,
+                                "s${d.device.deviceName}",
+                                hasPerms
+                            )
+                        )
+                    }
+
                     // filter and only accept devices that have a sw update service
                     val filter =
                         ScanFilter.Builder()
@@ -279,24 +298,69 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
             changeScanSelection(activity, it.address)
             return true
         } else {
-            // We ignore missing BT adapters, because it lets us run on the emulator
-            bluetoothAdapter
-                ?.getRemoteDevice(it.address)?.let { device ->
-                    requestBonding(activity, device) { state ->
-                        if (state == BOND_BONDED) {
-                            errorText.value = activity.getString(R.string.pairing_completed)
-                            changeScanSelection(
-                                activity,
-                                it.address
-                            )
-                        } else {
-                            errorText.value = activity.getString(R.string.pairing_failed_try_again)
-                        }
+            // Handle requestng USB or bluetooth permissions for the device
 
-                        // Force the GUI to redraw
-                        devices.value = devices.value
+            if (it.isBluetooth) {
+                // Request bonding for bluetooth
+                // We ignore missing BT adapters, because it lets us run on the emulator
+                bluetoothAdapter
+                    ?.getRemoteDevice(it.address)?.let { device ->
+                        requestBonding(activity, device) { state ->
+                            if (state == BOND_BONDED) {
+                                errorText.value = activity.getString(R.string.pairing_completed)
+                                changeScanSelection(
+                                    activity,
+                                    it.address
+                                )
+                            } else {
+                                errorText.value =
+                                    activity.getString(R.string.pairing_failed_try_again)
+                            }
+
+                            // Force the GUI to redraw
+                            devices.value = devices.value
+                        }
+                    }
+            }
+
+            if (it.isSerial) {
+                val ACTION_USB_PERMISSION = "com.geeksville.mesh.USB_PERMISSION"
+
+                val usbReceiver = object : BroadcastReceiver() {
+
+                    override fun onReceive(context: Context, intent: Intent) {
+                        if (ACTION_USB_PERMISSION == intent.action) {
+
+                            val device: UsbDevice? =
+                                intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+
+                            if (intent.getBooleanExtra(
+                                    UsbManager.EXTRA_PERMISSION_GRANTED,
+                                    false
+                                )
+                            ) {
+                                device?.apply {
+                                    info("User approved USB access")
+                                    changeScanSelection(activity, it.address)
+
+                                    // Force the GUI to redraw
+                                    devices.value = devices.value
+                                }
+                            } else {
+                                errormsg("USB permission denied for device $device")
+                            }
+                        }
+                        // We don't need to stay registered
+                        activity.unregisterReceiver(this)
                     }
                 }
+
+                val permissionIntent =
+                    PendingIntent.getBroadcast(activity, 0, Intent(ACTION_USB_PERMISSION), 0)
+                val filter = IntentFilter(ACTION_USB_PERMISSION)
+                activity.registerReceiver(usbReceiver, filter)
+                usbManager.requestPermission(device, permissionIntent)
+            }
 
             return false
         }

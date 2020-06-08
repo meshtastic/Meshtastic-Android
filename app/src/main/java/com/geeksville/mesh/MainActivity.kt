@@ -13,6 +13,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -426,6 +428,11 @@ class MainActivity : AppCompatActivity(), Logging,
                 perhapsChangeChannel()
 
             // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
+        }
+
+        if (appLinkAction == UsbManager.ACTION_USB_ACCESSORY_ATTACHED) {
+            val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
+            errormsg("Handle USB device attached! $device")
         }
     }
 

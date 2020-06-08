@@ -104,19 +104,6 @@
             android:enabled="true"
             android:exported="false" />
 
-        <!-- This is a private service which just does direct communication to the radio -->
-        <!-- <service
-            android:name="com.geeksville.mesh.service.SerialInterfaceService"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
-            </intent-filter>
-            <meta-data
-                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
-                android:resource="@xml/device_filter" />
-        </service> -->
-
         <activity
             android:name="com.geeksville.mesh.MainActivity"
             android:label="@string/app_name"
@@ -137,6 +124,8 @@
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
@@ -145,6 +134,11 @@
                     android:host="www.meshtastic.org"
                     android:pathPrefix="/c/" />
             </intent-filter>
+
+            <!-- The USB devices we want to be informed about -->
+            <meta-data
+                android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
+                android:resource="@xml/device_filter" />
         </activity>
 
         <receiver android:name="com.geeksville.mesh.service.BootCompleteReceiver">

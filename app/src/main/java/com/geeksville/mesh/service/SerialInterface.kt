@@ -6,44 +6,58 @@ import com.geeksville.android.Logging
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
+import kotlin.concurrent.thread
 
 
 class SerialInterface(private val service: RadioInterfaceService, val address: String) : Logging,
     IRadioInterface {
-    companion object {
+    companion object : Logging {
         private const val START1 = 0x94.toByte()
         private const val START2 = 0xc3.toByte()
         private const val MAX_TO_FROM_RADIO_SIZE = 512
+
+        fun findDrivers(context: Context): List<UsbSerialDriver> {
+            val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
+            val drivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager)
+            val devices = drivers.map { it.device }
+            devices.forEach { d ->
+                debug("Found serial port $d")
+            }
+            return drivers
+        }
     }
 
-    private var uart: UsbSerialPort? = null
-
-    private val manager: UsbManager by lazy {
-        service.getSystemService(Context.USB_SERVICE) as UsbManager
-    }
+    private var uart: UsbSerialPort?
+    private lateinit var reader: Thread
 
     init {
-        val drivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager)
+        val manager = service.getSystemService(Context.USB_SERVICE) as UsbManager
+        val drivers = findDrivers(this)
 
         // Open a connection to the first available driver.
-        // Open a connection to the first available driver.
-        val driver: UsbSerialDriver = drivers[0]
-        val connection = manager.openDevice(driver.device)
+        val device = drivers[0].device
+
+        info("Opening $device")
+        val connection = manager.openDevice(device)
         if (connection == null) {
-            // FIXME add UsbManager.requestPermission(driver.getDevice(), ..) handling to activity
-            TODO()
+            // FIXME add UsbManager.requestPermission(device, ..) handling to activity
+            TODO("Need permissions for port")
         } else {
-            val port = driver.ports[0] // Most devices have just one port (port 0)
+            val port = drivers[0].ports[0] // Most devices have just one port (port 0)
 
             port.open(connection)
             port.setParameters(921600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
             uart = port
 
+            debug("Starting serial reader thread")
             // FIXME, start reading thread
+            reader =
+                thread(start = true, isDaemon = true, name = "serial reader", block = ::readerLoop)
         }
     }
 
     override fun handleSendToRadio(p: ByteArray) {
+        // This method is called from a continuation and it might show up late, so check for uart being null
         uart?.apply {
             val header = ByteArray(4)
             header[0] = START1
@@ -57,7 +71,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
 
     /** Print device serial debug output somewhere */
     private fun debugOut(c: Byte) {
-
+        debug("Got c: ${c.toChar()}")
     }
 
     private fun readerLoop() {
@@ -71,7 +85,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
             var msb = 0
             var lsb = 0
 
-            while (true) { // FIXME wait for someone to ask us to exit, and catch continuation exception
+            while (uart != null) { // we run until our port gets closed
                 uart?.apply {
                     read(scratch, 0)
                     val c = scratch[0]
@@ -113,7 +127,8 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
     }
 
     override fun close() {
-        uart?.close()
+        debug("Closing serial port")
+        uart?.close() // This will cause the reader thread to exit
         uart = null
     }
 }
