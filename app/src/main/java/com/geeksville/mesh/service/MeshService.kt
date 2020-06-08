@@ -687,11 +687,15 @@ class MeshService : Service(), Logging {
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
     private fun newMeshPacketTo(idNum: Int) = MeshPacket.newBuilder().apply {
+        val useShortAddresses = (myNodeInfo?.nodeNumBits ?: 8) != 32
+
         if (myNodeInfo == null)
             throw RadioNotConnectedException()
 
         from = myNodeNum
-        to = idNum
+
+        // We might need to change broadcast addresses to work with old device loads
+        to = if (useShortAddresses && idNum == NODENUM_BROADCAST) 255 else idNum
     }
 
     /**
