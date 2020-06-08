@@ -340,9 +340,6 @@ class MeshService : Service(), Logging {
         })
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return binder
-    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(): String {
@@ -439,14 +436,19 @@ class MeshService : Service(), Logging {
      * tell android not to kill us
      */
     private fun startForeground() {
-        startForeground(notifyId, createNotification())
+        val wantForeground = RadioInterfaceService.getBondedDeviceAddress(this) != null
+
+        info("Requesting foreground service=$wantForeground")
+        if (wantForeground)
+            startForeground(notifyId, createNotification())
+        else
+            stopForeground(true)
     }
 
     override fun onCreate() {
         super.onCreate()
 
         info("Creating mesh service")
-        startForeground()
 
         // Switch to the IO thread
         serviceScope.handledLaunch {
@@ -467,6 +469,23 @@ class MeshService : Service(), Logging {
         }
     }
 
+    /**
+     * If someone binds to us, this will be called after on create
+     */
+    override fun onBind(intent: Intent?): IBinder? {
+        startForeground()
+
+        return binder
+    }
+
+    /**
+     * If someone starts us (or restarts us) this will be called after onCreate)
+     */
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        startForeground()
+
+        return super.onStartCommand(intent, flags, startId)
+    }
 
     override fun onDestroy() {
         info("Destroying mesh service")
@@ -1439,6 +1458,7 @@ class MeshService : Service(), Logging {
             debug("Passing through device change to radio service: $deviceAddr")
             discardNodeDB()
             radio.service.setDeviceAddress(deviceAddr)
+            startForeground() // We might need to become foreground or background at this point
         }
 
         // Note: bound methods don't get properly exception caught/logged, so do that with a wrapper
