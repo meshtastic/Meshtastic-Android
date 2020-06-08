@@ -61,4 +61,5 @@
     <string name="update_to">Update to %s</string>
     <string name="app_too_old">Application too old</string>
     <string name="must_update">You must update this application on the Google Play store (or Github). It is too old to talk to this radio.</string>
+    <string name="none">None</string>
 </resources>

@@ -105,6 +105,10 @@ class RadioInterfaceService : Service(), Logging {
     private val serviceJob = Job()
     val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
 
+    private val nopIf = NopInterface()
+    private var radioIf: IRadioInterface = nopIf
+
+
     /**
      * If the user turns on bluetooth after we start, make sure to try and reconnected then
      */
@@ -123,9 +127,7 @@ class RadioInterfaceService : Service(), Logging {
 
     /// Send a packet/command out the radio link, this routine can block if it needs to
     private fun handleSendToRadio(p: ByteArray) {
-        radioIf?.let { r ->
-            r.handleSendToRadio(p)
-        }
+        radioIf.handleSendToRadio(p)
     }
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
@@ -166,11 +168,9 @@ class RadioInterfaceService : Service(), Logging {
     }
 
 
-    private var radioIf: IRadioInterface? = null
-
     /** Start our configured interface (if it isn't already running) */
     private fun startInterface() {
-        if (radioIf != null)
+        if (radioIf != nopIf)
             warn("Can't start interface - $radioIf is already running")
         else {
             val address = getBondedDeviceAddress(this)
@@ -189,6 +189,7 @@ class RadioInterfaceService : Service(), Logging {
                 radioIf = when (c) {
                     'x' -> BluetoothInterface(this, rest)
                     's' -> SerialInterface(this, rest)
+                    'n' -> nopIf
                     else -> TODO("Unexpected radio interface type")
                 }
             }
@@ -197,23 +198,24 @@ class RadioInterfaceService : Service(), Logging {
 
 
     private fun stopInterface() {
-        info("stopping interface $radioIf")
-        radioIf?.let { r ->
-            radioIf = null
-            r.close()
+        val r = radioIf
+        info("stopping interface $r")
+        radioIf = nopIf
+        r.close()
 
-            if (logSends)
-                sentPacketsLog.close()
-            if (logReceives)
-                receivedPacketsLog.close()
+        if (logSends)
+            sentPacketsLog.close()
+        if (logReceives)
+            receivedPacketsLog.close()
 
+        // Don't broadcast disconnects if we were just using the nop device
+        if (radioIf != nopIf)
             onDisconnect(isPermanent = true) // Tell any clients we are now offline
-        }
     }
 
 
     @SuppressLint("NewApi")
-    fun setBondedDeviceAddress(addr: String?) {
+    fun setBondedDeviceAddress(addressIn: String?) {
         // Record that this use has configured a radio
         GeeksvilleApplication.analytics.track(
             "mesh_bond"
@@ -224,15 +226,18 @@ class RadioInterfaceService : Service(), Logging {
             stopInterface()
         }
 
-        debug("Setting bonded device to $addr")
+        // The device address "n" can be used to mean none
+        val address = if ("n" == addressIn) null else addressIn
+
+        debug("Setting bonded device to $address")
 
         getPrefs(this).edit(commit = true) {
             this.remove(DEVADDR_KEY_OLD) // remove any old version of the key
 
-            if (addr == null)
+            if (address == null)
                 this.remove(DEVADDR_KEY)
             else
-                putString(DEVADDR_KEY, addr)
+                putString(DEVADDR_KEY, address)
         }
 
         // Force the service to reconnect
