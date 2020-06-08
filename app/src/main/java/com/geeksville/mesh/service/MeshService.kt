@@ -86,14 +86,20 @@ class MeshService : Service(), Logging {
          * https://issuetracker.google.com/issues/76112072#comment56
          */
         fun startLater(context: Context) {
-            info("Received boot complete announcement, starting mesh service in one minute")
-            val delayRequest = OneTimeWorkRequestBuilder<ServiceStarter>()
-                .setInitialDelay(1, TimeUnit.MINUTES)
-                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
-                .addTag("startLater")
-                .build()
+            // No point in even starting the service if the user doesn't have a device bonded
 
-            WorkManager.getInstance(context).enqueue(delayRequest)
+            if (RadioInterfaceService.getBondedDeviceAddress(context) != null) {
+                info("Received boot complete announcement, starting mesh service in one minute")
+                val delayRequest = OneTimeWorkRequestBuilder<ServiceStarter>()
+                    .setInitialDelay(1, TimeUnit.MINUTES)
+                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
+                    .addTag("startLater")
+                    .build()
+
+                WorkManager.getInstance(context).enqueue(delayRequest)
+            } else {
+                debug("Booted: but not starting mesh service - we are unbonded")
+            }
         }
 
         val intent = Intent().apply {
