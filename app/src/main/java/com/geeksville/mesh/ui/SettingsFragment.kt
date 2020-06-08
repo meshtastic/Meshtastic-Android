@@ -169,9 +169,11 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                 debug("onScanResult ${entry}")
 
                 // If nothing was selected, by default select the first valid thing we see
-                if (selectedAddress == null && entry.bonded)
+                val activity =
+                    GeeksvilleApplication.currentActivity as MainActivity? // Can be null if app is shutting down
+                if (selectedAddress == null && entry.bonded && activity != null)
                     changeScanSelection(
-                        GeeksvilleApplication.currentActivity as MainActivity,
+                        activity,
                         fullAddr
                     )
                 addDevice(entry) // Add/replace entry
