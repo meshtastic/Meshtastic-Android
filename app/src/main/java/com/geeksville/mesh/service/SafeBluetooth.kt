@@ -214,7 +214,10 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                                 debug("queuing a reconnection callback")
                                 assert(currentWork == null)
 
-                                // note - we don't need an init fn (because that would normally redo the connectGatt call - which we don't need
+                                if (!currentConnectIsAuto) // we must have been running during that 1-time manual connect, switch to auto-mode from now on
+                                    lowLevelConnect(true)
+
+                                // note - we don't need an init fn (because that would normally redo the connectGatt call - which we don't need)
                                 queueWork("reconnect", CallbackContinuation(cb)) { -> true }
                             } else {
                                 debug("No connectionCallback registered")
@@ -465,7 +468,13 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     // Is the gatt trying to repeatedly connect as needed?
     private var autoConnect = false
 
+    /// True if the current active connection is auto (possible for this to be false but autoConnect to be true
+    /// if we are in the first non-automated lowLevel connect.
+    private var currentConnectIsAuto = false
+
     private fun lowLevelConnect(autoNow: Boolean): BluetoothGatt? {
+        currentConnectIsAuto = autoNow
+
         val g = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             device.connectGatt(
                 context,
