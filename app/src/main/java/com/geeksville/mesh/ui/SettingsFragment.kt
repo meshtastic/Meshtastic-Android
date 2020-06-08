@@ -104,12 +104,18 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     }
 
     data class DeviceListEntry(val name: String, val address: String, val bonded: Boolean) {
-        // val isSelected get() = macAddress == selectedMacAddr
+        val bluetoothAddress
+            get() =
+                if (address[0] == 'x')
+                    address.substring(1)
+                else
+                    null
+
 
         override fun toString(): String {
             return "DeviceListEntry(name=${name.anonymize}, addr=${address.anonymize})"
         }
-
+        
         val isBluetooth: Boolean get() = name[0] == 'x'
         val isSerial: Boolean get() = name[0] == 's'
     }
@@ -170,9 +176,11 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                 debug("onScanResult ${entry}")
 
                 // If nothing was selected, by default select the first valid thing we see
-                if (selectedAddress == null && entry.bonded)
+                val activity =
+                    GeeksvilleApplication.currentActivity as MainActivity? // Can be null if app is shutting down
+                if (selectedAddress == null && entry.bonded && activity != null)
                     changeScanSelection(
-                        GeeksvilleApplication.currentActivity as MainActivity,
+                        activity,
                         fullAddr
                     )
                 addDevice(entry) // Add/replace entry
@@ -304,7 +312,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                 // Request bonding for bluetooth
                 // We ignore missing BT adapters, because it lets us run on the emulator
                 bluetoothAdapter
-                    ?.getRemoteDevice(it.address)?.let { device ->
+                    ?.getRemoteDevice(it.bluetoothAddress)?.let { device ->
                         requestBonding(activity, device) { state ->
                             if (state == BOND_BONDED) {
                                 errorText.value = activity.getString(R.string.pairing_completed)
