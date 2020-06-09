@@ -173,7 +173,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
             val isBonded = result.device.bondState == BluetoothDevice.BOND_BONDED
             val oldDevs = devices.value!!
             val oldEntry = oldDevs[fullAddr]
-            if (oldEntry == null || oldEntry.bonded != isBonded) {
+            if (oldEntry == null || oldEntry.bonded != isBonded) { // Don't spam the GUI with endless updates for non changing nodes
 
                 val skipBogus = try {
                     // Note Soyes XS has a buggy BLE scan implementation and returns devices we didn't ask for.  So we check to see if the
@@ -407,6 +407,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         info("Changing device to ${newAddr.anonymize}")
         selectedAddress = newAddr
         changeDeviceSelection(context, newAddr)
+        devices.value = devices.value // Force a GUI update
     }
 }
 
