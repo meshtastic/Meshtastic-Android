@@ -152,6 +152,15 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                 null
         }
 
+    /// If this address is for a USB device, return the macaddr portion, else null
+    val selectedUSB: String?
+        get() = selectedAddress?.let { a ->
+            if (a[0] == 's')
+                a.substring(1)
+            else
+                null
+        }
+
     /// Use the string for the NopInterface
     val selectedNotNull: String get() = selectedAddress ?: "n"
 
@@ -618,14 +627,24 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
                 // The device the user is already paired with is offline currently, still show it
                 // it in the list, but greyed out
-                if (!hasShownOurDevice && scanModel.selectedBluetooth != null) {
-                    val bDevice =
-                        scanModel.bluetoothAdapter!!.getRemoteDevice(scanModel.selectedBluetooth)
-                    if (bDevice.name != null) { // ignore nodes that node have a name, that means we've lost them since they appeared
+                if (!hasShownOurDevice) {
+                    if (scanModel.selectedBluetooth != null) {
+                        val bDevice =
+                            scanModel.bluetoothAdapter!!.getRemoteDevice(scanModel.selectedBluetooth)
+                        if (bDevice.name != null) { // ignore nodes that node have a name, that means we've lost them since they appeared
+                            val curDevice = BTScanModel.DeviceListEntry(
+                                bDevice.name,
+                                scanModel.selectedAddress!!,
+                                bDevice.bondState == BOND_BONDED
+                            )
+                            addDeviceButton(curDevice, false)
+                        }
+                    } else if (scanModel.selectedUSB != null) {
+                        // Must be a USB device, show a placeholder disabled entry
                         val curDevice = BTScanModel.DeviceListEntry(
-                            bDevice.name,
+                            scanModel.selectedUSB!!,
                             scanModel.selectedAddress!!,
-                            bDevice.bondState == BOND_BONDED
+                            false
                         )
                         addDeviceButton(curDevice, false)
                     }

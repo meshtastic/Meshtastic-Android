@@ -169,7 +169,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
 
     override fun close() {
         debug("Closing serial port")
-        ioManager?.let { it.stop() }
+        ignoreException { ioManager?.let { it.stop() } }
         ioManager = null
         ignoreException {
             uart?.close() // This will cause the reader thread to exit
