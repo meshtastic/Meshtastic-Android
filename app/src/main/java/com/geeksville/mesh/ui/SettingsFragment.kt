@@ -39,6 +39,7 @@ import com.geeksville.mesh.service.SerialInterface
 import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.hoho.android.usbserial.driver.UsbSerialDriver
 import kotlinx.android.synthetic.main.settings_fragment.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -103,7 +104,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         debug("BTScanModel created")
     }
 
-    data class DeviceListEntry(val name: String, val address: String, val bonded: Boolean) {
+    open class DeviceListEntry(val name: String, val address: String, val bonded: Boolean) {
         val bluetoothAddress
             get() =
                 if (address[0] == 'x')
@@ -115,10 +116,16 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         override fun toString(): String {
             return "DeviceListEntry(name=${name.anonymize}, addr=${address.anonymize})"
         }
-        
-        val isBluetooth: Boolean get() = name[0] == 'x'
-        val isSerial: Boolean get() = name[0] == 's'
+
+        val isBluetooth: Boolean get() = address[0] == 'x'
+        val isSerial: Boolean get() = address[0] == 's'
     }
+
+    class USBDeviceListEntry(usbManager: UsbManager, val usb: UsbSerialDriver) : DeviceListEntry(
+        usb.device.deviceName,
+        "s${usb.device.deviceName}",
+        usbManager.hasPermission(usb.device)
+    )
 
     override fun onCleared() {
         super.onCleared()
@@ -248,17 +255,12 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
 
                     SerialInterface.findDrivers(context).forEach { d ->
-                        val hasPerms = usbManager.hasPermission(d.device)
                         addDevice(
-                            DeviceListEntry(
-                                d.device.deviceName,
-                                "s${d.device.deviceName}",
-                                hasPerms
-                            )
+                            USBDeviceListEntry(usbManager, d)
                         )
                     }
 
-                    // filter and only accept devices that have a sw update service
+                    // filter and only accept devices that have our service
                     val filter =
                         ScanFilter.Builder()
                             .setServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID))
@@ -307,6 +309,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
             return true
         } else {
             // Handle requestng USB or bluetooth permissions for the device
+            debug("Requesting permissions for the device")
 
             if (it.isBluetooth) {
                 // Request bonding for bluetooth
@@ -332,6 +335,8 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
             }
 
             if (it.isSerial) {
+                it as USBDeviceListEntry
+
                 val ACTION_USB_PERMISSION = "com.geeksville.mesh.USB_PERMISSION"
 
                 val usbReceiver = object : BroadcastReceiver() {
@@ -339,21 +344,19 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     override fun onReceive(context: Context, intent: Intent) {
                         if (ACTION_USB_PERMISSION == intent.action) {
 
-                            val device: UsbDevice? =
-                                intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+                            val device: UsbDevice =
+                                intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
 
                             if (intent.getBooleanExtra(
                                     UsbManager.EXTRA_PERMISSION_GRANTED,
                                     false
                                 )
                             ) {
-                                device?.apply {
-                                    info("User approved USB access")
-                                    changeScanSelection(activity, it.address)
+                                info("User approved USB access")
+                                changeScanSelection(activity, it.address)
 
-                                    // Force the GUI to redraw
-                                    devices.value = devices.value
-                                }
+                                // Force the GUI to redraw
+                                devices.value = devices.value
                             } else {
                                 errormsg("USB permission denied for device $device")
                             }
@@ -367,7 +370,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     PendingIntent.getBroadcast(activity, 0, Intent(ACTION_USB_PERMISSION), 0)
                 val filter = IntentFilter(ACTION_USB_PERMISSION)
                 activity.registerReceiver(usbReceiver, filter)
-                usbManager.requestPermission(device, permissionIntent)
+                usbManager.requestPermission(it.usb.device, permissionIntent)
             }
 
             return false

@@ -21,38 +21,62 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
             val drivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager)
             val devices = drivers.map { it.device }
             devices.forEach { d ->
-                debug("Found serial port $d")
+                debug("Found serial port ${d.deviceName}")
             }
             return drivers
         }
+
+        fun addressValid(context: Context, rest: String): Boolean {
+            findSerial(context, rest)?.let { d ->
+                val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
+                return manager.hasPermission(d.device)
+            }
+            return false
+        }
+
+        fun findSerial(context: Context, rest: String): UsbSerialDriver? {
+            val drivers = findDrivers(context)
+
+            return if (drivers.isEmpty())
+                null
+            else  // Open a connection to the first available driver.
+                drivers[0] // FIXME, instead we should find by name
+        }
     }
 
-    private var uart: UsbSerialPort?
+    private var uart: UsbSerialPort? = null
     private lateinit var reader: Thread
 
     init {
         val manager = service.getSystemService(Context.USB_SERVICE) as UsbManager
-        val drivers = findDrivers(this)
 
-        // Open a connection to the first available driver.
-        val device = drivers[0].device
+        val device = findSerial(service, address)
 
-        info("Opening $device")
-        val connection = manager.openDevice(device)
-        if (connection == null) {
-            // FIXME add UsbManager.requestPermission(device, ..) handling to activity
-            TODO("Need permissions for port")
+        if (device != null) {
+            info("Opening $device")
+            val connection = manager.openDevice(device.device)
+            if (connection == null) {
+                // FIXME add UsbManager.requestPermission(device, ..) handling to activity
+                TODO("Need permissions for port")
+            } else {
+                val port = device.ports[0] // Most devices have just one port (port 0)
+
+                port.open(connection)
+                port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
+                uart = port
+
+                debug("Starting serial reader thread")
+                // FIXME, start reading thread
+                reader =
+                    thread(
+                        start = true,
+                        isDaemon = true,
+                        name = "serial reader",
+                        block = ::readerLoop
+                    )
+            }
         } else {
-            val port = drivers[0].ports[0] // Most devices have just one port (port 0)
-
-            port.open(connection)
-            port.setParameters(921600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
-            uart = port
-
-            debug("Starting serial reader thread")
-            // FIXME, start reading thread
-            reader =
-                thread(start = true, isDaemon = true, name = "serial reader", block = ::readerLoop)
+            errormsg("Can't find device")
         }
     }
 
@@ -85,40 +109,49 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
             var msb = 0
             var lsb = 0
 
+            val timeout = (60 * 1000)
+
             while (uart != null) { // we run until our port gets closed
                 uart?.apply {
-                    read(scratch, 0)
-                    val c = scratch[0]
+                    val numRead = read(scratch, timeout)
+                    if (numRead == 0)
+                        errormsg("Read returned zero bytes")
+                    else {
+                        val c = scratch[0]
 
-                    // Assume we will be advancing our pointer
-                    var nextPtr = ptr + 1
+                        // Assume we will be advancing our pointer
+                        var nextPtr = ptr + 1
 
-                    when (ptr) {
-                        0 -> // looking for START1
-                            if (c != START1) {
-                                debugOut(c)
-                                nextPtr = 0 // Restart from scratch
+                        when (ptr) {
+                            0 -> // looking for START1
+                                if (c != START1) {
+                                    debugOut(c)
+                                    nextPtr = 0 // Restart from scratch
+                                }
+                            1 -> // Looking for START2
+                                if (c != START2)
+                                    nextPtr = 0 // Restart from scratch
+                            2 -> // Looking for MSB of our 16 bit length
+                                msb = c.toInt() and 0xff
+                            3 -> // Looking for LSB of our 16 bit length
+                                lsb = c.toInt() and 0xff
+                            else -> { // We've read our header, do one big read for the packet itself
+                                val packetLen = (msb shl 8) or lsb
+
+                                // If packet len is too long, the bytes must have been corrupted, start looking for START1 again
+                                if (packetLen <= MAX_TO_FROM_RADIO_SIZE) {
+                                    val buf = ByteArray(packetLen)
+                                    val numRead = read(buf, timeout)
+                                    if (numRead < packetLen)
+                                        errormsg("Packet read was too short")
+                                    else
+                                        service.handleFromRadio(buf)
+                                }
+                                nextPtr = 0 // Start parsing the next packet
                             }
-                        1 -> // Looking for START2
-                            if (c != START2)
-                                nextPtr = 0 // Restart from scratch
-                        2 -> // Looking for MSB of our 16 bit length
-                            msb = c.toInt() and 0xff
-                        3 -> // Looking for LSB of our 16 bit length
-                            lsb = c.toInt() and 0xff
-                        else -> { // We've read our header, do one big read for the packet itself
-                            val packetLen = (msb shl 8) or lsb
-
-                            // If packet len is too long, the bytes must have been corrupted, start looking for START1 again
-                            if (packetLen <= MAX_TO_FROM_RADIO_SIZE) {
-                                val buf = ByteArray(packetLen)
-                                read(buf, 0)
-                                service.handleFromRadio(buf)
-                            }
-                            nextPtr = 0 // Start parsing the next packet
                         }
+                        ptr = nextPtr
                     }
-                    ptr = nextPtr
                 }
             }
         } catch (ex: Exception) {

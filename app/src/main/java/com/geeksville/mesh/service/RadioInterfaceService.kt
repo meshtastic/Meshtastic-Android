@@ -85,6 +85,7 @@ class RadioInterfaceService : Service(), Logging {
                 val rest = address.substring(1)
                 val isValid = when (c) {
                     'x' -> BluetoothInterface.addressValid(context, rest)
+                    'u' -> SerialInterface.addressValid(context, rest)
                     else -> true
                 }
                 if (!isValid)
