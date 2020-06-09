@@ -68,7 +68,7 @@ class RadioInterfaceService : Service(), Logging {
          * and t is an interface specific address (macaddr or a device path)
          */
         @SuppressLint("NewApi")
-        fun getBondedDeviceAddress(context: Context): String? {
+        fun getDeviceAddress(context: Context): String? {
             // If the user has unpaired our device, treat things as if we don't have one
             val prefs = getPrefs(context)
             var address = prefs.getString(DEVADDR_KEY, null)
@@ -78,6 +78,22 @@ class RadioInterfaceService : Service(), Logging {
                 if (rest != null)
                     address = "x$rest" // Add the bluetooth prefix
             }
+
+            return address
+        }
+
+
+        /** Like getDeviceAddress, but filtered to return only devices we are currently bonded with
+         *
+         * at
+         *
+         * where a is either x for bluetooth or s for serial
+         * and t is an interface specific address (macaddr or a device path)
+         */
+        @SuppressLint("NewApi")
+        fun getBondedDeviceAddress(context: Context): String? {
+            // If the user has unpaired our device, treat things as if we don't have one
+            var address = getDeviceAddress(context)
 
             /// Interfaces can filter addresses to indicate that address is no longer acceptable
             if (address != null) {

@@ -65,12 +65,12 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
 
                 connection
                 port.open(connection)
-                port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
+                port.setParameters(921600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
                 uart = port
 
                 debug("Starting serial reader thread")
                 val io = SerialInputOutputManager(port, this)
-                io.readTimeout = 500 // To save battery we only timeout every 500ms
+                io.readTimeout = 200 // To save battery we only timeout ever so often
                 ioManager = io
                 Executors.newSingleThreadExecutor().submit(io);
 
