@@ -3,14 +3,16 @@ package com.geeksville.mesh.service
 import android.content.Context
 import android.hardware.usb.UsbManager
 import com.geeksville.android.Logging
+import com.geeksville.util.ignoreException
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
-import kotlin.concurrent.thread
+import com.hoho.android.usbserial.util.SerialInputOutputManager
+import java.util.concurrent.Executors
 
 
 class SerialInterface(private val service: RadioInterfaceService, val address: String) : Logging,
-    IRadioInterface {
+    IRadioInterface, SerialInputOutputManager.Listener {
     companion object : Logging {
         private const val START1 = 0x94.toByte()
         private const val START2 = 0xc3.toByte()
@@ -45,7 +47,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
     }
 
     private var uart: UsbSerialPort? = null
-    private lateinit var reader: Thread
+    private var ioManager: SerialInputOutputManager? = null
 
     init {
         val manager = service.getSystemService(Context.USB_SERVICE) as UsbManager
@@ -66,14 +68,8 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
                 uart = port
 
                 debug("Starting serial reader thread")
-                // FIXME, start reading thread
-                reader =
-                    thread(
-                        start = true,
-                        isDaemon = true,
-                        name = "serial reader",
-                        block = ::readerLoop
-                    )
+                ioManager = SerialInputOutputManager(port, this)
+                Executors.newSingleThreadExecutor().submit(ioManager);
             }
         } else {
             errormsg("Can't find device")
@@ -109,7 +105,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
             var msb = 0
             var lsb = 0
 
-            val timeout = (60 * 1000)
+            val timeout = 0 // (60 * 1000)
 
             while (uart != null) { // we run until our port gets closed
                 uart?.apply {
@@ -161,7 +157,26 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
 
     override fun close() {
         debug("Closing serial port")
-        uart?.close() // This will cause the reader thread to exit
+        ioManager?.let { it.stop() }
+        ioManager = null
+        ignoreException {
+            uart?.close() // This will cause the reader thread to exit
+        }
         uart = null
+    }
+
+    /**
+     * Called when [SerialInputOutputManager.run] aborts due to an error.
+     */
+    override fun onRunError(e: java.lang.Exception) {
+        errormsg("Serial error: $e")
+        // FIXME - try to reconnect to the device when it comes back
+    }
+
+    /**
+     * Called when new incoming data is available.
+     */
+    override fun onNewData(data: ByteArray) {
+        TODO("Not yet implemented")
     }
 }
