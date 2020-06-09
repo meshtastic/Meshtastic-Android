@@ -276,6 +276,9 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                 if (scanner == null) {
                     debug("starting scan")
 
+                    // Clear the old device list
+                    devices.value?.clear()
+
                     // Include a placeholder for "None"
                     addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
 
