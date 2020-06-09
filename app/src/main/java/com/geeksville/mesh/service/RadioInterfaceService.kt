@@ -154,6 +154,8 @@ class RadioInterfaceService : Service(), Logging {
             receivedPacketsLog.flush()
         }
 
+        // ignoreException { debug("FromRadio: ${MeshProtos.FromRadio.parseFrom(p)}") }
+
         broadcastReceivedFromRadio(
             this,
             p

@@ -1118,55 +1118,55 @@ class MeshService : Service(), Logging {
 
         // Important to never throw exceptions out of onReceive
         override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
-            serviceScope.handledLaunch {
-                debug("Received broadcast ${intent.action}")
-                when (intent.action) {
-                    RadioInterfaceService.RADIO_CONNECTED_ACTION -> {
-                        try {
-                            val connected = intent.getBooleanExtra(EXTRA_CONNECTED, false)
-                            val permanent = intent.getBooleanExtra(EXTRA_PERMANENT, false)
-                            onConnectionChanged(
-                                when {
-                                    connected -> ConnectionState.CONNECTED
-                                    permanent -> ConnectionState.DISCONNECTED
-                                    else -> ConnectionState.DEVICE_SLEEP
-                                }
-                            )
-                        } catch (ex: RemoteException) {
-                            // This can happen sometimes (especially if the device is slowly dying due to killing power, don't report to crashlytics
-                            warn("Abandoning reconnect attempt, due to errors during init: ${ex.message}")
-                        }
+            // NOTE: Do not call handledLaunch here, because it can cause out of order message processing - because each routine is scheduled independently
+            // serviceScope.handledLaunch {
+            debug("Received broadcast ${intent.action}")
+            when (intent.action) {
+                RadioInterfaceService.RADIO_CONNECTED_ACTION -> {
+                    try {
+                        val connected = intent.getBooleanExtra(EXTRA_CONNECTED, false)
+                        val permanent = intent.getBooleanExtra(EXTRA_PERMANENT, false)
+                        onConnectionChanged(
+                            when {
+                                connected -> ConnectionState.CONNECTED
+                                permanent -> ConnectionState.DISCONNECTED
+                                else -> ConnectionState.DEVICE_SLEEP
+                            }
+                        )
+                    } catch (ex: RemoteException) {
+                        // This can happen sometimes (especially if the device is slowly dying due to killing power, don't report to crashlytics
+                        warn("Abandoning reconnect attempt, due to errors during init: ${ex.message}")
                     }
-
-                    RadioInterfaceService.RECEIVE_FROMRADIO_ACTION -> {
-                        val proto =
-                            MeshProtos.FromRadio.parseFrom(
-                                intent.getByteArrayExtra(
-                                    EXTRA_PAYLOAD
-                                )!!
-                            )
-                        info("Received from radio service: ${proto.toOneLineString()}")
-                        when (proto.variantCase.number) {
-                            MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(
-                                proto.packet
-                            )
-
-                            MeshProtos.FromRadio.CONFIG_COMPLETE_ID_FIELD_NUMBER -> handleConfigComplete(
-                                proto.configCompleteId
-                            )
-
-                            MeshProtos.FromRadio.MY_INFO_FIELD_NUMBER -> handleMyInfo(proto.myInfo)
-
-                            MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleNodeInfo(proto.nodeInfo)
-
-                            MeshProtos.FromRadio.RADIO_FIELD_NUMBER -> handleRadioConfig(proto.radio)
-
-                            else -> errormsg("Unexpected FromRadio variant")
-                        }
-                    }
-
-                    else -> errormsg("Unexpected radio interface broadcast")
                 }
+
+                RadioInterfaceService.RECEIVE_FROMRADIO_ACTION -> {
+                    val proto =
+                        MeshProtos.FromRadio.parseFrom(
+                            intent.getByteArrayExtra(
+                                EXTRA_PAYLOAD
+                            )!!
+                        )
+                    info("Received from radio service: ${proto.toOneLineString()}")
+                    when (proto.variantCase.number) {
+                        MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(
+                            proto.packet
+                        )
+
+                        MeshProtos.FromRadio.CONFIG_COMPLETE_ID_FIELD_NUMBER -> handleConfigComplete(
+                            proto.configCompleteId
+                        )
+
+                        MeshProtos.FromRadio.MY_INFO_FIELD_NUMBER -> handleMyInfo(proto.myInfo)
+
+                        MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleNodeInfo(proto.nodeInfo)
+
+                        MeshProtos.FromRadio.RADIO_FIELD_NUMBER -> handleRadioConfig(proto.radio)
+
+                        else -> errormsg("Unexpected FromRadio variant")
+                    }
+                }
+
+                else -> errormsg("Unexpected radio interface broadcast")
             }
         }
     }
@@ -1295,6 +1295,7 @@ class MeshService : Service(), Logging {
         configNonce += 1
         newNodes.clear()
         newMyNodeInfo = null
+        debug("Starting config nonce=$configNonce")
 
         sendToRadio(ToRadio.newBuilder().apply {
             this.wantConfigId = configNonce

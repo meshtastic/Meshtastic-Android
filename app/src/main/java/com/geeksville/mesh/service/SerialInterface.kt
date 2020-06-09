@@ -88,14 +88,15 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
 
     override fun handleSendToRadio(p: ByteArray) {
         // This method is called from a continuation and it might show up late, so check for uart being null
-        uart?.apply {
-            val header = ByteArray(4)
-            header[0] = START1
-            header[1] = START2
-            header[2] = (p.size shr 8).toByte()
-            header[3] = (p.size and 0xff).toByte()
-            write(header, 0) // FIXME - combine these into one write (for fewer USB transactions)
-            write(p, 0)
+
+        val header = ByteArray(4)
+        header[0] = START1
+        header[1] = START2
+        header[2] = (p.size shr 8).toByte()
+        header[3] = (p.size and 0xff).toByte()
+        ioManager?.apply {
+            writeAsync(header)
+            writeAsync(p)
         }
     }
 
