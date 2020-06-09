@@ -174,23 +174,48 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
             val oldDevs = devices.value!!
             val oldEntry = oldDevs[fullAddr]
             if (oldEntry == null || oldEntry.bonded != isBonded) {
-                val entry = DeviceListEntry(
-                    result.device.name
-                        ?: "unnamed-$addr", // autobug: some devices might not have a name, if someone is running really old device code?
-                    fullAddr,
-                    isBonded
-                )
-                debug("onScanResult ${entry}")
 
-                // If nothing was selected, by default select the first valid thing we see
-                val activity =
-                    GeeksvilleApplication.currentActivity as MainActivity? // Can be null if app is shutting down
-                if (selectedAddress == null && entry.bonded && activity != null)
-                    changeScanSelection(
-                        activity,
-                        fullAddr
+                val skipBogus = try {
+                    // Note Soyes XS has a buggy BLE scan implementation and returns devices we didn't ask for.  So we check to see if the
+                    // last two chars of the name matches the last two of the address - if not we skip it
+
+                    // Note: the address is always two more than the hex string we show in the name
+
+                    // nasty parsing of a string that ends with ab:45 as four hex digits
+                    val lastAddr = (addr.substring(
+                        addr.length - 5,
+                        addr.length - 3
+                    ) + addr.substring(addr.length - 2)).toInt(16)
+
+                    val lastName =
+                        result.device.name.substring(result.device.name.length - 4).toInt(16)
+
+                    (lastAddr - 2) != lastName
+                } catch (ex: Throwable) {
+                    false // If we fail parsing anything, don't do this nasty hack
+                }
+
+                if (skipBogus)
+                    errormsg("Skipping bogus BLE entry $result")
+                else {
+                    val entry = DeviceListEntry(
+                        result.device.name
+                            ?: "unnamed-$addr", // autobug: some devices might not have a name, if someone is running really old device code?
+                        fullAddr,
+                        isBonded
                     )
-                addDevice(entry) // Add/replace entry
+                    debug("onScanResult ${entry}")
+
+                    // If nothing was selected, by default select the first valid thing we see
+                    val activity =
+                        GeeksvilleApplication.currentActivity as MainActivity? // Can be null if app is shutting down
+                    if (selectedAddress == null && entry.bonded && activity != null)
+                        changeScanSelection(
+                            activity,
+                            fullAddr
+                        )
+                    addDevice(entry) // Add/replace entry
+                }
             }
         }
     }
@@ -218,7 +243,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
      */
     fun startScan(): Boolean {
         debug("BTScan component active")
-        selectedAddress = RadioInterfaceService.getBondedDeviceAddress(context)
+        selectedAddress = RadioInterfaceService.getDeviceAddress(context)
 
         return if (bluetoothAdapter == null) {
             warn("No bluetooth adapter.  Running under emulation?")
