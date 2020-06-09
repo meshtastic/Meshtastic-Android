@@ -69,8 +69,13 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
                 uart = port
 
                 debug("Starting serial reader thread")
-                ioManager = SerialInputOutputManager(port, this)
-                Executors.newSingleThreadExecutor().submit(ioManager);
+                val io = SerialInputOutputManager(port, this)
+                io.readTimeout = 500 // To save battery we only timeout every 500ms
+                ioManager = io
+                Executors.newSingleThreadExecutor().submit(io);
+
+                // Now tell clients they can (finally use the api)
+                service.broadcastConnectionChanged(true, isPermanent = false)
             }
         } else {
             errormsg("Can't find device")
@@ -92,7 +97,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
 
     /** Print device serial debug output somewhere */
     private fun debugOut(c: Byte) {
-        debug("Got c: ${c.toChar()}")
+        // debug("Got c: ${c.toChar()}")
     }
 
     /** The index of the next byte we are hoping to receive */
@@ -121,18 +126,22 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
                     nextPtr = 0 // Restart from scratch
             2 -> // Looking for MSB of our 16 bit length
                 msb = c.toInt() and 0xff
-            3 -> // Looking for LSB of our 16 bit length
+            3 -> { // Looking for LSB of our 16 bit length
                 lsb = c.toInt() and 0xff
-            4 -> { // We've read our header, do one big read for the packet itself
+
+                // We've read our header, do one big read for the packet itself
                 packetLen = (msb shl 8) or lsb
                 if (packetLen > MAX_TO_FROM_RADIO_SIZE)
                     nextPtr =
                         0  // If packet len is too long, the bytes must have been corrupted, start looking for START1 again
             }
             else -> {
+                // We are looking at
                 if (ptr - 4 < packetLen) {
                     rxPacket[ptr - 4] = c
-                } else {
+                }
+
+                if (ptr - 4 == packetLen) {
                     val buf = rxPacket.copyOf(packetLen)
                     service.handleFromRadio(buf)
 
@@ -159,6 +168,8 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
     override fun onRunError(e: java.lang.Exception) {
         errormsg("Serial error: $e")
         // FIXME - try to reconnect to the device when it comes back
+
+        service.onDisconnect(isPermanent = false)
     }
 
     /**
