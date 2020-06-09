@@ -553,7 +553,7 @@ class MeshService : Service(), Logging {
             )
             val json = Json(JsonConfiguration.Default)
             val asString = json.stringify(SavedSettings.serializer(), settings)
-            debug("Saving settings as $asString")
+            debug("Saving settings")
             getPrefs().edit(commit = true) {
                 // FIXME, not really ideal to store this bigish blob in preferences
                 putString("json", asString)
