@@ -165,24 +165,23 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             status: Int,
             newState: Int
         ) = exceptionReporter {
+            info("new bluetooth connection state $newState, status $status")
 
-            if (gatt == null)
-                info("No gatt: ignoring connection state $newState, status $status") // Probably just shutting down
-            else {
-                info("new bluetooth connection state $newState, status $status")
+            when (newState) {
+                BluetoothProfile.STATE_CONNECTED -> {
+                    state =
+                        newState // we only care about connected/disconnected - not the transitional states
 
-                when (newState) {
-                    BluetoothProfile.STATE_CONNECTED -> {
-                        state =
-                            newState // we only care about connected/disconnected - not the transitional states
-
-                        // If autoconnect is on and this connect attempt failed, hopefully some future attempt will succeed
-                        if (status != BluetoothGatt.GATT_SUCCESS && autoConnect) {
-                            errormsg("Connect attempt failed $status, not calling connect completion handler...")
-                        } else
-                            completeWork(status, Unit)
-                    }
-                    BluetoothProfile.STATE_DISCONNECTED -> {
+                    // If autoconnect is on and this connect attempt failed, hopefully some future attempt will succeed
+                    if (status != BluetoothGatt.GATT_SUCCESS && autoConnect) {
+                        errormsg("Connect attempt failed $status, not calling connect completion handler...")
+                    } else
+                        completeWork(status, Unit)
+                }
+                BluetoothProfile.STATE_DISCONNECTED -> {
+                    if (gatt == null)
+                        info("No gatt: ignoring connection state $newState, status $status") // Probably just shutting down
+                    else {
                         // cancel any queued ops if we were already connected
                         val oldstate = state
                         state = newState
