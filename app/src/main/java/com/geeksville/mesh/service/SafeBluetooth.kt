@@ -13,6 +13,7 @@ import com.geeksville.concurrent.CallbackContinuation
 import com.geeksville.concurrent.Continuation
 import com.geeksville.concurrent.SyncContinuation
 import com.geeksville.util.exceptionReporter
+import com.geeksville.util.ignoreException
 import kotlinx.coroutines.*
 import java.io.Closeable
 import java.util.*
@@ -663,7 +664,10 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         lostConnectCallback = null
         connectionCallback = null
 
-        failAllWork(BLEException("Connection closing"))
+        ignoreException {
+            // Hmm - sometimes the "Connection closing" exception comes back to us - ignore it
+            failAllWork(BLEException("Connection closing"))
+        }
 
         gatt?.let { g ->
             info("Closing our GATT connection")
