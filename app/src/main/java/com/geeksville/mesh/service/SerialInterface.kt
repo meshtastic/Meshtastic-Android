@@ -63,6 +63,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
             } else {
                 val port = device.ports[0] // Most devices have just one port (port 0)
 
+                connection
                 port.open(connection)
                 port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
                 uart = port
@@ -84,7 +85,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
             header[1] = START2
             header[2] = (p.size shr 8).toByte()
             header[3] = (p.size and 0xff).toByte()
-            write(header, 0)
+            write(header, 0) // FIXME - combine these into one write (for fewer USB transactions)
             write(p, 0)
         }
     }
@@ -94,65 +95,52 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
         debug("Got c: ${c.toChar()}")
     }
 
-    private fun readerLoop() {
-        try {
-            val scratch = ByteArray(1)
+    /** The index of the next byte we are hoping to receive */
+    var ptr = 0
 
-            /** The index of the next byte we are hoping to receive */
-            var ptr = 0
+    /** The two halves of our length */
+    var msb = 0
+    var lsb = 0
 
-            /** The two halves of our length */
-            var msb = 0
-            var lsb = 0
+    var packetLen = 0
 
-            val timeout = 0 // (60 * 1000)
+    private val rxPacket = ByteArray(MAX_TO_FROM_RADIO_SIZE)
 
-            while (uart != null) { // we run until our port gets closed
-                uart?.apply {
-                    val numRead = read(scratch, timeout)
-                    if (numRead == 0)
-                        errormsg("Read returned zero bytes")
-                    else {
-                        val c = scratch[0]
+    private fun readChar(c: Byte) {
+        // Assume we will be advancing our pointer
+        var nextPtr = ptr + 1
 
-                        // Assume we will be advancing our pointer
-                        var nextPtr = ptr + 1
+        when (ptr) {
+            0 -> // looking for START1
+                if (c != START1) {
+                    debugOut(c)
+                    nextPtr = 0 // Restart from scratch
+                }
+            1 -> // Looking for START2
+                if (c != START2)
+                    nextPtr = 0 // Restart from scratch
+            2 -> // Looking for MSB of our 16 bit length
+                msb = c.toInt() and 0xff
+            3 -> // Looking for LSB of our 16 bit length
+                lsb = c.toInt() and 0xff
+            4 -> { // We've read our header, do one big read for the packet itself
+                packetLen = (msb shl 8) or lsb
+                if (packetLen > MAX_TO_FROM_RADIO_SIZE)
+                    nextPtr =
+                        0  // If packet len is too long, the bytes must have been corrupted, start looking for START1 again
+            }
+            else -> {
+                if (ptr - 4 < packetLen) {
+                    rxPacket[ptr - 4] = c
+                } else {
+                    val buf = rxPacket.copyOf(packetLen)
+                    service.handleFromRadio(buf)
 
-                        when (ptr) {
-                            0 -> // looking for START1
-                                if (c != START1) {
-                                    debugOut(c)
-                                    nextPtr = 0 // Restart from scratch
-                                }
-                            1 -> // Looking for START2
-                                if (c != START2)
-                                    nextPtr = 0 // Restart from scratch
-                            2 -> // Looking for MSB of our 16 bit length
-                                msb = c.toInt() and 0xff
-                            3 -> // Looking for LSB of our 16 bit length
-                                lsb = c.toInt() and 0xff
-                            else -> { // We've read our header, do one big read for the packet itself
-                                val packetLen = (msb shl 8) or lsb
-
-                                // If packet len is too long, the bytes must have been corrupted, start looking for START1 again
-                                if (packetLen <= MAX_TO_FROM_RADIO_SIZE) {
-                                    val buf = ByteArray(packetLen)
-                                    val numRead = read(buf, timeout)
-                                    if (numRead < packetLen)
-                                        errormsg("Packet read was too short")
-                                    else
-                                        service.handleFromRadio(buf)
-                                }
-                                nextPtr = 0 // Start parsing the next packet
-                            }
-                        }
-                        ptr = nextPtr
-                    }
+                    nextPtr = 0 // Start parsing the next packet
                 }
             }
-        } catch (ex: Exception) {
-            errormsg("Terminating reader thread due to ${ex.message}", ex)
         }
+        ptr = nextPtr
     }
 
     override fun close() {
@@ -177,6 +165,6 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
      * Called when new incoming data is available.
      */
     override fun onNewData(data: ByteArray) {
-        TODO("Not yet implemented")
+        data.forEach(::readChar)
     }
 }
