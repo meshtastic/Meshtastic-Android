@@ -418,21 +418,29 @@ class MainActivity : AppCompatActivity(), Logging,
         val appLinkAction = intent.action
         val appLinkData: Uri? = intent.data
 
-        // Were we asked to open one our channel URLs?
-        if (Intent.ACTION_VIEW == appLinkAction) {
-            debug("Asked to open a channel URL - ask user if they want to switch to that channel.  If so send the config to the radio")
-            requestedChannelUrl = appLinkData
+        when (appLinkAction) {
+            Intent.ACTION_VIEW -> {
+                debug("Asked to open a channel URL - ask user if they want to switch to that channel.  If so send the config to the radio")
+                requestedChannelUrl = appLinkData
 
-            // if the device is connected already, process it now
-            if (model.isConnected.value == MeshService.ConnectionState.CONNECTED)
-                perhapsChangeChannel()
+                // if the device is connected already, process it now
+                if (model.isConnected.value == MeshService.ConnectionState.CONNECTED)
+                    perhapsChangeChannel()
 
-            // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
-        }
+                // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
+            }
 
-        if (appLinkAction == UsbManager.ACTION_USB_ACCESSORY_ATTACHED) {
-            val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
-            errormsg("Handle USB device attached! $device")
+            UsbManager.ACTION_USB_ACCESSORY_ATTACHED -> {
+                val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
+                errormsg("Handle USB device attached! $device")
+            }
+
+            Intent.ACTION_MAIN -> {
+            }
+
+            else -> {
+                warn("Unexpected action $appLinkAction")
+            }
         }
     }
 

@@ -8,7 +8,6 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.driver.UsbSerialProber
 import com.hoho.android.usbserial.util.SerialInputOutputManager
-import java.util.concurrent.Executors
 
 
 class SerialInterface(private val service: RadioInterfaceService, val address: String) : Logging,
@@ -72,7 +71,12 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
                 val io = SerialInputOutputManager(port, this)
                 io.readTimeout = 200 // To save battery we only timeout ever so often
                 ioManager = io
-                Executors.newSingleThreadExecutor().submit(io);
+
+                val thread = Thread(io)
+                thread.isDaemon = true
+                thread.priority = Thread.MAX_PRIORITY
+                thread.name = "serial reader"
+                thread.start() // No need to keep reference to thread around, we quit by asking the ioManager to quit
 
                 // Now tell clients they can (finally use the api)
                 service.broadcastConnectionChanged(true, isPermanent = false)
@@ -97,7 +101,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
 
     /** Print device serial debug output somewhere */
     private fun debugOut(c: Byte) {
-        // debug("Got c: ${c.toChar()}")
+        debug("Got c: ${c.toChar()}")
     }
 
     /** The index of the next byte we are hoping to receive */
@@ -115,6 +119,19 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
         // Assume we will be advancing our pointer
         var nextPtr = ptr + 1
 
+        fun lostSync() {
+            errormsg("Lost protocol sync")
+            nextPtr = 0
+        }
+
+        /// Deliver our current packet and restart our reader
+        fun deliverPacket() {
+            val buf = rxPacket.copyOf(packetLen)
+            service.handleFromRadio(buf)
+
+            nextPtr = 0 // Start parsing the next packet
+        }
+
         when (ptr) {
             0 -> // looking for START1
                 if (c != START1) {
@@ -123,7 +140,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
                 }
             1 -> // Looking for START2
                 if (c != START2)
-                    nextPtr = 0 // Restart from scratch
+                    lostSync() // Restart from scratch
             2 -> // Looking for MSB of our 16 bit length
                 msb = c.toInt() and 0xff
             3 -> { // Looking for LSB of our 16 bit length
@@ -132,20 +149,17 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
                 // We've read our header, do one big read for the packet itself
                 packetLen = (msb shl 8) or lsb
                 if (packetLen > MAX_TO_FROM_RADIO_SIZE)
-                    nextPtr =
-                        0  // If packet len is too long, the bytes must have been corrupted, start looking for START1 again
+                    lostSync()  // If packet len is too long, the bytes must have been corrupted, start looking for START1 again
+                else if (packetLen == 0)
+                    deliverPacket() // zero length packets are valid and should be delivered immediately (because there won't be a next byte of payload)
             }
             else -> {
-                // We are looking at
-                if (ptr - 4 < packetLen) {
-                    rxPacket[ptr - 4] = c
-                }
+                // We are looking at the packet bytes now
+                rxPacket[ptr - 4] = c
 
-                if (ptr - 4 == packetLen) {
-                    val buf = rxPacket.copyOf(packetLen)
-                    service.handleFromRadio(buf)
-
-                    nextPtr = 0 // Start parsing the next packet
+                // Note: we have to check if ptr +1 is equal to packet length (for example, for a 1 byte packetlen, this code will be run with ptr of4
+                if (ptr - 4 + 1 == packetLen) {
+                    deliverPacket()
                 }
             }
         }
