@@ -64,7 +64,8 @@ interface IMeshService {
     /// Users should not call this directly, only used internally by the MeshUtil activity
     void setDeviceAddress(String deviceAddr);
 
-    /// Get basic device hardware info about our connected radio
+    /// Get basic device hardware info about our connected radio.  Will never return NULL.  Will throw
+    /// RemoteException if no my node info is available
     MyNodeInfo getMyNodeInfo();
 
     /// Start updating the radios firmware

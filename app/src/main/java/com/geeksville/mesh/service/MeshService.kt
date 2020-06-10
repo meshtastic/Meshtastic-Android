@@ -1488,7 +1488,9 @@ class MeshService : Service(), Logging {
             doFirmwareUpdate()
         }
 
-        override fun getMyNodeInfo(): MyNodeInfo? = this@MeshService.myNodeInfo
+        override fun getMyNodeInfo(): MyNodeInfo = toRemoteExceptions {
+            this@MeshService.myNodeInfo ?: throw RadioNotConnectedException("No MyNodeInfo")
+        }
 
         override fun getMyId() = toRemoteExceptions { myNodeID }
 
