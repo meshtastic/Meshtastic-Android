@@ -598,7 +598,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         len: Int,
         cb: (Result<Unit>) -> Unit
     ) {
-        logAssert(workQueue.isEmpty() && currentWork == null) // I don't think anything should be able to sneak in front
         queueRequestMtu(len, CallbackContinuation(cb))
     }
 
@@ -662,6 +661,9 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         lostConnectCallback = null
         connectionCallback = null
 
+        // Cancel any notifications - because when the device comes back it might have forgotten about us
+        notifyHandlers.clear()
+        
         ignoreException {
             // Hmm - sometimes the "Connection closing" exception comes back to us - ignore it
             failAllWork(BLEException("Connection closing"))
