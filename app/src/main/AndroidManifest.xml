@@ -57,6 +57,11 @@
         android:name="android.software.companion_device_setup"
         android:required="false" />
 
+    <!-- for USB serial access -->
+    <uses-feature
+        android:name="android.hardware.usb.host"
+        android:required="false" />
+
     <!-- hardware acceleration is required for zxing barcode lib -->
     <application
         tools:replace="android:icon"
@@ -116,15 +121,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- The QR codes to share channel settings are shared as meshtastic URLS
-
-            an approximate example:
-            http://www.meshtastic.org/s/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
-            -->
             <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
+                <!-- The QR codes to share channel settings are shared as meshtastic URLS
 
-                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+                an approximate example:
+                http://www.meshtastic.org/s/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
+                -->
+                <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -133,6 +136,10 @@
                     android:scheme="https"
                     android:host="www.meshtastic.org"
                     android:pathPrefix="/c/" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
 
             <!-- The USB devices we want to be informed about -->

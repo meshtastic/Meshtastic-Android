@@ -1,8 +1,13 @@
 package com.geeksville.mesh.service
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import com.geeksville.android.Logging
+import com.geeksville.util.exceptionReporter
 import com.geeksville.util.ignoreException
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
@@ -45,12 +50,67 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
         }
     }
 
-    private var uart: UsbSerialPort? = null
+    private var uart: UsbSerialDriver? = null
     private var ioManager: SerialInputOutputManager? = null
 
-    init {
-        val manager = service.getSystemService(Context.USB_SERVICE) as UsbManager
+    var usbReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
 
+            if (UsbManager.ACTION_USB_DEVICE_DETACHED == intent.action) {
+                debug("A USB device was detached")
+                val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
+                if (uart?.device == device)
+                    onDeviceDisconnect()
+            }
+
+            if (UsbManager.ACTION_USB_DEVICE_ATTACHED == intent.action) {
+                debug("attaching USB")
+                val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
+                val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
+                if (manager.hasPermission(device)) {
+                    // reinit the port from scratch and reopen
+                    onDeviceDisconnect()
+                    connect()
+                } else {
+                    warn("We don't have permissions for this USB device")
+                }
+            }
+        }
+    }
+
+    init {
+        val filter = IntentFilter()
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
+        filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
+        service.registerReceiver(usbReceiver, filter)
+
+        connect()
+    }
+
+    override fun close() {
+        debug("Closing serial port for good")
+        service.unregisterReceiver(usbReceiver)
+        onDeviceDisconnect()
+    }
+
+    /** Tell MeshService our device has gone away, but wait for it to come back */
+    fun onDeviceDisconnect() {
+        debug("USB device disconnected, but it might come back")
+
+        ignoreException { ioManager?.let { it.stop() } }
+        ioManager = null
+        ignoreException {
+            uart?.apply {
+                ports[0].close() // This will cause the reader thread to exit
+            }
+        }
+        uart = null
+
+        service.onDisconnect(isPermanent = true) // if USB device disconnects it is definitely permantently gone, not sleeping)
+    }
+
+    private fun connect() {
+        val manager = service.getSystemService(Context.USB_SERVICE) as UsbManager
         val device = findSerial(service, address)
 
         if (device != null) {
@@ -65,7 +125,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
                 connection
                 port.open(connection)
                 port.setParameters(921600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
-                uart = port
+                uart = device
 
                 debug("Starting serial reader thread")
                 val io = SerialInputOutputManager(port, this)
@@ -167,15 +227,6 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
         ptr = nextPtr
     }
 
-    override fun close() {
-        debug("Closing serial port")
-        ignoreException { ioManager?.let { it.stop() } }
-        ioManager = null
-        ignoreException {
-            uart?.close() // This will cause the reader thread to exit
-        }
-        uart = null
-    }
 
     /**
      * Called when [SerialInputOutputManager.run] aborts due to an error.
@@ -184,7 +235,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
         errormsg("Serial error: $e")
         // FIXME - try to reconnect to the device when it comes back
 
-        service.onDisconnect(isPermanent = false)
+        onDeviceDisconnect()
     }
 
     /**

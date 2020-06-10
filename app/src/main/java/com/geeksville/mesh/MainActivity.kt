@@ -374,9 +374,6 @@ class MainActivity : AppCompatActivity(), Logging,
 
          */
 
-        // Handle any intent
-        handleIntent(intent)
-
         /* setContent {
             MeshApp()
         } */
@@ -401,6 +398,9 @@ class MainActivity : AppCompatActivity(), Logging,
 
             connectStatusImage.setImageResource(image)
         })
+
+        // Handle any intent
+        handleIntent(intent)
 
         askToRate()
     }
@@ -430,9 +430,10 @@ class MainActivity : AppCompatActivity(), Logging,
                 // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
             }
 
-            UsbManager.ACTION_USB_ACCESSORY_ATTACHED -> {
+            UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
                 val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
-                errormsg("Handle USB device attached! $device")
+                debug("Handle USB device attached! $device")
+                showSettingsPage() // Later in the boot we should show the settings page
             }
 
             Intent.ACTION_MAIN -> {
@@ -750,7 +751,11 @@ class MainActivity : AppCompatActivity(), Logging,
 
         val bonded = RadioInterfaceService.getBondedDeviceAddress(this) != null
         if (!bonded)
-            pager.currentItem = 5
+            showSettingsPage()
+    }
+
+    fun showSettingsPage() {
+        pager.currentItem = 5
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
