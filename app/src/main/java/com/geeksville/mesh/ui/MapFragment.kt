@@ -132,6 +132,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     var mapView: MapView? = null
 
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -141,25 +142,32 @@ class MapFragment : ScreenFragment("Map"), Logging {
             mapView = v
             v.onCreate(savedInstanceState)
 
-            v.getMapAsync { map ->
+            mapView?.let { v ->
+                // Each time the pane is shown start fetching new map info (we do this here instead of
+                // onCreate because getMapAsync can die in native code if the view goes away)
+                v.getMapAsync { map ->
 
-                // val markerIcon = BitmapFactory.decodeResource(context.resources, R.drawable.ic_twotone_person_pin_24)
-                val markerIcon =
-                    requireActivity().getDrawable(R.drawable.ic_twotone_person_pin_24)!!
+                    if (view != null) { // it might have gone away by now
+                        // val markerIcon = BitmapFactory.decodeResource(context.resources, R.drawable.ic_twotone_person_pin_24)
+                        val markerIcon =
+                            requireActivity().getDrawable(R.drawable.ic_twotone_person_pin_24)!!
 
-                map.setStyle(Style.OUTDOORS) { style ->
-                    style.addSource(nodePositions)
-                    style.addImage(markerImageId, markerIcon)
-                    style.addLayer(nodeLayer)
-                    style.addLayer(labelLayer)
+                        map.setStyle(Style.OUTDOORS) { style ->
+                            style.addSource(nodePositions)
+                            style.addImage(markerImageId, markerIcon)
+                            style.addLayer(nodeLayer)
+                            style.addLayer(labelLayer)
+                        }
+
+                        model.nodeDB.nodes.observe(viewLifecycleOwner, Observer { nodes ->
+                            if (view != null)
+                                onNodesChanged(map, nodes.values)
+                        })
+
+                        //map.uiSettings.isScrollGesturesEnabled = true
+                        //map.uiSettings.isZoomGesturesEnabled = true
+                    }
                 }
-
-                model.nodeDB.nodes.observe(viewLifecycleOwner, Observer { nodes ->
-                    onNodesChanged(map, nodes.values)
-                })
-
-                //map.uiSettings.isScrollGesturesEnabled = true
-                //map.uiSettings.isZoomGesturesEnabled = true
             }
         }
     }
