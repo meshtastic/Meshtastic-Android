@@ -573,7 +573,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     }
 
     fun asyncDiscoverServices(cb: (Result<Unit>) -> Unit) {
-        logAssert(workQueue.isEmpty() && currentWork == null) // I don't think anything should be able to sneak in front
         queueDiscoverServices(CallbackContinuation(cb))
     }
 
