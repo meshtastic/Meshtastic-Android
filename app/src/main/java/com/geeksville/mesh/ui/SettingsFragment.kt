@@ -124,7 +124,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     class USBDeviceListEntry(usbManager: UsbManager, val usb: UsbSerialDriver) : DeviceListEntry(
         usb.device.deviceName,
         "s${usb.device.deviceName}",
-        usbManager.hasPermission(usb.device)
+        SerialInterface.assumePermission || usbManager.hasPermission(usb.device)
     )
 
     override fun onCleared() {

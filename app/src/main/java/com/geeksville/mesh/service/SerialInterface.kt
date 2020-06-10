@@ -22,6 +22,13 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
         private const val START2 = 0xc3.toByte()
         private const val MAX_TO_FROM_RADIO_SIZE = 512
 
+        /**
+         * according to https://stackoverflow.com/questions/12388914/usb-device-access-pop-up-suppression/15151075#15151075
+         * we should never ask for USB permissions ourselves, instead we should rely on the external dialog printed by the system.  If
+         * we do that the system will remember we have accesss
+         */
+        val assumePermission = true
+
         fun findDrivers(context: Context): List<UsbSerialDriver> {
             val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
             val drivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager)
@@ -35,7 +42,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
         fun addressValid(context: Context, rest: String): Boolean {
             findSerial(context, rest)?.let { d ->
                 val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
-                return manager.hasPermission(d.device)
+                return assumePermission || manager.hasPermission(d.device)
             }
             return false
         }
@@ -67,7 +74,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
                 debug("attaching USB")
                 val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
                 val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
-                if (manager.hasPermission(device)) {
+                if (assumePermission || manager.hasPermission(device)) {
                     // reinit the port from scratch and reopen
                     onDeviceDisconnect()
                     connect()
@@ -118,11 +125,10 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
             val connection = manager.openDevice(device.device)
             if (connection == null) {
                 // FIXME add UsbManager.requestPermission(device, ..) handling to activity
-                TODO("Need permissions for port")
+                errormsg("Need permissions for port")
             } else {
                 val port = device.ports[0] // Most devices have just one port (port 0)
-
-                connection
+                
                 port.open(connection)
                 port.setParameters(921600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
                 uart = device
