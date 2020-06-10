@@ -18,6 +18,7 @@ import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.RemoteException
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -695,8 +696,15 @@ class MainActivity : AppCompatActivity(), Logging,
             if (connectionState != MeshService.ConnectionState.CONNECTED)
                 updateNodesFromDevice()
 
-            // We won't receive a notify for the initial state of connection, so we force an update here
-            onMeshConnectionChanged(connectionState)
+            try {
+                // We won't receive a notify for the initial state of connection, so we force an update here
+                onMeshConnectionChanged(connectionState)
+            } catch (ex: RemoteException) {
+                // If we get an exception while reading our service config, the device might have gone away, double check to see if we are really connected
+                errormsg("Device error during init ${ex.message}")
+                model.isConnected.value =
+                    MeshService.ConnectionState.valueOf(service.connectionState())
+            }
 
             debug("connected to mesh service, isConnected=${model.isConnected.value}")
         }
