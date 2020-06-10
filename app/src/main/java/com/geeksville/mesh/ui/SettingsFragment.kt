@@ -21,6 +21,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.RadioButton
+import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
@@ -748,6 +749,15 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         super.onResume()
         if (!hasCompanionDeviceApi && model.bluetoothEnabled.value!!)
             scanModel.startScan()
+
+        // Keep reminding user BLE is still off
+        if (scanModel.bluetoothAdapter?.isEnabled != true) {
+            Toast.makeText(
+                requireContext(),
+                R.string.error_bluetooth,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 }
 
