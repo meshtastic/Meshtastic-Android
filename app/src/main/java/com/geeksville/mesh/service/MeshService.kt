@@ -908,14 +908,20 @@ class MeshService : Service(), Logging {
         offlineSentPackets.clear()
     }
 
+    /**
+     * Change the status on a data packet and update watchers
+     */
+    private fun changeStatus(p: DataPacket, m: MessageStatus) {
+        p.status = m
+        broadcastMessageStatus(p)
+    }
 
     /**
      * Handle an ack/nak packet by updating sent message status
      */
     private fun handleAckNak(isAck: Boolean, id: Int) {
         sentPackets.remove(id)?.let { p ->
-            p.status = if (isAck) MessageStatus.DELIVERED else MessageStatus.ERROR
-            broadcastMessageStatus(p)
+            changeStatus(p, if (isAck) MessageStatus.DELIVERED else MessageStatus.ERROR)
         }
     }
 
@@ -1464,9 +1470,14 @@ class MeshService : Service(), Logging {
     private fun deleteOldPackets() {
         myNodeInfo?.apply {
             val now = System.currentTimeMillis()
-            sentPackets.values.forEach { p ->
-                if (p.status == MessageStatus.ENROUTE && p.time + messageTimeoutMsec < now)
-                    handleAckNak(false, p.id)
+
+            val old = sentPackets.values.filter { p ->
+                (p.status == MessageStatus.ENROUTE && p.time + messageTimeoutMsec < now)
+            }
+
+            // Do this using a separate list to prevent concurrent modification exceptions
+            old.forEach { p ->
+                handleAckNak(false, p.id)
             }
         }
     }
