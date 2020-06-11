@@ -133,14 +133,14 @@ class MapFragment : ScreenFragment("Map"), Logging {
     var mapView: MapView? = null
 
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(viewIn: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         // We might not have a real mapview if running with analytics
         if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
-            val v = view.findViewById<MapView>(R.id.mapView)
-            mapView = v
-            v.onCreate(savedInstanceState)
+            val vIn = viewIn.findViewById<MapView>(R.id.mapView)
+            mapView = vIn
+            vIn.onCreate(savedInstanceState)
 
             mapView?.let { v ->
                 // Each time the pane is shown start fetching new map info (we do this here instead of
