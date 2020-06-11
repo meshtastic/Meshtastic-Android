@@ -210,28 +210,34 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 
     /// Send a packet/command out the radio link
     override fun handleSendToRadio(a: ByteArray) {
-        safe?.let { s ->
-            val uuid = BTM_TORADIO_CHARACTER
-            debug("queuing ${a.size} bytes to $uuid")
+        try {
+            safe?.let { s ->
+                val uuid = BTM_TORADIO_CHARACTER
+                debug("queuing ${a.size} bytes to $uuid")
 
-            // Note: we generate a new characteristic each time, because we are about to
-            // change the data and we want the data stored in the closure
-            val toRadio = getCharacteristic(uuid)
-            toRadio.value = a
+                // Note: we generate a new characteristic each time, because we are about to
+                // change the data and we want the data stored in the closure
+                val toRadio = getCharacteristic(uuid)
+                toRadio.value = a
 
-            s.asyncWriteCharacteristic(toRadio) { r ->
-                try {
-                    r.getOrThrow()
-                    debug("write of ${a.size} bytes completed")
+                s.asyncWriteCharacteristic(toRadio) { r ->
+                    try {
+                        r.getOrThrow()
+                        debug("write of ${a.size} bytes completed")
 
-                    if (isFirstSend) {
-                        isFirstSend = false
-                        doReadFromRadio(false)
+                        if (isFirstSend) {
+                            isFirstSend = false
+                            doReadFromRadio(false)
+                        }
+                    } catch (ex: Exception) {
+                        warn("error during asyncWriteCharacteristic - disconnecting, ${ex.message}")
+                        service.serviceScope.handledLaunch { retryDueToException() }
                     }
-                } catch (ex: Exception) {
-                    errormsg("Ignoring sendToRadio exception: $ex")
                 }
             }
+        } catch (ex: BLEException) {
+            warn("error during handleSendToRadio - disconnecting, ${ex.message}")
+            service.serviceScope.handledLaunch { retryDueToException() }
         }
     }
 
@@ -257,9 +263,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
                             startWatchingFromNum()
                     }
                 } catch (ex: BLEException) {
-                    warn(
-                        "error during doReadFromRadio - disconnecting, ${ex.message}"
-                    )
+                    warn("error during doReadFromRadio - disconnecting, ${ex.message}")
                     service.serviceScope.handledLaunch { retryDueToException() }
                 }
             }
