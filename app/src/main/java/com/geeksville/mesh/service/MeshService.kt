@@ -888,6 +888,13 @@ class MeshService : Service(), Logging {
         }
     }
 
+    private fun sendNow(p: DataPacket) {
+        val packet = toMeshPacket(p)
+        p.status = MessageStatus.ENROUTE
+        p.time = System.currentTimeMillis() // update time to the actual time we started sending
+        sendToRadio(packet)
+    }
+
     /// Process any packets that showed up too early
     private fun processEarlyPackets() {
         earlyReceivedPackets.forEach { processReceivedMeshPacket(it) }
@@ -895,11 +902,7 @@ class MeshService : Service(), Logging {
 
         offlineSentPackets.forEach { p ->
             // encapsulate our payload in the proper protobufs and fire it off
-            val packet = toMeshPacket(p)
-            p.status = MessageStatus.ENROUTE
-            p.time =
-                System.currentTimeMillis() // update time to the actual time we started sending
-            sendToRadio(packet)
+            sendNow(p)
             broadcastMessageStatus(p)
         }
         offlineSentPackets.clear()
@@ -1468,6 +1471,12 @@ class MeshService : Service(), Logging {
         }
     }
 
+
+    private fun enqueueForSending(p: DataPacket) {
+        p.status = MessageStatus.QUEUED
+        offlineSentPackets.add(p)
+    }
+
     val binder = object : IMeshService.Stub() {
 
         override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
@@ -1527,19 +1536,18 @@ class MeshService : Service(), Logging {
                     sentPackets[p.id] = p
                 }
 
-                // If radio is sleeping, queue the packet
+                // If radio is sleeping or disconnected, queue the packet
                 when (connectionState) {
-                    ConnectionState.DEVICE_SLEEP -> {
-                        p.status = MessageStatus.QUEUED
-                        offlineSentPackets.add(p)
-                    }
-                    else -> {
-                        p.status = MessageStatus.ENROUTE
-
-                        // encapsulate our payload in the proper protobufs and fire it off
-                        val packet = toMeshPacket(p)
-                        sendToRadio(packet)
-                    }
+                    ConnectionState.CONNECTED ->
+                        try {
+                            sendNow(p)
+                        } catch (ex: Exception) {
+                            // This can happen if a user is unlucky and the device goes to sleep after the GUI starts a send, but before we update connectionState
+                            errormsg("Error sending message, so enqueueing", ex)
+                            enqueueForSending(p)
+                        }
+                    else -> // sleeping or disconnected
+                        enqueueForSending(p)
                 }
 
                 GeeksvilleApplication.analytics.track(
