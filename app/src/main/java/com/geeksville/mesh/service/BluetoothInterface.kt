@@ -12,7 +12,6 @@ import com.geeksville.concurrent.handledLaunch
 import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
 import com.geeksville.util.ignoreException
-import com.geeksville.util.toRemoteExceptions
 import kotlinx.coroutines.delay
 import java.lang.reflect.Method
 import java.util.*
@@ -208,21 +207,31 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         }
     }
 
-    /// Send a packet/command out the radio link
-    override fun handleSendToRadio(p: ByteArray) {
-        try {
-            debug("sending to radio")
-            doWrite(
-                BTM_TORADIO_CHARACTER,
-                p
-            ) // Do a synchronous write, so that we can then do our reads if needed
 
-            if (isFirstSend) {
-                isFirstSend = false
-                doReadFromRadio(false)
+    /// Send a packet/command out the radio link
+    override fun handleSendToRadio(a: ByteArray) {
+        safe?.let { s ->
+            val uuid = BTM_TORADIO_CHARACTER
+            debug("queuing ${a.size} bytes to $uuid")
+
+            // Note: we generate a new characteristic each time, because we are about to
+            // change the data and we want the data stored in the closure
+            val toRadio = getCharacteristic(uuid)
+            toRadio.value = a
+
+            s.asyncWriteCharacteristic(toRadio) { r ->
+                try {
+                    r.getOrThrow()
+                    debug("write of ${a.size} bytes completed")
+
+                    if (isFirstSend) {
+                        isFirstSend = false
+                        doReadFromRadio(false)
+                    }
+                } catch (ex: Exception) {
+                    errormsg("Ignoring sendToRadio exception: $ex")
+                }
             }
-        } catch (ex: Exception) {
-            errormsg("Ignoring sendToRadio exception: $ex")
         }
     }
 
@@ -248,9 +257,8 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
                             startWatchingFromNum()
                     }
                 } catch (ex: BLEException) {
-                    errormsg(
-                        "error during doReadFromRadio",
-                        ex
+                    warn(
+                        "error during doReadFromRadio - disconnecting, ${ex.message}"
                     )
                     service.serviceScope.handledLaunch { retryDueToException() }
                 }
@@ -274,10 +282,21 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
     /// We only force service refresh the _first_ time we connect to the device.  Thereafter it is assumed the firmware didn't change
     private var hasForcedRefresh = false
 
+    @Volatile
+    var fromNumChanged = false
+
     private fun startWatchingFromNum() {
         safe!!.setNotify(fromNum, true) {
-            debug("fromNum changed, so we are reading new messages")
-            doReadFromRadio(false)
+            // We might get multiple notifies before we get around to reading from the radio - so just set one flag
+            fromNumChanged = true
+            debug("fromNum changed")
+            service.serviceScope.handledLaunch {
+                if (fromNumChanged) {
+                    fromNumChanged = false
+                    debug("fromNum changed, so we are reading new messages")
+                    doReadFromRadio(false)
+                }
+            }
         }
     }
 
@@ -309,9 +328,11 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
     }
 
     /// We only try to set MTU once, because some buggy implementations fail
+    @Volatile
     private var shouldSetMtu = true
 
     /// For testing
+    @Volatile
     private var isFirstTime = true
 
     private fun doDiscoverServicesAndInit() {
@@ -410,22 +431,6 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
             lostConnectCb = { service.onDisconnect(isPermanent = false) })
     }
 
-    /**
-     * do a synchronous write operation
-     */
-    private fun doWrite(uuid: UUID, a: ByteArray) = toRemoteExceptions {
-        safe?.let { s ->
-            debug("queuing ${a.size} bytes to $uuid")
-
-            // Note: we generate a new characteristic each time, because we are about to
-            // change the data and we want the data stored in the closure
-            val toRadio = getCharacteristic(uuid)
-            toRadio.value = a
-
-            s.writeCharacteristic(toRadio)
-            debug("write of ${a.size} bytes completed")
-        }
-    }
 
     /**
      * Get a chracteristic, but in a safe manner because some buggy BLE implementations might return null

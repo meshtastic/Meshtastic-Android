@@ -58,12 +58,18 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     /// Users can access the GATT directly as needed
     var gatt: BluetoothGatt? = null
 
+    @Volatile
     var state = BluetoothProfile.STATE_DISCONNECTED
+
+    @Volatile
     private var currentWork: BluetoothContinuation? = null
     private val workQueue = mutableListOf<BluetoothContinuation>()
 
     // Called for reconnection attemps
+    @Volatile
     private var connectionCallback: ((Result<Unit>) -> Unit)? = null
+
+    @Volatile
     private var lostConnectCallback: (() -> Unit)? = null
 
     /// from characteristic UUIDs to the handler function for notfies
@@ -123,13 +129,17 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             debug("Starting work: $tag")
             return startWorkFn()
         }
+
+        override fun toString(): String {
+            return super.toString()
+        }
     }
 
     /**
      * skanky hack to restart BLE if it says it is hosed
      * https://stackoverflow.com/questions/35103701/ble-android-onconnectionstatechange-not-being-called
      */
-    var mHandler: Handler = Handler()
+    private val mHandler: Handler = Handler()
 
     fun restartBle() {
         GeeksvilleApplication.analytics.track("ble_restart") // record # of times we needed to use this nasty hack
@@ -533,7 +543,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         lostConnectCb: () -> Unit
     ) {
         logAssert(workQueue.isEmpty())
-        logAssert(currentWork == null) // I don't think anything should be able to sneak in front
+        if (currentWork != null)
+            throw AssertionError("currentWork was not null: $currentWork")
 
         lostConnectCallback = lostConnectCb
         connectionCallback = if (autoConnect)
@@ -663,7 +674,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
         // Cancel any notifications - because when the device comes back it might have forgotten about us
         notifyHandlers.clear()
-        
+
         ignoreException {
             // Hmm - sometimes the "Connection closing" exception comes back to us - ignore it
             failAllWork(BLEException("Connection closing"))
