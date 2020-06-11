@@ -124,7 +124,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
     class USBDeviceListEntry(usbManager: UsbManager, val usb: UsbSerialDriver) : DeviceListEntry(
         usb.device.deviceName,
-        "s${usb.device.deviceName}",
+        SerialInterface.toInterfaceName(usb.device.deviceName),
         SerialInterface.assumePermission || usbManager.hasPermission(usb.device)
     )
 
@@ -277,14 +277,17 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
             /// The following call might return null if the user doesn't have bluetooth access permissions
             val s: BluetoothLeScanner? = bluetoothAdapter.bluetoothLeScanner
 
-            if (s == null) {
+            val usbDrivers = SerialInterface.findDrivers(context)
+
+            /* model.bluetoothEnabled.value */
+
+            if (s == null && usbDrivers.isEmpty()) {
                 errorText.value =
                     context.getString(R.string.requires_bluetooth)
 
                 false
             } else {
                 if (scanner == null) {
-                    debug("starting scan")
 
                     // Clear the old device list
                     devices.value?.clear()
@@ -292,23 +295,27 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     // Include a placeholder for "None"
                     addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
 
-                    SerialInterface.findDrivers(context).forEach { d ->
+                    usbDrivers.forEach { d ->
                         addDevice(
                             USBDeviceListEntry(usbManager, d)
                         )
                     }
 
-                    // filter and only accept devices that have our service
-                    val filter =
-                        ScanFilter.Builder()
-                            .setServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID))
-                            .build()
+                    if (s != null) { // could be null if bluetooth is disabled
+                        debug("starting scan")
 
-                    val settings =
-                        ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                            .build()
-                    s.startScan(listOf(filter), settings, scanCallback)
-                    scanner = s
+                        // filter and only accept devices that have our service
+                        val filter =
+                            ScanFilter.Builder()
+                                .setServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID))
+                                .build()
+
+                        val settings =
+                            ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                                .build()
+                        s.startScan(listOf(filter), settings, scanCallback)
+                        scanner = s
+                    }
                 } else {
                     debug("scan already running")
                 }
@@ -597,8 +604,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // Turn off the widgets for the new API (we turn on/off hte classic widgets when we start scanning
         changeRadioButton.visibility = View.GONE
 
+        showClassicWidgets(View.VISIBLE)
+
         model.bluetoothEnabled.observe(viewLifecycleOwner, Observer { enabled ->
-            showClassicWidgets(if (enabled) View.VISIBLE else View.GONE)
             if (enabled)
                 scanModel.startScan()
             else
@@ -616,39 +624,36 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             deviceRadioGroup.removeAllViews()
 
             val adapter = scanModel.bluetoothAdapter
-            if (adapter != null && adapter.isEnabled) {
-                // This code requres BLE to be enabled
 
-                var hasShownOurDevice = false
-                devices.values.forEach { device ->
-                    if (device.address == scanModel.selectedNotNull)
-                        hasShownOurDevice = true
-                    addDeviceButton(device, true)
-                }
+            var hasShownOurDevice = false
+            devices.values.forEach { device ->
+                if (device.address == scanModel.selectedNotNull)
+                    hasShownOurDevice = true
+                addDeviceButton(device, true)
+            }
 
-                // The device the user is already paired with is offline currently, still show it
-                // it in the list, but greyed out
-                if (!hasShownOurDevice) {
-                    if (scanModel.selectedBluetooth != null) {
-                        val bDevice =
-                            scanModel.bluetoothAdapter!!.getRemoteDevice(scanModel.selectedBluetooth)
-                        if (bDevice.name != null) { // ignore nodes that node have a name, that means we've lost them since they appeared
-                            val curDevice = BTScanModel.DeviceListEntry(
-                                bDevice.name,
-                                scanModel.selectedAddress!!,
-                                bDevice.bondState == BOND_BONDED
-                            )
-                            addDeviceButton(curDevice, false)
-                        }
-                    } else if (scanModel.selectedUSB != null) {
-                        // Must be a USB device, show a placeholder disabled entry
+            // The device the user is already paired with is offline currently, still show it
+            // it in the list, but greyed out
+            if (!hasShownOurDevice) {
+                if (scanModel.selectedBluetooth != null && adapter != null && adapter.isEnabled) {
+                    val bDevice =
+                        adapter.getRemoteDevice(scanModel.selectedBluetooth)
+                    if (bDevice.name != null) { // ignore nodes that node have a name, that means we've lost them since they appeared
                         val curDevice = BTScanModel.DeviceListEntry(
-                            scanModel.selectedUSB!!,
+                            bDevice.name,
                             scanModel.selectedAddress!!,
-                            false
+                            bDevice.bondState == BOND_BONDED
                         )
                         addDeviceButton(curDevice, false)
                     }
+                } else if (scanModel.selectedUSB != null) {
+                    // Must be a USB device, show a placeholder disabled entry
+                    val curDevice = BTScanModel.DeviceListEntry(
+                        scanModel.selectedUSB!!,
+                        scanModel.selectedAddress!!,
+                        false
+                    )
+                    addDeviceButton(curDevice, false)
                 }
             }
 
@@ -747,11 +752,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     override fun onResume() {
         super.onResume()
-        if (!hasCompanionDeviceApi && model.bluetoothEnabled.value!!)
+        if (!hasCompanionDeviceApi)
             scanModel.startScan()
 
         // Keep reminding user BLE is still off
-        if (scanModel.bluetoothAdapter?.isEnabled != true) {
+        val hasUSB = activity?.let { SerialInterface.findDrivers(it).isNotEmpty() } ?: true
+        if (scanModel.bluetoothAdapter?.isEnabled != true && !hasUSB) {
             Toast.makeText(
                 requireContext(),
                 R.string.error_bluetooth,

@@ -414,6 +414,9 @@ class MainActivity : AppCompatActivity(), Logging,
 
     private var requestedChannelUrl: Uri? = null
 
+    /** We keep the usb device here, so later we can give it to our service */
+    private var usbDevice: UsbDevice? = null
+
     /// Handle any itents that were passed into us
     private fun handleIntent(intent: Intent) {
         val appLinkAction = intent.action
@@ -434,7 +437,7 @@ class MainActivity : AppCompatActivity(), Logging,
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
                 val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
                 debug("Handle USB device attached! $device")
-                showSettingsPage() // Later in the boot we should show the settings page
+                usbDevice = device
             }
 
             Intent.ACTION_MAIN -> {
@@ -683,6 +686,12 @@ class MainActivity : AppCompatActivity(), Logging,
         override fun onConnected(service: com.geeksville.mesh.IMeshService) = exceptionReporter {
             model.meshService = service
 
+            usbDevice?.let { usb ->
+                debug("Switching to USB radio ${usb.deviceName}")
+                service.setDeviceAddress(SerialInterface.toInterfaceName(usb.deviceName))
+                usbDevice = null // Only switch once - thereafter it should be stored in settings
+            }
+
             // We don't start listening for packets until after we are connected to the service
             registerMeshReceiver()
 
@@ -746,23 +755,25 @@ class MainActivity : AppCompatActivity(), Logging,
     override fun onStart() {
         super.onStart()
 
-        // Ensures Bluetooth is available on the device and it is enabled. If not,
-        // displays a dialog requesting user permission to enable Bluetooth.
-        if (!isInTestLab) {
-            bluetoothAdapter?.takeIf { !it.isEnabled }?.apply {
-                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+        // Ask to start bluetooth if no USB devices are visible
+        val hasUSB = SerialInterface.findDrivers(this).isNotEmpty()
+        if (!isInTestLab && !hasUSB) {
+            bluetoothAdapter?.let {
+                if (!it.isEnabled) {
+                    val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+                }
             }
         }
 
         bindMeshService()
 
         val bonded = RadioInterfaceService.getBondedDeviceAddress(this) != null
-        if (!bonded)
+        if (!bonded && usbDevice == null) // we will handle USB later
             showSettingsPage()
     }
 
-    fun showSettingsPage() {
+    private fun showSettingsPage() {
         pager.currentItem = 5
     }
 
