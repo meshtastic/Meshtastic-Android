@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Meshtastic</string>
+    <string name="action_settings">Nastavenia</string>
+    <string name="channel_name">Názov kanálu</string>
+    <string name="channel_options">Nastavenia kanálu</string>
+    <string name="share_button">Tlačitko pre zdieľanie</string>
+    <string name="qr_code">QR kód</string>
+    <string name="unset">Zrušiť nastavenie</string>
+    <string name="connection_status">Stav pripojenia</string>
+    <string name="application_icon">Ikona aplikácie</string>
+    <string name="unknown_username">Neznáme užívateľské meno</string>
+    <string name="user_avatar">Užívateľov avatar</string>
+    <string name="sample_distance" translatable="false">2.13 km</string>
+    <string name="sample_message">Ahoj, našiel som cache-ku, je to kúsok od mňa vedľa veľkého tigra. Trochu ma to desí.</string>
+    <string name="some_username" translatable="false">SKH</string>
+    <string name="send_text">Odoslať text</string>
+    <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in alpha-testing, if you find problems please post on our forum: meshtastic.discourse.group.\n\nFor more information see our web page - www.meshtastic.org.</string>
+    <string name="username_unset">Užívateľské meno vymazané</string>
+    <string name="your_name">Vaše meno</string>
+    <string name="analytics_okay">Anonymné hlásenia o používaní aplikácie a jej chybách.</string>
+    <string name="looking_for_meshtastic_devices">Looking for Meshtastic devices…</string>
+    <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
+    <string name="test_devname2" translatable="false">Meshtastic_1267</string>
+    <string name="requires_bluetooth">Táto aplikácia vyžaduje prístup k Bluetooth. Prosím povoľte jej prístup v nastaveniach telefónu.</string>
+    <string name="error_bluetooth">Chyba - táto aplikácia potrebuje bluetooth.</string>
+    <string name="starting_pairing">Spúšťam párovanie</string>
+    <string name="pairing_failed">Párovanie zlyhalo</string>
+    <string name="url_for_join">URL pre pripojenie sa do Meshtastic MESH siete</string>
+    <string name="accept">Prijať</string>
+    <string name="cancel">Odmietnuť</string>
+    <string name="change_channel">Zmeniť kanál</string>
+    <string name="are_you_sure_channel">Ste si istý, že chcete zmeniť kanál? Všetka komunikácia s ostatnými vysielačmi prestane fungovať až do momentu distribúcie rovnakého nastavenia na ostatné vysielače.</string>
+    <string name="new_channel_rcvd">Obdržaná nová URL kanálu.</string>
+    <string name="do_you_want_switch">Chcete sa prpnúť na kanál \'%s\' ?</string>
+    <string name="map_not_allowed">You have analytics disabled. Unfortunately our map provider (mapbox) requires analytics to be allowed for their \'free\' plan. So we have turned off the map view.\n\n
+        If you would like to see the map, you\'ll need to turn on analytics in the Settings pane (also, for the time being you might need to force restart the application).\n\n
+        If you are interested in us paying for mapbox (or switching to a different map provider), please post in meshtastic.discourse.group</string>
+    <string name="permission_missing">A required permission is missing, Meshtastic won\'t be able to work properly.  Please enable in application settings.</string>
+    <string name="radio_sleeping">Vysielač je uspatý, nepodarilo sa zmeniť kanál</string>
+    <string name="report_bug">Nahlásenie chyby</string>
+    <string name="report_a_bug">Nahlásiť chybu</string>
+    <string name="report_bug_text">Ste si istý, že chcete nahlásiť chybu? Po odoslaní prosím pridajte správu do meshtastic.discourse.group aby sme vedeli priradiť Vami nahlásenú chybu ku Vášmu príspevku.</string>
+    <string name="report">Odoslať chybové hlásenie</string>
+    <string name="select_radio">Vyberte vysielač</string>
+    <string name="current_pair">Ste napárovaný s vysielačom %s</string>
+    <string name="not_paired_yet">Zatiaľ ste nenapárovali žiaden vysielač.</string>
+    <string name="change_radio">Zmeniť vysielač</string>
+    <string name="please_pair">Prosím pripojte zariadenie v nastaveniach systému Android.</string>
+    <string name="pairing_completed">Párovanie ukončené, štartujem službu</string>
+    <string name="pairing_failed_try_again">Párovanie zlyhalo, prosím skúste to znovu.</string>
+    <string name="location_disabled">Prístup k polohe zariadenia nie je povolený, nodokážem poskytnúť polohu zariadenia MESH sieti.</string>
+    <string name="share">Zdieľať</string>
+    <string name="disconnected">Odpojené</string>
+    <string name="device_sleeping">Zariadenie spí</string>
+    <string name="connected_count">Pripojený: %s z %s je online</string>
+    <string name="list_of_nodes">Zoznam vysielačov v sieti</string>
+    <string name="update_firmware">Aktualizácia firmvéru</string>
+    <string name="connected_to">Pripojené k vysielaču (%s)</string>
+    <string name="not_connected">Nepripojené, zvoľte si vysielač</string>
+    <string name="connected_sleeping">Pripojené k uspatému vysielaču.</string>
+    <string name="update_to">Aktualizovať na %s</string>
+    <string name="app_too_old">Aplikácia je príliš stará</string>
+    <string name="must_update">Musíte aktualizovať aplikáciu na Google Play store (alebo z Github). Je príliš stará pre komunikáciu s touto verziou firmvéru vysielača.</string>
+    <string name="none">Žiaden (zakázať)</string>
+    <string name="rate_dialog_no_en">Nie, ďakujem</string>
+    <string name="rate_dialog_cancel_en">Pripomenúť neskôr</string>
+    <string name="rate_dialog_ok_en">Ohodnotiť teraz</string>
+    <string name="rate_dialog_title_en">Ohodnoťte Meshtastic</string>
+</resources>

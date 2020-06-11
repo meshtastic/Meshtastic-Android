@@ -58,11 +58,13 @@ This project is the work of volunteers:
 * @artemisoftnian: Contributed Spanish translations.
 * @CycloMies: Contributed Swedish, Finnish and German translations.
 * @eriktheV-king: Contributed Dutch and French translations.
+* @Lgoix: Contributed tooltip for radio mode
 * @Eugene: Contributed Russian translation.
 * @Konradrundfunk: Contributed German fixes.
 * @Mango-sauce: Contributed Chinese translation.
 * @NEKLAN: Contributed Japanese translation.
 * @Ohcdh: Contributed Irish and Italian translations.
+* @Slavino: Contributed Slovak translation.
 
 Copyright 2019, Geeksville Industries, LLC. GPL V3 license
 
