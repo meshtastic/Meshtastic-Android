@@ -25,6 +25,7 @@ import android.view.MotionEvent
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.TooltipCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -390,14 +391,7 @@ class MainActivity : AppCompatActivity(), Logging,
         }.attach()
 
         model.isConnected.observe(this, Observer { connected ->
-            val image = when (connected) {
-                MeshService.ConnectionState.CONNECTED -> R.drawable.cloud_on
-                MeshService.ConnectionState.DEVICE_SLEEP -> R.drawable.ic_twotone_cloud_upload_24
-                MeshService.ConnectionState.DISCONNECTED -> R.drawable.cloud_off
-                else -> R.drawable.cloud_off
-            }
-
-            connectStatusImage.setImageResource(image)
+            updateConnectionStatusImage(connected)
         })
 
         // Handle any intent
@@ -405,6 +399,26 @@ class MainActivity : AppCompatActivity(), Logging,
 
         askToRate()
     }
+
+    private fun updateConnectionStatusImage(connected: MeshService.ConnectionState) {
+
+        val (image, tooltip) = when (connected) {
+            MeshService.ConnectionState.CONNECTED -> Pair(R.drawable.cloud_on, R.string.connected)
+            MeshService.ConnectionState.DEVICE_SLEEP -> Pair(
+                R.drawable.ic_twotone_cloud_upload_24,
+                R.string.device_sleeping
+            )
+            MeshService.ConnectionState.DISCONNECTED -> Pair(
+                R.drawable.cloud_off,
+                R.string.disconnected
+            )
+            else -> Pair(R.drawable.cloud_off, R.string.disconnected)
+        }
+
+        connectStatusImage.setImageResource(image)
+        TooltipCompat.setTooltipText(connectStatusImage, getString(tooltip))
+    }
+
 
 
     override fun onNewIntent(intent: Intent) {
