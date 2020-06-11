@@ -29,6 +29,8 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
          */
         val assumePermission = true
 
+        fun toInterfaceName(deviceName: String) = "s$deviceName"
+
         fun findDrivers(context: Context): List<UsbSerialDriver> {
             val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
             val drivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager)
@@ -85,6 +87,16 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
         }
     }
 
+    private val debugLineBuf = kotlin.text.StringBuilder()
+
+    /** The index of the next byte we are hoping to receive */
+    private var ptr = 0
+
+    /** The two halves of our length */
+    private var msb = 0
+    private var lsb = 0
+    private var packetLen = 0
+
     init {
         val filter = IntentFilter()
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
@@ -128,7 +140,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
                 errormsg("Need permissions for port")
             } else {
                 val port = device.ports[0] // Most devices have just one port (port 0)
-                
+
                 port.open(connection)
                 port.setParameters(921600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
                 uart = device
@@ -143,6 +155,10 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
                 thread.priority = Thread.MAX_PRIORITY
                 thread.name = "serial reader"
                 thread.start() // No need to keep reference to thread around, we quit by asking the ioManager to quit
+
+                // Before telling mesh service, send a few START1s to wake a sleeping device
+                val wakeBytes = byteArrayOf(START1, START1, START1, START1)
+                io.writeAsync(wakeBytes)
 
                 // Now tell clients they can (finally use the api)
                 service.broadcastConnectionChanged(true, isPermanent = false)
@@ -166,19 +182,20 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
         }
     }
 
+
     /** Print device serial debug output somewhere */
-    private fun debugOut(c: Byte) {
-        debug("Got c: ${c.toChar()}")
+    private fun debugOut(b: Byte) {
+        when (val c = b.toChar()) {
+            '\r' -> {
+            } // ignore
+            '\n' -> {
+                debug("DeviceLog: $debugLineBuf")
+                debugLineBuf.clear()
+            }
+            else ->
+                debugLineBuf.append(c)
+        }
     }
-
-    /** The index of the next byte we are hoping to receive */
-    var ptr = 0
-
-    /** The two halves of our length */
-    var msb = 0
-    var lsb = 0
-
-    var packetLen = 0
 
     private val rxPacket = ByteArray(MAX_TO_FROM_RADIO_SIZE)
 
