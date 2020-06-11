@@ -171,7 +171,6 @@ class RadioInterfaceService : Service(), Logging {
         runningService = this
         super.onCreate()
         registerReceiver(bluetoothStateReceiver, bluetoothStateReceiver.intent)
-        startInterface()
     }
 
     override fun onDestroy() {
@@ -237,7 +236,7 @@ class RadioInterfaceService : Service(), Logging {
 
 
     @SuppressLint("NewApi")
-    fun setBondedDeviceAddress(addressIn: String?) {
+    private fun setBondedDeviceAddress(addressIn: String?) {
         // Record that this use has configured a radio
         GeeksvilleApplication.analytics.track(
             "mesh_bond"
@@ -270,6 +269,14 @@ class RadioInterfaceService : Service(), Logging {
 
         override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
             setBondedDeviceAddress(deviceAddr)
+        }
+
+        /** If the service is not currently connected to the radio, try to connect now.  At boot the radio interface service will
+         * not connect to a radio until this call is received.  */
+        override fun connect() = toRemoteExceptions {
+            // We don't start actually talking to our device until MeshService binds to us - this prevents
+            // broadcasting connection events before MeshService is ready to receive them
+            startInterface()
         }
 
         override fun sendToRadio(a: ByteArray) {

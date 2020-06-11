@@ -5,6 +5,10 @@ package com.geeksville.mesh;
 
 interface IRadioInterfaceService {
 
+    /** If the service is not currently connected to the radio, try to connect now.  At boot the radio interface service will
+     * not connect to a radio until this call is received. */
+    void connect();
+
     void sendToRadio(in byte [] a);
 
     /// If a macaddress we will try to talk to our device, if null we will be idle.

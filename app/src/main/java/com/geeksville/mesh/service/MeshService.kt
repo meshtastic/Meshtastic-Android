@@ -148,7 +148,12 @@ class MeshService : Service(), Logging {
     private val clientPackages = mutableMapOf<String, String>()
 
     val radio = ServiceClient {
-        IRadioInterfaceService.Stub.asInterface(it)
+        val stub = IRadioInterfaceService.Stub.asInterface(it)
+
+        // Now that we are connected to the radio service, tell it to connect to the radio
+        stub.connect()
+
+        stub
     }
 
     private val serviceJob = Job()
