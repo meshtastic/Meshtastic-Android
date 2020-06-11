@@ -134,7 +134,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
 
     override fun onViewCreated(viewIn: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        super.onViewCreated(viewIn, savedInstanceState)
 
         // We might not have a real mapview if running with analytics
         if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
