@@ -41,4 +41,27 @@
     <string name="current_pair">Vous êtes actuellement jumelé à radio %s</string>
     <string name="not_paired_yet">Vous n\'avez pas encore jumelé une radio.</string>
     <string name="change_radio">Changer radio</string>
+    <string name="rate_dialog_title_en">Évaluer Meshtastic</string>
+    <string name="rate_dialog_message_en">Ceci est une application faite par des amateurs, cela vous dérangerait de prendre un moment pour la noter? Si vous trouvez des bugs, merci de poster sur notre forum. Merci pour votre aide!</string>
+    <string name="rate_dialog_ok_en">Évaluer maintenant</string>
+    <string name="rate_dialog_cancel_en">Évaluer plus tard</string>
+    <string name="rate_dialog_no_en">Non merci</string>
+    <string name="share">Partager</string>
+    <string name="disconnected">Déconnecté</string>
+    <string name="device_sleeping">Appareil en veille</string>
+    <string name="connected_count">Connecté: %s sur %s en ligne</string>
+    <string name="list_of_nodes">Une liste de nœuds dans le réseau</string>
+    <string name="update_firmware">Mise à jour du firmware</string>
+    <string name="connected">Connecté à la radio</string>
+    <string name="connected_to">Connecté à la radio (%s)</string>
+    <string name="not_connected">Non connecté, veuillez sélectionner une radio ci-dessous</string>
+    <string name="connected_sleeping">Connecté à la radio, mais en mode veille</string>
+    <string name="none">Aucun (désactivé)</string>
+    <string name="must_update">Vous devez mettre à jour cette application sur le Google Play Store (ou Github). Cette version n\'est plus compatible avec la radio.</string>
+    <string name="app_too_old">Application désuète</string>
+    <string name="please_pair">Veuillez jumeler l\'appareil dans les paramètres Android.</string>
+    <string name="pairing_completed">Jumelage  terminé, démarrage du service</string>
+    <string name="pairing_failed_try_again">Le jumelage a échoué, veuillez sélectionner à nouveau</string>
+    <string name="location_disabled">L\'accès à la position est désactivé, ne peut pas fournir de position au mesh.</string>
+    <string name="update_to">Mise à jour vers %s</string>
 </resources>
