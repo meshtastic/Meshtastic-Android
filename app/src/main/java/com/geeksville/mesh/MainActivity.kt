@@ -211,9 +211,7 @@ class MainActivity : AppCompatActivity(), Logging,
         ) != PackageManager.PERMISSION_GRANTED
     }
 
-    private fun requestPermission() {
-        debug("Checking permissions")
-
+    private fun getMissingPermissions(): List<String> {
         val perms = mutableListOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -234,7 +232,13 @@ class MainActivity : AppCompatActivity(), Logging,
             perms.add(Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND)
         }
 
-        val missingPerms = getMissingPermissions(perms)
+        return getMissingPermissions(perms)
+    }
+
+    private fun requestPermission() {
+        debug("Checking permissions")
+
+        val missingPerms = getMissingPermissions()
         if (missingPerms.isNotEmpty()) {
             missingPerms.forEach {
                 // Permission is not granted
@@ -263,6 +267,31 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
 
+    /**
+     * Remind user he's disabled permissions we need
+     */
+    private fun warnMissingPermissions() {
+        // Older versions of android don't know about these permissions - ignore failure to grant
+        val ignoredPermissions = setOf(
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND,
+            Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND
+        )
+
+        val deniedPermissions = getMissingPermissions().filter { name ->
+            !ignoredPermissions.contains(name)
+        }
+
+        if (deniedPermissions.isNotEmpty()) {
+            errormsg("Denied permissions: ${deniedPermissions.joinToString(",")}")
+            Toast.makeText(
+                this,
+                getString(R.string.permission_missing),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -270,26 +299,6 @@ class MainActivity : AppCompatActivity(), Logging,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        // Older versions of android don't know about these permissions - ignore failure to grant
-        val ignoredPermissions = arrayOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND,
-            Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND
-        )
-
-        val deniedPermissions = permissions.filterIndexed { index, name ->
-            grantResults[index] == PackageManager.PERMISSION_DENIED &&
-                    !ignoredPermissions.contains(name)
-        }
-
-        if (deniedPermissions.isNotEmpty()) {
-            warn("Denied permissions: ${deniedPermissions.joinToString(",")}")
-            Toast.makeText(
-                this,
-                getString(R.string.permission_missing),
-                Toast.LENGTH_LONG
-            ).show()
-        }
         updateBluetoothEnabled()
     }
 
@@ -418,7 +427,6 @@ class MainActivity : AppCompatActivity(), Logging,
         connectStatusImage.setImageResource(image)
         TooltipCompat.setTooltipText(connectStatusImage, getString(tooltip))
     }
-
 
 
     override fun onNewIntent(intent: Intent) {
@@ -768,6 +776,8 @@ class MainActivity : AppCompatActivity(), Logging,
 
     override fun onStart() {
         super.onStart()
+
+        warnMissingPermissions()
 
         // Ask to start bluetooth if no USB devices are visible
         val hasUSB = SerialInterface.findDrivers(this).isNotEmpty()
