@@ -5,13 +5,12 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.content.Context
-import com.geeksville.analytics.DataPair
-import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
 import com.geeksville.util.ignoreException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import java.lang.reflect.Method
 import java.util.*
@@ -230,17 +229,29 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
                             doReadFromRadio(false)
                         }
                     } catch (ex: Exception) {
-                        warn("error during asyncWriteCharacteristic - disconnecting, ${ex.message}")
-                        service.serviceScope.handledLaunch { retryDueToException() }
+                        scheduleReconnect("error during asyncWriteCharacteristic - disconnecting, ${ex.message}")
                     }
                 }
             }
         } catch (ex: BLEException) {
-            warn("error during handleSendToRadio - disconnecting, ${ex.message}")
-            service.serviceScope.handledLaunch { retryDueToException() }
+            scheduleReconnect("error during handleSendToRadio ${ex.message}")
         }
     }
 
+    @Volatile
+    private var reconnectJob: Job? = null
+
+    /**
+     * We had some problem, schedule a reconnection attempt (if one isn't already queued)
+     */
+    fun scheduleReconnect(reason: String) {
+        if (reconnectJob == null) {
+            warn("Scheduling reconnect because $reason")
+            reconnectJob = service.serviceScope.handledLaunch { retryDueToException() }
+        } else {
+            warn("Skipping reconnect for $reason")
+        }
+    }
 
     /// Attempt to read from the fromRadio mailbox, if data is found broadcast it to android apps
     private fun doReadFromRadio(firstRead: Boolean) {
@@ -263,8 +274,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
                             startWatchingFromNum()
                     }
                 } catch (ex: BLEException) {
-                    warn("error during doReadFromRadio - disconnecting, ${ex.message}")
-                    service.serviceScope.handledLaunch { retryDueToException() }
+                    scheduleReconnect("error during doReadFromRadio - disconnecting, ${ex.message}")
                 }
             }
         }
@@ -309,12 +319,6 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
      * disconnect and try again when the device reenumerates.
      */
     private suspend fun retryDueToException() {
-        // Track how often in the field we need this hack
-        GeeksvilleApplication.analytics.track(
-            "ble_reconnect_hack",
-            DataPair(1)
-        )
-
         /// We gracefully handle safe being null because this can occur if someone has unpaired from our device - just abandon the reconnect attempt
         val s = safe
         if (s != null) {
@@ -324,6 +328,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
                 s.closeConnection()
             }
             delay(1000) // Give some nasty time for buggy BLE stacks to shutdown (500ms was not enough)
+            reconnectJob = null // Any new reconnect requests after this will be allowed to run
             warn("Attempting reconnect")
             startConnect()
         } else {
@@ -365,11 +370,9 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
                     // Immediately broadcast any queued packets sitting on the device
                     doReadFromRadio(true)
                 } catch (ex: BLEException) {
-                    errormsg(
-                        "Unexpected error in initial device enumeration, forcing disconnect",
-                        ex
+                    scheduleReconnect(
+                        "Unexpected error in initial device enumeration, forcing disconnect $ex"
                     )
-                    retryDueToException()
                 }
             }
         }
@@ -398,12 +401,10 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 
                     doDiscoverServicesAndInit()
                 } catch (ex: BLEException) {
-                    errormsg(
-                        "Giving up on setting MTUs, forcing disconnect",
-                        ex
-                    )
                     shouldSetMtu = false
-                    service.serviceScope.handledLaunch { retryDueToException() }
+                    scheduleReconnect(
+                        "Giving up on setting MTUs, forcing disconnect $ex"
+                    )
                 }
             }
         else

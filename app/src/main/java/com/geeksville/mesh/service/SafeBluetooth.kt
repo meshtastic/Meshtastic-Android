@@ -196,7 +196,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                         val oldstate = state
                         state = newState
                         if (oldstate == BluetoothProfile.STATE_CONNECTED) {
-                            info("Lost connection - aborting current work")
+                            info("Lost connection - aborting current work: $currentWork")
 
                             /*
                             Supposedly this reconnect attempt happens automatically
@@ -224,8 +224,10 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                                 debug("queuing a reconnection callback")
                                 assert(currentWork == null)
 
-                                if (!currentConnectIsAuto) // we must have been running during that 1-time manual connect, switch to auto-mode from now on
+                                if (!currentConnectIsAuto) { // we must have been running during that 1-time manual connect, switch to auto-mode from now on
+                                    closeGatt() // Close the old non-auto connection
                                     lowLevelConnect(true)
+                                }
 
                                 // note - we don't need an init fn (because that would normally redo the connectGatt call - which we don't need)
                                 queueWork("reconnect", CallbackContinuation(cb)) { -> true }
@@ -243,6 +245,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                             // to initiate a background connection.
                             if (autoConnect) {
                                 warn("Failed on non-auto connect, falling back to auto connect attempt")
+                                closeGatt() // Close the old non-auto connection
                                 lowLevelConnect(true)
                             }
                         }
@@ -484,6 +487,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     private fun lowLevelConnect(autoNow: Boolean): BluetoothGatt? {
         currentConnectIsAuto = autoNow
+        logAssert(gatt == null)
 
         val g = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             device.connectGatt(
@@ -663,6 +667,18 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     ) = queueWriteDescriptor(c, CallbackContinuation(cb))
 
 
+    /** Close just the GATT device but keep our pending callbacks active */
+    fun closeGatt() {
+
+        gatt?.let { g ->
+            info("Closing our GATT connection")
+            gatt =
+                null // Clear this first so the onConnectionChange callback can ignore while we are shutting down
+            g.disconnect()
+            g.close()
+        }
+    }
+
     /**
      * Close down any existing connection, any existing calls (including async connects will be
      * cancelled and you'll need to recall connect to use this againt
@@ -675,17 +691,11 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         // Cancel any notifications - because when the device comes back it might have forgotten about us
         notifyHandlers.clear()
 
+        closeGatt()
+
         ignoreException {
             // Hmm - sometimes the "Connection closing" exception comes back to us - ignore it
             failAllWork(BLEException("Connection closing"))
-        }
-
-        gatt?.let { g ->
-            info("Closing our GATT connection")
-            gatt =
-                null // Clear this first so the onConnectionChange callback can ignore while we are shutting down
-            g.disconnect()
-            g.close()
         }
     }
 
