@@ -1327,9 +1327,6 @@ class MeshService : Service(), Logging {
         debug("Sending our position to=$destNum lat=$lat, lon=$lon, alt=$alt")
 
         val position = MeshProtos.Position.newBuilder().also {
-            it.latitudeD = lat // Only old radios will use this variant, others will just ignore it
-            it.longitudeD = lon
-
             it.longitudeI = Position.degI(lon)
             it.latitudeI = Position.degI(lat)
 

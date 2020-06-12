@@ -42,8 +42,8 @@ data class Position(
      */
     constructor(p: MeshProtos.Position, defaultTime: Int = currentTime()) : this(
         // We prefer the int version of lat/lon but if not available use the depreciated legacy version
-        if (p.latitudeI == 0) p.latitudeD else degD(p.latitudeI),
-        if (p.longitudeI == 0) p.longitudeD else degD(p.longitudeI),
+        degD(p.latitudeI),
+        degD(p.longitudeI),
         p.altitude,
         if (p.time != 0) p.time else defaultTime
     )
