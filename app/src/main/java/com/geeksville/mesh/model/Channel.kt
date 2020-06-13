@@ -9,6 +9,9 @@ import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import java.net.MalformedURLException
 
+/** Utility function to make it easy to declare byte arrays - FIXME move someplace better */
+fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
+
 
 data class Channel(
     val settings: MeshProtos.ChannelSettings = MeshProtos.ChannelSettings.getDefaultInstance()
@@ -16,6 +19,12 @@ data class Channel(
     companion object {
         // Note: this string _SHOULD NOT BE LOCALIZED_ because it directly hashes to values used on the device for the default channel name.
         val defaultChannelName = "Default"
+
+        // These bytes must math the well known and not secret bytes used the default channel AES128 key device code
+        val channelDefaultKey = byteArrayOfInts(
+            0xd4, 0xf1, 0xbb, 0x3a, 0x20, 0x29, 0x07, 0x59,
+            0xf0, 0xbc, 0xff, 0xab, 0xcf, 0x4e, 0x69, 0xbf
+        )
 
         // Placeholder when emulating
         val emulated = Channel(
