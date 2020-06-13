@@ -387,7 +387,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         info("Connected to radio!")
 
         if (needForceRefresh) { // Our ESP32 code doesn't properly generate "service changed" indications.  Therefore we need to force a refresh on initial start
-            needForceRefresh = false
+            //needForceRefresh = false // In fact, because of tearing down BLE in sleep on the ESP32, our handle # assignments are not stable across sleep - so we much refetch every time
             forceServiceRefresh()
         }
 
