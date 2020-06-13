@@ -620,6 +620,7 @@ class MeshService : Service(), Logging {
     private var radioConfig: MeshProtos.RadioConfig? = null
 
     /// True after we've done our initial node db init
+    @Volatile
     private var haveNodeDB = false
 
     // The database of active nodes, index is the node number
@@ -933,6 +934,7 @@ class MeshService : Service(), Logging {
         // decided to pass through to us (except for broadcast packets)
         //val toNum = packet.to
 
+        debug("Recieved: $packet")
         val p = packet.decoded
 
         // If the rxTime was not set by the device (because device software was old), guess at a time
@@ -1154,29 +1156,30 @@ class MeshService : Service(), Logging {
                 }
 
                 RadioInterfaceService.RECEIVE_FROMRADIO_ACTION -> {
-                    val proto =
-                        MeshProtos.FromRadio.parseFrom(
-                            intent.getByteArrayExtra(
-                                EXTRA_PAYLOAD
-                            )!!
-                        )
-                    info("Received from radio service: ${proto.toOneLineString()}")
-                    when (proto.variantCase.number) {
-                        MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(
-                            proto.packet
-                        )
+                    val bytes = intent.getByteArrayExtra(EXTRA_PAYLOAD)!!
+                    try {
+                        val proto =
+                            MeshProtos.FromRadio.parseFrom(bytes)
+                        info("Received from radio service: ${proto.toOneLineString()}")
+                        when (proto.variantCase.number) {
+                            MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(
+                                proto.packet
+                            )
 
-                        MeshProtos.FromRadio.CONFIG_COMPLETE_ID_FIELD_NUMBER -> handleConfigComplete(
-                            proto.configCompleteId
-                        )
+                            MeshProtos.FromRadio.CONFIG_COMPLETE_ID_FIELD_NUMBER -> handleConfigComplete(
+                                proto.configCompleteId
+                            )
 
-                        MeshProtos.FromRadio.MY_INFO_FIELD_NUMBER -> handleMyInfo(proto.myInfo)
+                            MeshProtos.FromRadio.MY_INFO_FIELD_NUMBER -> handleMyInfo(proto.myInfo)
 
-                        MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleNodeInfo(proto.nodeInfo)
+                            MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleNodeInfo(proto.nodeInfo)
 
-                        MeshProtos.FromRadio.RADIO_FIELD_NUMBER -> handleRadioConfig(proto.radio)
+                            MeshProtos.FromRadio.RADIO_FIELD_NUMBER -> handleRadioConfig(proto.radio)
 
-                        else -> errormsg("Unexpected FromRadio variant")
+                            else -> errormsg("Unexpected FromRadio variant")
+                        }
+                    } catch (ex: InvalidProtocolBufferException) {
+                        Exceptions.report(ex, "Invalid Protobuf from radio, len=${bytes.size}")
                     }
                 }
 
