@@ -622,19 +622,25 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     private fun queueWriteCharacteristic(
         c: BluetoothGattCharacteristic,
+        v: ByteArray,
         cont: Continuation<BluetoothGattCharacteristic>
     ) = queueWork("writeC ${c.uuid}", cont) {
         currentReliableWrite = null
+        c.value = v
         gatt!!.writeCharacteristic(c)
     }
 
     fun asyncWriteCharacteristic(
         c: BluetoothGattCharacteristic,
+        v: ByteArray,
         cb: (Result<BluetoothGattCharacteristic>) -> Unit
-    ) = queueWriteCharacteristic(c, CallbackContinuation(cb))
+    ) = queueWriteCharacteristic(c, v, CallbackContinuation(cb))
 
-    fun writeCharacteristic(c: BluetoothGattCharacteristic): BluetoothGattCharacteristic =
-        makeSync { queueWriteCharacteristic(c, it) }
+    fun writeCharacteristic(
+        c: BluetoothGattCharacteristic,
+        v: ByteArray
+    ): BluetoothGattCharacteristic =
+        makeSync { queueWriteCharacteristic(c, v, it) }
 
     /** Like write, but we use the extra reliable flow documented here:
      * https://stackoverflow.com/questions/24485536/what-is-reliable-write-in-ble

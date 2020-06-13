@@ -217,9 +217,8 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
                 // Note: we generate a new characteristic each time, because we are about to
                 // change the data and we want the data stored in the closure
                 val toRadio = getCharacteristic(uuid)
-                toRadio.value = a
 
-                s.asyncWriteCharacteristic(toRadio) { r ->
+                s.asyncWriteCharacteristic(toRadio, a) { r ->
                     try {
                         r.getOrThrow()
                         debug("write of ${a.size} bytes completed")
