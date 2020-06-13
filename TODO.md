@@ -1,7 +1,6 @@
 # Remaining tasks before declaring 1.0
 
 * add a low level settings screen (let user change any of the RadioConfig parameters)
-* if user edits the channel, generate a new AES256 key
 * add play store link with https://developers.google.com/analytics/devguides/collection/android/v4/campaigns#google-play-url-builder and the play icon
 
 Things for the betaish period.

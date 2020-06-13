@@ -18,12 +18,15 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.util.Exceptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.protobuf.ByteString
 import kotlinx.android.synthetic.main.channel_fragment.*
+import java.security.SecureRandom
 
 
 // Make an image view dim
@@ -142,7 +145,15 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                         UIViewModel.getChannel(model.radioConfig.value)?.let { old ->
                             val newSettings = old.settings.toBuilder()
                             newSettings.name = channelNameEdit.text.toString().trim()
-                            // FIXME, regenerate a new preshared key!
+
+                            // Generate a new AES256 key (for any channel not named Default)
+                            if (newSettings.name != Channel.defaultChannelName) {
+                                debug("ASSIGNING NEW AES256 KEY")
+                                val random = SecureRandom()
+                                val bytes = ByteArray(32)
+                                random.nextBytes(bytes)
+                                newSettings.psk = ByteString.copyFrom(bytes)
+                            }
 
                             // Try to change the radio, if it fails, tell the user why and throw away their redits
                             try {
@@ -150,7 +161,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                                 // Since we are writing to radioconfig, that will trigger the rest of the GUI update (QR code etc)
                             } catch (ex: RemoteException) {
                                 setGUIfromModel() // Throw away user edits
-                                
+
                                 // Tell the user to try again
                                 Snackbar.make(
                                     editableCheckbox,

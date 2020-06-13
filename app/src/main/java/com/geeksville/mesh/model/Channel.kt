@@ -14,10 +14,12 @@ data class Channel(
     val settings: MeshProtos.ChannelSettings = MeshProtos.ChannelSettings.getDefaultInstance()
 ) {
     companion object {
+        // Note: this string _SHOULD NOT BE LOCALIZED_ because it directly hashes to values used on the device for the default channel name.
+        val defaultChannelName = "Default"
+
         // Placeholder when emulating
         val emulated = Channel(
-            // Note: this string _SHOULD NOT BE LOCALIZED_ because it directly hashes to values used on the device for the default channel name.
-            MeshProtos.ChannelSettings.newBuilder().setName("Default")
+            MeshProtos.ChannelSettings.newBuilder().setName(defaultChannelName)
                 .setModemConfig(MeshProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128).build()
         )
 
