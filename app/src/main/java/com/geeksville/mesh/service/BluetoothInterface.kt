@@ -378,15 +378,16 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         }
     }
 
+    private var needForceRefresh = true
+
     private fun onConnect(connRes: Result<Unit>) {
         // This callback is invoked after we are connected
 
         connRes.getOrThrow()
         info("Connected to radio!")
 
-        if (!hasForcedRefresh) {
-            // FIXME - for some reason we need to refresh _everytime_.  It is almost as if we've cached wrong descriptor fieldnums forever
-            // hasForcedRefresh = true
+        if (needForceRefresh) { // Our ESP32 code doesn't properly generate "service changed" indications.  Therefore we need to force a refresh on initial start
+            needForceRefresh = false
             forceServiceRefresh()
         }
 
