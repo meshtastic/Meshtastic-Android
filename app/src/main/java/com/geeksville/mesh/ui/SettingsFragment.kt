@@ -574,7 +574,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         b.text = device.name
         b.id = View.generateViewId()
         b.isEnabled = enabled
-        b.isChecked = device.address == scanModel.selectedNotNull
+        b.isChecked =
+            device.address == scanModel.selectedNotNull && device.bonded // Only show checkbox if device is still paired
         deviceRadioGroup.addView(b)
 
         // Once we have at least one device, don't show the "looking for" animation - it makes uers think

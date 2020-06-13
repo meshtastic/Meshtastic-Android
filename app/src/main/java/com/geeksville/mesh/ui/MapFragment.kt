@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.mesh.NodeInfo
@@ -131,7 +130,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
     }
 
     var mapView: MapView? = null
-
+    var mapboxMap: MapboxMap? = null
 
     override fun onViewCreated(viewIn: View, savedInstanceState: Bundle?) {
         super.onViewCreated(viewIn, savedInstanceState)
@@ -146,6 +145,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 // Each time the pane is shown start fetching new map info (we do this here instead of
                 // onCreate because getMapAsync can die in native code if the view goes away)
                 v.getMapAsync { map ->
+                    mapboxMap = map
 
                     if (view != null) { // it might have gone away by now
                         // val markerIcon = BitmapFactory.decodeResource(context.resources, R.drawable.ic_twotone_person_pin_24)
@@ -158,11 +158,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
                             style.addLayer(nodeLayer)
                             style.addLayer(labelLayer)
                         }
-
-                        model.nodeDB.nodes.observe(viewLifecycleOwner, Observer { nodes ->
-                            if (view != null)
-                                onNodesChanged(map, nodes.values)
-                        })
 
                         //map.uiSettings.isScrollGesturesEnabled = true
                         //map.uiSettings.isZoomGesturesEnabled = true
@@ -190,6 +185,16 @@ class MapFragment : ScreenFragment("Map"), Logging {
     override fun onResume() {
         super.onResume()
         mapView?.onResume()
+
+        // FIXME: for now we just set the node positions when the user pages to the map - because
+        // otherwise we try to update in the background which breaks mapbox native code (when view is not shown
+        mapboxMap?.let { map ->
+            // model.nodeDB.nodes.observe(viewLifecycleOwner, Observer { nodes ->
+            model.nodeDB.nodes.value?.values?.let {
+                onNodesChanged(map, it)
+            }
+            //})
+        }
     }
 
     override fun onDestroy() {
