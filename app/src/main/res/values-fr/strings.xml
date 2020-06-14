@@ -64,4 +64,8 @@
     <string name="pairing_failed_try_again">Le jumelage a échoué, veuillez sélectionner à nouveau</string>
     <string name="location_disabled">L\'accès à la position est désactivé, ne peut pas fournir de position au mesh.</string>
     <string name="update_to">Mise à jour vers %s</string>
+    <string name="modem_config_short">Courte distance (rapide)</string>
+    <string name="modem_config_medium">Moyenne distance (rapide)</string>
+    <string name="modem_config_long">Longue distance (plus lent)</string>
+    <string name="modem_config_very_long">Très longue distance (lent)</string>
 </resources>
