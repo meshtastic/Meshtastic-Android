@@ -74,15 +74,3 @@ data class Channel(
         return barcodeEncoder.createBitmap(bitMatrix)
     }
 }
-
-
-/**
- * a nice readable description of modem configs
- */
-fun MeshProtos.ChannelSettings.ModemConfig.toHumanString(): String = when (this) {
-    MeshProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128 -> "Medium range (but fast)"
-    MeshProtos.ChannelSettings.ModemConfig.Bw500Cr45Sf128 -> "Short range (but fast)"
-    MeshProtos.ChannelSettings.ModemConfig.Bw31_25Cr48Sf512 -> "Long range (but slower)"
-    MeshProtos.ChannelSettings.ModemConfig.Bw125Cr48Sf4096 -> "Very long range (but slow)"
-    else -> this.toString()
-}
