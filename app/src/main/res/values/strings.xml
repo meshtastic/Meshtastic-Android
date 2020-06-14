@@ -63,4 +63,9 @@
     <string name="app_too_old">Application too old</string>
     <string name="must_update">You must update this application on the Google Play store (or Github). It is too old to talk to this radio.</string>
     <string name="none">None (disable)</string>
+    <string name="modem_config_short">Short range (but fast)</string>
+    <string name="modem_config_medium">Medium range (but fast)</string>
+    <string name="modem_config_long">Long range (but slower)</string>
+    <string name="modem_config_very_long">Very long range (but slow)</string>
+    <string name="modem_config_unrecognized">UNRECOGNIZED</string>
 </resources>

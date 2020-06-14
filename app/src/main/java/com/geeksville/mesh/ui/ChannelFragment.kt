@@ -17,9 +17,12 @@ import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.model.toHumanRes
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.util.Exceptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -59,7 +62,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     private fun onEditingChanged() {
         val isEditing = editableCheckbox.isChecked
 
-        channelOptions.isEnabled = false // Not yet ready
+        channelOptions.isEnabled = isEditing
         shareButton.isEnabled = !isEditing
         channelNameView.isEnabled = isEditing
         if (isEditing) // Dim the (stale) QR code while editing...
@@ -91,11 +94,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
 
         onEditingChanged() // we just locked the gui
-
+        val modemConfigs = ChannelOption.values()
+        val modemConfigList = modemConfigs.map { getString(it.configRes) }
         val adapter = ArrayAdapter(
             requireContext(),
             R.layout.dropdown_menu_popup_item,
-            arrayOf("Item 1", "Item 2", "Item 3", "Item 4")
+            modemConfigList
         )
 
         filled_exposed_dropdown.setAdapter(adapter)
@@ -163,6 +167,8 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                                 newSettings.psk = ByteString.copyFrom(Channel.channelDefaultKey)
                             }
 
+                            val selectedChannelOptionString = filled_exposed_dropdown.editableText.toString()
+                            newSettings.modemConfig = getModemConfig(selectedChannelOptionString)
                             // Try to change the radio, if it fails, tell the user why and throw away their redits
                             try {
                                 model.setChannel(newSettings.build())
@@ -199,5 +205,14 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         model.isConnected.observe(viewLifecycleOwner, Observer {
             setGUIfromModel()
         })
+    }
+
+    private fun getModemConfig(selectedChannelOptionString: String): MeshProtos.ChannelSettings.ModemConfig {
+        for (item in ChannelOption.values()) {
+            if (getString(item.configRes) == selectedChannelOptionString)
+                return item.modemConfig
+        }
+
+        return MeshProtos.ChannelSettings.ModemConfig.UNRECOGNIZED
     }
 }
