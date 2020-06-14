@@ -102,6 +102,7 @@ class RadioInterfaceService : Service(), Logging {
                 val isValid = when (c) {
                     'x' -> BluetoothInterface.addressValid(context, rest)
                     's' -> SerialInterface.addressValid(context, rest)
+                    'n' -> true
                     else -> TODO("Unexpected interface type $c")
                 }
                 if (!isValid)
@@ -236,7 +237,7 @@ class RadioInterfaceService : Service(), Logging {
 
 
     @SuppressLint("NewApi")
-    private fun setBondedDeviceAddress(addressIn: String?) {
+    private fun setBondedDeviceAddress(address: String?) {
         // Record that this use has configured a radio
         GeeksvilleApplication.analytics.track(
             "mesh_bond"
@@ -248,7 +249,6 @@ class RadioInterfaceService : Service(), Logging {
         }
 
         // The device address "n" can be used to mean none
-        val address = if ("n" == addressIn) null else addressIn
 
         debug("Setting bonded device to $address")
 

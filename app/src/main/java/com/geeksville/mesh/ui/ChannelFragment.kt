@@ -22,7 +22,6 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.model.toHumanRes
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.util.Exceptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -167,7 +166,8 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                                 newSettings.psk = ByteString.copyFrom(Channel.channelDefaultKey)
                             }
 
-                            val selectedChannelOptionString = filled_exposed_dropdown.editableText.toString()
+                            val selectedChannelOptionString =
+                                filled_exposed_dropdown.editableText.toString()
                             newSettings.modemConfig = getModemConfig(selectedChannelOptionString)
                             // Try to change the radio, if it fails, tell the user why and throw away their redits
                             try {

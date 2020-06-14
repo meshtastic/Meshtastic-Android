@@ -893,7 +893,7 @@ class MeshService : Service(), Logging {
         val packet = toMeshPacket(p)
         p.status = MessageStatus.ENROUTE
         p.time = System.currentTimeMillis() // update time to the actual time we started sending
-        debug("SENDING TO RADIO: $packet")
+        // debug("SENDING TO RADIO: $packet")
         sendToRadio(packet)
     }
 
@@ -1161,7 +1161,7 @@ class MeshService : Service(), Logging {
                     try {
                         val proto =
                             MeshProtos.FromRadio.parseFrom(bytes)
-                        info("Received from radio service: ${proto.toOneLineString()}")
+                        // info("Received from radio service: ${proto.toOneLineString()}")
                         when (proto.variantCase.number) {
                             MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(
                                 proto.packet
