@@ -893,6 +893,7 @@ class MeshService : Service(), Logging {
         val packet = toMeshPacket(p)
         p.status = MessageStatus.ENROUTE
         p.time = System.currentTimeMillis() // update time to the actual time we started sending
+        debug("SENDING TO RADIO: $packet")
         sendToRadio(packet)
     }
 
@@ -934,7 +935,7 @@ class MeshService : Service(), Logging {
         // decided to pass through to us (except for broadcast packets)
         //val toNum = packet.to
 
-        debug("Recieved: $packet")
+        // debug("Recieved: $packet")
         val p = packet.decoded
 
         // If the rxTime was not set by the device (because device software was old), guess at a time
@@ -1370,24 +1371,34 @@ class MeshService : Service(), Logging {
      * Set our owner with either the new or old API
      */
     fun setOwner(myId: String?, longName: String, shortName: String) {
-        debug("SetOwner $myId : ${longName.anonymize} : $shortName")
+        val myNode = myNodeInfo
+        if (myNode != null) {
 
-        val user = MeshProtos.User.newBuilder().also {
-            if (myId != null)  // Only set the id if it was provided
-                it.id = myId
-            it.longName = longName
-            it.shortName = shortName
-        }.build()
 
-        // Also update our own map for our nodenum, by handling the packet just like packets from other users
-        if (myNodeInfo != null) {
-            handleReceivedUser(myNodeInfo!!.myNodeNum, user)
-        }
+            val myInfo = toNodeInfo(myNode.myNodeNum)
+            if (longName == myInfo.user?.longName && shortName == myInfo.user?.shortName)
+                debug("Ignoring nop owner change")
+            else {
+                debug("SetOwner $myId : ${longName.anonymize} : $shortName")
 
-        // set my owner info
-        sendToRadio(ToRadio.newBuilder().apply {
-            this.setOwner = user
-        })
+                val user = MeshProtos.User.newBuilder().also {
+                    if (myId != null)  // Only set the id if it was provided
+                        it.id = myId
+                    it.longName = longName
+                    it.shortName = shortName
+                }.build()
+
+                // Also update our own map for our nodenum, by handling the packet just like packets from other users
+
+                handleReceivedUser(myNode.myNodeNum, user)
+
+                // set my owner info
+                sendToRadio(ToRadio.newBuilder().apply {
+                    this.setOwner = user
+                })
+            }
+        } else
+            throw Exception("Can't set user without a node info") // this shouldn't happen
     }
 
     /// Do not use directly, instead call generatePacketId()

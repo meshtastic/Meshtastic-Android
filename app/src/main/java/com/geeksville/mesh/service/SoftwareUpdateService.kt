@@ -14,6 +14,48 @@ import java.util.*
 import java.util.zip.CRC32
 
 /**
+ * Move this somewhere as a generic network byte order function
+ */
+fun toNetworkByteArray(value: Int, formatType: Int): ByteArray {
+
+    val len: Int = 4 // getTypeLen(formatType)
+    val mValue = ByteArray(len)
+
+    when (formatType) {
+        /* BluetoothGattCharacteristic.FORMAT_SINT8 -> {
+            value = intToSignedBits(value, 8)
+            mValue.get(offset) = (value and 0xFF).toByte()
+        }
+        BluetoothGattCharacteristic.FORMAT_UINT8 -> mValue.get(offset) =
+            (value and 0xFF).toByte()
+        BluetoothGattCharacteristic.FORMAT_SINT16 -> {
+            value = intToSignedBits(value, 16)
+            mValue.get(offset++) = (value and 0xFF).toByte()
+            mValue.get(offset) = (value shr 8 and 0xFF).toByte()
+        }
+        BluetoothGattCharacteristic.FORMAT_UINT16 -> {
+            mValue.get(offset++) = (value and 0xFF).toByte()
+            mValue.get(offset) = (value shr 8 and 0xFF).toByte()
+        }
+        BluetoothGattCharacteristic.FORMAT_SINT32 -> {
+            value = intToSignedBits(value, 32)
+            mValue.get(offset++) = (value and 0xFF).toByte()
+            mValue.get(offset++) = (value shr 8 and 0xFF).toByte()
+            mValue.get(offset++) = (value shr 16 and 0xFF).toByte()
+            mValue.get(offset) = (value shr 24 and 0xFF).toByte()
+        } */
+        BluetoothGattCharacteristic.FORMAT_UINT32 -> {
+            mValue[0] = (value and 0xFF).toByte()
+            mValue[1] = (value shr 8 and 0xFF).toByte()
+            mValue[2] = (value shr 16 and 0xFF).toByte()
+            mValue[3] = (value shr 24 and 0xFF).toByte()
+        }
+        else -> TODO()
+    }
+    return mValue
+}
+
+/**
  * typical flow
  *
  * startScan
@@ -211,14 +253,10 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 val firmwareSize = firmwareStream.available()
 
                 // Start the update by writing the # of bytes in the image
-                logAssert(
-                    totalSizeDesc.setValue(
-                        firmwareSize,
-                        BluetoothGattCharacteristic.FORMAT_UINT32,
-                        0
-                    )
+                sync.writeCharacteristic(
+                    totalSizeDesc,
+                    toNetworkByteArray(firmwareSize, BluetoothGattCharacteristic.FORMAT_UINT32)
                 )
-                sync.writeCharacteristic(totalSizeDesc)
 
                 // Our write completed, queue up a readback
                 val totalSizeReadback = sync.readCharacteristic(totalSizeDesc)
@@ -239,23 +277,18 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                     // slightly expensive to keep reallocing this buffer, but whatever
                     logAssert(firmwareStream.read(buffer) == blockSize)
                     firmwareCrc.update(buffer)
-                    
-                    dataDesc.value = buffer
-                    sync.writeCharacteristic(dataDesc)
+
+                    sync.writeCharacteristic(dataDesc, buffer)
                     firmwareNumSent += blockSize
                 }
 
                 // We have finished sending all our blocks, so post the CRC so our state machine can advance
                 val c = firmwareCrc.value
                 info("Sent all blocks, crc is $c")
-                logAssert(
-                    crc32Desc.setValue(
-                        c.toInt(),
-                        BluetoothGattCharacteristic.FORMAT_UINT32,
-                        0
-                    )
+                sync.writeCharacteristic(
+                    crc32Desc,
+                    toNetworkByteArray(c.toInt(), BluetoothGattCharacteristic.FORMAT_UINT32)
                 )
-                sync.writeCharacteristic(crc32Desc)
 
                 // we just read the update result if !0 we have an error
                 val updateResult =

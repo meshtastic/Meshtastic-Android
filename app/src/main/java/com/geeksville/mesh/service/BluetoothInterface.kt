@@ -217,9 +217,8 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
                 // Note: we generate a new characteristic each time, because we are about to
                 // change the data and we want the data stored in the closure
                 val toRadio = getCharacteristic(uuid)
-                toRadio.value = a
 
-                s.asyncWriteCharacteristic(toRadio) { r ->
+                s.asyncWriteCharacteristic(toRadio, a) { r ->
                     try {
                         r.getOrThrow()
                         debug("write of ${a.size} bytes completed")
@@ -378,15 +377,16 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         }
     }
 
+    private var needForceRefresh = true
+
     private fun onConnect(connRes: Result<Unit>) {
         // This callback is invoked after we are connected
 
         connRes.getOrThrow()
         info("Connected to radio!")
 
-        if (!hasForcedRefresh) {
-            // FIXME - for some reason we need to refresh _everytime_.  It is almost as if we've cached wrong descriptor fieldnums forever
-            // hasForcedRefresh = true
+        if (needForceRefresh) { // Our ESP32 code doesn't properly generate "service changed" indications.  Therefore we need to force a refresh on initial start
+            //needForceRefresh = false // In fact, because of tearing down BLE in sleep on the ESP32, our handle # assignments are not stable across sleep - so we much refetch every time
             forceServiceRefresh()
         }
 

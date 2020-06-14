@@ -147,12 +147,20 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                             newSettings.name = channelNameEdit.text.toString().trim()
 
                             // Generate a new AES256 key (for any channel not named Default)
-                            if (newSettings.name != Channel.defaultChannelName) {
+                            if (!newSettings.name.equals(
+                                    Channel.defaultChannelName,
+                                    ignoreCase = true
+                                )
+                            ) {
                                 debug("ASSIGNING NEW AES256 KEY")
                                 val random = SecureRandom()
                                 val bytes = ByteArray(32)
                                 random.nextBytes(bytes)
                                 newSettings.psk = ByteString.copyFrom(bytes)
+                            } else {
+                                debug("ASSIGNING NEW default AES128 KEY")
+                                newSettings.name = Channel.defaultChannelName // Fix any case errors
+                                newSettings.psk = ByteString.copyFrom(Channel.channelDefaultKey)
                             }
 
                             // Try to change the radio, if it fails, tell the user why and throw away their redits
