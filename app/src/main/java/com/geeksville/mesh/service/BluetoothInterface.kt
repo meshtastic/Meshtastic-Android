@@ -326,6 +326,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
             ignoreException {
                 s.closeConnection()
             }
+            service.onDisconnect(false) // assume we will fail
             delay(1000) // Give some nasty time for buggy BLE stacks to shutdown (500ms was not enough)
             reconnectJob = null // Any new reconnect requests after this will be allowed to run
             warn("Attempting reconnect")
@@ -364,7 +365,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
                     isFirstSend = true
 
                     // Now tell clients they can (finally use the api)
-                    service.broadcastConnectionChanged(true, isPermanent = false)
+                    service.onConnect()
 
                     // Immediately broadcast any queued packets sitting on the device
                     doReadFromRadio(true)
