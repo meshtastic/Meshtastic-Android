@@ -6,12 +6,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.os.DeadObjectException
 import android.os.Handler
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.CallbackContinuation
 import com.geeksville.concurrent.Continuation
 import com.geeksville.concurrent.SyncContinuation
+import com.geeksville.util.Exceptions
 import com.geeksville.util.exceptionReporter
 import com.geeksville.util.ignoreException
 import kotlinx.coroutines.*
@@ -680,8 +682,12 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             info("Closing our GATT connection")
             gatt =
                 null // Clear this first so the onConnectionChange callback can ignore while we are shutting down
-            g.disconnect()
-            g.close()
+            try {
+                g.disconnect()
+                g.close()
+            } catch (ex: DeadObjectException) {
+                Exceptions.report(ex, "Dead object while closing GATT")
+            }
         }
     }
 

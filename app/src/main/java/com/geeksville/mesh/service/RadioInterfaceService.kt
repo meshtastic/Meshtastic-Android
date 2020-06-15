@@ -135,7 +135,7 @@ class RadioInterfaceService : Service(), Logging {
             startInterface() // If bluetooth just got turned on, try to restart our ble link
     }
 
-    fun broadcastConnectionChanged(isConnected: Boolean, isPermanent: Boolean) {
+    private fun broadcastConnectionChanged(isConnected: Boolean, isPermanent: Boolean) {
         debug("Broadcasting connection=$isConnected")
         val intent = Intent(RADIO_CONNECTED_ACTION)
         intent.putExtra(EXTRA_CONNECTED, isConnected)
@@ -163,8 +163,20 @@ class RadioInterfaceService : Service(), Logging {
         )
     }
 
+    private var isConnected = false
+
+    fun onConnect() {
+        if (!isConnected) {
+            isConnected = true
+            broadcastConnectionChanged(true, false)
+        }
+    }
+
     fun onDisconnect(isPermanent: Boolean) {
-        broadcastConnectionChanged(false, isPermanent)
+        if (isConnected) {
+            isConnected = false
+            broadcastConnectionChanged(false, isPermanent)
+        }
     }
 
 

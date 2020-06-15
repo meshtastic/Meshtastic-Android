@@ -161,7 +161,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
                 io.writeAsync(wakeBytes)
 
                 // Now tell clients they can (finally use the api)
-                service.broadcastConnectionChanged(true, isPermanent = false)
+                service.onConnect()
             }
         } else {
             errormsg("Can't find device")
