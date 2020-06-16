@@ -14,6 +14,7 @@ import android.companion.CompanionDeviceManager
 import android.content.*
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import android.location.LocationManager
 import android.os.Bundle
 import android.os.ParcelUuid
 import android.view.LayoutInflater
@@ -751,6 +752,15 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         scanModel.stopScan()
     }
 
+    /**
+     * Has the user _turned on_ the system setting for current location access.
+     */
+    private fun isLocationEnabled(): Boolean {
+        val locManager =
+            requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locManager.isLocationEnabled
+    }
+
     override fun onResume() {
         super.onResume()
         if (!hasCompanionDeviceApi)
@@ -758,12 +768,21 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         // Keep reminding user BLE is still off
         val hasUSB = activity?.let { SerialInterface.findDrivers(it).isNotEmpty() } ?: true
-        if (scanModel.bluetoothAdapter?.isEnabled != true && !hasUSB) {
-            Toast.makeText(
-                requireContext(),
-                R.string.error_bluetooth,
-                Toast.LENGTH_SHORT
-            ).show()
+        if (!hasUSB) {
+            // Warn user if BLE is disabled
+            if (scanModel.bluetoothAdapter?.isEnabled != true) {
+                Toast.makeText(
+                    requireContext(),
+                    R.string.error_bluetooth,
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else if (!isLocationEnabled()) {
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.location_disabled_warning),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 }
