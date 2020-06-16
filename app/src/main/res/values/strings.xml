@@ -68,4 +68,5 @@
     <string name="modem_config_long">Long range (but slower)</string>
     <string name="modem_config_very_long">Very long range (but slow)</string>
     <string name="modem_config_unrecognized">UNRECOGNIZED</string>
+    <string name="meshtastic_service_notifications">Meshtastic Service Notifications</string>
 </resources>

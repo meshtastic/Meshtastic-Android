@@ -353,7 +353,7 @@ class MeshService : Service(), Logging {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(): String {
         val channelId = "my_service"
-        val channelName = "My Background Service"
+        val channelName = getString(R.string.meshtastic_service_notifications)
         val chan = NotificationChannel(
             channelId,
             channelName, NotificationManager.IMPORTANCE_HIGH
