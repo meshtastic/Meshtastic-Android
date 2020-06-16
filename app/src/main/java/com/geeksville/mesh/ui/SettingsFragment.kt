@@ -14,7 +14,6 @@ import android.companion.CompanionDeviceManager
 import android.content.*
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import android.location.LocationManager
 import android.os.Bundle
 import android.os.ParcelUuid
 import android.view.LayoutInflater
@@ -38,8 +37,13 @@ import com.geeksville.mesh.service.BluetoothInterface
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.RadioInterfaceService
 import com.geeksville.mesh.service.SerialInterface
+import com.geeksville.util.Exceptions
 import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import kotlinx.android.synthetic.main.settings_fragment.*
@@ -753,12 +757,46 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     }
 
     /**
-     * Has the user _turned on_ the system setting for current location access.
+     * If the user has not turned on location access throw up a toast warning
      */
-    private fun isLocationEnabled(): Boolean {
-        val locManager =
-            requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return locManager.isLocationEnabled
+    private fun checkLocationEnabled() {
+        // We do this painful process because LocationManager.isEnabled is only SDK28 or latet
+        val builder = LocationSettingsRequest.Builder()
+        builder.setNeedBle(true)
+
+        val request = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+        builder.addLocationRequest(request) // Make sure we are granted high accuracy permission
+
+        val locationSettingsResponse = LocationServices.getSettingsClient(requireActivity())
+            .checkLocationSettings(builder.build())
+
+        locationSettingsResponse.addOnSuccessListener {
+            debug("We have location access")
+        }
+
+        locationSettingsResponse.addOnFailureListener { exception ->
+            errormsg("Failed to get location access")
+            if (exception is ResolvableApiException) {
+                exceptionReporter {
+                    // Location settings are not satisfied, but this can be fixed
+                    // by showing the user a dialog.
+
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    // exception.startResolutionForResult(this@MainActivity, REQUEST_CHECK_SETTINGS)
+
+                    // For now just punt and show a dialog
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.location_disabled_warning),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } else
+                Exceptions.report(exception)
+        }
     }
 
     override fun onResume() {
@@ -776,12 +814,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     R.string.error_bluetooth,
                     Toast.LENGTH_SHORT
                 ).show()
-            } else if (!isLocationEnabled()) {
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.location_disabled_warning),
-                    Toast.LENGTH_SHORT
-                ).show()
+            } else {
+                checkLocationEnabled()
             }
         }
     }
