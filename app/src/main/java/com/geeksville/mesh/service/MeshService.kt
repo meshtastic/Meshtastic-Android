@@ -262,7 +262,6 @@ class MeshService : Service(), Logging {
             locationSettingsResponse.addOnFailureListener { exception ->
                 errormsg("Failed to listen to GPS")
                 if (exception is ResolvableApiException) {
-                    // Exceptions.report(exception) // FIXME, not yet implemented, report failure to mothership
                     exceptionReporter {
                         // Location settings are not satisfied, but this can be fixed
                         // by showing the user a dialog.
