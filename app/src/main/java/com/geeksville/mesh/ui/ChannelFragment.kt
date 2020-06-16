@@ -168,7 +168,10 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
                             val selectedChannelOptionString =
                                 filled_exposed_dropdown.editableText.toString()
-                            newSettings.modemConfig = getModemConfig(selectedChannelOptionString)
+                            val modemConfig = getModemConfig(selectedChannelOptionString)
+
+                            if (modemConfig!=MeshProtos.ChannelSettings.ModemConfig.UNRECOGNIZED)
+                                newSettings.modemConfig = modemConfig
                             // Try to change the radio, if it fails, tell the user why and throw away their redits
                             try {
                                 model.setChannel(newSettings.build())
