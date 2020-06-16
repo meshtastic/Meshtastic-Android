@@ -17,8 +17,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 10775 // format is Mmmss (where M is 1+the numeric major number
-        versionName "0.7.75"
+        versionCode 10776 // format is Mmmss (where M is 1+the numeric major number
+        versionName "0.7.76"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -35,7 +35,7 @@ android {
     defaultConfig {
         // We have to list all translated languages here, because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
-        resConfigs "en", "de", "es", "fi", "fr", "ga", "it", "ja", "nl", "ru", "sk", "sv", "zh"
+        resConfigs "cs", "de", "en", "es", "fi", "fr", "ga", "it", "ja", "nl", "ru", "sk", "sv", "zh"
 
         // Needed to make mapbox work inside the firebase testlab - FIXME, alas, still doesn't work
         ndk {
