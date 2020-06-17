@@ -16,6 +16,7 @@ import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.os.ParcelUuid
+import android.os.RemoteException
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -429,10 +430,16 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
     /// Change to a new macaddr selection, updating GUI and radio
     fun changeScanSelection(context: MainActivity, newAddr: String) {
-        info("Changing device to ${newAddr.anonymize}")
-        selectedAddress = newAddr
-        changeDeviceSelection(context, newAddr)
-        devices.value = devices.value // Force a GUI update
+        try {
+            info("Changing device to ${newAddr.anonymize}")
+            changeDeviceSelection(context, newAddr)
+            selectedAddress =
+                newAddr // do this after changeDeviceSelection, so if it throws the change will be discarded
+            devices.value = devices.value // Force a GUI update
+        } catch (ex: RemoteException) {
+            errormsg("Failed talking to service, probably it is shutting down $ex.message")
+            // ignore the failure and the GUI won't be updating anyways
+        }
     }
 }
 
