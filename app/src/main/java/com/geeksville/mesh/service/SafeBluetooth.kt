@@ -608,7 +608,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         cont: Continuation<Unit>
     ) = queueWork("reqMtu", cont, 5 * 1000) {
         isSettingMtu = true
-        gatt!!.requestMtu(len)
+        gatt?.requestMtu(len) ?: false
     }
 
     fun asyncRequestMtu(
@@ -629,7 +629,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     ) = queueWork("writeC ${c.uuid}", cont) {
         currentReliableWrite = null
         c.value = v
-        gatt!!.writeCharacteristic(c)
+        gatt?.writeCharacteristic(c) ?: false
     }
 
     fun asyncWriteCharacteristic(
@@ -653,7 +653,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     ) = queueWork("rwriteC ${c.uuid}", cont) {
         logAssert(gatt!!.beginReliableWrite())
         currentReliableWrite = c.value.clone()
-        gatt!!.writeCharacteristic(c)
+        gatt?.writeCharacteristic(c) ?: false
     }
 
     /* fun asyncWriteReliable(
