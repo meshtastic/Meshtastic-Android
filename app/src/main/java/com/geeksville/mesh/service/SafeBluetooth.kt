@@ -200,42 +200,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                         if (oldstate == BluetoothProfile.STATE_CONNECTED) {
                             info("Lost connection - aborting current work: $currentWork")
 
-                            /*
-                            Supposedly this reconnect attempt happens automatically
-                            "If the connection was established through an auto connect, Android will
-                            automatically try to reconnect to the remote device when it gets disconnected
-                            until you manually call disconnect() or close(). Once a connection established
-                            through direct connect disconnects, no attempt is made to reconnect to the remote device."
-                            https://stackoverflow.com/questions/37965337/what-exactly-does-androids-bluetooth-autoconnect-parameter-do?rq=1
-
-                            closeConnection()
-                            */
-                            failAllWork(BLEException("Lost connection"))
-
-                            // Cancel any notifications - because when the device comes back it might have forgotten about us
-                            notifyHandlers.clear()
-
-                            lostConnectCallback?.let {
-                                debug("calling lostConnect handler")
-                                it.invoke()
-                            }
-
-                            // Queue a new connection attempt
-                            val cb = connectionCallback
-                            if (cb != null) {
-                                debug("queuing a reconnection callback")
-                                assert(currentWork == null)
-
-                                if (!currentConnectIsAuto) { // we must have been running during that 1-time manual connect, switch to auto-mode from now on
-                                    closeGatt() // Close the old non-auto connection
-                                    lowLevelConnect(true)
-                                }
-
-                                // note - we don't need an init fn (because that would normally redo the connectGatt call - which we don't need)
-                                queueWork("reconnect", CallbackContinuation(cb)) { -> true }
-                            } else {
-                                debug("No connectionCallback registered")
-                            }
+                            reconnect()
                         } else if (status == 133) {
                             // We were not previously connected and we just failed with our non-auto connection attempt.  Therefore we now need
                             // to do an autoconnection attempt.  When that attempt succeeds/fails the normal callbacks will be called
@@ -560,10 +525,43 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         queueConnect(autoConnect, CallbackContinuation(cb))
     }
 
-    /// Restart any previous connect attempts
+    /// Drop our current connection and then requeue a connect as needed
     private fun reconnect() {
-        connectionCallback?.let { cb ->
-            queueConnect(true, CallbackContinuation(cb))
+        /*
+        Supposedly this reconnect attempt happens automatically
+        "If the connection was established through an auto connect, Android will
+        automatically try to reconnect to the remote device when it gets disconnected
+        until you manually call disconnect() or close(). Once a connection established
+        through direct connect disconnects, no attempt is made to reconnect to the remote device."
+        https://stackoverflow.com/questions/37965337/what-exactly-does-androids-bluetooth-autoconnect-parameter-do?rq=1
+
+        closeConnection()
+        */
+        failAllWork(BLEException("Lost connection"))
+
+        // Cancel any notifications - because when the device comes back it might have forgotten about us
+        notifyHandlers.clear()
+
+        lostConnectCallback?.let {
+            debug("calling lostConnect handler")
+            it.invoke()
+        }
+
+        // Queue a new connection attempt
+        val cb = connectionCallback
+        if (cb != null) {
+            debug("queuing a reconnection callback")
+            assert(currentWork == null)
+
+            if (!currentConnectIsAuto) { // we must have been running during that 1-time manual connect, switch to auto-mode from now on
+                closeGatt() // Close the old non-auto connection
+                lowLevelConnect(true)
+            }
+
+            // note - we don't need an init fn (because that would normally redo the connectGatt call - which we don't need)
+            queueWork("reconnect", CallbackContinuation(cb)) { -> true }
+        } else {
+            debug("No connectionCallback registered")
         }
     }
 
