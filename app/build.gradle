@@ -17,8 +17,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 10778 // format is Mmmss (where M is 1+the numeric major number
-        versionName "0.7.78"
+        versionCode 10779 // format is Mmmss (where M is 1+the numeric major number
+        versionName "0.7.79"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
