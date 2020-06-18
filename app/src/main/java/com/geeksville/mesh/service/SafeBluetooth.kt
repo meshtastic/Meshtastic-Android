@@ -665,7 +665,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private fun queueWriteDescriptor(
         c: BluetoothGattDescriptor,
         cont: Continuation<BluetoothGattDescriptor>
-    ) = queueWork("writeD", cont) { gatt!!.writeDescriptor(c) }
+    ) = queueWork("writeD", cont) { gatt?.writeDescriptor(c) ?: false }
 
     fun asyncWriteDescriptor(
         c: BluetoothGattDescriptor,
