@@ -59,7 +59,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
-    /// When we see the BT stack getting disabled/renabled we handle that as a connect/disconnect event
+    /// When we see the BT stack getting disabled we handle that as a disconnect event
+    /*
     private val btStateReceiver = BluetoothStateReceiver { enabled ->
         // Sometimes we might not have a gatt object, while that is true, we don't care about BLE state changes
         gatt?.let { g ->
@@ -70,14 +71,14 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                         0,
                         BluetoothProfile.STATE_DISCONNECTED
                     )
-                else
-                    debug("We were not connected, so ignoring bluetooth shutdown")
-            } else {
-                warn("requeue a connect anytime bluetooth is reenabled")
-                reconnect()
+                else {
+                    debug("we are not connected, but BLE was disabled so shutdown everything")
+                    closeConnection()
+                }
             }
         }
     }
+     */
 
     /**
      * A BLE status code based error
@@ -89,10 +90,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         longBLEUUID("2902")
 
     init {
-        context.registerReceiver(
-            btStateReceiver,
-            btStateReceiver.intent
-        )
+        //context.registerReceiver( btStateReceiver, btStateReceiver.intent )
     }
 
     /**
@@ -171,16 +169,17 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                         completeWork(status, Unit)
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
-                    if (gatt == null)
+                    if (gatt == null) {
                         info("No gatt: ignoring connection state $newState, status $status") // Probably just shutting down
-                    else {
+                        g.close() // Finish closing our gatt here
+                    } else {
                         // cancel any queued ops if we were already connected
                         val oldstate = state
                         state = newState
                         if (oldstate == BluetoothProfile.STATE_CONNECTED) {
                             info("Lost connection - aborting current work: $currentWork")
 
-                            reconnect()
+                            dropAndReconnect()
                         } else if (status == 133) {
                             // We were not previously connected and we just failed with our non-auto connection attempt.  Therefore we now need
                             // to do an autoconnection attempt.  When that attempt succeeds/fails the normal callbacks will be called
@@ -505,8 +504,17 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         queueConnect(autoConnect, CallbackContinuation(cb))
     }
 
-    /// Drop our current connection and then requeue a connect as needed
+    /// Restart any previous connect attempts
     private fun reconnect() {
+        // closeGatt() // Get rid of any old gatt
+
+        connectionCallback?.let { cb ->
+            queueConnect(true, CallbackContinuation(cb))
+        }
+    }
+
+    /// Drop our current connection and then requeue a connect as needed
+    private fun dropAndReconnect() {
         /*
         Supposedly this reconnect attempt happens automatically
         "If the connection was established through an auto connect, Android will
@@ -662,7 +670,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                 null // Clear this first so the onConnectionChange callback can ignore while we are shutting down
             try {
                 g.disconnect()
-                g.close()
+                g.close() // movedinto the onDisconnect callback?
             } catch (ex: DeadObjectException) {
                 Exceptions.report(ex, "Dead object while closing GATT")
             }
@@ -695,7 +703,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     override fun close() {
         closeConnection()
 
-        context.unregisterReceiver(btStateReceiver)
+        // context.unregisterReceiver(btStateReceiver)
     }
 
 
