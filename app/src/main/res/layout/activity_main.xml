@@ -7,6 +7,7 @@
     tools:context=".MainActivity">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
@@ -15,48 +16,41 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <ImageView
-                android:id="@+id/imageView4"
-                android:layout_width="wrap_content"
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:contentDescription="@string/application_icon"
-                android:scaleType="center"
-                android:scaleX="1.5"
-                android:scaleY="1.5"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_baseline_settings_input_antenna_24" />
-
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:gravity="center"
-                android:minHeight="?actionBarSize"
-                android:padding="16dp"
-                android:text="@string/app_name"
-                android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
-                app:layout_constraintStart_toEndOf="@+id/imageView4"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <ImageView
-                android:id="@+id/connectStatusImage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:layout_weight="1"
-                android:contentDescription="@string/connection_status"
-                android:tint="#FFFFFF"
-
+                android:background="?attr/colorPrimary"
+                android:minHeight="?attr/actionBarSize"
+                android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
 
-                app:layout_constraintHeight_percent=".5"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/cloud_off" />
+                <ImageView
+                    android:id="@+id/imageView5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:contentDescription="@string/application_icon"
+                    android:scaleType="center"
+                    android:scaleX="1.5"
+                    android:scaleY="1.5"
+                    app:srcCompat="@drawable/ic_baseline_settings_input_antenna_24" />
+
+                <TextView
+                    android:id="@+id/title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:gravity="center"
+                    android:minHeight="?actionBarSize"
+                    android:padding="16dp"
+                    android:text="@string/app_name"
+                    android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title" />
+
+            </androidx.appcompat.widget.Toolbar>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.tabs.TabLayout

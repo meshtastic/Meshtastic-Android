@@ -1,10 +1,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.geeksville.mesh.MainActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
-        app:showAsAction="never" />
+        android:id="@+id/connectStatusImage"
+        android:contentDescription="@string/connection_status"
+        android:icon="@drawable/cloud_off"
+        android:tint="#FFFFFF"
+        android:title="@string/disconnected"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/about"
+        android:title="@string/about"
+        app:showAsAction="withText" />
 </menu>
