@@ -1,6 +1,5 @@
 package com.geeksville.mesh
 
-// import kotlinx.android.synthetic.main.tabs.*
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -12,6 +11,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
@@ -22,10 +22,11 @@ import android.os.RemoteException
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
+import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.TooltipCompat
+import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -120,6 +121,8 @@ class MainActivity : AppCompatActivity(), Logging,
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         bluetoothManager.adapter
     }
+
+    private var actionBarMenu: Menu? = null
 
     val model: UIViewModel by viewModels()
 
@@ -390,6 +393,8 @@ class MainActivity : AppCompatActivity(), Logging,
         } */
         setContentView(R.layout.activity_main)
 
+        initToolbar()
+
         pager.adapter = tabsAdapter
         pager.isUserInputEnabled =
             false // Gestures for screen switching doesn't work so good with the map view
@@ -409,7 +414,17 @@ class MainActivity : AppCompatActivity(), Logging,
         askToRate()
     }
 
+    private fun initToolbar() {
+        val toolbar =
+            findViewById<View>(R.id.toolbar) as Toolbar
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+    }
+
     private fun updateConnectionStatusImage(connected: MeshService.ConnectionState) {
+
+        if (actionBarMenu==null)
+            return
 
         val (image, tooltip) = when (connected) {
             MeshService.ConnectionState.CONNECTED -> Pair(R.drawable.cloud_on, R.string.connected)
@@ -424,8 +439,11 @@ class MainActivity : AppCompatActivity(), Logging,
             else -> Pair(R.drawable.cloud_off, R.string.disconnected)
         }
 
-        connectStatusImage.setImageResource(image)
-        TooltipCompat.setTooltipText(connectStatusImage, getString(tooltip))
+        val item = actionBarMenu?.findItem(R.id.connectStatusImage)
+        if (item != null) {
+            item.setIcon(image)
+            item.setTitle(tooltip)
+        }
     }
 
 
@@ -804,6 +822,7 @@ class MainActivity : AppCompatActivity(), Logging,
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
+        actionBarMenu = menu
         return true
     }
 
@@ -812,8 +831,25 @@ class MainActivity : AppCompatActivity(), Logging,
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
-            R.id.action_settings -> true
+            R.id.about -> {
+                getVersionInfo()
+                return true
+            }
+            R.id.connectStatusImage -> {
+                Toast.makeText(this, item.title, Toast.LENGTH_SHORT).show()
+                return true
+            }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun getVersionInfo() {
+        try {
+            val packageInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
+            val versionName = packageInfo.versionName
+            Toast.makeText(this, versionName, Toast.LENGTH_LONG).show()
+        } catch (e: PackageManager.NameNotFoundException) {
+            errormsg("Can not find the version: ${e.message}")
         }
     }
 }
