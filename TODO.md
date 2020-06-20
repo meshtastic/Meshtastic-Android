@@ -6,6 +6,7 @@
 Things for the betaish period.
 
 * let user change more channel parameters
+* really great notes about importance of clean BLE disconnects: https://blog.classycode.com/a-short-story-about-android-ble-connection-timeouts-and-gatt-internal-errors-fa89e3f6a456
 
 # Documentation tasks
 

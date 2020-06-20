@@ -89,7 +89,11 @@ data class NodeInfo(
     /// return the position if it is valid, else null
     val validPosition: Position?
         get() {
-            return position?.takeIf { it.latitude != 0.0 || it.longitude != 0.0 }
+            return position?.takeIf {
+                (it.latitude <= 90.0 && it.latitude >= -90) && // If GPS gives a crap position don't crash our app
+                        it.latitude != 0.0 &&
+                        it.longitude != 0.0
+            }
         }
 
     /// @return distance in meters to some other node (or null if unknown)

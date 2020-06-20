@@ -132,7 +132,9 @@ class RadioInterfaceService : Service(), Logging {
      */
     private val bluetoothStateReceiver = BluetoothStateReceiver { enabled ->
         if (enabled)
-            startInterface() // If bluetooth just got turned on, try to restart our ble link
+            startInterface() // If bluetooth just got turned on, try to restart our ble link (which might be bluetooth)
+        else if (radioIf is BluetoothInterface)
+            stopInterface() // Was using bluetooth, need to shutdown
     }
 
     private fun broadcastConnectionChanged(isConnected: Boolean, isPermanent: Boolean) {
