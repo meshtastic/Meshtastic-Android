@@ -65,6 +65,7 @@ This project is the work of volunteers:
 * @NEKLAN: Contributed Japanese translation.
 * @Ohcdh: Contributed Irish and Italian translations.
 * @Slavino: Contributed Slovak translation.
+* @Zone: Contributed Turkish translation.
 
 Copyright 2019, Geeksville Industries, LLC. GPL V3 license
 
