@@ -15,11 +15,11 @@
     <string name="sample_message">Ahoj, našiel som cache-ku, je to kúsok od mňa vedľa veľkého tigra. Trochu ma to desí.</string>
     <string name="some_username" translatable="false">SKH</string>
     <string name="send_text">Odoslať text</string>
-    <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in alpha-testing, if you find problems please post on our forum: meshtastic.discourse.group.\n\nFor more information see our web page - www.meshtastic.org.</string>
+    <string name="warning_not_paired">"K tomuto telefónu ste ešte nenapárovalii žiadne zariadenie kompatibilné s Meshtastic. Prosím napárujte zariadenie a nastavte svoje užívateľské meno. Táto open-source aplikácia je v alpha testovacej fáze, ak nájdete chybu, prosím popíšte ju na fóre: meshtastic.discourse.group.\n\n Pre viac informácií navštívte web stránku - www.meshtastic.org."</string>
     <string name="username_unset">Užívateľské meno vymazané</string>
     <string name="your_name">Vaše meno</string>
     <string name="analytics_okay">Anonymné hlásenia o používaní aplikácie a jej chybách.</string>
-    <string name="looking_for_meshtastic_devices">Looking for Meshtastic devices…</string>
+    <string name="looking_for_meshtastic_devices">Vyhľadávam Meshtastic zariadenia…</string>
     <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
     <string name="test_devname2" translatable="false">Meshtastic_1267</string>
     <string name="requires_bluetooth">Táto aplikácia vyžaduje prístup k Bluetooth. Prosím povoľte jej prístup v nastaveniach telefónu.</string>
@@ -36,7 +36,7 @@
     <string name="map_not_allowed">You have analytics disabled. Unfortunately our map provider (mapbox) requires analytics to be allowed for their \'free\' plan. So we have turned off the map view.\n\n
         If you would like to see the map, you\'ll need to turn on analytics in the Settings pane (also, for the time being you might need to force restart the application).\n\n
         If you are interested in us paying for mapbox (or switching to a different map provider), please post in meshtastic.discourse.group</string>
-    <string name="permission_missing">A required permission is missing, Meshtastic won\'t be able to work properly.  Please enable in application settings.</string>
+    <string name="permission_missing">Aplikácia Meshtastic nemá pridelené požadované oprávnenie a pravdepodobne nebude fungovať správne.  Prosím povoľte tieto oprávnenia v nastaveniach aplikácie.</string>
     <string name="radio_sleeping">Vysielač je uspatý, nepodarilo sa zmeniť kanál</string>
     <string name="report_bug">Nahlásenie chyby</string>
     <string name="report_a_bug">Nahlásiť chybu</string>
@@ -57,7 +57,7 @@
     <string name="list_of_nodes">Zoznam vysielačov v sieti</string>
     <string name="update_firmware">Aktualizácia firmvéru</string>
     <string name="connected_to">Pripojené k vysielaču (%s)</string>
-    <string name="not_connected">Nepripojené, zvoľte si vysielač</string>
+    <string name="not_connected">Nepripojené, zvoľte si vysielač.</string>
     <string name="connected_sleeping">Pripojené k uspatému vysielaču.</string>
     <string name="update_to">Aktualizovať na %s</string>
     <string name="app_too_old">Aplikácia je príliš stará</string>
@@ -67,4 +67,14 @@
     <string name="rate_dialog_cancel_en">Pripomenúť neskôr</string>
     <string name="rate_dialog_ok_en">Ohodnotiť teraz</string>
     <string name="rate_dialog_title_en">Ohodnoťte Meshtastic</string>
+    <string name="connected">Pripojené k vysielaču</string>
+    <string name="modem_config_short">Krátka vzdialenosť dosahu (rýchlejší prenos)</string>
+    <string name="modem_config_medium">Stredná vzdialenosť dosahu (rýchlejší prenos)</string>
+    <string name="modem_config_long">Dlhá vzdialenosť dosahu (pomalší prenos)</string>
+    <string name="modem_config_very_long">Veľmi dlhá vzdialenosť (pomalý prenos dát)</string>
+    <string name="meshtastic_service_notifications">Notifikácie z Meshtastic service</string>
+    <string name="about">O aplikácii (verzia)</string>
+    <string name="location_disabled_warning">Musíte zapnúť služby o polohe zariadenia (GPS) v nastaveniach systému Android.</string>
+    <string name="modem_config_unrecognized">UNRECOGNIZED</string>
+    <string name="rate_dialog_message_en">Táto aplikácia je vyvíjaná hobbystami, našli by ste si chvíľku pre jej hodnotenie? Ak nájdete chyby, proím oznámte ich na našom fóre - meshtastic.discourse.group . Ďakujeme za Vašu podporu!</string>
 </resources>
