@@ -20,9 +20,10 @@
             android:id="@+id/channelNameEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890- "
             android:hint="@string/channel_name"
             android:imeOptions="actionDone"
-            android:maxLength="12"
+            android:maxLength="11"
             android:singleLine="true"
             android:text="@string/unset" />
     </com.google.android.material.textfield.TextInputLayout>
