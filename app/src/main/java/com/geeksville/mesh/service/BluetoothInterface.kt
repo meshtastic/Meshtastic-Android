@@ -384,32 +384,36 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         // This callback is invoked after we are connected
 
         connRes.getOrThrow()
-        info("Connected to radio!")
 
-        if (needForceRefresh) { // Our ESP32 code doesn't properly generate "service changed" indications.  Therefore we need to force a refresh on initial start
-            //needForceRefresh = false // In fact, because of tearing down BLE in sleep on the ESP32, our handle # assignments are not stable across sleep - so we much refetch every time
-            forceServiceRefresh()
-        }
-
-        // we begin by setting our MTU size as high as it can go (if we can)
-        if (shouldSetMtu)
-            safe!!.asyncRequestMtu(512) { mtuRes ->
-                try {
-                    mtuRes.getOrThrow() // FIXME - why sometimes is the result Unit!?!
-                    debug("MTU change attempted")
-
-                    // throw BLEException("Test MTU set failed")
-
-                    doDiscoverServicesAndInit()
-                } catch (ex: BLEException) {
-                    shouldSetMtu = false
-                    scheduleReconnect(
-                        "Giving up on setting MTUs, forcing disconnect $ex"
-                    )
-                }
+        service.serviceScope.handledLaunch {
+            info("Connected to radio!")
+            
+            if (needForceRefresh) { // Our ESP32 code doesn't properly generate "service changed" indications.  Therefore we need to force a refresh on initial start
+                //needForceRefresh = false // In fact, because of tearing down BLE in sleep on the ESP32, our handle # assignments are not stable across sleep - so we much refetch every time
+                forceServiceRefresh() // this article says android should not be caching, but it does on some phones: https://punchthrough.com/attribute-caching-in-ble-advantages-and-pitfalls/
+                delay(200) // From looking at the android C code it seems that we need to give some time for the refresh message to reach that worked _before_ we try to set mtu/get services
             }
-        else
-            doDiscoverServicesAndInit()
+
+            // we begin by setting our MTU size as high as it can go (if we can)
+            if (shouldSetMtu)
+                safe!!.asyncRequestMtu(512) { mtuRes ->
+                    try {
+                        mtuRes.getOrThrow() // FIXME - why sometimes is the result Unit!?!
+                        debug("MTU change attempted")
+
+                        // throw BLEException("Test MTU set failed")
+
+                        doDiscoverServicesAndInit()
+                    } catch (ex: BLEException) {
+                        shouldSetMtu = false
+                        scheduleReconnect(
+                            "Giving up on setting MTUs, forcing disconnect $ex"
+                        )
+                    }
+                }
+            else
+                doDiscoverServicesAndInit()
+        }
     }
 
 
