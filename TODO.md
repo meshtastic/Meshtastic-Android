@@ -1,8 +1,6 @@
 # Remaining tasks before declaring 1.0
 
 - disable software update button after update finishes
-- check BLE handle stability across sleep - stress test sleep/wake
-- @feh123 Sony Xperia Z1 C6903 running Android 5.1.1
 - first message sent is still doubled for some people
 - Android frontend should refetch the android messages from backend service on Resume
 - let users set arbitrary params in android
