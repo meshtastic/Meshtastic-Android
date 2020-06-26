@@ -322,7 +322,8 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         val s = safe
         if (s != null) {
             warn("Forcing disconnect and hopefully device will comeback (disabling forced refresh)")
-            hasForcedRefresh = true
+            hasForcedRefresh =
+                true // We've already tossed any old service caches, no need to do it again
             ignoreException {
                 s.closeConnection()
             }
@@ -387,7 +388,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 
         service.serviceScope.handledLaunch {
             info("Connected to radio!")
-            
+
             if (needForceRefresh) { // Our ESP32 code doesn't properly generate "service changed" indications.  Therefore we need to force a refresh on initial start
                 //needForceRefresh = false // In fact, because of tearing down BLE in sleep on the ESP32, our handle # assignments are not stable across sleep - so we much refetch every time
                 forceServiceRefresh() // this article says android should not be caching, but it does on some phones: https://punchthrough.com/attribute-caching-in-ble-advantages-and-pitfalls/

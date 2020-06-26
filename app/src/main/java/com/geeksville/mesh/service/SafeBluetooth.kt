@@ -38,6 +38,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     var timeoutMsec = 15 * 1000L
 
     /// Users can access the GATT directly as needed
+    @Volatile
     var gatt: BluetoothGatt? = null
 
     @Volatile
