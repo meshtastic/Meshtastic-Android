@@ -28,9 +28,9 @@
     <string name="are_you_sure_channel">チャンネルを変更しますか？新しいチャンネル設定をシェアするまで他のノードとの通信はすべて停止します。</string>
     <string name="new_channel_rcvd">新しいチャンネルURLを受信しました</string>
     <string name="do_you_want_switch">\'%s\チャンネルに変更しますか？</string>
-    <string name="map_not_allowed">解析がオフになっています。残念ながら地図プロバイダ（mapbox）は無料プランの場合、解析をオンにする必要があります。マップビューをオフにしました。\n\n
-        マップを表示したい場合は設定パネルで解析をオンにする必要があります（また当分の間アプリを強制的に再起動する必要があります）。\n\n
-        mapboxの有償プラン（または代替地図プロバイダ）を検討される方は meshtastic.discourse.group に書き込んでください。</string>
+    <string name="map_not_allowed">解析が無効になっています。残念ながら地図プロバイダ（mapbox）は無料プランの場合、解析を有効にする必要があります。マップビューをオフにしました。\n\n
+マップを表示したい場合は設定パネルで匿名の診断情報と不具合報告にチェックする必要があります（また当分の間アプリを強制停止して再起動する必要があります）。\n\n
+mapboxの有償プラン（または代替地図プロバイダ）を検討される方は meshtastic.discourse.group に書き込んでください。</string>
     <string name="permission_missing">必要なアクセス権限が拒否されているため、アプリが正常に動作しません。設定により権限を許可してください。</string>
     <string name="radio_sleeping">Meshtasticデバイスはスリープ状態です。チャンネルを変更できませんでした。</string>
     <string name="report_bug">バグ報告</string>
