@@ -35,7 +35,7 @@ android {
     defaultConfig {
         // We have to list all translated languages here, because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
-        resConfigs "cs", "de", "en", "es", "fi", "fr", "ga", "it", "ja", "nl", "ru", "sk", "sv", "tr", "zh"
+        resConfigs "cs", "de", "en", "es", "fi", "fr", "ga", "it", "ja", "nl", "ru", "sk", "sl", "sv", "tr", "zh"
 
         // Needed to make mapbox work inside the firebase testlab - FIXME, alas, still doesn't work
         ndk {
