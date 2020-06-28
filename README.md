@@ -60,6 +60,7 @@ This project is the work of volunteers:
 * @eriktheV-king: Contributed Dutch and French translations.
 * @Lgoix: Contributed tooltip for radio mode
 * @Eugene: Contributed Russian translation.
+* @Jinx17: Contributed Slovenian translation.
 * @Konradrundfunk: Contributed German fixes.
 * @Mango-sauce: Contributed Chinese translation.
 * @NEKLAN: Contributed Japanese translation.

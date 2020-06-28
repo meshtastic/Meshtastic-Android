@@ -219,7 +219,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             hwVerIn: String,
             swVer: String,
             mfg: String
-        ): String {
+        ): String? {
             val curver = context.getString(R.string.cur_firmware_version)
 
             val regionRegex = Regex(".+-(.+)")
@@ -230,7 +230,12 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             val (region) = regionRegex.find(hwVer)?.destructured
                 ?: throw Exception("Malformed hw version")
 
-            return "firmware/firmware-$mfg-$region-$curver.bin"
+            val name = "firmware/firmware-$mfg-$region-$curver.bin"
+            // Check to see if the file exists (some builds might not include update files for size reasons)
+            return if (!context.assets.list(name).isNullOrEmpty())
+                name
+            else
+                null
         }
 
         /** Return the filename this device needs to use as an update (or null if no update needed)

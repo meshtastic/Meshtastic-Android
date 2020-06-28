@@ -1,10 +1,11 @@
 # Remaining tasks before declaring 1.0
 
+- Android frontend should refetch the android messages from backend service on Resume
 - disable software update button after update finishes
 - first message sent is still doubled for some people
-- Android frontend should refetch the android messages from backend service on Resume
 - let users set arbitrary params in android
 * add a low level settings screen (let user change any of the RadioConfig parameters)
+- optionally include firmware files in debug builds - currently they are release only.  per https://developer.android.com/studio/build/build-variants
 
 Things for the betaish period.
 
