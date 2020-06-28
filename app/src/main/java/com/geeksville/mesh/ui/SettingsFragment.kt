@@ -174,6 +174,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     private val scanCallback = object : ScanCallback() {
         override fun onScanFailed(errorCode: Int) {
             val msg = "Unexpected bluetooth scan failure: $errorCode"
+            errormsg(msg)
             // error code2 seeems to be indicate hung bluetooth stack
             errorText.value = msg
         }
