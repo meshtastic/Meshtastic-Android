@@ -1442,7 +1442,7 @@ class MeshService : Service(), Logging {
     /***
      * Return the filename we will install on the device
      */
-    fun setFirmwareUpdateFilename(info: MeshProtos.MyNodeInfo) {
+    private fun setFirmwareUpdateFilename(info: MeshProtos.MyNodeInfo) {
         firmwareUpdateFilename = try {
             if (info.region != null && info.firmwareVersion != null && info.hwModel != null)
                 SoftwareUpdateService.getUpdateFilename(
