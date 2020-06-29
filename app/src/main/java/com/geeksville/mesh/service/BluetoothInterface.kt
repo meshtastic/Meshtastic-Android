@@ -285,10 +285,11 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
      */
     private fun forceServiceRefresh() {
         exceptionReporter {
-            // BluetoothGatt gatt
-            val gatt = safe!!.gatt!!
-            val refresh: Method = gatt.javaClass.getMethod("refresh")
-            refresh.invoke(gatt)
+            // If the gatt has been destroyed, skip the refresh attempt
+            safe?.gatt?.let { gatt ->
+                val refresh: Method = gatt.javaClass.getMethod("refresh")
+                refresh.invoke(gatt)
+            }
         }
     }
 
