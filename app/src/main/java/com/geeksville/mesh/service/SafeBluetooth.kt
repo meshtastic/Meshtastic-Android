@@ -10,7 +10,6 @@ import com.geeksville.android.Logging
 import com.geeksville.concurrent.CallbackContinuation
 import com.geeksville.concurrent.Continuation
 import com.geeksville.concurrent.SyncContinuation
-import com.geeksville.util.Exceptions
 import com.geeksville.util.exceptionReporter
 import com.geeksville.util.ignoreException
 import kotlinx.coroutines.*
@@ -60,27 +59,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
-    /// When we see the BT stack getting disabled we handle that as a disconnect event
-    /*
-    private val btStateReceiver = BluetoothStateReceiver { enabled ->
-        // Sometimes we might not have a gatt object, while that is true, we don't care about BLE state changes
-        gatt?.let { g ->
-            if (!enabled) {
-                if (state == BluetoothProfile.STATE_CONNECTED)
-                    gattCallback.onConnectionStateChange(
-                        g,
-                        0,
-                        BluetoothProfile.STATE_DISCONNECTED
-                    )
-                else {
-                    debug("we are not connected, but BLE was disabled so shutdown everything")
-                    closeConnection()
-                }
-            }
-        }
-    }
-     */
-
     /**
      * A BLE status code based error
      */
@@ -89,10 +67,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     // 0x2902 org.bluetooth.descriptor.gatt.client_characteristic_configuration.xml
     private val configurationDescriptorUUID =
         longBLEUUID("2902")
-
-    init {
-        //context.registerReceiver( btStateReceiver, btStateReceiver.intent )
-    }
 
     /**
      * a schedulable bit of bluetooth work, includes both the closure to call to start the operation
@@ -171,7 +145,10 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                 }
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     if (gatt == null) {
-                        info("No gatt: ignoring connection state $newState, status $status") // Probably just shutting down
+                        errormsg("No gatt: ignoring connection state $newState, status $status")
+                    } else if (isClosing) {
+                        info("Got disconnect because we are shutting down, closing gatt")
+                        gatt = null
                         g.close() // Finish closing our gatt here
                     } else {
                         // cancel any queued ops if we were already connected
@@ -661,19 +638,53 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         cb: (Result<BluetoothGattDescriptor>) -> Unit
     ) = queueWriteDescriptor(c, CallbackContinuation(cb))
 
+    /**
+     * Some old androids have a bug where calling disconnect doesn't guarantee that the onConnectionStateChange callback gets called
+     * but the only safe way to call gatt.close is from that callback.  So we set a flag once we start closing and then poll
+     * until we see the callback has set gatt to null (indicating the CALLBACK has close the gatt).  If the timeout expires we assume the bug
+     * has occurred, and we manually close the gatt here.
+     *
+     * Log of typical failure
+     * 06-29 08:47:15.035 29788-30155/com.geeksville.mesh D/BluetoothGatt: cancelOpen() - device: 24:62:AB:F8:40:9A
+    06-29 08:47:15.036 29788-30155/com.geeksville.mesh D/BluetoothGatt: close()
+    06-29 08:47:15.037 29788-30155/com.geeksville.mesh D/BluetoothGatt: unregisterApp() - mClientIf=5
+    06-29 08:47:15.037 29788-29813/com.geeksville.mesh D/BluetoothGatt: onClientConnectionState() - status=0 clientIf=5 device=24:62:AB:F8:40:9A
+    06-29 08:47:15.037 29788-29813/com.geeksville.mesh W/BluetoothGatt: Unhandled exception in callback
+    java.lang.NullPointerException: Attempt to invoke virtual method 'void android.bluetooth.BluetoothGattCallback.onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int)' on a null object reference
+    at android.bluetooth.BluetoothGatt$1.onClientConnectionState(BluetoothGatt.java:182)
+    at android.bluetooth.IBluetoothGattCallback$Stub.onTransact(IBluetoothGattCallback.java:70)
+    at android.os.Binder.execTransact(Binder.java:446)
+     *
+     * per https://github.com/don/cordova-plugin-ble-central/issues/473#issuecomment-367687575
+     */
+    @Volatile
+    private var isClosing = false
 
     /** Close just the GATT device but keep our pending callbacks active */
     fun closeGatt() {
 
         gatt?.let { g ->
             info("Closing our GATT connection")
-            gatt =
-                null // Clear this first so the onConnectionChange callback can ignore while we are shutting down
+            isClosing = true
             try {
                 g.disconnect()
-                g.close() // movedinto the onDisconnect callback?
+
+                // Wait for our callback to run and handle hte disconnect
+                var msecsLeft = 1000
+                while (gatt != null && msecsLeft >= 0) {
+                    Thread.sleep(100)
+                    msecsLeft -= 100
+                }
+
+                if (gatt != null) {
+                    warn("Android onConnectionStateChange did not run, manually closing")
+                    gatt?.close()
+                    gatt = null
+                }
             } catch (ex: DeadObjectException) {
-                Exceptions.report(ex, "Dead object while closing GATT")
+                warn("Ignoring dead object exception, probably bluetooth was just disabled")
+            } finally {
+                isClosing = false
             }
         }
     }
