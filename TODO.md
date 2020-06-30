@@ -1,38 +1,6 @@
 # Remaining tasks before declaring 1.0
 
-- turning off Bluetooth on oneplus causes a harmless exception - devwork is null
-
-
-06-29 08:47:10.007 29788-29812/com.geeksville.mesh D/BluetoothGatt: configureMTU() - device: 24:62:AB:F8:40:9A mtu: 512
-06-29 08:47:10.007 29788-31466/com.geeksville.mesh D/com.geeksville.mesh.service.SafeBluetooth: Starting failsafe timer 5000
-06-29 08:47:10.014 29788-29812/com.geeksville.mesh D/com.geeksville.mesh.service.SafeBluetooth: work reconnect is completed, resuming status=0, res=kotlin.Unit
-06-29 08:47:10.016 29788-31466/com.geeksville.mesh I/com.geeksville.mesh.service.BluetoothInterface: Connected to radio!
-06-29 08:47:10.016 29788-31466/com.geeksville.mesh D/BluetoothGatt: refresh() - device: 24:62:AB:F8:40:9A
-06-29 08:47:10.220 29788-31466/com.geeksville.mesh D/com.geeksville.mesh.service.SafeBluetooth: Enqueuing work: reqMtu
-06-29 08:47:15.009 29788-31466/com.geeksville.mesh E/com.geeksville.mesh.service.SafeBluetooth: Failsafe BLE timer expired! (exception none
-06-29 08:47:15.011 29788-29859/com.geeksville.mesh D/com.geeksville.mesh.service.SafeBluetooth: Starting failsafe timer 5000
-06-29 08:47:15.015 29788-31466/com.geeksville.mesh D/com.geeksville.mesh.service.SafeBluetooth$BluetoothContinuation: Starting work: reqMtu
-06-29 08:47:15.016 29788-31466/com.geeksville.mesh D/BluetoothGatt: configureMTU() - device: 24:62:AB:F8:40:9A mtu: 512
-06-29 08:47:15.028 29788-31466/com.geeksville.mesh D/com.geeksville.mesh.service.SafeBluetooth: work reqMtu is completed, resuming status=4404, res=kotlin.Unit
-06-29 08:47:15.029 29788-31466/com.geeksville.mesh W/com.geeksville.mesh.service.BluetoothInterface: Scheduling reconnect because Giving up on setting MTUs, forcing disconnect com.geeksville.mesh.service.SafeBluetooth$BLEStatusException: Bluetooth status=4404 while doing reqMtu
-06-29 08:47:15.034 29788-30155/com.geeksville.mesh W/com.geeksville.mesh.service.BluetoothInterface: Forcing disconnect and hopefully device will comeback (disabling forced refresh)
-06-29 08:47:15.034 29788-30155/com.geeksville.mesh I/com.geeksville.mesh.service.SafeBluetooth: Closing our GATT connection
-06-29 08:47:15.035 29788-30155/com.geeksville.mesh D/BluetoothGatt: cancelOpen() - device: 24:62:AB:F8:40:9A
-06-29 08:47:15.036 29788-30155/com.geeksville.mesh D/BluetoothGatt: close()
-06-29 08:47:15.037 29788-30155/com.geeksville.mesh D/BluetoothGatt: unregisterApp() - mClientIf=5
-06-29 08:47:15.037 29788-29813/com.geeksville.mesh D/BluetoothGatt: onClientConnectionState() - status=0 clientIf=5 device=24:62:AB:F8:40:9A
-06-29 08:47:15.037 29788-29813/com.geeksville.mesh W/BluetoothGatt: Unhandled exception in callback
-    java.lang.NullPointerException: Attempt to invoke virtual method 'void android.bluetooth.BluetoothGattCallback.onConnectionStateChange(android.bluetooth.BluetoothGatt, int, int)' on a null object reference
-        at android.bluetooth.BluetoothGatt$1.onClientConnectionState(BluetoothGatt.java:182)
-        at android.bluetooth.IBluetoothGattCallback$Stub.onTransact(IBluetoothGattCallback.java:70)
-        at android.os.Binder.execTransact(Binder.java:446)
-06-29 08:47:16.040 29788-31466/com.geeksville.mesh W/com.geeksville.mesh.service.BluetoothInterface: Attempting reconnect
-06-29 08:47:16.041 29788-31466/com.geeksville.mesh D/com.geeksville.mesh.service.SafeBluetooth: Enqueuing work: connect
-06-29 08:47:16.041 29788-31466/com.geeksville.mesh D/com.geeksville.mesh.service.SafeBluetooth$BluetoothContinuation: Starting work: connect
-06-29 08:47:16.043 29788-31466/com.geeksville.mesh D/BluetoothGatt: connect() - device: 24:62:AB:F8:40:9A, auto: false
-06-29 08:47:16.043 29788-31466/com.geeksville.mesh D/BluetoothGatt: registerApp()
-
-- soyes sx ble problems (again)
+- fix release build inclusion of firmware
 - Android frontend should refetch the android messages from backend service on Resume
 - disable software update button after update finishes
 - first message sent is still doubled for some people
