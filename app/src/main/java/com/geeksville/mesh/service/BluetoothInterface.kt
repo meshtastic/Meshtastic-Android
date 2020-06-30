@@ -425,7 +425,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 
     override fun close() {
         if (safe != null) {
-            info("Closing radio interface service")
+            info("Closing BluetoothInterface")
             val s = safe
             safe =
                 null // We do this first, because if we throw we still want to mark that we no longer have a valid connection

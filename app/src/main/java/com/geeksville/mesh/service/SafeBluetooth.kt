@@ -11,7 +11,6 @@ import com.geeksville.concurrent.CallbackContinuation
 import com.geeksville.concurrent.Continuation
 import com.geeksville.concurrent.SyncContinuation
 import com.geeksville.util.exceptionReporter
-import com.geeksville.util.ignoreException
 import kotlinx.coroutines.*
 import java.io.Closeable
 import java.util.*
@@ -387,6 +386,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
      */
     private fun failAllWork(ex: Exception) {
         synchronized(workQueue) {
+            warn("Failing ${workQueue.size} works, because ${ex.message}")
             workQueue.forEach {
                 it.completion.resumeWithException(ex)
             }
@@ -704,10 +704,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
         closeGatt()
 
-        ignoreException {
-            // Hmm - sometimes the "Connection closing" exception comes back to us - ignore it
-            failAllWork(BLEException("Connection closing"))
-        }
+        failAllWork(BLEException("Connection closing"))
     }
 
     /**
