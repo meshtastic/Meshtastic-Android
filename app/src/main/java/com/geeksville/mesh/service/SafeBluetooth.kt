@@ -121,6 +121,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     // Our own custom BLE status codes
     private val STATUS_RELIABLE_WRITE_FAILED = 4403
     private val STATUS_TIMEOUT = 4404
+    private val STATUS_NOSTART = 4405
 
     private val gattCallback = object : BluetoothGattCallback() {
 
@@ -310,7 +311,14 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
             isSettingMtu =
                 false // Most work is not doing MTU stuff, the work that is will re set this flag
-            logAssert(newWork.startWork())
+            val started = newWork.startWork()
+            if (!started) {
+                errormsg("Failed to start work, returned error status")
+                completeWork(
+                    STATUS_NOSTART,
+                    Unit
+                ) // abandon the current attempt and try for another
+            }
         }
     }
 
