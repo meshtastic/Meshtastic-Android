@@ -398,7 +398,8 @@ class MeshService : Service(), Logging {
         }
 
 
-    override fun toString() = summaryString
+    // Note: do not override toString, it causes infinite recursion on some androids (because contextWrapper.getResources calls to string)
+    // override fun toString() = summaryString
 
     /**
      * Generate a new version of our notification - reflecting current app state

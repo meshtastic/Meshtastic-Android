@@ -11,7 +11,6 @@ import com.geeksville.concurrent.CallbackContinuation
 import com.geeksville.concurrent.Continuation
 import com.geeksville.concurrent.SyncContinuation
 import com.geeksville.util.exceptionReporter
-import com.geeksville.util.ignoreException
 import kotlinx.coroutines.*
 import java.io.Closeable
 import java.util.*
@@ -122,6 +121,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     // Our own custom BLE status codes
     private val STATUS_RELIABLE_WRITE_FAILED = 4403
     private val STATUS_TIMEOUT = 4404
+    private val STATUS_NOSTART = 4405
 
     private val gattCallback = object : BluetoothGattCallback() {
 
@@ -311,7 +311,14 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
             isSettingMtu =
                 false // Most work is not doing MTU stuff, the work that is will re set this flag
-            logAssert(newWork.startWork())
+            val started = newWork.startWork()
+            if (!started) {
+                errormsg("Failed to start work, returned error status")
+                completeWork(
+                    STATUS_NOSTART,
+                    Unit
+                ) // abandon the current attempt and try for another
+            }
         }
     }
 
@@ -387,6 +394,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
      */
     private fun failAllWork(ex: Exception) {
         synchronized(workQueue) {
+            warn("Failing ${workQueue.size} works, because ${ex.message}")
             workQueue.forEach {
                 it.completion.resumeWithException(ex)
             }
@@ -676,10 +684,11 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                     msecsLeft -= 100
                 }
 
-                if (gatt != null) {
+                gatt?.let { g2 ->
                     warn("Android onConnectionStateChange did not run, manually closing")
-                    gatt?.close()
-                    gatt = null
+                    gatt =
+                        null // clear gat before calling close, bcause close might throw dead object exception
+                    g2.close()
                 }
             } catch (ex: DeadObjectException) {
                 warn("Ignoring dead object exception, probably bluetooth was just disabled")
@@ -703,10 +712,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
         closeGatt()
 
-        ignoreException {
-            // Hmm - sometimes the "Connection closing" exception comes back to us - ignore it
-            failAllWork(BLEException("Connection closing"))
-        }
+        failAllWork(BLEException("Connection closing"))
     }
 
     /**

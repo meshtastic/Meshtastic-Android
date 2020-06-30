@@ -169,6 +169,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
          * this is created in onCreate()
          * We do an ugly hack of keeping it in the singleton so we can share it for the rare software update case
          */
+        @Volatile
         var safe: SafeBluetooth? = null
     }
 
@@ -332,7 +333,10 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
             delay(1000) // Give some nasty time for buggy BLE stacks to shutdown (500ms was not enough)
             reconnectJob = null // Any new reconnect requests after this will be allowed to run
             warn("Attempting reconnect")
-            startConnect()
+            if (safe != null) // check again, because we just slept for 1sec, and someone might have closed our interface
+                startConnect()
+            else
+                warn("Not connecting, because safe==null, someone must have closed us")
         } else {
             warn("Abandoning reconnect because safe==null, someone must have closed the device")
         }
@@ -421,7 +425,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 
     override fun close() {
         if (safe != null) {
-            info("Closing radio interface service")
+            info("Closing BluetoothInterface")
             val s = safe
             safe =
                 null // We do this first, because if we throw we still want to mark that we no longer have a valid connection
