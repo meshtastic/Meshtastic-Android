@@ -676,10 +676,11 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                     msecsLeft -= 100
                 }
 
-                if (gatt != null) {
+                gatt?.let { g2 ->
                     warn("Android onConnectionStateChange did not run, manually closing")
-                    gatt?.close()
-                    gatt = null
+                    gatt =
+                        null // clear gat before calling close, bcause close might throw dead object exception
+                    g2.close()
                 }
             } catch (ex: DeadObjectException) {
                 warn("Ignoring dead object exception, probably bluetooth was just disabled")
