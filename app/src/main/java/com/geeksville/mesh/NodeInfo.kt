@@ -28,7 +28,8 @@ data class Position(
     val latitude: Double,
     val longitude: Double,
     val altitude: Int,
-    val time: Int = currentTime() // default to current time in secs
+    val time: Int = currentTime(), // default to current time in secs
+    val batteryPctLevel: Int
 ) : Parcelable {
     companion object {
         /// Convert to a double representation of degrees
@@ -45,7 +46,8 @@ data class Position(
         degD(p.latitudeI),
         degD(p.longitudeI),
         p.altitude,
-        if (p.time != 0) p.time else defaultTime
+        if (p.time != 0) p.time else defaultTime,
+        p.batteryLevel
     )
 
     /// @return distance in meters to some other node (or null if unknown)
@@ -70,6 +72,8 @@ data class NodeInfo(
 
     /// Return the last time we've seen this node in secs since 1970
     val lastSeen get() = position?.time ?: 0
+
+    val batteryPctLevel get() = position?.batteryPctLevel
 
     /**
      * true if the device was heard from recently

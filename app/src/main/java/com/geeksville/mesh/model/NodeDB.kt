@@ -10,12 +10,14 @@ import com.geeksville.mesh.Position
 /// NodeDB lives inside the UIViewModel, but it needs a backpointer to reach the service
 class NodeDB(private val ui: UIViewModel) {
     private val testPositions = arrayOf(
-        Position(32.776665, -96.796989, 35), // dallas
-        Position(32.960758, -96.733521, 35), // richardson
+        Position(32.776665, -96.796989, 35, 123, 40), // dallas
+        Position(32.960758, -96.733521, 35, 456, 50), // richardson
         Position(
             32.912901,
             -96.781776,
-            35
+            35,
+            789,
+            60
         ) // north dallas
     )
 
