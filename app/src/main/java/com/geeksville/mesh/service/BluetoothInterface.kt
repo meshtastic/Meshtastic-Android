@@ -402,7 +402,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 
             // we begin by setting our MTU size as high as it can go (if we can)
             if (shouldSetMtu)
-                safe!!.asyncRequestMtu(512) { mtuRes ->
+                safe?.asyncRequestMtu(512) { mtuRes ->
                     try {
                         mtuRes.getOrThrow() // FIXME - why sometimes is the result Unit!?!
                         debug("MTU change attempted")
