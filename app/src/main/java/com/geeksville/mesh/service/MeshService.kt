@@ -1180,7 +1180,7 @@ class MeshService : Service(), Logging {
                             else -> errormsg("Unexpected FromRadio variant")
                         }
                     } catch (ex: InvalidProtocolBufferException) {
-                        Exceptions.report(ex, "Invalid Protobuf from radio, len=${bytes.size}")
+                        errormsg("Invalid Protobuf from radio, len=${bytes.size}", ex)
                     }
                 }
 
@@ -1285,7 +1285,7 @@ class MeshService : Service(), Logging {
         if (configCompleteId == configNonce) {
             // This was our config request
             if (newMyNodeInfo == null || newNodes.isEmpty())
-                reportError("Did not receive a valid config")
+                errormsg("Did not receive a valid config")
             else {
                 debug("Installing new node DB")
                 discardNodeDB()
