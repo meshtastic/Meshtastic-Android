@@ -10,6 +10,7 @@ import com.geeksville.concurrent.handledLaunch
 import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
 import com.geeksville.util.ignoreException
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import java.lang.reflect.Method
@@ -319,7 +320,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
      * Some buggy BLE stacks can fail on initial connect, with either missing services or missing characteristics.  If that happens we
      * disconnect and try again when the device reenumerates.
      */
-    private suspend fun retryDueToException() {
+    private suspend fun retryDueToException() = try {
         /// We gracefully handle safe being null because this can occur if someone has unpaired from our device - just abandon the reconnect attempt
         val s = safe
         if (s != null) {
@@ -340,6 +341,8 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         } else {
             warn("Abandoning reconnect because safe==null, someone must have closed the device")
         }
+    } catch (ex: CancellationException) {
+        warn("retryDueToException was cancelled")
     }
 
     /// We only try to set MTU once, because some buggy implementations fail
@@ -402,7 +405,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 
             // we begin by setting our MTU size as high as it can go (if we can)
             if (shouldSetMtu)
-                safe!!.asyncRequestMtu(512) { mtuRes ->
+                safe?.asyncRequestMtu(512) { mtuRes ->
                     try {
                         mtuRes.getOrThrow() // FIXME - why sometimes is the result Unit!?!
                         debug("MTU change attempted")
@@ -424,6 +427,9 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 
 
     override fun close() {
+        reconnectJob?.cancel() // Cancel any queued reconnect attempts
+        reconnectJob = null
+
         if (safe != null) {
             info("Closing BluetoothInterface")
             val s = safe
