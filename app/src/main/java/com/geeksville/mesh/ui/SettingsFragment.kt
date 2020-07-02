@@ -484,10 +484,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     updateProgressBar.progress = service.updateStatus
                     delay(2000) // Only check occasionally
                 }
+
+                val isSuccess = (service.updateStatus == -1)
                 scanStatusText.text =
-                    if (service.updateStatus == -1) "Update successful" else "Update failed"
+                    if (isSuccess) "Update successful" else "Update failed"
                 updateProgressBar.isEnabled = false
-                updateFirmwareButton.isEnabled = true
+                updateFirmwareButton.isEnabled = !isSuccess
             }
         }
     }

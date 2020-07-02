@@ -2,7 +2,6 @@
 
 - add faq entry about range and antennas and rain
 - first message sent is still doubled for some people
-- disable software update button after update finishes
 - let users set arbitrary params in android
 - add a low level settings screen (let user change any of the RadioConfig parameters)
 
