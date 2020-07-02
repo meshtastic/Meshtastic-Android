@@ -162,7 +162,9 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                             info("Lost connection - aborting current work: $currentWork")
 
                             // If we get a disconnect, just try again otherwise fail all current operations
-                            if (currentWork?.isConnect() == true)
+                            // Note: if no work is pending (likely) we also just totally teardown and restart the connection, because we won't be
+                            // throwing a lost connection exception to any worker.
+                            if (currentWork == null || currentWork?.isConnect() == true)
                                 dropAndReconnect()
                             else
                                 lostConnection("lost connection")
