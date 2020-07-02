@@ -436,7 +436,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 R.drawable.cloud_off,
                 R.string.disconnected
             )
-            else -> Pair(R.drawable.cloud_off, R.string.disconnected)
+            // else -> Pair(R.drawable.cloud_off, R.string.disconnected)
         }
 
         val item = actionBarMenu?.findItem(R.id.connectStatusImage)
