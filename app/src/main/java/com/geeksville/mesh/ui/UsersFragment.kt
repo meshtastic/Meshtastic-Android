@@ -26,6 +26,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val nodeNameView = itemView.nodeNameView
         val distance_view = itemView.distance_view
+        val batteryPctView = itemView.batteryPercentageView
     }
 
     private val nodesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
@@ -105,6 +106,16 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 holder.distance_view.visibility = View.VISIBLE
             } else {
                 holder.distance_view.visibility = View.INVISIBLE
+            }
+
+            val battery = n.batteryPctLevel
+            if (battery != null)
+            {
+                holder.batteryPctView.text = "$battery%"
+            }
+            else
+            {
+                holder.batteryPctView.text = "?"
             }
         }
 
