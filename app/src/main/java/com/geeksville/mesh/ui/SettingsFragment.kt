@@ -504,7 +504,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         // If actively connected possibly let the user update firmware
         val info = model.myNodeInfo.value
-        if (connected == MeshService.ConnectionState.CONNECTED && info != null && info.shouldUpdate) {
+        if (connected == MeshService.ConnectionState.CONNECTED && info != null && info.shouldUpdate && info.couldUpdate) {
             updateFirmwareButton.visibility = View.VISIBLE
             updateFirmwareButton.text =
                 getString(R.string.update_to).format(getString(R.string.cur_firmware_version))
