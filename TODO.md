@@ -1,7 +1,6 @@
 # Remaining tasks before declaring 1.0
 
 - first message sent is still doubled for some people
-- fix release build inclusion of firmware - per https://developer.android.com/studio/build/build-variants
 - disable software update button after update finishes
 - let users set arbitrary params in android
 - add a low level settings screen (let user change any of the RadioConfig parameters)
