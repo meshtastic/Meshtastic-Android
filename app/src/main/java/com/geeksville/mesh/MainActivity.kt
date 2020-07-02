@@ -772,7 +772,12 @@ class MainActivity : AppCompatActivity(), Logging,
         if (model.meshService != null)
             Exceptions.reportError("meshService was supposed to be null, ignoring (but reporting a bug)")
 
-        MeshService.startService(this) // Start the service so it stays running even after we unbind
+        try {
+            MeshService.startService(this) // Start the service so it stays running even after we unbind
+        } catch (ex: Exception) {
+            // Old samsung phones have a race condition andthis might rarely fail.  Which is probably find because the bind will be sufficient most of the time
+            errormsg("Failed to start service from activity - but ignoring because bind will work ${ex.message}")
+        }
 
         // ALSO bind so we can use the api
         mesh.connect(this, MeshService.intent, Context.BIND_AUTO_CREATE + Context.BIND_ABOVE_CLIENT)

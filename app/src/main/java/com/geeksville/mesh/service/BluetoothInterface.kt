@@ -354,35 +354,40 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
     private var isFirstTime = true
 
     private fun doDiscoverServicesAndInit() {
-        // FIXME - no need to discover services more than once - instead use lazy() to use them in future attempts
         safe!!.asyncDiscoverServices { discRes ->
-            discRes.getOrThrow() // FIXME, instead just try to reconnect?
+            try {
+                discRes.getOrThrow()
 
-            service.serviceScope.handledLaunch {
-                try {
-                    debug("Discovered services!")
-                    delay(1000) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null
+                service.serviceScope.handledLaunch {
+                    try {
+                        debug("Discovered services!")
+                        delay(1000) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null
 
-                    /* if (isFirstTime) {
-                        isFirstTime = false
-                        throw BLEException("Faking a BLE failure")
-                    } */
+                        /* if (isFirstTime) {
+                            isFirstTime = false
+                            throw BLEException("Faking a BLE failure")
+                        } */
 
-                    fromNum = getCharacteristic(BTM_FROMNUM_CHARACTER)
+                        fromNum = getCharacteristic(BTM_FROMNUM_CHARACTER)
 
-                    // We treat the first send by a client as special
-                    isFirstSend = true
+                        // We treat the first send by a client as special
+                        isFirstSend = true
 
-                    // Now tell clients they can (finally use the api)
-                    service.onConnect()
+                        // Now tell clients they can (finally use the api)
+                        service.onConnect()
 
-                    // Immediately broadcast any queued packets sitting on the device
-                    doReadFromRadio(true)
-                } catch (ex: BLEException) {
-                    scheduleReconnect(
-                        "Unexpected error in initial device enumeration, forcing disconnect $ex"
-                    )
+                        // Immediately broadcast any queued packets sitting on the device
+                        doReadFromRadio(true)
+                    } catch (ex: BLEException) {
+                        scheduleReconnect(
+                            "Unexpected error in initial device enumeration, forcing disconnect $ex"
+                        )
+                    }
                 }
+            } catch (ex: BLEException) {
+                scheduleReconnect(
+                    "Unexpected error discovering services, forcing disconnect $ex"
+                )
             }
         }
     }

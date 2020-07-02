@@ -1461,6 +1461,8 @@ class MeshService : Service(), Logging {
             errormsg("Unable to update", ex)
             null
         }
+
+        debug("setFirmwareUpdateFilename $firmwareUpdateFilename")
     }
 
     private fun doFirmwareUpdate() {
