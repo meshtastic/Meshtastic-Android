@@ -85,8 +85,11 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         }
 
         override fun toString(): String {
-            return super.toString()
+            return "Work:$tag"
         }
+
+        /// Connection work items are treated specially
+        fun isConnect() = tag == "connect" || tag == "reconnect"
     }
 
     /**
@@ -122,6 +125,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private val STATUS_RELIABLE_WRITE_FAILED = 4403
     private val STATUS_TIMEOUT = 4404
     private val STATUS_NOSTART = 4405
+    private val STATUS_SIMFAILURE = 4406
 
     private val gattCallback = object : BluetoothGattCallback() {
 
@@ -157,7 +161,11 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                         if (oldstate == BluetoothProfile.STATE_CONNECTED) {
                             info("Lost connection - aborting current work: $currentWork")
 
-                            lostConnection("lost connection")
+                            // If we get a disconnect, just try again otherwise fail all current operations
+                            if (currentWork?.isConnect() == true)
+                                dropAndReconnect()
+                            else
+                                lostConnection("lost connection")
                         } else if (status == 133) {
                             // We were not previously connected and we just failed with our non-auto connection attempt.  Therefore we now need
                             // to do an autoconnection attempt.  When that attempt succeeds/fails the normal callbacks will be called
@@ -285,6 +293,12 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         }
     }
 
+    // To test loss of BLE faults we can randomly fail a certain % of all work items.  We
+    // skip this for "connect" items because the handling for connection failure is special
+    var simFailures = false
+    var failPercent =
+        10 // 15% failure is unusably high because of constant reconnects, 7% somewhat usable, 10% pretty bad
+    private val failRandom = Random()
 
     private var activeTimeout: Job? = null
 
@@ -311,13 +325,22 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
             isSettingMtu =
                 false // Most work is not doing MTU stuff, the work that is will re set this flag
-            val started = newWork.startWork()
-            if (!started) {
-                errormsg("Failed to start work, returned error status")
-                completeWork(
-                    STATUS_NOSTART,
-                    Unit
-                ) // abandon the current attempt and try for another
+
+            val failThis =
+                simFailures && !newWork.isConnect() && failRandom.nextInt(100) < failPercent
+
+            if (failThis) {
+                errormsg("Simulating random work failure!")
+                completeWork(STATUS_SIMFAILURE, Unit)
+            } else {
+                val started = newWork.startWork()
+                if (!started) {
+                    errormsg("Failed to start work, returned error status")
+                    completeWork(
+                        STATUS_NOSTART,
+                        Unit
+                    ) // abandon the current attempt and try for another
+                }
             }
         }
     }
