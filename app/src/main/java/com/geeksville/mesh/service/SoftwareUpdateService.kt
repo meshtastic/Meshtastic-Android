@@ -230,10 +230,12 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             val (region) = regionRegex.find(hwVer)?.destructured
                 ?: throw Exception("Malformed hw version")
 
-            val name = "firmware/firmware-$mfg-$region-$curver.bin"
+            val base = "firmware-$mfg-$region-$curver.bin"
+
             // Check to see if the file exists (some builds might not include update files for size reasons)
-            return if (!context.assets.list(name).isNullOrEmpty())
-                name
+            val firmwareFiles = context.assets.list("firmware") ?: arrayOf()
+            return if (firmwareFiles.contains(base))
+                "firmware/$base"
             else
                 null
         }
