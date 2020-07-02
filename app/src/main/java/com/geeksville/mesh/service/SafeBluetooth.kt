@@ -157,7 +157,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                         if (oldstate == BluetoothProfile.STATE_CONNECTED) {
                             info("Lost connection - aborting current work: $currentWork")
 
-                            dropAndReconnect()
+                            lostConnection("lost connection")
                         } else if (status == 133) {
                             // We were not previously connected and we just failed with our non-auto connection attempt.  Therefore we now need
                             // to do an autoconnection attempt.  When that attempt succeeds/fails the normal callbacks will be called
@@ -499,8 +499,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         }
     }
 
-    /// Drop our current connection and then requeue a connect as needed
-    private fun dropAndReconnect() {
+    private fun lostConnection(reason: String) {
         /*
         Supposedly this reconnect attempt happens automatically
         "If the connection was established through an auto connect, Android will
@@ -511,7 +510,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
         closeConnection()
         */
-        failAllWork(BLEException("Lost connection"))
+        failAllWork(BLEException(reason))
 
         // Cancel any notifications - because when the device comes back it might have forgotten about us
         notifyHandlers.clear()
@@ -520,6 +519,11 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             debug("calling lostConnect handler")
             it.invoke()
         }
+    }
+
+    /// Drop our current connection and then requeue a connect as needed
+    private fun dropAndReconnect() {
+        lostConnection("lost connection, reconnecting")
 
         // Queue a new connection attempt
         val cb = connectionCallback
