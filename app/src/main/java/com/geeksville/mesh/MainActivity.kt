@@ -423,7 +423,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
     private fun updateConnectionStatusImage(connected: MeshService.ConnectionState) {
 
-        if (actionBarMenu==null)
+        if (actionBarMenu == null)
             return
 
         val (image, tooltip) = when (connected) {
@@ -736,7 +736,9 @@ class MainActivity : AppCompatActivity(), Logging,
             registerMeshReceiver()
 
             // Init our messages table with the service's record of past text messages
-            model.messagesState.messages.value = service.oldMessages
+            val msgs = service.oldMessages
+            debug("Service provided ${msgs.size} messages")
+            model.messagesState.messages.value = msgs
             val connectionState =
                 MeshService.ConnectionState.valueOf(service.connectionState())
 

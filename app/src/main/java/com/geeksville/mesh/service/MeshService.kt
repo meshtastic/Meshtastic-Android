@@ -605,13 +605,13 @@ class MeshService : Service(), Logging {
     }
 
     /**
-     * discard entire node db & message state - used when changing radio channels
+     * discard entire node db & message state - used when downloading a new db from the device
      */
     private fun discardNodeDB() {
         myNodeInfo = null
         nodeDBbyNodeNum.clear()
         nodeDBbyID.clear()
-        recentDataPackets.clear()
+        // recentDataPackets.clear() We do NOT want to clear this, because it is the record of old messages the GUI still might want to show
         haveNodeDB = false
     }
 
@@ -1024,6 +1024,9 @@ class MeshService : Service(), Logging {
 
         /// Perform all the steps needed once we start waiting for device sleep to complete
         fun startDeviceSleep() {
+            // Just in case the user uncleanly reboots the phone, save now (we normally save in onDestroy)
+            saveSettings()
+
             // lost radio connection, therefore no need to keep listening to GPS
             stopLocationRequests()
 

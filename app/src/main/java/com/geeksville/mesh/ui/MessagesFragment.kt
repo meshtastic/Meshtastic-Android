@@ -187,7 +187,8 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         layoutManager.stackFromEnd = true // We want the last rows to always be shown
         messageListView.layoutManager = layoutManager
 
-        model.messagesState.messages.observe(viewLifecycleOwner, Observer { it ->
+        model.messagesState.messages.observe(viewLifecycleOwner, Observer {
+            debug("New messages received: ${it.size}")
             messagesAdapter.onMessagesChanged(it)
         })
 

@@ -1,10 +1,7 @@
 # Remaining tasks before declaring 1.0
 
-- feh123 problem sony
-- fix release build inclusion of firmware - per https://developer.android.com/studio/build/build-variants
-- Android frontend should refetch the android messages from backend service on Resume
-- disable software update button after update finishes
 - first message sent is still doubled for some people
+- disable software update button after update finishes
 - let users set arbitrary params in android
 - add a low level settings screen (let user change any of the RadioConfig parameters)
 
