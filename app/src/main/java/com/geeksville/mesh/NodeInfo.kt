@@ -29,7 +29,7 @@ data class Position(
     val longitude: Double,
     val altitude: Int,
     val time: Int = currentTime(), // default to current time in secs
-    val batteryPctLevel: Int
+    val batteryPctLevel: Int = 0
 ) : Parcelable {
     companion object {
         /// Convert to a double representation of degrees
