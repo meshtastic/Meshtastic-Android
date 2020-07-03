@@ -846,6 +846,10 @@ class MainActivity : AppCompatActivity(), Logging,
                 Toast.makeText(this, item.title, Toast.LENGTH_SHORT).show()
                 return true
             }
+            R.id.clear_history -> {
+                model.messagesState.cleanMessages()
+                return true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }

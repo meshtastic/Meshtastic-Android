@@ -41,6 +41,12 @@ class MessagesState(private val ui: UIViewModel) : Logging {
             messages.value!! + m
     }
 
+    /// clean messages from our UI
+    fun cleanMessages() {
+        debug("cleaning messages")
+        messages.value = emptyList()
+    }
+
     fun updateStatus(id: Int, status: MessageStatus) {
         // Super inefficent but this is rare
         debug("Handling message status change $id: $status")

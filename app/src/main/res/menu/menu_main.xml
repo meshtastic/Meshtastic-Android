@@ -8,6 +8,10 @@
         android:title="@string/disconnected"
         app:showAsAction="ifRoom" />
     <item
+        android:id="@+id/clear_history"
+        android:title="Clear History"
+        app:showAsAction="withText" />
+    <item
         android:id="@+id/about"
         android:title="@string/about"
         app:showAsAction="withText" />
