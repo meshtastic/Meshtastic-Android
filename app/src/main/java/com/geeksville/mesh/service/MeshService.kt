@@ -608,6 +608,7 @@ class MeshService : Service(), Logging {
      * discard entire node db & message state - used when downloading a new db from the device
      */
     private fun discardNodeDB() {
+        debug("Discarding NodeDB")
         myNodeInfo = null
         nodeDBbyNodeNum.clear()
         nodeDBbyID.clear()
@@ -1508,8 +1509,12 @@ class MeshService : Service(), Logging {
 
         override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
             debug("Passing through device change to radio service: $deviceAddr")
-            discardNodeDB()
-            radio.service.setDeviceAddress(deviceAddr)
+
+            val res = radio.service.setDeviceAddress(deviceAddr)
+            if (res) {
+                discardNodeDB()
+            }
+            res
         }
 
         // Note: bound methods don't get properly exception caught/logged, so do that with a wrapper

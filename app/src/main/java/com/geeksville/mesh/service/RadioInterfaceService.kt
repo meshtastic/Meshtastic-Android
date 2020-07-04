@@ -250,38 +250,49 @@ class RadioInterfaceService : Service(), Logging {
     }
 
 
+    /**
+     * Change to a new device
+     *
+     * @return true if the device changed, false if no change
+     */
     @SuppressLint("NewApi")
-    private fun setBondedDeviceAddress(address: String?) {
-        // Record that this use has configured a radio
-        GeeksvilleApplication.analytics.track(
-            "mesh_bond"
-        )
+    private fun setBondedDeviceAddress(address: String?): Boolean {
+        return if (getBondedDeviceAddress(this) == address && isConnected) {
+            warn("Ignoring setBondedDevice $address, because we are already using that device")
+            false
+        } else {
+            // Record that this use has configured a new radio
+            GeeksvilleApplication.analytics.track(
+                "mesh_bond"
+            )
 
-        // Ignore any errors that happen while closing old device
-        ignoreException {
-            stopInterface()
+            // Ignore any errors that happen while closing old device
+            ignoreException {
+                stopInterface()
+            }
+
+            // The device address "n" can be used to mean none
+
+            debug("Setting bonded device to $address")
+
+            getPrefs(this).edit(commit = true) {
+                this.remove(DEVADDR_KEY_OLD) // remove any old version of the key
+
+                if (address == null)
+                    this.remove(DEVADDR_KEY)
+                else
+                    putString(DEVADDR_KEY, address)
+            }
+
+            // Force the service to reconnect
+            startInterface()
+            true
         }
-
-        // The device address "n" can be used to mean none
-
-        debug("Setting bonded device to $address")
-
-        getPrefs(this).edit(commit = true) {
-            this.remove(DEVADDR_KEY_OLD) // remove any old version of the key
-
-            if (address == null)
-                this.remove(DEVADDR_KEY)
-            else
-                putString(DEVADDR_KEY, address)
-        }
-
-        // Force the service to reconnect
-        startInterface()
     }
 
     private val binder = object : IRadioInterfaceService.Stub() {
 
-        override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
+        override fun setDeviceAddress(deviceAddr: String?): Boolean = toRemoteExceptions {
             setBondedDeviceAddress(deviceAddr)
         }
 
