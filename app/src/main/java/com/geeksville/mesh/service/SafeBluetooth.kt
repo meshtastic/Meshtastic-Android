@@ -426,7 +426,14 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         synchronized(workQueue) {
             warn("Failing ${workQueue.size} works, because ${ex.message}")
             workQueue.forEach {
-                it.completion.resumeWithException(ex)
+                try {
+                    it.completion.resumeWithException(ex)
+                } catch (ex: Exception) {
+                    errormsg(
+                        "Mystery exception, why were we informed about our own exceptions?",
+                        ex
+                    )
+                }
             }
             workQueue.clear()
             stopCurrentWork()
