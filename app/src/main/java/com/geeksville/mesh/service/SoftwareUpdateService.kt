@@ -268,7 +268,8 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         fun doUpdate(context: Context, sync: SafeBluetooth, assetName: String) {
             try {
                 val g = sync.gatt!!
-                val service = g.services.find { it.uuid == SW_UPDATE_UUID }!!
+                val service = g.services.find { it.uuid == SW_UPDATE_UUID }
+                    ?: throw BLEException("Couldn't find update service")
 
                 info("Starting firmware update for $assetName")
 
