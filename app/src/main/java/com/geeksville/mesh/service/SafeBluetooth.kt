@@ -392,25 +392,30 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             // startup next job in queue before calling the completion handler
             val work =
                 synchronized(workQueue) {
-                    val w =
-                        currentWork
-                            ?: throw Exception("currentWork was null") // will throw if null, which is helpful (FIXME - throws in the field - because of a bogus mtu completion gatt call)
-                    stopCurrentWork() // We are now no longer working on anything
+                    val w = currentWork
 
-                    startNewWork()
+                    if (w != null) {
+                        stopCurrentWork() // We are now no longer working on anything
+
+                        startNewWork()
+                    }
                     w
                 }
 
-            debug("work ${work.tag} is completed, resuming status=$status, res=$res")
-            if (status != 0)
-                work.completion.resumeWithException(
-                    BLEStatusException(
-                        status,
-                        "Bluetooth status=$status while doing ${work.tag}"
+            if (work == null)
+                warn("wor completed, but we already killed it via failsafetimer? status=$status, res=$res")
+            else {
+                debug("work ${work.tag} is completed, resuming status=$status, res=$res")
+                if (status != 0)
+                    work.completion.resumeWithException(
+                        BLEStatusException(
+                            status,
+                            "Bluetooth status=$status while doing ${work.tag}"
+                        )
                     )
-                )
-            else
-                work.completion.resume(Result.success(res) as Result<Nothing>)
+                else
+                    work.completion.resume(Result.success(res) as Result<Nothing>)
+            }
         }
     }
 
@@ -607,7 +612,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private fun queueRequestMtu(
         len: Int,
         cont: Continuation<Unit>
-    ) = queueWork("reqMtu", cont, 5 * 1000) {
+    ) = queueWork("reqMtu", cont, 10 * 1000) {
         isSettingMtu = true
         gatt?.requestMtu(len) ?: false
     }
