@@ -127,6 +127,17 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private val STATUS_NOSTART = 4405
     private val STATUS_SIMFAILURE = 4406
 
+    /**
+     * Should we automatically try to reconnect when we lose our connection?
+     *
+     * Originally this was true, but over time (now that clients are smarter and need to build
+     * up more state) I see this was a mistake.  Now if the connection drops we just call
+     * the lostConnection callback and the client of this API is responsible for reconnecting.
+     * This also prevents nasty races when sometimes both the upperlayer and this layer decide to reconnect
+     * simultaneously.
+     */
+    private val autoReconnect = false
+
     private val gattCallback = object : BluetoothGattCallback() {
 
         override fun onConnectionStateChange(
@@ -164,7 +175,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                             // If we get a disconnect, just try again otherwise fail all current operations
                             // Note: if no work is pending (likely) we also just totally teardown and restart the connection, because we won't be
                             // throwing a lost connection exception to any worker.
-                            if (currentWork == null || currentWork?.isConnect() == true)
+                            if (autoReconnect && (currentWork == null || currentWork?.isConnect() == true))
                                 dropAndReconnect()
                             else
                                 lostConnection("lost connection")

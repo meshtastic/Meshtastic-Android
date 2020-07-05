@@ -325,11 +325,15 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         val s = safe
         if (s != null) {
             warn("Forcing disconnect and hopefully device will comeback (disabling forced refresh)")
-            hasForcedRefresh =
-                true // We've already tossed any old service caches, no need to do it again
+
+            // The following optimization is not currently correct - because the device might be sleeping and come back with different BLE handles
+            // hasForcedRefresh = true // We've already tossed any old service caches, no need to do it again
+
+            // Make sure the old connection was killed
             ignoreException {
                 s.closeConnection()
             }
+
             service.onDisconnect(false) // assume we will fail
             delay(1000) // Give some nasty time for buggy BLE stacks to shutdown (500ms was not enough)
             reconnectJob = null // Any new reconnect requests after this will be allowed to run
@@ -416,7 +420,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
             if (shouldSetMtu)
                 safe?.asyncRequestMtu(512) { mtuRes ->
                     try {
-                        mtuRes.getOrThrow() // FIXME - why sometimes is the result Unit!?!
+                        mtuRes.getOrThrow()
                         debug("MTU change attempted")
 
                         // throw BLEException("Test MTU set failed")
@@ -457,9 +461,9 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         // comes in range (even if we made this connect call long ago when we got powered on)
         // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
         // more info
-        safe!!.asyncConnect(true, // FIXME, sometimes this seems to not work or take a very long time!
+        safe!!.asyncConnect(true,
             cb = ::onConnect,
-            lostConnectCb = { service.onDisconnect(isPermanent = false) })
+            lostConnectCb = { scheduleReconnect("connection dropped") })
     }
 
 
