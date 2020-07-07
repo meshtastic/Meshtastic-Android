@@ -126,6 +126,14 @@ class RadioInterfaceService : Service(), Logging {
     private val nopIf = NopInterface()
     private var radioIf: IRadioInterface = nopIf
 
+    /** true if we have started our interface
+     *
+     * Note: an interface may be started without necessarily yet having a connection
+     */
+    private var isStarted = false
+
+    /// true if our interface is currently connected to a device
+    private var isConnected = false
 
     /**
      * If the user turns on bluetooth after we start, make sure to try and reconnected then
@@ -164,8 +172,6 @@ class RadioInterfaceService : Service(), Logging {
             p
         )
     }
-
-    private var isConnected = false
 
     fun onConnect() {
         if (!isConnected) {
@@ -211,6 +217,7 @@ class RadioInterfaceService : Service(), Logging {
                 warn("No bonded mesh radio, can't start interface")
             else {
                 info("Starting radio $address")
+                isStarted = true
 
                 if (logSends)
                     sentPacketsLog = BinaryLogFile(this, "sent_log.pb")
@@ -236,6 +243,7 @@ class RadioInterfaceService : Service(), Logging {
     private fun stopInterface() {
         val r = radioIf
         info("stopping interface $r")
+        isStarted = false
         radioIf = nopIf
         r.close()
 
@@ -257,7 +265,7 @@ class RadioInterfaceService : Service(), Logging {
      */
     @SuppressLint("NewApi")
     private fun setBondedDeviceAddress(address: String?): Boolean {
-        return if (getBondedDeviceAddress(this) == address && isConnected) {
+        return if (getBondedDeviceAddress(this) == address && isStarted) {
             warn("Ignoring setBondedDevice $address, because we are already using that device")
             false
         } else {
