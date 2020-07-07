@@ -37,7 +37,6 @@ the channel is encrypted, you can share the the channel key with others by qr co
 * keep past messages in db, one db per channel (currently we just keep an array in saved preferences)
 * show user avatars in chat (use the google user info api)
 * let users save old channels (i.e. have a menu of channels the user can use)
-* also add a receiver that fires after a new update was installed from the play store
 * if the rxpacket queue on the device overflows (because android hasn't connected in a while) send a special packet to android which means 'X packets have been dropped because you were offline' -drop oldest packets first
 * make sw update work over BLE
 
