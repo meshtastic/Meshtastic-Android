@@ -149,6 +149,7 @@
         </activity>
 
         <receiver android:name="com.geeksville.mesh.service.BootCompleteReceiver">
+            <!-- handle boot events -->
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
 
@@ -159,6 +160,15 @@
 
                 <!-- for testing -->
                 <action android:name="com.geeksville.mesh.SIM_BOOT" />
+            </intent-filter>
+
+            <!-- Also restart our service if the app gets upgraded -->
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <!-- I was using PACKAGE_REPLACED, but MY_PACKAGE_REPLACED is newer and seems cleaner
+                <data
+                    android:scheme="package"
+                    android:path="com.geeksville.mesh" /> -->
             </intent-filter>
         </receiver>
     </application>
