@@ -1508,7 +1508,7 @@ class MeshService : Service(), Logging {
     val binder = object : IMeshService.Stub() {
 
         override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
-            debug("Passing through device change to radio service: $deviceAddr")
+            debug("Passing through device change to radio service: ${deviceAddr.anonymize}")
 
             val res = radio.service.setDeviceAddress(deviceAddr)
             if (res) {

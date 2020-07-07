@@ -12,6 +12,7 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.IRadioInterfaceService
+import com.geeksville.util.anonymize
 import com.geeksville.util.ignoreException
 import com.geeksville.util.toRemoteExceptions
 import kotlinx.coroutines.CoroutineScope
@@ -216,7 +217,7 @@ class RadioInterfaceService : Service(), Logging {
             if (address == null)
                 warn("No bonded mesh radio, can't start interface")
             else {
-                info("Starting radio $address")
+                info("Starting radio ${address.anonymize}")
                 isStarted = true
 
                 if (logSends)
@@ -281,7 +282,7 @@ class RadioInterfaceService : Service(), Logging {
 
             // The device address "n" can be used to mean none
 
-            debug("Setting bonded device to $address")
+            debug("Setting bonded device to ${address.anonymize}")
 
             getPrefs(this).edit(commit = true) {
                 this.remove(DEVADDR_KEY_OLD) // remove any old version of the key
