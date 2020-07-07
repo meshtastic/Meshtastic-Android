@@ -38,10 +38,8 @@ import com.geeksville.mesh.service.BluetoothInterface
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.RadioInterfaceService
 import com.geeksville.mesh.service.SerialInterface
-import com.geeksville.util.Exceptions
 import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
-import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
@@ -788,24 +786,27 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         locationSettingsResponse.addOnFailureListener { exception ->
             errormsg("Failed to get location access")
-            if (exception is ResolvableApiException) {
-                exceptionReporter {
-                    // Location settings are not satisfied, but this can be fixed
-                    // by showing the user a dialog.
+            // We always show the toast regardless of what type of exception we receive.  Because even non
+            // resolvable api exceptions mean user still needs to fix something.
+            
+            ///if (exception is ResolvableApiException) {
 
-                    // Show the dialog by calling startResolutionForResult(),
-                    // and check the result in onActivityResult().
-                    // exception.startResolutionForResult(this@MainActivity, REQUEST_CHECK_SETTINGS)
+            // Location settings are not satisfied, but this can be fixed
+            // by showing the user a dialog.
 
-                    // For now just punt and show a dialog
-                    Toast.makeText(
-                        requireContext(),
-                        getString(R.string.location_disabled_warning),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            } else
-                Exceptions.report(exception)
+            // Show the dialog by calling startResolutionForResult(),
+            // and check the result in onActivityResult().
+            // exception.startResolutionForResult(this@MainActivity, REQUEST_CHECK_SETTINGS)
+
+            // For now just punt and show a dialog
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.location_disabled_warning),
+                Toast.LENGTH_SHORT
+            ).show()
+
+            //} else
+            //    Exceptions.report(exception)
         }
     }
 

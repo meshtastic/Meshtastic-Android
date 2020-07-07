@@ -14,5 +14,6 @@ interface IRadioInterfaceService {
     /// If a macaddress we will try to talk to our device, if null we will be idle.
     /// Any current connection will be dropped (even if the device address is the same) before reconnecting.
     /// Users should not call this directly, called only by MeshService
+    /// Returns true if the device address actually changed, or false if no change was needed
     boolean setDeviceAddress(String deviceAddr);
 }

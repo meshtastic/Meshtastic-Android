@@ -12,6 +12,7 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.IRadioInterfaceService
+import com.geeksville.util.anonymize
 import com.geeksville.util.ignoreException
 import com.geeksville.util.toRemoteExceptions
 import kotlinx.coroutines.CoroutineScope
@@ -126,6 +127,14 @@ class RadioInterfaceService : Service(), Logging {
     private val nopIf = NopInterface()
     private var radioIf: IRadioInterface = nopIf
 
+    /** true if we have started our interface
+     *
+     * Note: an interface may be started without necessarily yet having a connection
+     */
+    private var isStarted = false
+
+    /// true if our interface is currently connected to a device
+    private var isConnected = false
 
     /**
      * If the user turns on bluetooth after we start, make sure to try and reconnected then
@@ -164,8 +173,6 @@ class RadioInterfaceService : Service(), Logging {
             p
         )
     }
-
-    private var isConnected = false
 
     fun onConnect() {
         if (!isConnected) {
@@ -210,7 +217,8 @@ class RadioInterfaceService : Service(), Logging {
             if (address == null)
                 warn("No bonded mesh radio, can't start interface")
             else {
-                info("Starting radio $address")
+                info("Starting radio ${address.anonymize}")
+                isStarted = true
 
                 if (logSends)
                     sentPacketsLog = BinaryLogFile(this, "sent_log.pb")
@@ -236,6 +244,7 @@ class RadioInterfaceService : Service(), Logging {
     private fun stopInterface() {
         val r = radioIf
         info("stopping interface $r")
+        isStarted = false
         radioIf = nopIf
         r.close()
 
@@ -257,7 +266,7 @@ class RadioInterfaceService : Service(), Logging {
      */
     @SuppressLint("NewApi")
     private fun setBondedDeviceAddress(address: String?): Boolean {
-        return if (getBondedDeviceAddress(this) == address && isConnected) {
+        return if (getBondedDeviceAddress(this) == address && isStarted) {
             warn("Ignoring setBondedDevice $address, because we are already using that device")
             false
         } else {
@@ -273,7 +282,7 @@ class RadioInterfaceService : Service(), Logging {
 
             // The device address "n" can be used to mean none
 
-            debug("Setting bonded device to $address")
+            debug("Setting bonded device to ${address.anonymize}")
 
             getPrefs(this).edit(commit = true) {
                 this.remove(DEVADDR_KEY_OLD) // remove any old version of the key
