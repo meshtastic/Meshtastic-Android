@@ -332,25 +332,28 @@ class MainActivity : AppCompatActivity(), Logging,
 
     /// Ask user to rate in play store
     private fun askToRate() {
-        AppRate.with(this)
-            .setInstallDays(10.toByte()) // default is 10, 0 means install day, 10 means app is launched 10 or more days later than installation
-            .setLaunchTimes(10.toByte()) // default is 10, 3 means app is launched 3 or more times
-            .setRemindInterval(1.toByte()) // default is 1, 1 means app is launched 1 or more days after neutral button clicked
-            .setRemindLaunchesNumber(1.toByte()) // default is 0, 1 means app is launched 1 or more times after neutral button clicked
-            .monitor() // Monitors the app launch times
+        exceptionReporter { // Got one IllegalArgumentException from inside this lib, but we don't want to crash our app because of bugs in this optional feature
 
-        // Only ask to rate if the user has a suitable store
-        if (AppRate.with(this).storeType == StoreType.GOOGLEPLAY) { // Checks that current app store type from library options is StoreType.GOOGLEPLAY
-            if (GoogleApiAvailability.getInstance()
-                    .isGooglePlayServicesAvailable(this) != ConnectionResult.SERVICE_MISSING
-            ) { // Checks that Google Play is available
-                AppRate.showRateDialogIfMeetsConditions(this) // Shows the Rate Dialog when conditions are met
+            AppRate.with(this)
+                .setInstallDays(10.toByte()) // default is 10, 0 means install day, 10 means app is launched 10 or more days later than installation
+                .setLaunchTimes(10.toByte()) // default is 10, 3 means app is launched 3 or more times
+                .setRemindInterval(1.toByte()) // default is 1, 1 means app is launched 1 or more days after neutral button clicked
+                .setRemindLaunchesNumber(1.toByte()) // default is 0, 1 means app is launched 1 or more times after neutral button clicked
+                .monitor() // Monitors the app launch times
 
-                // Force the dialog - for testing
-                // AppRate.with(this).showRateDialog(this)
+            // Only ask to rate if the user has a suitable store
+            if (AppRate.with(this).storeType == StoreType.GOOGLEPLAY) { // Checks that current app store type from library options is StoreType.GOOGLEPLAY
+                if (GoogleApiAvailability.getInstance()
+                        .isGooglePlayServicesAvailable(this) != ConnectionResult.SERVICE_MISSING
+                ) { // Checks that Google Play is available
+                    AppRate.showRateDialogIfMeetsConditions(this) // Shows the Rate Dialog when conditions are met
+
+                    // Force the dialog - for testing
+                    // AppRate.with(this).showRateDialog(this)
+                }
+            } else {
+                AppRate.showRateDialogIfMeetsConditions(this);     // Shows the Rate Dialog when conditions are met
             }
-        } else {
-            AppRate.showRateDialogIfMeetsConditions(this);     // Shows the Rate Dialog when conditions are met
         }
     }
 
@@ -643,7 +646,16 @@ class MainActivity : AppCompatActivity(), Logging,
                 }
                 .setPositiveButton(R.string.accept) { _, _ ->
                     debug("Setting channel from URL")
-                    model.setChannel(channel.settings)
+                    try {
+                        model.setChannel(channel.settings)
+                    } catch (ex: RemoteException) {
+                        errormsg("Couldn't change channel ${ex.message}")
+                        Toast.makeText(
+                            this,
+                            "Couldn't change channel, because radio is not yet connected. Please try again.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
                 .show()
         }

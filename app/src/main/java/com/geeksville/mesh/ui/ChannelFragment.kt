@@ -23,7 +23,6 @@ import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.util.Exceptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.protobuf.ByteString
@@ -170,13 +169,15 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                                 filled_exposed_dropdown.editableText.toString()
                             val modemConfig = getModemConfig(selectedChannelOptionString)
 
-                            if (modemConfig!=MeshProtos.ChannelSettings.ModemConfig.UNRECOGNIZED)
+                            if (modemConfig != MeshProtos.ChannelSettings.ModemConfig.UNRECOGNIZED)
                                 newSettings.modemConfig = modemConfig
                             // Try to change the radio, if it fails, tell the user why and throw away their redits
                             try {
                                 model.setChannel(newSettings.build())
                                 // Since we are writing to radioconfig, that will trigger the rest of the GUI update (QR code etc)
                             } catch (ex: RemoteException) {
+                                errormsg("ignoring channel problem", ex)
+                                
                                 setGUIfromModel() // Throw away user edits
 
                                 // Tell the user to try again
@@ -185,7 +186,6 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                                     R.string.radio_sleeping,
                                     Snackbar.LENGTH_SHORT
                                 ).show()
-                                Exceptions.report(ex, "ignoring channel problem")
                             }
                         }
                     }
