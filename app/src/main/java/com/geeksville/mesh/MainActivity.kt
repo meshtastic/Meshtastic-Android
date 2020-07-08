@@ -333,7 +333,7 @@ class MainActivity : AppCompatActivity(), Logging,
     /// Ask user to rate in play store
     private fun askToRate() {
         exceptionReporter { // Got one IllegalArgumentException from inside this lib, but we don't want to crash our app because of bugs in this optional feature
-            
+
             AppRate.with(this)
                 .setInstallDays(10.toByte()) // default is 10, 0 means install day, 10 means app is launched 10 or more days later than installation
                 .setLaunchTimes(10.toByte()) // default is 10, 3 means app is launched 3 or more times
@@ -646,7 +646,16 @@ class MainActivity : AppCompatActivity(), Logging,
                 }
                 .setPositiveButton(R.string.accept) { _, _ ->
                     debug("Setting channel from URL")
-                    model.setChannel(channel.settings)
+                    try {
+                        model.setChannel(channel.settings)
+                    } catch (ex: RemoteException) {
+                        errormsg("Couldn't change channel ${ex.message}")
+                        Toast.makeText(
+                            this,
+                            "Couldn't change channel, because radio is not yet connected. Please try again.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
                 .show()
         }
