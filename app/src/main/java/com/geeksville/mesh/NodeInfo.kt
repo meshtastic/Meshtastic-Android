@@ -57,7 +57,7 @@ data class Position(
     fun bearing(o: Position) = bearing(latitude, longitude, o.latitude, o.longitude)
 
     override fun toString(): String {
-        return "Position(lat=${latitude.anonymize}, lon=${longitude.anonymize}, alt=${altitude.anonymize}, time=${time})"
+        return "Position(lat=${latitude.anonymize}, lon=${longitude.anonymize}, alt=${altitude.anonymize}, time=${time}, batteryPctLevel=${batteryPctLevel})"
     }
 }
 
