@@ -1,6 +1,7 @@
 package com.geeksville.mesh.ui
 
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,7 +22,6 @@ import com.geeksville.mesh.service.MeshService
 import com.google.android.material.chip.Chip
 import kotlinx.android.synthetic.main.adapter_message_layout.view.*
 import kotlinx.android.synthetic.main.messages_fragment.*
-import java.text.SimpleDateFormat
 import java.util.*
 
 // Allows usage like email.on(EditorInfo.IME_ACTION_NEXT, { confirm() })
@@ -39,6 +39,8 @@ fun EditText.on(actionId: Int, func: () -> Unit) {
 class MessagesFragment : ScreenFragment("Messages"), Logging {
 
     private val model: UIViewModel by activityViewModels()
+
+    private lateinit var dateTimeFormat : java.text.DateFormat
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
@@ -131,7 +133,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
                 holder.messageText.text = msg.text
             }
 
-            holder.messageTime.text = dateFormat.format(Date(msg.time))
+            holder.messageTime.text = dateTimeFormat.format(Date(msg.time))
 
             val icon = when (msg.status) {
                 MessageStatus.QUEUED -> R.drawable.ic_twotone_cloud_upload_24
@@ -171,6 +173,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+         dateTimeFormat = DateFormat.getTimeFormat(context)
         messageInputText.on(EditorInfo.IME_ACTION_DONE) {
             debug("did IME action")
 
@@ -206,6 +209,5 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         })
     }
 
-    private val dateFormat = SimpleDateFormat("h:mm a")
 }
 
