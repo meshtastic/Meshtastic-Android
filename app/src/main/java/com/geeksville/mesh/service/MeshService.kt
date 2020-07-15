@@ -22,6 +22,7 @@ import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
+import com.geeksville.android.isGooglePlayAvailable
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.*
 import com.geeksville.mesh.MeshProtos.MeshPacket
@@ -242,7 +243,8 @@ class MeshService : Service(), Logging {
     @SuppressLint("MissingPermission")
     @UiThread
     private fun startLocationRequests() {
-        if (fusedLocationClient == null) {
+        // FIXME - currently we don't support location reading without google play
+        if (fusedLocationClient == null && isGooglePlayAvailable(this)) {
             GeeksvilleApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
 
             val request = LocationRequest.create().apply {
