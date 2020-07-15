@@ -2,6 +2,7 @@ package com.geeksville.mesh.ui
 
 
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,6 +16,8 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
 import kotlinx.android.synthetic.main.adapter_node_layout.view.*
 import kotlinx.android.synthetic.main.nodelist_fragment.*
+import java.text.ParseException
+import java.util.*
 
 
 class UsersFragment : ScreenFragment("Users"), Logging {
@@ -27,6 +30,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         val nodeNameView = itemView.nodeNameView
         val distance_view = itemView.distance_view
         val batteryPctView = itemView.batteryPercentageView
+        val lastTime = itemView.lastConnectionView
     }
 
     private val nodesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
@@ -117,6 +121,8 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             {
                 holder.batteryPctView.text = "?"
             }
+
+            holder.lastTime.text = getLastTimeValue(n)
         }
 
         private var nodes = arrayOf<NodeInfo>()
@@ -127,6 +133,31 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all nodes
         }
     }
+
+    private fun getLastTimeValue(n: NodeInfo): String {
+        var lastTimeText: String = "?"
+
+        val currentTime = (System.currentTimeMillis()/1000).toInt()
+        val threeDaysLong = 3 * 60*60*24
+
+        //if the lastSeen is too old
+        if((n.lastSeen<currentTime-threeDaysLong))
+            return lastTimeText
+
+        try {
+            val toLong: Long =  n.lastSeen.toLong()
+            val long1000 = toLong * 1000L
+            val date = Date(long1000)
+            val timeFormat = DateFormat.getTimeFormat(context)
+
+            lastTimeText = timeFormat.format(date)
+
+        } catch (e: ParseException) {
+            //
+        }
+        return lastTimeText
+    }
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
