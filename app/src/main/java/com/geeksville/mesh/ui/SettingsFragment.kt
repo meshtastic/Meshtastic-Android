@@ -30,6 +30,7 @@ import androidx.lifecycle.Observer
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
+import com.geeksville.android.isGooglePlayAvailable
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
@@ -687,8 +688,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // To skip filtering based on name and supported feature flags (UUIDs),
         // don't include calls to setNamePattern() and addServiceUuid(),
         // respectively. This example uses Bluetooth.
+        // We only look for Mesh (rather than the full name) because NRF52 uses a very short name
         val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
-            .setNamePattern(Pattern.compile("Meshtastic_.*"))
+            .setNamePattern(Pattern.compile("Mesh.*"))
             // .addServiceUuid(ParcelUuid(RadioInterfaceService.BTM_SERVICE_UUID), null)
             .build()
 
@@ -768,45 +770,48 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
      * If the user has not turned on location access throw up a toast warning
      */
     private fun checkLocationEnabled() {
-        // We do this painful process because LocationManager.isEnabled is only SDK28 or latet
-        val builder = LocationSettingsRequest.Builder()
-        builder.setNeedBle(true)
+        // If they don't have google play FIXME for now we don't check for location access
+        if (isGooglePlayAvailable(requireContext())) {
+            // We do this painful process because LocationManager.isEnabled is only SDK28 or latet
+            val builder = LocationSettingsRequest.Builder()
+            builder.setNeedBle(true)
 
-        val request = LocationRequest.create().apply {
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        }
-        builder.addLocationRequest(request) // Make sure we are granted high accuracy permission
+            val request = LocationRequest.create().apply {
+                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            }
+            builder.addLocationRequest(request) // Make sure we are granted high accuracy permission
 
-        val locationSettingsResponse = LocationServices.getSettingsClient(requireActivity())
-            .checkLocationSettings(builder.build())
+            val locationSettingsResponse = LocationServices.getSettingsClient(requireActivity())
+                .checkLocationSettings(builder.build())
 
-        locationSettingsResponse.addOnSuccessListener {
-            debug("We have location access")
-        }
+            locationSettingsResponse.addOnSuccessListener {
+                debug("We have location access")
+            }
 
-        locationSettingsResponse.addOnFailureListener { exception ->
-            errormsg("Failed to get location access")
-            // We always show the toast regardless of what type of exception we receive.  Because even non
-            // resolvable api exceptions mean user still needs to fix something.
-            
-            ///if (exception is ResolvableApiException) {
+            locationSettingsResponse.addOnFailureListener { exception ->
+                errormsg("Failed to get location access")
+                // We always show the toast regardless of what type of exception we receive.  Because even non
+                // resolvable api exceptions mean user still needs to fix something.
 
-            // Location settings are not satisfied, but this can be fixed
-            // by showing the user a dialog.
+                ///if (exception is ResolvableApiException) {
 
-            // Show the dialog by calling startResolutionForResult(),
-            // and check the result in onActivityResult().
-            // exception.startResolutionForResult(this@MainActivity, REQUEST_CHECK_SETTINGS)
+                // Location settings are not satisfied, but this can be fixed
+                // by showing the user a dialog.
 
-            // For now just punt and show a dialog
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.location_disabled_warning),
-                Toast.LENGTH_SHORT
-            ).show()
+                // Show the dialog by calling startResolutionForResult(),
+                // and check the result in onActivityResult().
+                // exception.startResolutionForResult(this@MainActivity, REQUEST_CHECK_SETTINGS)
 
-            //} else
-            //    Exceptions.report(exception)
+                // For now just punt and show a dialog
+                Toast.makeText(
+                    requireContext(),
+                    getString(R.string.location_disabled_warning),
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                //} else
+                //    Exceptions.report(exception)
+            }
         }
     }
 
