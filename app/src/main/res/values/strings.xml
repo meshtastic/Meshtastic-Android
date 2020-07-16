@@ -71,4 +71,6 @@
     <string name="meshtastic_service_notifications">Meshtastic Service Notifications</string>
     <string name="location_disabled_warning">You must turn on location services in Android Settings</string>
     <string name="about">About</string>
+    <string name="a_list_of_nodes_in_the_mesh">A list of nodes in the mesh</string>
+    <string name="text_messages">Text messages</string>
 </resources>
