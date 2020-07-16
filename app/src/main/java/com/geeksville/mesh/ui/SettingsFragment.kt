@@ -183,54 +183,59 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         // if that device later disconnects remove it as a candidate
         override fun onScanResult(callbackType: Int, result: ScanResult) {
 
-            val addr = result.device.address
-            val fullAddr = "x$addr" // full address with the bluetooh prefix
-            // prevent logspam because weill get get lots of redundant scan results
-            val isBonded = result.device.bondState == BluetoothDevice.BOND_BONDED
-            val oldDevs = devices.value!!
-            val oldEntry = oldDevs[fullAddr]
-            if (oldEntry == null || oldEntry.bonded != isBonded) { // Don't spam the GUI with endless updates for non changing nodes
+            if ((result.device.name?.startsWith("Mesh") ?: false)) {
+                val addr = result.device.address
+                val fullAddr = "x$addr" // full address with the bluetooh prefix
+                // prevent logspam because weill get get lots of redundant scan results
+                val isBonded = result.device.bondState == BluetoothDevice.BOND_BONDED
+                val oldDevs = devices.value!!
+                val oldEntry = oldDevs[fullAddr]
+                if (oldEntry == null || oldEntry.bonded != isBonded) { // Don't spam the GUI with endless updates for non changing nodes
 
-                val skipBogus = try {
-                    // Note Soyes XS has a buggy BLE scan implementation and returns devices we didn't ask for.  So we check to see if the
-                    // last two chars of the name matches the last two of the address - if not we skip it
+                    val skipBogus = try {
+                        // Note Soyes XS has a buggy BLE scan implementation and returns devices we didn't ask for.  So we check to see if the
+                        // last two chars of the name matches the last two of the address - if not we skip it
 
-                    // Note: the address is always two more than the hex string we show in the name
+                        // Note: the address is always two more than the hex string we show in the name
 
-                    // nasty parsing of a string that ends with ab:45 as four hex digits
-                    val lastAddr = (addr.substring(
-                        addr.length - 5,
-                        addr.length - 3
-                    ) + addr.substring(addr.length - 2)).toInt(16)
+                        // nasty parsing of a string that ends with ab:45 as four hex digits
+                        val lastAddr = (addr.substring(
+                            addr.length - 5,
+                            addr.length - 3
+                        ) + addr.substring(addr.length - 2)).toInt(16)
 
-                    val lastName =
-                        result.device.name.substring(result.device.name.length - 4).toInt(16)
+                        val lastName =
+                            result.device.name.substring(result.device.name.length - 4).toInt(16)
 
-                    (lastAddr - 2) != lastName
-                } catch (ex: Throwable) {
-                    false // If we fail parsing anything, don't do this nasty hack
-                }
+                        // ESP32 macaddr are two higher than the reported device name
+                        // NRF52 macaddrs match the portion used in the string
+                        // either would be acceptable
+                        (lastAddr - 2) != lastName && lastAddr != lastName
+                    } catch (ex: Throwable) {
+                        false // If we fail parsing anything, don't do this nasty hack
+                    }
 
-                if (skipBogus)
-                    errormsg("Skipping bogus BLE entry $result")
-                else {
-                    val entry = DeviceListEntry(
-                        result.device.name
-                            ?: "unnamed-$addr", // autobug: some devices might not have a name, if someone is running really old device code?
-                        fullAddr,
-                        isBonded
-                    )
-                    debug("onScanResult ${entry}")
-
-                    // If nothing was selected, by default select the first valid thing we see
-                    val activity =
-                        GeeksvilleApplication.currentActivity as MainActivity? // Can be null if app is shutting down
-                    if (selectedAddress == null && entry.bonded && activity != null)
-                        changeScanSelection(
-                            activity,
-                            fullAddr
+                    if (skipBogus)
+                        errormsg("Skipping bogus BLE entry $result")
+                    else {
+                        val entry = DeviceListEntry(
+                            result.device.name
+                                ?: "unnamed-$addr", // autobug: some devices might not have a name, if someone is running really old device code?
+                            fullAddr,
+                            isBonded
                         )
-                    addDevice(entry) // Add/replace entry
+                        debug("onScanResult ${entry}")
+
+                        // If nothing was selected, by default select the first valid thing we see
+                        val activity =
+                            GeeksvilleApplication.currentActivity as MainActivity? // Can be null if app is shutting down
+                        if (selectedAddress == null && entry.bonded && activity != null)
+                            changeScanSelection(
+                                activity,
+                                fullAddr
+                            )
+                        addDevice(entry) // Add/replace entry
+                    }
                 }
             }
         }
@@ -313,6 +318,8 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                         // filter and only accept devices that have our service
                         val filter =
                             ScanFilter.Builder()
+                                // Note: NRF52 doesn't put the service in the avertizement, so we can't filter by service here
+                                // Instead we check in the callback
                                 .setServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID))
                                 .build()
 
