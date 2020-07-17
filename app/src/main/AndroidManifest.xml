@@ -4,6 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="GoogleAppIndexingWarning">
 
+    <!-- If a device is missing a GPS - we will still be able to work though , must be before uses-permission-->
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+
     <!-- per https://github.com/journeyapps/zxing-android-embedded to force support for build 22 -->
     <uses-sdk tools:overrideLibrary="com.google.zxing.client.android" />
 
@@ -12,14 +20,6 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- only useful if this phone can do BTLE -->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- needed to access bluetooth when app is background -->
-
-    <!-- If a device is missing a GPS - we will still be able to work though -->
-    <uses-feature
-        android:name="android.hardware.location"
-        android:required="false" />
-    <uses-feature
-        android:name="android.hardware.location.gps"
-        android:required="false" />
 
     <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- for job intent service -->
 
@@ -58,7 +58,7 @@
 
     <uses-feature
         android:name="android.hardware.bluetooth_le"
-        android:required="true" />
+        android:required="false" />
 
     <!-- For the modern BLE scanning API -->
     <uses-feature
