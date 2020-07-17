@@ -193,6 +193,8 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 
     // NRF52 targets do not need the nasty force refresh hack that ESP32 needs (because they keep their
     // BLE handles stable.  So turn the hack off for these devices.  FIXME - find a better way to know that the board is NRF52 based
+    // and Amazon fire devices seem to not need this hack either
+    // Build.MANUFACTURER != "Amazon" &&
     private var needForceRefresh = !address.startsWith("FD:10:04")
 
     init {
@@ -415,7 +417,9 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
             if (needForceRefresh) { // Our ESP32 code doesn't properly generate "service changed" indications.  Therefore we need to force a refresh on initial start
                 //needForceRefresh = false // In fact, because of tearing down BLE in sleep on the ESP32, our handle # assignments are not stable across sleep - so we much refetch every time
                 forceServiceRefresh() // this article says android should not be caching, but it does on some phones: https://punchthrough.com/attribute-caching-in-ble-advantages-and-pitfalls/
-                delay(200) // From looking at the android C code it seems that we need to give some time for the refresh message to reach that worked _before_ we try to set mtu/get services
+                
+                delay(500) // From looking at the android C code it seems that we need to give some time for the refresh message to reach that worked _before_ we try to set mtu/get services
+                // 200ms was not enough on an Amazon Fire
             }
 
             // we begin by setting our MTU size as high as it can go (if we can)
