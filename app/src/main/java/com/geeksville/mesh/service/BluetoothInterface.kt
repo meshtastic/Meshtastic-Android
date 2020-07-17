@@ -191,6 +191,10 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
      */
     private var isFirstSend = true
 
+    // NRF52 targets do not need the nasty force refresh hack that ESP32 needs (because they keep their
+    // BLE handles stable.  So turn the hack off for these devices.  FIXME - find a better way to know that the board is NRF52 based
+    private var needForceRefresh = !address.startsWith("FD:10:04")
+
     init {
         // Note: this call does no comms, it just creates the device object (even if the
         // device is off/not connected)
@@ -399,8 +403,6 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
                 }
             }
     }
-
-    private var needForceRefresh = true
 
     private fun onConnect(connRes: Result<Unit>) {
         // This callback is invoked after we are connected
