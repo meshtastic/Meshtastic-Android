@@ -6,6 +6,7 @@ import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -31,6 +32,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         val distance_view = itemView.distance_view
         val batteryPctView = itemView.batteryPercentageView
         val lastTime = itemView.lastConnectionView
+        val powerIcon = itemView.batteryIcon
     }
 
     private val nodesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
@@ -112,15 +114,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 holder.distance_view.visibility = View.INVISIBLE
             }
 
-            val battery = n.batteryPctLevel
-            if (battery != null)
-            {
-                holder.batteryPctView.text = "$battery%"
-            }
-            else
-            {
-                holder.batteryPctView.text = "?"
-            }
+            renderBattery(n.batteryPctLevel, holder)
 
             holder.lastTime.text = getLastTimeValue(n)
         }
@@ -134,14 +128,33 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         }
     }
 
-    private fun getLastTimeValue(n: NodeInfo): String {
-        var lastTimeText: String = "?"
+    private fun renderBattery(
+        battery: Int?,
+        holder: ViewHolder
+    ) {
 
+        val (image, text) = when (battery) {
+            null -> Pair(R.drawable.ic_battery_full_24, "?")
+            0 -> Pair(R.drawable.ic_power_plug_24, "")
+            else -> Pair(R.drawable.ic_battery_full_24, "$battery%")
+        }
+
+        holder.batteryPctView.text = text
+        holder.powerIcon.setImageDrawable(context?.let {
+            ContextCompat.getDrawable(
+                it,
+                image
+            )
+        })
+    }
+
+    private fun getLastTimeValue(n: NodeInfo): String {
+        var lastTimeText = "?"
         val currentTime = (System.currentTimeMillis()/1000).toInt()
         val threeDaysLong = 3 * 60*60*24
 
         //if the lastSeen is too old
-        if((n.lastSeen<currentTime-threeDaysLong))
+        if (n.lastSeen < (currentTime - threeDaysLong))
             return lastTimeText
 
         try {
