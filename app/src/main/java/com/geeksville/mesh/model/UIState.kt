@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.RemoteException
+import android.view.Menu
 import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
@@ -49,6 +50,8 @@ class UIViewModel(app: Application) : AndroidViewModel(app), Logging {
     }
 
     private val context = app.applicationContext
+
+    var actionBarMenu: Menu? = null
 
     var meshService: IMeshService? = null
 

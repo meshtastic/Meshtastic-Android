@@ -87,7 +87,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
-                android:text="06/14 15h01 (13 min ago)"
+                android:text="11h01 PM"
                 android:visibility="visible"
                 app:layout_constraintBottom_toBottomOf="@+id/lastCommIcon"
                 app:layout_constraintEnd_toEndOf="parent"
