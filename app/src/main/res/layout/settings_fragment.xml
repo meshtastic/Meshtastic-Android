@@ -89,6 +89,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginBottom="8dp"
+        android:background="@color/cardview_light_background"
         android:checked="true"
         android:text="@string/analytics_okay"
         app:layout_constraintBottom_toBottomOf="parent"
