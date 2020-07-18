@@ -17,8 +17,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 10796 // format is Mmmss (where M is 1+the numeric major number
-        versionName "0.7.96"
+        versionCode 10801 // format is Mmmss (where M is 1+the numeric major number
+        versionName "0.8.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -128,7 +128,7 @@ dependencies {
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.1.0'
 
     // mapbox specifies a really old version of okhttp3 which causes lots of API warnings.  trying a newer version
-    implementation 'com.squareup.okhttp3:okhttp:4.7.2'
+    implementation 'com.squareup.okhttp3:okhttp:4.8.0'
 
     // location services
     implementation 'com.google.android.gms:play-services-location:17.0.0'
