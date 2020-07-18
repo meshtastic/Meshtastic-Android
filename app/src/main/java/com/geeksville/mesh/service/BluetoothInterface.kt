@@ -353,6 +353,8 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         }
     } catch (ex: CancellationException) {
         warn("retryDueToException was cancelled")
+    } finally {
+        reconnectJob = null
     }
 
     /// We only try to set MTU once, because some buggy implementations fail
@@ -417,7 +419,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
             if (needForceRefresh) { // Our ESP32 code doesn't properly generate "service changed" indications.  Therefore we need to force a refresh on initial start
                 //needForceRefresh = false // In fact, because of tearing down BLE in sleep on the ESP32, our handle # assignments are not stable across sleep - so we much refetch every time
                 forceServiceRefresh() // this article says android should not be caching, but it does on some phones: https://punchthrough.com/attribute-caching-in-ble-advantages-and-pitfalls/
-                
+
                 delay(500) // From looking at the android C code it seems that we need to give some time for the refresh message to reach that worked _before_ we try to set mtu/get services
                 // 200ms was not enough on an Amazon Fire
             }
@@ -447,7 +449,6 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 
     override fun close() {
         reconnectJob?.cancel() // Cancel any queued reconnect attempts
-        reconnectJob = null
 
         if (safe != null) {
             info("Closing BluetoothInterface")
