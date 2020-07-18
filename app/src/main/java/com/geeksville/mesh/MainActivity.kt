@@ -123,8 +123,6 @@ class MainActivity : AppCompatActivity(), Logging,
         bluetoothManager.adapter
     }
 
-    private var actionBarMenu: Menu? = null
-
     val model: UIViewModel by viewModels()
 
     data class TabInfo(val text: String, val icon: Int, val content: Fragment)
@@ -421,7 +419,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
     private fun updateConnectionStatusImage(connected: MeshService.ConnectionState) {
 
-        if (actionBarMenu == null)
+        if (model.actionBarMenu == null)
             return
 
         val (image, tooltip) = when (connected) {
@@ -434,10 +432,9 @@ class MainActivity : AppCompatActivity(), Logging,
                 R.drawable.cloud_off,
                 R.string.disconnected
             )
-            // else -> Pair(R.drawable.cloud_off, R.string.disconnected)
         }
 
-        val item = actionBarMenu?.findItem(R.id.connectStatusImage)
+        val item = model.actionBarMenu?.findItem(R.id.connectStatusImage)
         if (item != null) {
             item.setIcon(image)
             item.setTitle(tooltip)
@@ -844,7 +841,10 @@ class MainActivity : AppCompatActivity(), Logging,
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
-        actionBarMenu = menu
+        model.actionBarMenu = menu
+
+        updateConnectionStatusImage(model.isConnected.value!!)
+
         return true
     }
 
