@@ -73,4 +73,5 @@
     <string name="about">About</string>
     <string name="a_list_of_nodes_in_the_mesh">A list of nodes in the mesh</string>
     <string name="text_messages">Text messages</string>
+    <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
 </resources>

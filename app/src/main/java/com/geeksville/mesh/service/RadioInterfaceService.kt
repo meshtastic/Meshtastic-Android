@@ -18,6 +18,7 @@ import com.geeksville.util.toRemoteExceptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 
 
 class RadioNotConnectedException(message: String = "Not connected to radio") :
@@ -121,8 +122,10 @@ class RadioInterfaceService : Service(), Logging {
     private lateinit var sentPacketsLog: BinaryLogFile // inited in onCreate
     private lateinit var receivedPacketsLog: BinaryLogFile
 
-    private val serviceJob = Job()
-    val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
+    /**
+     * We recreate this scope each time we stop an interface
+     */
+    var serviceScope = CoroutineScope(Dispatchers.IO + Job())
 
     private val nopIf = NopInterface()
     private var radioIf: IRadioInterface = nopIf
@@ -198,7 +201,7 @@ class RadioInterfaceService : Service(), Logging {
     override fun onDestroy() {
         unregisterReceiver(bluetoothStateReceiver)
         stopInterface()
-        serviceJob.cancel()
+        serviceScope.cancel("Destroying RadioInterface")
         runningService = null
         super.onDestroy()
     }
@@ -247,6 +250,10 @@ class RadioInterfaceService : Service(), Logging {
         isStarted = false
         radioIf = nopIf
         r.close()
+
+        // cancel any old jobs and get ready for the new ones
+        serviceScope.cancel("stopping interface")
+        serviceScope = CoroutineScope(Dispatchers.IO + Job())
 
         if (logSends)
             sentPacketsLog.close()
