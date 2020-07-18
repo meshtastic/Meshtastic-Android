@@ -791,30 +791,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         notifyHandlers[c.uuid] = onChanged
         // c.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
         gatt!!.setCharacteristicNotification(c, enable)
-
-        /*
-    c is null sometimes
-2020-04-13 15:59:38.222 2111-2182/com.geeksville.mesh D/BluetoothGatt: setCharacteristicNotification() - uuid: ed9da18c-a800-4f66-a670-aa7547e34453 enable: true
-2020-04-13 15:59:38.225 2111-2182/com.geeksville.mesh E/com.geeksville.util.Exceptions: exceptionReporter Uncaught Exception
-kotlin.KotlinNullPointerException
-    at com.geeksville.mesh.service.SafeBluetooth.setNotify(SafeBluetooth.kt:505)
-    at com.geeksville.mesh.service.RadioInterfaceService$onConnect$1$1.invoke(RadioInterfaceService.kt:328)
-    at com.geeksville.mesh.service.RadioInterfaceService$onConnect$1$1.invoke(RadioInterfaceService.kt:90)
-    at com.geeksville.concurrent.CallbackContinuation.resume(SyncContinuation.kt:20)
-    at com.geeksville.mesh.service.SafeBluetooth$completeWork$1.invoke(SafeBluetooth.kt:329)
-    at com.geeksville.mesh.service.SafeBluetooth$completeWork$1.invoke(SafeBluetooth.kt:33)
-    at com.geeksville.util.ExceptionsKt.exceptionReporter(Exceptions.kt:34)
-    at com.geeksville.mesh.service.SafeBluetooth.completeWork(SafeBluetooth.kt:312)
-    at com.geeksville.mesh.service.SafeBluetooth.access$completeWork(SafeBluetooth.kt:33)
-    at com.geeksville.mesh.service.SafeBluetooth$gattCallback$1.onMtuChanged(SafeBluetooth.kt:221)
-    at android.bluetooth.BluetoothGatt$1$13.run(BluetoothGatt.java:658)
-    at android.bluetooth.BluetoothGatt.runOrQueueCallback(BluetoothGatt.java:780)
-    at android.bluetooth.BluetoothGatt.access$200(BluetoothGatt.java:41)
-    at android.bluetooth.BluetoothGatt$1.onConfigureMTU(BluetoothGatt.java:653)
-    at android.bluetooth.IBluetoothGattCallback$Stub.onTransact(IBluetoothGattCallback.java:330)
-    at android.os.Binder.execTransactInternal(Binder.java:1021)
-    at android.os.Binder.execTransact(Binder.java:994)
-     */
+        
         // per https://stackoverflow.com/questions/27068673/subscribe-to-a-ble-gatt-notification-android
         val descriptor: BluetoothGattDescriptor = c.getDescriptor(configurationDescriptorUUID)
             ?: throw BLEException("Notify descriptor not found for ${c.uuid}") // This can happen on buggy BLE implementations
