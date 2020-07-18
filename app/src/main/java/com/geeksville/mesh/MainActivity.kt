@@ -48,6 +48,7 @@ import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.Task
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayoutMediator
+import com.google.protobuf.InvalidProtocolBufferException
 import com.vorlonsoft.android.rate.AppRate
 import com.vorlonsoft.android.rate.StoreType
 import kotlinx.android.synthetic.main.activity_main.*
@@ -629,29 +630,37 @@ class MainActivity : AppCompatActivity(), Logging,
     private fun perhapsChangeChannel() {
         // If the is opening a channel URL, handle it now
         requestedChannelUrl?.let { url ->
-            val channel = Channel(url)
-            requestedChannelUrl = null
+            try {
+                val channel = Channel(url)
+                requestedChannelUrl = null
 
-            MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.new_channel_rcvd)
-                .setMessage(getString(R.string.do_you_want_switch).format(channel.name))
-                .setNeutralButton(R.string.cancel) { _, _ ->
-                    // Do nothing
-                }
-                .setPositiveButton(R.string.accept) { _, _ ->
-                    debug("Setting channel from URL")
-                    try {
-                        model.setChannel(channel.settings)
-                    } catch (ex: RemoteException) {
-                        errormsg("Couldn't change channel ${ex.message}")
-                        Toast.makeText(
-                            this,
-                            "Couldn't change channel, because radio is not yet connected. Please try again.",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.new_channel_rcvd)
+                    .setMessage(getString(R.string.do_you_want_switch).format(channel.name))
+                    .setNeutralButton(R.string.cancel) { _, _ ->
+                        // Do nothing
                     }
-                }
-                .show()
+                    .setPositiveButton(R.string.accept) { _, _ ->
+                        debug("Setting channel from URL")
+                        try {
+                            model.setChannel(channel.settings)
+                        } catch (ex: RemoteException) {
+                            errormsg("Couldn't change channel ${ex.message}")
+                            Toast.makeText(
+                                this,
+                                "Couldn't change channel, because radio is not yet connected. Please try again.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                    .show()
+            } catch (ex: InvalidProtocolBufferException) {
+                Toast.makeText(
+                    this,
+                    R.string.channel_invalid,
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
