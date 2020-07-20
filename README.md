@@ -51,6 +51,10 @@ for verbose logging:
 adb shell setprop log.tag.FA VERBOSE
 ```
 
+## Publishing to google play
+
+(Only supported if you are a core developer that needs to do releases)
+
 # Credits
 
 This project is the work of volunteers:

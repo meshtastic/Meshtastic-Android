@@ -3,6 +3,8 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.github.triplet.play'
+// apply plugin: "app.brant.amazonappstorepublisher"
 
 // Apply the Crashlytics Gradle plugin
 apply plugin: 'com.google.firebase.crashlytics'
@@ -11,14 +13,23 @@ apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'com.google.protobuf'
 
 android {
+    /*
+    signingConfigs {
+        release {
+            storeFile "$meshtasticKeystoreFile"
+            keyAlias 'upload'
+            storePassword "$meshtasticKeystorePassword"
+            keyPassword "$meshtasticKeyPassword"
+        }
+    } */
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 10802 // format is Mmmss (where M is 1+the numeric major number
-        versionName "0.8.02"
+        versionCode 10803 // format is Mmmss (where M is 1+the numeric major number
+        versionName "0.8.03"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -65,6 +76,12 @@ android {
     }
 }
 
+play {
+    // configure per https://github.com/Triple-T/gradle-play-publisher#authenticating-gradle-play-publisher
+    track = 'internal'
+    defaultToAppBundles = true
+    serviceAccountCredentials = file("../../play-credentials.json")
+}
 
 androidExtensions {
     experimental = true
