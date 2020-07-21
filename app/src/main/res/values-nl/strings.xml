@@ -19,8 +19,8 @@
     <string name="looking_for_meshtastic_devices">Zoekt Meshtastic apparaten...</string>
     <string name="requires_bluetooth">Deze applicatie vereist bluetooth toegang. Geef toegang in android settings.</string>
     <string name="error_bluetooth">Fout - deze app vereist bluetooth</string>
-    <string name="starting_pairing">Start paring</string>
-    <string name="pairing_failed">Paring mislukt</string>
+    <string name="starting_pairing">Start koppeling</string>
+    <string name="pairing_failed">Koppeling mislukt</string>
     <string name="url_for_join">Een URL om te verbinden met een Meshtastic net</string>
     <string name="accept">Bevestig</string>
     <string name="cancel">Annuleer</string>
@@ -28,6 +28,9 @@
     <string name="are_you_sure_channel">Ben je zeker van kanaal te willen veranderen? Alle communicatie met andere nodes wordt gestopt tot je de nieuwe instellingen deelt.</string>
     <string name="new_channel_rcvd">Nieuw kanaal URL ontvangen</string>
     <string name="do_you_want_switch">Wil je veranderen naar kanaal \'%s\' ?</string>
+	<string name="map_not_allowed">Je hebt analytics uitgeschakeld. Spijtig want onze kaartprovider (mapbox) vereist ingeschakelde analytics voor het \'gratis\' plan. Daarom hebben we de kaartmodus uitgeschakeld.\n\n
+        Indien je de kaart wil zien, is het nodig analytics aan te zetten in de Instellingen (ook is het mogelijk, voorlopig, dat een herstart van de applicatie nodig is).\n\n
+        Indien je het nodig acht dat we betalen voor mapbox (of veranderen naar een andere kaartprovider), post dan een berichtje in de meshtastic.discourse.group</string>
     <string name="permission_missing">Een vereiste toelating ontbreekt, Meshtastic kan niet goed werken. Graag aanzetten in Instellingen.</string>
     <string name="radio_sleeping">Radio was in slaapmodus, kon het kanaal niet veranderen</string>
     <string name="report_bug">Rapporteer Bug</string>
@@ -35,7 +38,41 @@
     <string name="report_bug_text">Ben je zeker dat je een bug wil rapporteren? Na het doorsturen, graag een post in meshtastic.discourse.group zodat we het rapport kunnen toetsen aan hetgeen je ondervond.</string>
     <string name="report">Rapport</string>
     <string name="select_radio">Selecteer radio</string>
-    <string name="current_pair">Je bent momenteel gepaard met radio %s</string>
-    <string name="not_paired_yet">Je hebt nog geen radio gepaard.</string>
-    <string name="change_radio">Wijzig radio</string>
+    <string name="current_pair">Je bent momenteel gekoppeld met radio %s</string>
+    <string name="not_paired_yet">Je hebt nog geen radio gekoppeld.</string>
+    <string name="change_radio">Wijzig radio</string>	
+	<string name="please_pair">Koppel een radio in Android Instellingen.</string>
+    <string name="pairing_completed">Koppeling geslaagd, start service</string>
+    <string name="pairing_failed_try_again">Koppeling mislukt, selecteer opnieuw</string>
+    <string name="location_disabled">Vrijgave positie niet actief, onmogelijk de positie aan het netwerk te geven.</string>
+    <string name="share">Deel</string>
+    <string name="disconnected">Niet verbonden</string>
+    <string name="device_sleeping">Apparaat in slaapstand</string>
+    <string name="connected_count">Verbonden: %s van %s online</string>
+    <string name="list_of_nodes">Een lijst van de aansluitpunten in het netwerk</string>
+    <string name="update_firmware">Programma Updaten</string>
+    <string name="connected">Verbonden met een radio</string>
+    <string name="connected_to">Verbonden met radio (%s)</string>
+    <string name="not_connected">Niet verbonden, selecteer radio hieronder</string>
+    <string name="connected_sleeping">Verbonden met radio in slaapstand</string>
+    <string name="update_to">Updaten naar %s</string>
+    <string name="app_too_old">Applicatie te oud</string>
+    <string name="must_update">Applicatie update noodzakelijk in Google Play store (of Github). Deze versie is te oud om te praten met deze radio.</string>
+    <string name="none">Geen (inactief)</string>
+    <string name="modem_config_short">Klein bereik (maar snel)</string>
+    <string name="modem_config_medium">Medium bereik (minder snel)</string>
+    <string name="modem_config_long">Groot bereik (maar trager)</string>
+    <string name="modem_config_very_long">Zeer groot bereik (maar traag)</string>
+    <string name="modem_config_unrecognized">ONBEKEND</string>
+    <string name="meshtastic_service_notifications">Meshtastic Service Berichten</string>
+    <string name="location_disabled_warning">Noodzakelijk de positioneringsservice te activeren in Android Instellingen</string>
+    <string name="about">Over</string>
+    <string name="a_list_of_nodes_in_the_mesh">Een lijst van de aansluitpunten in het netwerk</string>
+    <string name="text_messages">Teksberichten</string>
+    <string name="channel_invalid">Deze Kanaal URL kan niet worden gebruikt</string>	
+	<string name="app_name" translatable="false">Meshtastic</string>
+    <string name="sample_distance" translatable="false">2.13 km</string>
+    <string name="some_username" translatable="false">SKH</string>
+    <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
+    <string name="test_devname2" translatable="false">Meshtastic_1267</string>
 </resources>
