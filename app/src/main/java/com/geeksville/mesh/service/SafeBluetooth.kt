@@ -765,7 +765,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
         // Cancel any notifications - because when the device comes back it might have forgotten about us
         notifyHandlers.clear()
-
+ 
         closeGatt()
 
         failAllWork(BLEException("Connection closing"))
@@ -791,7 +791,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         notifyHandlers[c.uuid] = onChanged
         // c.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
         gatt!!.setCharacteristicNotification(c, enable)
-        
+
         // per https://stackoverflow.com/questions/27068673/subscribe-to-a-ble-gatt-notification-android
         val descriptor: BluetoothGattDescriptor = c.getDescriptor(configurationDescriptorUUID)
             ?: throw BLEException("Notify descriptor not found for ${c.uuid}") // This can happen on buggy BLE implementations

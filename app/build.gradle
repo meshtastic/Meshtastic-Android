@@ -3,6 +3,8 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.github.triplet.play'
+// apply plugin: "app.brant.amazonappstorepublisher"
 
 // Apply the Crashlytics Gradle plugin
 apply plugin: 'com.google.firebase.crashlytics'
@@ -11,14 +13,23 @@ apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'com.google.protobuf'
 
 android {
+    /*
+    signingConfigs {
+        release {
+            storeFile "$meshtasticKeystoreFile"
+            keyAlias 'upload'
+            storePassword "$meshtasticKeystorePassword"
+            keyPassword "$meshtasticKeyPassword"
+        }
+    } */
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 10801 // format is Mmmss (where M is 1+the numeric major number
-        versionName "0.8.1"
+        versionCode 10803 // format is Mmmss (where M is 1+the numeric major number
+        versionName "0.8.03"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -65,6 +76,12 @@ android {
     }
 }
 
+play {
+    // configure per https://github.com/Triple-T/gradle-play-publisher#authenticating-gradle-play-publisher
+    track = 'internal'
+    defaultToAppBundles = true
+    serviceAccountCredentials = file("../../play-credentials.json")
+}
 
 androidExtensions {
     experimental = true
@@ -90,13 +107,13 @@ protobuf {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'androidx.appcompat:appcompat:1.2.0-rc01'
     implementation 'androidx.core:core-ktx:1.3.0'
     implementation 'androidx.fragment:fragment-ktx:1.2.5'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta8'
-    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'com.google.android.material:material:1.2.0-rc01'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
@@ -125,7 +142,7 @@ dependencies {
     implementation 'com.github.mik3y:usb-serial-for-android:v2.2.2'
 
     // mapbox
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.1.0'
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.2.1'
 
     // mapbox specifies a really old version of okhttp3 which causes lots of API warnings.  trying a newer version
     implementation 'com.squareup.okhttp3:okhttp:4.8.0'

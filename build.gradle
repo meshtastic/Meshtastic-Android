@@ -10,7 +10,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.0.0'
+        classpath 'com.android.tools.build:gradle:4.0.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
 
@@ -25,6 +25,9 @@ buildscript {
 
         // protobuf plugin - docs here https://github.com/google/protobuf-gradle-plugin
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.12'
+
+        //classpath "app.brant:amazonappstorepublisher:0.1.0"
+        classpath 'com.github.triplet.gradle:play-publisher:2.8.0'
     }
 }
 
@@ -33,6 +36,7 @@ allprojects {
         google()
         jcenter()
         maven { url 'https://jitpack.io' }
+        //maven { url "https://plugins.gradle.org/m2/" }
     }
 }
 

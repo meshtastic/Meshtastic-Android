@@ -1,0 +1,3 @@
+This is a beta release of the meshtastic.org project.  We'd love you to try it and tell us what you think.  You'll need to buy an inexpensive ($30ish) radio from a variety of vendors to use this application, see our website for details.  We don't make these devices.
+
+***Please*** if you encounter problems or have questions: post on our forum at meshtastic.discourse.group and we'll work together to fix them (we are volunteer hobbyists).  We would really appreciate good Google reviews if you think this is a good project.
