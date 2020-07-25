@@ -151,7 +151,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:17.0.0'
 
     // For Google Sign-In (owner name accesss)
-    implementation 'com.google.android.gms:play-services-auth:18.0.0'
+    implementation 'com.google.android.gms:play-services-auth:18.1.0'
 
     // Add the Firebase SDK for Crashlytics.
     implementation 'com.google.firebase:firebase-crashlytics:17.1.1'
