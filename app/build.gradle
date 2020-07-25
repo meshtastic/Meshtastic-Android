@@ -139,7 +139,7 @@ dependencies {
 
     // For UART access
     // implementation 'com.google.android.things:androidthings:1.0'
-    implementation 'com.github.mik3y:usb-serial-for-android:v2.2.2'
+    implementation 'com.github.mik3y:usb-serial-for-android:v2.3.0'
 
     // mapbox
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.2.1'
