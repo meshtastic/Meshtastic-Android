@@ -23,13 +23,13 @@ android {
         }
     } */
     compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    buildToolsVersion "30.0.1"
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 10803 // format is Mmmss (where M is 1+the numeric major number
-        versionName "0.8.03"
+        versionCode 10901 // format is Mmmss (where M is 1+the numeric major number
+        versionName "0.9.01"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
