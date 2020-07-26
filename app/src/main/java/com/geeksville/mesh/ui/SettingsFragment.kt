@@ -810,11 +810,15 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 // exception.startResolutionForResult(this@MainActivity, REQUEST_CHECK_SETTINGS)
 
                 // For now just punt and show a dialog
-                Toast.makeText(
-                    requireContext(),
-                    getString(R.string.location_disabled_warning),
-                    Toast.LENGTH_SHORT
-                ).show()
+
+                // The context might be gone (if activity is going away) by the time this handler is called
+                context?.let { c ->
+                    Toast.makeText(
+                        c,
+                        getString(R.string.location_disabled_warning),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
 
                 //} else
                 //    Exceptions.report(exception)
