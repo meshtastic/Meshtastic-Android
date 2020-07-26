@@ -229,7 +229,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
                 s.asyncWriteCharacteristic(toRadio, a) { r ->
                     try {
                         r.getOrThrow()
-                        debug("write of ${a.size} bytes completed")
+                        debug("write of ${a.size} bytes to $uuid completed")
 
                         if (isFirstSend) {
                             isFirstSend = false
@@ -295,6 +295,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         exceptionReporter {
             // If the gatt has been destroyed, skip the refresh attempt
             safe?.gatt?.let { gatt ->
+                debug("DOING FORCE REFRESH")
                 val refresh: Method = gatt.javaClass.getMethod("refresh")
                 refresh.invoke(gatt)
             }

@@ -17,6 +17,8 @@ not bleeding edge alpha test builds skip to the next step.
 2. Go to this [URL](https://play.google.com/apps/testing/com.geeksville.mesh) to opt-in to the alpha/beta test.
 3. If you encounter any problems or have questions, [post in the forum](https://meshtastic.discourse.group/)t and we'll help.
 
+The app is also distributed for Amazon Fire devices via the Amazon appstore: [![Amazon appstore link](https://raw.githubusercontent.com/meshtastic/Meshtastic-device/master/images/amazon-fire-button.png)](https://www.amazon.com/Geeksville-Industries-Meshtastic/dp/B08CY9394Q)
+
 ## Build instructions
 
 If you would like to develop this application we'd love your help!  These build instructions are brief 

@@ -1,5 +1,6 @@
 # Remaining tasks before declaring 1.0
 
+- add new languages from eric: https://meshtastic.discourse.group/t/call-for-help-please-localize-the-app-for-your-language/107/61?u=geeksville
 - add faq entry about range and antennas and rain
 - first message sent is still doubled for some people
 - let users set arbitrary params in android
