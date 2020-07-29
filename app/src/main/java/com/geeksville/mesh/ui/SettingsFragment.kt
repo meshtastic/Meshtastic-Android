@@ -69,7 +69,7 @@ private fun requestBonding(
     device: BluetoothDevice,
     onComplete: (Int) -> Unit
 ) {
-    SLogging.info("Starting bonding for $device")
+    SLogging.info("Starting bonding for ${device.anonymize}")
 
     // We need this receiver to get informed when the bond attempt finished
     val bondChangedReceiver = object : BroadcastReceiver() {
