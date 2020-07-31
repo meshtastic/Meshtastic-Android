@@ -858,7 +858,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 return true
             }
             R.id.connectStatusImage -> {
-                Toast.makeText(this, item.title, Toast.LENGTH_SHORT).show()
+                Toast.makeText(applicationContext, item.title, Toast.LENGTH_SHORT).show()
                 return true
             }
             else -> super.onOptionsItemSelected(item)
@@ -869,7 +869,7 @@ class MainActivity : AppCompatActivity(), Logging,
         try {
             val packageInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
             val versionName = packageInfo.versionName
-            Toast.makeText(this, versionName, Toast.LENGTH_LONG).show()
+            Toast.makeText(applicationContext, versionName, Toast.LENGTH_LONG).show()
         } catch (e: PackageManager.NameNotFoundException) {
             errormsg("Can not find the version: ${e.message}")
         }
