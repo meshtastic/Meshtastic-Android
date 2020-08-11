@@ -32,7 +32,7 @@ data class Channel(
                 .setModemConfig(MeshProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128).build()
         )
 
-        const val prefix = "https://www.meshtastic.org/c/"
+        const val prefix = "https://www.meshtastic.org/c/#"
 
         private const val base64Flags = Base64.URL_SAFE + Base64.NO_WRAP
 
