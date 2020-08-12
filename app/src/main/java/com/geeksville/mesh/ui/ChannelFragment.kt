@@ -77,7 +77,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         if (channel != null) {
             qrView.visibility = View.VISIBLE
             channelNameEdit.visibility = View.VISIBLE
-            channelNameEdit.setText(channel.name)
+            channelNameEdit.setText(channel.humanName)
 
             // For now, we only let the user edit/save channels while the radio is awake - because the service
             // doesn't cache radioconfig writes.
@@ -134,7 +134,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
 
         editableCheckbox.setOnCheckedChangeListener { _, checked ->
-            if (!checked) {
+            if (checked) {
+                // User just unlocked for editing - remove the # goo around the channel name
+                UIViewModel.getChannel(model.radioConfig.value)?.let { channel ->
+                    channelNameEdit.setText(channel.name)
+                }
+            } else {
                 // User just locked it, we should warn and then apply changes to radio
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.change_channel)
@@ -177,7 +182,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                                 // Since we are writing to radioconfig, that will trigger the rest of the GUI update (QR code etc)
                             } catch (ex: RemoteException) {
                                 errormsg("ignoring channel problem", ex)
-                                
+
                                 setGUIfromModel() // Throw away user edits
 
                                 // Tell the user to try again
