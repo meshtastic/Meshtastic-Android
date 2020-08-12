@@ -97,10 +97,10 @@ class MeshService : Service(), Logging {
          */
         fun startLater(context: Context) {
             // No point in even starting the service if the user doesn't have a device bonded
-            info("Received boot complete announcement, starting mesh service in one minute")
+            info("Received boot complete announcement, starting mesh service in two minutes")
             val delayRequest = OneTimeWorkRequestBuilder<ServiceStarter>()
-                .setInitialDelay(1, TimeUnit.MINUTES)
-                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
+                .setInitialDelay(2, TimeUnit.MINUTES)
+                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 2, TimeUnit.MINUTES)
                 .addTag("startLater")
                 .build()
 
