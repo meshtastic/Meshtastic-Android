@@ -20,7 +20,7 @@ data class Channel(
         // Note: this string _SHOULD NOT BE LOCALIZED_ because it directly hashes to values used on the device for the default channel name.
         val defaultChannelName = "Default"
 
-        // These bytes must math the well known and not secret bytes used the default channel AES128 key device code
+        // These bytes must match the well known and not secret bytes used the default channel AES128 key device code
         val channelDefaultKey = byteArrayOfInts(
             0xd4, 0xf1, 0xbb, 0x3a, 0x20, 0x29, 0x07, 0x59,
             0xf0, 0xbc, 0xff, 0xab, 0xcf, 0x4e, 0x69, 0xbf
@@ -32,7 +32,7 @@ data class Channel(
                 .setModemConfig(MeshProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128).build()
         )
 
-        const val prefix = "https://www.meshtastic.org/c/"
+        const val prefix = "https://www.meshtastic.org/c/#"
 
         private const val base64Flags = Base64.URL_SAFE + Base64.NO_WRAP
 

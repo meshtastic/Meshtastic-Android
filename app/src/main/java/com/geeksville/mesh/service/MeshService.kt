@@ -866,9 +866,10 @@ class MeshService : Service(), Logging {
     }
 
     /// Update our DB of users based on someone sending out a Position subpacket
-    private fun handleReceivedPosition(fromNum: Int, p: MeshProtos.Position) {
+    private fun handleReceivedPosition(fromNum: Int, p: MeshProtos.Position, defaultTime: Int = Position.currentTime()) {
         updateNodeInfo(fromNum) {
-            it.position = Position(p, it.position?.time ?: 0)
+            it.position = Position(p)
+            updateNodeInfoTime(it, defaultTime)
         }
     }
 
@@ -942,22 +943,22 @@ class MeshService : Service(), Logging {
         val p = packet.decoded
 
         // If the rxTime was not set by the device (because device software was old), guess at a time
-        val rxTime = if (packet.rxTime == 0) packet.rxTime else currentSecond()
+        val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
 
         // Update last seen for the node that sent the packet, but also for _our node_ because anytime a packet passes
         // through our node on the way to the phone that means that local node is also alive in the mesh
-        updateNodeInfo(fromNum) {
-            // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
-            val lastSeen = rxTime
 
-            it.position = it.position?.copy(time = lastSeen)
-        }
         updateNodeInfo(myNodeNum) {
             it.position = it.position?.copy(time = currentSecond())
         }
 
         if (p.hasPosition())
-            handleReceivedPosition(fromNum, p.position)
+            handleReceivedPosition(fromNum, p.position, rxTime)
+        else
+            updateNodeInfo(fromNum) {
+                // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
+                updateNodeInfoTime(it, rxTime)
+            }
 
         if (p.hasData())
             handleReceivedData(packet)
@@ -1619,4 +1620,9 @@ class MeshService : Service(), Logging {
             r.toString()
         }
     }
+}
+
+public fun updateNodeInfoTime(it: NodeInfo, rxTime: Int) {
+    if (it.position?.time == null || it.position?.time!! < rxTime)
+        it.position = it.position?.copy(time = rxTime)
 }
