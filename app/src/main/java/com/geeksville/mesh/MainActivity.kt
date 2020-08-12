@@ -750,7 +750,7 @@ class MainActivity : AppCompatActivity(), Logging,
             // Init our messages table with the service's record of past text messages
             val msgs = service.oldMessages
             debug("Service provided ${msgs.size} messages")
-            model.messagesState.messages.value = msgs
+            model.messagesState.setMessages(msgs)
             val connectionState =
                 MeshService.ConnectionState.valueOf(service.connectionState())
 
