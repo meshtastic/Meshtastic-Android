@@ -45,11 +45,16 @@ that environment.
 ## Analytics setup
 
 * analytics are included but can be disabled by the user on the settings screen
-* on dev devices "adb shell setprop debug.firebase.analytics.app com.geeksville.mesh"
+
+* on dev devices
+
+```shell
+adb shell setprop debug.firebase.analytics.app com.geeksville.mesh
 adb shell setprop log.tag.FirebaseCrashlytics DEBUG
+```
 
 for verbose logging:
-```aidl
+```shell
 adb shell setprop log.tag.FA VERBOSE
 ```
 
