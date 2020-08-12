@@ -8,6 +8,7 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import java.net.MalformedURLException
+import kotlin.experimental.xor
 
 /** Utility function to make it easy to declare byte arrays - FIXME move someplace better */
 fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
@@ -51,6 +52,17 @@ data class Channel(
 
     val name: String get() = settings.name
     val modemConfig: MeshProtos.ChannelSettings.ModemConfig get() = settings.modemConfig
+
+    /**
+     * Return a name that is formatted as #channename-suffix
+     *
+     * Where suffix indicates the hash of the PSK
+     */
+    val humanName: String
+        get() {
+            val code = settings.psk.fold(0.toByte(), { acc, x -> acc xor x })
+            return "#${settings.name}-${'A' + (code % 26)}"
+        }
 
     /// Can this channel be changed right now?
     var editable = false
