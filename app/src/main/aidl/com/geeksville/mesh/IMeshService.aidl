@@ -7,7 +7,30 @@ parcelable NodeInfo;
 parcelable MyNodeInfo;
 
 /**
-* Note - these calls might throw RemoteException to indicate mesh error states
+This is the public android API for talking to meshtastic radios.
+
+To connect to meshtastic you should bind to it per https://developer.android.com/guide/components/bound-services
+
+The intent you use to reach the service should look like this:
+
+        val intent = Intent().apply {
+            setClassName(
+                "com.geeksville.mesh",
+                "com.geeksville.mesh.service.MeshService"
+            )
+        }
+
+Once you have bound to the service you should register your broadcast receivers per https://developer.android.com/guide/components/broadcasts#context-registered-receivers
+
+    // com.geeksville.com.geeksville.mesh.x broadcast intents, where x is:
+    // RECEIVED_DATA  for data received from other nodes.  payload will contain a DataPacket
+    // NODE_CHANGE  for new IDs appearing or disappearing
+    // CONNECTION_CHANGED for losing/gaining connection to the packet radio
+    // MESSAGE_STATUS_CHANGED for any message status changes (for sent messages only, other messages come via RECEIVED_DATA.  payload will contain a message ID and a MessageStatus)
+
+At the very least you will probably want to receive RECEIVED_DATA.
+
+Note - these calls might throw RemoteException to indicate mesh error states
 */
 interface IMeshService {
     /// Tell the service where to send its broadcasts of received packets
@@ -76,11 +99,4 @@ interface IMeshService {
     Return a number 0-100 for progress. -1 for completed and success, -2 for failure
     */
     int getUpdateStatus();
-
-    // see com.geeksville.com.geeksville.mesh broadcast intents
-    // RECEIVED_DATA  for data received from other nodes.  payload will contain a DataPacket
-    // NODE_CHANGE  for new IDs appearing or disappearing
-    // CONNECTION_CHANGED for losing/gaining connection to the packet radio
-    // MESSAGE_STATUS_CHANGED for any message status changes (for sent messages only, other messages come via RECEIVED_DATA.  payload will contain a message ID and a MessageStatus)
-
 }
