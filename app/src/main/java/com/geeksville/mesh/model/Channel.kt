@@ -8,7 +8,6 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import java.net.MalformedURLException
-import kotlin.experimental.xor
 
 /** Utility function to make it easy to declare byte arrays - FIXME move someplace better */
 fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
@@ -60,7 +59,7 @@ data class Channel(
      */
     val humanName: String
         get() {
-            val code = settings.psk.fold(0.toByte(), { acc, x -> acc xor x })
+            val code = settings.psk.fold(0, { acc, x -> acc xor (x.toInt() and 0xff) })
             return "#${settings.name}-${'A' + (code % 26)}"
         }
 
