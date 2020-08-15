@@ -9,7 +9,6 @@ import androidx.core.app.JobIntentService
 import com.geeksville.android.Logging
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
-import com.geeksville.util.Exceptions
 import com.geeksville.util.exceptionReporter
 import java.util.*
 import java.util.zip.CRC32
@@ -208,7 +207,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             (curVer > deviceVersion) && (deviceVersion >= minVer)
             // true
         } catch (ex: Exception) {
-            Exceptions.report(ex, "Error finding swupdate info")
+            errormsg("Error finding swupdate info", ex)
             false // If we fail parsing our update info
         }
 

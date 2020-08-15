@@ -176,7 +176,9 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 
 
     /// Our BLE device
-    val device get() = safe?.gatt ?: throw RadioNotConnectedException("No GATT")
+    val device
+        get() = (safe ?: throw RadioNotConnectedException("No SafeBluetooth")).gatt
+            ?: throw RadioNotConnectedException("No GATT")
 
     /// Our service - note - it is possible to get back a null response for getService if the device services haven't yet been found
     val bservice
@@ -314,10 +316,15 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
             fromNumChanged = true
             debug("fromNum changed")
             service.serviceScope.handledLaunch {
-                if (fromNumChanged) {
-                    fromNumChanged = false
-                    debug("fromNum changed, so we are reading new messages")
-                    doReadFromRadio(false)
+                try {
+                    if (fromNumChanged) {
+                        fromNumChanged = false
+                        debug("fromNum changed, so we are reading new messages")
+                        doReadFromRadio(false)
+                    }
+                } catch (e: RadioNotConnectedException) {
+                    // Don't report autobugs for this, getting an exception here is expected behavior
+                    errormsg("Ending FromNum read, radio not connected", e)
                 }
             }
         }

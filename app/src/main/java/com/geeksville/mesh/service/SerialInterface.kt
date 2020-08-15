@@ -69,7 +69,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
                 debug("A USB device was detached")
                 val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
                 if (uart?.device == device)
-                    onDeviceDisconnect()
+                    onDeviceDisconnect(true)
             }
 
             if (UsbManager.ACTION_USB_DEVICE_ATTACHED == intent.action) {
@@ -78,7 +78,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
                 val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
                 if (assumePermission || manager.hasPermission(device)) {
                     // reinit the port from scratch and reopen
-                    onDeviceDisconnect()
+                    onDeviceDisconnect(true)
                     connect()
                 } else {
                     warn("We don't have permissions for this USB device")
@@ -109,21 +109,41 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
     override fun close() {
         debug("Closing serial port for good")
         service.unregisterReceiver(usbReceiver)
-        onDeviceDisconnect()
+        onDeviceDisconnect(true)
     }
 
-    /** Tell MeshService our device has gone away, but wait for it to come back */
-    fun onDeviceDisconnect() {
-        debug("USB device disconnected, but it might come back")
+    /** Tell MeshService our device has gone away, but wait for it to come back
+     *
+     * @param waitForStopped if true we should wait for the manager to finish - must be false if called from inside the manager callbacks
+     *  */
+    fun onDeviceDisconnect(waitForStopped: Boolean) {
+        ignoreException {
+            ioManager?.let {
+                debug("USB device disconnected, but it might come back")
+                it.stop()
 
-        ignoreException { ioManager?.let { it.stop() } }
-        ioManager = null
+                // Allow a short amount of time for the manager to quit (so the port can be cleanly closed)
+                if (waitForStopped) {
+                    val msecSleep = 50L
+                    var numTries = 1000 / msecSleep
+                    while (it.state != SerialInputOutputManager.State.STOPPED && numTries > 0) {
+                        debug("Waiting for USB manager to stop...")
+                        Thread.sleep(msecSleep)
+                        numTries -= 1
+                    }
+                }
+
+                ioManager = null
+            }
+        }
+
         ignoreException {
             uart?.apply {
                 ports[0].close() // This will cause the reader thread to exit
+
+                uart = null
             }
         }
-        uart = null
 
         service.onDisconnect(isPermanent = true) // if USB device disconnects it is definitely permantently gone, not sleeping)
     }
@@ -134,7 +154,8 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
 
         if (device != null) {
             info("Opening $device")
-            val connection = manager.openDevice(device.device)
+            val connection =
+                manager.openDevice(device.device) // This can fail with "Control Transfer failed" if port was aleady open
             if (connection == null) {
                 // FIXME add UsbManager.requestPermission(device, ..) handling to activity
                 errormsg("Need permissions for port")
@@ -256,9 +277,8 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
      */
     override fun onRunError(e: java.lang.Exception) {
         errormsg("Serial error: $e")
-        // FIXME - try to reconnect to the device when it comes back
 
-        onDeviceDisconnect()
+        onDeviceDisconnect(false)
     }
 
     /**
