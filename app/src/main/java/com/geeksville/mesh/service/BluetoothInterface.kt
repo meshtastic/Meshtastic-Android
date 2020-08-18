@@ -218,20 +218,20 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 
 
     /// Send a packet/command out the radio link
-    override fun handleSendToRadio(a: ByteArray) {
+    override fun handleSendToRadio(p: ByteArray) {
         try {
             safe?.let { s ->
                 val uuid = BTM_TORADIO_CHARACTER
-                debug("queuing ${a.size} bytes to $uuid")
+                debug("queuing ${p.size} bytes to $uuid")
 
                 // Note: we generate a new characteristic each time, because we are about to
                 // change the data and we want the data stored in the closure
                 val toRadio = getCharacteristic(uuid)
 
-                s.asyncWriteCharacteristic(toRadio, a) { r ->
+                s.asyncWriteCharacteristic(toRadio, p) { r ->
                     try {
                         r.getOrThrow()
-                        debug("write of ${a.size} bytes to $uuid completed")
+                        debug("write of ${p.size} bytes to $uuid completed")
 
                         if (isFirstSend) {
                             isFirstSend = false

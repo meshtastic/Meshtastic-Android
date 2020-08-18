@@ -36,7 +36,6 @@ import com.google.protobuf.InvalidProtocolBufferException
 import kotlinx.coroutines.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.absoluteValue
@@ -558,8 +557,8 @@ class MeshService : Service(), Logging {
                 nodeDB = nodeDBbyNodeNum.values.toTypedArray(),
                 messages = recentDataPackets.toTypedArray()
             )
-            val json = Json(JsonConfiguration.Default)
-            val asString = json.stringify(SavedSettings.serializer(), settings)
+            val json = Json { isLenient = true }
+            val asString = json.encodeToString(SavedSettings.serializer(), settings)
             debug("Saving settings")
             getPrefs().edit(commit = true) {
                 // FIXME, not really ideal to store this bigish blob in preferences
@@ -593,8 +592,8 @@ class MeshService : Service(), Logging {
         try {
             getPrefs().getString("json", null)?.let { asString ->
 
-                val json = Json(JsonConfiguration.Default)
-                val settings = json.parse(SavedSettings.serializer(), asString)
+                val json = Json { isLenient = true }
+                val settings = json.decodeFromString(SavedSettings.serializer(), asString)
                 installNewNodeDB(settings.myInfo, settings.nodeDB)
 
                 // Note: we do not haveNodeDB = true because that means we've got a valid db from a real device (rather than this possibly stale hint)
@@ -866,7 +865,11 @@ class MeshService : Service(), Logging {
     }
 
     /// Update our DB of users based on someone sending out a Position subpacket
-    private fun handleReceivedPosition(fromNum: Int, p: MeshProtos.Position, defaultTime: Int = Position.currentTime()) {
+    private fun handleReceivedPosition(
+        fromNum: Int,
+        p: MeshProtos.Position,
+        defaultTime: Int = Position.currentTime()
+    ) {
         updateNodeInfo(fromNum) {
             it.position = Position(p)
             updateNodeInfoTime(it, defaultTime)
