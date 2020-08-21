@@ -28,8 +28,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 10902 // format is Mmmss (where M is 1+the numeric major number
-        versionName "0.9.02"
+        versionCode 10904 // format is Mmmss (where M is 1+the numeric major number
+        versionName "0.9.04"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -46,7 +46,7 @@ android {
     defaultConfig {
         // We have to list all translated languages here, because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
-        resConfigs "cs", "de", "el", "en", "es", "fi", "fr", "ga", "it", "ja", "nl", "ru", "sk", "sl", "sq", "sv", "tr", "zh"
+        resConfigs "cs", "de", "el", "en", "es", "fi", "fr", "ga", "ht", "it", "ja", "nl", "ru", "sk", "sl", "sq", "sv", "tr", "zh"
 
         // Needed to make mapbox work inside the firebase testlab - FIXME, alas, still doesn't work
         ndk {
@@ -107,13 +107,13 @@ protobuf {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.2.0-rc01'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
     implementation 'androidx.core:core-ktx:1.3.1'
     implementation 'androidx.fragment:fragment-ktx:1.2.5'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-rc1'
-    implementation 'com.google.android.material:material:1.2.0-rc01'
+    implementation 'com.google.android.material:material:1.2.0'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
@@ -122,7 +122,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     // kotlin serialization
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc"
 
     // rate this app
     implementation "com.vorlonsoft:androidrate:1.2.1"
@@ -139,13 +139,13 @@ dependencies {
 
     // For UART access
     // implementation 'com.google.android.things:androidthings:1.0'
-    implementation 'com.github.mik3y:usb-serial-for-android:v2.3.0'
+    implementation 'com.github.mik3y:usb-serial-for-android:v3.0.0'
 
     // mapbox
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.2.1'
 
     // mapbox specifies a really old version of okhttp3 which causes lots of API warnings.  trying a newer version
-    implementation 'com.squareup.okhttp3:okhttp:4.8.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.8.1'
 
     // location services
     implementation 'com.google.android.gms:play-services-location:17.0.0'
