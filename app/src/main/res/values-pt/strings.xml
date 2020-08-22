@@ -1,0 +1,77 @@
+<resources>
+    <string name="app_name" translatable="false">Meshtastic</string>
+    <string name="action_settings">Configurações</string>
+    <string name="channel_name">Nome do Canal</string>
+    <string name="channel_options">Opções do Canal</string>
+    <string name="share_button">Botão de Partilha</string>
+    <string name="qr_code">Código QR</string>
+    <string name="unset">Não Definido</string>
+    <string name="connection_status">Estado da Conexão</string>
+    <string name="application_icon">icone da aplicação</string>
+    <string name="unknown_username">Nome Desconhecido</string>
+    <string name="user_avatar">Avatar do Usuário</string>
+    <string name="sample_distance" translatable="false">2.13 km</string>
+    <string name="sample_message">Hey, encontrei o cache, está aqui ao lado do grande tigre. Estou um pouco assustado.</string>
+    <string name="some_username" translatable="false">SKH</string>
+    <string name="send_text">Enviar Texto</string>
+    <string name="warning_not_paired">Ainda não emparelhou um rádio compatível com Meshtastic com este telefone. Emparelhe um dispositivo e defina seu nome de usuário.\n\nEste aplicativo de código aberto está em teste alfa, se encontrar problemas, por favor reporte através do nosso forum em: meshtastic.discourse.group.\n\nPara obter mais informações, consulte a nossa página web - www.meshtastic.org.</string>
+    <string name="username_unset">Nome indefinido</string>
+    <string name="your_name">O seu Nome</string>
+    <string name="analytics_okay">Estatísticas de uso anônimas e relatórios de falhas.</string>
+    <string name="looking_for_meshtastic_devices">A procurar dispositivos Meshtastic...</string>
+    <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
+    <string name="test_devname2" translatable="false">Meshtastic_1267</string>
+    <string name="requires_bluetooth">Esta aplicação requer acesso ao Bluetooth. Por favor conceda acesso nas opções do android.</string>
+    <string name="error_bluetooth">Erro - esta app requer de bluetooth</string>
+    <string name="starting_pairing">A iniciar o emparelhamento.</string>
+    <string name="pairing_failed">Emparelhamento falhou</string>
+    <string name="url_for_join">Um link para se juntar a mesh Meshtastic</string>
+    <string name="accept">Aceitar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="change_channel">Mudar de canal</string>
+    <string name="are_you_sure_channel">Tem certeza que deseja mudar de canal? Todas as comunicações com outros nós serão interrompidas até que partilhe as novas configurações do canal.</string>
+    <string name="new_channel_rcvd">Novo Link Recebido do Canal</string>
+    <string name="do_you_want_switch">Pretende mudar para o canal \'%s\' ?</string>
+    <string name="map_not_allowed">Tem os dados analícos desativados. Infelizmente o fornecedor do mapa (mapbox) requer dos dados analíticos estejam activados para o seu plano \'gratuito\' . Por isso a visualização do mapa esta desativado.\n\n
+        Se pretender visualizar o mapa, vai necessitar de ativar os dados anaíticos no painel Configurações (também pode ser necessário forçar o reinício do aplicativo). \n\n
+        Se estiver interessado em pagarmos pelo mapbox (ou mudar para um provedor de mapas diferente), contacte através de meshtastic.discourse.group</string>
+    <string name="permission_missing">Uma permissão necessária está a faltar, o Meshtastic não será capaz de funcionar corretamente. Ative nas configurações do aplicativo Android.</string>
+    <string name="radio_sleeping">O rádio estava a dormir, não conseguia mudar de canal</string>
+    <string name="report_bug">Reportar Bug</string>
+    <string name="report_a_bug">Reportar a bug</string>
+    <string name="report_bug_text">Tem certeza de que deseja reportar um bug? Após o relatório, comunique também em meshtastic.discourse.group para que possamos comparar o relatório com o que encontrou.</string>
+    <string name="report">Reportar</string>
+    <string name="select_radio">Selecionar rádio</string>
+    <string name="current_pair">De momento, está emparelhado com o rádio %s</string>
+    <string name="not_paired_yet">De momento ainda não emparelhou com um rádio.</string>
+    <string name="change_radio">Mudar rádio</string>
+    <string name="please_pair">Emparelhe o dispositivo nas configurações do Android.</string>
+    <string name="pairing_completed">Emparelhamento concluído, a iniciar serviço</string>
+    <string name="pairing_failed_try_again">Emparelhamento falhou, por favor escolha novamente</string>
+    <string name="location_disabled">Acesso à localização desativado, não é possivel fornecer a localização na mesh.</string>
+    <string name="share">Partilha</string>
+    <string name="disconnected">Desconectado</string>
+    <string name="device_sleeping">Dispositivo a dormir</string>
+    <string name="connected_count">Conectado: %s de %s online</string>
+    <string name="list_of_nodes">Lista de nós na rede</string>
+    <string name="update_firmware">Atualizar Firmware</string>
+    <string name="connected">Conectado ao rádio</string>
+    <string name="connected_to">Conectado ao rádio (%s)</string>
+    <string name="not_connected">Não conectado, escolha um rádio em baixo</string>
+    <string name="connected_sleeping">Conectado ao rádio, mas está a dormir</string>
+    <string name="update_to">Atualização para %s</string>
+    <string name="app_too_old">A aplicação é muito antiga</string>
+    <string name="must_update">Tem de atualizar esta aplicação no Google Play (ou Github). A versão é muito antiga para ser possivel falar com este rádio.</string>
+    <string name="none">Nenhum (desabilitado)</string>
+    <string name="modem_config_short">Curto alcance (mas rápido)</string>
+    <string name="modem_config_medium">Médio alcance (mas rápido)</string>
+    <string name="modem_config_long">Longo alcance (mas lento)</string>
+    <string name="modem_config_very_long">Muito longo alcance (mas lento)</string>
+    <string name="modem_config_unrecognized">DESCONHECIDO</string>
+    <string name="meshtastic_service_notifications">Notificações do Serviço Meshtastic</string>
+    <string name="location_disabled_warning">Deve ativar os serviços de localização nas configurações do Android</string>
+    <string name="about">Sobre</string>
+    <string name="a_list_of_nodes_in_the_mesh">Lista de nós na mesh</string>
+    <string name="text_messages">Mensagem de Texto</string>
+    <string name="channel_invalid">O Link Deste Canal é inválido e não pode ser usado</string>
+</resources>
