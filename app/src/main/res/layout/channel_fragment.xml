@@ -31,11 +31,13 @@
     <ImageView
         android:id="@+id/qrView"
         android:layout_width="0dp"
-        android:layout_height="200dp"
-        android:layout_marginStart="96dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="96dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
         android:contentDescription="@string/qr_code"
+        app:layout_constraintBottom_toTopOf="@+id/channelOptions"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/channelNameView"
@@ -73,15 +75,37 @@
             app:icon="@drawable/ic_twotone_lock_open_24" />
     </com.google.android.material.button.MaterialButtonToggleGroup>
     -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/channelOptions"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="64dp"
+        android:layout_marginEnd="64dp"
+        android:layout_marginBottom="16dp"
+        android:hint="@string/channel_options"
+        app:layout_constraintBottom_toTopOf="@+id/editableCheckbox"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <AutoCompleteTextView
+            android:id="@+id/filled_exposed_dropdown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/channel_options" />
+    </com.google.android.material.textfield.TextInputLayout>
+
     <CheckBox
         android:id="@+id/editableCheckbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="96dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="16dp"
         android:button="@drawable/sl_lock_24dp"
-        app:layout_constraintTop_toBottomOf="@+id/channelOptions"></CheckBox>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/shareButton"
+        app:layout_constraintStart_toStartOf="parent"></CheckBox>
 
     <ImageButton
         android:id="@+id/shareButton"
@@ -93,25 +117,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/editableCheckbox"
         app:srcCompat="@drawable/ic_twotone_share_24" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/channelOptions"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="64dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="64dp"
-        android:hint="@string/channel_options"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/qrView">
-
-        <AutoCompleteTextView
-            android:id="@+id/filled_exposed_dropdown"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/channel_options" />
-    </com.google.android.material.textfield.TextInputLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
