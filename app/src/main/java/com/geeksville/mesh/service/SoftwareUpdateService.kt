@@ -205,7 +205,6 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 verStringToInt(if (swVer.isEmpty() || swVer == "unset") "99.99.99" else swVer)
 
             (curVer > deviceVersion) && (deviceVersion >= minVer)
-            // true
         } catch (ex: Exception) {
             errormsg("Error finding swupdate info", ex)
             false // If we fail parsing our update info
@@ -313,24 +312,29 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                         firmwareNumSent += blockSize
                     }
 
-                    // We have finished sending all our blocks, so post the CRC so our state machine can advance
-                    val c = firmwareCrc.value
-                    info("Sent all blocks, crc is $c")
-                    sync.writeCharacteristic(
-                        crc32Desc,
-                        toNetworkByteArray(c.toInt(), BluetoothGattCharacteristic.FORMAT_UINT32)
-                    )
+                    try {
+                        // We have finished sending all our blocks, so post the CRC so our state machine can advance
+                        val c = firmwareCrc.value
+                        info("Sent all blocks, crc is $c")
+                        sync.writeCharacteristic(
+                            crc32Desc,
+                            toNetworkByteArray(c.toInt(), BluetoothGattCharacteristic.FORMAT_UINT32)
+                        )
 
-                    // we just read the update result if !0 we have an error
-                    val updateResult =
-                        sync.readCharacteristic(updateResultDesc)
-                            .getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0)
-                    if (updateResult != 0) {
-                        progress = -2
-                        throw Exception("Device update failed, reason=$updateResult")
+                        // we just read the update result if !0 we have an error
+                        val updateResult =
+                            sync.readCharacteristic(updateResultDesc)
+                                .getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0)
+                        if (updateResult != 0) {
+                            progress = -2
+                            throw Exception("Device update failed, reason=$updateResult")
+                        }
+
+                        // Device will now reboot
+                    } catch (ex: BLEException) {
+                        // We might get SyncContinuation timeout on the final write, assume the device simply rebooted to run the new load and we missed it
+                        errormsg("Assuming successful update", ex)
                     }
-
-                    // Device will now reboot
 
                     progress = -1 // success
                 }
