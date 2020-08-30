@@ -32,8 +32,8 @@ fun longBLEUUID(hexFour: String): UUID = UUID.fromString("0000$hexFour-0000-1000
 class SafeBluetooth(private val context: Context, private val device: BluetoothDevice) :
     Logging, Closeable {
 
-    /// Timeout before we declare a bluetooth operation failed
-    var timeoutMsec = 15 * 1000L
+    /// Timeout before we declare a bluetooth operation failed (used for synchronous API operations only)
+    var timeoutMsec = 20 * 1000L
 
     /// Users can access the GATT directly as needed
     @Volatile
@@ -361,7 +361,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private fun <T> queueWork(
         tag: String,
         cont: Continuation<T>,
-        timeout: Long = 0,
+        timeout: Long,
         initFn: () -> Boolean
     ) {
         val btCont =
@@ -455,7 +455,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private fun <T> makeSync(wrappedFn: (SyncContinuation<T>) -> Unit): T {
         val cont = SyncContinuation<T>()
         wrappedFn(cont)
-        return cont.await(timeoutMsec)
+        return cont.await() // was timeoutMsec but we now do the timeout at the lower BLE level
     }
 
     // Is the gatt trying to repeatedly connect as needed?
@@ -495,12 +495,13 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     // Otherwise if you pass in false, it will try to connect now and will timeout and fail in 30 seconds.
     private fun queueConnect(
         autoConnect: Boolean = false,
-        cont: Continuation<Unit>
+        cont: Continuation<Unit>,
+        timeout: Long = 0
     ) {
         this.autoConnect = autoConnect
 
         // assert(gatt == null) this now might be !null with our new reconnect support
-        queueWork("connect", cont) {
+        queueWork("connect", cont, timeout) {
 
             // Note: To workaround https://issuetracker.google.com/issues/36995652
             // Always call BluetoothDevice#connectGatt() with autoConnect=false
@@ -585,7 +586,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             }
 
             // note - we don't need an init fn (because that would normally redo the connectGatt call - which we don't need)
-            queueWork("reconnect", CallbackContinuation(cb)) { -> true }
+            queueWork("reconnect", CallbackContinuation(cb), 0) { -> true }
         } else {
             debug("No connectionCallback registered")
         }
@@ -596,19 +597,22 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     private fun queueReadCharacteristic(
         c: BluetoothGattCharacteristic,
-        cont: Continuation<BluetoothGattCharacteristic>
-    ) = queueWork("readC ${c.uuid}", cont) { gatt!!.readCharacteristic(c) }
+        cont: Continuation<BluetoothGattCharacteristic>, timeout: Long = 0
+    ) = queueWork("readC ${c.uuid}", cont, timeout) { gatt!!.readCharacteristic(c) }
 
     fun asyncReadCharacteristic(
         c: BluetoothGattCharacteristic,
         cb: (Result<BluetoothGattCharacteristic>) -> Unit
     ) = queueReadCharacteristic(c, CallbackContinuation(cb))
 
-    fun readCharacteristic(c: BluetoothGattCharacteristic): BluetoothGattCharacteristic =
-        makeSync { queueReadCharacteristic(c, it) }
+    fun readCharacteristic(
+        c: BluetoothGattCharacteristic,
+        timeout: Long = timeoutMsec
+    ): BluetoothGattCharacteristic =
+        makeSync { queueReadCharacteristic(c, it, timeout) }
 
-    private fun queueDiscoverServices(cont: Continuation<Unit>) {
-        queueWork("discover", cont) {
+    private fun queueDiscoverServices(cont: Continuation<Unit>, timeout: Long = 0) {
+        queueWork("discover", cont, timeout) {
             gatt?.discoverServices() ?: throw BLEException("GATT is null")
         }
     }
@@ -649,8 +653,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     private fun queueWriteCharacteristic(
         c: BluetoothGattCharacteristic,
         v: ByteArray,
-        cont: Continuation<BluetoothGattCharacteristic>
-    ) = queueWork("writeC ${c.uuid}", cont) {
+        cont: Continuation<BluetoothGattCharacteristic>, timeout: Long = 0
+    ) = queueWork("writeC ${c.uuid}", cont, timeout) {
         currentReliableWrite = null
         c.value = v
         gatt?.writeCharacteristic(c) ?: false
@@ -664,17 +668,18 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     fun writeCharacteristic(
         c: BluetoothGattCharacteristic,
-        v: ByteArray
+        v: ByteArray,
+        timeout: Long = timeoutMsec
     ): BluetoothGattCharacteristic =
-        makeSync { queueWriteCharacteristic(c, v, it) }
+        makeSync { queueWriteCharacteristic(c, v, it, timeout) }
 
     /** Like write, but we use the extra reliable flow documented here:
      * https://stackoverflow.com/questions/24485536/what-is-reliable-write-in-ble
      */
     private fun queueWriteReliable(
         c: BluetoothGattCharacteristic,
-        cont: Continuation<Unit>
-    ) = queueWork("rwriteC ${c.uuid}", cont) {
+        cont: Continuation<Unit>, timeout: Long = 0
+    ) = queueWork("rwriteC ${c.uuid}", cont, timeout) {
         logAssert(gatt!!.beginReliableWrite())
         currentReliableWrite = c.value.clone()
         gatt?.writeCharacteristic(c) ?: false
@@ -690,8 +695,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     private fun queueWriteDescriptor(
         c: BluetoothGattDescriptor,
-        cont: Continuation<BluetoothGattDescriptor>
-    ) = queueWork("writeD", cont) { gatt?.writeDescriptor(c) ?: false }
+        cont: Continuation<BluetoothGattDescriptor>, timeout: Long = 0
+    ) = queueWork("writeD", cont, timeout) { gatt?.writeDescriptor(c) ?: false }
 
     fun asyncWriteDescriptor(
         c: BluetoothGattDescriptor,
@@ -765,7 +770,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
         // Cancel any notifications - because when the device comes back it might have forgotten about us
         notifyHandlers.clear()
- 
+
         closeGatt()
 
         failAllWork(BLEException("Connection closing"))
