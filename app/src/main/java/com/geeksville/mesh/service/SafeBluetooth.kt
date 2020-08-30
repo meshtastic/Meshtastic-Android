@@ -613,7 +613,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     private fun queueDiscoverServices(cont: Continuation<Unit>, timeout: Long = 0) {
         queueWork("discover", cont, timeout) {
-            gatt?.discoverServices() ?: throw BLEException("GATT is null")
+            gatt?.discoverServices()
+                ?: false // throw BLEException("GATT is null") - if we return false here it is probably because the device is being torn down
         }
     }
 

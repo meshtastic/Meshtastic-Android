@@ -409,9 +409,12 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
                         }
                     }
                 } catch (ex: BLEException) {
-                    scheduleReconnect(
-                        "Unexpected error discovering services, forcing disconnect $ex"
-                    )
+                    if (s.gatt == null)
+                        warn("GATT was closed while discovering, assume we are shutting down")
+                    else
+                        scheduleReconnect(
+                            "Unexpected error discovering services, forcing disconnect $ex"
+                        )
                 }
             }
     }
