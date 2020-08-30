@@ -29,6 +29,7 @@ import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.mesh.R
 import com.geeksville.util.*
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.protobuf.ByteString
@@ -262,20 +263,30 @@ class MeshService : Service(), Logging {
 
             locationSettingsResponse.addOnFailureListener { exception ->
                 errormsg("Failed to listen to GPS")
-                if (exception is ResolvableApiException) {
-                    exceptionReporter {
-                        // Location settings are not satisfied, but this can be fixed
-                        // by showing the user a dialog.
 
-                        // Show the dialog by calling startResolutionForResult(),
-                        // and check the result in onActivityResult().
-                        // exception.startResolutionForResult(this@MainActivity, REQUEST_CHECK_SETTINGS)
+                when (exception) {
+                    is ResolvableApiException ->
+                        exceptionReporter {
+                            // Location settings are not satisfied, but this can be fixed
+                            // by showing the user a dialog.
 
-                        // For now just punt and show a dialog
-                        warnUserAboutLocation()
-                    }
-                } else
-                    Exceptions.report(exception)
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            // exception.startResolutionForResult(this@MainActivity, REQUEST_CHECK_SETTINGS)
+
+                            // For now just punt and show a dialog
+                            warnUserAboutLocation()
+                        }
+                    is ApiException ->
+                        if (exception.statusCode == 17) {
+                            // error: cancelled by user
+                            errormsg("User cancelled location access", exception)
+                        } else {
+                            Exceptions.report(exception)
+                        }
+                    else ->
+                        Exceptions.report(exception)
+                }
             }
 
             val client = LocationServices.getFusedLocationProviderClient(this)
