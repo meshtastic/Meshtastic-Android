@@ -205,7 +205,6 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 verStringToInt(if (swVer.isEmpty() || swVer == "unset") "99.99.99" else swVer)
 
             (curVer > deviceVersion) && (deviceVersion >= minVer)
-            true
         } catch (ex: Exception) {
             errormsg("Error finding swupdate info", ex)
             false // If we fail parsing our update info
