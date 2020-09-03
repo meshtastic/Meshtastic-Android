@@ -583,6 +583,8 @@ class MainActivity : AppCompatActivity(), Logging,
             try {
                 // Pull down our real node ID - This must be done AFTER reading the nodedb because we need the DB to find our nodeinof object
                 model.nodeDB.myId.value = service.myId
+                val ourNodeInfo = model.nodeDB.ourNodeInfo
+                model.ownerName.value = ourNodeInfo?.user?.longName
             } catch (ex: Exception) {
                 warn("Ignoring failure to get myId, service is probably just uninited... ${ex.message}")
             }
@@ -594,9 +596,6 @@ class MainActivity : AppCompatActivity(), Logging,
         model.isConnected.value = connected
         debug("connchange ${model.isConnected.value}")
         if (connected == MeshService.ConnectionState.CONNECTED) {
-
-            // everytime the radio reconnects, we slam in our current owner data, the radio is smart enough to only broadcast if needed
-            model.setOwner()
 
             model.meshService?.let { service ->
                 debug("Getting latest radioconfig from service")

@@ -349,7 +349,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
             }
 
             service.onDisconnect(false) // assume we will fail
-            delay(1000) // Give some nasty time for buggy BLE stacks to shutdown (500ms was not enough)
+            delay(1500) // Give some nasty time for buggy BLE stacks to shutdown (500ms was not enough)
             reconnectJob = null // Any new reconnect requests after this will be allowed to run
             warn("Attempting reconnect")
             if (safe != null) // check again, because we just slept for 1sec, and someone might have closed our interface
