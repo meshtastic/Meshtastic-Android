@@ -542,6 +542,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // Only let user edit their name or set software update while connected to a radio
         model.isConnected.observe(viewLifecycleOwner, Observer { connected ->
             usernameView.isEnabled = connected == MeshService.ConnectionState.CONNECTED
+            if(connected == MeshService.ConnectionState.DISCONNECTED)
+                model.ownerName.value = ""
             initNodeInfo()
         })
 
