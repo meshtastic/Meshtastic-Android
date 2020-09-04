@@ -12,7 +12,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
@@ -71,7 +70,8 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
     /// Pull the latest data from the model (discarding any user edits)
     private fun setGUIfromModel() {
-        val channel = UIViewModel.getChannel(model.radioConfig.value)
+        val radioConfig = model.radioConfig.value
+        val channel = UIViewModel.getChannel(radioConfig)
 
         editableCheckbox.isChecked = false // start locked
         if (channel != null) {
@@ -85,6 +85,11 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             editableCheckbox.isEnabled = connected
 
             qrView.setImageBitmap(channel.getChannelQR())
+
+            val modemConfig = radioConfig?.channelSettings?.modemConfig
+            val channelOption = ChannelOption.fromConfig(modemConfig)
+            filled_exposed_dropdown.setText(getString(channelOption?.configRes ?: R.string.modem_config_unrecognized), false)
+
         } else {
             qrView.visibility = View.INVISIBLE
             channelNameEdit.visibility = View.INVISIBLE
@@ -205,12 +210,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             shareChannel()
         }
 
-        model.radioConfig.observe(viewLifecycleOwner, Observer {
+        model.radioConfig.observe(viewLifecycleOwner, {
             setGUIfromModel()
         })
 
         // If connection state changes, we might need to enable/disable buttons
-        model.isConnected.observe(viewLifecycleOwner, Observer {
+        model.isConnected.observe(viewLifecycleOwner, {
             setGUIfromModel()
         })
     }
