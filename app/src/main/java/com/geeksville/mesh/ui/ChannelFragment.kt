@@ -88,7 +88,11 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
             val modemConfig = radioConfig?.channelSettings?.modemConfig
             val channelOption = ChannelOption.fromConfig(modemConfig)
-            filled_exposed_dropdown.setText(getString(channelOption?.configRes ?: R.string.modem_config_unrecognized), false)
+            filled_exposed_dropdown.setText(
+                getString(
+                    channelOption?.configRes ?: R.string.modem_config_unrecognized
+                ), false
+            )
 
         } else {
             qrView.visibility = View.INVISIBLE
@@ -138,7 +142,9 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             requireActivity().hideKeyboard()
         }
 
-        editableCheckbox.setOnCheckedChangeListener { _, checked ->
+        // Note: Do not use setOnCheckedChanged here because we don't want to be called when we programmatically disable editing
+        editableCheckbox.setOnClickListener { _ ->
+            val checked = editableCheckbox.isChecked
             if (checked) {
                 // User just unlocked for editing - remove the # goo around the channel name
                 UIViewModel.getChannel(model.radioConfig.value)?.let { channel ->
@@ -171,7 +177,8 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                                 newSettings.psk = ByteString.copyFrom(bytes)
                             } else {
                                 debug("ASSIGNING NEW default AES128 KEY")
-                                newSettings.name = Channel.defaultChannelName // Fix any case errors
+                                newSettings.name =
+                                    Channel.defaultChannelName // Fix any case errors
                                 newSettings.psk = ByteString.copyFrom(Channel.channelDefaultKey)
                             }
 
