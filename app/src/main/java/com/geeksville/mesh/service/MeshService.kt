@@ -457,7 +457,8 @@ class MeshService : Service(), Logging {
      * tell android not to kill us
      */
     private fun startForeground() {
-        val wantForeground = RadioInterfaceService.getBondedDeviceAddress(this) != null
+        val a = RadioInterfaceService.getBondedDeviceAddress(this)
+        val wantForeground = a != null && a != "n"
 
         info("Requesting foreground service=$wantForeground")
 
