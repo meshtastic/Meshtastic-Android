@@ -35,6 +35,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
+import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.*
@@ -52,6 +53,10 @@ import com.google.protobuf.InvalidProtocolBufferException
 import com.vorlonsoft.android.rate.AppRate
 import com.vorlonsoft.android.rate.StoreType
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import java.nio.charset.Charset
 
 /*
@@ -117,6 +122,8 @@ class MainActivity : AppCompatActivity(), Logging,
             13 // seems to be hardwired in CompanionDeviceManager to add 65536
     }
 
+    // Used to schedule a coroutine in the GUI thread
+    private val mainScope = CoroutineScope(Dispatchers.Main + Job())
 
     private val bluetoothAdapter: BluetoothAdapter? by lazy(LazyThreadSafetyMode.NONE) {
         val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -485,9 +492,9 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
     override fun onDestroy() {
-
         unregisterReceiver(btStateReceiver)
         unregisterMeshReceiver()
+        mainScope.cancel("Activity going away")
         super.onDestroy()
     }
 
@@ -728,47 +735,85 @@ class MainActivity : AppCompatActivity(), Logging,
             }
     }
 
-
     private
     val mesh = object :
         ServiceClient<com.geeksville.mesh.IMeshService>({
             com.geeksville.mesh.IMeshService.Stub.asInterface(it)
         }) {
-        override fun onConnected(service: com.geeksville.mesh.IMeshService) = exceptionReporter {
-            model.meshService = service
+        override fun onConnected(service: com.geeksville.mesh.IMeshService) {
 
-            usbDevice?.let { usb ->
-                debug("Switching to USB radio ${usb.deviceName}")
-                service.setDeviceAddress(SerialInterface.toInterfaceName(usb.deviceName))
-                usbDevice = null // Only switch once - thereafter it should be stored in settings
-            }
+            /*
+                Note: we must call this callback in a coroutine.  Because apparently there is only a single activity looper thread.  and if that onConnected override
+                also tries to do a service operation we can deadlock.
 
-            // We don't start listening for packets until after we are connected to the service
-            registerMeshReceiver()
+                Old buggy stack trace:
 
-            // Init our messages table with the service's record of past text messages
-            val msgs = service.oldMessages
-            debug("Service provided ${msgs.size} messages")
-            model.messagesState.setMessages(msgs)
-            val connectionState =
-                MeshService.ConnectionState.valueOf(service.connectionState())
+                 at sun.misc.Unsafe.park (Unsafe.java)
+                - waiting on an unknown object
+                  at java.util.concurrent.locks.LockSupport.park (LockSupport.java:190)
+                  at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await (AbstractQueuedSynchronizer.java:2067)
+                  at com.geeksville.android.ServiceClient.waitConnect (ServiceClient.java:46)
+                  at com.geeksville.android.ServiceClient.getService (ServiceClient.java:27)
+                  at com.geeksville.mesh.service.MeshService$binder$1$setDeviceAddress$1.invoke (MeshService.java:1519)
+                  at com.geeksville.mesh.service.MeshService$binder$1$setDeviceAddress$1.invoke (MeshService.java:1514)
+                  at com.geeksville.util.ExceptionsKt.toRemoteExceptions (ExceptionsKt.java:56)
+                  at com.geeksville.mesh.service.MeshService$binder$1.setDeviceAddress (MeshService.java:1516)
+                  at com.geeksville.mesh.MainActivity$mesh$1$onConnected$1.invoke (MainActivity.java:743)
+                  at com.geeksville.mesh.MainActivity$mesh$1$onConnected$1.invoke (MainActivity.java:734)
+                  at com.geeksville.util.ExceptionsKt.exceptionReporter (ExceptionsKt.java:34)
+                  at com.geeksville.mesh.MainActivity$mesh$1.onConnected (MainActivity.java:738)
+                  at com.geeksville.mesh.MainActivity$mesh$1.onConnected (MainActivity.java:734)
+                  at com.geeksville.android.ServiceClient$connection$1$onServiceConnected$1.invoke (ServiceClient.java:89)
+                  at com.geeksville.android.ServiceClient$connection$1$onServiceConnected$1.invoke (ServiceClient.java:84)
+                  at com.geeksville.util.ExceptionsKt.exceptionReporter (ExceptionsKt.java:34)
+                  at com.geeksville.android.ServiceClient$connection$1.onServiceConnected (ServiceClient.java:85)
+                  at android.app.LoadedApk$ServiceDispatcher.doConnected (LoadedApk.java:2067)
+                  at android.app.LoadedApk$ServiceDispatcher$RunConnection.run (LoadedApk.java:2099)
+                  at android.os.Handler.handleCallback (Handler.java:883)
+                  at android.os.Handler.dispatchMessage (Handler.java:100)
+                  at android.os.Looper.loop (Looper.java:237)
+                  at android.app.ActivityThread.main (ActivityThread.java:8016)
+                  at java.lang.reflect.Method.invoke (Method.java)
+                  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run (RuntimeInit.java:493)
+                  at com.android.internal.os.ZygoteInit.main (ZygoteInit.java:1076)
+                 */
+            mainScope.handledLaunch {
+                model.meshService = service
 
-            // if we are not connected, onMeshConnectionChange won't fetch nodes from the service
-            // in that case, we do it here - because the service certainly has a better idea of node db that we have
-            if (connectionState != MeshService.ConnectionState.CONNECTED)
-                updateNodesFromDevice()
+                usbDevice?.let { usb ->
+                    debug("Switching to USB radio ${usb.deviceName}")
+                    service.setDeviceAddress(SerialInterface.toInterfaceName(usb.deviceName))
+                    usbDevice =
+                        null // Only switch once - thereafter it should be stored in settings
+                }
 
-            try {
-                // We won't receive a notify for the initial state of connection, so we force an update here
-                onMeshConnectionChanged(connectionState)
-            } catch (ex: RemoteException) {
-                // If we get an exception while reading our service config, the device might have gone away, double check to see if we are really connected
-                errormsg("Device error during init ${ex.message}")
-                model.isConnected.value =
+                // We don't start listening for packets until after we are connected to the service
+                registerMeshReceiver()
+
+                // Init our messages table with the service's record of past text messages
+                val msgs = service.oldMessages
+                debug("Service provided ${msgs.size} messages")
+                model.messagesState.setMessages(msgs)
+                val connectionState =
                     MeshService.ConnectionState.valueOf(service.connectionState())
-            }
 
-            debug("connected to mesh service, isConnected=${model.isConnected.value}")
+                // if we are not connected, onMeshConnectionChange won't fetch nodes from the service
+                // in that case, we do it here - because the service certainly has a better idea of node db that we have
+                if (connectionState != MeshService.ConnectionState.CONNECTED)
+                    updateNodesFromDevice()
+
+                try {
+                    // We won't receive a notify for the initial state of connection, so we force an update here
+                    onMeshConnectionChanged(connectionState)
+                } catch (ex: RemoteException) {
+                    // If we get an exception while reading our service config, the device might have gone away, double check to see if we are really connected
+                    errormsg("Device error during init ${ex.message}")
+                    model.isConnected.value =
+                        MeshService.ConnectionState.valueOf(service.connectionState())
+                }
+
+                debug("connected to mesh service, isConnected=${model.isConnected.value}")
+            }
         }
 
         override fun onDisconnected() {
