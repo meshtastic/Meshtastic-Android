@@ -1,24 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?><!-- translation by @artemisoftnian -->
+<?xml version="1.0" encoding="utf-8"?><!-- translation by @artemisoftnian and @smack815 -->
 <resources>
     <string name="app_name" translatable="false">Meshtastic</string>
     <string name="action_settings">Configuración</string>
-    <string name="channel_name">Nombre Canal</string>
-    <string name="channel_options">Opciones Canal</string>
+    <string name="channel_name">Nombre del canal</string>
+    <string name="channel_options">Opciones del canal</string>
     <string name="share_button">Botón de compartir</string>
     <string name="qr_code">Código QR</string>
-    <string name="unset">Desarmar</string>
+    <string name="unset">Sin configurar</string>
     <string name="connection_status">Estado de conexión</string>
     <string name="application_icon">icono de la aplicación</string>
     <string name="unknown_username">Nombre de usuario desconocido</string>
     <string name="user_avatar">Avatar de usuario</string>
     <string name="sample_distance" translatable="false">2.13 km</string>
-    <string name="sample_message">hey encontré el caché, está aquí al lado del gran tigre. Estoy un poco asustado..</string>
+    <string name="sample_message">hey encontré el caché, está aquí al lado del tigre grande. Estoy un poco asustado.</string>
+    <string name="some_username" translatable="false">SKH</string>
     <string name="send_text">Enviar texto</string>
-    <string name="warning_not_paired">Aún no ha emparejado un radio compatible con Meshtastic con este teléfono. Empareje un dispositivo y configure su nombre de usuario. \n\nEsta aplicación de código abierto está en prueba alfa; si encuentra problemas, publique en el chat de nuestro sitio web. \n \nPara obtener más información, visite nuestra página web - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Aún no ha emparejado un radio compatible con Meshtastic con este teléfono. Empareje un dispositivo y configure su nombre de usuario. \n\nEsta aplicación de código abierto es una prueba alfa; si encuentra un problema, publique en el foro: meshtastic.discourse.group. \n\nPara obtener más información, visite nuestra página web - www.meshtastic.org.</string>
     <string name="username_unset">Nombre de usuario sin configurar</string>
     <string name="your_name">Tu nombre</string>
-    <string name="analytics_okay">Estadísticas de uso anónimas e informes de fallos.</string>
-    <string name="looking_for_meshtastic_devices">Buscando dispositivos Meshtastic ...</string>
+    <string name="analytics_okay">Estadísticas de uso anónimo e informes de fallos.</string>
+    <string name="looking_for_meshtastic_devices">Buscando dispositivos Meshtastic...</string>
     <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
     <string name="test_devname2" translatable="false">Meshtastic_1267</string>
     <string name="requires_bluetooth">Esta aplicación requiere acceso a bluetooth. Por favor conceda acceso en la configuración de Android.</string>
@@ -26,7 +27,7 @@
     <string name="starting_pairing">Iniciando emparejamiento</string>
     <string name="pairing_failed">Emparejamiento fallido</string>
     <string name="url_for_join">Una URL para unirse a una malla Meshtastic</string>
-    <string name="accept">Acepter</string>
+    <string name="accept">Aceptar</string>
     <string name="cancel">Cancelar</string>
     <string name="change_channel">Cambia el canal</string>
     <string name="are_you_sure_channel">¿Estás seguro de que quieres cambiar el canal? Toda comunicación con otros nodos se detendrá hasta que comparta la nueva configuración del canal.</string>
