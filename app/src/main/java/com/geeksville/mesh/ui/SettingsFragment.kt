@@ -15,7 +15,6 @@ import android.content.*
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Bundle
-import android.os.ParcelUuid
 import android.os.RemoteException
 import android.view.LayoutInflater
 import android.view.View
@@ -318,9 +317,10 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                         // filter and only accept devices that have our service
                         val filter =
                             ScanFilter.Builder()
-                                // Note: NRF52 doesn't put the service in the avertizement, so we can't filter by service here
-                                // Instead we check in the callback
-                                .setServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID))
+                                // Samsung doesn't seem to filter properly by service so this can't work
+                                // see https://stackoverflow.com/questions/57981986/altbeacon-android-beacon-library-not-working-after-device-has-screen-off-for-a-s/57995960#57995960
+                                // and https://stackoverflow.com/a/45590493
+                                // .setServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID))
                                 .build()
 
                         val settings =
@@ -542,7 +542,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // Only let user edit their name or set software update while connected to a radio
         model.isConnected.observe(viewLifecycleOwner, Observer { connected ->
             usernameView.isEnabled = connected == MeshService.ConnectionState.CONNECTED
-            if(connected == MeshService.ConnectionState.DISCONNECTED)
+            if (connected == MeshService.ConnectionState.DISCONNECTED)
                 model.ownerName.value = ""
             initNodeInfo()
         })
