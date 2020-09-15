@@ -278,11 +278,18 @@ class MeshService : Service(), Logging {
                             warnUserAboutLocation()
                         }
                     is ApiException ->
-                        if (exception.statusCode == 17) {
-                            // error: cancelled by user
-                            errormsg("User cancelled location access", exception)
-                        } else {
-                            Exceptions.report(exception)
+                        when (exception.statusCode) {
+                            17 ->
+                                // error: cancelled by user
+                                errormsg("User cancelled location access", exception)
+                            8502 ->
+                                // error: cancelled by user
+                                errormsg(
+                                    "Settings-change-unavailable, user disabled location access (globally?)",
+                                    exception
+                                )
+                            else ->
+                                Exceptions.report(exception)
                         }
                     else ->
                         Exceptions.report(exception)
