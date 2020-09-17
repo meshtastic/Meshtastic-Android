@@ -33,6 +33,8 @@ import com.geeksville.android.isGooglePlayAvailable
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.bluetoothManager
+import com.geeksville.mesh.android.usbManager
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.BluetoothInterface
 import com.geeksville.mesh.service.MeshService
@@ -137,11 +139,8 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         debug("BTScanModel cleared")
     }
 
-    /// Note: may be null on platforms without a bluetooth driver (ie. the emulator)
-    val bluetoothAdapter =
-        (context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?)?.adapter
-
-    private val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
+    val bluetoothAdapter = context.bluetoothManager?.adapter
+    private val usbManager get() = context.usbManager
 
     var selectedAddress: String? = null
     val errorText = object : MutableLiveData<String?>(null) {}
