@@ -10,6 +10,7 @@ import com.geeksville.android.Logging
 import com.geeksville.concurrent.CallbackContinuation
 import com.geeksville.concurrent.Continuation
 import com.geeksville.concurrent.SyncContinuation
+import com.geeksville.mesh.android.bluetoothManager
 import com.geeksville.util.exceptionReporter
 import kotlinx.coroutines.*
 import java.io.Closeable
@@ -101,10 +102,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     fun restartBle() {
         GeeksvilleApplication.analytics.track("ble_restart") // record # of times we needed to use this nasty hack
         errormsg("Doing emergency BLE restart")
-        val mgr =
-            context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        val adp = mgr.adapter
-        if (null != adp) {
+        context.bluetoothManager?.adapter?.let { adp ->
             if (adp.isEnabled) {
                 adp.disable()
                 // TODO: display some kind of UI about restarting BLE
