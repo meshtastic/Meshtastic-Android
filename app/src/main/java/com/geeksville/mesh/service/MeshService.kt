@@ -283,7 +283,7 @@ class MeshService : Service(), Logging {
                                 // error: cancelled by user
                                 errormsg("User cancelled location access", exception)
                             8502 ->
-                                // error: cancelled by user
+                                // error: settings change unavailable
                                 errormsg(
                                     "Settings-change-unavailable, user disabled location access (globally?)",
                                     exception
