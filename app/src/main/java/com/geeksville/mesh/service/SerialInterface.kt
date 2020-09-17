@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import com.geeksville.android.Logging
+import com.geeksville.mesh.android.usbManager
 import com.geeksville.util.exceptionReporter
 import com.geeksville.util.ignoreException
 import com.hoho.android.usbserial.driver.UsbSerialDriver
@@ -32,8 +33,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
         fun toInterfaceName(deviceName: String) = "s$deviceName"
 
         fun findDrivers(context: Context): List<UsbSerialDriver> {
-            val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
-            val drivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager)
+            val drivers = UsbSerialProber.getDefaultProber().findAllDrivers(context.usbManager)
             val devices = drivers.map { it.device }
             devices.forEach { d ->
                 debug("Found serial port ${d.deviceName}")
@@ -43,8 +43,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
 
         fun addressValid(context: Context, rest: String): Boolean {
             findSerial(context, rest)?.let { d ->
-                val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
-                return assumePermission || manager.hasPermission(d.device)
+                return assumePermission || context.usbManager.hasPermission(d.device)
             }
             return false
         }
@@ -75,8 +74,7 @@ class SerialInterface(private val service: RadioInterfaceService, val address: S
             if (UsbManager.ACTION_USB_DEVICE_ATTACHED == intent.action) {
                 debug("attaching USB")
                 val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
-                val manager = context.getSystemService(Context.USB_SERVICE) as UsbManager
-                if (assumePermission || manager.hasPermission(device)) {
+                if (assumePermission || context.usbManager.hasPermission(device)) {
                     // reinit the port from scratch and reopen
                     onDeviceDisconnect(true)
                     connect()
