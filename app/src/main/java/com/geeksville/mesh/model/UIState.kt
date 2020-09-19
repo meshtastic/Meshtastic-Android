@@ -17,12 +17,23 @@ import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.service.MeshService
 
 /// Given a human name, strip out the first letter of the first three words and return that as the initials for
-/// that user.
-fun getInitials(name: String): String {
-    val words = name.split(Regex("\\s+")).filter { it.isNotEmpty() }.take(3).map { it.first() }
-        .joinToString("")
+/// that user. If the original name is only one word, strip vowels from the original name and if the result is
+/// 3 or more characters, use the first three characters. If not, just take the first 3 characters of the
+/// original name.
+fun getInitials(nameIn: String): String {
+    val nchars = 3
+    val minchars = 2
+    val name = nameIn.trim()
+    val words = name.split(Regex("\\s+")).filter { it.isNotEmpty() }
 
-    return words
+    val initials = when (words.size) {
+        in 0..minchars - 1 -> {
+            val nm = name.filterNot { c -> c.toLowerCase() in "aeiou" }
+            if (nm.length >= nchars) nm else name
+        }
+        else -> words.map { it.first() }.joinToString("")
+    }
+    return initials.take(nchars)
 }
 
 class UIViewModel(app: Application) : AndroidViewModel(app), Logging {
