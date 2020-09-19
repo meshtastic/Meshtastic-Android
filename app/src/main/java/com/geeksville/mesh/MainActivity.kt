@@ -371,7 +371,7 @@ class MainActivity : AppCompatActivity(), Logging,
         updateBluetoothEnabled()
 
         /// We now want to be informed of bluetooth state
-        registerReceiver(btStateReceiver, btStateReceiver.intent)
+        registerReceiver(btStateReceiver, btStateReceiver.intentFilter)
 
         // if (!isInTestLab) - very important - even in test lab we must request permissions because we need location perms for some of our tests to pass
         requestPermission()

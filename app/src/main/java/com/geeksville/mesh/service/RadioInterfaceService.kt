@@ -195,7 +195,7 @@ class RadioInterfaceService : Service(), Logging {
     override fun onCreate() {
         runningService = this
         super.onCreate()
-        registerReceiver(bluetoothStateReceiver, bluetoothStateReceiver.intent)
+        registerReceiver(bluetoothStateReceiver, bluetoothStateReceiver.intentFilter)
     }
 
     override fun onDestroy() {
