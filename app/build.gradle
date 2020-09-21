@@ -136,7 +136,7 @@ dependencies {
     // For now I'm not using javalite, because I want JSON printing
     //implementation 'com.google.protobuf:protobuf-java:3.11.1'
     //implementation 'com.google.protobuf:protobuf-java-util:3.11.1'
-    implementation 'com.google.protobuf:protobuf-javalite:3.12.2'
+    implementation 'com.google.protobuf:protobuf-javalite:3.13.0'
 
     // For UART access
     // implementation 'com.google.android.things:androidthings:1.0'
@@ -146,7 +146,7 @@ dependencies {
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.2.1'
 
     // mapbox specifies a really old version of okhttp3 which causes lots of API warnings.  trying a newer version
-    implementation 'com.squareup.okhttp3:okhttp:4.8.1'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
 
     // location services
     implementation 'com.google.android.gms:play-services-location:17.0.0'
