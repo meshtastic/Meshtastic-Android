@@ -735,6 +735,8 @@ class MainActivity : AppCompatActivity(), Logging,
             }
     }
 
+    private var connectionJob: Job? = null
+
     private
     val mesh = object :
         ServiceClient<com.geeksville.mesh.IMeshService>({
@@ -777,7 +779,7 @@ class MainActivity : AppCompatActivity(), Logging,
                   at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run (RuntimeInit.java:493)
                   at com.android.internal.os.ZygoteInit.main (ZygoteInit.java:1076)
                  */
-            mainScope.handledLaunch {
+            connectionJob = mainScope.handledLaunch {
                 model.meshService = service
 
                 usbDevice?.let { usb ->
@@ -813,6 +815,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 }
 
                 debug("connected to mesh service, isConnected=${model.isConnected.value}")
+                connectionJob = null
             }
         }
 
@@ -825,8 +828,12 @@ class MainActivity : AppCompatActivity(), Logging,
     private fun bindMeshService() {
         debug("Binding to mesh service!")
         // we bind using the well known name, to make sure 3rd party apps could also
-        if (model.meshService != null)
+        if (model.meshService != null) {
+            /* This problem can occur if we unbind, but there is already an onConnected job waiting to run.  That job runs and then makes meshService != null again
+            I think I've fixed this by cancelling connectionJob.  We'll see!
+             */
             Exceptions.reportError("meshService was supposed to be null, ignoring (but reporting a bug)")
+        }
 
         try {
             MeshService.startService(this) // Start the service so it stays running even after we unbind
@@ -844,6 +851,11 @@ class MainActivity : AppCompatActivity(), Logging,
         // it, then now is the time to unregister.
         // if we never connected, do nothing
         debug("Unbinding from mesh service!")
+        connectionJob?.let { job ->
+            connectionJob = null
+            warn("We had a pending onConnection job, so we are cancelling it")
+            job.cancel("unbinding")
+        }
         mesh.close()
         model.meshService = null
     }
