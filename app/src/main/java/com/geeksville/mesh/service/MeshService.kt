@@ -28,6 +28,9 @@ import com.geeksville.mesh.*
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.mesh.R
+import com.geeksville.mesh.database.MeshtasticDatabase
+import com.geeksville.mesh.database.PacketRepository
+import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.util.*
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
@@ -162,6 +165,8 @@ class MeshService : Service(), Logging {
 
     /// The current state of our connection
     private var connectionState = ConnectionState.DISCONNECTED
+
+    private var packetRepo: PacketRepository? = null
 
     /*
     see com.geeksville.mesh broadcast intents
@@ -480,6 +485,9 @@ class MeshService : Service(), Logging {
         super.onCreate()
 
         info("Creating mesh service")
+
+        val packetsDao = MeshtasticDatabase.getDatabase(applicationContext).packetDao()
+        packetRepo = PacketRepository(packetsDao)
 
         // Switch to the IO thread
         serviceScope.handledLaunch {
@@ -964,6 +972,8 @@ class MeshService : Service(), Logging {
         // debug("Recieved: $packet")
         val p = packet.decoded
 
+        val packetToSave = Packet(UUID.randomUUID().toString(), "packet", System.currentTimeMillis(), packet.toString())
+        insertPacket(packetToSave)
         // If the rxTime was not set by the device (because device software was old), guess at a time
         val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
 
@@ -993,6 +1003,13 @@ class MeshService : Service(), Logging {
 
         if (p.failId != 0)
             handleAckNak(false, p.failId)
+    }
+
+    private fun insertPacket(packetToSave: Packet) {
+        serviceScope.handledLaunch {
+            info("insert: ${packetToSave.message_type} = ${packetToSave.raw_message.toOneLineString()}")
+            packetRepo!!.insert(packetToSave)
+        }
     }
 
     private fun currentSecond() = (System.currentTimeMillis() / 1000).toInt()
@@ -1229,6 +1246,8 @@ class MeshService : Service(), Logging {
 
 
     private fun handleRadioConfig(radio: MeshProtos.RadioConfig) {
+        val packetToSave = Packet(UUID.randomUUID().toString(), "RadioConfig", System.currentTimeMillis(), radio.toString())
+        insertPacket(packetToSave)
         radioConfig = radio
     }
 
@@ -1257,6 +1276,9 @@ class MeshService : Service(), Logging {
     private fun handleNodeInfo(info: MeshProtos.NodeInfo) {
         debug("Received nodeinfo num=${info.num}, hasUser=${info.hasUser()}, hasPosition=${info.hasPosition()}")
 
+        val packetToSave = Packet(UUID.randomUUID().toString(), "NodeInfo", System.currentTimeMillis(), info.toString())
+        insertPacket(packetToSave)
+
         logAssert(newNodes.size <= 256) // Sanity check to make sure a device bug can't fill this list forever
         newNodes.add(info)
     }
@@ -1266,6 +1288,9 @@ class MeshService : Service(), Logging {
      * Update the nodeinfo (called from either new API version or the old one)
      */
     private fun handleMyInfo(myInfo: MeshProtos.MyNodeInfo) {
+        val packetToSave = Packet(UUID.randomUUID().toString(), "MyNodeInfo", System.currentTimeMillis(), myInfo.toString())
+        insertPacket(packetToSave)
+
         setFirmwareUpdateFilename(myInfo)
 
         val mi = with(myInfo) {
@@ -1312,6 +1337,10 @@ class MeshService : Service(), Logging {
 
     private fun handleConfigComplete(configCompleteId: Int) {
         if (configCompleteId == configNonce) {
+
+            val packetToSave = Packet(UUID.randomUUID().toString(), "ConfigComplete", System.currentTimeMillis(), configCompleteId.toString())
+            insertPacket(packetToSave)
+
             // This was our config request
             if (newMyNodeInfo == null || newNodes.isEmpty())
                 errormsg("Did not receive a valid config")

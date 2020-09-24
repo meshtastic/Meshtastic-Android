@@ -30,6 +30,8 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.geeksville.android.GeeksvilleApplication
@@ -915,6 +917,15 @@ class MainActivity : AppCompatActivity(), Logging,
             }
             R.id.connectStatusImage -> {
                 Toast.makeText(applicationContext, item.title, Toast.LENGTH_SHORT).show()
+                return true
+            }
+            R.id.debug -> {
+                val fragmentManager: FragmentManager = supportFragmentManager
+                val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
+                val nameFragment = DebugFragment()
+                fragmentTransaction.add(R.id.mainActivityLayout, nameFragment)
+                fragmentTransaction.addToBackStack(null)
+                fragmentTransaction.commit()
                 return true
             }
             else -> super.onOptionsItemSelected(item)
