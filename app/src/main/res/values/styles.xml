@@ -33,4 +33,9 @@
     </style>
 
     <style name="Widget.App.CardView" parent="Widget.MaterialComponents.CardView"/>
+
+    <style name="Meshtastic.Button.Rounded" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>
