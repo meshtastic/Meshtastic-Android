@@ -35,7 +35,10 @@ fun getInitials(nameIn: String): String {
 
     val initials = when (words.size) {
         in 0..minchars - 1 -> {
-            val nm = name.first() + name.drop(1).filterNot { c -> c.toLowerCase() in "aeiou" }
+            val nm = if (name.length >= 1)
+                name.first() + name.drop(1).filterNot { c -> c.toLowerCase() in "aeiou" }
+            else
+                ""
             if (nm.length >= nchars) nm else name
         }
         else -> words.map { it.first() }.joinToString("")
