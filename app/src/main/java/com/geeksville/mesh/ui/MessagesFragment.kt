@@ -1,7 +1,6 @@
 package com.geeksville.mesh.ui
 
 import android.os.Bundle
-import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +21,7 @@ import com.geeksville.mesh.service.MeshService
 import com.google.android.material.chip.Chip
 import kotlinx.android.synthetic.main.adapter_message_layout.view.*
 import kotlinx.android.synthetic.main.messages_fragment.*
+import java.text.DateFormat
 import java.util.*
 
 // Allows usage like email.on(EditorInfo.IME_ACTION_NEXT, { confirm() })
@@ -40,7 +40,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
 
     private val model: UIViewModel by activityViewModels()
 
-    private lateinit var dateTimeFormat : java.text.DateFormat
+    private val dateTimeFormat: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
@@ -173,7 +173,6 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-         dateTimeFormat = DateFormat.getTimeFormat(context)
         messageInputText.on(EditorInfo.IME_ACTION_DONE) {
             debug("did IME action")
 
