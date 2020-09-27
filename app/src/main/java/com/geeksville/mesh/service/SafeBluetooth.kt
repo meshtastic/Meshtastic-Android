@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Build
 import android.os.DeadObjectException
 import android.os.Handler
+import android.os.Looper
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.CallbackContinuation
@@ -97,7 +98,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
      * skanky hack to restart BLE if it says it is hosed
      * https://stackoverflow.com/questions/35103701/ble-android-onconnectionstatechange-not-being-called
      */
-    private val mHandler: Handler = Handler()
+    private val mHandler: Handler = Handler(Looper.getMainLooper())
 
     fun restartBle() {
         GeeksvilleApplication.analytics.track("ble_restart") // record # of times we needed to use this nasty hack
