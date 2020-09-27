@@ -1,7 +1,7 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.4.0'
+    ext.kotlin_version = '1.4.10'
     ext.coroutines_version = "1.3.9"
 
     repositories {
@@ -21,7 +21,7 @@ buildscript {
         // Check that you have the Google Services Gradle plugin v4.3.2 or later
         // (if not, add it).
         classpath 'com.google.gms:google-services:4.3.3'
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.2.0'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.3.0'
 
         // protobuf plugin - docs here https://github.com/google/protobuf-gradle-plugin
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.12'

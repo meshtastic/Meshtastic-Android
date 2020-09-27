@@ -22,7 +22,7 @@ The intent you use to reach the service should look like this:
 
 Once you have bound to the service you should register your broadcast receivers per https://developer.android.com/guide/components/broadcasts#context-registered-receivers
 
-    // com.geeksville.com.geeksville.mesh.x broadcast intents, where x is:
+    // com.geeksville.mesh.x broadcast intents, where x is:
     // RECEIVED_DATA  for data received from other nodes.  payload will contain a DataPacket
     // NODE_CHANGE  for new IDs appearing or disappearing
     // CONNECTION_CHANGED for losing/gaining connection to the packet radio
