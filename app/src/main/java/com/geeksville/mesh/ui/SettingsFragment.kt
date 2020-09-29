@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothDevice.BOND_BONDED
 import android.bluetooth.BluetoothDevice.BOND_BONDING
-import android.bluetooth.BluetoothManager
 import android.bluetooth.le.*
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
@@ -658,9 +657,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             // The device the user is already paired with is offline currently, still show it
             // it in the list, but greyed out
             if (!hasShownOurDevice) {
-                if (scanModel.selectedBluetooth != null && adapter != null && adapter.isEnabled) {
+                // Note: we pull this into a tempvar, because otherwise some other thread can change selectedAddress after our null check
+                // and before use
+                val bleAddr = scanModel.selectedBluetooth
+
+                if (bleAddr != null && adapter != null && adapter.isEnabled) {
                     val bDevice =
-                        adapter.getRemoteDevice(scanModel.selectedBluetooth)
+                        adapter.getRemoteDevice(bleAddr)
                     if (bDevice.name != null) { // ignore nodes that node have a name, that means we've lost them since they appeared
                         val curDevice = BTScanModel.DeviceListEntry(
                             bDevice.name,
