@@ -1,68 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/adapterPacketLayout"
+    style="@style/Widget.App.CardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clipToPadding="false">
+    android:layout_margin="4dp">
 
-    <com.google.android.material.card.MaterialCardView
-        style="@style/Widget.App.CardView"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="4dp">
+        android:layout_height="wrap_content">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <TextView
+            android:id="@+id/type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/cloudDownloadIcon"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/cloudDownloadIcon"
+            tools:text="NodeInfo" />
+
+        <TextView
+            android:id="@+id/dateReceived"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/cloudDownloadIcon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/cloudDownloadIcon"
+            tools:text="9/27/20 21:00:58" />
+
+        <TextView
+            android:id="@+id/rawMessage"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="monospace"
+            android:singleLine="false"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            android:textIsSelectable="true"
+            android:textSize="8sp"
+            android:typeface="monospace"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cloudDownloadIcon"
+            app:layout_constraintVertical_weight="1"
+            tools:text="# com.geeksville.mesh.MeshProtos$MeshPacket@1b1ea594\n
+              decoded {\n
+               position {\n
+               altitude: 60\n
+               battery_level: 81\n
+                latitude_i: 411111136\n
+                longitude_i: -711111805\n
+                time: 1600390966\n
+                }\n
+                }\n
+                from: -1409794164\n
+                hop_limit: 3\n
+                id: 1737414295\n
+                rx_snr: 9.5\n
+                rx_time: 316400569\n
+                to: -1409790708" />
 
-            <TextView
-                android:id="@+id/type"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:text="node_info"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <ImageView
+            android:id="@+id/cloudDownloadIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:alpha="0.4"
+            app:layout_constraintEnd_toStartOf="@+id/dateReceived"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/cloud_download_outline_24" />
 
-            <TextView
-                android:id="@+id/dateReceived"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="09-17 21:00:58.641"
-                app:layout_constraintBottom_toBottomOf="@+id/cloudDownloadIcon"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/cloudDownloadIcon" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
 
-            <TextView
-                android:id="@+id/rawMessage"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:fontFamily="monospace"
-                android:text="TextView"
-                android:textAppearance="@style/TextAppearance.AppCompat.Small"
-                android:textIsSelectable="true"
-                android:textSize="8sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/type" />
-
-            <ImageView
-                android:id="@+id/cloudDownloadIcon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:alpha="0.4"
-                app:layout_constraintEnd_toStartOf="@+id/dateReceived"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/cloud_download_outline_24" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-
-</LinearLayout>
