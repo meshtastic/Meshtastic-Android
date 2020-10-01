@@ -11,11 +11,14 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
         android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clearButton" />
+        app:layout_constraintTop_toBottomOf="@+id/clearButton"
+        tools:itemCount="8"
+        tools:listitem="@layout/adapter_packet_layout" />
 
     <Button
         android:id="@+id/clearButton"
