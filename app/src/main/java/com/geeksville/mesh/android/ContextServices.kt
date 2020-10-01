@@ -1,5 +1,6 @@
 package com.geeksville.mesh.android
 
+import android.app.NotificationManager
 import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.hardware.usb.UsbManager
@@ -10,3 +11,5 @@ import android.hardware.usb.UsbManager
 val Context.bluetoothManager: BluetoothManager? get() = getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager?
 
 val Context.usbManager: UsbManager get() = requireNotNull(getSystemService(Context.USB_SERVICE) as? UsbManager?) { "USB_SERVICE is not available"}
+
+val Context.notificationManager: NotificationManager get() = requireNotNull(getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager?)

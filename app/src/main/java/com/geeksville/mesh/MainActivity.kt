@@ -845,7 +845,7 @@ class MainActivity : AppCompatActivity(), Logging,
         }
 
         // ALSO bind so we can use the api
-        mesh.connect(this, MeshService.intent, Context.BIND_AUTO_CREATE + Context.BIND_ABOVE_CLIENT)
+        mesh.connect(this, MeshService.createIntent(), Context.BIND_AUTO_CREATE + Context.BIND_ABOVE_CLIENT)
     }
 
     private fun unbindMeshService() {
@@ -942,5 +942,3 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 }
-
-
