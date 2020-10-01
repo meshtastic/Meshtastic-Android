@@ -92,14 +92,15 @@ androidExtensions {
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:3.9.0'
+        artifact = 'com.google.protobuf:protoc:3.13.0'
     }
     generateProtoTasks {
         all().each { task ->
             task.builtins {
                 java {
+                    // turned off for now so I can use json printing in debug panel
                     // use the smaller android version of the library
-                    option "lite"
+                    //option "lite"
                 }
             }
         }
@@ -145,11 +146,8 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
-    // You need to depend on the lite runtime library, not protobuf-java
     // For now I'm not using javalite, because I want JSON printing
-    //implementation 'com.google.protobuf:protobuf-java:3.11.1'
-    //implementation 'com.google.protobuf:protobuf-java-util:3.11.1'
-    implementation 'com.google.protobuf:protobuf-javalite:3.13.0'
+    implementation ('com.google.protobuf:protobuf-java:3.13.0')
 
     // For UART access
     // implementation 'com.google.android.things:androidthings:1.0'
