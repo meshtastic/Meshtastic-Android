@@ -7,7 +7,6 @@ import com.geeksville.util.anonymize
 import kotlinx.android.parcel.Parcelize
 import kotlinx.serialization.Serializable
 
-
 //
 // model objects that directly map to the corresponding protobufs
 //
@@ -117,5 +116,11 @@ data class NodeInfo(
             dist < 1000 -> "%.0f m".format(dist.toDouble())
             else -> "%.1f km".format(dist / 1000.0)
         }
+    }
+}
+
+fun NodeInfo.updateTime(rxTime: Int) {
+    if (position?.time == null || position?.time!! < rxTime) {
+        position = position?.copy(time = rxTime)
     }
 }
