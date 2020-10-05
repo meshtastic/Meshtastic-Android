@@ -26,18 +26,21 @@
 -keepclassmembernames class kotlinx.** { volatile <fields>; }
 
 # Needed for protobufs
+-keepclassmembers class * extends com.google.protobuf.GeneratedMessageV3 { <fields>; }
+-keep class com.geeksville.mesh.**{*;}
 -keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite { <fields>; }
 
 # for kotlinx.serialization
 -keepattributes *Annotation*, InnerClasses
 -dontnote kotlinx.serialization.SerializationKt
--keep,includedescriptorclasses class com.yourcompany.yourpackage.**$$serializer { *; } # <-- change package name to your app's
--keepclassmembers class com.geeksville.mesh.** { # <-- change package name to your app's
+-keep,includedescriptorclasses class com.geeksville.mesh.**$$serializer { *; }
+-keepclassmembers class com.geeksville.mesh.** {
     *** Companion;
 }
--keepclasseswithmembers class com.geeksville.mesh.** { # <-- change package name to your app's
+-keepclasseswithmembers class com.geeksville.mesh.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 
 # Our app is opensource no need to obsfucate
 -dontobfuscate
+-optimizations !code/simplification/arithmetic,!field/*,!class/merging/*,!code/allocation/variable
