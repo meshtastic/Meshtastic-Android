@@ -712,7 +712,12 @@ class MeshService : Service(), Logging {
         // debug("Recieved: $packet")
         val p = packet.decoded
 
-        val packetToSave = Packet(UUID.randomUUID().toString(), "packet", System.currentTimeMillis(), packet.toString())
+        val packetToSave = Packet(
+            UUID.randomUUID().toString(),
+            "packet",
+            System.currentTimeMillis(),
+            packet.toString()
+        )
         insertPacket(packetToSave)
         // If the rxTime was not set by the device (because device software was old), guess at a time
         val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
@@ -974,7 +979,12 @@ class MeshService : Service(), Logging {
 
 
     private fun handleRadioConfig(radio: MeshProtos.RadioConfig) {
-        val packetToSave = Packet(UUID.randomUUID().toString(), "RadioConfig", System.currentTimeMillis(), radio.toString())
+        val packetToSave = Packet(
+            UUID.randomUUID().toString(),
+            "RadioConfig",
+            System.currentTimeMillis(),
+            radio.toString()
+        )
         insertPacket(packetToSave)
         radioConfig = radio
     }
@@ -1004,7 +1014,12 @@ class MeshService : Service(), Logging {
     private fun handleNodeInfo(info: MeshProtos.NodeInfo) {
         debug("Received nodeinfo num=${info.num}, hasUser=${info.hasUser()}, hasPosition=${info.hasPosition()}")
 
-        val packetToSave = Packet(UUID.randomUUID().toString(), "NodeInfo", System.currentTimeMillis(), info.toString())
+        val packetToSave = Packet(
+            UUID.randomUUID().toString(),
+            "NodeInfo",
+            System.currentTimeMillis(),
+            info.toString()
+        )
         insertPacket(packetToSave)
 
         logAssert(newNodes.size <= 256) // Sanity check to make sure a device bug can't fill this list forever
@@ -1016,7 +1031,12 @@ class MeshService : Service(), Logging {
      * Update the nodeinfo (called from either new API version or the old one)
      */
     private fun handleMyInfo(myInfo: MeshProtos.MyNodeInfo) {
-        val packetToSave = Packet(UUID.randomUUID().toString(), "MyNodeInfo", System.currentTimeMillis(), myInfo.toString())
+        val packetToSave = Packet(
+            UUID.randomUUID().toString(),
+            "MyNodeInfo",
+            System.currentTimeMillis(),
+            myInfo.toString()
+        )
         insertPacket(packetToSave)
 
         setFirmwareUpdateFilename(myInfo)
@@ -1066,7 +1086,12 @@ class MeshService : Service(), Logging {
     private fun handleConfigComplete(configCompleteId: Int) {
         if (configCompleteId == configNonce) {
 
-            val packetToSave = Packet(UUID.randomUUID().toString(), "ConfigComplete", System.currentTimeMillis(), configCompleteId.toString())
+            val packetToSave = Packet(
+                UUID.randomUUID().toString(),
+                "ConfigComplete",
+                System.currentTimeMillis(),
+                configCompleteId.toString()
+            )
             insertPacket(packetToSave)
 
             // This was our config request
