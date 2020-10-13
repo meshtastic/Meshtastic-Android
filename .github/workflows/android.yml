@@ -1,7 +1,9 @@
 name: Android CI
 # from https://medium.com/@wkrzywiec/github-actions-for-android-first-approach-f616c24aa0f9
 
-on: push
+on:
+  - push
+  - pull_request
 
 jobs:
   test:
