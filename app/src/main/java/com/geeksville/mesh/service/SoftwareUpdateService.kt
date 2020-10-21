@@ -204,7 +204,8 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             val deviceVersion =
                 verStringToInt(if (swVer.isEmpty() || swVer == "unset") "99.99.99" else swVer)
 
-            (curVer > deviceVersion) && (deviceVersion >= minVer)
+            // (curVer > deviceVersion) && (deviceVersion >= minVer)
+            true
         } catch (ex: Exception) {
             errormsg("Error finding swupdate info", ex)
             false // If we fail parsing our update info
@@ -214,21 +215,11 @@ class SoftwareUpdateService : JobIntentService(), Logging {
          */
         fun getUpdateFilename(
             context: Context,
-            hwVerIn: String,
-            swVer: String,
             mfg: String
         ): String? {
             val curver = context.getString(R.string.cur_firmware_version)
 
-            val regionRegex = Regex(".+-(.+)")
-
-            val hwVer = if (hwVerIn.isEmpty() || hwVerIn == "unset")
-                "1.0-US" else hwVerIn // lie and claim US, because that's what the device load will be doing without hwVer set
-
-            val (region) = regionRegex.find(hwVer)?.destructured
-                ?: throw Exception("Malformed hw version")
-
-            val base = "firmware-$mfg-$region-$curver.bin"
+            val base = "firmware-$mfg-$curver.bin"
 
             // Check to see if the file exists (some builds might not include update files for size reasons)
             val firmwareFiles = context.assets.list("firmware") ?: arrayOf()
@@ -239,24 +230,19 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         }
 
         /** Return the filename this device needs to use as an update (or null if no update needed)
+         * No longer used, because we get update info inband from our radio API
          */
         fun getUpdateFilename(context: Context, sync: SafeBluetooth): String? {
             val service = sync.gatt!!.services.find { it.uuid == SW_UPDATE_UUID }!!
 
-            val hwVerDesc = service.getCharacteristic(HW_VERSION_CHARACTER)
+            //val hwVerDesc = service.getCharacteristic(HW_VERSION_CHARACTER)
             val mfgDesc = service.getCharacteristic(MANUFACTURE_CHARACTER)
-            val swVerDesc = service.getCharacteristic(SW_VERSION_CHARACTER)
-
-            // looks like 1.0-US
-            var hwVer = sync.readCharacteristic(hwVerDesc).getStringValue(0)
+            //val swVerDesc = service.getCharacteristic(SW_VERSION_CHARACTER)
 
             // looks like HELTEC
             val mfg = sync.readCharacteristic(mfgDesc).getStringValue(0)
 
-            // looks like 0.0.12
-            val swVer = sync.readCharacteristic(swVerDesc).getStringValue(0)
-
-            return getUpdateFilename(context, hwVer, swVer, mfg)
+            return getUpdateFilename(context, mfg)
         }
 
         /**
