@@ -60,6 +60,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import java.nio.charset.Charset
+import kotlin.system.exitProcess
 
 /*
 UI design
@@ -926,6 +927,11 @@ class MainActivity : AppCompatActivity(), Logging,
                 fragmentTransaction.add(R.id.mainActivityLayout, nameFragment)
                 fragmentTransaction.addToBackStack(null)
                 fragmentTransaction.commit()
+                return true
+            }
+            R.id.exit -> {
+                moveTaskToBack(true);
+                exitProcess(0)
                 return true
             }
             else -> super.onOptionsItemSelected(item)

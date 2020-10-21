@@ -37,6 +37,7 @@
         If you are interested in us paying for mapbox (or switching to a different map provider), please post in meshtastic.discourse.group</string>
     <string name="permission_missing">A required permission is missing, Meshtastic won\'t be able to work properly.  Please enable in Android application settings.</string>
     <string name="radio_sleeping">Radio was sleeping, could not change channel</string>
+    <string name="exit_app">Exit App</string>
     <string name="report_bug">Report Bug</string>
     <string name="report_a_bug">Report a bug</string>
     <string name="report_bug_text">Are you sure you want to report a bug? After reporting, please post in meshtastic.discourse.group so we can match up the report with what you found.</string>
