@@ -483,17 +483,19 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 updateProgressBar.progress = 0 // start from scratch
 
                 scanStatusText.text = "Updating firmware, wait up to eight minutes..."
-                service.startFirmwareUpdate()
-                while (service.updateStatus >= 0) {
-                    updateProgressBar.progress = service.updateStatus
-                    delay(2000) // Only check occasionally
+                try {
+                    service.startFirmwareUpdate()
+                    while (service.updateStatus >= 0) {
+                        updateProgressBar.progress = service.updateStatus
+                        delay(2000) // Only check occasionally
+                    }
+                } finally {
+                    val isSuccess = (service.updateStatus == -1)
+                    scanStatusText.text =
+                        if (isSuccess) "Update successful" else "Update failed"
+                    updateProgressBar.isEnabled = false
+                    updateFirmwareButton.isEnabled = !isSuccess
                 }
-
-                val isSuccess = (service.updateStatus == -1)
-                scanStatusText.text =
-                    if (isSuccess) "Update successful" else "Update failed"
-                updateProgressBar.isEnabled = false
-                updateFirmwareButton.isEnabled = !isSuccess
             }
         }
     }
@@ -512,6 +514,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val info = model.myNodeInfo.value
         if (connected == MeshService.ConnectionState.CONNECTED && info != null && info.shouldUpdate && info.couldUpdate) {
             updateFirmwareButton.visibility = View.VISIBLE
+            updateFirmwareButton.isEnabled = true
             updateFirmwareButton.text =
                 getString(R.string.update_to).format(getString(R.string.cur_firmware_version))
         } else {
