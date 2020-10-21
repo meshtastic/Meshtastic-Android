@@ -1,7 +1,7 @@
 package com.geeksville.mesh.service
 
 import android.annotation.SuppressLint
-import android.app.*
+import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -20,14 +20,16 @@ import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.*
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
-import com.geeksville.mesh.R
 import com.geeksville.mesh.database.MeshtasticDatabase
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.util.*
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.*
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
 import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
 import kotlinx.coroutines.*
@@ -234,7 +236,11 @@ class MeshService : Service(), Logging {
         })
     }
 
-    private fun updateNotification() = serviceNotifications.updateNotification(recentReceivedTextPacket, notificationSummary, getSenderName())
+    private fun updateNotification() = serviceNotifications.updateNotification(
+        recentReceivedTextPacket,
+        notificationSummary,
+        getSenderName()
+    )
 
     /**
      * tell android not to kill us
@@ -247,7 +253,11 @@ class MeshService : Service(), Logging {
 
         // We always start foreground because that's how our service is always started (if we didn't then android would kill us)
         // but if we don't really need foreground we immediately stop it.
-        val notification = serviceNotifications.createNotification(recentReceivedTextPacket, notificationSummary, getSenderName())
+        val notification = serviceNotifications.createNotification(
+            recentReceivedTextPacket,
+            notificationSummary,
+            getSenderName()
+        )
         startForeground(serviceNotifications.notifyId, notification)
         if (!wantForeground) {
             stopForeground(true)
@@ -1272,8 +1282,6 @@ class MeshService : Service(), Logging {
             if (info.region != null && info.firmwareVersion != null && info.hwModel != null)
                 SoftwareUpdateService.getUpdateFilename(
                     this,
-                    info.region,
-                    info.firmwareVersion,
                     info.hwModel
                 )
             else
@@ -1286,6 +1294,9 @@ class MeshService : Service(), Logging {
         debug("setFirmwareUpdateFilename $firmwareUpdateFilename")
     }
 
+    /// We only allow one update to be running at a time
+    private var updateJob: Job? = null
+
     private fun doFirmwareUpdate() {
         // Run in the IO thread
         val filename = firmwareUpdateFilename ?: throw Exception("No update filename")
@@ -1293,9 +1304,13 @@ class MeshService : Service(), Logging {
             BluetoothInterface.safe
                 ?: throw Exception("Can't update - no bluetooth connected")
 
-        serviceScope.handledLaunch {
-            SoftwareUpdateService.doUpdate(this@MeshService, safe, filename)
-        }
+        if (updateJob?.isActive == true)
+            throw Exception("Firmware update already running")
+        else
+            updateJob = serviceScope.handledLaunch {
+                info("Starting firmware update coroutine")
+                SoftwareUpdateService.doUpdate(this@MeshService, safe, filename)
+            }
     }
 
     /**
