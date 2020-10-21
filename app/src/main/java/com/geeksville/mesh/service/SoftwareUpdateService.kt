@@ -204,8 +204,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             val deviceVersion =
                 verStringToInt(if (swVer.isEmpty() || swVer == "unset") "99.99.99" else swVer)
 
-            // (curVer > deviceVersion) && (deviceVersion >= minVer)
-            true
+            (curVer > deviceVersion) && (deviceVersion >= minVer)
         } catch (ex: Exception) {
             errormsg("Error finding swupdate info", ex)
             false // If we fail parsing our update info
