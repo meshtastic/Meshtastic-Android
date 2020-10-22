@@ -3,6 +3,7 @@ package com.geeksville.mesh.service
 import com.geeksville.mesh.MeshUser
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.Position
+import com.geeksville.mesh.updateTime
 import org.junit.Assert
 import org.junit.Test
 
@@ -15,7 +16,7 @@ class MeshServiceTest {
     fun givenNodeInfo_whenUpdatingWithNewTime_thenPositionTimeIsUpdated() {
 
         val newerTime = 20
-        updateNodeInfoTime(nodeInfo, newerTime)
+        nodeInfo.updateTime(newerTime)
         Assert.assertEquals(newerTime, nodeInfo.position?.time)
     }
 
@@ -23,7 +24,7 @@ class MeshServiceTest {
     fun givenNodeInfo_whenUpdatingWithOldTime_thenPositionTimeIsNotUpdated() {
         val olderTime = 5
         val timeBeforeTryingToUpdate = nodeInfo.position?.time
-        updateNodeInfoTime(nodeInfo, olderTime)
+        nodeInfo.updateTime( olderTime)
         Assert.assertEquals(timeBeforeTryingToUpdate, nodeInfo.position?.time)
     }
 }
