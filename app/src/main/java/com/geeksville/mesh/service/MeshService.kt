@@ -337,7 +337,8 @@ class MeshService : Service(), Logging {
             val settings = MeshServiceSettingsData(
                 myInfo = myInfo,
                 nodeDB = nodeDBbyNodeNum.values.toTypedArray(),
-                messages = recentDataPackets.toTypedArray()
+                messages = recentDataPackets.toTypedArray(),
+                regionCode = curRegionValue
             )
             val json = Json { isLenient = true }
             val asString = json.encodeToString(MeshServiceSettingsData.serializer(), settings)
@@ -373,6 +374,7 @@ class MeshService : Service(), Logging {
                 val json = Json { isLenient = true }
                 val settings = json.decodeFromString(MeshServiceSettingsData.serializer(), asString)
                 installNewNodeDB(settings.myInfo, settings.nodeDB)
+                curRegionValue = settings.regionCode
 
                 // Note: we do not haveNodeDB = true because that means we've got a valid db from a real device (rather than this possibly stale hint)
 
@@ -1093,6 +1095,57 @@ class MeshService : Service(), Logging {
         }
     }
 
+    // If we've ever read a valid region code from our device it will be here
+    var curRegionValue = MeshProtos.RegionCode.Unset_VALUE
+
+    /**
+     * If we are updating nodes we might need to use old (fixed by firmware build)
+     * region info to populate our new universal ROMs.
+     *
+     * This function updates our saved preferences region info and if the device has an unset new
+     * region info, we set it.
+     */
+    private fun updateRegion() {
+        ignoreException {
+            // Try to pull our region code from the new preferences field
+            val curConfigRegion = radioConfig?.preferences?.region ?: MeshProtos.RegionCode.Unset
+            if (curConfigRegion != MeshProtos.RegionCode.Unset) {
+                info("Using device region $curConfigRegion (code ${curConfigRegion.number})")
+                curRegionValue = curConfigRegion.number
+            }
+
+            if (curRegionValue == MeshProtos.RegionCode.Unset_VALUE) {
+                // look for a legacy region
+                val legacyRegex = Regex(".+-(.+)")
+                myNodeInfo?.region?.let { legacyRegion ->
+                    val matches = legacyRegex.find(legacyRegion)
+                    if (matches != null) {
+                        val (region) = matches.destructured
+                        val newRegion = MeshProtos.RegionCode.valueOf(region)
+                        info("Upgrading legacy region $newRegion (code ${newRegion.number})")
+                        curRegionValue = newRegion.number
+                    }
+                }
+            }
+
+            // If nothing was set in our (new style radio preferences, but we now have a valid setting - slam it in)
+            if (curConfigRegion == MeshProtos.RegionCode.Unset && curRegionValue != MeshProtos.RegionCode.Unset_VALUE) {
+                info("Telling device to upgrade region")
+
+                // Tell the device to set the new region field (old devices will simply ignore this)
+                radioConfig?.let { currentConfig ->
+                    val newConfig = currentConfig.toBuilder()
+
+                    val newPrefs = currentConfig.preferences.toBuilder()
+                    newPrefs.regionValue = curRegionValue
+                    newConfig.preferences = newPrefs.build()
+
+                    sendRadioConfig(newConfig.build())
+                }
+            }
+        }
+    }
+
     private fun handleConfigComplete(configCompleteId: Int) {
         if (configCompleteId == configNonce) {
 
@@ -1117,6 +1170,8 @@ class MeshService : Service(), Logging {
 
                 haveNodeDB = true // we now have nodes from real hardware
                 processEarlyPackets() // send receive any packets that were queued up
+
+                updateRegion()
 
                 // broadcast an intent with our new connection state
                 serviceBroadcasts.broadcastConnection()
@@ -1187,18 +1242,24 @@ class MeshService : Service(), Logging {
         sendPosition(lat, lon, alt, destNum, wantResponse)
     }
 
-    /** Set our radio config either with the new or old API
+    /** Send our current radio config to the device
+     */
+    private fun sendRadioConfig(c: MeshProtos.RadioConfig) {
+        // Update our device
+        sendToRadio(ToRadio.newBuilder().apply {
+            this.setRadio = c
+        })
+
+        // Update our cached copy
+        this@MeshService.radioConfig = c
+    }
+
+    /** Set our radio config
      */
     private fun setRadioConfig(payload: ByteArray) {
         val parsed = MeshProtos.RadioConfig.parseFrom(payload)
 
-        // Update our device
-        sendToRadio(ToRadio.newBuilder().apply {
-            this.setRadio = parsed
-        })
-
-        // Update our cached copy
-        this@MeshService.radioConfig = parsed
+        sendRadioConfig(parsed)
     }
 
     /**
