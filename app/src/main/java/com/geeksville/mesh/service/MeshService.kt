@@ -1108,6 +1108,7 @@ class MeshService : Service(), Logging {
     private fun updateRegion() {
         ignoreException {
             // Try to pull our region code from the new preferences field
+            // FIXME - do not check net - figuring out why board is rebooting
             val curConfigRegion = radioConfig?.preferences?.region ?: MeshProtos.RegionCode.Unset
             if (curConfigRegion != MeshProtos.RegionCode.Unset) {
                 info("Using device region $curConfigRegion (code ${curConfigRegion.number})")
@@ -1171,12 +1172,12 @@ class MeshService : Service(), Logging {
                 haveNodeDB = true // we now have nodes from real hardware
                 processEarlyPackets() // send receive any packets that were queued up
 
-                updateRegion()
-
                 // broadcast an intent with our new connection state
                 serviceBroadcasts.broadcastConnection()
                 onNodeDBChanged()
                 reportConnection()
+
+                updateRegion()
             }
         } else
             warn("Ignoring stale config complete")
