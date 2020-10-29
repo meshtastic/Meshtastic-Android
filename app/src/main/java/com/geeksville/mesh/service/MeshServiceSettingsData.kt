@@ -1,6 +1,7 @@
 package com.geeksville.mesh.service
 
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
 import kotlinx.serialization.Serializable
@@ -10,7 +11,8 @@ import kotlinx.serialization.Serializable
 data class MeshServiceSettingsData(
     val nodeDB: Array<NodeInfo>,
     val myInfo: MyNodeInfo,
-    val messages: Array<DataPacket>
+    val messages: Array<DataPacket>,
+    val regionCode: Int = MeshProtos.RegionCode.Unset_VALUE
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -21,6 +23,7 @@ data class MeshServiceSettingsData(
         if (!nodeDB.contentEquals(other.nodeDB)) return false
         if (myInfo != other.myInfo) return false
         if (!messages.contentEquals(other.messages)) return false
+        if (regionCode != other.regionCode) return false
 
         return true
     }
@@ -29,6 +32,7 @@ data class MeshServiceSettingsData(
         var result = nodeDB.contentHashCode()
         result = 31 * result + myInfo.hashCode()
         result = 31 * result + messages.contentHashCode()
+        result = 31 * result + regionCode
         return result
     }
 }

@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 /**
  * Helper that calls MeshService.startService()
  */
-private class ServiceStarter(
+public class ServiceStarter(
     appContext: Context,
     workerParams: WorkerParameters
 ) : Worker(appContext, workerParams) {
