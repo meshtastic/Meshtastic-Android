@@ -802,7 +802,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 debug("We have location access")
             }
 
-            locationSettingsResponse.addOnFailureListener { exception ->
+            locationSettingsResponse.addOnFailureListener { _ ->
                 errormsg("Failed to get location access")
                 // We always show the toast regardless of what type of exception we receive.  Because even non
                 // resolvable api exceptions mean user still needs to fix something.
