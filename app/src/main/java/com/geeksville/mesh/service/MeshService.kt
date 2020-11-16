@@ -1334,7 +1334,7 @@ class MeshService : Service(), Logging {
         return 0 // We don't have mynodeinfo yet, so just let the radio eventually assign an ID
     }
 
-    var firmwareUpdateFilename: String? = null
+    var firmwareUpdateFilename: UpdateFilenames? = null
 
     /***
      * Return the filename we will install on the device
