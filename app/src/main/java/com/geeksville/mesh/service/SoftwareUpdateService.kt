@@ -349,7 +349,11 @@ class SoftwareUpdateService : JobIntentService(), Logging {
 
                     // Send all the blocks
                     while (firmwareNumSent < firmwareSize) {
-                        progress = firmwareNumSent * 100 / firmwareSize
+                        // If we are doing the spiffs partition, we limit progress to a max of 50%, so that the user doesn't think we are done
+                        // yet
+                        val maxProgress = if(flashRegion != FLASH_REGION_APPLOAD)
+                            50 else 100
+                        progress = firmwareNumSent * maxProgress / firmwareSize
                         debug("sending block ${progress}%")
                         var blockSize = 512 - 3 // Max size MTU excluding framing
 

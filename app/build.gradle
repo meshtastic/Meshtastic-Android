@@ -25,13 +25,13 @@ android {
         }
     } */
     compileSdkVersion 29
-    buildToolsVersion "30.0.1" // Note: 30.0.0.2 doesn't yet work on Github actions CI
+    buildToolsVersion "30.0.2" // Note: 30.0.0.2 doesn't yet work on Github actions CI
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 20108 // format is Mmmss (where M is 1+the numeric major number
-        versionName "1.1.8"
+        versionCode 20109 // format is Mmmss (where M is 1+the numeric major number
+        versionName "1.1.9"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
