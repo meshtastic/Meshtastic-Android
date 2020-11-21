@@ -1458,6 +1458,11 @@ class MeshService : Service(), Logging {
                 // Keep a record of datapackets, so GUIs can show proper chat history
                 rememberDataPacket(p)
 
+                if(p.bytes.size >= MeshProtos.Constants.DATA_PAYLOAD_LEN.number) {
+                    p.status = MessageStatus.ERROR
+                    throw RemoteException("Message too long")
+                }
+
                 if (p.id != 0) { // If we have an ID we can wait for an ack or nak
                     deleteOldPackets()
                     sentPackets[p.id] = p
