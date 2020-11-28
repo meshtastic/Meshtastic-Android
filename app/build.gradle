@@ -147,7 +147,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
     // For now I'm not using javalite, because I want JSON printing
-    implementation ('com.google.protobuf:protobuf-java:3.13.0')
+    implementation ('com.google.protobuf:protobuf-java:3.14.0')
 
     // For UART access
     // implementation 'com.google.android.things:androidthings:1.0'
@@ -177,7 +177,7 @@ dependencies {
     // barcode support
     // per https://github.com/journeyapps/zxing-android-embedded for support of android version 22
     implementation('com.journeyapps:zxing-android-embedded:4.1.0') { transitive = false }
-    implementation 'com.google.zxing:core:3.4.0'
+    implementation 'com.google.zxing:core:3.4.1'
 
     def work_version = '2.4.0'
 
