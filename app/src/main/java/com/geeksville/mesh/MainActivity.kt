@@ -324,14 +324,14 @@ class MainActivity : AppCompatActivity(), Logging,
                 DataPacket(
                     "+16508675310",
                     testPayload,
-                    MeshProtos.Data.Type.OPAQUE_VALUE
+                    Portnums.PortNum.PRIVATE_APP_VALUE
                 )
             )
             m.send(
                 DataPacket(
                     "+16508675310",
                     testPayload,
-                    MeshProtos.Data.Type.CLEAR_TEXT_VALUE
+                    Portnums.PortNum.TEXT_MESSAGE_APP_VALUE
                 )
             )
         }
@@ -707,7 +707,7 @@ class MainActivity : AppCompatActivity(), Logging,
                             intent.getParcelableExtra<DataPacket>(EXTRA_PAYLOAD)!!
 
                         when (payload.dataType) {
-                            MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
+                            Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
                                 model.messagesState.addMessage(payload)
                             }
                             else ->

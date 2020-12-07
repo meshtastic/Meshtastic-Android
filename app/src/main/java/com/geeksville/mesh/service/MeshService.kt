@@ -547,7 +547,7 @@ class MeshService : Service(), Logging {
                         to = toId,
                         time = rxTime * 1000L,
                         id = packet.id,
-                        dataType = data.typValue,
+                        dataType = data.portnumValue,
                         bytes = bytes
                     )
                 }
@@ -558,7 +558,7 @@ class MeshService : Service(), Logging {
     private fun toMeshPacket(p: DataPacket): MeshPacket {
         return buildMeshPacket(p.to!!, id = p.id, wantAck = true) {
             data = MeshProtos.Data.newBuilder().also {
-                it.typ = MeshProtos.Data.Type.forNumber(p.dataType)
+                it.portnumValue = p.dataType
                 it.payload = ByteString.copyFrom(p.bytes)
             }.build()
         }
@@ -596,25 +596,33 @@ class MeshService : Service(), Logging {
                     dataPacket.status = MessageStatus.RECEIVED
                     rememberDataPacket(dataPacket)
 
-                    when (data.typValue) {
-                        MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
+                    when (data.portnumValue) {
+                        Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
                             debug("Received CLEAR_TEXT from $fromId")
 
                             recentReceivedTextPacket = dataPacket
                             updateNotification()
-                            serviceBroadcasts.broadcastReceivedData(dataPacket)
                         }
 
-                        MeshProtos.Data.Type.CLEAR_READACK_VALUE ->
-                            warn(
-                                "TODO ignoring CLEAR_READACK from $fromId"
-                            )
+                        // Handle new style position info
+                        Portnums.PortNum.POSITION_APP_VALUE -> {
+                            val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
+                            val u = MeshProtos.Position.parseFrom(data.payload)
+                            handleReceivedPosition(packet.from, u, rxTime)
+                        }
 
-                        MeshProtos.Data.Type.OPAQUE_VALUE ->
-                            serviceBroadcasts.broadcastReceivedData(dataPacket)
+                        // Handle new style user info
+                        Portnums.PortNum.NODEINFO_APP_VALUE -> {
+                            val u = MeshProtos.User.parseFrom(data.payload)
+                            handleReceivedUser(packet.from, u)
+                        }
 
-                        else -> TODO()
-                    }
+                        else -> {
+                            debug("Received other data packet")
+                    }}
+
+                    // We always tell other apps when new data packets arrive
+                    serviceBroadcasts.broadcastReceivedData(dataPacket)
 
                     GeeksvilleApplication.analytics.track(
                         "num_data_receive",
@@ -624,7 +632,7 @@ class MeshService : Service(), Logging {
                     GeeksvilleApplication.analytics.track(
                         "data_receive",
                         DataPair("num_bytes", bytes.size),
-                        DataPair("type", data.typValue)
+                        DataPair("type", data.portnumValue)
                     )
                 }
             }

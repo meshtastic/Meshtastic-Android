@@ -22,7 +22,7 @@ enum class MessageStatus : Parcelable {
 data class DataPacket(
     var to: String? = ID_BROADCAST, // a nodeID string, or ID_BROADCAST for broadcast
     val bytes: ByteArray?,
-    val dataType: Int, // A value such as MeshProtos.Data.Type.OPAQUE_VALUE
+    val dataType: Int, // A port number for this packet (formerly called DataType, see portnums.proto for new usage instructions)
     var from: String? = ID_LOCAL, // a nodeID string, or ID_LOCAL for localhost
     var time: Long = System.currentTimeMillis(), // msecs since 1970
     var id: Int = 0, // 0 means unassigned
@@ -39,14 +39,14 @@ data class DataPacket(
      */
     constructor(to: String? = ID_BROADCAST, text: String) : this(
         to, text.toByteArray(utf8),
-        MeshProtos.Data.Type.CLEAR_TEXT_VALUE
+        Portnums.PortNum.TEXT_MESSAGE_APP_VALUE
     )
 
     /**
      * If this is a text message, return the string, otherwise null
      */
     val text: String?
-        get() = if (dataType == MeshProtos.Data.Type.CLEAR_TEXT_VALUE)
+        get() = if (dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
             bytes?.toString(utf8)
         else
             null
