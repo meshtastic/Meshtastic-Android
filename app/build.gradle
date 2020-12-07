@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.github.triplet.play'
@@ -59,6 +59,8 @@ android {
     buildFeatures {
         // Enables Jetpack Compose for this module
         // compose true // NOTE, if true main app crashes if you use regular view layout functions
+
+        viewBinding true
     }
 
     // Set both the Java and Kotlin compilers to target Java 8.
@@ -83,10 +85,6 @@ play {
     track = 'internal'
     defaultToAppBundles = true
     serviceAccountCredentials = file("../../play-credentials.json")
-}
-
-androidExtensions {
-    experimental = true
 }
 
 // per protobuf-gradle-plugin docs, this is recommended for android

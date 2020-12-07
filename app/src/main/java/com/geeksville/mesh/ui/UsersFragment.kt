@@ -14,22 +14,26 @@ import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.android.Logging
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
+import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
+import com.geeksville.mesh.databinding.NodelistFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
-import kotlinx.android.synthetic.main.adapter_node_layout.view.*
-import kotlinx.android.synthetic.main.nodelist_fragment.*
 import java.text.ParseException
 import java.util.*
 
 
 class UsersFragment : ScreenFragment("Users"), Logging {
 
+    private var _binding: NodelistFragmentBinding? = null
+    // This property is only valid between onCreateView and onDestroyView.
+    private val binding get() = _binding!!
+
     private val model: UIViewModel by activityViewModels()
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ViewHolder(itemView: AdapterNodeLayoutBinding) : RecyclerView.ViewHolder(itemView.root) {
         val nodeNameView = itemView.nodeNameView
-        val distance_view = itemView.distance_view
+        val distanceView = itemView.distanceView
         val batteryPctView = itemView.batteryPercentageView
         val lastTime = itemView.lastConnectionView
         val powerIcon = itemView.batteryIcon
@@ -64,9 +68,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             val inflater = LayoutInflater.from(requireContext())
 
             // Inflate the custom layout
-
-            // Inflate the custom layout
-            val contactView: View = inflater.inflate(R.layout.adapter_node_layout, parent, false)
+            val contactView = AdapterNodeLayoutBinding.inflate(inflater, parent, false)
 
             // Return a new holder instance
             return ViewHolder(contactView)
@@ -108,10 +110,10 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             val ourNodeInfo = model.nodeDB.ourNodeInfo
             val distance = ourNodeInfo?.distanceStr(n)
             if (distance != null) {
-                holder.distance_view.text = distance
-                holder.distance_view.visibility = View.VISIBLE
+                holder.distanceView.text = distance
+                holder.distanceView.visibility = View.VISIBLE
             } else {
-                holder.distance_view.visibility = View.INVISIBLE
+                holder.distanceView.visibility = View.INVISIBLE
             }
 
             renderBattery(n.batteryPctLevel, holder)
@@ -176,14 +178,15 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.nodelist_fragment, container, false)
+        _binding = NodelistFragmentBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        nodeListView.adapter = nodesAdapter
-        nodeListView.layoutManager = LinearLayoutManager(requireContext())
+        binding.nodeListView.adapter = nodesAdapter
+        binding.nodeListView.layoutManager = LinearLayoutManager(requireContext())
 
         model.nodeDB.nodes.observe(viewLifecycleOwner, Observer { it ->
             nodesAdapter.onNodesChanged(it.values)

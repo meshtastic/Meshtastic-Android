@@ -18,6 +18,7 @@ import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
+import com.geeksville.mesh.databinding.ChannelFragmentBinding
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
@@ -25,7 +26,6 @@ import com.geeksville.mesh.service.MeshService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.protobuf.ByteString
-import kotlinx.android.synthetic.main.channel_fragment.*
 import java.security.SecureRandom
 
 
@@ -46,26 +46,31 @@ fun ImageView.setOpaque() {
 
 class ChannelFragment : ScreenFragment("Channel"), Logging {
 
+    private var _binding: ChannelFragmentBinding? = null
+    // This property is only valid between onCreateView and onDestroyView.
+    private val binding get() = _binding!!
+
     private val model: UIViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.channel_fragment, container, false)
+        _binding = ChannelFragmentBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     /// Called when the lock/unlock icon has changed
     private fun onEditingChanged() {
-        val isEditing = editableCheckbox.isChecked
+        val isEditing = binding.editableCheckbox.isChecked
 
-        channelOptions.isEnabled = isEditing
-        shareButton.isEnabled = !isEditing
-        channelNameView.isEnabled = isEditing
+        binding.channelOptions.isEnabled = isEditing
+        binding.shareButton.isEnabled = !isEditing
+        binding.channelNameView.isEnabled = isEditing
         if (isEditing) // Dim the (stale) QR code while editing...
-            qrView.setDim()
+            binding.qrView.setDim()
         else
-            qrView.setOpaque()
+            binding.qrView.setOpaque()
     }
 
     /// Pull the latest data from the model (discarding any user edits)
@@ -73,31 +78,31 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         val radioConfig = model.radioConfig.value
         val channel = UIViewModel.getChannel(radioConfig)
 
-        editableCheckbox.isChecked = false // start locked
+        binding.editableCheckbox.isChecked = false // start locked
         if (channel != null) {
-            qrView.visibility = View.VISIBLE
-            channelNameEdit.visibility = View.VISIBLE
-            channelNameEdit.setText(channel.humanName)
+            binding.qrView.visibility = View.VISIBLE
+            binding.channelNameEdit.visibility = View.VISIBLE
+            binding.channelNameEdit.setText(channel.humanName)
 
             // For now, we only let the user edit/save channels while the radio is awake - because the service
             // doesn't cache radioconfig writes.
             val connected = model.isConnected.value == MeshService.ConnectionState.CONNECTED
-            editableCheckbox.isEnabled = connected
+            binding.editableCheckbox.isEnabled = connected
 
-            qrView.setImageBitmap(channel.getChannelQR())
+            binding.qrView.setImageBitmap(channel.getChannelQR())
 
             val modemConfig = radioConfig?.channelSettings?.modemConfig
             val channelOption = ChannelOption.fromConfig(modemConfig)
-            filled_exposed_dropdown.setText(
+            binding.filledExposedDropdown.setText(
                 getString(
                     channelOption?.configRes ?: R.string.modem_config_unrecognized
                 ), false
             )
 
         } else {
-            qrView.visibility = View.INVISIBLE
-            channelNameEdit.visibility = View.INVISIBLE
-            editableCheckbox.isEnabled = false
+            binding.qrView.visibility = View.INVISIBLE
+            binding.channelNameEdit.visibility = View.INVISIBLE
+            binding.editableCheckbox.isEnabled = false
         }
 
         onEditingChanged() // we just locked the gui
@@ -109,7 +114,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             modemConfigList
         )
 
-        filled_exposed_dropdown.setAdapter(adapter)
+        binding.filledExposedDropdown.setAdapter(adapter)
     }
 
     private fun shareChannel() {
@@ -138,17 +143,17 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        channelNameEdit.on(EditorInfo.IME_ACTION_DONE) {
+        binding.channelNameEdit.on(EditorInfo.IME_ACTION_DONE) {
             requireActivity().hideKeyboard()
         }
 
         // Note: Do not use setOnCheckedChanged here because we don't want to be called when we programmatically disable editing
-        editableCheckbox.setOnClickListener { _ ->
-            val checked = editableCheckbox.isChecked
+        binding.editableCheckbox.setOnClickListener { _ ->
+            val checked = binding.editableCheckbox.isChecked
             if (checked) {
                 // User just unlocked for editing - remove the # goo around the channel name
                 UIViewModel.getChannel(model.radioConfig.value)?.let { channel ->
-                    channelNameEdit.setText(channel.name)
+                    binding.channelNameEdit.setText(channel.name)
                 }
             } else {
                 // User just locked it, we should warn and then apply changes to radio
@@ -162,7 +167,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                         // Generate a new channel with only the changes the user can change in the GUI
                         UIViewModel.getChannel(model.radioConfig.value)?.let { old ->
                             val newSettings = old.settings.toBuilder()
-                            newSettings.name = channelNameEdit.text.toString().trim()
+                            newSettings.name = binding.channelNameEdit.text.toString().trim()
 
                             // Generate a new AES256 key (for any channel not named Default)
                             if (!newSettings.name.equals(
@@ -183,7 +188,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                             }
 
                             val selectedChannelOptionString =
-                                filled_exposed_dropdown.editableText.toString()
+                                binding.filledExposedDropdown.editableText.toString()
                             val modemConfig = getModemConfig(selectedChannelOptionString)
 
                             if (modemConfig != MeshProtos.ChannelSettings.ModemConfig.UNRECOGNIZED)
@@ -199,7 +204,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
                                 // Tell the user to try again
                                 Snackbar.make(
-                                    editableCheckbox,
+                                    binding.editableCheckbox,
                                     R.string.radio_sleeping,
                                     Snackbar.LENGTH_SHORT
                                 ).show()
@@ -213,7 +218,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
 
         // Share this particular channel if someone clicks share
-        shareButton.setOnClickListener {
+        binding.shareButton.setOnClickListener {
             shareChannel()
         }
 

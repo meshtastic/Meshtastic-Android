@@ -591,7 +591,7 @@ class MeshService : Service(), Logging {
                 if (myInfo.myNodeNum == packet.from)
                     debug("Ignoring retransmission of our packet ${bytes.size}")
                 else {
-                    debug("Received data from $fromId ${bytes.size}")
+                    debug("Received data from $fromId, portnum=${data.portnumValue} ${bytes.size} bytes")
 
                     dataPacket.status = MessageStatus.RECEIVED
                     rememberDataPacket(dataPacket)
@@ -616,10 +616,7 @@ class MeshService : Service(), Logging {
                             val u = MeshProtos.User.parseFrom(data.payload)
                             handleReceivedUser(packet.from, u)
                         }
-
-                        else -> {
-                            debug("Received other data packet")
-                    }}
+                    }
 
                     // We always tell other apps when new data packets arrive
                     serviceBroadcasts.broadcastReceivedData(dataPacket)
@@ -1466,7 +1463,7 @@ class MeshService : Service(), Logging {
                 // Keep a record of datapackets, so GUIs can show proper chat history
                 rememberDataPacket(p)
 
-                if(p.bytes.size >= MeshProtos.Constants.DATA_PAYLOAD_LEN.number) {
+                if (p.bytes.size >= MeshProtos.Constants.DATA_PAYLOAD_LEN.number) {
                     p.status = MessageStatus.ERROR
                     throw RemoteException("Message too long")
                 }

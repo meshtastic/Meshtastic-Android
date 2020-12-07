@@ -10,10 +10,14 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.R
+import com.geeksville.mesh.databinding.DebugFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
-import kotlinx.android.synthetic.main.debug_fragment.*
 
 class DebugFragment : Fragment() {
+
+    private var _binding: DebugFragmentBinding? = null
+    // This property is only valid between onCreateView and onDestroyView.
+    private val binding get() = _binding!!
 
     val model: UIViewModel by viewModels()
 
@@ -21,8 +25,8 @@ class DebugFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-        return inflater.inflate(R.layout.debug_fragment, container, false)
+        _binding = DebugFragmentBinding.inflate(inflater, container, false)
+        return binding.root
     }
     //Button to clear All log
 
@@ -36,11 +40,11 @@ class DebugFragment : Fragment() {
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        clearButton.setOnClickListener {
+        binding.clearButton.setOnClickListener {
             model.deleteAllPacket()
         }
 
-        closeButton.setOnClickListener{
+        binding.closeButton.setOnClickListener{
             parentFragmentManager.popBackStack();
         }
         model.allPackets.observe(viewLifecycleOwner, Observer {
