@@ -38,7 +38,7 @@ class SimRadio(private val context: Context) {
             }.build().toByteArray()
         ) */
 
-        simInitPackets.forEach { json ->
+        simInitPackets.forEach { _ ->
             val fromRadio = MeshProtos.FromRadio.newBuilder().apply {
                 packet = MeshProtos.MeshPacket.newBuilder().apply {
                     // jsonParser.merge(json, this)

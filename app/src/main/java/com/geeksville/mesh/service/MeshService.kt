@@ -91,6 +91,9 @@ class MeshService : Service(), Logging {
     private var packetRepo: PacketRepository? = null
     private var fusedLocationClient: FusedLocationProviderClient? = null
 
+    // If we've ever read a valid region code from our device it will be here
+    var curRegionValue = MeshProtos.RegionCode.Unset_VALUE
+
     val radio = ServiceClient {
         IRadioInterfaceService.Stub.asInterface(it).apply {
             // Now that we are connected to the radio service, tell it to connect to the radio
@@ -418,6 +421,8 @@ class MeshService : Service(), Logging {
     /// END OF MODEL
     ///
 
+    val deviceVersion get() = DeviceVersion(myNodeInfo?.firmwareVersion ?: "")
+
     /// Map a nodenum to a node, or throw an exception if not found
     private fun toNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: throw NodeNumNotFoundException(
         n
@@ -547,7 +552,7 @@ class MeshService : Service(), Logging {
                         to = toId,
                         time = rxTime * 1000L,
                         id = packet.id,
-                        dataType = data.typValue,
+                        dataType = data.portnumValue,
                         bytes = bytes
                     )
                 }
@@ -555,12 +560,15 @@ class MeshService : Service(), Logging {
         }
     }
 
+    /// Syntactic sugar to create data subpackets
+    private fun makeData(portNum: Int, bytes: ByteString) = MeshProtos.Data.newBuilder().also {
+        it.portnumValue = portNum
+        it.payload = bytes
+    }.build()
+
     private fun toMeshPacket(p: DataPacket): MeshPacket {
         return buildMeshPacket(p.to!!, id = p.id, wantAck = true) {
-            data = MeshProtos.Data.newBuilder().also {
-                it.typ = MeshProtos.Data.Type.forNumber(p.dataType)
-                it.payload = ByteString.copyFrom(p.bytes)
-            }.build()
+            data = makeData(p.dataType, ByteString.copyFrom(p.bytes))
         }
     }
 
@@ -591,30 +599,35 @@ class MeshService : Service(), Logging {
                 if (myInfo.myNodeNum == packet.from)
                     debug("Ignoring retransmission of our packet ${bytes.size}")
                 else {
-                    debug("Received data from $fromId ${bytes.size}")
+                    debug("Received data from $fromId, portnum=${data.portnumValue} ${bytes.size} bytes")
 
                     dataPacket.status = MessageStatus.RECEIVED
                     rememberDataPacket(dataPacket)
 
-                    when (data.typValue) {
-                        MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
+                    when (data.portnumValue) {
+                        Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
                             debug("Received CLEAR_TEXT from $fromId")
 
                             recentReceivedTextPacket = dataPacket
                             updateNotification()
-                            serviceBroadcasts.broadcastReceivedData(dataPacket)
                         }
 
-                        MeshProtos.Data.Type.CLEAR_READACK_VALUE ->
-                            warn(
-                                "TODO ignoring CLEAR_READACK from $fromId"
-                            )
+                        // Handle new style position info
+                        Portnums.PortNum.POSITION_APP_VALUE -> {
+                            val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
+                            val u = MeshProtos.Position.parseFrom(data.payload)
+                            handleReceivedPosition(packet.from, u, rxTime)
+                        }
 
-                        MeshProtos.Data.Type.OPAQUE_VALUE ->
-                            serviceBroadcasts.broadcastReceivedData(dataPacket)
-
-                        else -> TODO()
+                        // Handle new style user info
+                        Portnums.PortNum.NODEINFO_APP_VALUE -> {
+                            val u = MeshProtos.User.parseFrom(data.payload)
+                            handleReceivedUser(packet.from, u)
+                        }
                     }
+
+                    // We always tell other apps when new data packets arrive
+                    serviceBroadcasts.broadcastReceivedData(dataPacket)
 
                     GeeksvilleApplication.analytics.track(
                         "num_data_receive",
@@ -624,7 +637,7 @@ class MeshService : Service(), Logging {
                     GeeksvilleApplication.analytics.track(
                         "data_receive",
                         DataPair("num_bytes", bytes.size),
-                        DataPair("type", data.typValue)
+                        DataPair("type", data.portnumValue)
                     )
                 }
             }
@@ -1061,7 +1074,10 @@ class MeshService : Service(), Logging {
                 hwModel,
                 firmwareVersion,
                 firmwareUpdateFilename != null,
-                SoftwareUpdateService.shouldUpdate(this@MeshService, firmwareVersion),
+                SoftwareUpdateService.shouldUpdate(
+                    this@MeshService,
+                    DeviceVersion(firmwareVersion)
+                ),
                 currentPacketId.toLong() and 0xffffffffL,
                 if (nodeNumBits == 0) 8 else nodeNumBits,
                 if (packetIdBits == 0) 8 else packetIdBits,
@@ -1095,8 +1111,7 @@ class MeshService : Service(), Logging {
         }
     }
 
-    // If we've ever read a valid region code from our device it will be here
-    var curRegionValue = MeshProtos.RegionCode.Unset_VALUE
+
 
     /**
      * If we are updating nodes we might need to use old (fixed by firmware build)
@@ -1222,7 +1237,14 @@ class MeshService : Service(), Logging {
         val packet = newMeshPacketTo(destNum)
 
         packet.decoded = MeshProtos.SubPacket.newBuilder().also {
-            it.position = position
+            val isNewPositionAPI = deviceVersion >= DeviceVersion("1.20.0") // We changed position APIs with this version
+            if (isNewPositionAPI) {
+                // Use the new position as data format
+                it.data = makeData(Portnums.PortNum.POSITION_APP_VALUE, position.toByteString())
+            } else {
+                // Send the old dedicated position subpacket
+                it.position = position
+            }
             it.wantResponse = wantResponse
         }.build()
 
@@ -1334,7 +1356,7 @@ class MeshService : Service(), Logging {
         return 0 // We don't have mynodeinfo yet, so just let the radio eventually assign an ID
     }
 
-    var firmwareUpdateFilename: String? = null
+    var firmwareUpdateFilename: UpdateFilenames? = null
 
     /***
      * Return the filename we will install on the device
@@ -1457,6 +1479,11 @@ class MeshService : Service(), Logging {
 
                 // Keep a record of datapackets, so GUIs can show proper chat history
                 rememberDataPacket(p)
+
+                if (p.bytes.size >= MeshProtos.Constants.DATA_PAYLOAD_LEN.number) {
+                    p.status = MessageStatus.ERROR
+                    throw RemoteException("Message too long")
+                }
 
                 if (p.id != 0) { // If we have an ID we can wait for an ack or nak
                     deleteOldPackets()

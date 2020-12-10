@@ -489,6 +489,6 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
      * Get a chracteristic, but in a safe manner because some buggy BLE implementations might return null
      */
     private fun getCharacteristic(uuid: UUID) =
-        bservice.getCharacteristic(uuid) ?: throw BLEException("Can't get characteristic $uuid")
+        bservice.getCharacteristic(uuid) ?: throw BLECharacteristicNotFoundException(uuid)
 
 }

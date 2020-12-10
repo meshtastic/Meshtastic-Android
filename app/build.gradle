@@ -1,6 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.github.triplet.play'
@@ -25,13 +25,13 @@ android {
         }
     } */
     compileSdkVersion 29
-    buildToolsVersion "30.0.1" // Note: 30.0.0.2 doesn't yet work on Github actions CI
+    buildToolsVersion "30.0.2" // Note: 30.0.0.2 doesn't yet work on Github actions CI
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 20108 // format is Mmmss (where M is 1+the numeric major number
-        versionName "1.1.8"
+        versionCode 20120 // format is Mmmss (where M is 1+the numeric major number
+        versionName "1.1.20"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -59,6 +59,8 @@ android {
     buildFeatures {
         // Enables Jetpack Compose for this module
         // compose true // NOTE, if true main app crashes if you use regular view layout functions
+
+        viewBinding true
     }
 
     // Set both the Java and Kotlin compilers to target Java 8.
@@ -83,10 +85,6 @@ play {
     track = 'internal'
     defaultToAppBundles = true
     serviceAccountCredentials = file("../../play-credentials.json")
-}
-
-androidExtensions {
-    experimental = true
 }
 
 // per protobuf-gradle-plugin docs, this is recommended for android
@@ -147,7 +145,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
     // For now I'm not using javalite, because I want JSON printing
-    implementation ('com.google.protobuf:protobuf-java:3.13.0')
+    implementation ('com.google.protobuf:protobuf-java:3.14.0')
 
     // For UART access
     // implementation 'com.google.android.things:androidthings:1.0'
@@ -166,7 +164,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
 
     // Add the Firebase SDK for Crashlytics.
-    implementation 'com.google.firebase:firebase-crashlytics:17.2.2'
+    implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
 
     // alas implementation bug deep in the bowels when I tried it for my SyncBluetoothDevice class
     // implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.3"
@@ -177,7 +175,7 @@ dependencies {
     // barcode support
     // per https://github.com/journeyapps/zxing-android-embedded for support of android version 22
     implementation('com.journeyapps:zxing-android-embedded:4.1.0') { transitive = false }
-    implementation 'com.google.zxing:core:3.4.0'
+    implementation 'com.google.zxing:core:3.4.1'
 
     def work_version = '2.4.0'
 

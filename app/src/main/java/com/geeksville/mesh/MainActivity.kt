@@ -38,6 +38,7 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
 import com.geeksville.concurrent.handledLaunch
+import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.*
@@ -54,7 +55,6 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.google.protobuf.InvalidProtocolBufferException
 import com.vorlonsoft.android.rate.AppRate
 import com.vorlonsoft.android.rate.StoreType
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -123,6 +123,8 @@ class MainActivity : AppCompatActivity(), Logging,
         const val RC_SELECT_DEVICE =
             13 // seems to be hardwired in CompanionDeviceManager to add 65536
     }
+
+    private lateinit var binding: ActivityMainBinding
 
     // Used to schedule a coroutine in the GUI thread
     private val mainScope = CoroutineScope(Dispatchers.Main + Job())
@@ -324,14 +326,14 @@ class MainActivity : AppCompatActivity(), Logging,
                 DataPacket(
                     "+16508675310",
                     testPayload,
-                    MeshProtos.Data.Type.OPAQUE_VALUE
+                    Portnums.PortNum.PRIVATE_APP_VALUE
                 )
             )
             m.send(
                 DataPacket(
                     "+16508675310",
                     testPayload,
-                    MeshProtos.Data.Type.CLEAR_TEXT_VALUE
+                    Portnums.PortNum.TEXT_MESSAGE_APP_VALUE
                 )
             )
         }
@@ -366,6 +368,8 @@ class MainActivity : AppCompatActivity(), Logging,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        binding = ActivityMainBinding.inflate(layoutInflater)
+
         val prefs = UIViewModel.getPreferences(this)
         model.ownerName.value = prefs.getString("owner", "")!!
 
@@ -396,15 +400,15 @@ class MainActivity : AppCompatActivity(), Logging,
         /* setContent {
             MeshApp()
         } */
-        setContentView(R.layout.activity_main)
+        setContentView(binding.root)
 
         initToolbar()
 
-        pager.adapter = tabsAdapter
-        pager.isUserInputEnabled =
+        binding.pager.adapter = tabsAdapter
+        binding.pager.isUserInputEnabled =
             false // Gestures for screen switching doesn't work so good with the map view
         // pager.offscreenPageLimit = 0 // Don't keep any offscreen pages around, because we want to make sure our bluetooth scanning stops
-        TabLayoutMediator(tab_layout, pager) { tab, position ->
+        TabLayoutMediator(binding.tabLayout, binding.pager) { tab, position ->
             // tab.text = tabInfos[position].text // I think it looks better with icons only
             tab.icon = getDrawable(tabInfos[position].icon)
         }.attach()
@@ -707,7 +711,7 @@ class MainActivity : AppCompatActivity(), Logging,
                             intent.getParcelableExtra<DataPacket>(EXTRA_PAYLOAD)!!
 
                         when (payload.dataType) {
-                            MeshProtos.Data.Type.CLEAR_TEXT_VALUE -> {
+                            Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
                                 model.messagesState.addMessage(payload)
                             }
                             else ->
@@ -893,7 +897,7 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
     private fun showSettingsPage() {
-        pager.currentItem = 5
+        binding.pager.currentItem = 5
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

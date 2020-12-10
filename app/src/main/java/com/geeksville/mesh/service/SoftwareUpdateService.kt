@@ -18,7 +18,12 @@ import java.util.zip.CRC32
  */
 fun toNetworkByteArray(value: Int, formatType: Int): ByteArray {
 
-    val len: Int = 4 // getTypeLen(formatType)
+    val len = when (formatType) {
+        BluetoothGattCharacteristic.FORMAT_UINT8 -> 1
+        BluetoothGattCharacteristic.FORMAT_UINT32 -> 4
+        else -> TODO()
+    }
+
     val mValue = ByteArray(len)
 
     when (formatType) {
@@ -44,6 +49,9 @@ fun toNetworkByteArray(value: Int, formatType: Int): ByteArray {
             mValue.get(offset++) = (value shr 16 and 0xFF).toByte()
             mValue.get(offset) = (value shr 24 and 0xFF).toByte()
         } */
+        BluetoothGattCharacteristic.FORMAT_UINT8 ->
+            mValue[0] = (value and 0xFF).toByte()
+
         BluetoothGattCharacteristic.FORMAT_UINT32 -> {
             mValue[0] = (value and 0xFF).toByte()
             mValue[1] = (value shr 8 and 0xFF).toByte()
@@ -54,6 +62,9 @@ fun toNetworkByteArray(value: Int, formatType: Int): ByteArray {
     }
     return mValue
 }
+
+
+data class UpdateFilenames(val appLoad: String?, val spiffs: String?)
 
 /**
  * typical flow
@@ -152,6 +163,8 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             UUID.fromString("4826129c-c22a-43a3-b066-ce8f0d5bacc6") //  write               crc32, write last - writing this will complete the OTA operation, now you can read result
         private val SW_UPDATE_RESULT_CHARACTER =
             UUID.fromString("5e134862-7411-4424-ac4a-210937432c77") // read|notify         result code, readable but will notify when the OTA operation completes
+        private val SW_UPDATE_REGION_CHARACTER =
+            UUID.fromString("5e134862-7411-4424-ac4a-210937432c67") // write - used to set the region we are setting (appload vs spiffs)
 
         private val SW_VERSION_CHARACTER = longBLEUUID("2a28")
         private val MANUFACTURE_CHARACTER = longBLEUUID("2a29")
@@ -173,20 +186,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             )
         }
 
-        /**
-         * Convert a version string of the form 1.23.57 to a comparable integer of
-         * the form 12357.
-         *
-         * Or throw an exception if the string can not be parsed
-         */
-        fun verStringToInt(s: String): Int {
-            // Allow 1 to two digits per match
-            val match =
-                Regex("(\\d{1,2}).(\\d{1,2}).(\\d{1,2})").find(s)
-                    ?: throw Exception("Can't parse version $s")
-            val (major, minor, build) = match.destructured
-            return major.toInt() * 1000 + minor.toInt() * 100 + build.toInt()
-        }
+
 
         /** Return true if we thing the firmwarte shoulde be updated
          *
@@ -194,15 +194,11 @@ class SoftwareUpdateService : JobIntentService(), Logging {
          */
         fun shouldUpdate(
             context: Context,
-            swVer: String
+            deviceVersion: DeviceVersion
         ): Boolean = try {
-            val curVer = verStringToInt(context.getString(R.string.cur_firmware_version))
+            val curVer = DeviceVersion(context.getString(R.string.cur_firmware_version))
             val minVer =
-                verStringToInt("0.7.8") // The oldest device version with a working software update service
-
-            // If the user is running a development build we never do an automatic update
-            val deviceVersion =
-                verStringToInt(if (swVer.isEmpty() || swVer == "unset") "99.99.99" else swVer)
+                DeviceVersion("0.7.8") // The oldest device version with a working software update service
 
             (curVer > deviceVersion) && (deviceVersion >= minVer)
         } catch (ex: Exception) {
@@ -210,28 +206,36 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             false // If we fail parsing our update info
         }
 
-        /** Return the filename this device needs to use as an update (or null if no update needed)
+        /** Return a Pair of apploadfilename, spiffs filename this device needs to use as an update (or null if no update needed)
          */
         fun getUpdateFilename(
             context: Context,
             mfg: String
-        ): String? {
-            val curver = context.getString(R.string.cur_firmware_version)
-
-            val base = "firmware-$mfg-$curver.bin"
+        ): UpdateFilenames {
+            val curVer = context.getString(R.string.cur_firmware_version)
 
             // Check to see if the file exists (some builds might not include update files for size reasons)
             val firmwareFiles = context.assets.list("firmware") ?: arrayOf()
-            return if (firmwareFiles.contains(base))
-                "firmware/$base"
-            else
-                null
+
+            val appLoad = "firmware-$mfg-$curVer.bin"
+            val spiffs = "spiffs-$curVer.bin"
+
+            return UpdateFilenames(
+                if (firmwareFiles.contains(appLoad))
+                    "firmware/$appLoad"
+                else
+                    null,
+                if (firmwareFiles.contains(spiffs))
+                    "firmware/$spiffs"
+                else
+                    null
+            )
         }
 
         /** Return the filename this device needs to use as an update (or null if no update needed)
          * No longer used, because we get update info inband from our radio API
          */
-        fun getUpdateFilename(context: Context, sync: SafeBluetooth): String? {
+        fun getUpdateFilename(context: Context, sync: SafeBluetooth): UpdateFilenames? {
             val service = sync.gatt!!.services.find { it.uuid == SW_UPDATE_UUID }!!
 
             //val hwVerDesc = service.getCharacteristic(HW_VERSION_CHARACTER)
@@ -248,19 +252,66 @@ class SoftwareUpdateService : JobIntentService(), Logging {
          * A public function so that if you have your own SafeBluetooth connection already open
          * you can use it for the software update.
          */
-        fun doUpdate(context: Context, sync: SafeBluetooth, assetName: String) {
+        fun doUpdate(context: Context, sync: SafeBluetooth, assets: UpdateFilenames) {
+            // we must attempt spiffs first, because if we update the appload the device will reboot afterwards
+            try {
+                assets.spiffs?.let { doUpdate(context, sync, it, FLASH_REGION_SPIFFS) }
+            }
+            catch(_: BLECharacteristicNotFoundException) {
+                // If we can't update spiffs (because not supported by target), do not fail
+                errormsg("Ignoring failure to update spiffs on old appload")
+            }
+            assets.appLoad?.let { doUpdate(context, sync, it, FLASH_REGION_APPLOAD) }
+            progress = -1 // success
+        }
+
+        // writable region codes in the ESP32 update code
+        private val FLASH_REGION_APPLOAD = 0
+        private val FLASH_REGION_SPIFFS = 100
+
+        /**
+         * A public function so that if you have your own SafeBluetooth connection already open
+         * you can use it for the software update.
+         */
+        private fun doUpdate(context: Context, sync: SafeBluetooth, assetName: String, flashRegion: Int = FLASH_REGION_APPLOAD) {
             try {
                 val g = sync.gatt!!
                 val service = g.services.find { it.uuid == SW_UPDATE_UUID }
                     ?: throw BLEException("Couldn't find update service")
 
-                info("Starting firmware update for $assetName")
+                /**
+                 * Get a chracteristic, but in a safe manner because some buggy BLE implementations might return null
+                 */
+                fun getCharacteristic(uuid: UUID) =
+                    service.getCharacteristic(uuid)
+                        ?: throw BLECharacteristicNotFoundException(uuid)
+
+                info("Starting firmware update for $assetName, flash region $flashRegion")
 
                 progress = 0
-                val totalSizeDesc = service.getCharacteristic(SW_UPDATE_TOTALSIZE_CHARACTER)
-                val dataDesc = service.getCharacteristic(SW_UPDATE_DATA_CHARACTER)
-                val crc32Desc = service.getCharacteristic(SW_UPDATE_CRC32_CHARACTER)
-                val updateResultDesc = service.getCharacteristic(SW_UPDATE_RESULT_CHARACTER)
+                val totalSizeDesc = getCharacteristic(SW_UPDATE_TOTALSIZE_CHARACTER)
+                val dataDesc = getCharacteristic(SW_UPDATE_DATA_CHARACTER)
+                val crc32Desc = getCharacteristic(SW_UPDATE_CRC32_CHARACTER)
+                val updateResultDesc = getCharacteristic(SW_UPDATE_RESULT_CHARACTER)
+
+                /// Try to set the destination region for programming (spiffs vs appload etc)
+                /// Old apploads don't have this feature, but we only fail if the user was trying to set a
+                /// spiffs - otherwise we assume appload.
+                try {
+                    val updateRegionDesc = getCharacteristic(SW_UPDATE_REGION_CHARACTER)
+                    sync.writeCharacteristic(
+                        updateRegionDesc,
+                        toNetworkByteArray(flashRegion, BluetoothGattCharacteristic.FORMAT_UINT8)
+                    )
+                }
+                catch(ex: BLECharacteristicNotFoundException) {
+                    errormsg("Can't set flash programming region (old appload?")
+                    if(flashRegion != FLASH_REGION_APPLOAD) {
+                        errormsg("Can't set flash programming region (old appload?)")
+                        throw ex
+                    }
+                    warn("Ignoring setting appload flashRegion (old appload?")
+                }
 
                 context.assets.open(assetName).use { firmwareStream ->
                     val firmwareCrc = CRC32()
@@ -281,7 +332,11 @@ class SoftwareUpdateService : JobIntentService(), Logging {
 
                     // Send all the blocks
                     while (firmwareNumSent < firmwareSize) {
-                        progress = firmwareNumSent * 100 / firmwareSize
+                        // If we are doing the spiffs partition, we limit progress to a max of 50%, so that the user doesn't think we are done
+                        // yet
+                        val maxProgress = if(flashRegion != FLASH_REGION_APPLOAD)
+                            50 else 100
+                        progress = firmwareNumSent * maxProgress / firmwareSize
                         debug("sending block ${progress}%")
                         var blockSize = 512 - 3 // Max size MTU excluding framing
 
@@ -320,8 +375,6 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                         // We might get SyncContinuation timeout on the final write, assume the device simply rebooted to run the new load and we missed it
                         errormsg("Assuming successful update", ex)
                     }
-
-                    progress = -1 // success
                 }
             } catch (ex: BLEException) {
                 progress = -3

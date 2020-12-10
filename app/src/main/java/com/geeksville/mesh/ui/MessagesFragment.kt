@@ -16,11 +16,11 @@ import com.geeksville.android.Logging
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
+import com.geeksville.mesh.databinding.AdapterMessageLayoutBinding
+import com.geeksville.mesh.databinding.MessagesFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.google.android.material.chip.Chip
-import kotlinx.android.synthetic.main.adapter_message_layout.view.*
-import kotlinx.android.synthetic.main.messages_fragment.*
 import java.text.DateFormat
 import java.util.*
 
@@ -38,13 +38,17 @@ fun EditText.on(actionId: Int, func: () -> Unit) {
 
 class MessagesFragment : ScreenFragment("Messages"), Logging {
 
+    private var _binding: MessagesFragmentBinding? = null
+    // This property is only valid between onCreateView and onDestroyView.
+    private val binding get() = _binding!!
+
     private val model: UIViewModel by activityViewModels()
 
     private val dateTimeFormat: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ViewHolder(itemView: AdapterMessageLayoutBinding) : RecyclerView.ViewHolder(itemView.root) {
         val username: Chip = itemView.username
         val messageText: TextView = itemView.messageText
         val messageTime: TextView = itemView.messageTime
@@ -82,10 +86,10 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             // Inflate the custom layout
 
             // Inflate the custom layout
-            val contactView: View = inflater.inflate(R.layout.adapter_message_layout, parent, false)
+            val contactViewBinding = AdapterMessageLayoutBinding.inflate(inflater, parent, false)
 
             // Return a new holder instance
-            return ViewHolder(contactView)
+            return ViewHolder(contactViewBinding)
         }
 
         /**
@@ -159,7 +163,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
 
             // scroll to the last line
             if (itemCount != 0)
-                messageListView.scrollToPosition(itemCount - 1)
+                binding.messageListView.scrollToPosition(itemCount - 1)
         }
     }
 
@@ -167,27 +171,28 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.messages_fragment, container, false)
+        _binding = MessagesFragmentBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        messageInputText.on(EditorInfo.IME_ACTION_DONE) {
+        binding.messageInputText.on(EditorInfo.IME_ACTION_DONE) {
             debug("did IME action")
 
-            val str = messageInputText.text.toString().trim()
+            val str = binding.messageInputText.text.toString().trim()
             if (str.isNotEmpty())
                 model.messagesState.sendMessage(str)
-            messageInputText.setText("") // blow away the string the user just entered
+            binding.messageInputText.setText("") // blow away the string the user just entered
 
             // requireActivity().hideKeyboard()
         }
 
-        messageListView.adapter = messagesAdapter
+        binding.messageListView.adapter = messagesAdapter
         val layoutManager = LinearLayoutManager(requireContext())
         layoutManager.stackFromEnd = true // We want the last rows to always be shown
-        messageListView.layoutManager = layoutManager
+        binding.messageListView.layoutManager = layoutManager
 
         model.messagesState.messages.observe(viewLifecycleOwner, Observer {
             debug("New messages received: ${it.size}")
@@ -197,13 +202,13 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         // If connection state _OR_ myID changes we have to fix our ability to edit outgoing messages
         model.isConnected.observe(viewLifecycleOwner, Observer { connected ->
             // If we don't know our node ID and we are offline don't let user try to send
-            textInputLayout.isEnabled =
+            binding.textInputLayout.isEnabled =
                 connected != MeshService.ConnectionState.DISCONNECTED && model.nodeDB.myId.value != null
         })
 
         model.nodeDB.myId.observe(viewLifecycleOwner, Observer { myId ->
             // If we don't know our node ID and we are offline don't let user try to send
-            textInputLayout.isEnabled =
+            binding.textInputLayout.isEnabled =
                 model.isConnected.value != MeshService.ConnectionState.DISCONNECTED && myId != null
         })
     }
