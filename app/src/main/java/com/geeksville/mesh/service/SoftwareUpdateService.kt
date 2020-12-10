@@ -186,20 +186,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             )
         }
 
-        /**
-         * Convert a version string of the form 1.23.57 to a comparable integer of
-         * the form 12357.
-         *
-         * Or throw an exception if the string can not be parsed
-         */
-        fun verStringToInt(s: String): Int {
-            // Allow 1 to two digits per match
-            val match =
-                Regex("(\\d{1,2}).(\\d{1,2}).(\\d{1,2})").find(s)
-                    ?: throw Exception("Can't parse version $s")
-            val (major, minor, build) = match.destructured
-            return major.toInt() * 1000 + minor.toInt() * 100 + build.toInt()
-        }
+
 
         /** Return true if we thing the firmwarte shoulde be updated
          *
@@ -207,15 +194,11 @@ class SoftwareUpdateService : JobIntentService(), Logging {
          */
         fun shouldUpdate(
             context: Context,
-            swVer: String
+            deviceVersion: DeviceVersion
         ): Boolean = try {
-            val curVer = verStringToInt(context.getString(R.string.cur_firmware_version))
+            val curVer = DeviceVersion(context.getString(R.string.cur_firmware_version))
             val minVer =
-                verStringToInt("0.7.8") // The oldest device version with a working software update service
-
-            // If the user is running a development build we never do an automatic update
-            val deviceVersion =
-                verStringToInt(if (swVer.isEmpty() || swVer == "unset") "99.99.99" else swVer)
+                DeviceVersion("0.7.8") // The oldest device version with a working software update service
 
             (curVer > deviceVersion) && (deviceVersion >= minVer)
         } catch (ex: Exception) {
@@ -229,13 +212,13 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             context: Context,
             mfg: String
         ): UpdateFilenames {
-            val curver = context.getString(R.string.cur_firmware_version)
+            val curVer = context.getString(R.string.cur_firmware_version)
 
             // Check to see if the file exists (some builds might not include update files for size reasons)
             val firmwareFiles = context.assets.list("firmware") ?: arrayOf()
 
-            val appLoad = "firmware-$mfg-$curver.bin"
-            val spiffs = "spiffs-$curver.bin"
+            val appLoad = "firmware-$mfg-$curVer.bin"
+            val spiffs = "spiffs-$curVer.bin"
 
             return UpdateFilenames(
                 if (firmwareFiles.contains(appLoad))

@@ -91,6 +91,9 @@ class MeshService : Service(), Logging {
     private var packetRepo: PacketRepository? = null
     private var fusedLocationClient: FusedLocationProviderClient? = null
 
+    // If we've ever read a valid region code from our device it will be here
+    var curRegionValue = MeshProtos.RegionCode.Unset_VALUE
+
     val radio = ServiceClient {
         IRadioInterfaceService.Stub.asInterface(it).apply {
             // Now that we are connected to the radio service, tell it to connect to the radio
@@ -418,6 +421,8 @@ class MeshService : Service(), Logging {
     /// END OF MODEL
     ///
 
+    val deviceVersion get() = DeviceVersion(myNodeInfo?.firmwareVersion ?: "")
+
     /// Map a nodenum to a node, or throw an exception if not found
     private fun toNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: throw NodeNumNotFoundException(
         n
@@ -555,12 +560,15 @@ class MeshService : Service(), Logging {
         }
     }
 
+    /// Syntactic sugar to create data subpackets
+    private fun makeData(portNum: Int, bytes: ByteString) = MeshProtos.Data.newBuilder().also {
+        it.portnumValue = portNum
+        it.payload = bytes
+    }.build()
+
     private fun toMeshPacket(p: DataPacket): MeshPacket {
         return buildMeshPacket(p.to!!, id = p.id, wantAck = true) {
-            data = MeshProtos.Data.newBuilder().also {
-                it.portnumValue = p.dataType
-                it.payload = ByteString.copyFrom(p.bytes)
-            }.build()
+            data = makeData(p.dataType, ByteString.copyFrom(p.bytes))
         }
     }
 
@@ -1066,7 +1074,10 @@ class MeshService : Service(), Logging {
                 hwModel,
                 firmwareVersion,
                 firmwareUpdateFilename != null,
-                SoftwareUpdateService.shouldUpdate(this@MeshService, firmwareVersion),
+                SoftwareUpdateService.shouldUpdate(
+                    this@MeshService,
+                    DeviceVersion(firmwareVersion)
+                ),
                 currentPacketId.toLong() and 0xffffffffL,
                 if (nodeNumBits == 0) 8 else nodeNumBits,
                 if (packetIdBits == 0) 8 else packetIdBits,
@@ -1100,8 +1111,7 @@ class MeshService : Service(), Logging {
         }
     }
 
-    // If we've ever read a valid region code from our device it will be here
-    var curRegionValue = MeshProtos.RegionCode.Unset_VALUE
+
 
     /**
      * If we are updating nodes we might need to use old (fixed by firmware build)
@@ -1227,7 +1237,14 @@ class MeshService : Service(), Logging {
         val packet = newMeshPacketTo(destNum)
 
         packet.decoded = MeshProtos.SubPacket.newBuilder().also {
-            it.position = position
+            val isNewPositionAPI = deviceVersion >= DeviceVersion("1.20.0") // We changed position APIs with this version
+            if (isNewPositionAPI) {
+                // Use the new position as data format
+                it.data = makeData(Portnums.PortNum.POSITION_APP_VALUE, position.toByteString())
+            } else {
+                // Send the old dedicated position subpacket
+                it.position = position
+            }
             it.wantResponse = wantResponse
         }.build()
 
