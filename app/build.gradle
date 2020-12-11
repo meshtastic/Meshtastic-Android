@@ -30,8 +30,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 20120 // format is Mmmss (where M is 1+the numeric major number
-        versionName "1.1.20"
+        versionCode 20121 // format is Mmmss (where M is 1+the numeric major number
+        versionName "1.1.21"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -152,7 +152,7 @@ dependencies {
     implementation 'com.github.mik3y:usb-serial-for-android:v3.0.0'
 
     // mapbox
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.2.1'
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.5.0'
 
     // mapbox specifies a really old version of okhttp3 which causes lots of API warnings.  trying a newer version
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
