@@ -113,7 +113,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     open class DeviceListEntry(val name: String, val address: String, val bonded: Boolean) {
         val bluetoothAddress
             get() =
-                if (address[0] == 'x')
+                if (isBluetooth)
                     address.substring(1)
                 else
                     null
@@ -367,27 +367,30 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
             // Handle requestng USB or bluetooth permissions for the device
             debug("Requesting permissions for the device")
 
-            if (it.isBluetooth) {
-                // Request bonding for bluetooth
-                // We ignore missing BT adapters, because it lets us run on the emulator
-                bluetoothAdapter
-                    ?.getRemoteDevice(it.bluetoothAddress)?.let { device ->
-                        requestBonding(activity, device) { state ->
-                            if (state == BOND_BONDED) {
-                                errorText.value = activity.getString(R.string.pairing_completed)
-                                changeScanSelection(
-                                    activity,
-                                    it.address
-                                )
-                            } else {
-                                errorText.value =
-                                    activity.getString(R.string.pairing_failed_try_again)
-                            }
+            exceptionReporter {
+                val bleAddress = it.bluetoothAddress
+                if (bleAddress != null) {
+                    // Request bonding for bluetooth
+                    // We ignore missing BT adapters, because it lets us run on the emulator
+                    bluetoothAdapter
+                        ?.getRemoteDevice(bleAddress)?.let { device ->
+                            requestBonding(activity, device) { state ->
+                                if (state == BOND_BONDED) {
+                                    errorText.value = activity.getString(R.string.pairing_completed)
+                                    changeScanSelection(
+                                        activity,
+                                        it.address
+                                    )
+                                } else {
+                                    errorText.value =
+                                        activity.getString(R.string.pairing_failed_try_again)
+                                }
 
-                            // Force the GUI to redraw
-                            devices.value = devices.value
+                                // Force the GUI to redraw
+                                devices.value = devices.value
+                            }
                         }
-                    }
+                }
             }
 
             if (it.isSerial) {
@@ -453,6 +456,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private var _binding: SettingsFragmentBinding? = null
+
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
