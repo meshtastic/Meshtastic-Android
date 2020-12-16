@@ -597,7 +597,7 @@ class MeshService : Service(), Logging {
             if (dataPacket != null) {
 
                 if (myInfo.myNodeNum == packet.from)
-                    debug("Ignoring retransmission of our packet ${bytes.size}")
+                    debug("Ignoring packet sent from our node")
                 else {
                     debug("Received data from $fromId, portnum=${data.portnumValue} ${bytes.size} bytes")
 
