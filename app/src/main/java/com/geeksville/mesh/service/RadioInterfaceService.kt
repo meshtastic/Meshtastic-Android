@@ -76,7 +76,10 @@ class RadioInterfaceService : Service(), Logging {
             var address = prefs.getString(DEVADDR_KEY, null)
 
             if (address == null) { /// Check for the old preferences name we used to use
-                val rest = prefs.getString(DEVADDR_KEY_OLD, null)
+                var rest = prefs.getString(DEVADDR_KEY_OLD, null)
+                if(rest == "null")
+                    rest = null
+
                 if (rest != null)
                     address = "x$rest" // Add the bluetooth prefix
             }

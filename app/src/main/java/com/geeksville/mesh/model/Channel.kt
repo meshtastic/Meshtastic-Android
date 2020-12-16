@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Base64
 import com.geeksville.mesh.MeshProtos
+import com.google.protobuf.ByteString
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
@@ -52,8 +53,25 @@ data class Channel(
 
     constructor(url: Uri) : this(urlToSettings(url))
 
-    val name: String get() = settings.name
+    /// Return the name of our channel as a human readable string.  If empty string, assume "Default" per mesh.proto spec
+    val name: String get() = if(settings.name.isEmpty()) defaultChannelName else settings.name
     val modemConfig: MeshProtos.ChannelSettings.ModemConfig get() = settings.modemConfig
+
+    val psk get() = if(settings.psk.size() != 1)
+        settings.psk // A standard PSK
+    else {
+        // One of our special 1 byte PSKs, see mesh.proto for docs.
+        val pskIndex = settings.psk.byteAt(0).toInt()
+
+        if(pskIndex == 0)
+            ByteString.EMPTY // Treat as an empty PSK (no encryption)
+        else {
+            // Treat an index of 1 as the old channelDefaultKey and work up from there
+            val bytes = channelDefaultKey.clone()
+            bytes[bytes.size - 1] = (0xff and (bytes[bytes.size - 1] + pskIndex - 1)).toByte()
+            ByteString.copyFrom(bytes)
+        }
+    }
 
     /**
      * Return a name that is formatted as #channename-suffix

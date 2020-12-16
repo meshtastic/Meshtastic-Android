@@ -715,7 +715,7 @@ class MainActivity : AppCompatActivity(), Logging,
                                 model.messagesState.addMessage(payload)
                             }
                             else ->
-                                errormsg("Unhandled dataType ${payload.dataType}")
+                                warn("Ignored dataType ${payload.dataType}")
                         }
                     }
 
@@ -798,8 +798,8 @@ class MainActivity : AppCompatActivity(), Logging,
                 // We don't start listening for packets until after we are connected to the service
                 registerMeshReceiver()
 
-                // Init our messages table with the service's record of past text messages
-                val msgs = service.oldMessages
+                // Init our messages table with the service's record of past text messages (ignore all other message types)
+                val msgs = service.oldMessages.filter { p -> p.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE }
                 debug("Service provided ${msgs.size} messages")
                 model.messagesState.setMessages(msgs)
                 val connectionState =
