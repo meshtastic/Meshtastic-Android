@@ -1097,10 +1097,10 @@ class MeshService : Service(), Logging {
             DataPair("dev_error_count", myInfo.errorCount)
         )
 
-        if (myInfo.errorCode != 0) {
+        if (myInfo.errorCode.number != 0) {
             GeeksvilleApplication.analytics.track(
                 "dev_error",
-                DataPair("code", myInfo.errorCode),
+                DataPair("code", myInfo.errorCode.number),
                 DataPair("address", myInfo.errorAddress),
 
                 // We also include this info, because it is required to correctly decode address from the map file
