@@ -19,6 +19,7 @@ data class Channel(
 ) {
     companion object {
         // Note: this string _SHOULD NOT BE LOCALIZED_ because it directly hashes to values used on the device for the default channel name.
+        // FIXME - make this work with new channel name system
         val defaultChannelName = "Default"
 
         // These bytes must match the well known and not secret bytes used the default channel AES128 key device code
@@ -32,7 +33,7 @@ data class Channel(
             MeshProtos.ChannelSettings.newBuilder().setName(defaultChannelName)
                 .setModemConfig(MeshProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128).build()
         )
-        
+
         const val prefix = "https://www.meshtastic.org/c/#"
 
         private const val base64Flags = Base64.URL_SAFE + Base64.NO_WRAP
@@ -54,24 +55,39 @@ data class Channel(
     constructor(url: Uri) : this(urlToSettings(url))
 
     /// Return the name of our channel as a human readable string.  If empty string, assume "Default" per mesh.proto spec
-    val name: String get() = if(settings.name.isEmpty()) defaultChannelName else settings.name
+    val name: String
+        get() = if (settings.name.isEmpty()) {
+            // We have a new style 'empty' channel name.  Use the same logic from the device to convert that to a human readable name
+            if (settings.bandwidth != 0)
+                "Unset"
+            else when (settings.modemConfig) {
+                MeshProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128 -> "Medium"
+                MeshProtos.ChannelSettings.ModemConfig.Bw500Cr45Sf128 -> "ShortFast"
+                MeshProtos.ChannelSettings.ModemConfig.Bw31_25Cr48Sf512 -> "LongAlt"
+                MeshProtos.ChannelSettings.ModemConfig.Bw125Cr48Sf4096 -> "LongSlow"
+                else -> "Invalid"
+            }
+        } else
+            settings.name
+
     val modemConfig: MeshProtos.ChannelSettings.ModemConfig get() = settings.modemConfig
 
-    val psk get() = if(settings.psk.size() != 1)
-        settings.psk // A standard PSK
-    else {
-        // One of our special 1 byte PSKs, see mesh.proto for docs.
-        val pskIndex = settings.psk.byteAt(0).toInt()
-
-        if(pskIndex == 0)
-            ByteString.EMPTY // Treat as an empty PSK (no encryption)
+    val psk
+        get() = if (settings.psk.size() != 1)
+            settings.psk // A standard PSK
         else {
-            // Treat an index of 1 as the old channelDefaultKey and work up from there
-            val bytes = channelDefaultKey.clone()
-            bytes[bytes.size - 1] = (0xff and (bytes[bytes.size - 1] + pskIndex - 1)).toByte()
-            ByteString.copyFrom(bytes)
+            // One of our special 1 byte PSKs, see mesh.proto for docs.
+            val pskIndex = settings.psk.byteAt(0).toInt()
+
+            if (pskIndex == 0)
+                ByteString.EMPTY // Treat as an empty PSK (no encryption)
+            else {
+                // Treat an index of 1 as the old channelDefaultKey and work up from there
+                val bytes = channelDefaultKey.clone()
+                bytes[bytes.size - 1] = (0xff and (bytes[bytes.size - 1] + pskIndex - 1)).toByte()
+                ByteString.copyFrom(bytes)
+            }
         }
-    }
 
     /**
      * Return a name that is formatted as #channename-suffix
@@ -80,8 +96,15 @@ data class Channel(
      */
     val humanName: String
         get() {
-            val code = settings.psk.fold(0, { acc, x -> acc xor (x.toInt() and 0xff) })
-            return "#${settings.name}-${'A' + (code % 26)}"
+            val suffix: Char = if (settings.psk.size() != 1) {
+                // we have a full PSK, so hash it to generate the suffix
+                val code = settings.psk.fold(0, { acc, x -> acc xor (x.toInt() and 0xff) })
+
+                'A' + (code % 26)
+            } else
+                '0' + settings.psk.byteAt(0).toInt()
+
+            return "#${name}-${suffix}"
         }
 
     /// Can this channel be changed right now?
