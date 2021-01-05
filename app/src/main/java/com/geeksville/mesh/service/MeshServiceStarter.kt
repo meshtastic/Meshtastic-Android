@@ -8,6 +8,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import com.geeksville.andlib.BuildConfig
 import java.util.concurrent.TimeUnit
 
 /**
@@ -65,6 +66,6 @@ fun MeshService.Companion.startService(context: Context) {
     // Before binding we want to explicitly create - so the service stays alive forever (so it can keep
     // listening for the bluetooth packets arriving from the radio. And when they arrive forward them
     // to Signal or whatever.
-    info("Trying to start service")
+    info("Trying to start service debug=${BuildConfig.DEBUG}")
     requireNotNull(context.startMeshService()) { "Failed to start service" }
 }
