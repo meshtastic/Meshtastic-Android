@@ -144,6 +144,10 @@
                     android:scheme="https"
                     android:host="www.meshtastic.org"
                     android:pathPrefix="/c/" />
+                <data
+                    android:scheme="https"
+                    android:host="www.meshtastic.org"
+                    android:pathPrefix="/C/" />
             </intent-filter>
 
             <intent-filter>

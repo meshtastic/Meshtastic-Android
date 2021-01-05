@@ -36,14 +36,14 @@ data class Channel(
 
         const val prefix = "https://www.meshtastic.org/c/#"
 
-        private const val base64Flags = Base64.URL_SAFE + Base64.NO_WRAP
+        private const val base64Flags = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
 
         private fun urlToSettings(url: Uri): MeshProtos.ChannelSettings {
             val urlStr = url.toString()
 
             // We no longer support the super old (about 0.8ish? verison of the URLs that don't use the # separator - I doubt
             // anyone is still using that old format
-            val pathRegex = Regex("$prefix(.*)")
+            val pathRegex = Regex("$prefix(.*)", RegexOption.IGNORE_CASE)
             val (base64) = pathRegex.find(urlStr)?.destructured
                 ?: throw MalformedURLException("Not a meshtastic URL: ${urlStr.take(40)}")
             val bytes = Base64.decode(base64, base64Flags)
@@ -111,20 +111,26 @@ data class Channel(
     var editable = false
 
     /// Return an URL that represents the current channel values
-    fun getChannelUrl(): Uri {
+    /// @param upperCasePrefix - portions of the URL can be upper case to make for more efficient QR codes
+    fun getChannelUrl(upperCasePrefix: Boolean = false): Uri {
         // If we have a valid radio config use it, othterwise use whatever we have saved in the prefs
 
         val channelBytes = settings.toByteArray() ?: ByteArray(0) // if unset just use empty
         val enc = Base64.encodeToString(channelBytes, base64Flags)
 
-        return Uri.parse("$prefix$enc")
+        val p = if(upperCasePrefix)
+            prefix.toUpperCase()
+        else
+            prefix
+        return Uri.parse("$p$enc")
     }
 
     fun getChannelQR(): Bitmap {
         val multiFormatWriter = MultiFormatWriter()
 
+        // We encode as UPPER case for the QR code URL because QR codes are more efficient for that special case
         val bitMatrix =
-            multiFormatWriter.encode(getChannelUrl().toString(), BarcodeFormat.QR_CODE, 192, 192);
+            multiFormatWriter.encode(getChannelUrl(true).toString(), BarcodeFormat.QR_CODE, 192, 192);
         val barcodeEncoder = BarcodeEncoder()
         return barcodeEncoder.createBitmap(bitMatrix)
     }
