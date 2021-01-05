@@ -23,6 +23,7 @@ import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.mesh.database.MeshtasticDatabase
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressNotStarted
 import com.geeksville.util.*
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
@@ -891,6 +892,7 @@ class MeshService : Service(), Logging {
             // Do our startup init
             try {
                 connectTimeMsec = System.currentTimeMillis()
+                SoftwareUpdateService.sendProgress(this, ProgressNotStarted) // Kinda crufty way of reiniting software update
                 startConfig()
 
             } catch (ex: InvalidProtocolBufferException) {
@@ -1097,10 +1099,10 @@ class MeshService : Service(), Logging {
             DataPair("dev_error_count", myInfo.errorCount)
         )
 
-        if (myInfo.errorCode != 0) {
+        if (myInfo.errorCode.number != 0) {
             GeeksvilleApplication.analytics.track(
                 "dev_error",
-                DataPair("code", myInfo.errorCode),
+                DataPair("code", myInfo.errorCode.number),
                 DataPair("address", myInfo.errorAddress),
 
                 // We also include this info, because it is required to correctly decode address from the map file
@@ -1262,7 +1264,12 @@ class MeshService : Service(), Logging {
         destNum: Int = NODENUM_BROADCAST,
         wantResponse: Boolean = false
     ) = serviceScope.handledLaunch {
-        sendPosition(lat, lon, alt, destNum, wantResponse)
+        try {
+            sendPosition(lat, lon, alt, destNum, wantResponse)
+        }
+        catch(ex: RadioNotConnectedException) {
+            warn("Ignoring disconnected radio during gps location update")
+        }
     }
 
     /** Send our current radio config to the device

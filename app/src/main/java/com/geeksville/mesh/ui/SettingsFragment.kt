@@ -29,7 +29,6 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
 import com.geeksville.android.isGooglePlayAvailable
-import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.bluetoothManager
@@ -40,6 +39,9 @@ import com.geeksville.mesh.service.BluetoothInterface
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.RadioInterfaceService
 import com.geeksville.mesh.service.SerialInterface
+import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ACTION_UPDATE_PROGRESS
+import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressNotStarted
+import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressSuccess
 import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
 import com.google.android.gms.location.LocationRequest
@@ -50,8 +52,8 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import java.util.regex.Pattern
+
 
 object SLogging : Logging {}
 
@@ -484,27 +486,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private fun doFirmwareUpdate() {
         model.meshService?.let { service ->
 
-            mainScope.handledLaunch {
-                debug("User started firmware update")
-                binding.updateFirmwareButton.isEnabled = false // Disable until things complete
-                binding.updateProgressBar.visibility = View.VISIBLE
-                binding.updateProgressBar.progress = 0 // start from scratch
+            debug("User started firmware update")
+            binding.updateFirmwareButton.isEnabled = false // Disable until things complete
+            binding.updateProgressBar.visibility = View.VISIBLE
+            binding.updateProgressBar.progress = 0 // start from scratch
 
-                binding.scanStatusText.text = "Updating firmware, wait up to eight minutes..."
-                try {
-                    service.startFirmwareUpdate()
-                    while (service.updateStatus >= 0) {
-                        binding.updateProgressBar.progress = service.updateStatus
-                        delay(2000) // Only check occasionally
-                    }
-                } finally {
-                    val isSuccess = (service.updateStatus == -1)
-                    binding.scanStatusText.text =
-                        if (isSuccess) "Update successful" else "Update failed"
-                    binding.updateProgressBar.isEnabled = false
-                    binding.updateFirmwareButton.isEnabled = !isSuccess
-                }
-            }
+            // We rely on our broadcast receiver to show progress as this progresses
+            service.startFirmwareUpdate()
         }
     }
 
@@ -516,20 +504,55 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         return binding.root
     }
 
-    private fun initNodeInfo() {
-        val connected = model.isConnected.value
-
-        // If actively connected possibly let the user update firmware
+    /// Set the correct update button configuration based on current progress
+    private fun refreshUpdateButton() {
+        debug("Reiniting the udpate button")
         val info = model.myNodeInfo.value
-        if (connected == MeshService.ConnectionState.CONNECTED && info != null && info.shouldUpdate && info.couldUpdate) {
+        val service = model.meshService
+        if (model.isConnected.value == MeshService.ConnectionState.CONNECTED && info != null && info.shouldUpdate && info.couldUpdate && service != null) {
             binding.updateFirmwareButton.visibility = View.VISIBLE
-            binding.updateFirmwareButton.isEnabled = true
             binding.updateFirmwareButton.text =
                 getString(R.string.update_to).format(getString(R.string.cur_firmware_version))
+
+            val progress = service.updateStatus
+
+            binding.updateFirmwareButton.isEnabled =
+                (progress < 0) // if currently doing an upgrade disable button
+
+            if (progress >= 0) {
+                binding.updateProgressBar.progress = progress // update partial progress
+                binding.scanStatusText.setText(R.string.updating_firmware)
+                binding.updateProgressBar.visibility = View.VISIBLE
+            } else
+                when (progress) {
+                    ProgressSuccess -> {
+                        binding.scanStatusText.setText(R.string.update_successful)
+                        binding.updateProgressBar.visibility = View.GONE
+                    }
+                    ProgressNotStarted -> {
+                        // Do nothing - because we don't want to overwrite the status text in this case
+                        binding.updateProgressBar.visibility = View.GONE
+                    }
+                    else -> {
+                        binding.scanStatusText.setText(R.string.update_failed)
+                        binding.updateProgressBar.visibility = View.VISIBLE
+                    }
+                }
+            binding.updateProgressBar.isEnabled = false
+
         } else {
             binding.updateFirmwareButton.visibility = View.GONE
             binding.updateProgressBar.visibility = View.GONE
         }
+    }
+
+    private fun initNodeInfo() {
+        val connected = model.isConnected.value
+
+        refreshUpdateButton()
+
+        // If actively connected possibly let the user update firmware
+        val info = model.myNodeInfo.value
 
         when (connected) {
             MeshService.ConnectionState.CONNECTED -> {
@@ -784,11 +807,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             initClassicScan()
     }
 
-    override fun onPause() {
-        super.onPause()
-        scanModel.stopScan()
-    }
-
     /**
      * If the user has not turned on location access throw up a toast warning
      */
@@ -842,10 +860,28 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
+    private val updateProgressFilter = IntentFilter(ACTION_UPDATE_PROGRESS)
+
+    private val updateProgressReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            refreshUpdateButton()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        scanModel.stopScan()
+
+        requireActivity().unregisterReceiver(updateProgressReceiver)
+    }
+
     override fun onResume() {
         super.onResume()
+
         if (!hasCompanionDeviceApi)
             scanModel.startScan()
+
+        requireActivity().registerReceiver(updateProgressReceiver, updateProgressFilter)
 
         // Keep reminding user BLE is still off
         val hasUSB = activity?.let { SerialInterface.findDrivers(it).isNotEmpty() } ?: true

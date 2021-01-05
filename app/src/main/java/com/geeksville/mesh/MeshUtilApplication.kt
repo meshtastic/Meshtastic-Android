@@ -27,20 +27,27 @@ class MeshUtilApplication : GeeksvilleApplication() {
             val pref = AppPrefs(this)
             crashlytics.setUserId(pref.getInstallId()) // be able to group all bugs per anonymous user
 
+            // We always send our log messages to the crashlytics lib, but they only get sent to the server if we report an exception
+            // This makes log messages work properly if someone turns on analytics just before they click report bug.
+            // send all log messages through crashyltics, so if we do crash we'll have those in the report
+            val standardLogger = Logging.printlog
+            Logging.printlog = { level, tag, message ->
+                crashlytics.log("$tag: $message")
+                standardLogger(level, tag, message)
+            }
+
+            fun sendCrashReports() {
+                if(isAnalyticsAllowed)
+                    crashlytics.sendUnsentReports()
+            }
+
+            // Send any old reports if user approves
+            sendCrashReports()
+            
             // Attach to our exception wrapper
             Exceptions.reporter = { exception, _, _ ->
                 crashlytics.recordException(exception)
-                crashlytics.sendUnsentReports()
-            }
-
-            if (isAnalyticsAllowed) {
-                val standardLogger = Logging.printlog
-
-                // send all log messages through crashyltics, so if we do crash we'll have those in the report
-                Logging.printlog = { level, tag, message ->
-                    crashlytics.log("$tag: $message")
-                    standardLogger(level, tag, message)
-                }
+                sendCrashReports() // Send the new report
             }
         }
 

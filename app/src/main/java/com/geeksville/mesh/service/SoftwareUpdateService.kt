@@ -147,6 +147,8 @@ class SoftwareUpdateService : JobIntentService(), Logging {
 
         const val ACTION_START_UPDATE = "$prefix.START_UPDATE"
 
+        const val ACTION_UPDATE_PROGRESS = "$prefix.UPDATE_PROGRESS"
+
         const val EXTRA_MACADDR = "macaddr"
 
         private const val SCAN_PERIOD: Long = 10000
@@ -170,10 +172,15 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         private val MANUFACTURE_CHARACTER = longBLEUUID("2a29")
         private val HW_VERSION_CHARACTER = longBLEUUID("2a27")
 
+        const val ProgressSuccess = -1
+        const val ProgressUpdateFailed = -2
+        const val ProgressBleException = -3
+        const val ProgressNotStarted = -4
+
         /**
          * % progress through the update
          */
-        var progress = 0
+        var progress = ProgressNotStarted
 
         /**
          * Convenience method for enqueuing work in to this service.
@@ -187,6 +194,17 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         }
 
 
+        fun sendProgress(context: Context, p: Int) {
+            if(progress != p) {
+                progress = p
+
+                val intent = Intent(ACTION_UPDATE_PROGRESS).putExtra(
+                    EXTRA_PROGRESS,
+                    p
+                )
+                context.sendBroadcast(intent)
+            }
+        }
 
         /** Return true if we thing the firmwarte shoulde be updated
          *
@@ -200,7 +218,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             val minVer =
                 DeviceVersion("0.7.8") // The oldest device version with a working software update service
 
-            (curVer > deviceVersion) && (deviceVersion >= minVer)
+            ((curVer > deviceVersion) && (deviceVersion >= minVer))
         } catch (ex: Exception) {
             errormsg("Error finding swupdate info", ex)
             false // If we fail parsing our update info
@@ -262,7 +280,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 errormsg("Ignoring failure to update spiffs on old appload")
             }
             assets.appLoad?.let { doUpdate(context, sync, it, FLASH_REGION_APPLOAD) }
-            progress = -1 // success
+            sendProgress(context, ProgressSuccess)
         }
 
         // writable region codes in the ESP32 update code
@@ -288,7 +306,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
 
                 info("Starting firmware update for $assetName, flash region $flashRegion")
 
-                progress = 0
+                sendProgress(context,0)
                 val totalSizeDesc = getCharacteristic(SW_UPDATE_TOTALSIZE_CHARACTER)
                 val dataDesc = getCharacteristic(SW_UPDATE_DATA_CHARACTER)
                 val crc32Desc = getCharacteristic(SW_UPDATE_CRC32_CHARACTER)
@@ -336,7 +354,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                         // yet
                         val maxProgress = if(flashRegion != FLASH_REGION_APPLOAD)
                             50 else 100
-                        progress = firmwareNumSent * maxProgress / firmwareSize
+                        sendProgress(context, firmwareNumSent * maxProgress / firmwareSize)
                         debug("sending block ${progress}%")
                         var blockSize = 512 - 3 // Max size MTU excluding framing
 
@@ -366,7 +384,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                             sync.readCharacteristic(updateResultDesc)
                                 .getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0)
                         if (updateResult != 0) {
-                            progress = -2
+                            sendProgress(context, ProgressUpdateFailed)
                             throw Exception("Device update failed, reason=$updateResult")
                         }
 
@@ -377,7 +395,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                     }
                 }
             } catch (ex: BLEException) {
-                progress = -3
+                sendProgress(context, ProgressBleException)
                 throw ex // Unexpected BLE exception
             }
         }

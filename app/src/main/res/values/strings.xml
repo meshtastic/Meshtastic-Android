@@ -77,4 +77,7 @@
     <string name="debug_panel">Debug Panel</string>
     <string name="debug_last_messages">500 last messages</string>
     <string name="clear_last_messages">Clear</string>
+    <string name="updating_firmware">Updating firmware, wait up to eight minutes...</string>
+    <string name="update_successful">Update successful</string>
+    <string name="update_failed">Update failed</string>
 </resources>

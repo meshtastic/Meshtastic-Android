@@ -25,13 +25,14 @@ android {
         }
     } */
     compileSdkVersion 29
-    buildToolsVersion "30.0.2" // Note: 30.0.0.2 doesn't yet work on Github actions CI
+    // leave undefined to use version plugin wants
+    // buildToolsVersion "30.0.2" // Note: 30.0.2 doesn't yet work on Github actions CI
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 20122 // format is Mmmss (where M is 1+the numeric major number
-        versionName "1.1.22"
+        versionCode 20133 // format is Mmmss (where M is 1+the numeric major number
+        versionName "1.1.33"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -107,7 +108,7 @@ protobuf {
 
 dependencies {
 
-    def room_version = "2.2.5"
+    def room_version = '2.2.6'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
