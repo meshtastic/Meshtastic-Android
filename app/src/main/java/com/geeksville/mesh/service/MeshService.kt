@@ -1262,7 +1262,12 @@ class MeshService : Service(), Logging {
         destNum: Int = NODENUM_BROADCAST,
         wantResponse: Boolean = false
     ) = serviceScope.handledLaunch {
-        sendPosition(lat, lon, alt, destNum, wantResponse)
+        try {
+            sendPosition(lat, lon, alt, destNum, wantResponse)
+        }
+        catch(ex: RadioNotConnectedException) {
+            warn("Ignoring disconnected radio during gps location update")
+        }
     }
 
     /** Send our current radio config to the device
