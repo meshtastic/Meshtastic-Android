@@ -9,6 +9,7 @@ const val prefix = "com.geeksville.mesh"
 
 // a bool true means now connected, false means not
 const val EXTRA_CONNECTED = "$prefix.Connected"
+const val EXTRA_PROGRESS = "$prefix.Progress"
 
 /// a bool true means we expect this condition to continue until, false means device might come back
 const val EXTRA_PERMANENT = "$prefix.Permanent"

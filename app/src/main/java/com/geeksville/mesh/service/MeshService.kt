@@ -23,6 +23,7 @@ import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.mesh.database.MeshtasticDatabase
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressNotStarted
 import com.geeksville.util.*
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
@@ -891,6 +892,7 @@ class MeshService : Service(), Logging {
             // Do our startup init
             try {
                 connectTimeMsec = System.currentTimeMillis()
+                SoftwareUpdateService.sendProgress(this, ProgressNotStarted) // Kinda crufty way of reiniting software update
                 startConfig()
 
             } catch (ex: InvalidProtocolBufferException) {
