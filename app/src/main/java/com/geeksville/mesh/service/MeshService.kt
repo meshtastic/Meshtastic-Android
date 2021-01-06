@@ -892,7 +892,7 @@ class MeshService : Service(), Logging {
             // Do our startup init
             try {
                 connectTimeMsec = System.currentTimeMillis()
-                SoftwareUpdateService.sendProgress(this, ProgressNotStarted) // Kinda crufty way of reiniting software update
+                SoftwareUpdateService.sendProgress(this, ProgressNotStarted, true) // Kinda crufty way of reiniting software update
                 startConfig()
 
             } catch (ex: InvalidProtocolBufferException) {
