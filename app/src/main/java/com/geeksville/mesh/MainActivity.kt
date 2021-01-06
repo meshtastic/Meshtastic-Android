@@ -711,6 +711,10 @@ class MainActivity : AppCompatActivity(), Logging,
                             intent.getParcelableExtra<DataPacket>(EXTRA_PAYLOAD)!!
 
                         when (payload.dataType) {
+                            Portnums.PortNum.POSITION_APP_VALUE -> {
+                                // This is expected
+                                debug("activity class ignores position messages")
+                            }
                             Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
                                 model.messagesState.addMessage(payload)
                             }
