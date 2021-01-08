@@ -606,33 +606,45 @@ class MainActivity : AppCompatActivity(), Logging,
 
     /// Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(connected: MeshService.ConnectionState) {
-        model.isConnected.value = connected
         debug("connchange ${model.isConnected.value}")
+
         if (connected == MeshService.ConnectionState.CONNECTED) {
-
             model.meshService?.let { service ->
+
+                val oldConnection = model.isConnected.value
+                model.isConnected.value = connected
+
                 debug("Getting latest radioconfig from service")
-                model.radioConfig.value =
-                    MeshProtos.RadioConfig.parseFrom(service.radioConfig)
+                try {
+                    model.radioConfig.value =
+                        MeshProtos.RadioConfig.parseFrom(service.radioConfig)
 
-                val info = service.myNodeInfo
-                model.myNodeInfo.value = info
+                    val info = service.myNodeInfo
+                    model.myNodeInfo.value = info
 
-                val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
-                if (isOld)
-                    MaterialAlertDialogBuilder(this)
-                        .setTitle(getString(R.string.app_too_old))
-                        .setMessage(getString(R.string.must_update))
-                        .setPositiveButton("Okay") { _, _ ->
-                            info("User acknowledged app is old")
-                        }
-                        .show()
+                    val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
+                    if (isOld)
+                        MaterialAlertDialogBuilder(this)
+                            .setTitle(getString(R.string.app_too_old))
+                            .setMessage(getString(R.string.must_update))
+                            .setPositiveButton("Okay") { _, _ ->
+                                info("User acknowledged app is old")
+                            }
+                            .show()
 
-                updateNodesFromDevice()
+                    updateNodesFromDevice()
 
-                // we have a connection to our device now, do the channel change
-                perhapsChangeChannel()
+                    // we have a connection to our device now, do the channel change
+                    perhapsChangeChannel()
+                } catch (ex: RemoteException) {
+                    warn("Abandoning connect $ex, because we probably just lost device connection")
+                    model.isConnected.value = oldConnection
+                }
             }
+        }
+        else {
+            // For other connection states, just slam them in
+            model.isConnected.value = connected
         }
     }
 
@@ -715,7 +727,7 @@ class MainActivity : AppCompatActivity(), Logging,
                                 model.messagesState.addMessage(payload)
                             }
                             else ->
-                                warn("Ignored dataType ${payload.dataType}")
+                                debug("activity only cares about text messages, ignoring dataType ${payload.dataType}")
                         }
                     }
 
@@ -799,7 +811,8 @@ class MainActivity : AppCompatActivity(), Logging,
                 registerMeshReceiver()
 
                 // Init our messages table with the service's record of past text messages (ignore all other message types)
-                val msgs = service.oldMessages.filter { p -> p.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE }
+                val msgs =
+                    service.oldMessages.filter { p -> p.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE }
                 debug("Service provided ${msgs.size} messages")
                 model.messagesState.setMessages(msgs)
                 val connectionState =
@@ -849,7 +862,11 @@ class MainActivity : AppCompatActivity(), Logging,
         }
 
         // ALSO bind so we can use the api
-        mesh.connect(this, MeshService.createIntent(), Context.BIND_AUTO_CREATE + Context.BIND_ABOVE_CLIENT)
+        mesh.connect(
+            this,
+            MeshService.createIntent(),
+            Context.BIND_AUTO_CREATE + Context.BIND_ABOVE_CLIENT
+        )
     }
 
     private fun unbindMeshService() {
