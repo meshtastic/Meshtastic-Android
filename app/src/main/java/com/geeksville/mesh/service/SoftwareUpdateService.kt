@@ -195,15 +195,20 @@ class SoftwareUpdateService : JobIntentService(), Logging {
 
 
         /**
+         * true if we are busy with an update right now
+         */
+        val isUpdating get() = progress >= 0
+
+        /**
          * Update our progress indication for GUIs
          *
          * @param isAppload if false, we don't report failure indications (because we consider spiffs non critical for now).  But do report to analytics
          */
         fun sendProgress(context: Context, p: Int, isAppload: Boolean) {
-            if(!isAppload && progress < 0)
+            if(!isAppload && p < 0)
                 reportError("Error while writing spiffs $progress") // See if this is happening in the wild
 
-            if(progress != p && (progress >= 0 || isAppload)) {
+            if(progress != p && (p >= 0 || isAppload)) {
                 progress = p
 
                 val intent = Intent(ACTION_UPDATE_PROGRESS).putExtra(
