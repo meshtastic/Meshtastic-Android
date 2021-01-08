@@ -60,6 +60,7 @@ class MeshService : Service(), Logging {
 
         class IdNotFoundException(id: String) : Exception("ID not found $id")
         class NodeNumNotFoundException(id: Int) : Exception("NodeNum not found $id")
+        class IsUpdatingException() : Exception("Operation prohibited during firmware update")
 
         /**
          * Talk to our running service and try to set a new device address.  And then immediately
@@ -227,6 +228,9 @@ class MeshService : Service(), Logging {
     /// before we are fully bound to the RadioInterfaceService
     private fun sendToRadio(p: ToRadio.Builder) {
         val b = p.build().toByteArray()
+
+        if(SoftwareUpdateService.isUpdating)
+            throw IsUpdatingException()
 
         connectedRadio.sendToRadio(b)
     }
