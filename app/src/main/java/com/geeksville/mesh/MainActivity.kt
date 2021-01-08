@@ -607,7 +607,7 @@ class MainActivity : AppCompatActivity(), Logging,
     /// Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(connected: MeshService.ConnectionState) {
         debug("connchange ${model.isConnected.value}")
-        
+
         if (connected == MeshService.ConnectionState.CONNECTED) {
             model.meshService?.let { service ->
 
@@ -723,15 +723,11 @@ class MainActivity : AppCompatActivity(), Logging,
                             intent.getParcelableExtra<DataPacket>(EXTRA_PAYLOAD)!!
 
                         when (payload.dataType) {
-                            Portnums.PortNum.POSITION_APP_VALUE -> {
-                                // This is expected
-                                debug("activity class ignores position messages")
-                            }
                             Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
                                 model.messagesState.addMessage(payload)
                             }
                             else ->
-                                warn("Ignored dataType ${payload.dataType}")
+                                debug("activity only cares about text messages, ignoring dataType ${payload.dataType}")
                         }
                     }
 
