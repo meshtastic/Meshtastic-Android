@@ -14,6 +14,11 @@ import java.util.*
 import java.util.zip.CRC32
 
 /**
+ * Some misformatted ESP32s have problems
+ */
+class DeviceRejectedException() : BLEException("Device rejected filesize")
+
+/**
  * Move this somewhere as a generic network byte order function
  */
 fun toNetworkByteArray(value: Int, formatType: Int): ByteArray {
@@ -292,6 +297,11 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 // If we can't update spiffs (because not supported by target), do not fail
                 errormsg("Ignoring failure to update spiffs on old appload")
             }
+            catch(_: DeviceRejectedException) {
+                // the spi filesystem of this device is malformatted
+                reportError("Device rejected invalid spiffs partition")
+            }
+
             assets.appLoad?.let { doUpdate(context, sync, it, FLASH_REGION_APPLOAD) }
             sendProgress(context, ProgressSuccess, true)
         }
@@ -340,10 +350,9 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 catch(ex: BLECharacteristicNotFoundException) {
                     errormsg("Can't set flash programming region (old appload?")
                     if(flashRegion != FLASH_REGION_APPLOAD) {
-                        errormsg("Can't set flash programming region (old appload?)")
                         throw ex
                     }
-                    warn("Ignoring setting appload flashRegion (old appload?")
+                    warn("Ignoring setting appload flashRegion")
                 }
 
                 context.assets.open(assetName).use { firmwareStream ->
@@ -360,8 +369,8 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                     // Our write completed, queue up a readback
                     val totalSizeReadback = sync.readCharacteristic(totalSizeDesc)
                         .getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, 0)
-                    if (totalSizeReadback == 0) // FIXME - handle this case
-                        throw Exception("Device rejected file size")
+                    if (totalSizeReadback == 0)
+                        throw DeviceRejectedException()
 
                     // Send all the blocks
                     while (firmwareNumSent < firmwareSize) {
