@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Parcelable
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.Portnums
 
 class MeshServiceBroadcasts(
     private val context: Context,
@@ -12,12 +13,17 @@ class MeshServiceBroadcasts(
     private val getConnectionState: () -> MeshService.ConnectionState
 ) {
     /**
-     * The RECEIVED_OPAQUE:
+     * Broadcast some received data
      * Payload will be a DataPacket
      */
     fun broadcastReceivedData(payload: DataPacket) {
-        val intent = Intent(MeshService.ACTION_RECEIVED_DATA).putExtra(EXTRA_PAYLOAD, payload)
-        explicitBroadcast(intent)
+
+        explicitBroadcast(Intent(MeshService.actionReceived(payload.dataType)).putExtra(EXTRA_PAYLOAD, payload))
+
+        // For the time being we ALSO broadcast using old ACTION_RECEIVED_DATA field for any oldschool opaque packets
+        // newer packets (that have a non zero portnum) are only broadcast using the standard mechanism.
+        if(payload.dataType == Portnums.PortNum.UNKNOWN_APP_VALUE)
+            explicitBroadcast(Intent(MeshService.ACTION_RECEIVED_DATA).putExtra(EXTRA_PAYLOAD, payload))
     }
 
     fun broadcastNodeChange(info: NodeInfo) {

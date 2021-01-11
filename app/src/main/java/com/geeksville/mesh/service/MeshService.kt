@@ -53,7 +53,20 @@ class MeshService : Service(), Logging {
         const val NODENUM_BROADCAST = (0xffffffff).toInt()
 
         /// Intents broadcast by MeshService
+
+        @Deprecated(message = "Does not filter by port number.  For legacy reasons only broadcast for UNKNOWN_APP, switch to ACTION_RECEIVED")
         const val ACTION_RECEIVED_DATA = "$prefix.RECEIVED_DATA"
+
+        fun actionReceived(portNum: String) = "$prefix.RECEIVED.$portNum"
+
+        /// generate a RECEIVED action filter string that includes either the portnumber as an int, or preferably a symbolic name from portnums.proto
+        fun actionReceived(portNum: Int): String {
+            val portType = Portnums.PortNum.forNumber(portNum)
+            val portStr = portType?.toString() ?: portNum.toString()
+
+            return actionReceived(portStr)
+        }
+
         const val ACTION_NODE_CHANGE = "$prefix.NODE_CHANGE"
         const val ACTION_MESH_CONNECTED = "$prefix.MESH_CONNECTED"
         const val ACTION_MESSAGE_STATUS = "$prefix.MESSAGE_STATUS"
