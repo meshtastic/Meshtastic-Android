@@ -8,6 +8,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.cardview.widget.CardView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.android.Logging
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
+import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.AdapterMessageLayoutBinding
 import com.geeksville.mesh.databinding.MessagesFragmentBinding
@@ -22,6 +24,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.google.android.material.chip.Chip
 import java.text.DateFormat
+import java.text.ParseException
 import java.util.*
 
 // Allows usage like email.on(EditorInfo.IME_ACTION_NEXT, { confirm() })
@@ -39,20 +42,35 @@ fun EditText.on(actionId: Int, func: () -> Unit) {
 class MessagesFragment : ScreenFragment("Messages"), Logging {
 
     private var _binding: MessagesFragmentBinding? = null
+
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     private val model: UIViewModel by activityViewModels()
 
-    private val dateTimeFormat: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
+    private val dateTimeFormat: DateFormat =
+        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+    private val timeFormat: DateFormat =
+        DateFormat.getTimeInstance(DateFormat.SHORT)
+
+    private fun getShortDateTime(time : Date): String {
+        // return time if within 24 hours, otherwise date/time
+        val one_day = 60*60*24*100L
+        if (System.currentTimeMillis() - time.time > one_day) {
+            return dateTimeFormat.format(time)
+        } else return timeFormat.format(time)
+    }
+
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
-    class ViewHolder(itemView: AdapterMessageLayoutBinding) : RecyclerView.ViewHolder(itemView.root) {
+    class ViewHolder(itemView: AdapterMessageLayoutBinding) :
+        RecyclerView.ViewHolder(itemView.root) {
         val username: Chip = itemView.username
         val messageText: TextView = itemView.messageText
         val messageTime: TextView = itemView.messageTime
         val messageStatusIcon: ImageView = itemView.messageStatusIcon
+        val card: CardView = itemView.Card
     }
 
     private val messagesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
@@ -122,14 +140,32 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
          */
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val msg = messages[position]
-
             val nodes = model.nodeDB.nodes.value!!
-
-            // If we can't find the sender, just use the ID
             val node = nodes.get(msg.from)
-            val user = node?.user
-            holder.username.text = user?.shortName ?: msg.from
+            // Determine if this is my message (originated on this device).
+            val isMe = model.myNodeInfo.value?.myNodeNum == node?.num
 
+            // Set cardview offset and color.
+            val marginParams = holder.card.layoutParams as ViewGroup.MarginLayoutParams
+            val messageOffset = resources.getDimensionPixelOffset(R.dimen.message_offset)
+            if (isMe) {
+                marginParams.leftMargin = messageOffset
+                marginParams.rightMargin = 0
+                holder.card.setCardBackgroundColor(resources.getColor(R.color.colorMyMsg))
+            } else {
+                marginParams.rightMargin = messageOffset
+                marginParams.leftMargin = 0
+                holder.card.setCardBackgroundColor(resources.getColor(R.color.colorMsg))
+            }
+            // Hide the username chip for my messages
+            if (isMe) {
+                holder.username.visibility = View.GONE
+            } else {
+                holder.username.visibility = View.VISIBLE
+                // If we can't find the sender, just use the ID
+                val user = node?.user
+                holder.username.text = user?.shortName ?: msg.from
+            }
             if (msg.errorMessage != null) {
                 // FIXME, set the style to show a red error message
                 holder.messageText.text = msg.errorMessage
@@ -137,7 +173,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
                 holder.messageText.text = msg.text
             }
 
-            holder.messageTime.text = dateTimeFormat.format(Date(msg.time))
+            holder.messageTime.text = getShortDateTime(Date(msg.time))
 
             val icon = when (msg.status) {
                 MessageStatus.QUEUED -> R.drawable.ic_twotone_cloud_upload_24
@@ -150,6 +186,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             if (icon != null) {
                 holder.messageStatusIcon.setImageResource(icon)
                 holder.messageStatusIcon.visibility = View.VISIBLE
+
             } else
                 holder.messageStatusIcon.visibility = View.INVISIBLE
         }
@@ -194,6 +231,11 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         layoutManager.stackFromEnd = true // We want the last rows to always be shown
         binding.messageListView.layoutManager = layoutManager
 
+
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
         model.messagesState.messages.observe(viewLifecycleOwner, Observer {
             debug("New messages received: ${it.size}")
             messagesAdapter.onMessagesChanged(it)
@@ -210,6 +252,12 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             // If we don't know our node ID and we are offline don't let user try to send
             binding.textInputLayout.isEnabled =
                 model.isConnected.value != MeshService.ConnectionState.DISCONNECTED && myId != null
+        })
+
+        model.myNodeInfo.observe(viewLifecycleOwner, Observer { myNodeInfo ->
+            // If our Id changed, the UI may need to be updated
+            messagesAdapter.notifyDataSetChanged()
+            debug("New id received ${myNodeInfo?.myNodeNum}")
         })
     }
 

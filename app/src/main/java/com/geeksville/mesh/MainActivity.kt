@@ -813,7 +813,8 @@ class MainActivity : AppCompatActivity(), Logging,
                 // Init our messages table with the service's record of past text messages (ignore all other message types)
                 val msgs =
                     service.oldMessages.filter { p -> p.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE }
-                debug("Service provided ${msgs.size} messages")
+                debug("Service provided ${msgs.size} messages and myNodeNum ${service.myNodeInfo?.myNodeNum}")
+                model.myNodeInfo.value = service.myNodeInfo
                 model.messagesState.setMessages(msgs)
                 val connectionState =
                     MeshService.ConnectionState.valueOf(service.connectionState())
