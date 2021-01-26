@@ -231,11 +231,6 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         layoutManager.stackFromEnd = true // We want the last rows to always be shown
         binding.messageListView.layoutManager = layoutManager
 
-
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
         model.messagesState.messages.observe(viewLifecycleOwner, Observer {
             debug("New messages received: ${it.size}")
             messagesAdapter.onMessagesChanged(it)
@@ -252,12 +247,6 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             // If we don't know our node ID and we are offline don't let user try to send
             binding.textInputLayout.isEnabled =
                 model.isConnected.value != MeshService.ConnectionState.DISCONNECTED && myId != null
-        })
-
-        model.myNodeInfo.observe(viewLifecycleOwner, Observer { myNodeInfo ->
-            // If our Id changed, the UI may need to be updated
-            messagesAdapter.notifyDataSetChanged()
-            debug("New id received ${myNodeInfo?.myNodeNum}")
         })
     }
 
