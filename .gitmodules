@@ -4,3 +4,6 @@
 [submodule "geeksville-androidlib"]
 	path = geeksville-androidlib
 	url = https://github.com/meshtastic/geeksville-androidlib.git
+[submodule "design"]
+	path = design
+	url = https://github.com/meshtastic/meshtastic-design.git

@@ -165,7 +165,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
 
     // Add the Firebase SDK for Crashlytics.
-    implementation 'com.google.firebase:firebase-crashlytics:17.3.0'
+    implementation 'com.google.firebase:firebase-crashlytics:17.3.1'
 
     // alas implementation bug deep in the bowels when I tried it for my SyncBluetoothDevice class
     // implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.3"
@@ -178,7 +178,7 @@ dependencies {
     implementation('com.journeyapps:zxing-android-embedded:4.1.0') { transitive = false }
     implementation 'com.google.zxing:core:3.4.1'
 
-    def work_version = '2.4.0'
+    def work_version = '2.5.0'
 
     // Work Request - used to delay boot event handling
     // implementation "androidx.work:work-runtime:$work_version"
