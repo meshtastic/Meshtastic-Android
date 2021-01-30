@@ -37,12 +37,13 @@
                         android:id="@+id/imageView5"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="16dp"
                         android:contentDescription="@string/application_icon"
                         android:scaleType="center"
                         android:scaleX="1.5"
                         android:scaleY="1.5"
-                        app:srcCompat="@drawable/ic_baseline_settings_input_antenna_24" />
+                        app:srcCompat="@drawable/app_icon"
+                        tools:layout_editor_absoluteX="16dp"
+                        tools:layout_editor_absoluteY="18dp" />
 
                     <TextView
                         android:id="@+id/title"

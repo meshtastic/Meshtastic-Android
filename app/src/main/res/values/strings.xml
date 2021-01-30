@@ -80,4 +80,7 @@
     <string name="updating_firmware">Updating firmware, wait up to eight minutes...</string>
     <string name="update_successful">Update successful</string>
     <string name="update_failed">Update failed</string>
+    <string name="message_reception_time">message reception time</string>
+    <string name="message_reception_state">message reception state</string>
+    <string name="message_delivery_status">Message delivery status</string>
 </resources>

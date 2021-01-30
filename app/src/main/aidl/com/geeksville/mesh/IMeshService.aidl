@@ -23,7 +23,13 @@ The intent you use to reach the service should look like this:
 Once you have bound to the service you should register your broadcast receivers per https://developer.android.com/guide/components/broadcasts#context-registered-receivers
 
     // com.geeksville.mesh.x broadcast intents, where x is:
-    // RECEIVED_DATA  for data received from other nodes.  payload will contain a DataPacket
+
+    // RECEIVED_DATA for data received from other nodes.  payload will contain a DataPacket, this action is DEPRECATED (because it sends all received data)
+    // far better to instead use RECEIVED.<portnumm>
+
+    // RECEIVED.<portnumm> -  will **only** deliver packets for the specified port number.  If a wellknown portnums.proto name for portnum is known it will be used
+    // (i.e. com.geeksville.mesh.RECEIVED.TEXT_MESSAGE_APP) else the numeric portnum will be included as a base 10 integer (com.geeksville.mesh.RECEIVED.4403 etc...)
+
     // NODE_CHANGE  for new IDs appearing or disappearing
     // CONNECTION_CHANGED for losing/gaining connection to the packet radio
     // MESSAGE_STATUS_CHANGED for any message status changes (for sent messages only, other messages come via RECEIVED_DATA.  payload will contain a message ID and a MessageStatus)

@@ -569,7 +569,7 @@ class MainActivity : AppCompatActivity(), Logging,
         val filter = IntentFilter()
         filter.addAction(MeshService.ACTION_MESH_CONNECTED)
         filter.addAction(MeshService.ACTION_NODE_CHANGE)
-        filter.addAction(MeshService.ACTION_RECEIVED_DATA)
+        filter.addAction(MeshService.actionReceived(Portnums.PortNum.TEXT_MESSAGE_APP_VALUE))
         filter.addAction((MeshService.ACTION_MESSAGE_STATUS))
         registerReceiver(meshServiceReceiver, filter)
         receiverRegistered = true;
@@ -641,8 +641,7 @@ class MainActivity : AppCompatActivity(), Logging,
                     model.isConnected.value = oldConnection
                 }
             }
-        }
-        else {
+        } else {
             // For other connection states, just slam them in
             model.isConnected.value = connected
         }
@@ -717,18 +716,12 @@ class MainActivity : AppCompatActivity(), Logging,
                         }
                     }
 
-                    MeshService.ACTION_RECEIVED_DATA -> {
-                        debug("received new data from service")
+                    MeshService.actionReceived(Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) -> {
+                        debug("received new message from service")
                         val payload =
                             intent.getParcelableExtra<DataPacket>(EXTRA_PAYLOAD)!!
 
-                        when (payload.dataType) {
-                            Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
-                                model.messagesState.addMessage(payload)
-                            }
-                            else ->
-                                debug("activity only cares about text messages, ignoring dataType ${payload.dataType}")
-                        }
+                        model.messagesState.addMessage(payload)
                     }
 
                     MeshService.ACTION_MESSAGE_STATUS -> {
