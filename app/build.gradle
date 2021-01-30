@@ -34,6 +34,9 @@ android {
         versionCode 20136 // format is Mmmss (where M is 1+the numeric major number
         versionName "1.1.36"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // per https://developer.android.com/studio/write/vector-asset-studio
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         release {
