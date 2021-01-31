@@ -73,7 +73,7 @@ class MeshServiceNotifications(
         val builder = NotificationCompat.Builder(context, channelId).setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_MIN)
             .setCategory(category)
-            .setSmallIcon(android.R.drawable.stat_sys_data_bluetooth)
+            .setSmallIcon(R.drawable.app_icon)
             .setContentTitle(summaryString) // leave this off for now so our notification looks smaller
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(openAppIntent)
