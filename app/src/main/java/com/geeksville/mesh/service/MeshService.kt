@@ -1196,8 +1196,8 @@ class MeshService : Service(), Logging {
             if (newMyNodeInfo == null || newNodes.isEmpty())
                 errormsg("Did not receive a valid config")
             else {
-                debug("Installing new node DB")
                 discardNodeDB()
+                debug("Installing new node DB")
                 myNodeInfo = newMyNodeInfo
 
                 newNodes.forEach(::installNodeInfo)
