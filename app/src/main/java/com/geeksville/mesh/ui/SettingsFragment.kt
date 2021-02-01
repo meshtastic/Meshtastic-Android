@@ -265,7 +265,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         debug("BTScan component active")
         selectedAddress = RadioInterfaceService.getDeviceAddress(context)
 
-        return if (bluetoothAdapter == null) {
+        return if (bluetoothAdapter == null || RadioInterfaceService.isMockInterfaceAvailable(context)) {
             warn("No bluetooth adapter.  Running under emulation?")
 
             val testnodes = listOf(

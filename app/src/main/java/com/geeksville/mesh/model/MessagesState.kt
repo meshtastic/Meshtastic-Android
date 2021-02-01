@@ -2,13 +2,13 @@ package com.geeksville.mesh.model
 
 import android.os.RemoteException
 import androidx.lifecycle.MutableLiveData
-import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.android.Logging
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 
 
 class MessagesState(private val ui: UIViewModel) : Logging {
+    /* We now provide fake messages a via MockInterface
     private val testTexts = listOf(
         DataPacket(
             "+16508765310",
@@ -18,10 +18,10 @@ class MessagesState(private val ui: UIViewModel) : Logging {
             "+16508765311",
             "Help! I've fallen and I can't get up."
         )
-    )
+    ) */
 
     /// This is the inner storage for messages
-    private val messagesList = (if (isEmulator) testTexts else emptyList()).toMutableList()
+    private val messagesList = emptyList<DataPacket>().toMutableList()
 
     // If the following (unused otherwise) line is commented out, the IDE preview window works.
     // if left in the preview always renders as empty.
