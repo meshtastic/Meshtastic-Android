@@ -269,6 +269,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
             warn("No bluetooth adapter.  Running under emulation?")
 
             val testnodes = listOf(
+                DeviceListEntry("Simulated interface", "m", true),
                 DeviceListEntry("Meshtastic_ab12", "xaa", false),
                 DeviceListEntry("Meshtastic_32ac", "xbb", true)
             )

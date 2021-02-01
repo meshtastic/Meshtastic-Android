@@ -8,6 +8,7 @@ import android.content.SharedPreferences
 import android.os.IBinder
 import androidx.core.content.edit
 import com.geeksville.android.BinaryLogFile
+import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.handledLaunch
@@ -81,8 +82,12 @@ class RadioInterfaceService : Service(), Logging {
                     rest = null
 
                 if (rest != null)
-                    address = "x$rest" // Add the bluetooth prefix
+                    address = BluetoothInterface.toInterfaceName(rest) // Add the bluetooth prefix
             }
+
+            // If we are running on the emulator we default to the mock interface, so we can have some data to show to the user
+            if(address == null && isEmulator)
+                address = MockInterface.interfaceName
 
             return address
         }
@@ -108,6 +113,7 @@ class RadioInterfaceService : Service(), Logging {
                     'x' -> BluetoothInterface.addressValid(context, rest)
                     's' -> SerialInterface.addressValid(context, rest)
                     'n' -> true
+                    'm' -> true
                     else -> TODO("Unexpected interface type $c")
                 }
                 if (!isValid)
@@ -236,6 +242,7 @@ class RadioInterfaceService : Service(), Logging {
                 radioIf = when (c) {
                     'x' -> BluetoothInterface(this, rest)
                     's' -> SerialInterface(this, rest)
+                    'm' -> MockInterface(this)
                     'n' -> nopIf
                     else -> {
                         errormsg("Unexpected radio interface type")
