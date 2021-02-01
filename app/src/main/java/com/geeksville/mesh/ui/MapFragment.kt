@@ -204,9 +204,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
         mapView?.onResume()
     }
 
-    override fun onDestroy() {
+    override fun onDestroyView() {
         mapView?.onDestroy()
-        super.onDestroy()
+        super.onDestroyView()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

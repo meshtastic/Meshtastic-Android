@@ -270,8 +270,12 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
             val testnodes = listOf(
                 DeviceListEntry("Simulated interface", "m", true),
+                DeviceListEntry(context.getString(R.string.none), "n", true)
+                /* Don't populate fake bluetooth devices, because we don't want testlab inside of google
+                to try and use them.
+
                 DeviceListEntry("Meshtastic_ab12", "xaa", false),
-                DeviceListEntry("Meshtastic_32ac", "xbb", true)
+                DeviceListEntry("Meshtastic_32ac", "xbb", true) */
             )
 
             devices.value = (testnodes.map { it.address to it }).toMap().toMutableMap()
