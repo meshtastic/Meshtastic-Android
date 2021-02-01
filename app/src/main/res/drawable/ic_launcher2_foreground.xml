@@ -8,12 +8,12 @@
       android:translateX="18.36"
       android:translateY="18.36">
     <path
-        android:pathData="m16.9229,9.3914 l-4.8076,13.3628 -1.0141,-1.3106 5.3136,-14.7693c0.1142,-0.3174 0.3038,-0.5075 0.5065,-0.5079 0.2028,-0.0003 0.3925,0.1891 0.507,0.5062l5.3259,14.7461 -1.0128,1.3141z"
+        android:pathData="m17.5564,11.8482 l-5.208,7.6376 -1.5217,-1.0377 5.9674,-8.7512c0.1714,-0.2513 0.4558,-0.4019 0.76,-0.4022 0.3042,-0.0003 0.5889,0.1497 0.7608,0.4008l5.9811,8.7374 -1.5199,1.0404z"
         android:strokeLineJoin="round"
         android:fillColor="#2c2d3c"
         android:fillType="evenOdd"/>
     <path
-        android:pathData="m6.8349,22.7403 l5.6159,-15.6089 -1.0141,-1.3106 -5.6159,15.6089z"
+        android:pathData="m5.854,19.4956 l6.3707,-9.3423 -1.5749,-1.0739 -6.3707,9.3423z"
         android:strokeLineJoin="round"
         android:fillColor="#2c2d3c"
         android:fillType="evenOdd"/>

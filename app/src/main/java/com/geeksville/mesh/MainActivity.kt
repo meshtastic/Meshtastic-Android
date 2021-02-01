@@ -606,7 +606,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
     /// Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(connected: MeshService.ConnectionState) {
-        debug("connchange ${model.isConnected.value}")
+        debug("connchange ${model.isConnected.value} -> $connected")
 
         if (connected == MeshService.ConnectionState.CONNECTED) {
             model.meshService?.let { service ->

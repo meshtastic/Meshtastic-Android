@@ -1,7 +1,6 @@
 package com.geeksville.mesh.model
 
 import androidx.lifecycle.MutableLiveData
-import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.mesh.MeshUser
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.Position
@@ -43,15 +42,15 @@ class NodeDB(private val ui: UIViewModel) {
         )
     }
 
-    private val seedWithTestNodes = isEmulator
+    private val seedWithTestNodes = false
 
     /// The unique ID of our node
-    val myId = object : MutableLiveData<String?>(if (isEmulator) "+16508765309" else null) {}
+    val myId = object : MutableLiveData<String?>(if (seedWithTestNodes) "+16508765309" else null) {}
 
     /// A map from nodeid to to nodeinfo
     val nodes =
         object :
-            MutableLiveData<Map<String, NodeInfo>>(mapOf(*(if (isEmulator) testNodes else listOf()).map { it.user!!.id to it }
+            MutableLiveData<Map<String, NodeInfo>>(mapOf(*(if (seedWithTestNodes) testNodes else listOf()).map { it.user!!.id to it }
                 .toTypedArray())) {}
 
     /// Could be null if we haven't received our node DB yet

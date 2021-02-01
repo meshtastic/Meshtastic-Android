@@ -265,10 +265,11 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         debug("BTScan component active")
         selectedAddress = RadioInterfaceService.getDeviceAddress(context)
 
-        return if (bluetoothAdapter == null) {
+        return if (bluetoothAdapter == null || RadioInterfaceService.isMockInterfaceAvailable(context)) {
             warn("No bluetooth adapter.  Running under emulation?")
 
             val testnodes = listOf(
+                DeviceListEntry("Simulated interface", "m", true),
                 DeviceListEntry("Meshtastic_ab12", "xaa", false),
                 DeviceListEntry("Meshtastic_32ac", "xbb", true)
             )

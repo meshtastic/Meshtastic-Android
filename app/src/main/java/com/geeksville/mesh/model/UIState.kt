@@ -11,7 +11,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.android.Logging
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
@@ -77,10 +76,7 @@ class UIViewModel(app: Application) : AndroidViewModel(app), Logging {
         fun getChannel(c: MeshProtos.RadioConfig?): Channel? {
             val channel = c?.channelSettings?.let { Channel(it) }
 
-            return if (channel == null && isEmulator)
-                Channel.emulated
-            else
-                channel
+            return channel
         }
 
         fun getPreferences(context: Context): SharedPreferences =
