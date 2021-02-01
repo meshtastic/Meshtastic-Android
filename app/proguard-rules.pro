@@ -30,6 +30,10 @@
 -keep class com.geeksville.mesh.**{*;}
 -keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite { <fields>; }
 
+# Recommended by mapbox to prevent native crashes
+-dontwarn com.mapbox.**
+-keep class com.mapbox.** { *; }
+
 # for kotlinx.serialization
 -keepattributes *Annotation*, InnerClasses
 -dontnote kotlinx.serialization.SerializationKt
