@@ -793,31 +793,32 @@ class MainActivity : AppCompatActivity(), Logging,
             connectionJob = mainScope.handledLaunch {
                 model.meshService = service
 
-                usbDevice?.let { usb ->
-                    debug("Switching to USB radio ${usb.deviceName}")
-                    service.setDeviceAddress(SerialInterface.toInterfaceName(usb.deviceName))
-                    usbDevice =
-                        null // Only switch once - thereafter it should be stored in settings
-                }
-
-                // We don't start listening for packets until after we are connected to the service
-                registerMeshReceiver()
-
-                // Init our messages table with the service's record of past text messages (ignore all other message types)
-                val msgs =
-                    service.oldMessages.filter { p -> p.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE }
-                debug("Service provided ${msgs.size} messages and myNodeNum ${service.myNodeInfo?.myNodeNum}")
-                model.myNodeInfo.value = service.myNodeInfo
-                model.messagesState.setMessages(msgs)
-                val connectionState =
-                    MeshService.ConnectionState.valueOf(service.connectionState())
-
-                // if we are not connected, onMeshConnectionChange won't fetch nodes from the service
-                // in that case, we do it here - because the service certainly has a better idea of node db that we have
-                if (connectionState != MeshService.ConnectionState.CONNECTED)
-                    updateNodesFromDevice()
-
                 try {
+                    usbDevice?.let { usb ->
+                        debug("Switching to USB radio ${usb.deviceName}")
+                        service.setDeviceAddress(SerialInterface.toInterfaceName(usb.deviceName))
+                        usbDevice =
+                            null // Only switch once - thereafter it should be stored in settings
+                    }
+
+                    // We don't start listening for packets until after we are connected to the service
+                    registerMeshReceiver()
+
+                    // Init our messages table with the service's record of past text messages (ignore all other message types)
+                    val msgs =
+                        service.oldMessages.filter { p -> p.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE }
+                    debug("Service provided ${msgs.size} messages and myNodeNum ${service.myNodeInfo?.myNodeNum}")
+                    model.myNodeInfo.value = service.myNodeInfo
+                    model.messagesState.setMessages(msgs)
+                    val connectionState =
+                        MeshService.ConnectionState.valueOf(service.connectionState())
+
+                    // if we are not connected, onMeshConnectionChange won't fetch nodes from the service
+                    // in that case, we do it here - because the service certainly has a better idea of node db that we have
+                    if (connectionState != MeshService.ConnectionState.CONNECTED)
+                        updateNodesFromDevice()
+
+
                     // We won't receive a notify for the initial state of connection, so we force an update here
                     onMeshConnectionChanged(connectionState)
                 } catch (ex: RemoteException) {
