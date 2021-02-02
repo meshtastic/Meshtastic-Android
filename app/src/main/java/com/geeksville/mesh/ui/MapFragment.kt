@@ -136,7 +136,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
      * Mapbox native code can crash painfully if you ever call a mapbox view function while the view is not actively being show
      */
     private val isViewVisible: Boolean
-        get() = view != null && isResumed
+        get() = view != null && isResumed && (mapView?.isDestroyed != false)
 
     override fun onViewCreated(viewIn: View, savedInstanceState: Bundle?) {
         super.onViewCreated(viewIn, savedInstanceState)
@@ -145,9 +145,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
         if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
             val vIn = viewIn.findViewById<MapView>(R.id.mapView)
             mapView = vIn
-            vIn.onCreate(savedInstanceState)
-
             mapView?.let { v ->
+                v.onCreate(savedInstanceState)
+
                 // Each time the pane is shown start fetching new map info (we do this here instead of
                 // onCreate because getMapAsync can die in native code if the view goes away)
                 v.getMapAsync { map ->
@@ -205,13 +205,24 @@ class MapFragment : ScreenFragment("Map"), Logging {
     }
 
     override fun onDestroyView() {
-        mapView?.onDestroy()
         super.onDestroyView()
+        mapView?.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        mapView?.onSaveInstanceState(outState)
+        mapView?.let {
+            if (!it.isDestroyed)
+                it.onSaveInstanceState(outState)
+        }
         super.onSaveInstanceState(outState)
+    }
+
+    override fun onLowMemory() {
+        mapView?.let {
+            if (!it.isDestroyed)
+                it.onLowMemory()
+        }
+        super.onLowMemory()
     }
 }
 
