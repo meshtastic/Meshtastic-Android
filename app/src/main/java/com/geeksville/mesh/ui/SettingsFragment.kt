@@ -674,8 +674,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             addDeviceButton(device, true)
         }
 
-        // The device the user is already paired with is offline currently, still show it
-        // it in the list, but greyed out
+        // The selected device is not in the scan; it is either offline, or it doesn't advertise
+        // itself (most BLE devices don't advertise when connected).
+        // Show it in the list, greyed out based on connection status.
         if (!hasShownOurDevice) {
             // Note: we pull this into a tempvar, because otherwise some other thread can change selectedAddress after our null check
             // and before use
