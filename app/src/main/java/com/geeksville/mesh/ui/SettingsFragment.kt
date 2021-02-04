@@ -660,6 +660,56 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         binding.scanProgressBar.visibility = visible
         binding.deviceRadioGroup.visibility = visible
     }
+    private fun updateDevicesButtons( devices: MutableMap<String, BTScanModel.DeviceListEntry>?) {
+        // Remove the old radio buttons and repopulate
+        binding.deviceRadioGroup.removeAllViews()
+
+        if(devices == null) return
+
+        val adapter = scanModel.bluetoothAdapter
+        var hasShownOurDevice = false
+        devices.values.forEach { device ->
+            if (device.address == scanModel.selectedNotNull)
+                hasShownOurDevice = true
+            addDeviceButton(device, true)
+        }
+
+        // The selected device is not in the scan; it is either offline, or it doesn't advertise
+        // itself (most BLE devices don't advertise when connected).
+        // Show it in the list, greyed out based on connection status.
+        if (!hasShownOurDevice) {
+            // Note: we pull this into a tempvar, because otherwise some other thread can change selectedAddress after our null check
+            // and before use
+            val bleAddr = scanModel.selectedBluetooth
+
+            if (bleAddr != null && adapter != null && adapter.isEnabled) {
+                val bDevice =
+                    adapter.getRemoteDevice(bleAddr)
+                if (bDevice.name != null) { // ignore nodes that node have a name, that means we've lost them since they appeared
+                    val curDevice = BTScanModel.DeviceListEntry(
+                        bDevice.name,
+                        scanModel.selectedAddress!!,
+                        bDevice.bondState == BOND_BONDED
+                    )
+                    addDeviceButton(curDevice, model.isConnected.value == MeshService.ConnectionState.CONNECTED)
+                }
+            } else if (scanModel.selectedUSB != null) {
+                // Must be a USB device, show a placeholder disabled entry
+                val curDevice = BTScanModel.DeviceListEntry(
+                    scanModel.selectedUSB!!,
+                    scanModel.selectedAddress!!,
+                    false
+                )
+                addDeviceButton(curDevice, false)
+            }
+        }
+
+        val hasBonded =
+            RadioInterfaceService.getBondedDeviceAddress(requireContext()) != null
+
+        // get rid of the warning text once at least one device is paired
+        binding.warningNotPaired.visibility = if (hasBonded) View.GONE else View.VISIBLE
+    }
 
     /// Setup the GUI to do a classic (pre SDK 26 BLE scan)
     private fun initClassicScan() {
@@ -681,54 +731,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
         })
 
-        scanModel.devices.observe(viewLifecycleOwner, Observer { devices ->
-            // Remove the old radio buttons and repopulate
-            binding.deviceRadioGroup.removeAllViews()
+        scanModel.devices.observe(
+            viewLifecycleOwner,
+            Observer { devices -> updateDevicesButtons(devices) })
 
-            val adapter = scanModel.bluetoothAdapter
-
-            var hasShownOurDevice = false
-            devices.values.forEach { device ->
-                if (device.address == scanModel.selectedNotNull)
-                    hasShownOurDevice = true
-                addDeviceButton(device, true)
-            }
-
-            // The device the user is already paired with is offline currently, still show it
-            // it in the list, but greyed out
-            if (!hasShownOurDevice) {
-                // Note: we pull this into a tempvar, because otherwise some other thread can change selectedAddress after our null check
-                // and before use
-                val bleAddr = scanModel.selectedBluetooth
-
-                if (bleAddr != null && adapter != null && adapter.isEnabled) {
-                    val bDevice =
-                        adapter.getRemoteDevice(bleAddr)
-                    if (bDevice.name != null) { // ignore nodes that node have a name, that means we've lost them since they appeared
-                        val curDevice = BTScanModel.DeviceListEntry(
-                            bDevice.name,
-                            scanModel.selectedAddress!!,
-                            bDevice.bondState == BOND_BONDED
-                        )
-                        addDeviceButton(curDevice, false)
-                    }
-                } else if (scanModel.selectedUSB != null) {
-                    // Must be a USB device, show a placeholder disabled entry
-                    val curDevice = BTScanModel.DeviceListEntry(
-                        scanModel.selectedUSB!!,
-                        scanModel.selectedAddress!!,
-                        false
-                    )
-                    addDeviceButton(curDevice, false)
-                }
-            }
-
-            val hasBonded =
-                RadioInterfaceService.getBondedDeviceAddress(requireContext()) != null
-
-            // get rid of the warning text once at least one device is paired
-            binding.warningNotPaired.visibility = if (hasBonded) View.GONE else View.VISIBLE
-        })
+        model.isConnected.observe(
+            viewLifecycleOwner,
+            { updateDevicesButtons(scanModel.devices.value) })
     }
 
     /// Start running the modern scan, once it has one result we enable the
