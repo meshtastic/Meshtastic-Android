@@ -30,6 +30,7 @@ import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
 import com.geeksville.android.isGooglePlayAvailable
 import com.geeksville.mesh.MainActivity
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.bluetoothManager
 import com.geeksville.mesh.android.usbManager
@@ -603,6 +604,26 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             requireActivity().hideKeyboard()
         }
 
+        binding.positionBroadcastPeriodEditText.on(EditorInfo.IME_ACTION_DONE) {
+            val n = binding.positionBroadcastPeriodEditText.text.toString().toIntOrNull()
+            debug("did IME action, text = ${binding.positionBroadcastPeriodEditText.text.toString()}, int=$n")
+            val meshService = model.meshService
+            if (n != null && meshService != null) {
+                try {
+                    var config: MeshProtos.RadioConfig =
+                        MeshProtos.RadioConfig.parseFrom(meshService.getRadioConfig())
+                    val builder : MeshProtos.RadioConfig.Builder = config.toBuilder()
+                    builder.preferencesBuilder.setPositionBroadcastSecs(n * 60)
+                    builder.preferencesBuilder.setLsSecs(n * 60)
+                    config = builder.build()
+                    debug("config=${config.toString()}")
+                    meshService.setRadioConfig(config.toByteArray())
+                } catch (ex: RemoteException) {
+                    errormsg("Can't change parameter, is device offline? ${ex.message}")
+                }
+            }
+
+        }
         val app = (requireContext().applicationContext as GeeksvilleApplication)
 
         // Set analytics checkbox
