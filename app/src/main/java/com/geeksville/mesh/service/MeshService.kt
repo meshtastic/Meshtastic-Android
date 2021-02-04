@@ -73,7 +73,9 @@ class MeshService : Service(), Logging {
 
         class IdNotFoundException(id: String) : Exception("ID not found $id")
         class NodeNumNotFoundException(id: Int) : Exception("NodeNum not found $id")
-        class IsUpdatingException() : Exception("Operation prohibited during firmware update")
+
+        /** We treat software update as similar to loss of comms to the regular bluetooth service (so things like sendPosition for background GPS ignores the problem */
+        class IsUpdatingException() : RadioNotConnectedException("Operation prohibited during firmware update")
 
         /**
          * Talk to our running service and try to set a new device address.  And then immediately
