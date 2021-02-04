@@ -1085,6 +1085,9 @@ class MeshService : Service(), Logging {
 
         setFirmwareUpdateFilename(myInfo)
 
+        val a = RadioInterfaceService.getBondedDeviceAddress(this)
+        val isBluetoothInterface = a != null && a.startsWith("x")
+
         val mi = with(myInfo) {
             MyNodeInfo(
                 myNodeNum,
@@ -1093,7 +1096,7 @@ class MeshService : Service(), Logging {
                 hwModel,
                 firmwareVersion,
                 firmwareUpdateFilename != null,
-                SoftwareUpdateService.shouldUpdate(
+                isBluetoothInterface && SoftwareUpdateService.shouldUpdate(
                     this@MeshService,
                     DeviceVersion(firmwareVersion)
                 ),
