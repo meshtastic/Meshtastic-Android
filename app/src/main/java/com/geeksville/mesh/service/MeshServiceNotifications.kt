@@ -73,7 +73,7 @@ class MeshServiceNotifications(
         val builder = NotificationCompat.Builder(context, channelId).setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_MIN)
             .setCategory(category)
-            .setSmallIcon(R.drawable.app_icon)
+            .setSmallIcon(if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) R.drawable.app_icon_novect else R.drawable.app_icon) // vector form icons don't work reliably on  older androids
             .setContentTitle(summaryString) // leave this off for now so our notification looks smaller
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(openAppIntent)
