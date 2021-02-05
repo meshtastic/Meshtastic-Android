@@ -344,6 +344,9 @@ class MeshService : Service(), Logging {
         radio.close()
         saveSettings()
 
+        stopForeground(true) // Make sure we aren't using the notification first
+        serviceNotifications.close()
+
         super.onDestroy()
         serviceJob.cancel()
     }
