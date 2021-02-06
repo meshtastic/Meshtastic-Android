@@ -30,6 +30,7 @@ import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
 import com.geeksville.android.isGooglePlayAvailable
 import com.geeksville.mesh.MainActivity
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.bluetoothManager
 import com.geeksville.mesh.android.usbManager
@@ -461,7 +462,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
 @SuppressLint("NewApi")
 class SettingsFragment : ScreenFragment("Settings"), Logging {
-
+    private val MAX_INT_DEVICE = 0xFFFFFFFF
     private var _binding: SettingsFragmentBinding? = null
 
     // This property is only valid between onCreateView and onDestroyView.
@@ -573,15 +574,25 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     /// Setup the ui widgets unrelated to BLE scanning
     private fun initCommonUI() {
-        model.ownerName.observe(viewLifecycleOwner, Observer { name ->
+        model.ownerName.observe(viewLifecycleOwner, { name ->
             binding.usernameEditText.setText(name)
         })
 
+        model.radioConfig.observe(viewLifecycleOwner, { _ ->
+            binding.positionBroadcastPeriodEditText.setText(model.positionBroadcastSecs.toString())
+            binding.lsSleepEditText.setText(model.lsSleepSecs.toString())
+        })
+
         // Only let user edit their name or set software update while connected to a radio
-        model.isConnected.observe(viewLifecycleOwner, Observer { connected ->
-            binding.usernameView.isEnabled = connected == MeshService.ConnectionState.CONNECTED
-            if (connected == MeshService.ConnectionState.DISCONNECTED)
+        model.isConnected.observe(viewLifecycleOwner, Observer { connectionState ->
+            val connected = connectionState == MeshService.ConnectionState.CONNECTED
+            binding.usernameView.isEnabled = connected
+            binding.positionBroadcastPeriodView.isEnabled = connected
+            binding.lsSleepView.isEnabled = connected
+
+            if (connectionState == MeshService.ConnectionState.DISCONNECTED)
                 model.ownerName.value = ""
+
             initNodeInfo()
         })
 
@@ -599,7 +610,28 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             val n = binding.usernameEditText.text.toString().trim()
             if (n.isNotEmpty())
                 model.setOwner(n)
+            requireActivity().hideKeyboard()
+        }
 
+        binding.positionBroadcastPeriodEditText.on(EditorInfo.IME_ACTION_DONE) {
+            val str = binding.positionBroadcastPeriodEditText.text.toString()
+            val n = str.toIntOrNull()
+            if (n != null && n <= MAX_INT_DEVICE && n >= 0) {
+                model.positionBroadcastSecs = n
+            } else {
+                binding.scanStatusText.text = "Bad value: $str"
+            }
+            requireActivity().hideKeyboard()
+        }
+
+        binding.lsSleepEditText.on(EditorInfo.IME_ACTION_DONE) {
+            val str = binding.lsSleepEditText.text.toString()
+            val n = str.toIntOrNull()
+            if (n != null && n < MAX_INT_DEVICE && n >= 0) {
+                model.lsSleepSecs = n
+            } else {
+                binding.scanStatusText.text = "Bad value: $str"
+            }
             requireActivity().hideKeyboard()
         }
 
