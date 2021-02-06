@@ -102,6 +102,49 @@ class UIViewModel(app: Application) : AndroidViewModel(app), Logging {
     val radioConfig = object : MutableLiveData<MeshProtos.RadioConfig?>(null) {
     }
 
+    var positionBroadcastSecs: Int?
+        get() {
+            radioConfig.value?.preferences?.let {
+                if (it.locationShare == MeshProtos.LocationSharing.LocDisabled) return 0
+                if (it.positionBroadcastSecs > 0) return it.positionBroadcastSecs
+                // These default values are borrowed from the device code.
+                if (it.isRouter) return 60 * 60
+                return 15 * 60
+            }
+            return null
+        }
+        set(value) {
+            val config = radioConfig.value
+            if (value != null && config != null) {
+                val builder = config.toBuilder()
+                if (value > 0) {
+                    builder.preferencesBuilder.positionBroadcastSecs = value
+                    builder.preferencesBuilder.locationShare =
+                        MeshProtos.LocationSharing.LocEnabled
+                } else
+                    builder.preferencesBuilder.locationShare =
+                        MeshProtos.LocationSharing.LocDisabled
+
+                setRadioConfig(builder.build())
+            }
+        }
+
+    var lsSleepSecs: Int?
+        get() {
+            radioConfig.value?.preferences?.let {
+                return it.lsSecs
+            }
+            return null
+        }
+        set(value) {
+            val config = radioConfig.value
+            if (value != null && config != null) {
+                val builder = config.toBuilder()
+                builder.preferencesBuilder.lsSecs = value
+                setRadioConfig(builder.build())
+            }
+        }
+
     /// hardware info about our local device
     val myNodeInfo = object : MutableLiveData<MyNodeInfo>(null) {}
 
