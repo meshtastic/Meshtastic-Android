@@ -7,7 +7,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.os.Build
@@ -25,8 +24,7 @@ import java.io.Closeable
 
 class MeshServiceNotifications(
     private val context: Context
-) : Closeable
-{
+) : Closeable {
     private val notificationManager: NotificationManager get() = context.notificationManager
     val notifyId = 101
     private var largeIcon: Bitmap? = null
@@ -101,19 +99,30 @@ class MeshServiceNotifications(
         summaryString: String,
         senderName: String
     ): Notification {
-        // We delay making this bitmap until we know we need it
-        if(largeIcon == null)
-            largeIcon = getBitmapFromVectorDrawable(R.mipmap.ic_launcher2)
-
-        val category = if (recentReceivedText != null) Notification.CATEGORY_SERVICE else Notification.CATEGORY_MESSAGE
+        val category =
+            if (recentReceivedText != null) Notification.CATEGORY_SERVICE else Notification.CATEGORY_MESSAGE
         val builder = NotificationCompat.Builder(context, channelId).setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_MIN)
             .setCategory(category)
-            .setSmallIcon(if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) R.drawable.app_icon_novect else R.drawable.app_icon) // vector form icons don't work reliably on  older androids
-            .setLargeIcon(largeIcon) // we must include a large icon because of a bug in cyanogenmod https://github.com/open-keychain/open-keychain/issues/1356#issue-89493995
             .setContentTitle(summaryString) // leave this off for now so our notification looks smaller
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(openAppIntent)
+
+        // Set the notification icon
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
+            // If running on really old versions of android (<= 5.1.1) (possibly only cyanogen) we might encounter a bug with setting application specific icons
+            // so punt and stay with just the bluetooth icon - see https://meshtastic.discourse.group/t/android-1-1-42-ready-for-alpha-testing/2399/3?u=geeksville
+            builder.setSmallIcon(android.R.drawable.stat_sys_data_bluetooth)
+        } else {
+            // Newer androids also support a 'large' icon
+
+            // We delay making this bitmap until we know we need it
+            if (largeIcon == null)
+                largeIcon = getBitmapFromVectorDrawable(R.mipmap.ic_launcher2)
+
+            builder.setSmallIcon(if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) R.drawable.app_icon_novect else R.drawable.app_icon) // vector form icons don't work reliably on  older androids
+                .setLargeIcon(largeIcon)
+        }
 
         // FIXME, show information about the nearest node
         // if(shortContent != null) builder.setContentText(shortContent)
