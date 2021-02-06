@@ -462,7 +462,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
 @SuppressLint("NewApi")
 class SettingsFragment : ScreenFragment("Settings"), Logging {
-
+    private val MAX_INT_DEVICE = 0xFFFFFFFF
     private var _binding: SettingsFragmentBinding? = null
 
     // This property is only valid between onCreateView and onDestroyView.
@@ -579,12 +579,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         })
 
         model.radioConfig.observe(viewLifecycleOwner, { _ ->
-            var inMinutes = model.positionBroadcastSecs
-            if (inMinutes != null) {
-                inMinutes /= 60
-            }
-            binding.positionBroadcastPeriodEditText.setText(inMinutes.toString())
-
+            binding.positionBroadcastPeriodEditText.setText(model.positionBroadcastSecs.toString())
             binding.lsSleepEditText.setText(model.lsSleepSecs.toString())
         })
 
@@ -620,9 +615,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         binding.positionBroadcastPeriodEditText.on(EditorInfo.IME_ACTION_DONE) {
             val str = binding.positionBroadcastPeriodEditText.text.toString()
-            var n = str.toIntOrNull()
-            if (n != null && n < 100000 && n >= 0) {
-                n *= 60
+            val n = str.toIntOrNull()
+            if (n != null && n <= MAX_INT_DEVICE && n >= 0) {
                 model.positionBroadcastSecs = n
             } else {
                 binding.scanStatusText.text = "Bad value: $str"
@@ -632,8 +626,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         binding.lsSleepEditText.on(EditorInfo.IME_ACTION_DONE) {
             val str = binding.lsSleepEditText.text.toString()
-            var n = str.toIntOrNull()
-            if (n != null && n < 100000 && n >= 0) {
+            val n = str.toIntOrNull()
+            if (n != null && n < MAX_INT_DEVICE && n >= 0) {
                 model.lsSleepSecs = n
             } else {
                 binding.scanStatusText.text = "Bad value: $str"
