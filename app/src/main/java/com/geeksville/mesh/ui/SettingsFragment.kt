@@ -574,15 +574,30 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     /// Setup the ui widgets unrelated to BLE scanning
     private fun initCommonUI() {
-        model.ownerName.observe(viewLifecycleOwner, Observer { name ->
+        model.ownerName.observe(viewLifecycleOwner, { name ->
             binding.usernameEditText.setText(name)
         })
 
+        model.radioConfig.observe(viewLifecycleOwner, { _ ->
+            var inMinutes = model.positionBroadcastSecs
+            if (inMinutes != null) {
+                inMinutes /= 60
+            }
+            binding.positionBroadcastPeriodEditText.setText(inMinutes.toString())
+
+            binding.lsSleepEditText.setText(model.lsSleepSecs.toString())
+        })
+
         // Only let user edit their name or set software update while connected to a radio
-        model.isConnected.observe(viewLifecycleOwner, Observer { connected ->
-            binding.usernameView.isEnabled = connected == MeshService.ConnectionState.CONNECTED
-            if (connected == MeshService.ConnectionState.DISCONNECTED)
+        model.isConnected.observe(viewLifecycleOwner, Observer { connectionState ->
+            val connected = connectionState == MeshService.ConnectionState.CONNECTED
+            binding.usernameView.isEnabled = connected
+            binding.positionBroadcastPeriodView.isEnabled = connected
+            binding.lsSleepView.isEnabled = connected
+
+            if (connectionState == MeshService.ConnectionState.DISCONNECTED)
                 model.ownerName.value = ""
+
             initNodeInfo()
         })
 
@@ -600,30 +615,32 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             val n = binding.usernameEditText.text.toString().trim()
             if (n.isNotEmpty())
                 model.setOwner(n)
-
             requireActivity().hideKeyboard()
         }
 
         binding.positionBroadcastPeriodEditText.on(EditorInfo.IME_ACTION_DONE) {
-            val n = binding.positionBroadcastPeriodEditText.text.toString().toIntOrNull()
-            debug("did IME action, text = ${binding.positionBroadcastPeriodEditText.text.toString()}, int=$n")
-            val meshService = model.meshService
-            if (n != null && meshService != null) {
-                try {
-                    var config: MeshProtos.RadioConfig =
-                        MeshProtos.RadioConfig.parseFrom(meshService.getRadioConfig())
-                    val builder : MeshProtos.RadioConfig.Builder = config.toBuilder()
-                    builder.preferencesBuilder.setPositionBroadcastSecs(n * 60)
-                    builder.preferencesBuilder.setLsSecs(n * 60)
-                    config = builder.build()
-                    debug("config=${config.toString()}")
-                    meshService.setRadioConfig(config.toByteArray())
-                } catch (ex: RemoteException) {
-                    errormsg("Can't change parameter, is device offline? ${ex.message}")
-                }
+            val str = binding.positionBroadcastPeriodEditText.text.toString()
+            var n = str.toIntOrNull()
+            if (n != null && n < 100000 && n >= 0) {
+                n *= 60
+                model.positionBroadcastSecs = n
+            } else {
+                binding.scanStatusText.text = "Bad value: $str"
             }
-
+            requireActivity().hideKeyboard()
         }
+
+        binding.lsSleepEditText.on(EditorInfo.IME_ACTION_DONE) {
+            val str = binding.lsSleepEditText.text.toString()
+            var n = str.toIntOrNull()
+            if (n != null && n < 100000 && n >= 0) {
+                model.lsSleepSecs = n
+            } else {
+                binding.scanStatusText.text = "Bad value: $str"
+            }
+            requireActivity().hideKeyboard()
+        }
+
         val app = (requireContext().applicationContext as GeeksvilleApplication)
 
         // Set analytics checkbox
