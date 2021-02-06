@@ -73,7 +73,9 @@ class MeshService : Service(), Logging {
 
         class IdNotFoundException(id: String) : Exception("ID not found $id")
         class NodeNumNotFoundException(id: Int) : Exception("NodeNum not found $id")
-        class IsUpdatingException() : Exception("Operation prohibited during firmware update")
+
+        /** We treat software update as similar to loss of comms to the regular bluetooth service (so things like sendPosition for background GPS ignores the problem */
+        class IsUpdatingException() : RadioNotConnectedException("Operation prohibited during firmware update")
 
         /**
          * Talk to our running service and try to set a new device address.  And then immediately
@@ -341,6 +343,9 @@ class MeshService : Service(), Logging {
 
         radio.close()
         saveSettings()
+
+        stopForeground(true) // Make sure we aren't using the notification first
+        serviceNotifications.close()
 
         super.onDestroy()
         serviceJob.cancel()
@@ -1085,6 +1090,9 @@ class MeshService : Service(), Logging {
 
         setFirmwareUpdateFilename(myInfo)
 
+        val a = RadioInterfaceService.getBondedDeviceAddress(this)
+        val isBluetoothInterface = a != null && a.startsWith("x")
+
         val mi = with(myInfo) {
             MyNodeInfo(
                 myNodeNum,
@@ -1093,7 +1101,7 @@ class MeshService : Service(), Logging {
                 hwModel,
                 firmwareVersion,
                 firmwareUpdateFilename != null,
-                SoftwareUpdateService.shouldUpdate(
+                isBluetoothInterface && SoftwareUpdateService.shouldUpdate(
                     this@MeshService,
                     DeviceVersion(firmwareVersion)
                 ),

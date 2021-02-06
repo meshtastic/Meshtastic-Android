@@ -22,7 +22,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 
 
-class RadioNotConnectedException(message: String = "Not connected to radio") :
+open class RadioNotConnectedException(message: String = "Not connected to radio") :
     BLEException(message)
 
 
