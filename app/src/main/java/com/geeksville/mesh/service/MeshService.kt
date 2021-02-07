@@ -596,17 +596,21 @@ class MeshService : Service(), Logging {
     }
 
     private fun rememberDataPacket(dataPacket: DataPacket) {
-        // discard old messages if needed then add the new one
-        while (recentDataPackets.size > 50)
-            recentDataPackets.removeAt(0)
+        // Now that we use data packets for more things, we need to be choosier about what we keep.  Since (currently - in the future less so)
+        // we only care about old text messages, we just store those...
+        if(dataPacket.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) {
+            // discard old messages if needed then add the new one
+            while (recentDataPackets.size > 50)
+                recentDataPackets.removeAt(0)
 
-        // FIXME - possible kotlin bug in 1.3.72 - it seems that if we start with the (globally shared) emptyList,
-        // then adding items are affecting that shared list rather than a copy.   This was causing aliasing of
-        // recentDataPackets with messages.value in the GUI.  So if the current list is empty we are careful to make a new list
-        if (recentDataPackets.isEmpty())
-            recentDataPackets = mutableListOf(dataPacket)
-        else
-            recentDataPackets.add(dataPacket)
+            // FIXME - possible kotlin bug in 1.3.72 - it seems that if we start with the (globally shared) emptyList,
+            // then adding items are affecting that shared list rather than a copy.   This was causing aliasing of
+            // recentDataPackets with messages.value in the GUI.  So if the current list is empty we are careful to make a new list
+            if (recentDataPackets.isEmpty())
+                recentDataPackets = mutableListOf(dataPacket)
+            else
+                recentDataPackets.add(dataPacket)
+        }
     }
 
     /// Update our model and resend as needed for a MeshPacket we just received from the radio

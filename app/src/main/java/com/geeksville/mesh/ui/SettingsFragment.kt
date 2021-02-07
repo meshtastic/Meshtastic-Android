@@ -574,6 +574,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     /// Setup the ui widgets unrelated to BLE scanning
     private fun initCommonUI() {
+        // We want to leave these visible in the IDE, but make sure they default to not visible until we have valid data
+        binding.positionBroadcastPeriodView.visibility = View.GONE
+        binding.lsSleepView.visibility = View.GONE
+
         model.ownerName.observe(viewLifecycleOwner, { name ->
             binding.usernameEditText.setText(name)
         })
@@ -587,8 +591,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         model.isConnected.observe(viewLifecycleOwner, Observer { connectionState ->
             val connected = connectionState == MeshService.ConnectionState.CONNECTED
             binding.usernameView.isEnabled = connected
-            binding.positionBroadcastPeriodView.isEnabled = connected
-            binding.lsSleepView.isEnabled = connected
+
+            // Don't even show advanced fields until after we have a connection
+            binding.positionBroadcastPeriodView.visibility = if (connected) View.VISIBLE else View.GONE
+            binding.lsSleepView.visibility = if (connected) View.VISIBLE else View.GONE
 
             if (connectionState == MeshService.ConnectionState.DISCONNECTED)
                 model.ownerName.value = ""
