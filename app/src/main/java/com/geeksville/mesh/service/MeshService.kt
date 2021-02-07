@@ -623,9 +623,14 @@ class MeshService : Service(), Logging {
 
             if (dataPacket != null) {
 
-                if (myInfo.myNodeNum == packet.from)
-                    debug("Ignoring packet sent from our node")
-                else {
+                if (myInfo.myNodeNum == packet.from) {
+                    // Handle position updates from the device
+                    if (data.portnumValue == Portnums.PortNum.POSITION_APP_VALUE) {
+                        val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
+                        handleReceivedPosition(packet.from, MeshProtos.Position.parseFrom(data.payload), rxTime)
+                    } else
+                        debug("Ignoring packet sent from our node, portnum=${data.portnumValue} ${bytes.size} bytes")
+                } else {
                     debug("Received data from $fromId, portnum=${data.portnumValue} ${bytes.size} bytes")
 
                     dataPacket.status = MessageStatus.RECEIVED

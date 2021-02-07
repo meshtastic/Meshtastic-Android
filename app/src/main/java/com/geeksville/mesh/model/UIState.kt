@@ -21,6 +21,7 @@ import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.service.MeshService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
 /// Given a human name, strip out the first letter of the first three words and return that as the initials for
 /// that user. If the original name is only one word, strip vowels from the original name and if the result is
@@ -119,12 +120,15 @@ class UIViewModel(app: Application) : AndroidViewModel(app), Logging {
                 val builder = config.toBuilder()
                 if (value > 0) {
                     builder.preferencesBuilder.positionBroadcastSecs = value
+                    builder.preferencesBuilder.gpsUpdateInterval = value
+                    builder.preferencesBuilder.sendOwnerInterval = max(1, 3600 / value).toInt()
                     builder.preferencesBuilder.locationShare =
                         MeshProtos.LocationSharing.LocEnabled
-                } else
+                } else {
+                    builder.preferencesBuilder.positionBroadcastSecs = Int.MAX_VALUE
                     builder.preferencesBuilder.locationShare =
                         MeshProtos.LocationSharing.LocDisabled
-
+                }
                 setRadioConfig(builder.build())
             }
         }
