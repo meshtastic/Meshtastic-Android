@@ -134,15 +134,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     var mapView: MapView? = null
 
-    /**
-     * Mapbox native code can crash painfully if you ever call a mapbox view function while the view is not actively being show
-     */
-    /**
-     * Mapbox native code can crash painfully if you ever call a mapbox view function while the view is not actively being show
-     */
-    private val isViewVisible: Boolean
-        get() = view != null && isResumed && mapView != null && !(mapView!!.isDestroyed)
-
     override fun onViewCreated(viewIn: View, savedInstanceState: Bundle?) {
         super.onViewCreated(viewIn, savedInstanceState)
 
@@ -178,9 +169,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
                     // Any times nodes change update our map
                     model.nodeDB.nodes.observe(viewLifecycleOwner, Observer { nodes ->
-                        debug("Nodes updated! map visible = $isViewVisible view!= null: ${view != null}  isResumed: $isResumed mapview destroyed: ${mapView?.isDestroyed}")
-                       // if (isViewVisible)
-                            onNodesChanged(map, nodes.values)
+                        onNodesChanged(map, nodes.values)
                     })
                     zoomToNodes(map)
                 }
