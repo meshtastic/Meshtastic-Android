@@ -9,6 +9,8 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.media.AudioAttributes
+import android.media.RingtoneManager
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
@@ -18,6 +20,7 @@ import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.notificationManager
+import com.geeksville.mesh.ui.SLogging
 import com.geeksville.mesh.utf8
 import java.io.Closeable
 
@@ -26,7 +29,10 @@ class MeshServiceNotifications(
     private val context: Context
 ) : Closeable {
     private val notificationManager: NotificationManager get() = context.notificationManager
+    // We have two notification channels: one for general service status and another one for messages
     val notifyId = 101
+    private val messageNotifyId = 102
+
     private var largeIcon: Bitmap? = null
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -36,11 +42,34 @@ class MeshServiceNotifications(
         val channel = NotificationChannel(
             channelId,
             channelName,
+            NotificationManager.IMPORTANCE_MIN
+        ).apply {
+            lightColor = Color.BLUE
+            lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+        }
+        notificationManager.createNotificationChannel(channel)
+        return channelId
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createMessageNotificationChannel(): String {
+        val channelId = "my_messages"
+        val channelName = context.getString(R.string.meshtastic_messages_notifications)
+        val channel = NotificationChannel(
+            channelId,
+            channelName,
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
             lightColor = Color.BLUE
-            importance = NotificationManager.IMPORTANCE_NONE
-            lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            setShowBadge(true)
+            setSound(
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
         }
         notificationManager.createNotificationChannel(channel)
         return channelId
@@ -56,17 +85,23 @@ class MeshServiceNotifications(
         }
     }
 
-    /**
-     * Update our notification with latest data
-     */
-    fun updateNotification(
-        recentReceivedText: DataPacket?,
-        summaryString: String,
-        senderName: String
-    ) {
-        val notification = createNotification(recentReceivedText, summaryString, senderName)
-        notificationManager.notify(notifyId, notification)
+    private val messageChannelId: String by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createMessageNotificationChannel()
+        } else {
+            // If earlier version channel ID is not used
+            // https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html#NotificationCompat.Builder(android.content.Context)
+            ""
+        }
     }
+
+    fun updateServiceStateNotification(summaryString: String) =
+        notificationManager.notify(notifyId,
+            createServiceStateNotification(summaryString))
+
+    fun updateMessageNotification(name: String, message: String) =
+        notificationManager.notify(messageNotifyId,
+            createMessageNotifcation(name, message))
 
     private val openAppIntent: PendingIntent by lazy {
         PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), 0)
@@ -91,20 +126,8 @@ class MeshServiceNotifications(
         return bitmap
     }
 
-    /**
-     * Generate a new version of our notification - reflecting current app state
-     */
-    fun createNotification(
-        recentReceivedText: DataPacket?,
-        summaryString: String,
-        senderName: String
-    ): Notification {
-        val category =
-            if (recentReceivedText != null) Notification.CATEGORY_SERVICE else Notification.CATEGORY_MESSAGE
-        val builder = NotificationCompat.Builder(context, channelId).setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_MIN)
-            .setCategory(category)
-            .setContentTitle(summaryString) // leave this off for now so our notification looks smaller
+    fun commonBuilder(channel: String) : NotificationCompat.Builder {
+        val builder = NotificationCompat.Builder(context, channel)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(openAppIntent)
 
@@ -123,20 +146,32 @@ class MeshServiceNotifications(
             builder.setSmallIcon(if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) R.drawable.app_icon_novect else R.drawable.app_icon) // vector form icons don't work reliably on  older androids
                 .setLargeIcon(largeIcon)
         }
+        return builder
+    }
 
-        // FIXME, show information about the nearest node
-        // if(shortContent != null) builder.setContentText(shortContent)
+    fun createServiceStateNotification(summaryString: String): Notification {
+        val builder = commonBuilder(channelId)
+        with(builder) {
+            setPriority(NotificationCompat.PRIORITY_MIN)
+            setCategory(Notification.CATEGORY_SERVICE)
+            setOngoing(true)
+            setContentTitle(summaryString) // leave this off for now so our notification looks smaller
+        }
+        return builder.build()
+    }
 
-        // If a text message arrived include it with our notification
-        recentReceivedText?.let { packet ->
-            // Try to show the human name of the sender if possible
-            builder.setContentText("Message from $senderName")
-            builder.setStyle(
+    fun createMessageNotifcation(name: String, message: String): Notification {
+        val builder = commonBuilder(messageChannelId)
+        with(builder) {
+            setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            setCategory(Notification.CATEGORY_MESSAGE)
+            setAutoCancel(true)
+            setContentTitle(name)
+            setStyle(
                 NotificationCompat.BigTextStyle()
-                    .bigText(packet.bytes!!.toString(utf8))
+                    .bigText(message),
             )
         }
-
         return builder.build()
     }
 
