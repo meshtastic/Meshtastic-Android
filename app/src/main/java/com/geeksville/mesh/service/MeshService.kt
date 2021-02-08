@@ -98,6 +98,8 @@ class MeshService : Service(), Logging {
         DEVICE_SLEEP // device is in LS sleep state, it will reconnected to us over bluetooth once it has data
     }
 
+    private var previousSummary: String? = null
+
     /// A mapping of receiver class name to package name - used for explicit broadcasts
     private val clientPackages = mutableMapOf<String, String>()
     private val serviceNotifications = MeshServiceNotifications(this)
@@ -124,18 +126,10 @@ class MeshService : Service(), Logging {
         getNodeNum = { myNodeNum }
     )
 
-    private fun getSenderName(): String {
-        val recentFrom = recentReceivedTextPacket?.from // safe, immutable copy
-        return if (recentFrom != null) {
-            nodeDBbyID[recentFrom]?.user?.longName
-                ?: recentFrom
-        } else {
-            getString(R.string.unknown_username)
-        }
+    private fun getSenderName(packet : DataPacket?): String {
+        val name = nodeDBbyID[packet?.from]?.user?.longName
+        return name ?: "Unknown username"
     }
-
-    /// A text message that has a arrived since the last notification update
-    private var recentReceivedTextPacket: DataPacket? = null
 
     private val notificationSummary
         get() = when (connectionState) {
@@ -259,11 +253,9 @@ class MeshService : Service(), Logging {
         })
     }
 
-    private fun updateNotification() = serviceNotifications.updateNotification(
-        recentReceivedTextPacket,
-        notificationSummary,
-        getSenderName()
-    )
+    private fun updateMessageNotification(message: DataPacket) =
+        serviceNotifications.updateMessageNotification(
+                getSenderName(message), message.bytes!!.toString(utf8))
 
     /**
      * tell android not to kill us
@@ -276,11 +268,9 @@ class MeshService : Service(), Logging {
 
         // We always start foreground because that's how our service is always started (if we didn't then android would kill us)
         // but if we don't really need foreground we immediately stop it.
-        val notification = serviceNotifications.createNotification(
-            recentReceivedTextPacket,
-            notificationSummary,
-            getSenderName()
-        )
+        val notification = serviceNotifications.createServiceStateNotification(
+            notificationSummary)
+
         startForeground(serviceNotifications.notifyId, notification)
         if (!wantForeground) {
             stopForeground(true)
@@ -650,9 +640,7 @@ class MeshService : Service(), Logging {
                     when (data.portnumValue) {
                         Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
                             debug("Received CLEAR_TEXT from $fromId")
-
-                            recentReceivedTextPacket = dataPacket
-                            updateNotification()
+                            updateMessageNotification(dataPacket)
                         }
 
                         // Handle new style position info
@@ -830,7 +818,7 @@ class MeshService : Service(), Logging {
 
     /// If we just changed our nodedb, we might want to do somethings
     private fun onNodeDBChanged() {
-        updateNotification()
+        maybeUpdateServiceStatusNotification()
 
         // we don't ask for GPS locations from android if our device has a built in GPS
         // Note: myNodeInfo can go away if we lose connections, so it might be null
@@ -976,7 +964,15 @@ class MeshService : Service(), Logging {
         }
 
         // Update the android notification in the status bar
-        updateNotification()
+        maybeUpdateServiceStatusNotification()
+    }
+
+    private fun maybeUpdateServiceStatusNotification() {
+        val currentSummary = notificationSummary
+        if (previousSummary == null || !previousSummary.equals(currentSummary)) {
+            serviceNotifications.updateServiceStateNotification(currentSummary)
+            previousSummary = currentSummary
+        }
     }
 
     /**
