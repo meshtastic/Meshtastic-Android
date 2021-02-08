@@ -126,7 +126,7 @@ class MeshService : Service(), Logging {
         getNodeNum = { myNodeNum }
     )
 
-    private fun getSenderName(packet : DataPacket?): String {
+    private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
         return name ?: "Unknown username"
     }
@@ -255,7 +255,8 @@ class MeshService : Service(), Logging {
 
     private fun updateMessageNotification(message: DataPacket) =
         serviceNotifications.updateMessageNotification(
-                getSenderName(message), message.bytes!!.toString(utf8))
+            getSenderName(message), message.bytes!!.toString(utf8)
+        )
 
     /**
      * tell android not to kill us
@@ -269,7 +270,8 @@ class MeshService : Service(), Logging {
         // We always start foreground because that's how our service is always started (if we didn't then android would kill us)
         // but if we don't really need foreground we immediately stop it.
         val notification = serviceNotifications.createServiceStateNotification(
-            notificationSummary)
+            notificationSummary
+        )
 
         startForeground(serviceNotifications.notifyId, notification)
         if (!wantForeground) {
@@ -633,7 +635,11 @@ class MeshService : Service(), Logging {
                     // Handle position updates from the device
                     if (data.portnumValue == Portnums.PortNum.POSITION_APP_VALUE) {
                         val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
-                        handleReceivedPosition(packet.from, MeshProtos.Position.parseFrom(data.payload), rxTime)
+                        handleReceivedPosition(
+                            packet.from,
+                            MeshProtos.Position.parseFrom(data.payload),
+                            rxTime
+                        )
                     } else
                         debug("Ignoring packet sent from our node, portnum=${data.portnumValue} ${bytes.size} bytes")
                 } else {
@@ -1390,13 +1396,10 @@ class MeshService : Service(), Logging {
             if (currentPacketId == 0L) {
                 logAssert(it.packetIdBits == 8 || it.packetIdBits == 32) // Only values I'm expecting (though we don't require this)
 
-                val devicePacketId = if (it.currentPacketId == 0L) {
-                    // Old devices don't send their current packet ID, in that case just pick something random and it will probably be fine ;-)
-                    val random = Random(System.currentTimeMillis())
-                    random.nextLong().absoluteValue
-                } else
-                    it.currentPacketId
-
+                // We now always pick a random initial packet id (odds of collision with the device is insanely low with 32 bit ids)
+                val random = Random(System.currentTimeMillis())
+                val devicePacketId = random.nextLong().absoluteValue
+                
                 // Not inited - pick a number on the opposite side of what the device is using
                 currentPacketId = devicePacketId + numPacketIds / 2
             } else {
