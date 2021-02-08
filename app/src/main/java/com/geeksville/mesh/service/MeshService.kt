@@ -1015,7 +1015,7 @@ class MeshService : Service(), Logging {
                         val proto =
                             MeshProtos.FromRadio.parseFrom(bytes)
                         // info("Received from radio service: ${proto.toOneLineString()}")
-                        when (proto.variantCase.number) {
+                        when (proto.payloadVariantCase.number) {
                             MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(
                                 proto.packet
                             )
