@@ -2,6 +2,7 @@ package com.geeksville.mesh.service
 
 import android.location.Location
 import android.os.RemoteException
+import com.geeksville.mesh.DataPacket
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 
@@ -37,7 +38,7 @@ class MeshServiceLocationCallback(
             MeshService.info("got phone location")
             if (location.isAccurateForMesh) { // if within 200 meters, or accuracy is unknown
                 val shouldSend = isAllowedToSend()
-                val destinationNumber = if (shouldSend) MeshService.NODENUM_BROADCAST else getNodeNum()
+                val destinationNumber = if (shouldSend) DataPacket.NODENUM_BROADCAST else getNodeNum()
                 sendPosition(location, destinationNumber, wantResponse = shouldSend)
             } else {
                 MeshService.warn("accuracy ${location.accuracy} is too poor to use")

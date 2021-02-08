@@ -49,9 +49,6 @@ class MeshService : Service(), Logging {
 
     companion object : Logging {
 
-        /// special broadcast address
-        const val NODENUM_BROADCAST = (0xffffffff).toInt()
-
         /// Intents broadcast by MeshService
 
         @Deprecated(message = "Does not filter by port number.  For legacy reasons only broadcast for UNKNOWN_APP, switch to ACTION_RECEIVED")
@@ -71,11 +68,14 @@ class MeshService : Service(), Logging {
         const val ACTION_MESH_CONNECTED = "$prefix.MESH_CONNECTED"
         const val ACTION_MESSAGE_STATUS = "$prefix.MESSAGE_STATUS"
 
-        class IdNotFoundException(id: String) : Exception("ID not found $id")
-        class NodeNumNotFoundException(id: Int) : Exception("NodeNum not found $id")
+        open class NodeNotFoundException(reason: String) : Exception(reason)
+        class InvalidNodeIdException() : NodeNotFoundException("Invalid NodeId")
+        class NodeNumNotFoundException(id: Int) : NodeNotFoundException("NodeNum not found $id")
+        class IdNotFoundException(id: String) : NodeNotFoundException("ID not found $id")
 
         /** We treat software update as similar to loss of comms to the regular bluetooth service (so things like sendPosition for background GPS ignores the problem */
-        class IsUpdatingException() : RadioNotConnectedException("Operation prohibited during firmware update")
+        class IsUpdatingException() :
+            RadioNotConnectedException("Operation prohibited during firmware update")
 
         /**
          * Talk to our running service and try to set a new device address.  And then immediately
@@ -126,7 +126,7 @@ class MeshService : Service(), Logging {
         getNodeNum = { myNodeNum }
     )
 
-    private fun getSenderName(packet : DataPacket?): String {
+    private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
         return name ?: "Unknown username"
     }
@@ -238,7 +238,7 @@ class MeshService : Service(), Logging {
     private fun sendToRadio(p: ToRadio.Builder) {
         val b = p.build().toByteArray()
 
-        if(SoftwareUpdateService.isUpdating)
+        if (SoftwareUpdateService.isUpdating)
             throw IsUpdatingException()
 
         connectedRadio.sendToRadio(b)
@@ -255,7 +255,8 @@ class MeshService : Service(), Logging {
 
     private fun updateMessageNotification(message: DataPacket) =
         serviceNotifications.updateMessageNotification(
-                getSenderName(message), message.bytes!!.toString(utf8))
+            getSenderName(message), message.bytes!!.toString(utf8)
+        )
 
     /**
      * tell android not to kill us
@@ -269,7 +270,8 @@ class MeshService : Service(), Logging {
         // We always start foreground because that's how our service is always started (if we didn't then android would kill us)
         // but if we don't really need foreground we immediately stop it.
         val notification = serviceNotifications.createServiceStateNotification(
-            notificationSummary)
+            notificationSummary
+        )
 
         startForeground(serviceNotifications.notifyId, notification)
         if (!wantForeground) {
@@ -441,20 +443,37 @@ class MeshService : Service(), Logging {
         n
     )
 
-    /// Map a nodenum to the nodeid string, or return null if not present or no id found
-    private fun toNodeID(n: Int) =
-        if (n == NODENUM_BROADCAST) DataPacket.ID_BROADCAST else nodeDBbyNodeNum[n]?.user?.id
+    /** Map a nodenum to the nodeid string, or return null if not present
+    If we have a NodeInfo for this ID we prefer to return the string ID inside the user record.
+    but some nodes might not have a user record at all (because not yet received), in that case, we return
+    a hex version of the ID just based on the number */
+    private fun toNodeID(n: Int): String? =
+        if (n == DataPacket.NODENUM_BROADCAST)
+            DataPacket.ID_BROADCAST
+        else
+            nodeDBbyNodeNum[n]?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
 
     /// given a nodenum, return a db entry - creating if necessary
     private fun getOrCreateNodeInfo(n: Int) =
         nodeDBbyNodeNum.getOrPut(n) { -> NodeInfo(n) }
 
+    private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
+
     /// Map a userid to a node/ node num, or throw an exception if not found
-    private fun toNodeInfo(id: String) =
-        nodeDBbyID[id]
-            ?: throw IdNotFoundException(
-                id
-            )
+    /// We prefer to find nodes based on their assigned IDs, but if no ID has been assigned to a node, we can also find it based on node number
+    private fun toNodeInfo(id: String): NodeInfo {
+        // If this is a valid hexaddr will be !null
+        val hexStr = hexIdRegex.matchEntire(id)?.groups?.get(1)?.value
+
+        return nodeDBbyID[id] ?: when {
+            id == DataPacket.ID_LOCAL -> toNodeInfo(myNodeNum)
+            hexStr != null -> {
+                val n = hexStr.toLong(16).toInt()
+                nodeDBbyNodeNum[n] ?: throw IdNotFoundException(id)
+            }
+            else -> throw InvalidNodeIdException()
+        }
+    }
 
     private val numNodes get() = nodeDBbyNodeNum.size
 
@@ -463,12 +482,11 @@ class MeshService : Service(), Logging {
      */
     private val numOnlineNodes get() = nodeDBbyNodeNum.values.count { it.isOnline }
 
-    private fun toNodeNum(id: String) =
-        when (id) {
-            DataPacket.ID_BROADCAST -> NODENUM_BROADCAST
-            DataPacket.ID_LOCAL -> myNodeNum
-            else -> toNodeInfo(id).num
-        }
+    private fun toNodeNum(id: String): Int = when (id) {
+        DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
+        DataPacket.ID_LOCAL -> myNodeNum
+        else -> toNodeInfo(id).num
+    }
 
     /// A helper function that makes it easy to update node info objects
     private fun updateNodeInfo(nodeNum: Int, updatefn: (NodeInfo) -> Unit) {
@@ -502,7 +520,7 @@ class MeshService : Service(), Logging {
         from = myNodeNum
 
         // We might need to change broadcast addresses to work with old device loads
-        to = if (useShortAddresses && idNum == NODENUM_BROADCAST) 255 else idNum
+        to = if (useShortAddresses && idNum == DataPacket.NODENUM_BROADCAST) 255 else idNum
     }
 
     /**
@@ -588,7 +606,7 @@ class MeshService : Service(), Logging {
     private fun rememberDataPacket(dataPacket: DataPacket) {
         // Now that we use data packets for more things, we need to be choosier about what we keep.  Since (currently - in the future less so)
         // we only care about old text messages, we just store those...
-        if(dataPacket.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) {
+        if (dataPacket.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) {
             // discard old messages if needed then add the new one
             while (recentDataPackets.size > 50)
                 recentDataPackets.removeAt(0)
@@ -617,7 +635,11 @@ class MeshService : Service(), Logging {
                     // Handle position updates from the device
                     if (data.portnumValue == Portnums.PortNum.POSITION_APP_VALUE) {
                         val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
-                        handleReceivedPosition(packet.from, MeshProtos.Position.parseFrom(data.payload), rxTime)
+                        handleReceivedPosition(
+                            packet.from,
+                            MeshProtos.Position.parseFrom(data.payload),
+                            rxTime
+                        )
                     } else
                         debug("Ignoring packet sent from our node, portnum=${data.portnumValue} ${bytes.size} bytes")
                 } else {
@@ -911,7 +933,11 @@ class MeshService : Service(), Logging {
             // Do our startup init
             try {
                 connectTimeMsec = System.currentTimeMillis()
-                SoftwareUpdateService.sendProgress(this, ProgressNotStarted, true) // Kinda crufty way of reiniting software update
+                SoftwareUpdateService.sendProgress(
+                    this,
+                    ProgressNotStarted,
+                    true
+                ) // Kinda crufty way of reiniting software update
                 startConfig()
 
             } catch (ex: InvalidProtocolBufferException) {
@@ -995,7 +1021,7 @@ class MeshService : Service(), Logging {
                         val proto =
                             MeshProtos.FromRadio.parseFrom(bytes)
                         // info("Received from radio service: ${proto.toOneLineString()}")
-                        when (proto.variantCase.number) {
+                        when (proto.payloadVariantCase.number) {
                             MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(
                                 proto.packet
                             )
@@ -1144,7 +1170,6 @@ class MeshService : Service(), Logging {
     }
 
 
-
     /**
      * If we are updating nodes we might need to use old (fixed by firmware build)
      * region info to populate our new universal ROMs.
@@ -1252,7 +1277,7 @@ class MeshService : Service(), Logging {
         lat: Double,
         lon: Double,
         alt: Int,
-        destNum: Int = NODENUM_BROADCAST,
+        destNum: Int = DataPacket.NODENUM_BROADCAST,
         wantResponse: Boolean = false
     ) {
         debug("Sending our position to=$destNum lat=$lat, lon=$lon, alt=$alt")
@@ -1269,7 +1294,8 @@ class MeshService : Service(), Logging {
         val packet = newMeshPacketTo(destNum)
 
         packet.decoded = MeshProtos.SubPacket.newBuilder().also {
-            val isNewPositionAPI = deviceVersion >= DeviceVersion("1.20.0") // We changed position APIs with this version
+            val isNewPositionAPI =
+                deviceVersion >= DeviceVersion("1.20.0") // We changed position APIs with this version
             if (isNewPositionAPI) {
                 // Use the new position as data format
                 it.data = makeData(Portnums.PortNum.POSITION_APP_VALUE, position.toByteString())
@@ -1291,13 +1317,12 @@ class MeshService : Service(), Logging {
         lat: Double,
         lon: Double,
         alt: Int,
-        destNum: Int = NODENUM_BROADCAST,
+        destNum: Int = DataPacket.NODENUM_BROADCAST,
         wantResponse: Boolean = false
     ) = serviceScope.handledLaunch {
         try {
             sendPosition(lat, lon, alt, destNum, wantResponse)
-        }
-        catch(ex: RadioNotConnectedException) {
+        } catch (ex: RadioNotConnectedException) {
             warn("Ignoring disconnected radio during gps location update")
         }
     }
@@ -1371,13 +1396,10 @@ class MeshService : Service(), Logging {
             if (currentPacketId == 0L) {
                 logAssert(it.packetIdBits == 8 || it.packetIdBits == 32) // Only values I'm expecting (though we don't require this)
 
-                val devicePacketId = if (it.currentPacketId == 0L) {
-                    // Old devices don't send their current packet ID, in that case just pick something random and it will probably be fine ;-)
-                    val random = Random(System.currentTimeMillis())
-                    random.nextLong().absoluteValue
-                } else
-                    it.currentPacketId
-
+                // We now always pick a random initial packet id (odds of collision with the device is insanely low with 32 bit ids)
+                val random = Random(System.currentTimeMillis())
+                val devicePacketId = random.nextLong().absoluteValue
+                
                 // Not inited - pick a number on the opposite side of what the device is using
                 currentPacketId = devicePacketId + numPacketIds / 2
             } else {
