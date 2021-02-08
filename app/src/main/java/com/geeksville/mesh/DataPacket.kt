@@ -126,6 +126,11 @@ data class DataPacket(
         /** The Node ID for the local node - used for from when sender doesn't know our local node ID */
         const val ID_LOCAL = "^local"
 
+        /// special broadcast address
+        const val NODENUM_BROADCAST = (0xffffffff).toInt()
+
+        fun nodeNumToDefaultId(n: Int): String = "!%08x".format(n)
+
         override fun createFromParcel(parcel: Parcel): DataPacket {
             return DataPacket(parcel)
         }

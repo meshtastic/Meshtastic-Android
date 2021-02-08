@@ -1,10 +1,7 @@
 package com.geeksville.mesh.service
 
 import com.geeksville.android.Logging
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.Portnums
-import com.geeksville.mesh.Position
-import com.geeksville.mesh.R
+import com.geeksville.mesh.*
 import com.geeksville.mesh.model.getInitials
 import com.google.protobuf.ByteString
 import okhttp3.internal.toHexString
@@ -89,7 +86,7 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
                 nodeInfo = MeshProtos.NodeInfo.newBuilder().apply {
                     num = numIn
                     user = MeshProtos.User.newBuilder().apply {
-                        id = "!0x" + num.toHexString()
+                        id = DataPacket.nodeNumToDefaultId(numIn)
                         longName = "Sim " + num.toHexString()
                         shortName = getInitials(longName)
                     }.build()
