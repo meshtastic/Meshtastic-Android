@@ -152,7 +152,7 @@ class MeshServiceNotifications(
     fun createServiceStateNotification(summaryString: String): Notification {
         val builder = commonBuilder(channelId)
         with(builder) {
-            setPriority(NotificationCompat.PRIORITY_MIN)
+            priority = NotificationCompat.PRIORITY_MIN
             setCategory(Notification.CATEGORY_SERVICE)
             setOngoing(true)
             setContentTitle(summaryString) // leave this off for now so our notification looks smaller
@@ -163,10 +163,11 @@ class MeshServiceNotifications(
     fun createMessageNotifcation(name: String, message: String): Notification {
         val builder = commonBuilder(messageChannelId)
         with(builder) {
-            setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_MESSAGE)
             setAutoCancel(true)
             setContentTitle(name)
+            setContentText(message)
             setStyle(
                 NotificationCompat.BigTextStyle()
                     .bigText(message),
