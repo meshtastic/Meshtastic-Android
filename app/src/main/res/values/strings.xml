@@ -85,4 +85,5 @@
     <string name="message_delivery_status">Message delivery status</string>
     <string name="broadcast_position_secs">Broadcast position period (in seconds), 0 - disable</string>
     <string name="ls_sleep_secs">Device sleep period (in seconds)</string>
+    <string name="meshtastic_messages_notifications">Notifications about messages</string>
 </resources>
