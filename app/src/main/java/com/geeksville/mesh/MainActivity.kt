@@ -929,6 +929,7 @@ class MainActivity : AppCompatActivity(), Logging,
     val handler: Handler by lazy {
         Handler(mainLooper)
     }
+    // Keeps track of pings status so we update the menu properly.
     var pingRunning: Boolean = false
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
@@ -961,13 +962,13 @@ class MainActivity : AppCompatActivity(), Logging,
             }
             R.id.start_ping -> {
                 fun postPing() {
-                    // Schedule sending ping message and recursion.
+                    // Send ping message and arrange delayed recursion.
+                    debug("Sending ping")
+                    val str = "Ping " + DateFormat.getTimeInstance(DateFormat.SHORT)
+                        .format(Date(System.currentTimeMillis()))
+                    model.messagesState.sendMessage(str)
                     handler.postDelayed(
                         Runnable {
-                            debug("Sending message")
-                            val str = DateFormat.getTimeInstance(DateFormat.SHORT)
-                                .format(Date(System.currentTimeMillis()))
-                            model.messagesState.sendMessage("Ping " + str)
                             postPing()
                         },
                         30000
