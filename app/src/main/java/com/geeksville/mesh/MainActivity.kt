@@ -929,12 +929,9 @@ class MainActivity : AppCompatActivity(), Logging,
     val handler: Handler by lazy {
         Handler(mainLooper)
     }
-    // Keeps track of pings status so we update the menu properly.
-    var pingRunning: Boolean = false
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.start_ping).setVisible(!pingRunning)
-        menu.findItem(R.id.stop_ping).setVisible(pingRunning)
+        menu.findItem(R.id.stress_test).isVisible = BuildConfig.DEBUG // only show stress test for debug builds (for now)
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -960,7 +957,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 fragmentTransaction.commit()
                 return true
             }
-            R.id.start_ping -> {
+            R.id.stress_test -> {
                 fun postPing() {
                     // Send ping message and arrange delayed recursion.
                     debug("Sending ping")
@@ -975,14 +972,11 @@ class MainActivity : AppCompatActivity(), Logging,
                     )
                 }
                 postPing()
-                pingRunning = true
-                invalidateOptionsMenu()
-                return true
-            }
-            R.id.stop_ping -> {
-                handler.removeCallbacksAndMessages(null)
-                pingRunning = false
-                invalidateOptionsMenu()
+                item.isChecked = !item.isChecked // toggle ping test
+                if(item.isChecked)
+                    postPing()
+                else
+                    handler.removeCallbacksAndMessages(null)
                 return true
             }
             else -> super.onOptionsItemSelected(item)
