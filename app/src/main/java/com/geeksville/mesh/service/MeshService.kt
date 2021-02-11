@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.IBinder
 import android.os.RemoteException
 import android.widget.Toast
@@ -734,7 +735,8 @@ class MeshService : Service(), Logging {
         val packet = toMeshPacket(p)
         p.status = MessageStatus.ENROUTE
         p.time = System.currentTimeMillis() // update time to the actual time we started sending
-        // debug("SENDING TO RADIO: $packet")
+        if(BuildConfig.DEBUG)
+            debug("Sending to radio: $packet") // IMPORTANT: we only log this info for debug builds, because it might leak PII
         sendToRadio(packet)
     }
 

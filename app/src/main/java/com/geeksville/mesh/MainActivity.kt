@@ -961,7 +961,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 fun postPing() {
                     // Send ping message and arrange delayed recursion.
                     debug("Sending ping")
-                    val str = "Ping " + DateFormat.getTimeInstance(DateFormat.SHORT)
+                    val str = "Ping " + DateFormat.getTimeInstance(DateFormat.MEDIUM)
                         .format(Date(System.currentTimeMillis()))
                     model.messagesState.sendMessage(str)
                     handler.postDelayed(
