@@ -18,6 +18,7 @@ import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.os.RemoteException
 import android.view.Menu
 import android.view.MenuItem
@@ -60,6 +61,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import java.nio.charset.Charset
+import java.text.DateFormat
+import java.util.*
 
 /*
 UI design
@@ -923,6 +926,18 @@ class MainActivity : AppCompatActivity(), Logging,
         return true
     }
 
+    val handler: Handler by lazy {
+        Handler(mainLooper)
+    }
+    // Keeps track of pings status so we update the menu properly.
+    var pingRunning: Boolean = false
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        menu.findItem(R.id.start_ping).setVisible(!pingRunning)
+        menu.findItem(R.id.stop_ping).setVisible(pingRunning)
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -943,6 +958,31 @@ class MainActivity : AppCompatActivity(), Logging,
                 fragmentTransaction.add(R.id.mainActivityLayout, nameFragment)
                 fragmentTransaction.addToBackStack(null)
                 fragmentTransaction.commit()
+                return true
+            }
+            R.id.start_ping -> {
+                fun postPing() {
+                    // Send ping message and arrange delayed recursion.
+                    debug("Sending ping")
+                    val str = "Ping " + DateFormat.getTimeInstance(DateFormat.SHORT)
+                        .format(Date(System.currentTimeMillis()))
+                    model.messagesState.sendMessage(str)
+                    handler.postDelayed(
+                        Runnable {
+                            postPing()
+                        },
+                        30000
+                    )
+                }
+                postPing()
+                pingRunning = true
+                invalidateOptionsMenu()
+                return true
+            }
+            R.id.stop_ping -> {
+                handler.removeCallbacksAndMessages(null)
+                pingRunning = false
+                invalidateOptionsMenu()
                 return true
             }
             else -> super.onOptionsItemSelected(item)
