@@ -14,7 +14,7 @@
     <string name="sample_message">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
     <string name="some_username" translatable="false">SKH</string>
     <string name="send_text">Send Text</string>
-    <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in alpha-testing, if you find problems please post on our forum: meshtastic.discourse.group.\n\nFor more information see our web page - www.meshtastic.org.</string>
+    <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: meshtastic.discourse.group.\n\nFor more information see our web page - www.meshtastic.org.</string>
     <string name="username_unset">Username unset</string>
     <string name="your_name">Your Name</string>
     <string name="analytics_okay">Anonymous usage statistics and crash reports.</string>
