@@ -971,7 +971,6 @@ class MainActivity : AppCompatActivity(), Logging,
                         30000
                     )
                 }
-                postPing()
                 item.isChecked = !item.isChecked // toggle ping test
                 if(item.isChecked)
                     postPing()
