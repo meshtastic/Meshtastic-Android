@@ -734,7 +734,8 @@ class MeshService : Service(), Logging {
         val packet = toMeshPacket(p)
         p.status = MessageStatus.ENROUTE
         p.time = System.currentTimeMillis() // update time to the actual time we started sending
-        // debug("SENDING TO RADIO: $packet")
+        if (BuildConfig.DEBUG)
+            debug("Sending to radio: $packet") // IMPORTANT: we only log this info for debug builds, because it might leak PII
         sendToRadio(packet)
     }
 
@@ -1306,6 +1307,9 @@ class MeshService : Service(), Logging {
             it.wantResponse = wantResponse
         }.build()
 
+        // Assume our position packets are not critical
+        packet.priority = MeshProtos.MeshPacket.Priority.BACKGROUND
+
         // Also update our own map for our nodenum, by handling the packet just like packets from other users
         handleReceivedPosition(myNodeInfo!!.myNodeNum, position)
 
@@ -1399,7 +1403,7 @@ class MeshService : Service(), Logging {
                 // We now always pick a random initial packet id (odds of collision with the device is insanely low with 32 bit ids)
                 val random = Random(System.currentTimeMillis())
                 val devicePacketId = random.nextLong().absoluteValue
-                
+
                 // Not inited - pick a number on the opposite side of what the device is using
                 currentPacketId = devicePacketId + numPacketIds / 2
             } else {
@@ -1447,13 +1451,16 @@ class MeshService : Service(), Logging {
             BluetoothInterface.safe
                 ?: throw Exception("Can't update - no bluetooth connected")
 
-        if (updateJob?.isActive == true)
+        if (updateJob?.isActive == true) {
+            errormsg("A firmware update is already running")
             throw Exception("Firmware update already running")
-        else
+        } else {
+            debug("Creating firmware update coroutine")
             updateJob = serviceScope.handledLaunch {
-                info("Starting firmware update coroutine")
+                debug("Starting firmware update coroutine")
                 SoftwareUpdateService.doUpdate(this@MeshService, safe, filename)
             }
+        }
     }
 
     /**

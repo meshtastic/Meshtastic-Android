@@ -12,6 +12,11 @@
         android:title="@string/debug_panel"
         app:showAsAction="withText" />
     <item
+        android:id="@+id/stress_test"
+        android:checkable="true"
+        android:checked="false"
+        android:title="Protocol stress test" />
+    <item
         android:id="@+id/about"
         android:title="@string/about"
         app:showAsAction="withText" />

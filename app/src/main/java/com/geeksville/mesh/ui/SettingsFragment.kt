@@ -745,8 +745,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val hasBonded =
             RadioInterfaceService.getBondedDeviceAddress(requireContext()) != null
 
-        // get rid of the warning text once at least one device is paired
-        binding.warningNotPaired.visibility = if (hasBonded) View.GONE else View.VISIBLE
+        // get rid of the warning text once at least one device is paired.
+        // If we are running on an emulator, always leave this message showing so we can test the worst case layout
+        binding.warningNotPaired.visibility = if (hasBonded && !RadioInterfaceService.isMockInterfaceAvailable(requireContext())) View.GONE else View.VISIBLE
     }
 
     /// Setup the GUI to do a classic (pre SDK 26 BLE scan)
