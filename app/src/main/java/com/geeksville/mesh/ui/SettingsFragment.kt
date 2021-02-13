@@ -30,11 +30,11 @@ import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
 import com.geeksville.android.isGooglePlayAvailable
 import com.geeksville.mesh.MainActivity
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.bluetoothManager
 import com.geeksville.mesh.android.usbManager
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
+import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.BluetoothInterface
 import com.geeksville.mesh.service.MeshService
@@ -620,13 +620,22 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         binding.positionBroadcastPeriodEditText.on(EditorInfo.IME_ACTION_DONE) {
-            val str = binding.positionBroadcastPeriodEditText.text.toString()
-            val n = str.toIntOrNull()
-            if (n != null && n <= MAX_INT_DEVICE && n >= 0) {
-                model.positionBroadcastSecs = n
+            val textEdit = binding.positionBroadcastPeriodEditText
+            val n = textEdit.text.toString().toIntOrNull()
+            val minBroadcastPeriodSecs =
+                ChannelOption.fromConfig(model.radioConfig.value?.channelSettings?.modemConfig)?.minBroadcastPeriodSecs
+                    ?: 9000
+            info("edit broadcast $n min $minBroadcastPeriodSecs")
+            if (n != null && n >= 0 && n >= minBroadcastPeriodSecs) {
+                    model.positionBroadcastSecs = n
             } else {
-                binding.scanStatusText.text = "Bad value: $str"
+                // restore the value in the edit field
+                textEdit.setText(model.positionBroadcastSecs.toString())
+                val errorText = if (n == null || n <= 0) "Bad value: ${textEdit.text.toString()}" else
+                    getString(R.string.broadcast_period_too_small).format(minBroadcastPeriodSecs)
+                Toast.makeText(context, errorText, Toast.LENGTH_LONG).show()
             }
+
             requireActivity().hideKeyboard()
         }
 
