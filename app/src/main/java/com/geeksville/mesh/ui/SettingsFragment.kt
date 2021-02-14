@@ -226,8 +226,14 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                         debug("onScanResult ${entry}")
 
                         // If nothing was selected, by default select the first valid thing we see
-                        val activity =
+                        val activity: MainActivity? = try {
                             GeeksvilleApplication.currentActivity as MainActivity? // Can be null if app is shutting down
+                        } catch (_: ClassCastException) {
+                            // Buggy "Z812" phones apparently have the wrong class type for this
+                            errormsg("Unexpected class for main activity")
+                            null
+                        }
+
                         if (selectedAddress == null && entry.bonded && activity != null)
                             changeScanSelection(
                                 activity,
@@ -265,7 +271,10 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         debug("BTScan component active")
         selectedAddress = RadioInterfaceService.getDeviceAddress(context)
 
-        return if (bluetoothAdapter == null || RadioInterfaceService.isMockInterfaceAvailable(context)) {
+        return if (bluetoothAdapter == null || RadioInterfaceService.isMockInterfaceAvailable(
+                context
+            )
+        ) {
             warn("No bluetooth adapter.  Running under emulation?")
 
             val testnodes = listOf(
@@ -578,7 +587,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         })
 
 
-
         // Only let user edit their name or set software update while connected to a radio
         model.isConnected.observe(viewLifecycleOwner, Observer { connectionState ->
             val connected = connectionState == MeshService.ConnectionState.CONNECTED
@@ -665,11 +673,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         binding.scanProgressBar.visibility = visible
         binding.deviceRadioGroup.visibility = visible
     }
-    private fun updateDevicesButtons( devices: MutableMap<String, BTScanModel.DeviceListEntry>?) {
+
+    private fun updateDevicesButtons(devices: MutableMap<String, BTScanModel.DeviceListEntry>?) {
         // Remove the old radio buttons and repopulate
         binding.deviceRadioGroup.removeAllViews()
 
-        if(devices == null) return
+        if (devices == null) return
 
         val adapter = scanModel.bluetoothAdapter
         var hasShownOurDevice = false
@@ -696,7 +705,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                         scanModel.selectedAddress!!,
                         bDevice.bondState == BOND_BONDED
                     )
-                    addDeviceButton(curDevice, model.isConnected.value == MeshService.ConnectionState.CONNECTED)
+                    addDeviceButton(
+                        curDevice,
+                        model.isConnected.value == MeshService.ConnectionState.CONNECTED
+                    )
                 }
             } else if (scanModel.selectedUSB != null) {
                 // Must be a USB device, show a placeholder disabled entry
@@ -714,7 +726,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         // get rid of the warning text once at least one device is paired.
         // If we are running on an emulator, always leave this message showing so we can test the worst case layout
-        binding.warningNotPaired.visibility = if (hasBonded && !RadioInterfaceService.isMockInterfaceAvailable(requireContext())) View.GONE else View.VISIBLE
+        binding.warningNotPaired.visibility =
+            if (hasBonded && !RadioInterfaceService.isMockInterfaceAvailable(requireContext())) View.GONE else View.VISIBLE
     }
 
     /// Setup the GUI to do a classic (pre SDK 26 BLE scan)
