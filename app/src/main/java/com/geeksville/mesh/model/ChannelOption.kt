@@ -17,5 +17,6 @@ enum class ChannelOption(val modemConfig: MeshProtos.ChannelSettings.ModemConfig
             }
             return null
         }
+        val defaultMinBroadcastPeriod = VERY_LONG.minBroadcastPeriodSecs
     }
 }

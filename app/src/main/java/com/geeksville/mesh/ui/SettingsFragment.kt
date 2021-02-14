@@ -34,7 +34,6 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.android.bluetoothManager
 import com.geeksville.mesh.android.usbManager
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
-import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.BluetoothInterface
 import com.geeksville.mesh.service.MeshService
@@ -49,7 +48,6 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

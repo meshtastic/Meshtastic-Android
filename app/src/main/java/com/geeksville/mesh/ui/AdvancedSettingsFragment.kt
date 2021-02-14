@@ -20,7 +20,6 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
     private val MAX_INT_DEVICE = 0xFFFFFFFF
     private var _binding: AdvancedSettingsBinding? = null
 
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     private val model: UIViewModel by activityViewModels()
@@ -52,17 +51,19 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             val n = textEdit.text.toString().toIntOrNull()
             val minBroadcastPeriodSecs =
                 ChannelOption.fromConfig(model.radioConfig.value?.channelSettings?.modemConfig)?.minBroadcastPeriodSecs
-                    ?: 9000
-            info("edit broadcast $n min $minBroadcastPeriodSecs")
+                    ?: ChannelOption.defaultMinBroadcastPeriod
+
             if (n != null && n < MAX_INT_DEVICE && (n == 0 || n >= minBroadcastPeriodSecs)) {
                 model.positionBroadcastSecs = n
             } else {
                 // restore the value in the edit field
                 textEdit.setText(model.positionBroadcastSecs.toString())
-                val errorText = when {
-                    (n == null || n < 0 || n >= MAX_INT_DEVICE) -> "Bad value: ${textEdit.text.toString()}"
-                    else -> getString(R.string.broadcast_period_too_small).format(minBroadcastPeriodSecs)
-                }
+                val errorText =
+                    if (n == null || n < 0 || n >= MAX_INT_DEVICE)
+                        "Bad value: ${textEdit.text.toString()}"
+                    else
+                        getString(R.string.broadcast_period_too_small).format(minBroadcastPeriodSecs)
+
                 Snackbar.make(requireView(), errorText, Snackbar.LENGTH_LONG).show()
             }
             requireActivity().hideKeyboard()
