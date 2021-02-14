@@ -49,6 +49,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -626,14 +627,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 ChannelOption.fromConfig(model.radioConfig.value?.channelSettings?.modemConfig)?.minBroadcastPeriodSecs
                     ?: 9000
             info("edit broadcast $n min $minBroadcastPeriodSecs")
-            if (n != null && n >= 0 && n >= minBroadcastPeriodSecs) {
-                    model.positionBroadcastSecs = n
+            if (n != null && n < MAX_INT_DEVICE && (n == 0 || n >= minBroadcastPeriodSecs)) {
+                model.positionBroadcastSecs = n
             } else {
                 // restore the value in the edit field
                 textEdit.setText(model.positionBroadcastSecs.toString())
-                val errorText = if (n == null || n <= 0) "Bad value: ${textEdit.text.toString()}" else
+                val errorText = if (n == null || n < 0 || n >= MAX_INT_DEVICE) "Bad value: ${textEdit.text.toString()}" else
                     getString(R.string.broadcast_period_too_small).format(minBroadcastPeriodSecs)
-                Toast.makeText(context, errorText, Toast.LENGTH_LONG).show()
+                Snackbar.make(requireView(), errorText, Snackbar.LENGTH_LONG).show()
             }
 
             requireActivity().hideKeyboard()
