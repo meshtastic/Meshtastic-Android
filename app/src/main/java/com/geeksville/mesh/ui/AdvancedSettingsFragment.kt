@@ -14,6 +14,7 @@ import com.geeksville.mesh.databinding.AdvancedSettingsBinding
 import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.util.exceptionToSnackbar
 import com.google.android.material.snackbar.Snackbar
 
 class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
@@ -54,7 +55,9 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
                     ?: ChannelOption.defaultMinBroadcastPeriod
 
             if (n != null && n < MAX_INT_DEVICE && (n == 0 || n >= minBroadcastPeriodSecs)) {
-                model.positionBroadcastSecs = n
+                exceptionToSnackbar(requireView()) {
+                    model.positionBroadcastSecs = n
+                }
             } else {
                 // restore the value in the edit field
                 textEdit.setText(model.positionBroadcastSecs.toString())
@@ -73,7 +76,9 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             val str = binding.lsSleepEditText.text.toString()
             val n = str.toIntOrNull()
             if (n != null && n < MAX_INT_DEVICE && n >= 0) {
-                model.lsSleepSecs = n
+                exceptionToSnackbar(requireView()) {
+                    model.lsSleepSecs = n
+                }
             } else {
                 Snackbar.make(requireView(), "Bad value: $str", Snackbar.LENGTH_LONG).show()
             }
