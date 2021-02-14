@@ -107,7 +107,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/reportBugButton"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/lsSleepView"
+            app:layout_constraintTop_toBottomOf="@+id/warningNotPaired"
             app:layout_constraintVertical_bias="1.0" />
 
         <Button
