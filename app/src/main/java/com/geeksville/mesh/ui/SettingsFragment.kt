@@ -44,6 +44,7 @@ import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressNotSt
 import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressSuccess
 import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
+import com.geeksville.util.exceptionToSnackbar
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
@@ -504,8 +505,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             binding.updateProgressBar.visibility = View.VISIBLE
             binding.updateProgressBar.progress = 0 // start from scratch
 
-            // We rely on our broadcast receiver to show progress as this progresses
-            service.startFirmwareUpdate()
+            exceptionToSnackbar(requireView()) {
+                // We rely on our broadcast receiver to show progress as this progresses
+                service.startFirmwareUpdate()
+            }
         }
     }
 
