@@ -978,6 +978,15 @@ class MainActivity : AppCompatActivity(), Logging,
                     handler.removeCallbacksAndMessages(null)
                 return true
             }
+            R.id.advanced_settings -> {
+                val fragmentManager: FragmentManager = supportFragmentManager
+                val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
+                val nameFragment = AdvancedSettingsFragment()
+                fragmentTransaction.add(R.id.mainActivityLayout, nameFragment)
+                fragmentTransaction.addToBackStack(null)
+                fragmentTransaction.commit()
+                return true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }

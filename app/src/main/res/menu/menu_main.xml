@@ -17,6 +17,10 @@
         android:checked="false"
         android:title="Protocol stress test" />
     <item
+        android:id="@+id/advanced_settings"
+        app:showAsAction="withText"
+        android:title="Advanced settings" />
+    <item
         android:id="@+id/about"
         android:title="@string/about"
         app:showAsAction="withText" />
