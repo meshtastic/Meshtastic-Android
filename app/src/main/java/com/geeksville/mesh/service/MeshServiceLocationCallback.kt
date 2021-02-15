@@ -37,9 +37,13 @@ class MeshServiceLocationCallback(
         locationResult.lastLocationOrBestEffort()?.let { location ->
             MeshService.info("got phone location")
             if (location.isAccurateForMesh) { // if within 200 meters, or accuracy is unknown
-                val shouldSend = isAllowedToSend()
-                val destinationNumber = if (shouldSend) DataPacket.NODENUM_BROADCAST else getNodeNum()
-                sendPosition(location, destinationNumber, wantResponse = shouldSend)
+
+                // Do we want to broadcast this position globally, or are we just telling the local node what its current position is (
+                val shouldBroadcast = isAllowedToSend()
+                val destinationNumber = if (shouldBroadcast) DataPacket.NODENUM_BROADCAST else getNodeNum()
+
+                // Note: we never want this message sent as a reliable message, because it is low value and we'll be sending one again later anyways
+                sendPosition(location, destinationNumber, wantResponse = false)
             } else {
                 MeshService.warn("accuracy ${location.accuracy} is too poor to use")
             }
