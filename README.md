@@ -38,6 +38,12 @@ Run the following commands to do so:
         cp ./app/special/curfirmwareversion.xml ./app/src/main/res/values/
 ```
 
+* (unfortunately) you need to get a (free) mapbox developer token [here](https://docs.mapbox.com/android/maps/guides/install/) and put that token in your user gradle.properties.
+```
+~/development/meshtastic/MeshUtil$ cat ~/.gradle/gradle.properties
+MAPBOX_DOWNLOADS_TOKEN=sk.yourtokenherexxx
+```
+
 * Now you should be able to select "Run / Run" in the IDE and it will happily start running on your phone
 or the emulator.  Note: The emulators don't support bluetooth, so some features can not be used in
 that environment.
