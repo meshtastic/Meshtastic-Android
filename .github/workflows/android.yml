@@ -14,12 +14,12 @@ jobs:
     - name: Checkout submodules
       uses: textbook/git-checkout-submodule-action@master
     - name: Loading secrets
-    ¦ env:
-    ¦   gservices: ${{ secrets.gservices }}
-    ¦   mapboxtoken: ${{ secrets.mapboxtoken }}
-    ¦ run: |
-    ¦   echo $gservices > ./app/google-services.json
-    ¦   echo $mapboxtoken > ./app/src/main/res/values/mapbox-token.xml
+      env:
+          gservices: ${{ secrets.gservices }}
+          mapboxtoken: ${{ secrets.mapboxtoken }}
+      run: |
+          echo $gservices > ./app/google-services.json
+          echo $mapboxtoken > ./app/src/main/res/values/mapbox-token.xml
     - name: Mock curfirmware version for CI
       run: |
         rm ./app/src/main/res/values/curfirmwareversion.xml
