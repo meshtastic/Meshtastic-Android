@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">Meshtastic</string>
     <string name="action_settings">Configurações</string>
     <string name="channel_name">Nome do Canal</string>
     <string name="channel_options">Opções do Canal</string>

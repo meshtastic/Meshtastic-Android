@@ -73,8 +73,7 @@
     <string name="about">Infos</string>
     <string name="a_list_of_nodes_in_the_mesh">Une liste des nœuds dans le réseau</string>
     <string name="text_messages">Messages tèxte</string>
-    <string name="channel_invalid">Cet URL Canal n\'est pas valide et ne peut être utilisé</string>	
-	<string name="app_name" translatable="false">Meshtastic</string>
+    <string name="channel_invalid">Cet URL Canal n\'est pas valide et ne peut être utilisé</string>
     <string name="sample_distance" translatable="false">2.13 km</string>
     <string name="some_username" translatable="false">SKH</string>
     <string name="test__devname1" translatable="false">Meshtastic_ac23</string>

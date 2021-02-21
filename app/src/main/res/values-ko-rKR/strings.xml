@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Meshtastic</string>
     <string name="action_settings">설정</string>
     <string name="channel_name">채널명</string>
     <string name="channel_options">채널옵션</string>
