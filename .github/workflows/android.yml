@@ -20,6 +20,9 @@ jobs:
       run: |
           echo $gservices > ./app/google-services.json
           echo $mapboxtoken > ./app/src/main/res/values/mapbox-token.xml
+          mkdir -p ~/.gradle
+          echo "MAPBOX_DOWNLOADS_TOKEN=$mapboxtoken" >>~/.gradle/gradle.properties
+
     - name: Mock curfirmware version for CI
       run: |
         rm ./app/src/main/res/values/curfirmwareversion.xml
@@ -28,5 +31,7 @@ jobs:
       uses: actions/setup-java@master
       with:
         java-version: 1.8
+    - name: Build java code
+      run: bash ./gradlew build
     - name: Unit tests
       run: bash ./gradlew test --stacktrace
