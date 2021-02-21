@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><!-- Chinese contributed by @Mango-sauce -->
 <resources>
-    <string name="app_name" translatable="false">Mesh网络</string>
+    <string name="app_name">Mesh网络</string>
     <string name="action_settings">设置</string>
     <string name="channel_name">频道名称</string>
     <string name="channel_options">频道设置</string>
@@ -18,8 +18,6 @@
     <string name="your_name">用户名</string>
     <string name="analytics_okay">匿名上传崩溃报告.</string>
     <string name="looking_for_meshtastic_devices">Mesh设备扫描中…</string>
-    <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
-    <string name="test_devname2" translatable="false">Meshtastic_1267</string>
     <string name="requires_bluetooth">此应用程序需要蓝牙权限.请在Android设置中授予权限.</string>
     <string name="error_bluetooth">未开启蓝牙</string>
     <string name="starting_pairing">开始配对</string>

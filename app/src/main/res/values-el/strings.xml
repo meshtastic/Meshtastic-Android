@@ -24,8 +24,6 @@
 
     <string name="sample_message">Βρήκα το σημείο, είναι διπλα στη τίγρη. Φοβάμαι λίγο.</string>
 
-    <string name="some_username" translatable="false">SKH</string>
-
     <string name="send_text">Αποστολή κειμένου</string>
 
     <string name="warning_not_paired">Δεν έχετε κάνει ακόμη pair μια συσκευή συμβατή με Meshtastic με το τηλέφωνο. Παρακαλώ κάντε pair μια συσκευή και ορίστε το όνομα χρήστη.\n\nΗ εφαρμογή ανοιχτού κώδικα βρίσκεται σε alpha-testing, αν εντοπίσετε προβλήματα παρακαλώ δημοσιεύστε τα στο forum: meshtastic.discourse.group.\n\nΠερισσότερες πληροφορίες στην ιστοσελίδα - www.meshtastic.org.</string>
@@ -37,10 +35,6 @@
     <string name="analytics_okay">Ανώνυμα στατιστικά χρήσης και αναφορές crash.</string>
 
     <string name="looking_for_meshtastic_devices">Αναζήτηση συσκευών Meshtastic …</string>
-
-    <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
-
-    <string name="test_devname2" translatable="false">Meshtastic_1267</string>
 
     <string name="requires_bluetooth">Η εφαρμογή απαιτεί bluetooth πρόσβαση. Παρακαλώ παρέχεται σχετική άδεια χρήσης στις ρυθμίσεις του android.</string>
 

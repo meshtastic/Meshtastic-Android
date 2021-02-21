@@ -70,8 +70,4 @@
     <string name="a_list_of_nodes_in_the_mesh">Een lijst van de aansluitpunten in het netwerk</string>
     <string name="text_messages">Teksberichten</string>
     <string name="channel_invalid">Deze Kanaal URL kan niet worden gebruikt</string>
-    <string name="sample_distance" translatable="false">2.13 km</string>
-    <string name="some_username" translatable="false">SKH</string>
-    <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
-    <string name="test_devname2" translatable="false">Meshtastic_1267</string>
 </resources>

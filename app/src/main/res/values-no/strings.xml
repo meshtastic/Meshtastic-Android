@@ -17,8 +17,6 @@
     <string name="your_name">Ditt Navn</string>
     <string name="analytics_okay">Anonym brukerstatistikk og kræsjrapporter.</string>
     <string name="looking_for_meshtastic_devices">Ser etter Meshtastic enheter…</string>
-    <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
-    <string name="test_devname2" translatable="false">Meshtastic_1267</string>
     <string name="requires_bluetooth">Denne applikasjonen krever blåtann tilgang.Vennligst gi tilgang i android instillinger.</string>
     <string name="error_bluetooth">Feil - denne app krever blåtann</string>
     <string name="starting_pairing">Starter paring</string>

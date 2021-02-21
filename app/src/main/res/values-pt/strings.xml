@@ -9,17 +9,13 @@
     <string name="application_icon">icone da aplicação</string>
     <string name="unknown_username">Nome Desconhecido</string>
     <string name="user_avatar">Avatar do Usuário</string>
-    <string name="sample_distance" translatable="false">2.13 km</string>
     <string name="sample_message">Hey, encontrei o cache, está aqui ao lado do grande tigre. Estou um pouco assustado.</string>
-    <string name="some_username" translatable="false">SKH</string>
     <string name="send_text">Enviar Texto</string>
     <string name="warning_not_paired">Ainda não emparelhou um rádio compatível com Meshtastic com este telefone. Emparelhe um dispositivo e defina seu nome de usuário.\n\nEste aplicativo de código aberto está em teste alfa, se encontrar problemas, por favor reporte através do nosso forum em: meshtastic.discourse.group.\n\nPara obter mais informações, consulte a nossa página web - www.meshtastic.org.</string>
     <string name="username_unset">Nome indefinido</string>
     <string name="your_name">O seu Nome</string>
     <string name="analytics_okay">Estatísticas de uso anônimas e relatórios de falhas.</string>
     <string name="looking_for_meshtastic_devices">A procurar dispositivos Meshtastic…</string>
-    <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
-    <string name="test_devname2" translatable="false">Meshtastic_1267</string>
     <string name="requires_bluetooth">Esta aplicação requer acesso ao Bluetooth. Por favor conceda acesso nas opções do android.</string>
     <string name="error_bluetooth">Erro - esta app requer de bluetooth</string>
     <string name="starting_pairing">A iniciar o emparelhamento.</string>
