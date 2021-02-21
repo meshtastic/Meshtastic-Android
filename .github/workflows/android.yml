@@ -28,5 +28,7 @@ jobs:
       uses: actions/setup-java@master
       with:
         java-version: 1.8
+    - name: Build java code
+      run: bash ./gradlew build       
     - name: Unit tests
       run: bash ./gradlew test --stacktrace
