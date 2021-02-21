@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import com.geeksville.android.GeeksvilleApplication
@@ -157,7 +158,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     if (view != null) { // it might have gone away by now
                         // val markerIcon = BitmapFactory.decodeResource(context.resources, R.drawable.ic_twotone_person_pin_24)
                         val markerIcon =
-                            requireActivity().getDrawable(R.drawable.ic_twotone_person_pin_24)!!
+                            ContextCompat.getDrawable(requireActivity(), R.drawable.ic_twotone_person_pin_24)!!
 
                         map.setStyle(Style.OUTDOORS) { style ->
                             style.addSource(nodePositions)

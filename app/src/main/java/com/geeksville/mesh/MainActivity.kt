@@ -413,7 +413,7 @@ class MainActivity : AppCompatActivity(), Logging,
         // pager.offscreenPageLimit = 0 // Don't keep any offscreen pages around, because we want to make sure our bluetooth scanning stops
         TabLayoutMediator(binding.tabLayout, binding.pager) { tab, position ->
             // tab.text = tabInfos[position].text // I think it looks better with icons only
-            tab.icon = getDrawable(tabInfos[position].icon)
+            tab.icon = ContextCompat.getDrawable(this, tabInfos[position].icon)
         }.attach()
 
         model.isConnected.observe(this, Observer { connected ->

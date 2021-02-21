@@ -17,7 +17,7 @@
     <string name="username_unset">Nome indefinido</string>
     <string name="your_name">O seu Nome</string>
     <string name="analytics_okay">Estatísticas de uso anônimas e relatórios de falhas.</string>
-    <string name="looking_for_meshtastic_devices">A procurar dispositivos Meshtastic...</string>
+    <string name="looking_for_meshtastic_devices">A procurar dispositivos Meshtastic…</string>
     <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
     <string name="test_devname2" translatable="false">Meshtastic_1267</string>
     <string name="requires_bluetooth">Esta aplicação requer acesso ao Bluetooth. Por favor conceda acesso nas opções do android.</string>

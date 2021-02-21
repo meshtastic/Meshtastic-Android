@@ -16,7 +16,7 @@
     <string name="username_unset">Benutzername nicht gesetzt</string>
     <string name="your_name">Dein Name</string>
     <string name="analytics_okay">Anonyme Nutzungsstatistiken und Absturzberichte.</string>
-    <string name="looking_for_meshtastic_devices">Suche nach Meshtastic Geräten...</string>
+    <string name="looking_for_meshtastic_devices">Suche nach Meshtastic Geräten…</string>
     <string name="requires_bluetooth">Diese Anwendung erfordert Bluetooth-Zugang. Bitte gewähren Sie Zugriff in den Android-Einstellungen.</string>
     <string name="error_bluetooth">Fehler - dieses Programm erfordert Bluetooth!</string>
     <string name="starting_pairing">Pairing beginnen</string>

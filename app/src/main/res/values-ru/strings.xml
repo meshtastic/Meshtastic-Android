@@ -16,7 +16,7 @@
     <string name="username_unset">Имя пользователя не установлено</string>
     <string name="your_name">Ваше имя</string>
     <string name="analytics_okay">Анонимная статистика использования и отчеты о сбоях.</string>
-    <string name="looking_for_meshtastic_devices">Поиск устройств Meshtastic...</string>
+    <string name="looking_for_meshtastic_devices">Поиск устройств Meshtastic…</string>
     <string name="requires_bluetooth">Это приложение требует доступа к Bluetooth. Пожалуйста, предоставьте доступ в настройках Android.</string>
     <string name="error_bluetooth">Ошибка - для работы приложения требуется bluetooth</string>
     <string name="starting_pairing">Сопряжение</string>

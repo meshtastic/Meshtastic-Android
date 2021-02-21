@@ -16,7 +16,7 @@
     <string name="username_unset">ユーザー名削除</string>
     <string name="your_name">ユーザー名</string>
     <string name="analytics_okay">匿名の診断情報と不具合報告</string>
-    <string name="looking_for_meshtastic_devices">Meshtasticデバイスを検索中...</string>
+    <string name="looking_for_meshtastic_devices">Meshtasticデバイスを検索中…</string>
     <string name="requires_bluetooth">このアプリはBluetooth通信が必要です。無線とネットワーク設定によりBluetoothをオンにしてください。</string>
     <string name="error_bluetooth">エラー - このアプリはBluetooth通信が必要です。</string>
     <string name="starting_pairing">ペアとして設定中</string>

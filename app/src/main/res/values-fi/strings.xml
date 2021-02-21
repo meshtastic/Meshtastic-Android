@@ -16,7 +16,7 @@
     <string name="username_unset">Käyttäjänimi asettamatta</string>
     <string name="your_name">Nimesi</string>
     <string name="analytics_okay">Nimettömät käyttötilastot ja kaatumisraportit.</string>
-    <string name="looking_for_meshtastic_devices">Etsii Meshtastic laiteita...</string>
+    <string name="looking_for_meshtastic_devices">Etsii Meshtastic laiteita…</string>
     <string name="requires_bluetooth">Tämä sovellus edellyttää Bluetoothin sallimista. Salli lupa Androidin asetuksista.</string>
     <string name="error_bluetooth">Virhe - tämä sovellus edellyttää Bluetoothia</string>
     <string name="starting_pairing">Yhdistää laitteeseen</string>

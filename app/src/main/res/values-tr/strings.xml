@@ -16,7 +16,7 @@
     <string name="username_unset">Kullanıcı adını kaldır</string>
     <string name="your_name">Adınız</string>
     <string name="analytics_okay">Anonim kullanim istatistikleri ve hata raporları.</string>
-    <string name="looking_for_meshtastic_devices">Meshtastic cihazları aranıyor...</string>
+    <string name="looking_for_meshtastic_devices">Meshtastic cihazları aranıyor…</string>
     <string name="requires_bluetooth">Bu cihaz bluetooth erişimi gerektiriyor. Lütfen Android ayarlarından izin veriniz.</string>
     <string name="error_bluetooth">Hata - bu uygulama bluetooth gerektiriyor</string>
     <string name="starting_pairing">Eşleşme başlatılıyor</string>

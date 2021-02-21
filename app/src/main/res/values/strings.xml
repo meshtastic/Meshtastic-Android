@@ -17,7 +17,7 @@
     <string name="username_unset">Username unset</string>
     <string name="your_name">Your Name</string>
     <string name="analytics_okay">Anonymous usage statistics and crash reports.</string>
-    <string name="looking_for_meshtastic_devices">Looking for Meshtastic devices...</string>
+    <string name="looking_for_meshtastic_devices">Looking for Meshtastic devices…</string>
     <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
     <string name="test_devname2" translatable="false">Meshtastic_1267</string>
     <string name="requires_bluetooth">This application requires bluetooth access. Please grant access in android settings.</string>
@@ -76,7 +76,7 @@
     <string name="debug_panel">Debug Panel</string>
     <string name="debug_last_messages">500 last messages</string>
     <string name="clear_last_messages">Clear</string>
-    <string name="updating_firmware">Updating firmware, wait up to eight minutes...</string>
+    <string name="updating_firmware">Updating firmware, wait up to eight minutes…</string>
     <string name="update_successful">Update successful</string>
     <string name="update_failed">Update failed</string>
     <string name="message_reception_time">message reception time</string>

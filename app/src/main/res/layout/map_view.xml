@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:id="@+id/mapFrame"> <!-- tab layout requires a unique ID -->
 
-    <com.mapbox.mapboxsdk.maps.MapView xmlns:android="http://schemas.android.com/apk/res/android"
+    <com.mapbox.mapboxsdk.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

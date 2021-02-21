@@ -16,7 +16,7 @@
     <string name="username_unset">사용자 이름 해제</string>
     <string name="your_name">이름</string>
     <string name="analytics_okay">익며의 사용 통계와 충돌 보고서</string>
-    <string name="looking_for_meshtastic_devices">Meshtastic 장치 찾는 중...</string>
+    <string name="looking_for_meshtastic_devices">Meshtastic 장치 찾는 중…</string>
     <string name="requires_bluetooth">본 앱은 블루투스에 대한 접근 권한이 필요합니다. 안드로이드 설정에서 권한을 부여하세요.</string>
     <string name="error_bluetooth">에러 - 본 앱은 블루투스를 필요로 합니다.</string>
     <string name="starting_pairing">페어링 시작</string>

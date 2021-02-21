@@ -42,7 +42,7 @@
         product-id="29987" />
 
     <!-- CDC driver -->
-    <usb-device vendor-id="9025" />                   <!-- 0x2341 / ......: Arduino -->
+    <usb-device vendor-id="9025" />                   <!-- 0x2341 / ……: Arduino -->
     <usb-device
         vendor-id="5824"
         product-id="1155" /> <!-- 0x16C0 / 0x0483: Teensyduino  -->

@@ -16,7 +16,7 @@
     <string name="username_unset">Username nesetat</string>
     <string name="your_name">Numele tău</string>
     <string name="analytics_okay">Trimite în mod anonim statistici de utilizare și reporturi de crash.</string>
-    <string name="looking_for_meshtastic_devices">Caut dispozitive Meshtastic...</string>
+    <string name="looking_for_meshtastic_devices">Caut dispozitive Meshtastic…</string>
     <string name="requires_bluetooth">Această aplicație necesită access la bluetooth. Te rog acordă accesul în setările telefonului.</string>
     <string name="error_bluetooth">Eroare - această aplicație necesită bluetooth</string>
     <string name="starting_pairing">Încep să mă conectez</string>

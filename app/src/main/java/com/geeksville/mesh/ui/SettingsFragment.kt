@@ -107,7 +107,7 @@ private fun requestBonding(
 
 class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
-    private val context = getApplication<Application>().applicationContext
+    private val context: Context get() = getApplication<Application>().applicationContext
 
     init {
         debug("BTScanModel created")

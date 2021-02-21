@@ -16,7 +16,7 @@
     <string name="username_unset">Ainm úsáideora díshocraithe</string>
     <string name="your_name">D\'ainm</string>
     <string name="analytics_okay">Staitisticí úsáide gan ainm agus tuairiscí tuairteála.</string>
-    <string name="looking_for_meshtastic_devices">Ag lorg gléasanna Meshtastic ...</string>
+    <string name="looking_for_meshtastic_devices">Ag lorg gléasanna Meshtastic …</string>
     <string name="requires_bluetooth">Éilíonn an feidhmchlár seo rochtain bluetooth. Tabhair rochtain i suíomhanna android le do thoil.</string>
     <string name="error_bluetooth">Earráid - éilíonn an aip seo bluetooth</string>
     <string name="starting_pairing">Ag tosú ag péireáil</string>
