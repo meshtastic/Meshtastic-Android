@@ -46,7 +46,7 @@ fun getInitials(nameIn: String): String {
     return initials.take(nchars)
 }
 
-class UIViewModel(app: Application) : AndroidViewModel(app), Logging {
+class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging {
 
     private val repository: PacketRepository
 
@@ -84,7 +84,7 @@ class UIViewModel(app: Application) : AndroidViewModel(app), Logging {
             context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
     }
 
-    private val context = app.applicationContext
+    private val context: Context get() = app.applicationContext
 
     var actionBarMenu: Menu? = null
 
