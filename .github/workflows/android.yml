@@ -19,13 +19,14 @@ jobs:
           mapboxtoken: ${{ secrets.mapboxtoken }}
       run: |
           # not yet needed echo $gservices > ./app/google-services.json
+          rm ./app/google-services.json          
           cp ./app/google-services-example.json ./app/google-services.json
 
-          rm ./app/google-services.json
+          rm ./app/src/main/res/values/mapbox-token.xml
           cp ./app/special/mapbox-token.xml ./app/src/main/res/values/
           # The following would not be valid XML, don't use yet
           # echo $mapboxtoken > ./app/src/main/res/values/mapbox-token.xml
-          
+
           mkdir -p ~/.gradle
           echo "MAPBOX_DOWNLOADS_TOKEN=$mapboxtoken" >>~/.gradle/gradle.properties
 
