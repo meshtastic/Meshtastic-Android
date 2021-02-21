@@ -15,11 +15,11 @@
         android:id="@+id/stress_test"
         android:checkable="true"
         android:checked="false"
-        android:title="Protocol stress test" />
+        android:title="@string/protocol_stress_test" />
     <item
         android:id="@+id/advanced_settings"
         app:showAsAction="withText"
-        android:title="Advanced settings" />
+        android:title="@string/advanced_settings" />
     <item
         android:id="@+id/about"
         android:title="@string/about"

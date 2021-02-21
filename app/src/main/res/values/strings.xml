@@ -86,4 +86,6 @@
     <string name="ls_sleep_secs">Device sleep period (in seconds)</string>
     <string name="meshtastic_messages_notifications">Notifications about messages</string>
     <string name="broadcast_period_too_small">Minimum broadcast period for this channel is %d</string>
+    <string name="protocol_stress_test">Protocol stress test</string>
+    <string name="advanced_settings">Advanced settings</string>
 </resources>
