@@ -11,10 +11,6 @@ import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import java.net.MalformedURLException
 
-/** Utility function to make it easy to declare byte arrays - FIXME move someplace better */
-fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
-
-
 data class ChannelSet(
     val protobuf: AppOnlyProtos.ChannelSet = AppOnlyProtos.ChannelSet.getDefaultInstance()
 ) {
@@ -47,6 +43,13 @@ data class ChannelSet(
 
     /// Can this channel be changed right now?
     var editable = false
+
+    /**
+     * Return the primary channel info
+     */
+    val primaryChannel: Channel get() {
+        return Channel(protobuf.getSettings(0))
+    }
 
     /// Return an URL that represents the current channel values
     /// @param upperCasePrefix - portions of the URL can be upper case to make for more efficient QR codes

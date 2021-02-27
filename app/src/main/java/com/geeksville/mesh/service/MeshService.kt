@@ -111,7 +111,7 @@ class MeshService : Service(), Logging {
     private var fusedLocationClient: FusedLocationProviderClient? = null
 
     // If we've ever read a valid region code from our device it will be here
-    var curRegionValue = MeshProtos.RegionCode.Unset_VALUE
+    var curRegionValue = RadioConfigProtos.RegionCode.Unset_VALUE
 
     val radio = ServiceClient {
         IRadioInterfaceService.Stub.asInterface(it).apply {
@@ -417,7 +417,7 @@ class MeshService : Service(), Logging {
 
     var myNodeInfo: MyNodeInfo? = null
 
-    private var radioConfig: MeshProtos.RadioConfig? = null
+    private var radioConfig: RadioConfigProtos.RadioConfig? = null
 
     /// True after we've done our initial node db init
     @Volatile
@@ -1029,7 +1029,7 @@ class MeshService : Service(), Logging {
 
                             MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleNodeInfo(proto.nodeInfo)
 
-                            MeshProtos.FromRadio.RADIO_FIELD_NUMBER -> handleRadioConfig(proto.radio)
+                            // MeshProtos.FromRadio.RADIO_FIELD_NUMBER -> handleRadioConfig(proto.radio)
 
                             else -> errormsg("Unexpected FromRadio variant")
                         }
@@ -1053,7 +1053,7 @@ class MeshService : Service(), Logging {
     private var configNonce = 1
 
 
-    private fun handleRadioConfig(radio: MeshProtos.RadioConfig) {
+    private fun handleRadioConfig(radio: RadioConfigProtos.RadioConfig) {
         val packetToSave = Packet(
             UUID.randomUUID().toString(),
             "RadioConfig",
@@ -1174,20 +1174,20 @@ class MeshService : Service(), Logging {
         ignoreException {
             // Try to pull our region code from the new preferences field
             // FIXME - do not check net - figuring out why board is rebooting
-            val curConfigRegion = radioConfig?.preferences?.region ?: MeshProtos.RegionCode.Unset
-            if (curConfigRegion != MeshProtos.RegionCode.Unset) {
+            val curConfigRegion = radioConfig?.preferences?.region ?: RadioConfigProtos.RegionCode.Unset
+            if (curConfigRegion != RadioConfigProtos.RegionCode.Unset) {
                 info("Using device region $curConfigRegion (code ${curConfigRegion.number})")
                 curRegionValue = curConfigRegion.number
             }
 
-            if (curRegionValue == MeshProtos.RegionCode.Unset_VALUE) {
+            if (curRegionValue == RadioConfigProtos.RegionCode.Unset_VALUE) {
                 // look for a legacy region
                 val legacyRegex = Regex(".+-(.+)")
                 myNodeInfo?.region?.let { legacyRegion ->
                     val matches = legacyRegex.find(legacyRegion)
                     if (matches != null) {
                         val (region) = matches.destructured
-                        val newRegion = MeshProtos.RegionCode.valueOf(region)
+                        val newRegion = RadioConfigProtos.RegionCode.valueOf(region)
                         info("Upgrading legacy region $newRegion (code ${newRegion.number})")
                         curRegionValue = newRegion.number
                     }
@@ -1195,7 +1195,7 @@ class MeshService : Service(), Logging {
             }
 
             // If nothing was set in our (new style radio preferences, but we now have a valid setting - slam it in)
-            if (curConfigRegion == MeshProtos.RegionCode.Unset && curRegionValue != MeshProtos.RegionCode.Unset_VALUE) {
+            if (curConfigRegion == RadioConfigProtos.RegionCode.Unset && curRegionValue != RadioConfigProtos.RegionCode.Unset_VALUE) {
                 info("Telling device to upgrade region")
 
                 // Tell the device to set the new region field (old devices will simply ignore this)
@@ -1321,7 +1321,7 @@ class MeshService : Service(), Logging {
 
     /** Send our current radio config to the device
      */
-    private fun sendRadioConfig(c: MeshProtos.RadioConfig) {
+    private fun sendRadioConfig(c: RadioConfigProtos.RadioConfig) {
         // Update our device
         val payload = AdminProtos.AdminMessage.newBuilder().also {
             it.setRadio = c
@@ -1347,7 +1347,7 @@ class MeshService : Service(), Logging {
     /** Set our radio config
      */
     private fun setRadioConfig(payload: ByteArray) {
-        val parsed = MeshProtos.RadioConfig.parseFrom(payload)
+        val parsed = RadioConfigProtos.RadioConfig.parseFrom(payload)
 
         sendRadioConfig(parsed)
     }
@@ -1605,6 +1605,10 @@ class MeshService : Service(), Logging {
         }
 
         override fun getChannels(): ByteArray {
+            TODO("Not yet implemented")
+        }
+
+        override fun setChannels(payload: ByteArray?) {
             TODO("Not yet implemented")
         }
 

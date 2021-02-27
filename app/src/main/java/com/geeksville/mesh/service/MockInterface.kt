@@ -46,11 +46,9 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
                 to = 0xffffffff.toInt() // ugly way of saying broadcast
                 rxTime = (System.currentTimeMillis() / 1000).toInt()
                 rxSnr = 1.5f
-                decoded = MeshProtos.SubPacket.newBuilder().apply {
-                    data = MeshProtos.Data.newBuilder().apply {
-                        portnum = Portnums.PortNum.TEXT_MESSAGE_APP
-                        payload = ByteString.copyFromUtf8("This simulated node sends Hi!")
-                    }.build()
+                decoded = MeshProtos.Data.newBuilder().apply {
+                    portnum = Portnums.PortNum.TEXT_MESSAGE_APP
+                    payload = ByteString.copyFromUtf8("This simulated node sends Hi!")
                 }.build()
             }.build()
         }
@@ -64,17 +62,20 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
                 to = toIn
                 rxTime = (System.currentTimeMillis() / 1000).toInt()
                 rxSnr = 1.5f
-                decoded = MeshProtos.SubPacket.newBuilder().apply {
-                    data = MeshProtos.Data.newBuilder().apply {
-                        successId = msgId
-                    }.build()
+                decoded = MeshProtos.Data.newBuilder().apply {
+                    portnum = Portnums.PortNum.ROUTING_APP
+                    payload = MeshProtos.Routing.newBuilder().apply {
+                    }.build().toByteString()
+                    requestId = msgId
                 }.build()
             }.build()
         }
 
     /// Send a fake ack packet back if the sender asked for want_ack
     private fun sendFakeAck(pr: MeshProtos.ToRadio) {
-        service.handleFromRadio(makeAck(pr.packet.to, pr.packet.from, pr.packet.id).build().toByteArray())
+        service.handleFromRadio(
+            makeAck(pr.packet.to, pr.packet.from, pr.packet.id).build().toByteArray()
+        )
     }
 
     private fun sendConfigResponse(configId: Int) {
@@ -101,37 +102,33 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
             }
 
         // Simulated network data to feed to our app
-         val MY_NODE = 0x42424242
+        val MY_NODE = 0x42424242
         val packets = arrayOf(
             // MyNodeInfo
             MeshProtos.FromRadio.newBuilder().apply {
                 myInfo = MeshProtos.MyNodeInfo.newBuilder().apply {
                     myNodeNum = MY_NODE
                     region = "TW"
-                    numChannels = 7
                     hwModel = "Sim"
-                    packetIdBits = 32
-                    nodeNumBits = 32
-                    currentPacketId = 1
                     messageTimeoutMsec = 5 * 60 * 1000
                     firmwareVersion = service.getString(R.string.cur_firmware_version)
                 }.build()
             },
 
             // RadioConfig
-            MeshProtos.FromRadio.newBuilder().apply {
-                radio = MeshProtos.RadioConfig.newBuilder().apply {
+            /* MeshProtos.FromRadio.newBuilder().apply {
+                radio = RadioConfigProtos.RadioConfig.newBuilder().apply {
 
-                    preferences = MeshProtos.RadioConfig.UserPreferences.newBuilder().apply {
-                        region = MeshProtos.RegionCode.TW
+                    preferences = RadioConfigProtos.RadioConfig.UserPreferences.newBuilder().apply {
+                        region = RadioConfigProtos.RegionCode.TW
                         // FIXME set critical times?
                     }.build()
 
-                    channel = MeshProtos.ChannelSettings.newBuilder().apply {
+                    /* channel = ChannelProtos.ChannelSettings.newBuilder().apply {
                         // we just have an empty listing so that the default channel works
-                    }.build()
+                    }.build() */
                 }.build()
-            },
+            }, */
 
             // Fake NodeDB
             makeNodeInfo(MY_NODE, 32.776665, -96.796989), // dallas

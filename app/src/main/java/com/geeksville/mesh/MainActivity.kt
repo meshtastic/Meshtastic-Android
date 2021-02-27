@@ -41,6 +41,7 @@ import com.geeksville.android.ServiceClient
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
@@ -620,7 +621,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 debug("Getting latest radioconfig from service")
                 try {
                     model.radioConfig.value =
-                        MeshProtos.RadioConfig.parseFrom(service.radioConfig)
+                        RadioConfigProtos.RadioConfig.parseFrom(service.radioConfig)
 
                     val info = service.myNodeInfo
                     model.myNodeInfo.value = info
@@ -654,19 +655,20 @@ class MainActivity : AppCompatActivity(), Logging,
         // If the is opening a channel URL, handle it now
         requestedChannelUrl?.let { url ->
             try {
-                val channel = Channel(url)
+                val channels = ChannelSet(url)
+                val primary = channels.primaryChannel
                 requestedChannelUrl = null
 
                 MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.new_channel_rcvd)
-                    .setMessage(getString(R.string.do_you_want_switch).format(channel.name))
+                    .setMessage(getString(R.string.do_you_want_switch).format(primary.name))
                     .setNeutralButton(R.string.cancel) { _, _ ->
                         // Do nothing
                     }
                     .setPositiveButton(R.string.accept) { _, _ ->
                         debug("Setting channel from URL")
                         try {
-                            model.setChannel(channel.settings)
+                            model.setChannels(channels)
                         } catch (ex: RemoteException) {
                             errormsg("Couldn't change channel ${ex.message}")
                             Toast.makeText(

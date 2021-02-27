@@ -3,6 +3,7 @@ package com.geeksville.mesh.model
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Base64
+import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.MeshProtos
 import com.google.protobuf.ByteString
 import com.google.zxing.BarcodeFormat
@@ -15,7 +16,7 @@ fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].
 
 
 data class Channel(
-    val settings: MeshProtos.ChannelSettings = MeshProtos.ChannelSettings.getDefaultInstance()
+    val settings: ChannelProtos.ChannelSettings = ChannelProtos.ChannelSettings.getDefaultInstance()
 ) {
     companion object {
         // Note: this string _SHOULD NOT BE LOCALIZED_ because it directly hashes to values used on the device for the default channel name.
@@ -30,8 +31,8 @@ data class Channel(
 
         // Placeholder when emulating
         val emulated = Channel(
-            MeshProtos.ChannelSettings.newBuilder().setName(defaultChannelName)
-                .setModemConfig(MeshProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128).build()
+            ChannelProtos.ChannelSettings.newBuilder().setName(defaultChannelName)
+                .setModemConfig(ChannelProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128).build()
         )
     }
 
@@ -42,16 +43,16 @@ data class Channel(
             if (settings.bandwidth != 0)
                 "Unset"
             else when (settings.modemConfig) {
-                MeshProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128 -> "Medium"
-                MeshProtos.ChannelSettings.ModemConfig.Bw500Cr45Sf128 -> "ShortFast"
-                MeshProtos.ChannelSettings.ModemConfig.Bw31_25Cr48Sf512 -> "LongAlt"
-                MeshProtos.ChannelSettings.ModemConfig.Bw125Cr48Sf4096 -> "LongSlow"
+                ChannelProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128 -> "Medium"
+                ChannelProtos.ChannelSettings.ModemConfig.Bw500Cr45Sf128 -> "ShortFast"
+                ChannelProtos.ChannelSettings.ModemConfig.Bw31_25Cr48Sf512 -> "LongAlt"
+                ChannelProtos.ChannelSettings.ModemConfig.Bw125Cr48Sf4096 -> "LongSlow"
                 else -> "Invalid"
             }
         } else
             settings.name
 
-    val modemConfig: MeshProtos.ChannelSettings.ModemConfig get() = settings.modemConfig
+    val modemConfig: ChannelProtos.ChannelSettings.ModemConfig get() = settings.modemConfig
 
     val psk
         get() = if (settings.psk.size() != 1)

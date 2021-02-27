@@ -16,6 +16,7 @@ import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
+import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.ChannelFragmentBinding
@@ -76,10 +77,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     /// Pull the latest data from the model (discarding any user edits)
     private fun setGUIfromModel() {
         val radioConfig = model.radioConfig.value
-        val channel = UIViewModel.getChannel(radioConfig)
+        val channels = model.channels.value
 
         binding.editableCheckbox.isChecked = false // start locked
-        if (channel != null) {
+        if (channels != null) {
+            val channel = channels.primaryChannel
+
             binding.qrView.visibility = View.VISIBLE
             binding.channelNameEdit.visibility = View.VISIBLE
             binding.channelNameEdit.setText(channel.humanName)
@@ -89,9 +92,9 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             val connected = model.isConnected.value == MeshService.ConnectionState.CONNECTED
             binding.editableCheckbox.isEnabled = connected
 
-            binding.qrView.setImageBitmap(channel.getChannelQR())
+            binding.qrView.setImageBitmap(channels.getChannelQR())
 
-            val modemConfig = radioConfig?.channelSettings?.modemConfig
+            val modemConfig = channel.modemConfig
             val channelOption = ChannelOption.fromConfig(modemConfig)
             binding.filledExposedDropdown.setText(
                 getString(
@@ -118,7 +121,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     }
 
     private fun shareChannel() {
-        UIViewModel.getChannel(model.radioConfig.value)?.let { channel ->
+        model.channels.value?.let { channels ->
 
             GeeksvilleApplication.analytics.track(
                 "share",
@@ -127,7 +130,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
             val sendIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, channel.getChannelUrl().toString())
+                putExtra(Intent.EXTRA_TEXT, channels.getChannelUrl().toString())
                 putExtra(
                     Intent.EXTRA_TITLE,
                     getString(R.string.url_for_join)
@@ -152,8 +155,8 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             val checked = binding.editableCheckbox.isChecked
             if (checked) {
                 // User just unlocked for editing - remove the # goo around the channel name
-                UIViewModel.getChannel(model.radioConfig.value)?.let { channel ->
-                    binding.channelNameEdit.setText(channel.name)
+                model.channels.value?.let { channels ->
+                    binding.channelNameEdit.setText(channels.primaryChannel.name)
                 }
             } else {
                 // User just locked it, we should warn and then apply changes to radio
@@ -165,8 +168,9 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                     }
                     .setPositiveButton(getString(R.string.accept)) { _, _ ->
                         // Generate a new channel with only the changes the user can change in the GUI
-                        UIViewModel.getChannel(model.radioConfig.value)?.let { old ->
-                            val newSettings = old.settings.toBuilder()
+                        model.channels.value?.let { old ->
+                            val oldPrimary = old.primaryChannel
+                            val newSettings = oldPrimary.settings.toBuilder()
                             newSettings.name = binding.channelNameEdit.text.toString().trim()
 
                             // Generate a new AES256 key (for any channel not named Default)
@@ -191,7 +195,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                                 binding.filledExposedDropdown.editableText.toString()
                             val modemConfig = getModemConfig(selectedChannelOptionString)
 
-                            if (modemConfig != MeshProtos.ChannelSettings.ModemConfig.UNRECOGNIZED)
+                            if (modemConfig != ChannelProtos.ChannelSettings.ModemConfig.UNRECOGNIZED)
                                 newSettings.modemConfig = modemConfig
                             // Try to change the radio, if it fails, tell the user why and throw away their redits
                             try {
@@ -232,12 +236,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         })
     }
 
-    private fun getModemConfig(selectedChannelOptionString: String): MeshProtos.ChannelSettings.ModemConfig {
+    private fun getModemConfig(selectedChannelOptionString: String): ChannelProtos.ChannelSettings.ModemConfig {
         for (item in ChannelOption.values()) {
             if (getString(item.configRes) == selectedChannelOptionString)
                 return item.modemConfig
         }
 
-        return MeshProtos.ChannelSettings.ModemConfig.UNRECOGNIZED
+        return ChannelProtos.ChannelSettings.ModemConfig.UNRECOGNIZED
     }
 }

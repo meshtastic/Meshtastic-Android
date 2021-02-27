@@ -12,10 +12,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.geeksville.android.Logging
-import com.geeksville.mesh.AppOnlyProtos
-import com.geeksville.mesh.IMeshService
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.MyNodeInfo
+import com.geeksville.mesh.*
 import com.geeksville.mesh.database.MeshtasticDatabase
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
@@ -90,16 +87,16 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
         }
 
     /// various radio settings (including the channel)
-    val radioConfig = object : MutableLiveData<MeshProtos.RadioConfig?>(null) {
+    val radioConfig = object : MutableLiveData<RadioConfigProtos.RadioConfig?>(null) {
     }
 
-    val channels = object : MutableLiveData<AppOnlyProtos.ChannelSet?>(null) {
+    val channels = object : MutableLiveData<ChannelSet?>(null) {
     }
 
     var positionBroadcastSecs: Int?
         get() {
             radioConfig.value?.preferences?.let {
-                if (it.locationShare == MeshProtos.LocationSharing.LocDisabled) return 0
+                if (it.locationShare == RadioConfigProtos.LocationSharing.LocDisabled) return 0
                 if (it.positionBroadcastSecs > 0) return it.positionBroadcastSecs
                 // These default values are borrowed from the device code.
                 if (it.isRouter) return 60 * 60
@@ -116,11 +113,11 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
                     builder.preferencesBuilder.gpsUpdateInterval = value
                     builder.preferencesBuilder.sendOwnerInterval = max(1, 3600 / value).toInt()
                     builder.preferencesBuilder.locationShare =
-                        MeshProtos.LocationSharing.LocEnabled
+                        RadioConfigProtos.LocationSharing.LocEnabled
                 } else {
                     builder.preferencesBuilder.positionBroadcastSecs = Int.MAX_VALUE
                     builder.preferencesBuilder.locationShare =
-                        MeshProtos.LocationSharing.LocDisabled
+                        RadioConfigProtos.LocationSharing.LocDisabled
                 }
                 setRadioConfig(builder.build())
             }
@@ -153,13 +150,11 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
     /**
      * Return the primary channel info
      */
-    val primaryChannel: ChannelSet? get() {
-        return channels.value?.let { it ->
-            Channel(it.getSettings(0))
-        }
-    }
-    /// Set the radio config (also updates our saved copy in preferences)
-    private fun setRadioConfig(c: MeshProtos.RadioConfig) {
+    val primaryChannel: Channel? get() = channels.value?.primaryChannel
+
+    ///
+    // Set the radio config (also updates our saved copy in preferences)
+    private fun setRadioConfig(c: RadioConfigProtos.RadioConfig) {
         debug("Setting new radio config!")
         meshService?.radioConfig = c.toByteArray()
         radioConfig.value =
@@ -167,23 +162,14 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
     }
 
     /// Set the radio config (also updates our saved copy in preferences)
-    private fun setChannels(c: AppOnlyProtos.ChannelSet) {
+    fun setChannels(c: ChannelSet) {
         debug("Setting new channels!")
-        meshService?.channels = c.toByteArray()
+        meshService?.channels = c.protobuf.toByteArray()
         channels.value =
             c // Must be done after calling the service, so we will will properly throw if the service failed (and therefore not cache invalid new settings)
 
         getPreferences(context).edit(commit = true) {
-            this.putString("channel-url", primaryChannel!!.getChannelUrl().toString())
-        }
-    }
-
-    /** Update just the channel settings portion of our config (both in the device and in saved preferences) */
-    fun setChannel(c: MeshProtos.ChannelSettings) {
-        // When running on the emulator, radio config might not really be available, in that case, just ignore attempts to change the config
-        radioConfig.value?.toBuilder()?.let { config ->
-            config.channelSettings = c
-            setRadioConfig(config.build())
+            this.putString("channel-url", c.getChannelUrl().toString())
         }
     }
 
