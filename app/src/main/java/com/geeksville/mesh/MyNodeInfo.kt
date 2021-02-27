@@ -15,8 +15,6 @@ data class MyNodeInfo(
     val couldUpdate: Boolean, // this application contains a software load we _could_ install if you want
     val shouldUpdate: Boolean, // this device has old firmware
     val currentPacketId: Long,
-    val nodeNumBits: Int,
-    val packetIdBits: Int,
     val messageTimeoutMsec: Int,
     val minAppVersion: Int
 ) : Parcelable {
@@ -33,8 +31,6 @@ data class MyNodeInfo(
         parcel.readByte() != 0.toByte(),
         parcel.readLong(),
         parcel.readInt(),
-        parcel.readInt(),
-        parcel.readInt(),
         parcel.readInt()
     ) {
     }
@@ -48,8 +44,6 @@ data class MyNodeInfo(
         parcel.writeByte(if (couldUpdate) 1 else 0)
         parcel.writeByte(if (shouldUpdate) 1 else 0)
         parcel.writeLong(currentPacketId)
-        parcel.writeInt(nodeNumBits)
-        parcel.writeInt(packetIdBits)
         parcel.writeInt(messageTimeoutMsec)
         parcel.writeInt(minAppVersion)
     }

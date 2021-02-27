@@ -71,8 +71,6 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
     companion object {
         /**
          * Return the current channel info
-         * FIXME, we should sim channels at the MeshService level if we are running on an emulator,
-         * for now I just fake it by returning a canned channel.
          */
         fun getChannel(c: MeshProtos.RadioConfig?): Channel? {
             val channel = c?.channelSettings?.let { Channel(it) }

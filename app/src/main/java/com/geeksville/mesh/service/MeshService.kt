@@ -512,15 +512,12 @@ class MeshService : Service(), Logging {
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
     private fun newMeshPacketTo(idNum: Int) = MeshPacket.newBuilder().apply {
-        val useShortAddresses = (myNodeInfo?.nodeNumBits ?: 8) != 32
-
         if (myNodeInfo == null)
             throw RadioNotConnectedException()
 
         from = myNodeNum
 
-        // We might need to change broadcast addresses to work with old device loads
-        to = if (useShortAddresses && idNum == DataPacket.NODENUM_BROADCAST) 255 else idNum
+        to = idNum
     }
 
     /**
@@ -540,11 +537,11 @@ class MeshService : Service(), Logging {
         destId: String,
         wantAck: Boolean = false,
         id: Int = 0,
-        initFn: MeshProtos.SubPacket.Builder.() -> Unit
+        initFn: MeshProtos.Data.Builder.() -> Unit
     ): MeshPacket = newMeshPacketTo(destId).apply {
         this.wantAck = wantAck
         this.id = id
-        decoded = MeshProtos.SubPacket.newBuilder().also {
+        decoded = MeshProtos.Data.newBuilder().also {
             initFn(it)
         }.build()
     }.build()
@@ -556,11 +553,11 @@ class MeshService : Service(), Logging {
 
     /// Generate a DataPacket from a MeshPacket, or null if we didn't have enough data to do so
     private fun toDataPacket(packet: MeshPacket): DataPacket? {
-        return if (!packet.hasDecoded() || !packet.decoded.hasData()) {
+        return if (!packet.hasDecoded()) {
             // We never convert packets that are not DataPackets
             null
         } else {
-            val data = packet.decoded.data
+            val data = packet.decoded
             val bytes = data.payload.toByteArray()
             val fromId = toNodeID(packet.from)
             val toId = toNodeID(packet.to)
@@ -591,15 +588,10 @@ class MeshService : Service(), Logging {
         }
     }
 
-    /// Syntactic sugar to create data subpackets
-    private fun makeData(portNum: Int, bytes: ByteString) = MeshProtos.Data.newBuilder().also {
-        it.portnumValue = portNum
-        it.payload = bytes
-    }.build()
-
     private fun toMeshPacket(p: DataPacket): MeshPacket {
         return buildMeshPacket(p.to!!, id = p.id, wantAck = true) {
-            data = makeData(p.dataType, ByteString.copyFrom(p.bytes))
+            portnumValue = p.dataType
+            payload = ByteString.copyFrom(p.bytes)
         }
     }
 
@@ -624,7 +616,7 @@ class MeshService : Service(), Logging {
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedData(packet: MeshPacket) {
         myNodeInfo?.let { myInfo ->
-            val data = packet.decoded.data
+            val data = packet.decoded
             val bytes = data.payload.toByteArray()
             val fromId = toNodeID(packet.from)
             val dataPacket = toDataPacket(packet)
@@ -648,6 +640,8 @@ class MeshService : Service(), Logging {
                     dataPacket.status = MessageStatus.RECEIVED
                     rememberDataPacket(dataPacket)
 
+                    // if (p.hasUser()) handleReceivedUser(fromNum, p.user)
+
                     when (data.portnumValue) {
                         Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
                             debug("Received CLEAR_TEXT from $fromId")
@@ -665,6 +659,15 @@ class MeshService : Service(), Logging {
                         Portnums.PortNum.NODEINFO_APP_VALUE -> {
                             val u = MeshProtos.User.parseFrom(data.payload)
                             handleReceivedUser(packet.from, u)
+                        }
+
+                        // Handle new style routing info
+                        Portnums.PortNum.ROUTING_APP_VALUE -> {
+                            val u = MeshProtos.Routing.parseFrom(data.payload)
+                            if (u.errorReasonValue == MeshProtos.Routing.Error.NONE_VALUE)
+                                handleAckNak(true, data.requestId)
+                            else
+                                handleAckNak(false, data.requestId)
                         }
                     }
 
@@ -778,44 +781,35 @@ class MeshService : Service(), Logging {
         //val toNum = packet.to
 
         // debug("Recieved: $packet")
-        val p = packet.decoded
+        if (packet.hasDecoded()) {
+            val p = packet.decoded
 
-        val packetToSave = Packet(
-            UUID.randomUUID().toString(),
-            "packet",
-            System.currentTimeMillis(),
-            packet.toString()
-        )
-        insertPacket(packetToSave)
-        // If the rxTime was not set by the device (because device software was old), guess at a time
-        val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
+            val packetToSave = Packet(
+                UUID.randomUUID().toString(),
+                "packet",
+                System.currentTimeMillis(),
+                packet.toString()
+            )
+            insertPacket(packetToSave)
+            // If the rxTime was not set by the device (because device software was old), guess at a time
+            val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
 
-        // Update last seen for the node that sent the packet, but also for _our node_ because anytime a packet passes
-        // through our node on the way to the phone that means that local node is also alive in the mesh
+            // Update last seen for the node that sent the packet, but also for _our node_ because anytime a packet passes
+            // through our node on the way to the phone that means that local node is also alive in the mesh
 
-        updateNodeInfo(myNodeNum) {
-            it.position = it.position?.copy(time = currentSecond())
-        }
+            updateNodeInfo(myNodeNum) {
+                it.position = it.position?.copy(time = currentSecond())
+            }
 
-        if (p.hasPosition())
-            handleReceivedPosition(fromNum, p.position, rxTime)
-        else
+            // if (p.hasPosition()) handleReceivedPosition(fromNum, p.position, rxTime)
+
             updateNodeInfo(fromNum) {
                 // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
                 updateNodeInfoTime(it, rxTime)
             }
 
-        if (p.hasData())
             handleReceivedData(packet)
-
-        if (p.hasUser())
-            handleReceivedUser(fromNum, p.user)
-
-        if (p.successId != 0)
-            handleAckNak(true, p.successId)
-
-        if (p.failId != 0)
-            handleAckNak(false, p.failId)
+        }
     }
 
     private fun insertPacket(packetToSave: Packet) {
@@ -1138,8 +1132,6 @@ class MeshService : Service(), Logging {
                     DeviceVersion(firmwareVersion)
                 ),
                 currentPacketId.toLong() and 0xffffffffL,
-                if (nodeNumBits == 0) 8 else nodeNumBits,
-                if (packetIdBits == 0) 8 else packetIdBits,
                 if (messageTimeoutMsec == 0) 5 * 60 * 1000 else messageTimeoutMsec, // constants from current device code
                 minAppVersion
             )
@@ -1294,16 +1286,12 @@ class MeshService : Service(), Logging {
         // encapsulate our payload in the proper protobufs and fire it off
         val packet = newMeshPacketTo(destNum)
 
-        packet.decoded = MeshProtos.SubPacket.newBuilder().also {
-            val isNewPositionAPI =
-                deviceVersion >= DeviceVersion("1.20.0") // We changed position APIs with this version
-            if (isNewPositionAPI) {
-                // Use the new position as data format
-                it.data = makeData(Portnums.PortNum.POSITION_APP_VALUE, position.toByteString())
-            } else {
-                // Send the old dedicated position subpacket
-                it.position = position
-            }
+        packet.decoded = MeshProtos.Data.newBuilder().also {
+
+            // Use the new position as data format
+            it.portnumValue = Portnums.PortNum.POSITION_APP_VALUE
+            it.payload = position.toByteString()
+
             it.wantResponse = wantResponse
         }.build()
 
@@ -1395,11 +1383,9 @@ class MeshService : Service(), Logging {
 
         myNodeInfo?.let {
             val numPacketIds =
-                ((1L shl it.packetIdBits) - 1).toLong() // A mask for only the valid packet ID bits, either 255 or maxint
+                ((1L shl 32) - 1).toLong() // A mask for only the valid packet ID bits, either 255 or maxint
 
             if (currentPacketId == 0L) {
-                logAssert(it.packetIdBits == 8 || it.packetIdBits == 32) // Only values I'm expecting (though we don't require this)
-
                 // We now always pick a random initial packet id (odds of collision with the device is insanely low with 32 bit ids)
                 val random = Random(System.currentTimeMillis())
                 val devicePacketId = random.nextLong().absoluteValue
