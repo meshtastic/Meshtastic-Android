@@ -1323,9 +1323,22 @@ class MeshService : Service(), Logging {
      */
     private fun sendRadioConfig(c: MeshProtos.RadioConfig) {
         // Update our device
-        sendToRadio(ToRadio.newBuilder().apply {
-            this.setRadio = c
-        })
+        val payload = AdminProtos.AdminMessage.newBuilder().also {
+            it.setRadio = c
+        }.build()
+
+        // encapsulate our payload in the proper protobufs and fire it off
+        val packet = newMeshPacketTo(myNodeNum)
+
+        packet.decoded = MeshProtos.Data.newBuilder().also {
+
+            // Use the new position as data format
+            it.portnumValue = Portnums.PortNum.ADMIN_APP_VALUE
+            it.payload = payload.toByteString()
+        }.build()
+
+        // send the packet into the mesh
+        sendToRadio(packet.build())
 
         // Update our cached copy
         this@MeshService.radioConfig = c
@@ -1365,9 +1378,22 @@ class MeshService : Service(), Logging {
                 handleReceivedUser(myNode.myNodeNum, user)
 
                 // set my owner info
-                sendToRadio(ToRadio.newBuilder().apply {
-                    this.setOwner = user
-                })
+                val payload = AdminProtos.AdminMessage.newBuilder().also {
+                    it.setOwner = user
+                }.build()
+
+                // encapsulate our payload in the proper protobufs and fire it off
+                val packet = newMeshPacketTo(myNodeNum)
+
+                packet.decoded = MeshProtos.Data.newBuilder().also {
+
+                    // Use the new position as data format
+                    it.portnumValue = Portnums.PortNum.ADMIN_APP_VALUE
+                    it.payload = payload.toByteString()
+                }.build()
+
+                // send the packet into the mesh
+                sendToRadio(packet.build())
             }
         } else
             throw Exception("Can't set user without a node info") // this shouldn't happen
