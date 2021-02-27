@@ -16,12 +16,14 @@ import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
+import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.ChannelFragmentBinding
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
+import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -197,9 +199,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
                             if (modemConfig != ChannelProtos.ChannelSettings.ModemConfig.UNRECOGNIZED)
                                 newSettings.modemConfig = modemConfig
+
+                            val newChannel = newSettings.build()
+                            val newSet = ChannelSet(AppOnlyProtos.ChannelSet.newBuilder().addSettings(newChannel).build())
                             // Try to change the radio, if it fails, tell the user why and throw away their redits
                             try {
-                                model.setChannel(newSettings.build())
+                                model.setChannels(newSet)
                                 // Since we are writing to radioconfig, that will trigger the rest of the GUI update (QR code etc)
                             } catch (ex: RemoteException) {
                                 errormsg("ignoring channel problem", ex)

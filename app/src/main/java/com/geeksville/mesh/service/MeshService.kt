@@ -419,6 +419,8 @@ class MeshService : Service(), Logging {
 
     private var radioConfig: RadioConfigProtos.RadioConfig? = null
 
+    private var channels = listOf<ChannelProtos.Channel>()
+
     /// True after we've done our initial node db init
     @Volatile
     private var haveNodeDB = false
@@ -509,6 +511,33 @@ class MeshService : Service(), Logging {
 
     /// My node ID string
     private val myNodeID get() = toNodeID(myNodeNum)
+
+    /// Convert the channels array into a ChannelSet
+    private var channelSet: AppOnlyProtos.ChannelSet
+        get() {
+            val cs = channels.filter {
+                it.role != ChannelProtos.Channel.Role.DISABLED
+            }.map {
+                it.settings
+            }
+
+            return AppOnlyProtos.ChannelSet.newBuilder().apply {
+                addAllSettings(cs)
+            }.build()
+        }
+        set(value) {
+            val asChannels = value.settingsList.mapIndexed { i, c ->
+                ChannelProtos.Channel.newBuilder().apply {
+                    role = if(i == 0) ChannelProtos.Channel.Role.PRIMARY else ChannelProtos.Channel.Role.SECONDARY
+                    index = i
+                    settings = c
+                }.build()
+            }
+
+            // FIXME, send channels to device!
+
+            channels = asChannels
+        }
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
     private fun newMeshPacketTo(idNum: Int) = MeshPacket.newBuilder().apply {
@@ -1604,12 +1633,13 @@ class MeshService : Service(), Logging {
             this@MeshService.setRadioConfig(payload)
         }
 
-        override fun getChannels(): ByteArray {
-            TODO("Not yet implemented")
+        override fun getChannels(): ByteArray = toRemoteExceptions {
+             channelSet.toByteArray()
         }
 
         override fun setChannels(payload: ByteArray?) {
-            TODO("Not yet implemented")
+            val parsed = AppOnlyProtos.ChannelSet.parseFrom(payload)
+            channelSet = parsed
         }
 
         override fun getNodes(): MutableList<NodeInfo> = toRemoteExceptions {
