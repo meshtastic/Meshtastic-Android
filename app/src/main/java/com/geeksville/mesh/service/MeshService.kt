@@ -1604,6 +1604,10 @@ class MeshService : Service(), Logging {
             this@MeshService.setRadioConfig(payload)
         }
 
+        override fun getChannels(): ByteArray {
+            TODO("Not yet implemented")
+        }
+
         override fun getNodes(): MutableList<NodeInfo> = toRemoteExceptions {
             val r = nodeDBbyID.values.toMutableList()
             info("in getOnline, count=${r.size}")

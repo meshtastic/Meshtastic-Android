@@ -12,6 +12,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.geeksville.android.Logging
+import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MyNodeInfo
@@ -69,15 +70,6 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
     }
 
     companion object {
-        /**
-         * Return the current channel info
-         */
-        fun getChannel(c: MeshProtos.RadioConfig?): Channel? {
-            val channel = c?.channelSettings?.let { Channel(it) }
-
-            return channel
-        }
-
         fun getPreferences(context: Context): SharedPreferences =
             context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
     }
@@ -99,6 +91,9 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
 
     /// various radio settings (including the channel)
     val radioConfig = object : MutableLiveData<MeshProtos.RadioConfig?>(null) {
+    }
+
+    val channels = object : MutableLiveData<AppOnlyProtos.ChannelSet?>(null) {
     }
 
     var positionBroadcastSecs: Int?
@@ -155,15 +150,31 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
         debug("ViewModel cleared")
     }
 
+    /**
+     * Return the primary channel info
+     */
+    val primaryChannel: ChannelSet? get() {
+        return channels.value?.let { it ->
+            Channel(it.getSettings(0))
+        }
+    }
     /// Set the radio config (also updates our saved copy in preferences)
-    fun setRadioConfig(c: MeshProtos.RadioConfig) {
+    private fun setRadioConfig(c: MeshProtos.RadioConfig) {
         debug("Setting new radio config!")
         meshService?.radioConfig = c.toByteArray()
         radioConfig.value =
             c // Must be done after calling the service, so we will will properly throw if the service failed (and therefore not cache invalid new settings)
+    }
+
+    /// Set the radio config (also updates our saved copy in preferences)
+    private fun setChannels(c: AppOnlyProtos.ChannelSet) {
+        debug("Setting new channels!")
+        meshService?.channels = c.toByteArray()
+        channels.value =
+            c // Must be done after calling the service, so we will will properly throw if the service failed (and therefore not cache invalid new settings)
 
         getPreferences(context).edit(commit = true) {
-            this.putString("channel-url", getChannel(c)!!.getChannelUrl().toString())
+            this.putString("channel-url", primaryChannel!!.getChannelUrl().toString())
         }
     }
 

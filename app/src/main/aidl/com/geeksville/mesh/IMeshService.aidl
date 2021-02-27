@@ -71,17 +71,25 @@ interface IMeshService {
     */
     List<NodeInfo> getNodes();
 
-    /// This method is only intended for use in our GUI, so the user can set radio options
-    /// It returns a RadioConfig protobuf.
-    byte []getRadioConfig();
-
     /// Return an list of MeshPacket protobuf (byte arrays) which were received while your client app was offline (recent messages only).
     /// Also includes any messages we have sent recently (useful for finding current message status)
     List<DataPacket> getOldMessages();
 
     /// This method is only intended for use in our GUI, so the user can set radio options
+    /// It returns a RadioConfig protobuf.
+    byte []getRadioConfig();
+
+    /// This method is only intended for use in our GUI, so the user can set radio options
     /// It sets a RadioConfig protobuf
     void setRadioConfig(in byte []payload);
+
+    /// This method is only intended for use in our GUI, so the user can set radio options
+    /// It returns a ChannelSet protobuf.
+    byte []getChannels();
+
+    /// This method is only intended for use in our GUI, so the user can set radio options
+    /// It sets a ChannelSet protobuf
+    void setChannels(in byte []payload);
 
     /**
     Is the packet radio currently connected to the phone?  Returns a ConnectionState string.
