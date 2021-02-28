@@ -26,7 +26,8 @@ data class DataPacket(
     var from: String? = ID_LOCAL, // a nodeID string, or ID_LOCAL for localhost
     var time: Long = System.currentTimeMillis(), // msecs since 1970
     var id: Int = 0, // 0 means unassigned
-    var status: MessageStatus? = MessageStatus.UNKNOWN
+    var status: MessageStatus? = MessageStatus.UNKNOWN,
+    var hopLimit: Int = 0
 ) : Parcelable {
 
     /**
@@ -60,7 +61,8 @@ data class DataPacket(
         parcel.readString(),
         parcel.readLong(),
         parcel.readInt(),
-        parcel.readParcelable(MessageStatus::class.java.classLoader)
+        parcel.readParcelable(MessageStatus::class.java.classLoader),
+        parcel.readInt()
     ) {
     }
 
@@ -77,6 +79,7 @@ data class DataPacket(
         if (dataType != other.dataType) return false
         if (!bytes!!.contentEquals(other.bytes!!)) return false
         if (status != other.status) return false
+        if (hopLimit != other.hopLimit) return false
 
         return true
     }
@@ -89,6 +92,7 @@ data class DataPacket(
         result = 31 * result + dataType
         result = 31 * result + bytes!!.contentHashCode()
         result = 31 * result + status.hashCode()
+        result = 31 * result + hopLimit
         return result
     }
 
@@ -100,6 +104,7 @@ data class DataPacket(
         parcel.writeLong(time)
         parcel.writeInt(id)
         parcel.writeParcelable(status, flags)
+        parcel.writeInt(hopLimit)
     }
 
     override fun describeContents(): Int {
@@ -115,6 +120,7 @@ data class DataPacket(
         time = parcel.readLong()
         id = parcel.readInt()
         status = parcel.readParcelable(MessageStatus::class.java.classLoader)
+        hopLimit = parcel.readInt()
     }
 
     companion object CREATOR : Parcelable.Creator<DataPacket> {
