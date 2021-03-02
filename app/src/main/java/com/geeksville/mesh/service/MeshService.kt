@@ -111,7 +111,10 @@ class MeshService : Service(), Logging {
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
     private var connectionState = ConnectionState.DISCONNECTED
+
+    /// A database of received packets - used only for debug log
     private var packetRepo: PacketRepository? = null
+
     private var fusedLocationClient: FusedLocationProviderClient? = null
 
     // If we've ever read a valid region code from our device it will be here
@@ -588,12 +591,14 @@ class MeshService : Service(), Logging {
      * Helper to make it easy to build a subpacket in the proper protobufs
      */
     private fun MeshProtos.MeshPacket.Builder.buildAdminPacket(
+        wantResponse: Boolean = false,
         initFn: AdminProtos.AdminMessage.Builder.() -> Unit
     ): MeshPacket = buildMeshPacket(
         wantAck = true,
         priority = MeshPacket.Priority.RELIABLE
     )
     {
+        this.wantResponse = wantResponse
         portnumValue = Portnums.PortNum.ADMIN_APP_VALUE
         payload = AdminProtos.AdminMessage.newBuilder().also {
             initFn(it)
@@ -684,47 +689,42 @@ class MeshService : Service(), Logging {
 
             if (dataPacket != null) {
 
-                if (myInfo.myNodeNum == packet.from) {
-                    // Handle position updates from the device
-                    if (data.portnumValue == Portnums.PortNum.POSITION_APP_VALUE) {
-                        handleReceivedPosition(
-                            packet.from,
-                            MeshProtos.Position.parseFrom(data.payload),
-                            dataPacket.time
-                        )
-                    } else
-                        debug("Ignoring packet sent from our node, portnum=${data.portnumValue} ${bytes.size} bytes")
-                } else {
-                    debug("Received data from $fromId, portnum=${data.portnumValue} ${bytes.size} bytes")
+                // We ignore most messages that we sent
+                val fromUs = myInfo.myNodeNum == packet.from
 
-                    dataPacket.status = MessageStatus.RECEIVED
-                    rememberDataPacket(dataPacket)
+                debug("Received data from $fromId, portnum=${data.portnum} ${bytes.size} bytes")
 
-                    // if (p.hasUser()) handleReceivedUser(fromNum, p.user)
+                dataPacket.status = MessageStatus.RECEIVED
+                rememberDataPacket(dataPacket)
 
-                    /// We tell other apps about most message types, but some may have sensitve data, so that is not shared'
-                    var shouldBroadcast = true
+                // if (p.hasUser()) handleReceivedUser(fromNum, p.user)
 
-                    when (data.portnumValue) {
-                        Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
+                /// We tell other apps about most message types, but some may have sensitve data, so that is not shared'
+                var shouldBroadcast = !fromUs
+
+                when (data.portnumValue) {
+                    Portnums.PortNum.TEXT_MESSAGE_APP_VALUE ->
+                        if (!fromUs) {
                             debug("Received CLEAR_TEXT from $fromId")
                             updateMessageNotification(dataPacket)
                         }
 
-                        // Handle new style position info
-                        Portnums.PortNum.POSITION_APP_VALUE -> {
-                            val u = MeshProtos.Position.parseFrom(data.payload)
-                            handleReceivedPosition(packet.from, u, dataPacket.time)
-                        }
+                    // Handle new style position info
+                    Portnums.PortNum.POSITION_APP_VALUE -> {
+                        val u = MeshProtos.Position.parseFrom(data.payload)
+                        handleReceivedPosition(packet.from, u, dataPacket.time)
+                    }
 
-                        // Handle new style user info
-                        Portnums.PortNum.NODEINFO_APP_VALUE -> {
+                    // Handle new style user info
+                    Portnums.PortNum.NODEINFO_APP_VALUE ->
+                        if (!fromUs) {
                             val u = MeshProtos.User.parseFrom(data.payload)
                             handleReceivedUser(packet.from, u)
                         }
 
-                        // Handle new style routing info
-                        Portnums.PortNum.ROUTING_APP_VALUE -> {
+                    // Handle new style routing info
+                    Portnums.PortNum.ROUTING_APP_VALUE ->
+                        if (!fromUs) {
                             val u = MeshProtos.Routing.parseFrom(data.payload)
                             if (u.errorReasonValue == MeshProtos.Routing.Error.NONE_VALUE)
                                 handleAckNak(true, data.requestId)
@@ -732,31 +732,30 @@ class MeshService : Service(), Logging {
                                 handleAckNak(false, data.requestId)
                         }
 
-                        Portnums.PortNum.ADMIN_APP_VALUE -> {
-                            val u = AdminProtos.AdminMessage.parseFrom(data.payload)
-                            handleReceivedAdmin(packet.from, u)
-                            shouldBroadcast = false
-                        }
-
-                        else ->
-                            debug("No custom processing needed for ${data.portnumValue}")
+                    Portnums.PortNum.ADMIN_APP_VALUE -> {
+                        val u = AdminProtos.AdminMessage.parseFrom(data.payload)
+                        handleReceivedAdmin(packet.from, u)
+                        shouldBroadcast = false
                     }
 
-                    // We always tell other apps when new data packets arrive
-                    if (shouldBroadcast)
-                        serviceBroadcasts.broadcastReceivedData(dataPacket)
-
-                    GeeksvilleApplication.analytics.track(
-                        "num_data_receive",
-                        DataPair(1)
-                    )
-
-                    GeeksvilleApplication.analytics.track(
-                        "data_receive",
-                        DataPair("num_bytes", bytes.size),
-                        DataPair("type", data.portnumValue)
-                    )
+                    else ->
+                        debug("No custom processing needed for ${data.portnumValue}")
                 }
+
+                // We always tell other apps when new data packets arrive
+                if (shouldBroadcast)
+                    serviceBroadcasts.broadcastReceivedData(dataPacket)
+
+                GeeksvilleApplication.analytics.track(
+                    "num_data_receive",
+                    DataPair(1)
+                )
+
+                GeeksvilleApplication.analytics.track(
+                    "data_receive",
+                    DataPair("num_bytes", bytes.size),
+                    DataPair("type", data.portnumValue)
+                )
             }
         }
     }
@@ -1361,20 +1360,19 @@ class MeshService : Service(), Logging {
 
                 haveNodeDB = true // we now have nodes from real hardware
                 requestRadioConfig()
-                requestChannel(0)
             }
         } else
             warn("Ignoring stale config complete")
     }
 
     private fun requestRadioConfig() {
-        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
             getRadioRequest = true
         })
     }
 
     private fun requestChannel(channelIndex: Int) {
-        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
             getChannelRequest = channelIndex + 1
         })
     }
