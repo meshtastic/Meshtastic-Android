@@ -723,14 +723,13 @@ class MeshService : Service(), Logging {
                         }
 
                     // Handle new style routing info
-                    Portnums.PortNum.ROUTING_APP_VALUE ->
-                        if (!fromUs) {
-                            val u = MeshProtos.Routing.parseFrom(data.payload)
-                            if (u.errorReasonValue == MeshProtos.Routing.Error.NONE_VALUE)
-                                handleAckNak(true, data.requestId)
-                            else
-                                handleAckNak(false, data.requestId)
-                        }
+                    Portnums.PortNum.ROUTING_APP_VALUE -> {
+                        val u = MeshProtos.Routing.parseFrom(data.payload)
+                        if (u.errorReasonValue == MeshProtos.Routing.Error.NONE_VALUE)
+                            handleAckNak(true, data.requestId)
+                        else
+                            handleAckNak(false, data.requestId)
+                    }
 
                     Portnums.PortNum.ADMIN_APP_VALUE -> {
                         val u = AdminProtos.AdminMessage.parseFrom(data.payload)
@@ -774,10 +773,19 @@ class MeshService : Service(), Logging {
                     if (mi != null) {
                         val ch = a.getChannelResponse
                         channels[ch.index] = ch
+                        debug("Received channel ${ch.index}")
                         if (ch.index + 1 < mi.maxChannels) {
-                            // Not done yet, request next channel
-                            requestChannel(ch.index + 1)
+                            if(ch.hasSettings()) {
+                                // Not done yet, request next channel
+                                requestChannel(ch.index + 1)
+                            }
+                            /* if(ch.index == 0) {
+                                // We allow the app to start as soon as we've received the primary channel, we'll keep fetching other channels in the background
+                                debug("We've received the primary channel, allowing rest of app to start...")
+                                onHasSettings()
+                            } */
                         } else {
+                            debug("Received all channels")
                             onHasSettings()
                         }
                     }
@@ -1326,6 +1334,7 @@ class MeshService : Service(), Logging {
 
     /// If we've received our initial config, our radio settings and all of our channels, send any queueed packets and broadcast connected to clients
     private fun onHasSettings() {
+
         processEarlyPackets() // send receive any packets that were queued up
 
         // broadcast an intent with our new connection state
