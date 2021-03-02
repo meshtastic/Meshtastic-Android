@@ -423,7 +423,7 @@ class MeshService : Service(), Logging {
 
     private var radioConfig: RadioConfigProtos.RadioConfig? = null
 
-    private var channels = listOf<ChannelProtos.Channel>()
+    private var channels = arrayOf<ChannelProtos.Channel>()
 
     /// True after we've done our initial node db init
     @Volatile
@@ -539,9 +539,9 @@ class MeshService : Service(), Logging {
                 }.build()
             }
 
-            // FIXME, send channels to device!
+            TODO("Need to send channels to device")
 
-            channels = asChannels
+            channels = asChannels.toTypedArray()
         }
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
@@ -567,7 +567,7 @@ class MeshService : Service(), Logging {
      */
     private fun MeshProtos.MeshPacket.Builder.buildMeshPacket(
         wantAck: Boolean = false,
-        id: Int = 0,
+        id: Int = generatePacketId(), // always assign a packet ID if we didn't already have one
         hopLimit: Int = 0,
         priority: MeshPacket.Priority = MeshPacket.Priority.UNSET,
         initFn: MeshProtos.Data.Builder.() -> Unit
@@ -702,6 +702,9 @@ class MeshService : Service(), Logging {
 
                     // if (p.hasUser()) handleReceivedUser(fromNum, p.user)
 
+                    /// We tell other apps about most message types, but some may have sensitve data, so that is not shared'
+                    var shouldBroadcast = true
+
                     when (data.portnumValue) {
                         Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
                             debug("Received CLEAR_TEXT from $fromId")
@@ -728,10 +731,20 @@ class MeshService : Service(), Logging {
                             else
                                 handleAckNak(false, data.requestId)
                         }
+
+                        Portnums.PortNum.ADMIN_APP_VALUE -> {
+                            val u = AdminProtos.AdminMessage.parseFrom(data.payload)
+                            handleReceivedAdmin(packet.from, u)
+                            shouldBroadcast = false
+                        }
+
+                        else ->
+                            debug("No custom processing needed for ${data.portnumValue}")
                     }
 
                     // We always tell other apps when new data packets arrive
-                    serviceBroadcasts.broadcastReceivedData(dataPacket)
+                    if (shouldBroadcast)
+                        serviceBroadcasts.broadcastReceivedData(dataPacket)
 
                     GeeksvilleApplication.analytics.track(
                         "num_data_receive",
@@ -744,6 +757,35 @@ class MeshService : Service(), Logging {
                         DataPair("type", data.portnumValue)
                     )
                 }
+            }
+        }
+    }
+
+    private fun handleReceivedAdmin(fromNodeNum: Int, a: AdminProtos.AdminMessage) {
+        // For the time being we only care about admin messages from our local node
+        if (fromNodeNum == myNodeNum) {
+            when (a.variantCase) {
+                AdminProtos.AdminMessage.VariantCase.GET_RADIO_RESPONSE -> {
+                    radioConfig = a.getRadioResponse
+                    requestChannel(0) // Now start reading channels
+                }
+
+                AdminProtos.AdminMessage.VariantCase.GET_CHANNEL_RESPONSE -> {
+                    val mi = myNodeInfo
+                    if (mi != null) {
+                        val ch = a.getChannelResponse
+                        channels[ch.index] = ch
+                        if (ch.index + 1 < mi.maxChannels) {
+                            // Not done yet, request next channel
+                            requestChannel(ch.index + 1)
+                        } else {
+                            onHasSettings()
+                        }
+                    }
+                }
+                else ->
+                    warn("No special processing needed for ${a.variantCase}")
+
             }
         }
     }
@@ -1192,11 +1234,22 @@ class MeshService : Service(), Logging {
                 ),
                 currentPacketId.toLong() and 0xffffffffL,
                 if (messageTimeoutMsec == 0) 5 * 60 * 1000 else messageTimeoutMsec, // constants from current device code
-                minAppVersion
+                minAppVersion,
+                maxChannels
             )
         }
 
         newMyNodeInfo = mi
+
+        // We'll need to get a new set of channels and settings now
+        radioConfig = null
+
+        // prefill the channel array with null channels
+        channels = Array(mi.maxChannels) {
+            val b = ChannelProtos.Channel.newBuilder()
+            b.index = it
+            b.build()
+        }
 
         /// Track types of devices and firmware versions in use
         GeeksvilleApplication.analytics.setUserInfo(
@@ -1272,6 +1325,18 @@ class MeshService : Service(), Logging {
         }
     }
 
+    /// If we've received our initial config, our radio settings and all of our channels, send any queueed packets and broadcast connected to clients
+    private fun onHasSettings() {
+        processEarlyPackets() // send receive any packets that were queued up
+
+        // broadcast an intent with our new connection state
+        serviceBroadcasts.broadcastConnection()
+        onNodeDBChanged()
+        reportConnection()
+
+        updateRegion()
+    }
+
     private fun handleConfigComplete(configCompleteId: Int) {
         if (configCompleteId == configNonce) {
 
@@ -1295,17 +1360,23 @@ class MeshService : Service(), Logging {
                 newNodes.clear() // Just to save RAM ;-)
 
                 haveNodeDB = true // we now have nodes from real hardware
-                processEarlyPackets() // send receive any packets that were queued up
-
-                // broadcast an intent with our new connection state
-                serviceBroadcasts.broadcastConnection()
-                onNodeDBChanged()
-                reportConnection()
-
-                updateRegion()
+                requestRadioConfig()
+                requestChannel(0)
             }
         } else
             warn("Ignoring stale config complete")
+    }
+
+    private fun requestRadioConfig() {
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+            getRadioRequest = true
+        })
+    }
+
+    private fun requestChannel(channelIndex: Int) {
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+            getChannelRequest = channelIndex + 1
+        })
     }
 
     /**
@@ -1430,36 +1501,24 @@ class MeshService : Service(), Logging {
             throw Exception("Can't set user without a node info") // this shouldn't happen
     }
 
+
     /// Do not use directly, instead call generatePacketId()
-    private var currentPacketId = 0L
+    private var currentPacketId = Random(System.currentTimeMillis()).nextLong().absoluteValue
 
     /**
      * Generate a unique packet ID (if we know enough to do so - otherwise return 0 so the device will do it)
      */
+    @Synchronized
     private fun generatePacketId(): Int {
+        val numPacketIds =
+            ((1L shl 32) - 1).toLong() // A mask for only the valid packet ID bits, either 255 or maxint
 
-        myNodeInfo?.let {
-            val numPacketIds =
-                ((1L shl 32) - 1).toLong() // A mask for only the valid packet ID bits, either 255 or maxint
+        currentPacketId++
 
-            if (currentPacketId == 0L) {
-                // We now always pick a random initial packet id (odds of collision with the device is insanely low with 32 bit ids)
-                val random = Random(System.currentTimeMillis())
-                val devicePacketId = random.nextLong().absoluteValue
+        currentPacketId = currentPacketId and 0xffffffff // keep from exceeding 32 bits
 
-                // Not inited - pick a number on the opposite side of what the device is using
-                currentPacketId = devicePacketId + numPacketIds / 2
-            } else {
-                currentPacketId++
-            }
-
-            currentPacketId = currentPacketId and 0xffffffff // keep from exceeding 32 bits
-
-            // Use modulus and +1 to ensure we skip 0 on any values we return
-            return ((currentPacketId % numPacketIds) + 1L).toInt()
-        }
-
-        return 0 // We don't have mynodeinfo yet, so just let the radio eventually assign an ID
+        // Use modulus and +1 to ensure we skip 0 on any values we return
+        return ((currentPacketId % numPacketIds) + 1L).toInt()
     }
 
     var firmwareUpdateFilename: UpdateFilenames? = null
