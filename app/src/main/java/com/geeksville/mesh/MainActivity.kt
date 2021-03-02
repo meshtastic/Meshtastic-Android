@@ -622,7 +622,7 @@ class MainActivity : AppCompatActivity(), Logging,
         val builder = MaterialAlertDialogBuilder(this)
             .setTitle(titleText)
             .setMessage(messageText)
-            .setPositiveButton("Okay") { _, _ ->
+            .setPositiveButton(R.string.okay) { _, _ ->
                 info("User acknowledged")
             }
 
@@ -660,7 +660,7 @@ class MainActivity : AppCompatActivity(), Logging,
                         val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
                         val minVer = DeviceVersion("1.2.0")
                         if(curVer < minVer)
-                            showAlert(R.string.app_too_old, R.string.firmware_old)
+                            showAlert(R.string.firmware_too_old, R.string.firmware_old)
                         else {
                             // If our app is too old/new, we probably don't understand the new radioconfig messages, so we don't read them until here
 

@@ -91,4 +91,5 @@
     <string name="advanced_settings">Advanced settings</string>
     <string name="firmware_too_old">Firmware update required</string>
     <string name="firmware_old">The radio firmware is too old to talk to this application, please go to the settings pane and choose "Update Firmware".  For more information on this see <a href="https://www.meshtastic.org/software/firmware-too-old.html">our wiki</a>.</string>
+    <string name="okay">Okay</string>
 </resources>
