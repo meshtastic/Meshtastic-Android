@@ -564,23 +564,42 @@ class MeshService : Service(), Logging {
 
     /**
      * Helper to make it easy to build a subpacket in the proper protobufs
-     *
-     * If destId is null we assume a broadcast message
      */
-    private fun buildMeshPacket(
-        destId: String,
+    private fun MeshProtos.MeshPacket.Builder.buildMeshPacket(
         wantAck: Boolean = false,
         id: Int = 0,
         hopLimit: Int = 0,
+        priority: MeshPacket.Priority = MeshPacket.Priority.UNSET,
         initFn: MeshProtos.Data.Builder.() -> Unit
-    ): MeshPacket = newMeshPacketTo(destId).apply {
+    ): MeshPacket {
         this.wantAck = wantAck
         this.id = id
         this.hopLimit = hopLimit
+        this.priority = priority
         decoded = MeshProtos.Data.newBuilder().also {
             initFn(it)
         }.build()
-    }.build()
+
+        return build()
+    }
+
+
+    /**
+     * Helper to make it easy to build a subpacket in the proper protobufs
+     */
+    private fun MeshProtos.MeshPacket.Builder.buildAdminPacket(
+        initFn: AdminProtos.AdminMessage.Builder.() -> Unit
+    ): MeshPacket = buildMeshPacket(
+        wantAck = true,
+        priority = MeshPacket.Priority.RELIABLE
+    )
+    {
+        portnumValue = Portnums.PortNum.ADMIN_APP_VALUE
+        payload = AdminProtos.AdminMessage.newBuilder().also {
+            initFn(it)
+        }.build().toByteString()
+    }
+
 
     // FIXME - possible kotlin bug in 1.3.72 - it seems that if we start with the (globally shared) emptyList,
     // then adding items are affecting that shared list rather than a copy.   This was causing aliasing of
@@ -627,7 +646,11 @@ class MeshService : Service(), Logging {
     }
 
     private fun toMeshPacket(p: DataPacket): MeshPacket {
-        return buildMeshPacket(p.to!!, id = p.id, wantAck = true, hopLimit = p.hopLimit) {
+        return newMeshPacketTo(p.to!!).buildMeshPacket(
+            id = p.id,
+            wantAck = true,
+            hopLimit = p.hopLimit
+        ) {
             portnumValue = p.dataType
             payload = ByteString.copyFrom(p.bytes)
         }
@@ -820,8 +843,6 @@ class MeshService : Service(), Logging {
 
         // debug("Recieved: $packet")
         if (packet.hasDecoded()) {
-            val p = packet.decoded
-
             val packetToSave = Packet(
                 UUID.randomUUID().toString(),
                 "packet",
@@ -1322,26 +1343,20 @@ class MeshService : Service(), Logging {
             it.time = currentSecond() // Include our current timestamp
         }.build()
 
-        // encapsulate our payload in the proper protobufs and fire it off
-        val packet = newMeshPacketTo(destNum)
-
-        packet.decoded = MeshProtos.Data.newBuilder().also {
-
-            // Use the new position as data format
-            it.portnumValue = Portnums.PortNum.POSITION_APP_VALUE
-            it.payload = position.toByteString()
-
-            it.wantResponse = wantResponse
-        }.build()
-
-        // Assume our position packets are not critical
-        packet.priority = MeshProtos.MeshPacket.Priority.BACKGROUND
-
         // Also update our own map for our nodenum, by handling the packet just like packets from other users
         handleReceivedPosition(myNodeInfo!!.myNodeNum, position)
 
+        val fullPacket =
+            newMeshPacketTo(destNum).buildMeshPacket(priority = MeshProtos.MeshPacket.Priority.BACKGROUND) {
+                // Use the new position as data format
+                portnumValue = Portnums.PortNum.POSITION_APP_VALUE
+                payload = position.toByteString()
+
+                this.wantResponse = wantResponse
+            }
+
         // send the packet into the mesh
-        sendToRadio(packet.build())
+        sendToRadio(fullPacket)
     }
 
     private fun sendPositionScoped(
@@ -1361,23 +1376,10 @@ class MeshService : Service(), Logging {
     /** Send our current radio config to the device
      */
     private fun sendRadioConfig(c: RadioConfigProtos.RadioConfig) {
-        // Update our device
-        val payload = AdminProtos.AdminMessage.newBuilder().also {
-            it.setRadio = c
-        }.build()
-
-        // encapsulate our payload in the proper protobufs and fire it off
-        val packet = newMeshPacketTo(myNodeNum)
-
-        packet.decoded = MeshProtos.Data.newBuilder().also {
-
-            // Use the new position as data format
-            it.portnumValue = Portnums.PortNum.ADMIN_APP_VALUE
-            it.payload = payload.toByteString()
-        }.build()
-
         // send the packet into the mesh
-        sendToRadio(packet.build())
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+            setRadio = c
+        })
 
         // Update our cached copy
         this@MeshService.radioConfig = c
@@ -1416,23 +1418,13 @@ class MeshService : Service(), Logging {
 
                 handleReceivedUser(myNode.myNodeNum, user)
 
-                // set my owner info
-                val payload = AdminProtos.AdminMessage.newBuilder().also {
-                    it.setOwner = user
-                }.build()
-
                 // encapsulate our payload in the proper protobufs and fire it off
-                val packet = newMeshPacketTo(myNodeNum)
-
-                packet.decoded = MeshProtos.Data.newBuilder().also {
-
-                    // Use the new position as data format
-                    it.portnumValue = Portnums.PortNum.ADMIN_APP_VALUE
-                    it.payload = payload.toByteString()
-                }.build()
+                val packet = newMeshPacketTo(myNodeNum).buildAdminPacket {
+                    setOwner = user
+                }
 
                 // send the packet into the mesh
-                sendToRadio(packet.build())
+                sendToRadio(packet)
             }
         } else
             throw Exception("Can't set user without a node info") // this shouldn't happen
