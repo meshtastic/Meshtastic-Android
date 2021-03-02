@@ -20,10 +20,14 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.RemoteException
+import android.text.SpannableString
+import android.text.method.LinkMovementMethod
+import android.text.util.Linkify
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -64,6 +68,7 @@ import kotlinx.coroutines.cancel
 import java.nio.charset.Charset
 import java.text.DateFormat
 import java.util.*
+
 
 /*
 UI design
@@ -620,26 +625,38 @@ class MainActivity : AppCompatActivity(), Logging,
 
                 debug("Getting latest radioconfig from service")
                 try {
-                    model.radioConfig.value =
-                        RadioConfigProtos.RadioConfig.parseFrom(service.radioConfig)
-
                     val info = service.myNodeInfo
                     model.myNodeInfo.value = info
 
                     val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
-                    if (isOld)
-                        MaterialAlertDialogBuilder(this)
+                    if (isOld) {
+                        // make links clickable per https://stackoverflow.com/a/62642807
+                        val messageStr = getText(R.string.must_update)
+
+                        val builder = MaterialAlertDialogBuilder(this)
                             .setTitle(getString(R.string.app_too_old))
-                            .setMessage(getString(R.string.must_update))
+                            .setMessage(messageStr)
                             .setPositiveButton("Okay") { _, _ ->
                                 info("User acknowledged app is old")
                             }
-                            .show()
 
-                    updateNodesFromDevice()
+                        val dialog = builder.show()
 
-                    // we have a connection to our device now, do the channel change
-                    perhapsChangeChannel()
+                        // Make the textview clickable. Must be called after show()
+                        val view = (dialog.findViewById(android.R.id.message) as TextView?)!!
+                        // Linkify.addLinks(view, Linkify.ALL) // not needed with this method
+                        view.movementMethod = LinkMovementMethod.getInstance()
+                    } else {
+                        // If our app is too old, we probably don't understand the new radioconfig messages
+
+                        model.radioConfig.value =
+                            RadioConfigProtos.RadioConfig.parseFrom(service.radioConfig)
+
+                        updateNodesFromDevice()
+
+                        // we have a connection to our device now, do the channel change
+                        perhapsChangeChannel()
+                    }
                 } catch (ex: RemoteException) {
                     warn("Abandoning connect $ex, because we probably just lost device connection")
                     model.isConnected.value = oldConnection
@@ -933,7 +950,8 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.stress_test).isVisible = BuildConfig.DEBUG // only show stress test for debug builds (for now)
+        menu.findItem(R.id.stress_test).isVisible =
+            BuildConfig.DEBUG // only show stress test for debug builds (for now)
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -974,7 +992,7 @@ class MainActivity : AppCompatActivity(), Logging,
                     )
                 }
                 item.isChecked = !item.isChecked // toggle ping test
-                if(item.isChecked)
+                if (item.isChecked)
                     postPing()
                 else
                     handler.removeCallbacksAndMessages(null)

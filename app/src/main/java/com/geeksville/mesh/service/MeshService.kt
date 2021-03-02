@@ -73,6 +73,9 @@ class MeshService : Service(), Logging {
         class NodeNumNotFoundException(id: Int) : NodeNotFoundException("NodeNum not found $id")
         class IdNotFoundException(id: String) : NodeNotFoundException("ID not found $id")
 
+        class NoRadioConfigException(message: String = "No radio settings received (is our app too old?)") :
+            RadioNotConnectedException(message)
+
         /** We treat software update as similar to loss of comms to the regular bluetooth service (so things like sendPosition for background GPS ignores the problem */
         class IsUpdatingException() :
             RadioNotConnectedException("Operation prohibited during firmware update")
@@ -528,7 +531,8 @@ class MeshService : Service(), Logging {
         set(value) {
             val asChannels = value.settingsList.mapIndexed { i, c ->
                 ChannelProtos.Channel.newBuilder().apply {
-                    role = if(i == 0) ChannelProtos.Channel.Role.PRIMARY else ChannelProtos.Channel.Role.SECONDARY
+                    role =
+                        if (i == 0) ChannelProtos.Channel.Role.PRIMARY else ChannelProtos.Channel.Role.SECONDARY
                     index = i
                     settings = c
                 }.build()
@@ -566,10 +570,12 @@ class MeshService : Service(), Logging {
         destId: String,
         wantAck: Boolean = false,
         id: Int = 0,
+        hopLimit: Int = 0,
         initFn: MeshProtos.Data.Builder.() -> Unit
     ): MeshPacket = newMeshPacketTo(destId).apply {
         this.wantAck = wantAck
         this.id = id
+        this.hopLimit = hopLimit
         decoded = MeshProtos.Data.newBuilder().also {
             initFn(it)
         }.build()
@@ -590,9 +596,10 @@ class MeshService : Service(), Logging {
             val bytes = data.payload.toByteArray()
             val fromId = toNodeID(packet.from)
             val toId = toNodeID(packet.to)
+            val hopLimit = packet.hopLimit
 
             // If the rxTime was not set by the device (because device software was old), guess at a time
-            val rxTime = if (packet.rxTime == 0) packet.rxTime else currentSecond()
+            val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
 
             when {
                 fromId == null -> {
@@ -610,7 +617,8 @@ class MeshService : Service(), Logging {
                         time = rxTime * 1000L,
                         id = packet.id,
                         dataType = data.portnumValue,
-                        bytes = bytes
+                        bytes = bytes,
+                        hopLimit = hopLimit
                     )
                 }
             }
@@ -618,7 +626,7 @@ class MeshService : Service(), Logging {
     }
 
     private fun toMeshPacket(p: DataPacket): MeshPacket {
-        return buildMeshPacket(p.to!!, id = p.id, wantAck = true) {
+        return buildMeshPacket(p.to!!, id = p.id, wantAck = true, hopLimit = p.hopLimit) {
             portnumValue = p.dataType
             payload = ByteString.copyFrom(p.bytes)
         }
@@ -655,11 +663,10 @@ class MeshService : Service(), Logging {
                 if (myInfo.myNodeNum == packet.from) {
                     // Handle position updates from the device
                     if (data.portnumValue == Portnums.PortNum.POSITION_APP_VALUE) {
-                        val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
                         handleReceivedPosition(
                             packet.from,
                             MeshProtos.Position.parseFrom(data.payload),
-                            rxTime
+                            dataPacket.time
                         )
                     } else
                         debug("Ignoring packet sent from our node, portnum=${data.portnumValue} ${bytes.size} bytes")
@@ -679,9 +686,8 @@ class MeshService : Service(), Logging {
 
                         // Handle new style position info
                         Portnums.PortNum.POSITION_APP_VALUE -> {
-                            val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
                             val u = MeshProtos.Position.parseFrom(data.payload)
-                            handleReceivedPosition(packet.from, u, rxTime)
+                            handleReceivedPosition(packet.from, u, dataPacket.time)
                         }
 
                         // Handle new style user info
@@ -730,15 +736,17 @@ class MeshService : Service(), Logging {
         }
     }
 
-    /// Update our DB of users based on someone sending out a Position subpacket
+    /** Update our DB of users based on someone sending out a Position subpacket
+     * @param defaultTime in msecs since 1970
+     */
     private fun handleReceivedPosition(
         fromNum: Int,
         p: MeshProtos.Position,
-        defaultTime: Int = Position.currentTime()
+        defaultTime: Long = System.currentTimeMillis()
     ) {
         updateNodeInfo(fromNum) {
             it.position = Position(p)
-            updateNodeInfoTime(it, defaultTime)
+            updateNodeInfoTime(it, (defaultTime / 1000).toInt())
         }
     }
 
@@ -820,8 +828,6 @@ class MeshService : Service(), Logging {
                 packet.toString()
             )
             insertPacket(packetToSave)
-            // If the rxTime was not set by the device (because device software was old), guess at a time
-            val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
 
             // Update last seen for the node that sent the packet, but also for _our node_ because anytime a packet passes
             // through our node on the way to the phone that means that local node is also alive in the mesh
@@ -832,6 +838,8 @@ class MeshService : Service(), Logging {
 
             // if (p.hasPosition()) handleReceivedPosition(fromNum, p.position, rxTime)
 
+            // If the rxTime was not set by the device (because device software was old), guess at a time
+            val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
             updateNodeInfo(fromNum) {
                 // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
                 updateNodeInfoTime(it, rxTime)
@@ -1203,7 +1211,8 @@ class MeshService : Service(), Logging {
         ignoreException {
             // Try to pull our region code from the new preferences field
             // FIXME - do not check net - figuring out why board is rebooting
-            val curConfigRegion = radioConfig?.preferences?.region ?: RadioConfigProtos.RegionCode.Unset
+            val curConfigRegion =
+                radioConfig?.preferences?.region ?: RadioConfigProtos.RegionCode.Unset
             if (curConfigRegion != RadioConfigProtos.RegionCode.Unset) {
                 info("Using device region $curConfigRegion (code ${curConfigRegion.number})")
                 curRegionValue = curConfigRegion.number
@@ -1626,7 +1635,7 @@ class MeshService : Service(), Logging {
 
         override fun getRadioConfig(): ByteArray = toRemoteExceptions {
             this@MeshService.radioConfig?.toByteArray()
-                ?: throw RadioNotConnectedException()
+                ?: throw NoRadioConfigException()
         }
 
         override fun setRadioConfig(payload: ByteArray) = toRemoteExceptions {
@@ -1634,7 +1643,7 @@ class MeshService : Service(), Logging {
         }
 
         override fun getChannels(): ByteArray = toRemoteExceptions {
-             channelSet.toByteArray()
+            channelSet.toByteArray()
         }
 
         override fun setChannels(payload: ByteArray?) {
