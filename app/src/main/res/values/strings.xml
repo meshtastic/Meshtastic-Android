@@ -60,8 +60,8 @@
     <string name="not_connected">Not connected, select radio below</string>
     <string name="connected_sleeping">Connected to radio, but it is sleeping</string>
     <string name="update_to">Update to %s</string>
-    <string name="app_too_old">Application too old</string>
-    <string name="must_update">You must update this application on the Google Play store (or Github). It is too old to talk to this radio.</string>
+    <string name="app_too_old">Application update required</string>
+    <string name="must_update">You must update this application on the Google Play store (or Github). It is too old to talk to this radio firmware.  Please read our <a href="https://www.meshtastic.org/software/android-too-old.html">wiki</a> on this topic.</string>
     <string name="none">None (disable)</string>
     <string name="modem_config_short">Short range (but fast)</string>
     <string name="modem_config_medium">Medium range (but fast)</string>

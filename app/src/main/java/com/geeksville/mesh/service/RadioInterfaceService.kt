@@ -26,6 +26,7 @@ open class RadioNotConnectedException(message: String = "Not connected to radio"
     BLEException(message)
 
 
+
 /**
  * Handles the bluetooth link with a mesh radio device.  Does not cache any device state,
  * just does bluetooth comms etc...

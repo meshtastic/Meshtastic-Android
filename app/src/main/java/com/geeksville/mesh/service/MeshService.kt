@@ -73,6 +73,9 @@ class MeshService : Service(), Logging {
         class NodeNumNotFoundException(id: Int) : NodeNotFoundException("NodeNum not found $id")
         class IdNotFoundException(id: String) : NodeNotFoundException("ID not found $id")
 
+        class NoRadioConfigException(message: String = "No radio settings received (is our app too old?)") :
+            RadioNotConnectedException(message)
+
         /** We treat software update as similar to loss of comms to the regular bluetooth service (so things like sendPosition for background GPS ignores the problem */
         class IsUpdatingException() :
             RadioNotConnectedException("Operation prohibited during firmware update")
@@ -1589,7 +1592,7 @@ class MeshService : Service(), Logging {
 
         override fun getRadioConfig(): ByteArray = toRemoteExceptions {
             this@MeshService.radioConfig?.toByteArray()
-                ?: throw RadioNotConnectedException()
+                ?: throw NoRadioConfigException()
         }
 
         override fun setRadioConfig(payload: ByteArray) = toRemoteExceptions {
