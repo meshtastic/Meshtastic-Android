@@ -31,8 +31,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 20148 // format is Mmmss (where M is 1+the numeric major number
-        versionName "1.1.48"
+        versionCode 20150 // format is Mmmss (where M is 1+the numeric major number
+        versionName "1.1.50"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
@@ -90,7 +90,7 @@ play {
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:3.13.0'
+        artifact = 'com.google.protobuf:protoc:3.15.3'
     }
     generateProtoTasks {
         all().each { task ->
@@ -130,7 +130,7 @@ dependencies {
 
     // optional - Test helpers
     testImplementation "androidx.room:room-testing:$room_version"
-    testImplementation 'junit:junit:4.13.1'
+    testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
@@ -145,7 +145,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
     // For now I'm not using javalite, because I want JSON printing
-    implementation ('com.google.protobuf:protobuf-java:3.14.0')
+    implementation ('com.google.protobuf:protobuf-java:3.15.3')
 
     // For UART access
     // implementation 'com.google.android.things:androidthings:1.0'
@@ -158,7 +158,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
 
     // location services
-    implementation 'com.google.android.gms:play-services-location:17.1.0'
+    implementation 'com.google.android.gms:play-services-location:18.0.0'
 
     // For Google Sign-In (owner name accesss)
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
