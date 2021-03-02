@@ -89,4 +89,6 @@
     <string name="broadcast_period_too_small">Minimum broadcast period for this channel is %d</string>
     <string name="protocol_stress_test">Protocol stress test</string>
     <string name="advanced_settings">Advanced settings</string>
+    <string name="firmware_too_old">Firmware update required</string>
+    <string name="firmware_old">The radio firmware is too old to talk to this application, please go to the settings pane and choose "Update Firmware".  For more information on this see <a href="https://www.meshtastic.org/software/firmware-too-old.html">our wiki</a>.</string>
 </resources>

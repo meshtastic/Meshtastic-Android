@@ -46,6 +46,7 @@ import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelSet
+import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
@@ -613,6 +614,29 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
+    /** Show an alert that may contain HTML */
+    private fun showAlert(titleText: Int, messageText: Int) {
+        // make links clickable per https://stackoverflow.com/a/62642807
+        // val messageStr = getText(messageText)
+
+        val builder = MaterialAlertDialogBuilder(this)
+            .setTitle(titleText)
+            .setMessage(messageText)
+            .setPositiveButton("Okay") { _, _ ->
+                info("User acknowledged")
+            }
+
+        val dialog = builder.show()
+
+        // Make the textview clickable. Must be called after show()
+        val view = (dialog.findViewById(android.R.id.message) as TextView?)!!
+        // Linkify.addLinks(view, Linkify.ALL) // not needed with this method
+        view.movementMethod = LinkMovementMethod.getInstance()
+
+        showSettingsPage() // Default to the settings page in this case
+    }
+
+
     /// Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(connected: MeshService.ConnectionState) {
         debug("connchange ${model.isConnected.value} -> $connected")
@@ -629,33 +653,25 @@ class MainActivity : AppCompatActivity(), Logging,
                     model.myNodeInfo.value = info
 
                     val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
-                    if (isOld) {
-                        // make links clickable per https://stackoverflow.com/a/62642807
-                        val messageStr = getText(R.string.must_update)
+                    if (isOld)
+                        showAlert(R.string.app_too_old, R.string.must_update)
+                    else {
 
-                        val builder = MaterialAlertDialogBuilder(this)
-                            .setTitle(getString(R.string.app_too_old))
-                            .setMessage(messageStr)
-                            .setPositiveButton("Okay") { _, _ ->
-                                info("User acknowledged app is old")
-                            }
+                        val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
+                        val minVer = DeviceVersion("1.2.0")
+                        if(curVer < minVer)
+                            showAlert(R.string.app_too_old, R.string.firmware_old)
+                        else {
+                            // If our app is too old/new, we probably don't understand the new radioconfig messages, so we don't read them until here
 
-                        val dialog = builder.show()
+                            model.radioConfig.value =
+                                RadioConfigProtos.RadioConfig.parseFrom(service.radioConfig)
 
-                        // Make the textview clickable. Must be called after show()
-                        val view = (dialog.findViewById(android.R.id.message) as TextView?)!!
-                        // Linkify.addLinks(view, Linkify.ALL) // not needed with this method
-                        view.movementMethod = LinkMovementMethod.getInstance()
-                    } else {
-                        // If our app is too old, we probably don't understand the new radioconfig messages
+                            updateNodesFromDevice()
 
-                        model.radioConfig.value =
-                            RadioConfigProtos.RadioConfig.parseFrom(service.radioConfig)
-
-                        updateNodesFromDevice()
-
-                        // we have a connection to our device now, do the channel change
-                        perhapsChangeChannel()
+                            // we have a connection to our device now, do the channel change
+                            perhapsChangeChannel()
+                        }
                     }
                 } catch (ex: RemoteException) {
                     warn("Abandoning connect $ex, because we probably just lost device connection")
