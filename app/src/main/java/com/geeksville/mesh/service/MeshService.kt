@@ -540,10 +540,12 @@ class MeshService : Service(), Logging {
         destId: String,
         wantAck: Boolean = false,
         id: Int = 0,
+        hopLimit: Int = 0,
         initFn: MeshProtos.SubPacket.Builder.() -> Unit
     ): MeshPacket = newMeshPacketTo(destId).apply {
         this.wantAck = wantAck
         this.id = id
+        this.hopLimit = hopLimit
         decoded = MeshProtos.SubPacket.newBuilder().also {
             initFn(it)
         }.build()
@@ -564,6 +566,7 @@ class MeshService : Service(), Logging {
             val bytes = data.payload.toByteArray()
             val fromId = toNodeID(packet.from)
             val toId = toNodeID(packet.to)
+            val hopLimit = packet.hopLimit
 
             // If the rxTime was not set by the device (because device software was old), guess at a time
             val rxTime = if (packet.rxTime == 0) packet.rxTime else currentSecond()
@@ -584,7 +587,8 @@ class MeshService : Service(), Logging {
                         time = rxTime * 1000L,
                         id = packet.id,
                         dataType = data.portnumValue,
-                        bytes = bytes
+                        bytes = bytes,
+                        hopLimit = hopLimit
                     )
                 }
             }
@@ -598,7 +602,7 @@ class MeshService : Service(), Logging {
     }.build()
 
     private fun toMeshPacket(p: DataPacket): MeshPacket {
-        return buildMeshPacket(p.to!!, id = p.id, wantAck = true) {
+        return buildMeshPacket(p.to!!, id = p.id, wantAck = true, hopLimit = p.hopLimit) {
             data = makeData(p.dataType, ByteString.copyFrom(p.bytes))
         }
     }
