@@ -572,7 +572,7 @@ class MeshService : Service(), Logging {
             val hopLimit = packet.hopLimit
 
             // If the rxTime was not set by the device (because device software was old), guess at a time
-            val rxTime = if (packet.rxTime == 0) packet.rxTime else currentSecond()
+            val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
 
             when {
                 fromId == null -> {
@@ -641,11 +641,10 @@ class MeshService : Service(), Logging {
                 if (myInfo.myNodeNum == packet.from) {
                     // Handle position updates from the device
                     if (data.portnumValue == Portnums.PortNum.POSITION_APP_VALUE) {
-                        val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
                         handleReceivedPosition(
                             packet.from,
                             MeshProtos.Position.parseFrom(data.payload),
-                            rxTime
+                            dataPacket.time
                         )
                     } else
                         debug("Ignoring packet sent from our node, portnum=${data.portnumValue} ${bytes.size} bytes")
@@ -663,9 +662,8 @@ class MeshService : Service(), Logging {
 
                         // Handle new style position info
                         Portnums.PortNum.POSITION_APP_VALUE -> {
-                            val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
                             val u = MeshProtos.Position.parseFrom(data.payload)
-                            handleReceivedPosition(packet.from, u, rxTime)
+                            handleReceivedPosition(packet.from, u, dataPacket.time)
                         }
 
                         // Handle new style user info
@@ -705,15 +703,17 @@ class MeshService : Service(), Logging {
         }
     }
 
-    /// Update our DB of users based on someone sending out a Position subpacket
+    /** Update our DB of users based on someone sending out a Position subpacket
+     * @param defaultTime in msecs since 1970
+    */
     private fun handleReceivedPosition(
         fromNum: Int,
         p: MeshProtos.Position,
-        defaultTime: Int = Position.currentTime()
+        defaultTime: Long = System.currentTimeMillis()
     ) {
         updateNodeInfo(fromNum) {
             it.position = Position(p)
-            updateNodeInfoTime(it, defaultTime)
+            updateNodeInfoTime(it, (defaultTime / 1000).toInt())
         }
     }
 
@@ -794,8 +794,6 @@ class MeshService : Service(), Logging {
             packet.toString()
         )
         insertPacket(packetToSave)
-        // If the rxTime was not set by the device (because device software was old), guess at a time
-        val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
 
         // Update last seen for the node that sent the packet, but also for _our node_ because anytime a packet passes
         // through our node on the way to the phone that means that local node is also alive in the mesh
@@ -804,8 +802,11 @@ class MeshService : Service(), Logging {
             it.position = it.position?.copy(time = currentSecond())
         }
 
-        if (p.hasPosition())
-            handleReceivedPosition(fromNum, p.position, rxTime)
+        // If the rxTime was not set by the device (because device software was old), guess at a time
+        val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
+        if (p.hasPosition()) {
+            handleReceivedPosition(fromNum, p.position, rxTime.toLong() * 1000)
+        }
         else
             updateNodeInfo(fromNum) {
                 // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
