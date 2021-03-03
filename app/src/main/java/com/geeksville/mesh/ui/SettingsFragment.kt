@@ -19,6 +19,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.ArrayAdapter
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
@@ -585,6 +586,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     /// Setup the ui widgets unrelated to BLE scanning
     private fun initCommonUI() {
 
+        val regions = arrayOf("US", "CN", "EU488")
+        val spinner = binding.regionSpinner
+        val regionAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, regions)
+        regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = regionAdapter
+
         model.ownerName.observe(viewLifecycleOwner, { name ->
             binding.usernameEditText.setText(name)
         })
@@ -593,7 +600,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // Only let user edit their name or set software update while connected to a radio
         model.isConnected.observe(viewLifecycleOwner, Observer { connectionState ->
             val connected = connectionState == MeshService.ConnectionState.CONNECTED
-            binding.usernameView.isEnabled = connected
+            binding.nodeSettings.visibility = if(connected) View.VISIBLE else View.GONE
 
             if (connectionState == MeshService.ConnectionState.DISCONNECTED)
                 model.ownerName.value = ""
