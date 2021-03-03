@@ -26,11 +26,38 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
     override fun handleSendToRadio(p: ByteArray) {
         val pr = MeshProtos.ToRadio.parseFrom(p)
 
+        val data = if (pr.hasPacket()) pr.packet.decoded else null
+
         when {
             pr.wantConfigId != 0 -> sendConfigResponse(pr.wantConfigId)
+            data != null && data.portnum == Portnums.PortNum.ADMIN_APP -> handleAdminPacket(
+                pr,
+                AdminProtos.AdminMessage.parseFrom(data.payload)
+            )
             pr.hasPacket() && pr.packet.wantAck -> sendFakeAck(pr)
             else -> info("Ignoring data sent to mock interface $pr")
         }
+    }
+
+    private fun handleAdminPacket(pr: MeshProtos.ToRadio, d: AdminProtos.AdminMessage) {
+        if (d.getRadioRequest)
+            sendAdmin(pr.packet.to, pr.packet.from, pr.packet.id) {
+                getRadioResponse = RadioConfigProtos.RadioConfig.newBuilder().apply {
+
+                    preferences = RadioConfigProtos.RadioConfig.UserPreferences.newBuilder().apply {
+                        region = RadioConfigProtos.RegionCode.TW
+                        // FIXME set critical times?
+                    }.build()
+                }.build()
+            }
+
+        if (d.getChannelRequest != 0)
+            sendAdmin(pr.packet.to, pr.packet.from, pr.packet.id) {
+                getChannelResponse = ChannelProtos.Channel.newBuilder().apply {
+                        index = d.getChannelRequest - 1 // 0 based on the response
+                    role = if(d.getChannelRequest == 1) ChannelProtos.Channel.Role.PRIMARY else ChannelProtos.Channel.Role.DISABLED
+                    }.build()
+            }
     }
 
     override fun close() {
@@ -53,8 +80,7 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
             }.build()
         }
 
-
-    private fun makeAck(fromIn: Int, toIn: Int, msgId: Int) =
+    private fun makeDataPacket(fromIn: Int, toIn: Int, data: MeshProtos.Data.Builder) =
         MeshProtos.FromRadio.newBuilder().apply {
             packet = MeshProtos.MeshPacket.newBuilder().apply {
                 id = messageNumSequence.next()
@@ -62,14 +88,33 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
                 to = toIn
                 rxTime = (System.currentTimeMillis() / 1000).toInt()
                 rxSnr = 1.5f
-                decoded = MeshProtos.Data.newBuilder().apply {
-                    portnum = Portnums.PortNum.ROUTING_APP
-                    payload = MeshProtos.Routing.newBuilder().apply {
-                    }.build().toByteString()
-                    requestId = msgId
-                }.build()
+                decoded = data.build()
             }.build()
         }
+
+    private fun makeAck(fromIn: Int, toIn: Int, msgId: Int) =
+        makeDataPacket(fromIn, toIn, MeshProtos.Data.newBuilder().apply {
+            portnum = Portnums.PortNum.ROUTING_APP
+            payload = MeshProtos.Routing.newBuilder().apply {
+            }.build().toByteString()
+            requestId = msgId
+        })
+
+    private fun sendAdmin(
+        fromIn: Int,
+        toIn: Int,
+        reqId: Int,
+        initFn: AdminProtos.AdminMessage.Builder.() -> Unit
+    ) {
+        val p = makeDataPacket(fromIn, toIn, MeshProtos.Data.newBuilder().apply {
+            portnum = Portnums.PortNum.ADMIN_APP
+            payload = AdminProtos.AdminMessage.newBuilder().also {
+                initFn(it)
+            }.build().toByteString()
+            requestId = reqId
+        })
+        service.handleFromRadio(p.build().toByteArray())
+    }
 
     /// Send a fake ack packet back if the sender asked for want_ack
     private fun sendFakeAck(pr: MeshProtos.ToRadio) {

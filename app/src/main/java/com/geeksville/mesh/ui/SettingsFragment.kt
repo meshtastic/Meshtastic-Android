@@ -590,7 +590,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val spinner = binding.regionSpinner
         val regionAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, regions)
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = regionAdapter
+        // spinner.adapter = regionAdapter
 
         model.ownerName.observe(viewLifecycleOwner, { name ->
             binding.usernameEditText.setText(name)

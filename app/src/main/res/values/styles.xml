@@ -13,6 +13,20 @@
         <item name="android:itemTextAppearance">@style/menu_item_color</item>
     </style>
 
+    <style name="AppTheme.Spinner">
+        <item name="android:spinnerItemStyle">@style/SpinnerItem</item>
+        <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItem</item>
+    </style>
+
+    <style name="SpinnerItem">
+        <item name="android:gravity">right|center_vertical</item>
+        <item name="android:paddingRight">16dp</item>
+    </style>
+
+    <style name="SpinnerDropDownItem">
+        <item name="android:gravity">right|center_vertical</item>
+        <item name="android:paddingRight">16dp</item>
+    </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
