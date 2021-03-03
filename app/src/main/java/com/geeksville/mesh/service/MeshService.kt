@@ -52,8 +52,8 @@ class MeshService : Service(), Logging {
 
         /// Intents broadcast by MeshService
 
-        @Deprecated(message = "Does not filter by port number.  For legacy reasons only broadcast for UNKNOWN_APP, switch to ACTION_RECEIVED")
-        const val ACTION_RECEIVED_DATA = "$prefix.RECEIVED_DATA"
+        /* @Deprecated(message = "Does not filter by port number.  For legacy reasons only broadcast for UNKNOWN_APP, switch to ACTION_RECEIVED")
+        const val ACTION_RECEIVED_DATA = "$prefix.RECEIVED_DATA" */
 
         fun actionReceived(portNum: String) = "$prefix.RECEIVED.$portNum"
 
@@ -724,6 +724,7 @@ class MeshService : Service(), Logging {
 
                     // Handle new style routing info
                     Portnums.PortNum.ROUTING_APP_VALUE -> {
+                        shouldBroadcast = true // We always send acks to other apps, because they might care about the messages they sent
                         val u = MeshProtos.Routing.parseFrom(data.payload)
                         if (u.errorReasonValue == MeshProtos.Routing.Error.NONE_VALUE)
                             handleAckNak(true, data.requestId)
@@ -1231,7 +1232,6 @@ class MeshService : Service(), Logging {
             MyNodeInfo(
                 myNodeNum,
                 hasGps,
-                region,
                 hwModel,
                 firmwareVersion,
                 firmwareUpdateFilename != null,
@@ -1260,7 +1260,7 @@ class MeshService : Service(), Logging {
 
         /// Track types of devices and firmware versions in use
         GeeksvilleApplication.analytics.setUserInfo(
-            DataPair("region", mi.region),
+            // DataPair("region", mi.region),
             DataPair("firmware", mi.firmwareVersion),
             DataPair("has_gps", mi.hasGPS),
             DataPair("hw_model", mi.model),
@@ -1275,8 +1275,8 @@ class MeshService : Service(), Logging {
 
                 // We also include this info, because it is required to correctly decode address from the map file
                 DataPair("firmware", mi.firmwareVersion),
-                DataPair("hw_model", mi.model),
-                DataPair("region", mi.region)
+                DataPair("hw_model", mi.model)
+                // DataPair("region", mi.region)
             )
         }
     }
@@ -1301,7 +1301,8 @@ class MeshService : Service(), Logging {
             }
 
             if (curRegionValue == RadioConfigProtos.RegionCode.Unset_VALUE) {
-                // look for a legacy region
+                TODO("Need gui for setting region")
+                /* // look for a legacy region
                 val legacyRegex = Regex(".+-(.+)")
                 myNodeInfo?.region?.let { legacyRegion ->
                     val matches = legacyRegex.find(legacyRegion)
@@ -1311,7 +1312,7 @@ class MeshService : Service(), Logging {
                         info("Upgrading legacy region $newRegion (code ${newRegion.number})")
                         curRegionValue = newRegion.number
                     }
-                }
+                } */
             }
 
             // If nothing was set in our (new style radio preferences, but we now have a valid setting - slam it in)

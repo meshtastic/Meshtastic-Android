@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -151,11 +152,11 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             if (isMe) {
                 marginParams.leftMargin = messageOffset
                 marginParams.rightMargin = 0
-                holder.card.setCardBackgroundColor(resources.getColor(R.color.colorMyMsg))
+                context?.let{ holder.card.setCardBackgroundColor(ContextCompat.getColor(it, R.color.colorMyMsg)) }
             } else {
                 marginParams.rightMargin = messageOffset
                 marginParams.leftMargin = 0
-                holder.card.setCardBackgroundColor(resources.getColor(R.color.colorMsg))
+                context?.let{ holder.card.setCardBackgroundColor(ContextCompat.getColor(it, R.color.colorMsg)) }
             }
             // Hide the username chip for my messages
             if (isMe) {
