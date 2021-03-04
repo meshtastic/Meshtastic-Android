@@ -124,17 +124,23 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
         }
 
     var lsSleepSecs: Int?
-        get() {
-            radioConfig.value?.preferences?.let {
-                return it.lsSecs
-            }
-            return null
-        }
+        get() = radioConfig.value?.preferences?.lsSecs
         set(value) {
             val config = radioConfig.value
             if (value != null && config != null) {
                 val builder = config.toBuilder()
                 builder.preferencesBuilder.lsSecs = value
+                setRadioConfig(builder.build())
+            }
+        }
+
+    var region: RadioConfigProtos.RegionCode?
+        get() = radioConfig.value?.preferences?.region
+        set(value) {
+            val config = radioConfig.value
+            if (value != null && config != null) {
+                val builder = config.toBuilder()
+                builder.preferencesBuilder.region = value
                 setRadioConfig(builder.build())
             }
         }

@@ -33,6 +33,7 @@ import com.geeksville.android.hideKeyboard
 import com.geeksville.android.isGooglePlayAvailable
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
+import com.geeksville.mesh.RadioConfigProtos
 import com.geeksville.mesh.android.bluetoothManager
 import com.geeksville.mesh.android.usbManager
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
@@ -564,14 +565,37 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
-    private fun initNodeInfo() {
+    /**
+     * Pull the latest device info from the model and into the GUI
+     */
+    private fun updateNodeInfo() {
         val connected = model.isConnected.value
 
-        refreshUpdateButton()
+        val isConnected = connected == MeshService.ConnectionState.CONNECTED
+        binding.nodeSettings.visibility = if(isConnected) View.VISIBLE else View.GONE
+
+        if (connected == MeshService.ConnectionState.DISCONNECTED)
+            model.ownerName.value = ""
+
+        // update the region selection from the device
+        val region = model.region
+        if(region != null) {
+            val spinner = binding.regionSpinner
+            var regionIndex = regions.indexOf(region.name)
+            if(regionIndex == -1) // Not found, probably because the device has a region our app doesn't yet understand.  Punt and say Unset
+                regionIndex = regions.indexOf(RadioConfigProtos.RegionCode.Unset.name)
+
+            // We don't want to be notified of our own changes, so turn off listener while making them
+            spinner.onItemSelectedListener = null
+            spinner.setSelection(regionIndex, false)
+            spinner.onItemSelectedListener = regionSpinnerListener
+        }
 
         // If actively connected possibly let the user update firmware
-        val info = model.myNodeInfo.value
+        refreshUpdateButton()
 
+        // Update the status string
+        val info = model.myNodeInfo.value
         when (connected) {
             MeshService.ConnectionState.CONNECTED -> {
                 val fwStr = info?.firmwareString ?: ""
@@ -591,25 +615,33 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             position: Int,
             id: Long
         ) {
-            val item = parent.getItemAtPosition(position)
-            //TODO("Not yet implemented")
+            val item = parent.getItemAtPosition(position) as String
+            val asProto = item!!.let { RadioConfigProtos.RegionCode.valueOf(it) }
+            exceptionToSnackbar(requireView()) {
+                model.region = asProto
+            }
         }
 
-        override fun onNothingSelected(parent: AdapterView<*>?) {
+        override fun onNothingSelected(parent: AdapterView<*>) {
             //TODO("Not yet implemented")
         }
     }
 
+    /// the sorted list of region names
+    private val regions = RadioConfigProtos.RegionCode.values().filter {
+        it != RadioConfigProtos.RegionCode.UNRECOGNIZED
+    }.map {
+        it.name
+    }.sorted()
+
     /// Setup the ui widgets unrelated to BLE scanning
     private fun initCommonUI() {
 
-        val regions = arrayOf("US", "CN", "EU488")
+        // val regions = arrayOf("US", "CN", "EU488")
         val spinner = binding.regionSpinner
         val regionAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, regions)
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        // spinner.adapter = regionAdapter
-
-        spinner.onItemSelectedListener = regionSpinnerListener
+        spinner.adapter = regionAdapter
 
         model.ownerName.observe(viewLifecycleOwner, { name ->
             binding.usernameEditText.setText(name)
@@ -618,18 +650,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         // Only let user edit their name or set software update while connected to a radio
         model.isConnected.observe(viewLifecycleOwner, Observer { connectionState ->
-            val connected = connectionState == MeshService.ConnectionState.CONNECTED
-            binding.nodeSettings.visibility = if(connected) View.VISIBLE else View.GONE
-
-            if (connectionState == MeshService.ConnectionState.DISCONNECTED)
-                model.ownerName.value = ""
-
-            initNodeInfo()
+            updateNodeInfo()
         })
 
         // Also watch myNodeInfo because it might change later
         model.myNodeInfo.observe(viewLifecycleOwner, Observer {
-            initNodeInfo()
+            updateNodeInfo()
         })
 
         binding.updateFirmwareButton.setOnClickListener {

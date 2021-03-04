@@ -40,24 +40,31 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
     }
 
     private fun handleAdminPacket(pr: MeshProtos.ToRadio, d: AdminProtos.AdminMessage) {
-        if (d.getRadioRequest)
-            sendAdmin(pr.packet.to, pr.packet.from, pr.packet.id) {
-                getRadioResponse = RadioConfigProtos.RadioConfig.newBuilder().apply {
+        when {
+            d.getRadioRequest ->
+                sendAdmin(pr.packet.to, pr.packet.from, pr.packet.id) {
+                    getRadioResponse = RadioConfigProtos.RadioConfig.newBuilder().apply {
 
-                    preferences = RadioConfigProtos.RadioConfig.UserPreferences.newBuilder().apply {
-                        region = RadioConfigProtos.RegionCode.TW
-                        // FIXME set critical times?
+                        preferences =
+                            RadioConfigProtos.RadioConfig.UserPreferences.newBuilder().apply {
+                                region = RadioConfigProtos.RegionCode.TW
+                                // FIXME set critical times?
+                            }.build()
                     }.build()
-                }.build()
-            }
+                }
 
-        if (d.getChannelRequest != 0)
-            sendAdmin(pr.packet.to, pr.packet.from, pr.packet.id) {
-                getChannelResponse = ChannelProtos.Channel.newBuilder().apply {
+            d.getChannelRequest != 0 ->
+                sendAdmin(pr.packet.to, pr.packet.from, pr.packet.id) {
+                    getChannelResponse = ChannelProtos.Channel.newBuilder().apply {
                         index = d.getChannelRequest - 1 // 0 based on the response
-                    role = if(d.getChannelRequest == 1) ChannelProtos.Channel.Role.PRIMARY else ChannelProtos.Channel.Role.DISABLED
+                        role =
+                            if (d.getChannelRequest == 1) ChannelProtos.Channel.Role.PRIMARY else ChannelProtos.Channel.Role.DISABLED
                     }.build()
-            }
+                }
+
+            else ->
+                info("Ignoring admin sent to mock interface $d")
+        }
     }
 
     override fun close() {
