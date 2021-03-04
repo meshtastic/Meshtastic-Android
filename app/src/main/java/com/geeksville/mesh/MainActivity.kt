@@ -846,8 +846,10 @@ class MainActivity : AppCompatActivity(), Logging,
                     val allMsgs = service.oldMessages
                     val msgs =
                         allMsgs.filter { p -> p.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE }
-                    debug("Service provided ${msgs.size} messages and myNodeNum ${service.myNodeInfo?.myNodeNum}")
-                    model.myNodeInfo.value = service.myNodeInfo
+
+                    model.myNodeInfo.value = service.myNodeInfo // Note: this could be NULL!
+                    debug("Service provided ${msgs.size} messages and myNodeNum ${model.myNodeInfo.value?.myNodeNum}")
+
                     model.messagesState.setMessages(msgs)
                     val connectionState =
                         MeshService.ConnectionState.valueOf(service.connectionState())
@@ -857,7 +859,6 @@ class MainActivity : AppCompatActivity(), Logging,
                     if (connectionState != MeshService.ConnectionState.CONNECTED)
                         updateNodesFromDevice()
 
-
                     // We won't receive a notify for the initial state of connection, so we force an update here
                     onMeshConnectionChanged(connectionState)
                 } catch (ex: RemoteException) {
@@ -866,9 +867,11 @@ class MainActivity : AppCompatActivity(), Logging,
                     model.isConnected.value =
                         MeshService.ConnectionState.valueOf(service.connectionState())
                 }
+                finally {
+                    connectionJob = null
+                }
 
                 debug("connected to mesh service, isConnected=${model.isConnected.value}")
-                connectionJob = null
             }
         }
 

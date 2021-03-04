@@ -156,23 +156,10 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
                     hwModel = "Sim"
                     messageTimeoutMsec = 5 * 60 * 1000
                     firmwareVersion = service.getString(R.string.cur_firmware_version)
+                    numBands = 13
+                    maxChannels = 8
                 }.build()
             },
-
-            // RadioConfig
-            /* MeshProtos.FromRadio.newBuilder().apply {
-                radio = RadioConfigProtos.RadioConfig.newBuilder().apply {
-
-                    preferences = RadioConfigProtos.RadioConfig.UserPreferences.newBuilder().apply {
-                        region = RadioConfigProtos.RegionCode.TW
-                        // FIXME set critical times?
-                    }.build()
-
-                    /* channel = ChannelProtos.ChannelSettings.newBuilder().apply {
-                        // we just have an empty listing so that the default channel works
-                    }.build() */
-                }.build()
-            }, */
 
             // Fake NodeDB
             makeNodeInfo(MY_NODE, 32.776665, -96.796989), // dallas

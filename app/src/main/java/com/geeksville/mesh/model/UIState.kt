@@ -139,8 +139,8 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
             }
         }
 
-    /// hardware info about our local device
-    val myNodeInfo = object : MutableLiveData<MyNodeInfo>(null) {}
+    /// hardware info about our local device (can be null)
+    val myNodeInfo = object : MutableLiveData<MyNodeInfo?>(null) {}
 
     override fun onCleared() {
         super.onCleared()

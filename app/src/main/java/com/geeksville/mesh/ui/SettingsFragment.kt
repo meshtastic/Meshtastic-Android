@@ -19,6 +19,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.RadioButton
 import android.widget.Toast
@@ -583,6 +584,22 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
+    private val regionSpinnerListener = object : AdapterView.OnItemSelectedListener{
+        override fun onItemSelected(
+            parent: AdapterView<*>,
+            view: View,
+            position: Int,
+            id: Long
+        ) {
+            val item = parent.getItemAtPosition(position)
+            //TODO("Not yet implemented")
+        }
+
+        override fun onNothingSelected(parent: AdapterView<*>?) {
+            //TODO("Not yet implemented")
+        }
+    }
+
     /// Setup the ui widgets unrelated to BLE scanning
     private fun initCommonUI() {
 
@@ -591,6 +608,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val regionAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, regions)
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         // spinner.adapter = regionAdapter
+
+        spinner.onItemSelectedListener = regionSpinnerListener
 
         model.ownerName.observe(viewLifecycleOwner, { name ->
             binding.usernameEditText.setText(name)

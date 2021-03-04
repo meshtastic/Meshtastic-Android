@@ -102,8 +102,8 @@ interface IMeshService {
     /// Returns true if the device address actually changed, or false if no change was needed
     boolean setDeviceAddress(String deviceAddr);
 
-    /// Get basic device hardware info about our connected radio.  Will never return NULL.  Will throw
-    /// RemoteException if no my node info is available
+    /// Get basic device hardware info about our connected radio.  Will never return NULL.  Will return NULL
+    /// if no my node info is available (i.e. it will not throw an exception)
     MyNodeInfo getMyNodeInfo();
 
     /// Start updating the radios firmware

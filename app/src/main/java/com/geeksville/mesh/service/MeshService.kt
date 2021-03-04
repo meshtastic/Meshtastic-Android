@@ -765,6 +765,7 @@ class MeshService : Service(), Logging {
         if (fromNodeNum == myNodeNum) {
             when (a.variantCase) {
                 AdminProtos.AdminMessage.VariantCase.GET_RADIO_RESPONSE -> {
+                    debug("Admin: received radioConfig")
                     radioConfig = a.getRadioResponse
                     requestChannel(0) // Now start reading channels
                 }
@@ -774,19 +775,18 @@ class MeshService : Service(), Logging {
                     if (mi != null) {
                         val ch = a.getChannelResponse
                         channels[ch.index] = ch
-                        debug("Received channel ${ch.index}")
+                        debug("Admin: Received channel ${ch.index}")
                         if (ch.index + 1 < mi.maxChannels) {
                             if(ch.hasSettings()) {
                                 // Not done yet, request next channel
                                 requestChannel(ch.index + 1)
                             }
-                            /* if(ch.index == 0) {
-                                // We allow the app to start as soon as we've received the primary channel, we'll keep fetching other channels in the background
+                            else {
                                 debug("We've received the primary channel, allowing rest of app to start...")
                                 onHasSettings()
-                            } */
+                            }
                         } else {
-                            debug("Received all channels")
+                            debug("Received max channels, starting app")
                             onHasSettings()
                         }
                     }
@@ -1629,9 +1629,7 @@ class MeshService : Service(), Logging {
             doFirmwareUpdate()
         }
 
-        override fun getMyNodeInfo(): MyNodeInfo = toRemoteExceptions {
-            this@MeshService.myNodeInfo ?: throw RadioNotConnectedException("No MyNodeInfo")
-        }
+        override fun getMyNodeInfo(): MyNodeInfo? = this@MeshService.myNodeInfo
 
         override fun getMyId() = toRemoteExceptions { myNodeID }
 
