@@ -579,32 +579,42 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         // update the region selection from the device
         val region = model.region
+        val spinner = binding.regionSpinner
+        val unsetIndex = regions.indexOf(RadioConfigProtos.RegionCode.Unset.name)
+        spinner.onItemSelectedListener = null
         if(region != null) {
-            val spinner = binding.regionSpinner
             var regionIndex = regions.indexOf(region.name)
             if(regionIndex == -1) // Not found, probably because the device has a region our app doesn't yet understand.  Punt and say Unset
-                regionIndex = regions.indexOf(RadioConfigProtos.RegionCode.Unset.name)
+                regionIndex = unsetIndex
 
             // We don't want to be notified of our own changes, so turn off listener while making them
-            spinner.onItemSelectedListener = null
             spinner.setSelection(regionIndex, false)
             spinner.onItemSelectedListener = regionSpinnerListener
+            spinner.isEnabled = true
+        }
+        else {
+            spinner.setSelection(unsetIndex, false)
+            spinner.isEnabled = false // leave disabled, because we can't get our region
         }
 
         // If actively connected possibly let the user update firmware
         refreshUpdateButton()
 
-        // Update the status string
+        // Update the status string (highest priority messages first)
         val info = model.myNodeInfo.value
-        when (connected) {
-            MeshService.ConnectionState.CONNECTED -> {
+        val statusText = binding.scanStatusText
+        when {
+            region == RadioConfigProtos.RegionCode.Unset ->
+                statusText.text = getString(R.string.must_set_region)
+
+            connected == MeshService.ConnectionState.CONNECTED -> {
                 val fwStr = info?.firmwareString ?: ""
-                binding.scanStatusText.text = getString(R.string.connected_to).format(fwStr)
+                statusText.text = getString(R.string.connected_to).format(fwStr)
             }
-            MeshService.ConnectionState.DISCONNECTED ->
-                binding.scanStatusText.text = getString(R.string.not_connected)
-            MeshService.ConnectionState.DEVICE_SLEEP ->
-                binding.scanStatusText.text = getString(R.string.connected_sleeping)
+            connected == MeshService.ConnectionState.DISCONNECTED ->
+                statusText.text = getString(R.string.not_connected)
+            connected == MeshService.ConnectionState.DEVICE_SLEEP ->
+                statusText.text = getString(R.string.connected_sleeping)
         }
     }
 
@@ -620,6 +630,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             exceptionToSnackbar(requireView()) {
                 model.region = asProto
             }
+            updateNodeInfo() // We might have just changed Unset to set
         }
 
         override fun onNothingSelected(parent: AdapterView<*>) {
@@ -627,7 +638,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
-    /// the sorted list of region names
+    /// the sorted list of region names like arrayOf("US", "CN", "EU488")
     private val regions = RadioConfigProtos.RegionCode.values().filter {
         it != RadioConfigProtos.RegionCode.UNRECOGNIZED
     }.map {
@@ -637,7 +648,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     /// Setup the ui widgets unrelated to BLE scanning
     private fun initCommonUI() {
 
-        // val regions = arrayOf("US", "CN", "EU488")
+        // init our region spinner
         val spinner = binding.regionSpinner
         val regionAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, regions)
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)

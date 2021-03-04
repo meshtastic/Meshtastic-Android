@@ -56,17 +56,29 @@
                 android:singleLine="true" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/regionLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/region"
+            app:layout_constraintEnd_toEndOf="@+id/regionSpinner"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Region" />
+
         <Spinner
             android:id="@+id/regionSpinner"
             android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="16dp"
+            android:entries="@array/regions"
             android:theme="@style/AppTheme.Spinner"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/regionLabel"
             app:layout_constraintStart_toEndOf="@+id/usernameView"
-            android:entries="@array/regions"
-            app:layout_constraintTop_toTopOf="parent" />
+            />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.textview.MaterialTextView
