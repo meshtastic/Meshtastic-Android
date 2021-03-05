@@ -10,14 +10,14 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp">
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/warningNotPaired"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
             android:autoLink="web"
             android:ems="10"
@@ -27,17 +27,25 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/deviceRadioGroup" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/nodeSettings"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="16dp"
+        >
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/usernameView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
             android:hint="@string/your_name"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight="2"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/regionSpinner"
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -48,6 +56,30 @@
                 android:singleLine="true" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/regionLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/region"
+            app:layout_constraintEnd_toEndOf="@+id/regionSpinner"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Region" />
+
+        <Spinner
+            android:id="@+id/regionSpinner"
+            android:layout_width="120dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="16dp"
+            android:entries="@array/regions"
+            android:theme="@style/AppTheme.Spinner"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/regionLabel"
+            app:layout_constraintStart_toEndOf="@+id/usernameView"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/scanStatusText"
@@ -59,7 +91,7 @@
             android:text="@string/looking_for_meshtastic_devices"
             app:layout_constraintEnd_toStartOf="@+id/updateFirmwareButton"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/usernameView" />
+            app:layout_constraintTop_toBottomOf="@+id/nodeSettings" />
 
         <ProgressBar
             android:id="@+id/scanProgressBar"
@@ -149,8 +181,6 @@
             app:layout_constraintEnd_toEndOf="@+id/updateFirmwareButton"
             app:layout_constraintStart_toStartOf="@+id/updateFirmwareButton"
             app:layout_constraintTop_toBottomOf="@+id/updateFirmwareButton" />
-
-
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

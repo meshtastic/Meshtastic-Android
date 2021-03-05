@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -151,11 +152,11 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             if (isMe) {
                 marginParams.leftMargin = messageOffset
                 marginParams.rightMargin = 0
-                holder.card.setCardBackgroundColor(resources.getColor(R.color.colorMyMsg))
+                context?.let{ holder.card.setCardBackgroundColor(ContextCompat.getColor(it, R.color.colorMyMsg)) }
             } else {
                 marginParams.rightMargin = messageOffset
                 marginParams.leftMargin = 0
-                holder.card.setCardBackgroundColor(resources.getColor(R.color.colorMsg))
+                context?.let{ holder.card.setCardBackgroundColor(ContextCompat.getColor(it, R.color.colorMsg)) }
             }
             // Hide the username chip for my messages
             if (isMe) {
@@ -237,17 +238,22 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         })
 
         // If connection state _OR_ myID changes we have to fix our ability to edit outgoing messages
-        model.isConnected.observe(viewLifecycleOwner, Observer { connected ->
-            // If we don't know our node ID and we are offline don't let user try to send
+        fun updateTextEnabled() {
             binding.textInputLayout.isEnabled =
-                connected != MeshService.ConnectionState.DISCONNECTED && model.nodeDB.myId.value != null
-        })
+                model.isConnected.value  != MeshService.ConnectionState.DISCONNECTED && model.nodeDB.myId.value != null && model.radioConfig.value != null
+        }
 
-        model.nodeDB.myId.observe(viewLifecycleOwner, Observer { myId ->
+        model.isConnected.observe(viewLifecycleOwner, Observer { _ ->
             // If we don't know our node ID and we are offline don't let user try to send
-            binding.textInputLayout.isEnabled =
-                model.isConnected.value != MeshService.ConnectionState.DISCONNECTED && myId != null
-        })
+            updateTextEnabled() })
+
+        model.nodeDB.myId.observe(viewLifecycleOwner, Observer { _ ->
+            // If we don't know our node ID and we are offline don't let user try to send
+            updateTextEnabled() })
+
+        model.radioConfig.observe(viewLifecycleOwner, Observer { _ ->
+            // If we don't know our node ID and we are offline don't let user try to send
+            updateTextEnabled() })
     }
 
 }

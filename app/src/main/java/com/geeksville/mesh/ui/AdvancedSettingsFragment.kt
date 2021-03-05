@@ -51,7 +51,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             val textEdit = binding.positionBroadcastPeriodEditText
             val n = textEdit.text.toString().toIntOrNull()
             val minBroadcastPeriodSecs =
-                ChannelOption.fromConfig(model.radioConfig.value?.channelSettings?.modemConfig)?.minBroadcastPeriodSecs
+                ChannelOption.fromConfig(model.primaryChannel?.modemConfig)?.minBroadcastPeriodSecs
                     ?: ChannelOption.defaultMinBroadcastPeriod
 
             if (n != null && n < MAX_INT_DEVICE && (n == 0 || n >= minBroadcastPeriodSecs)) {

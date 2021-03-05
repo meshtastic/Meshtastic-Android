@@ -19,6 +19,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.RadioButton
 import android.widget.Toast
 import androidx.fragment.app.activityViewModels
@@ -31,6 +33,7 @@ import com.geeksville.android.hideKeyboard
 import com.geeksville.android.isGooglePlayAvailable
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
+import com.geeksville.mesh.RadioConfigProtos
 import com.geeksville.mesh.android.bluetoothManager
 import com.geeksville.mesh.android.usbManager
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
@@ -562,28 +565,94 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
-    private fun initNodeInfo() {
+    /**
+     * Pull the latest device info from the model and into the GUI
+     */
+    private fun updateNodeInfo() {
         val connected = model.isConnected.value
 
-        refreshUpdateButton()
+        val isConnected = connected == MeshService.ConnectionState.CONNECTED
+        binding.nodeSettings.visibility = if(isConnected) View.VISIBLE else View.GONE
+
+        if (connected == MeshService.ConnectionState.DISCONNECTED)
+            model.ownerName.value = ""
+
+        // update the region selection from the device
+        val region = model.region
+        val spinner = binding.regionSpinner
+        val unsetIndex = regions.indexOf(RadioConfigProtos.RegionCode.Unset.name)
+        spinner.onItemSelectedListener = null
+        if(region != null) {
+            var regionIndex = regions.indexOf(region.name)
+            if(regionIndex == -1) // Not found, probably because the device has a region our app doesn't yet understand.  Punt and say Unset
+                regionIndex = unsetIndex
+
+            // We don't want to be notified of our own changes, so turn off listener while making them
+            spinner.setSelection(regionIndex, false)
+            spinner.onItemSelectedListener = regionSpinnerListener
+            spinner.isEnabled = true
+        }
+        else {
+            spinner.setSelection(unsetIndex, false)
+            spinner.isEnabled = false // leave disabled, because we can't get our region
+        }
 
         // If actively connected possibly let the user update firmware
-        val info = model.myNodeInfo.value
+        refreshUpdateButton()
 
-        when (connected) {
-            MeshService.ConnectionState.CONNECTED -> {
+        // Update the status string (highest priority messages first)
+        val info = model.myNodeInfo.value
+        val statusText = binding.scanStatusText
+        when {
+            region == RadioConfigProtos.RegionCode.Unset ->
+                statusText.text = getString(R.string.must_set_region)
+
+            connected == MeshService.ConnectionState.CONNECTED -> {
                 val fwStr = info?.firmwareString ?: ""
-                binding.scanStatusText.text = getString(R.string.connected_to).format(fwStr)
+                statusText.text = getString(R.string.connected_to).format(fwStr)
             }
-            MeshService.ConnectionState.DISCONNECTED ->
-                binding.scanStatusText.text = getString(R.string.not_connected)
-            MeshService.ConnectionState.DEVICE_SLEEP ->
-                binding.scanStatusText.text = getString(R.string.connected_sleeping)
+            connected == MeshService.ConnectionState.DISCONNECTED ->
+                statusText.text = getString(R.string.not_connected)
+            connected == MeshService.ConnectionState.DEVICE_SLEEP ->
+                statusText.text = getString(R.string.connected_sleeping)
         }
     }
 
+    private val regionSpinnerListener = object : AdapterView.OnItemSelectedListener{
+        override fun onItemSelected(
+            parent: AdapterView<*>,
+            view: View,
+            position: Int,
+            id: Long
+        ) {
+            val item = parent.getItemAtPosition(position) as String
+            val asProto = item!!.let { RadioConfigProtos.RegionCode.valueOf(it) }
+            exceptionToSnackbar(requireView()) {
+                model.region = asProto
+            }
+            updateNodeInfo() // We might have just changed Unset to set
+        }
+
+        override fun onNothingSelected(parent: AdapterView<*>) {
+            //TODO("Not yet implemented")
+        }
+    }
+
+    /// the sorted list of region names like arrayOf("US", "CN", "EU488")
+    private val regions = RadioConfigProtos.RegionCode.values().filter {
+        it != RadioConfigProtos.RegionCode.UNRECOGNIZED
+    }.map {
+        it.name
+    }.sorted()
+
     /// Setup the ui widgets unrelated to BLE scanning
     private fun initCommonUI() {
+
+        // init our region spinner
+        val spinner = binding.regionSpinner
+        val regionAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, regions)
+        regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = regionAdapter
 
         model.ownerName.observe(viewLifecycleOwner, { name ->
             binding.usernameEditText.setText(name)
@@ -592,18 +661,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         // Only let user edit their name or set software update while connected to a radio
         model.isConnected.observe(viewLifecycleOwner, Observer { connectionState ->
-            val connected = connectionState == MeshService.ConnectionState.CONNECTED
-            binding.usernameView.isEnabled = connected
-
-            if (connectionState == MeshService.ConnectionState.DISCONNECTED)
-                model.ownerName.value = ""
-
-            initNodeInfo()
+            updateNodeInfo()
         })
 
         // Also watch myNodeInfo because it might change later
         model.myNodeInfo.observe(viewLifecycleOwner, Observer {
-            initNodeInfo()
+            updateNodeInfo()
         })
 
         binding.updateFirmwareButton.setOnClickListener {

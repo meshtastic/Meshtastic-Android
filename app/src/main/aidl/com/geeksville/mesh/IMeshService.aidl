@@ -71,17 +71,25 @@ interface IMeshService {
     */
     List<NodeInfo> getNodes();
 
-    /// This method is only intended for use in our GUI, so the user can set radio options
-    /// It returns a RadioConfig protobuf.
-    byte []getRadioConfig();
-
     /// Return an list of MeshPacket protobuf (byte arrays) which were received while your client app was offline (recent messages only).
     /// Also includes any messages we have sent recently (useful for finding current message status)
     List<DataPacket> getOldMessages();
 
     /// This method is only intended for use in our GUI, so the user can set radio options
+    /// It returns a RadioConfig protobuf.
+    byte []getRadioConfig();
+
+    /// This method is only intended for use in our GUI, so the user can set radio options
     /// It sets a RadioConfig protobuf
     void setRadioConfig(in byte []payload);
+
+    /// This method is only intended for use in our GUI, so the user can set radio options
+    /// It returns a ChannelSet protobuf.
+    byte []getChannels();
+
+    /// This method is only intended for use in our GUI, so the user can set radio options
+    /// It sets a ChannelSet protobuf
+    void setChannels(in byte []payload);
 
     /**
     Is the packet radio currently connected to the phone?  Returns a ConnectionState string.
@@ -94,8 +102,8 @@ interface IMeshService {
     /// Returns true if the device address actually changed, or false if no change was needed
     boolean setDeviceAddress(String deviceAddr);
 
-    /// Get basic device hardware info about our connected radio.  Will never return NULL.  Will throw
-    /// RemoteException if no my node info is available
+    /// Get basic device hardware info about our connected radio.  Will never return NULL.  Will return NULL
+    /// if no my node info is available (i.e. it will not throw an exception)
     MyNodeInfo getMyNodeInfo();
 
     /// Start updating the radios firmware

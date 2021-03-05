@@ -9,30 +9,26 @@ import kotlinx.serialization.Serializable
 data class MyNodeInfo(
     val myNodeNum: Int,
     val hasGPS: Boolean,
-    val region: String?,
     val model: String?,
     val firmwareVersion: String?,
     val couldUpdate: Boolean, // this application contains a software load we _could_ install if you want
     val shouldUpdate: Boolean, // this device has old firmware
     val currentPacketId: Long,
-    val nodeNumBits: Int,
-    val packetIdBits: Int,
     val messageTimeoutMsec: Int,
-    val minAppVersion: Int
+    val minAppVersion: Int,
+    val maxChannels: Int
 ) : Parcelable {
     /** A human readable description of the software/hardware version */
-    val firmwareString: String get() = "$model $region/$firmwareVersion"
+    val firmwareString: String get() = "$model $firmwareVersion"
 
     constructor(parcel: Parcel) : this(
         parcel.readInt(),
         parcel.readByte() != 0.toByte(),
         parcel.readString(),
         parcel.readString(),
-        parcel.readString(),
         parcel.readByte() != 0.toByte(),
         parcel.readByte() != 0.toByte(),
         parcel.readLong(),
-        parcel.readInt(),
         parcel.readInt(),
         parcel.readInt(),
         parcel.readInt()
@@ -42,16 +38,14 @@ data class MyNodeInfo(
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(myNodeNum)
         parcel.writeByte(if (hasGPS) 1 else 0)
-        parcel.writeString(region)
         parcel.writeString(model)
         parcel.writeString(firmwareVersion)
         parcel.writeByte(if (couldUpdate) 1 else 0)
         parcel.writeByte(if (shouldUpdate) 1 else 0)
         parcel.writeLong(currentPacketId)
-        parcel.writeInt(nodeNumBits)
-        parcel.writeInt(packetIdBits)
         parcel.writeInt(messageTimeoutMsec)
         parcel.writeInt(minAppVersion)
+        parcel.writeInt(maxChannels)
     }
 
     override fun describeContents(): Int {

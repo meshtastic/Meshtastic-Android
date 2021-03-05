@@ -45,6 +45,8 @@ import com.geeksville.android.ServiceClient
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.ChannelSet
+import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
@@ -612,6 +614,29 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
+    /** Show an alert that may contain HTML */
+    private fun showAlert(titleText: Int, messageText: Int) {
+        // make links clickable per https://stackoverflow.com/a/62642807
+        // val messageStr = getText(messageText)
+
+        val builder = MaterialAlertDialogBuilder(this)
+            .setTitle(titleText)
+            .setMessage(messageText)
+            .setPositiveButton(R.string.okay) { _, _ ->
+                info("User acknowledged")
+            }
+
+        val dialog = builder.show()
+
+        // Make the textview clickable. Must be called after show()
+        val view = (dialog.findViewById(android.R.id.message) as TextView?)!!
+        // Linkify.addLinks(view, Linkify.ALL) // not needed with this method
+        view.movementMethod = LinkMovementMethod.getInstance()
+
+        showSettingsPage() // Default to the settings page in this case
+    }
+
+
     /// Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(connected: MeshService.ConnectionState) {
         debug("connchange ${model.isConnected.value} -> $connected")
@@ -628,33 +653,28 @@ class MainActivity : AppCompatActivity(), Logging,
                     model.myNodeInfo.value = info
 
                     val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
-                    if (isOld) {
-                        // make links clickable per https://stackoverflow.com/a/62642807
-                        val messageStr = getText(R.string.must_update)
+                    if (isOld)
+                        showAlert(R.string.app_too_old, R.string.must_update)
+                    else {
 
-                        val builder = MaterialAlertDialogBuilder(this)
-                            .setTitle(getString(R.string.app_too_old))
-                            .setMessage(messageStr)
-                            .setPositiveButton("Okay") { _, _ ->
-                                info("User acknowledged app is old")
-                            }
+                        val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
+                        val minVer = DeviceVersion("1.2.0")
+                        if(curVer < minVer)
+                            showAlert(R.string.firmware_too_old, R.string.firmware_old)
+                        else {
+                            // If our app is too old/new, we probably don't understand the new radioconfig messages, so we don't read them until here
 
-                        val dialog = builder.show()
+                            model.radioConfig.value =
+                                RadioConfigProtos.RadioConfig.parseFrom(service.radioConfig)
 
-                        // Make the textview clickable. Must be called after show()
-                        val view = (dialog.findViewById(android.R.id.message) as TextView?)!!
-                        // Linkify.addLinks(view, Linkify.ALL) // not needed with this method
-                        view.movementMethod = LinkMovementMethod.getInstance()
-                    } else {
-                        // If our app is too old, we probably don't understand the new radioconfig messages
+                            model.channels.value =
+                                ChannelSet(AppOnlyProtos.ChannelSet.parseFrom(service.channels))
 
-                        model.radioConfig.value =
-                            MeshProtos.RadioConfig.parseFrom(service.radioConfig)
+                            updateNodesFromDevice()
 
-                        updateNodesFromDevice()
-
-                        // we have a connection to our device now, do the channel change
-                        perhapsChangeChannel()
+                            // we have a connection to our device now, do the channel change
+                            perhapsChangeChannel()
+                        }
                     }
                 } catch (ex: RemoteException) {
                     warn("Abandoning connect $ex, because we probably just lost device connection")
@@ -671,19 +691,20 @@ class MainActivity : AppCompatActivity(), Logging,
         // If the is opening a channel URL, handle it now
         requestedChannelUrl?.let { url ->
             try {
-                val channel = Channel(url)
+                val channels = ChannelSet(url)
+                val primary = channels.primaryChannel
                 requestedChannelUrl = null
 
                 MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.new_channel_rcvd)
-                    .setMessage(getString(R.string.do_you_want_switch).format(channel.name))
+                    .setMessage(getString(R.string.do_you_want_switch).format(primary.name))
                     .setNeutralButton(R.string.cancel) { _, _ ->
                         // Do nothing
                     }
                     .setPositiveButton(R.string.accept) { _, _ ->
                         debug("Setting channel from URL")
                         try {
-                            model.setChannel(channel.settings)
+                            model.setChannels(channels)
                         } catch (ex: RemoteException) {
                             errormsg("Couldn't change channel ${ex.message}")
                             Toast.makeText(
@@ -828,8 +849,10 @@ class MainActivity : AppCompatActivity(), Logging,
                     val allMsgs = service.oldMessages
                     val msgs =
                         allMsgs.filter { p -> p.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE }
-                    debug("Service provided ${msgs.size} messages and myNodeNum ${service.myNodeInfo?.myNodeNum}")
-                    model.myNodeInfo.value = service.myNodeInfo
+
+                    model.myNodeInfo.value = service.myNodeInfo // Note: this could be NULL!
+                    debug("Service provided ${msgs.size} messages and myNodeNum ${model.myNodeInfo.value?.myNodeNum}")
+
                     model.messagesState.setMessages(msgs)
                     val connectionState =
                         MeshService.ConnectionState.valueOf(service.connectionState())
@@ -839,7 +862,6 @@ class MainActivity : AppCompatActivity(), Logging,
                     if (connectionState != MeshService.ConnectionState.CONNECTED)
                         updateNodesFromDevice()
 
-
                     // We won't receive a notify for the initial state of connection, so we force an update here
                     onMeshConnectionChanged(connectionState)
                 } catch (ex: RemoteException) {
@@ -848,9 +870,11 @@ class MainActivity : AppCompatActivity(), Logging,
                     model.isConnected.value =
                         MeshService.ConnectionState.valueOf(service.connectionState())
                 }
+                finally {
+                    connectionJob = null
+                }
 
                 debug("connected to mesh service, isConnected=${model.isConnected.value}")
-                connectionJob = null
             }
         }
 
