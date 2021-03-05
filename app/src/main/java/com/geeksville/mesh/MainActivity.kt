@@ -667,6 +667,9 @@ class MainActivity : AppCompatActivity(), Logging,
                             model.radioConfig.value =
                                 RadioConfigProtos.RadioConfig.parseFrom(service.radioConfig)
 
+                            model.channels.value =
+                                ChannelSet(AppOnlyProtos.ChannelSet.parseFrom(service.channels))
+
                             updateNodesFromDevice()
 
                             // we have a connection to our device now, do the channel change

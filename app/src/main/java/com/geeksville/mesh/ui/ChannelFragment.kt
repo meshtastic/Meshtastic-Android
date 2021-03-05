@@ -78,7 +78,6 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
     /// Pull the latest data from the model (discarding any user edits)
     private fun setGUIfromModel() {
-        val radioConfig = model.radioConfig.value
         val channels = model.channels.value
 
         binding.editableCheckbox.isChecked = false // start locked
@@ -231,7 +230,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             shareChannel()
         }
 
-        model.radioConfig.observe(viewLifecycleOwner, {
+        model.channels.observe(viewLifecycleOwner, {
             setGUIfromModel()
         })
 

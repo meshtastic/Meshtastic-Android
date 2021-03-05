@@ -542,7 +542,10 @@ class MeshService : Service(), Logging {
                 }.build()
             }
 
-            TODO("Need to send channels to device")
+            debug("Sending channels to device")
+            asChannels.forEach {
+              setChannel(it)
+            }
 
             channels = asChannels.toTypedArray()
         }
@@ -1384,6 +1387,12 @@ class MeshService : Service(), Logging {
     private fun requestChannel(channelIndex: Int) {
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
             getChannelRequest = channelIndex + 1
+        })
+    }
+
+    private fun setChannel(channel: ChannelProtos.Channel) {
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
+            setChannel = channel
         })
     }
 
