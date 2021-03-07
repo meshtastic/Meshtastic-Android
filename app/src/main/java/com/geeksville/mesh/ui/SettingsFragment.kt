@@ -583,6 +583,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val unsetIndex = regions.indexOf(RadioConfigProtos.RegionCode.Unset.name)
         spinner.onItemSelectedListener = null
         if(region != null) {
+            debug("current region is $region")
             var regionIndex = regions.indexOf(region.name)
             if(regionIndex == -1) // Not found, probably because the device has a region our app doesn't yet understand.  Punt and say Unset
                 regionIndex = unsetIndex
@@ -593,6 +594,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             spinner.isEnabled = true
         }
         else {
+            warn("region is unset!")
             spinner.setSelection(unsetIndex, false)
             spinner.isEnabled = false // leave disabled, because we can't get our region
         }

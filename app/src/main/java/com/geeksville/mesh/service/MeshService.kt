@@ -1660,6 +1660,9 @@ class MeshService : Service(), Logging {
 
                 info("sendData dest=${p.to}, id=${p.id} <- ${p.bytes!!.size} bytes (connectionState=$connectionState)")
 
+                if(p.dataType == 0)
+                    throw Exception("Port numbers must be non-zero!") // we are now more strict
+
                 // Keep a record of datapackets, so GUIs can show proper chat history
                 rememberDataPacket(p)
 
