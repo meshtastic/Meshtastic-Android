@@ -1,6 +1,7 @@
 package com.geeksville.mesh.model
 
 import androidx.lifecycle.MutableLiveData
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshUser
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.Position
@@ -25,7 +26,8 @@ class NodeDB(private val ui: UIViewModel) {
         MeshUser(
             "+16508765308".format(8),
             "Kevin MesterNoLoc",
-            "KLO"
+            "KLO",
+            MeshProtos.HardwareModel.ANDROID_SIM
         ),
         null
     )
@@ -36,7 +38,8 @@ class NodeDB(private val ui: UIViewModel) {
             MeshUser(
                 "+165087653%02d".format(9 + index),
                 "Kevin Mester$index",
-                "KM$index"
+                "KM$index",
+                MeshProtos.HardwareModel.ANDROID_SIM
             ),
             it
         )

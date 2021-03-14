@@ -544,7 +544,7 @@ class MeshService : Service(), Logging {
 
             debug("Sending channels to device")
             asChannels.forEach {
-              setChannel(it)
+                setChannel(it)
             }
 
             channels = asChannels.toTypedArray()
@@ -727,7 +727,8 @@ class MeshService : Service(), Logging {
 
                     // Handle new style routing info
                     Portnums.PortNum.ROUTING_APP_VALUE -> {
-                        shouldBroadcast = true // We always send acks to other apps, because they might care about the messages they sent
+                        shouldBroadcast =
+                            true // We always send acks to other apps, because they might care about the messages they sent
                         val u = MeshProtos.Routing.parseFrom(data.payload)
                         if (u.errorReasonValue == MeshProtos.Routing.Error.NONE_VALUE)
                             handleAckNak(true, data.requestId)
@@ -780,11 +781,10 @@ class MeshService : Service(), Logging {
                         channels[ch.index] = ch
                         debug("Admin: Received channel ${ch.index}")
                         if (ch.index + 1 < mi.maxChannels) {
-                            if(ch.hasSettings()) {
+                            if (ch.hasSettings()) {
                                 // Not done yet, request next channel
                                 requestChannel(ch.index + 1)
-                            }
-                            else {
+                            } else {
                                 debug("We've received the primary channel, allowing rest of app to start...")
                                 onHasSettings()
                             }
@@ -808,7 +808,8 @@ class MeshService : Service(), Logging {
             it.user = MeshUser(
                 if (p.id.isNotEmpty()) p.id else oldId, // If the new update doesn't contain an ID keep our old value
                 p.longName,
-                p.shortName
+                p.shortName,
+                p.hwModel
             )
         }
     }
@@ -1187,7 +1188,8 @@ class MeshService : Service(), Logging {
                     MeshUser(
                         info.user.id,
                         info.user.longName,
-                        info.user.shortName
+                        info.user.shortName,
+                        info.user.hwModel
                     )
 
             if (info.hasPosition()) {
@@ -1214,6 +1216,79 @@ class MeshService : Service(), Logging {
     }
 
 
+    private var rawMyNodeInfo: MeshProtos.MyNodeInfo? = null
+
+    /** Regenerate the myNodeInfo model.  We call this twice.  Once after we receive myNodeInfo from the device
+     * and again after we have the node DB (which might allow us a better notion of our HwModel.
+     */
+    private fun regenMyNodeInfo() {
+        val myInfo = rawMyNodeInfo
+        if (myInfo != null) {
+            val a = RadioInterfaceService.getBondedDeviceAddress(this)
+            val isBluetoothInterface = a != null && a.startsWith("x")
+
+            var hwModelStr = myInfo.hwModelDeprecated
+            if(hwModelStr.isEmpty())  {
+                try {
+                    val ni = toNodeInfo(myNodeNum)
+                    val asStr = ni.user?.hwModelString
+                    if (asStr != null)
+                        hwModelStr = asStr
+                } catch(_: NodeNumNotFoundException) {
+                    warn("Can't find local node to get hardware model")
+                }
+            }
+            val mi = with(myInfo) {
+                MyNodeInfo(
+                    myNodeNum,
+                    hasGps,
+                    hwModelStr,
+                    firmwareVersion,
+                    firmwareUpdateFilename != null,
+                    isBluetoothInterface && com.geeksville.mesh.service.SoftwareUpdateService.shouldUpdate(
+                        this@MeshService,
+                        DeviceVersion(firmwareVersion)
+                    ),
+                    currentPacketId.toLong() and 0xffffffffL,
+                    if (messageTimeoutMsec == 0) 5 * 60 * 1000 else messageTimeoutMsec, // constants from current device code
+                    minAppVersion,
+                    maxChannels
+                )
+            }
+
+            newMyNodeInfo = mi
+            setFirmwareUpdateFilename(mi)
+        }
+    }
+
+    private fun sendAnalytics() {
+        val myInfo = rawMyNodeInfo
+        val mi = myNodeInfo
+        if (myInfo != null && mi != null) {
+            /// Track types of devices and firmware versions in use
+            GeeksvilleApplication.analytics.setUserInfo(
+                // DataPair("region", mi.region),
+                DataPair("firmware", mi.firmwareVersion),
+                DataPair("has_gps", mi.hasGPS),
+                DataPair("hw_model", mi.model),
+                DataPair("dev_error_count", myInfo.errorCount)
+            )
+
+            if (myInfo.errorCode.number != 0) {
+                GeeksvilleApplication.analytics.track(
+                    "dev_error",
+                    DataPair("code", myInfo.errorCode.number),
+                    DataPair("address", myInfo.errorAddress),
+
+                    // We also include this info, because it is required to correctly decode address from the map file
+                    DataPair("firmware", mi.firmwareVersion),
+                    DataPair("hw_model", mi.model)
+                    // DataPair("region", mi.region)
+                )
+            }
+        }
+    }
+
     /**
      * Update the nodeinfo (called from either new API version or the old one)
      */
@@ -1226,61 +1301,17 @@ class MeshService : Service(), Logging {
         )
         insertPacket(packetToSave)
 
-        setFirmwareUpdateFilename(myInfo)
-
-        val a = RadioInterfaceService.getBondedDeviceAddress(this)
-        val isBluetoothInterface = a != null && a.startsWith("x")
-
-        val mi = with(myInfo) {
-            MyNodeInfo(
-                myNodeNum,
-                hasGps,
-                hwModel,
-                firmwareVersion,
-                firmwareUpdateFilename != null,
-                isBluetoothInterface && SoftwareUpdateService.shouldUpdate(
-                    this@MeshService,
-                    DeviceVersion(firmwareVersion)
-                ),
-                currentPacketId.toLong() and 0xffffffffL,
-                if (messageTimeoutMsec == 0) 5 * 60 * 1000 else messageTimeoutMsec, // constants from current device code
-                minAppVersion,
-                maxChannels
-            )
-        }
-
-        newMyNodeInfo = mi
+        rawMyNodeInfo = myInfo
+        regenMyNodeInfo()
 
         // We'll need to get a new set of channels and settings now
         radioConfig = null
 
         // prefill the channel array with null channels
-        channels = Array(mi.maxChannels) {
+        channels = Array(myInfo.maxChannels) {
             val b = ChannelProtos.Channel.newBuilder()
             b.index = it
             b.build()
-        }
-
-        /// Track types of devices and firmware versions in use
-        GeeksvilleApplication.analytics.setUserInfo(
-            // DataPair("region", mi.region),
-            DataPair("firmware", mi.firmwareVersion),
-            DataPair("has_gps", mi.hasGPS),
-            DataPair("hw_model", mi.model),
-            DataPair("dev_error_count", myInfo.errorCount)
-        )
-
-        if (myInfo.errorCode.number != 0) {
-            GeeksvilleApplication.analytics.track(
-                "dev_error",
-                DataPair("code", myInfo.errorCode.number),
-                DataPair("address", myInfo.errorAddress),
-
-                // We also include this info, because it is required to correctly decode address from the map file
-                DataPair("firmware", mi.firmwareVersion),
-                DataPair("hw_model", mi.model)
-                // DataPair("region", mi.region)
-            )
         }
     }
 
@@ -1372,6 +1403,10 @@ class MeshService : Service(), Logging {
                 newNodes.clear() // Just to save RAM ;-)
 
                 haveNodeDB = true // we now have nodes from real hardware
+
+                regenMyNodeInfo() // we have a node db now, so can possibly find a better hwmodel
+                sendAnalytics()
+
                 requestRadioConfig()
             }
         } else
@@ -1543,12 +1578,12 @@ class MeshService : Service(), Logging {
     /***
      * Return the filename we will install on the device
      */
-    private fun setFirmwareUpdateFilename(info: MeshProtos.MyNodeInfo) {
+    private fun setFirmwareUpdateFilename(info: MyNodeInfo) {
         firmwareUpdateFilename = try {
-            if (info.region != null && info.firmwareVersion != null && info.hwModel != null)
+            if (info.firmwareVersion != null && info.model != null)
                 SoftwareUpdateService.getUpdateFilename(
                     this,
-                    info.hwModel
+                    info.model
                 )
             else
                 null
@@ -1660,7 +1695,7 @@ class MeshService : Service(), Logging {
 
                 info("sendData dest=${p.to}, id=${p.id} <- ${p.bytes!!.size} bytes (connectionState=$connectionState)")
 
-                if(p.dataType == 0)
+                if (p.dataType == 0)
                     throw Exception("Port numbers must be non-zero!") // we are now more strict
 
                 // Keep a record of datapackets, so GUIs can show proper chat history
