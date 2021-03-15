@@ -17,6 +17,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
 import com.geeksville.mesh.databinding.NodelistFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.util.formatAgo
 import java.text.ParseException
 import java.util.*
 
@@ -24,6 +25,7 @@ import java.util.*
 class UsersFragment : ScreenFragment("Users"), Logging {
 
     private var _binding: NodelistFragmentBinding? = null
+
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
@@ -34,6 +36,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     class ViewHolder(itemView: AdapterNodeLayoutBinding) : RecyclerView.ViewHolder(itemView.root) {
         val nodeNameView = itemView.nodeNameView
         val distanceView = itemView.distanceView
+        val coordsview = itemView.coordsView
         val batteryPctView = itemView.batteryPercentageView
         val lastTime = itemView.lastConnectionView
         val powerIcon = itemView.batteryIcon
@@ -108,6 +111,13 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             holder.nodeNameView.text = n.user?.longName ?: n.user?.id ?: "Unknown node"
 
             val ourNodeInfo = model.nodeDB.ourNodeInfo
+            val pos = ourNodeInfo?.position;
+            if (pos != null) {
+                holder.coordsview.text = pos.latitude.toString() + " " + pos.longitude
+                holder.coordsview.visibility = View.VISIBLE
+            } else {
+                holder.coordsview.visibility = View.INVISIBLE
+            }
             val distance = ourNodeInfo?.distanceStr(n)
             if (distance != null) {
                 holder.distanceView.text = distance
@@ -118,7 +128,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
             renderBattery(n.batteryPctLevel, holder)
 
-            holder.lastTime.text = getLastTimeValue(n)
+            holder.lastTime.text = formatAgo(n.lastSeen);
         }
 
         private var nodes = arrayOf<NodeInfo>()
@@ -149,30 +159,6 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             )
         })
     }
-
-    private fun getLastTimeValue(n: NodeInfo): String {
-        var lastTimeText = "?"
-        val currentTime = (System.currentTimeMillis()/1000).toInt()
-        val threeDaysLong = 3 * 60*60*24
-
-        //if the lastSeen is too old
-        if (n.lastSeen < (currentTime - threeDaysLong))
-            return lastTimeText
-
-        try {
-            val toLong: Long =  n.lastSeen.toLong()
-            val long1000 = toLong * 1000L
-            val date = Date(long1000)
-            val timeFormat = DateFormat.getTimeFormat(context)
-
-            lastTimeText = timeFormat.format(date)
-
-        } catch (e: ParseException) {
-            //
-        }
-        return lastTimeText
-    }
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
