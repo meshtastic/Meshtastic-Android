@@ -610,7 +610,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 statusText.text = getString(R.string.must_set_region)
 
             connected == MeshService.ConnectionState.CONNECTED -> {
-                val fwStr = info?.firmwareString ?: ""
+                val fwStr = info?.firmwareString ?: "unknown"
                 statusText.text = getString(R.string.connected_to).format(fwStr)
             }
             connected == MeshService.ConnectionState.DISCONNECTED ->

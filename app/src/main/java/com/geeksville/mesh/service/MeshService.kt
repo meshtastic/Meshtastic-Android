@@ -375,10 +375,10 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private fun installNewNodeDB(newMyNodeInfo: MyNodeInfo, nodes: Array<NodeInfo>) {
+    private fun installNewNodeDB(ni: MyNodeInfo, nodes: Array<NodeInfo>) {
         discardNodeDB() // Get rid of any old state
 
-        myNodeInfo = newMyNodeInfo
+        myNodeInfo = ni
 
         // put our node array into our two different map representations
         nodeDBbyNodeNum.putAll(nodes.map { Pair(it.num, it) })
@@ -1228,15 +1228,13 @@ class MeshService : Service(), Logging {
             val isBluetoothInterface = a != null && a.startsWith("x")
 
             var hwModelStr = myInfo.hwModelDeprecated
-            if(hwModelStr.isEmpty())  {
-                try {
-                    val ni = toNodeInfo(myNodeNum)
-                    val asStr = ni.user?.hwModelString
-                    if (asStr != null)
-                        hwModelStr = asStr
-                } catch(_: NodeNumNotFoundException) {
-                    warn("Can't find local node to get hardware model")
-                }
+            if (hwModelStr.isEmpty()) {
+                val nodeNum =
+                    myInfo.myNodeNum // Note: can't use the normal property because myNodeInfo not yet setup
+                val ni = nodeDBbyNodeNum[nodeNum] // can't use toNodeInfo because too early
+                val asStr = ni?.user?.hwModelString
+                if (asStr != null)
+                    hwModelStr = asStr
             }
             val mi = with(myInfo) {
                 MyNodeInfo(
@@ -1397,7 +1395,7 @@ class MeshService : Service(), Logging {
             else {
                 discardNodeDB()
                 debug("Installing new node DB")
-                myNodeInfo = newMyNodeInfo
+                myNodeInfo = newMyNodeInfo// Install myNodeInfo as current
 
                 newNodes.forEach(::installNodeInfo)
                 newNodes.clear() // Just to save RAM ;-)
@@ -1405,6 +1403,8 @@ class MeshService : Service(), Logging {
                 haveNodeDB = true // we now have nodes from real hardware
 
                 regenMyNodeInfo() // we have a node db now, so can possibly find a better hwmodel
+                myNodeInfo = newMyNodeInfo // we might have just updated myNodeInfo
+                
                 sendAnalytics()
 
                 requestRadioConfig()
