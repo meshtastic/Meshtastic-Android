@@ -13,6 +13,7 @@ import com.geeksville.android.Logging
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.util.formatAgo
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
@@ -79,7 +80,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     )
                 )
                 node.user?.let {
-                    f.addStringProperty("name", it.longName)
+                    f.addStringProperty("name", it.longName + " " + formatAgo(node.lastSeen))
                 }
                 f
             }
