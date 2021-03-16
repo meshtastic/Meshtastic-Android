@@ -2,11 +2,13 @@ package com.geeksville.mesh.ui
 
 
 import android.os.Bundle
-import android.text.format.DateFormat
+import android.text.Html
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.text.HtmlCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,8 +20,6 @@ import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
 import com.geeksville.mesh.databinding.NodelistFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.util.formatAgo
-import java.text.ParseException
-import java.util.*
 
 
 class UsersFragment : ScreenFragment("Users"), Logging {
@@ -36,7 +36,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     class ViewHolder(itemView: AdapterNodeLayoutBinding) : RecyclerView.ViewHolder(itemView.root) {
         val nodeNameView = itemView.nodeNameView
         val distanceView = itemView.distanceView
-        val coordsview = itemView.coordsView
+        val coordsView = itemView.coordsView
         val batteryPctView = itemView.batteryPercentageView
         val lastTime = itemView.lastConnectionView
         val powerIcon = itemView.batteryIcon
@@ -111,12 +111,15 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             holder.nodeNameView.text = n.user?.longName ?: n.user?.id ?: "Unknown node"
 
             val ourNodeInfo = model.nodeDB.ourNodeInfo
-            val pos = ourNodeInfo?.position;
+            val pos = ourNodeInfo?.validPosition;
             if (pos != null) {
-                holder.coordsview.text = pos.latitude.toString() + " " + pos.longitude
-                holder.coordsview.visibility = View.VISIBLE
+                val html =
+                    "<a href='geo:${pos.latitude},${pos.longitude}'>${pos.latitude.toString()} ${pos.longitude}</a>"
+                holder.coordsView.text = HtmlCompat.fromHtml(html, Html.FROM_HTML_MODE_LEGACY)
+                holder.coordsView.movementMethod = LinkMovementMethod.getInstance()
+                holder.coordsView.visibility = View.VISIBLE
             } else {
-                holder.coordsview.visibility = View.INVISIBLE
+                holder.coordsView.visibility = View.INVISIBLE
             }
             val distance = ourNodeInfo?.distanceStr(n)
             if (distance != null) {
