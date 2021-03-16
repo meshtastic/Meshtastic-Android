@@ -113,8 +113,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             val ourNodeInfo = model.nodeDB.ourNodeInfo
             val pos = ourNodeInfo?.validPosition;
             if (pos != null) {
+                val coords = String.format("%.5f %.5f", pos.latitude, pos.longitude).replace(",",".")
                 val html =
-                    "<a href='geo:${pos.latitude},${pos.longitude}'>${pos.latitude.toString()} ${pos.longitude}</a>"
+                    "<a href='geo:${pos.latitude},${pos.longitude}'>${coords}</a>"
                 holder.coordsView.text = HtmlCompat.fromHtml(html, Html.FROM_HTML_MODE_LEGACY)
                 holder.coordsView.movementMethod = LinkMovementMethod.getInstance()
                 holder.coordsView.visibility = View.VISIBLE
