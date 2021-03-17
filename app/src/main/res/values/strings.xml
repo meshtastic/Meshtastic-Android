@@ -94,4 +94,5 @@
     <string name="okay">Okay</string>
     <string name="must_set_region">You must set a region!</string>
     <string name="region">Region</string>
+    <string name="cant_change_no_radio">Couldn\'t change channel, because radio is not yet connected. Please try again.</string>
 </resources>
