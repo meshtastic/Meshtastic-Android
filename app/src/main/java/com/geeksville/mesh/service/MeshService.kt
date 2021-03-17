@@ -781,11 +781,13 @@ class MeshService : Service(), Logging {
                         channels[ch.index] = ch
                         debug("Admin: Received channel ${ch.index}")
                         if (ch.index + 1 < mi.maxChannels) {
-                            if (ch.hasSettings()) {
+
+                            // Stop once we get to the first disabled entry
+                            if (/* ch.hasSettings() || */ ch.role != ChannelProtos.Channel.Role.DISABLED) {
                                 // Not done yet, request next channel
                                 requestChannel(ch.index + 1)
                             } else {
-                                debug("We've received the primary channel, allowing rest of app to start...")
+                                debug("We've received the last channel, allowing rest of app to start...")
                                 onHasSettings()
                             }
                         } else {
