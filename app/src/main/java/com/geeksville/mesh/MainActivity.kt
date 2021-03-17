@@ -37,6 +37,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.geeksville.android.BindFailedException
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
@@ -950,8 +951,14 @@ class MainActivity : AppCompatActivity(), Logging,
             }
         }
 
-        bindMeshService()
-
+        try {
+            bindMeshService()
+        }
+        catch(ex: BindFailedException) {
+            // App is probably shutting down, ignore
+            errormsg("Bind of MeshService failed")
+        }
+        
         val bonded = RadioInterfaceService.getBondedDeviceAddress(this) != null
         if (!bonded && usbDevice == null) // we will handle USB later
             showSettingsPage()
