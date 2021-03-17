@@ -1751,7 +1751,7 @@ class MeshService : Service(), Logging {
             channelSet.toByteArray()
         }
 
-        override fun setChannels(payload: ByteArray?) {
+        override fun setChannels(payload: ByteArray?) = toRemoteExceptions {
             val parsed = AppOnlyProtos.ChannelSet.parseFrom(payload)
             channelSet = parsed
         }
