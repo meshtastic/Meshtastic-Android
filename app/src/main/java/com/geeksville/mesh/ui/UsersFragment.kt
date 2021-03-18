@@ -20,6 +20,7 @@ import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
 import com.geeksville.mesh.databinding.NodelistFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.util.formatAgo
+import java.net.URLEncoder
 
 
 class UsersFragment : ScreenFragment("Users"), Logging {
@@ -107,21 +108,28 @@ class UsersFragment : ScreenFragment("Users"), Logging {
          */
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val n = nodes[position]
+            val name = n.user?.longName ?: n.user?.id ?: "Unknown node"
+            holder.nodeNameView.text = name
 
-            holder.nodeNameView.text = n.user?.longName ?: n.user?.id ?: "Unknown node"
-
-            val ourNodeInfo = model.nodeDB.ourNodeInfo
-            val pos = ourNodeInfo?.validPosition;
+            val pos = n.validPosition;
             if (pos != null) {
-                val coords = String.format("%.5f %.5f", pos.latitude, pos.longitude).replace(",",".")
+                val coords =
+                    String.format("%.5f %.5f", pos.latitude, pos.longitude).replace(",", ".")
                 val html =
-                    "<a href='geo:${pos.latitude},${pos.longitude}'>${coords}</a>"
+                    "<a href='geo:${pos.latitude},${pos.longitude}?z=17&label=${
+                        URLEncoder.encode(
+                            name,
+                            "utf-8"
+                        )
+                    }'>${coords}</a>"
                 holder.coordsView.text = HtmlCompat.fromHtml(html, Html.FROM_HTML_MODE_LEGACY)
                 holder.coordsView.movementMethod = LinkMovementMethod.getInstance()
                 holder.coordsView.visibility = View.VISIBLE
             } else {
                 holder.coordsView.visibility = View.INVISIBLE
             }
+
+            val ourNodeInfo = model.nodeDB.ourNodeInfo
             val distance = ourNodeInfo?.distanceStr(n)
             if (distance != null) {
                 holder.distanceView.text = distance
