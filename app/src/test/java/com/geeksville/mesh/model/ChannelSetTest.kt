@@ -12,5 +12,6 @@ class ChannelSetTest {
         val cs = ChannelSet(url)
         Assert.assertEquals("LongSlow", cs.primaryChannel!!.name, )
         Assert.assertEquals("#LongSlow-V", cs.primaryChannel!!.humanName, )
+        Assert.assertEquals(url, cs.getChannelUrl(false))
     }
 }
