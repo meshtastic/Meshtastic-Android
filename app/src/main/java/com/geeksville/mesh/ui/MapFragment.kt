@@ -13,6 +13,7 @@ import com.geeksville.android.Logging
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.util.formatAgo
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
@@ -79,7 +80,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     )
                 )
                 node.user?.let {
-                    f.addStringProperty("name", it.longName)
+                    f.addStringProperty("name", it.longName + " " + formatAgo(p.time))
                 }
                 f
             }
@@ -93,7 +94,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
     }
 
     fun zoomToNodes(map: MapboxMap) {
-        val nodesWithPosition = model.nodeDB.nodes.value?.values?.filter { it.validPosition != null }
+        val nodesWithPosition =
+            model.nodeDB.nodes.value?.values?.filter { it.validPosition != null }
         if (nodesWithPosition != null && nodesWithPosition.isNotEmpty()) {
             val update = if (nodesWithPosition.size >= 2) {
                 // Multiple nodes, make them all fit on the map view
@@ -158,7 +160,10 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     if (view != null) { // it might have gone away by now
                         // val markerIcon = BitmapFactory.decodeResource(context.resources, R.drawable.ic_twotone_person_pin_24)
                         val markerIcon =
-                            ContextCompat.getDrawable(requireActivity(), R.drawable.ic_twotone_person_pin_24)!!
+                            ContextCompat.getDrawable(
+                                requireActivity(),
+                                R.drawable.ic_twotone_person_pin_24
+                            )!!
 
                         map.setStyle(Style.OUTDOORS) { style ->
                             style.addSource(nodePositions)
@@ -176,7 +181,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
                     // Any times nodes change update our map
                     model.nodeDB.nodes.observe(viewLifecycleOwner, Observer { nodes ->
-                        if(isViewVisible)
+                        if (isViewVisible)
                             onNodesChanged(map, nodes.values)
                     })
                     zoomToNodes(map)
