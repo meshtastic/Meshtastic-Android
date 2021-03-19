@@ -20,9 +20,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.RemoteException
-import android.text.SpannableString
 import android.text.method.LinkMovementMethod
-import android.text.util.Linkify
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -43,8 +41,8 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
 import com.geeksville.concurrent.handledLaunch
+import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.ActivityMainBinding
-import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
@@ -66,9 +64,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import java.io.FileOutputStream
 import java.nio.charset.Charset
 import java.text.DateFormat
 import java.util.*
+import kotlin.math.roundToInt
 
 
 /*
@@ -132,6 +132,7 @@ class MainActivity : AppCompatActivity(), Logging,
         const val RC_SIGN_IN = 12 // google signin completed
         const val RC_SELECT_DEVICE =
             13 // seems to be hardwired in CompanionDeviceManager to add 65536
+        const val CREATE_CSV_FILE = 14
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -555,6 +556,18 @@ class MainActivity : AppCompatActivity(), Logging,
                 else ->
                     warn("BLE device select intent failed")
             }
+            CREATE_CSV_FILE -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    data?.data?.let { file_uri ->
+                        model.allPackets.observe(this, { packets ->
+                            if (packets != null) {
+                                saveMessagesCSV(file_uri, packets)
+                                model.allPackets.removeObservers(this)
+                            }
+                        })
+                    }
+                }
+            }
         }
     }
 
@@ -659,7 +672,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
                         val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
                         val minVer = DeviceVersion("1.2.0")
-                        if(curVer < minVer)
+                        if (curVer < minVer)
                             showAlert(R.string.firmware_too_old, R.string.firmware_old)
                         else {
                             // If our app is too old/new, we probably don't understand the new radioconfig messages, so we don't read them until here
@@ -869,8 +882,7 @@ class MainActivity : AppCompatActivity(), Logging,
                     errormsg("Device error during init ${ex.message}")
                     model.isConnected.value =
                         MeshService.ConnectionState.valueOf(service.connectionState())
-                }
-                finally {
+                } finally {
                     connectionJob = null
                 }
 
@@ -1029,6 +1041,15 @@ class MainActivity : AppCompatActivity(), Logging,
                 fragmentTransaction.commit()
                 return true
             }
+            R.id.save_messages_csv -> {
+                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "application/csv"
+                    putExtra(Intent.EXTRA_TITLE, "messages.csv")
+                }
+                startActivityForResult(intent, CREATE_CSV_FILE)
+                return true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -1042,4 +1063,38 @@ class MainActivity : AppCompatActivity(), Logging,
             errormsg("Can not find the version: ${e.message}")
         }
     }
+
+    private fun saveMessagesCSV(file_uri: Uri, packets: List<Packet>) {
+        // Extract distances to this device from position messages and put (node,SNR,distance) in
+        // the file_uri
+        val myNodeNum = model.myNodeInfo.value?.myNodeNum ?: return
+
+        applicationContext.contentResolver.openFileDescriptor(file_uri, "w")?.use {
+            FileOutputStream(it.fileDescriptor).use { fs ->
+                // Write header
+                fs.write(("from,snr,time,dist\n").toByteArray());
+                // Packets are ordered by time, we keep most recent position of
+                // our device in my_position.
+                var my_position: MeshProtos.Position? = null
+                packets.forEach {
+                    it.proto?.let { packet_proto ->
+                        it.position?.let { position ->
+                            if (packet_proto.from == myNodeNum) {
+                                my_position = position
+                            } else if (my_position != null) {
+                                val dist: Int =
+                                    positionToMeter(my_position!!, position).roundToInt()
+                                fs.write(
+                                    ("${packet_proto.from.toUInt().toString(16)}," +
+                                            "${packet_proto.rxSnr},${packet_proto.rxTime},$dist\n")
+                                        .toByteArray()
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
+

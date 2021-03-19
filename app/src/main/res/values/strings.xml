@@ -95,4 +95,5 @@
     <string name="must_set_region">You must set a region!</string>
     <string name="region">Region</string>
     <string name="sample_coords">55.332244 34.442211</string>
+    <string name="save_messages">Save messages as csv...</string>
 </resources>

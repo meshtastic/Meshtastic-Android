@@ -9,7 +9,7 @@ import com.geeksville.mesh.database.entity.Packet
 @Dao
 interface PacketDao {
 
-    @Query("Select * from packet order by rowid desc limit 0,:maxItem")
+    @Query("Select * from packet order by received_date desc limit 0,:maxItem")
     fun getAllPacket(maxItem: Int): LiveData<List<Packet>>
 
     @Insert

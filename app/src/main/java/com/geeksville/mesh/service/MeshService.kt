@@ -163,15 +163,13 @@ class MeshService : Service(), Logging {
      */
     @SuppressLint("MissingPermission")
     @UiThread
-    private fun startLocationRequests() {
+    private fun startLocationRequests(requestInterval: Long) {
         // FIXME - currently we don't support location reading without google play
         if (fusedLocationClient == null && isGooglePlayAvailable(this)) {
             GeeksvilleApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
-
+            
             val request = LocationRequest.create().apply {
-                interval =
-                    5 * 60 * 1000 // FIXME, do more like once every 5 mins while we are connected to our radio _and_ someone else is in the mesh
-
+                interval = requestInterval
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
             }
             val builder = LocationSettingsRequest.Builder().addLocationRequest(request)
@@ -938,19 +936,28 @@ class MeshService : Service(), Logging {
     private fun onNodeDBChanged() {
         maybeUpdateServiceStatusNotification()
 
-        // we don't ask for GPS locations from android if our device has a built in GPS
-        // Note: myNodeInfo can go away if we lose connections, so it might be null
-        if (myNodeInfo?.hasGPS != true) {
-            // If we have at least one other person in the mesh, send our GPS position otherwise stop listening to GPS
+        serviceScope.handledLaunch(Dispatchers.Main) {
+            setupLocationRequest()
+        }
+    }
 
-            serviceScope.handledLaunch(Dispatchers.Main) {
-                if (numOnlineNodes >= 2)
-                    startLocationRequests()
-                else
-                    stopLocationRequests()
-            }
-        } else
-            debug("Our radio has a built in GPS, so not reading GPS in phone")
+    private var locationRequestInterval: Long = 0;
+    private fun setupLocationRequest () {
+        val desiredInterval: Long = if (myNodeInfo?.hasGPS == true) {
+            0L  // no requests when device has GPS
+        } else if (numOnlineNodes < 2)  {
+            5 * 60 * 1000L  // send infrequently, device needs these requests to set its clock
+        } else {
+            radioConfig?.preferences?.positionBroadcastSecs?.times( 1000L) ?: 5 * 60 * 1000L
+        }
+
+        debug("desired location request $desiredInterval, current $locationRequestInterval")
+
+        if (desiredInterval != locationRequestInterval) {
+            if (locationRequestInterval > 0) stopLocationRequests()
+            if (desiredInterval > 0) startLocationRequests(desiredInterval)
+            locationRequestInterval = desiredInterval
+        }
     }
 
 

@@ -21,6 +21,10 @@
         app:showAsAction="withText"
         android:title="@string/advanced_settings" />
     <item
+        android:id="@+id/save_messages_csv"
+        app:showAsAction="withText"
+        android:title="@string/save_messages" />
+    <item
         android:id="@+id/about"
         android:title="@string/about"
         app:showAsAction="withText" />
