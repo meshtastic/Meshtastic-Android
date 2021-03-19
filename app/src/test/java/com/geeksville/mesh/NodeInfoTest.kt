@@ -8,9 +8,10 @@ import org.junit.Test
 import java.util.*
 
 class NodeInfoTest {
-    val ni1 = NodeInfo(4, MeshUser("+one", "User One", "U1"), Position(37.1, 121.1, 35))
-    val ni2 = NodeInfo(5, MeshUser("+two", "User Two", "U2"), Position(37.11, 121.1, 40))
-    val ni3 = NodeInfo(6, MeshUser("+three", "User Three", "U3"), Position(37.101, 121.1, 40))
+    val model = MeshProtos.HardwareModel.ANDROID_SIM
+    val ni1 = NodeInfo(4, MeshUser("+one", "User One", "U1", model), Position(37.1, 121.1, 35))
+    val ni2 = NodeInfo(5, MeshUser("+two", "User Two", "U2", model), Position(37.11, 121.1, 40))
+    val ni3 = NodeInfo(6, MeshUser("+three", "User Three", "U3", model), Position(37.101, 121.1, 40))
 
     private val currentDefaultLocale = LocaleListCompat.getDefault().get(0)
 

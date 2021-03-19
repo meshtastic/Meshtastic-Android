@@ -1,15 +1,7 @@
 package com.geeksville.mesh.model
 
-import android.graphics.Bitmap
-import android.net.Uri
-import android.util.Base64
 import com.geeksville.mesh.ChannelProtos
-import com.geeksville.mesh.MeshProtos
 import com.google.protobuf.ByteString
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.MultiFormatWriter
-import com.journeyapps.barcodescanner.BarcodeEncoder
-import java.net.MalformedURLException
 
 /** Utility function to make it easy to declare byte arrays - FIXME move someplace better */
 fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
@@ -74,14 +66,13 @@ data class Channel(
      */
     val humanName: String
         get() {
-            val suffix: Char = if (settings.psk.size() != 1) {
-                // we have a full PSK, so hash it to generate the suffix
-                val code = settings.psk.fold(0, { acc, x -> acc xor (x.toInt() and 0xff) })
-
-                'A' + (code % 26)
-            } else
-                '0' + settings.psk.byteAt(0).toInt()
+            // start with the PSK then xor in the name
+            val pskCode = xorHash(psk.toByteArray())
+            val nameCode = xorHash(name.toByteArray())
+            val suffix = 'A' + ((pskCode xor nameCode) % 26)
 
             return "#${name}-${suffix}"
         }
 }
+
+fun xorHash(b: ByteArray) = b.fold(0, { acc, x -> acc xor (x.toInt() and 0xff) })
