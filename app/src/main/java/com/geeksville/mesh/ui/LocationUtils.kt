@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+import com.geeksville.mesh.MeshProtos
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -124,6 +125,14 @@ fun latLongToMeter(
     return 6366000 * tt
 }
 
+// Same as above, but takes Mesh Position proto.
+fun positionToMeter(a: MeshProtos.Position, b: MeshProtos.Position): Double {
+    return latLongToMeter(
+        a.latitudeI * 1e-7,
+        a.longitudeI * 1e-7,
+        b.latitudeI * 1e-7,
+        b.longitudeI * 1e-7)
+}
 /**
  * Convert degrees/mins/secs to a single double
  *
