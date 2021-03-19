@@ -30,13 +30,13 @@ android {
             keyPassword "$meshtasticKeyPassword"
         }
     } */
-    compileSdkVersion 29
+    compileSdkVersion 30
     // leave undefined to use version plugin wants
     // buildToolsVersion "30.0.2" // Note: 30.0.2 doesn't yet work on Github actions CI
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode 20211 // format is Mmmss (where M is 1+the numeric major number
         versionName "1.2.11"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
