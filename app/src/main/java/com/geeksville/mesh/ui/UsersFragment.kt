@@ -2,11 +2,13 @@ package com.geeksville.mesh.ui
 
 
 import android.os.Bundle
-import android.text.format.DateFormat
+import android.text.Html
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.text.HtmlCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,13 +19,14 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
 import com.geeksville.mesh.databinding.NodelistFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
-import java.text.ParseException
-import java.util.*
+import com.geeksville.util.formatAgo
+import java.net.URLEncoder
 
 
 class UsersFragment : ScreenFragment("Users"), Logging {
 
     private var _binding: NodelistFragmentBinding? = null
+
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
@@ -34,6 +37,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     class ViewHolder(itemView: AdapterNodeLayoutBinding) : RecyclerView.ViewHolder(itemView.root) {
         val nodeNameView = itemView.nodeNameView
         val distanceView = itemView.distanceView
+        val coordsView = itemView.coordsView
         val batteryPctView = itemView.batteryPercentageView
         val lastTime = itemView.lastConnectionView
         val powerIcon = itemView.batteryIcon
@@ -105,8 +109,26 @@ class UsersFragment : ScreenFragment("Users"), Logging {
          */
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val n = nodes[position]
+            val name = n.user?.longName ?: n.user?.id ?: "Unknown node"
+            holder.nodeNameView.text = name
 
-            holder.nodeNameView.text = n.user?.longName ?: n.user?.id ?: "Unknown node"
+            val pos = n.validPosition;
+            if (pos != null) {
+                val coords =
+                    String.format("%.5f %.5f", pos.latitude, pos.longitude).replace(",", ".")
+                val html =
+                    "<a href='geo:${pos.latitude},${pos.longitude}?z=17&label=${
+                        URLEncoder.encode(
+                            name,
+                            "utf-8"
+                        )
+                    }'>${coords}</a>"
+                holder.coordsView.text = HtmlCompat.fromHtml(html, Html.FROM_HTML_MODE_LEGACY)
+                holder.coordsView.movementMethod = LinkMovementMethod.getInstance()
+                holder.coordsView.visibility = View.VISIBLE
+            } else {
+                holder.coordsView.visibility = View.INVISIBLE
+            }
 
             val ourNodeInfo = model.nodeDB.ourNodeInfo
             val distance = ourNodeInfo?.distanceStr(n)
@@ -116,10 +138,10 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             } else {
                 holder.distanceView.visibility = View.INVISIBLE
             }
-            debug("node=${n.user?.longName} bat=${n.batteryPctLevel}")
             renderBattery(n.batteryPctLevel, holder)
 
-            holder.lastTime.text = getLastTimeValue(n)
+            holder.lastTime.text = formatAgo(n.lastSeen);
+
             if ((n.num == ourNodeInfo?.num) || (n.snr > 100f)) {
                 holder.snrView.visibility = View.INVISIBLE
             } else {
@@ -156,30 +178,6 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             )
         })
     }
-
-    private fun getLastTimeValue(n: NodeInfo): String {
-        var lastTimeText = "?"
-        val currentTime = (System.currentTimeMillis()/1000).toInt()
-        val threeDaysLong = 3 * 60*60*24
-
-        //if the lastSeen is too old
-        if (n.lastSeen < (currentTime - threeDaysLong))
-            return lastTimeText
-
-        try {
-            val toLong: Long =  n.lastSeen.toLong()
-            val long1000 = toLong * 1000L
-            val date = Date(long1000)
-            val timeFormat = DateFormat.getTimeFormat(context)
-
-            lastTimeText = timeFormat.format(date)
-
-        } catch (e: ParseException) {
-            //
-        }
-        return lastTimeText
-    }
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

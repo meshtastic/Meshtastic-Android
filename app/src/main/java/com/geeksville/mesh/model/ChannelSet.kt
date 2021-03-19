@@ -16,11 +16,6 @@ data class ChannelSet(
 ) {
     companion object {
 
-        // Placeholder when emulating
-        val emulated = ChannelSet(
-            AppOnlyProtos.ChannelSet.newBuilder().addSettings(Channel.emulated.settings).build()
-        )
-
         const val prefix = "https://www.meshtastic.org/d/#"
 
         private const val base64Flags = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
@@ -47,9 +42,11 @@ data class ChannelSet(
     /**
      * Return the primary channel info
      */
-    val primaryChannel: Channel get() {
-        return Channel(protobuf.getSettings(0))
-    }
+    val primaryChannel: Channel? get() =
+        if(protobuf.settingsCount > 0)
+            Channel(protobuf.getSettings(0))
+        else
+            null
 
     /// Return an URL that represents the current channel values
     /// @param upperCasePrefix - portions of the URL can be upper case to make for more efficient QR codes

@@ -14,12 +14,27 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-data class MeshUser(val id: String, val longName: String, val shortName: String) :
+data class MeshUser(
+    val id: String,
+    val longName: String,
+    val shortName: String,
+    val hwModel: MeshProtos.HardwareModel
+) :
     Parcelable {
 
     override fun toString(): String {
-        return "MeshUser(id=${id.anonymize}, longName=${longName.anonymize}, shortName=${shortName.anonymize})"
+        return "MeshUser(id=${id.anonymize}, longName=${longName.anonymize}, shortName=${shortName.anonymize}, hwModel=${hwModelString})"
     }
+
+    /** a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot
+     * or null if unset
+     * */
+    val hwModelString: String?
+        get() =
+            if (hwModel == MeshProtos.HardwareModel.UNSET)
+                null
+            else
+                hwModel.name.replace('_', '-').replace('p', '.').toLowerCase()
 }
 
 @Serializable
@@ -96,8 +111,8 @@ data class NodeInfo(
         get() {
             return position?.takeIf {
                 (it.latitude <= 90.0 && it.latitude >= -90) && // If GPS gives a crap position don't crash our app
-                        it.latitude != 0.0 &&
-                        it.longitude != 0.0
+                    it.latitude != 0.0 &&
+                    it.longitude != 0.0
             }
         }
 
