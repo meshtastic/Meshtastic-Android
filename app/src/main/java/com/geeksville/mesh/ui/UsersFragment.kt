@@ -37,6 +37,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         val batteryPctView = itemView.batteryPercentageView
         val lastTime = itemView.lastConnectionView
         val powerIcon = itemView.batteryIcon
+        val snrView = itemView.snrView
     }
 
     private val nodesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
@@ -115,10 +116,16 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             } else {
                 holder.distanceView.visibility = View.INVISIBLE
             }
-
+            debug("node=${n.user?.longName} bat=${n.batteryPctLevel}")
             renderBattery(n.batteryPctLevel, holder)
 
             holder.lastTime.text = getLastTimeValue(n)
+            if ((n.num == ourNodeInfo?.num) || (n.snr > 100f)) {
+                holder.snrView.visibility = View.INVISIBLE
+            } else {
+                holder.snrView.visibility = View.VISIBLE
+                holder.snrView.text = n.snr.toString()
+            }
         }
 
         private var nodes = arrayOf<NodeInfo>()

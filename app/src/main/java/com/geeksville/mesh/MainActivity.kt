@@ -60,11 +60,9 @@ import com.google.android.material.tabs.TabLayoutMediator
 import com.google.protobuf.InvalidProtocolBufferException
 import com.vorlonsoft.android.rate.AppRate
 import com.vorlonsoft.android.rate.StoreType
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
+import kotlinx.coroutines.*
 import java.io.FileOutputStream
+import java.lang.Runnable
 import java.nio.charset.Charset
 import java.text.DateFormat
 import java.util.*
@@ -559,10 +557,16 @@ class MainActivity : AppCompatActivity(), Logging,
             CREATE_CSV_FILE -> {
                 if (resultCode == Activity.RESULT_OK) {
                     data?.data?.let { file_uri ->
+                        // model.allPackets is a result of a query, so we need to use observer for
+                        // the query to materialize
                         model.allPackets.observe(this, { packets ->
                             if (packets != null) {
-                                saveMessagesCSV(file_uri, packets)
+                                // no need for observer once got non-null list
                                 model.allPackets.removeObservers(this)
+                                // execute on the default thread pool to not block the main thread
+                                CoroutineScope(Dispatchers.Default + Job()).handledLaunch {
+                                    saveMessagesCSV(file_uri, packets)
+                                }
                             }
                         })
                     }
@@ -1084,11 +1088,8 @@ class MainActivity : AppCompatActivity(), Logging,
                             } else if (my_position != null) {
                                 val dist: Int =
                                     positionToMeter(my_position!!, position).roundToInt()
-                                fs.write(
-                                    ("${packet_proto.from.toUInt().toString(16)}," +
-                                            "${packet_proto.rxSnr},${packet_proto.rxTime},$dist\n")
-                                        .toByteArray()
-                                )
+                                fs.write("%x,%f,%d,%d".format( packet_proto.from,
+                                    packet_proto.rxSnr, packet_proto.rxTime, dist).toByteArray())
                             }
                         }
                     }

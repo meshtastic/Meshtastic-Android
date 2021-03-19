@@ -167,7 +167,7 @@ class MeshService : Service(), Logging {
         // FIXME - currently we don't support location reading without google play
         if (fusedLocationClient == null && isGooglePlayAvailable(this)) {
             GeeksvilleApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
-            
+
             val request = LocationRequest.create().apply {
                 interval = requestInterval
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
@@ -713,6 +713,7 @@ class MeshService : Service(), Logging {
                     // Handle new style position info
                     Portnums.PortNum.POSITION_APP_VALUE -> {
                         val u = MeshProtos.Position.parseFrom(data.payload)
+                        debug("position_app ${packet.from} ${u.toOneLineString()}")
                         handleReceivedPosition(packet.from, u, dataPacket.time)
                     }
 
@@ -820,6 +821,7 @@ class MeshService : Service(), Logging {
         defaultTime: Long = System.currentTimeMillis()
     ) {
         updateNodeInfo(fromNum) {
+            debug("update ${it.user?.longName} with ${p.toOneLineString()}")
             it.position = Position(p)
             updateNodeInfoTime(it, (defaultTime / 1000).toInt())
         }
@@ -916,6 +918,7 @@ class MeshService : Service(), Logging {
             updateNodeInfo(fromNum) {
                 // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
                 updateNodeInfoTime(it, rxTime)
+                it.snr = packet.rxSnr
             }
 
             handleReceivedData(packet)
