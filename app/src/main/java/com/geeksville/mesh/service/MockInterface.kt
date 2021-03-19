@@ -160,7 +160,7 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
             MeshProtos.FromRadio.newBuilder().apply {
                 myInfo = MeshProtos.MyNodeInfo.newBuilder().apply {
                     myNodeNum = MY_NODE
-                    hwModel = "Sim"
+                    hwModelDeprecated = "Sim"
                     messageTimeoutMsec = 5 * 60 * 1000
                     firmwareVersion = service.getString(R.string.cur_firmware_version)
                     numBands = 13

@@ -1242,7 +1242,7 @@ class MeshService : Service(), Logging {
             MyNodeInfo(
                 myNodeNum,
                 hasGps,
-                hwModel,
+                hwModelDeprecated,
                 firmwareVersion,
                 firmwareUpdateFilename != null,
                 isBluetoothInterface && SoftwareUpdateService.shouldUpdate(
@@ -1552,10 +1552,10 @@ class MeshService : Service(), Logging {
      */
     private fun setFirmwareUpdateFilename(info: MeshProtos.MyNodeInfo) {
         firmwareUpdateFilename = try {
-            if (info.region != null && info.firmwareVersion != null && info.hwModel != null)
+            if (info.region != null && info.firmwareVersion != null && info.hwModelDeprecated != null)
                 SoftwareUpdateService.getUpdateFilename(
                     this,
-                    info.hwModel
+                    info.hwModelDeprecated
                 )
             else
                 null
