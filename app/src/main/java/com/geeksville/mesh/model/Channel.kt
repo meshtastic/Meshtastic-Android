@@ -19,19 +19,15 @@ data class Channel(
     val settings: ChannelProtos.ChannelSettings = ChannelProtos.ChannelSettings.getDefaultInstance()
 ) {
     companion object {
-        // Note: this string _SHOULD NOT BE LOCALIZED_ because it directly hashes to values used on the device for the default channel name.
-        // FIXME - make this work with new channel name system
-        const val defaultChannelName = "Default"
-
         // These bytes must match the well known and not secret bytes used the default channel AES128 key device code
         val channelDefaultKey = byteArrayOfInts(
             0xd4, 0xf1, 0xbb, 0x3a, 0x20, 0x29, 0x07, 0x59,
             0xf0, 0xbc, 0xff, 0xab, 0xcf, 0x4e, 0x69, 0xbf
         )
 
-        // Placeholder when emulating
-        val emulated = Channel(
-            ChannelProtos.ChannelSettings.newBuilder().setName(defaultChannelName)
+        // TH=he unsecured channel that devices ship with
+        val defaultChannel = Channel(
+            ChannelProtos.ChannelSettings.newBuilder()
                 .setModemConfig(ChannelProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128).build()
         )
     }

@@ -169,12 +169,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                     .setPositiveButton(getString(R.string.accept)) { _, _ ->
                         // Generate a new channel with only the changes the user can change in the GUI
                         model.channels.value?.primaryChannel?.let { oldPrimary ->
-                            val newSettings = oldPrimary.settings.toBuilder()
+                            var newSettings = oldPrimary.settings.toBuilder()
                             newSettings.name = binding.channelNameEdit.text.toString().trim()
 
-                            // Generate a new AES256 key (for any channel not named Default)
+                            // Generate a new AES256 key unleess the user is trying to go back to stock
                             if (!newSettings.name.equals(
-                                    Channel.defaultChannelName,
+                                    Channel.defaultChannel.name,
                                     ignoreCase = true
                                 )
                             ) {
@@ -184,10 +184,8 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                                 random.nextBytes(bytes)
                                 newSettings.psk = ByteString.copyFrom(bytes)
                             } else {
-                                debug("ASSIGNING NEW default AES128 KEY")
-                                newSettings.name =
-                                    Channel.defaultChannelName // Fix any case errors
-                                newSettings.psk = ByteString.copyFrom(Channel.channelDefaultKey)
+                                debug("Switching back to default channel")
+                                newSettings = Channel.defaultChannel.settings.toBuilder()
                             }
 
                             val selectedChannelOptionString =
