@@ -4,6 +4,7 @@ apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.github.triplet.play'
+apply plugin: 'de.mobilej.unmock'
 // apply plugin: "app.brant.amazonappstorepublisher"
 
 // Apply the Crashlytics Gradle plugin
@@ -13,6 +14,11 @@ apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'com.google.protobuf'
 
 apply plugin: 'kotlin-kapt'
+
+unMock {
+    keep "android.net.Uri"
+    keep "android.util.Base64"
+}
 
 android {
     /*
@@ -31,8 +37,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 29
-        versionCode 20207 // format is Mmmss (where M is 1+the numeric major number
-        versionName "1.2.7"
+        versionCode 20211 // format is Mmmss (where M is 1+the numeric major number
+        versionName "1.2.11"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio

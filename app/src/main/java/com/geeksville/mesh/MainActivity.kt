@@ -668,8 +668,7 @@ class MainActivity : AppCompatActivity(), Logging,
                     else {
 
                         val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
-                        val minVer = DeviceVersion("1.2.0")
-                        if (curVer < minVer)
+                        if (curVer < MeshService.minFirmwareVersion)
                             showAlert(R.string.firmware_too_old, R.string.firmware_old)
                         else {
                             // If our app is too old/new, we probably don't understand the new radioconfig messages, so we don't read them until here

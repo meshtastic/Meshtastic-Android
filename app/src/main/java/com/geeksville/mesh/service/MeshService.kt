@@ -94,6 +94,10 @@ class MeshService : Service(), Logging {
             "com.geeksville.mesh",
             "com.geeksville.mesh.service.MeshService"
         )
+
+        /** The minimmum firmware version we know how to talk to. We'll still be able to talk to 1.0 firmwares but only well enough to ask them to firmware update
+         */
+        val minFirmwareVersion = DeviceVersion("1.2.0")
     }
 
     enum class ConnectionState {
@@ -167,7 +171,7 @@ class MeshService : Service(), Logging {
         // FIXME - currently we don't support location reading without google play
         if (fusedLocationClient == null && isGooglePlayAvailable(this)) {
             GeeksvilleApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
-            
+
             val request = LocationRequest.create().apply {
                 interval = requestInterval
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
@@ -945,13 +949,13 @@ class MeshService : Service(), Logging {
     }
 
     private var locationRequestInterval: Long = 0;
-    private fun setupLocationRequest () {
+    private fun setupLocationRequest() {
         val desiredInterval: Long = if (myNodeInfo?.hasGPS == true) {
             0L  // no requests when device has GPS
-        } else if (numOnlineNodes < 2)  {
+        } else if (numOnlineNodes < 2) {
             5 * 60 * 1000L  // send infrequently, device needs these requests to set its clock
         } else {
-            radioConfig?.preferences?.positionBroadcastSecs?.times( 1000L) ?: 5 * 60 * 1000L
+            radioConfig?.preferences?.positionBroadcastSecs?.times(1000L) ?: 5 * 60 * 1000L
         }
 
         debug("desired location request $desiredInterval, current $locationRequestInterval")
@@ -1174,18 +1178,6 @@ class MeshService : Service(), Logging {
     /// Used to make sure we never get foold by old BLE packets
     private var configNonce = 1
 
-
-    private fun handleRadioConfig(radio: RadioConfigProtos.RadioConfig) {
-        val packetToSave = Packet(
-            UUID.randomUUID().toString(),
-            "RadioConfig",
-            System.currentTimeMillis(),
-            radio.toString()
-        )
-        insertPacket(packetToSave)
-        radioConfig = radio
-    }
-
     /**
      * Convert a protobuf NodeInfo into our model objects and update our node DB
      */
@@ -1296,6 +1288,9 @@ class MeshService : Service(), Logging {
         }
     }
 
+    /// If found, the old region string of the form 1.0-EU865 etc...
+    private var legacyRegion: String? = null
+
     /**
      * Update the nodeinfo (called from either new API version or the old one)
      */
@@ -1309,6 +1304,7 @@ class MeshService : Service(), Logging {
         insertPacket(packetToSave)
 
         rawMyNodeInfo = myInfo
+        legacyRegion = myInfo.region
         regenMyNodeInfo()
 
         // We'll need to get a new set of channels and settings now
@@ -1342,34 +1338,37 @@ class MeshService : Service(), Logging {
             }
 
             if (curRegionValue == RadioConfigProtos.RegionCode.Unset_VALUE) {
-                TODO("Need gui for setting region")
-                /* // look for a legacy region
+                // look for a legacy region
                 val legacyRegex = Regex(".+-(.+)")
-                myNodeInfo?.region?.let { legacyRegion ->
-                    val matches = legacyRegex.find(legacyRegion)
+                legacyRegion?.let { lr ->
+                    val matches = legacyRegex.find(lr)
                     if (matches != null) {
                         val (region) = matches.destructured
                         val newRegion = RadioConfigProtos.RegionCode.valueOf(region)
                         info("Upgrading legacy region $newRegion (code ${newRegion.number})")
                         curRegionValue = newRegion.number
                     }
-                } */
+                }
             }
 
             // If nothing was set in our (new style radio preferences, but we now have a valid setting - slam it in)
             if (curConfigRegion == RadioConfigProtos.RegionCode.Unset && curRegionValue != RadioConfigProtos.RegionCode.Unset_VALUE) {
-                info("Telling device to upgrade region")
+                if (deviceVersion >= minFirmwareVersion) {
+                    info("Telling device to upgrade region")
 
-                // Tell the device to set the new region field (old devices will simply ignore this)
-                radioConfig?.let { currentConfig ->
-                    val newConfig = currentConfig.toBuilder()
+                    // Tell the device to set the new region field (old devices will simply ignore this)
+                    radioConfig?.let { currentConfig ->
+                        val newConfig = currentConfig.toBuilder()
 
-                    val newPrefs = currentConfig.preferences.toBuilder()
-                    newPrefs.regionValue = curRegionValue
-                    newConfig.preferences = newPrefs.build()
+                        val newPrefs = currentConfig.preferences.toBuilder()
+                        newPrefs.regionValue = curRegionValue
+                        newConfig.preferences = newPrefs.build()
 
-                    sendRadioConfig(newConfig.build())
+                        sendRadioConfig(newConfig.build())
+                    }
                 }
+                else
+                    warn("Device is too old to understand region changes")
             }
         }
     }
@@ -1413,10 +1412,14 @@ class MeshService : Service(), Logging {
 
                 regenMyNodeInfo() // we have a node db now, so can possibly find a better hwmodel
                 myNodeInfo = newMyNodeInfo // we might have just updated myNodeInfo
-                
+
                 sendAnalytics()
 
-                requestRadioConfig()
+                if (deviceVersion < minFirmwareVersion) {
+                    info("Device firmware is too old, faking config so firmware update can occur")
+                    onHasSettings()
+                } else
+                    requestRadioConfig()
             }
         } else
             warn("Ignoring stale config complete")

@@ -16,11 +16,6 @@ data class ChannelSet(
 ) {
     companion object {
 
-        // Placeholder when emulating
-        val emulated = ChannelSet(
-            AppOnlyProtos.ChannelSet.newBuilder().addSettings(Channel.emulated.settings).build()
-        )
-
         const val prefix = "https://www.meshtastic.org/d/#"
 
         private const val base64Flags = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
