@@ -94,6 +94,10 @@ class MeshService : Service(), Logging {
             "com.geeksville.mesh",
             "com.geeksville.mesh.service.MeshService"
         )
+
+        /** The minimmum firmware version we know how to talk to. We'll still be able to talk to 1.0 firmwares but only well enough to ask them to firmware update
+         */
+        val minFirmwareVersion = DeviceVersion("1.2.0")
     }
 
     enum class ConnectionState {
@@ -1174,18 +1178,6 @@ class MeshService : Service(), Logging {
     /// Used to make sure we never get foold by old BLE packets
     private var configNonce = 1
 
-
-    private fun handleRadioConfig(radio: RadioConfigProtos.RadioConfig) {
-        val packetToSave = Packet(
-            UUID.randomUUID().toString(),
-            "RadioConfig",
-            System.currentTimeMillis(),
-            radio.toString()
-        )
-        insertPacket(packetToSave)
-        radioConfig = radio
-    }
-
     /**
      * Convert a protobuf NodeInfo into our model objects and update our node DB
      */
@@ -1416,7 +1408,12 @@ class MeshService : Service(), Logging {
                 
                 sendAnalytics()
 
-                requestRadioConfig()
+                if(deviceVersion < minFirmwareVersion) {
+                    info("Device firmware is too old, faking config so firmware update can occur")
+                    onHasSettings()
+                }
+                else
+                    requestRadioConfig()
             }
         } else
             warn("Ignoring stale config complete")
