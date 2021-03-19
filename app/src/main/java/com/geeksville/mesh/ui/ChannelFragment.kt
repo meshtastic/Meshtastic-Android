@@ -79,11 +79,10 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     /// Pull the latest data from the model (discarding any user edits)
     private fun setGUIfromModel() {
         val channels = model.channels.value
+        val channel = channels?.primaryChannel
 
         binding.editableCheckbox.isChecked = false // start locked
-        if (channels != null) {
-            val channel = channels.primaryChannel
-
+        if (channel != null) {
             binding.qrView.visibility = View.VISIBLE
             binding.channelNameEdit.visibility = View.VISIBLE
             binding.channelNameEdit.setText(channel.humanName)
@@ -156,8 +155,8 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             val checked = binding.editableCheckbox.isChecked
             if (checked) {
                 // User just unlocked for editing - remove the # goo around the channel name
-                model.channels.value?.let { channels ->
-                    binding.channelNameEdit.setText(channels.primaryChannel.name)
+                model.channels.value?.primaryChannel?.let { ch ->
+                    binding.channelNameEdit.setText(ch.name)
                 }
             } else {
                 // User just locked it, we should warn and then apply changes to radio
@@ -169,8 +168,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                     }
                     .setPositiveButton(getString(R.string.accept)) { _, _ ->
                         // Generate a new channel with only the changes the user can change in the GUI
-                        model.channels.value?.let { old ->
-                            val oldPrimary = old.primaryChannel
+                        model.channels.value?.primaryChannel?.let { oldPrimary ->
                             val newSettings = oldPrimary.settings.toBuilder()
                             newSettings.name = binding.channelNameEdit.text.toString().trim()
 

@@ -37,6 +37,7 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.Observer
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.geeksville.android.BindFailedException
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
@@ -308,11 +309,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
         if (deniedPermissions.isNotEmpty()) {
             errormsg("Denied permissions: ${deniedPermissions.joinToString(",")}")
-            Toast.makeText(
-                this,
-                getString(R.string.permission_missing),
-                Toast.LENGTH_LONG
-            ).show()
+            showToast(R.string.permission_missing)
         }
     }
 
@@ -700,40 +697,52 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
+    private fun showToast(msgId: Int) {
+        Toast.makeText(
+            this,
+            msgId,
+            Toast.LENGTH_LONG
+        ).show()
+    }
+
+    private fun showToast(msg: String) {
+        Toast.makeText(
+            this,
+            msg,
+            Toast.LENGTH_LONG
+        ).show()
+    }
+
     private fun perhapsChangeChannel() {
         // If the is opening a channel URL, handle it now
         requestedChannelUrl?.let { url ->
             try {
                 val channels = ChannelSet(url)
                 val primary = channels.primaryChannel
-                requestedChannelUrl = null
+                if (primary == null)
+                    showToast(R.string.channel_invalid)
+                else {
+                    requestedChannelUrl = null
 
-                MaterialAlertDialogBuilder(this)
-                    .setTitle(R.string.new_channel_rcvd)
-                    .setMessage(getString(R.string.do_you_want_switch).format(primary.name))
-                    .setNeutralButton(R.string.cancel) { _, _ ->
-                        // Do nothing
-                    }
-                    .setPositiveButton(R.string.accept) { _, _ ->
-                        debug("Setting channel from URL")
-                        try {
-                            model.setChannels(channels)
-                        } catch (ex: RemoteException) {
-                            errormsg("Couldn't change channel ${ex.message}")
-                            Toast.makeText(
-                                this,
-                                "Couldn't change channel, because radio is not yet connected. Please try again.",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle(R.string.new_channel_rcvd)
+                        .setMessage(getString(R.string.do_you_want_switch).format(primary.name))
+                        .setNeutralButton(R.string.cancel) { _, _ ->
+                            // Do nothing
                         }
-                    }
-                    .show()
+                        .setPositiveButton(R.string.accept) { _, _ ->
+                            debug("Setting channel from URL")
+                            try {
+                                model.setChannels(channels)
+                            } catch (ex: RemoteException) {
+                                errormsg("Couldn't change channel ${ex.message}")
+                                showToast(R.string.cant_change_no_radio)
+                            }
+                        }
+                        .show()
+                }
             } catch (ex: InvalidProtocolBufferException) {
-                Toast.makeText(
-                    this,
-                    R.string.channel_invalid,
-                    Toast.LENGTH_LONG
-                ).show()
+                showToast(R.string.channel_invalid)
             }
         }
     }
@@ -958,8 +967,14 @@ class MainActivity : AppCompatActivity(), Logging,
             }
         }
 
-        bindMeshService()
-
+        try {
+            bindMeshService()
+        }
+        catch(ex: BindFailedException) {
+            // App is probably shutting down, ignore
+            errormsg("Bind of MeshService failed")
+        }
+        
         val bonded = RadioInterfaceService.getBondedDeviceAddress(this) != null
         if (!bonded && usbDevice == null) // we will handle USB later
             showSettingsPage()
@@ -1058,7 +1073,7 @@ class MainActivity : AppCompatActivity(), Logging,
         try {
             val packageInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
             val versionName = packageInfo.versionName
-            Toast.makeText(applicationContext, versionName, Toast.LENGTH_LONG).show()
+            showToast(versionName)
         } catch (e: PackageManager.NameNotFoundException) {
             errormsg("Can not find the version: ${e.message}")
         }

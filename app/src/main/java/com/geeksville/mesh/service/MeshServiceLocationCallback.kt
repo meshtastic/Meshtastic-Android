@@ -38,12 +38,22 @@ class MeshServiceLocationCallback(
             MeshService.info("got phone location")
             if (location.isAccurateForMesh) { // if within 200 meters, or accuracy is unknown
 
-                // Do we want to broadcast this position globally, or are we just telling the local node what its current position is (
-                val shouldBroadcast = isAllowedToSend()
-                val destinationNumber = if (shouldBroadcast) DataPacket.NODENUM_BROADCAST else getNodeNum()
+                try {
+                    // Do we want to broadcast this position globally, or are we just telling the local node what its current position is (
+                    val shouldBroadcast = isAllowedToSend()
+                    val destinationNumber =
+                        if (shouldBroadcast) DataPacket.NODENUM_BROADCAST else getNodeNum()
 
-                // Note: we never want this message sent as a reliable message, because it is low value and we'll be sending one again later anyways
-                sendPosition(location, destinationNumber, wantResponse = false)
+                    // Note: we never want this message sent as a reliable message, because it is low value and we'll be sending one again later anyways
+                    sendPosition(location, destinationNumber, wantResponse = false)
+
+                } catch (ex: RemoteException) { // Really a RadioNotConnected exception, but it has changed into this type via remoting
+                    MeshService.warn("Lost connection to radio, stopping location requests")
+                    onSendPositionFailed()
+                } catch (ex: BLEException) { // Really a RadioNotConnected exception, but it has changed into this type via remoting
+                    MeshService.warn("BLE exception, stopping location requests $ex")
+                    onSendPositionFailed()
+                }
             } else {
                 MeshService.warn("accuracy ${location.accuracy} is too poor to use")
             }
@@ -51,21 +61,13 @@ class MeshServiceLocationCallback(
     }
 
     private fun sendPosition(location: Location, destinationNumber: Int, wantResponse: Boolean) {
-        try {
-            onSendPosition(
-                location.latitude,
-                location.longitude,
-                location.altitude.toInt(),
-                destinationNumber,
-                wantResponse // wantResponse?
-            )
-        } catch (ex: RemoteException) { // Really a RadioNotConnected exception, but it has changed into this type via remoting
-            MeshService.warn("Lost connection to radio, stopping location requests")
-            onSendPositionFailed()
-        } catch (ex: BLEException) { // Really a RadioNotConnected exception, but it has changed into this type via remoting
-            MeshService.warn("BLE exception, stopping location requests $ex")
-            onSendPositionFailed()
-        }
+        onSendPosition(
+            location.latitude,
+            location.longitude,
+            location.altitude.toInt(),
+            destinationNumber,
+            wantResponse // wantResponse?
+        )
     }
 
     /**

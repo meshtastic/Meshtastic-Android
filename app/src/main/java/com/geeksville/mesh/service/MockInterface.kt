@@ -142,6 +142,7 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
                         id = DataPacket.nodeNumToDefaultId(numIn)
                         longName = "Sim " + num.toHexString()
                         shortName = getInitials(longName)
+                        hwModel = MeshProtos.HardwareModel.ANDROID_SIM
                     }.build()
                     position = MeshProtos.Position.newBuilder().apply {
                         latitudeI = Position.degI(lat)
@@ -160,9 +161,8 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
             MeshProtos.FromRadio.newBuilder().apply {
                 myInfo = MeshProtos.MyNodeInfo.newBuilder().apply {
                     myNodeNum = MY_NODE
-                    hwModelDeprecated = "Sim"
                     messageTimeoutMsec = 5 * 60 * 1000
-                    firmwareVersion = service.getString(R.string.cur_firmware_version)
+                    firmwareVersion = "1.2.8" // Pretend to be running an older 1.2 version
                     numBands = 13
                     maxChannels = 8
                 }.build()
