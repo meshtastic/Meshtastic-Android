@@ -942,28 +942,22 @@ class MeshService : Service(), Logging {
     /// If we just changed our nodedb, we might want to do somethings
     private fun onNodeDBChanged() {
         maybeUpdateServiceStatusNotification()
-
-        serviceScope.handledLaunch(Dispatchers.Main) {
-            setupLocationRequest()
-        }
     }
 
-    private var locationRequestInterval: Long = 0;
     private fun setupLocationRequest() {
-        val desiredInterval: Long = if (myNodeInfo?.hasGPS == true) {
-            0L  // no requests when device has GPS
-        } else if (numOnlineNodes < 2) {
-            5 * 60 * 1000L  // send infrequently, device needs these requests to set its clock
+        var desiredInterval = 0L
+
+        if (myNodeInfo?.hasGPS == true)
+            desiredInterval =
+                radioConfig?.preferences?.positionBroadcastSecs?.times(1000L) ?: 5 * 60 * 1000L
+
+        stopLocationRequests()
+        if (desiredInterval != 0L) {
+            debug("desired GPS assistance interval $desiredInterval")
+            startLocationRequests(desiredInterval)
         } else {
-            radioConfig?.preferences?.positionBroadcastSecs?.times(1000L) ?: 5 * 60 * 1000L
-        }
-
-        debug("desired location request $desiredInterval, current $locationRequestInterval")
-
-        if (desiredInterval != locationRequestInterval) {
-            if (locationRequestInterval > 0) stopLocationRequests()
-            if (desiredInterval > 0) startLocationRequests(desiredInterval)
-            locationRequestInterval = desiredInterval
+            debug("No GPS assistance desired, but sending UTC time to mesh")
+            sendPositionScoped()
         }
     }
 
@@ -1366,8 +1360,7 @@ class MeshService : Service(), Logging {
 
                         sendRadioConfig(newConfig.build())
                     }
-                }
-                else
+                } else
                     warn("Device is too old to understand region changes")
             }
         }
@@ -1384,6 +1377,8 @@ class MeshService : Service(), Logging {
         reportConnection()
 
         updateRegion()
+
+        setupLocationRequest() // start sending location packets if needed
     }
 
     private fun handleConfigComplete(configCompleteId: Int) {
@@ -1462,13 +1457,13 @@ class MeshService : Service(), Logging {
      * Must be called from serviceScope. Use sendPositionScoped() for direct calls.
      */
     private fun sendPosition(
-        lat: Double,
-        lon: Double,
-        alt: Int,
+        lat: Double = 0.0,
+        lon: Double = 0.0,
+        alt: Int = 0,
         destNum: Int = DataPacket.NODENUM_BROADCAST,
         wantResponse: Boolean = false
     ) {
-        debug("Sending our position to=$destNum lat=$lat, lon=$lon, alt=$alt")
+        debug("Sending our position/time to=$destNum lat=$lat, lon=$lon, alt=$alt")
 
         val position = MeshProtos.Position.newBuilder().also {
             it.longitudeI = Position.degI(lon)
@@ -1495,15 +1490,15 @@ class MeshService : Service(), Logging {
     }
 
     private fun sendPositionScoped(
-        lat: Double,
-        lon: Double,
-        alt: Int,
+        lat: Double = 0.0,
+        lon: Double = 0.0,
+        alt: Int = 0,
         destNum: Int = DataPacket.NODENUM_BROADCAST,
         wantResponse: Boolean = false
     ) = serviceScope.handledLaunch {
         try {
             sendPosition(lat, lon, alt, destNum, wantResponse)
-        } catch (ex: RadioNotConnectedException) {
+        } catch (ex: BLEException) {
             warn("Ignoring disconnected radio during gps location update")
         }
     }
