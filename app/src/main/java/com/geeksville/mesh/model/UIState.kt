@@ -134,15 +134,10 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
             }
         }
 
-    var region: RadioConfigProtos.RegionCode?
-        get() = radioConfig.value?.preferences?.region
+    var region: RadioConfigProtos.RegionCode
+        get() = meshService?.region?.let { RadioConfigProtos.RegionCode.forNumber(it) } ?: RadioConfigProtos.RegionCode.Unset
         set(value) {
-            val config = radioConfig.value
-            if (value != null && config != null) {
-                val builder = config.toBuilder()
-                builder.preferencesBuilder.region = value
-                setRadioConfig(builder.build())
-            }
+            meshService?.region = value.number
         }
 
     /// hardware info about our local device (can be null)

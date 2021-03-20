@@ -1313,6 +1313,28 @@ class MeshService : Service(), Logging {
     }
 
 
+    private fun setRegionOnDevice() {
+        val curConfigRegion =
+            radioConfig?.preferences?.region ?: RadioConfigProtos.RegionCode.Unset
+
+        if (curConfigRegion.number != curRegionValue && curRegionValue != RadioConfigProtos.RegionCode.Unset_VALUE)
+            if (deviceVersion >= minFirmwareVersion) {
+                info("Telling device to upgrade region")
+
+                // Tell the device to set the new region field (old devices will simply ignore this)
+                radioConfig?.let { currentConfig ->
+                    val newConfig = currentConfig.toBuilder()
+
+                    val newPrefs = currentConfig.preferences.toBuilder()
+                    newPrefs.regionValue = curRegionValue
+                    newConfig.preferences = newPrefs.build()
+
+                    sendRadioConfig(newConfig.build())
+                }
+            } else
+                warn("Device is too old to understand region changes")
+    }
+
     /**
      * If we are updating nodes we might need to use old (fixed by firmware build)
      * region info to populate our new universal ROMs.
@@ -1346,23 +1368,7 @@ class MeshService : Service(), Logging {
             }
 
             // If nothing was set in our (new style radio preferences, but we now have a valid setting - slam it in)
-            if (curConfigRegion == RadioConfigProtos.RegionCode.Unset && curRegionValue != RadioConfigProtos.RegionCode.Unset_VALUE) {
-                if (deviceVersion >= minFirmwareVersion) {
-                    info("Telling device to upgrade region")
-
-                    // Tell the device to set the new region field (old devices will simply ignore this)
-                    radioConfig?.let { currentConfig ->
-                        val newConfig = currentConfig.toBuilder()
-
-                        val newPrefs = currentConfig.preferences.toBuilder()
-                        newPrefs.regionValue = curRegionValue
-                        newConfig.preferences = newPrefs.build()
-
-                        sendRadioConfig(newConfig.build())
-                    }
-                } else
-                    warn("Device is too old to understand region changes")
-            }
+            setRegionOnDevice()
         }
     }
 
@@ -1651,7 +1657,7 @@ class MeshService : Service(), Logging {
         offlineSentPackets.add(p)
     }
 
-    val binder = object : IMeshService.Stub() {
+    private val binder = object : IMeshService.Stub() {
 
         override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
             debug("Passing through device change to radio service: ${deviceAddr.anonymize}")
@@ -1675,6 +1681,12 @@ class MeshService : Service(), Logging {
         }
 
         override fun getUpdateStatus(): Int = SoftwareUpdateService.progress
+        override fun getRegion(): Int = curRegionValue
+
+        override fun setRegion(regionCode: Int) = toRemoteExceptions {
+            curRegionValue = regionCode
+            setRegionOnDevice()
+        }
 
         override fun startFirmwareUpdate() = toRemoteExceptions {
             doFirmwareUpdate()
