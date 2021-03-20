@@ -1624,8 +1624,10 @@ class MeshService : Service(), Logging {
         } else {
             debug("Creating firmware update coroutine")
             updateJob = serviceScope.handledLaunch {
-                debug("Starting firmware update coroutine")
-                SoftwareUpdateService.doUpdate(this@MeshService, safe, filename)
+                exceptionReporter {
+                    debug("Starting firmware update coroutine")
+                    SoftwareUpdateService.doUpdate(this@MeshService, safe, filename)
+                }
             }
         }
     }
