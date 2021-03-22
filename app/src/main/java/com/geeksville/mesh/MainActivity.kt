@@ -1102,7 +1102,7 @@ class MainActivity : AppCompatActivity(), Logging,
                             } else if (my_position != null) {
                                 val dist: Int =
                                     positionToMeter(my_position!!, position).roundToInt()
-                                fs.write("%x,%f,%d,%d".format( packet_proto.from,
+                                fs.write("%x,%f,%d,%d\n".format( packet_proto.from,
                                     packet_proto.rxSnr, packet_proto.rxTime, dist).toByteArray())
                             }
                         }
