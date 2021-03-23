@@ -1090,7 +1090,7 @@ class MainActivity : AppCompatActivity(), Logging,
         applicationContext.contentResolver.openFileDescriptor(file_uri, "w")?.use {
             FileOutputStream(it.fileDescriptor).use { fs ->
                 // Write header
-                fs.write(("from,snr,time,dist\n").toByteArray());
+                fs.write(("from,rssi,snr,time,dist\n").toByteArray());
                 // Packets are ordered by time, we keep most recent position of
                 // our device in my_position.
                 var my_position: MeshProtos.Position? = null
@@ -1100,9 +1100,8 @@ class MainActivity : AppCompatActivity(), Logging,
                             if (packet_proto.from == myNodeNum) {
                                 my_position = position
                             } else if (my_position != null) {
-                                val dist: Int =
-                                    positionToMeter(my_position!!, position).roundToInt()
-                                fs.write("%x,%f,%d,%d\n".format( packet_proto.from,
+                                val dist = positionToMeter(my_position!!, position).roundToInt()
+                                fs.write("%x,%d,%f,%d,%d\n".format(packet_proto.from,packet_proto.rxRssi,
                                     packet_proto.rxSnr, packet_proto.rxTime, dist).toByteArray())
                             }
                         }
