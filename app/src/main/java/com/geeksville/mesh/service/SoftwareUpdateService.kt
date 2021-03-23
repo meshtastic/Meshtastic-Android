@@ -374,13 +374,17 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                         throw DeviceRejectedException()
 
                     // Send all the blocks
+                    var oldProgress = -1 // used to limit # of log spam
                     while (firmwareNumSent < firmwareSize) {
                         // If we are doing the spiffs partition, we limit progress to a max of 50%, so that the user doesn't think we are done
                         // yet
                         val maxProgress = if(flashRegion != FLASH_REGION_APPLOAD)
                             50 else 100
                         sendProgress(context, firmwareNumSent * maxProgress / firmwareSize, isAppload)
-                        debug("sending block ${progress}%")
+                        if(progress != oldProgress) {
+                            debug("sending block ${progress}%")
+                            oldProgress = progress;
+                        }
                         var blockSize = 512 - 3 // Max size MTU excluding framing
 
                         if (blockSize > firmwareStream.available())
