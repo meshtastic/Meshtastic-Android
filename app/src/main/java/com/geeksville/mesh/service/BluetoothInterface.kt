@@ -469,7 +469,12 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
             safe =
                 null // We do this first, because if we throw we still want to mark that we no longer have a valid connection
 
-            s?.close()
+            try {
+                s?.close()
+            }
+            catch(_: BLEConnectionClosing) {
+                warn("Ignoring BLE errors while closing")
+            }
         } else {
             debug("Radio was not connected, skipping disable")
         }

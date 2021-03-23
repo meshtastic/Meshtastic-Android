@@ -773,7 +773,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
         closeGatt()
 
-        failAllWork(BLEException("Connection closing"))
+        failAllWork(BLEConnectionClosing())
     }
 
     /**
