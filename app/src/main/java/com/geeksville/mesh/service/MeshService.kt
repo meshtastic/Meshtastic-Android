@@ -926,6 +926,7 @@ class MeshService : Service(), Logging {
                 // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
                 updateNodeInfoTime(it, rxTime)
                 it.snr = packet.rxSnr
+                it.rssi = packet.rxRssi
             }
 
             handleReceivedData(packet)

@@ -83,7 +83,8 @@ data class NodeInfo(
     val num: Int, // This is immutable, and used as a key
     var user: MeshUser? = null,
     var position: Position? = null,
-    var snr: Float = 1000.0f
+    var snr: Float = Float.MAX_VALUE,
+    var rssi: Int = Int.MAX_VALUE
 ) : Parcelable {
 
     /// Return the last time we've seen this node in secs since 1970
