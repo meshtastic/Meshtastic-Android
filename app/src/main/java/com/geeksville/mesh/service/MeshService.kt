@@ -549,7 +549,7 @@ class MeshService : Service(), Logging {
                 setChannel(it)
             }
 
-            channels = asChannels.toTypedArray()
+            channels = fixupChannelList(asChannels).toTypedArray()
         }
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
@@ -1305,11 +1305,20 @@ class MeshService : Service(), Logging {
         radioConfig = null
 
         // prefill the channel array with null channels
-        channels = Array(myInfo.maxChannels) {
-            val b = ChannelProtos.Channel.newBuilder()
-            b.index = it
-            b.build()
-        }
+        channels = fixupChannelList(listOf<ChannelProtos.Channel>()).toTypedArray()
+    }
+
+    /// scan the channel list and make sure it has one PRIMARY channel and is maxChannels long
+    private fun fixupChannelList(lIn: List<ChannelProtos.Channel>): List<ChannelProtos.Channel> {
+        val mi = myNodeInfo
+        var l = lIn
+        if (mi != null)
+            while (l.size < mi.maxChannels) {
+                val b = ChannelProtos.Channel.newBuilder()
+                b.index = l.size
+                l += b.build()
+            }
+        return l
     }
 
 
