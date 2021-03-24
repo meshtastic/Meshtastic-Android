@@ -85,7 +85,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
         // Only let buttons work if we are connected to the radio
         binding.shareButton.isEnabled = connected
-        binding.resetButton.isEnabled = connected
+        binding.resetButton.isEnabled = connected && Channel.defaultChannel != channel
 
         binding.editableCheckbox.isChecked = false // start locked
         if (channel != null) {
@@ -185,7 +185,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 .setNeutralButton(R.string.cancel) { _, _ ->
                     setGUIfromModel() // throw away any edits
                 }
-                .setPositiveButton(getString(R.string.accept)) { _, _ ->
+                .setPositiveButton(R.string.apply) { _, _ ->
                     debug("Switching back to default channel")
                     installSettings(Channel.defaultChannel.settings)
                 }
