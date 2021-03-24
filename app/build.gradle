@@ -30,15 +30,15 @@ android {
             keyPassword "$meshtasticKeyPassword"
         }
     } */
-    compileSdkVersion 29
+    compileSdkVersion 30
     // leave undefined to use version plugin wants
     // buildToolsVersion "30.0.2" // Note: 30.0.2 doesn't yet work on Github actions CI
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
-        targetSdkVersion 29
-        versionCode 20211 // format is Mmmss (where M is 1+the numeric major number
-        versionName "1.2.11"
+        targetSdkVersion 30
+        versionCode 20213 // format is Mmmss (where M is 1+the numeric major number
+        versionName "1.2.13"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
@@ -151,7 +151,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
     // For now I'm not using javalite, because I want JSON printing
-    implementation ('com.google.protobuf:protobuf-java:3.15.5')
+    implementation ('com.google.protobuf:protobuf-java:3.15.6')
 
     // For UART access
     // implementation 'com.google.android.things:androidthings:1.0'
@@ -170,7 +170,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:19.0.0'
 
     // Add the Firebase SDK for Crashlytics.
-    implementation 'com.google.firebase:firebase-crashlytics:17.3.1'
+    implementation 'com.google.firebase:firebase-crashlytics:17.4.0'
 
     // alas implementation bug deep in the bowels when I tried it for my SyncBluetoothDevice class
     // implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.3"

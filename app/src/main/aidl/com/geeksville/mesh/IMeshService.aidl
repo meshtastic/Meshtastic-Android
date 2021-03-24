@@ -113,4 +113,7 @@ interface IMeshService {
     Return a number 0-100 for progress. -1 for completed and success, -2 for failure
     */
     int getUpdateStatus();
+
+    int getRegion();
+    void setRegion(int regionCode);
 }

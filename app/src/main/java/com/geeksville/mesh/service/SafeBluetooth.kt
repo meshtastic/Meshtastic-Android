@@ -325,7 +325,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             if (newWork.timeoutMillis != 0L) {
 
                 activeTimeout = serviceScope.launch {
-                    debug("Starting failsafe timer ${newWork.timeoutMillis}")
+                    // debug("Starting failsafe timer ${newWork.timeoutMillis}")
                     delay(newWork.timeoutMillis)
                     errormsg("Failsafe BLE timer expired!")
                     completeWork(
@@ -415,7 +415,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             if (work == null)
                 warn("wor completed, but we already killed it via failsafetimer? status=$status, res=$res")
             else {
-                debug("work ${work.tag} is completed, resuming status=$status, res=$res")
+                // debug("work ${work.tag} is completed, resuming status=$status, res=$res")
                 if (status != 0)
                     work.completion.resumeWithException(
                         BLEStatusException(
@@ -773,7 +773,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
         closeGatt()
 
-        failAllWork(BLEException("Connection closing"))
+        failAllWork(BLEConnectionClosing())
     }
 
     /**

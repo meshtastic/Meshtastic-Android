@@ -18,7 +18,6 @@ import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.ChannelFragmentBinding
 import com.geeksville.mesh.model.Channel
@@ -50,6 +49,7 @@ fun ImageView.setOpaque() {
 class ChannelFragment : ScreenFragment("Channel"), Logging {
 
     private var _binding: ChannelFragmentBinding? = null
+
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
@@ -81,6 +81,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         val channels = model.channels.value
         val channel = channels?.primaryChannel
 
+        val connected = model.isConnected.value == MeshService.ConnectionState.CONNECTED
+
+        // Only let buttons work if we are connected to the radio
+        binding.shareButton.isEnabled = connected
+        binding.resetButton.isEnabled = connected
+
         binding.editableCheckbox.isChecked = false // start locked
         if (channel != null) {
             binding.qrView.visibility = View.VISIBLE
@@ -89,7 +95,6 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
             // For now, we only let the user edit/save channels while the radio is awake - because the service
             // doesn't cache radioconfig writes.
-            val connected = model.isConnected.value == MeshService.ConnectionState.CONNECTED
             binding.editableCheckbox.isEnabled = connected
 
             binding.qrView.setImageBitmap(channels.getChannelQR())
@@ -143,11 +148,48 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
     }
 
+    /// Send new channel settings to the device
+    private fun installSettings(newChannel: ChannelProtos.ChannelSettings) {
+        val newSet =
+            ChannelSet(AppOnlyProtos.ChannelSet.newBuilder().addSettings(newChannel).build())
+        // Try to change the radio, if it fails, tell the user why and throw away their redits
+        try {
+            model.setChannels(newSet)
+            // Since we are writing to radioconfig, that will trigger the rest of the GUI update (QR code etc)
+        } catch (ex: RemoteException) {
+            errormsg("ignoring channel problem", ex)
+
+            setGUIfromModel() // Throw away user edits
+
+            // Tell the user to try again
+            Snackbar.make(
+                binding.editableCheckbox,
+                R.string.radio_sleeping,
+                Snackbar.LENGTH_SHORT
+            ).show()
+        }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.channelNameEdit.on(EditorInfo.IME_ACTION_DONE) {
             requireActivity().hideKeyboard()
+        }
+
+        binding.resetButton.setOnClickListener { _ ->
+            // User just locked it, we should warn and then apply changes to radio
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.reset_to_defaults)
+                .setMessage(R.string.are_you_shure_change_default)
+                .setNeutralButton(R.string.cancel) { _, _ ->
+                    setGUIfromModel() // throw away any edits
+                }
+                .setPositiveButton(getString(R.string.accept)) { _, _ ->
+                    debug("Switching back to default channel")
+                    installSettings(Channel.defaultChannel.settings)
+                }
+                .show()
         }
 
         // Note: Do not use setOnCheckedChanged here because we don't want to be called when we programmatically disable editing
@@ -178,41 +220,26 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                                     ignoreCase = true
                                 )
                             ) {
+                                // Install a new customized channel
+
                                 debug("ASSIGNING NEW AES256 KEY")
                                 val random = SecureRandom()
                                 val bytes = ByteArray(32)
                                 random.nextBytes(bytes)
                                 newSettings.psk = ByteString.copyFrom(bytes)
+
+                                val selectedChannelOptionString =
+                                    binding.filledExposedDropdown.editableText.toString()
+                                val modemConfig = getModemConfig(selectedChannelOptionString)
+
+                                if (modemConfig != ChannelProtos.ChannelSettings.ModemConfig.UNRECOGNIZED)
+                                    newSettings.modemConfig = modemConfig
                             } else {
                                 debug("Switching back to default channel")
                                 newSettings = Channel.defaultChannel.settings.toBuilder()
                             }
 
-                            val selectedChannelOptionString =
-                                binding.filledExposedDropdown.editableText.toString()
-                            val modemConfig = getModemConfig(selectedChannelOptionString)
-
-                            if (modemConfig != ChannelProtos.ChannelSettings.ModemConfig.UNRECOGNIZED)
-                                newSettings.modemConfig = modemConfig
-
-                            val newChannel = newSettings.build()
-                            val newSet = ChannelSet(AppOnlyProtos.ChannelSet.newBuilder().addSettings(newChannel).build())
-                            // Try to change the radio, if it fails, tell the user why and throw away their redits
-                            try {
-                                model.setChannels(newSet)
-                                // Since we are writing to radioconfig, that will trigger the rest of the GUI update (QR code etc)
-                            } catch (ex: RemoteException) {
-                                errormsg("ignoring channel problem", ex)
-
-                                setGUIfromModel() // Throw away user edits
-
-                                // Tell the user to try again
-                                Snackbar.make(
-                                    binding.editableCheckbox,
-                                    R.string.radio_sleeping,
-                                    Snackbar.LENGTH_SHORT
-                                ).show()
-                            }
+                            installSettings(newSettings.build())
                         }
                     }
                     .show()

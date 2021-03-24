@@ -17,10 +17,15 @@ data class Channel(
             0xf0, 0xbc, 0xff, 0xab, 0xcf, 0x4e, 0x69, 0xbf
         )
 
+        private val cleartextPSK = ByteString.EMPTY
+        private val defaultPSK = byteArrayOfInts(1) // a shortstring code to indicate we need our default PSK
+
         // TH=he unsecured channel that devices ship with
         val defaultChannel = Channel(
             ChannelProtos.ChannelSettings.newBuilder()
-                .setModemConfig(ChannelProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128).build()
+                .setModemConfig(ChannelProtos.ChannelSettings.ModemConfig.Bw125Cr48Sf4096)
+                .setPsk(ByteString.copyFrom(defaultPSK))
+                .build()
         )
     }
 
@@ -50,7 +55,7 @@ data class Channel(
             val pskIndex = settings.psk.byteAt(0).toInt()
 
             if (pskIndex == 0)
-                ByteString.EMPTY // Treat as an empty PSK (no encryption)
+                 cleartextPSK
             else {
                 // Treat an index of 1 as the old channelDefaultKey and work up from there
                 val bytes = channelDefaultKey.clone()

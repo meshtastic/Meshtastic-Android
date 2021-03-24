@@ -524,7 +524,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     }
 
     /// Set the correct update button configuration based on current progress
-    private fun refreshUpdateButton() {
+    private fun refreshUpdateButton(enable: Boolean) {
         debug("Reiniting the udpate button")
         val info = model.myNodeInfo.value
         val service = model.meshService
@@ -535,7 +535,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
             val progress = service.updateStatus
 
-            binding.updateFirmwareButton.isEnabled =
+            binding.updateFirmwareButton.isEnabled = enable &&
                 (progress < 0) // if currently doing an upgrade disable button
 
             if (progress >= 0) {
@@ -572,7 +572,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val connected = model.isConnected.value
 
         val isConnected = connected == MeshService.ConnectionState.CONNECTED
-        binding.nodeSettings.visibility = if(isConnected) View.VISIBLE else View.GONE
+        binding.nodeSettings.visibility = if (isConnected) View.VISIBLE else View.GONE
 
         if (connected == MeshService.ConnectionState.DISCONNECTED)
             model.ownerName.value = ""
@@ -582,25 +582,19 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val spinner = binding.regionSpinner
         val unsetIndex = regions.indexOf(RadioConfigProtos.RegionCode.Unset.name)
         spinner.onItemSelectedListener = null
-        if(region != null) {
-            debug("current region is $region")
-            var regionIndex = regions.indexOf(region.name)
-            if(regionIndex == -1) // Not found, probably because the device has a region our app doesn't yet understand.  Punt and say Unset
-                regionIndex = unsetIndex
 
-            // We don't want to be notified of our own changes, so turn off listener while making them
-            spinner.setSelection(regionIndex, false)
-            spinner.onItemSelectedListener = regionSpinnerListener
-            spinner.isEnabled = true
-        }
-        else {
-            warn("region is unset!")
-            spinner.setSelection(unsetIndex, false)
-            spinner.isEnabled = false // leave disabled, because we can't get our region
-        }
+        debug("current region is $region")
+        var regionIndex = regions.indexOf(region.name)
+        if (regionIndex == -1) // Not found, probably because the device has a region our app doesn't yet understand.  Punt and say Unset
+            regionIndex = unsetIndex
+
+        // We don't want to be notified of our own changes, so turn off listener while making them
+        spinner.setSelection(regionIndex, false)
+        spinner.onItemSelectedListener = regionSpinnerListener
+        spinner.isEnabled = true
 
         // If actively connected possibly let the user update firmware
-        refreshUpdateButton()
+        refreshUpdateButton(region != RadioConfigProtos.RegionCode.Unset)
 
         // Update the status string (highest priority messages first)
         val info = model.myNodeInfo.value
@@ -620,7 +614,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
-    private val regionSpinnerListener = object : AdapterView.OnItemSelectedListener{
+    private val regionSpinnerListener = object : AdapterView.OnItemSelectedListener {
         override fun onItemSelected(
             parent: AdapterView<*>,
             view: View,
@@ -652,7 +646,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         // init our region spinner
         val spinner = binding.regionSpinner
-        val regionAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, regions)
+        val regionAdapter =
+            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, regions)
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = regionAdapter
 
@@ -965,7 +960,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private val updateProgressReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            refreshUpdateButton()
+            refreshUpdateButton(true)
         }
     }
 

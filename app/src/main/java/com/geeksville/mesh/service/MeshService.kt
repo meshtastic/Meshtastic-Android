@@ -55,7 +55,7 @@ class MeshService : Service(), Logging {
         /* @Deprecated(message = "Does not filter by port number.  For legacy reasons only broadcast for UNKNOWN_APP, switch to ACTION_RECEIVED")
         const val ACTION_RECEIVED_DATA = "$prefix.RECEIVED_DATA" */
 
-        fun actionReceived(portNum: String) = "$prefix.RECEIVED.$portNum"
+        private fun actionReceived(portNum: String) = "$prefix.RECEIVED.$portNum"
 
         /// generate a RECEIVED action filter string that includes either the portnumber as an int, or preferably a symbolic name from portnums.proto
         fun actionReceived(portNum: Int): String {
@@ -549,7 +549,7 @@ class MeshService : Service(), Logging {
                 setChannel(it)
             }
 
-            channels = asChannels.toTypedArray()
+            channels = fixupChannelList(asChannels).toTypedArray()
         }
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
@@ -946,28 +946,22 @@ class MeshService : Service(), Logging {
     /// If we just changed our nodedb, we might want to do somethings
     private fun onNodeDBChanged() {
         maybeUpdateServiceStatusNotification()
-
-        serviceScope.handledLaunch(Dispatchers.Main) {
-            setupLocationRequest()
-        }
     }
 
-    private var locationRequestInterval: Long = 0;
     private fun setupLocationRequest() {
-        val desiredInterval: Long = if (myNodeInfo?.hasGPS == true) {
-            0L  // no requests when device has GPS
-        } else if (numOnlineNodes < 2) {
-            5 * 60 * 1000L  // send infrequently, device needs these requests to set its clock
+        var desiredInterval = 0L
+
+        if (myNodeInfo?.hasGPS == true)
+            desiredInterval =
+                radioConfig?.preferences?.positionBroadcastSecs?.times(1000L) ?: 5 * 60 * 1000L
+
+        stopLocationRequests()
+        if (desiredInterval != 0L) {
+            debug("desired GPS assistance interval $desiredInterval")
+            startLocationRequests(desiredInterval)
         } else {
-            radioConfig?.preferences?.positionBroadcastSecs?.times(1000L) ?: 5 * 60 * 1000L
-        }
-
-        debug("desired location request $desiredInterval, current $locationRequestInterval")
-
-        if (desiredInterval != locationRequestInterval) {
-            if (locationRequestInterval > 0) stopLocationRequests()
-            if (desiredInterval > 0) startLocationRequests(desiredInterval)
-            locationRequestInterval = desiredInterval
+            debug("No GPS assistance desired, but sending UTC time to mesh")
+            sendPositionScoped()
         }
     }
 
@@ -1315,13 +1309,44 @@ class MeshService : Service(), Logging {
         radioConfig = null
 
         // prefill the channel array with null channels
-        channels = Array(myInfo.maxChannels) {
-            val b = ChannelProtos.Channel.newBuilder()
-            b.index = it
-            b.build()
-        }
+        channels = fixupChannelList(listOf<ChannelProtos.Channel>()).toTypedArray()
     }
 
+    /// scan the channel list and make sure it has one PRIMARY channel and is maxChannels long
+    private fun fixupChannelList(lIn: List<ChannelProtos.Channel>): List<ChannelProtos.Channel> {
+        val mi = myNodeInfo
+        var l = lIn
+        if (mi != null)
+            while (l.size < mi.maxChannels) {
+                val b = ChannelProtos.Channel.newBuilder()
+                b.index = l.size
+                l += b.build()
+            }
+        return l
+    }
+
+
+    private fun setRegionOnDevice() {
+        val curConfigRegion =
+            radioConfig?.preferences?.region ?: RadioConfigProtos.RegionCode.Unset
+
+        if (curConfigRegion.number != curRegionValue && curRegionValue != RadioConfigProtos.RegionCode.Unset_VALUE)
+            if (deviceVersion >= minFirmwareVersion) {
+                info("Telling device to upgrade region")
+
+                // Tell the device to set the new region field (old devices will simply ignore this)
+                radioConfig?.let { currentConfig ->
+                    val newConfig = currentConfig.toBuilder()
+
+                    val newPrefs = currentConfig.preferences.toBuilder()
+                    newPrefs.regionValue = curRegionValue
+                    newConfig.preferences = newPrefs.build()
+
+                    sendRadioConfig(newConfig.build())
+                }
+            } else
+                warn("Device is too old to understand region changes")
+    }
 
     /**
      * If we are updating nodes we might need to use old (fixed by firmware build)
@@ -1356,24 +1381,7 @@ class MeshService : Service(), Logging {
             }
 
             // If nothing was set in our (new style radio preferences, but we now have a valid setting - slam it in)
-            if (curConfigRegion == RadioConfigProtos.RegionCode.Unset && curRegionValue != RadioConfigProtos.RegionCode.Unset_VALUE) {
-                if (deviceVersion >= minFirmwareVersion) {
-                    info("Telling device to upgrade region")
-
-                    // Tell the device to set the new region field (old devices will simply ignore this)
-                    radioConfig?.let { currentConfig ->
-                        val newConfig = currentConfig.toBuilder()
-
-                        val newPrefs = currentConfig.preferences.toBuilder()
-                        newPrefs.regionValue = curRegionValue
-                        newConfig.preferences = newPrefs.build()
-
-                        sendRadioConfig(newConfig.build())
-                    }
-                }
-                else
-                    warn("Device is too old to understand region changes")
-            }
+            setRegionOnDevice()
         }
     }
 
@@ -1388,6 +1396,8 @@ class MeshService : Service(), Logging {
         reportConnection()
 
         updateRegion()
+
+        setupLocationRequest() // start sending location packets if needed
     }
 
     private fun handleConfigComplete(configCompleteId: Int) {
@@ -1466,13 +1476,13 @@ class MeshService : Service(), Logging {
      * Must be called from serviceScope. Use sendPositionScoped() for direct calls.
      */
     private fun sendPosition(
-        lat: Double,
-        lon: Double,
-        alt: Int,
+        lat: Double = 0.0,
+        lon: Double = 0.0,
+        alt: Int = 0,
         destNum: Int = DataPacket.NODENUM_BROADCAST,
         wantResponse: Boolean = false
     ) {
-        debug("Sending our position to=$destNum lat=$lat, lon=$lon, alt=$alt")
+        debug("Sending our position/time to=$destNum lat=$lat, lon=$lon, alt=$alt")
 
         val position = MeshProtos.Position.newBuilder().also {
             it.longitudeI = Position.degI(lon)
@@ -1499,15 +1509,15 @@ class MeshService : Service(), Logging {
     }
 
     private fun sendPositionScoped(
-        lat: Double,
-        lon: Double,
-        alt: Int,
+        lat: Double = 0.0,
+        lon: Double = 0.0,
+        alt: Int = 0,
         destNum: Int = DataPacket.NODENUM_BROADCAST,
         wantResponse: Boolean = false
     ) = serviceScope.handledLaunch {
         try {
             sendPosition(lat, lon, alt, destNum, wantResponse)
-        } catch (ex: RadioNotConnectedException) {
+        } catch (ex: BLEException) {
             warn("Ignoring disconnected radio during gps location update")
         }
     }
@@ -1627,8 +1637,10 @@ class MeshService : Service(), Logging {
         } else {
             debug("Creating firmware update coroutine")
             updateJob = serviceScope.handledLaunch {
-                debug("Starting firmware update coroutine")
-                SoftwareUpdateService.doUpdate(this@MeshService, safe, filename)
+                exceptionReporter {
+                    debug("Starting firmware update coroutine")
+                    SoftwareUpdateService.doUpdate(this@MeshService, safe, filename)
+                }
             }
         }
     }
@@ -1660,7 +1672,7 @@ class MeshService : Service(), Logging {
         offlineSentPackets.add(p)
     }
 
-    val binder = object : IMeshService.Stub() {
+    private val binder = object : IMeshService.Stub() {
 
         override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
             debug("Passing through device change to radio service: ${deviceAddr.anonymize}")
@@ -1684,6 +1696,12 @@ class MeshService : Service(), Logging {
         }
 
         override fun getUpdateStatus(): Int = SoftwareUpdateService.progress
+        override fun getRegion(): Int = curRegionValue
+
+        override fun setRegion(regionCode: Int) = toRemoteExceptions {
+            curRegionValue = regionCode
+            setRegionOnDevice()
+        }
 
         override fun startFirmwareUpdate() = toRemoteExceptions {
             doFirmwareUpdate()
