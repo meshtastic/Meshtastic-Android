@@ -428,7 +428,7 @@ class MeshService : Service(), Logging {
 
     private var radioConfig: RadioConfigProtos.RadioConfig? = null
 
-    private var channels = arrayOf<ChannelProtos.Channel>()
+    private var channels = fixupChannelList(listOf()).toTypedArray()
 
     /// True after we've done our initial node db init
     @Volatile
@@ -781,6 +781,7 @@ class MeshService : Service(), Logging {
                     val mi = myNodeInfo
                     if (mi != null) {
                         val ch = a.getChannelResponse
+                        // add new entries if needed
                         channels[ch.index] = ch
                         debug("Admin: Received channel ${ch.index}")
                         if (ch.index + 1 < mi.maxChannels) {
@@ -1314,14 +1315,14 @@ class MeshService : Service(), Logging {
 
     /// scan the channel list and make sure it has one PRIMARY channel and is maxChannels long
     private fun fixupChannelList(lIn: List<ChannelProtos.Channel>): List<ChannelProtos.Channel> {
-        val mi = myNodeInfo
+        val maxChannels =
+            myNodeInfo?.maxChannels ?: 8 // If we don't have my node info, assume 8 channels
         var l = lIn
-        if (mi != null)
-            while (l.size < mi.maxChannels) {
-                val b = ChannelProtos.Channel.newBuilder()
-                b.index = l.size
-                l += b.build()
-            }
+        while (l.size < maxChannels) {
+            val b = ChannelProtos.Channel.newBuilder()
+            b.index = l.size
+            l += b.build()
+        }
         return l
     }
 
