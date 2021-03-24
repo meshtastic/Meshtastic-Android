@@ -21,6 +21,7 @@ import com.geeksville.mesh.databinding.NodelistFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.util.formatAgo
 import java.net.URLEncoder
+import kotlin.math.roundToInt
 
 
 class UsersFragment : ScreenFragment("Users"), Logging {
@@ -41,6 +42,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         val batteryPctView = itemView.batteryPercentageView
         val lastTime = itemView.lastConnectionView
         val powerIcon = itemView.batteryIcon
+        val signalView = itemView.signalView
     }
 
     private val nodesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
@@ -137,10 +139,22 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             } else {
                 holder.distanceView.visibility = View.INVISIBLE
             }
-
             renderBattery(n.batteryPctLevel, holder)
 
             holder.lastTime.text = formatAgo(n.lastSeen);
+
+            if ((n.num == ourNodeInfo?.num) || (n.snr > 100f)) {
+                holder.signalView.visibility = View.INVISIBLE
+            } else {
+                val text = if (n.rssi < 0) {
+                    "rssi:${n.rssi}  snr:${n.snr.roundToInt()}"
+                } else {
+                    // Older devices do not send rssi. Remove this branch once upgraded past 1.2.1
+                    "snr:${n.snr.roundToInt()}"
+                }
+                holder.signalView.text = text
+                holder.signalView.visibility = View.VISIBLE
+            }
         }
 
         private var nodes = arrayOf<NodeInfo>()
