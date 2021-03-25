@@ -952,17 +952,31 @@ class MeshService : Service(), Logging {
     private fun setupLocationRequest() {
         var desiredInterval = 0L
 
-        if (myNodeInfo?.hasGPS == true)
-            desiredInterval =
-                radioConfig?.preferences?.positionBroadcastSecs?.times(1000L) ?: 5 * 60 * 1000L
-
         stopLocationRequests()
-        if (desiredInterval != 0L) {
-            debug("desired GPS assistance interval $desiredInterval")
-            startLocationRequests(desiredInterval)
-        } else {
-            debug("No GPS assistance desired, but sending UTC time to mesh")
-            sendPositionScoped()
+        val mi = myNodeInfo
+        val prefs = radioConfig?.preferences
+        if (mi != null && prefs != null) {
+            if (!mi.hasGPS) {
+                var broadcastSecs = prefs.positionBroadcastSecs
+
+                desiredInterval = if(broadcastSecs == 0) // unset by device, use default
+                     15 * 60 * 1000
+                else
+                    broadcastSecs * 1000L
+            }
+
+            if (prefs.locationShare == RadioConfigProtos.LocationSharing.LocDisabled) {
+                info("GPS location sharing is disabled")
+                desiredInterval = 0
+            }
+
+            if (desiredInterval != 0L) {
+                info("desired GPS assistance interval $desiredInterval")
+                startLocationRequests(desiredInterval)
+            } else {
+                info("No GPS assistance desired, but sending UTC time to mesh")
+                sendPositionScoped()
+            }
         }
     }
 
