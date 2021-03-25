@@ -76,4 +76,36 @@
     <string name="location_disabled_warning">Musíte zapnúť služby o polohe zariadenia (GPS) v nastaveniach systému Android.</string>
     <string name="modem_config_unrecognized">UNRECOGNIZED</string>
     <string name="rate_dialog_message_en">Táto aplikácia je vyvíjaná hobbystami, našli by ste si chvíľku pre jej hodnotenie? Ak nájdete chyby, proím oznámte ich na našom fóre - meshtastic.discourse.group . Ďakujeme za Vašu podporu!</string>
+    <string name="a_list_of_nodes_in_the_mesh">Zoznam zariadení v mesh sieti</string>
+    <string name="text_messages">Textové správy</string>
+    <string name="channel_invalid">URL tohoto kanála nie je platá a nemôže byť použitá</string>
+    <string name="debug_panel">Debug okno</string>
+    <string name="debug_last_messages">500 posledných správ</string>
+    <string name="clear_last_messages">Zmazať</string>
+    <string name="updating_firmware">Aktualizácia firmvéru, môže to trvať do 8 minút...</string>
+    <string name="update_successful">Aktualizácia úspešná</string>
+    <string name="update_failed">Aktualizácia zlyhala</string>
+    <string name="message_reception_time">čas prijatia správy</string>
+    <string name="message_reception_state">stav prijatia správy</string>
+    <string name="message_delivery_status">stav doručenia správy</string>
+    <string name="broadcast_position_secs">Interval rozosielania pozície (v sekundách)</string>
+    <string name="ls_sleep_secs">Interval uspávania zariadenia (v sekundách)</string>
+    <string name="meshtastic_messages_notifications">Upozornenia na správy</string>
+    <string name="broadcast_period_too_small">Najkratší interval rozosielania pre tento kanál je %d</string>
+    <string name="protocol_stress_test">Stres test protokolu</string>
+    <string name="advanced_settings">Rozšírené nastavenia</string>
+    <string name="firmware_too_old">Nutná aktualizácia formvéru</string>
+    <string name="okay">Ok</string>
+    <string name="must_set_region">Musíte nastaviť región!</string>
+    <string name="region">Región</string>
+    <string name="sample_coords">48.14816 17.10674</string>
+    <string name="save_messages">Ulož spávy ako CSV súbor</string>
+    <string name="set_channel_options">Nastaviť kanál</string>
+    <string name="reset">Resetovať</string>
+    <string name="reset_to_defaults">Resetovať na základné (default) nastavenia</string>
+    <string name="apply">Použiť</string>
+    <string name="are_you_shure_change_default">Ste si istý, že chcete preladiť na základný (default) kanál?</string>
+    <string name="cant_change_no_radio">Nie je možné zmeniť kanál, pretože vysielač ešte nie je pripojený. Skúste to neskôr.</string>
+    <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Prosím choďte na panel nastavení a zvoľte možnosť \"Aktualizácia firmvéru\". Viac informácií nájdete na <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">našom sprievodcovi inštaláciou firmvéru</a> na Github-e.</string>
+    <string name="min_firmware_version">0.1.01</string>
 </resources>
