@@ -70,7 +70,7 @@ class MeshService : Service(), Logging {
         const val ACTION_MESSAGE_STATUS = "$prefix.MESSAGE_STATUS"
 
         open class NodeNotFoundException(reason: String) : Exception(reason)
-        class InvalidNodeIdException() : NodeNotFoundException("Invalid NodeId")
+        class InvalidNodeIdException : NodeNotFoundException("Invalid NodeId")
         class NodeNumNotFoundException(id: Int) : NodeNotFoundException("NodeNum not found $id")
         class IdNotFoundException(id: String) : NodeNotFoundException("ID not found $id")
 
@@ -78,7 +78,7 @@ class MeshService : Service(), Logging {
             RadioNotConnectedException(message)
 
         /** We treat software update as similar to loss of comms to the regular bluetooth service (so things like sendPosition for background GPS ignores the problem */
-        class IsUpdatingException() :
+        class IsUpdatingException :
             RadioNotConnectedException("Operation prohibited during firmware update")
 
         /**
@@ -132,7 +132,7 @@ class MeshService : Service(), Logging {
     }
 
     private val locationCallback = MeshServiceLocationCallback(
-        ::sendPositionScoped,
+        ::perhapsSendPosition,
         onSendPositionFailed = { onConnectionChanged(ConnectionState.DEVICE_SLEEP) },
         getNodeNum = { myNodeNum }
     )
@@ -160,6 +160,36 @@ class MeshService : Service(), Logging {
         ).show()
     }
 
+    private var locationIntervalMsec = 0L
+
+    /**
+     * a periodic callback that perhaps send our position to other nodes.
+     * We first check to see if our local device has already sent a position and if so, we punt until the next check.
+     * This allows us to only 'fill in' with GPS positions when the local device happens to have no good GPS sats.
+     */
+    private fun perhapsSendPosition(
+        lat: Double = 0.0,
+        lon: Double = 0.0,
+        alt: Int = 0,
+        destNum: Int = DataPacket.NODENUM_BROADCAST,
+        wantResponse: Boolean = false
+    ) {
+        // This operation can take a while, so instead of staying in the callback (location services) context
+        // do most of the work in my service thread
+        serviceScope.handledLaunch {
+            // if android called us too soon, just ignore
+
+            val myInfo = localNodeInfo
+            val lastSendMsec = (myInfo?.position?.time ?: 0) * 1000L
+            val now = System.currentTimeMillis()
+            if(now - lastSendMsec < locationIntervalMsec)
+                debug("Not sending position - the local node has sent one recently...")
+            else {
+                sendPosition(lat, lon, alt, destNum, wantResponse)
+            }
+        }
+    }
+
     /**
      * start our location requests (if they weren't already running)
      *
@@ -172,6 +202,7 @@ class MeshService : Service(), Logging {
         if (fusedLocationClient == null && isGooglePlayAvailable(this)) {
             GeeksvilleApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
 
+            locationIntervalMsec = requestInterval
             val request = LocationRequest.create().apply {
                 interval = requestInterval
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
@@ -454,6 +485,17 @@ class MeshService : Service(), Logging {
         n
     )
 
+    /**
+     * Return the nodeinfo for the local node, or null if not found
+     */
+    private val localNodeInfo get(): NodeInfo? =
+        try {
+             toNodeInfo(myNodeNum)
+        }
+        catch(ex: Exception) {
+             null
+        }
+
     /** Map a nodenum to the nodeid string, or return null if not present
     If we have a NodeInfo for this ID we prefer to return the string ID inside the user record.
     but some nodes might not have a user record at all (because not yet received), in that case, we return
@@ -716,7 +758,10 @@ class MeshService : Service(), Logging {
 
                     // Handle new style position info
                     Portnums.PortNum.POSITION_APP_VALUE -> {
-                        val u = MeshProtos.Position.parseFrom(data.payload)
+                        var u = MeshProtos.Position.parseFrom(data.payload)
+                        // position updates from mesh usually don't include times.  So promote rx time
+                        if(u.time == 0 && packet.rxTime != 0)
+                            u = u.toBuilder().setTime(packet.rxTime).build()
                         debug("position_app ${packet.from} ${u.toOneLineString()}")
                         handleReceivedPosition(packet.from, u, dataPacket.time)
                     }
@@ -835,7 +880,7 @@ class MeshService : Service(), Logging {
             debug("Ignoring nop position update for the local node")
         else
             updateNodeInfo(fromNum) {
-                debug("update ${it.user?.longName} position with ${p.toOneLineString()}")
+                debug("update position: ${it.user?.longName} with ${p.toOneLineString()}")
                 it.position = Position(p, (defaultTime / 1000L).toInt())
             }
     }
@@ -976,7 +1021,7 @@ class MeshService : Service(), Logging {
                 startLocationRequests(desiredInterval)
             } else {
                 info("No GPS assistance desired, but sending UTC time to mesh")
-                sendPositionScoped()
+                sendPosition()
             }
         }
     }
@@ -1089,7 +1134,7 @@ class MeshService : Service(), Logging {
                 // claim we have a valid connection still
                 connectionState = ConnectionState.DEVICE_SLEEP
                 startDeviceSleep()
-                throw ex; // Important to rethrow so that we don't tell the app all is well
+                throw ex // Important to rethrow so that we don't tell the app all is well
             }
         }
 
@@ -1498,41 +1543,31 @@ class MeshService : Service(), Logging {
         destNum: Int = DataPacket.NODENUM_BROADCAST,
         wantResponse: Boolean = false
     ) {
-        debug("Sending our position/time to=$destNum lat=$lat, lon=$lon, alt=$alt")
-
-        val position = MeshProtos.Position.newBuilder().also {
-            it.longitudeI = Position.degI(lon)
-            it.latitudeI = Position.degI(lat)
-
-            it.altitude = alt
-            it.time = currentSecond() // Include our current timestamp
-        }.build()
-
-        // Also update our own map for our nodenum, by handling the packet just like packets from other users
-        handleReceivedPosition(myNodeInfo!!.myNodeNum, position)
-
-        val fullPacket =
-            newMeshPacketTo(destNum).buildMeshPacket(priority = MeshProtos.MeshPacket.Priority.BACKGROUND) {
-                // Use the new position as data format
-                portnumValue = Portnums.PortNum.POSITION_APP_VALUE
-                payload = position.toByteString()
-
-                this.wantResponse = wantResponse
-            }
-
-        // send the packet into the mesh
-        sendToRadio(fullPacket)
-    }
-
-    private fun sendPositionScoped(
-        lat: Double = 0.0,
-        lon: Double = 0.0,
-        alt: Int = 0,
-        destNum: Int = DataPacket.NODENUM_BROADCAST,
-        wantResponse: Boolean = false
-    ) = serviceScope.handledLaunch {
         try {
-            sendPosition(lat, lon, alt, destNum, wantResponse)
+            debug("Sending our position/time to=$destNum lat=$lat, lon=$lon, alt=$alt")
+
+            val position = MeshProtos.Position.newBuilder().also {
+                it.longitudeI = Position.degI(lon)
+                it.latitudeI = Position.degI(lat)
+
+                it.altitude = alt
+                it.time = currentSecond() // Include our current timestamp
+            }.build()
+
+            // Also update our own map for our nodenum, by handling the packet just like packets from other users
+            handleReceivedPosition(myNodeInfo!!.myNodeNum, position)
+
+            val fullPacket =
+                newMeshPacketTo(destNum).buildMeshPacket(priority = MeshProtos.MeshPacket.Priority.BACKGROUND) {
+                    // Use the new position as data format
+                    portnumValue = Portnums.PortNum.POSITION_APP_VALUE
+                    payload = position.toByteString()
+
+                    this.wantResponse = wantResponse
+                }
+
+            // send the packet into the mesh
+            sendToRadio(fullPacket)
         } catch (ex: BLEException) {
             warn("Ignoring disconnected radio during gps location update")
         }
@@ -1565,9 +1600,7 @@ class MeshService : Service(), Logging {
         val myNode = myNodeInfo
         if (myNode != null) {
 
-
-            val myInfo = toNodeInfo(myNode.myNodeNum)
-            if (longName == myInfo.user?.longName && shortName == myInfo.user?.shortName)
+            if (longName == localNodeInfo?.user?.longName && shortName == localNodeInfo?.user?.shortName)
                 debug("Ignoring nop owner change")
             else {
                 debug("SetOwner $myId : ${longName.anonymize} : $shortName")

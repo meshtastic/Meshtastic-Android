@@ -43,7 +43,7 @@ data class Position(
     val latitude: Double,
     val longitude: Double,
     val altitude: Int,
-    val time: Int = currentTime(), // default to current time in secs
+    val time: Int = currentTime(), // default to current time in secs (NOT MILLISECONDS!)
     val batteryPctLevel: Int = 0
 ) : Parcelable {
     companion object {
