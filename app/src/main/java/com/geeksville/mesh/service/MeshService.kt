@@ -828,10 +828,16 @@ class MeshService : Service(), Logging {
         p: MeshProtos.Position,
         defaultTime: Long = System.currentTimeMillis()
     ) {
-        updateNodeInfo(fromNum) {
-            debug("update ${it.user?.longName} with ${p.toOneLineString()}")
-            it.position = Position(p)
-        }
+        // Nodes periodically send out position updates, but those updates might not contain a lat & lon (because no GPS lock)
+        // We like to look at the local node to see if it has been sending out valid lat/lon, so for the LOCAL node (only)
+        // we don't record these nop position updates
+        if (myNodeNum == fromNum && p.latitudeI == 0 && p.longitudeI == 0)
+            debug("Ignoring nop position update for the local node")
+        else
+            updateNodeInfo(fromNum) {
+                debug("update ${it.user?.longName} position with ${p.toOneLineString()}")
+                it.position = Position(p, (defaultTime / 1000L).toInt())
+            }
     }
 
     /// If packets arrive before we have our node DB, we delay parsing them until the DB is ready
@@ -918,8 +924,6 @@ class MeshService : Service(), Logging {
                 it.lastHeard = currentSecond()
             }
 
-            // if (p.hasPosition()) handleReceivedPosition(fromNum, p.position, rxTime)
-
             // If the rxTime was not set by the device (because device software was old), guess at a time
             val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
             updateNodeInfo(fromNum) {
@@ -955,14 +959,12 @@ class MeshService : Service(), Logging {
         val mi = myNodeInfo
         val prefs = radioConfig?.preferences
         if (mi != null && prefs != null) {
-            if (!mi.hasGPS) {
-                var broadcastSecs = prefs.positionBroadcastSecs
+            var broadcastSecs = prefs.positionBroadcastSecs
 
-                desiredInterval = if (broadcastSecs == 0) // unset by device, use default
-                    15 * 60 * 1000
-                else
-                    broadcastSecs * 1000L
-            }
+            desiredInterval = if (broadcastSecs == 0) // unset by device, use default
+                15 * 60 * 1000
+            else
+                broadcastSecs * 1000L
 
             if (prefs.locationShare == RadioConfigProtos.LocationSharing.LocDisabled) {
                 info("GPS location sharing is disabled")
