@@ -542,9 +542,9 @@ class MeshService : Service(), Logging {
     }
 
     /// A helper function that makes it easy to update node info objects
-    private fun updateNodeInfo(nodeNum: Int, updatefn: (NodeInfo) -> Unit) {
+    private fun updateNodeInfo(nodeNum: Int, withBroadcast: Boolean = true, updateFn: (NodeInfo) -> Unit) {
         val info = getOrCreateNodeInfo(nodeNum)
-        updatefn(info)
+        updateFn(info)
 
         // This might have been the first time we know an ID for this node, so also update the by ID map
         val userId = info.user?.id.orEmpty()
@@ -552,7 +552,8 @@ class MeshService : Service(), Logging {
             nodeDBbyID[userId] = info
 
         // parcelable is busted
-        serviceBroadcasts.broadcastNodeChange(info)
+        if(withBroadcast)
+            serviceBroadcasts.broadcastNodeChange(info)
     }
 
     /// My node num
@@ -965,13 +966,17 @@ class MeshService : Service(), Logging {
             // Update last seen for the node that sent the packet, but also for _our node_ because anytime a packet passes
             // through our node on the way to the phone that means that local node is also alive in the mesh
 
-            updateNodeInfo(myNodeNum) {
+            val isOtherNode = myNodeNum != fromNum
+            updateNodeInfo(myNodeNum, withBroadcast = isOtherNode) {
                 it.lastHeard = currentSecond()
             }
 
-            // If the rxTime was not set by the device (because device software was old), guess at a time
-            val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
-            updateNodeInfo(fromNum) {
+            // Do not generate redundant broadcasts of node change for this bookkeeping updateNodeInfo call
+            // because apps really only care about important updates of node state - which handledReceivedData will give them
+            updateNodeInfo(fromNum, withBroadcast = false) {
+                // If the rxTime was not set by the device (because device software was old), guess at a time
+                val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
+
                 // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
                 updateNodeInfoTime(it, rxTime)
                 it.snr = packet.rxSnr
