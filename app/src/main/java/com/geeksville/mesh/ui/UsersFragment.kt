@@ -141,7 +141,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             }
             renderBattery(n.batteryPctLevel, holder)
 
-            holder.lastTime.text = formatAgo(n.lastSeen);
+            holder.lastTime.text = formatAgo(n.lastHeard);
 
             if ((n.num == ourNodeInfo?.num) || (n.snr > 100f)) {
                 holder.signalView.visibility = View.INVISIBLE

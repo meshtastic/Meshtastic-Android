@@ -831,7 +831,6 @@ class MeshService : Service(), Logging {
         updateNodeInfo(fromNum) {
             debug("update ${it.user?.longName} with ${p.toOneLineString()}")
             it.position = Position(p)
-            updateNodeInfoTime(it, (defaultTime / 1000).toInt())
         }
     }
 
@@ -959,8 +958,8 @@ class MeshService : Service(), Logging {
             if (!mi.hasGPS) {
                 var broadcastSecs = prefs.positionBroadcastSecs
 
-                desiredInterval = if(broadcastSecs == 0) // unset by device, use default
-                     15 * 60 * 1000
+                desiredInterval = if (broadcastSecs == 0) // unset by device, use default
+                    15 * 60 * 1000
                 else
                     broadcastSecs * 1000L
             }
@@ -1821,6 +1820,5 @@ class MeshService : Service(), Logging {
 }
 
 fun updateNodeInfoTime(it: NodeInfo, rxTime: Int) {
-    if (it.position?.time == null || it.position?.time!! < rxTime)
-        it.position = it.position?.copy(time = rxTime)
+    it.lastHeard = rxTime
 }

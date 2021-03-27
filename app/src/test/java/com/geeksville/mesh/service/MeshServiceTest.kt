@@ -17,15 +17,7 @@ class MeshServiceTest {
 
         val newerTime = 20
         updateNodeInfoTime(nodeInfo, newerTime)
-        Assert.assertEquals(newerTime, nodeInfo.position?.time)
-    }
-
-    @Test
-    fun givenNodeInfo_whenUpdatingWithOldTime_thenPositionTimeIsNotUpdated() {
-        val olderTime = 5
-        val timeBeforeTryingToUpdate = nodeInfo.position?.time
-        updateNodeInfoTime(nodeInfo, olderTime)
-        Assert.assertEquals(timeBeforeTryingToUpdate, nodeInfo.position?.time)
+        Assert.assertEquals(newerTime, nodeInfo.lastHeard)
     }
 }
 
