@@ -273,24 +273,31 @@ class MeshService : Service(), Logging {
         get() = (if (connectionState == ConnectionState.CONNECTED) radio.serviceP else null)
             ?: throw RadioNotConnectedException()
 
-    /// Send a command/packet to our radio.  But cope with the possiblity that we might start up
-    /// before we are fully bound to the RadioInterfaceService
-    private fun sendToRadio(p: ToRadio.Builder) {
+    /** Send a command/packet to our radio.  But cope with the possiblity that we might start up
+    before we are fully bound to the RadioInterfaceService
+    @param requireConnected set to false if you are okay with using a partially connected device (i.e. during startup)
+     */
+    private fun sendToRadio(p: ToRadio.Builder, requireConnected: Boolean = true) {
         val b = p.build().toByteArray()
 
         if (SoftwareUpdateService.isUpdating)
             throw IsUpdatingException()
 
-        connectedRadio.sendToRadio(b)
+        if (requireConnected)
+            connectedRadio.sendToRadio(b)
+        else {
+            val s = radio.serviceP ?: throw RadioNotConnectedException()
+            s.sendToRadio(b)
+        }
     }
 
     /**
      * Send a mesh packet to the radio, if the radio is not currently connected this function will throw NotConnectedException
      */
-    private fun sendToRadio(packet: MeshPacket) {
+    private fun sendToRadio(packet: MeshPacket, requireConnected: Boolean = true) {
         sendToRadio(ToRadio.newBuilder().apply {
             this.packet = packet
-        })
+        }, requireConnected)
     }
 
     private fun updateMessageNotification(message: DataPacket) =
@@ -1510,13 +1517,13 @@ class MeshService : Service(), Logging {
     private fun requestRadioConfig() {
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
             getRadioRequest = true
-        })
+        }, requireConnected = false)
     }
 
     private fun requestChannel(channelIndex: Int) {
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
             getChannelRequest = channelIndex + 1
-        })
+        }, requireConnected = false)
     }
 
     private fun setChannel(channel: ChannelProtos.Channel) {
