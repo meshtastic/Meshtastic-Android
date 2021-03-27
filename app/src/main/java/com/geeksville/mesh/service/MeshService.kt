@@ -182,7 +182,7 @@ class MeshService : Service(), Logging {
             val myInfo = localNodeInfo
             val lastSendMsec = (myInfo?.position?.time ?: 0) * 1000L
             val now = System.currentTimeMillis()
-            if(now - lastSendMsec < locationIntervalMsec)
+            if (now - lastSendMsec < locationIntervalMsec)
                 debug("Not sending position - the local node has sent one recently...")
             else {
                 sendPosition(lat, lon, alt, destNum, wantResponse)
@@ -488,13 +488,13 @@ class MeshService : Service(), Logging {
     /**
      * Return the nodeinfo for the local node, or null if not found
      */
-    private val localNodeInfo get(): NodeInfo? =
-        try {
-             toNodeInfo(myNodeNum)
-        }
-        catch(ex: Exception) {
-             null
-        }
+    private val localNodeInfo
+        get(): NodeInfo? =
+            try {
+                toNodeInfo(myNodeNum)
+            } catch (ex: Exception) {
+                null
+            }
 
     /** Map a nodenum to the nodeid string, or return null if not present
     If we have a NodeInfo for this ID we prefer to return the string ID inside the user record.
@@ -542,7 +542,11 @@ class MeshService : Service(), Logging {
     }
 
     /// A helper function that makes it easy to update node info objects
-    private fun updateNodeInfo(nodeNum: Int, withBroadcast: Boolean = true, updateFn: (NodeInfo) -> Unit) {
+    private fun updateNodeInfo(
+        nodeNum: Int,
+        withBroadcast: Boolean = true,
+        updateFn: (NodeInfo) -> Unit
+    ) {
         val info = getOrCreateNodeInfo(nodeNum)
         updateFn(info)
 
@@ -552,7 +556,7 @@ class MeshService : Service(), Logging {
             nodeDBbyID[userId] = info
 
         // parcelable is busted
-        if(withBroadcast)
+        if (withBroadcast)
             serviceBroadcasts.broadcastNodeChange(info)
     }
 
@@ -761,7 +765,7 @@ class MeshService : Service(), Logging {
                     Portnums.PortNum.POSITION_APP_VALUE -> {
                         var u = MeshProtos.Position.parseFrom(data.payload)
                         // position updates from mesh usually don't include times.  So promote rx time
-                        if(u.time == 0 && packet.rxTime != 0)
+                        if (u.time == 0 && packet.rxTime != 0)
                             u = u.toBuilder().setTime(packet.rxTime).build()
                         debug("position_app ${packet.from} ${u.toOneLineString()}")
                         handleReceivedPosition(packet.from, u, dataPacket.time)
