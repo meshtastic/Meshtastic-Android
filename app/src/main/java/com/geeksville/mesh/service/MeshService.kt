@@ -1007,16 +1007,14 @@ class MeshService : Service(), Logging {
     }
 
     private fun setupLocationRequest() {
-        var desiredInterval = 0L
-
         stopLocationRequests()
         val mi = myNodeInfo
         val prefs = radioConfig?.preferences
         if (mi != null && prefs != null) {
             var broadcastSecs = prefs.positionBroadcastSecs
 
-            desiredInterval = if (broadcastSecs == 0) // unset by device, use default
-                15 * 60 * 1000
+            var desiredInterval = if (broadcastSecs == 0) // unset by device, use default
+                15 * 60 * 1000L
             else
                 broadcastSecs * 1000L
 
