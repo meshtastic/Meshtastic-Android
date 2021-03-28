@@ -604,7 +604,7 @@ class MeshService : Service(), Logging {
                 setChannel(it)
             }
 
-            channels = fixupChannelList(asChannels).toTypedArray()
+            channels = fixupChannelList(asChannels)
         }
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
@@ -1573,7 +1573,7 @@ class MeshService : Service(), Logging {
                 }.build()
 
                 // Also update our own map for our nodenum, by handling the packet just like packets from other users
-                handleReceivedPosition(mmi.myNodeNum, position)
+                handleReceivedPosition(mi.myNodeNum, position)
 
                 val fullPacket =
                     newMeshPacketTo(destNum).buildMeshPacket(priority = MeshProtos.MeshPacket.Priority.BACKGROUND) {
