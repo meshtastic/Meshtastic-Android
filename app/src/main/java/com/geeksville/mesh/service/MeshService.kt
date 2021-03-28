@@ -1558,30 +1558,33 @@ class MeshService : Service(), Logging {
         wantResponse: Boolean = false
     ) {
         try {
-            debug("Sending our position/time to=$destNum lat=$lat, lon=$lon, alt=$alt")
+            val mi = myNodeInfo
+            if(mi != null) {
+                debug("Sending our position/time to=$destNum lat=$lat, lon=$lon, alt=$alt")
 
-            val position = MeshProtos.Position.newBuilder().also {
-                it.longitudeI = Position.degI(lon)
-                it.latitudeI = Position.degI(lat)
+                val position = MeshProtos.Position.newBuilder().also {
+                    it.longitudeI = Position.degI(lon)
+                    it.latitudeI = Position.degI(lat)
 
-                it.altitude = alt
-                it.time = currentSecond() // Include our current timestamp
-            }.build()
+                    it.altitude = alt
+                    it.time = currentSecond() // Include our current timestamp
+                }.build()
 
-            // Also update our own map for our nodenum, by handling the packet just like packets from other users
-            handleReceivedPosition(myNodeInfo!!.myNodeNum, position)
+                // Also update our own map for our nodenum, by handling the packet just like packets from other users
+                handleReceivedPosition(mmi.myNodeNum, position)
 
-            val fullPacket =
-                newMeshPacketTo(destNum).buildMeshPacket(priority = MeshProtos.MeshPacket.Priority.BACKGROUND) {
-                    // Use the new position as data format
-                    portnumValue = Portnums.PortNum.POSITION_APP_VALUE
-                    payload = position.toByteString()
+                val fullPacket =
+                    newMeshPacketTo(destNum).buildMeshPacket(priority = MeshProtos.MeshPacket.Priority.BACKGROUND) {
+                        // Use the new position as data format
+                        portnumValue = Portnums.PortNum.POSITION_APP_VALUE
+                        payload = position.toByteString()
 
-                    this.wantResponse = wantResponse
-                }
+                        this.wantResponse = wantResponse
+                    }
 
-            // send the packet into the mesh
-            sendToRadio(fullPacket)
+                // send the packet into the mesh
+                sendToRadio(fullPacket)
+            }
         } catch (ex: BLEException) {
             warn("Ignoring disconnected radio during gps location update")
         }
