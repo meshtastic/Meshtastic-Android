@@ -38,6 +38,7 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import java.util.*
 import kotlin.math.absoluteValue
+import kotlin.math.max
 
 /**
  * Handles all the communication with android apps.  Also keeps an internal model
@@ -466,7 +467,7 @@ class MeshService : Service(), Logging {
 
     private var radioConfig: RadioConfigProtos.RadioConfig? = null
 
-    private var channels = fixupChannelList(listOf()).toTypedArray()
+    private var channels = fixupChannelList(listOf())
 
     /// True after we've done our initial node db init
     @Volatile
@@ -1384,20 +1385,21 @@ class MeshService : Service(), Logging {
         radioConfig = null
 
         // prefill the channel array with null channels
-        channels = fixupChannelList(listOf<ChannelProtos.Channel>()).toTypedArray()
+        channels = fixupChannelList(listOf<ChannelProtos.Channel>())
     }
 
     /// scan the channel list and make sure it has one PRIMARY channel and is maxChannels long
-    private fun fixupChannelList(lIn: List<ChannelProtos.Channel>): List<ChannelProtos.Channel> {
+    private fun fixupChannelList(lIn: List<ChannelProtos.Channel>): Array<ChannelProtos.Channel> {
+        // When updating old firmware, we will briefly be told that there is zero channels
         val maxChannels =
-            myNodeInfo?.maxChannels ?: 8 // If we don't have my node info, assume 8 channels
+           max(myNodeInfo?.maxChannels ?: 8, 1) // If we don't have my node info, assume 8 channels
         var l = lIn
         while (l.size < maxChannels) {
             val b = ChannelProtos.Channel.newBuilder()
             b.index = l.size
             l += b.build()
         }
-        return l
+        return l.toTypedArray()
     }
 
 
