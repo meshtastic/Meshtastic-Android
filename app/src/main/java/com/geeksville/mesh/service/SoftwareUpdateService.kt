@@ -211,18 +211,18 @@ class SoftwareUpdateService : JobIntentService(), Logging {
          * @param isAppload if false, we don't report failure indications (because we consider spiffs non critical for now).  But do report to analytics
          */
         fun sendProgress(context: Context, p: Int, isAppload: Boolean) {
-            if(!isAppload && p < 0)
-                reportError("Error while writing spiffs $progress") // See if this is happening in the wild
+            if (!isAppload && p < 0)
+                errormsg("Error while writing spiffs $p") // treat errors writing spiffs as non fatal for now (user partition probably missized and most people don't need it)
+            else
+                if (progress != p) {
+                    progress = p
 
-            if(progress != p && (p >= 0 || isAppload)) {
-                progress = p
-
-                val intent = Intent(ACTION_UPDATE_PROGRESS).putExtra(
-                    EXTRA_PROGRESS,
-                    p
-                )
-                context.sendBroadcast(intent)
-            }
+                    val intent = Intent(ACTION_UPDATE_PROGRESS).putExtra(
+                        EXTRA_PROGRESS,
+                        p
+                    )
+                    context.sendBroadcast(intent)
+                }
         }
 
         /** Return true if we thing the firmwarte shoulde be updated
@@ -293,12 +293,10 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             // we must attempt spiffs first, because if we update the appload the device will reboot afterwards
             try {
                 assets.spiffs?.let { doUpdate(context, sync, it, FLASH_REGION_SPIFFS) }
-            }
-            catch(_: BLECharacteristicNotFoundException) {
+            } catch (_: BLECharacteristicNotFoundException) {
                 // If we can't update spiffs (because not supported by target), do not fail
                 errormsg("Ignoring failure to update spiffs on old appload")
-            }
-            catch(_: DeviceRejectedException) {
+            } catch (_: DeviceRejectedException) {
                 // the spi filesystem of this device is malformatted
                 reportError("Device rejected invalid spiffs partition")
             }
@@ -315,9 +313,14 @@ class SoftwareUpdateService : JobIntentService(), Logging {
          * A public function so that if you have your own SafeBluetooth connection already open
          * you can use it for the software update.
          */
-        private fun doUpdate(context: Context, sync: SafeBluetooth, assetName: String, flashRegion: Int = FLASH_REGION_APPLOAD) {
+        private fun doUpdate(
+            context: Context,
+            sync: SafeBluetooth,
+            assetName: String,
+            flashRegion: Int = FLASH_REGION_APPLOAD
+        ) {
             val isAppload = flashRegion == FLASH_REGION_APPLOAD
-            
+
             try {
                 val g = sync.gatt!!
                 val service = g.services.find { it.uuid == SW_UPDATE_UUID }
@@ -332,7 +335,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
 
                 info("Starting firmware update for $assetName, flash region $flashRegion")
 
-                sendProgress(context,0, isAppload)
+                sendProgress(context, 0, isAppload)
                 val totalSizeDesc = getCharacteristic(SW_UPDATE_TOTALSIZE_CHARACTER)
                 val dataDesc = getCharacteristic(SW_UPDATE_DATA_CHARACTER)
                 val crc32Desc = getCharacteristic(SW_UPDATE_CRC32_CHARACTER)
@@ -347,10 +350,9 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                         updateRegionDesc,
                         toNetworkByteArray(flashRegion, BluetoothGattCharacteristic.FORMAT_UINT8)
                     )
-                }
-                catch(ex: BLECharacteristicNotFoundException) {
+                } catch (ex: BLECharacteristicNotFoundException) {
                     errormsg("Can't set flash programming region (old appload?")
-                    if(flashRegion != FLASH_REGION_APPLOAD) {
+                    if (flashRegion != FLASH_REGION_APPLOAD) {
                         throw ex
                     }
                     warn("Ignoring setting appload flashRegion")
@@ -378,10 +380,14 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                     while (firmwareNumSent < firmwareSize) {
                         // If we are doing the spiffs partition, we limit progress to a max of 50%, so that the user doesn't think we are done
                         // yet
-                        val maxProgress = if(flashRegion != FLASH_REGION_APPLOAD)
+                        val maxProgress = if (flashRegion != FLASH_REGION_APPLOAD)
                             50 else 100
-                        sendProgress(context, firmwareNumSent * maxProgress / firmwareSize, isAppload)
-                        if(progress != oldProgress) {
+                        sendProgress(
+                            context,
+                            firmwareNumSent * maxProgress / firmwareSize,
+                            isAppload
+                        )
+                        if (progress != oldProgress) {
                             debug("sending block ${progress}%")
                             oldProgress = progress;
                         }
