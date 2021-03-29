@@ -105,8 +105,6 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
             return bluetoothManager.adapter
         }
 
-        fun toInterfaceName(deviceName: String) = "x$deviceName"
-
         /** Return true if this address is still acceptable. For BLE that means, still bonded */
         override fun addressValid(context: Context, rest: String): Boolean {
             val allPaired =

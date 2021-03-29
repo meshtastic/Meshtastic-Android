@@ -38,10 +38,7 @@ import com.geeksville.mesh.android.bluetoothManager
 import com.geeksville.mesh.android.usbManager
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.service.BluetoothInterface
-import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.service.RadioInterfaceService
-import com.geeksville.mesh.service.SerialInterface
+import com.geeksville.mesh.service.*
 import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ACTION_UPDATE_PROGRESS
 import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressNotStarted
 import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressSuccess
@@ -275,10 +272,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         debug("BTScan component active")
         selectedAddress = RadioInterfaceService.getDeviceAddress(context)
 
-        return if (bluetoothAdapter == null || RadioInterfaceService.isMockInterfaceAvailable(
-                context
-            )
-        ) {
+        return if (bluetoothAdapter == null || MockInterface.addressValid(context, "")) {
             warn("No bluetooth adapter.  Running under emulation?")
 
             val testnodes = listOf(
@@ -790,7 +784,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // get rid of the warning text once at least one device is paired.
         // If we are running on an emulator, always leave this message showing so we can test the worst case layout
         binding.warningNotPaired.visibility =
-            if (hasBonded && !RadioInterfaceService.isMockInterfaceAvailable(requireContext())) View.GONE else View.VISIBLE
+            if (hasBonded && !MockInterface.addressValid(requireContext(), ""))
+                View.GONE
+            else
+                View.VISIBLE
     }
 
     /// Setup the GUI to do a classic (pre SDK 26 BLE scan)

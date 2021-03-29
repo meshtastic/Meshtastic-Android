@@ -1,5 +1,8 @@
 package com.geeksville.mesh.service
 
+import android.content.Context
+import com.geeksville.android.BuildUtils
+import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.mesh.*
 import com.geeksville.mesh.model.getInitials
@@ -13,6 +16,9 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
             service: RadioInterfaceService,
             rest: String
         ): IRadioInterface = MockInterface(service)
+
+        override fun addressValid(context: Context, rest: String): Boolean =
+            BuildUtils.isEmulator || ((context.applicationContext as GeeksvilleApplication).isInTestLab)
 
         init {
             registerFactory()
