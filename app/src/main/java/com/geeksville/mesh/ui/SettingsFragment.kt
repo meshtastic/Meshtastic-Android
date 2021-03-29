@@ -276,7 +276,8 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
             warn("No bluetooth adapter.  Running under emulation?")
 
             val testnodes = listOf(
-                DeviceListEntry("Simulated interface", "m", true),
+                DeviceListEntry("Included simulator", "m", true),
+                DeviceListEntry("Complete simulator", "t10.0.2.2", true),
                 DeviceListEntry(context.getString(R.string.none), "n", true)
                 /* Don't populate fake bluetooth devices, because we don't want testlab inside of google
                 to try and use them.

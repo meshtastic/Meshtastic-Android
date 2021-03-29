@@ -54,23 +54,24 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
     override fun connect() {
         //here you must put your computer's IP address.
         //here you must put your computer's IP address.
-        val addr = InetAddress.getByName(address)
-
-        debug("TCP connecting to $address")
-
-        //create a socket to make the connection with the server
-
-        //create a socket to make the connection with the server
-        val port = 4403
-        val s = Socket(addr, port)
-        s.tcpNoDelay = true
-        socket = s
-        outStream = BufferedOutputStream(s.getOutputStream())
-        inStream = BufferedInputStream(s.getInputStream())
 
         // No need to keep a reference to this thread - it will exit when we close inStream
         thread(start = true, isDaemon = true, name = "TCP reader") {
             try {
+                val a = InetAddress.getByName(address)
+                debug("TCP connecting to $address")
+
+                //create a socket to make the connection with the server
+                val port = 4403
+                val s = Socket(a, port)
+                s.tcpNoDelay = true
+                socket = s
+                outStream = BufferedOutputStream(s.getOutputStream())
+                inStream = s.getInputStream()
+
+                // Note: we call the super method FROM OUR NEW THREAD
+                super.connect()
+
                 while (true) {
                     val c = inStream.read()
                     if (c == -1)
@@ -84,6 +85,5 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
             }
             debug("Exiting TCP reader")
         }
-        super.connect()
     }
 }

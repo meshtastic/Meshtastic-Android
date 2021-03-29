@@ -51,6 +51,9 @@ class RadioInterfaceService : Service(), Logging {
 
         const val DEVADDR_KEY = "devAddr2" // the new name for devaddr
 
+        /// We keep this var alive so that the following factory objects get created and not stripped during the android build
+        private val factories = arrayOf<InterfaceFactory>(BluetoothInterface, SerialInterface, TCPInterface, MockInterface, NopInterface)
+
         /// This is public only so that SimRadio can bootstrap our message flow
         fun broadcastReceivedFromRadio(context: Context, payload: ByteArray) {
             val intent = Intent(RECEIVE_FROMRADIO_ACTION)
