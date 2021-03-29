@@ -21,7 +21,15 @@ import com.hoho.android.usbserial.util.SerialInputOutputManager
  */
 class SerialInterface(service: RadioInterfaceService, private val address: String) :
     StreamInterface(service), Logging, SerialInputOutputManager.Listener {
-    companion object : Logging {
+    companion object : Logging, InterfaceFactory('s') {
+        override fun createInterface(
+            service: RadioInterfaceService,
+            rest: String
+        ): IRadioInterface = SerialInterface(service, rest)
+
+        init {
+            registerFactory()
+        }
 
         /**
          * according to https://stackoverflow.com/questions/12388914/usb-device-access-pop-up-suppression/15151075#15151075
@@ -41,14 +49,14 @@ class SerialInterface(service: RadioInterfaceService, private val address: Strin
             return drivers
         }
 
-        fun addressValid(context: Context, rest: String): Boolean {
+        override fun addressValid(context: Context, rest: String): Boolean {
             findSerial(context, rest)?.let { d ->
                 return assumePermission || context.usbManager.hasPermission(d.device)
             }
             return false
         }
 
-        fun findSerial(context: Context, rest: String): UsbSerialDriver? {
+        private fun findSerial(context: Context, rest: String): UsbSerialDriver? {
             val drivers = findDrivers(context)
 
             return if (drivers.isEmpty())
@@ -61,7 +69,7 @@ class SerialInterface(service: RadioInterfaceService, private val address: Strin
     private var uart: UsbSerialDriver? = null
     private var ioManager: SerialInputOutputManager? = null
 
-    var usbReceiver = object : BroadcastReceiver() {
+    private var usbReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
 
             if (UsbManager.ACTION_USB_DEVICE_DETACHED == intent.action) {

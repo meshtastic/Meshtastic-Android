@@ -78,7 +78,7 @@ class RadioInterfaceService : Service(), Logging {
 
             // If we are running on the emulator we default to the mock interface, so we can have some data to show to the user
             if(address == null && isMockInterfaceAvailable(context))
-                address = MockInterface.interfaceName
+                address = MockInterface.prefix.toString()
 
             return address
         }
@@ -104,13 +104,7 @@ class RadioInterfaceService : Service(), Logging {
             if (address != null) {
                 val c = address[0]
                 val rest = address.substring(1)
-                val isValid = when (c) {
-                    'x' -> BluetoothInterface.addressValid(context, rest)
-                    's' -> SerialInterface.addressValid(context, rest)
-                    'n' -> true
-                    'm' -> true
-                    else -> TODO("Unexpected interface type $c")
-                }
+                val isValid = InterfaceFactory.getFactory(c)?.addressValid(context, rest) ?: false
                 if (!isValid)
                     return null
             }
@@ -131,8 +125,7 @@ class RadioInterfaceService : Service(), Logging {
      */
     var serviceScope = CoroutineScope(Dispatchers.IO + Job())
 
-    private val nopIf = NopInterface()
-    private var radioIf: IRadioInterface = nopIf
+    private var radioIf: IRadioInterface = NopInterface()
 
     /** true if we have started our interface
      *
@@ -217,7 +210,7 @@ class RadioInterfaceService : Service(), Logging {
 
     /** Start our configured interface (if it isn't already running) */
     private fun startInterface() {
-        if (radioIf != nopIf)
+        if (radioIf !is NopInterface)
             warn("Can't start interface - $radioIf is already running")
         else {
             val address = getBondedDeviceAddress(this)
@@ -234,26 +227,17 @@ class RadioInterfaceService : Service(), Logging {
 
                 val c = address[0]
                 val rest = address.substring(1)
-                radioIf = when (c) {
-                    'x' -> BluetoothInterface(this, rest)
-                    's' -> SerialInterface(this, rest)
-                    'm' -> MockInterface(this)
-                    'n' -> nopIf
-                    else -> {
-                        errormsg("Unexpected radio interface type")
-                        nopIf
-                    }
-                }
+                radioIf = InterfaceFactory.getFactory(c)?.createInterface(this, rest) ?:
+                        NopInterface()
             }
         }
     }
-
 
     private fun stopInterface() {
         val r = radioIf
         info("stopping interface $r")
         isStarted = false
-        radioIf = nopIf
+        radioIf = NopInterface()
         r.close()
 
         // cancel any old jobs and get ready for the new ones
@@ -266,7 +250,7 @@ class RadioInterfaceService : Service(), Logging {
             receivedPacketsLog.close()
 
         // Don't broadcast disconnects if we were just using the nop device
-        if (r != nopIf)
+        if (r !is NopInterface)
             onDisconnect(isPermanent = true) // Tell any clients we are now offline
     }
 

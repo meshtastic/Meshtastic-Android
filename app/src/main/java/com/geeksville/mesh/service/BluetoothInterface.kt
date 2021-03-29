@@ -78,7 +78,15 @@ A variable keepAllPackets, if set to true will suppress this behavior and instea
 class BluetoothInterface(val service: RadioInterfaceService, val address: String) : IRadioInterface,
     Logging {
 
-    companion object : Logging {
+    companion object : Logging, InterfaceFactory('x') {
+        override fun createInterface(
+            service: RadioInterfaceService,
+            rest: String
+        ): IRadioInterface = BluetoothInterface(service, rest)
+
+        init {
+            registerFactory()
+        }
 
         /// this service UUID is publically visible for scanning
         val BTM_SERVICE_UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
@@ -100,12 +108,12 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         fun toInterfaceName(deviceName: String) = "x$deviceName"
 
         /** Return true if this address is still acceptable. For BLE that means, still bonded */
-        fun addressValid(context: Context, address: String): Boolean {
+        override fun addressValid(context: Context, rest: String): Boolean {
             val allPaired =
                 getBluetoothAdapter(context)?.bondedDevices.orEmpty().map { it.address }.toSet()
 
-            return if (!allPaired.contains(address)) {
-                warn("Ignoring stale bond to ${address.anonymize}")
+            return if (!allPaired.contains(rest)) {
+                warn("Ignoring stale bond to ${rest.anonymize}")
                 false
             } else
                 true

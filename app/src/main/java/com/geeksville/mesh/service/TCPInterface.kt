@@ -1,5 +1,6 @@
 package com.geeksville.mesh.service
 
+import com.geeksville.android.Logging
 import java.io.*
 import java.net.InetAddress
 import java.net.Socket
@@ -9,7 +10,18 @@ import kotlin.concurrent.thread
 class TCPInterface(service: RadioInterfaceService, private val address: String) :
     StreamInterface(service) {
 
-    var socket: Socket? = null
+    companion object : Logging, InterfaceFactory('t') {
+        override fun createInterface(
+            service: RadioInterfaceService,
+            rest: String
+        ): IRadioInterface = TCPInterface(service, rest)
+
+        init {
+            registerFactory()
+        }
+    }
+
+        var socket: Socket? = null
     lateinit var outStream: OutputStream
     lateinit var inStream: InputStream
 

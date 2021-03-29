@@ -8,9 +8,15 @@ import okhttp3.internal.toHexString
 
 /** A simulated interface that is used for testing in the simulator */
 class MockInterface(private val service: RadioInterfaceService) : Logging, IRadioInterface {
-    companion object : Logging {
+    companion object : Logging, InterfaceFactory('m') {
+        override fun createInterface(
+            service: RadioInterfaceService,
+            rest: String
+        ): IRadioInterface = MockInterface(service)
 
-        const val interfaceName = "m"
+        init {
+            registerFactory()
+        }
     }
 
     private var messageCount = 50
