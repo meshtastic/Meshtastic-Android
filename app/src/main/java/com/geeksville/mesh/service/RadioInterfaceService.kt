@@ -50,7 +50,6 @@ class RadioInterfaceService : Service(), Logging {
          */
         const val RADIO_CONNECTED_ACTION = "$prefix.CONNECT_CHANGED"
 
-        const val DEVADDR_KEY_OLD = "devAddr"
         const val DEVADDR_KEY = "devAddr2" // the new name for devaddr
 
         /// This is public only so that SimRadio can bootstrap our message flow
@@ -76,15 +75,6 @@ class RadioInterfaceService : Service(), Logging {
             // If the user has unpaired our device, treat things as if we don't have one
             val prefs = getPrefs(context)
             var address = prefs.getString(DEVADDR_KEY, null)
-
-            if (address == null) { /// Check for the old preferences name we used to use
-                var rest = prefs.getString(DEVADDR_KEY_OLD, null)
-                if(rest == "null")
-                    rest = null
-
-                if (rest != null)
-                    address = BluetoothInterface.toInterfaceName(rest) // Add the bluetooth prefix
-            }
 
             // If we are running on the emulator we default to the mock interface, so we can have some data to show to the user
             if(address == null && isMockInterfaceAvailable(context))
@@ -307,8 +297,6 @@ class RadioInterfaceService : Service(), Logging {
             debug("Setting bonded device to ${address.anonymize}")
 
             getPrefs(this).edit(commit = true) {
-                this.remove(DEVADDR_KEY_OLD) // remove any old version of the key
-
                 if (address == null)
                     this.remove(DEVADDR_KEY)
                 else
