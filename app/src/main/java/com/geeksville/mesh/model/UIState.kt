@@ -12,7 +12,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.geeksville.android.Logging
-import com.geeksville.mesh.*
+import com.geeksville.mesh.IMeshService
+import com.geeksville.mesh.MyNodeInfo
+import com.geeksville.mesh.RadioConfigProtos
 import com.geeksville.mesh.database.MeshtasticDatabase
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
@@ -135,7 +137,8 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
         }
 
     var region: RadioConfigProtos.RegionCode
-        get() = meshService?.region?.let { RadioConfigProtos.RegionCode.forNumber(it) } ?: RadioConfigProtos.RegionCode.Unset
+        get() = meshService?.region?.let { RadioConfigProtos.RegionCode.forNumber(it) }
+            ?: RadioConfigProtos.RegionCode.Unset
         set(value) {
             meshService?.region = value.number
         }

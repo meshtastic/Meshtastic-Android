@@ -479,8 +479,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 
             try {
                 s?.close()
-            }
-            catch(_: BLEConnectionClosing) {
+            } catch (_: BLEConnectionClosing) {
                 warn("Ignoring BLE errors while closing")
             }
         } else {

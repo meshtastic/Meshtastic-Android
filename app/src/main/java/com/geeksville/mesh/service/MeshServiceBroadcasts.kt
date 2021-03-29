@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Parcelable
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.NodeInfo
-import com.geeksville.mesh.Portnums
 
 class MeshServiceBroadcasts(
     private val context: Context,
@@ -18,7 +17,12 @@ class MeshServiceBroadcasts(
      */
     fun broadcastReceivedData(payload: DataPacket) {
 
-        explicitBroadcast(Intent(MeshService.actionReceived(payload.dataType)).putExtra(EXTRA_PAYLOAD, payload))
+        explicitBroadcast(
+            Intent(MeshService.actionReceived(payload.dataType)).putExtra(
+                EXTRA_PAYLOAD,
+                payload
+            )
+        )
 
         /*
         // For the time being we ALSO broadcast using old ACTION_RECEIVED_DATA field for any oldschool opaque packets

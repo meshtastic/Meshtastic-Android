@@ -1,7 +1,6 @@
 package com.geeksville.mesh.ui
 
 import android.content.Context
-import java.text.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.Packet
+import java.text.DateFormat
 import java.util.*
 
 class PacketListAdapter internal constructor(
@@ -18,12 +18,13 @@ class PacketListAdapter internal constructor(
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     private var packets = emptyList<Packet>()
 
-    private val timeFormat: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
+    private val timeFormat: DateFormat =
+        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
 
     inner class PacketViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val packetTypeView: TextView = itemView.findViewById(R.id.type)
         val packetDateReceivedView: TextView = itemView.findViewById(R.id.dateReceived)
-        val packetRawMessage : TextView = itemView.findViewById(R.id.rawMessage)
+        val packetRawMessage: TextView = itemView.findViewById(R.id.rawMessage)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PacketViewHolder {

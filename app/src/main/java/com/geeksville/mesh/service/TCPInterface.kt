@@ -1,7 +1,10 @@
 package com.geeksville.mesh.service
 
 import com.geeksville.android.Logging
-import java.io.*
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 import java.net.InetAddress
 import java.net.Socket
 import kotlin.concurrent.thread
@@ -21,7 +24,7 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
         }
     }
 
-        var socket: Socket? = null
+    var socket: Socket? = null
     lateinit var outStream: OutputStream
     lateinit var inStream: InputStream
 
@@ -30,7 +33,7 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
     }
 
     override fun sendBytes(p: ByteArray) {
-       outStream.write(p)
+        outStream.write(p)
     }
 
     override fun flushBytes() {
@@ -39,7 +42,7 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
 
     override fun onDeviceDisconnect(waitForStopped: Boolean) {
         val s = socket
-        if(s != null) {
+        if (s != null) {
             socket = null
             outStream.close()
             inStream.close()
@@ -68,15 +71,14 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
         // No need to keep a reference to this thread - it will exit when we close inStream
         thread(start = true, isDaemon = true, name = "TCP reader") {
             try {
-                while(true) {
+                while (true) {
                     val c = inStream.read()
-                    if(c == -1)
-                        break;
+                    if (c == -1)
+                        break
                     else
                         readChar(c.toByte())
                 }
-            }
-            catch(ex: Throwable) {
+            } catch (ex: Throwable) {
                 errormsg("Exception in TCP reader: $ex")
                 onDeviceDisconnect(false)
             }

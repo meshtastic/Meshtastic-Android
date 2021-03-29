@@ -17,7 +17,7 @@ import java.util.zip.CRC32
 /**
  * Some misformatted ESP32s have problems
  */
-class DeviceRejectedException() : BLEException("Device rejected filesize")
+class DeviceRejectedException : BLEException("Device rejected filesize")
 
 /**
  * Move this somewhere as a generic network byte order function
@@ -389,7 +389,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                         )
                         if (progress != oldProgress) {
                             debug("sending block ${progress}%")
-                            oldProgress = progress;
+                            oldProgress = progress
                         }
                         var blockSize = 512 - 3 // Max size MTU excluding framing
 

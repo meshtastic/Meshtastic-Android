@@ -113,7 +113,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             val name = n.user?.longName ?: n.user?.id ?: "Unknown node"
             holder.nodeNameView.text = name
 
-            val pos = n.validPosition;
+            val pos = n.validPosition
             if (pos != null) {
                 val coords =
                     String.format("%.5f %.5f", pos.latitude, pos.longitude).replace(",", ".")
@@ -141,7 +141,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             }
             renderBattery(n.batteryPctLevel, holder)
 
-            holder.lastTime.text = formatAgo(n.lastHeard);
+            holder.lastTime.text = formatAgo(n.lastHeard)
 
             if ((n.num == ourNodeInfo?.num) || (n.snr > 100f)) {
                 holder.signalView.visibility = View.INVISIBLE

@@ -59,7 +59,7 @@ import kotlinx.coroutines.Job
 import java.util.regex.Pattern
 
 
-object SLogging : Logging {}
+object SLogging : Logging
 
 /// Change to a new macaddr selection, updating GUI and radio
 fun changeDeviceSelection(context: MainActivity, newAddr: String?) {
@@ -186,7 +186,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         // if that device later disconnects remove it as a candidate
         override fun onScanResult(callbackType: Int, result: ScanResult) {
 
-            if ((result.device.name?.startsWith("Mesh") ?: false)) {
+            if ((result.device.name?.startsWith("Mesh") == true)) {
                 val addr = result.device.address
                 val fullAddr = "x$addr" // full address with the bluetooh prefix
                 // prevent logspam because weill get get lots of redundant scan results
@@ -727,7 +727,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 scanModel.onSelected(requireActivity() as MainActivity, device)
 
             if (!b.isSelected)
-                binding.scanStatusText.setText(getString(R.string.please_pair))
+                binding.scanStatusText.text = getString(R.string.please_pair)
         }
     }
 

@@ -39,7 +39,8 @@ class MeshServiceLocationCallback(
 
                 try {
                     // Do we want to broadcast this position globally, or are we just telling the local node what its current position is (
-                    val shouldBroadcast = true // no need to rate limit, because we are just sending at the interval requested by the preferences
+                    val shouldBroadcast =
+                        true // no need to rate limit, because we are just sending at the interval requested by the preferences
                     val destinationNumber =
                         if (shouldBroadcast) DataPacket.NODENUM_BROADCAST else getNodeNum()
 

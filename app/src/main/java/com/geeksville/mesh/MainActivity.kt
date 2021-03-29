@@ -363,7 +363,7 @@ class MainActivity : AppCompatActivity(), Logging,
             rater.monitor() // Monitors the app launch times
 
             // Only ask to rate if the user has a suitable store
-            AppRate.showRateDialogIfMeetsConditions(this);     // Shows the Rate Dialog when conditions are met
+            AppRate.showRateDialogIfMeetsConditions(this)     // Shows the Rate Dialog when conditions are met
         }
     }
 
@@ -596,7 +596,7 @@ class MainActivity : AppCompatActivity(), Logging,
         filter.addAction(MeshService.actionReceived(Portnums.PortNum.TEXT_MESSAGE_APP_VALUE))
         filter.addAction((MeshService.ACTION_MESSAGE_STATUS))
         registerReceiver(meshServiceReceiver, filter)
-        receiverRegistered = true;
+        receiverRegistered = true
     }
 
     private fun unregisterMeshReceiver() {
@@ -1091,7 +1091,7 @@ class MainActivity : AppCompatActivity(), Logging,
         applicationContext.contentResolver.openFileDescriptor(file_uri, "w")?.use {
             FileOutputStream(it.fileDescriptor).use { fs ->
                 // Write header
-                fs.write(("from,rssi,snr,time,dist\n").toByteArray());
+                fs.write(("from,rssi,snr,time,dist\n").toByteArray())
                 // Packets are ordered by time, we keep most recent position of
                 // our device in my_position.
                 var my_position: MeshProtos.Position? = null
@@ -1102,8 +1102,12 @@ class MainActivity : AppCompatActivity(), Logging,
                                 my_position = position
                             } else if (my_position != null) {
                                 val dist = positionToMeter(my_position!!, position).roundToInt()
-                                fs.write("%x,%d,%f,%d,%d\n".format(packet_proto.from,packet_proto.rxRssi,
-                                    packet_proto.rxSnr, packet_proto.rxTime, dist).toByteArray())
+                                fs.write(
+                                    "%x,%d,%f,%d,%d\n".format(
+                                        packet_proto.from, packet_proto.rxRssi,
+                                        packet_proto.rxSnr, packet_proto.rxTime, dist
+                                    ).toByteArray()
+                                )
                             }
                         }
                     }

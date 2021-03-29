@@ -14,7 +14,7 @@ class NopInterface : IRadioInterface {
         }
     }
 
-        override fun handleSendToRadio(p: ByteArray) {
+    override fun handleSendToRadio(p: ByteArray) {
     }
 
     override fun close() {

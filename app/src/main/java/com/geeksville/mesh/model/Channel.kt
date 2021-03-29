@@ -18,7 +18,8 @@ data class Channel(
         )
 
         private val cleartextPSK = ByteString.EMPTY
-        private val defaultPSK = byteArrayOfInts(1) // a shortstring code to indicate we need our default PSK
+        private val defaultPSK =
+            byteArrayOfInts(1) // a shortstring code to indicate we need our default PSK
 
         // TH=he unsecured channel that devices ship with
         val defaultChannel = Channel(
@@ -55,7 +56,7 @@ data class Channel(
             val pskIndex = settings.psk.byteAt(0).toInt()
 
             if (pskIndex == 0)
-                 cleartextPSK
+                cleartextPSK
             else {
                 // Treat an index of 1 as the old channelDefaultKey and work up from there
                 val bytes = channelDefaultKey.clone()

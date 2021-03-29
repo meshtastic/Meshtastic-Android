@@ -26,5 +26,9 @@ class BluetoothStateReceiver(
         }
     }
 
-    private val Intent.bluetoothAdapterState: Int get() = getIntExtra(BluetoothAdapter.EXTRA_STATE, -1)
+    private val Intent.bluetoothAdapterState: Int
+        get() = getIntExtra(
+            BluetoothAdapter.EXTRA_STATE,
+            -1
+        )
 }

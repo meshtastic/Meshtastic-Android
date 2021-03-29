@@ -16,12 +16,9 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
-import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.notificationManager
-import com.geeksville.mesh.ui.SLogging
-import com.geeksville.mesh.utf8
 import java.io.Closeable
 
 
@@ -29,6 +26,7 @@ class MeshServiceNotifications(
     private val context: Context
 ) : Closeable {
     private val notificationManager: NotificationManager get() = context.notificationManager
+
     // We have two notification channels: one for general service status and another one for messages
     val notifyId = 101
     private val messageNotifyId = 102
@@ -96,12 +94,16 @@ class MeshServiceNotifications(
     }
 
     fun updateServiceStateNotification(summaryString: String) =
-        notificationManager.notify(notifyId,
-            createServiceStateNotification(summaryString))
+        notificationManager.notify(
+            notifyId,
+            createServiceStateNotification(summaryString)
+        )
 
     fun updateMessageNotification(name: String, message: String) =
-        notificationManager.notify(messageNotifyId,
-            createMessageNotifcation(name, message))
+        notificationManager.notify(
+            messageNotifyId,
+            createMessageNotifcation(name, message)
+        )
 
     private val openAppIntent: PendingIntent by lazy {
         PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), 0)
@@ -126,7 +128,7 @@ class MeshServiceNotifications(
         return bitmap
     }
 
-    fun commonBuilder(channel: String) : NotificationCompat.Builder {
+    fun commonBuilder(channel: String): NotificationCompat.Builder {
         val builder = NotificationCompat.Builder(context, channel)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(openAppIntent)

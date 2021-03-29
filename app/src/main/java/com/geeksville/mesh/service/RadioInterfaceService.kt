@@ -26,7 +26,6 @@ open class RadioNotConnectedException(message: String = "Not connected to radio"
     BLEException(message)
 
 
-
 /**
  * Handles the bluetooth link with a mesh radio device.  Does not cache any device state,
  * just does bluetooth comms etc...
@@ -77,7 +76,7 @@ class RadioInterfaceService : Service(), Logging {
             var address = prefs.getString(DEVADDR_KEY, null)
 
             // If we are running on the emulator we default to the mock interface, so we can have some data to show to the user
-            if(address == null && isMockInterfaceAvailable(context))
+            if (address == null && isMockInterfaceAvailable(context))
                 address = MockInterface.prefix.toString()
 
             return address
@@ -86,7 +85,8 @@ class RadioInterfaceService : Service(), Logging {
         /** return true if we should show the mock interface on this device
          * (ie are we in an emulator or in testlab
          */
-        fun isMockInterfaceAvailable(context: Context) = isEmulator || ((context.applicationContext as GeeksvilleApplication).isInTestLab)
+        fun isMockInterfaceAvailable(context: Context) =
+            isEmulator || ((context.applicationContext as GeeksvilleApplication).isInTestLab)
 
         /** Like getDeviceAddress, but filtered to return only devices we are currently bonded with
          *
@@ -204,7 +204,7 @@ class RadioInterfaceService : Service(), Logging {
     }
 
     override fun onBind(intent: Intent?): IBinder? {
-        return binder;
+        return binder
     }
 
 
@@ -227,8 +227,8 @@ class RadioInterfaceService : Service(), Logging {
 
                 val c = address[0]
                 val rest = address.substring(1)
-                radioIf = InterfaceFactory.getFactory(c)?.createInterface(this, rest) ?:
-                        NopInterface()
+                radioIf =
+                    InterfaceFactory.getFactory(c)?.createInterface(this, rest) ?: NopInterface()
             }
         }
     }

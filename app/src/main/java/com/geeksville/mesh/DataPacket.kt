@@ -63,8 +63,7 @@ data class DataPacket(
         parcel.readInt(),
         parcel.readParcelable(MessageStatus::class.java.classLoader),
         parcel.readInt()
-    ) {
-    }
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

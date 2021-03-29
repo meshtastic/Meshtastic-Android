@@ -5,14 +5,15 @@ import com.geeksville.android.Logging
 /**
  * Provide structured access to parse and compare device version strings
  */
-data class DeviceVersion(val asString: String): Comparable<DeviceVersion>, Logging {
+data class DeviceVersion(val asString: String) : Comparable<DeviceVersion>, Logging {
 
-    val asInt get() = try {
-        verStringToInt(asString)
-    } catch(e: Exception) {
-        warn("Exception while parsing version '$asString', assuming version 0")
-        0
-    }
+    val asInt
+        get() = try {
+            verStringToInt(asString)
+        } catch (e: Exception) {
+            warn("Exception while parsing version '$asString', assuming version 0")
+            0
+        }
 
     /**
      * Convert a version string of the form 1.23.57 to a comparable integer of

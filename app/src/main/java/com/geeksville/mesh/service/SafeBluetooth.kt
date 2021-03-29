@@ -229,7 +229,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             if (reliable != null)
                 if (!characteristic.value.contentEquals(reliable)) {
                     errormsg("A reliable write failed!")
-                    gatt.abortReliableWrite();
+                    gatt.abortReliableWrite()
                     completeWork(
                         STATUS_RELIABLE_WRITE_FAILED,
                         characteristic
