@@ -19,8 +19,8 @@ import com.hoho.android.usbserial.util.SerialInputOutputManager
 /**
  * An interface that assumes we are talking to a meshtastic device via USB serial
  */
-class SerialInterface(service: RadioInterfaceService, address: String) :
-    StreamInterface(service, address), Logging, SerialInputOutputManager.Listener {
+class SerialInterface(service: RadioInterfaceService, private val address: String) :
+    StreamInterface(service), Logging, SerialInputOutputManager.Listener {
     companion object : Logging {
 
         /**

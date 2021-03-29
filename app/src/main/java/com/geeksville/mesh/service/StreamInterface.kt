@@ -6,7 +6,7 @@ import com.geeksville.android.Logging
 /**
  * An interface that assumes we are talking to a meshtastic device over some sort of stream connection (serial or TCP probably)
  */
-abstract class StreamInterface(protected val service: RadioInterfaceService, val address: String) :
+abstract class StreamInterface(protected val service: RadioInterfaceService) :
     Logging,
     IRadioInterface {
     companion object : Logging {
@@ -49,6 +49,9 @@ abstract class StreamInterface(protected val service: RadioInterfaceService, val
 
     abstract fun sendBytes(p: ByteArray)
 
+    /// If subclasses need to flash at the end of a packet they can implement
+    open fun flushBytes() {}
+
     override fun handleSendToRadio(p: ByteArray) {
         // This method is called from a continuation and it might show up late, so check for uart being null
 
@@ -60,6 +63,7 @@ abstract class StreamInterface(protected val service: RadioInterfaceService, val
 
         sendBytes(header)
         sendBytes(p)
+        flushBytes()
     }
 
 
