@@ -621,7 +621,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             position: Int,
             id: Long
         ) {
-            val item = parent.getItemAtPosition(position) as String
+            val item = parent.getItemAtPosition(position) as String?
             val asProto = item!!.let { RadioConfigProtos.RegionCode.valueOf(it) }
             exceptionToSnackbar(requireView()) {
                 model.region = asProto
@@ -657,7 +657,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
 
         // Only let user edit their name or set software update while connected to a radio
-        model.isConnected.observe(viewLifecycleOwner, Observer { connectionState ->
+        model.isConnected.observe(viewLifecycleOwner, Observer { _ ->
             updateNodeInfo()
         })
 
