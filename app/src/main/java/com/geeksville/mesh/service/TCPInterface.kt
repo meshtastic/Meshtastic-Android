@@ -1,12 +1,14 @@
 package com.geeksville.mesh.service
 
 import com.geeksville.android.Logging
-import java.io.BufferedInputStream
+import com.geeksville.util.Exceptions
 import java.io.BufferedOutputStream
+import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.InetAddress
 import java.net.Socket
+import java.net.SocketTimeoutException
 import kotlin.concurrent.thread
 
 
@@ -43,6 +45,7 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
     override fun onDeviceDisconnect(waitForStopped: Boolean) {
         val s = socket
         if (s != null) {
+            debug("Closing TCP socket")
             socket = null
             outStream.close()
             inStream.close()
@@ -65,6 +68,7 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
                 val port = 4403
                 val s = Socket(a, port)
                 s.tcpNoDelay = true
+                s.soTimeout = 500
                 socket = s
                 outStream = BufferedOutputStream(s.getOutputStream())
                 inStream = s.getInputStream()
@@ -73,14 +77,23 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
                 super.connect()
 
                 while (true) {
-                    val c = inStream.read()
-                    if (c == -1)
-                        break
-                    else
-                        readChar(c.toByte())
+                    try {
+                        val c = inStream.read()
+                        if (c == -1) {
+                            warn("Got EOF on TCP stream")
+                            onDeviceDisconnect(false)
+                            break
+                        } else
+                            readChar(c.toByte())
+                    } catch (ex: SocketTimeoutException) {
+                        // Ignore and start another read
+                    }
                 }
+            } catch (ex: IOException) {
+                errormsg("IOException in TCP reader: $ex") // FIXME, show message to user
+                onDeviceDisconnect(false)
             } catch (ex: Throwable) {
-                errormsg("Exception in TCP reader: $ex")
+                Exceptions.report(ex, "Exception in TCP reader")
                 onDeviceDisconnect(false)
             }
             debug("Exiting TCP reader")
