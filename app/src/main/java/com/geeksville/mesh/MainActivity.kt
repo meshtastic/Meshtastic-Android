@@ -489,9 +489,11 @@ class MainActivity : AppCompatActivity(), Logging,
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
-                val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
-                debug("Handle USB device attached! $device")
-                usbDevice = device
+                val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+                if (device != null) {
+                    debug("Handle USB device attached! $device")
+                    usbDevice = device
+                }
             }
 
             Intent.ACTION_MAIN -> {
