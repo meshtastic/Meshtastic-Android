@@ -102,4 +102,5 @@
     <string name="are_you_shure_change_default">Are you sure you want to change to the default channel?</string>
     <string name="reset_to_defaults">Reset to defaults</string>
     <string name="apply">Apply</string>
+    <string name="no_app_found">No application found to send URLs</string>
 </resources>

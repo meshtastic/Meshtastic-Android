@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
@@ -143,8 +144,17 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 type = "text/plain"
             }
 
-            val shareIntent = Intent.createChooser(sendIntent, null)
-            requireActivity().startActivity(shareIntent)
+            try {
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                requireActivity().startActivity(shareIntent)
+            }
+            catch(ex: ActivityNotFoundException) {
+                Snackbar.make(
+                    binding.shareButton,
+                    R.string.no_app_found,
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 
