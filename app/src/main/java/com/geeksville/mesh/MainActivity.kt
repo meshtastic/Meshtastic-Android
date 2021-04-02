@@ -803,13 +803,10 @@ class MainActivity : AppCompatActivity(), Logging,
                     }
 
                     MeshService.ACTION_MESH_CONNECTED -> {
-                        val connected =
-                            MeshService.ConnectionState.valueOf(
-                                intent.getStringExtra(
-                                    EXTRA_CONNECTED
-                                )!!
-                            )
-                        onMeshConnectionChanged(connected)
+                        val extra = intent.getStringExtra(EXTRA_CONNECTED)
+                        if (extra != null) {
+                            onMeshConnectionChanged(MeshService.ConnectionState.valueOf(extra))
+                        }
                     }
                     else -> TODO()
                 }
