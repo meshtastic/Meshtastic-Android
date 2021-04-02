@@ -1465,7 +1465,7 @@ class MeshService : Service(), Logging {
     /// If we've received our initial config, our radio settings and all of our channels, send any queueed packets and broadcast connected to clients
     private fun onHasSettings() {
 
-        processEarlyPackets() // send receive any packets that were queued up
+        processEarlyPackets() // send any packets that were queued up
 
         // broadcast an intent with our new connection state
         serviceBroadcasts.broadcastConnection()

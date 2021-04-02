@@ -252,7 +252,10 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         // If connection state _OR_ myID changes we have to fix our ability to edit outgoing messages
         fun updateTextEnabled() {
             binding.textInputLayout.isEnabled =
-                model.isConnected.value != MeshService.ConnectionState.DISCONNECTED && model.nodeDB.myId.value != null && model.radioConfig.value != null
+                model.isConnected.value != MeshService.ConnectionState.DISCONNECTED
+
+        // Just being connected is enough to allow sending texts I think
+        // && model.nodeDB.myId.value != null && model.radioConfig.value != null
         }
 
         model.isConnected.observe(viewLifecycleOwner, Observer { _ ->
@@ -260,7 +263,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             updateTextEnabled()
         })
 
-        model.nodeDB.myId.observe(viewLifecycleOwner, Observer { _ ->
+        /* model.nodeDB.myId.observe(viewLifecycleOwner, Observer { _ ->
             // If we don't know our node ID and we are offline don't let user try to send
             updateTextEnabled()
         })
@@ -268,7 +271,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         model.radioConfig.observe(viewLifecycleOwner, Observer { _ ->
             // If we don't know our node ID and we are offline don't let user try to send
             updateTextEnabled()
-        })
+        }) */
     }
 
 }
