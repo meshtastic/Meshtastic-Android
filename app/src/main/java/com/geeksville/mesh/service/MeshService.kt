@@ -1392,7 +1392,7 @@ class MeshService : Service(), Logging {
     private fun fixupChannelList(lIn: List<ChannelProtos.Channel>): Array<ChannelProtos.Channel> {
         // When updating old firmware, we will briefly be told that there is zero channels
         val maxChannels =
-            max(myNodeInfo?.maxChannels ?: 8, 1) // If we don't have my node info, assume 8 channels
+            max(myNodeInfo?.maxChannels ?: 8, 8) // If we don't have my node info, assume 8 channels
         var l = lIn
         while (l.size < maxChannels) {
             val b = ChannelProtos.Channel.newBuilder()
