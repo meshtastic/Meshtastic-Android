@@ -297,8 +297,8 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 // If we can't update spiffs (because not supported by target), do not fail
                 errormsg("Ignoring failure to update spiffs on old appload")
             } catch (_: DeviceRejectedException) {
-                // the spi filesystem of this device is malformatted
-                reportError("Device rejected invalid spiffs partition")
+                // the spi filesystem of this device is malformatted, fail silently because most users don't need the web server
+                errormsg("Device rejected invalid spiffs partition")
             }
 
             assets.appLoad?.let { doUpdate(context, sync, it, FLASH_REGION_APPLOAD) }
