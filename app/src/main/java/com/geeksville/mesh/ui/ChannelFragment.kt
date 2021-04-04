@@ -86,7 +86,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
         // Only let buttons work if we are connected to the radio
         binding.shareButton.isEnabled = connected
-        binding.resetButton.isEnabled = connected && Channel.defaultChannel != channel
+        binding.resetButton.isEnabled = connected && Channel.default != channel
 
         binding.editableCheckbox.isChecked = false // start locked
         if (channel != null) {
@@ -197,7 +197,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 }
                 .setPositiveButton(R.string.apply) { _, _ ->
                     debug("Switching back to default channel")
-                    installSettings(Channel.defaultChannel.settings)
+                    installSettings(Channel.default.settings)
                 }
                 .show()
         }
@@ -226,7 +226,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
                             // Generate a new AES256 key unleess the user is trying to go back to stock
                             if (!newSettings.name.equals(
-                                    Channel.defaultChannel.name,
+                                    Channel.default.name,
                                     ignoreCase = true
                                 )
                             ) {
@@ -246,7 +246,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                                     newSettings.modemConfig = modemConfig
                             } else {
                                 debug("Switching back to default channel")
-                                newSettings = Channel.defaultChannel.settings.toBuilder()
+                                newSettings = Channel.default.settings.toBuilder()
                             }
 
                             installSettings(newSettings.build())
