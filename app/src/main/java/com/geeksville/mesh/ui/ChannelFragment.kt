@@ -147,8 +147,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             try {
                 val shareIntent = Intent.createChooser(sendIntent, null)
                 requireActivity().startActivity(shareIntent)
-            }
-            catch(ex: ActivityNotFoundException) {
+            } catch (ex: ActivityNotFoundException) {
                 Snackbar.make(
                     binding.shareButton,
                     R.string.no_app_found,
@@ -204,11 +203,17 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
         // Note: Do not use setOnCheckedChanged here because we don't want to be called when we programmatically disable editing
         binding.editableCheckbox.setOnClickListener { _ ->
+
+            /// We use this to determine if the user tried to install a custom name
+            var originalName = ""
+
             val checked = binding.editableCheckbox.isChecked
             if (checked) {
                 // User just unlocked for editing - remove the # goo around the channel name
                 model.channels.value?.primaryChannel?.let { ch ->
-                    binding.channelNameEdit.setText(ch.name)
+                    // Note: We are careful to show the emptystring here if the user was on a default channel, so the user knows they should it for any changes
+                    originalName = ch.settings.name
+                    binding.channelNameEdit.setText(originalName)
                 }
             } else {
                 // User just locked it, we should warn and then apply changes to radio
@@ -222,32 +227,31 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                         // Generate a new channel with only the changes the user can change in the GUI
                         model.channels.value?.primaryChannel?.let { oldPrimary ->
                             var newSettings = oldPrimary.settings.toBuilder()
-                            newSettings.name = binding.channelNameEdit.text.toString().trim()
+                            val newName = binding.channelNameEdit.text.toString().trim()
 
-                            // Generate a new AES256 key unleess the user is trying to go back to stock
-                            if (!newSettings.name.equals(
-                                    Channel.default.name,
-                                    ignoreCase = true
-                                )
-                            ) {
+                            // Find the new modem config
+                            val selectedChannelOptionString =
+                                binding.filledExposedDropdown.editableText.toString()
+                            var modemConfig = getModemConfig(selectedChannelOptionString)
+                            if (modemConfig == ChannelProtos.ChannelSettings.ModemConfig.UNRECOGNIZED) // Huh? didn't find it - keep same
+                                modemConfig = oldPrimary.settings.modemConfig
+
+                            // Generate a new AES256 key if the user changes channel name or the name is non-default and the settings changed
+                            if (newName != originalName || (newName.isNotEmpty() && modemConfig != oldPrimary.settings.modemConfig)) {
                                 // Install a new customized channel
-
                                 debug("ASSIGNING NEW AES256 KEY")
                                 val random = SecureRandom()
                                 val bytes = ByteArray(32)
                                 random.nextBytes(bytes)
+                                newSettings.name = newName // Only change the name if the user did some editing
                                 newSettings.psk = ByteString.copyFrom(bytes)
-
-                                val selectedChannelOptionString =
-                                    binding.filledExposedDropdown.editableText.toString()
-                                val modemConfig = getModemConfig(selectedChannelOptionString)
-
-                                if (modemConfig != ChannelProtos.ChannelSettings.ModemConfig.UNRECOGNIZED)
-                                    newSettings.modemConfig = modemConfig
                             } else {
                                 debug("Switching back to default channel")
                                 newSettings = Channel.default.settings.toBuilder()
                             }
+
+                            // No matter what apply the speed selection from the user
+                            newSettings.modemConfig = modemConfig
 
                             installSettings(newSettings.build())
                         }
