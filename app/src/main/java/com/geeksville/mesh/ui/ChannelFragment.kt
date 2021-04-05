@@ -243,7 +243,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                                 val random = SecureRandom()
                                 val bytes = ByteArray(32)
                                 random.nextBytes(bytes)
-                                newSettings.name = newName // Only change the name if the user did some editing
+                                newSettings.name = newName
                                 newSettings.psk = ByteString.copyFrom(bytes)
                             } else {
                                 debug("Switching back to default channel")

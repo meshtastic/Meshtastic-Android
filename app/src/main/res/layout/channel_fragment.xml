@@ -24,7 +24,7 @@
             android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890- "
             android:hint="@string/channel_name"
             android:imeOptions="actionDone"
-            android:maxLength="11"
+            android:maxLength="15"
             android:singleLine="true"
             android:text="@string/unset" />
     </com.google.android.material.textfield.TextInputLayout>
