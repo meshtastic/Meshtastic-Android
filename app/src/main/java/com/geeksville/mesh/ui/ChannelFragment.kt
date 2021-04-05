@@ -98,7 +98,9 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             // doesn't cache radioconfig writes.
             binding.editableCheckbox.isEnabled = connected
 
-            binding.qrView.setImageBitmap(channels.getChannelQR())
+            val bitmap = channels.qrCode
+            if (bitmap != null)
+                binding.qrView.setImageBitmap(bitmap)
 
             val modemConfig = channel.modemConfig
             val channelOption = ChannelOption.fromConfig(modemConfig)

@@ -3,6 +3,7 @@ package com.geeksville.mesh.model
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Base64
+import com.geeksville.android.Logging
 import com.geeksville.mesh.AppOnlyProtos
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
@@ -11,7 +12,7 @@ import java.net.MalformedURLException
 
 data class ChannelSet(
     val protobuf: AppOnlyProtos.ChannelSet = AppOnlyProtos.ChannelSet.getDefaultInstance()
-) {
+) : Logging {
     companion object {
 
         const val prefix = "https://www.meshtastic.org/d/#"
@@ -62,18 +63,23 @@ data class ChannelSet(
         return Uri.parse("$p$enc")
     }
 
-    fun getChannelQR(): Bitmap {
-        val multiFormatWriter = MultiFormatWriter()
+    val qrCode
+        get(): Bitmap? = try {
+            val multiFormatWriter = MultiFormatWriter()
 
-        // We encode as UPPER case for the QR code URL because QR codes are more efficient for that special case
-        val bitMatrix =
-            multiFormatWriter.encode(
-                getChannelUrl(true).toString(),
-                BarcodeFormat.QR_CODE,
-                192,
-                192
-            )
-        val barcodeEncoder = BarcodeEncoder()
-        return barcodeEncoder.createBitmap(bitMatrix)
-    }
+            // We encode as UPPER case for the QR code URL because QR codes are more efficient for that special case
+            val bitMatrix =
+                multiFormatWriter.encode(
+                    getChannelUrl(true).toString(),
+                    BarcodeFormat.QR_CODE,
+                    192,
+                    192
+                )
+            val barcodeEncoder = BarcodeEncoder()
+            barcodeEncoder.createBitmap(bitMatrix)
+        } catch (ex: Throwable) {
+            errormsg("URL was too complex to render as barcode")
+            null
+        }
 }
+
