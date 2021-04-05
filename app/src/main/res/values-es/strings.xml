@@ -22,7 +22,7 @@
     <string name="starting_pairing">Iniciando emparejamiento</string>
     <string name="pairing_failed">Emparejamiento fallido</string>
     <string name="url_for_join">Una URL para unirse a una malla Meshtastic</string>
-    <string name="accept">Acceptar</string>
+    <string name="accept">Aceptar</string>
     <string name="cancel">Cancelar</string>
     <string name="change_channel">Cambia el canal</string>
     <string name="are_you_sure_channel">¿Estás seguro de que quieres cambiar el canal? Toda comunicación con otros nodos se detendrá hasta que comparta la nueva configuración del canal.</string>
