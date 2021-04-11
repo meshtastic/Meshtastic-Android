@@ -77,7 +77,9 @@
             android:alpha="0.4"
             app:layout_constraintEnd_toStartOf="@+id/dateReceived"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/cloud_download_outline_24" />
+            app:srcCompat="@drawable/cloud_download_outline_24"
+            android:contentDescription="TODO"
+            app:tint="@color/colorIconTint" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

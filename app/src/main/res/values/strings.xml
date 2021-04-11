@@ -103,4 +103,9 @@
     <string name="reset_to_defaults">Reset to defaults</string>
     <string name="apply">Apply</string>
     <string name="no_app_found">No application found to send URLs</string>
+    <string name="theme">Theme</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_system">System default</string>
+    <string name="choose_theme_title">Choose theme</string>
 </resources>
