@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3700B3</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorMsg">#212121</color>
+    <color name="colorMyMsg">#212121</color>
+    <color name="colorDebugBackground">#141414</color>
+    <color name="colorAdvancedBackground">#141414</color>
+    <color name="colorIconTint">#FFFFFF</color>
+    <color name="colorMenuItem">#FFFFFF</color>
+    <color name="colorToolbar">#000000</color>
+</resources>

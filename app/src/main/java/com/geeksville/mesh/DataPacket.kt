@@ -4,6 +4,8 @@ import android.os.Parcel
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
+import java.nio.charset.Charset
+
 
 @Parcelize
 enum class MessageStatus : Parcelable {
@@ -143,6 +145,8 @@ data class DataPacket(
         override fun newArray(size: Int): Array<DataPacket?> {
             return arrayOfNulls(size)
         }
+        val utf8 = Charset.forName("UTF-8")
     }
+
 
 }
