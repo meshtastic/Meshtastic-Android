@@ -1031,6 +1031,11 @@ class MeshService : Service(), Logging {
                 desiredInterval = 0
             }
 
+            if (prefs.fixedPosition) {
+                info("Node has fixed position, therefore not overriding position")
+                desiredInterval = 0
+            }
+
             if (desiredInterval != 0L) {
                 info("desired GPS assistance interval $desiredInterval")
                 startLocationRequests(desiredInterval)
