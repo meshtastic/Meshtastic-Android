@@ -7,10 +7,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.companion.CompanionDeviceManager
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.hardware.usb.UsbDevice
@@ -28,7 +25,9 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -378,6 +377,9 @@ class MainActivity : AppCompatActivity(), Logging,
 
         val prefs = UIViewModel.getPreferences(this)
         model.ownerName.value = prefs.getString("owner", "")!!
+
+        /// Set theme
+        setUITheme(prefs)
 
         /// Set initial bluetooth state
         updateBluetoothEnabled()
@@ -1068,6 +1070,10 @@ class MainActivity : AppCompatActivity(), Logging,
                 startActivityForResult(intent, CREATE_CSV_FILE)
                 return true
             }
+            R.id.theme -> {
+                chooseThemeDialog()
+                return true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -1114,5 +1120,80 @@ class MainActivity : AppCompatActivity(), Logging,
             }
         }
     }
+
+
+    /// Theme functions
+
+    private fun chooseThemeDialog() {
+
+        /// Prepare dialog and its items
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(getString(R.string.choose_theme_title))
+
+        val styles = arrayOf(
+            getString(R.string.theme_light),
+            getString(R.string.theme_dark),
+            getString(R.string.theme_system))
+
+        /// Load preferences and its value
+        val prefs = UIViewModel.getPreferences(this)
+        val editor: SharedPreferences.Editor = prefs.edit()
+        val checkedItem = prefs.getInt("theme", 2)
+
+        builder.setSingleChoiceItems(styles, checkedItem) { dialog, which ->
+
+            when (which) {
+                0 -> {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                    editor.putInt("theme", 0)
+                    editor.apply()
+
+                    delegate.applyDayNight()
+                    dialog.dismiss()
+                }
+                1 -> {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                    editor.putInt("theme", 1)
+                    editor.apply()
+
+                    delegate.applyDayNight()
+                    dialog.dismiss()
+                }
+                2 -> {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                    editor.putInt("theme", 2)
+                    editor.apply()
+
+                    delegate.applyDayNight()
+                    dialog.dismiss()
+                }
+
+            }
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    private fun setUITheme(prefs: SharedPreferences) {
+        /// Read theme settings from preferences and set it
+        /// If nothing is found set FOLLOW SYSTEM option
+
+        when (prefs.getInt("theme", 2)) {
+            0 -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                delegate.applyDayNight()
+            }
+            1 -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                delegate.applyDayNight()
+            }
+            2 -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                delegate.applyDayNight()
+            }
+        }
+    }
+
 }
 

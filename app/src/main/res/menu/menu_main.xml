@@ -25,6 +25,10 @@
         app:showAsAction="withText"
         android:title="@string/save_messages" />
     <item
+        android:id="@+id/theme"
+        android:title="@string/theme"
+        app:showAsAction="withText" />
+    <item
         android:id="@+id/about"
         android:title="@string/about"
         app:showAsAction="withText" />

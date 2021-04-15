@@ -1,14 +1,14 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">#FFFFFF</item>
     </style>
 
-    <style name="AppTheme.NoActionBar" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="AppTheme.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="android:itemTextAppearance">@style/menu_item_color</item>
     </style>
@@ -31,7 +31,7 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="menu_item_color">
-        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textColor">@color/colorMenuItem</item>
     </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
@@ -51,5 +51,12 @@
     <style name="Meshtastic.Button.Rounded" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
+    </style>
+
+    // Toolbar style
+    <style name="MyToolbar" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
+        <item name="tint">@color/colorToolbar</item>
+        <item name="colorOnPrimary">@color/colorToolbar</item>
+        <item name="android:textColor">@color/colorToolbar</item>
     </style>
 </resources>
