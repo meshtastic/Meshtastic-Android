@@ -37,13 +37,13 @@ class MeshUtilApplication : GeeksvilleApplication() {
             }
 
             fun sendCrashReports() {
-                if(isAnalyticsAllowed)
+                if (isAnalyticsAllowed)
                     crashlytics.sendUnsentReports()
             }
 
             // Send any old reports if user approves
             sendCrashReports()
-            
+
             // Attach to our exception wrapper
             Exceptions.reporter = { exception, _, _ ->
                 crashlytics.recordException(exception)

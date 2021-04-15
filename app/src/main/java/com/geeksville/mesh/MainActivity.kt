@@ -363,7 +363,7 @@ class MainActivity : AppCompatActivity(), Logging,
             rater.monitor() // Monitors the app launch times
 
             // Only ask to rate if the user has a suitable store
-            AppRate.showRateDialogIfMeetsConditions(this);     // Shows the Rate Dialog when conditions are met
+            AppRate.showRateDialogIfMeetsConditions(this)     // Shows the Rate Dialog when conditions are met
         }
     }
 
@@ -489,9 +489,11 @@ class MainActivity : AppCompatActivity(), Logging,
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
-                val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
-                debug("Handle USB device attached! $device")
-                usbDevice = device
+                val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+                if (device != null) {
+                    debug("Handle USB device attached! $device")
+                    usbDevice = device
+                }
             }
 
             Intent.ACTION_MAIN -> {
@@ -596,7 +598,7 @@ class MainActivity : AppCompatActivity(), Logging,
         filter.addAction(MeshService.actionReceived(Portnums.PortNum.TEXT_MESSAGE_APP_VALUE))
         filter.addAction((MeshService.ACTION_MESSAGE_STATUS))
         registerReceiver(meshServiceReceiver, filter)
-        receiverRegistered = true;
+        receiverRegistered = true
     }
 
     private fun unregisterMeshReceiver() {
@@ -663,30 +665,32 @@ class MainActivity : AppCompatActivity(), Logging,
 
                 debug("Getting latest radioconfig from service")
                 try {
-                    val info = service.myNodeInfo
+                    val info: MyNodeInfo? = service.myNodeInfo // this can be null
                     model.myNodeInfo.value = info
 
-                    val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
-                    if (isOld)
-                        showAlert(R.string.app_too_old, R.string.must_update)
-                    else {
-
-                        val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
-                        if (curVer < MeshService.minFirmwareVersion)
-                            showAlert(R.string.firmware_too_old, R.string.firmware_old)
+                    if (info != null) {
+                        val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
+                        if (isOld)
+                            showAlert(R.string.app_too_old, R.string.must_update)
                         else {
-                            // If our app is too old/new, we probably don't understand the new radioconfig messages, so we don't read them until here
 
-                            model.radioConfig.value =
-                                RadioConfigProtos.RadioConfig.parseFrom(service.radioConfig)
+                            val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
+                            if (curVer < MeshService.minFirmwareVersion)
+                                showAlert(R.string.firmware_too_old, R.string.firmware_old)
+                            else {
+                                // If our app is too old/new, we probably don't understand the new radioconfig messages, so we don't read them until here
 
-                            model.channels.value =
-                                ChannelSet(AppOnlyProtos.ChannelSet.parseFrom(service.channels))
+                                model.radioConfig.value =
+                                    RadioConfigProtos.RadioConfig.parseFrom(service.radioConfig)
 
-                            updateNodesFromDevice()
+                                model.channels.value =
+                                    ChannelSet(AppOnlyProtos.ChannelSet.parseFrom(service.channels))
 
-                            // we have a connection to our device now, do the channel change
-                            perhapsChangeChannel()
+                                updateNodesFromDevice()
+
+                                // we have a connection to our device now, do the channel change
+                                perhapsChangeChannel()
+                            }
                         }
                     }
                 } catch (ex: RemoteException) {
@@ -799,13 +803,10 @@ class MainActivity : AppCompatActivity(), Logging,
                     }
 
                     MeshService.ACTION_MESH_CONNECTED -> {
-                        val connected =
-                            MeshService.ConnectionState.valueOf(
-                                intent.getStringExtra(
-                                    EXTRA_CONNECTED
-                                )!!
-                            )
-                        onMeshConnectionChanged(connected)
+                        val extra = intent.getStringExtra(EXTRA_CONNECTED)
+                        if (extra != null) {
+                            onMeshConnectionChanged(MeshService.ConnectionState.valueOf(extra))
+                        }
                     }
                     else -> TODO()
                 }
@@ -972,12 +973,11 @@ class MainActivity : AppCompatActivity(), Logging,
 
         try {
             bindMeshService()
-        }
-        catch(ex: BindFailedException) {
+        } catch (ex: BindFailedException) {
             // App is probably shutting down, ignore
             errormsg("Bind of MeshService failed")
         }
-        
+
         val bonded = RadioInterfaceService.getBondedDeviceAddress(this) != null
         if (!bonded && usbDevice == null) // we will handle USB later
             showSettingsPage()
@@ -1090,7 +1090,7 @@ class MainActivity : AppCompatActivity(), Logging,
         applicationContext.contentResolver.openFileDescriptor(file_uri, "w")?.use {
             FileOutputStream(it.fileDescriptor).use { fs ->
                 // Write header
-                fs.write(("from,rssi,snr,time,dist\n").toByteArray());
+                fs.write(("from,rssi,snr,time,dist\n").toByteArray())
                 // Packets are ordered by time, we keep most recent position of
                 // our device in my_position.
                 var my_position: MeshProtos.Position? = null
@@ -1101,8 +1101,12 @@ class MainActivity : AppCompatActivity(), Logging,
                                 my_position = position
                             } else if (my_position != null) {
                                 val dist = positionToMeter(my_position!!, position).roundToInt()
-                                fs.write("%x,%d,%f,%d,%d\n".format(packet_proto.from,packet_proto.rxRssi,
-                                    packet_proto.rxSnr, packet_proto.rxTime, dist).toByteArray())
+                                fs.write(
+                                    "%x,%d,%f,%d,%d\n".format(
+                                        packet_proto.from, packet_proto.rxRssi,
+                                        packet_proto.rxSnr, packet_proto.rxTime, dist
+                                    ).toByteArray()
+                                )
                             }
                         }
                     }

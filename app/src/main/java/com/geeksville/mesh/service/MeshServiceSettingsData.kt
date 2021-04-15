@@ -1,6 +1,9 @@
 package com.geeksville.mesh.service
 
-import com.geeksville.mesh.*
+import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.MyNodeInfo
+import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.RadioConfigProtos
 import kotlinx.serialization.Serializable
 
 /// Our saved preferences as stored on disk

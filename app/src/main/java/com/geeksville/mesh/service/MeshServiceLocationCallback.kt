@@ -21,8 +21,7 @@ typealias GetNodeNum = () -> Int
 class MeshServiceLocationCallback(
     private val onSendPosition: SendPosition,
     private val onSendPositionFailed: OnSendFailure,
-    private val getNodeNum: GetNodeNum,
-    private val sendRateLimitInSeconds: Int = DEFAULT_SEND_RATE_LIMIT
+    private val getNodeNum: GetNodeNum
 ) : LocationCallback() {
 
     companion object {
@@ -40,7 +39,8 @@ class MeshServiceLocationCallback(
 
                 try {
                     // Do we want to broadcast this position globally, or are we just telling the local node what its current position is (
-                    val shouldBroadcast = isAllowedToSend()
+                    val shouldBroadcast =
+                        true // no need to rate limit, because we are just sending at the interval requested by the preferences
                     val destinationNumber =
                         if (shouldBroadcast) DataPacket.NODENUM_BROADCAST else getNodeNum()
 
@@ -68,18 +68,5 @@ class MeshServiceLocationCallback(
             destinationNumber,
             wantResponse // wantResponse?
         )
-    }
-
-    /**
-     * Rate limiting function.
-     */
-    private fun isAllowedToSend(): Boolean {
-        val now = System.currentTimeMillis()
-        // we limit our sends onto the lora net to a max one once every FIXME
-        val sendLora = (now - lastSendTimeMs >= sendRateLimitInSeconds * 1000)
-        if (sendLora) {
-            lastSendTimeMs = now
-        }
-        return sendLora
     }
 }

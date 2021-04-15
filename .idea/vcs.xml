@@ -5,6 +5,5 @@
     <mapping directory="$PROJECT_DIR$/app/src/main/proto" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/design" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/geeksville-androidlib" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/mesh_shared/src/main/proto" vcs="Git" />
   </component>
 </project>

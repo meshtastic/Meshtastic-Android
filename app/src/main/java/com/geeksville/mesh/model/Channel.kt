@@ -7,9 +7,7 @@ import com.google.protobuf.ByteString
 fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
 
 
-data class Channel(
-    val settings: ChannelProtos.ChannelSettings = ChannelProtos.ChannelSettings.getDefaultInstance()
-) {
+data class Channel(val settings: ChannelProtos.ChannelSettings) {
     companion object {
         // These bytes must match the well known and not secret bytes used the default channel AES128 key device code
         val channelDefaultKey = byteArrayOfInts(
@@ -17,10 +15,16 @@ data class Channel(
             0xf0, 0xbc, 0xff, 0xab, 0xcf, 0x4e, 0x69, 0xbf
         )
 
+        private val cleartextPSK = ByteString.EMPTY
+        private val defaultPSK =
+            byteArrayOfInts(1) // a shortstring code to indicate we need our default PSK
+
         // TH=he unsecured channel that devices ship with
-        val defaultChannel = Channel(
+        val default = Channel(
             ChannelProtos.ChannelSettings.newBuilder()
-                .setModemConfig(ChannelProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128).build()
+                .setModemConfig(ChannelProtos.ChannelSettings.ModemConfig.Bw125Cr48Sf4096)
+                .setPsk(ByteString.copyFrom(defaultPSK))
+                .build()
         )
     }
 
@@ -50,7 +54,7 @@ data class Channel(
             val pskIndex = settings.psk.byteAt(0).toInt()
 
             if (pskIndex == 0)
-                ByteString.EMPTY // Treat as an empty PSK (no encryption)
+                cleartextPSK
             else {
                 // Treat an index of 1 as the old channelDefaultKey and work up from there
                 val bytes = channelDefaultKey.clone()
@@ -73,6 +77,10 @@ data class Channel(
 
             return "#${name}-${suffix}"
         }
+
+    override fun equals(o: Any?): Boolean = (o is Channel)
+        && psk.toByteArray() contentEquals o.psk.toByteArray()
+        && name == o.name
 }
 
 fun xorHash(b: ByteArray) = b.fold(0, { acc, x -> acc xor (x.toInt() and 0xff) })

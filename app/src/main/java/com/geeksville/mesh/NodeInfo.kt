@@ -43,7 +43,7 @@ data class Position(
     val latitude: Double,
     val longitude: Double,
     val altitude: Int,
-    val time: Int = currentTime(), // default to current time in secs
+    val time: Int = currentTime(), // default to current time in secs (NOT MILLISECONDS!)
     val batteryPctLevel: Int = 0
 ) : Parcelable {
     companion object {
@@ -84,11 +84,13 @@ data class NodeInfo(
     var user: MeshUser? = null,
     var position: Position? = null,
     var snr: Float = Float.MAX_VALUE,
-    var rssi: Int = Int.MAX_VALUE
+    var rssi: Int = Int.MAX_VALUE,
+    var lastHeard: Int = 0 // the last time we've seen this node in secs since 1970
 ) : Parcelable {
 
-    /// Return the last time we've seen this node in secs since 1970
-    val lastSeen get() = position?.time ?: 0
+    /**
+     * Return the last time we've seen this node in secs since 1970
+     */
 
     val batteryPctLevel get() = position?.batteryPctLevel
 
@@ -104,7 +106,7 @@ data class NodeInfo(
             // FIXME - use correct timeout from the device settings
             val timeout =
                 15 * 60 // Don't set this timeout too tight, or otherwise we will stop sending GPS helper positions to our device
-            return (now - lastSeen <= timeout) || lastSeen == 0
+            return (now - lastHeard <= timeout) || lastHeard == 0
         }
 
     /// return the position if it is valid, else null

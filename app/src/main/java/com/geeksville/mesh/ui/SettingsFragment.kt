@@ -38,10 +38,7 @@ import com.geeksville.mesh.android.bluetoothManager
 import com.geeksville.mesh.android.usbManager
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.service.BluetoothInterface
-import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.service.RadioInterfaceService
-import com.geeksville.mesh.service.SerialInterface
+import com.geeksville.mesh.service.*
 import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ACTION_UPDATE_PROGRESS
 import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressNotStarted
 import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressSuccess
@@ -59,7 +56,7 @@ import kotlinx.coroutines.Job
 import java.util.regex.Pattern
 
 
-object SLogging : Logging {}
+object SLogging : Logging
 
 /// Change to a new macaddr selection, updating GUI and radio
 fun changeDeviceSelection(context: MainActivity, newAddr: String?) {
@@ -186,7 +183,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         // if that device later disconnects remove it as a candidate
         override fun onScanResult(callbackType: Int, result: ScanResult) {
 
-            if ((result.device.name?.startsWith("Mesh") ?: false)) {
+            if ((result.device.name?.startsWith("Mesh") == true)) {
                 val addr = result.device.address
                 val fullAddr = "x$addr" // full address with the bluetooh prefix
                 // prevent logspam because weill get get lots of redundant scan results
@@ -245,14 +242,12 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         debug("BTScan component active")
         selectedAddress = RadioInterfaceService.getDeviceAddress(context)
 
-        return if (bluetoothAdapter == null || RadioInterfaceService.isMockInterfaceAvailable(
-                context
-            )
-        ) {
+        return if (bluetoothAdapter == null || MockInterface.addressValid(context, "")) {
             warn("No bluetooth adapter.  Running under emulation?")
 
             val testnodes = listOf(
-                DeviceListEntry("Simulated interface", "m", true),
+                DeviceListEntry("Included simulator", "m", true),
+                DeviceListEntry("Complete simulator", "t10.0.2.2", true),
                 DeviceListEntry(context.getString(R.string.none), "n", true)
                 /* Don't populate fake bluetooth devices, because we don't want testlab inside of google
                 to try and use them.
@@ -494,7 +489,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     }
 
     /// Set the correct update button configuration based on current progress
-    private fun refreshUpdateButton() {
+    private fun refreshUpdateButton(enable: Boolean) {
         debug("Reiniting the udpate button")
         val info = model.myNodeInfo.value
         val service = model.meshService
@@ -505,7 +500,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
             val progress = service.updateStatus
 
-            binding.updateFirmwareButton.isEnabled =
+            binding.updateFirmwareButton.isEnabled = enable &&
                 (progress < 0) // if currently doing an upgrade disable button
 
             if (progress >= 0) {
@@ -542,7 +537,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val connected = model.isConnected.value
 
         val isConnected = connected == MeshService.ConnectionState.CONNECTED
-        binding.nodeSettings.visibility = if(isConnected) View.VISIBLE else View.GONE
+        binding.nodeSettings.visibility = if (isConnected) View.VISIBLE else View.GONE
 
         if (connected == MeshService.ConnectionState.DISCONNECTED)
             model.ownerName.value = ""
@@ -552,25 +547,19 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val spinner = binding.regionSpinner
         val unsetIndex = regions.indexOf(RadioConfigProtos.RegionCode.Unset.name)
         spinner.onItemSelectedListener = null
-        if(region != null) {
-            debug("current region is $region")
-            var regionIndex = regions.indexOf(region.name)
-            if(regionIndex == -1) // Not found, probably because the device has a region our app doesn't yet understand.  Punt and say Unset
-                regionIndex = unsetIndex
 
-            // We don't want to be notified of our own changes, so turn off listener while making them
-            spinner.setSelection(regionIndex, false)
-            spinner.onItemSelectedListener = regionSpinnerListener
-            spinner.isEnabled = true
-        }
-        else {
-            warn("region is unset!")
-            spinner.setSelection(unsetIndex, false)
-            spinner.isEnabled = false // leave disabled, because we can't get our region
-        }
+        debug("current region is $region")
+        var regionIndex = regions.indexOf(region.name)
+        if (regionIndex == -1) // Not found, probably because the device has a region our app doesn't yet understand.  Punt and say Unset
+            regionIndex = unsetIndex
+
+        // We don't want to be notified of our own changes, so turn off listener while making them
+        spinner.setSelection(regionIndex, false)
+        spinner.onItemSelectedListener = regionSpinnerListener
+        spinner.isEnabled = true
 
         // If actively connected possibly let the user update firmware
-        refreshUpdateButton()
+        refreshUpdateButton(region != RadioConfigProtos.RegionCode.Unset)
 
         // Update the status string (highest priority messages first)
         val info = model.myNodeInfo.value
@@ -590,14 +579,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
-    private val regionSpinnerListener = object : AdapterView.OnItemSelectedListener{
+    private val regionSpinnerListener = object : AdapterView.OnItemSelectedListener {
         override fun onItemSelected(
             parent: AdapterView<*>,
             view: View,
             position: Int,
             id: Long
         ) {
-            val item = parent.getItemAtPosition(position) as String
+            val item = parent.getItemAtPosition(position) as String?
             val asProto = item!!.let { RadioConfigProtos.RegionCode.valueOf(it) }
             exceptionToSnackbar(requireView()) {
                 model.region = asProto
@@ -622,7 +611,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         // init our region spinner
         val spinner = binding.regionSpinner
-        val regionAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, regions)
+        val regionAdapter =
+            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, regions)
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = regionAdapter
 
@@ -632,7 +622,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
 
         // Only let user edit their name or set software update while connected to a radio
-        model.isConnected.observe(viewLifecycleOwner, Observer { connectionState ->
+        model.isConnected.observe(viewLifecycleOwner, Observer { _ ->
             updateNodeInfo()
         })
 
@@ -702,7 +692,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 scanModel.onSelected(requireActivity() as MainActivity, device)
 
             if (!b.isSelected)
-                binding.scanStatusText.setText(getString(R.string.please_pair))
+                binding.scanStatusText.text = getString(R.string.please_pair)
         }
     }
 
@@ -765,7 +755,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // get rid of the warning text once at least one device is paired.
         // If we are running on an emulator, always leave this message showing so we can test the worst case layout
         binding.warningNotPaired.visibility =
-            if (hasBonded && !RadioInterfaceService.isMockInterfaceAvailable(requireContext())) View.GONE else View.VISIBLE
+            if (hasBonded && !MockInterface.addressValid(requireContext(), ""))
+                View.GONE
+            else
+                View.VISIBLE
     }
 
     /// Setup the GUI to do a classic (pre SDK 26 BLE scan)
@@ -935,7 +928,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private val updateProgressReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            refreshUpdateButton()
+            refreshUpdateButton(true)
         }
     }
 

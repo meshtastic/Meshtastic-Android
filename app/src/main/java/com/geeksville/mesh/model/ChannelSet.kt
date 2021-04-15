@@ -4,8 +4,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Base64
 import com.geeksville.mesh.AppOnlyProtos
-import com.geeksville.mesh.MeshProtos
-import com.google.protobuf.ByteString
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
@@ -42,11 +40,12 @@ data class ChannelSet(
     /**
      * Return the primary channel info
      */
-    val primaryChannel: Channel? get() =
-        if(protobuf.settingsCount > 0)
-            Channel(protobuf.getSettings(0))
-        else
-            null
+    val primaryChannel: Channel?
+        get() =
+            if (protobuf.settingsCount > 0)
+                Channel(protobuf.getSettings(0))
+            else
+                null
 
     /// Return an URL that represents the current channel values
     /// @param upperCasePrefix - portions of the URL can be upper case to make for more efficient QR codes
@@ -56,7 +55,7 @@ data class ChannelSet(
         val channelBytes = protobuf.toByteArray() ?: ByteArray(0) // if unset just use empty
         val enc = Base64.encodeToString(channelBytes, base64Flags)
 
-        val p = if(upperCasePrefix)
+        val p = if (upperCasePrefix)
             prefix.toUpperCase()
         else
             prefix
@@ -68,7 +67,12 @@ data class ChannelSet(
 
         // We encode as UPPER case for the QR code URL because QR codes are more efficient for that special case
         val bitMatrix =
-            multiFormatWriter.encode(getChannelUrl(true).toString(), BarcodeFormat.QR_CODE, 192, 192);
+            multiFormatWriter.encode(
+                getChannelUrl(true).toString(),
+                BarcodeFormat.QR_CODE,
+                192,
+                192
+            )
         val barcodeEncoder = BarcodeEncoder()
         return barcodeEncoder.createBitmap(bitMatrix)
     }

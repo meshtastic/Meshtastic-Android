@@ -38,6 +38,7 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import java.util.*
 import kotlin.math.absoluteValue
+import kotlin.math.max
 
 /**
  * Handles all the communication with android apps.  Also keeps an internal model
@@ -55,7 +56,7 @@ class MeshService : Service(), Logging {
         /* @Deprecated(message = "Does not filter by port number.  For legacy reasons only broadcast for UNKNOWN_APP, switch to ACTION_RECEIVED")
         const val ACTION_RECEIVED_DATA = "$prefix.RECEIVED_DATA" */
 
-        fun actionReceived(portNum: String) = "$prefix.RECEIVED.$portNum"
+        private fun actionReceived(portNum: String) = "$prefix.RECEIVED.$portNum"
 
         /// generate a RECEIVED action filter string that includes either the portnumber as an int, or preferably a symbolic name from portnums.proto
         fun actionReceived(portNum: Int): String {
@@ -70,7 +71,7 @@ class MeshService : Service(), Logging {
         const val ACTION_MESSAGE_STATUS = "$prefix.MESSAGE_STATUS"
 
         open class NodeNotFoundException(reason: String) : Exception(reason)
-        class InvalidNodeIdException() : NodeNotFoundException("Invalid NodeId")
+        class InvalidNodeIdException : NodeNotFoundException("Invalid NodeId")
         class NodeNumNotFoundException(id: Int) : NodeNotFoundException("NodeNum not found $id")
         class IdNotFoundException(id: String) : NodeNotFoundException("ID not found $id")
 
@@ -78,7 +79,7 @@ class MeshService : Service(), Logging {
             RadioNotConnectedException(message)
 
         /** We treat software update as similar to loss of comms to the regular bluetooth service (so things like sendPosition for background GPS ignores the problem */
-        class IsUpdatingException() :
+        class IsUpdatingException :
             RadioNotConnectedException("Operation prohibited during firmware update")
 
         /**
@@ -132,7 +133,7 @@ class MeshService : Service(), Logging {
     }
 
     private val locationCallback = MeshServiceLocationCallback(
-        ::sendPositionScoped,
+        ::perhapsSendPosition,
         onSendPositionFailed = { onConnectionChanged(ConnectionState.DEVICE_SLEEP) },
         getNodeNum = { myNodeNum }
     )
@@ -160,6 +161,36 @@ class MeshService : Service(), Logging {
         ).show()
     }
 
+    private var locationIntervalMsec = 0L
+
+    /**
+     * a periodic callback that perhaps send our position to other nodes.
+     * We first check to see if our local device has already sent a position and if so, we punt until the next check.
+     * This allows us to only 'fill in' with GPS positions when the local device happens to have no good GPS sats.
+     */
+    private fun perhapsSendPosition(
+        lat: Double = 0.0,
+        lon: Double = 0.0,
+        alt: Int = 0,
+        destNum: Int = DataPacket.NODENUM_BROADCAST,
+        wantResponse: Boolean = false
+    ) {
+        // This operation can take a while, so instead of staying in the callback (location services) context
+        // do most of the work in my service thread
+        serviceScope.handledLaunch {
+            // if android called us too soon, just ignore
+
+            val myInfo = localNodeInfo
+            val lastSendMsec = (myInfo?.position?.time ?: 0) * 1000L
+            val now = System.currentTimeMillis()
+            if (now - lastSendMsec < locationIntervalMsec)
+                debug("Not sending position - the local node has sent one recently...")
+            else {
+                sendPosition(lat, lon, alt, destNum, wantResponse)
+            }
+        }
+    }
+
     /**
      * start our location requests (if they weren't already running)
      *
@@ -172,6 +203,7 @@ class MeshService : Service(), Logging {
         if (fusedLocationClient == null && isGooglePlayAvailable(this)) {
             GeeksvilleApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
 
+            locationIntervalMsec = requestInterval
             val request = LocationRequest.create().apply {
                 interval = requestInterval
                 priority = LocationRequest.PRIORITY_HIGH_ACCURACY
@@ -242,24 +274,31 @@ class MeshService : Service(), Logging {
         get() = (if (connectionState == ConnectionState.CONNECTED) radio.serviceP else null)
             ?: throw RadioNotConnectedException()
 
-    /// Send a command/packet to our radio.  But cope with the possiblity that we might start up
-    /// before we are fully bound to the RadioInterfaceService
-    private fun sendToRadio(p: ToRadio.Builder) {
+    /** Send a command/packet to our radio.  But cope with the possiblity that we might start up
+    before we are fully bound to the RadioInterfaceService
+    @param requireConnected set to false if you are okay with using a partially connected device (i.e. during startup)
+     */
+    private fun sendToRadio(p: ToRadio.Builder, requireConnected: Boolean = true) {
         val b = p.build().toByteArray()
 
         if (SoftwareUpdateService.isUpdating)
             throw IsUpdatingException()
 
-        connectedRadio.sendToRadio(b)
+        if (requireConnected)
+            connectedRadio.sendToRadio(b)
+        else {
+            val s = radio.serviceP ?: throw RadioNotConnectedException()
+            s.sendToRadio(b)
+        }
     }
 
     /**
      * Send a mesh packet to the radio, if the radio is not currently connected this function will throw NotConnectedException
      */
-    private fun sendToRadio(packet: MeshPacket) {
+    private fun sendToRadio(packet: MeshPacket, requireConnected: Boolean = true) {
         sendToRadio(ToRadio.newBuilder().apply {
             this.packet = packet
-        })
+        }, requireConnected)
     }
 
     private fun updateMessageNotification(message: DataPacket) =
@@ -428,7 +467,7 @@ class MeshService : Service(), Logging {
 
     private var radioConfig: RadioConfigProtos.RadioConfig? = null
 
-    private var channels = arrayOf<ChannelProtos.Channel>()
+    private var channels = fixupChannelList(listOf())
 
     /// True after we've done our initial node db init
     @Volatile
@@ -453,6 +492,17 @@ class MeshService : Service(), Logging {
     private fun toNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: throw NodeNumNotFoundException(
         n
     )
+
+    /**
+     * Return the nodeinfo for the local node, or null if not found
+     */
+    private val localNodeInfo
+        get(): NodeInfo? =
+            try {
+                toNodeInfo(myNodeNum)
+            } catch (ex: Exception) {
+                null
+            }
 
     /** Map a nodenum to the nodeid string, or return null if not present
     If we have a NodeInfo for this ID we prefer to return the string ID inside the user record.
@@ -500,9 +550,13 @@ class MeshService : Service(), Logging {
     }
 
     /// A helper function that makes it easy to update node info objects
-    private fun updateNodeInfo(nodeNum: Int, updatefn: (NodeInfo) -> Unit) {
+    private fun updateNodeInfo(
+        nodeNum: Int,
+        withBroadcast: Boolean = true,
+        updateFn: (NodeInfo) -> Unit
+    ) {
         val info = getOrCreateNodeInfo(nodeNum)
-        updatefn(info)
+        updateFn(info)
 
         // This might have been the first time we know an ID for this node, so also update the by ID map
         val userId = info.user?.id.orEmpty()
@@ -510,7 +564,8 @@ class MeshService : Service(), Logging {
             nodeDBbyID[userId] = info
 
         // parcelable is busted
-        serviceBroadcasts.broadcastNodeChange(info)
+        if (withBroadcast)
+            serviceBroadcasts.broadcastNodeChange(info)
     }
 
     /// My node num
@@ -549,7 +604,7 @@ class MeshService : Service(), Logging {
                 setChannel(it)
             }
 
-            channels = asChannels.toTypedArray()
+            channels = fixupChannelList(asChannels)
         }
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
@@ -716,7 +771,10 @@ class MeshService : Service(), Logging {
 
                     // Handle new style position info
                     Portnums.PortNum.POSITION_APP_VALUE -> {
-                        val u = MeshProtos.Position.parseFrom(data.payload)
+                        var u = MeshProtos.Position.parseFrom(data.payload)
+                        // position updates from mesh usually don't include times.  So promote rx time
+                        if (u.time == 0 && packet.rxTime != 0)
+                            u = u.toBuilder().setTime(packet.rxTime).build()
                         debug("position_app ${packet.from} ${u.toOneLineString()}")
                         handleReceivedPosition(packet.from, u, dataPacket.time)
                     }
@@ -781,6 +839,7 @@ class MeshService : Service(), Logging {
                     val mi = myNodeInfo
                     if (mi != null) {
                         val ch = a.getChannelResponse
+                        // add new entries if needed
                         channels[ch.index] = ch
                         debug("Admin: Received channel ${ch.index}")
                         if (ch.index + 1 < mi.maxChannels) {
@@ -827,11 +886,16 @@ class MeshService : Service(), Logging {
         p: MeshProtos.Position,
         defaultTime: Long = System.currentTimeMillis()
     ) {
-        updateNodeInfo(fromNum) {
-            debug("update ${it.user?.longName} with ${p.toOneLineString()}")
-            it.position = Position(p)
-            updateNodeInfoTime(it, (defaultTime / 1000).toInt())
-        }
+        // Nodes periodically send out position updates, but those updates might not contain a lat & lon (because no GPS lock)
+        // We like to look at the local node to see if it has been sending out valid lat/lon, so for the LOCAL node (only)
+        // we don't record these nop position updates
+        if (myNodeNum == fromNum && p.latitudeI == 0 && p.longitudeI == 0)
+            debug("Ignoring nop position update for the local node")
+        else
+            updateNodeInfo(fromNum) {
+                debug("update position: ${it.user?.longName} with ${p.toOneLineString()}")
+                it.position = Position(p, (defaultTime / 1000L).toInt())
+            }
     }
 
     /// If packets arrive before we have our node DB, we delay parsing them until the DB is ready
@@ -914,15 +978,17 @@ class MeshService : Service(), Logging {
             // Update last seen for the node that sent the packet, but also for _our node_ because anytime a packet passes
             // through our node on the way to the phone that means that local node is also alive in the mesh
 
-            updateNodeInfo(myNodeNum) {
-                it.position = it.position?.copy(time = currentSecond())
+            val isOtherNode = myNodeNum != fromNum
+            updateNodeInfo(myNodeNum, withBroadcast = isOtherNode) {
+                it.lastHeard = currentSecond()
             }
 
-            // if (p.hasPosition()) handleReceivedPosition(fromNum, p.position, rxTime)
+            // Do not generate redundant broadcasts of node change for this bookkeeping updateNodeInfo call
+            // because apps really only care about important updates of node state - which handledReceivedData will give them
+            updateNodeInfo(fromNum, withBroadcast = false) {
+                // If the rxTime was not set by the device (because device software was old), guess at a time
+                val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
 
-            // If the rxTime was not set by the device (because device software was old), guess at a time
-            val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
-            updateNodeInfo(fromNum) {
                 // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
                 updateNodeInfoTime(it, rxTime)
                 it.snr = packet.rxSnr
@@ -946,28 +1012,32 @@ class MeshService : Service(), Logging {
     /// If we just changed our nodedb, we might want to do somethings
     private fun onNodeDBChanged() {
         maybeUpdateServiceStatusNotification()
-
-        serviceScope.handledLaunch(Dispatchers.Main) {
-            setupLocationRequest()
-        }
     }
 
-    private var locationRequestInterval: Long = 0;
     private fun setupLocationRequest() {
-        val desiredInterval: Long = if (myNodeInfo?.hasGPS == true) {
-            0L  // no requests when device has GPS
-        } else if (numOnlineNodes < 2) {
-            5 * 60 * 1000L  // send infrequently, device needs these requests to set its clock
-        } else {
-            radioConfig?.preferences?.positionBroadcastSecs?.times(1000L) ?: 5 * 60 * 1000L
-        }
+        stopLocationRequests()
+        val mi = myNodeInfo
+        val prefs = radioConfig?.preferences
+        if (mi != null && prefs != null) {
+            var broadcastSecs = prefs.positionBroadcastSecs
 
-        debug("desired location request $desiredInterval, current $locationRequestInterval")
+            var desiredInterval = if (broadcastSecs == 0) // unset by device, use default
+                15 * 60 * 1000L
+            else
+                broadcastSecs * 1000L
 
-        if (desiredInterval != locationRequestInterval) {
-            if (locationRequestInterval > 0) stopLocationRequests()
-            if (desiredInterval > 0) startLocationRequests(desiredInterval)
-            locationRequestInterval = desiredInterval
+            if (prefs.locationShare == RadioConfigProtos.LocationSharing.LocDisabled) {
+                info("GPS location sharing is disabled")
+                desiredInterval = 0
+            }
+
+            if (desiredInterval != 0L) {
+                info("desired GPS assistance interval $desiredInterval")
+                startLocationRequests(desiredInterval)
+            } else {
+                info("No GPS assistance desired, but sending UTC time to mesh")
+                sendPosition()
+            }
         }
     }
 
@@ -1079,7 +1149,7 @@ class MeshService : Service(), Logging {
                 // claim we have a valid connection still
                 connectionState = ConnectionState.DEVICE_SLEEP
                 startDeviceSleep()
-                throw ex; // Important to rethrow so that we don't tell the app all is well
+                throw ex // Important to rethrow so that we don't tell the app all is well
             }
         }
 
@@ -1315,13 +1385,45 @@ class MeshService : Service(), Logging {
         radioConfig = null
 
         // prefill the channel array with null channels
-        channels = Array(myInfo.maxChannels) {
-            val b = ChannelProtos.Channel.newBuilder()
-            b.index = it
-            b.build()
-        }
+        channels = fixupChannelList(listOf<ChannelProtos.Channel>())
     }
 
+    /// scan the channel list and make sure it has one PRIMARY channel and is maxChannels long
+    private fun fixupChannelList(lIn: List<ChannelProtos.Channel>): Array<ChannelProtos.Channel> {
+        // When updating old firmware, we will briefly be told that there is zero channels
+        val maxChannels =
+            max(myNodeInfo?.maxChannels ?: 8, 8) // If we don't have my node info, assume 8 channels
+        var l = lIn
+        while (l.size < maxChannels) {
+            val b = ChannelProtos.Channel.newBuilder()
+            b.index = l.size
+            l += b.build()
+        }
+        return l.toTypedArray()
+    }
+
+
+    private fun setRegionOnDevice() {
+        val curConfigRegion =
+            radioConfig?.preferences?.region ?: RadioConfigProtos.RegionCode.Unset
+
+        if (curConfigRegion.number != curRegionValue && curRegionValue != RadioConfigProtos.RegionCode.Unset_VALUE)
+            if (deviceVersion >= minFirmwareVersion) {
+                info("Telling device to upgrade region")
+
+                // Tell the device to set the new region field (old devices will simply ignore this)
+                radioConfig?.let { currentConfig ->
+                    val newConfig = currentConfig.toBuilder()
+
+                    val newPrefs = currentConfig.preferences.toBuilder()
+                    newPrefs.regionValue = curRegionValue
+                    newConfig.preferences = newPrefs.build()
+
+                    sendRadioConfig(newConfig.build())
+                }
+            } else
+                warn("Device is too old to understand region changes")
+    }
 
     /**
      * If we are updating nodes we might need to use old (fixed by firmware build)
@@ -1356,31 +1458,14 @@ class MeshService : Service(), Logging {
             }
 
             // If nothing was set in our (new style radio preferences, but we now have a valid setting - slam it in)
-            if (curConfigRegion == RadioConfigProtos.RegionCode.Unset && curRegionValue != RadioConfigProtos.RegionCode.Unset_VALUE) {
-                if (deviceVersion >= minFirmwareVersion) {
-                    info("Telling device to upgrade region")
-
-                    // Tell the device to set the new region field (old devices will simply ignore this)
-                    radioConfig?.let { currentConfig ->
-                        val newConfig = currentConfig.toBuilder()
-
-                        val newPrefs = currentConfig.preferences.toBuilder()
-                        newPrefs.regionValue = curRegionValue
-                        newConfig.preferences = newPrefs.build()
-
-                        sendRadioConfig(newConfig.build())
-                    }
-                }
-                else
-                    warn("Device is too old to understand region changes")
-            }
+            setRegionOnDevice()
         }
     }
 
     /// If we've received our initial config, our radio settings and all of our channels, send any queueed packets and broadcast connected to clients
     private fun onHasSettings() {
 
-        processEarlyPackets() // send receive any packets that were queued up
+        processEarlyPackets() // send any packets that were queued up
 
         // broadcast an intent with our new connection state
         serviceBroadcasts.broadcastConnection()
@@ -1388,6 +1473,8 @@ class MeshService : Service(), Logging {
         reportConnection()
 
         updateRegion()
+
+        setupLocationRequest() // start sending location packets if needed
     }
 
     private fun handleConfigComplete(configCompleteId: Int) {
@@ -1432,13 +1519,13 @@ class MeshService : Service(), Logging {
     private fun requestRadioConfig() {
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
             getRadioRequest = true
-        })
+        }, requireConnected = false)
     }
 
     private fun requestChannel(channelIndex: Int) {
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
             getChannelRequest = channelIndex + 1
-        })
+        }, requireConnected = false)
     }
 
     private fun setChannel(channel: ChannelProtos.Channel) {
@@ -1466,48 +1553,41 @@ class MeshService : Service(), Logging {
      * Must be called from serviceScope. Use sendPositionScoped() for direct calls.
      */
     private fun sendPosition(
-        lat: Double,
-        lon: Double,
-        alt: Int,
+        lat: Double = 0.0,
+        lon: Double = 0.0,
+        alt: Int = 0,
         destNum: Int = DataPacket.NODENUM_BROADCAST,
         wantResponse: Boolean = false
     ) {
-        debug("Sending our position to=$destNum lat=$lat, lon=$lon, alt=$alt")
-
-        val position = MeshProtos.Position.newBuilder().also {
-            it.longitudeI = Position.degI(lon)
-            it.latitudeI = Position.degI(lat)
-
-            it.altitude = alt
-            it.time = currentSecond() // Include our current timestamp
-        }.build()
-
-        // Also update our own map for our nodenum, by handling the packet just like packets from other users
-        handleReceivedPosition(myNodeInfo!!.myNodeNum, position)
-
-        val fullPacket =
-            newMeshPacketTo(destNum).buildMeshPacket(priority = MeshProtos.MeshPacket.Priority.BACKGROUND) {
-                // Use the new position as data format
-                portnumValue = Portnums.PortNum.POSITION_APP_VALUE
-                payload = position.toByteString()
-
-                this.wantResponse = wantResponse
-            }
-
-        // send the packet into the mesh
-        sendToRadio(fullPacket)
-    }
-
-    private fun sendPositionScoped(
-        lat: Double,
-        lon: Double,
-        alt: Int,
-        destNum: Int = DataPacket.NODENUM_BROADCAST,
-        wantResponse: Boolean = false
-    ) = serviceScope.handledLaunch {
         try {
-            sendPosition(lat, lon, alt, destNum, wantResponse)
-        } catch (ex: RadioNotConnectedException) {
+            val mi = myNodeInfo
+            if (mi != null) {
+                debug("Sending our position/time to=$destNum lat=$lat, lon=$lon, alt=$alt")
+
+                val position = MeshProtos.Position.newBuilder().also {
+                    it.longitudeI = Position.degI(lon)
+                    it.latitudeI = Position.degI(lat)
+
+                    it.altitude = alt
+                    it.time = currentSecond() // Include our current timestamp
+                }.build()
+
+                // Also update our own map for our nodenum, by handling the packet just like packets from other users
+                handleReceivedPosition(mi.myNodeNum, position)
+
+                val fullPacket =
+                    newMeshPacketTo(destNum).buildMeshPacket(priority = MeshProtos.MeshPacket.Priority.BACKGROUND) {
+                        // Use the new position as data format
+                        portnumValue = Portnums.PortNum.POSITION_APP_VALUE
+                        payload = position.toByteString()
+
+                        this.wantResponse = wantResponse
+                    }
+
+                // send the packet into the mesh
+                sendToRadio(fullPacket)
+            }
+        } catch (ex: BLEException) {
             warn("Ignoring disconnected radio during gps location update")
         }
     }
@@ -1539,9 +1619,7 @@ class MeshService : Service(), Logging {
         val myNode = myNodeInfo
         if (myNode != null) {
 
-
-            val myInfo = toNodeInfo(myNode.myNodeNum)
-            if (longName == myInfo.user?.longName && shortName == myInfo.user?.shortName)
+            if (longName == localNodeInfo?.user?.longName && shortName == localNodeInfo?.user?.shortName)
                 debug("Ignoring nop owner change")
             else {
                 debug("SetOwner $myId : ${longName.anonymize} : $shortName")
@@ -1627,8 +1705,10 @@ class MeshService : Service(), Logging {
         } else {
             debug("Creating firmware update coroutine")
             updateJob = serviceScope.handledLaunch {
-                debug("Starting firmware update coroutine")
-                SoftwareUpdateService.doUpdate(this@MeshService, safe, filename)
+                exceptionReporter {
+                    debug("Starting firmware update coroutine")
+                    SoftwareUpdateService.doUpdate(this@MeshService, safe, filename)
+                }
             }
         }
     }
@@ -1660,7 +1740,7 @@ class MeshService : Service(), Logging {
         offlineSentPackets.add(p)
     }
 
-    val binder = object : IMeshService.Stub() {
+    private val binder = object : IMeshService.Stub() {
 
         override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
             debug("Passing through device change to radio service: ${deviceAddr.anonymize}")
@@ -1684,6 +1764,12 @@ class MeshService : Service(), Logging {
         }
 
         override fun getUpdateStatus(): Int = SoftwareUpdateService.progress
+        override fun getRegion(): Int = curRegionValue
+
+        override fun setRegion(regionCode: Int) = toRemoteExceptions {
+            curRegionValue = regionCode
+            setRegionOnDevice()
+        }
 
         override fun startFirmwareUpdate() = toRemoteExceptions {
             doFirmwareUpdate()
@@ -1788,6 +1874,5 @@ class MeshService : Service(), Logging {
 }
 
 fun updateNodeInfoTime(it: NodeInfo, rxTime: Int) {
-    if (it.position?.time == null || it.position?.time!! < rxTime)
-        it.position = it.position?.copy(time = rxTime)
+    it.lastHeard = rxTime
 }

@@ -131,8 +131,10 @@ fun positionToMeter(a: MeshProtos.Position, b: MeshProtos.Position): Double {
         a.latitudeI * 1e-7,
         a.longitudeI * 1e-7,
         b.latitudeI * 1e-7,
-        b.longitudeI * 1e-7)
+        b.longitudeI * 1e-7
+    )
 }
+
 /**
  * Convert degrees/mins/secs to a single double
  *
@@ -186,7 +188,7 @@ fun bearing(
     val y = sin(deltaLonRad) * cos(lat2Rad)
     val x =
         cos(lat1Rad) * sin(lat2Rad) - (sin(lat1Rad) * cos(lat2Rad)
-                * Math.cos(deltaLonRad))
+            * Math.cos(deltaLonRad))
     return radToBearing(Math.atan2(y, x))
 }
 

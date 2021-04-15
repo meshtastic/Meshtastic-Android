@@ -3,18 +3,14 @@ package com.geeksville.mesh.service
 import android.content.ComponentName
 import android.content.Context
 import android.os.Build
-import androidx.work.BackoffPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.Worker
-import androidx.work.WorkerParameters
+import androidx.work.*
 import com.geeksville.andlib.BuildConfig
 import java.util.concurrent.TimeUnit
 
 /**
  * Helper that calls MeshService.startService()
  */
-public class ServiceStarter(
+class ServiceStarter(
     appContext: Context,
     workerParams: WorkerParameters
 ) : Worker(appContext, workerParams) {

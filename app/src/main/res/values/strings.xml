@@ -90,11 +90,17 @@
     <string name="protocol_stress_test">Protocol stress test</string>
     <string name="advanced_settings">Advanced settings</string>
     <string name="firmware_too_old">Firmware update required</string>
-    <string name="firmware_old">The radio firmware is too old to talk to this application, please go to the settings pane and choose "Update Firmware".  For more information on this see <a href="https://www.meshtastic.org/software/firmware-too-old.html">our wiki</a>.</string>
+    <string name="firmware_old">The radio firmware is too old to talk to this application, please go to the settings pane and choose "Update Firmware".  For more information on this see <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">our Firmware Installation guide</a> on Github.</string>
     <string name="okay">Okay</string>
     <string name="must_set_region">You must set a region!</string>
     <string name="region">Region</string>
     <string name="cant_change_no_radio">Couldn\'t change channel, because radio is not yet connected. Please try again.</string>
     <string name="sample_coords">55.332244 34.442211</string>
     <string name="save_messages">Save messages as csv...</string>
+    <string name="set_channel_options">Set channel options</string>
+    <string name="reset">Reset</string>
+    <string name="are_you_shure_change_default">Are you sure you want to change to the default channel?</string>
+    <string name="reset_to_defaults">Reset to defaults</string>
+    <string name="apply">Apply</string>
+    <string name="no_app_found">No application found to send URLs</string>
 </resources>

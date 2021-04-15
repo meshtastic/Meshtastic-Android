@@ -17,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.android.Logging
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
-import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.AdapterMessageLayoutBinding
 import com.geeksville.mesh.databinding.MessagesFragmentBinding
@@ -25,7 +24,6 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.google.android.material.chip.Chip
 import java.text.DateFormat
-import java.text.ParseException
 import java.util.*
 
 // Allows usage like email.on(EditorInfo.IME_ACTION_NEXT, { confirm() })
@@ -54,9 +52,9 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
     private val timeFormat: DateFormat =
         DateFormat.getTimeInstance(DateFormat.SHORT)
 
-    private fun getShortDateTime(time : Date): String {
+    private fun getShortDateTime(time: Date): String {
         // return time if within 24 hours, otherwise date/time
-        val one_day = 60*60*24*100L
+        val one_day = 60 * 60 * 24 * 100L
         if (System.currentTimeMillis() - time.time > one_day) {
             return dateTimeFormat.format(time)
         } else return timeFormat.format(time)
@@ -152,11 +150,25 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             if (isMe) {
                 marginParams.leftMargin = messageOffset
                 marginParams.rightMargin = 0
-                context?.let{ holder.card.setCardBackgroundColor(ContextCompat.getColor(it, R.color.colorMyMsg)) }
+                context?.let {
+                    holder.card.setCardBackgroundColor(
+                        ContextCompat.getColor(
+                            it,
+                            R.color.colorMyMsg
+                        )
+                    )
+                }
             } else {
                 marginParams.rightMargin = messageOffset
                 marginParams.leftMargin = 0
-                context?.let{ holder.card.setCardBackgroundColor(ContextCompat.getColor(it, R.color.colorMsg)) }
+                context?.let {
+                    holder.card.setCardBackgroundColor(
+                        ContextCompat.getColor(
+                            it,
+                            R.color.colorMsg
+                        )
+                    )
+                }
             }
             // Hide the username chip for my messages
             if (isMe) {
@@ -240,20 +252,26 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         // If connection state _OR_ myID changes we have to fix our ability to edit outgoing messages
         fun updateTextEnabled() {
             binding.textInputLayout.isEnabled =
-                model.isConnected.value  != MeshService.ConnectionState.DISCONNECTED && model.nodeDB.myId.value != null && model.radioConfig.value != null
+                model.isConnected.value != MeshService.ConnectionState.DISCONNECTED
+
+        // Just being connected is enough to allow sending texts I think
+        // && model.nodeDB.myId.value != null && model.radioConfig.value != null
         }
 
         model.isConnected.observe(viewLifecycleOwner, Observer { _ ->
             // If we don't know our node ID and we are offline don't let user try to send
-            updateTextEnabled() })
+            updateTextEnabled()
+        })
 
-        model.nodeDB.myId.observe(viewLifecycleOwner, Observer { _ ->
+        /* model.nodeDB.myId.observe(viewLifecycleOwner, Observer { _ ->
             // If we don't know our node ID and we are offline don't let user try to send
-            updateTextEnabled() })
+            updateTextEnabled()
+        })
 
         model.radioConfig.observe(viewLifecycleOwner, Observer { _ ->
             // If we don't know our node ID and we are offline don't let user try to send
-            updateTextEnabled() })
+            updateTextEnabled()
+        }) */
     }
 
 }

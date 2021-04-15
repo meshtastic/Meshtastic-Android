@@ -16,6 +16,7 @@ import com.geeksville.mesh.model.UIViewModel
 class DebugFragment : Fragment() {
 
     private var _binding: DebugFragmentBinding? = null
+
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
@@ -44,11 +45,11 @@ class DebugFragment : Fragment() {
             model.deleteAllPacket()
         }
 
-        binding.closeButton.setOnClickListener{
-            parentFragmentManager.popBackStack();
+        binding.closeButton.setOnClickListener {
+            parentFragmentManager.popBackStack()
         }
-        model.allPackets.observe(viewLifecycleOwner, Observer {
-            packets -> packets?.let { adapter.setPackets(it) }
+        model.allPackets.observe(viewLifecycleOwner, Observer { packets ->
+            packets?.let { adapter.setPackets(it) }
         })
     }
 }
