@@ -191,57 +191,27 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                 val oldDevs = devices.value!!
                 val oldEntry = oldDevs[fullAddr]
                 if (oldEntry == null || oldEntry.bonded != isBonded) { // Don't spam the GUI with endless updates for non changing nodes
-
-                    val skipBogus = try {
-                        // Note Soyes XS has a buggy BLE scan implementation and returns devices we didn't ask for.  So we check to see if the
-                        // last two chars of the name matches the last two of the address - if not we skip it
-
-                        // Note: the address is always two more than the hex string we show in the name
-
-                        // nasty parsing of a string that ends with ab:45 as four hex digits
-                        val lastAddr = (addr.substring(
-                            addr.length - 5,
-                            addr.length - 3
-                        ) + addr.substring(addr.length - 2)).toInt(16)
-
-                        val lastName =
-                            result.device.name.substring(result.device.name.length - 4).toInt(16)
-
-                        // ESP32 macaddr are two higher than the reported device name
-                        // NRF52 macaddrs match the portion used in the string
-                        // either would be acceptable
-                        (lastAddr - 2) != lastName && lastAddr != lastName
-                    } catch (ex: Throwable) {
-                        false // If we fail parsing anything, don't do this nasty hack
+                    val entry = DeviceListEntry(
+                        result.device.name
+                            ?: "unnamed-$addr", // autobug: some devices might not have a name, if someone is running really old device code?
+                        fullAddr,
+                        isBonded
+                    )
+                    // If nothing was selected, by default select the first valid thing we see
+                    val activity: MainActivity? = try {
+                        GeeksvilleApplication.currentActivity as MainActivity? // Can be null if app is shutting down
+                    } catch (_: ClassCastException) {
+                        // Buggy "Z812" phones apparently have the wrong class type for this
+                        errormsg("Unexpected class for main activity")
+                        null
                     }
 
-                    if (skipBogus)
-                        errormsg("Skipping bogus BLE entry $result")
-                    else {
-                        val entry = DeviceListEntry(
-                            result.device.name
-                                ?: "unnamed-$addr", // autobug: some devices might not have a name, if someone is running really old device code?
-                            fullAddr,
-                            isBonded
+                    if (selectedAddress == null && entry.bonded && activity != null)
+                        changeScanSelection(
+                            activity,
+                            fullAddr
                         )
-                        debug("onScanResult ${entry}")
-
-                        // If nothing was selected, by default select the first valid thing we see
-                        val activity: MainActivity? = try {
-                            GeeksvilleApplication.currentActivity as MainActivity? // Can be null if app is shutting down
-                        } catch (_: ClassCastException) {
-                            // Buggy "Z812" phones apparently have the wrong class type for this
-                            errormsg("Unexpected class for main activity")
-                            null
-                        }
-
-                        if (selectedAddress == null && entry.bonded && activity != null)
-                            changeScanSelection(
-                                activity,
-                                fullAddr
-                            )
-                        addDevice(entry) // Add/replace entry
-                    }
+                    addDevice(entry) // Add/replace entry
                 }
             }
         }
