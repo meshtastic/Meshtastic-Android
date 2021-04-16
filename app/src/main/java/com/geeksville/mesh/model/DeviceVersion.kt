@@ -27,7 +27,7 @@ data class DeviceVersion(val asString: String) : Comparable<DeviceVersion>, Logg
             Regex("(\\d{1,2}).(\\d{1,2}).(\\d{1,2})").find(s)
                 ?: throw Exception("Can't parse version $s")
         val (major, minor, build) = match.destructured
-        return major.toInt() * 1000 + minor.toInt() * 100 + build.toInt()
+        return major.toInt() * 10000 + minor.toInt() * 100 + build.toInt()
     }
 
     override fun compareTo(other: DeviceVersion): Int = asInt - other.asInt
