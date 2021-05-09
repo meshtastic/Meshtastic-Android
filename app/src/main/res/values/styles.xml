@@ -4,6 +4,7 @@
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
         <!-- Customize your theme here. -->
         <item name="actionBarTheme">@style/MyActionBar</item>
+        <item name="materialButtonStyle">@style/Widget.App.Button</item>
 
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -51,6 +52,10 @@
     <style name="Meshtastic.Button.Rounded" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
+    </style>
+
+    <style name="Widget.App.Button" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/buttonColor</item>
     </style>
 
     <style name="MyThemeOverlay_Toolbar" parent="">
