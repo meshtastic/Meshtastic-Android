@@ -141,7 +141,7 @@
             app:layout_constraintTop_toBottomOf="@+id/warningNotPaired"
             app:layout_constraintVertical_bias="1.0" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/reportBugButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -153,7 +153,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintWidth_percent="0.4" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/changeRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -163,7 +163,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/scanStatusText" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/updateFirmwareButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
