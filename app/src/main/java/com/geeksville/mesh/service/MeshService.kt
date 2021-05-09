@@ -279,7 +279,9 @@ class MeshService : Service(), Logging {
     @param requireConnected set to false if you are okay with using a partially connected device (i.e. during startup)
      */
     private fun sendToRadio(p: ToRadio.Builder, requireConnected: Boolean = true) {
-        val b = p.build().toByteArray()
+        val built = p.build()
+        debug("Sending to radio $built")
+        val b = built.toByteArray()
 
         if (SoftwareUpdateService.isUpdating)
             throw IsUpdatingException()
@@ -1793,8 +1795,9 @@ class MeshService : Service(), Logging {
             toRemoteExceptions {
                 // Init from and id
                 myNodeID?.let { myId ->
-                    if (p.from == DataPacket.ID_LOCAL)
-                        p.from = myId
+                    // we no longer set from, we let the device do it
+                    //if (p.from == DataPacket.ID_LOCAL)
+                    //    p.from = myId
 
                     if (p.id == 0)
                         p.id = generatePacketId()

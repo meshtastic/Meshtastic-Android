@@ -113,7 +113,7 @@ protobuf {
 
 dependencies {
 
-    def room_version = '2.2.6'
+    def room_version = '2.3.0'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"

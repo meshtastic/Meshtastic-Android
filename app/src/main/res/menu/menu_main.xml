@@ -4,7 +4,7 @@
         android:id="@+id/connectStatusImage"
         android:contentDescription="@string/connection_status"
         android:icon="@drawable/cloud_off"
-        android:tint="#FFFFFF"
+        android:tint="@color/colorOnPrimary"
         android:title="@string/disconnected"
         app:showAsAction="ifRoom" />
     <item

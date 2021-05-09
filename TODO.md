@@ -1,15 +1,6 @@
-# Remaining tasks before declaring 1.0
+# Misc todo
 
-- add new languages from eric: https://meshtastic.discourse.group/t/call-for-help-please-localize-the-app-for-your-language/107/61?u=geeksville
-- add faq entry about range and antennas and rain
-- first message sent is still doubled for some people
-- let users set arbitrary params in android
-- add a low level settings screen (let user change any of the RadioConfig parameters)
-
-Things for the betaish period.
-
-* let user change more channel parameters
-* really great notes about importance of clean BLE disconnects: https://blog.classycode.com/a-short-story-about-android-ble-connection-timeouts-and-gatt-internal-errors-fa89e3f6a456
+* move analytics out with https://blog.gradle.org/optional-dependencies
 
 # Documentation tasks
 

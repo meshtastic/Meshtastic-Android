@@ -685,10 +685,10 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         gatt?.writeCharacteristic(c) ?: false
     }
 
-    /* fun asyncWriteReliable(
+    fun asyncWriteReliable(
         c: BluetoothGattCharacteristic,
         cb: (Result<Unit>) -> Unit
-    ) = queueWriteCharacteristic(c, CallbackContinuation(cb)) */
+    ) = queueWriteReliable(c, CallbackContinuation(cb))
 
     fun writeReliable(c: BluetoothGattCharacteristic): Unit =
         makeSync { queueWriteReliable(c, it) }

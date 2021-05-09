@@ -3,14 +3,14 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
         <!-- Customize your theme here. -->
+        <item name="actionBarTheme">@style/MyActionBar</item>
+
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">#FFFFFF</item>
-    </style>
 
-    <style name="AppTheme.NoActionBar" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="windowNoTitle">true</item>
         <item name="android:itemTextAppearance">@style/menu_item_color</item>
+
     </style>
 
     <style name="AppTheme.Spinner">
@@ -53,10 +53,19 @@
         <item name="cornerSize">50%</item>
     </style>
 
-    // Toolbar style
-    <style name="MyToolbar" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
-        <item name="tint">@color/colorToolbar</item>
-        <item name="colorOnPrimary">@color/colorToolbar</item>
-        <item name="android:textColor">@color/colorToolbar</item>
+    <style name="MyThemeOverlay_Toolbar" parent="">
+        <item name="background">@color/colorPrimary</item>
+        <item name="android:textColorPrimary">@color/colorOnPrimary</item>
+        <item name="tint">@color/colorOnPrimary</item>
     </style>
+
+    <style name="MyActionBar" parent="@style/ThemeOverlay.MaterialComponents.ActionBar">
+        <item name="background">@color/colorPrimary</item>
+        <item name="android:textColorPrimary">@color/colorOnPrimary</item>
+    </style>
+
+    <style name="MyToolbar" parent="Widget.MaterialComponents.Toolbar">
+        <item name="materialThemeOverlay">@style/MyThemeOverlay_Toolbar</item>
+    </style>
+
 </resources>
