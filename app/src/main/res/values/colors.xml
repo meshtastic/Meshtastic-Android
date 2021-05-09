@@ -9,4 +9,6 @@
     <color name="colorAdvancedBackground">#FFFFFF</color>
     <color name="colorIconTint">#000000</color>
     <color name="colorMenuItem">#000000</color>
+    <color name="selectedColor">#67EA94</color>
+    <color name="unselectedColor">#212121</color>
 </resources>
