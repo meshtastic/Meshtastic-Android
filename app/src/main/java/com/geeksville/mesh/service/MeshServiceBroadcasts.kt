@@ -42,7 +42,8 @@ class MeshServiceBroadcasts(
         if (p.id == 0) {
             MeshService.debug("Ignoring anonymous packet status")
         } else {
-            MeshService.debug("Broadcasting message status $p")
+            // Do not log, contains PII possibly
+            // MeshService.debug("Broadcasting message status $p")
             val intent = Intent(MeshService.ACTION_MESSAGE_STATUS).apply {
                 putExtra(EXTRA_PACKET_ID, p.id)
                 putExtra(EXTRA_STATUS, p.status as Parcelable)

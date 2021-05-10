@@ -280,7 +280,7 @@ class MeshService : Service(), Logging {
      */
     private fun sendToRadio(p: ToRadio.Builder, requireConnected: Boolean = true) {
         val built = p.build()
-        debug("Sending to radio $built")
+        debug("Sending to radio ${built.toPIIString()}")
         val b = built.toByteArray()
 
         if (SoftwareUpdateService.isUpdating)
@@ -777,7 +777,8 @@ class MeshService : Service(), Logging {
                         // position updates from mesh usually don't include times.  So promote rx time
                         if (u.time == 0 && packet.rxTime != 0)
                             u = u.toBuilder().setTime(packet.rxTime).build()
-                        debug("position_app ${packet.from} ${u.toOneLineString()}")
+                        // PII
+                        // debug("position_app ${packet.from} ${u.toOneLineString()}")
                         handleReceivedPosition(packet.from, u, dataPacket.time)
                     }
 
@@ -895,7 +896,7 @@ class MeshService : Service(), Logging {
             debug("Ignoring nop position update for the local node")
         else
             updateNodeInfo(fromNum) {
-                debug("update position: ${it.user?.longName} with ${p.toOneLineString()}")
+                debug("update position: ${it.user?.longName?.toPIIString()} with ${p.toPIIString()}")
                 it.position = Position(p, (defaultTime / 1000L).toInt())
             }
     }
@@ -924,8 +925,7 @@ class MeshService : Service(), Logging {
         val packet = toMeshPacket(p)
         p.status = MessageStatus.ENROUTE
         p.time = System.currentTimeMillis() // update time to the actual time we started sending
-        if (BuildConfig.DEBUG)
-            debug("Sending to radio: $packet") // IMPORTANT: we only log this info for debug builds, because it might leak PII
+        // debug("Sending to radio: ${packet.toPIIString()}")
         sendToRadio(packet)
     }
 
@@ -1003,7 +1003,8 @@ class MeshService : Service(), Logging {
 
     private fun insertPacket(packetToSave: Packet) {
         serviceScope.handledLaunch {
-            info("insert: ${packetToSave.message_type} = ${packetToSave.raw_message.toOneLineString()}")
+            // Do not log, because might contain PII
+            // info("insert: ${packetToSave.message_type} = ${packetToSave.raw_message.toOneLineString()}")
             packetRepo!!.insert(packetToSave)
         }
     }
