@@ -379,7 +379,7 @@ class MeshService : Service(), Logging {
         info("Destroying mesh service")
 
         // This might fail if we get destroyed before the handledLaunch completes
-        ignoreException {
+        ignoreException(silent = true) {
             unregisterReceiver(radioInterfaceReceiver)
         }
 
