@@ -291,8 +291,10 @@ class MainActivity : AppCompatActivity(), Logging,
 
     /**
      * Remind user he's disabled permissions we need
+     *
+     * @return true if we did warn
      */
-    private fun warnMissingPermissions() {
+    fun warnMissingPermissions(): Boolean {
         // Older versions of android don't know about these permissions - ignore failure to grant
         val ignoredPermissions = setOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -304,10 +306,12 @@ class MainActivity : AppCompatActivity(), Logging,
             !ignoredPermissions.contains(name)
         }
 
-        if (deniedPermissions.isNotEmpty()) {
+        return if (deniedPermissions.isNotEmpty()) {
             errormsg("Denied permissions: ${deniedPermissions.joinToString(",")}")
             showToast(R.string.permission_missing)
-        }
+            true
+        } else
+            false
     }
 
     override fun onRequestPermissionsResult(
@@ -1133,7 +1137,8 @@ class MainActivity : AppCompatActivity(), Logging,
         val styles = arrayOf(
             getString(R.string.theme_light),
             getString(R.string.theme_dark),
-            getString(R.string.theme_system))
+            getString(R.string.theme_system)
+        )
 
         /// Load preferences and its value
         val prefs = UIViewModel.getPreferences(this)

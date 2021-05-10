@@ -889,8 +889,22 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             val locationSettingsResponse = LocationServices.getSettingsClient(requireActivity())
                 .checkLocationSettings(builder.build())
 
+            fun weNeedAccess() {
+                context?.let { c ->
+                    warn("Telling user we need need location accesss")
+                    Toast.makeText(
+                        c,
+                        getString(R.string.location_disabled_warning),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
             locationSettingsResponse.addOnSuccessListener {
-                debug("We have location access")
+                if(!it.locationSettingsStates.isBleUsable || !it.locationSettingsStates.isLocationUsable)
+                    weNeedAccess()
+                else
+                    debug("We have location access")
             }
 
             locationSettingsResponse.addOnFailureListener { _ ->
@@ -910,13 +924,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 // For now just punt and show a dialog
 
                 // The context might be gone (if activity is going away) by the time this handler is called
-                context?.let { c ->
-                    Toast.makeText(
-                        c,
-                        getString(R.string.location_disabled_warning),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                weNeedAccess()
 
                 //} else
                 //    Exceptions.report(exception)
@@ -945,20 +953,25 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (!hasCompanionDeviceApi)
             scanModel.startScan()
 
-        requireActivity().registerReceiver(updateProgressReceiver, updateProgressFilter)
+        val activity = requireActivity() as MainActivity
+
+        activity.registerReceiver(updateProgressReceiver, updateProgressFilter)
 
         // Keep reminding user BLE is still off
         val hasUSB = activity?.let { SerialInterface.findDrivers(it).isNotEmpty() } ?: true
         if (!hasUSB) {
-            // Warn user if BLE is disabled
-            if (scanModel.bluetoothAdapter?.isEnabled != true) {
-                Toast.makeText(
-                    requireContext(),
-                    R.string.error_bluetooth,
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
-                checkLocationEnabled()
+            // First warn about permissions, and then if needed warn abotu settings
+            if(!activity.warnMissingPermissions()) {
+                // Warn user if BLE is disabled
+                if (scanModel.bluetoothAdapter?.isEnabled != true) {
+                    Toast.makeText(
+                        requireContext(),
+                        R.string.error_bluetooth,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    checkLocationEnabled()
+                }
             }
         }
     }
