@@ -8,6 +8,7 @@ This project is currently beta testing, if you have questions or feedback please
 
 The production version of our application is here:
 
+<!---
 [![Download at https://play.google.com/store/apps/details?id=com.geeksville.mesh](https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png)](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dgithub-android-readme)
 
 But if you want the beta-test app now, we'd love to have your help testing.  Three steps to opt-in to the test:
@@ -16,8 +17,14 @@ But if you want the beta-test app now, we'd love to have your help testing.  Thr
 not bleeding edge alpha test builds skip to the next step.
 2. Go to this [URL](https://play.google.com/apps/testing/com.geeksville.mesh) to opt-in to the alpha/beta test.
 3. If you encounter any problems or have questions, [post in the forum](https://meshtastic.discourse.group/)t and we'll help.
+-->
 
-The app is also distributed for Amazon Fire devices via the Amazon appstore: [![Amazon appstore link](https://raw.githubusercontent.com/meshtastic/Meshtastic-device/master/images/amazon-fire-button.png)](https://www.amazon.com/Geeksville-Industries-Meshtastic/dp/B08CY9394Q)
+We currently recommend using the Amazon appstore: [![Amazon appstore link](images/amazon-fire-button.png)](https://www.amazon.com/Geeksville-Industries-Meshtastic/dp/B08CY9394Q)
+
+However, if you must use 'raw' APKs you can get them from our [github releases](https://github.com/meshtastic/Meshtastic-Android/releases).  This is not recommended because if you manually install an APK it will not automatically update.
+
+**Important note about Google Play**: Our Google Play listing has been removed by google due to a recent policy change by them wrt background location accesss (which our app needs).  We've [started](https://meshtastic.org/docs/software/android/location-access)
+the 'appeal' process, but for now you'll need to get the app from other places.
 
 ## Build instructions
 
