@@ -19,7 +19,9 @@ not bleeding edge alpha test builds skip to the next step.
 3. If you encounter any problems or have questions, [post in the forum](https://meshtastic.discourse.group/)t and we'll help.
 -->
 
-We currently recommend using the Amazon appstore: [![Amazon appstore link](images/amazon-fire-button.png)](https://www.amazon.com/Geeksville-Industries-Meshtastic/dp/B08CY9394Q)
+We currently recommend using the Amazon [appstore](https://www.amazon.com/Geeksville-Industries-Meshtastic/dp/B08CY9394Q).  If you don't already have their app on your phone you'll need to install it first.
+
+[![Amazon appstore link](images/amazon-fire-button.png)](https://www.amazon.com/Geeksville-Industries-Meshtastic/dp/B08CY9394Q)
 
 However, if you must use 'raw' APKs you can get them from our [github releases](https://github.com/meshtastic/Meshtastic-Android/releases).  This is not recommended because if you manually install an APK it will not automatically update.
 
