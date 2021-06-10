@@ -2,6 +2,13 @@
 
 * move analytics out with https://blog.gradle.org/optional-dependencies
 
+# Android 30 location tasks
+
+* https://developer.android.com/about/versions/11/privacy/location#background-location - ask for foreground and background location separately
+* add "help location checkbox"
+* turn off "provideLocation" checkbox if we don't have background permission.  If someone tries to turn it on, raise dialog then ask for background permissions
+* add help button to location checkbox
+
 # Documentation tasks
 
 Mostly for geeksville 
