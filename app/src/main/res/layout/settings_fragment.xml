@@ -13,21 +13,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="16dp">
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/warningNotPaired"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:autoLink="web"
-            android:ems="10"
-            android:gravity="start|top"
-            android:text="@string/warning_not_paired"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/deviceRadioGroup" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/nodeSettings"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -125,34 +111,6 @@
                 android:text="@string/test_devname2" />
         </RadioGroup>
 
-        <CheckBox
-            android:id="@+id/analyticsOkayCheckbox"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            android:background="@android:color/transparent"
-            android:checked="true"
-            android:text="@string/analytics_okay"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/reportBugButton"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/warningNotPaired"
-            app:layout_constraintVertical_bias="1.0" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/reportBugButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="@string/report_bug"
-            app:layout_constrainedWidth="true"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintWidth_percent="0.4" />
-
         <com.google.android.material.button.MaterialButton
             android:id="@+id/changeRadioButton"
             android:layout_width="wrap_content"
@@ -181,6 +139,57 @@
             app:layout_constraintEnd_toEndOf="@+id/updateFirmwareButton"
             app:layout_constraintStart_toStartOf="@+id/updateFirmwareButton"
             app:layout_constraintTop_toBottomOf="@+id/updateFirmwareButton" />
+
+        <CheckBox
+            android:id="@+id/provideLocationCheckbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="Provide location to mesh"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/deviceRadioGroup" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/warningNotPaired"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:autoLink="web"
+            android:ems="10"
+            android:gravity="start|top"
+            android:text="@string/warning_not_paired"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/provideLocationCheckbox" />
+
+        <CheckBox
+            android:id="@+id/analyticsOkayCheckbox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@android:color/transparent"
+            android:checked="true"
+            android:text="@string/analytics_okay"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/reportBugButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/warningNotPaired"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/reportBugButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="@string/report_bug"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintWidth_percent="0.4" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

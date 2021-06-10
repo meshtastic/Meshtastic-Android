@@ -25,6 +25,7 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -41,6 +42,8 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
 import com.geeksville.concurrent.handledLaunch
+import com.geeksville.mesh.android.getBackgroundPermissions
+import com.geeksville.mesh.android.getMissingPermissions
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.ChannelSet
@@ -119,7 +122,6 @@ eventually:
 */
 
 val utf8 = Charset.forName("UTF-8")
-
 
 class MainActivity : AppCompatActivity(), Logging,
     ActivityCompat.OnRequestPermissionsResultCallback {
@@ -223,17 +225,9 @@ class MainActivity : AppCompatActivity(), Logging,
         model.bluetoothEnabled.value = enabled
     }
 
-    /**
-     * return a list of the permissions we don't have
+    /** Get the minimum permissions our app needs to run correctly
      */
-    private fun getMissingPermissions(perms: List<String>) = perms.filter {
-        ContextCompat.checkSelfPermission(
-            this,
-            it
-        ) != PackageManager.PERMISSION_GRANTED
-    }
-
-    private fun getMissingPermissions(): List<String> {
+    private fun getMinimumPermissions(): List<String> {
         val perms = mutableListOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -245,9 +239,6 @@ class MainActivity : AppCompatActivity(), Logging,
             // Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
 
-        if (Build.VERSION.SDK_INT >= 29) // only added later
-            perms.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-
         // Some old phones complain about requesting perms they don't understand
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             perms.add(Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND)
@@ -257,10 +248,16 @@ class MainActivity : AppCompatActivity(), Logging,
         return getMissingPermissions(perms)
     }
 
-    private fun requestPermission() {
-        debug("Checking permissions")
 
-        val missingPerms = getMissingPermissions()
+
+    /** Ask the user to grant background location permission */
+    fun requestBackgroundPermission() = requestPermission(getBackgroundPermissions())
+
+    /** Possibly prompt user to grant permissions
+     *
+     * @return true if we already have the needed permissions
+     */
+    private fun requestPermission(missingPerms: List<String> = getMinimumPermissions()): Boolean =
         if (missingPerms.isNotEmpty()) {
             missingPerms.forEach {
                 // Permission is not granted
@@ -283,17 +280,20 @@ class MainActivity : AppCompatActivity(), Logging,
             // DID_REQUEST_PERM is an
             // app-defined int constant. The callback method gets the
             // result of the request.
+            error("Permissions missing, asked user to grant")
+            false
         } else {
             // Permission has already been granted
+            debug("We have our required permissions")
+            true
         }
-    }
-
 
     /**
      * Remind user he's disabled permissions we need
      *
      * @return true if we did warn
      */
+    @SuppressLint("InlinedApi") // This function is careful to work with old APIs correctly
     fun warnMissingPermissions(): Boolean {
         // Older versions of android don't know about these permissions - ignore failure to grant
         val ignoredPermissions = setOf(
@@ -302,7 +302,7 @@ class MainActivity : AppCompatActivity(), Logging,
             Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND
         )
 
-        val deniedPermissions = getMissingPermissions().filter { name ->
+        val deniedPermissions = getMinimumPermissions().filter { name ->
             !ignoredPermissions.contains(name)
         }
 

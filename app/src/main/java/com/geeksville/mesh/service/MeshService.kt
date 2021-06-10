@@ -20,6 +20,7 @@ import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.*
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
+import com.geeksville.mesh.android.hasBackgroundPermission
 import com.geeksville.mesh.database.MeshtasticDatabase
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
@@ -200,7 +201,7 @@ class MeshService : Service(), Logging {
     @UiThread
     private fun startLocationRequests(requestInterval: Long) {
         // FIXME - currently we don't support location reading without google play
-        if (fusedLocationClient == null && isGooglePlayAvailable(this)) {
+        if (fusedLocationClient == null && hasBackgroundPermission() && isGooglePlayAvailable(this)) {
             GeeksvilleApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
 
             locationIntervalMsec = requestInterval
