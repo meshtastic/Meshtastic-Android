@@ -903,7 +903,7 @@ class MeshService : Service(), Logging {
     }
 
     /// If packets arrive before we have our node DB, we delay parsing them until the DB is ready
-    private val earlyReceivedPackets = mutableListOf<MeshPacket>()
+    // private val earlyReceivedPackets = mutableListOf<MeshPacket>()
 
     /// If apps try to send packets when our radio is sleeping, we queue them here instead
     private val offlineSentPackets = mutableListOf<DataPacket>()
@@ -917,8 +917,9 @@ class MeshService : Service(), Logging {
             processReceivedMeshPacket(packet)
             onNodeDBChanged()
         } else {
-            earlyReceivedPackets.add(packet)
-            logAssert(earlyReceivedPackets.size < 128) // The max should normally be about 32, but if the device is messed up it might try to send forever
+            warn("Ignoring early received packet: $packet")
+            //earlyReceivedPackets.add(packet)
+            //logAssert(earlyReceivedPackets.size < 128) // The max should normally be about 32, but if the device is messed up it might try to send forever
         }
     }
 
@@ -931,7 +932,7 @@ class MeshService : Service(), Logging {
     }
 
     /// Process any packets that showed up too early
-    private fun processEarlyPackets() {
+    /* private fun processEarlyPackets() {
         earlyReceivedPackets.forEach { processReceivedMeshPacket(it) }
         earlyReceivedPackets.clear()
 
@@ -941,7 +942,7 @@ class MeshService : Service(), Logging {
             serviceBroadcasts.broadcastMessageStatus(p)
         }
         offlineSentPackets.clear()
-    }
+    } */
 
     /**
      * Change the status on a data packet and update watchers
@@ -1474,7 +1475,7 @@ class MeshService : Service(), Logging {
     /// If we've received our initial config, our radio settings and all of our channels, send any queueed packets and broadcast connected to clients
     private fun onHasSettings() {
 
-        processEarlyPackets() // send any packets that were queued up
+        // processEarlyPackets() // send any packets that were queued up
 
         // broadcast an intent with our new connection state
         serviceBroadcasts.broadcastConnection()
