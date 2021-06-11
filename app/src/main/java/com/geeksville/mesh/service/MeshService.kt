@@ -1357,7 +1357,7 @@ class MeshService : Service(), Logging {
                 DataPair("dev_error_count", myInfo.errorCount)
             )
 
-            if (myInfo.errorCode.number != 0) {
+            if (myInfo.errorCode != MeshProtos.CriticalErrorCode.Unspecified && myInfo.errorCode != MeshProtos.CriticalErrorCode.None) {
                 GeeksvilleApplication.analytics.track(
                     "dev_error",
                     DataPair("code", myInfo.errorCode.number),
