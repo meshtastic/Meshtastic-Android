@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Meshtastic</string>
+    <string name="action_settings">Ustawienia</string>
+    <string name="channel_name">Nazwa kanału</string>
+    <string name="channel_options">Opcje kanału</string>
+    <string name="share_button">Przycisk udostępniania</string>
+    <string name="qr_code">Kod QR</string>
+    <string name="unset">Nieustawiony</string>
+    <string name="connection_status">Stan połączenia</string>
+    <string name="application_icon">Ikona aplikacji</string>
+    <string name="unknown_username">Nieznany użytkownik</string>
+    <string name="user_avatar">Avatar użytkownika</string>
+    <string name="sample_distance" translatable="false">2.13 km</string>
+    <string name="sample_message">Czerwona, czy niebieska, która wybierasz?</string>
+    <string name="some_username" translatable="false">SKH</string>
+    <string name="send_text">Wyślij</string>
+    <string name="warning_not_paired">Urządzenie Meshtastic nie jest  jeszcze połączone z telefonem. Połącz urządzenie i ustaw nazwę użytkownika.\n\nTo jest aplikacja open-source i jest w fazie rozwoju, jeśli znajdziesz błąd lub problem napisz o tym na naszym forum: meshtastic.discourse.group.\n\nJeśli potrzebujesz więcej informacji odwiedź naszą stronę - www.meshtastic.org.</string>
+    <string name="username_unset">Brak nazwy użytkownika.</string>
+    <string name="your_name">Twoje imię.</string>
+    <string name="analytics_okay">Anonimowe statystyki użycia aplikacji i raporty błędów.</string>
+    <string name="looking_for_meshtastic_devices">Szukam urządzeń Meshtastic…</string>
+    <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
+    <string name="test_devname2" translatable="false">Meshtastic_1267</string>
+    <string name="requires_bluetooth">Ta aplikacja wymaga dostępu do Bluetooth. Proszę zezwól aplikacji na to w ustawieniach systemu.</string>
+    <string name="error_bluetooth">Błąd - aplikacja wymaga połączenia Bluetooth</string>
+    <string name="starting_pairing">Rozpoczęcie parowania.</string>
+    <string name="pairing_failed">Parowanie nieudane</string>
+    <string name="url_for_join">Adres dołączenia do sieci Meshtastic.</string>
+    <string name="accept">Akceptuj</string>
+    <string name="cancel">Odrzuć</string>
+    <string name="change_channel">Nazwa kanału</string>
+    <string name="are_you_sure_channel">Na pewno chcesz zmienić nazwę kanału? Cała korespondencja z innymi użytkowaniami sieci zostanie wstrzymana do czasu, kiedy przekażesz nowe ustawienia sieci.</string>
+    <string name="new_channel_rcvd">Otrzymano nowy adres kanału.</string>
+    <string name="do_you_want_switch">Czy chcesz przełączyć na kanał \'%s\'?</string>
+    <string name="map_not_allowed">Przekazywanie statystyk wyłączone. Niestety dostawca mapy (mapbox) wymaga przekazywania statystyk w ramach ich \'darmowej\' usługi. Dlatego wyłączyliśmy widok mapy.\n\n
+        Jeśli chcesz widzieć mapę, musisz włączyć udostępnianie statystyk w zakładce Ustawienia (również powinieneś zrestartować aplikację).\n\n
+        </string>
+    <string name="permission_missing">Brakuje wymaganego zezwolenia, Meshtastic nie będzie w stanie działać poprawnie. Nadaj uprawnienia w Ustawieniach systemu.</string>
+    <string name="radio_sleeping">Urządzenie było uśpione, nie można było zmienić kanału.</string>
+    <string name="report_bug">Zgłoś błąd.</string>
+    <string name="report_a_bug">Zgłoś błąd.</string>
+    <string name="report_bug_text">Potwierdź, że chcesz zgłosić błąd. Po zgłoszeniu proszę napisz post na meshtastic.discourse.group co umożliwi nam dopasowanie zgłoszenia z tym co znalazłeś.</string>
+    <string name="report">Zgłoś</string>
+    <string name="select_radio">Wybierz urządzenie.</string>
+    <string name="current_pair">Obecnie połączono z %s</string>
+    <string name="not_paired_yet">Urządzenie nie jest jeszcze połączone.</string>
+    <string name="change_radio">Zmień urządzenie</string>
+    <string name="please_pair">Proszę sparuj urządzenie w Ustawieniach systemu.</string>
+    <string name="pairing_completed">Urządzenie połączone, usługa działa.</string>
+    <string name="pairing_failed_try_again">Parowanie nieudane, spróbuj jeszcze raz.</string>
+    <string name="location_disabled">Dostęp do lokalizacji wyłączony, nie można udostępniać pozycji do innych użytkowników.</string>
+    <string name="share">Udostępnij</string>
+    <string name="disconnected">Rozłączone</string>
+    <string name="device_sleeping">Urządzenie uśpione.</string>
+    <string name="connected_count">Połączono: %s of %s online</string>
+    <string name="list_of_nodes">Lista użytkowników w sieci</string>
+    <string name="update_firmware">Aktualizuj oprogramowanie.</string>
+    <string name="connected">Połączony z urządzeniem</string>
+    <string name="connected_to">Połączony z urządzeniem (%s)</string>
+    <string name="not_connected">Niepołączony, wybierz urządzenie poniżej.</string>
+    <string name="connected_sleeping">Połączony z urządzeniem, ale jest w trybie uśpienia.</string>
+    <string name="update_to">Zaktualizuj do %s.</string>
+    <string name="app_too_old">Wymagana jest aktualizacja aplikacji.</string>
+    <string name="must_update">Musisz zaktualizować tę aplikację w Google Play store (lub ręcznie przez Github). Wersja aplikacji jest za stara, aby komunikować się z urządzeniem. Więcej informacji na ten temat znajdziesz tu: <a href="https://www.meshtastic.org/software/android-too-old.html">wiki</a></string>
+    <string name="none">Żadne (Wyłącz)</string>
+    <string name="modem_config_short">Bliski zasięg (ale szybki transfer)</string>
+    <string name="modem_config_medium">Średni zasięg (ale szybki transfer)</string>
+    <string name="modem_config_long">Daleki zasięg (ale wolniejszy transfer)</string>
+    <string name="modem_config_very_long">Bardzo daleki zasięg (ale wolny transfer)</string>
+    <string name="modem_config_unrecognized">Nierozpoznany</string>
+    <string name="meshtastic_service_notifications">Powiadomienia usługi Meshtastic</string>
+    <string name="location_disabled_warning">Musisz włączyć usługi lokalizacji (duża dokładność) w ustawieniach systemu.</string>
+    <string name="about">O Meshtastic</string>
+    <string name="a_list_of_nodes_in_the_mesh">Lista użytkowników sieci.</string>
+    <string name="text_messages">Wiadomości</string>
+    <string name="channel_invalid">Ten adres kanału jest nieprawidłowy i nie może być użyty</string>
+    <string name="debug_panel">Panel kontrolny.</string>
+    <string name="debug_last_messages">500 ostatnich wiadomości</string>
+    <string name="clear_last_messages">Wyczyść</string>
+    <string name="updating_firmware">Aktualizowanie oprogramowania, czekaj do 8 minut…</string>
+    <string name="update_successful">Aktualizacja udana.</string>
+    <string name="update_failed">Aktualizacja nieudana</string>
+    <string name="message_reception_time">Czas odbioru wiadomości</string>
+    <string name="message_reception_state">Status odbioru wiadomości</string>
+    <string name="message_delivery_status">Status dostarczenia wiadomości</string>
+    <string name="broadcast_position_secs">Rozgłaszanie pozycji co: (w sekundach), 0 - wyłączone</string>
+    <string name="ls_sleep_secs">Uśpienie urządzenia (w sekundach)</string>
+    <string name="meshtastic_messages_notifications">Powiadomienie o wiadomościach</string>
+    <string name="broadcast_period_too_small">Minimalny okres rozgłaszania dla tego kanału wynosi %d</string>
+    <string name="protocol_stress_test">Próba działania protokołu.</string>
+    <string name="advanced_settings">Zaawansowane ustawienia</string>
+    <string name="firmware_too_old">Wymagana aktualizacja oprogramowania urządzenia.</string>
+    <string name="firmware_old">Oprogramowanie urządzenia jest za stare, żeby komunikować się z tą aplikacją. Wejdź w Ustawienia aplikacji i wybierz "Aktualizuj oprogramowanie". Więcej informacji na ten temat znajdziesz na <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">Nasz przewodnik instalacji oprogramowania</a> na Github.</string>
+    <string name="okay">OK</string>
+    <string name="must_set_region">Musisz wybrać region!</string>
+    <string name="region">Region</string>
+    <string name="cant_change_no_radio">Nie można zmienić kanału, ponieważ urządzenie nie jest jeszcze połączone. Proszę spróbuj jeszcze raz.</string>
+    <string name="sample_coords">55.332244 34.442211</string>
+    <string name="save_messages">Zapisz wiadomości jako csv...</string>
+    <string name="set_channel_options">Ustaw właściwości kanału.</string>
+    <string name="reset">Reset</string>
+    <string name="are_you_shure_change_default">Na pewno chcesz zmienić na domyślny kanał?</string>
+    <string name="reset_to_defaults">Powrót do ustawień domyślnych.</string>
+    <string name="apply">Zastosuj</string>
+    <string name="no_app_found">Nie znaleziono aplikacji do wysłania adresu.</string>
+    <string name="theme">Motyw</string>
+    <string name="theme_light">Jasny</string>
+    <string name="theme_dark">Ciemny</string>
+    <string name="theme_system">Domyślny systemu</string>
+    <string name="choose_theme_title">Wybierz motyw</string>
+</resources>
