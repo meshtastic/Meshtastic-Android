@@ -190,4 +190,7 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
     implementation project(':geeksville-androidlib')
+
+    // Locus Maps: displaying stations as POIs in the map
+    implementation 'com.asamm:locus-api-android:0.9.39'
 }

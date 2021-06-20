@@ -51,8 +51,8 @@ allprojects {
             }
         }
         google()
-        jcenter()
         maven { url 'https://jitpack.io' }
+        mavenCentral()
         //maven { url "https://plugins.gradle.org/m2/" }
     }
 }

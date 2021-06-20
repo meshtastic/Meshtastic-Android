@@ -496,7 +496,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (model.isConnected.value == MeshService.ConnectionState.CONNECTED && info != null && info.shouldUpdate && info.couldUpdate && service != null) {
             binding.updateFirmwareButton.visibility = View.VISIBLE
             binding.updateFirmwareButton.text =
-                getString(R.string.update_to).format(getString(R.string.short_firmware_version))
+                getString(R.string.update_to).format(getString(R.string.cur_firmware_version))
 
             val progress = service.updateStatus
 
