@@ -351,6 +351,29 @@ class MainActivity : AppCompatActivity(), Logging,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
+        when(requestCode) {
+            DID_REQUEST_PERM -> {
+                // If request is cancelled, the result arrays are empty.
+                if ((grantResults.isNotEmpty() &&
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    // Permission is granted. Continue the action or workflow
+                    // in your app.
+
+                    // yay!
+                } else {
+                    // Explain to the user that the feature is unavailable because
+                    // the features requires a permission that the user has denied.
+                    // At the same time, respect the user's decision. Don't link to
+                    // system settings in an effort to convince the user to change
+                    // their decision.
+                    warnMissingPermissions()
+                }
+            }
+            else -> {
+                // ignore other requests
+            }
+        }
+
         updateBluetoothEnabled()
     }
 
@@ -421,9 +444,6 @@ class MainActivity : AppCompatActivity(), Logging,
         /// We now want to be informed of bluetooth state
         registerReceiver(btStateReceiver, btStateReceiver.intentFilter)
 
-        // if (!isInTestLab) - very important - even in test lab we must request permissions because we need location perms for some of our tests to pass
-        requestPermission()
-
         /*  not yet working
         // Configure sign-in to request the user's ID, email address, and basic
 // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
@@ -463,7 +483,11 @@ class MainActivity : AppCompatActivity(), Logging,
         handleIntent(intent)
 
         askToRate()
+
+        // if (!isInTestLab) - very important - even in test lab we must request permissions because we need location perms for some of our tests to pass
+        requestPermission()
     }
+
 
     private fun initToolbar() {
         val toolbar =
@@ -993,8 +1017,6 @@ class MainActivity : AppCompatActivity(), Logging,
 
     override fun onStart() {
         super.onStart()
-
-        warnMissingPermissions()
 
         // Ask to start bluetooth if no USB devices are visible
         val hasUSB = SerialInterface.findDrivers(this).isNotEmpty()

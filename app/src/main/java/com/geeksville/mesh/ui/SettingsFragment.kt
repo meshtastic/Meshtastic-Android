@@ -571,7 +571,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         when {
             permissionsWarning != null ->
                 statusText.text = permissionsWarning
-            
+
             region == RadioConfigProtos.RegionCode.Unset ->
                 statusText.text = getString(R.string.must_set_region)
 
