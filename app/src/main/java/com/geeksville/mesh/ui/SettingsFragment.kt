@@ -651,6 +651,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
+            // No matter what set our desired state in prefs
+            model.provideLocation.value = isChecked
+
             if (view.isPressed && isChecked) { // We want to ignore changes caused by code (as opposed to the user)
                 debug("User changed location tracking to $isChecked")
                 view.isChecked =
@@ -977,7 +980,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             scanModel.startScan()
 
         // system permissions might have changed while we were away
-        binding.provideLocationCheckbox.isChecked = myActivity.hasBackgroundPermission()
+        binding.provideLocationCheckbox.isChecked = myActivity.hasBackgroundPermission() && (model.provideLocation.value ?: false)
 
         myActivity.registerReceiver(updateProgressReceiver, updateProgressFilter)
 

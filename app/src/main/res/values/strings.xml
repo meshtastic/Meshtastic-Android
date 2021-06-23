@@ -115,4 +115,5 @@
     <string name="location">location</string>
     <string name="cancel_no_radio">Cancel (no radio access)</string>
     <string name="allow_will_show">Allow (will show dialog)</string>
+    <string name="provide_location_to_mesh">Provide location to mesh</string>
 </resources>
