@@ -249,7 +249,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
 
     /** Ask the user to grant background location permission */
-    fun requestBackgroundPermission() = requestPermission(getBackgroundPermissions())
+    fun requestBackgroundPermission() = requestPermission(getBackgroundPermissions(), false)
 
     /**
      * @return a localized string warning user about missing permissions.  Or null if everything is find
@@ -280,10 +280,11 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
     /** Possibly prompt user to grant permissions
+     * @param shouldShowDialog usually true, but in cases where we've already shown a dialog elsewhere we skip it.
      *
      * @return true if we already have the needed permissions
      */
-    private fun requestPermission(missingPerms: List<String> = getMinimumPermissions()): Boolean =
+    private fun requestPermission(missingPerms: List<String> = getMinimumPermissions(), shouldShowDialog: Boolean = true): Boolean =
         if (missingPerms.isNotEmpty()) {
             val shouldShow = missingPerms.filter {
                 ActivityCompat.shouldShowRequestPermissionRationale(this, it)
@@ -299,7 +300,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 )
             }
 
-            if (shouldShow.isNotEmpty()) {
+            if (shouldShow.isNotEmpty() && shouldShowDialog) {
                 // DID_REQUEST_PERM is an
                 // app-defined int constant. The callback method gets the
                 // result of the request.
@@ -308,10 +309,10 @@ class MainActivity : AppCompatActivity(), Logging,
                 MaterialAlertDialogBuilder(this)
                     .setTitle(getString(R.string.required_permissions))
                     .setMessage(getMissingMessage())
-                    .setNeutralButton("Cancel (no radio access)") { _, _ ->
+                    .setNeutralButton(R.string.cancel_no_radio) { _, _ ->
                         error("User bailed due to permissions")
                     }
-                    .setPositiveButton("Allow (will show dialog)") { _, _ ->
+                    .setPositiveButton(R.string.allow_will_show) { _, _ ->
                         doRequest()
                     }
                     .show()

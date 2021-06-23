@@ -110,7 +110,9 @@
     <string name="choose_theme_title">Choose theme</string>
     <string name="background_required">Background location access required</string>
     <string name="show_system_settings">Show system settings</string>
-    <string name="why_background_required">In order to enable this feature, you must grant this application "allow location access all the time" permission.  This allows meshtastic to read your location while the application is in the background, so that it can send your location to other members of your mesh.</string>
+    <string name="why_background_required">In order to enable this feature, you must grant "allow location access all the time" permission.\n\nThis allows meshtastic to read your location while the application is in the background, so that it can send your location to other members of your mesh.</string>
     <string name="required_permissions">Required permissions</string>
     <string name="location">location</string>
+    <string name="cancel_no_radio">Cancel (no radio access)</string>
+    <string name="allow_will_show">Allow (will show dialog)</string>
 </resources>
