@@ -35,7 +35,7 @@
     <string name="map_not_allowed">You have analytics disabled. Unfortunately our map provider (mapbox) requires analytics to be allowed for their \'free\' plan. So we have turned off the map view.\n\n
         If you would like to see the map, you\'ll need to turn on analytics in the Settings pane (also, for the time being you might need to force restart the application).\n\n
         If you are interested in us paying for mapbox (or switching to a different map provider), please post in meshtastic.discourse.group</string>
-    <string name="permission_missing">A required permission is missing, Meshtastic won\'t be able to work properly.  Please enable in Android application settings.</string>
+    <string name="permission_missing">Meshtastic needs %s permission granted. Without this Android will not allow connecting to the LoRa bluetooth radios.</string>
     <string name="radio_sleeping">Radio was sleeping, could not change channel</string>
     <string name="report_bug">Report Bug</string>
     <string name="report_a_bug">Report a bug</string>
@@ -108,4 +108,9 @@
     <string name="theme_dark">Dark</string>
     <string name="theme_system">System default</string>
     <string name="choose_theme_title">Choose theme</string>
+    <string name="background_required">Background location access required</string>
+    <string name="show_system_settings">Show system settings</string>
+    <string name="why_background_required">In order to enable this feature, you must grant this application "allow location access all the time" permission.  This allows meshtastic to read your location while the application is in the background, so that it can send your location to other members of your mesh.</string>
+    <string name="required_permissions">Required permissions</string>
+    <string name="location">location</string>
 </resources>

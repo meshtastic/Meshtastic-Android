@@ -25,7 +25,6 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -249,9 +248,36 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
 
-
     /** Ask the user to grant background location permission */
     fun requestBackgroundPermission() = requestPermission(getBackgroundPermissions())
+
+    /**
+     * @return a localized string warning user about missing permissions.  Or null if everything is find
+     */
+    fun getMissingMessage(): String? {
+        val renamedPermissions = mapOf(
+            // Older versions of android don't know about these permissions - ignore failure to grant
+            Manifest.permission.ACCESS_COARSE_LOCATION to null,
+            Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND to null,
+            Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND to null,
+            Manifest.permission.ACCESS_FINE_LOCATION to getString(R.string.location)
+        )
+
+        val deniedPermissions = getMinimumPermissions().mapNotNull {
+            if(renamedPermissions.containsKey(it))
+                renamedPermissions[it]
+            else // No localization found - just show the nasty android string
+                it
+        }
+
+        return if(deniedPermissions.isEmpty())
+            null
+        else {
+            val asEnglish = deniedPermissions.joinToString(" & ")
+
+            getString(R.string.permission_missing).format(asEnglish)
+        }
+    }
 
     /** Possibly prompt user to grant permissions
      *
@@ -259,28 +285,41 @@ class MainActivity : AppCompatActivity(), Logging,
      */
     private fun requestPermission(missingPerms: List<String> = getMinimumPermissions()): Boolean =
         if (missingPerms.isNotEmpty()) {
-            missingPerms.forEach {
-                // Permission is not granted
-                // Should we show an explanation?
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, it)) {
-                    // FIXME
-                    // Show an explanation to the user *asynchronously* -- don't block
-                    // this thread waiting for the user's response! After the user
-                    // sees the explanation, try again to request the permission.
-                }
+            val shouldShow = missingPerms.filter {
+                ActivityCompat.shouldShowRequestPermissionRationale(this, it)
             }
 
-            // Ask for all the missing perms
-            ActivityCompat.requestPermissions(
-                this,
-                missingPerms.toTypedArray(),
-                DID_REQUEST_PERM
-            )
+            fun doRequest() {
+                info("requesting permissions")
+                // Ask for all the missing perms
+                ActivityCompat.requestPermissions(
+                    this,
+                    missingPerms.toTypedArray(),
+                    DID_REQUEST_PERM
+                )
+            }
 
-            // DID_REQUEST_PERM is an
-            // app-defined int constant. The callback method gets the
-            // result of the request.
-            error("Permissions missing, asked user to grant")
+            if (shouldShow.isNotEmpty()) {
+                // DID_REQUEST_PERM is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+                warn("Permissions $shouldShow missing, we should show dialog")
+
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(getString(R.string.required_permissions))
+                    .setMessage(getMissingMessage())
+                    .setNeutralButton("Cancel (no radio access)") { _, _ ->
+                        error("User bailed due to permissions")
+                    }
+                    .setPositiveButton("Allow (will show dialog)") { _, _ ->
+                        doRequest()
+                    }
+                    .show()
+            } else {
+                info("Permissions $missingPerms missing, no need to show dialog, just asking OS")
+                doRequest()
+            }
+
             false
         } else {
             // Permission has already been granted
@@ -295,20 +334,11 @@ class MainActivity : AppCompatActivity(), Logging,
      */
     @SuppressLint("InlinedApi") // This function is careful to work with old APIs correctly
     fun warnMissingPermissions(): Boolean {
-        // Older versions of android don't know about these permissions - ignore failure to grant
-        val ignoredPermissions = setOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND,
-            Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND
-        )
+        val message = getMissingMessage()
 
-        val deniedPermissions = getMinimumPermissions().filter { name ->
-            !ignoredPermissions.contains(name)
-        }
-
-        return if (deniedPermissions.isNotEmpty()) {
-            errormsg("Denied permissions: ${deniedPermissions.joinToString(",")}")
-            showToast(R.string.permission_missing)
+        return if (message != null) {
+            errormsg("Denied permissions: $message")
+            showToast(message)
             true
         } else
             false

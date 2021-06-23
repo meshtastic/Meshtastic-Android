@@ -35,6 +35,7 @@ import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.RadioConfigProtos
 import com.geeksville.mesh.android.bluetoothManager
+import com.geeksville.mesh.android.hasBackgroundPermission
 import com.geeksville.mesh.android.usbManager
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
@@ -460,6 +461,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         requireContext().getSystemService(CompanionDeviceManager::class.java)
     }
 
+    private val myActivity get() = requireActivity() as MainActivity
+
     override fun onDestroy() {
         guiJob.cancel()
         super.onDestroy()
@@ -564,7 +567,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // Update the status string (highest priority messages first)
         val info = model.myNodeInfo.value
         val statusText = binding.scanStatusText
+        val permissionsWarning = myActivity.getMissingMessage()
         when {
+            permissionsWarning != null ->
+                statusText.text = permissionsWarning
+            
             region == RadioConfigProtos.RegionCode.Unset ->
                 statusText.text = getString(R.string.must_set_region)
 
@@ -643,6 +650,24 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             requireActivity().hideKeyboard()
         }
 
+        binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
+            if (view.isPressed && isChecked) { // We want to ignore changes caused by code (as opposed to the user)
+                debug("User changed location tracking to $isChecked")
+                view.isChecked =
+                    myActivity.hasBackgroundPermission() // Don't check the box until the system setting changes
+                if (!view.isChecked)
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.background_required)
+                        .setMessage(R.string.why_background_required)
+                        .setNeutralButton(R.string.cancel) { _, _ ->
+                            debug("Decided not to report a bug")
+                        }
+                        .setPositiveButton(getString(R.string.show_system_settings)) { _, _ ->
+                            myActivity.requestBackgroundPermission()
+                        }
+                        .show()
+            }
+        }
 
         val app = (requireContext().applicationContext as GeeksvilleApplication)
 
@@ -689,7 +714,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 binding.scanStatusText.setText(R.string.starting_pairing)
 
             b.isChecked =
-                scanModel.onSelected(requireActivity() as MainActivity, device)
+                scanModel.onSelected(myActivity, device)
 
             if (!b.isSelected)
                 binding.scanStatusText.text = getString(R.string.please_pair)
@@ -812,8 +837,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             .setSingleDevice(false)
             .build()
 
-        //val mainActivity = requireActivity() as MainActivity
-
         // When the app tries to pair with the Bluetooth device, show the
         // appropriate pairing request dialog to the user.
         deviceManager.associate(
@@ -901,7 +924,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
 
             locationSettingsResponse.addOnSuccessListener {
-                if(!it.locationSettingsStates.isBleUsable || !it.locationSettingsStates.isLocationUsable)
+                if (!it.locationSettingsStates.isBleUsable || !it.locationSettingsStates.isLocationUsable)
                     weNeedAccess()
                 else
                     debug("We have location access")
@@ -953,15 +976,16 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (!hasCompanionDeviceApi)
             scanModel.startScan()
 
-        val activity = requireActivity() as MainActivity
+        // system permissions might have changed while we were away
+        binding.provideLocationCheckbox.isChecked = myActivity.hasBackgroundPermission()
 
-        activity.registerReceiver(updateProgressReceiver, updateProgressFilter)
+        myActivity.registerReceiver(updateProgressReceiver, updateProgressFilter)
 
         // Keep reminding user BLE is still off
-        val hasUSB = activity?.let { SerialInterface.findDrivers(it).isNotEmpty() } ?: true
+        val hasUSB = SerialInterface.findDrivers(myActivity).isNotEmpty()
         if (!hasUSB) {
-            // First warn about permissions, and then if needed warn abotu settings
-            if(!activity.warnMissingPermissions()) {
+            // First warn about permissions, and then if needed warn about settings
+            if (!myActivity.warnMissingPermissions()) {
                 // Warn user if BLE is disabled
                 if (scanModel.bluetoothAdapter?.isEnabled != true) {
                     Toast.makeText(
