@@ -8,12 +8,11 @@ on:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
-          submodules: "recursive"
-
+          submodules: true
       - name: Loading secrets
         env:
           gservices: ${{ secrets.gservices }}
@@ -30,7 +29,6 @@ jobs:
 
           mkdir -p ~/.gradle
           echo "MAPBOX_DOWNLOADS_TOKEN=$mapboxtoken" >>~/.gradle/gradle.properties
-
       - name: Mock curfirmware version for CI
         run: |
           rm ./app/src/main/res/values/curfirmwareversion.xml
