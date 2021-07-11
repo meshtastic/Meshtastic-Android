@@ -8,17 +8,16 @@ on:
 jobs:
   test:
     name: Test
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
         with:
-          submodules: 'recursive'
-          
-    - name: Loading secrets
-      env:
+          submodules: true
+      - name: Loading secrets
+        env:
           gservices: ${{ secrets.gservices }}
           mapboxtoken: ${{ secrets.mapboxtoken }}
-      run: |
+        run: |
           # not yet needed echo $gservices > ./app/google-services.json
           rm ./app/google-services.json          
           cp ./app/google-services-example.json ./app/google-services.json
@@ -30,14 +29,14 @@ jobs:
 
           mkdir -p ~/.gradle
           echo "MAPBOX_DOWNLOADS_TOKEN=$mapboxtoken" >>~/.gradle/gradle.properties
-
-    - name: Mock curfirmware version for CI
-      run: |
-        rm ./app/src/main/res/values/curfirmwareversion.xml
-        cp ./app/special/curfirmwareversion.xml ./app/src/main/res/values/
-    - name: set up JDK 1.8
-      uses: actions/setup-java@master
-      with:
-        java-version: 1.8
-    - name: Unit tests
-      run: bash ./gradlew test --stacktrace
+      - name: Mock curfirmware version for CI
+        run: |
+          rm ./app/src/main/res/values/curfirmwareversion.xml
+          cp ./app/special/curfirmwareversion.xml ./app/src/main/res/values/
+      - name: set up Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: "adopt"
+          java-version: 16
+      - name: Unit tests
+        run: bash ./gradlew test --stacktrace
