@@ -37,9 +37,17 @@ import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
+import locus.api.android.ActionDisplayPoints
+import locus.api.android.objects.PackPoints
+import locus.api.objects.extra.Location
+import locus.api.objects.geoData.Point
+import java.text.SimpleDateFormat
+
+import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.math.absoluteValue
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Handles all the communication with android apps.  Also keeps an internal model
@@ -132,6 +140,9 @@ class MeshService : Service(), Logging {
             connect()
         }
     }
+
+    private val isoLocalDateTimeFormatter: DateTimeFormatter =
+        DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     private val locationCallback = MeshServiceLocationCallback(
         ::perhapsSendPosition,
@@ -1017,6 +1028,7 @@ class MeshService : Service(), Logging {
     /// If we just changed our nodedb, we might want to do somethings
     private fun onNodeDBChanged() {
         maybeUpdateServiceStatusNotification()
+        exportVisibleNodesToLocusMaps()
     }
 
     private fun setupLocationRequest() {
@@ -1880,6 +1892,47 @@ class MeshService : Service(), Logging {
             val r = this@MeshService.connectionState
             info("in connectionState=$r")
             r.toString()
+        }
+    }
+
+    fun exportVisibleNodesToLocusMaps() {
+        val exportPoints =
+            nodeDBbyNodeNum.map { entry -> nodeInfoToPoint(entry.value) }.filterNotNull()
+
+        val packPoints = PackPoints("Meshtastic Nodes")
+        packPoints.bitmap = serviceNotifications.getBitmapFromVectorDrawable(R.mipmap.ic_launcher2_round);
+
+        exportPoints.subList(
+            0, min(
+                exportPoints.size, 999
+            ) // more than 999 points  requires file based transport
+        ).forEach { packPoints.addPoint(it) }
+
+        val send = ActionDisplayPoints.sendPackSilent(this, packPoints, false)
+        info("Exported: ${packPoints.getPoints().size} point to Locus Maps. Result $send")
+    }
+
+    private fun nodeInfoToPoint(nodeInfo: NodeInfo): Point? {
+        if (nodeInfo.validPosition == null) {
+            return null
+        } else {
+            val loc = Location()
+            val point = Point(nodeInfo.user?.longName ?: nodeInfo.num.toString() , loc)
+            val lastHeardString =
+                SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(java.sql.Timestamp(nodeInfo.lastHeard.toLong() * 1000))
+
+            point.parameterDescription =
+                "User: ${nodeInfo.user?.longName}\nLast heard: ${lastHeardString}\n" +
+                        "Battery: ${nodeInfo.batteryPctLevel}\n:Online ${nodeInfo.isOnline}\n"
+
+            loc.latitude = nodeInfo.position?.latitude ?: Double.NaN
+            loc.longitude = nodeInfo.position?.longitude ?: Double.NaN
+            nodeInfo.position?.altitude?.let { loc.altitude = it.toDouble() }
+            nodeInfo.position?.time?.let { loc.time = 1000 * it.toLong() }
+            loc.provider = "Meshtastic"
+            loc.id = nodeInfo.num.toLong()
+
+            return point
         }
     }
 }
