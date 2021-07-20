@@ -25,7 +25,7 @@
     <string name="accept">Принять</string>
     <string name="cancel">Отмена</string>
     <string name="change_channel">Смена канала</string>
-    <string name="are_you_sure_channel">Вы уверены, что хотите изменить канал? Связь с другими устроствами будет прервана, пока вы не поделитесь новыми настройками канала.</string>
+    <string name="are_you_sure_channel">Вы уверены, что хотите изменить канал? Связь с другими устройствами будет прервана, пока вы не поделитесь новыми настройками канала.</string>
     <string name="new_channel_rcvd">URL нового канала получен</string>
     <string name="do_you_want_switch">Вы хотите переключиться на \'%s\' канал?</string>
     <string name="map_not_allowed">У вас отключена аналитика. К сожалению, наш поставщик карт (mapbox) требует, чтобы аналитика была разрешена для «бесплатного» использования. Мы вынуждены отключить карту.\n\n
