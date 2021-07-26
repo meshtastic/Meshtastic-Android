@@ -8,7 +8,6 @@ import android.content.SharedPreferences
 import android.os.IBinder
 import androidx.core.content.edit
 import com.geeksville.android.BinaryLogFile
-import com.geeksville.android.BuildUtils.isEmulator
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.handledLaunch
@@ -51,8 +50,17 @@ class RadioInterfaceService : Service(), Logging {
 
         const val DEVADDR_KEY = "devAddr2" // the new name for devaddr
 
-        /// We keep this var alive so that the following factory objects get created and not stripped during the android build
-        private val factories = arrayOf<InterfaceFactory>(BluetoothInterface, SerialInterface, TCPInterface, MockInterface, NopInterface)
+        init {
+            /// We keep this var alive so that the following factory objects get created and not stripped during the android build
+            val factories = arrayOf<InterfaceFactory>(
+                BluetoothInterface,
+                SerialInterface,
+                TCPInterface,
+                MockInterface,
+                NopInterface
+            )
+            info("Using ${factories.size} interface factories")
+        }
 
         /// This is public only so that SimRadio can bootstrap our message flow
         fun broadcastReceivedFromRadio(context: Context, payload: ByteArray) {
