@@ -264,13 +264,13 @@ class MainActivity : AppCompatActivity(), Logging,
         )
 
         val deniedPermissions = getMinimumPermissions().mapNotNull {
-            if(renamedPermissions.containsKey(it))
+            if (renamedPermissions.containsKey(it))
                 renamedPermissions[it]
             else // No localization found - just show the nasty android string
                 it
         }
 
-        return if(deniedPermissions.isEmpty())
+        return if (deniedPermissions.isEmpty())
             null
         else {
             val asEnglish = deniedPermissions.joinToString(" & ")
@@ -284,7 +284,10 @@ class MainActivity : AppCompatActivity(), Logging,
      *
      * @return true if we already have the needed permissions
      */
-    private fun requestPermission(missingPerms: List<String> = getMinimumPermissions(), shouldShowDialog: Boolean = true): Boolean =
+    private fun requestPermission(
+        missingPerms: List<String> = getMinimumPermissions(),
+        shouldShowDialog: Boolean = true
+    ): Boolean =
         if (missingPerms.isNotEmpty()) {
             val shouldShow = missingPerms.filter {
                 ActivityCompat.shouldShowRequestPermissionRationale(this, it)
@@ -352,11 +355,12 @@ class MainActivity : AppCompatActivity(), Logging,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        when(requestCode) {
+        when (requestCode) {
             DID_REQUEST_PERM -> {
                 // If request is cancelled, the result arrays are empty.
                 if ((grantResults.isNotEmpty() &&
-                        grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                        grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                ) {
                     // Permission is granted. Continue the action or workflow
                     // in your app.
 
@@ -734,23 +738,27 @@ class MainActivity : AppCompatActivity(), Logging,
                         if (isOld)
                             showAlert(R.string.app_too_old, R.string.must_update)
                         else {
+                            // If we are already doing an update don't put up a dialog or try to get device info
+                            val isUpdating = service.updateStatus >= 0
+                            if (!isUpdating) {
+                                val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
 
-                            val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
-                            if (curVer < MeshService.minFirmwareVersion)
-                                showAlert(R.string.firmware_too_old, R.string.firmware_old)
-                            else {
-                                // If our app is too old/new, we probably don't understand the new radioconfig messages, so we don't read them until here
+                                if (curVer < MeshService.minFirmwareVersion)
+                                    showAlert(R.string.firmware_too_old, R.string.firmware_old)
+                                else {
+                                    // If our app is too old/new, we probably don't understand the new radioconfig messages, so we don't read them until here
 
-                                model.radioConfig.value =
-                                    RadioConfigProtos.RadioConfig.parseFrom(service.radioConfig)
+                                    model.radioConfig.value =
+                                        RadioConfigProtos.RadioConfig.parseFrom(service.radioConfig)
 
-                                model.channels.value =
-                                    ChannelSet(AppOnlyProtos.ChannelSet.parseFrom(service.channels))
+                                    model.channels.value =
+                                        ChannelSet(AppOnlyProtos.ChannelSet.parseFrom(service.channels))
 
-                                updateNodesFromDevice()
+                                    updateNodesFromDevice()
 
-                                // we have a connection to our device now, do the channel change
-                                perhapsChangeChannel()
+                                    // we have a connection to our device now, do the channel change
+                                    perhapsChangeChannel()
+                                }
                             }
                         }
                     }
