@@ -12,11 +12,11 @@
     <string name="user_avatar">Avatar do usuário</string>
     <string name="sample_message">ei, encontrei o esconderijo, está aqui ao lado do tigre grande. estou um pouco assustado.</string>
     <string name="send_text">Enviar Texto</string>
-    <string name="warning_not_paired">Você ainda não pareou um rádio compatível ao Meshtastic com este smartphone. Por favor pareie um dispositivo e configure seu nome de usuário.\n\nEste aplicativo opensource está em desenvolvimento, caso encontrar algum problema por favor publique em nosso fórum: meshtastic.discourse.group.\n\nPara mais informações acesse nossa página - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Você ainda não pareou um rádio compatível ao Meshtastic com este smartphone. Por favor pareie um dispositivo e configure seu nome de usuário.\n\nEste aplicativo open source está em desenvolvimento, caso encontre algum problema por favor publique em nosso fórum: meshtastic.discourse.group.\n\nPara mais informações acesse nossa página: www.meshtastic.org.</string>
     <string name="username_unset">Nome de usuário não configurado</string>
     <string name="your_name">Seu Nome</string>
-    <string name="analytics_okay">Estatísticas anônimas de uso e relatórios de falhas.</string>
-    <string name="looking_for_meshtastic_devices">Procurando por dispositivos Meshtastic...</string>
+    <string name="analytics_okay">Estatísticas anônimas de uso e relatórios de erros.</string>
+    <string name="looking_for_meshtastic_devices">Procurando por dispositivos Meshtastic…</string>
     <string name="requires_bluetooth">Este aplicativo requer acesso ao bluetooth. Por favor permita o acesso nas configurações do Android.</string>
     <string name="error_bluetooth">Erro - este app requer bluetooth</string>
     <string name="starting_pairing">Iniciando pareamento</string>
@@ -73,14 +73,14 @@
     <string name="debug_panel">Painel de depuração</string>
     <string name="debug_last_messages">500 últimas mensagens</string>
     <string name="clear_last_messages">Limpar</string>
-    <string name="updating_firmware">Atualizando firmware, aguarde até 8 minutos...</string>
+    <string name="updating_firmware">Atualizando firmware, aguarde até 8 minutos…</string>
     <string name="update_successful">Atualização bem sucedida</string>
     <string name="update_failed">Atualização falhou</string>
     <string name="message_reception_time">tempo de recebimento de mensagem</string>
     <string name="message_reception_state">estado de recebimento de mensagem</string>
     <string name="message_delivery_status">Status de entrega de mensagem</string>
-    <string name="broadcast_position_secs">Intervalo de transmissão da posição (em segundos), 0 - desabilitar</string>
-    <string name="ls_sleep_secs">Período de suspensão (sleep) do dispositivo (em segundos)</string>
+    <string name="broadcast_position_secs">Intervalo de localização (segundos), 0 - desabilitar</string>
+    <string name="ls_sleep_secs">Intervalo de suspensão (sleep) (segundos)</string>
     <string name="meshtastic_messages_notifications">Notificações sobre mensagens</string>
     <string name="broadcast_period_too_small">Período mínimo de transmissão para este canal é %d</string>
     <string name="protocol_stress_test">Stress test do protocolo</string>
@@ -88,11 +88,11 @@
     <string name="firmware_too_old">Atualização do firmware necessária</string>
     <string name="firmware_old">Versão de firmware do rádio muito antiga para comunicar com este aplicativo, favor acessar opção "Atualizar firmware" nas Configurações.  Para mais informações consultar <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">Nosso guia de instalação de firmware</a> no Github.</string>
     <string name="okay">Okay</string>
-    <string name="must_set_region">Você deve informar a região!</string>
+    <string name="must_set_region">Você deve informar uma região!</string>
     <string name="region">Região</string>
     <string name="cant_change_no_radio">Não foi possível mudar de canal, rádio não conectado. Tente novamente.</string>
     <string name="sample_coords">55.332244 34.442211</string>
-    <string name="save_messages">Salvar mensagens como .CSV...</string>
+    <string name="save_messages">Salvar mensagens como .CSV…</string>
     <string name="set_channel_options">Configurar opções do canal</string>
     <string name="reset">Redefinir</string>
     <string name="are_you_shure_change_default">Tem certeza que quer mudar para o canal padrão?</string>
