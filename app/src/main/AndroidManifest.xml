@@ -99,13 +99,15 @@
             android:name="com.geeksville.mesh.service.SoftwareUpdateService"
             android:enabled="true"
             android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+            android:permission="android.permission.BIND_JOB_SERVICE"
+            android:stopWithTask="true"/>
 
         <!-- This is the public API for doing mesh radio operations from android apps -->
         <service
             android:name="com.geeksville.mesh.service.MeshService"
             android:enabled="true"
-            android:exported="true" tools:ignore="ExportedActivity">
+            android:exported="true" tools:ignore="ExportedActivity"
+            android:stopWithTask="true">
             <intent-filter>
                 <action android:name="com.geeksville.mesh.Service" />
             </intent-filter>
@@ -115,7 +117,8 @@
         <service
             android:name="com.geeksville.mesh.service.RadioInterfaceService"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            android:stopWithTask="true"/>
 
         <activity
             android:name="com.geeksville.mesh.MainActivity"

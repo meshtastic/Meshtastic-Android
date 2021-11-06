@@ -69,6 +69,7 @@ import java.nio.charset.Charset
 import java.text.DateFormat
 import java.util.*
 import kotlin.math.roundToInt
+import kotlin.system.exitProcess
 
 
 /*
@@ -1079,6 +1080,10 @@ class MainActivity : AppCompatActivity(), Logging,
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         return when (item.itemId) {
+            R.id.exit -> {
+                exitProcess(-1)
+                return true
+            }
             R.id.about -> {
                 getVersionInfo()
                 return true
