@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.ColorMatrix
 import android.graphics.ColorMatrixColorFilter
+import android.net.Uri
 import android.os.Bundle
 import android.os.RemoteException
 import android.view.LayoutInflater
@@ -29,6 +30,8 @@ import com.geeksville.mesh.service.MeshService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.protobuf.ByteString
+import com.google.zxing.integration.android.IntentIntegrator
+import java.net.MalformedURLException
 import java.security.SecureRandom
 
 
@@ -70,6 +73,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
         binding.channelOptions.isEnabled = isEditing
         binding.shareButton.isEnabled = !isEditing
+        binding.scanButton.isEnabled = isEditing
         binding.channelNameView.isEnabled = isEditing
         if (isEditing) // Dim the (stale) QR code while editing...
             binding.qrView.setDim()
@@ -203,6 +207,15 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 .show()
         }
 
+        binding.scanButton.setOnClickListener {
+            val zxingScan = IntentIntegrator.forSupportFragment(this)
+            zxingScan.setCameraId(0)
+            zxingScan.setPrompt("")
+            zxingScan.setBeepEnabled(false)
+            zxingScan.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
+            zxingScan.initiateScan()
+        }
+
         // Note: Do not use setOnCheckedChanged here because we don't want to be called when we programmatically disable editing
         binding.editableCheckbox.setOnClickListener { _ ->
 
@@ -286,5 +299,26 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
 
         return ChannelProtos.ChannelSettings.ModemConfig.UNRECOGNIZED
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
+        if (result != null) {
+            if (result.contents == null) {
+                Snackbar.make(binding.scanButton, R.string.channel_invalid, Snackbar.LENGTH_LONG).show()
+            } else {
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.data = ChannelSet(Uri.parse(result.contents)).getChannelUrl(false)
+                    startActivity(intent)
+                } catch (ex: ActivityNotFoundException) {
+                    Snackbar.make(binding.scanButton, R.string.channel_invalid, Snackbar.LENGTH_LONG).show()
+                } catch (ex: MalformedURLException) {
+                    Snackbar.make(binding.scanButton, R.string.channel_invalid, Snackbar.LENGTH_LONG).show()
+                }
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 }
