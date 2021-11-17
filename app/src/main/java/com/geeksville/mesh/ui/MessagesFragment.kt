@@ -1,6 +1,8 @@
 package com.geeksville.mesh.ui
 
+import android.graphics.Color
 import android.os.Bundle
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,6 +30,8 @@ import java.util.*
 
 // Allows usage like email.on(EditorInfo.IME_ACTION_NEXT, { confirm() })
 fun EditText.on(actionId: Int, func: () -> Unit) {
+    setImeOptions(EditorInfo.IME_ACTION_SEND) // Force "SEND" IME Action
+    setRawInputType(InputType.TYPE_CLASS_TEXT) // Suppress ENTER but allow textMultiLine
     setOnEditorActionListener { _, receivedActionId, _ ->
 
         if (actionId == receivedActionId) {
@@ -54,7 +58,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
 
     private fun getShortDateTime(time: Date): String {
         // return time if within 24 hours, otherwise date/time
-        val one_day = 60 * 60 * 24 * 100L
+        val one_day = 60 * 60 * 24 * 1000
         if (System.currentTimeMillis() - time.time > one_day) {
             return dateTimeFormat.format(time)
         } else return timeFormat.format(time)
@@ -142,7 +146,8 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             val nodes = model.nodeDB.nodes.value!!
             val node = nodes.get(msg.from)
             // Determine if this is my message (originated on this device).
-            val isMe = model.myNodeInfo.value?.myNodeNum == node?.num
+            // val isMe = model.myNodeInfo.value?.myNodeNum == node?.num
+            val isMe = msg.from == "^local"
 
             // Set cardview offset and color.
             val marginParams = holder.card.layoutParams as ViewGroup.MarginLayoutParams
@@ -180,7 +185,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
                 holder.username.text = user?.shortName ?: msg.from
             }
             if (msg.errorMessage != null) {
-                // FIXME, set the style to show a red error message
+                context?.let { holder.card.setCardBackgroundColor(Color.RED) }
                 holder.messageText.text = msg.errorMessage
             } else {
                 holder.messageText.text = msg.text
@@ -239,7 +244,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             // requireActivity().hideKeyboard()
         }
 
-        binding.messageInputText.on(EditorInfo.IME_ACTION_DONE) {
+        binding.messageInputText.on(EditorInfo.IME_ACTION_SEND) {
             debug("did IME action")
 
             val str = binding.messageInputText.text.toString().trim()
