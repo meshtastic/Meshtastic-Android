@@ -228,6 +228,17 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.sendButton.setOnClickListener {
+            debug("sendButton click")
+
+            val str = binding.messageInputText.text.toString().trim()
+            if (str.isNotEmpty())
+                model.messagesState.sendMessage(str)
+            binding.messageInputText.setText("") // blow away the string the user just entered
+
+            // requireActivity().hideKeyboard()
+        }
+
         binding.messageInputText.on(EditorInfo.IME_ACTION_DONE) {
             debug("did IME action")
 
