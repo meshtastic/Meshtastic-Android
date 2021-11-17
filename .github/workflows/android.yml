@@ -28,7 +28,7 @@ jobs:
           echo "MAPBOX_DOWNLOADS_TOKEN=$MAPBOXTOKEN" >>~/.gradle/gradle.properties
         env:
           gservices: ${{ secrets.gservices }}
-          mapboxtoken: ${{ secrets.mapboxtoken }}
+          MAPBOXTOKEN: ${{ secrets.MAPBOXTOKEN }}
       - name: Mock curfirmware version for CI
         run: |
           rm ./app/src/main/res/values/curfirmwareversion.xml
