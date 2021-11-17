@@ -2,6 +2,7 @@ package com.geeksville.mesh.ui
 
 import android.graphics.Color
 import android.os.Bundle
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +30,8 @@ import java.util.*
 
 // Allows usage like email.on(EditorInfo.IME_ACTION_NEXT, { confirm() })
 fun EditText.on(actionId: Int, func: () -> Unit) {
+    setImeOptions(EditorInfo.IME_ACTION_SEND) // Force "SEND" IME Action
+    setRawInputType(InputType.TYPE_CLASS_TEXT) // Suppress ENTER but allow textMultiLine
     setOnEditorActionListener { _, receivedActionId, _ ->
 
         if (actionId == receivedActionId) {
@@ -241,7 +244,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             // requireActivity().hideKeyboard()
         }
 
-        binding.messageInputText.on(EditorInfo.IME_ACTION_DONE) {
+        binding.messageInputText.on(EditorInfo.IME_ACTION_SEND) {
             debug("did IME action")
 
             val str = binding.messageInputText.text.toString().trim()
