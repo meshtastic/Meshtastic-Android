@@ -73,6 +73,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
         binding.channelOptions.isEnabled = isEditing
         binding.shareButton.isEnabled = !isEditing
+        binding.resetButton.isEnabled = isEditing
         binding.scanButton.isEnabled = isEditing
         binding.channelNameView.isEnabled = isEditing
         if (isEditing) // Dim the (stale) QR code while editing...
@@ -90,7 +91,6 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
         // Only let buttons work if we are connected to the radio
         binding.shareButton.isEnabled = connected
-        binding.resetButton.isEnabled = connected && Channel.default != channel
 
         binding.editableCheckbox.isChecked = false // start locked
         if (channel != null) {
