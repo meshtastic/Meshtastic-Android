@@ -20,7 +20,9 @@ import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos
+import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.hasCameraPermission
 import com.geeksville.mesh.databinding.ChannelFragmentBinding
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
@@ -208,12 +210,16 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
 
         binding.scanButton.setOnClickListener {
-            val zxingScan = IntentIntegrator.forSupportFragment(this)
-            zxingScan.setCameraId(0)
-            zxingScan.setPrompt("")
-            zxingScan.setBeepEnabled(false)
-            zxingScan.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
-            zxingScan.initiateScan()
+            if ((requireActivity() as MainActivity).hasCameraPermission()) {
+                val zxingScan = IntentIntegrator.forSupportFragment(this)
+                zxingScan.setCameraId(0)
+                zxingScan.setPrompt("")
+                zxingScan.setBeepEnabled(false)
+                zxingScan.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
+                zxingScan.initiateScan()
+            } else {
+                (requireActivity() as MainActivity).requestCameraPermission()
+            }
         }
 
         // Note: Do not use setOnCheckedChanged here because we don't want to be called when we programmatically disable editing
