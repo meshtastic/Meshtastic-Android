@@ -218,7 +218,16 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 zxingScan.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
                 zxingScan.initiateScan()
             } else {
-                (requireActivity() as MainActivity).requestCameraPermission()
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.camera_required)
+                    .setMessage(R.string.why_camera_required)
+                    .setNeutralButton(R.string.cancel) { _, _ ->
+                        debug("Camera permission denied")
+                    }
+                    .setPositiveButton(getString(R.string.accept)) { _, _ ->
+                        (requireActivity() as MainActivity).requestCameraPermission()
+                    }
+                    .show()
             }
         }
 

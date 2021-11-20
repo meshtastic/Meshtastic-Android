@@ -116,4 +116,6 @@
     <string name="cancel_no_radio">Cancel (no radio access)</string>
     <string name="allow_will_show">Allow (will show dialog)</string>
     <string name="provide_location_to_mesh">Provide location to mesh</string>
+    <string name="camera_required">Camera permission</string>
+    <string name="why_camera_required">We must be granted access to the camera to read QR codes. No pictures or videos will be saved.</string>
 </resources>
