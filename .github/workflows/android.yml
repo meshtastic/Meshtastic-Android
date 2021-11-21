@@ -14,6 +14,9 @@ jobs:
         with:
           submodules: true
       - name: Loading secrets
+        env:
+          gservices: ${{ secrets.gservices }}
+          mapboxtoken: ${{ secrets.mapboxtoken }}
         run: |
           # not yet needed echo $gservices > ./app/google-services.json
           rm ./app/google-services.json          
@@ -22,13 +25,10 @@ jobs:
           rm ./app/src/main/res/values/mapbox-token.xml
           cp ./app/special/mapbox-token.xml ./app/src/main/res/values/
           # The following would not be valid XML, don't use yet
-          # echo $MAPBOXTOKEN > ./app/src/main/res/values/mapbox-token.xml
+          # echo $mapboxtoken > ./app/src/main/res/values/mapbox-token.xml
 
           mkdir -p ~/.gradle
-          echo "MAPBOX_DOWNLOADS_TOKEN=$MAPBOXTOKEN" >>~/.gradle/gradle.properties
-        env:
-          gservices: ${{ secrets.gservices }}
-          MAPBOXTOKEN: ${{ secrets.MAPBOXTOKEN }}
+          echo "MAPBOX_DOWNLOADS_TOKEN=$mapboxtoken" >>~/.gradle/gradle.properties
       - name: Mock curfirmware version for CI
         run: |
           rm ./app/src/main/res/values/curfirmwareversion.xml
