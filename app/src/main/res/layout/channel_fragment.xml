@@ -98,30 +98,40 @@
         android:id="@+id/resetButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
+        android:layout_marginEnd="10dp"
         android:text="@string/reset"
         app:icon="@drawable/ic_twotone_public_24"
         app:layout_constraintBottom_toBottomOf="@id/bottomButtonsGuideline"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintEnd_toStartOf="@id/editableCheckbox" />
+
+    <Button
+        android:id="@+id/scanButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:text="Scan"
+        app:layout_constraintBottom_toBottomOf="@id/bottomButtonsGuideline"
+        app:layout_constraintStart_toEndOf="@id/editableCheckbox" />
 
     <CheckBox
         android:id="@+id/editableCheckbox"
+        android:minWidth="0dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:button="@drawable/sl_lock_24dp"
         app:layout_constraintBottom_toBottomOf="@id/bottomButtonsGuideline"
-        app:layout_constraintStart_toEndOf="@+id/resetButton"></CheckBox>
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
 
     <ImageButton
         android:id="@+id/shareButton"
         style="@android:style/Widget.Material.ImageButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="32dp"
+        android:layout_marginEnd="16dp"
         android:contentDescription="@string/share"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/editableCheckbox"
+        app:layout_constraintBottom_toBottomOf="@id/bottomButtonsGuideline"
         app:srcCompat="@drawable/ic_twotone_share_24" />
 
     <androidx.constraintlayout.widget.Guideline

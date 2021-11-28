@@ -50,11 +50,8 @@
 
     <!-- Uart access -->
 
-
-    <!-- the xing library will try to bring this permission in but we don't want it -->
-    <uses-permission
-        android:name="android.permission.CAMERA"
-        tools:node="remove" />
+    <!-- zxing library for QR Code scanning using camera -->
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <uses-feature
         android:name="android.hardware.bluetooth_le"
@@ -116,6 +113,12 @@
             android:name="com.geeksville.mesh.service.RadioInterfaceService"
             android:enabled="true"
             android:exported="false" />
+
+        <!-- zxing for QR Code scanning: lock portrait orientation -->
+        <activity
+            android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="portrait"
+            tools:replace="screenOrientation" />
 
         <activity
             android:name="com.geeksville.mesh.MainActivity"
