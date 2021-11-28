@@ -42,6 +42,7 @@ import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.android.getBackgroundPermissions
+import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.android.getMissingPermissions
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.ActivityMainBinding
@@ -247,6 +248,8 @@ class MainActivity : AppCompatActivity(), Logging,
         return getMissingPermissions(perms)
     }
 
+    /** Ask the user to grant camera permission */
+    fun requestCameraPermission() = requestPermission(getCameraPermissions(), false)
 
     /** Ask the user to grant background location permission */
     fun requestBackgroundPermission() = requestPermission(getBackgroundPermissions(), false)

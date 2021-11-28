@@ -112,4 +112,6 @@
     <string name="cancel_no_radio">Cancelar (sem acesso ao rádio)</string>
     <string name="allow_will_show">Permitir (exibe diálogo)</string>
     <string name="provide_location_to_mesh">Fornecer localização para mesh</string>
+    <string name="why_camera_required">Precisamos acessar a câmera para escanear códigos QR. Nenhuma foto ou video são armazenados.</string>
+    <string name="camera_required">Permissão da câmera</string>
 </resources>
