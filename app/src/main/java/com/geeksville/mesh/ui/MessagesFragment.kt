@@ -30,8 +30,6 @@ import java.util.*
 
 // Allows usage like email.on(EditorInfo.IME_ACTION_NEXT, { confirm() })
 fun EditText.on(actionId: Int, func: () -> Unit) {
-    setImeOptions(EditorInfo.IME_ACTION_SEND) // Force "SEND" IME Action
-    setRawInputType(InputType.TYPE_CLASS_TEXT) // Suppress ENTER but allow textMultiLine
     setOnEditorActionListener { _, receivedActionId, _ ->
 
         if (actionId == receivedActionId) {
@@ -50,6 +48,20 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
     private val binding get() = _binding!!
 
     private val model: UIViewModel by activityViewModels()
+    
+    // Allows textMultiline with IME_ACTION_SEND
+    fun EditText.onActionSend(func: () -> Unit) {
+        setImeOptions(EditorInfo.IME_ACTION_SEND)
+        setRawInputType(InputType.TYPE_CLASS_TEXT)
+        setOnEditorActionListener { _, actionId, _ ->
+
+            if (actionId == EditorInfo.IME_ACTION_SEND) {
+                func()
+            }
+
+            true
+        }
+    }
 
     private val dateTimeFormat: DateFormat =
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
@@ -244,7 +256,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             // requireActivity().hideKeyboard()
         }
 
-        binding.messageInputText.on(EditorInfo.IME_ACTION_SEND) {
+        binding.messageInputText.onActionSend {
             debug("did IME action")
 
             val str = binding.messageInputText.text.toString().trim()
@@ -291,4 +303,3 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
     }
 
 }
-
