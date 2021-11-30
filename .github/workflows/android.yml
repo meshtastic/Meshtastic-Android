@@ -1,41 +1,59 @@
 name: Android CI
-# from https://medium.com/@wkrzywiec/github-actions-for-android-first-approach-f616c24aa0f9
 
 on:
-  - push
-  - pull_request
+  push:
+  pull_request:
 
 jobs:
-  test:
-    name: Test
+
+  ci-build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          submodules: true
-      - name: Loading secrets
-        run: |
-          # not yet needed echo $gservices > ./app/google-services.json
-          rm ./app/google-services.json          
-          cp ./app/google-services-example.json ./app/google-services.json
-          rm ./app/src/main/res/values/mapbox-token.xml
-          cp ./app/special/mapbox-token.xml ./app/src/main/res/values/
-          # The following would not be valid XML, don't use yet
-          # echo $MAPBOXTOKEN > ./app/src/main/res/values/mapbox-token.xml
-          mkdir -p ~/.gradle
-          echo "MAPBOX_DOWNLOADS_TOKEN=$MAPBOXTOKEN" >>~/.gradle/gradle.properties
-        env:
-          gservices: ${{ secrets.gservices }}
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+
+    - name: Load secrets
+      run: |
+        # not yet needed echo $GSERVICES > ./app/google-services.json
+        rm ./app/google-services.json          
+        cp ./app/google-services-example.json ./app/google-services.json
+        rm ./app/src/main/res/values/mapbox-token.xml
+        cp ./app/special/mapbox-token.xml ./app/src/main/res/values/
+        # The following would not be valid XML, don't use yet
+        # echo $MAPBOXTOKEN > ./app/src/main/res/values/mapbox-token.xml
+        mkdir -p ~/.gradle
+        echo "MAPBOX_DOWNLOADS_TOKEN=$MAPBOXTOKEN" >>~/.gradle/gradle.properties
+      env:
+          GSERVICES: ${{ secrets.GSERVICES }}
           MAPBOXTOKEN: ${{ secrets.MAPBOXTOKEN }}
-      - name: Mock curfirmware version for CI
-        run: |
-          rm ./app/src/main/res/values/curfirmwareversion.xml
-          cp ./app/special/curfirmwareversion.xml ./app/src/main/res/values/
-      - name: set up Java
-        uses: actions/setup-java@v2
-        with:
-          distribution: "adopt"
-          java-version: 16
-      - name: Unit tests
-        run: bash ./gradlew test --stacktrace
+
+    - name: Mock curfirmware version for CI
+      run: |
+        rm ./app/src/main/res/values/curfirmwareversion.xml
+        cp ./app/special/curfirmwareversion.xml ./app/src/main/res/values/
+
+    - name: Set up JDK 11
+      uses: actions/setup-java@v2
+      with:
+        java-version: 11
+        distribution: 'adopt'
+        cache: gradle
         
+    - name: Validate Gradle wrapper
+      uses: gradle/wrapper-validation-action@v1
+      
+    - name: Integration test
+      run: ./gradlew test --stacktrace
+
+    - name: Build debug APK
+      run: ./gradlew assembleDebug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v2
+      with:
+        name: app-debug
+        path: app/build/outputs/apk/debug/app-debug.apk
+        retention-days: 30
