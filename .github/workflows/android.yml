@@ -21,9 +21,7 @@ jobs:
         rm ./app/google-services.json          
         cp ./app/google-services-example.json ./app/google-services.json
         rm ./app/src/main/res/values/mapbox-token.xml
-        cp ./app/special/mapbox-token.xml ./app/src/main/res/values/
-        # The following would not be valid XML, don't use yet
-        # echo $MAPBOXTOKEN > ./app/src/main/res/values/mapbox-token.xml
+        echo "<resources>\n    <string name=\"mapbox_access_token\">$MAPBOXTOKEN</string>\n</resources>" > ./app/src/main/res/values/mapbox-token.xml
         mkdir -p ~/.gradle
         echo "MAPBOX_DOWNLOADS_TOKEN=$MAPBOXTOKEN" >>~/.gradle/gradle.properties
       env:
