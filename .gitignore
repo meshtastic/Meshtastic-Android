@@ -14,3 +14,10 @@
 .externalNativeBuild
 .cxx
 /app/release
+
+# Java KeyStore certificates
+*.jks
+keystore.properties
+
+# Mapbox token file
+/app/src/main/res/values/mapbox-token.xml
