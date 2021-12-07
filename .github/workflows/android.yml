@@ -17,9 +17,8 @@ jobs:
 
     - name: Load secrets
       run: |
-        # not yet needed echo $GSERVICES > ./app/google-services.json
-        rm ./app/google-services.json          
-        cp ./app/google-services-example.json ./app/google-services.json
+        rm ./app/google-services.json
+        echo $GSERVICES > ./app/google-services.json
         rm ./app/src/main/res/values/mapbox-token.xml
         echo "<resources>\n    <string name=\"mapbox_access_token\">$MAPBOXTOKEN</string>\n</resources>" > ./app/src/main/res/values/mapbox-token.xml
         mkdir -p ~/.gradle
