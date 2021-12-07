@@ -24,8 +24,8 @@ jobs:
         mkdir -p ~/.gradle
         echo "MAPBOX_DOWNLOADS_TOKEN=$MAPBOXTOKEN" >>~/.gradle/gradle.properties
       env:
-          GSERVICES: ${{ secrets.GSERVICES }}
-          MAPBOXTOKEN: ${{ secrets.MAPBOXTOKEN }}
+        GSERVICES: ${{ secrets.GSERVICES }}
+        MAPBOXTOKEN: ${{ secrets.MAPBOXTOKEN }}
 
     - name: Mock curfirmware version for CI
       run: |
