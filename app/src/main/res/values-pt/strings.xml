@@ -58,10 +58,10 @@
     <string name="app_too_old">A aplicação é muito antiga</string>
     <string name="must_update">Tem de atualizar esta aplicação no Google Play (ou Github). A versão é muito antiga para ser possível falar com este rádio.</string>
     <string name="none">Nenhum (desabilitado)</string>
-    <string name="modem_config_short">Curto alcance (mas rápido)</string>
-    <string name="modem_config_medium">Médio alcance (mas rápido)</string>
-    <string name="modem_config_long">Longo alcance (mas lento)</string>
-    <string name="modem_config_very_long">Muito longo alcance (mas lento)</string>
+    <string name="modem_config_short">Curto alcance / rápido</string>
+    <string name="modem_config_medium">Médio alcance / rápido</string>
+    <string name="modem_config_long">Longo alcance / lento</string>
+    <string name="modem_config_very_long">Longo alcance / lento</string>
     <string name="modem_config_unrecognized">DESCONHECIDO</string>
     <string name="meshtastic_service_notifications">Notificações do Serviço Meshtastic</string>
     <string name="location_disabled_warning">Deve ativar os serviços de localização nas configurações do Android</string>
@@ -114,4 +114,6 @@
     <string name="provide_location_to_mesh">Fornecer localização para mesh</string>
     <string name="why_camera_required">Precisamos acessar a câmera para escanear códigos QR. Nenhuma foto ou video são armazenados.</string>
     <string name="camera_required">Permissão da câmera</string>
+    <string name="modem_config_slow_short">Curto alcance / lento</string>
+    <string name="modem_config_slow_medium">Médio alcance / lento</string>
 </resources>
