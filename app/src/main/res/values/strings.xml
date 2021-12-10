@@ -65,7 +65,7 @@
     <string name="none">None (disable)</string>
     <string name="modem_config_short">Short Range / Fast</string>
     <string name="modem_config_medium">Medium Range / Fast</string>
-    <string name="modem_config_long">Long Range / Slow</string>
+    <string name="modem_config_long">Long Range / Fast</string>
     <string name="modem_config_very_long">Long Range / Slow</string>
     <string name="modem_config_unrecognized">UNRECOGNIZED</string>
     <string name="meshtastic_service_notifications">Meshtastic Service Notifications</string>
