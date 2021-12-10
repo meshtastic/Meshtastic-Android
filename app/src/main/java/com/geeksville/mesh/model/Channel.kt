@@ -35,9 +35,11 @@ data class Channel(val settings: ChannelProtos.ChannelSettings) {
             if (settings.bandwidth != 0)
                 "Unset"
             else when (settings.modemConfig) {
-                ChannelProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128 -> "Medium"
                 ChannelProtos.ChannelSettings.ModemConfig.Bw500Cr45Sf128 -> "ShortFast"
-                ChannelProtos.ChannelSettings.ModemConfig.Bw31_25Cr48Sf512 -> "LongAlt"
+                ChannelProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128 -> "ShortSlow"
+                ChannelProtos.ChannelSettings.ModemConfig.Bw250Cr47Sf1024 -> "MediumFast"
+                ChannelProtos.ChannelSettings.ModemConfig.Bw250Cr46Sf2048 -> "MediumSlow"
+                ChannelProtos.ChannelSettings.ModemConfig.Bw31_25Cr48Sf512 -> "LongFast"
                 ChannelProtos.ChannelSettings.ModemConfig.Bw125Cr48Sf4096 -> "LongSlow"
                 else -> "Invalid"
             }

@@ -59,10 +59,10 @@
     <string name="app_too_old">Atualização do aplicativo necessária</string>
     <string name="must_update">Será necessário atualizar este aplicativo no Google Play (ou Github). Versão muito antiga para comunicar com o firmware do rádio.  Favor consultar <a href="https://www.meshtastic.org/software/android-too-old.html">wiki</a>.</string>
     <string name="none">Nenhum (desabilitado)</string>
-    <string name="modem_config_short">Curto alcance (mais rápido)</string>
-    <string name="modem_config_medium">Médio alcance (rápido)</string>
-    <string name="modem_config_long">Longo alcance (lento)</string>
-    <string name="modem_config_very_long">Muito longo alcance (mais lento)</string>
+    <string name="modem_config_short">Curto alcance / rápido</string>
+    <string name="modem_config_medium">Médio alcance / rápido</string>
+    <string name="modem_config_long">Longo alcance / lento</string>
+    <string name="modem_config_very_long">Longo alcance / lento</string>
     <string name="modem_config_unrecognized">DESCONHECIDO</string>
     <string name="meshtastic_service_notifications">Notificações do Serviço Meshtastic</string>
     <string name="location_disabled_warning"> Você deve ativar o modo de alta precisão nas Configurações de Local do Android</string>
@@ -114,4 +114,6 @@
     <string name="provide_location_to_mesh">Fornecer localização para mesh</string>
     <string name="camera_required">Permissão da câmera</string>
     <string name="why_camera_required">Precisamos acessar a câmera para escanear códigos QR. Nenhuma foto ou video são armazenados.</string>
+    <string name="modem_config_slow_short">Curto alcance / lento</string>
+    <string name="modem_config_slow_medium">Médio alcance / lento</string>
 </resources>

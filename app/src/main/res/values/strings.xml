@@ -63,10 +63,10 @@
     <string name="app_too_old">Application update required</string>
     <string name="must_update">You must update this application on the app store (or Github). It is too old to talk to this radio firmware.  Please read our <a href="https://www.meshtastic.org/software/android-too-old.html">wiki</a> on this topic.</string>
     <string name="none">None (disable)</string>
-    <string name="modem_config_short">Short range (but fast)</string>
-    <string name="modem_config_medium">Medium range (but fast)</string>
-    <string name="modem_config_long">Long range (but slower)</string>
-    <string name="modem_config_very_long">Very long range (but slow)</string>
+    <string name="modem_config_short">Short Range / Fast</string>
+    <string name="modem_config_medium">Medium Range / Fast</string>
+    <string name="modem_config_long">Long Range / Fast</string>
+    <string name="modem_config_very_long">Long Range / Slow</string>
     <string name="modem_config_unrecognized">UNRECOGNIZED</string>
     <string name="meshtastic_service_notifications">Meshtastic Service Notifications</string>
     <string name="location_disabled_warning">You must turn on (high accuracy) location services in Android Settings</string>
@@ -118,4 +118,6 @@
     <string name="provide_location_to_mesh">Provide location to mesh</string>
     <string name="camera_required">Camera permission</string>
     <string name="why_camera_required">We must be granted access to the camera to read QR codes. No pictures or videos will be saved.</string>
+    <string name="modem_config_slow_short">Short Range / Slow</string>
+    <string name="modem_config_slow_medium">Medium Range / Slow</string>
 </resources>
