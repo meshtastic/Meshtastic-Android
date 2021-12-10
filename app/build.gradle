@@ -20,16 +20,21 @@ unMock {
     keep "android.util.Base64"
 }
 
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
-    /*
     signingConfigs {
         release {
-            storeFile "$meshtasticKeystoreFile"
-            keyAlias 'upload'
-            storePassword "$meshtasticKeystorePassword"
-            keyPassword "$meshtasticKeyPassword"
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+            storePassword keystoreProperties['storePassword']
         }
-    } */
+    }
     compileSdkVersion 31
     // leave undefined to use version plugin wants
     // buildToolsVersion "30.0.2" // Note: 30.0.2 doesn't yet work on Github actions CI
@@ -46,6 +51,9 @@ android {
     }
     buildTypes {
         release {
+            if (keystoreProperties['storeFile']) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
