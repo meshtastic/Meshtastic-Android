@@ -22,7 +22,7 @@ jobs:
         rm ./app/google-services.json
         echo $GSERVICES > ./app/google-services.json
         rm ./app/src/main/res/values/mapbox-token.xml
-        echo "<resources>\n    <string name=\"mapbox_access_token\">$MAPBOXTOKEN</string>\n</resources>" > ./app/src/main/res/values/mapbox-token.xml
+        echo -e "<resources>\n    <string name=\"mapbox_access_token\">$MAPBOXTOKEN</string>\n</resources>" > ./app/src/main/res/values/mapbox-token.xml
         mkdir -p ~/.gradle
         echo "MAPBOX_DOWNLOADS_TOKEN=$MAPBOXTOKEN" >> ~/.gradle/gradle.properties
         echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
@@ -34,10 +34,6 @@ jobs:
           KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
           KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
 
-    - name: Mock curfirmware version for CI
-      run: |
-        rm ./app/src/main/res/values/curfirmwareversion.xml
-        cp ./app/special/curfirmwareversion.xml ./app/src/main/res/values/
     - name: Set up JDK 11
       uses: actions/setup-java@v2
       with:
@@ -52,20 +48,27 @@ jobs:
         repo_path: meshtastic/Meshtastic-device
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Get version strings from tags
-      run: echo "FIRMWARE_VERSION=$(echo ${{ steps.firmware_latest.outputs.tag_name }}|sed -e 's/^v//')" >> $GITHUB_ENV
+    - name: Get version strings from tag_name
+      run: |
+        echo "CUR_FIRMWARE_VERSION=$(echo ${{ steps.firmware_latest.outputs.tag_name }}|sed -e 's/^v//')" >> $GITHUB_ENV
+        echo "SHORT_FIRMWARE_VERSION=$(echo ${{ steps.firmware_latest.outputs.tag_name }}|sed -e 's/^v//' -e 's/.\{8\}$//')" >> $GITHUB_ENV
+
+    - name: Create curfirmwareversion.xml latest
+      run: |
+        rm ./app/src/main/res/values/curfirmwareversion.xml
+        echo -e "<resources>\n    <string name=\"cur_firmware_version\" translatable=\"false\">${{ env.CUR_FIRMWARE_VERSION }}</string>\n    <string name=\"short_firmware_version\" translatable=\"false\">${{ env.SHORT_FIRMWARE_VERSION }}</string>\n</resources>" > ./app/src/main/res/values/curfirmwareversion.xml
 
     - name: Pull firmware latest
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: meshtastic/Meshtastic-device
-        file: firmware-${{ env.FIRMWARE_VERSION }}.zip
+        file: firmware-${{ env.CUR_FIRMWARE_VERSION }}.zip
         target: firmware.zip
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Unzip firmware into assets/firmware
       run: |
-        rm -f app/src/main/assets/firmware
+        rm -rf app/src/main/assets/firmware
         mkdir -p app/src/main/assets/firmware
         unzip -qq firmware.zip 'firmware-*.bin' 'spiffs-*.bin' -d app/src/main/assets/firmware
         rm firmware.zip
@@ -105,4 +108,3 @@ jobs:
         asset_path: app/build/outputs/apk/release/app-release.apk
         asset_name: app-release-${{ github.event.inputs.version}}.apk
         asset_content_type: application/zip
-        
