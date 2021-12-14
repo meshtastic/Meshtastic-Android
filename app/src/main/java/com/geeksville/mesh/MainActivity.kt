@@ -316,7 +316,7 @@ class MainActivity : AppCompatActivity(), Logging,
                     .setTitle(getString(R.string.required_permissions))
                     .setMessage(getMissingMessage())
                     .setNeutralButton(R.string.cancel_no_radio) { _, _ ->
-                        error("User bailed due to permissions")
+                        warn("User bailed due to permissions")
                     }
                     .setPositiveButton(R.string.allow_will_show) { _, _ ->
                         doRequest()
