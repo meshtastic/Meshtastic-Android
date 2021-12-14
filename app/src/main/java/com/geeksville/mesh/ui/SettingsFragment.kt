@@ -665,7 +665,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                         .setNeutralButton(R.string.cancel) { _, _ ->
                             debug("Decided not to report a bug")
                         }
-                        .setPositiveButton(getString(R.string.show_system_settings)) { _, _ ->
+                        .setPositiveButton(getString(R.string.accept)) { _, _ ->
                             myActivity.requestBackgroundPermission()
                         }
                         .show()

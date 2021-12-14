@@ -31,7 +31,7 @@
     <string name="map_not_allowed">O Google Analytics está desativado. Infelizmente a plataforma de mapas utilizada (Mapbox) requer este recurso ativado para uso do plano \’gratuito\’ . Tivemos que desativar a visualização do mapa.\n\n
         Para poder visualizar o mapa será necessário ativar o Google Analytics na configuração do Android (pode ser necessário forçar o reinício do aplicativo).\n\n
         Se tiver interesse em que o Meshtastic use um plano pago do Mapbox (ou mude para uma plataforma de mapas diferente), por favor envie uma mensagem em meshtastic.discourse.group</string>
-    <string name="permission_missing">Meshtastic precisa permissão de %s. Sem isso o Android não permite conexão com um rádio LoRa via bluetooth.</string>
+    <string name="permission_missing">Meshtastic precisa da permissão de %s e da localização ativada para encontrar novos dispositivos via bluetooth. Você pode desativar novamente depois.</string>
     <string name="radio_sleeping">Rádio estava em suspensão (sleep), não foi possível mudar de canal</string>
     <string name="report_bug">Informar Bug</string>
     <string name="report_a_bug">Informar um bug</string>
@@ -104,9 +104,9 @@
     <string name="theme_dark">Escuro</string>
     <string name="theme_system">Padrão do sistema</string>
     <string name="choose_theme_title">Escolher tema</string>
-    <string name="background_required">Localização em segundo plano necessária</string>
+    <string name="background_required">Localização em segundo plano</string>
     <string name="show_system_settings">Exibir configurações do sistema</string>
-    <string name="why_background_required">Para usar esta função, você deve permitir acesso ao Local com a opção "localização em segundo plano".\n\nIsso permite acesso à localização enquanto o Meshtastic roda em segundo plano, possibilitando o envio da sua localização aos outros membros da mesh.</string>
+    <string name="why_background_required">Para este recurso, você deve conceder permissão para acessar Local com a opção \"Permitir o tempo todo\".\nIsto permite ao Meshtastic ler a localização do seu smartphone e enviar aos membros da sua mesh, mesmo quando o aplicativo está fechado ou não em uso.</string>
     <string name="required_permissions">Permissões necessárias</string>
     <string name="location">localização</string>
     <string name="cancel_no_radio">Cancelar (sem acesso ao rádio)</string>

@@ -315,10 +315,10 @@ class MainActivity : AppCompatActivity(), Logging,
                 MaterialAlertDialogBuilder(this)
                     .setTitle(getString(R.string.required_permissions))
                     .setMessage(getMissingMessage())
-                    .setNeutralButton(R.string.cancel_no_radio) { _, _ ->
+                    .setNeutralButton(R.string.cancel) { _, _ ->
                         warn("User bailed due to permissions")
                     }
-                    .setPositiveButton(R.string.allow_will_show) { _, _ ->
+                    .setPositiveButton(R.string.accept) { _, _ ->
                         doRequest()
                     }
                     .show()
