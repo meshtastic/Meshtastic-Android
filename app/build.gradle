@@ -165,7 +165,7 @@ dependencies {
     implementation 'com.github.mik3y:usb-serial-for-android:v3.0.0'
 
     // mapbox
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.6.0'
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.7.1'
 
     // mapbox specifies a really old version of okhttp3 which causes lots of API warnings.  trying a newer version
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
@@ -177,7 +177,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:19.2.0'
 
     // Add the Firebase SDK for Crashlytics.
-    implementation 'com.google.firebase:firebase-crashlytics:18.2.4'
+    implementation 'com.google.firebase:firebase-crashlytics:18.2.6'
 
     // alas implementation bug deep in the bowels when I tried it for my SyncBluetoothDevice class
     // implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.3"
