@@ -41,6 +41,18 @@ fun Context.getCameraPermissions(): List<String> {
 fun Context.hasCameraPermission() = getCameraPermissions().isEmpty()
 
 /**
+ * Camera permission (or empty if we already have what we need)
+ */
+fun Context.getLocationPermissions(): List<String> {
+    val perms = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
+
+    return getMissingPermissions(perms)
+}
+
+/** @return true if the user already has camera permission */
+fun Context.hasLocationPermission() = getLocationPermissions().isEmpty()
+
+/**
  * A list of missing background location permissions (or empty if we already have what we need)
  */
 fun Context.getBackgroundPermissions(): List<String> {

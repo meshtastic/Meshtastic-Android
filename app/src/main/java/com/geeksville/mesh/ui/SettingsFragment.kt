@@ -11,6 +11,7 @@ import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
 import android.content.*
+import android.content.pm.PackageManager
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Bundle
@@ -35,6 +36,7 @@ import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.RadioConfigProtos
 import com.geeksville.mesh.android.bluetoothManager
+import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.android.hasBackgroundPermission
 import com.geeksville.mesh.android.usbManager
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
@@ -656,16 +658,22 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
             if (view.isPressed && isChecked) { // We want to ignore changes caused by code (as opposed to the user)
                 debug("User changed location tracking to $isChecked")
-                view.isChecked =
-                    myActivity.hasBackgroundPermission() // Don't check the box until the system setting changes
-                if (!view.isChecked)
+                val hasLocationPermission = myActivity.hasLocationPermission()
+                val hasBackgroundPermission = myActivity.hasBackgroundPermission()
+
+                // Don't check the box until the system setting changes
+                view.isChecked = hasLocationPermission && hasBackgroundPermission
+
+                if (!hasLocationPermission) // Make sure we have location permission (prerequisite)
+                    myActivity.requestLocationPermission()
+                if (hasLocationPermission && !hasBackgroundPermission)
                     MaterialAlertDialogBuilder(requireContext())
                         .setTitle(R.string.background_required)
                         .setMessage(R.string.why_background_required)
                         .setNeutralButton(R.string.cancel) { _, _ ->
-                            debug("Decided not to report a bug")
+                            debug("User denied background permission")
                         }
-                        .setPositiveButton(getString(R.string.show_system_settings)) { _, _ ->
+                        .setPositiveButton(getString(R.string.accept)) { _, _ ->
                             myActivity.requestBackgroundPermission()
                         }
                         .show()
@@ -901,8 +909,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
      * If the user has not turned on location access throw up a toast warning
      */
     private fun checkLocationEnabled() {
+
+        fun hasGpsSensor(): Boolean =
+            myActivity.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+
         // If they don't have google play FIXME for now we don't check for location access
-        if (isGooglePlayAvailable(requireContext())) {
+        if (hasGpsSensor() && isGooglePlayAvailable(requireContext())) {
             // We do this painful process because LocationManager.isEnabled is only SDK28 or latet
             val builder = LocationSettingsRequest.Builder()
             builder.setNeedBle(true)
