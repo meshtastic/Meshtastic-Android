@@ -11,6 +11,7 @@ import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
 import android.content.*
+import android.content.pm.PackageManager
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Bundle
@@ -908,8 +909,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
      * If the user has not turned on location access throw up a toast warning
      */
     private fun checkLocationEnabled() {
+
+        fun hasGpsSensor(): Boolean =
+            myActivity.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+
         // If they don't have google play FIXME for now we don't check for location access
-        if (isGooglePlayAvailable(requireContext())) {
+        if (hasGpsSensor() && isGooglePlayAvailable(requireContext())) {
             // We do this painful process because LocationManager.isEnabled is only SDK28 or latet
             val builder = LocationSettingsRequest.Builder()
             builder.setNeedBle(true)
