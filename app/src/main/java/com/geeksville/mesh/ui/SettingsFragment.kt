@@ -35,6 +35,7 @@ import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.RadioConfigProtos
 import com.geeksville.mesh.android.bluetoothManager
+import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.android.hasBackgroundPermission
 import com.geeksville.mesh.android.usbManager
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
@@ -656,14 +657,20 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
             if (view.isPressed && isChecked) { // We want to ignore changes caused by code (as opposed to the user)
                 debug("User changed location tracking to $isChecked")
-                view.isChecked =
-                    myActivity.hasBackgroundPermission() // Don't check the box until the system setting changes
-                if (!view.isChecked)
+                val hasLocationPermission = myActivity.hasLocationPermission()
+                val hasBackgroundPermission = myActivity.hasBackgroundPermission()
+
+                // Don't check the box until the system setting changes
+                view.isChecked = hasLocationPermission && hasBackgroundPermission
+
+                if (!hasLocationPermission) // Make sure we have location permission (prerequisite)
+                    myActivity.requestLocationPermission()
+                if (hasLocationPermission && !hasBackgroundPermission)
                     MaterialAlertDialogBuilder(requireContext())
                         .setTitle(R.string.background_required)
                         .setMessage(R.string.why_background_required)
                         .setNeutralButton(R.string.cancel) { _, _ ->
-                            debug("Decided not to report a bug")
+                            debug("User denied background permission")
                         }
                         .setPositiveButton(getString(R.string.accept)) { _, _ ->
                             myActivity.requestBackgroundPermission()
