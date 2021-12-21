@@ -136,6 +136,17 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
             }
         }
 
+    var isAlwaysPowered: Boolean?
+        get() = radioConfig.value?.preferences?.isAlwaysPowered
+        set(value) {
+            val config = radioConfig.value
+            if (value != null && config != null) {
+                val builder = config.toBuilder()
+                builder.preferencesBuilder.isAlwaysPowered = value
+                setRadioConfig(builder.build())
+            }
+        }
+
     var region: RadioConfigProtos.RegionCode
         get() = meshService?.region?.let { RadioConfigProtos.RegionCode.forNumber(it) }
             ?: RadioConfigProtos.RegionCode.Unset
