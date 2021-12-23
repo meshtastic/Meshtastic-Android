@@ -41,37 +41,40 @@ jobs:
         distribution: 'adopt'
         # Note: we don't use caches on release builds because we don't want to accidentally not have a virgin build machine
 
-    - name: Fetch firmware latest tag_name
-      id: firmware_latest
-      uses: gregziegan/fetch-latest-release@v2.0.0
+    - name: Find firmware release tag
+      id: firmware_version
+      uses: oprypin/find-latest-tag@v1
       with:
-        repo_path: meshtastic/Meshtastic-device
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        repository: meshtastic/Meshtastic-device
+        releases-only: true
+        token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Get version strings from tag_name
+    - name: Create version strings
       run: |
-        echo "CUR_FIRMWARE_VERSION=$(echo ${{ steps.firmware_latest.outputs.tag_name }}|sed -e 's/^v//')" >> $GITHUB_ENV
-        echo "SHORT_FIRMWARE_VERSION=$(echo ${{ steps.firmware_latest.outputs.tag_name }}|sed -e 's/^v//' -e 's/.\{8\}$//')" >> $GITHUB_ENV
+        echo "CUR_FIRMWARE_VERSION=$(echo ${{ steps.firmware_version.outputs.tag }}|sed -e 's/^v//')" >> $GITHUB_ENV
+        echo "SHORT_FIRMWARE_VERSION=$(echo ${{ steps.firmware_version.outputs.tag }}|sed -e 's/^v//' -e 's/.\{8\}$//')" >> $GITHUB_ENV
 
-    - name: Create curfirmwareversion.xml latest
+    - name: Create curfirmwareversion.xml
       run: |
         rm ./app/src/main/res/values/curfirmwareversion.xml
         echo -e "<resources>\n    <string name=\"cur_firmware_version\" translatable=\"false\">${{ env.CUR_FIRMWARE_VERSION }}</string>\n    <string name=\"short_firmware_version\" translatable=\"false\">${{ env.SHORT_FIRMWARE_VERSION }}</string>\n</resources>" > ./app/src/main/res/values/curfirmwareversion.xml
 
-    - name: Pull firmware latest
+    - name: Fetch firmware release
       uses: dsaltares/fetch-gh-release-asset@master
       with:
         repo: meshtastic/Meshtastic-device
         file: firmware-${{ env.CUR_FIRMWARE_VERSION }}.zip
+        version: tags/${{ steps.firmware_version.outputs.tag }}
         target: firmware.zip
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Unzip firmware into assets/firmware
       run: |
-        rm -rf app/src/main/assets/firmware
-        mkdir -p app/src/main/assets/firmware
-        unzip -qq firmware.zip 'firmware-*.bin' 'spiffs-*.bin' -d app/src/main/assets/firmware
-        rm firmware.zip
+        rm -rf ./app/src/main/assets/firmware
+        mkdir -p ./app/src/main/assets/firmware
+        unzip -qq ./firmware.zip 'spiffs-*.bin' 'firmware-heltec*.bin' 'firmware-tbeam*.bin' 'firmware-tlora*.bin' -d ./app/src/main/assets/firmware
+        rm ./firmware.zip
+
     - name: Validate Gradle wrapper
       uses: gradle/wrapper-validation-action@v1
 
