@@ -39,12 +39,14 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
         model.radioConfig.observe(viewLifecycleOwner, { _ ->
             binding.positionBroadcastPeriodEditText.setText(model.positionBroadcastSecs.toString())
             binding.lsSleepEditText.setText(model.lsSleepSecs.toString())
+            binding.isAlwaysPoweredCheckbox.isChecked = model.isAlwaysPowered?: false
         })
 
         model.isConnected.observe(viewLifecycleOwner, Observer { connectionState ->
             val connected = connectionState == MeshService.ConnectionState.CONNECTED
             binding.positionBroadcastPeriodView.isEnabled = connected
             binding.lsSleepView.isEnabled = connected
+            binding.isAlwaysPoweredCheckbox.isEnabled = connected
         })
 
         binding.positionBroadcastPeriodEditText.on(EditorInfo.IME_ACTION_DONE) {
@@ -83,6 +85,13 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
                 Snackbar.make(requireView(), "Bad value: $str", Snackbar.LENGTH_LONG).show()
             }
             requireActivity().hideKeyboard()
+        }
+
+        binding.isAlwaysPoweredCheckbox.setOnCheckedChangeListener { view, isChecked ->
+            if (view.isPressed) {
+                model.isAlwaysPowered = isChecked
+                debug("User changed isAlwaysPowered to $isChecked")
+            }
         }
     }
 }
