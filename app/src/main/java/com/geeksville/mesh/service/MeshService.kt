@@ -931,18 +931,14 @@ class MeshService : Service(), Logging {
         sendToRadio(packet)
     }
 
-    /// Process any packets that showed up too early
-    /* private fun processEarlyPackets() {
-        earlyReceivedPackets.forEach { processReceivedMeshPacket(it) }
-        earlyReceivedPackets.clear()
-
+    private fun processQueuedPackets() {
         offlineSentPackets.forEach { p ->
             // encapsulate our payload in the proper protobufs and fire it off
             sendNow(p)
             serviceBroadcasts.broadcastMessageStatus(p)
         }
         offlineSentPackets.clear()
-    } */
+    }
 
     /**
      * Change the status on a data packet and update watchers
@@ -1474,10 +1470,10 @@ class MeshService : Service(), Logging {
         }
     }
 
-    /// If we've received our initial config, our radio settings and all of our channels, send any queueed packets and broadcast connected to clients
+    /// If we've received our initial config, our radio settings and all of our channels, send any queued packets and broadcast connected to clients
     private fun onHasSettings() {
 
-        // processEarlyPackets() // send any packets that were queued up
+        processQueuedPackets() // send any packets that were queued up
 
         // broadcast an intent with our new connection state
         serviceBroadcasts.broadcastConnection()
