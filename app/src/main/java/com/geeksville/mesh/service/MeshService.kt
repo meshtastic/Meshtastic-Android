@@ -1282,6 +1282,8 @@ class MeshService : Service(), Logging {
                 // so if the info is for _our_ node we always assume time is current
                 it.position = Position(info.position)
             }
+
+            it.lastHeard = info.lastHeard
         }
     }
 
