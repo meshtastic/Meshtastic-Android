@@ -21,8 +21,6 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- only useful if this phone can do BTLE -->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- needed to access bluetooth when app is background -->
 
-    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- for job intent service -->
-
     <!--
     This permission is required for analytics - and soon the MQTT gateway
     -->
