@@ -27,7 +27,6 @@
     This permission is required for analytics - and soon the MQTT gateway
     -->
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!--
       This permission is optional but recommended so we can be smart
