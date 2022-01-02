@@ -482,7 +482,7 @@ class MainActivity : AppCompatActivity(), Logging,
         binding.pager.isUserInputEnabled =
             false // Gestures for screen switching doesn't work so good with the map view
         // pager.offscreenPageLimit = 0 // Don't keep any offscreen pages around, because we want to make sure our bluetooth scanning stops
-        TabLayoutMediator(binding.tabLayout, binding.pager) { tab, position ->
+        TabLayoutMediator(binding.tabLayout, binding.pager, false, false) { tab, position ->
             // tab.text = tabInfos[position].text // I think it looks better with icons only
             tab.icon = ContextCompat.getDrawable(this, tabInfos[position].icon)
         }.attach()
