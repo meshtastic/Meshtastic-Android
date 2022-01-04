@@ -1015,12 +1015,12 @@ class MeshService : Service(), Logging {
         maybeUpdateServiceStatusNotification()
     }
 
-    private fun setupLocationRequest() {
+    private fun setupLocationRequests() {
         stopLocationRequests()
         val mi = myNodeInfo
         val prefs = radioConfig?.preferences
         if (mi != null && prefs != null) {
-            var broadcastSecs = prefs.positionBroadcastSecs
+            val broadcastSecs = prefs.positionBroadcastSecs
 
             var desiredInterval = if (broadcastSecs == 0) // unset by device, use default
                 15 * 60 * 1000L
@@ -1046,7 +1046,6 @@ class MeshService : Service(), Logging {
             }
         }
     }
-
 
     /**
      * Send in analytics about mesh connection
@@ -1326,7 +1325,7 @@ class MeshService : Service(), Logging {
                     hwModelStr,
                     firmwareVersion,
                     firmwareUpdateFilename != null,
-                    isBluetoothInterface && com.geeksville.mesh.service.SoftwareUpdateService.shouldUpdate(
+                    isBluetoothInterface && SoftwareUpdateService.shouldUpdate(
                         this@MeshService,
                         DeviceVersion(firmwareVersion)
                     ),
@@ -1481,8 +1480,6 @@ class MeshService : Service(), Logging {
         reportConnection()
 
         updateRegion()
-
-        setupLocationRequest() // start sending location packets if needed
     }
 
     private fun handleConfigComplete(configCompleteId: Int) {
@@ -1879,6 +1876,15 @@ class MeshService : Service(), Logging {
             info("in connectionState=$r")
             r.toString()
         }
+
+        override fun setupProvideLocation() = toRemoteExceptions {
+            setupLocationRequests()
+        }
+
+        override fun stopProvideLocation() = toRemoteExceptions {
+            stopLocationRequests()
+        }
+
     }
 }
 

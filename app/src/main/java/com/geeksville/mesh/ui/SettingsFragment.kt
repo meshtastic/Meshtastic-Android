@@ -58,7 +58,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import java.util.regex.Pattern
 
-
 object SLogging : Logging
 
 /// Change to a new macaddr selection, updating GUI and radio
@@ -326,7 +325,6 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
     val devices = object : MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf()) {
 
-
         /**
          * Called when the number of active observers change from 1 to 0.
          *
@@ -439,7 +437,6 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     }
 }
 
-
 @SuppressLint("NewApi")
 class SettingsFragment : ScreenFragment("Settings"), Logging {
     private var _binding: SettingsFragmentBinding? = null
@@ -495,7 +492,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     /// Set the correct update button configuration based on current progress
     private fun refreshUpdateButton(enable: Boolean) {
-        debug("Reiniting the udpate button")
+        debug("Reiniting the update button")
         val info = model.myNodeInfo.value
         val service = model.meshService
         if (model.isConnected.value == MeshService.ConnectionState.CONNECTED && info != null && info.shouldUpdate && info.couldUpdate && service != null) {
@@ -629,7 +626,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             binding.usernameEditText.setText(name)
         })
 
-
         // Only let user edit their name or set software update while connected to a radio
         model.isConnected.observe(viewLifecycleOwner, Observer { _ ->
             updateNodeInfo()
@@ -652,31 +648,38 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             requireActivity().hideKeyboard()
         }
 
+        binding.provideLocationCheckbox.isEnabled = isGooglePlayAvailable(requireContext())
         binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
-            // No matter what set our desired state in prefs
-            model.provideLocation.value = isChecked
-
-            if (view.isPressed && isChecked) { // We want to ignore changes caused by code (as opposed to the user)
+            if (view.isPressed) { // We want to ignore changes caused by code (as opposed to the user)
                 debug("User changed location tracking to $isChecked")
-                val hasLocationPermission = myActivity.hasLocationPermission()
-                val hasBackgroundPermission = myActivity.hasBackgroundPermission()
+                if (view.isChecked) {
+                    val hasLocationPermission = myActivity.hasLocationPermission()
+                    val hasBackgroundPermission = myActivity.hasBackgroundPermission()
 
-                // Don't check the box until the system setting changes
-                view.isChecked = hasLocationPermission && hasBackgroundPermission
+                    // Don't check the box until the system setting changes
+                    view.isChecked = hasLocationPermission && hasBackgroundPermission
 
-                if (!hasLocationPermission) // Make sure we have location permission (prerequisite)
-                    myActivity.requestLocationPermission()
-                if (hasLocationPermission && !hasBackgroundPermission)
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(R.string.background_required)
-                        .setMessage(R.string.why_background_required)
-                        .setNeutralButton(R.string.cancel) { _, _ ->
-                            debug("User denied background permission")
-                        }
-                        .setPositiveButton(getString(R.string.accept)) { _, _ ->
-                            myActivity.requestBackgroundPermission()
-                        }
-                        .show()
+                    if (!hasLocationPermission) // Make sure we have location permission (prerequisite)
+                        myActivity.requestLocationPermission()
+                    if (hasLocationPermission && !hasBackgroundPermission)
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(R.string.background_required)
+                            .setMessage(R.string.why_background_required)
+                            .setNeutralButton(R.string.cancel) { _, _ ->
+                                debug("User denied background permission")
+                            }
+                            .setPositiveButton(getString(R.string.accept)) { _, _ ->
+                                myActivity.requestBackgroundPermission()
+                            }
+                            .show()
+
+                    if (view.isChecked)
+                        model.provideLocation.value = isChecked
+                        model.meshService?.setupProvideLocation()
+                }
+                else {
+                    model.meshService?.stopProvideLocation()
+                }
             }
         }
 
@@ -905,16 +908,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             initClassicScan()
     }
 
-    /**
-     * If the user has not turned on location access throw up a toast warning
-     */
+    // If the user has not turned on location access throw up a toast warning
     private fun checkLocationEnabled() {
 
-        fun hasGpsSensor(): Boolean =
+        fun hasGps(): Boolean =
             myActivity.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
 
-        // If they don't have google play FIXME for now we don't check for location access
-        if (hasGpsSensor() && isGooglePlayAvailable(requireContext())) {
+        // FIXME If they don't have google play for now we don't check for location enabled
+        if (hasGps() && isGooglePlayAvailable(requireContext())) {
             // We do this painful process because LocationManager.isEnabled is only SDK28 or latet
             val builder = LocationSettingsRequest.Builder()
             builder.setNeedBle(true)
@@ -992,7 +993,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             scanModel.startScan()
 
         // system permissions might have changed while we were away
-        binding.provideLocationCheckbox.isChecked = myActivity.hasBackgroundPermission() && (model.provideLocation.value ?: false)
+        binding.provideLocationCheckbox.isChecked = myActivity.hasBackgroundPermission() && (model.provideLocation.value ?: false) && isGooglePlayAvailable(requireContext())
 
         myActivity.registerReceiver(updateProgressReceiver, updateProgressFilter)
 
@@ -1015,4 +1016,3 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 }
-
