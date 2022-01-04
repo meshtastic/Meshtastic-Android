@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.IBinder
+import android.os.Looper
 import android.os.RemoteException
 import android.widget.Toast
 import androidx.annotation.UiThread
@@ -196,6 +197,7 @@ class MeshService : Service(), Logging {
      * start our location requests (if they weren't already running)
      *
      * per https://developer.android.com/training/location/change-location-settings
+     *   & https://developer.android.com/training/location/request-updates
      */
     @SuppressLint("MissingPermission")
     @UiThread
@@ -253,10 +255,7 @@ class MeshService : Service(), Logging {
             }
 
             val client = LocationServices.getFusedLocationProviderClient(this)
-
-            // FIXME - should we use Looper.myLooper() in the third param per https://github.com/android/location-samples/blob/432d3b72b8c058f220416958b444274ddd186abd/LocationUpdatesForegroundService/app/src/main/java/com/google/android/gms/location/sample/locationupdatesforegroundservice/LocationUpdatesService.java
-            client.requestLocationUpdates(request, locationCallback, null)
-
+            client.requestLocationUpdates(request, locationCallback, Looper.getMainLooper())
             fusedLocationClient = client
         }
     }

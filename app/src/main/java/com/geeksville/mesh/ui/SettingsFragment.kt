@@ -878,7 +878,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
 
             locationSettingsResponse.addOnSuccessListener {
-                if (!it.locationSettingsStates.isBleUsable || !it.locationSettingsStates.isLocationUsable)
+                if (!it.locationSettingsStates?.isBleUsable!! || !it.locationSettingsStates?.isLocationUsable!!)
                     weNeedAccess()
                 else
                     debug("We have location access")
