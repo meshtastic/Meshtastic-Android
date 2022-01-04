@@ -650,9 +650,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         binding.provideLocationCheckbox.isEnabled = isGooglePlayAvailable(requireContext())
         binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
-            if (view.isPressed) { // We want to ignore changes caused by code (as opposed to the user)
+            if (view.isChecked) {
                 debug("User changed location tracking to $isChecked")
-                if (view.isChecked) {
+                if (view.isPressed) { // We want to ignore changes caused by code (as opposed to the user)
                     val hasLocationPermission = myActivity.hasLocationPermission()
                     val hasBackgroundPermission = myActivity.hasBackgroundPermission()
 
@@ -677,9 +677,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                         model.provideLocation.value = isChecked
                         model.meshService?.setupProvideLocation()
                 }
-                else {
-                    model.meshService?.stopProvideLocation()
-                }
+            }
+            else {
+                model.provideLocation.value = isChecked
+                model.meshService?.stopProvideLocation()
             }
         }
 
@@ -993,7 +994,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             scanModel.startScan()
 
         // system permissions might have changed while we were away
-        binding.provideLocationCheckbox.isChecked = myActivity.hasBackgroundPermission() && (model.provideLocation.value ?: false) && isGooglePlayAvailable(requireContext())
+        binding.provideLocationCheckbox.isChecked = myActivity.hasLocationPermission() && myActivity.hasBackgroundPermission() && (model.provideLocation.value ?: false) && isGooglePlayAvailable(requireContext())
 
         myActivity.registerReceiver(updateProgressReceiver, updateProgressFilter)
 
