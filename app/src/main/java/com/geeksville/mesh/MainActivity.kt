@@ -179,8 +179,7 @@ class MainActivity : AppCompatActivity(), Logging,
         )
     )
 
-    private
-    val tabsAdapter = object : FragmentStateAdapter(this) {
+    private val tabsAdapter = object : FragmentStateAdapter(this) {
 
         override fun getItemCount(): Int = tabInfos.size
 
@@ -200,7 +199,6 @@ class MainActivity : AppCompatActivity(), Logging,
         updateBluetoothEnabled()
     }
 
-
     /**
      * Don't tell our app we have bluetooth until we have bluetooth _and_ location access
      */
@@ -212,7 +210,6 @@ class MainActivity : AppCompatActivity(), Logging,
             Manifest.permission.BLUETOOTH,
             Manifest.permission.BLUETOOTH_ADMIN
         )
-
 
         if (getMissingPermissions(requiredPerms).isEmpty()) {
             /// ask the adapter if we have access
@@ -532,7 +529,6 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleIntent(intent)
@@ -659,8 +655,7 @@ class MainActivity : AppCompatActivity(), Logging,
         } */
     }
 
-    private
-    var receiverRegistered = false
+    private var receiverRegistered = false
 
     private fun registerMeshReceiver() {
         unregisterMeshReceiver()
@@ -679,7 +674,6 @@ class MainActivity : AppCompatActivity(), Logging,
             unregisterReceiver(meshServiceReceiver)
         }
     }
-
 
     /// Pull our latest node db from the device
     private fun updateNodesFromDevice() {
@@ -723,7 +717,6 @@ class MainActivity : AppCompatActivity(), Logging,
 
         showSettingsPage() // Default to the settings page in this case
     }
-
 
     /// Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(connected: MeshService.ConnectionState) {
@@ -773,6 +766,9 @@ class MainActivity : AppCompatActivity(), Logging,
                     warn("Abandoning connect $ex, because we probably just lost device connection")
                     model.isConnected.value = oldConnection
                 }
+                // if provideLocation enabled: Start providing location (from phone GPS) to mesh
+                if (model.provideLocation.value == true && (oldConnection != connected))
+                    service.setupProvideLocation()
             }
         } else {
             // For other connection states, just slam them in
@@ -842,8 +838,7 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    private
-    val meshServiceReceiver = object : BroadcastReceiver() {
+    private val meshServiceReceiver = object : BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) =
             exceptionReporter {
@@ -891,8 +886,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
     private var connectionJob: Job? = null
 
-    private
-    val mesh = object :
+    private val mesh = object :
         ServiceClient<com.geeksville.mesh.IMeshService>({
             com.geeksville.mesh.IMeshService.Stub.asInterface(it)
         }) {
@@ -1269,4 +1263,3 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
 }
-

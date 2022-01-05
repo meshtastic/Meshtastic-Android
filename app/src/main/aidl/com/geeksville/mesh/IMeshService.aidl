@@ -109,11 +109,15 @@ interface IMeshService {
     /// Start updating the radios firmware
     void startFirmwareUpdate();
 
-    /**
-    Return a number 0-100 for progress. -1 for completed and success, -2 for failure
-    */
+    /// Return a number 0-100 for firmware update progress. -1 for completed and success, -2 for failure
     int getUpdateStatus();
 
     int getRegion();
     void setRegion(int regionCode);
+
+    /// Start providing location (from phone GPS) to mesh
+    void setupProvideLocation();
+
+    /// Stop providing location (from phone GPS) to mesh
+    void stopProvideLocation();
 }
