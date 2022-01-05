@@ -65,7 +65,7 @@
     <string name="rate_dialog_title_en">Ohodnoťte Meshtastic</string>
     <string name="connected">Pripojené k vysielaču</string>
     <string name="modem_config_short">Krátky dosah / Rýchle</string>
-    <string name="modem_config_medium">Stredný dosahu / Rýchle</string>
+    <string name="modem_config_medium">Stredný dosah / Rýchle</string>
     <string name="modem_config_long">Dlhý dosah / Rýchle</string>
     <string name="modem_config_very_long">Veľmi dlhý dosah / Pomalé</string>
     <string name="meshtastic_service_notifications">Notifikácie zo služby Meshtastic</string>
