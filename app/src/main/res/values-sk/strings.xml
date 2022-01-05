@@ -64,10 +64,10 @@
     <string name="rate_dialog_ok_en">Ohodnotiť teraz</string>
     <string name="rate_dialog_title_en">Ohodnoťte Meshtastic</string>
     <string name="connected">Pripojené k vysielaču</string>
-    <string name="modem_config_short">Krátka vzdialenosť dosahu (rýchly prenos dát)</string>
-    <string name="modem_config_medium">Stredná vzdialenosť dosahu (rýchly prenos dát)</string>
-    <string name="modem_config_long">Dlhá vzdialenosť dosahu (rýchly prenos dát)</string>
-    <string name="modem_config_very_long">Veľmi dlhá vzdialenosť (pomalý prenos dát)</string>
+    <string name="modem_config_short">Krátky dosah / Rýchle</string>
+    <string name="modem_config_medium">Stredný dosahu / Rýchle</string>
+    <string name="modem_config_long">Dlhý dosah / Rýchle</string>
+    <string name="modem_config_very_long">Veľmi dlhý dosah / Pomalé</string>
     <string name="meshtastic_service_notifications">Notifikácie zo služby Meshtastic</string>
     <string name="about">O aplikácii (verzia)</string>
     <string name="location_disabled_warning">Musíte zapnúť služby o polohe zariadenia (GPS) v nastaveniach systému Android.</string>
