@@ -57,7 +57,7 @@
     <string name="connected_sleeping">Pripojené k uspatému vysielaču.</string>
     <string name="update_to">Aktualizovať na %s</string>
     <string name="app_too_old">Aplikácia je príliš stará</string>
-    <string name="must_update">Musíte aktualizovať aplikáciu na Google Play store (alebo z Github). Je príliš stará pre komunikáciu s touto verziou firmvéru vysielača. Viac informácií k tejto téme nájdete na <a href="https://www.meshtastic.org/software/android-too-old.html">Meshtastic wiki</a> .</string>
+    <string name="must_update">Musíte aktualizovať aplikáciu na Google Play store (alebo z Github). Je príliš stará pre komunikáciu s touto verziou firmvéru vysielača. Viac informácií k tejto téme nájdete na <a href="https://www.meshtastic.org/software/android-too-old.html">Meshtastic wiki</a>.</string>
     <string name="none">Žiaden (zakázať)</string>
     <string name="rate_dialog_no_en">Nie, ďakujem</string>
     <string name="rate_dialog_cancel_en">Pripomenúť neskôr</string>
@@ -68,7 +68,7 @@
     <string name="modem_config_medium">Stredná vzdialenosť dosahu (rýchly prenos dát)</string>
     <string name="modem_config_long">Dlhá vzdialenosť dosahu (rýchly prenos dát)</string>
     <string name="modem_config_very_long">Veľmi dlhá vzdialenosť (pomalý prenos dát)</string>
-    <string name="meshtastic_service_notifications">Notifikácie zo služby  Meshtastic</string>
+    <string name="meshtastic_service_notifications">Notifikácie zo služby Meshtastic</string>
     <string name="about">O aplikácii (verzia)</string>
     <string name="location_disabled_warning">Musíte zapnúť služby o polohe zariadenia (GPS) v nastaveniach systému Android.</string>
     <string name="modem_config_unrecognized">UNRECOGNIZED</string>
