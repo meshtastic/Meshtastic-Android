@@ -7,9 +7,6 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothDevice.BOND_BONDED
 import android.bluetooth.BluetoothDevice.BOND_BONDING
 import android.bluetooth.le.*
-import android.companion.AssociationRequest
-import android.companion.BluetoothDeviceFilter
-import android.companion.CompanionDeviceManager
 import android.content.*
 import android.content.pm.PackageManager
 import android.hardware.usb.UsbDevice
@@ -56,7 +53,6 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import java.util.regex.Pattern
 
 object SLogging : Logging
 
@@ -106,7 +102,6 @@ private fun requestBonding(
     device.createBond()
 }
 
-
 class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
     private val context: Context get() = getApplication<Application>().applicationContext
@@ -122,7 +117,6 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     address.substring(1)
                 else
                     null
-
 
         override fun toString(): String {
             return "DeviceListEntry(name=${name.anonymize}, addr=${address.anonymize})"
@@ -187,7 +181,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
             if ((result.device.name?.startsWith("Mesh") == true)) {
                 val addr = result.device.address
-                val fullAddr = "x$addr" // full address with the bluetooh prefix
+                val fullAddr = "x$addr" // full address with the bluetooth prefix added
                 // prevent logspam because weill get get lots of redundant scan results
                 val isBonded = result.device.bondState == BluetoothDevice.BOND_BONDED
                 val oldDevs = devices.value!!
@@ -456,10 +450,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         BluetoothInterface.hasCompanionDeviceApi(requireContext())
     }
 
-    private val deviceManager: CompanionDeviceManager by lazy {
-        requireContext().getSystemService(CompanionDeviceManager::class.java)
-    }
-
     private val myActivity get() = requireActivity() as MainActivity
 
     override fun onDestroy() {
@@ -540,6 +530,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         val isConnected = connected == MeshService.ConnectionState.CONNECTED
         binding.nodeSettings.visibility = if (isConnected) View.VISIBLE else View.GONE
+        binding.provideLocationCheckbox.visibility = if (isConnected) View.VISIBLE else View.GONE
 
         if (connected == MeshService.ConnectionState.DISCONNECTED)
             model.ownerName.value = ""
@@ -720,7 +711,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             device.address == scanModel.selectedNotNull && device.bonded // Only show checkbox if device is still paired
         binding.deviceRadioGroup.addView(b)
 
-        // Once we have at least one device, don't show the "looking for" animation - it makes uers think
+        // Once we have at least one device, don't show the "looking for" animation - it makes users think
         // something is busted
         binding.scanProgressBar.visibility = View.INVISIBLE
 
@@ -830,56 +821,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             { updateDevicesButtons(scanModel.devices.value) })
     }
 
-    /// Start running the modern scan, once it has one result we enable the
-    private fun startBackgroundScan() {
-        // Disable the change button until our scan has some results
-        binding.changeRadioButton.isEnabled = false
-
-        // To skip filtering based on name and supported feature flags (UUIDs),
-        // don't include calls to setNamePattern() and addServiceUuid(),
-        // respectively. This example uses Bluetooth.
-        // We only look for Mesh (rather than the full name) because NRF52 uses a very short name
-        val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
-            .setNamePattern(Pattern.compile("Mesh.*"))
-            // .addServiceUuid(ParcelUuid(RadioInterfaceService.BTM_SERVICE_UUID), null)
-            .build()
-
-        // The argument provided in setSingleDevice() determines whether a single
-        // device name or a list of device names is presented to the user as
-        // pairing options.
-        val pairingRequest: AssociationRequest = AssociationRequest.Builder()
-            .addDeviceFilter(deviceFilter)
-            .setSingleDevice(false)
-            .build()
-
-        // When the app tries to pair with the Bluetooth device, show the
-        // appropriate pairing request dialog to the user.
-        deviceManager.associate(
-            pairingRequest,
-            object : CompanionDeviceManager.Callback() {
-
-                override fun onDeviceFound(chooserLauncher: IntentSender) {
-                    debug("Found one device - enabling button")
-                    binding.changeRadioButton.isEnabled = true
-                    binding.changeRadioButton.setOnClickListener {
-                        debug("User clicked BLE change button")
-
-                        // Request code seems to be ignored anyways
-                        startIntentSenderForResult(
-                            chooserLauncher,
-                            MainActivity.RC_SELECT_DEVICE, null, 0, 0, 0, null
-                        )
-                    }
-                }
-
-                override fun onFailure(error: CharSequence?) {
-                    warn("BLE selection service failed $error")
-                    // changeDeviceSelection(mainActivity, null) // deselect any device
-                }
-            }, null
-        )
-    }
-
     private fun initModernScan() {
         // Turn off the widgets for the classic API
         binding.scanProgressBar.visibility = View.GONE
@@ -895,8 +836,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             binding.scanStatusText.text = getString(R.string.not_paired_yet)
             binding.changeRadioButton.setText(R.string.select_radio)
         }
-
-        startBackgroundScan()
+        binding.changeRadioButton.setOnClickListener {
+            myActivity.startCompanionScan()
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

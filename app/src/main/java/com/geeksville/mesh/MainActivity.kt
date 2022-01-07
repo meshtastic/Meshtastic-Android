@@ -6,6 +6,8 @@ import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
+import android.companion.AssociationRequest
+import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
 import android.content.*
 import android.content.pm.PackageInfo
@@ -70,6 +72,7 @@ import java.lang.Runnable
 import java.nio.charset.Charset
 import java.text.DateFormat
 import java.util.*
+import java.util.regex.Pattern
 import kotlin.math.roundToInt
 
 
@@ -131,8 +134,7 @@ class MainActivity : AppCompatActivity(), Logging,
         const val REQUEST_ENABLE_BT = 10
         const val DID_REQUEST_PERM = 11
         const val RC_SIGN_IN = 12 // google signin completed
-        const val RC_SELECT_DEVICE =
-            13 // seems to be hardwired in CompanionDeviceManager to add 65536
+        const val SELECT_DEVICE_REQUEST_CODE = 13
         const val CREATE_CSV_FILE = 14
     }
 
@@ -194,9 +196,50 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-
     private val btStateReceiver = BluetoothStateReceiver { _ ->
         updateBluetoothEnabled()
+    }
+
+    fun startCompanionScan() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val deviceManager: CompanionDeviceManager by lazy {
+                getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager
+            }
+
+            // To skip filtering based on name and supported feature flags (UUIDs),
+            // don't include calls to setNamePattern() and addServiceUuid(),
+            // respectively. This example uses Bluetooth.
+            // We only look for Mesh (rather than the full name) because NRF52 uses a very short name
+            val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
+                .setNamePattern(Pattern.compile("Mesh.*"))
+                // .addServiceUuid(ParcelUuid(RadioInterfaceService.BTM_SERVICE_UUID), null)
+                .build()
+
+            // The argument provided in setSingleDevice() determines whether a single
+            // device name or a list of device names is presented to the user as
+            // pairing options.
+            val pairingRequest: AssociationRequest = AssociationRequest.Builder()
+                .addDeviceFilter(deviceFilter)
+                .setSingleDevice(false)
+                .build()
+
+            // When the app tries to pair with the Bluetooth device, show the
+            // appropriate pairing request dialog to the user.
+            deviceManager.associate(pairingRequest,
+                object : CompanionDeviceManager.Callback() {
+                    override fun onDeviceFound(chooserLauncher: IntentSender) {
+                        startIntentSenderForResult(chooserLauncher,
+                            SELECT_DEVICE_REQUEST_CODE, null, 0, 0, 0)
+                    }
+
+                    override fun onFailure(error: CharSequence?) {
+                        warn("BLE selection service failed $error")
+                        // changeDeviceSelection(mainActivity, null) // deselect any device
+                    }
+                }, null
+            )
+        }
+        else warn("startCompanionScan should not run on SDK < 26")
     }
 
     /**
@@ -410,7 +453,6 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-
     /// Ask user to rate in play store
     private fun askToRate() {
         exceptionReporter { // Got one IllegalArgumentException from inside this lib, but we don't want to crash our app because of bugs in this optional feature
@@ -496,7 +538,6 @@ class MainActivity : AppCompatActivity(), Logging,
         // if (!isInTestLab) - very important - even in test lab we must request permissions because we need location perms for some of our tests to pass
         requestPermission()
     }
-
 
     private fun initToolbar() {
         val toolbar =
@@ -601,25 +642,18 @@ class MainActivity : AppCompatActivity(), Logging,
                     GoogleSignIn.getSignedInAccountFromIntent(data)
                 handleSignInResult(task)
             }
-            (65536 + RC_SELECT_DEVICE) -> when (resultCode) {
+            (SELECT_DEVICE_REQUEST_CODE) -> when (resultCode) {
                 Activity.RESULT_OK -> {
-                    // User has chosen to pair with the Bluetooth device.
-                    val device: BluetoothDevice =
+                    val deviceToPair: BluetoothDevice =
                         data?.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)!!
-                    debug("Received BLE pairing ${device.address}")
-                    if (device.bondState != BluetoothDevice.BOND_BONDED) {
-                        device.createBond()
-                        // FIXME - wait for bond to complete
+                    if (deviceToPair.bondState != BluetoothDevice.BOND_BONDED) {
+                        deviceToPair.createBond()
                     }
-
-                    // ... Continue interacting with the paired device.
                     model.meshService?.let { service ->
-                        MeshService.changeDeviceAddress(this@MainActivity, service, device.address)
+                        MeshService.changeDeviceAddress(this@MainActivity, service, "x${deviceToPair.address}")
                     }
                 }
-
-                else ->
-                    warn("BLE device select intent failed")
+                else -> warn("BLE device select intent failed")
             }
             CREATE_CSV_FILE -> {
                 if (resultCode == Activity.RESULT_OK) {
