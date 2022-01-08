@@ -831,10 +831,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         if (curRadio != null) {
             binding.scanStatusText.text = getString(R.string.current_pair).format(curRadio)
-            binding.changeRadioButton.text = getString(R.string.change_radio)
         } else {
             binding.scanStatusText.text = getString(R.string.not_paired_yet)
-            binding.changeRadioButton.setText(R.string.select_radio)
         }
         binding.changeRadioButton.setOnClickListener {
             myActivity.startCompanionScan()
