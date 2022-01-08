@@ -559,7 +559,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val statusText = binding.scanStatusText
         val permissionsWarning = myActivity.getMissingMessage()
         when {
-            permissionsWarning != null ->
+            (!hasCompanionDeviceApi && permissionsWarning != null) ->
                 statusText.text = permissionsWarning
 
             region == RadioConfigProtos.RegionCode.Unset ->
@@ -927,17 +927,18 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // Keep reminding user BLE is still off
         val hasUSB = SerialInterface.findDrivers(myActivity).isNotEmpty()
         if (!hasUSB) {
-            // First warn about permissions, and then if needed warn about settings
-            if (!myActivity.warnMissingPermissions()) {
-                // Warn user if BLE is disabled
-                if (scanModel.bluetoothAdapter?.isEnabled != true) {
-                    Toast.makeText(
-                        requireContext(),
-                        R.string.error_bluetooth,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    checkLocationEnabled()
+            // Warn user if BLE is disabled
+            if (scanModel.bluetoothAdapter?.isEnabled != true) {
+                Toast.makeText(
+                    requireContext(),
+                    R.string.error_bluetooth,
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                if (!hasCompanionDeviceApi) {
+                    if (!myActivity.warnMissingPermissions()) {
+                        checkLocationEnabled()
+                    }
                 }
             }
         }
