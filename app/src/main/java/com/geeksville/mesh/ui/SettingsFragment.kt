@@ -12,6 +12,8 @@ import android.content.pm.PackageManager
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.RemoteException
 import android.view.LayoutInflater
 import android.view.View
@@ -811,12 +813,32 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private fun initClassicScan() {
 
-        model.bluetoothEnabled.observe(viewLifecycleOwner, Observer { enabled ->
-            if (enabled)
-                scanModel.startScan()
-            else
+        binding.changeRadioButton.setOnClickListener {
+            if (myActivity.warnMissingPermissions()) {
+                myActivity.requestPermission()
+            } else scanLeDevice()
+        }
+    }
+
+    // per https://developer.android.com/guide/topics/connectivity/bluetooth/find-ble-devices
+    private fun scanLeDevice() {
+        var scanning = false
+        val SCAN_PERIOD: Long = 5000 // Stops scanning after 5 seconds
+
+        if (!scanning) { // Stops scanning after a pre-defined scan period.
+            Handler(Looper.getMainLooper()).postDelayed({
+                scanning = false
+                binding.scanProgressBar.visibility = View.GONE
                 scanModel.stopScan()
-        })
+            }, SCAN_PERIOD)
+            scanning = true
+            binding.scanProgressBar.visibility = View.VISIBLE
+            scanModel.startScan()
+        } else {
+            scanning = false
+            binding.scanProgressBar.visibility = View.GONE
+            scanModel.stopScan()
+        }
     }
 
     private fun initModernScan() {

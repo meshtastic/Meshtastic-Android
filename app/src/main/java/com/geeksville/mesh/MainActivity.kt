@@ -290,6 +290,9 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
     /** Ask the user to grant camera permission */
+    fun requestBTScanPermission() = requestPermission(getCameraPermissions(), false)
+
+    /** Ask the user to grant camera permission */
     fun requestCameraPermission() = requestPermission(getCameraPermissions(), false)
 
     /** Ask the user to grant foreground location permission */
@@ -331,7 +334,7 @@ class MainActivity : AppCompatActivity(), Logging,
      *
      * @return true if we already have the needed permissions
      */
-    private fun requestPermission(
+    fun requestPermission(
         missingPerms: List<String> = getMinimumPermissions(),
         shouldShowDialog: Boolean = true
     ): Boolean =
@@ -534,9 +537,6 @@ class MainActivity : AppCompatActivity(), Logging,
         handleIntent(intent)
 
         askToRate()
-
-        // if (!isInTestLab) - very important - even in test lab we must request permissions because we need location perms for some of our tests to pass
-        requestPermission()
     }
 
     private fun initToolbar() {
