@@ -26,7 +26,6 @@ import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
@@ -335,7 +334,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
          */
         override fun onInactive() {
             super.onInactive()
-            stopScan()
+            // stopScan()
         }
     }
 
@@ -621,16 +620,18 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         })
 
         // Only let user edit their name or set software update while connected to a radio
-        model.isConnected.observe(viewLifecycleOwner, Observer { _ ->
-            updateNodeInfo()
-        })
+        model.isConnected.observe(
+            viewLifecycleOwner, {
+                updateNodeInfo()
+                updateDevicesButtons(scanModel.devices.value)
+            })
 
         // Also watch myNodeInfo because it might change later
-        model.myNodeInfo.observe(viewLifecycleOwner, Observer {
+        model.myNodeInfo.observe(viewLifecycleOwner, {
             updateNodeInfo()
         })
 
-        scanModel.errorText.observe(viewLifecycleOwner, Observer { errMsg ->
+        scanModel.errorText.observe(viewLifecycleOwner, { errMsg ->
             if (errMsg != null) {
                 binding.scanStatusText.text = errMsg
             }
@@ -638,11 +639,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         scanModel.devices.observe(
             viewLifecycleOwner,
-            Observer { devices -> updateDevicesButtons(devices) })
-
-        model.isConnected.observe(
-            viewLifecycleOwner,
-            { updateDevicesButtons(scanModel.devices.value) })
+            { devices -> updateDevicesButtons(devices) })
 
         binding.updateFirmwareButton.setOnClickListener {
             doFirmwareUpdate()
@@ -791,22 +788,15 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
         }
 
-        val hasBonded =
-            RadioInterfaceService.getBondedDeviceAddress(requireContext()) != null
-
         // get rid of the warning text once at least one device is paired.
         // If we are running on an emulator, always leave this message showing so we can test the worst case layout
-        binding.warningNotPaired.visibility =
-            if (hasBonded && !MockInterface.addressValid(requireContext(), ""))
-                View.GONE
-            else
-                View.VISIBLE
-
         val curRadio = RadioInterfaceService.getBondedDeviceAddress(requireContext())
 
-        if (curRadio != null) {
+        if (curRadio != null && !MockInterface.addressValid(requireContext(), "")) {
+            binding.warningNotPaired.visibility = View.GONE
             binding.scanStatusText.text = getString(R.string.current_pair).format(curRadio)
         } else {
+            binding.warningNotPaired.visibility = View.VISIBLE
             binding.scanStatusText.text = getString(R.string.not_paired_yet)
         }
     }
