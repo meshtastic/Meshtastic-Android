@@ -234,7 +234,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     /**
      * returns true if we could start scanning, false otherwise
      */
-    fun startScan(): Boolean {
+    fun setupScan(): Boolean {
         debug("BTScan component active")
         selectedAddress = RadioInterfaceService.getDeviceAddress(context)
 
@@ -263,14 +263,11 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
             true
         } else {
-            /// The following call might return null if the user doesn't have bluetooth access permissions
-            val s: BluetoothLeScanner? = bluetoothAdapter.bluetoothLeScanner
-
             val usbDrivers = SerialInterface.findDrivers(context)
 
             /* model.bluetoothEnabled.value */
 
-            if (s == null && usbDrivers.isEmpty()) {
+            if (bluetoothAdapter.bluetoothLeScanner == null && usbDrivers.isEmpty()) {
                 errorText.value =
                     context.getString(R.string.requires_bluetooth)
 
@@ -289,31 +286,35 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                             USBDeviceListEntry(usbManager, d)
                         )
                     }
-
-                    if (s != null) { // could be null if bluetooth is disabled
-                        debug("starting scan")
-
-                        // filter and only accept devices that have our service
-                        val filter =
-                            ScanFilter.Builder()
-                                // Samsung doesn't seem to filter properly by service so this can't work
-                                // see https://stackoverflow.com/questions/57981986/altbeacon-android-beacon-library-not-working-after-device-has-screen-off-for-a-s/57995960#57995960
-                                // and https://stackoverflow.com/a/45590493
-                                // .setServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID))
-                                .build()
-
-                        val settings =
-                            ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                                .build()
-                        s.startScan(listOf(filter), settings, scanCallback)
-                        scanner = s
-                    }
                 } else {
                     debug("scan already running")
                 }
-
                 true
             }
+        }
+    }
+
+    fun startScan() {
+        /// The following call might return null if the user doesn't have bluetooth access permissions
+        val bluetoothLeScanner: BluetoothLeScanner? = bluetoothAdapter?.bluetoothLeScanner
+
+        if (bluetoothLeScanner != null) { // could be null if bluetooth is disabled
+            debug("starting scan")
+
+            // filter and only accept devices that have our service
+            val filter =
+                ScanFilter.Builder()
+                    // Samsung doesn't seem to filter properly by service so this can't work
+                    // see https://stackoverflow.com/questions/57981986/altbeacon-android-beacon-library-not-working-after-device-has-screen-off-for-a-s/57995960#57995960
+                    // and https://stackoverflow.com/a/45590493
+                    // .setServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID))
+                    .build()
+
+            val settings =
+                ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                    .build()
+            bluetoothLeScanner.startScan(listOf(filter), settings, scanCallback)
+            scanner = bluetoothLeScanner
         }
     }
 
@@ -603,8 +604,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         it.name
     }.sorted()
 
-    /// Setup the ui widgets unrelated to BLE scanning
     private fun initCommonUI() {
+        scanModel.setupScan()
 
         // init our region spinner
         val spinner = binding.regionSpinner
@@ -908,7 +909,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     override fun onPause() {
         super.onPause()
-        scanModel.stopScan()
 
         requireActivity().unregisterReceiver(updateProgressReceiver)
     }
@@ -916,8 +916,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     override fun onResume() {
         super.onResume()
 
-        if (!hasCompanionDeviceApi)
-            scanModel.startScan()
+        scanModel.setupScan()
 
         // system permissions might have changed while we were away
         binding.provideLocationCheckbox.isChecked = myActivity.hasLocationPermission() && myActivity.hasBackgroundPermission() && (model.provideLocation.value ?: false) && isGooglePlayAvailable(requireContext())
