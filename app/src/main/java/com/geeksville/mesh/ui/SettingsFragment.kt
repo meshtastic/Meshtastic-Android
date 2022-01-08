@@ -627,6 +627,20 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             updateNodeInfo()
         })
 
+        scanModel.errorText.observe(viewLifecycleOwner, Observer { errMsg ->
+            if (errMsg != null) {
+                binding.scanStatusText.text = errMsg
+            }
+        })
+
+        scanModel.devices.observe(
+            viewLifecycleOwner,
+            Observer { devices -> updateDevicesButtons(devices) })
+
+        model.isConnected.observe(
+            viewLifecycleOwner,
+            { updateDevicesButtons(scanModel.devices.value) })
+
         binding.updateFirmwareButton.setOnClickListener {
             doFirmwareUpdate()
         }
@@ -727,12 +741,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
-    /// Show the GUI for classic scanning
-    private fun showClassicWidgets(visible: Int) {
-        binding.scanProgressBar.visibility = visible
-        binding.deviceRadioGroup.visibility = visible
-    }
-
     private fun updateDevicesButtons(devices: MutableMap<String, BTScanModel.DeviceListEntry>?) {
         // Remove the old radio buttons and repopulate
         binding.deviceRadioGroup.removeAllViews()
@@ -790,42 +798,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 View.GONE
             else
                 View.VISIBLE
-    }
-
-    /// Setup the GUI to do a classic (pre SDK 26 BLE scan)
-    private fun initClassicScan() {
-        // Turn off the widgets for the new API (we turn on/off hte classic widgets when we start scanning
-        binding.changeRadioButton.visibility = View.GONE
-
-        showClassicWidgets(View.VISIBLE)
-
-        model.bluetoothEnabled.observe(viewLifecycleOwner, Observer { enabled ->
-            if (enabled)
-                scanModel.startScan()
-            else
-                scanModel.stopScan()
-        })
-
-        scanModel.errorText.observe(viewLifecycleOwner, Observer { errMsg ->
-            if (errMsg != null) {
-                binding.scanStatusText.text = errMsg
-            }
-        })
-
-        scanModel.devices.observe(
-            viewLifecycleOwner,
-            Observer { devices -> updateDevicesButtons(devices) })
-
-        model.isConnected.observe(
-            viewLifecycleOwner,
-            { updateDevicesButtons(scanModel.devices.value) })
-    }
-
-    private fun initModernScan() {
-        // Turn off the widgets for the classic API
-        binding.scanProgressBar.visibility = View.GONE
-        binding.deviceRadioGroup.visibility = View.GONE
-        binding.changeRadioButton.visibility = View.VISIBLE
 
         val curRadio = RadioInterfaceService.getBondedDeviceAddress(requireContext())
 
@@ -834,6 +806,20 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         } else {
             binding.scanStatusText.text = getString(R.string.not_paired_yet)
         }
+    }
+
+    private fun initClassicScan() {
+
+        model.bluetoothEnabled.observe(viewLifecycleOwner, Observer { enabled ->
+            if (enabled)
+                scanModel.startScan()
+            else
+                scanModel.stopScan()
+        })
+    }
+
+    private fun initModernScan() {
+
         binding.changeRadioButton.setOnClickListener {
             myActivity.startCompanionScan()
         }
