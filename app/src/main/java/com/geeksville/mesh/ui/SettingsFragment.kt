@@ -236,7 +236,6 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
      * returns true if we could start scanning, false otherwise
      */
     fun setupScan(): Boolean {
-        debug("BTScan component active")
         selectedAddress = RadioInterfaceService.getDeviceAddress(context)
 
         return if (bluetoothAdapter == null || MockInterface.addressValid(context, "")) {
@@ -678,12 +677,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                             }
                             .show()
 
-                    if (view.isChecked)
+                    if (view.isChecked) {
                         model.provideLocation.value = isChecked
                         model.meshService?.setupProvideLocation()
+                    }
                 }
-            }
-            else {
+            } else {
                 model.provideLocation.value = isChecked
                 model.meshService?.stopProvideLocation()
             }
@@ -724,10 +723,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         b.isChecked =
             device.address == scanModel.selectedNotNull && device.bonded // Only show checkbox if device is still paired
         binding.deviceRadioGroup.addView(b)
-
-        // Once we have at least one device, don't show the "looking for" animation - it makes users think
-        // something is busted
-        binding.scanProgressBar.visibility = View.INVISIBLE
 
         b.setOnClickListener {
             if (!device.bonded) // If user just clicked on us, try to bond
@@ -794,7 +789,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         if (curRadio != null && !MockInterface.addressValid(requireContext(), "")) {
             binding.warningNotPaired.visibility = View.GONE
-            binding.scanStatusText.text = getString(R.string.current_pair).format(curRadio)
+            // binding.scanStatusText.text = getString(R.string.current_pair).format(curRadio)
         } else {
             binding.warningNotPaired.visibility = View.VISIBLE
             binding.scanStatusText.text = getString(R.string.not_paired_yet)
@@ -851,11 +846,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     // If the user has not turned on location access throw up a toast warning
     private fun checkLocationEnabled() {
 
-        fun hasGps(): Boolean =
+        val hasGps: Boolean =
             myActivity.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
 
         // FIXME If they don't have google play for now we don't check for location enabled
-        if (hasGps() && isGooglePlayAvailable(requireContext())) {
+        if (hasGps && isGooglePlayAvailable(requireContext())) {
             // We do this painful process because LocationManager.isEnabled is only SDK28 or latet
             val builder = LocationSettingsRequest.Builder()
             builder.setNeedBle(true)
@@ -869,14 +864,17 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 .checkLocationSettings(builder.build())
 
             fun weNeedAccess() {
-                context?.let { c ->
-                    warn("Telling user we need need location accesss")
-                    Toast.makeText(
-                        c,
-                        getString(R.string.location_disabled_warning),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                warn("Telling user we need need location access")
+
+                var warningReason = getString(R.string.location_disabled)
+                if (!hasCompanionDeviceApi)
+                    warningReason = getString(R.string.location_disabled_warning)
+
+                Toast.makeText(
+                    requireContext(),
+                    warningReason,
+                    Toast.LENGTH_LONG
+                ).show()
             }
 
             locationSettingsResponse.addOnSuccessListener {
@@ -947,10 +945,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 ).show()
             } else {
                 if (!hasCompanionDeviceApi) {
-                    if (!myActivity.warnMissingPermissions()) {
+                    if (!myActivity.warnMissingPermissions())
                         checkLocationEnabled()
-                    }
-                }
+                } else
+                    if (binding.provideLocationCheckbox.isChecked)
+                        checkLocationEnabled()
             }
         }
     }

@@ -290,9 +290,6 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
     /** Ask the user to grant camera permission */
-    fun requestBTScanPermission() = requestPermission(getCameraPermissions(), false)
-
-    /** Ask the user to grant camera permission */
     fun requestCameraPermission() = requestPermission(getCameraPermissions(), false)
 
     /** Ask the user to grant foreground location permission */
