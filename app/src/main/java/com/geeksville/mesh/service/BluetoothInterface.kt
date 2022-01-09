@@ -5,6 +5,8 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.util.anonymize
@@ -148,7 +150,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 */
 
         /// Can we use the modern BLE scan API?
-        fun hasCompanionDeviceApi(context: Context): Boolean = false /* ALAS - not ready for production yet
+        fun hasCompanionDeviceApi(context: Context): Boolean =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 val res =
                     context.packageManager.hasSystemFeature(PackageManager.FEATURE_COMPANION_DEVICE_SETUP)
@@ -157,7 +159,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
             } else {
                 warn("CompanionDevice API not available, falling back to classic scan")
                 false
-            } */
+            }
 
         /** FIXME - when adding companion device support back in, use this code to set companion device from setBondedDevice
          *         if (BluetoothInterface.hasCompanionDeviceApi(this)) {
