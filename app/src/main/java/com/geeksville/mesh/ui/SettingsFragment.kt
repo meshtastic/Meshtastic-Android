@@ -7,14 +7,13 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothDevice.BOND_BONDED
 import android.bluetooth.BluetoothDevice.BOND_BONDING
 import android.bluetooth.le.*
-import android.companion.AssociationRequest
-import android.companion.BluetoothDeviceFilter
-import android.companion.CompanionDeviceManager
 import android.content.*
 import android.content.pm.PackageManager
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.RemoteException
 import android.view.LayoutInflater
 import android.view.View
@@ -27,7 +26,6 @@ import android.widget.Toast
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
@@ -56,7 +54,6 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import java.util.regex.Pattern
 
 object SLogging : Logging
 
@@ -106,7 +103,6 @@ private fun requestBonding(
     device.createBond()
 }
 
-
 class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
     private val context: Context get() = getApplication<Application>().applicationContext
@@ -122,7 +118,6 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     address.substring(1)
                 else
                     null
-
 
         override fun toString(): String {
             return "DeviceListEntry(name=${name.anonymize}, addr=${address.anonymize})"
@@ -187,7 +182,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
             if ((result.device.name?.startsWith("Mesh") == true)) {
                 val addr = result.device.address
-                val fullAddr = "x$addr" // full address with the bluetooh prefix
+                val fullAddr = "x$addr" // full address with the bluetooth prefix added
                 // prevent logspam because weill get get lots of redundant scan results
                 val isBonded = result.device.bondState == BluetoothDevice.BOND_BONDED
                 val oldDevs = devices.value!!
@@ -240,8 +235,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     /**
      * returns true if we could start scanning, false otherwise
      */
-    fun startScan(): Boolean {
-        debug("BTScan component active")
+    fun setupScan(): Boolean {
         selectedAddress = RadioInterfaceService.getDeviceAddress(context)
 
         return if (bluetoothAdapter == null || MockInterface.addressValid(context, "")) {
@@ -269,14 +263,11 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
             true
         } else {
-            /// The following call might return null if the user doesn't have bluetooth access permissions
-            val s: BluetoothLeScanner? = bluetoothAdapter.bluetoothLeScanner
-
             val usbDrivers = SerialInterface.findDrivers(context)
 
             /* model.bluetoothEnabled.value */
 
-            if (s == null && usbDrivers.isEmpty()) {
+            if (bluetoothAdapter.bluetoothLeScanner == null && usbDrivers.isEmpty()) {
                 errorText.value =
                     context.getString(R.string.requires_bluetooth)
 
@@ -295,31 +286,35 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                             USBDeviceListEntry(usbManager, d)
                         )
                     }
-
-                    if (s != null) { // could be null if bluetooth is disabled
-                        debug("starting scan")
-
-                        // filter and only accept devices that have our service
-                        val filter =
-                            ScanFilter.Builder()
-                                // Samsung doesn't seem to filter properly by service so this can't work
-                                // see https://stackoverflow.com/questions/57981986/altbeacon-android-beacon-library-not-working-after-device-has-screen-off-for-a-s/57995960#57995960
-                                // and https://stackoverflow.com/a/45590493
-                                // .setServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID))
-                                .build()
-
-                        val settings =
-                            ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                                .build()
-                        s.startScan(listOf(filter), settings, scanCallback)
-                        scanner = s
-                    }
                 } else {
                     debug("scan already running")
                 }
-
                 true
             }
+        }
+    }
+
+    fun startScan() {
+        /// The following call might return null if the user doesn't have bluetooth access permissions
+        val bluetoothLeScanner: BluetoothLeScanner? = bluetoothAdapter?.bluetoothLeScanner
+
+        if (bluetoothLeScanner != null) { // could be null if bluetooth is disabled
+            debug("starting scan")
+
+            // filter and only accept devices that have our service
+            val filter =
+                ScanFilter.Builder()
+                    // Samsung doesn't seem to filter properly by service so this can't work
+                    // see https://stackoverflow.com/questions/57981986/altbeacon-android-beacon-library-not-working-after-device-has-screen-off-for-a-s/57995960#57995960
+                    // and https://stackoverflow.com/a/45590493
+                    // .setServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID))
+                    .build()
+
+            val settings =
+                ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+                    .build()
+            bluetoothLeScanner.startScan(listOf(filter), settings, scanCallback)
+            scanner = bluetoothLeScanner
         }
     }
 
@@ -338,7 +333,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
          */
         override fun onInactive() {
             super.onInactive()
-            stopScan()
+            // stopScan()
         }
     }
 
@@ -456,10 +451,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         BluetoothInterface.hasCompanionDeviceApi(requireContext())
     }
 
-    private val deviceManager: CompanionDeviceManager by lazy {
-        requireContext().getSystemService(CompanionDeviceManager::class.java)
-    }
-
     private val myActivity get() = requireActivity() as MainActivity
 
     override fun onDestroy() {
@@ -540,6 +531,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         val isConnected = connected == MeshService.ConnectionState.CONNECTED
         binding.nodeSettings.visibility = if (isConnected) View.VISIBLE else View.GONE
+        binding.provideLocationCheckbox.visibility = if (isConnected) View.VISIBLE else View.GONE
 
         if (connected == MeshService.ConnectionState.DISCONNECTED)
             model.ownerName.value = ""
@@ -568,7 +560,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val statusText = binding.scanStatusText
         val permissionsWarning = myActivity.getMissingMessage()
         when {
-            permissionsWarning != null ->
+            (!hasCompanionDeviceApi && permissionsWarning != null) ->
                 statusText.text = permissionsWarning
 
             region == RadioConfigProtos.RegionCode.Unset ->
@@ -612,8 +604,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         it.name
     }.sorted()
 
-    /// Setup the ui widgets unrelated to BLE scanning
     private fun initCommonUI() {
+        scanModel.setupScan()
 
         // init our region spinner
         val spinner = binding.regionSpinner
@@ -627,14 +619,26 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         })
 
         // Only let user edit their name or set software update while connected to a radio
-        model.isConnected.observe(viewLifecycleOwner, Observer { _ ->
+        model.isConnected.observe(
+            viewLifecycleOwner, {
+                updateNodeInfo()
+                updateDevicesButtons(scanModel.devices.value)
+            })
+
+        // Also watch myNodeInfo because it might change later
+        model.myNodeInfo.observe(viewLifecycleOwner, {
             updateNodeInfo()
         })
 
-        // Also watch myNodeInfo because it might change later
-        model.myNodeInfo.observe(viewLifecycleOwner, Observer {
-            updateNodeInfo()
+        scanModel.errorText.observe(viewLifecycleOwner, { errMsg ->
+            if (errMsg != null) {
+                binding.scanStatusText.text = errMsg
+            }
         })
+
+        scanModel.devices.observe(
+            viewLifecycleOwner,
+            { devices -> updateDevicesButtons(devices) })
 
         binding.updateFirmwareButton.setOnClickListener {
             doFirmwareUpdate()
@@ -673,12 +677,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                             }
                             .show()
 
-                    if (view.isChecked)
+                    if (view.isChecked) {
                         model.provideLocation.value = isChecked
                         model.meshService?.setupProvideLocation()
+                    }
                 }
-            }
-            else {
+            } else {
                 model.provideLocation.value = isChecked
                 model.meshService?.stopProvideLocation()
             }
@@ -720,10 +724,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             device.address == scanModel.selectedNotNull && device.bonded // Only show checkbox if device is still paired
         binding.deviceRadioGroup.addView(b)
 
-        // Once we have at least one device, don't show the "looking for" animation - it makes uers think
-        // something is busted
-        binding.scanProgressBar.visibility = View.INVISIBLE
-
         b.setOnClickListener {
             if (!device.bonded) // If user just clicked on us, try to bond
                 binding.scanStatusText.setText(R.string.starting_pairing)
@@ -734,12 +734,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             if (!b.isSelected)
                 binding.scanStatusText.text = getString(R.string.please_pair)
         }
-    }
-
-    /// Show the GUI for classic scanning
-    private fun showClassicWidgets(visible: Int) {
-        binding.scanProgressBar.visibility = visible
-        binding.deviceRadioGroup.visibility = visible
     }
 
     private fun updateDevicesButtons(devices: MutableMap<String, BTScanModel.DeviceListEntry>?) {
@@ -789,114 +783,54 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
         }
 
-        val hasBonded =
-            RadioInterfaceService.getBondedDeviceAddress(requireContext()) != null
-
         // get rid of the warning text once at least one device is paired.
         // If we are running on an emulator, always leave this message showing so we can test the worst case layout
-        binding.warningNotPaired.visibility =
-            if (hasBonded && !MockInterface.addressValid(requireContext(), ""))
-                View.GONE
-            else
-                View.VISIBLE
+        val curRadio = RadioInterfaceService.getBondedDeviceAddress(requireContext())
+
+        if (curRadio != null && !MockInterface.addressValid(requireContext(), "")) {
+            binding.warningNotPaired.visibility = View.GONE
+            // binding.scanStatusText.text = getString(R.string.current_pair).format(curRadio)
+        } else {
+            binding.warningNotPaired.visibility = View.VISIBLE
+            binding.scanStatusText.text = getString(R.string.not_paired_yet)
+        }
     }
 
-    /// Setup the GUI to do a classic (pre SDK 26 BLE scan)
     private fun initClassicScan() {
-        // Turn off the widgets for the new API (we turn on/off hte classic widgets when we start scanning
-        binding.changeRadioButton.visibility = View.GONE
 
-        showClassicWidgets(View.VISIBLE)
-
-        model.bluetoothEnabled.observe(viewLifecycleOwner, Observer { enabled ->
-            if (enabled)
-                scanModel.startScan()
-            else
-                scanModel.stopScan()
-        })
-
-        scanModel.errorText.observe(viewLifecycleOwner, Observer { errMsg ->
-            if (errMsg != null) {
-                binding.scanStatusText.text = errMsg
-            }
-        })
-
-        scanModel.devices.observe(
-            viewLifecycleOwner,
-            Observer { devices -> updateDevicesButtons(devices) })
-
-        model.isConnected.observe(
-            viewLifecycleOwner,
-            { updateDevicesButtons(scanModel.devices.value) })
+        binding.changeRadioButton.setOnClickListener {
+            if (myActivity.warnMissingPermissions()) {
+                myActivity.requestPermission()
+            } else scanLeDevice()
+        }
     }
 
-    /// Start running the modern scan, once it has one result we enable the
-    private fun startBackgroundScan() {
-        // Disable the change button until our scan has some results
-        binding.changeRadioButton.isEnabled = false
+    // per https://developer.android.com/guide/topics/connectivity/bluetooth/find-ble-devices
+    private fun scanLeDevice() {
+        var scanning = false
+        val SCAN_PERIOD: Long = 5000 // Stops scanning after 5 seconds
 
-        // To skip filtering based on name and supported feature flags (UUIDs),
-        // don't include calls to setNamePattern() and addServiceUuid(),
-        // respectively. This example uses Bluetooth.
-        // We only look for Mesh (rather than the full name) because NRF52 uses a very short name
-        val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
-            .setNamePattern(Pattern.compile("Mesh.*"))
-            // .addServiceUuid(ParcelUuid(RadioInterfaceService.BTM_SERVICE_UUID), null)
-            .build()
-
-        // The argument provided in setSingleDevice() determines whether a single
-        // device name or a list of device names is presented to the user as
-        // pairing options.
-        val pairingRequest: AssociationRequest = AssociationRequest.Builder()
-            .addDeviceFilter(deviceFilter)
-            .setSingleDevice(false)
-            .build()
-
-        // When the app tries to pair with the Bluetooth device, show the
-        // appropriate pairing request dialog to the user.
-        deviceManager.associate(
-            pairingRequest,
-            object : CompanionDeviceManager.Callback() {
-
-                override fun onDeviceFound(chooserLauncher: IntentSender) {
-                    debug("Found one device - enabling button")
-                    binding.changeRadioButton.isEnabled = true
-                    binding.changeRadioButton.setOnClickListener {
-                        debug("User clicked BLE change button")
-
-                        // Request code seems to be ignored anyways
-                        startIntentSenderForResult(
-                            chooserLauncher,
-                            MainActivity.RC_SELECT_DEVICE, null, 0, 0, 0, null
-                        )
-                    }
-                }
-
-                override fun onFailure(error: CharSequence?) {
-                    warn("BLE selection service failed $error")
-                    // changeDeviceSelection(mainActivity, null) // deselect any device
-                }
-            }, null
-        )
+        if (!scanning) { // Stops scanning after a pre-defined scan period.
+            Handler(Looper.getMainLooper()).postDelayed({
+                scanning = false
+                binding.scanProgressBar.visibility = View.GONE
+                scanModel.stopScan()
+            }, SCAN_PERIOD)
+            scanning = true
+            binding.scanProgressBar.visibility = View.VISIBLE
+            scanModel.startScan()
+        } else {
+            scanning = false
+            binding.scanProgressBar.visibility = View.GONE
+            scanModel.stopScan()
+        }
     }
 
     private fun initModernScan() {
-        // Turn off the widgets for the classic API
-        binding.scanProgressBar.visibility = View.GONE
-        binding.deviceRadioGroup.visibility = View.GONE
-        binding.changeRadioButton.visibility = View.VISIBLE
 
-        val curRadio = RadioInterfaceService.getBondedDeviceAddress(requireContext())
-
-        if (curRadio != null) {
-            binding.scanStatusText.text = getString(R.string.current_pair).format(curRadio)
-            binding.changeRadioButton.text = getString(R.string.change_radio)
-        } else {
-            binding.scanStatusText.text = getString(R.string.not_paired_yet)
-            binding.changeRadioButton.setText(R.string.select_radio)
+        binding.changeRadioButton.setOnClickListener {
+            myActivity.startCompanionScan()
         }
-
-        startBackgroundScan()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -912,11 +846,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     // If the user has not turned on location access throw up a toast warning
     private fun checkLocationEnabled() {
 
-        fun hasGps(): Boolean =
+        val hasGps: Boolean =
             myActivity.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
 
         // FIXME If they don't have google play for now we don't check for location enabled
-        if (hasGps() && isGooglePlayAvailable(requireContext())) {
+        if (hasGps && isGooglePlayAvailable(requireContext())) {
             // We do this painful process because LocationManager.isEnabled is only SDK28 or latet
             val builder = LocationSettingsRequest.Builder()
             builder.setNeedBle(true)
@@ -930,14 +864,17 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 .checkLocationSettings(builder.build())
 
             fun weNeedAccess() {
-                context?.let { c ->
-                    warn("Telling user we need need location accesss")
-                    Toast.makeText(
-                        c,
-                        getString(R.string.location_disabled_warning),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+                warn("Telling user we need need location access")
+
+                var warningReason = getString(R.string.location_disabled)
+                if (!hasCompanionDeviceApi)
+                    warningReason = getString(R.string.location_disabled_warning)
+
+                Toast.makeText(
+                    requireContext(),
+                    warningReason,
+                    Toast.LENGTH_LONG
+                ).show()
             }
 
             locationSettingsResponse.addOnSuccessListener {
@@ -982,7 +919,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     override fun onPause() {
         super.onPause()
-        scanModel.stopScan()
 
         requireActivity().unregisterReceiver(updateProgressReceiver)
     }
@@ -990,8 +926,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     override fun onResume() {
         super.onResume()
 
-        if (!hasCompanionDeviceApi)
-            scanModel.startScan()
+        scanModel.setupScan()
 
         // system permissions might have changed while we were away
         binding.provideLocationCheckbox.isChecked = myActivity.hasLocationPermission() && myActivity.hasBackgroundPermission() && (model.provideLocation.value ?: false) && isGooglePlayAvailable(requireContext())
@@ -1001,18 +936,20 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // Keep reminding user BLE is still off
         val hasUSB = SerialInterface.findDrivers(myActivity).isNotEmpty()
         if (!hasUSB) {
-            // First warn about permissions, and then if needed warn about settings
-            if (!myActivity.warnMissingPermissions()) {
-                // Warn user if BLE is disabled
-                if (scanModel.bluetoothAdapter?.isEnabled != true) {
-                    Toast.makeText(
-                        requireContext(),
-                        R.string.error_bluetooth,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    checkLocationEnabled()
-                }
+            // Warn user if BLE is disabled
+            if (scanModel.bluetoothAdapter?.isEnabled != true) {
+                Toast.makeText(
+                    requireContext(),
+                    R.string.error_bluetooth,
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                if (!hasCompanionDeviceApi) {
+                    if (!myActivity.warnMissingPermissions())
+                        checkLocationEnabled()
+                } else
+                    if (binding.provideLocationCheckbox.isChecked)
+                        checkLocationEnabled()
             }
         }
     }

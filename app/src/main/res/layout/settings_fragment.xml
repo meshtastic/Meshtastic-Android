@@ -85,6 +85,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/deviceRadioGroup" />
@@ -96,7 +97,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/changeRadioButton">
+            app:layout_constraintTop_toBottomOf="@+id/scanStatusText">
 
             <RadioButton
                 android:id="@+id/radioButton2"
@@ -111,15 +112,15 @@
                 android:text="@string/test_devname2" />
         </RadioGroup>
 
-        <com.google.android.material.button.MaterialButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/changeRadioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/select_radio"
+            android:layout_margin="16dp"
+            android:contentDescription="@string/change_radio"
+            app:srcCompat="@drawable/ic_twotone_add_24"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/scanStatusText" />
+            app:layout_constraintBottom_toTopOf="@+id/reportBugButton" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/updateFirmwareButton"
