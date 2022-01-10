@@ -42,8 +42,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 30 // 30 can't work until an explicit location permissions dialog is added
-        versionCode 20252 // format is Mmmss (where M is 1+the numeric major number
-        versionName "1.2.52"
+        versionCode 20253 // format is Mmmss (where M is 1+the numeric major number
+        versionName "1.2.53"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
@@ -171,7 +171,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
 
     // location services
-    implementation 'com.google.android.gms:play-services-location:18.0.0'
+    implementation 'com.google.android.gms:play-services-location:19.0.0'
 
     // For Google Sign-In (owner name accesss)
     implementation 'com.google.android.gms:play-services-auth:20.0.0'
@@ -186,9 +186,9 @@ dependencies {
     // https://firebase.google.com/docs/android/setup#available-libraries
 
     // barcode support
-    // per https://github.com/journeyapps/zxing-android-embedded for support of android version 22
-    implementation('com.journeyapps:zxing-android-embedded:4.1.0') { transitive = false }
-    implementation 'com.google.zxing:core:3.4.1'
+    // per https://github.com/journeyapps/zxing-android-embedded#older-sdk-versions for minSdkVersion 21
+    implementation('com.journeyapps:zxing-android-embedded:4.3.0') { transitive = false }
+    implementation 'com.google.zxing:core:3.3.0' // <-- don't update
 
     def work_version = '2.7.1'
 
