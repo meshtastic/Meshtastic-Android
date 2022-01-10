@@ -211,6 +211,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
         binding.scanButton.setOnClickListener {
             if ((requireActivity() as MainActivity).hasCameraPermission()) {
+                debug("Starting QR code scanner")
                 val zxingScan = IntentIntegrator.forSupportFragment(this)
                 zxingScan.setCameraId(0)
                 zxingScan.setPrompt("")
