@@ -183,12 +183,14 @@ class MeshService : Service(), Logging {
             // if android called us too soon, just ignore
 
             val myInfo = localNodeInfo
+            val lastLat = (myInfo?.position?.latitude ?: 0.0)
+            val lastLon = (myInfo?.position?.longitude ?: 0.0)
             val lastSendMsec = (myInfo?.position?.time ?: 0) * 1000L
             val now = System.currentTimeMillis()
-            if (now - lastSendMsec < locationIntervalMsec)
-                debug("Not sending position - the local node has sent one recently...")
-            else {
+            if ((lastLat == 0.0 && lastLon == 0.0) || (now - lastSendMsec > locationIntervalMsec)) // && minBroadcastPeriod ?
                 sendPosition(lat, lon, alt, destNum, wantResponse)
+            else {
+                debug("Not sending position - local node sent ${(now - lastSendMsec) / 1000L}s ago ${myInfo?.position?.toPIIString()}")
             }
         }
     }
@@ -1026,15 +1028,15 @@ class MeshService : Service(), Logging {
             else
                 broadcastSecs * 1000L
 
-            if (prefs.locationShare == RadioConfigProtos.LocationSharing.LocDisabled) {
-                info("GPS location sharing is disabled")
-                desiredInterval = 0
-            }
+            // if (prefs.locationShare == RadioConfigProtos.LocationSharing.LocDisabled) {
+            //     info("GPS location sharing is disabled")
+            //     desiredInterval = 0
+            // }
 
-            if (prefs.fixedPosition) {
-                info("Node has fixed position, therefore not overriding position")
-                desiredInterval = 0
-            }
+            // if (prefs.fixedPosition) {
+            //     info("Node has fixed position, therefore not overriding position")
+            //     desiredInterval = 0
+            // }
 
             if (desiredInterval != 0L) {
                 info("desired GPS assistance interval $desiredInterval")
