@@ -247,12 +247,16 @@ class MainActivity : AppCompatActivity(), Logging,
      */
     private fun updateBluetoothEnabled() {
         var enabled = false // assume failure
+        val requiredPerms: MutableList<String> = mutableListOf()
 
-        val requiredPerms = listOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN
-        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            requiredPerms.add(Manifest.permission.BLUETOOTH_SCAN)
+            requiredPerms.add(Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            requiredPerms.add(Manifest.permission.ACCESS_FINE_LOCATION)
+            requiredPerms.add(Manifest.permission.BLUETOOTH)
+            requiredPerms.add(Manifest.permission.BLUETOOTH_ADMIN)
+        }
 
         if (getMissingPermissions(requiredPerms).isEmpty()) {
             /// ask the adapter if we have access
@@ -272,13 +276,19 @@ class MainActivity : AppCompatActivity(), Logging,
         val perms = mutableListOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.BLUETOOTH,
-            Manifest.permission.BLUETOOTH_ADMIN,
             Manifest.permission.WAKE_LOCK
 
             // We only need this for logging to capture files for the simulator - turn off for most users
             // Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            perms.add(Manifest.permission.BLUETOOTH_SCAN)
+            perms.add(Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            perms.add(Manifest.permission.BLUETOOTH)
+            perms.add(Manifest.permission.BLUETOOTH_ADMIN)
+        }
 
         // Some old phones complain about requesting perms they don't understand
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
