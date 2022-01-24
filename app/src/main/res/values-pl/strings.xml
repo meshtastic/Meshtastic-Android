@@ -84,7 +84,7 @@
     <string name="message_reception_time">Czas odbioru wiadomości</string>
     <string name="message_reception_state">Status odbioru wiadomości</string>
     <string name="message_delivery_status">Status dostarczenia wiadomości</string>
-    <string name="broadcast_position_secs">Rozgłaszanie pozycji co: (w sekundach), 0 - wyłączone</string>
+    <string name="broadcast_position_secs">Rozgłaszanie pozycji co: (w sekundach)</string>
     <string name="ls_sleep_secs">Uśpienie urządzenia (w sekundach)</string>
     <string name="meshtastic_messages_notifications">Powiadomienie o wiadomościach</string>
     <string name="broadcast_period_too_small">Minimalny okres rozgłaszania dla tego kanału wynosi %d</string>
