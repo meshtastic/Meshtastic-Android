@@ -62,6 +62,7 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.tasks.Task
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.protobuf.InvalidProtocolBufferException
 import com.vorlonsoft.android.rate.AppRate
@@ -399,7 +400,12 @@ class MainActivity : AppCompatActivity(), Logging,
 
         return if (message != null) {
             errormsg("Denied permissions: $message")
-            showToast(message)
+            Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_INDEFINITE)
+                .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
+                .setAction(R.string.okay) {
+                    // dismiss
+                }
+                .show()
             true
         } else
             false

@@ -48,7 +48,7 @@
     <string name="please_pair">Please pair device in Android Settings.</string>
     <string name="pairing_completed">Pairing completed, starting service</string>
     <string name="pairing_failed_try_again">Pairing failed, please select again</string>
-    <string name="location_disabled">Location access is disabled, can not provide position to the mesh.</string>
+    <string name="location_disabled">Location access is turned off, can not provide position to mesh.</string>
     <string name="share">Share</string>
     <string name="disconnected">Disconnected</string>
     <string name="device_sleeping">Device sleeping</string>
@@ -69,7 +69,7 @@
     <string name="modem_config_very_long">Long Range / Slow</string>
     <string name="modem_config_unrecognized">UNRECOGNIZED</string>
     <string name="meshtastic_service_notifications">Meshtastic Service Notifications</string>
-    <string name="location_disabled_warning">You must turn on (high accuracy) location services in Android Settings</string>
+    <string name="location_disabled_warning">Location must be turned on (high accuracy) to find new devices via bluetooth. You can turn it off again afterwards.</string>
     <string name="about">About</string>
     <string name="a_list_of_nodes_in_the_mesh">A list of nodes in the mesh</string>
     <string name="text_messages">Text messages</string>
