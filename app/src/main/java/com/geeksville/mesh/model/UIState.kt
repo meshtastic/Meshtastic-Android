@@ -21,7 +21,6 @@ import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.service.MeshService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlin.math.max
 
 /// Given a human name, strip out the first letter of the first three words and return that as the initials for
 /// that user. If the original name is only one word, strip vowels from the original name and if the result is
@@ -36,7 +35,7 @@ fun getInitials(nameIn: String): String {
     val initials = when (words.size) {
         in 0..minchars - 1 -> {
             val nm = if (name.length >= 1)
-                name.first() + name.drop(1).filterNot { c -> c.toLowerCase() in "aeiou" }
+                name.first() + name.drop(1).filterNot { c -> c.lowercase() in "aeiou" }
             else
                 ""
             if (nm.length >= nchars) nm else name
@@ -98,7 +97,6 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
     var positionBroadcastSecs: Int?
         get() {
             radioConfig.value?.preferences?.let {
-                if (it.locationShare == RadioConfigProtos.LocationSharing.LocDisabled) return 0
                 if (it.positionBroadcastSecs > 0) return it.positionBroadcastSecs
                 // These default values are borrowed from the device code.
                 if (it.isRouter) return 60 * 60
@@ -110,17 +108,7 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
             val config = radioConfig.value
             if (value != null && config != null) {
                 val builder = config.toBuilder()
-                if (value > 0) {
-                    builder.preferencesBuilder.positionBroadcastSecs = value
-                    builder.preferencesBuilder.gpsUpdateInterval = value
-                    builder.preferencesBuilder.sendOwnerInterval = max(1, 3600 / value).toInt()
-                    builder.preferencesBuilder.locationShare =
-                        RadioConfigProtos.LocationSharing.LocEnabled
-                } else {
-                    builder.preferencesBuilder.positionBroadcastSecs = Int.MAX_VALUE
-                    builder.preferencesBuilder.locationShare =
-                        RadioConfigProtos.LocationSharing.LocDisabled
-                }
+                builder.preferencesBuilder.positionBroadcastSecs = value
                 setRadioConfig(builder.build())
             }
         }
@@ -132,6 +120,36 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
             if (value != null && config != null) {
                 val builder = config.toBuilder()
                 builder.preferencesBuilder.lsSecs = value
+                setRadioConfig(builder.build())
+            }
+        }
+
+    var locationShare: Boolean?
+        get() {
+            return radioConfig.value?.preferences?.locationShare == RadioConfigProtos.LocationSharing.LocEnabled
+        }
+    set(value) {
+            val config = radioConfig.value
+            if (value != null && config != null) {
+                val builder = config.toBuilder()
+                if (value == true) {
+                    builder.preferencesBuilder.locationShare =
+                        RadioConfigProtos.LocationSharing.LocEnabled
+                } else {
+                    builder.preferencesBuilder.locationShare =
+                        RadioConfigProtos.LocationSharing.LocDisabled
+                }
+                setRadioConfig(builder.build())
+            }
+        }
+
+    var isPowerSaving: Boolean?
+        get() = radioConfig.value?.preferences?.isPowerSaving
+        set(value) {
+            val config = radioConfig.value
+            if (value != null && config != null) {
+                val builder = config.toBuilder()
+                builder.preferencesBuilder.isPowerSaving = value
                 setRadioConfig(builder.build())
             }
         }

@@ -79,7 +79,7 @@
     <string name="message_reception_time">消息接收时间</string>
     <string name="message_reception_state">消息接收状态</string>
     <string name="message_delivery_status">消息传递状态</string>
-    <string name="broadcast_position_secs">广播周期（以秒为单位），0为禁用</string>
+    <string name="broadcast_position_secs">广播周期（以秒为单位）</string>
     <string name="ls_sleep_secs">设备休眠时间（以秒为单位）</string>
     <string name="meshtastic_messages_notifications">关于消息的通知</string>
     <string name="broadcast_period_too_small">此频道的最短广播时间为 %d</string>

@@ -78,7 +78,7 @@
     <string name="message_reception_time">üzenet fogadásának ideje</string>
     <string name="message_reception_state">üzenet fogadásának állapota</string>
     <string name="message_delivery_status">Üzenet kézbesítésének állapota</string>
-    <string name="broadcast_position_secs">Pozíció hírdetésének gyakorisága (másodpercben), 0 - letiltva</string>
+    <string name="broadcast_position_secs">Pozíció hírdetésének gyakorisága (másodpercben)</string>
     <string name="ls_sleep_secs">Eszköz alvásának gyakorisága (másodpercben)</string>
     <string name="meshtastic_messages_notifications">Értesítések az üzenetekről</string>
     <string name="broadcast_period_too_small">Minimum üzenet küldési gyakoriság ezen a csatornán %d</string>

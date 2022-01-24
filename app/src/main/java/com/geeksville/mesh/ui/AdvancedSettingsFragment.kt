@@ -36,17 +36,22 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        model.radioConfig.observe(viewLifecycleOwner, { _ ->
+        model.radioConfig.observe(viewLifecycleOwner, {
             binding.positionBroadcastPeriodEditText.setText(model.positionBroadcastSecs.toString())
             binding.lsSleepEditText.setText(model.lsSleepSecs.toString())
-            binding.isAlwaysPoweredCheckbox.isChecked = model.isAlwaysPowered?: false
+            binding.positionBroadcastSwitch.isChecked = model.locationShare ?: true
+            binding.lsSleepView.isEnabled = model.isPowerSaving ?: false
+            binding.lsSleepSwitch.isChecked = model.isPowerSaving ?: false
+            binding.isAlwaysPoweredSwitch.isChecked = model.isAlwaysPowered ?: false
         })
 
-        model.isConnected.observe(viewLifecycleOwner, Observer { connectionState ->
+        model.isConnected.observe(viewLifecycleOwner, { connectionState ->
             val connected = connectionState == MeshService.ConnectionState.CONNECTED
             binding.positionBroadcastPeriodView.isEnabled = connected
-            binding.lsSleepView.isEnabled = connected
-            binding.isAlwaysPoweredCheckbox.isEnabled = connected
+            binding.lsSleepView.isEnabled = connected && model.isPowerSaving ?: false
+            binding.positionBroadcastSwitch.isEnabled = connected
+            binding.lsSleepSwitch.isEnabled = connected
+            binding.isAlwaysPoweredSwitch.isEnabled = connected
         })
 
         binding.positionBroadcastPeriodEditText.on(EditorInfo.IME_ACTION_DONE) {
@@ -74,6 +79,14 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             requireActivity().hideKeyboard()
         }
 
+        binding.positionBroadcastSwitch.setOnCheckedChangeListener { view, isChecked ->
+            if (view.isPressed) {
+                model.locationShare = isChecked
+                debug("User changed locationShare to $isChecked")
+            }
+        }
+
+        // TODO - disable all sleep settings for non-ESP32 devices
         binding.lsSleepEditText.on(EditorInfo.IME_ACTION_DONE) {
             val str = binding.lsSleepEditText.text.toString()
             val n = str.toIntOrNull()
@@ -87,7 +100,14 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             requireActivity().hideKeyboard()
         }
 
-        binding.isAlwaysPoweredCheckbox.setOnCheckedChangeListener { view, isChecked ->
+        binding.lsSleepSwitch.setOnCheckedChangeListener { view, isChecked ->
+            if (view.isPressed) {
+                model.isPowerSaving = isChecked
+                debug("User changed isPowerSaving to $isChecked")
+            }
+        }
+
+        binding.isAlwaysPoweredSwitch.setOnCheckedChangeListener { view, isChecked ->
             if (view.isPressed) {
                 model.isAlwaysPowered = isChecked
                 debug("User changed isAlwaysPowered to $isChecked")

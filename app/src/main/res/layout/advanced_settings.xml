@@ -27,6 +27,15 @@
             android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/positionBroadcastSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="@id/positionBroadcastPeriodView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/positionBroadcastPeriodView" />
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/lsSleepView"
         android:layout_width="0dp"
@@ -48,15 +57,24 @@
             android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <CheckBox
-        android:id="@+id/isAlwaysPoweredCheckbox"
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/lsSleepSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="@id/lsSleepView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/lsSleepView" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/isAlwaysPoweredSwitch"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
-        android:text="isAlwaysPowered"
+        android:text="is_always_powered"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/lsSleepView"
         app:layout_constraintTop_toBottomOf="@+id/lsSleepView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
