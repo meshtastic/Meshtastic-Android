@@ -22,7 +22,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.RadioButton
-import android.widget.Toast
+import android.widget.TextView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
@@ -50,6 +50,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -844,7 +845,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     }
 
     // If the user has not turned on location access throw up a toast warning
-    private fun checkLocationEnabled() {
+    private fun checkLocationEnabled(
+        warningReason: String = getString(R.string.location_disabled_warning)
+    ) {
 
         val hasGps: Boolean =
             myActivity.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
@@ -863,23 +866,20 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             val locationSettingsResponse = LocationServices.getSettingsClient(requireActivity())
                 .checkLocationSettings(builder.build())
 
-            fun weNeedAccess() {
+            fun weNeedAccess(warningReason: String) {
                 warn("Telling user we need need location access")
 
-                var warningReason = getString(R.string.location_disabled)
-                if (!hasCompanionDeviceApi)
-                    warningReason = getString(R.string.location_disabled_warning)
-
-                Toast.makeText(
-                    requireContext(),
-                    warningReason,
-                    Toast.LENGTH_LONG
-                ).show()
+                Snackbar.make(binding.changeRadioButton, warningReason, Snackbar.LENGTH_INDEFINITE)
+                    .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
+                    .setAction(R.string.okay) {
+                        // dismiss
+                    }
+                    .show()
             }
 
             locationSettingsResponse.addOnSuccessListener {
                 if (!it.locationSettingsStates?.isBleUsable!! || !it.locationSettingsStates?.isLocationUsable!!)
-                    weNeedAccess()
+                    weNeedAccess(warningReason)
                 else
                     debug("We have location access")
             }
@@ -901,7 +901,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 // For now just punt and show a dialog
 
                 // The context might be gone (if activity is going away) by the time this handler is called
-                weNeedAccess()
+                weNeedAccess(warningReason)
 
                 //} else
                 //    Exceptions.report(exception)
@@ -938,18 +938,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (!hasUSB) {
             // Warn user if BLE is disabled
             if (scanModel.bluetoothAdapter?.isEnabled != true) {
-                Toast.makeText(
-                    requireContext(),
-                    R.string.error_bluetooth,
-                    Toast.LENGTH_SHORT
-                ).show()
+                Snackbar.make(binding.changeRadioButton, R.string.error_bluetooth, Snackbar.LENGTH_INDEFINITE)
+                    .setAction(R.string.okay) {
+                        // dismiss
+                    }
+                    .show()
             } else {
-                if (!hasCompanionDeviceApi) {
-                    if (!myActivity.warnMissingPermissions())
-                        checkLocationEnabled()
-                } else
-                    if (binding.provideLocationCheckbox.isChecked)
-                        checkLocationEnabled()
+                if (binding.provideLocationCheckbox.isChecked)
+                    checkLocationEnabled(getString(R.string.location_disabled))
             }
         }
     }
