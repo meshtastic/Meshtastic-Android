@@ -655,18 +655,17 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         binding.provideLocationCheckbox.isEnabled = isGooglePlayAvailable(requireContext())
         binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
+            model.provideLocation.value = isChecked
+
             if (view.isChecked) {
                 debug("User changed location tracking to $isChecked")
                 if (view.isPressed) { // We want to ignore changes caused by code (as opposed to the user)
-                    val hasLocationPermission = myActivity.hasLocationPermission()
-                    val hasBackgroundPermission = myActivity.hasBackgroundPermission()
-
                     // Don't check the box until the system setting changes
-                    view.isChecked = hasLocationPermission && hasBackgroundPermission
+                    view.isChecked = myActivity.hasLocationPermission() && myActivity.hasBackgroundPermission()
 
-                    if (!hasLocationPermission) // Make sure we have location permission (prerequisite)
+                    if (!myActivity.hasLocationPermission()) // Make sure we have location permission (prerequisite)
                         myActivity.requestLocationPermission()
-                    if (hasLocationPermission && !hasBackgroundPermission)
+                    else if (!myActivity.hasBackgroundPermission())
                         MaterialAlertDialogBuilder(requireContext())
                             .setTitle(R.string.background_required)
                             .setMessage(R.string.why_background_required)
@@ -679,12 +678,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                             .show()
 
                     if (view.isChecked) {
-                        model.provideLocation.value = isChecked
+                        checkLocationEnabled(getString(R.string.location_disabled))
                         model.meshService?.setupProvideLocation()
                     }
                 }
             } else {
-                model.provideLocation.value = isChecked
                 model.meshService?.stopProvideLocation()
             }
         }
