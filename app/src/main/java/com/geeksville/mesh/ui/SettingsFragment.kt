@@ -34,6 +34,7 @@ import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.RadioConfigProtos
 import com.geeksville.mesh.android.bluetoothManager
+import com.geeksville.mesh.android.hasScanPermission
 import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.android.hasBackgroundPermission
 import com.geeksville.mesh.android.usbManager
@@ -447,7 +448,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private val guiJob = Job()
     private val mainScope = CoroutineScope(Dispatchers.Main + guiJob)
 
-
     private val hasCompanionDeviceApi: Boolean by lazy {
         BluetoothInterface.hasCompanionDeviceApi(requireContext())
     }
@@ -477,7 +477,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = SettingsFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -561,7 +561,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val statusText = binding.scanStatusText
         val permissionsWarning = myActivity.getMissingMessage()
         when {
-            (!hasCompanionDeviceApi && permissionsWarning != null) ->
+            (permissionsWarning != null) ->
                 statusText.text = permissionsWarning
 
             region == RadioConfigProtos.RegionCode.Unset ->
@@ -615,6 +615,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = regionAdapter
 
+        model.bluetoothEnabled.observe(
+            viewLifecycleOwner, {
+                if (it) binding.changeRadioButton.show()
+                else binding.changeRadioButton.hide()
+            })
+
         model.ownerName.observe(viewLifecycleOwner, { name ->
             binding.usernameEditText.setText(name)
         })
@@ -637,9 +643,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
         })
 
-        scanModel.devices.observe(
-            viewLifecycleOwner,
-            { devices -> updateDevicesButtons(devices) })
+        scanModel.devices.observe(viewLifecycleOwner, { devices ->
+            updateDevicesButtons(devices)
+        })
 
         binding.updateFirmwareButton.setOnClickListener {
             doFirmwareUpdate()
@@ -655,34 +661,31 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         binding.provideLocationCheckbox.isEnabled = isGooglePlayAvailable(requireContext())
         binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
-            model.provideLocation.value = isChecked
+            if (view.isPressed && isChecked) { // We want to ignore changes caused by code (as opposed to the user)
+                // Don't check the box until the system setting changes
+                view.isChecked = myActivity.hasLocationPermission() && myActivity.hasBackgroundPermission()
 
-            if (view.isChecked) {
-                debug("User changed location tracking to $isChecked")
-                if (view.isPressed) { // We want to ignore changes caused by code (as opposed to the user)
-                    // Don't check the box until the system setting changes
-                    view.isChecked = myActivity.hasLocationPermission() && myActivity.hasBackgroundPermission()
-
-                    if (!myActivity.hasLocationPermission()) // Make sure we have location permission (prerequisite)
-                        myActivity.requestLocationPermission()
-                    else if (!myActivity.hasBackgroundPermission())
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setTitle(R.string.background_required)
-                            .setMessage(R.string.why_background_required)
-                            .setNeutralButton(R.string.cancel) { _, _ ->
-                                debug("User denied background permission")
-                            }
-                            .setPositiveButton(getString(R.string.accept)) { _, _ ->
-                                myActivity.requestBackgroundPermission()
-                            }
-                            .show()
-
-                    if (view.isChecked) {
-                        checkLocationEnabled(getString(R.string.location_disabled))
-                        model.meshService?.setupProvideLocation()
-                    }
+                if (!myActivity.hasLocationPermission()) // Make sure we have location permission (prerequisite)
+                    myActivity.requestLocationPermission()
+                else if (!myActivity.hasBackgroundPermission())
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.background_required)
+                        .setMessage(R.string.why_background_required)
+                        .setNeutralButton(R.string.cancel) { _, _ ->
+                            debug("User denied background permission")
+                        }
+                        .setPositiveButton(getString(R.string.accept)) { _, _ ->
+                            myActivity.requestBackgroundPermission()
+                        }
+                        .show()
+                if (view.isChecked) {
+                    debug("User changed location tracking to $isChecked")
+                    model.provideLocation.value = isChecked
+                    checkLocationEnabled(getString(R.string.location_disabled))
+                    model.meshService?.setupProvideLocation()
                 }
             } else {
+                model.provideLocation.value = isChecked
                 model.meshService?.stopProvideLocation()
             }
         }
@@ -730,8 +733,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             b.isChecked =
                 scanModel.onSelected(myActivity, device)
 
-            if (!b.isSelected)
+            if (!b.isSelected) {
                 binding.scanStatusText.text = getString(R.string.please_pair)
+            }
         }
     }
 
@@ -757,7 +761,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             // and before use
             val bleAddr = scanModel.selectedBluetooth
 
-            if (bleAddr != null && adapter != null && adapter.isEnabled) {
+            if (bleAddr != null && adapter != null) {
                 val bDevice =
                     adapter.getRemoteDevice(bleAddr)
                 if (bDevice.name != null) { // ignore nodes that node have a name, that means we've lost them since they appeared
@@ -798,9 +802,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private fun initClassicScan() {
 
         binding.changeRadioButton.setOnClickListener {
-            if (myActivity.warnMissingPermissions()) {
-                myActivity.requestPermission()
-            } else scanLeDevice()
+            debug("User clicked changeRadioButton")
+            if (!myActivity.hasScanPermission()) {
+                myActivity.requestScanPermission()
+            } else {
+                checkLocationEnabled()
+                scanLeDevice()
+            }
         }
     }
 
@@ -828,7 +836,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private fun initModernScan() {
 
         binding.changeRadioButton.setOnClickListener {
-            myActivity.startCompanionScan()
+            debug("User clicked changeRadioButton")
+            if (!myActivity.hasScanPermission()) {
+                myActivity.requestScanPermission()
+            } else {
+                // checkLocationEnabled() // ? some phones still need location turned on
+                myActivity.startCompanionScan()
+            }
         }
     }
 

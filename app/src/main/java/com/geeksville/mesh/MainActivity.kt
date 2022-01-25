@@ -47,6 +47,7 @@ import com.geeksville.mesh.android.getLocationPermissions
 import com.geeksville.mesh.android.getBackgroundPermissions
 import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.android.getMissingPermissions
+import com.geeksville.mesh.android.getScanPermissions
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.ChannelSet
@@ -251,12 +252,9 @@ class MainActivity : AppCompatActivity(), Logging,
         val requiredPerms: MutableList<String> = mutableListOf()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            requiredPerms.add(Manifest.permission.BLUETOOTH_SCAN)
             requiredPerms.add(Manifest.permission.BLUETOOTH_CONNECT)
         } else {
-            requiredPerms.add(Manifest.permission.ACCESS_FINE_LOCATION)
             requiredPerms.add(Manifest.permission.BLUETOOTH)
-            requiredPerms.add(Manifest.permission.BLUETOOTH_ADMIN)
         }
 
         if (getMissingPermissions(requiredPerms).isEmpty()) {
@@ -275,8 +273,6 @@ class MainActivity : AppCompatActivity(), Logging,
      */
     private fun getMinimumPermissions(): List<String> {
         val perms = mutableListOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.WAKE_LOCK
 
             // We only need this for logging to capture files for the simulator - turn off for most users
@@ -284,11 +280,9 @@ class MainActivity : AppCompatActivity(), Logging,
         )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            perms.add(Manifest.permission.BLUETOOTH_SCAN)
             perms.add(Manifest.permission.BLUETOOTH_CONNECT)
         } else {
             perms.add(Manifest.permission.BLUETOOTH)
-            perms.add(Manifest.permission.BLUETOOTH_ADMIN)
         }
 
         // Some old phones complain about requesting perms they don't understand
@@ -299,6 +293,9 @@ class MainActivity : AppCompatActivity(), Logging,
 
         return getMissingPermissions(perms)
     }
+
+    /** Ask the user to grant Bluetooth scan/discovery permission */
+    fun requestScanPermission() = requestPermission(getScanPermissions(), true)
 
     /** Ask the user to grant camera permission */
     fun requestCameraPermission() = requestPermission(getCameraPermissions(), false)
@@ -312,16 +309,19 @@ class MainActivity : AppCompatActivity(), Logging,
     /**
      * @return a localized string warning user about missing permissions.  Or null if everything is find
      */
-    fun getMissingMessage(): String? {
+    fun getMissingMessage(
+        missingPerms: List<String> = getMinimumPermissions()
+    ): String? {
         val renamedPermissions = mapOf(
             // Older versions of android don't know about these permissions - ignore failure to grant
             Manifest.permission.ACCESS_COARSE_LOCATION to null,
             Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND to null,
             Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND to null,
-            Manifest.permission.ACCESS_FINE_LOCATION to getString(R.string.location)
+            Manifest.permission.ACCESS_FINE_LOCATION to getString(R.string.location),
+            Manifest.permission.BLUETOOTH_CONNECT to "Bluetooth"
         )
 
-        val deniedPermissions = getMinimumPermissions().mapNotNull {
+        val deniedPermissions = missingPerms.mapNotNull {
             if (renamedPermissions.containsKey(it))
                 renamedPermissions[it]
             else // No localization found - just show the nasty android string
@@ -342,7 +342,7 @@ class MainActivity : AppCompatActivity(), Logging,
      *
      * @return true if we already have the needed permissions
      */
-    fun requestPermission(
+    private fun requestPermission(
         missingPerms: List<String> = getMinimumPermissions(),
         shouldShowDialog: Boolean = true
     ): Boolean =
@@ -369,7 +369,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
                 MaterialAlertDialogBuilder(this)
                     .setTitle(getString(R.string.required_permissions))
-                    .setMessage(getMissingMessage())
+                    .setMessage(getMissingMessage(missingPerms))
                     .setNeutralButton(R.string.cancel) { _, _ ->
                         warn("User bailed due to permissions")
                     }
@@ -550,6 +550,9 @@ class MainActivity : AppCompatActivity(), Logging,
         handleIntent(intent)
 
         askToRate()
+
+        // if (!isInTestLab) - very important - even in test lab we must request permissions because we need location perms for some of our tests to pass
+        requestPermission()
     }
 
     private fun initToolbar() {
@@ -814,7 +817,7 @@ class MainActivity : AppCompatActivity(), Logging,
                     model.isConnected.value = oldConnection
                 }
                 // if provideLocation enabled: Start providing location (from phone GPS) to mesh
-                if (model.provideLocation.value == true && (oldConnection != connected))
+                if (model.provideLocation.value == true)
                     service.setupProvideLocation()
             }
         } else {
