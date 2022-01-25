@@ -447,7 +447,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private val guiJob = Job()
     private val mainScope = CoroutineScope(Dispatchers.Main + guiJob)
 
-
     private val hasCompanionDeviceApi: Boolean by lazy {
         BluetoothInterface.hasCompanionDeviceApi(requireContext())
     }
@@ -477,7 +476,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = SettingsFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -615,6 +614,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = regionAdapter
 
+        model.bluetoothEnabled.observe(
+            viewLifecycleOwner, {
+                if (it) binding.changeRadioButton.show()
+                else binding.changeRadioButton.hide()
+            })
+
         model.ownerName.observe(viewLifecycleOwner, { name ->
             binding.usernameEditText.setText(name)
         })
@@ -727,8 +732,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             b.isChecked =
                 scanModel.onSelected(myActivity, device)
 
-            if (!b.isSelected)
-                binding.scanStatusText.text = getString(R.string.please_pair)
+            if (!b.isSelected) {
+                binding.warningNotPaired.visibility = View.VISIBLE
+                binding.scanStatusText.text = getString(R.string.not_paired_yet)
+                // binding.scanStatusText.text = getString(R.string.please_pair)
+            }
         }
     }
 
@@ -754,7 +762,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             // and before use
             val bleAddr = scanModel.selectedBluetooth
 
-            if (bleAddr != null && adapter != null && adapter.isEnabled) {
+            if (bleAddr != null && adapter != null) {
                 val bDevice =
                     adapter.getRemoteDevice(bleAddr)
                 if (bDevice.name != null) { // ignore nodes that node have a name, that means we've lost them since they appeared
@@ -786,9 +794,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (curRadio != null && !MockInterface.addressValid(requireContext(), "")) {
             binding.warningNotPaired.visibility = View.GONE
             // binding.scanStatusText.text = getString(R.string.current_pair).format(curRadio)
-        } else {
-            binding.warningNotPaired.visibility = View.VISIBLE
-            binding.scanStatusText.text = getString(R.string.not_paired_yet)
         }
     }
 
