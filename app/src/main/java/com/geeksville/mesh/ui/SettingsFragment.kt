@@ -560,7 +560,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val statusText = binding.scanStatusText
         val permissionsWarning = myActivity.getMissingMessage()
         when {
-            (!hasCompanionDeviceApi && permissionsWarning != null) ->
+            (permissionsWarning != null) ->
                 statusText.text = permissionsWarning
 
             region == RadioConfigProtos.RegionCode.Unset ->
