@@ -12,15 +12,22 @@
         android:name="android.hardware.location.gps"
         android:required="false" />
 
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <!-- Request legacy Bluetooth permissions on older devices -->
+    <uses-permission android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
+        android:maxSdkVersion="30" />
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- only useful if this phone can do BTLE -->
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- needed to access bluetooth when app is background -->
+    <!-- API 31+ Bluetooth permissions -->
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation" />
 
-    <!--
-    This permission is required for analytics - and soon the MQTT gateway
-    -->
+    <!-- Permissions required for providing location (from phone GPS) to mesh -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
+    <!-- This permission is required for analytics - and soon the MQTT gateway -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
@@ -41,9 +48,6 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!-- For android >=26 we can use the new BLE scanning API, which allows auto launching our service when our device is seen -->
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
-                     android:usesPermissionFlags="neverForLocation" />
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND" />
     <uses-permission android:name="android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND" />
 
@@ -124,7 +128,8 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateAlwaysHidden"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -162,7 +167,8 @@
                 android:resource="@xml/device_filter" />
         </activity>
 
-        <receiver android:name="com.geeksville.mesh.service.BootCompleteReceiver">
+        <receiver android:name="com.geeksville.mesh.service.BootCompleteReceiver"
+            android:exported="false">
             <!-- handle boot events -->
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
