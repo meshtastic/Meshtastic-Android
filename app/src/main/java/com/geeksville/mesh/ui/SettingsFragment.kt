@@ -655,34 +655,31 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         binding.provideLocationCheckbox.isEnabled = isGooglePlayAvailable(requireContext())
         binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
-            model.provideLocation.value = isChecked
+            if (view.isPressed && isChecked) { // We want to ignore changes caused by code (as opposed to the user)
+                // Don't check the box until the system setting changes
+                view.isChecked = myActivity.hasLocationPermission() && myActivity.hasBackgroundPermission()
 
-            if (view.isChecked) {
-                debug("User changed location tracking to $isChecked")
-                if (view.isPressed) { // We want to ignore changes caused by code (as opposed to the user)
-                    // Don't check the box until the system setting changes
-                    view.isChecked = myActivity.hasLocationPermission() && myActivity.hasBackgroundPermission()
-
-                    if (!myActivity.hasLocationPermission()) // Make sure we have location permission (prerequisite)
-                        myActivity.requestLocationPermission()
-                    else if (!myActivity.hasBackgroundPermission())
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setTitle(R.string.background_required)
-                            .setMessage(R.string.why_background_required)
-                            .setNeutralButton(R.string.cancel) { _, _ ->
-                                debug("User denied background permission")
-                            }
-                            .setPositiveButton(getString(R.string.accept)) { _, _ ->
-                                myActivity.requestBackgroundPermission()
-                            }
-                            .show()
-
-                    if (view.isChecked) {
-                        checkLocationEnabled(getString(R.string.location_disabled))
-                        model.meshService?.setupProvideLocation()
-                    }
+                if (!myActivity.hasLocationPermission()) // Make sure we have location permission (prerequisite)
+                    myActivity.requestLocationPermission()
+                else if (!myActivity.hasBackgroundPermission())
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.background_required)
+                        .setMessage(R.string.why_background_required)
+                        .setNeutralButton(R.string.cancel) { _, _ ->
+                            debug("User denied background permission")
+                        }
+                        .setPositiveButton(getString(R.string.accept)) { _, _ ->
+                            myActivity.requestBackgroundPermission()
+                        }
+                        .show()
+                if (view.isChecked) {
+                    debug("User changed location tracking to $isChecked")
+                    model.provideLocation.value = isChecked
+                    checkLocationEnabled(getString(R.string.location_disabled))
+                    model.meshService?.setupProvideLocation()
                 }
             } else {
+                model.provideLocation.value = isChecked
                 model.meshService?.stopProvideLocation()
             }
         }

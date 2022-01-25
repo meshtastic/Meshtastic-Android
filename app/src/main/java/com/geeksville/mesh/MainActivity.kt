@@ -814,7 +814,7 @@ class MainActivity : AppCompatActivity(), Logging,
                     model.isConnected.value = oldConnection
                 }
                 // if provideLocation enabled: Start providing location (from phone GPS) to mesh
-                if (model.provideLocation.value == true && (oldConnection != connected))
+                if (model.provideLocation.value == true)
                     service.setupProvideLocation()
             }
         } else {
