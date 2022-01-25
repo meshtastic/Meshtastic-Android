@@ -47,6 +47,7 @@ import com.geeksville.mesh.android.getLocationPermissions
 import com.geeksville.mesh.android.getBackgroundPermissions
 import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.android.getMissingPermissions
+import com.geeksville.mesh.android.getScanPermissions
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.ChannelSet
@@ -293,6 +294,9 @@ class MainActivity : AppCompatActivity(), Logging,
         return getMissingPermissions(perms)
     }
 
+    /** Ask the user to grant Bluetooth scan/discovery permission */
+    fun requestScanPermission() = requestPermission(getScanPermissions(), true)
+
     /** Ask the user to grant camera permission */
     fun requestCameraPermission() = requestPermission(getCameraPermissions(), false)
 
@@ -338,7 +342,7 @@ class MainActivity : AppCompatActivity(), Logging,
      *
      * @return true if we already have the needed permissions
      */
-    fun requestPermission(
+    private fun requestPermission(
         missingPerms: List<String> = getMinimumPermissions(),
         shouldShowDialog: Boolean = true
     ): Boolean =

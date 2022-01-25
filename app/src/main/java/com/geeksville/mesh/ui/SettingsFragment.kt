@@ -34,6 +34,7 @@ import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.RadioConfigProtos
 import com.geeksville.mesh.android.bluetoothManager
+import com.geeksville.mesh.android.hasScanPermission
 import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.android.hasBackgroundPermission
 import com.geeksville.mesh.android.usbManager
@@ -642,9 +643,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
         })
 
-        scanModel.devices.observe(
-            viewLifecycleOwner,
-            { devices -> updateDevicesButtons(devices) })
+        scanModel.devices.observe(viewLifecycleOwner, { devices ->
+            updateDevicesButtons(devices)
+        })
 
         binding.updateFirmwareButton.setOnClickListener {
             doFirmwareUpdate()
@@ -733,9 +734,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 scanModel.onSelected(myActivity, device)
 
             if (!b.isSelected) {
-                binding.warningNotPaired.visibility = View.VISIBLE
-                binding.scanStatusText.text = getString(R.string.not_paired_yet)
-                // binding.scanStatusText.text = getString(R.string.please_pair)
+                binding.scanStatusText.text = getString(R.string.please_pair)
             }
         }
     }
@@ -794,15 +793,22 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (curRadio != null && !MockInterface.addressValid(requireContext(), "")) {
             binding.warningNotPaired.visibility = View.GONE
             // binding.scanStatusText.text = getString(R.string.current_pair).format(curRadio)
+        } else {
+            binding.warningNotPaired.visibility = View.VISIBLE
+            binding.scanStatusText.text = getString(R.string.not_paired_yet)
         }
     }
 
     private fun initClassicScan() {
 
         binding.changeRadioButton.setOnClickListener {
-            if (myActivity.warnMissingPermissions()) {
-                myActivity.requestPermission()
-            } else scanLeDevice()
+            debug("User clicked changeRadioButton")
+            if (!myActivity.hasScanPermission()) {
+                myActivity.requestScanPermission()
+            } else {
+                checkLocationEnabled()
+                scanLeDevice()
+            }
         }
     }
 
@@ -830,7 +836,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private fun initModernScan() {
 
         binding.changeRadioButton.setOnClickListener {
-            myActivity.startCompanionScan()
+            debug("User clicked changeRadioButton")
+            if (!myActivity.hasScanPermission()) {
+                myActivity.requestScanPermission()
+            } else {
+                // checkLocationEnabled() // ? some phones still need location turned on
+                myActivity.startCompanionScan()
+            }
         }
     }
 

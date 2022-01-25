@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
 import android.os.Build
 import androidx.core.content.ContextCompat
+import com.geeksville.mesh.service.BluetoothInterface
 
 /**
  * @return null on platforms without a BlueTooth driver (i.e. the emulator)
@@ -27,6 +28,25 @@ fun Context.getMissingPermissions(perms: List<String>) = perms.filter {
         it
     ) != PackageManager.PERMISSION_GRANTED
 }
+
+/**
+ * Bluetooth scan/discovery permissions (or empty if we already have what we need)
+ */
+fun Context.getScanPermissions(): List<String> {
+    val perms = mutableListOf<String>()
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        perms.add(Manifest.permission.BLUETOOTH_SCAN)
+    } else if (!BluetoothInterface.hasCompanionDeviceApi(this)) {
+        perms.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        perms.add(Manifest.permission.BLUETOOTH_ADMIN)
+    }
+
+    return getMissingPermissions(perms)
+}
+
+/** @return true if the user already has Bluetooth scan/discovery permission */
+fun Context.hasScanPermission() = getScanPermissions().isEmpty()
 
 /**
  * Camera permission (or empty if we already have what we need)
@@ -49,7 +69,7 @@ fun Context.getLocationPermissions(): List<String> {
     return getMissingPermissions(perms)
 }
 
-/** @return true if the user already has camera permission */
+/** @return true if the user already has location permission */
 fun Context.hasLocationPermission() = getLocationPermissions().isEmpty()
 
 /**
