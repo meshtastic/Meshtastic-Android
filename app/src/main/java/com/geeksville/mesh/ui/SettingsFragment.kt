@@ -615,22 +615,29 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = regionAdapter
 
-        model.bluetoothEnabled.observe(
-            viewLifecycleOwner, {
-                if (it) binding.changeRadioButton.show()
-                else binding.changeRadioButton.hide()
-            })
+        model.bluetoothEnabled.observe(viewLifecycleOwner, {
+            if (it) binding.changeRadioButton.show()
+            else binding.changeRadioButton.hide()
+        })
 
         model.ownerName.observe(viewLifecycleOwner, { name ->
             binding.usernameEditText.setText(name)
         })
 
         // Only let user edit their name or set software update while connected to a radio
-        model.isConnected.observe(
-            viewLifecycleOwner, {
-                updateNodeInfo()
-                updateDevicesButtons(scanModel.devices.value)
-            })
+        model.isConnected.observe(viewLifecycleOwner, {
+            updateNodeInfo()
+            updateDevicesButtons(scanModel.devices.value)
+        })
+
+        model.radioConfig.observe(viewLifecycleOwner, {
+            binding.provideLocationCheckbox.isEnabled =
+                isGooglePlayAvailable(requireContext()) && model.locationShare ?: true
+            if (model.locationShare == false) {
+                model.provideLocation.value = false
+                binding.provideLocationCheckbox.isChecked = false
+            }
+        })
 
         // Also watch myNodeInfo because it might change later
         model.myNodeInfo.observe(viewLifecycleOwner, {
@@ -659,7 +666,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             requireActivity().hideKeyboard()
         }
 
-        binding.provideLocationCheckbox.isEnabled = isGooglePlayAvailable(requireContext())
         binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
             if (view.isPressed && isChecked) { // We want to ignore changes caused by code (as opposed to the user)
                 // Don't check the box until the system setting changes
@@ -896,7 +902,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     debug("We have location access")
             }
 
-            locationSettingsResponse.addOnFailureListener { _ ->
+            locationSettingsResponse.addOnFailureListener {
                 errormsg("Failed to get location access")
                 // We always show the toast regardless of what type of exception we receive.  Because even non
                 // resolvable api exceptions mean user still needs to fix something.

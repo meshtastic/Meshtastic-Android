@@ -1018,10 +1018,10 @@ class MeshService : Service(), Logging {
             else
                 broadcastSecs * 1000L
 
-            // if (prefs.locationShare == RadioConfigProtos.LocationSharing.LocDisabled) {
-            //     info("GPS location sharing is disabled")
-            //     desiredInterval = 0
-            // }
+             if (prefs.locationShare == RadioConfigProtos.LocationSharing.LocDisabled) {
+                 info("GPS location sharing is disabled")
+                 desiredInterval = 0
+             }
 
             // if (prefs.fixedPosition) {
             //     info("Node has fixed position, therefore not overriding position")
@@ -1033,6 +1033,7 @@ class MeshService : Service(), Logging {
                 startLocationRequests(desiredInterval)
             } else {
                 info("No GPS assistance desired, but sending UTC time to mesh")
+                warnUserAboutLocation()
                 sendPosition()
             }
         }
