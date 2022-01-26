@@ -298,13 +298,13 @@ class MainActivity : AppCompatActivity(), Logging,
     fun requestScanPermission() = requestPermission(getScanPermissions(), true)
 
     /** Ask the user to grant camera permission */
-    fun requestCameraPermission() = requestPermission(getCameraPermissions(), false)
+    fun requestCameraPermission() = requestPermission(getCameraPermissions())
 
     /** Ask the user to grant foreground location permission */
-    fun requestLocationPermission() = requestPermission(getLocationPermissions(), false)
+    fun requestLocationPermission() = requestPermission(getLocationPermissions())
 
     /** Ask the user to grant background location permission */
-    fun requestBackgroundPermission() = requestPermission(getBackgroundPermissions(), false)
+    fun requestBackgroundPermission() = requestPermission(getBackgroundPermissions())
 
     /**
      * @return a localized string warning user about missing permissions.  Or null if everything is find
@@ -344,7 +344,7 @@ class MainActivity : AppCompatActivity(), Logging,
      */
     private fun requestPermission(
         missingPerms: List<String> = getMinimumPermissions(),
-        shouldShowDialog: Boolean = true
+        shouldShowDialog: Boolean = false
     ): Boolean =
         if (missingPerms.isNotEmpty()) {
             val shouldShow = missingPerms.filter {
