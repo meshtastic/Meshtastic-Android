@@ -38,9 +38,9 @@ class MeshServiceLocationCallback(
             if (location.isAccurateForMesh) { // if within 200 meters, or accuracy is unknown
 
                 try {
-                    // Do we want to broadcast this position globally, or are we just telling the local node what its current position is (
+                    // Do we want to broadcast this position globally, or are we just telling the local node what its current position is
                     val shouldBroadcast =
-                        true // no need to rate limit, because we are just sending at the interval requested by the preferences
+                        false // no need to rate limit, because we are just sending to the local node
                     val destinationNumber =
                         if (shouldBroadcast) DataPacket.NODENUM_BROADCAST else getNodeNum()
 
