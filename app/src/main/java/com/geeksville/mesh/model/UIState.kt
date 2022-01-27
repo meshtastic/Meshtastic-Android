@@ -127,6 +127,7 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
     var locationShare: Boolean?
         get() {
             return radioConfig.value?.preferences?.locationShare == RadioConfigProtos.LocationSharing.LocEnabled
+                    || radioConfig.value?.preferences?.locationShare == RadioConfigProtos.LocationSharing.LocUnset
         }
     set(value) {
             val config = radioConfig.value
@@ -134,7 +135,7 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
                 val builder = config.toBuilder()
                 if (value == true) {
                     builder.preferencesBuilder.locationShare =
-                        RadioConfigProtos.LocationSharing.LocEnabled
+                        RadioConfigProtos.LocationSharing.LocUnset
                 } else {
                     builder.preferencesBuilder.locationShare =
                         RadioConfigProtos.LocationSharing.LocDisabled
