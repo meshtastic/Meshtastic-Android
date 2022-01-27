@@ -1333,7 +1333,9 @@ class MeshService : Service(), Logging {
                     currentPacketId.toLong() and 0xffffffffL,
                     if (messageTimeoutMsec == 0) 5 * 60 * 1000 else messageTimeoutMsec, // constants from current device code
                     minAppVersion,
-                    maxChannels
+                    maxChannels,
+                    channelUtilization,
+                    airUtilTx
                 )
             }
 

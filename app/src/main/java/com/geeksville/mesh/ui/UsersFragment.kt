@@ -1,6 +1,5 @@
 package com.geeksville.mesh.ui
 
-
 import android.os.Bundle
 import android.text.Html
 import android.text.method.LinkMovementMethod
@@ -22,7 +21,6 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.util.formatAgo
 import java.net.URLEncoder
 import kotlin.math.roundToInt
-
 
 class UsersFragment : ScreenFragment("Users"), Logging {
 
@@ -155,6 +153,17 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 holder.signalView.text = text
                 holder.signalView.visibility = View.VISIBLE
             }
+
+            if (n.num == ourNodeInfo?.num) {
+                val info = model.myNodeInfo.value
+                if (info != null) {
+                    val channelUtilizationText = String.format("%.1f", info.channelUtilization)
+                    val airUtilTxText = String.format("%.1f", info.airUtilTx)
+                    val combinedText = "ChUtil $channelUtilizationText% AirUtilTX $airUtilTxText%"
+                    holder.signalView.text = combinedText
+                    holder.signalView.visibility = View.VISIBLE
+                }
+            }
         }
 
         private var nodes = arrayOf<NodeInfo>()
@@ -172,9 +181,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     ) {
 
         val (image, text) = when (battery) {
-            null -> Pair(R.drawable.ic_battery_full_24, "?")
+            in 1..100 -> Pair(R.drawable.ic_battery_full_24, "$battery%")
             0 -> Pair(R.drawable.ic_power_plug_24, "")
-            else -> Pair(R.drawable.ic_battery_full_24, "$battery%")
+            else -> Pair(R.drawable.ic_battery_full_24, "?")
         }
 
         holder.batteryPctView.text = text
@@ -200,7 +209,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         binding.nodeListView.adapter = nodesAdapter
         binding.nodeListView.layoutManager = LinearLayoutManager(requireContext())
 
-        model.nodeDB.nodes.observe(viewLifecycleOwner, Observer { it ->
+        model.nodeDB.nodes.observe(viewLifecycleOwner, {
             nodesAdapter.onNodesChanged(it.values)
         })
     }

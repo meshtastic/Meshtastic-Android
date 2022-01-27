@@ -62,7 +62,7 @@
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
 
                 app:layout_constraintStart_toEndOf="@+id/distance_view"
-                app:layout_constraintTop_toBottomOf="@+id/imageView"
+                app:layout_constraintTop_toBottomOf="@+id/nodeNameView"
                 app:layout_constraintVertical_bias="0.0" />
 
             <ImageView
