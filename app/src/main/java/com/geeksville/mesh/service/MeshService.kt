@@ -135,7 +135,7 @@ class MeshService : Service(), Logging {
     }
 
     private val locationCallback = MeshServiceLocationCallback(
-        ::perhapsSendPosition,
+        ::sendPositionScoped,
         onSendPositionFailed = { onConnectionChanged(ConnectionState.DEVICE_SLEEP) },
         getNodeNum = { myNodeNum }
     )
@@ -170,7 +170,7 @@ class MeshService : Service(), Logging {
      * We first check to see if our local device has already sent a position and if so, we punt until the next check.
      * This allows us to only 'fill in' with GPS positions when the local device happens to have no good GPS sats.
      */
-    private fun perhapsSendPosition(
+    private fun sendPositionScoped(
         lat: Double = 0.0,
         lon: Double = 0.0,
         alt: Int = 0,
@@ -181,17 +181,7 @@ class MeshService : Service(), Logging {
         // do most of the work in my service thread
         serviceScope.handledLaunch {
             // if android called us too soon, just ignore
-
-            val myInfo = localNodeInfo
-            val lastLat = (myInfo?.position?.latitude ?: 0.0)
-            val lastLon = (myInfo?.position?.longitude ?: 0.0)
-            val lastSendMsec = (myInfo?.position?.time ?: 0) * 1000L
-            val now = System.currentTimeMillis()
-            if ((lastLat == 0.0 && lastLon == 0.0) || (now - lastSendMsec > locationIntervalMsec)) // && minBroadcastPeriod ?
-                sendPosition(lat, lon, alt, destNum, wantResponse)
-            else {
-                debug("Not sending position - local node sent ${(now - lastSendMsec) / 1000L}s ago ${myInfo?.position?.toPIIString()}")
-            }
+            sendPosition(lat, lon, alt, destNum, wantResponse)
         }
     }
 
@@ -1028,10 +1018,10 @@ class MeshService : Service(), Logging {
             else
                 broadcastSecs * 1000L
 
-            // if (prefs.locationShare == RadioConfigProtos.LocationSharing.LocDisabled) {
-            //     info("GPS location sharing is disabled")
-            //     desiredInterval = 0
-            // }
+             if (prefs.locationShare == RadioConfigProtos.LocationSharing.LocDisabled) {
+                 info("GPS location sharing is disabled")
+                 desiredInterval = 0
+             }
 
             // if (prefs.fixedPosition) {
             //     info("Node has fixed position, therefore not overriding position")
@@ -1043,6 +1033,7 @@ class MeshService : Service(), Logging {
                 startLocationRequests(desiredInterval)
             } else {
                 info("No GPS assistance desired, but sending UTC time to mesh")
+                warnUserAboutLocation()
                 sendPosition()
             }
         }

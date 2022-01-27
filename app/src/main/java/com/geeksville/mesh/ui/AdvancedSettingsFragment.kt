@@ -28,7 +28,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = AdvancedSettingsBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -39,6 +39,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
         model.radioConfig.observe(viewLifecycleOwner, {
             binding.positionBroadcastPeriodEditText.setText(model.positionBroadcastSecs.toString())
             binding.lsSleepEditText.setText(model.lsSleepSecs.toString())
+            binding.positionBroadcastPeriodView.isEnabled = model.locationShare ?: true
             binding.positionBroadcastSwitch.isChecked = model.locationShare ?: true
             binding.lsSleepView.isEnabled = model.isPowerSaving ?: false
             binding.lsSleepSwitch.isChecked = model.isPowerSaving ?: false
@@ -47,7 +48,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
 
         model.isConnected.observe(viewLifecycleOwner, { connectionState ->
             val connected = connectionState == MeshService.ConnectionState.CONNECTED
-            binding.positionBroadcastPeriodView.isEnabled = connected
+            binding.positionBroadcastPeriodView.isEnabled = connected && model.locationShare ?: true
             binding.lsSleepView.isEnabled = connected && model.isPowerSaving ?: false
             binding.positionBroadcastSwitch.isEnabled = connected
             binding.lsSleepSwitch.isEnabled = connected
