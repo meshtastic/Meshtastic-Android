@@ -1,9 +1,6 @@
 package com.geeksville.mesh.ui
 
 import android.app.AlertDialog
-import android.app.Dialog
-import android.content.Context
-import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.text.InputType
@@ -16,7 +13,6 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,7 +26,6 @@ import com.geeksville.mesh.databinding.MessagesFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.google.android.material.chip.Chip
-import kotlinx.serialization.descriptors.buildSerialDescriptor
 import java.text.DateFormat
 import java.util.*
 
@@ -172,16 +167,15 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             val messageOffset = resources.getDimensionPixelOffset(R.dimen.message_offset)
             holder.card.setOnLongClickListener {
                 val deleteMessageDialog = AlertDialog.Builder(context)
-                // deleteMessageDialog.setTitle(R.string.delete_selected_message)
                 deleteMessageDialog.setMessage(R.string.delete_selected_message)
                 deleteMessageDialog.setPositiveButton(
                     R.string.delete
                 ) { _, _ ->
                     model.messagesState.deleteMessage((messages[position]), position)
                 }
-                deleteMessageDialog.setNegativeButton(R.string.cancel,
-                    DialogInterface.OnClickListener { _, _ ->
-                    })
+                deleteMessageDialog.setNegativeButton(R.string.cancel
+                ) { _, _ ->
+                }
                 deleteMessageDialog.create()
                 deleteMessageDialog.show()
                 true
@@ -266,7 +260,6 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         binding.sendButton.setOnClickListener {
             debug("sendButton click")
 
