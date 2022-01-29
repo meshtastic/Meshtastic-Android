@@ -46,54 +46,6 @@ fun EditText.on(actionId: Int, func: () -> Unit) {
     }
 }
 
-//class DeleteMessageDialog : DialogFragment() {
-//    private lateinit var listener: NoticeDialogListener
-//
-//    interface NoticeDialogListener {
-//        fun onDialogPositiveClick(dialog: DialogFragment)
-//        fun onDialogNegativeClick(dialog: DialogFragment)
-//    }
-//
-//    // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
-//    override fun onAttach(context: Context) {
-//        super.onAttach(context)
-//        // Verify that the host activity implements the callback interface
-//        try {
-//            // Instantiate the NoticeDialogListener so we can send events to the host
-//            listener = context as NoticeDialogListener
-//        } catch (e: ClassCastException) {
-//            // The activity doesn't implement the interface, throw exception
-//            throw ClassCastException(
-//                (context.toString() +
-//                        " must implement NoticeDialogListener")
-//            )
-//        }
-//    }
-//
-//
-//}
-
-class DeleteMessageDialog : DialogFragment() {
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        return activity?.let {
-
-            var delete = false;
-            val builder = AlertDialog.Builder(it)
-            builder.setMessage(R.string.delete_selected_message)
-                .setPositiveButton(R.string.delete,
-                    DialogInterface.OnClickListener { dialog, id ->
-                        delete = true
-                    })
-                .setNegativeButton(R.string.cancel,
-                    DialogInterface.OnClickListener { dialog, id ->
-                        delete = false
-                    })
-            // Create the AlertDialog object and return it
-            builder.create()
-        } ?: throw IllegalStateException("Activity cannot be null")
-    }
-}
-
 class MessagesFragment : ScreenFragment("Messages"), Logging {
 
     private var _binding: MessagesFragmentBinding? = null
