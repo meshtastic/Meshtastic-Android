@@ -48,7 +48,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
     private val binding get() = _binding!!
 
     private val model: UIViewModel by activityViewModels()
-    
+
     // Allows textMultiline with IME_ACTION_SEND
     fun EditText.onActionSend(func: () -> Unit) {
         setImeOptions(EditorInfo.IME_ACTION_SEND)
@@ -164,6 +164,10 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             // Set cardview offset and color.
             val marginParams = holder.card.layoutParams as ViewGroup.MarginLayoutParams
             val messageOffset = resources.getDimensionPixelOffset(R.dimen.message_offset)
+            holder.card.setOnLongClickListener {
+                this.onLongCLick(position)
+                true
+            }
             if (isMe) {
                 marginParams.leftMargin = messageOffset
                 marginParams.rightMargin = 0
@@ -232,6 +236,12 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             if (itemCount != 0)
                 binding.messageListView.scrollToPosition(itemCount - 1)
         }
+
+        fun onLongCLick(position: Int) {
+            messages = messages.filter { x -> x != messages[position] }.toTypedArray()
+            onMessagesChanged(messages.toList())
+        }
+
     }
 
     override fun onCreateView(
@@ -282,8 +292,8 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             binding.textInputLayout.isEnabled =
                 model.isConnected.value != MeshService.ConnectionState.DISCONNECTED
 
-        // Just being connected is enough to allow sending texts I think
-        // && model.nodeDB.myId.value != null && model.radioConfig.value != null
+            // Just being connected is enough to allow sending texts I think
+            // && model.nodeDB.myId.value != null && model.radioConfig.value != null
         }
 
         model.isConnected.observe(viewLifecycleOwner, Observer { _ ->

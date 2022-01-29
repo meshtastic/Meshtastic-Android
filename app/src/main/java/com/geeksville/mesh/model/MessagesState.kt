@@ -46,6 +46,13 @@ class MessagesState(private val ui: UIViewModel) : Logging {
         messages.value = messagesList
     }
 
+    fun removeMessage(m: DataPacket) {
+        debug("Removing message from view id=${m.id}")
+
+        messagesList.remove(m)
+        messages.value = messagesList;
+    }
+
     fun updateStatus(id: Int, status: MessageStatus) {
         // Super inefficent but this is rare
         debug("Handling message status change $id: $status")
@@ -79,5 +86,21 @@ class MessagesState(private val ui: UIViewModel) : Logging {
 
         // FIXME - why is the first time we are called p is already in the list at this point?
         addMessage(p)
+    }
+
+    fun deleteMessage(str: String, dest: String = DataPacket.ID_BROADCAST) {
+        val service = ui.meshService
+        val p = DataPacket(str, dest)
+
+        if (service != null) {
+            try {
+                service.send(p)
+            } catch (ex: RemoteException) {
+                p.errorMessage = "Error: ${ex.message}"
+            }
+        } else {
+            p.errorMessage = "Error: No Mesh service"
+        }
+        removeMessage(p)
     }
 }
