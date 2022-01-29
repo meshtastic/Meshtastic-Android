@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
+import android.companion.CompanionDeviceManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -109,9 +110,13 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 
         /** Return true if this address is still acceptable. For BLE that means, still bonded */
         override fun addressValid(context: Context, rest: String): Boolean {
-            val allPaired =
-                getBluetoothAdapter(context)?.bondedDevices.orEmpty().map { it.address }.toSet()
-
+            val allPaired = if (hasCompanionDeviceApi(context)) {
+                val deviceManager = context.getSystemService(CompanionDeviceManager::class.java)
+                deviceManager.associations.map { it }.toSet()
+            } else {
+                getBluetoothAdapter(context)?.bondedDevices.orEmpty()
+                    .map { it.address }.toSet()
+            }
             return if (!allPaired.contains(rest)) {
                 warn("Ignoring stale bond to ${rest.anonymize}")
                 false
