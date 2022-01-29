@@ -1,5 +1,9 @@
 package com.geeksville.mesh.ui
 
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.Context
+import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.text.InputType
@@ -12,6 +16,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,6 +30,7 @@ import com.geeksville.mesh.databinding.MessagesFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.google.android.material.chip.Chip
+import kotlinx.serialization.descriptors.buildSerialDescriptor
 import java.text.DateFormat
 import java.util.*
 
@@ -37,6 +43,54 @@ fun EditText.on(actionId: Int, func: () -> Unit) {
         }
 
         true
+    }
+}
+
+//class DeleteMessageDialog : DialogFragment() {
+//    private lateinit var listener: NoticeDialogListener
+//
+//    interface NoticeDialogListener {
+//        fun onDialogPositiveClick(dialog: DialogFragment)
+//        fun onDialogNegativeClick(dialog: DialogFragment)
+//    }
+//
+//    // Override the Fragment.onAttach() method to instantiate the NoticeDialogListener
+//    override fun onAttach(context: Context) {
+//        super.onAttach(context)
+//        // Verify that the host activity implements the callback interface
+//        try {
+//            // Instantiate the NoticeDialogListener so we can send events to the host
+//            listener = context as NoticeDialogListener
+//        } catch (e: ClassCastException) {
+//            // The activity doesn't implement the interface, throw exception
+//            throw ClassCastException(
+//                (context.toString() +
+//                        " must implement NoticeDialogListener")
+//            )
+//        }
+//    }
+//
+//
+//}
+
+class DeleteMessageDialog : DialogFragment() {
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return activity?.let {
+
+            var delete = false;
+            val builder = AlertDialog.Builder(it)
+            builder.setMessage(R.string.delete_selected_message)
+                .setPositiveButton(R.string.delete,
+                    DialogInterface.OnClickListener { dialog, id ->
+                        delete = true
+                    })
+                .setNegativeButton(R.string.cancel,
+                    DialogInterface.OnClickListener { dialog, id ->
+                        delete = false
+                    })
+            // Create the AlertDialog object and return it
+            builder.create()
+        } ?: throw IllegalStateException("Activity cannot be null")
     }
 }
 
@@ -165,7 +219,19 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             val marginParams = holder.card.layoutParams as ViewGroup.MarginLayoutParams
             val messageOffset = resources.getDimensionPixelOffset(R.dimen.message_offset)
             holder.card.setOnLongClickListener {
-                model.messagesState.deleteMessage(messages[position], position)
+                val deleteMessageDialog = AlertDialog.Builder(context)
+                // deleteMessageDialog.setTitle(R.string.delete_selected_message)
+                deleteMessageDialog.setMessage(R.string.delete_selected_message)
+                deleteMessageDialog.setPositiveButton(
+                    R.string.delete
+                ) { _, _ ->
+                    model.messagesState.deleteMessage((messages[position]), position)
+                }
+                deleteMessageDialog.setNegativeButton(R.string.cancel,
+                    DialogInterface.OnClickListener { _, _ ->
+                    })
+                deleteMessageDialog.create()
+                deleteMessageDialog.show()
                 true
             }
             if (isMe) {
