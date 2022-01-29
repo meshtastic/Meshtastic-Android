@@ -50,7 +50,7 @@ class MessagesState(private val ui: UIViewModel) : Logging {
         debug("Removing message from view id=${m.id}")
 
         messagesList.remove(m)
-        messages.value = messagesList;
+        messages.value = messagesList
     }
 
     fun updateStatus(id: Int, status: MessageStatus) {
@@ -88,19 +88,18 @@ class MessagesState(private val ui: UIViewModel) : Logging {
         addMessage(p)
     }
 
-    fun deleteMessage(str: String, dest: String = DataPacket.ID_BROADCAST) {
+    fun deleteMessage(packet: DataPacket, position: Int) {
         val service = ui.meshService
-        val p = DataPacket(str, dest)
 
         if (service != null) {
             try {
-                service.send(p)
+                service.delete(position)
             } catch (ex: RemoteException) {
-                p.errorMessage = "Error: ${ex.message}"
+                packet.errorMessage = "Error: ${ex.message}"
             }
         } else {
-            p.errorMessage = "Error: No Mesh service"
+            packet.errorMessage = "Error: No Mesh service"
         }
-        removeMessage(p)
+        removeMessage(packet)
     }
 }

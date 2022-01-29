@@ -165,7 +165,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             val marginParams = holder.card.layoutParams as ViewGroup.MarginLayoutParams
             val messageOffset = resources.getDimensionPixelOffset(R.dimen.message_offset)
             holder.card.setOnLongClickListener {
-                this.onLongCLick(position)
+                model.messagesState.deleteMessage(messages[position], position)
                 true
             }
             if (isMe) {
@@ -236,12 +236,6 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             if (itemCount != 0)
                 binding.messageListView.scrollToPosition(itemCount - 1)
         }
-
-        fun onLongCLick(position: Int) {
-            messages = messages.filter { x -> x != messages[position] }.toTypedArray()
-            onMessagesChanged(messages.toList())
-        }
-
     }
 
     override fun onCreateView(
