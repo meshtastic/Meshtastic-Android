@@ -32,4 +32,8 @@
         android:id="@+id/about"
         android:title="@string/about"
         app:showAsAction="withText" />
+    <item
+        android:id="@+id/exit"
+        android:title="@string/exit"
+        app:showAsAction="withText" />
 </menu>

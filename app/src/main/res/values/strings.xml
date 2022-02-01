@@ -123,4 +123,5 @@
     <string name="delete_selected_message">Delete selected message?</string>
     <string name="delete">Delete</string>
     <string name="delete_all_messages">Delete All Messages</string>
+    <string name="exit">Exit</string>
 </resources>

@@ -70,6 +70,7 @@ import java.text.DateFormat
 import java.util.*
 import java.util.regex.Pattern
 import kotlin.math.roundToInt
+import kotlin.system.exitProcess
 
 
 /*
@@ -1175,6 +1176,10 @@ class MainActivity : AppCompatActivity(), Logging,
             R.id.theme -> {
                 chooseThemeDialog()
                 return true
+            }
+            R.id.exit -> {
+                finishAndRemoveTask()
+                exitProcess(0)
             }
             else -> super.onOptionsItemSelected(item)
         }
