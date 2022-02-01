@@ -43,11 +43,7 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
 import com.geeksville.concurrent.handledLaunch
-import com.geeksville.mesh.android.getLocationPermissions
-import com.geeksville.mesh.android.getBackgroundPermissions
-import com.geeksville.mesh.android.getCameraPermissions
-import com.geeksville.mesh.android.getMissingPermissions
-import com.geeksville.mesh.android.getScanPermissions
+import com.geeksville.mesh.android.*
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.ChannelSet
@@ -249,15 +245,8 @@ class MainActivity : AppCompatActivity(), Logging,
      */
     private fun updateBluetoothEnabled() {
         var enabled = false // assume failure
-        val requiredPerms: MutableList<String> = mutableListOf()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            requiredPerms.add(Manifest.permission.BLUETOOTH_CONNECT)
-        } else {
-            requiredPerms.add(Manifest.permission.BLUETOOTH)
-        }
-
-        if (getMissingPermissions(requiredPerms).isEmpty()) {
+        if (hasConnectPermission()) {
             /// ask the adapter if we have access
             bluetoothAdapter?.apply {
                 enabled = isEnabled
@@ -309,6 +298,7 @@ class MainActivity : AppCompatActivity(), Logging,
     /**
      * @return a localized string warning user about missing permissions.  Or null if everything is find
      */
+    @SuppressLint("InlinedApi")
     fun getMissingMessage(
         missingPerms: List<String> = getMinimumPermissions()
     ): String? {
@@ -338,7 +328,7 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
     /** Possibly prompt user to grant permissions
-     * @param shouldShowDialog usually true, but in cases where we've already shown a dialog elsewhere we skip it.
+     * @param shouldShowDialog usually false in cases where we've already shown a dialog elsewhere we skip it.
      *
      * @return true if we already have the needed permissions
      */
@@ -640,7 +630,7 @@ class MainActivity : AppCompatActivity(), Logging,
     /**
      * Dispatch incoming result to the correct fragment.
      */
-    @SuppressLint("InlinedApi")
+    @SuppressLint("InlinedApi", "MissingPermission")
     override fun onActivityResult(
         requestCode: Int,
         resultCode: Int,
@@ -1075,18 +1065,21 @@ class MainActivity : AppCompatActivity(), Logging,
         super.onStop()
     }
 
+    @SuppressLint("MissingPermission")
     override fun onStart() {
         super.onStart()
 
         // Ask to start bluetooth if no USB devices are visible
         val hasUSB = SerialInterface.findDrivers(this).isNotEmpty()
         if (!isInTestLab && !hasUSB) {
-            bluetoothAdapter?.let {
-                if (!it.isEnabled) {
-                    val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+            if (hasConnectPermission()) {
+                bluetoothAdapter?.let {
+                    if (!it.isEnabled) {
+                        val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                        startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+                    }
                 }
-            }
+            } else requestPermission()
         }
 
         try {
