@@ -104,6 +104,7 @@
         <!-- This is the public API for doing mesh radio operations from android apps -->
         <service
             android:name="com.geeksville.mesh.service.MeshService"
+            android:stopWithTask="true"
             android:enabled="true"
             android:exported="true" tools:ignore="ExportedActivity">
             <intent-filter>
@@ -115,6 +116,7 @@
         <service
             android:name="com.geeksville.mesh.service.RadioInterfaceService"
             android:enabled="true"
+            android:stopWithTask="true"
             android:exported="false" />
 
         <!-- zxing for QR Code scanning: lock portrait orientation -->
@@ -128,6 +130,7 @@
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateAlwaysHidden"
+            android:stopWithTask="true"
             android:theme="@style/AppTheme"
             android:exported="true">
             <intent-filter>
