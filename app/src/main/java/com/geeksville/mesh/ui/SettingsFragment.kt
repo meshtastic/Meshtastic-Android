@@ -619,44 +619,44 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = regionAdapter
 
-        model.bluetoothEnabled.observe(viewLifecycleOwner, {
+        model.bluetoothEnabled.observe(viewLifecycleOwner) {
             if (it) binding.changeRadioButton.show()
             else binding.changeRadioButton.hide()
-        })
+        }
 
-        model.ownerName.observe(viewLifecycleOwner, { name ->
+        model.ownerName.observe(viewLifecycleOwner) { name ->
             binding.usernameEditText.setText(name)
-        })
+        }
 
         // Only let user edit their name or set software update while connected to a radio
-        model.isConnected.observe(viewLifecycleOwner, {
+        model.isConnected.observe(viewLifecycleOwner) {
             updateNodeInfo()
             updateDevicesButtons(scanModel.devices.value)
-        })
+        }
 
-        model.radioConfig.observe(viewLifecycleOwner, {
+        model.radioConfig.observe(viewLifecycleOwner) {
             binding.provideLocationCheckbox.isEnabled =
                 isGooglePlayAvailable(requireContext()) && model.locationShare ?: true
             if (model.locationShare == false) {
                 model.provideLocation.value = false
                 binding.provideLocationCheckbox.isChecked = false
             }
-        })
+        }
 
         // Also watch myNodeInfo because it might change later
-        model.myNodeInfo.observe(viewLifecycleOwner, {
+        model.myNodeInfo.observe(viewLifecycleOwner) {
             updateNodeInfo()
-        })
+        }
 
-        scanModel.errorText.observe(viewLifecycleOwner, { errMsg ->
+        scanModel.errorText.observe(viewLifecycleOwner) { errMsg ->
             if (errMsg != null) {
                 binding.scanStatusText.text = errMsg
             }
-        })
+        }
 
-        scanModel.devices.observe(viewLifecycleOwner, { devices ->
+        scanModel.devices.observe(viewLifecycleOwner) { devices ->
             updateDevicesButtons(devices)
-        })
+        }
 
         binding.updateFirmwareButton.setOnClickListener {
             doFirmwareUpdate()
@@ -961,7 +961,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (!hasUSB) {
             // Warn user if BLE is disabled
             if (scanModel.bluetoothAdapter?.isEnabled != true) {
-                Snackbar.make(binding.changeRadioButton, R.string.error_bluetooth, Snackbar.LENGTH_INDEFINITE)
+                Snackbar.make(
+                    binding.changeRadioButton,
+                    R.string.error_bluetooth,
+                    Snackbar.LENGTH_INDEFINITE
+                )
                     .setAction(R.string.okay) {
                         // dismiss
                     }

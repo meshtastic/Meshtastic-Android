@@ -36,7 +36,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.Observer
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.geeksville.android.BindFailedException
 import com.geeksville.android.GeeksvilleApplication
@@ -66,7 +65,6 @@ import com.vorlonsoft.android.rate.AppRate
 import com.vorlonsoft.android.rate.StoreType
 import kotlinx.coroutines.*
 import java.io.FileOutputStream
-import java.lang.Runnable
 import java.nio.charset.Charset
 import java.text.DateFormat
 import java.util.*
@@ -194,7 +192,7 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    private val btStateReceiver = BluetoothStateReceiver { _ ->
+    private val btStateReceiver = BluetoothStateReceiver {
         updateBluetoothEnabled()
     }
 
@@ -532,9 +530,9 @@ class MainActivity : AppCompatActivity(), Logging,
             tab.icon = ContextCompat.getDrawable(this, tabInfos[position].icon)
         }.attach()
 
-        model.isConnected.observe(this, Observer { connected ->
+        model.isConnected.observe(this) { connected ->
             updateConnectionStatusImage(connected)
-        })
+        }
 
         // Handle any intent
         handleIntent(intent)
@@ -927,10 +925,10 @@ class MainActivity : AppCompatActivity(), Logging,
     private var connectionJob: Job? = null
 
     private val mesh = object :
-        ServiceClient<com.geeksville.mesh.IMeshService>({
-            com.geeksville.mesh.IMeshService.Stub.asInterface(it)
+        ServiceClient<IMeshService>({
+            IMeshService.Stub.asInterface(it)
         }) {
-        override fun onConnected(service: com.geeksville.mesh.IMeshService) {
+        override fun onConnected(service: IMeshService) {
 
             /*
                 Note: we must call this callback in a coroutine.  Because apparently there is only a single activity looper thread.  and if that onConnected override
@@ -1147,12 +1145,7 @@ class MainActivity : AppCompatActivity(), Logging,
                     val str = "Ping " + DateFormat.getTimeInstance(DateFormat.MEDIUM)
                         .format(Date(System.currentTimeMillis()))
                     model.messagesState.sendMessage(str)
-                    handler.postDelayed(
-                        Runnable {
-                            postPing()
-                        },
-                        30000
-                    )
+                    handler.postDelayed({ postPing() }, 30000)
                 }
                 item.isChecked = !item.isChecked // toggle ping test
                 if (item.isChecked)
