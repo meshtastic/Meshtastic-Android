@@ -36,18 +36,13 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.Observer
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.geeksville.android.BindFailedException
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
 import com.geeksville.concurrent.handledLaunch
-import com.geeksville.mesh.android.getLocationPermissions
-import com.geeksville.mesh.android.getBackgroundPermissions
-import com.geeksville.mesh.android.getCameraPermissions
-import com.geeksville.mesh.android.getMissingPermissions
-import com.geeksville.mesh.android.getScanPermissions
+import com.geeksville.mesh.android.*
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.ChannelSet
@@ -70,7 +65,6 @@ import com.vorlonsoft.android.rate.AppRate
 import com.vorlonsoft.android.rate.StoreType
 import kotlinx.coroutines.*
 import java.io.FileOutputStream
-import java.lang.Runnable
 import java.nio.charset.Charset
 import java.text.DateFormat
 import java.util.*
@@ -198,7 +192,7 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    private val btStateReceiver = BluetoothStateReceiver { _ ->
+    private val btStateReceiver = BluetoothStateReceiver {
         updateBluetoothEnabled()
     }
 
@@ -249,15 +243,8 @@ class MainActivity : AppCompatActivity(), Logging,
      */
     private fun updateBluetoothEnabled() {
         var enabled = false // assume failure
-        val requiredPerms: MutableList<String> = mutableListOf()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            requiredPerms.add(Manifest.permission.BLUETOOTH_CONNECT)
-        } else {
-            requiredPerms.add(Manifest.permission.BLUETOOTH)
-        }
-
-        if (getMissingPermissions(requiredPerms).isEmpty()) {
+        if (hasConnectPermission()) {
             /// ask the adapter if we have access
             bluetoothAdapter?.apply {
                 enabled = isEnabled
@@ -309,6 +296,7 @@ class MainActivity : AppCompatActivity(), Logging,
     /**
      * @return a localized string warning user about missing permissions.  Or null if everything is find
      */
+    @SuppressLint("InlinedApi")
     fun getMissingMessage(
         missingPerms: List<String> = getMinimumPermissions()
     ): String? {
@@ -338,7 +326,7 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
     /** Possibly prompt user to grant permissions
-     * @param shouldShowDialog usually true, but in cases where we've already shown a dialog elsewhere we skip it.
+     * @param shouldShowDialog usually false in cases where we've already shown a dialog elsewhere we skip it.
      *
      * @return true if we already have the needed permissions
      */
@@ -542,9 +530,9 @@ class MainActivity : AppCompatActivity(), Logging,
             tab.icon = ContextCompat.getDrawable(this, tabInfos[position].icon)
         }.attach()
 
-        model.isConnected.observe(this, Observer { connected ->
+        model.isConnected.observe(this) { connected ->
             updateConnectionStatusImage(connected)
-        })
+        }
 
         // Handle any intent
         handleIntent(intent)
@@ -640,7 +628,7 @@ class MainActivity : AppCompatActivity(), Logging,
     /**
      * Dispatch incoming result to the correct fragment.
      */
-    @SuppressLint("InlinedApi")
+    @SuppressLint("InlinedApi", "MissingPermission")
     override fun onActivityResult(
         requestCode: Int,
         resultCode: Int,
@@ -937,10 +925,10 @@ class MainActivity : AppCompatActivity(), Logging,
     private var connectionJob: Job? = null
 
     private val mesh = object :
-        ServiceClient<com.geeksville.mesh.IMeshService>({
-            com.geeksville.mesh.IMeshService.Stub.asInterface(it)
+        ServiceClient<IMeshService>({
+            IMeshService.Stub.asInterface(it)
         }) {
-        override fun onConnected(service: com.geeksville.mesh.IMeshService) {
+        override fun onConnected(service: IMeshService) {
 
             /*
                 Note: we must call this callback in a coroutine.  Because apparently there is only a single activity looper thread.  and if that onConnected override
@@ -1075,18 +1063,21 @@ class MainActivity : AppCompatActivity(), Logging,
         super.onStop()
     }
 
+    @SuppressLint("MissingPermission")
     override fun onStart() {
         super.onStart()
 
         // Ask to start bluetooth if no USB devices are visible
         val hasUSB = SerialInterface.findDrivers(this).isNotEmpty()
         if (!isInTestLab && !hasUSB) {
-            bluetoothAdapter?.let {
-                if (!it.isEnabled) {
-                    val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+            if (hasConnectPermission()) {
+                bluetoothAdapter?.let {
+                    if (!it.isEnabled) {
+                        val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                        startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
+                    }
                 }
-            }
+            } else requestPermission()
         }
 
         try {
@@ -1154,12 +1145,7 @@ class MainActivity : AppCompatActivity(), Logging,
                     val str = "Ping " + DateFormat.getTimeInstance(DateFormat.MEDIUM)
                         .format(Date(System.currentTimeMillis()))
                     model.messagesState.sendMessage(str)
-                    handler.postDelayed(
-                        Runnable {
-                            postPing()
-                        },
-                        30000
-                    )
+                    handler.postDelayed({ postPing() }, 30000)
                 }
                 item.isChecked = !item.isChecked // toggle ping test
                 if (item.isChecked)

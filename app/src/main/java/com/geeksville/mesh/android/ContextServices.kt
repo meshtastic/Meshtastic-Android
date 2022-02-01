@@ -30,6 +30,24 @@ fun Context.getMissingPermissions(perms: List<String>) = perms.filter {
 }
 
 /**
+ * Bluetooth connect permissions (or empty if we already have what we need)
+ */
+fun Context.getConnectPermissions(): List<String> {
+    val perms = mutableListOf<String>()
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        perms.add(Manifest.permission.BLUETOOTH_CONNECT)
+    } else {
+        perms.add(Manifest.permission.BLUETOOTH)
+    }
+
+    return getMissingPermissions(perms)
+}
+
+/** @return true if the user already has Bluetooth connect permission */
+fun Context.hasConnectPermission() = getConnectPermissions().isEmpty()
+
+/**
  * Bluetooth scan/discovery permissions (or empty if we already have what we need)
  */
 fun Context.getScanPermissions(): List<String> {

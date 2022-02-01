@@ -1,9 +1,11 @@
 package com.geeksville.mesh.service
 
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
+import android.companion.CompanionDeviceManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -91,13 +93,13 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         }
 
         /// this service UUID is publically visible for scanning
-        val BTM_SERVICE_UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
+        val BTM_SERVICE_UUID: UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
 
-        val BTM_FROMRADIO_CHARACTER =
+        val BTM_FROMRADIO_CHARACTER: UUID =
             UUID.fromString("8ba2bcc2-ee02-4a55-a531-c525c5e454d5")
-        val BTM_TORADIO_CHARACTER =
+        val BTM_TORADIO_CHARACTER: UUID =
             UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
-        val BTM_FROMNUM_CHARACTER =
+        val BTM_FROMNUM_CHARACTER: UUID =
             UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
 
         /// Get our bluetooth adapter (should always succeed except on emulator
@@ -108,10 +110,15 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         }
 
         /** Return true if this address is still acceptable. For BLE that means, still bonded */
+        @SuppressLint("NewApi", "MissingPermission")
         override fun addressValid(context: Context, rest: String): Boolean {
-            val allPaired =
-                getBluetoothAdapter(context)?.bondedDevices.orEmpty().map { it.address }.toSet()
-
+            val allPaired = if (hasCompanionDeviceApi(context)) {
+                val deviceManager = context.getSystemService(CompanionDeviceManager::class.java)
+                deviceManager.associations.map { it }.toSet()
+            } else {
+                getBluetoothAdapter(context)?.bondedDevices.orEmpty()
+                    .map { it.address }.toSet()
+            }
             return if (!allPaired.contains(rest)) {
                 warn("Ignoring stale bond to ${rest.anonymize}")
                 false
@@ -191,7 +198,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
             ?: throw RadioNotConnectedException("No GATT")
 
     /// Our service - note - it is possible to get back a null response for getService if the device services haven't yet been found
-    val bservice
+    private val bservice
         get(): BluetoothGattService = device.getService(BTM_SERVICE_UUID)
             ?: throw RadioNotConnectedException("BLE service not found")
 
@@ -263,7 +270,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
     /**
      * We had some problem, schedule a reconnection attempt (if one isn't already queued)
      */
-    fun scheduleReconnect(reason: String) {
+    private fun scheduleReconnect(reason: String) {
         if (reconnectJob == null) {
             warn("Scheduling reconnect because $reason")
             reconnectJob = service.serviceScope.handledLaunch { retryDueToException() }

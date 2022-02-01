@@ -33,11 +33,7 @@ import com.geeksville.android.isGooglePlayAvailable
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.RadioConfigProtos
-import com.geeksville.mesh.android.bluetoothManager
-import com.geeksville.mesh.android.hasScanPermission
-import com.geeksville.mesh.android.hasLocationPermission
-import com.geeksville.mesh.android.hasBackgroundPermission
-import com.geeksville.mesh.android.usbManager
+import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.*
@@ -68,6 +64,7 @@ fun changeDeviceSelection(context: MainActivity, newAddr: String?) {
 }
 
 /// Show the UI asking the user to bond with a device, call changeSelection() if/when bonding completes
+@SuppressLint("MissingPermission")
 private fun requestBonding(
     activity: MainActivity,
     device: BluetoothDevice,
@@ -102,7 +99,11 @@ private fun requestBonding(
     activity.registerReceiver(bondChangedReceiver, filter)
 
     // We ignore missing BT adapters, because it lets us run on the emulator
-    device.createBond()
+    try {
+        device.createBond()
+    } catch (ex: Throwable) {
+        SLogging.warn("Failed creating Bluetooth bond: ${ex.message}")
+    }
 }
 
 class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
@@ -180,13 +181,14 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         // For each device that appears in our scan, ask for its GATT, when the gatt arrives,
         // check if it is an eligable device and store it in our list of candidates
         // if that device later disconnects remove it as a candidate
+        @SuppressLint("MissingPermission")
         override fun onScanResult(callbackType: Int, result: ScanResult) {
 
             if ((result.device.name?.startsWith("Mesh") == true)) {
                 val addr = result.device.address
                 val fullAddr = "x$addr" // full address with the bluetooth prefix added
                 // prevent logspam because weill get get lots of redundant scan results
-                val isBonded = result.device.bondState == BluetoothDevice.BOND_BONDED
+                val isBonded = result.device.bondState == BOND_BONDED
                 val oldDevs = devices.value!!
                 val oldEntry = oldDevs[fullAddr]
                 if (oldEntry == null || oldEntry.bonded != isBonded) { // Don't spam the GUI with endless updates for non changing nodes
@@ -222,6 +224,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         devices.value = oldDevs // trigger gui updates
     }
 
+    @SuppressLint("MissingPermission")
     fun stopScan() {
         if (scanner != null) {
             debug("stopping scan")
@@ -296,6 +299,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         }
     }
 
+    @SuppressLint("MissingPermission")
     fun startScan() {
         /// The following call might return null if the user doesn't have bluetooth access permissions
         val bluetoothLeScanner: BluetoothLeScanner? = bluetoothAdapter?.bluetoothLeScanner
@@ -615,44 +619,44 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = regionAdapter
 
-        model.bluetoothEnabled.observe(viewLifecycleOwner, {
+        model.bluetoothEnabled.observe(viewLifecycleOwner) {
             if (it) binding.changeRadioButton.show()
             else binding.changeRadioButton.hide()
-        })
+        }
 
-        model.ownerName.observe(viewLifecycleOwner, { name ->
+        model.ownerName.observe(viewLifecycleOwner) { name ->
             binding.usernameEditText.setText(name)
-        })
+        }
 
         // Only let user edit their name or set software update while connected to a radio
-        model.isConnected.observe(viewLifecycleOwner, {
+        model.isConnected.observe(viewLifecycleOwner) {
             updateNodeInfo()
             updateDevicesButtons(scanModel.devices.value)
-        })
+        }
 
-        model.radioConfig.observe(viewLifecycleOwner, {
+        model.radioConfig.observe(viewLifecycleOwner) {
             binding.provideLocationCheckbox.isEnabled =
                 isGooglePlayAvailable(requireContext()) && model.locationShare ?: true
             if (model.locationShare == false) {
                 model.provideLocation.value = false
                 binding.provideLocationCheckbox.isChecked = false
             }
-        })
+        }
 
         // Also watch myNodeInfo because it might change later
-        model.myNodeInfo.observe(viewLifecycleOwner, {
+        model.myNodeInfo.observe(viewLifecycleOwner) {
             updateNodeInfo()
-        })
+        }
 
-        scanModel.errorText.observe(viewLifecycleOwner, { errMsg ->
+        scanModel.errorText.observe(viewLifecycleOwner) { errMsg ->
             if (errMsg != null) {
                 binding.scanStatusText.text = errMsg
             }
-        })
+        }
 
-        scanModel.devices.observe(viewLifecycleOwner, { devices ->
+        scanModel.devices.observe(viewLifecycleOwner) { devices ->
             updateDevicesButtons(devices)
-        })
+        }
 
         binding.updateFirmwareButton.setOnClickListener {
             doFirmwareUpdate()
@@ -745,6 +749,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun updateDevicesButtons(devices: MutableMap<String, BTScanModel.DeviceListEntry>?) {
         // Remove the old radio buttons and repopulate
         binding.deviceRadioGroup.removeAllViews()
@@ -767,7 +772,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             // and before use
             val bleAddr = scanModel.selectedBluetooth
 
-            if (bleAddr != null && adapter != null) {
+            if (bleAddr != null && adapter != null && myActivity.hasConnectPermission()) {
                 val bDevice =
                     adapter.getRemoteDevice(bleAddr)
                 if (bDevice.name != null) { // ignore nodes that node have a name, that means we've lost them since they appeared
@@ -956,7 +961,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (!hasUSB) {
             // Warn user if BLE is disabled
             if (scanModel.bluetoothAdapter?.isEnabled != true) {
-                Snackbar.make(binding.changeRadioButton, R.string.error_bluetooth, Snackbar.LENGTH_INDEFINITE)
+                Snackbar.make(
+                    binding.changeRadioButton,
+                    R.string.error_bluetooth,
+                    Snackbar.LENGTH_INDEFINITE
+                )
                     .setAction(R.string.okay) {
                         // dismiss
                     }
