@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+import android.app.AlertDialog
 import android.graphics.Color
 import android.os.Bundle
 import android.text.InputType
@@ -48,7 +49,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
     private val binding get() = _binding!!
 
     private val model: UIViewModel by activityViewModels()
-    
+
     // Allows textMultiline with IME_ACTION_SEND
     fun EditText.onActionSend(func: () -> Unit) {
         setImeOptions(EditorInfo.IME_ACTION_SEND)
@@ -164,6 +165,27 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             // Set cardview offset and color.
             val marginParams = holder.card.layoutParams as ViewGroup.MarginLayoutParams
             val messageOffset = resources.getDimensionPixelOffset(R.dimen.message_offset)
+            holder.card.setOnLongClickListener {
+                val deleteMessageDialog = AlertDialog.Builder(context)
+                deleteMessageDialog.setMessage(R.string.delete_selected_message)
+                deleteMessageDialog.setPositiveButton(
+                    R.string.delete
+                ) { _, _ ->
+                    model.messagesState.deleteMessage((messages[position]), position)
+                }
+                deleteMessageDialog.setNeutralButton(
+                    R.string.cancel
+                ) { _, _ ->
+                }
+                deleteMessageDialog.setNegativeButton(
+                    R.string.delete_all_messages
+                ) { _, _ ->
+                    model.messagesState.deleteAllMessages()
+                }
+                deleteMessageDialog.create()
+                deleteMessageDialog.show()
+                true
+            }
             if (isMe) {
                 marginParams.leftMargin = messageOffset
                 marginParams.rightMargin = 0
@@ -244,7 +266,6 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         binding.sendButton.setOnClickListener {
             debug("sendButton click")
 
@@ -282,8 +303,8 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             binding.textInputLayout.isEnabled =
                 model.isConnected.value != MeshService.ConnectionState.DISCONNECTED
 
-        // Just being connected is enough to allow sending texts I think
-        // && model.nodeDB.myId.value != null && model.radioConfig.value != null
+            // Just being connected is enough to allow sending texts I think
+            // && model.nodeDB.myId.value != null && model.radioConfig.value != null
         }
 
         model.isConnected.observe(viewLifecycleOwner, Observer { _ ->

@@ -1018,10 +1018,10 @@ class MeshService : Service(), Logging {
             else
                 broadcastSecs * 1000L
 
-             if (prefs.locationShare == RadioConfigProtos.LocationSharing.LocDisabled) {
-                 info("GPS location sharing is disabled")
-                 desiredInterval = 0
-             }
+            if (prefs.locationShare == RadioConfigProtos.LocationSharing.LocDisabled) {
+                info("GPS location sharing is disabled")
+                desiredInterval = 0
+            }
 
             // if (prefs.fixedPosition) {
             //     info("Node has fixed position, therefore not overriding position")
@@ -1782,6 +1782,16 @@ class MeshService : Service(), Logging {
             toRemoteExceptions {
                 this@MeshService.setOwner(myId, longName, shortName)
             }
+
+        override fun delete(position: Int) {
+            if (position >= 0) {
+                recentDataPackets.removeAt(position)
+            }
+        }
+
+        override fun deleteAllMessages() {
+            recentDataPackets.clear()
+        }
 
         override fun send(p: DataPacket) {
             toRemoteExceptions {
