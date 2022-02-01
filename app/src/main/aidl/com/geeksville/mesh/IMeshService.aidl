@@ -69,6 +69,8 @@ interface IMeshService {
 
     void delete(int position);
 
+    void deleteAllMessages();
+
     /**
     Get the IDs of everyone on the mesh.  You should also subscribe for NODE_CHANGE broadcasts.
     */

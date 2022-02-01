@@ -1789,6 +1789,10 @@ class MeshService : Service(), Logging {
             }
         }
 
+        override fun deleteAllMessages() {
+            recentDataPackets.clear()
+        }
+
         override fun send(p: DataPacket) {
             toRemoteExceptions {
                 // Init from and id

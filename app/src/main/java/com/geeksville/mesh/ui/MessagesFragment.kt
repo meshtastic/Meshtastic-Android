@@ -173,8 +173,14 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
                 ) { _, _ ->
                     model.messagesState.deleteMessage((messages[position]), position)
                 }
-                deleteMessageDialog.setNegativeButton(R.string.cancel
+                deleteMessageDialog.setNeutralButton(
+                    R.string.cancel
                 ) { _, _ ->
+                }
+                deleteMessageDialog.setNegativeButton(
+                    R.string.delete_all_messages
+                ) { _, _ ->
+                    model.messagesState.deleteAllMessages()
                 }
                 deleteMessageDialog.create()
                 deleteMessageDialog.show()

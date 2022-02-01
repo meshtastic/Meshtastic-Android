@@ -53,6 +53,13 @@ class MessagesState(private val ui: UIViewModel) : Logging {
         messages.value = messagesList
     }
 
+    private fun removeAllMessages() {
+        debug("Removing all messages")
+
+        messagesList.clear()
+        messages.value = messagesList
+    }
+
     fun updateStatus(id: Int, status: MessageStatus) {
         // Super inefficent but this is rare
         debug("Handling message status change $id: $status")
@@ -101,5 +108,17 @@ class MessagesState(private val ui: UIViewModel) : Logging {
             packet.errorMessage = "Error: No Mesh service"
         }
         removeMessage(packet)
+    }
+
+    fun deleteAllMessages() {
+        val service = ui.meshService
+        if (service != null) {
+            try {
+                service.deleteAllMessages()
+            } catch (ex: RemoteException) {
+
+            }
+            removeAllMessages()
+        }
     }
 }
