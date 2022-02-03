@@ -830,9 +830,9 @@ class MainActivity : AppCompatActivity(), Logging,
         ).show()
     }
 
-    private fun perhapsChangeChannel() {
+    fun perhapsChangeChannel(url: Uri? = requestedChannelUrl) {
         // If the is opening a channel URL, handle it now
-        requestedChannelUrl?.let { url ->
+        if (url != null) {
             try {
                 val channels = ChannelSet(url)
                 val primary = channels.primaryChannel

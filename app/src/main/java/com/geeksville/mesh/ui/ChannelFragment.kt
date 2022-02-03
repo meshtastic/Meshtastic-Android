@@ -33,7 +33,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.protobuf.ByteString
 import com.google.zxing.integration.android.IntentIntegrator
-import java.net.MalformedURLException
 import java.security.SecureRandom
 
 
@@ -320,18 +319,8 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
         if (result != null) {
-            if (result.contents == null) {
-                Snackbar.make(binding.scanButton, R.string.channel_invalid, Snackbar.LENGTH_LONG).show()
-            } else {
-                try {
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = ChannelSet(Uri.parse(result.contents)).getChannelUrl(false)
-                    startActivity(intent)
-                } catch (ex: ActivityNotFoundException) {
-                    Snackbar.make(binding.scanButton, R.string.channel_invalid, Snackbar.LENGTH_LONG).show()
-                } catch (ex: MalformedURLException) {
-                    Snackbar.make(binding.scanButton, R.string.channel_invalid, Snackbar.LENGTH_LONG).show()
-                }
+            if (result.contents != null) {
+                ((requireActivity() as MainActivity).perhapsChangeChannel(Uri.parse(result.contents)))
             }
         } else {
             super.onActivityResult(requestCode, resultCode, data)
