@@ -60,7 +60,6 @@ import com.google.android.gms.tasks.Task
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
-import com.google.protobuf.InvalidProtocolBufferException
 import com.vorlonsoft.android.rate.AppRate
 import com.vorlonsoft.android.rate.StoreType
 import kotlinx.coroutines.*
@@ -388,12 +387,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
         return if (message != null) {
             errormsg("Denied permissions: $message")
-            Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_INDEFINITE)
-                .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
-                .setAction(R.string.okay) {
-                    // dismiss
-                }
-                .show()
+            showSnackbar(message)
             true
         } else
             false
@@ -814,30 +808,35 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    private fun showToast(msgId: Int) {
-        Toast.makeText(
-            this,
+    private fun showSnackbar(msgId: Int) {
+        Snackbar.make(
+            findViewById(android.R.id.content),
             msgId,
-            Toast.LENGTH_LONG
+            Snackbar.LENGTH_LONG
         ).show()
     }
 
-    private fun showToast(msg: String) {
-        Toast.makeText(
-            this,
+    private fun showSnackbar(msg: String) {
+        Snackbar.make(
+            findViewById(android.R.id.content),
             msg,
-            Toast.LENGTH_LONG
-        ).show()
+            Snackbar.LENGTH_INDEFINITE
+        )
+            .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
+            .setAction(R.string.okay) {
+                // dismiss
+            }
+            .show()
     }
 
-    private fun perhapsChangeChannel() {
+    fun perhapsChangeChannel(url: Uri? = requestedChannelUrl) {
         // If the is opening a channel URL, handle it now
-        requestedChannelUrl?.let { url ->
+        if (url != null) {
             try {
                 val channels = ChannelSet(url)
                 val primary = channels.primaryChannel
                 if (primary == null)
-                    showToast(R.string.channel_invalid)
+                    showSnackbar(R.string.channel_invalid)
                 else {
                     requestedChannelUrl = null
 
@@ -853,13 +852,14 @@ class MainActivity : AppCompatActivity(), Logging,
                                 model.setChannels(channels)
                             } catch (ex: RemoteException) {
                                 errormsg("Couldn't change channel ${ex.message}")
-                                showToast(R.string.cant_change_no_radio)
+                                showSnackbar(R.string.cant_change_no_radio)
                             }
                         }
                         .show()
                 }
-            } catch (ex: InvalidProtocolBufferException) {
-                showToast(R.string.channel_invalid)
+            } catch (ex: Throwable) {
+                errormsg("Channel url error: ${ex.message}")
+                showSnackbar("${getString(R.string.channel_invalid)}: ${ex.message}")
             }
         }
     }
@@ -1184,7 +1184,7 @@ class MainActivity : AppCompatActivity(), Logging,
         try {
             val packageInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
             val versionName = packageInfo.versionName
-            showToast(versionName)
+            Toast.makeText(this, versionName, Toast.LENGTH_LONG).show()
         } catch (e: PackageManager.NameNotFoundException) {
             errormsg("Can not find the version: ${e.message}")
         }
