@@ -33,6 +33,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
@@ -43,7 +44,6 @@ import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.android.*
-import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.DeviceVersion
@@ -60,17 +60,18 @@ import com.google.android.gms.tasks.Task
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
-import com.google.protobuf.InvalidProtocolBufferException
 import com.vorlonsoft.android.rate.AppRate
 import com.vorlonsoft.android.rate.StoreType
-import kotlinx.coroutines.*
-import java.io.FileOutputStream
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import java.nio.charset.Charset
 import java.text.DateFormat
 import java.util.*
 import java.util.regex.Pattern
 import kotlin.math.roundToInt
-import kotlin.system.exitProcess
+
 
 
 /*
@@ -389,12 +390,7 @@ class MainActivity : AppCompatActivity(), Logging,
 
         return if (message != null) {
             errormsg("Denied permissions: $message")
-            Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_INDEFINITE)
-                .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
-                .setAction(R.string.okay) {
-                    // dismiss
-                }
-                .show()
+            showSnackbar(message)
             true
         } else
             false
@@ -484,6 +480,7 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -662,20 +659,7 @@ class MainActivity : AppCompatActivity(), Logging,
             }
             CREATE_CSV_FILE -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    data?.data?.let { file_uri ->
-                        // model.allPackets is a result of a query, so we need to use observer for
-                        // the query to materialize
-                        model.allPackets.observe(this, { packets ->
-                            if (packets != null) {
-                                // no need for observer once got non-null list
-                                model.allPackets.removeObservers(this)
-                                // execute on the default thread pool to not block the main thread
-                                CoroutineScope(Dispatchers.Default + Job()).handledLaunch {
-                                    saveMessagesCSV(file_uri, packets)
-                                }
-                            }
-                        })
-                    }
+                    data?.data?.let { file_uri -> model.saveMessagesCSV(file_uri) }
                 }
             }
         }
@@ -815,30 +799,35 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    private fun showToast(msgId: Int) {
-        Toast.makeText(
-            this,
+    private fun showSnackbar(msgId: Int) {
+        Snackbar.make(
+            findViewById(android.R.id.content),
             msgId,
-            Toast.LENGTH_LONG
+            Snackbar.LENGTH_LONG
         ).show()
     }
 
-    private fun showToast(msg: String) {
-        Toast.makeText(
-            this,
+    private fun showSnackbar(msg: String) {
+        Snackbar.make(
+            findViewById(android.R.id.content),
             msg,
-            Toast.LENGTH_LONG
-        ).show()
+            Snackbar.LENGTH_INDEFINITE
+        )
+            .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
+            .setAction(R.string.okay) {
+                // dismiss
+            }
+            .show()
     }
 
-    private fun perhapsChangeChannel() {
+    fun perhapsChangeChannel(url: Uri? = requestedChannelUrl) {
         // If the is opening a channel URL, handle it now
-        requestedChannelUrl?.let { url ->
+        if (url != null) {
             try {
                 val channels = ChannelSet(url)
                 val primary = channels.primaryChannel
                 if (primary == null)
-                    showToast(R.string.channel_invalid)
+                    showSnackbar(R.string.channel_invalid)
                 else {
                     requestedChannelUrl = null
 
@@ -854,13 +843,14 @@ class MainActivity : AppCompatActivity(), Logging,
                                 model.setChannels(channels)
                             } catch (ex: RemoteException) {
                                 errormsg("Couldn't change channel ${ex.message}")
-                                showToast(R.string.cant_change_no_radio)
+                                showSnackbar(R.string.cant_change_no_radio)
                             }
                         }
                         .show()
                 }
-            } catch (ex: InvalidProtocolBufferException) {
-                showToast(R.string.channel_invalid)
+            } catch (ex: Throwable) {
+                errormsg("Channel url error: ${ex.message}")
+                showSnackbar("${getString(R.string.channel_invalid)}: ${ex.message}")
             }
         }
     }
@@ -1189,45 +1179,11 @@ class MainActivity : AppCompatActivity(), Logging,
         try {
             val packageInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
             val versionName = packageInfo.versionName
-            showToast(versionName)
+            Toast.makeText(this, versionName, Toast.LENGTH_LONG).show()
         } catch (e: PackageManager.NameNotFoundException) {
             errormsg("Can not find the version: ${e.message}")
         }
     }
-
-    private fun saveMessagesCSV(file_uri: Uri, packets: List<Packet>) {
-        // Extract distances to this device from position messages and put (node,SNR,distance) in
-        // the file_uri
-        val myNodeNum = model.myNodeInfo.value?.myNodeNum ?: return
-
-        applicationContext.contentResolver.openFileDescriptor(file_uri, "w")?.use {
-            FileOutputStream(it.fileDescriptor).use { fs ->
-                // Write header
-                fs.write(("from,rssi,snr,time,dist\n").toByteArray())
-                // Packets are ordered by time, we keep most recent position of
-                // our device in my_position.
-                var my_position: MeshProtos.Position? = null
-                packets.forEach {
-                    it.proto?.let { packet_proto ->
-                        it.position?.let { position ->
-                            if (packet_proto.from == myNodeNum) {
-                                my_position = position
-                            } else if (my_position != null) {
-                                val dist = positionToMeter(my_position!!, position).roundToInt()
-                                fs.write(
-                                    "%x,%d,%f,%d,%d\n".format(
-                                        packet_proto.from, packet_proto.rxRssi,
-                                        packet_proto.rxSnr, packet_proto.rxTime, dist
-                                    ).toByteArray()
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
 
     /// Theme functions
 
