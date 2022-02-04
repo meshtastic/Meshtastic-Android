@@ -1168,6 +1168,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 return true
             }
             R.id.exit -> {
+                // Temp comment
                 finishAndRemoveTask()
                 stopService(this.intent)
             }
