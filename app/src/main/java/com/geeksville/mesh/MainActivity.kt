@@ -1179,7 +1179,7 @@ class MainActivity : AppCompatActivity(), Logging,
             }
             R.id.exit -> {
                 finishAndRemoveTask()
-                exitProcess(0)
+                stopService(this.intent)
             }
             else -> super.onOptionsItemSelected(item)
         }
