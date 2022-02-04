@@ -43,7 +43,6 @@ import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.android.*
-import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.DeviceVersion
@@ -62,13 +61,14 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
 import com.vorlonsoft.android.rate.AppRate
 import com.vorlonsoft.android.rate.StoreType
-import kotlinx.coroutines.*
-import java.io.FileOutputStream
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import java.nio.charset.Charset
 import java.text.DateFormat
 import java.util.*
 import java.util.regex.Pattern
-import kotlin.math.roundToInt
 
 
 /*
@@ -655,20 +655,7 @@ class MainActivity : AppCompatActivity(), Logging,
             }
             CREATE_CSV_FILE -> {
                 if (resultCode == Activity.RESULT_OK) {
-                    data?.data?.let { file_uri ->
-                        // model.allPackets is a result of a query, so we need to use observer for
-                        // the query to materialize
-                        model.allPackets.observe(this, { packets ->
-                            if (packets != null) {
-                                // no need for observer once got non-null list
-                                model.allPackets.removeObservers(this)
-                                // execute on the default thread pool to not block the main thread
-                                CoroutineScope(Dispatchers.Default + Job()).handledLaunch {
-                                    saveMessagesCSV(file_uri, packets)
-                                }
-                            }
-                        })
-                    }
+                    data?.data?.let { file_uri -> model.saveMessagesCSV(file_uri) }
                 }
             }
         }
@@ -1189,40 +1176,6 @@ class MainActivity : AppCompatActivity(), Logging,
             errormsg("Can not find the version: ${e.message}")
         }
     }
-
-    private fun saveMessagesCSV(file_uri: Uri, packets: List<Packet>) {
-        // Extract distances to this device from position messages and put (node,SNR,distance) in
-        // the file_uri
-        val myNodeNum = model.myNodeInfo.value?.myNodeNum ?: return
-
-        applicationContext.contentResolver.openFileDescriptor(file_uri, "w")?.use {
-            FileOutputStream(it.fileDescriptor).use { fs ->
-                // Write header
-                fs.write(("from,rssi,snr,time,dist\n").toByteArray())
-                // Packets are ordered by time, we keep most recent position of
-                // our device in my_position.
-                var my_position: MeshProtos.Position? = null
-                packets.forEach {
-                    it.proto?.let { packet_proto ->
-                        it.position?.let { position ->
-                            if (packet_proto.from == myNodeNum) {
-                                my_position = position
-                            } else if (my_position != null) {
-                                val dist = positionToMeter(my_position!!, position).roundToInt()
-                                fs.write(
-                                    "%x,%d,%f,%d,%d\n".format(
-                                        packet_proto.from, packet_proto.rxRssi,
-                                        packet_proto.rxSnr, packet_proto.rxTime, dist
-                                    ).toByteArray()
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
 
     /// Theme functions
 
