@@ -659,7 +659,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         binding.updateFirmwareButton.setOnClickListener {
-            doFirmwareUpdate()
+            MaterialAlertDialogBuilder(requireContext())
+                .setMessage("${getString(R.string.update_firmware)}?")
+                .setNeutralButton(R.string.cancel) { _, _ ->
+                }
+                .setPositiveButton(getString(R.string.okay)) { _, _ ->
+                    doFirmwareUpdate()
+                }
+                .show()
         }
 
         binding.usernameEditText.on(EditorInfo.IME_ACTION_DONE) {
