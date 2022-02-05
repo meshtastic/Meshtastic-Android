@@ -48,6 +48,7 @@ cp ./app/special/curfirmwareversion.xml ./app/src/main/res/values/
 cat ~/.gradle/gradle.properties
 MAPBOX_DOWNLOADS_TOKEN=sk.yourtokenherexxx
 ```
+- (optional) to run CI tests on your fork: 1) allow GitHub Actions; 2) add your token at: Settings > Secrets > Actions > New repository secret: Name: MAPBOXTOKEN Value: sk.yourtokenherexxx
 
 - Now you should be able to select "Run / Run" in the IDE and it will happily start running on your phone
   or the emulator. Note: The emulators don't support bluetooth, so some features can not be used in
