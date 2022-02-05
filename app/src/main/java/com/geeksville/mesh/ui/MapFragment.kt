@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
@@ -18,16 +19,16 @@ import com.geeksville.util.formatAgo
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
-import com.mapbox.mapboxsdk.style.layers.PropertyFactory.textAllowOverlap
 import com.mapbox.maps.MapView
-import com.mapbox.maps.CameraOptions
 import com.mapbox.maps.MapboxMap
 import com.mapbox.maps.Style
 import com.mapbox.maps.extension.style.expressions.generated.Expression
+import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.TextAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.TextJustify
+import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 
 
@@ -49,9 +50,10 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     private val labelLayer = SymbolLayer(labelLayerId, nodeSourceId)
         .textField(Expression.get("name"))
-        .textSize() // TODO Set text size
+        .textSize(12.0)
         .textColor(Color.RED)
-        .textVariableAnchor(arrayListOf(TextAnchor.TOP.toString()))
+        .textAnchor(TextAnchor.TOP)
+        //.textVariableAnchor(TextAnchor.TOP) //TODO investigate need for variable anchor vs normal anchor
         .textJustify(TextJustify.AUTO)
         .textAllowOverlap(true)
 
@@ -156,20 +158,18 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
                 val map = v.getMapboxMap()
                 if (view != null) { // it might have gone away by now
-                    // val markerIcon = BitmapFactory.decodeResource(context.resources, R.drawable.ic_twotone_person_pin_24)
                     val markerIcon =
                         ContextCompat.getDrawable(
                             requireActivity(),
                             R.drawable.ic_twotone_person_pin_24
-                        )!!
+                        )!!.toBitmap()
 
-                    map.loadStyleUri(Style.OUTDOORS)
-                    //TODO add layers to current view of map
-//                        style.addSource(nodePositions)
-//                        style.addImage(markerImageId, markerIcon)
-//                        style.addLayer(nodeLayer)
-//                        style.addLayer(labelLayer)
-
+                    map.loadStyleUri(Style.OUTDOORS) {
+                        it.addSource(nodePositions)
+                        it.addImage(markerImageId, markerIcon)
+                        it.addLayer(nodeLayer)
+                        it.addLayer(labelLayer)
+                    }
 
                     //TODO setup gesture controls
                     // map.uiSettings.isRotateGesturesEnabled = false
