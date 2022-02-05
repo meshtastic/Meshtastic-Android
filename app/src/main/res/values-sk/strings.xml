@@ -95,7 +95,6 @@
     <string name="must_set_region">Musíte nastaviť región!</string>
     <string name="region">Región</string>
     <string name="sample_coords">48.14816 17.10674</string>
-    <string name="save_messages">Ulož spávy ako CSV súbor</string>
     <string name="set_channel_options">Nastaviť kanál</string>
     <string name="reset">Resetovať</string>
     <string name="reset_to_defaults">Resetovať na základné (default) nastavenia</string>

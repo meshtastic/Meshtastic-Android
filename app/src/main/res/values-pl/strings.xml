@@ -97,7 +97,6 @@
     <string name="region">Region</string>
     <string name="cant_change_no_radio">Nie można zmienić kanału, ponieważ urządzenie nie jest jeszcze połączone. Proszę spróbuj jeszcze raz.</string>
     <string name="sample_coords">55.332244 34.442211</string>
-    <string name="save_messages">Zapisz wiadomości jako csv...</string>
     <string name="set_channel_options">Ustaw właściwości kanału.</string>
     <string name="reset">Reset</string>
     <string name="are_you_shure_change_default">Na pewno chcesz zmienić na domyślny kanał?</string>

@@ -1155,7 +1155,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
                     type = "application/csv"
-                    putExtra(Intent.EXTRA_TITLE, "messages.csv")
+                    putExtra(Intent.EXTRA_TITLE, "rangetest.csv")
                 }
                 startActivityForResult(intent, CREATE_CSV_FILE)
                 return true

@@ -87,7 +87,7 @@
     <string name="region">Región</string>
     <string name="cant_change_no_radio">No se puede cambiar de canal porque la radio aún no está conectada. Por favor inténtelo de nuevo.</string>
     <string name="sample_coords">55.332244 34.442211</string>
-    <string name="save_messages">Guardar mensajes como csv...</string>
+    <string name="save_messages">Guardar rangetest.csv</string>
     <string name="set_channel_options">Establecer las opciones de los canales</string>
     <string name="reset">Reiniciar</string>
     <string name="are_you_shure_change_default">¿Estás seguro de que quieres cambiar al canal por defecto?</string>

@@ -91,7 +91,6 @@
     <string name="region">Régió</string>
     <string name="cant_change_no_radio">Nem lehet csatornát váltani, mert a rádió nincs csatlakoztatva. Kérem próbálja meg újra.</string>
     <string name="sample_coords">55.332244 34.442211</string>
-    <string name="save_messages">Üzenetek mentése csv fájlba...</string>
     <string name="set_channel_options">Csatorna paraméterek beállítása</string>
     <string name="reset">Újraindítás</string>
     <string name="are_you_shure_change_default">Biztosan meg akarja változtatni az alapértelmezett csatornát?</string>
