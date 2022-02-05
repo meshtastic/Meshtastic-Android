@@ -30,6 +30,7 @@ import com.mapbox.maps.extension.style.layers.properties.generated.TextAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.TextJustify
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.plugin.gestures.gestures
 
 
 class MapFragment : ScreenFragment("Map"), Logging {
@@ -165,14 +166,16 @@ class MapFragment : ScreenFragment("Map"), Logging {
                         )!!.toBitmap()
 
                     map.loadStyleUri(Style.OUTDOORS) {
-                        it.addSource(nodePositions)
-                        it.addImage(markerImageId, markerIcon)
-                        it.addLayer(nodeLayer)
-                        it.addLayer(labelLayer)
+                        if (it.isStyleLoaded) {
+                            it.addSource(nodePositions)
+                            it.addImage(markerImageId, markerIcon)
+                            it.addLayer(nodeLayer)
+                            it.addLayer(labelLayer)
+                        }
+
                     }
 
-                    //TODO setup gesture controls
-                    // map.uiSettings.isRotateGesturesEnabled = false
+                    v.gestures.rotateEnabled = false
 
                     // Provide initial positions
                     model.nodeDB.nodes.value?.let { nodes ->

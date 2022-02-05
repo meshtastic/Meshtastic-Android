@@ -1,18 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.mapbox.maps.MapView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:mapbox="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/mapFrame"
+    android:id="@+id/mapView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"> <!-- tab layout requires a unique ID -->
-
-    <com.mapbox.maps.MapView
-        android:id="@+id/mapView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clickable="true"
-        android:focusable="true"
-        mapbox:mapbox_uiScrollGestures="true"
-        mapbox:mapbox_uiZoomGestures="true"></com.mapbox.maps.MapView>
-
-</FrameLayout>
+    android:layout_height="match_parent"
+    mapbox:mapbox_cameraTargetLat="40.7128"
+    mapbox:mapbox_cameraTargetLng="-74.0060"
+    mapbox:mapbox_cameraZoom="9.0" />
