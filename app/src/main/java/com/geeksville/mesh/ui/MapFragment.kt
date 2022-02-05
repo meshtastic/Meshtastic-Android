@@ -45,10 +45,11 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val nodeLayer = SymbolLayer(nodeLayerId, nodeSourceId)
         .iconImage(markerImageId)
         .iconAnchor(IconAnchor.BOTTOM)
+        .iconAllowOverlap(true)
 
     private val labelLayer = SymbolLayer(labelLayerId, nodeSourceId)
         .textField(Expression.get("name"))
-        .textSize()
+        .textSize() // TODO Set text size
         .textColor(Color.RED)
         .textVariableAnchor(arrayListOf(TextAnchor.TOP.toString()))
         .textJustify(TextJustify.AUTO)
@@ -84,9 +85,11 @@ class MapFragment : ScreenFragment("Map"), Logging {
         }
 
 
+        //TODO Update node positions
         // nodePositions.setGeoJson(getCurrentNodes()) // Update node positions
     }
 
+    //TODO Update camera movements
     fun zoomToNodes(map: MapboxMap) {
         val nodesWithPosition =
             model.nodeDB.nodes.value?.values?.filter { it.validPosition != null }
@@ -161,13 +164,16 @@ class MapFragment : ScreenFragment("Map"), Logging {
                         )!!
 
                     map.loadStyleUri(Style.OUTDOORS)
+                    //TODO add layers to current view of map
 //                        style.addSource(nodePositions)
 //                        style.addImage(markerImageId, markerIcon)
 //                        style.addLayer(nodeLayer)
 //                        style.addLayer(labelLayer)
 
 
+                    //TODO setup gesture controls
                     // map.uiSettings.isRotateGesturesEnabled = false
+
                     // Provide initial positions
                     model.nodeDB.nodes.value?.let { nodes ->
                         onNodesChanged(map, nodes.values)
@@ -183,37 +189,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
             }
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        mapView?.onStart()
-    }
-
-    override fun onStop() {
-        mapView?.onStop()
-        super.onStop()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mapView?.onDestroy()
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        mapView?.let {
-            super.onSaveInstanceState(outState)
-        }
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        mapView?.onLowMemory()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        mapView?.onDestroy()
     }
 }
 
