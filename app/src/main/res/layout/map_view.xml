@@ -2,16 +2,17 @@
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:mapbox="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/mapFrame"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/mapFrame"> <!-- tab layout requires a unique ID -->
+    android:layout_height="match_parent"> <!-- tab layout requires a unique ID -->
 
-    <com.mapbox.mapboxsdk.maps.MapView
+    <com.mapbox.maps.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clickable="true" android:focusable="true"
-        mapbox:mapbox_uiZoomGestures="true"
-        mapbox:mapbox_uiScrollGestures="true"></com.mapbox.mapboxsdk.maps.MapView>
+        android:clickable="true"
+        android:focusable="true"
+        mapbox:mapbox_uiScrollGestures="true"
+        mapbox:mapbox_uiZoomGestures="true"></com.mapbox.maps.MapView>
 
 </FrameLayout>
