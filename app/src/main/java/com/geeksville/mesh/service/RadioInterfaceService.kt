@@ -2,6 +2,7 @@ package com.geeksville.mesh.service
 
 import android.annotation.SuppressLint
 import android.app.Service
+import android.companion.CompanionDeviceManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -284,6 +285,22 @@ class RadioInterfaceService : Service(), Logging {
             // The device address "n" can be used to mean none
 
             debug("Setting bonded device to ${address.anonymize}")
+
+            // We only keep an association to one device at a time... (move to BluetoothInterface?)
+            if (BluetoothInterface.hasCompanionDeviceApi(this)) {
+                if (address != null) {
+                    val deviceManager = getSystemService(CompanionDeviceManager::class.java)
+                    val c = address[0]
+                    val rest = address.substring(1)
+
+                    deviceManager.associations.forEach { old ->
+                        if (rest != old) {
+                            debug("Forgetting old BLE association ${old.anonymize}")
+                            deviceManager.disassociate(old)
+                        }
+                    }
+                }
+            }
 
             getPrefs(this).edit(commit = true) {
                 if (address == null)

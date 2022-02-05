@@ -12,15 +12,21 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.geeksville.android.Logging
-import com.geeksville.mesh.IMeshService
-import com.geeksville.mesh.MyNodeInfo
-import com.geeksville.mesh.RadioConfigProtos
+import com.geeksville.mesh.*
 import com.geeksville.mesh.database.MeshtasticDatabase
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.ui.positionToMeter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.BufferedWriter
+import java.io.FileWriter
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.math.roundToInt
 
 /// Given a human name, strip out the first letter of the first three words and return that as the initials for
 /// that user. If the original name is only one word, strip vowels from the original name and if the result is
@@ -257,5 +263,96 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
                 errormsg("Can't set username on device, is device offline? ${ex.message}")
             }
     }
+
+    /**
+     * Write the persisted packet data out to a CSV file in the specified location.
+     */
+    fun saveMessagesCSV(file_uri: Uri) {
+        viewModelScope.launch(Dispatchers.Main) {
+            // Extract distances to this device from position messages and put (node,SNR,distance) in
+            // the file_uri
+            val myNodeNum = myNodeInfo.value?.myNodeNum ?: return@launch
+
+            // Capture the current node value while we're still on main thread
+            val nodes = nodeDB.nodes.value ?: emptyMap()
+
+            writeToUri(file_uri) { writer ->
+                // Create a map of nodes keyed by their ID
+                val nodesById = nodes.values.associateBy { it.num }
+
+                writer.appendLine("date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload")
+
+                // Packets are ordered by time, we keep most recent position of
+                // our device in localNodePosition.
+                var localNodePosition: MeshProtos.Position? = null
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd,HH:mm:ss", Locale.getDefault())
+                repository.allPacketsInReceiveOrder.first().forEach { packet ->
+                    packet.proto?.let { proto ->
+                        packet.position?.let { position ->
+                            if (proto.from == myNodeNum) {
+                                localNodePosition = position
+                            } else {
+                                val rxDateTime = dateFormat.format(packet.received_date)
+                                val rxFrom = proto.from.toUInt()
+                                val senderName = nodesById[proto.from]?.user?.longName ?: ""
+
+                                // sender lat & long
+                                val senderPos = packet.position
+                                    ?.let { p -> Position(p) }
+                                    ?.takeIf { p -> p.isValid() }
+                                val senderLat = senderPos?.latitude ?: ""
+                                val senderLong = senderPos?.longitude ?: ""
+
+                                // rx lat, long, and elevation
+                                val rxPos = localNodePosition
+                                    ?.let { p -> Position(p) }
+                                    ?.takeIf { p -> p.isValid() }
+                                val rxLat = rxPos?.latitude ?: ""
+                                val rxLong = rxPos?.longitude ?: ""
+                                val rxAlt = rxPos?.altitude ?: ""
+                                val rxSnr = "%f".format(proto.rxSnr)
+
+                                // Calculate the distance if both positions are valid
+                                val dist = if (senderPos == null || rxPos == null) {
+                                    ""
+                                } else {
+                                    positionToMeter(
+                                        localNodePosition!!,
+                                        position
+                                    ).roundToInt().toString()
+                                }
+
+                                val hopLimit = proto.hopLimit
+
+                                val payload = when {
+                                    proto.decoded.portnumValue != Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> "<${proto.decoded.portnum}>"
+                                    proto.hasDecoded() -> "\"" + proto.decoded.payload.toStringUtf8()
+                                        .replace("\"", "\\\"") + "\""
+                                    proto.hasEncrypted() -> "${proto.encrypted.size()} encrypted bytes"
+                                    else -> ""
+                                }
+
+                                //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload
+                                writer.appendLine("$rxDateTime,$rxFrom,$senderName,$senderLat,$senderLong,$rxLat,$rxLong,$rxAlt,$rxSnr,$dist,$hopLimit,$payload")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend inline fun writeToUri(uri: Uri, crossinline block: suspend (BufferedWriter) -> Unit) {
+        withContext(Dispatchers.IO) {
+            app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
+                FileWriter(parcelFileDescriptor.fileDescriptor).use { fileWriter ->
+                    BufferedWriter(fileWriter).use { writer ->
+                        block.invoke(writer)
+                    }
+                }
+            }
+        }
+    }
+
 }
 

@@ -71,6 +71,13 @@ data class Position(
     /// @return bearing to the other position in degrees
     fun bearing(o: Position) = bearing(latitude, longitude, o.latitude, o.longitude)
 
+    // If GPS gives a crap position don't crash our app
+    fun isValid(): Boolean {
+        return (latitude <= 90.0 && latitude >= -90) &&
+                latitude != 0.0 &&
+                longitude != 0.0
+    }
+
     override fun toString(): String {
         return "Position(lat=${latitude.anonymize}, lon=${longitude.anonymize}, alt=${altitude.anonymize}, time=${time}, batteryPctLevel=${batteryPctLevel})"
     }
@@ -112,11 +119,7 @@ data class NodeInfo(
     /// return the position if it is valid, else null
     val validPosition: Position?
         get() {
-            return position?.takeIf {
-                (it.latitude <= 90.0 && it.latitude >= -90) && // If GPS gives a crap position don't crash our app
-                    it.latitude != 0.0 &&
-                    it.longitude != 0.0
-            }
+            return position?.takeIf { it.isValid() }
         }
 
     /// @return distance in meters to some other node (or null if unknown)

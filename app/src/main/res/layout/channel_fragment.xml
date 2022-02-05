@@ -100,7 +100,6 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="10dp"
         android:text="@string/reset"
-        app:icon="@drawable/ic_twotone_public_24"
         app:layout_constraintBottom_toBottomOf="@id/bottomButtonsGuideline"
         app:layout_constraintEnd_toStartOf="@id/editableCheckbox" />
 
