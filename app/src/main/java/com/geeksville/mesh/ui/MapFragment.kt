@@ -91,7 +91,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
         nodePositions.featureCollection(getCurrentNodes())
     }
 
-    //TODO Update camera movements
     private fun zoomToNodes(map: MapboxMap) {
         val points: MutableList<Point> = mutableListOf()
         val nodesWithPosition =
@@ -100,10 +99,13 @@ class MapFragment : ScreenFragment("Map"), Logging {
             val unit = if (nodesWithPosition.size >= 2) {
 
                 // Multiple nodes, make them all fit on the map view
-                for (node in nodesWithPosition) {
-                    val point =
-                        Point.fromLngLat(node.position!!.longitude, node.position!!.latitude)
-                    points.add(point)
+                nodesWithPosition.forEach {
+                    points.add(
+                        Point.fromLngLat(
+                            it.position!!.longitude,
+                            it.position!!.latitude
+                        )
+                    )
                 }
                 map.cameraForCoordinates(points)
             } else {
@@ -115,7 +117,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     this.zoom(9.0)
                     this.center(points[0])
                 }
-
             }
             map.flyTo(
                 unit,
