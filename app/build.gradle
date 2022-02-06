@@ -158,14 +158,14 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
     // For now I'm not using javalite, because I want JSON printing
-    implementation ('com.google.protobuf:protobuf-java:3.15.8')
+    implementation('com.google.protobuf:protobuf-java:3.15.8')
 
     // For UART access
     // implementation 'com.google.android.things:androidthings:1.0'
-    implementation 'com.github.mik3y:usb-serial-for-android:v3.0.0'
+    implementation 'com.github.mik3y:usb-serial-for-android:3.4.3'
 
     // mapbox
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:9.7.1'
+    implementation('com.mapbox.maps:android:10.2.0')
 
     // mapbox specifies a really old version of okhttp3 which causes lots of API warnings.  trying a newer version
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'

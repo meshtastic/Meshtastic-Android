@@ -7,8 +7,6 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.util.Exceptions
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.mapbox.mapboxsdk.Mapbox
-
 
 class MeshUtilApplication : GeeksvilleApplication() {
 
@@ -50,7 +48,5 @@ class MeshUtilApplication : GeeksvilleApplication() {
                 sendCrashReports() // Send the new report
             }
         }
-
-        Mapbox.getInstance(this, getString(R.string.mapbox_access_token))
     }
 }
