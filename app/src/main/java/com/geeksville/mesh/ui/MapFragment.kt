@@ -19,9 +19,8 @@ import com.geeksville.util.formatAgo
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
-import com.mapbox.maps.MapView
-import com.mapbox.maps.MapboxMap
-import com.mapbox.maps.Style
+import com.mapbox.mapboxsdk.Mapbox
+import com.mapbox.maps.*
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
@@ -30,6 +29,8 @@ import com.mapbox.maps.extension.style.layers.properties.generated.TextAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.TextJustify
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.plugin.animation.MapAnimationOptions
+import com.mapbox.maps.plugin.animation.easeTo
 import com.mapbox.maps.plugin.gestures.gestures
 
 
@@ -42,7 +43,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val labelLayerId = "label-layer"
     private val markerImageId = "my-marker-image"
 
-    private val nodePositions = GeoJsonSource(GeoJsonSource.Builder(nodeSourceId))
+    private var nodePositions = GeoJsonSource(GeoJsonSource.Builder(nodeSourceId))
 
     private val nodeLayer = SymbolLayer(nodeLayerId, nodeSourceId)
         .iconImage(markerImageId)
@@ -86,10 +87,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
             return FeatureCollection.fromFeatures(locations)
         }
-
-
-        //TODO Update node positions
-        // nodePositions.setGeoJson(getCurrentNodes()) // Update node positions
+        nodePositions.featureCollection(getCurrentNodes())
     }
 
     //TODO Update camera movements
@@ -97,27 +95,27 @@ class MapFragment : ScreenFragment("Map"), Logging {
         val nodesWithPosition =
             model.nodeDB.nodes.value?.values?.filter { it.validPosition != null }
         if (nodesWithPosition != null && nodesWithPosition.isNotEmpty()) {
-//            val update = if (nodesWithPosition.size >= 2) {
-//                // Multiple nodes, make them all fit on the map view
-//                val bounds = LatLngBounds.Builder()
-//
-//                // Add all positions
-//                bounds.includes(nodesWithPosition.map { it.position!! }
-//                    .map { LatLng(it.latitude, it.longitude) })
-//
-//                CameraUpdateFactory.newLatLngBounds(bounds.build(), 150)
-//            } else {
-//                // Only one node, just zoom in on it
-//                val it = nodesWithPosition[0].position!!
-//
-//                val cameraPos = CameraPosition.Builder().target(
-//                    LatLng(it.latitude, it.longitude)
-//                ).zoom(9.0).build()
-//                CameraUpdateFactory.newCameraPosition(cameraPos)
-//            }
-//            map.animateCamera(update, 1000)
-//        }
-//    }
+            val update = if (nodesWithPosition.size >= 2) {
+                // Multiple nodes, make them all fit on the map view
+                // val bounds = LatLngBounds.Builder()
+
+                // Add all positions
+                //    bounds.includes(nodesWithPosition.map { it.position!! }
+                //       .map { LatLng(it.latitude, it.longitude) })
+
+                //  CameraUpdateFactory.newLatLngBounds(bounds.build(), 150)
+            } else {
+                // Only one node, just zoom in on it
+                val it = nodesWithPosition[0].position!!
+
+                val cameraPos = CameraOptions.Builder().center(
+                    Point.fromLngLat(it.latitude, it.longitude)
+                ).zoom(9.0).build()
+                //  mapView?.getMapboxMap()?.setCamera(cameraPos)
+            }
+//            map.easeTo(update, MapAnimationOptions.mapAnimationOptions {
+//                duration(100)
+//            })
         }
     }
 
@@ -172,7 +170,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
                             it.addLayer(nodeLayer)
                             it.addLayer(labelLayer)
                         }
-
                     }
 
                     v.gestures.rotateEnabled = false
@@ -189,7 +186,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
                         onNodesChanged(map, nodes.values)
                 })
                 zoomToNodes(map)
-
             }
         }
     }
