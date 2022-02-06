@@ -19,8 +19,8 @@ import com.geeksville.util.formatAgo
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
-import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.maps.*
+import com.mapbox.maps.dsl.cameraOptions
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
@@ -31,6 +31,7 @@ import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.easeTo
+import com.mapbox.maps.plugin.animation.flyTo
 import com.mapbox.maps.plugin.gestures.gestures
 
 
@@ -91,31 +92,34 @@ class MapFragment : ScreenFragment("Map"), Logging {
     }
 
     //TODO Update camera movements
-    fun zoomToNodes(map: MapboxMap) {
+    private fun zoomToNodes(map: MapboxMap) {
+        val points: MutableList<Point> = mutableListOf()
         val nodesWithPosition =
             model.nodeDB.nodes.value?.values?.filter { it.validPosition != null }
         if (nodesWithPosition != null && nodesWithPosition.isNotEmpty()) {
-            val update = if (nodesWithPosition.size >= 2) {
+            val unit = if (nodesWithPosition.size >= 2) {
+
                 // Multiple nodes, make them all fit on the map view
-                // val bounds = LatLngBounds.Builder()
-
-                // Add all positions
-                //    bounds.includes(nodesWithPosition.map { it.position!! }
-                //       .map { LatLng(it.latitude, it.longitude) })
-
-                //  CameraUpdateFactory.newLatLngBounds(bounds.build(), 150)
+                for (node in nodesWithPosition) {
+                    val point =
+                        Point.fromLngLat(node.position!!.longitude, node.position!!.latitude)
+                    points.add(point)
+                }
+                map.cameraForCoordinates(points)
             } else {
                 // Only one node, just zoom in on it
                 val it = nodesWithPosition[0].position!!
+                points.add(Point.fromLngLat(it.longitude, it.latitude))
+                map.cameraForCoordinates(points)
+                cameraOptions {
+                    this.zoom(9.0)
+                    this.center(points[0])
+                }
 
-                val cameraPos = CameraOptions.Builder().center(
-                    Point.fromLngLat(it.latitude, it.longitude)
-                ).zoom(9.0).build()
-                //  mapView?.getMapboxMap()?.setCamera(cameraPos)
             }
-//            map.easeTo(update, MapAnimationOptions.mapAnimationOptions {
-//                duration(100)
-//            })
+            map.flyTo(
+                unit,
+                MapAnimationOptions.mapAnimationOptions { duration(1000) })
         }
     }
 
