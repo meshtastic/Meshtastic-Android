@@ -1,13 +1,13 @@
+# Android Studio
+/.idea/*
+!/.idea/codeStyles
+!/.idea/dictionaries/
+!/.idea/runConfigurations/
+*.iws
 *.iml
+
 .gradle
 /local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-/.idea/modules/app/google-services.json
 .DS_Store
 /build
 /captures
@@ -18,6 +18,9 @@
 # Java KeyStore certificates
 *.jks
 keystore.properties
+
+# AGP profiling traces
+*.trace
 
 # Mapbox token file
 /app/src/main/res/values/mapbox-token.xml
