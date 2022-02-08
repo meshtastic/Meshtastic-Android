@@ -899,7 +899,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             fun weNeedAccess(warningReason: String) {
                 warn("Telling user we need need location access")
 
-                Snackbar.make(binding.changeRadioButton, warningReason, Snackbar.LENGTH_INDEFINITE)
+                Snackbar.make(requireView(), warningReason, Snackbar.LENGTH_INDEFINITE)
                     .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
                     .setAction(R.string.okay) {
                         // dismiss
@@ -969,7 +969,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             // Warn user if BLE is disabled
             if (scanModel.bluetoothAdapter?.isEnabled != true) {
                 Snackbar.make(
-                    binding.changeRadioButton,
+                    requireView(),
                     R.string.error_bluetooth,
                     Snackbar.LENGTH_INDEFINITE
                 )

@@ -156,7 +156,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 requireActivity().startActivity(shareIntent)
             } catch (ex: ActivityNotFoundException) {
                 Snackbar.make(
-                    binding.shareButton,
+                    requireView(),
                     R.string.no_app_found,
                     Snackbar.LENGTH_SHORT
                 ).show()
@@ -179,7 +179,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
             // Tell the user to try again
             Snackbar.make(
-                binding.editableCheckbox,
+                requireView(),
                 R.string.radio_sleeping,
                 Snackbar.LENGTH_SHORT
             ).show()
