@@ -22,7 +22,6 @@ import com.geeksville.mesh.*
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.mesh.android.hasBackgroundPermission
-import com.geeksville.mesh.database.MeshtasticDatabase
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.DeviceVersion
@@ -36,9 +35,12 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
+import dagger.Lazy
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import java.util.*
+import javax.inject.Inject
 import kotlin.math.absoluteValue
 import kotlin.math.max
 
@@ -49,7 +51,10 @@ import kotlin.math.max
  * Note: this service will go away once all clients are unbound from it.
  * Warning: do not override toString, it causes infinite recursion on some androids (because contextWrapper.getResources calls to string
  */
+@AndroidEntryPoint
 class MeshService : Service(), Logging {
+    @Inject
+    lateinit var packetRepository: Lazy<PacketRepository>
 
     companion object : Logging {
 
@@ -118,9 +123,6 @@ class MeshService : Service(), Logging {
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
     private var connectionState = ConnectionState.DISCONNECTED
-
-    /// A database of received packets - used only for debug log
-    private var packetRepo: PacketRepository? = null
 
     private var fusedLocationClient: FusedLocationProviderClient? = null
 
@@ -325,9 +327,6 @@ class MeshService : Service(), Logging {
         super.onCreate()
 
         info("Creating mesh service")
-
-        val packetsDao = MeshtasticDatabase.getDatabase(applicationContext).packetDao()
-        packetRepo = PacketRepository(packetsDao)
 
         // Switch to the IO thread
         serviceScope.handledLaunch {
@@ -994,7 +993,7 @@ class MeshService : Service(), Logging {
         serviceScope.handledLaunch {
             // Do not log, because might contain PII
             // info("insert: ${packetToSave.message_type} = ${packetToSave.raw_message.toOneLineString()}")
-            packetRepo!!.insert(packetToSave)
+            packetRepository.get().insert(packetToSave)
         }
     }
 

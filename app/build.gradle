@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlinx-serialization'
+apply plugin: 'dagger.hilt.android.plugin'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.github.triplet.play'
 apply plugin: 'de.mobilej.unmock'
@@ -135,7 +136,9 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.0'
     implementation "androidx.room:room-runtime:$room_version"
+    implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "androidx.room:room-compiler:$room_version"
+    kapt "com.google.dagger:hilt-compiler:$hilt_version"
 
 
     // optional - Kotlin Extensions and Coroutines support for Room
@@ -199,4 +202,8 @@ dependencies {
     implementation "androidx.core:core-splashscreen:1.0.0-beta01"
 
     implementation project(':geeksville-androidlib')
+}
+
+kapt {
+    correctErrorTypes true
 }

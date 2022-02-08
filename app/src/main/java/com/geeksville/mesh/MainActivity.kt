@@ -62,6 +62,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
 import com.vorlonsoft.android.rate.AppRate
 import com.vorlonsoft.android.rate.StoreType
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -123,6 +124,7 @@ eventually:
 
 val utf8 = Charset.forName("UTF-8")
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity(), Logging,
     ActivityCompat.OnRequestPermissionsResultCallback {
 

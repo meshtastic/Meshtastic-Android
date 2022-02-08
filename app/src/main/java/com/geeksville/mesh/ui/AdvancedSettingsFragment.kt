@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
 import com.geeksville.mesh.R
@@ -16,7 +15,9 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.util.exceptionToSnackbar
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
     private val MAX_INT_DEVICE = 0xFFFFFFFF
     private var _binding: AdvancedSettingsBinding? = null

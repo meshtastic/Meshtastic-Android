@@ -1,24 +1,34 @@
 package com.geeksville.mesh.database
 
-import androidx.lifecycle.LiveData
 import com.geeksville.mesh.database.dao.PacketDao
 import com.geeksville.mesh.database.entity.Packet
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class PacketRepository(private val packetDao : PacketDao) {
-    val allPackets : LiveData<List<Packet>> = packetDao.getAllPacket(MAX_ITEMS)
-    val allPacketsInReceiveOrder : Flow<List<Packet>> = packetDao.getAllPacketsInReceiveOrder(MAX_ITEMS)
+class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Lazy<PacketDao>) {
+    private val packetDao by lazy {
+        packetDaoLazy.get()
+    }
 
-    suspend fun insert(packet: Packet) {
+    suspend fun getAllPackets(): Flow<List<Packet>> = withContext(Dispatchers.IO) {
+        packetDao.getAllPacket(MAX_ITEMS)
+    }
+
+    suspend fun getAllPacketsInReceiveOrder(): Flow<List<Packet>> = withContext(Dispatchers.IO) {
+        packetDao.getAllPacketsInReceiveOrder(MAX_ITEMS)
+    }
+
+    suspend fun insert(packet: Packet) = withContext(Dispatchers.IO) {
         packetDao.insert(packet)
     }
 
-    suspend fun deleteAll() {
+    suspend fun deleteAll() = withContext(Dispatchers.IO) {
         packetDao.deleteAll()
     }
 
     companion object {
         private const val MAX_ITEMS = 500
     }
-
 }

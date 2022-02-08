@@ -33,6 +33,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.protobuf.ByteString
 import com.google.zxing.integration.android.IntentIntegrator
+import dagger.hilt.android.AndroidEntryPoint
 import java.security.SecureRandom
 
 
@@ -51,6 +52,7 @@ fun ImageView.setOpaque() {
     imageAlpha = 255
 }
 
+@AndroidEntryPoint
 class ChannelFragment : ScreenFragment("Channel"), Logging {
 
     private var _binding: ChannelFragmentBinding? = null
