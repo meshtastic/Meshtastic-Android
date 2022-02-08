@@ -1,28 +1,26 @@
 package com.geeksville.mesh.ui
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Application
 import android.app.PendingIntent
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothDevice.BOND_BONDED
 import android.bluetooth.BluetoothDevice.BOND_BONDING
 import android.bluetooth.le.*
+import android.companion.AssociationRequest
+import android.companion.BluetoothDeviceFilter
+import android.companion.CompanionDeviceManager
 import android.content.*
 import android.content.pm.PackageManager
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.RemoteException
+import android.os.*
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.RadioButton
-import android.widget.TextView
+import android.widget.*
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
@@ -52,6 +50,7 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import java.util.regex.Pattern
 
 object SLogging : Logging
 
@@ -456,6 +455,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         BluetoothInterface.hasCompanionDeviceApi(requireContext())
     }
 
+    private val deviceManager: CompanionDeviceManager by lazy {
+        requireContext().getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager
+    }
+
     private val myActivity get() = requireActivity() as MainActivity
 
     override fun onDestroy() {
@@ -851,6 +854,49 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
+    private fun startCompanionScan() {
+        // To skip filtering based on name and supported feature flags (UUIDs),
+        // don't include calls to setNamePattern() and addServiceUuid(),
+        // respectively. This example uses Bluetooth.
+        // We only look for Mesh (rather than the full name) because NRF52 uses a very short name
+        val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
+            .setNamePattern(Pattern.compile("Mesh.*"))
+            // .addServiceUuid(ParcelUuid(RadioInterfaceService.BTM_SERVICE_UUID), null)
+            .build()
+
+        // The argument provided in setSingleDevice() determines whether a single
+        // device name or a list of device names is presented to the user as
+        // pairing options.
+        val pairingRequest: AssociationRequest = AssociationRequest.Builder()
+            .addDeviceFilter(deviceFilter)
+            .setSingleDevice(false)
+            .build()
+
+        // When the app tries to pair with the Bluetooth device, show the
+        // appropriate pairing request dialog to the user.
+        deviceManager.associate(
+            pairingRequest,
+            object : CompanionDeviceManager.Callback() {
+
+                override fun onDeviceFound(chooserLauncher: IntentSender) {
+                    try {
+                        startIntentSenderForResult(
+                            chooserLauncher,
+                            MainActivity.SELECT_DEVICE_REQUEST_CODE, null, 0, 0, 0, null
+                        )
+                    } catch (ex: Throwable) {
+                        errormsg("CompanionDevice startIntentSenderForResult error")
+                    }
+                }
+
+                override fun onFailure(error: CharSequence?) {
+                    warn("BLE selection service failed $error")
+                    // changeDeviceSelection(myActivity, null) // deselect any device
+                }
+            }, null
+        )
+    }
+
     private fun initModernScan() {
 
         binding.changeRadioButton.setOnClickListener {
@@ -859,7 +905,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 myActivity.requestScanPermission()
             } else {
                 // checkLocationEnabled() // ? some phones still need location turned on
-                myActivity.startCompanionScan()
+                startCompanionScan()
             }
         }
     }
@@ -981,6 +1027,22 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 if (binding.provideLocationCheckbox.isChecked)
                     checkLocationEnabled(getString(R.string.location_disabled))
             }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+            && requestCode == MainActivity.SELECT_DEVICE_REQUEST_CODE
+            && resultCode == Activity.RESULT_OK
+        ) {
+            val deviceToPair: BluetoothDevice =
+                data?.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)!!
+            if (deviceToPair.bondState != BOND_BONDED) {
+                deviceToPair.createBond()
+            }
+            changeDeviceSelection(myActivity, "x${deviceToPair.address}")
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
         }
     }
 }
