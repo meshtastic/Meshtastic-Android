@@ -7,18 +7,20 @@ import android.net.Uri
 import android.os.RemoteException
 import android.view.Menu
 import androidx.core.content.edit
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.android.Logging
 import com.geeksville.mesh.*
-import com.geeksville.mesh.database.MeshtasticDatabase
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.positionToMeter
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,6 +28,7 @@ import java.io.BufferedWriter
 import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.*
+import javax.inject.Inject
 import kotlin.math.roundToInt
 
 /// Given a human name, strip out the first letter of the first three words and return that as the initials for
@@ -51,19 +54,24 @@ fun getInitials(nameIn: String): String {
     return initials.take(nchars)
 }
 
-class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging {
+@HiltViewModel
+class UIViewModel @Inject constructor(
+    private val app: Application,
+    private val repository: PacketRepository,
+    private val preferences: SharedPreferences
+) : ViewModel(), Logging {
 
-    private val repository: PacketRepository
-
-    val allPackets: LiveData<List<Packet>>
+    private val _allPacketState = MutableStateFlow<List<Packet>>(emptyList())
+    val allPackets: StateFlow<List<Packet>> = _allPacketState
 
     init {
-        val packetsDao = MeshtasticDatabase.getDatabase(app).packetDao()
-        repository = PacketRepository(packetsDao)
-        allPackets = repository.allPackets
+        viewModelScope.launch {
+            repository.getAllPackets().collect { packets ->
+                _allPacketState.value = packets
+            }
+        }
         debug("ViewModel created")
     }
-
 
     fun insertPacket(packet: Packet) = viewModelScope.launch(Dispatchers.IO) {
         repository.insert(packet)
@@ -77,8 +85,6 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
         fun getPreferences(context: Context): SharedPreferences =
             context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
     }
-
-    private val context: Context get() = app.applicationContext
 
     var actionBarMenu: Menu? = null
 
@@ -208,7 +214,7 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
         channels.value =
             c // Must be done after calling the service, so we will will properly throw if the service failed (and therefore not cache invalid new settings)
 
-        getPreferences(context).edit(commit = true) {
+        preferences.edit(commit = true) {
             this.putString("channel-url", c.getChannelUrl().toString())
         }
     }
@@ -226,11 +232,11 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
     val bluetoothEnabled = object : MutableLiveData<Boolean>(false) {
     }
 
-    val provideLocation = object : MutableLiveData<Boolean>(getPreferences(context).getBoolean(MyPreferences.provideLocationKey, false)) {
+    val provideLocation = object : MutableLiveData<Boolean>(preferences.getBoolean(MyPreferences.provideLocationKey, false)) {
         override fun setValue(value: Boolean) {
             super.setValue(value)
 
-            getPreferences(context).edit(commit = true) {
+            preferences.edit(commit = true) {
                 this.putBoolean(MyPreferences.provideLocationKey, value)
             }
         }
@@ -246,7 +252,7 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
             ownerName.value = s
 
             // note: we allow an empty userstring to be written to prefs
-            getPreferences(context).edit(commit = true) {
+            preferences.edit(commit = true) {
                 putString("owner", s)
             }
         }
@@ -286,7 +292,7 @@ class UIViewModel(private val app: Application) : AndroidViewModel(app), Logging
                 // our device in localNodePosition.
                 var localNodePosition: MeshProtos.Position? = null
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd,HH:mm:ss", Locale.getDefault())
-                repository.allPacketsInReceiveOrder.first().forEach { packet ->
+                repository.getAllPacketsInReceiveOrder().first().forEach { packet ->
                     packet.proto?.let { proto ->
                         packet.position?.let { position ->
                             if (proto.from == myNodeNum) {

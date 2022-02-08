@@ -49,6 +49,7 @@ import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.hoho.android.usbserial.driver.UsbSerialDriver
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -439,6 +440,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 }
 
 @SuppressLint("NewApi")
+@AndroidEntryPoint
 class SettingsFragment : ScreenFragment("Settings"), Logging {
     private var _binding: SettingsFragmentBinding? = null
 

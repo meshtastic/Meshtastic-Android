@@ -1,6 +1,5 @@
 package com.geeksville.mesh.database.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -11,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 interface PacketDao {
 
     @Query("Select * from packet order by received_date desc limit 0,:maxItem")
-    fun getAllPacket(maxItem: Int): LiveData<List<Packet>>
+    fun getAllPacket(maxItem: Int): Flow<List<Packet>>
 
     @Query("Select * from packet order by received_date asc limit 0,:maxItem")
     fun getAllPacketsInReceiveOrder(maxItem: Int): Flow<List<Packet>>

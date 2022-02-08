@@ -3,6 +3,7 @@
 buildscript {
     ext.kotlin_version = '1.6.10'
     ext.coroutines_version = "1.5.2"
+    ext.hilt_version = '2.40.5'
 
     repositories {
         google()
@@ -30,6 +31,8 @@ buildscript {
 
         // for unit testing https://github.com/bjoernQ/unmock-plugin
         classpath 'com.github.bjoernq:unmockplugin:0.7.9'
+
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
     }
 }
 

@@ -26,6 +26,7 @@ import com.geeksville.mesh.databinding.MessagesFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.google.android.material.chip.Chip
+import dagger.hilt.android.AndroidEntryPoint
 import java.text.DateFormat
 import java.util.*
 
@@ -41,6 +42,7 @@ fun EditText.on(actionId: Int, func: () -> Unit) {
     }
 }
 
+@AndroidEntryPoint
 class MessagesFragment : ScreenFragment("Messages"), Logging {
 
     private var _binding: MessagesFragmentBinding? = null

@@ -6,13 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
+import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.DebugFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class DebugFragment : Fragment() {
 
     private var _binding: DebugFragmentBinding? = null
@@ -48,8 +50,8 @@ class DebugFragment : Fragment() {
         binding.closeButton.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
-        model.allPackets.observe(viewLifecycleOwner, Observer { packets ->
+        model.allPackets.asLiveData().observe(viewLifecycleOwner) { packets ->
             packets?.let { adapter.setPackets(it) }
-        })
+        }
     }
 }

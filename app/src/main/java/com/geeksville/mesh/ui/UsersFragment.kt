@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.android.Logging
@@ -19,9 +18,11 @@ import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
 import com.geeksville.mesh.databinding.NodelistFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.util.formatAgo
+import dagger.hilt.android.AndroidEntryPoint
 import java.net.URLEncoder
 import kotlin.math.roundToInt
 
+@AndroidEntryPoint
 class UsersFragment : ScreenFragment("Users"), Logging {
 
     private var _binding: NodelistFragmentBinding? = null

@@ -32,8 +32,10 @@ import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.flyTo
 import com.mapbox.maps.plugin.gestures.gestures
+import dagger.hilt.android.AndroidEntryPoint
 
 
+@AndroidEntryPoint
 class MapFragment : ScreenFragment("Map"), Logging {
 
     private val model: UIViewModel by activityViewModels()

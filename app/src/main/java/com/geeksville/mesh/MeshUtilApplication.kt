@@ -7,8 +7,13 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.util.Exceptions
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import dagger.hilt.android.HiltAndroidApp
 
-class MeshUtilApplication : GeeksvilleApplication() {
+// NOTE: This is a workaround since the Hilt Gradle plugin doesn't support constructors with default parameters
+open class GeeksvilleApplicationWrapper : GeeksvilleApplication()
+
+@HiltAndroidApp
+class MeshUtilApplication : GeeksvilleApplicationWrapper() {
 
     override fun onCreate() {
         super.onCreate()
