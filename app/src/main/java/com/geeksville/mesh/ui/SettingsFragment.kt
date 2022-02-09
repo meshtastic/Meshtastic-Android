@@ -732,6 +732,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 }
                 .setPositiveButton(getString(R.string.report)) { _, _ ->
                     reportError("Clicked Report A Bug")
+                    Toast.makeText(requireContext(), "Bug report sent!", Toast.LENGTH_LONG).show()
                 }
                 .show()
         }
