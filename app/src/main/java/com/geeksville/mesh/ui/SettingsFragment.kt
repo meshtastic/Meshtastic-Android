@@ -657,10 +657,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
         }
 
-        scanModel.devices.observe(viewLifecycleOwner) { devices ->
-            updateDevicesButtons(devices)
-        }
-
         binding.updateFirmwareButton.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
                 .setMessage("${getString(R.string.update_firmware)}?")
@@ -823,6 +819,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private fun initClassicScan() {
 
+        scanModel.devices.observe(viewLifecycleOwner) { devices ->
+            updateDevicesButtons(devices)
+        }
+
         binding.changeRadioButton.setOnClickListener {
             debug("User clicked changeRadioButton")
             if (!myActivity.hasScanPermission()) {
@@ -856,6 +856,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     }
 
     private fun startCompanionScan() {
+        // Disable the change button until our scan has some results
+        binding.changeRadioButton.isEnabled = false
+
         // To skip filtering based on name and supported feature flags (UUIDs),
         // don't include calls to setNamePattern() and addServiceUuid(),
         // respectively. This example uses Bluetooth.
@@ -880,13 +883,18 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             object : CompanionDeviceManager.Callback() {
 
                 override fun onDeviceFound(chooserLauncher: IntentSender) {
-                    try {
-                        startIntentSenderForResult(
-                            chooserLauncher,
-                            MainActivity.SELECT_DEVICE_REQUEST_CODE, null, 0, 0, 0, null
-                        )
-                    } catch (ex: Throwable) {
-                        errormsg("CompanionDevice startIntentSenderForResult error")
+                    debug("Found one device - enabling changeRadioButton")
+                    binding.changeRadioButton.isEnabled = true
+                    binding.changeRadioButton.setOnClickListener {
+                        debug("User clicked changeRadioButton")
+                        try {
+                            startIntentSenderForResult(
+                                chooserLauncher,
+                                MainActivity.SELECT_DEVICE_REQUEST_CODE, null, 0, 0, 0, null
+                            )
+                        } catch (ex: Throwable) {
+                            errormsg("CompanionDevice startIntentSenderForResult error")
+                        }
                     }
                 }
 
@@ -900,15 +908,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private fun initModernScan() {
 
-        binding.changeRadioButton.setOnClickListener {
-            debug("User clicked changeRadioButton")
-            if (!myActivity.hasScanPermission()) {
-                myActivity.requestScanPermission()
-            } else {
-                // checkLocationEnabled() // ? some phones still need location turned on
-                startCompanionScan()
-            }
+        scanModel.devices.observe(viewLifecycleOwner) { devices ->
+            updateDevicesButtons(devices)
+            startCompanionScan()
         }
+
+        startCompanionScan()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
