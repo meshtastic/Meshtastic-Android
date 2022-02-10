@@ -268,11 +268,14 @@ class MainActivity : AppCompatActivity(), Logging,
             // Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
 
+/*      TODO - wait for targetSdkVersion 31
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             perms.add(Manifest.permission.BLUETOOTH_CONNECT)
         } else {
             perms.add(Manifest.permission.BLUETOOTH)
         }
+*/
+        perms.add(Manifest.permission.BLUETOOTH)
 
         // Some old phones complain about requesting perms they don't understand
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
