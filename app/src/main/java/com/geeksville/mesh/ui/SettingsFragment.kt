@@ -1046,7 +1046,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             if (deviceToPair.bondState != BOND_BONDED) {
                 deviceToPair.createBond()
             }
-            changeDeviceSelection(myActivity, "x${deviceToPair.address}")
+            scanModel.changeScanSelection(myActivity, "x${deviceToPair.address}")
         } else {
             super.onActivityResult(requestCode, resultCode, data)
         }
