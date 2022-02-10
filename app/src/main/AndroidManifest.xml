@@ -12,16 +12,20 @@
         android:name="android.hardware.location.gps"
         android:required="false" />
 
-    <!-- Request legacy Bluetooth permissions on older devices -->
+<!-- TODO - wait for targetSdkVersion 31
+    &lt;!&ndash; Request legacy Bluetooth permissions on older devices &ndash;&gt;
     <uses-permission android:name="android.permission.BLUETOOTH"
         android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
         android:maxSdkVersion="30" />
 
-    <!-- API 31+ Bluetooth permissions -->
+    &lt;!&ndash; API 31+ Bluetooth permissions &ndash;&gt;
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
         android:usesPermissionFlags="neverForLocation" />
+-->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
     <!-- Permissions required for providing location (from phone GPS) to mesh -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
