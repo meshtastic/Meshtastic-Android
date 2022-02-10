@@ -96,7 +96,7 @@
     <string name="region">Region</string>
     <string name="cant_change_no_radio">Couldn\'t change channel, because radio is not yet connected. Please try again.</string>
     <string name="sample_coords">55.332244 34.442211</string>
-    <string name="save_messages">Save messages as csv...</string>
+    <string name="save_messages">Export rangetest.csv</string>
     <string name="set_channel_options">Set channel options</string>
     <string name="reset">Reset</string>
     <string name="are_you_shure_change_default">Are you sure you want to change to the default channel?</string>

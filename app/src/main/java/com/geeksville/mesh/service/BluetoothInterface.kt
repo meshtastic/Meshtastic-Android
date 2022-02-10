@@ -113,7 +113,9 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         @SuppressLint("NewApi", "MissingPermission")
         override fun addressValid(context: Context, rest: String): Boolean {
             val allPaired = if (hasCompanionDeviceApi(context)) {
-                val deviceManager = context.getSystemService(CompanionDeviceManager::class.java)
+                val deviceManager: CompanionDeviceManager by lazy {
+                    context.getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager
+                }
                 deviceManager.associations.map { it }.toSet()
             } else {
                 getBluetoothAdapter(context)?.bondedDevices.orEmpty()

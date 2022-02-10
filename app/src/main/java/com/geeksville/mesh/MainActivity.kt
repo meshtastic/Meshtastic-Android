@@ -4,11 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
-import android.companion.AssociationRequest
-import android.companion.BluetoothDeviceFilter
-import android.companion.CompanionDeviceManager
 import android.content.*
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -27,7 +23,6 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
@@ -70,8 +65,6 @@ import kotlinx.coroutines.cancel
 import java.nio.charset.Charset
 import java.text.DateFormat
 import java.util.*
-import java.util.regex.Pattern
-
 
 /*
 UI design
@@ -196,48 +189,6 @@ class MainActivity : AppCompatActivity(), Logging,
 
     private val btStateReceiver = BluetoothStateReceiver {
         updateBluetoothEnabled()
-    }
-
-    fun startCompanionScan() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val deviceManager: CompanionDeviceManager by lazy {
-                getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager
-            }
-
-            // To skip filtering based on name and supported feature flags (UUIDs),
-            // don't include calls to setNamePattern() and addServiceUuid(),
-            // respectively. This example uses Bluetooth.
-            // We only look for Mesh (rather than the full name) because NRF52 uses a very short name
-            val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
-                .setNamePattern(Pattern.compile("Mesh.*"))
-                // .addServiceUuid(ParcelUuid(RadioInterfaceService.BTM_SERVICE_UUID), null)
-                .build()
-
-            // The argument provided in setSingleDevice() determines whether a single
-            // device name or a list of device names is presented to the user as
-            // pairing options.
-            val pairingRequest: AssociationRequest = AssociationRequest.Builder()
-                .addDeviceFilter(deviceFilter)
-                .setSingleDevice(false)
-                .build()
-
-            // When the app tries to pair with the Bluetooth device, show the
-            // appropriate pairing request dialog to the user.
-            deviceManager.associate(pairingRequest,
-                object : CompanionDeviceManager.Callback() {
-                    override fun onDeviceFound(chooserLauncher: IntentSender) {
-                        startIntentSenderForResult(chooserLauncher,
-                            SELECT_DEVICE_REQUEST_CODE, null, 0, 0, 0)
-                    }
-
-                    override fun onFailure(error: CharSequence?) {
-                        warn("BLE selection service failed $error")
-                        // changeDeviceSelection(mainActivity, null) // deselect any device
-                    }
-                }, null
-            )
-        }
-        else warn("startCompanionScan should not run on SDK < 26")
     }
 
     /**
@@ -503,8 +454,6 @@ class MainActivity : AppCompatActivity(), Logging,
         /*  not yet working
         // Configure sign-in to request the user's ID, email address, and basic
 // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        // Configure sign-in to request the user's ID, email address, and basic
-// profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         val gso =
             GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -629,7 +578,6 @@ class MainActivity : AppCompatActivity(), Logging,
     /**
      * Dispatch incoming result to the correct fragment.
      */
-    @SuppressLint("InlinedApi", "MissingPermission")
     override fun onActivityResult(
         requestCode: Int,
         resultCode: Int,
@@ -638,7 +586,6 @@ class MainActivity : AppCompatActivity(), Logging,
         super.onActivityResult(requestCode, resultCode, data)
 
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         when (requestCode) {
             RC_SIGN_IN -> {
                 // The Task returned from this call is always completed, no need to attach
@@ -646,19 +593,6 @@ class MainActivity : AppCompatActivity(), Logging,
                 val task: Task<GoogleSignInAccount> =
                     GoogleSignIn.getSignedInAccountFromIntent(data)
                 handleSignInResult(task)
-            }
-            (SELECT_DEVICE_REQUEST_CODE) -> when (resultCode) {
-                Activity.RESULT_OK -> {
-                    val deviceToPair: BluetoothDevice =
-                        data?.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)!!
-                    if (deviceToPair.bondState != BluetoothDevice.BOND_BONDED) {
-                        deviceToPair.createBond()
-                    }
-                    model.meshService?.let { service ->
-                        MeshService.changeDeviceAddress(this@MainActivity, service, "x${deviceToPair.address}")
-                    }
-                }
-                else -> warn("BLE device select intent failed")
             }
             CREATE_CSV_FILE -> {
                 if (resultCode == Activity.RESULT_OK) {
@@ -1161,7 +1095,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
                     type = "application/csv"
-                    putExtra(Intent.EXTRA_TITLE, "messages.csv")
+                    putExtra(Intent.EXTRA_TITLE, "rangetest.csv")
                 }
                 startActivityForResult(intent, CREATE_CSV_FILE)
                 return true
@@ -1189,7 +1123,7 @@ class MainActivity : AppCompatActivity(), Logging,
     private fun chooseThemeDialog() {
 
         /// Prepare dialog and its items
-        val builder = AlertDialog.Builder(this)
+        val builder = MaterialAlertDialogBuilder(this)
         builder.setTitle(getString(R.string.choose_theme_title))
 
         val styles = arrayOf(

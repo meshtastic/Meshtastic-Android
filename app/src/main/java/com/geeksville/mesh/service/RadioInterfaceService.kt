@@ -269,7 +269,7 @@ class RadioInterfaceService : Service(), Logging {
     @SuppressLint("NewApi")
     private fun setBondedDeviceAddress(address: String?): Boolean {
         return if (getBondedDeviceAddress(this) == address && isStarted) {
-            warn("Ignoring setBondedDevice $address, because we are already using that device")
+            warn("Ignoring setBondedDevice ${address.anonymize}, because we are already using that device")
             false
         } else {
             // Record that this use has configured a new radio
