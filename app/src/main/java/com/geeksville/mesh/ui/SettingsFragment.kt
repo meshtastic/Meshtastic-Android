@@ -1046,6 +1046,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         ) {
             val deviceToPair: BluetoothDevice =
                 data?.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)!!
+
+            // We only keep an association to one device at a time...
+            deviceManager.associations.forEach { old ->
+                if (deviceToPair.address != old) {
+                    debug("Forgetting old BLE association ${old.anonymize}")
+                    deviceManager.disassociate(old)
+                }
+            }
             scanModel.onSelected(
                 myActivity,
                 BTScanModel.DeviceListEntry(

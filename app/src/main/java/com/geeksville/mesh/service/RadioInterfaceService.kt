@@ -286,22 +286,6 @@ class RadioInterfaceService : Service(), Logging {
 
             debug("Setting bonded device to ${address.anonymize}")
 
-            // We only keep an association to one device at a time... (move to BluetoothInterface?)
-            if (BluetoothInterface.hasCompanionDeviceApi(this)) {
-                if (address != null) {
-                    val deviceManager = getSystemService(CompanionDeviceManager::class.java)
-                    val c = address[0]
-                    val rest = address.substring(1)
-
-                    deviceManager.associations.forEach { old ->
-                        if (rest != old) {
-                            debug("Forgetting old BLE association ${old.anonymize}")
-                            deviceManager.disassociate(old)
-                        }
-                    }
-                }
-            }
-
             getPrefs(this).edit(commit = true) {
                 if (address == null)
                     this.remove(DEVADDR_KEY)
