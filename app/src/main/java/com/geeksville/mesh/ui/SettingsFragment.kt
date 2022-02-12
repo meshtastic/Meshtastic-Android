@@ -883,7 +883,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         deviceManager.associate(
             pairingRequest,
             object : CompanionDeviceManager.Callback() {
-
                 override fun onDeviceFound(chooserLauncher: IntentSender) {
                     debug("Found one device - enabling changeRadioButton")
                     binding.changeRadioButton.isEnabled = true
@@ -914,8 +913,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             updateDevicesButtons(devices)
             startCompanionScan()
         }
-
-        startCompanionScan()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -1041,17 +1038,22 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
+    @SuppressLint("MissingPermission")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+        if (hasCompanionDeviceApi && myActivity.hasConnectPermission()
             && requestCode == MainActivity.SELECT_DEVICE_REQUEST_CODE
             && resultCode == Activity.RESULT_OK
         ) {
             val deviceToPair: BluetoothDevice =
                 data?.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)!!
-            if (deviceToPair.bondState != BOND_BONDED) {
-                deviceToPair.createBond()
-            }
-            scanModel.changeScanSelection(myActivity, "x${deviceToPair.address}")
+            scanModel.onSelected(
+                myActivity,
+                BTScanModel.DeviceListEntry(
+                    deviceToPair.name,
+                    "x${deviceToPair.address}",
+                    deviceToPair.bondState == BOND_BONDED
+                )
+            )
         } else {
             super.onActivityResult(requestCode, resultCode, data)
         }
