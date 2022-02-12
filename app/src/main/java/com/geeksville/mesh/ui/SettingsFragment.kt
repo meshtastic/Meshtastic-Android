@@ -952,13 +952,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
             fun weNeedAccess(warningReason: String) {
                 warn("Telling user we need need location access")
-
-                Snackbar.make(requireView(), warningReason, Snackbar.LENGTH_INDEFINITE)
-                    .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
-                    .setAction(R.string.okay) {
-                        // dismiss
-                    }
-                    .show()
+                showSnackbar(warningReason)
             }
 
             locationSettingsResponse.addOnSuccessListener {
@@ -1001,6 +995,23 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
+    private fun showSnackbar(msg: String) {
+        try {
+            Snackbar.make(
+                requireView(),
+                msg,
+                Snackbar.LENGTH_INDEFINITE
+            )
+                .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
+                .setAction(R.string.okay) {
+                    // dismiss
+                }
+                .show()
+        } catch (ex: IllegalStateException) {
+            reportError("Snackbar couldn't find view for msgString $msg")
+        }
+    }
+
     override fun onPause() {
         super.onPause()
 
@@ -1022,15 +1033,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (!hasUSB) {
             // Warn user if BLE is disabled
             if (scanModel.bluetoothAdapter?.isEnabled != true) {
-                Snackbar.make(
-                    requireView(),
-                    R.string.error_bluetooth,
-                    Snackbar.LENGTH_INDEFINITE
-                )
-                    .setAction(R.string.okay) {
-                        // dismiss
-                    }
-                    .show()
+                showSnackbar(getString(R.string.error_bluetooth))
             } else {
                 if (binding.provideLocationCheckbox.isChecked)
                     checkLocationEnabled(getString(R.string.location_disabled))
