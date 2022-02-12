@@ -112,15 +112,14 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
         /** Return true if this address is still acceptable. For BLE that means, still bonded */
         @SuppressLint("NewApi", "MissingPermission")
         override fun addressValid(context: Context, rest: String): Boolean {
-            val allPaired = if (hasCompanionDeviceApi(context)) {
+            /* val allPaired = if (hasCompanionDeviceApi(context)) {
                 val deviceManager: CompanionDeviceManager by lazy {
                     context.getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager
                 }
                 deviceManager.associations.map { it }.toSet()
-            } else {
-                getBluetoothAdapter(context)?.bondedDevices.orEmpty()
+            } else { */
+            val allPaired = getBluetoothAdapter(context)?.bondedDevices.orEmpty()
                     .map { it.address }.toSet()
-            }
             return if (!allPaired.contains(rest)) {
                 warn("Ignoring stale bond to ${rest.anonymize}")
                 false

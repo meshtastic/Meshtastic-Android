@@ -813,7 +813,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (curRadio != null && !MockInterface.addressValid(requireContext(), "")) {
             binding.warningNotPaired.visibility = View.GONE
             // binding.scanStatusText.text = getString(R.string.current_pair).format(curRadio)
-        } else {
+        } else if (model.bluetoothEnabled.value == true){
             binding.warningNotPaired.visibility = View.VISIBLE
             binding.scanStatusText.text = getString(R.string.not_paired_yet)
         }
