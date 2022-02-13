@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedWriter
+import java.io.FileNotFoundException
 import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.*
@@ -350,12 +351,16 @@ class UIViewModel @Inject constructor(
 
     private suspend inline fun writeToUri(uri: Uri, crossinline block: suspend (BufferedWriter) -> Unit) {
         withContext(Dispatchers.IO) {
-            app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
-                FileWriter(parcelFileDescriptor.fileDescriptor).use { fileWriter ->
-                    BufferedWriter(fileWriter).use { writer ->
-                        block.invoke(writer)
+            try {
+                app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
+                    FileWriter(parcelFileDescriptor.fileDescriptor).use { fileWriter ->
+                        BufferedWriter(fileWriter).use { writer ->
+                            block.invoke(writer)
+                        }
                     }
                 }
+            } catch (ex: FileNotFoundException) {
+                errormsg("Can't write file error: ${ex.message}")
             }
         }
     }
