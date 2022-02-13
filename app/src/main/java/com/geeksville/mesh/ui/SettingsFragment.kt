@@ -813,7 +813,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (curRadio != null && !MockInterface.addressValid(requireContext(), "")) {
             binding.warningNotPaired.visibility = View.GONE
             // binding.scanStatusText.text = getString(R.string.current_pair).format(curRadio)
-        } else {
+        } else if (model.bluetoothEnabled.value == true){
             binding.warningNotPaired.visibility = View.VISIBLE
             binding.scanStatusText.text = getString(R.string.not_paired_yet)
         }
@@ -883,7 +883,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         deviceManager.associate(
             pairingRequest,
             object : CompanionDeviceManager.Callback() {
-
                 override fun onDeviceFound(chooserLauncher: IntentSender) {
                     debug("Found one device - enabling changeRadioButton")
                     binding.changeRadioButton.isEnabled = true
@@ -914,8 +913,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             updateDevicesButtons(devices)
             startCompanionScan()
         }
-
-        startCompanionScan()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -952,13 +949,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
             fun weNeedAccess(warningReason: String) {
                 warn("Telling user we need need location access")
-
-                Snackbar.make(requireView(), warningReason, Snackbar.LENGTH_INDEFINITE)
-                    .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
-                    .setAction(R.string.okay) {
-                        // dismiss
-                    }
-                    .show()
+                showSnackbar(warningReason)
             }
 
             locationSettingsResponse.addOnSuccessListener {
@@ -1001,6 +992,23 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
+    private fun showSnackbar(msg: String) {
+        try {
+            Snackbar.make(
+                requireView(),
+                msg,
+                Snackbar.LENGTH_INDEFINITE
+            )
+                .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
+                .setAction(R.string.okay) {
+                    // dismiss
+                }
+                .show()
+        } catch (ex: IllegalStateException) {
+            reportError("Snackbar couldn't find view for msgString $msg")
+        }
+    }
+
     override fun onPause() {
         super.onPause()
 
@@ -1022,15 +1030,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (!hasUSB) {
             // Warn user if BLE is disabled
             if (scanModel.bluetoothAdapter?.isEnabled != true) {
-                Snackbar.make(
-                    requireView(),
-                    R.string.error_bluetooth,
-                    Snackbar.LENGTH_INDEFINITE
-                )
-                    .setAction(R.string.okay) {
-                        // dismiss
-                    }
-                    .show()
+                showSnackbar(getString(R.string.error_bluetooth))
             } else {
                 if (binding.provideLocationCheckbox.isChecked)
                     checkLocationEnabled(getString(R.string.location_disabled))
@@ -1038,17 +1038,30 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
+    @SuppressLint("MissingPermission")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+        if (hasCompanionDeviceApi && myActivity.hasConnectPermission()
             && requestCode == MainActivity.SELECT_DEVICE_REQUEST_CODE
             && resultCode == Activity.RESULT_OK
         ) {
             val deviceToPair: BluetoothDevice =
                 data?.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)!!
-            if (deviceToPair.bondState != BOND_BONDED) {
-                deviceToPair.createBond()
+
+            // We only keep an association to one device at a time...
+            deviceManager.associations.forEach { old ->
+                if (deviceToPair.address != old) {
+                    debug("Forgetting old BLE association ${old.anonymize}")
+                    deviceManager.disassociate(old)
+                }
             }
-            scanModel.changeScanSelection(myActivity, "x${deviceToPair.address}")
+            scanModel.onSelected(
+                myActivity,
+                BTScanModel.DeviceListEntry(
+                    deviceToPair.name,
+                    "x${deviceToPair.address}",
+                    deviceToPair.bondState == BOND_BONDED
+                )
+            )
         } else {
             super.onActivityResult(requestCode, resultCode, data)
         }

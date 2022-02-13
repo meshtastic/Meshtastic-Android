@@ -737,24 +737,32 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
     private fun showSnackbar(msgId: Int) {
-        Snackbar.make(
-            findViewById(android.R.id.content),
-            msgId,
-            Snackbar.LENGTH_LONG
-        ).show()
+        try {
+            Snackbar.make(
+                findViewById(android.R.id.content),
+                msgId,
+                Snackbar.LENGTH_LONG
+            ).show()
+        } catch (ex: IllegalStateException) {
+            reportError("Snackbar couldn't find view for msgId $msgId")
+        }
     }
 
     private fun showSnackbar(msg: String) {
-        Snackbar.make(
-            findViewById(android.R.id.content),
-            msg,
-            Snackbar.LENGTH_INDEFINITE
-        )
-            .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
-            .setAction(R.string.okay) {
-                // dismiss
-            }
-            .show()
+        try {
+            Snackbar.make(
+                findViewById(android.R.id.content),
+                msg,
+                Snackbar.LENGTH_INDEFINITE
+            )
+                .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
+                .setAction(R.string.okay) {
+                    // dismiss
+                }
+                .show()
+        } catch (ex: IllegalStateException) {
+            reportError("Snackbar couldn't find view for msgString $msg")
+        }
     }
 
     fun perhapsChangeChannel(url: Uri? = requestedChannelUrl) {
