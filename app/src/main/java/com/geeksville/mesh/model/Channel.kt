@@ -12,7 +12,7 @@ data class Channel(val settings: ChannelProtos.ChannelSettings) {
         // These bytes must match the well known and not secret bytes used the default channel AES128 key device code
         val channelDefaultKey = byteArrayOfInts(
             0xd4, 0xf1, 0xbb, 0x3a, 0x20, 0x29, 0x07, 0x59,
-            0xf0, 0xbc, 0xff, 0xab, 0xcf, 0x4e, 0x69, 0xbf
+            0xf0, 0xbc, 0xff, 0xab, 0xcf, 0x4e, 0x69, 0x01
         )
 
         private val cleartextPSK = ByteString.EMPTY
