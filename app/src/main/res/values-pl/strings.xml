@@ -64,10 +64,10 @@
     <string name="app_too_old">Wymagana jest aktualizacja aplikacji.</string>
     <string name="must_update">Musisz zaktualizować tę aplikację w Google Play store (lub ręcznie przez Github). Wersja aplikacji jest za stara, aby komunikować się z urządzeniem. Więcej informacji na ten temat znajdziesz tu: <a href="https://www.meshtastic.org/software/android-too-old.html">wiki</a></string>
     <string name="none">Żadne (Wyłącz)</string>
-    <string name="modem_config_short">Bliski zasięg (ale szybki transfer)</string>
-    <string name="modem_config_medium">Średni zasięg (ale szybki transfer)</string>
-    <string name="modem_config_long">Daleki zasięg (ale wolniejszy transfer)</string>
-    <string name="modem_config_very_long">Bardzo daleki zasięg (ale wolny transfer)</string>
+    <string name="modem_config_short">Bliski zasięg (szybko)</string>
+    <string name="modem_config_medium">Średni zasięg (szybko)</string>
+    <string name="modem_config_long">Daleki zasięg (szybko)</string>
+    <string name="modem_config_very_long">Bardzo daleki zasięg (wolny)</string>
     <string name="modem_config_unrecognized">Nierozpoznany</string>
     <string name="meshtastic_service_notifications">Powiadomienia usługi Meshtastic</string>
     <string name="location_disabled_warning">Musisz włączyć usługi lokalizacji (duża dokładność) w ustawieniach systemu.</string>
@@ -108,4 +108,7 @@
     <string name="theme_dark">Ciemny</string>
     <string name="theme_system">Domyślny systemu</string>
     <string name="choose_theme_title">Wybierz motyw</string>
+    <string name="modem_config_slow_short">Bliski zasięg (wolny)</string>
+    <string name="modem_config_slow_medium">Średni zasięg (wolny)</string>
+    <string name="modem_config_slow_long">Daleki zasięg (wolny)</string>
 </resources>

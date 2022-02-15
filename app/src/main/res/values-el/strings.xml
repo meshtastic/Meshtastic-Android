@@ -1,142 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="action_settings">Ρυθμίσεις</string>
-
     <string name="channel_name">Όνομα Καναλιού</string>
-
     <string name="channel_options">Επιλογές Καναλιού</string>
-
     <string name="share_button">Κοινή χρήση</string>
-
     <string name="qr_code">Κώδικας QR</string>
-
     <string name="unset">Αναίρεση</string>
-
     <string name="connection_status">Κατάσταση Σύνδεσης</string>
-
     <string name="application_icon">Εικονίδιο εφαρμογής </string>
-
     <string name="unknown_username">Άγνωστο Όνομα Χρήστη</string>
-
     <string name="user_avatar">Avatar Χρήστη</string>
-
-
     <string name="sample_message">Βρήκα το σημείο, είναι διπλα στη τίγρη. Φοβάμαι λίγο.</string>
-
     <string name="send_text">Αποστολή κειμένου</string>
-
     <string name="warning_not_paired">Δεν έχετε κάνει ακόμη pair μια συσκευή συμβατή με Meshtastic με το τηλέφωνο. Παρακαλώ κάντε pair μια συσκευή και ορίστε το όνομα χρήστη.\n\nΗ εφαρμογή ανοιχτού κώδικα βρίσκεται σε alpha-testing, αν εντοπίσετε προβλήματα παρακαλώ δημοσιεύστε τα στο forum: meshtastic.discourse.group.\n\nΠερισσότερες πληροφορίες στην ιστοσελίδα - www.meshtastic.org.</string>
-
     <string name="username_unset">Όνομα Χρήστη αναιρέθηκε</string>
-
     <string name="your_name">Όνομα</string>
-
     <string name="analytics_okay">Ανώνυμα στατιστικά χρήσης και αναφορές crash.</string>
-
     <string name="looking_for_meshtastic_devices">Αναζήτηση συσκευών Meshtastic …</string>
-
     <string name="requires_bluetooth">Η εφαρμογή απαιτεί bluetooth πρόσβαση. Παρακαλώ παρέχεται σχετική άδεια χρήσης στις ρυθμίσεις του android.</string>
-
     <string name="error_bluetooth">Σφάλμα - η εφαρμογή απαιτεί bluetooth</string>
-
     <string name="starting_pairing">Αρχή pairing</string>
-
     <string name="pairing_failed">Pairing απέτυχε</string>
-
     <string name="url_for_join">Διεύθυνση URL για συμμετοχή σε Meshtastic mesh</string>
-
     <string name="accept">Αποδοχή</string>
-
     <string name="cancel">Ακύρωση</string>
-
     <string name="change_channel">Αλλαγή καναλιού</string>
-
     <string name="are_you_sure_channel">Είστε βέβαιοι ότι θέλετε να αλλάξετε κανάλι? Η επικοινωνία με άλλες συσκευές θα σταματήσεις μέχρι να μοιραστείτε τις ρυθμίσεις του νέου καναλιού.</string>
-
     <string name="new_channel_rcvd">Λήψη URL νέου καναλιού</string>
-
     <string name="do_you_want_switch">Θέλετε να αλλάξετε ‘%s’ κανάλι?</string>
-
     <string name="map_not_allowed">Έχετε απενεργοποιήσει την ανάλυση δεδομένων. Δυστυχώς ο πάροχος χαρτών μας (mapbox) απαιτεί η ανάλυση δεδομένων να επιτρέπεται στο ‘δωρεάν’ πακέτο. Επομένως έχουμε απενεργοποιήσει το χάρτη.\n\n
     Αν επιθυμείτε να δείτε το χάρτη, θα πρέπει να ενεργοποιήσετε την ανάλυση δεδομένων στις Ρυθμίσεις (επίσης - προσωρινά - θα πρέπει να επανεκκινήσετε την εφαρμογή).\n\n
     Αν θεωρείτε ότι πρέπει να πληρώνουμε το mapbox (η να αλλάξουμε πάροχο χαρτών), παρακαλώ δημοσιεύστε στο meshtastic.discourse.group</string>
-
     <string name="permission_missing">Λείπει μια απαιτούμενη άδεια, Meshtastic δεν θα λειτοργεί σωστά.  Ενεργοποιήστε τις ρυθμίσεις εφαρμογής Android.</string>
-
     <string name="radio_sleeping">Radio σε κατάσταση ύπνου, δεν γίνεται αλλαγή καναλιού</string>
-
     <string name="report_bug">Αναφορά Bug</string>
-
     <string name="report_a_bug">Αναφέρετε ένα bug</string>
-
     <string name="report_bug_text">Είστε σίγουροι ότι θέλετε να αναφέρετε ένα bug? Μετά την αναφορά δημοσιεύστε στο meshtastic.discourse.group ώστε να συνδέσουμε την αναφορά με το συμβάν.</string>
-
     <string name="report">Αναφορά</string>
-
     <string name="select_radio">Επιλογή radio</string>
-
     <string name="current_pair">Έχετε κάνει pair με radio %s</string>
-
     <string name="not_paired_yet">Δεν έχετε κάνει pair με radio ακόμη.</string>
-
     <string name="change_radio">Αλλαγή radio</string>
-
     <string name="please_pair">Παρακαλώ κάντε pair μια συσκευή στις ρυθμίσεις Android.</string>
-
     <string name="pairing_completed">Η διαδικασία pairing ολοκληρώθηκε, εκκίνηση υπηρεσίας</string>
-
     <string name="pairing_failed_try_again">Η διαδικασία pairing απέτυχε, παρακαλώ επιλέξτε πάλι</string>
-
     <string name="location_disabled">Ο εντοπισμός τοποθεσίας είναι απενεργοποιημένος, δε μπορούμε να μοιραστούμε τη θέση σας με το mesh.</string>
-
     <string name="share">Κοινοποίηση</string>
-
     <string name="disconnected">Αποσυνδεδεμένο</string>
-
     <string name="device_sleeping">Συσκευή σε ύπνωση</string>
-
     <string name="connected_count">Συνδεδεμένος: %s από %s online</string>
-
     <string name="list_of_nodes">Λίστα κόμβων δικτύου</string>
-
     <string name="update_firmware">Αναβάθμιση Firmware</string>
-
     <string name="connected">Συνδεδεμένο στο radio</string>
-
     <string name="connected_to">Συνδεδεμένο στο radio (%s)</string>
-
     <string name="not_connected">Αποσυνδεδεμένο, επιλέξτε radio </string>
-
     <string name="connected_sleeping">Συνδεδεμένο στο radio, αλλά βρίσκεται σε ύπνωση</string>
-
     <string name="update_to">Αναβάθμιση σε %s</string>
-
     <string name="app_too_old">Εφαρμογή πολύ παλαιά</string>
-
     <string name="must_update">Πρέπει να ενημερώσετε την εφαρμογή μέσω Google Play store (ή Github). Είναι πολύ παλαιά ώστε να συνδεθεί με το radio.</string>
-
     <string name="none">Κανένα (απενεργοποιημένο)</string>
-
-    <string name="modem_config_short">Μικρή εμβέλεια (αλλά γρήγορο)</string>
-
-    <string name="modem_config_medium">Μεσαία εμβέλεια (αλλά γρήγορο)</string>
-
-    <string name="modem_config_long">Μεγάλη εμβέλεια (αλλά αργό)</string>
-
-    <string name="modem_config_very_long">Πολύ μεγάλη εμβέλεια (αλλά αργό)</string>
-
+    <string name="modem_config_short">Μικρή εμβέλεια (γρήγορο)</string>
+    <string name="modem_config_medium">Μεσαία εμβέλεια (γρήγορο)</string>
+    <string name="modem_config_long">Μεγάλη εμβέλεια (γρήγορο)</string>
+    <string name="modem_config_very_long">Πολύ μεγάλη εμβέλεια (αργό)</string>
     <string name="modem_config_unrecognized">ΜΗ ΑΝΑΓΝΩΡΙΣΙΜΟ</string>
-
     <string name="meshtastic_service_notifications">Ειδοποιήσεις Υπηρεσίας Meshtastic</string>
-
     <string name="location_disabled_warning">Πρέπει να ενεργοποιήσετε τις υπηρεσίες εντοπισμού τοποθεσίας στις ρυθμίσεις Android</string>
-
     <string name="about">Σχετικά</string>
-
     <string name="a_list_of_nodes_in_the_mesh">Λίστα κόμβων στο mesh</string>
-
     <string name="text_messages">Μηνύματα</string>
-
     <string name="channel_invalid">Αυτό το κανάλι URL δεν είναι ορθό και δεν μπορεί να χρησιμοποιηθεί</string>
+    <string name="modem_config_slow_short">Μικρή εμβέλεια (αργό)</string>
+    <string name="modem_config_slow_medium">Μεσαία εμβέλεια (αργό)</string>
+    <string name="modem_config_slow_long">μεγάλη εμβέλεια (αργό)</string>
 </resources>

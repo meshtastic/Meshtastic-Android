@@ -62,7 +62,7 @@
     <string name="modem_config_short">Curto alcance / rápido</string>
     <string name="modem_config_medium">Médio alcance / rápido</string>
     <string name="modem_config_long">Longo alcance / lento</string>
-    <string name="modem_config_very_long">Longo alcance / lento</string>
+    <string name="modem_config_very_long">Muito longo alcance / lento</string>
     <string name="modem_config_unrecognized">DESCONHECIDO</string>
     <string name="meshtastic_service_notifications">Notificações do Serviço Meshtastic</string>
     <string name="location_disabled_warning"> Você deve ativar o modo de alta precisão nas Configurações de Local do Android</string>
@@ -116,4 +116,5 @@
     <string name="why_camera_required">Precisamos acessar a câmera para escanear códigos QR. Nenhuma foto ou video são armazenados.</string>
     <string name="modem_config_slow_short">Curto alcance / lento</string>
     <string name="modem_config_slow_medium">Médio alcance / lento</string>
+    <string name="modem_config_slow_long">Longo alcance / lento</string>
 </resources>

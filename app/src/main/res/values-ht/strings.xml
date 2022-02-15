@@ -59,7 +59,7 @@
     <string name="none">Okenn (enfim)</string>
     <string name="modem_config_short">Distans kout (men vit)</string>
     <string name="modem_config_medium">Distans mwayènn (men vit)</string>
-    <string name="modem_config_long">Anpil distans (men pi lan)</string>
+    <string name="modem_config_long">Anpil distans (men vit)</string>
     <string name="modem_config_very_long">Distans vrèman long (men lan)</string>
     <string name="modem_config_unrecognized">PA REKONÈT</string>
     <string name="meshtastic_service_notifications">Notifikasyon Sèvis Meshtastic</string>
@@ -68,4 +68,7 @@
     <string name="a_list_of_nodes_in_the_mesh">Yon lis ne elektronik nan mesh la</string>
     <string name="text_messages">Mesaj tèks yo</string>
     <string name="channel_invalid">Chènn URL sa a pa valab epi yo pa kapab itilize li</string>
+    <string name="modem_config_slow_short">Distans kout (men lan)</string>
+    <string name="modem_config_slow_medium">Distans mwayènn (men lan)</string>
+    <string name="modem_config_slow_long">Anpil distans (men lan)</string>
 </resources>

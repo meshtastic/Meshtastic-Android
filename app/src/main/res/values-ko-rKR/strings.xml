@@ -59,7 +59,7 @@
     <string name="none">없음 (비활성화)</string>
     <string name="modem_config_short">짧은 거리 (빠른 속도)</string>
     <string name="modem_config_medium">중간 거리 (빠른 속도)</string>
-    <string name="modem_config_long">먼 거리 (느린 속도)</string>
+    <string name="modem_config_long">먼 거리 (빠른 속도)</string>
     <string name="modem_config_very_long">아주 먼 거리 (느린 속도)</string>
     <string name="modem_config_unrecognized">알 수 없음</string>
     <string name="meshtastic_service_notifications">Meshtastic 서비스 알림</string>
@@ -73,4 +73,7 @@
     <string name="rate_dialog_message_en">이 앱은 상업적인 목적으로 만들어 진 것이 아닙니다. 개발자의 노고를 치하하기 위해서 평가를 해주시겠어요? 만약 버그를 발견하면 해당 포럼에 알려주세요. 고맙습니다.</string>
     <string name="rate_dialog_no_en">하지 않음</string>
     <string name="rate_dialog_title_en">Meshtastic 평가</string>
+    <string name="modem_config_slow_short">짧은 거리 (느린 속도)</string>
+    <string name="modem_config_slow_medium">중간 거리 (느린 속도)</string>
+    <string name="modem_config_slow_long">>먼 거리 (느린 속도)</string>
 </resources>

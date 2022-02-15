@@ -120,4 +120,5 @@
     <string name="why_camera_required">Aplikácia Meshtastic potrebuje práva pre prístup ku fotoaparátu kvôli možnosti načítania QR kódov. Fotky ani videá nebudú ukladané na Vašom Android zariadení.</string>
     <string name="modem_config_slow_short">Krátky dosah / Pomalé</string>
     <string name="modem_config_slow_medium">Stredný dosah / Pomalé</string>
+    <string name="modem_config_slow_long">Dlhý dosah / Pomalé</string>
 </resources>

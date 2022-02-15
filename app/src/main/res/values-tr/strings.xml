@@ -59,12 +59,15 @@
     <string name="app_too_old">Uygulama çok eski</string>
     <string name="must_update">Uygulamayı Google Play store (ya da GitHub)\'da güncellemelisiniz. Bu telsiz ile haberleşmek için uygualama çok eski.</string>
     <string name="none">Hiçbiri (kapat)</string>
-    <string name="modem_config_short">Kısa menzilli (ama hızlı)</string>
-    <string name="modem_config_medium">Orta menzilli (ama hızlı)</string>
-    <string name="modem_config_long">Uzun menzilli (ama yavaş)</string>
-    <string name="modem_config_very_long">Çok uzun menzilli (ama yavaş)</string>
+    <string name="modem_config_short">Kısa menzilli (hızlı)</string>
+    <string name="modem_config_medium">Orta menzilli (hızlı)</string>
+    <string name="modem_config_long">Uzun menzilli (hızlı)</string>
+    <string name="modem_config_very_long">Çok uzun menzilli (yavaş)</string>
     <string name="modem_config_unrecognized">TANIMLANAMADI</string>
     <string name="meshtastic_service_notifications">Meshtastic Servis Bildirimleri</string>
     <string name="location_disabled_warning">Android ayarlarında konum servislerine izin vermelisiniz</string>
     <string name="about">Hakkında</string>
+    <string name="modem_config_slow_short">Kısa menzilli (yavaş)</string>
+    <string name="modem_config_slow_medium">Orta menzilli (yavaş)</string>
+    <string name="modem_config_slow_long">Uzun menzilli (yavaş)</string>
 </resources>

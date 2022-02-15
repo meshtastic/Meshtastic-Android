@@ -58,10 +58,10 @@
     <string name="app_too_old">Az alkalmazás frissítése szükséges</string>
     <string name="must_update">Frissítenie kell ezt az alkalmazást a Google Play áruházban (vagy a GitHub-ról), mert túl régi, hogy kommunikálni tudjob ezzel a rádió firmware-rel. Kérem olvassa el a tudnivalókat ebből a <a href="https://www.meshtastic.org/software/android-too-old.html">wiki</a>-ből.</string>
     <string name="none">Egyik sem (letiltás)</string>
-    <string name="modem_config_short">Rövid hatótáv (nagyon gyors)</string>
+    <string name="modem_config_short">Rövid hatótáv (gyors)</string>
     <string name="modem_config_medium">Közepes hatótáv (gyors)</string>
-    <string name="modem_config_long">Távoli hatótáv (lassú)</string>
-    <string name="modem_config_very_long">Nagyon távoli hatótáv (nagyon lassú)</string>
+    <string name="modem_config_long">Távoli hatótáv (gyors)</string>
+    <string name="modem_config_very_long">Nagyon távoli hatótáv (lassú)</string>
     <string name="modem_config_unrecognized">FELISMERHETETLEN</string>
     <string name="meshtastic_service_notifications">Meshtastic szolgáltatás értesítések</string>
     <string name="location_disabled_warning">Be kell kapcsolja a (nagy pontosságú) helyzet szolgáltatásokat az Android beállításokban</string>
@@ -102,4 +102,7 @@
     <string name="theme_dark">Sötét</string>
     <string name="theme_system">Rendszer alapértelmezett</string>
     <string name="choose_theme_title">Válasszon témát</string>
+    <string name="modem_config_slow_short">Rövid hatótáv (lassú)</string>
+    <string name="modem_config_slow_medium">Közepes hatótáv (lassú)</string>
+    <string name="modem_config_slow_long">Távoli hatótáv (lassú)</string>
 </resources>

@@ -66,7 +66,7 @@
     <string name="update_to">Mise à jour vers %s</string>
     <string name="modem_config_short">Courte distance (rapide)</string>
     <string name="modem_config_medium">Moyenne distance (rapide)</string>
-    <string name="modem_config_long">Longue distance (plus lent)</string>
+    <string name="modem_config_long">Longue distance (rapide)</string>
     <string name="modem_config_very_long">Très longue distance (lent)</string>
     <string name="meshtastic_service_notifications">Meshtastic Notifications de Service</string>
     <string name="location_disabled_warning">Besoin d\'activer l\'accès à la position dans les Paramètres Android</string>
@@ -74,4 +74,7 @@
     <string name="a_list_of_nodes_in_the_mesh">Une liste des nœuds dans le réseau</string>
     <string name="text_messages">Messages tèxte</string>
     <string name="channel_invalid">Cet URL Canal n\'est pas valide et ne peut être utilisé</string>
+    <string name="modem_config_slow_short">Courte distance (lent)</string>
+    <string name="modem_config_slow_medium">Moyenne distance (lent)</string>
+    <string name="modem_config_slow_long">Longue distance (lent)</string>
 </resources>

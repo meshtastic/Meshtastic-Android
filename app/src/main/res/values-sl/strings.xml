@@ -57,12 +57,15 @@
     <string name="app_too_old">Aplikacija je prestara</string>
     <string name="must_update">To aplikacijo morate posodobiti v trgovini Google Play (ali Github). Žal se ne more povezati s tem radiem.</string>
     <string name="none">Brez (onemogoči)</string>
-    <string name="modem_config_short">Kratek doseg (vendar hiter)</string>
-    <string name="modem_config_medium">Srednji doseg (vendar hiter)</string>
-    <string name="modem_config_long">Dolg doseg (vendar počasnejši)</string>
-    <string name="modem_config_very_long">Zelo dolg doseg (vendar počasen)</string>
+    <string name="modem_config_short">Kratek doseg (hitro)</string>
+    <string name="modem_config_medium">Srednji doseg (hitro)</string>
+    <string name="modem_config_long">Dolg doseg (hitro)</string>
+    <string name="modem_config_very_long">Zelo dolg doseg (počasen)</string>
     <string name="modem_config_unrecognized">NEZNANO</string>
     <string name="meshtastic_service_notifications">Obvestila storitve Meshtastic</string>
     <string name="location_disabled_warning">V nastavitvah za Android morate vključiti lokacijske storitve</string>
     <string name="about">O programu</string>
+    <string name="modem_config_slow_short">Kratek doseg (počasen)</string>
+    <string name="modem_config_slow_medium">Srednji doseg (počasen)</string>
+    <string name="modem_config_slow_long">Dolg doseg (počasen)</string>
 </resources>
