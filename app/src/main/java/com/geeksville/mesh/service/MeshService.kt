@@ -1300,15 +1300,10 @@ class MeshService : Service(), Logging {
             val a = RadioInterfaceService.getBondedDeviceAddress(this)
             val isBluetoothInterface = a != null && a.startsWith("x")
 
-            var hwModelStr = myInfo.hwModelDeprecated
-            if (hwModelStr.isEmpty()) {
-                val nodeNum =
-                    myInfo.myNodeNum // Note: can't use the normal property because myNodeInfo not yet setup
-                val ni = nodeDBbyNodeNum[nodeNum] // can't use toNodeInfo because too early
-                val asStr = ni?.user?.hwModelString
-                if (asStr != null)
-                    hwModelStr = asStr
-            }
+            val nodeNum =
+                myInfo.myNodeNum // Note: can't use the normal property because myNodeInfo not yet setup
+            val ni = nodeDBbyNodeNum[nodeNum] // can't use toNodeInfo because too early
+            val hwModelStr = ni?.user?.hwModelString
             val mi = with(myInfo) {
                 MyNodeInfo(
                     myNodeNum,
