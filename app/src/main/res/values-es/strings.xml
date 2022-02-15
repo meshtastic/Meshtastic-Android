@@ -55,10 +55,10 @@
     <string name="update_to">Actualizar a %s</string>
     <string name="app_too_old">Es necesario actualizar la aplicación</string>
     <string name="none">Ninguno (desactivado)</string>
-    <string name="modem_config_short">Corto alcance (pero rápido)</string>
-    <string name="modem_config_medium">Alcance medio (pero rápido)</string>
-    <string name="modem_config_long">Largo alcance (pero más lento)</string>
-    <string name="modem_config_very_long">Muy largo alcance (pero lento)</string>
+    <string name="modem_config_short">Corto alcance / rápido</string>
+    <string name="modem_config_medium">Alcance medio / rápido</string>
+    <string name="modem_config_long">Largo alcance / rápido</string>
+    <string name="modem_config_very_long">Muy largo alcance / lento</string>
     <string name="modem_config_unrecognized">SIN RECONOCIMIENTO</string>
     <string name="meshtastic_service_notifications">Notificaciones de servicio de Meshtastic</string>
     <string name="location_disabled_warning">Debes activar los servicios de localización (de alta precisión) en los Ajustes de Android</string>
@@ -93,4 +93,7 @@
     <string name="are_you_shure_change_default">¿Estás seguro de que quieres cambiar al canal por defecto?</string>
     <string name="reset_to_defaults">Restablecer los valores predeterminados</string>
     <string name="apply">Aplique</string>
+    <string name="modem_config_slow_short">Curto alcance / lento</string>
+    <string name="modem_config_slow_medium">Médio alcance / lento</string>
+    <string name="modem_config_slow_long">Largo alcance / lento)</string>
 </resources>

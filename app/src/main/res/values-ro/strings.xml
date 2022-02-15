@@ -59,9 +59,9 @@
     <string name="app_too_old">Aplicație prea veche</string>
     <string name="must_update">Trebuie să updatezi această aplicație de pe Google Play  (sau Github). Aplicația este prea veche pentru a comunica cu dispozitivul.</string>
     <string name="none">Niciunul (dezactivat)</string>
-    <string name="modem_config_short">Rază scurtă (comunicare rapidă)</string>
-    <string name="modem_config_medium">Rază medie (comunicare rapidă)</string>
-    <string name="modem_config_long">Rază lungă (încet)</string>
+    <string name="modem_config_short">Rază scurtă (rapidă)</string>
+    <string name="modem_config_medium">Rază medie (rapidă)</string>
+    <string name="modem_config_long">Rază lungă (rapidă)</string>
     <string name="modem_config_very_long">Rază foarte lungă (încet)</string>
     <string name="modem_config_unrecognized">NERECUNOSCUT</string>
     <string name="meshtastic_service_notifications">Notificările Sistemului Meshtastic</string>
@@ -70,4 +70,7 @@
     <string name="a_list_of_nodes_in_the_mesh">O lista cu nodurile din rețea</string>
     <string name="text_messages">Mesaje Text</string>
     <string name="channel_invalid">Acest URL de canal este invalid și nu poate fi folosit</string>
+    <string name="modem_config_slow_short">Rază scurtă (încet)</string>
+    <string name="modem_config_slow_medium">Rază medie (încet)</string>
+    <string name="modem_config_slow_long">Rază lungă (încet)</string>
 </resources>

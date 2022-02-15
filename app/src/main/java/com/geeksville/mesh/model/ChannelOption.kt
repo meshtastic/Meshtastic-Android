@@ -8,12 +8,13 @@ enum class ChannelOption(
     val configRes: Int,
     val minBroadcastPeriodSecs: Int
 ) {
-    SHORT(ChannelProtos.ChannelSettings.ModemConfig.Bw500Cr45Sf128,R.string.modem_config_short, 30),
-    MEDIUM(ChannelProtos.ChannelSettings.ModemConfig.Bw125Cr45Sf128, R.string.modem_config_slow_short, 30),
-    MED_FAST(ChannelProtos.ChannelSettings.ModemConfig.Bw250Cr47Sf1024,R.string.modem_config_medium, 60),
-    MED_SLOW(ChannelProtos.ChannelSettings.ModemConfig.Bw250Cr46Sf2048,R.string.modem_config_slow_medium, 60),
-    LONG(ChannelProtos.ChannelSettings.ModemConfig.Bw31_25Cr48Sf512, R.string.modem_config_long, 240),
-    VERY_LONG(ChannelProtos.ChannelSettings.ModemConfig.Bw125Cr48Sf4096, R.string.modem_config_very_long, 375);
+    SHORT_FAST(ChannelProtos.ChannelSettings.ModemConfig.ShortFast,R.string.modem_config_short, 30),
+    SHORT_SLOW(ChannelProtos.ChannelSettings.ModemConfig.ShortSlow, R.string.modem_config_slow_short, 30),
+    MED_FAST(ChannelProtos.ChannelSettings.ModemConfig.MidFast,R.string.modem_config_medium, 60),
+    MED_SLOW(ChannelProtos.ChannelSettings.ModemConfig.MidSlow,R.string.modem_config_slow_medium, 60),
+    LONG_FAST(ChannelProtos.ChannelSettings.ModemConfig.LongFast, R.string.modem_config_long, 240),
+    LONG_SLOW(ChannelProtos.ChannelSettings.ModemConfig.LongSlow, R.string.modem_config_slow_long, 375),
+    VERY_LONG(ChannelProtos.ChannelSettings.ModemConfig.VLongSlow, R.string.modem_config_very_long, 375);
 
     companion object {
         fun fromConfig(modemConfig: ChannelProtos.ChannelSettings.ModemConfig?): ChannelOption? {

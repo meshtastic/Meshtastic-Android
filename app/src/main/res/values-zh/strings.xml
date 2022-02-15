@@ -61,7 +61,7 @@
     <string name="none">无（禁用）</string>
     <string name="modem_config_short">短距离（速度快）</string>
     <string name="modem_config_medium">中等距离（速度快）</string>
-    <string name="modem_config_long">长距离（速度较慢）</string>
+    <string name="modem_config_long">长距离（速度快）</string>
     <string name="modem_config_very_long">远距离（速度慢）</string>
     <string name="modem_config_unrecognized">无法识别</string>
     <string name="meshtastic_service_notifications">Mesh网络服务通知</string>
@@ -103,4 +103,7 @@
     <string name="theme_dark">暗黑</string>
     <string name="theme_system">系统默认</string>
     <string name="choose_theme_title">选择主题</string>
+    <string name="modem_config_slow_short">短距离（速度慢）</string>
+    <string name="modem_config_slow_medium">中等距离（速度慢）</string>
+    <string name="modem_config_slow_long">长距离（速度慢）</string>
 </resources>

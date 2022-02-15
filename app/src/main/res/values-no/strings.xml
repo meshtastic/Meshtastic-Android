@@ -59,10 +59,10 @@
     <string name="app_too_old">Applikasjon for gammel</string>
     <string name="must_update">Du må oppdatere denne applikasjonen på Google Play store (eller Github). Den er for gammel til å snakke med denne radioen.</string>
     <string name="none">Ingen (slå av)</string>
-    <string name="modem_config_short">Kort rekkevidde (men rask)</string>
-    <string name="modem_config_medium">Medium rekkevidde (men rask)</string>
-    <string name="modem_config_long">Lang rekkevidde (men langsommerer)</string>
-    <string name="modem_config_very_long">Veldig lang rekkevidde (men langsom)</string>
+    <string name="modem_config_short">Kort rekkevidde (rask)</string>
+    <string name="modem_config_medium">Medium rekkevidde (rask)</string>
+    <string name="modem_config_long">Lang rekkevidde (rask)</string>
+    <string name="modem_config_very_long">Veldig lang rekkevidde (langsom)</string>
     <string name="modem_config_unrecognized">IKKE GJENKJENT</string>
     <string name="meshtastic_service_notifications">Meshtastic Tjeneste meldinger</string>
     <string name="location_disabled_warning">Du må slå på (høy presisjon) lokasjonstjenester i Android Innstillinger</string>
@@ -70,4 +70,7 @@
     <string name="a_list_of_nodes_in_the_mesh">En liste over noder i nettet</string>
     <string name="text_messages">Tekstmeldinger</string>
     <string name="channel_invalid">Denne kanall URL er ugyldig og kan ikke benyttes</string>
+    <string name="modem_config_slow_short">Kort rekkevidde (langsom)</string>
+    <string name="modem_config_slow_medium">Medium rekkevidde (langsom)</string>
+    <string name="modem_config_slow_long">Lang rekkevidde (langsom)</string>
 </resources>

@@ -66,7 +66,7 @@
     <string name="modem_config_short">Short Range / Fast</string>
     <string name="modem_config_medium">Medium Range / Fast</string>
     <string name="modem_config_long">Long Range / Fast</string>
-    <string name="modem_config_very_long">Long Range / Slow</string>
+    <string name="modem_config_very_long">Very Long Range / Slow</string>
     <string name="modem_config_unrecognized">UNRECOGNIZED</string>
     <string name="meshtastic_service_notifications">Meshtastic Service Notifications</string>
     <string name="location_disabled_warning">Location must be turned on (high accuracy) to find new devices via bluetooth. You can turn it off again afterwards.</string>
@@ -123,4 +123,5 @@
     <string name="delete_selected_message">Delete selected message?</string>
     <string name="delete">Delete</string>
     <string name="delete_all_messages">Delete All Messages</string>
+    <string name="modem_config_slow_long">Long Range / Slow</string>
 </resources>
