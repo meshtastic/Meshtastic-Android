@@ -1335,7 +1335,6 @@ class MeshService : Service(), Logging {
         if (myInfo != null && mi != null) {
             /// Track types of devices and firmware versions in use
             GeeksvilleApplication.analytics.setUserInfo(
-                // DataPair("region", mi.region),
                 DataPair("firmware", mi.firmwareVersion),
                 DataPair("has_gps", mi.hasGPS),
                 DataPair("hw_model", mi.model),
@@ -1351,14 +1350,10 @@ class MeshService : Service(), Logging {
                     // We also include this info, because it is required to correctly decode address from the map file
                     DataPair("firmware", mi.firmwareVersion),
                     DataPair("hw_model", mi.model)
-                    // DataPair("region", mi.region)
                 )
             }
         }
     }
-
-    /// If found, the old region string of the form 1.0-EU865 etc...
-    private var legacyRegion: String? = null
 
     /**
      * Update the nodeinfo (called from either new API version or the old one)
@@ -1373,7 +1368,6 @@ class MeshService : Service(), Logging {
         insertPacket(packetToSave)
 
         rawMyNodeInfo = myInfo
-        legacyRegion = myInfo.region
         regenMyNodeInfo()
 
         // We'll need to get a new set of channels and settings now
@@ -1437,21 +1431,6 @@ class MeshService : Service(), Logging {
                 info("Using device region $curConfigRegion (code ${curConfigRegion.number})")
                 curRegionValue = curConfigRegion.number
             }
-
-            if (curRegionValue == RadioConfigProtos.RegionCode.Unset_VALUE) {
-                // look for a legacy region
-                val legacyRegex = Regex(".+-(.+)")
-                legacyRegion?.let { lr ->
-                    val matches = legacyRegex.find(lr)
-                    if (matches != null) {
-                        val (region) = matches.destructured
-                        val newRegion = RadioConfigProtos.RegionCode.valueOf(region)
-                        info("Upgrading legacy region $newRegion (code ${newRegion.number})")
-                        curRegionValue = newRegion.number
-                    }
-                }
-            }
-
             // If nothing was set in our (new style radio preferences, but we now have a valid setting - slam it in)
             setRegionOnDevice()
         }
