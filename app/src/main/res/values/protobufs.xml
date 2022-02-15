@@ -5,11 +5,14 @@
         <item>Unset</item>
         <item>US</item>
         <item>EU433</item>
-        <item>EU865</item>
+        <item>EU868</item>
         <item>CN</item>
         <item>JP</item>
         <item>ANZ</item>
         <item>KR</item>
         <item>TW</item>
+        <item>RU</item>
+        <item>IN</item>
+        <item>TH</item>
     </array>
 </resources>
