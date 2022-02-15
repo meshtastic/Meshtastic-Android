@@ -1415,9 +1415,6 @@ class MeshService : Service(), Logging {
     }
 
     /**
-     * If we are updating nodes we might need to use old (fixed by firmware build)
-     * region info to populate our new universal ROMs.
-     *
      * This function updates our saved preferences region info and if the device has an unset new
      * region info, we set it.
      */
