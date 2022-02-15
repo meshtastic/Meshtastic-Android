@@ -175,7 +175,6 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
                     myNodeNum = MY_NODE
                     messageTimeoutMsec = 5 * 60 * 1000
                     firmwareVersion = "1.2.8" // Pretend to be running an older 1.2 version
-                    numBands = 13
                     maxChannels = 8
                 }.build()
             },
