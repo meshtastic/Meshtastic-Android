@@ -53,6 +53,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val userTouchLayerId = "user-touch-layer"
     private var nodePositions = GeoJsonSource(GeoJsonSource.Builder(nodeSourceId))
 
+    private val userTouchPosition = GeoJsonSource(GeoJsonSource.Builder(userTouchPositionId))
+
+
     private val nodeLayer = SymbolLayer(nodeLayerId, nodeSourceId)
         .iconImage(markerImageId)
         .iconAnchor(IconAnchor.BOTTOM)
@@ -208,19 +211,23 @@ class MapFragment : ScreenFragment("Map"), Logging {
         }
     }
 
-    //TODO Create list of touch positions that can be updated on new press
+    /**
+     * OnLongClick of the map set a position marker.
+     */
     private val longClick = OnMapLongClickListener {
         val userDefinedPointImg =
             ContextCompat.getDrawable(requireActivity(), R.drawable.ic_twotone_person_24)!!
                 .toBitmap()
         val point = Point.fromLngLat(it.longitude(), it.latitude())
-        val userTouchPosition = GeoJsonSource(GeoJsonSource.Builder(userTouchPositionId))
-        userTouchPosition.geometry(point)
 
         mapView?.getMapboxMap()?.getStyle()?.let { style ->
-            style.addImage("userImage", userDefinedPointImg)
-            style.addSource(userTouchPosition)
-            style.addLayer(userTouchLayer)
+            userTouchPosition.geometry(point)
+
+            if (!style.styleLayerExists(userTouchLayerId)) {
+                style.addImage("userImage", userDefinedPointImg)
+                style.addSource(userTouchPosition)
+                style.addLayer(userTouchLayer)
+            }
 
         }
         return@OnMapLongClickListener true
