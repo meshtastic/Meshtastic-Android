@@ -1,5 +1,7 @@
 package com.geeksville.mesh.ui
 
+import android.app.AlertDialog
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -31,6 +33,7 @@ import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.flyTo
+import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -45,9 +48,17 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val labelLayerId = "label-layer"
     private val markerImageId = "my-marker-image"
 
+
+    private val userTouchPositionId = "user-touch-position"
+    private val userTouchLayerId = "user-touch-layer"
     private var nodePositions = GeoJsonSource(GeoJsonSource.Builder(nodeSourceId))
 
     private val nodeLayer = SymbolLayer(nodeLayerId, nodeSourceId)
+        .iconImage(markerImageId)
+        .iconAnchor(IconAnchor.BOTTOM)
+        .iconAllowOverlap(true)
+
+    private val userTouchLayer = SymbolLayer(userTouchLayerId, userTouchPositionId)
         .iconImage(markerImageId)
         .iconAnchor(IconAnchor.BOTTOM)
         .iconAllowOverlap(true)
@@ -179,6 +190,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     }
 
                     v.gestures.rotateEnabled = false
+                    v.gestures.addOnMapLongClickListener(this.longClick)
 
                     // Provide initial positions
                     model.nodeDB.nodes.value?.let { nodes ->
@@ -194,6 +206,33 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 zoomToNodes(map)
             }
         }
+    }
+
+    //TODO Create list of touch positions that can be updated on new press
+    private val longClick = OnMapLongClickListener {
+        val userDefinedPointImg =
+            ContextCompat.getDrawable(requireActivity(), R.drawable.ic_twotone_person_24)!!
+                .toBitmap()
+        val point = Point.fromLngLat(it.longitude(), it.latitude())
+        val userTouchPosition = GeoJsonSource(GeoJsonSource.Builder(userTouchPositionId))
+        userTouchPosition.geometry(point)
+
+        mapView?.getMapboxMap()?.getStyle()?.let { style ->
+            style.addImage("userImage", userDefinedPointImg)
+            style.addSource(userTouchPosition)
+            style.addLayer(userTouchLayer)
+
+        }
+        return@OnMapLongClickListener true
+    }
+
+    private sealed class OfflineLog(val message: String, val color: Int) {
+        class Info(message: String) : OfflineLog(message, android.R.color.black)
+        class Error(message: String) : OfflineLog(message, android.R.color.holo_red_dark)
+        class Success(message: String) : OfflineLog(message, android.R.color.holo_green_dark)
+        class TilePackProgress(message: String) : OfflineLog(message, android.R.color.holo_purple)
+        class StylePackProgress(message: String) :
+            OfflineLog(message, android.R.color.holo_orange_dark)
     }
 }
 
