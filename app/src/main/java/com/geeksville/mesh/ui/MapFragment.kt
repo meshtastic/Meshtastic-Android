@@ -77,6 +77,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private lateinit var binding: MapViewBinding
     private lateinit var mapNotAllowedBinding: MapNotAllowedBinding
     private lateinit var viewAnnotationManager: ViewAnnotationManager
+    private lateinit var mapStyleURI: String
 
     private lateinit var point: Geometry
 
@@ -86,6 +87,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val nodeLayerId = "node-layer"
     private val labelLayerId = "label-layer"
     private val markerImageId = "my-marker-image"
+    private val userPointImageId = "user-image";
 
     private var stylePackCancelable: Cancelable? = null
     private var tilePackCancelable: Cancelable? = null
@@ -105,7 +107,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         .iconAllowOverlap(true)
 
     private val userTouchLayer = SymbolLayer(userTouchLayerId, userTouchPositionId)
-        .iconImage(markerImageId)
+        .iconImage(userPointImageId)
         .iconAnchor(IconAnchor.BOTTOM)
         .iconAllowOverlap(true)
 
@@ -241,7 +243,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         // Remove the style pack with the style url.
         // Note this will not remove the downloaded style pack, instead, it will just mark the resources
         // not a part of the existing style pack. The resources still exists as disk cache.
-        offlineManager.removeStylePack(Style.OUTDOORS)
+        offlineManager.removeStylePack(mapStyleURI)
 
         MapboxMap.clearData(resourceOptions) {
             it.error?.let { error ->
@@ -262,7 +264,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
         binding.fabStyleToggle.setOnClickListener {
 
             //TODO: Setup Style menu for satellite view, street view, & outdoor view
-            // downloadOfflineRegion()
         }
         binding.downloadRegion.setOnClickListener {
             downloadOfflineRegion()
@@ -290,6 +291,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                             it.addImage(markerImageId, markerIcon)
                             it.addLayer(nodeLayer)
                             it.addLayer(labelLayer)
+                            this.mapStyleURI = map.getStyle()?.styleURI.toString()
                         }
                     }
 
@@ -328,8 +330,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
         // Style packs are stored in the disk cache database, but their resources are not subject to
         // the data eviction algorithm and are not considered when calculating the disk cache size.
+
         stylePackCancelable = offlineManager.loadStylePack(
-            Style.OUTDOORS,
+            mapStyleURI,
             // Build Style pack load options
             StylePackLoadOptions.Builder()
                 .glyphsRasterizationMode(GlyphsRasterizationMode.IDEOGRAPHS_RASTERIZED_LOCALLY)
@@ -380,9 +383,10 @@ class MapFragment : ScreenFragment("Map"), Logging {
         // the region area geometry to load a new Tile Region.
 
         // The OfflineManager is responsible for creating tileset descriptors for the given style and zoom range.
+
         val tilesetDescriptor = offlineManager.createTilesetDescriptor(
             TilesetDescriptorOptions.Builder()
-                .styleURI(Style.OUTDOORS)
+                .styleURI(mapStyleURI)
                 .minZoom(0)
                 .maxZoom(16)
                 .build()
@@ -393,7 +397,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
         // Note that the TileStore path must be the same with the TileStore used when initialise the MapView.
         tilePackCancelable = tileStore.loadTileRegion(
-            TILE_REGION_ID,
+            TILE_REGION_ID, // Make this dynamic
             TileRegionLoadOptions.Builder()
                 .geometry(point)
                 .descriptors(listOf(tilesetDescriptor))
@@ -441,10 +445,14 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     /**
      * OnLongClick of the map set a position marker.
+     * If a user long-clicks again, the position of the first marker will be updated
      */
     private val longClick = OnMapLongClickListener {
         val userDefinedPointImg =
-            ContextCompat.getDrawable(requireActivity(), R.drawable.ic_twotone_person_24)!!
+            ContextCompat.getDrawable(
+                requireActivity(),
+                R.drawable.baseline_location_on_white_24dp
+            )!!
                 .toBitmap()
         point = Point.fromLngLat(it.longitude(), it.latitude())
 
@@ -452,7 +460,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
             userTouchPosition.geometry(point)
 
             if (!style.styleLayerExists(userTouchLayerId)) {
-                style.addImage("userImage", userDefinedPointImg)
+                style.addImage(userPointImageId, userDefinedPointImg)
                 style.addSource(userTouchPosition)
                 style.addLayer(userTouchLayer)
             }
@@ -479,6 +487,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         binding.stylePackDownloadProgress.progress = progress.toInt()
     }
 
+    // TODO: Make this dynamic
     private val click = OnMapClickListener {
         if (binding.fabStyleToggle.isVisible && binding.downloadRegion.isVisible) {
             binding.fabStyleToggle.visibility = View.INVISIBLE
