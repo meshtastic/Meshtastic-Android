@@ -200,7 +200,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     var mapView: MapView? = null
 
 
-
     private fun showDownloadedRegions() {
         // Get a list of tile regions that are currently available.
         tileStore.getAllTileRegions { expected ->
@@ -264,6 +263,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
             //TODO: Setup Style menu for satellite view, street view, & outdoor view
             // downloadOfflineRegion()
+        }
+        binding.downloadRegion.setOnClickListener {
+            downloadOfflineRegion()
         }
         // We might not have a real mapview if running with analytics
         if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
@@ -478,10 +480,12 @@ class MapFragment : ScreenFragment("Map"), Logging {
     }
 
     private val click = OnMapClickListener {
-        if (binding.fabStyleToggle.isVisible) {
+        if (binding.fabStyleToggle.isVisible && binding.downloadRegion.isVisible) {
             binding.fabStyleToggle.visibility = View.INVISIBLE
+            binding.downloadRegion.visibility = View.INVISIBLE
         } else {
             binding.fabStyleToggle.visibility = View.VISIBLE
+            binding.downloadRegion.visibility = View.VISIBLE
         }
         return@OnMapClickListener true
     }
