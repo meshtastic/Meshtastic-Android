@@ -60,6 +60,12 @@ class MapFragment : ScreenFragment("Map"), Logging {
         }
     }
 
+    //TODO: Setup menu when creating region for offline maps (On long press set a point to center region, then click that point to bring up menu)
+    //TODO: View Offline Regions (This will allow you to select the region and the map will zoom to it)
+    //TODO: Manage Offline Regions (Allow you to edit the name, delete, & select region)
+    //TODO: Add option to download mbtiles from existing tiles on MapBox (No mobile SDK supports mbtiles natively, they must be uploaded to MapBox studio first, and then they can be downloaded by specifying a URI)
+    //TODO: Update download animation
+
     private val resourceOptions: ResourceOptions by lazy {
         ResourceOptions.Builder().applyDefaultParams(requireContext()).tileStore(tileStore).build()
     }
@@ -255,7 +261,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
         super.onViewCreated(viewIn, savedInstanceState)
 
         binding.fabStyleToggle.setOnClickListener {
-            downloadOfflineRegion()
+
+            //TODO: Setup Style menu for satellite view, street view, & outdoor view
+            // downloadOfflineRegion()
         }
         // We might not have a real mapview if running with analytics
         if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
@@ -488,7 +496,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     }
 
     companion object {
-        private const val TAG = "OfflineActivity"
         private const val ZOOM = 12.0
         private const val TILE_REGION_ID = "myTileRegion"
         private const val STYLE_PACK_METADATA = "my-outdoor-style-pack"
