@@ -5,20 +5,42 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.mapbox.maps.MapView xmlns:mapbox="http://schemas.android.com/apk/res-auto"
+    <com.mapbox.maps.MapView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:mapbox="http://schemas.android.com/apk/res-auto"
         android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         mapbox:mapbox_cameraZoom="0" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ProgressBar
+            android:id="@+id/style_pack_download_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="8"
+            android:clickable="false"
+            android:indeterminate="false"
+            android:max="100"
+            android:visibility="gone"
+            android:progressTint="@color/colorPrimaryDark" />
+    </LinearLayout>
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_style_toggle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
+        android:src="@drawable/baseline_layers_white_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:backgroundTint="@color/colorPrimary"
-        android:contentDescription="DownloadButton" />
+        tools:backgroundTint="@color/buttonColor"
+        android:contentDescription="@string/style_selection" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
