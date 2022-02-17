@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,10 +17,14 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
+import com.geeksville.mesh.databinding.ActivityOfflineBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.util.formatAgo
+import com.mapbox.bindgen.Value
+import com.mapbox.common.*
 import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.maps.*
 import com.mapbox.maps.dsl.cameraOptions
@@ -33,13 +38,40 @@ import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.flyTo
+import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
+import com.mapbox.maps.viewannotation.ViewAnnotationManager
+import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
 class MapFragment : ScreenFragment("Map"), Logging {
+
+
+    private val tileStore: TileStore by lazy {
+        TileStore.create().also {
+            // Set default access token for the created tile store instance
+            it.setOption(
+                TileStoreOptions.MAPBOX_ACCESS_TOKEN,
+                TileDataDomain.MAPS,
+                Value(getString(R.string.mapbox_access_token))
+            )
+        }
+    }
+
+    private val resourceOptions: ResourceOptions by lazy {
+        ResourceOptions.Builder().applyDefaultParams(requireContext()).tileStore(tileStore).build()
+    }
+    private val offlineManager: OfflineManager by lazy {
+        OfflineManager(resourceOptions)
+    }
+
+    private lateinit var handler: Handler
+    private lateinit var binding: ActivityOfflineBinding
+
+    private lateinit var point: Geometry
 
     private val model: UIViewModel by activityViewModels()
 
@@ -48,10 +80,15 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val labelLayerId = "label-layer"
     private val markerImageId = "my-marker-image"
 
+    private var stylePackCancelable: Cancelable? = null
+    private var tilePackCancelable: Cancelable? = null
+
 
     private val userTouchPositionId = "user-touch-position"
     private val userTouchLayerId = "user-touch-layer"
     private var nodePositions = GeoJsonSource(GeoJsonSource.Builder(nodeSourceId))
+
+    private lateinit var viewAnnotationManager: ViewAnnotationManager
 
     private val userTouchPosition = GeoJsonSource(GeoJsonSource.Builder(userTouchPositionId))
 
@@ -157,6 +194,84 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     var mapView: MapView? = null
 
+
+    private fun prepareRemoveOfflineRegionButton() {
+        downloadButton("REMOVE DOWNLOADED REGIONS") {
+            removeOfflineRegions()
+            showDownloadedRegions()
+            binding.container.removeAllViews()
+
+            // Re-enable the Mapbox network stack, so that the new offline region download can succeed.
+            OfflineSwitch.getInstance().isMapboxStackConnected = true
+            debug("Mapbox network stack enabled.")
+
+            prepareDownloadButton()
+        }
+    }
+
+    private fun prepareDownloadButton() {
+        downloadButton("DOWNLOAD") {
+            downloadOfflineRegion()
+        }
+    }
+
+
+    private fun showDownloadedRegions() {
+        // Get a list of tile regions that are currently available.
+        tileStore.getAllTileRegions { expected ->
+            if (expected.isValue) {
+                expected.value?.let { tileRegionList ->
+                    debug("Existing tile regions: $tileRegionList")
+                }
+            }
+            expected.error?.let { tileRegionError ->
+                debug("TileRegionError: $tileRegionError")
+            }
+        }
+        // Get a list of style packs that are currently available.
+        offlineManager.getAllStylePacks { expected ->
+            if (expected.isValue) {
+                expected.value?.let { stylePackList ->
+                    debug("Existing style packs: $stylePackList")
+                }
+            }
+            expected.error?.let { stylePackError ->
+                debug("StylePackError: $stylePackError")
+            }
+        }
+    }
+
+
+    private fun removeOfflineRegions() {
+        // Remove the tile region with the tile region ID.
+        // Note this will not remove the downloaded tile packs, instead, it will just mark the tileset
+        // not a part of a tile region. The tiles still exists as a predictive cache in TileStore.
+        tileStore.removeTileRegion(TILE_REGION_ID)
+
+        // Set the disk quota to zero, so that tile regions are fully evicted
+        // when removed. The TileStore is also used when `ResourceOptions.isLoadTilePacksFromNetwork`
+        // is `true`, and also by the Navigation SDK.
+        // This removes the tiles that do not belong to any tile regions.
+        tileStore.setOption(TileStoreOptions.DISK_QUOTA, Value(0))
+
+        // Remove the style pack with the style url.
+        // Note this will not remove the downloaded style pack, instead, it will just mark the resources
+        // not a part of the existing style pack. The resources still exists as disk cache.
+        offlineManager.removeStylePack(Style.OUTDOORS)
+
+        MapboxMap.clearData(resourceOptions) {
+            it.error?.let { error ->
+                debug(error)
+            }
+        }
+    }
+
+
+    private fun downloadButton(text: String, listener: View.OnClickListener) {
+        binding.button.text = text
+        binding.button.setOnClickListener(listener)
+    }
+
     /**
      * Mapbox native code can crash painfully if you ever call a mapbox view function while the view is not actively being show
      */
@@ -194,6 +309,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
                     v.gestures.rotateEnabled = false
                     v.gestures.addOnMapLongClickListener(this.longClick)
+                    // v.gestures.addOnMapClickListener(this.click)
 
                     // Provide initial positions
                     model.nodeDB.nodes.value?.let { nodes ->
@@ -206,10 +322,134 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     if (isViewVisible)
                         onNodesChanged(map, nodes.values)
                 })
+                //viewAnnotationManager = v.viewAnnotationManager
                 zoomToNodes(map)
             }
         }
     }
+
+
+    private fun downloadOfflineRegion() {
+        // By default, users may download up to 250MB of data for offline use without incurring
+        // additional charges. This limit is subject to change during the beta.
+
+        // - - - - - - - -
+
+        // 1. Create style package with loadStylePack() call.
+
+        // A style pack (a Style offline package) contains the loaded style and its resources: loaded
+        // sources, fonts, sprites. Style packs are identified with their style URI.
+
+        // Style packs are stored in the disk cache database, but their resources are not subject to
+        // the data eviction algorithm and are not considered when calculating the disk cache size.
+        stylePackCancelable = offlineManager.loadStylePack(
+            Style.OUTDOORS,
+            // Build Style pack load options
+            StylePackLoadOptions.Builder()
+                .glyphsRasterizationMode(GlyphsRasterizationMode.IDEOGRAPHS_RASTERIZED_LOCALLY)
+                .metadata(Value(STYLE_PACK_METADATA))
+                .build(),
+            { progress ->
+                // Update the download progress to UI
+//                updateStylePackDownloadProgress(
+//                    progress.completedResourceCount,
+//                    progress.requiredResourceCount,
+//                    "StylePackLoadProgress: $progress"
+//                )
+            },
+            { expected ->
+                if (expected.isValue) {
+                    expected.value?.let { stylePack ->
+                        // Style pack download finishes successfully
+                        // logSuccessMessage("StylePack downloaded: $stylePack")
+                        // if (binding.tilePackDownloadProgress.progress == binding.tilePackDownloadProgress.max) {
+                        //  prepareViewMapButton()
+                        //  } else {
+                        //  logInfoMessage("Waiting for tile region download to be finished.")
+                        //  }
+                    }
+                }
+                expected.error?.let {
+                    // Handle error occurred during the style pack download.
+                    // logErrorMessage("StylePackError: $it")
+                }
+            }
+        )
+
+        // - - - - - - - -
+
+        // 2. Create a tile region with tiles for the outdoors style
+
+        // A Tile Region represents an identifiable geographic tile region with metadata, consisting of
+        // a set of tiles packs that cover a given area (a polygon). Tile Regions allow caching tiles
+        // packs in an explicit way: By creating a Tile Region, developers can ensure that all tiles in
+        // that region will be downloaded and remain cached until explicitly deleted.
+
+        // Creating a Tile Region requires supplying a description of the area geometry, the tilesets
+        // and zoom ranges of the tiles within the region.
+
+        // The tileset descriptor encapsulates the tile-specific data, such as which tilesets, zoom ranges,
+        // pixel ratio etc. the cached tile packs should have. It is passed to the Tile Store along with
+        // the region area geometry to load a new Tile Region.
+
+        // The OfflineManager is responsible for creating tileset descriptors for the given style and zoom range.
+        val tilesetDescriptor = offlineManager.createTilesetDescriptor(
+            TilesetDescriptorOptions.Builder()
+                .styleURI(Style.OUTDOORS)
+                .minZoom(0)
+                .maxZoom(16)
+                .build()
+        )
+
+        // Use the the default TileStore to load this region. You can create custom TileStores are are
+        // unique for a particular file path, i.e. there is only ever one TileStore per unique path.
+
+        // Note that the TileStore path must be the same with the TileStore used when initialise the MapView.
+        tilePackCancelable = tileStore.loadTileRegion(
+            TILE_REGION_ID,
+            TileRegionLoadOptions.Builder()
+                .geometry(point)
+                .descriptors(listOf(tilesetDescriptor))
+                .metadata(Value(TILE_REGION_METADATA))
+                .acceptExpired(true)
+                .networkRestriction(NetworkRestriction.NONE)
+                .build(),
+            { progress ->
+                //updateTileRegionDownloadProgress(
+                //  progress.completedResourceCount,
+                //   progress.requiredResourceCount,
+                //  "TileRegionLoadProgress: $progress"
+                // )
+            }
+        ) { expected ->
+            if (expected.isValue) {
+                // Tile pack download finishes successfully
+                expected.value?.let { region ->
+                    // logSuccessMessage("TileRegion downloaded: $region")
+                    if (binding.stylePackDownloadProgress.progress == binding.stylePackDownloadProgress.max) {
+                        //   prepareViewMapButton()
+                    } else {
+                        // logInfoMessage("Waiting for style pack download to be finished.")
+                    }
+                }
+            }
+            expected.error?.let {
+                // Handle error occurred during the tile region download.
+                //  logErrorMessage("TileRegionError: $it")
+            }
+        }
+        // prepareCancelButton()
+    }
+
+
+//    private fun addViewAnnotation(point: Point) {
+//        viewAnnotationManager?.addViewAnnotation(
+//            resId = R.layout.user_icon_menu,
+//            options = viewAnnotationOptions {
+//                geometry(point)
+//            }
+//        )
+//    }
 
     /**
      * OnLongClick of the map set a position marker.
@@ -218,7 +458,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         val userDefinedPointImg =
             ContextCompat.getDrawable(requireActivity(), R.drawable.ic_twotone_person_24)!!
                 .toBitmap()
-        val point = Point.fromLngLat(it.longitude(), it.latitude())
+        point = Point.fromLngLat(it.longitude(), it.latitude())
 
         mapView?.getMapboxMap()?.getStyle()?.let { style ->
             userTouchPosition.geometry(point)
@@ -228,10 +468,15 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 style.addSource(userTouchPosition)
                 style.addLayer(userTouchLayer)
             }
-
         }
         return@OnMapLongClickListener true
     }
+
+//    private val click = OnMapClickListener {
+//        val point = Point.fromLngLat(it.longitude(), it.latitude())
+//        addViewAnnotation(point)
+//        return@OnMapClickListener true
+//    }
 
     private sealed class OfflineLog(val message: String, val color: Int) {
         class Info(message: String) : OfflineLog(message, android.R.color.black)
@@ -240,6 +485,14 @@ class MapFragment : ScreenFragment("Map"), Logging {
         class TilePackProgress(message: String) : OfflineLog(message, android.R.color.holo_purple)
         class StylePackProgress(message: String) :
             OfflineLog(message, android.R.color.holo_orange_dark)
+    }
+
+    companion object {
+        private const val TAG = "OfflineActivity"
+        private const val ZOOM = 12.0
+        private const val TILE_REGION_ID = "myTileRegion"
+        private const val STYLE_PACK_METADATA = "my-outdoor-style-pack"
+        private const val TILE_REGION_METADATA = "my-outdoors-tile-region"
     }
 }
 
