@@ -124,4 +124,5 @@
     <string name="delete">Delete</string>
     <string name="delete_all_messages">Delete All Messages</string>
     <string name="modem_config_slow_long">Long Range / Slow</string>
+    <string name="style_selection">Style Selection</string>
 </resources>

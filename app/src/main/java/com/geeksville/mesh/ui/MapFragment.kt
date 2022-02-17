@@ -1,7 +1,5 @@
 package com.geeksville.mesh.ui
 
-import android.app.AlertDialog
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -17,7 +15,6 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
-import com.geeksville.mesh.databinding.ActivityOfflineBinding
 import com.geeksville.mesh.databinding.MapNotAllowedBinding
 import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
@@ -30,7 +27,6 @@ import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.maps.*
 import com.mapbox.maps.dsl.cameraOptions
-import com.mapbox.maps.extension.style.expressions.dsl.generated.id
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
@@ -289,7 +285,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
                     v.gestures.rotateEnabled = false
                     v.gestures.addOnMapLongClickListener(this.longClick)
-                    // v.gestures.addOnMapClickListener(this.click)
+                    v.gestures.addOnMapClickListener(this.click)
 
                     // Provide initial positions
                     model.nodeDB.nodes.value?.let { nodes ->
@@ -331,27 +327,28 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 .build(),
             { progress ->
                 // Update the download progress to UI
-//                updateStylePackDownloadProgress(
-//                    progress.completedResourceCount,
-//                    progress.requiredResourceCount,
-//                    "StylePackLoadProgress: $progress"
-//                )
+                updateStylePackDownloadProgress(
+                    progress.completedResourceCount,
+                    progress.requiredResourceCount,
+                    "StylePackLoadProgress: $progress"
+                )
             },
             { expected ->
                 if (expected.isValue) {
                     expected.value?.let { stylePack ->
                         // Style pack download finishes successfully
-                        // logSuccessMessage("StylePack downloaded: $stylePack")
-                        // if (binding.tilePackDownloadProgress.progress == binding.tilePackDownloadProgress.max) {
-                        //  prepareViewMapButton()
-                        //  } else {
-                        //  logInfoMessage("Waiting for tile region download to be finished.")
-                        //  }
+                        debug("StylePack downloaded: $stylePack")
+                        if (binding.stylePackDownloadProgress.progress == binding.stylePackDownloadProgress.max) {
+                            debug("Doing stuff")
+                            binding.stylePackDownloadProgress.visibility = View.INVISIBLE
+                        } else {
+                            debug("Waiting for tile region download to be finished.")
+                        }
                     }
                 }
                 expected.error?.let {
                     // Handle error occurred during the style pack download.
-                    // logErrorMessage("StylePackError: $it")
+                    debug("StylePackError: $it")
                 }
             }
         )
@@ -395,27 +392,28 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 .networkRestriction(NetworkRestriction.NONE)
                 .build(),
             { progress ->
-                //updateTileRegionDownloadProgress(
-                //  progress.completedResourceCount,
-                //   progress.requiredResourceCount,
-                //  "TileRegionLoadProgress: $progress"
-                // )
+                updateTileRegionDownloadProgress(
+                    progress.completedResourceCount,
+                    progress.requiredResourceCount,
+                    "TileRegionLoadProgress: $progress"
+                )
             }
         ) { expected ->
             if (expected.isValue) {
                 // Tile pack download finishes successfully
                 expected.value?.let { region ->
-                    // logSuccessMessage("TileRegion downloaded: $region")
-                    //   if (binding.stylePackDownloadProgress.progress == binding.stylePackDownloadProgress.max) {
-                    //   prepareViewMapButton()
-                    //   } else {
-                    // logInfoMessage("Waiting for style pack download to be finished.")
-                    //  }
+                    debug("TileRegion downloaded: $region")
+                    if (binding.stylePackDownloadProgress.progress == binding.stylePackDownloadProgress.max) {
+                        debug("Finished tilepack download")
+                        binding.stylePackDownloadProgress.visibility = View.INVISIBLE
+                    } else {
+                        debug("Waiting for style pack download to be finished.")
+                    }
                 }
             }
             expected.error?.let {
                 // Handle error occurred during the tile region download.
-                //  logErrorMessage("TileRegionError: $it")
+                debug("TileRegionError: $it")
             }
         }
         // prepareCancelButton()
@@ -452,11 +450,33 @@ class MapFragment : ScreenFragment("Map"), Logging {
         return@OnMapLongClickListener true
     }
 
-//    private val click = OnMapClickListener {
-//        val point = Point.fromLngLat(it.longitude(), it.latitude())
-//        addViewAnnotation(point)
-//        return@OnMapClickListener true
-//    }
+    private fun updateStylePackDownloadProgress(
+        progress: Long,
+        max: Long,
+        message: String? = null
+    ) {
+        binding.stylePackDownloadProgress.visibility = View.VISIBLE
+        binding.stylePackDownloadProgress.max = max.toInt()
+        binding.stylePackDownloadProgress.progress = progress.toInt()
+    }
+
+    private fun updateTileRegionDownloadProgress(
+        progress: Long,
+        max: Long,
+        message: String? = null
+    ) {
+        binding.stylePackDownloadProgress.max = max.toInt()
+        binding.stylePackDownloadProgress.progress = progress.toInt()
+    }
+
+    private val click = OnMapClickListener {
+        if (binding.fabStyleToggle.isVisible) {
+            binding.fabStyleToggle.visibility = View.INVISIBLE
+        } else {
+            binding.fabStyleToggle.visibility = View.VISIBLE
+        }
+        return@OnMapClickListener true
+    }
 
     private sealed class OfflineLog(val message: String, val color: Int) {
         class Info(message: String) : OfflineLog(message, android.R.color.black)
