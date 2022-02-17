@@ -18,6 +18,8 @@ import com.geeksville.android.Logging
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.ActivityOfflineBinding
+import com.geeksville.mesh.databinding.MapNotAllowedBinding
+import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.util.formatAgo
 import com.mapbox.bindgen.Value
@@ -28,6 +30,7 @@ import com.mapbox.geojson.Geometry
 import com.mapbox.geojson.Point
 import com.mapbox.maps.*
 import com.mapbox.maps.dsl.cameraOptions
+import com.mapbox.maps.extension.style.expressions.dsl.generated.id
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
@@ -69,7 +72,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
     }
 
     private lateinit var handler: Handler
-    private lateinit var binding: ActivityOfflineBinding
+    private lateinit var binding: MapViewBinding
+    private lateinit var mapNotAllowedBinding: MapNotAllowedBinding
+    private lateinit var viewAnnotationManager: ViewAnnotationManager
 
     private lateinit var point: Geometry
 
@@ -88,7 +93,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val userTouchLayerId = "user-touch-layer"
     private var nodePositions = GeoJsonSource(GeoJsonSource.Builder(nodeSourceId))
 
-    private lateinit var viewAnnotationManager: ViewAnnotationManager
 
     private val userTouchPosition = GeoJsonSource(GeoJsonSource.Builder(userTouchPositionId))
 
@@ -179,41 +183,20 @@ class MapFragment : ScreenFragment("Map"), Logging {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // We can't allow mapbox if user doesn't want analytics
-        val id =
-            if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
-                // Mapbox Access token
-                R.layout.map_view
-            } else {
-                R.layout.map_not_allowed
-            }
-
-        return inflater.inflate(id, container, false)
+        return if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
+            // Mapbox Access token
+            binding = MapViewBinding.inflate(inflater, container, false)
+            binding.root
+        } else {
+            mapNotAllowedBinding = MapNotAllowedBinding.inflate(inflater, container, false)
+            mapNotAllowedBinding.root
+        }
     }
 
     var mapView: MapView? = null
 
-
-    private fun prepareRemoveOfflineRegionButton() {
-        downloadButton("REMOVE DOWNLOADED REGIONS") {
-            removeOfflineRegions()
-            showDownloadedRegions()
-            binding.container.removeAllViews()
-
-            // Re-enable the Mapbox network stack, so that the new offline region download can succeed.
-            OfflineSwitch.getInstance().isMapboxStackConnected = true
-            debug("Mapbox network stack enabled.")
-
-            prepareDownloadButton()
-        }
-    }
-
-    private fun prepareDownloadButton() {
-        downloadButton("DOWNLOAD") {
-            downloadOfflineRegion()
-        }
-    }
 
 
     private fun showDownloadedRegions() {
@@ -266,12 +249,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
         }
     }
 
-
-    private fun downloadButton(text: String, listener: View.OnClickListener) {
-        binding.button.text = text
-        binding.button.setOnClickListener(listener)
-    }
-
     /**
      * Mapbox native code can crash painfully if you ever call a mapbox view function while the view is not actively being show
      */
@@ -281,6 +258,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
     override fun onViewCreated(viewIn: View, savedInstanceState: Bundle?) {
         super.onViewCreated(viewIn, savedInstanceState)
 
+        binding.fabStyleToggle.setOnClickListener {
+            downloadOfflineRegion()
+        }
         // We might not have a real mapview if running with analytics
         if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
             val vIn = viewIn.findViewById<MapView>(R.id.mapView)
@@ -426,11 +406,11 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 // Tile pack download finishes successfully
                 expected.value?.let { region ->
                     // logSuccessMessage("TileRegion downloaded: $region")
-                    if (binding.stylePackDownloadProgress.progress == binding.stylePackDownloadProgress.max) {
-                        //   prepareViewMapButton()
-                    } else {
-                        // logInfoMessage("Waiting for style pack download to be finished.")
-                    }
+                    //   if (binding.stylePackDownloadProgress.progress == binding.stylePackDownloadProgress.max) {
+                    //   prepareViewMapButton()
+                    //   } else {
+                    // logInfoMessage("Waiting for style pack download to be finished.")
+                    //  }
                 }
             }
             expected.error?.let {
