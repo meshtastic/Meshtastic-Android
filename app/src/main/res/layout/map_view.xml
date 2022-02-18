@@ -36,26 +36,27 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fab_style_toggle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:backgroundTint="@color/buttonColor"
-            android:contentDescription="@string/style_selection"
-            android:src="@drawable/baseline_layers_white_24dp"
-            tools:background="@color/buttonColor" />
+<!--        <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+<!--            android:id="@+id/fab_style_toggle"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_margin="8dp"-->
+<!--            android:backgroundTint="@color/buttonColor"-->
+<!--            android:contentDescription="@string/style_selection"-->
+<!--            android:src="@drawable/baseline_layers_white_24dp"-->
+<!--            tools:background="@color/buttonColor" />-->
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/download_region"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
+            android:layout_margin="16dp"
             android:backgroundTint="@color/buttonColor"
             android:contentDescription="@string/download_region"
             android:src="@drawable/baseline_download_white_24dp"
             tools:background="@color/buttonColor" />
     </LinearLayout>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

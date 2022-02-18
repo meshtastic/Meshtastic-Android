@@ -1,14 +1,21 @@
 package com.geeksville.mesh.ui
 
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import com.geeksville.android.GeeksvilleApplication
@@ -33,6 +40,7 @@ import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.TextAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.TextJustify
+import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
@@ -78,6 +86,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private lateinit var mapNotAllowedBinding: MapNotAllowedBinding
     private lateinit var viewAnnotationManager: ViewAnnotationManager
     private lateinit var mapStyleURI: String
+    private lateinit var userStyleURI: String
 
     private lateinit var point: Geometry
 
@@ -261,12 +270,21 @@ class MapFragment : ScreenFragment("Map"), Logging {
     override fun onViewCreated(viewIn: View, savedInstanceState: Bundle?) {
         super.onViewCreated(viewIn, savedInstanceState)
 
-        binding.fabStyleToggle.setOnClickListener {
-
-            //TODO: Setup Style menu for satellite view, street view, & outdoor view
-        }
+//        binding.fabStyleToggle.setOnClickListener {
+//
+//            //TODO: Setup Style menu for satellite view, street view, & outdoor view
+//        }
         binding.downloadRegion.setOnClickListener {
-            downloadOfflineRegion()
+            // Display menu for download region
+
+            // Add option to pull custom published style with .mbtile (This will require a URI from mapbox)
+            val downloadMenuFragment = DownloadRegionDialogFragment()
+            downloadMenuFragment.show(this.parentFragmentManager, "Download Region")
+            // Populate Coordinates on menu for downloadable region with specs
+            // Show save button -> once save is clicked add option to name region and then confirm
+            // Convert Save Button to cancel once download starts
+            // Show region
+            //downloadOfflineRegion()
         }
         // We might not have a real mapview if running with analytics
         if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
@@ -315,7 +333,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
             }
         }
     }
-
 
     private fun downloadOfflineRegion() {
         // By default, users may download up to 250MB of data for offline use without incurring
@@ -489,23 +506,15 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     // TODO: Make this dynamic
     private val click = OnMapClickListener {
-        if (binding.fabStyleToggle.isVisible && binding.downloadRegion.isVisible) {
-            binding.fabStyleToggle.visibility = View.INVISIBLE
+        //binding.fabStyleToggle.isVisible &&
+        if (binding.downloadRegion.isVisible) {
+            //binding.fabStyleToggle.visibility = View.INVISIBLE
             binding.downloadRegion.visibility = View.INVISIBLE
         } else {
-            binding.fabStyleToggle.visibility = View.VISIBLE
+            //binding.fabStyleToggle.visibility = View.VISIBLE
             binding.downloadRegion.visibility = View.VISIBLE
         }
         return@OnMapClickListener true
-    }
-
-    private sealed class OfflineLog(val message: String, val color: Int) {
-        class Info(message: String) : OfflineLog(message, android.R.color.black)
-        class Error(message: String) : OfflineLog(message, android.R.color.holo_red_dark)
-        class Success(message: String) : OfflineLog(message, android.R.color.holo_green_dark)
-        class TilePackProgress(message: String) : OfflineLog(message, android.R.color.holo_purple)
-        class StylePackProgress(message: String) :
-            OfflineLog(message, android.R.color.holo_orange_dark)
     }
 
     companion object {
@@ -513,6 +522,52 @@ class MapFragment : ScreenFragment("Map"), Logging {
         private const val TILE_REGION_ID = "myTileRegion"
         private const val STYLE_PACK_METADATA = "my-outdoor-style-pack"
         private const val TILE_REGION_METADATA = "my-outdoors-tile-region"
+    }
+
+
+    //TODO: Setup checkbox to add URI
+    //TODO: Investigate different UI elements (Rather than dialog)
+    class DownloadRegionDialogFragment : DialogFragment() {
+
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            return activity?.let {
+
+                val mapDownloadView = layoutInflater.inflate(R.layout.dialog_map_download, null)
+
+                /*           if (mapDownloadView.isActivated) {
+                               val checkBox = mapDownloadView.findViewById<CheckBox>(R.id.checkbox)
+                               if (checkBox.isChecked) {
+                                   mapDownloadView.findViewById<EditText>(R.id.uri).visibility =
+                                       View.VISIBLE
+                               } else {
+                                   mapDownloadView.findViewById<EditText>(R.id.uri).visibility =
+                                       View.GONE
+                               }
+                           }*/
+                // Use the Builder class for convenient dialog construction
+                val builder = AlertDialog.Builder(it)
+                builder.setView(mapDownloadView)
+                    .setMessage("Download Region")
+                    .setPositiveButton(
+                        "Save"
+                    ) { dialog, _ ->
+                        val editText = mapDownloadView.findViewById<EditText>(R.id.uri)
+                        if (editText.text != null) {
+                            // Save URI
+                            MapFragment().userStyleURI = editText.text.toString()
+                            editText.setText("")// Clear Text
+                        }
+                    }
+                    .setNegativeButton(
+                        R.string.cancel
+                    ) { dialog, _ ->
+                        dialog.cancel()
+                        // User cancelled the dialog
+                    }
+                // Create the AlertDialog object and return it
+                builder.create()
+            } ?: throw IllegalStateException("Activity cannot be null")
+        }
     }
 }
 
