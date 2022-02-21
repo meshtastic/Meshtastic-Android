@@ -278,12 +278,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
             // Add option to pull custom published style with .mbtile (This will require a URI from mapbox)
             this.downloadRegionDialogFragment()
-
             // Populate Coordinates on menu for downloadable region with specs
-            // Show save button -> once save is clicked add option to name region and then confirm
-            // Convert Save Button to cancel once download starts
-            // Show region
-            //downloadOfflineRegion()
         }
         // We might not have a real mapview if running with analytics
         if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
@@ -557,16 +552,26 @@ class MapFragment : ScreenFragment("Map"), Logging {
             }
             .setPositiveButton(
                 "Save"
-            ) { _, _ ->
-                if (uri.text != null) {
+            ) { dialog, _ ->
+                if (uri.isVisible) {
                     // Save URI
                     userStyleURI = uri.text.toString()
                     uri.setText("") // clear text
+                }
+                if ((this::pointLat.isInitialized && this::pointLong.isInitialized) || this::userStyleURI.isInitialized) {
+                    // Create new popup to handle download menu
+                    // Name region and then confirm
+                    // Save Button to start download and cancel
+                    downloadOfflineRegion()
+                } else {
+                    dialog.cancel()
+                    // Tell user to select region
                 }
             }
             .setNegativeButton(
                 R.string.cancel
             ) { dialog, _ ->
+                removeOfflineRegions()
                 dialog.cancel()
             }
 
