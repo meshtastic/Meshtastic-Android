@@ -85,7 +85,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private lateinit var binding: MapViewBinding
     private lateinit var mapNotAllowedBinding: MapNotAllowedBinding
     private lateinit var viewAnnotationManager: ViewAnnotationManager
-    private lateinit var mapStyleURI: String
     private lateinit var userStyleURI: String
 
     private lateinit var point: Geometry
@@ -252,7 +251,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         // Remove the style pack with the style url.
         // Note this will not remove the downloaded style pack, instead, it will just mark the resources
         // not a part of the existing style pack. The resources still exists as disk cache.
-        offlineManager.removeStylePack(mapStyleURI)
+        offlineManager.removeStylePack(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
 
         MapboxMap.clearData(resourceOptions) {
             it.error?.let { error ->
@@ -309,7 +308,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
                             it.addImage(markerImageId, markerIcon)
                             it.addLayer(nodeLayer)
                             it.addLayer(labelLayer)
-                            this.mapStyleURI = map.getStyle()?.styleURI.toString()
                         }
                     }
 
@@ -349,7 +347,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         // the data eviction algorithm and are not considered when calculating the disk cache size.
 
         stylePackCancelable = offlineManager.loadStylePack(
-            mapStyleURI,
+            mapView?.getMapboxMap()?.getStyle()?.styleURI.toString(),
             // Build Style pack load options
             StylePackLoadOptions.Builder()
                 .glyphsRasterizationMode(GlyphsRasterizationMode.IDEOGRAPHS_RASTERIZED_LOCALLY)
@@ -403,7 +401,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
         val tilesetDescriptor = offlineManager.createTilesetDescriptor(
             TilesetDescriptorOptions.Builder()
-                .styleURI(mapStyleURI)
+                .styleURI(mapView?.getMapboxMap()?.getStyle()?.styleURI!!)
                 .minZoom(0)
                 .maxZoom(16)
                 .build()
@@ -524,8 +522,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
         private const val TILE_REGION_METADATA = "my-outdoors-tile-region"
     }
 
-
-    //TODO: Setup checkbox to add URI
     //TODO: Investigate different UI elements (Rather than dialog)
     class DownloadRegionDialogFragment : DialogFragment() {
 
@@ -533,29 +529,34 @@ class MapFragment : ScreenFragment("Map"), Logging {
             return activity?.let {
 
                 val mapDownloadView = layoutInflater.inflate(R.layout.dialog_map_download, null)
+                val uri = mapDownloadView.findViewById<EditText>(R.id.uri)
 
-                /*           if (mapDownloadView.isActivated) {
-                               val checkBox = mapDownloadView.findViewById<CheckBox>(R.id.checkbox)
-                               if (checkBox.isChecked) {
-                                   mapDownloadView.findViewById<EditText>(R.id.uri).visibility =
-                                       View.VISIBLE
-                               } else {
-                                   mapDownloadView.findViewById<EditText>(R.id.uri).visibility =
-                                       View.GONE
-                               }
-                           }*/
                 // Use the Builder class for convenient dialog construction
                 val builder = AlertDialog.Builder(it)
                 builder.setView(mapDownloadView)
-                    .setMessage("Download Region")
+                    .setMultiChoiceItems(
+                        R.array.MapMenuCheckbox,
+                        null,
+                    ) { _, _, isChecked ->
+                        if (isChecked) {
+                            if (!uri.isVisible) {
+                                uri.visibility =
+                                    View.VISIBLE
+                            }
+                        } else {
+                            if (uri.isVisible) {
+                                uri.visibility =
+                                    View.GONE
+                            }
+                        }
+                    }
                     .setPositiveButton(
                         "Save"
                     ) { dialog, _ ->
-                        val editText = mapDownloadView.findViewById<EditText>(R.id.uri)
-                        if (editText.text != null) {
+                        if (uri.text != null) {
                             // Save URI
-                            MapFragment().userStyleURI = editText.text.toString()
-                            editText.setText("")// Clear Text
+                            MapFragment().userStyleURI = uri.text.toString()
+                            uri.setText("")// Clear Text
                         }
                     }
                     .setNegativeButton(

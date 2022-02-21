@@ -3,24 +3,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <!--    <CheckBox-->
-    <!--        android:id="@+id/checkbox"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="match_parent"-->
-    <!--        android:text="Use Custom URI?"-->
-    <!--        />-->
-
-    <EditText
-        android:id="@+id/uri"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="4dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginRight="4dp"
-        android:layout_marginBottom="4dp"
-        android:hint="URI"
-        android:inputType="textUri" />
-
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -40,5 +22,17 @@
             android:padding="8dp"
             android:text="Lon:" />
     </LinearLayout>
+
+    <EditText
+        android:id="@+id/uri"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
+        android:hint="URI"
+        android:inputType="textUri"
+        android:visibility="gone" />
 
 </LinearLayout>
