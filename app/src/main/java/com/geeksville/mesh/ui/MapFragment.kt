@@ -83,7 +83,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private lateinit var binding: MapViewBinding
     private lateinit var mapNotAllowedBinding: MapNotAllowedBinding
     private lateinit var viewAnnotationManager: ViewAnnotationManager
-    private lateinit var userStyleURI: String
     private lateinit var pointLat: String
     private lateinit var pointLong: String
 
@@ -327,7 +326,11 @@ class MapFragment : ScreenFragment("Map"), Logging {
         }
     }
 
-    private fun downloadOfflineRegion() {
+    private fun downloadOfflineRegion(styleURI: String = "") {
+        val style = styleURI.ifEmpty {
+            mapView?.getMapboxMap()
+                ?.getStyle()?.styleURI.toString()
+        }
         // By default, users may download up to 250MB of data for offline use without incurring
         // additional charges. This limit is subject to change during the beta.
 
@@ -342,7 +345,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         // the data eviction algorithm and are not considered when calculating the disk cache size.
 
         stylePackCancelable = offlineManager.loadStylePack(
-            mapView?.getMapboxMap()?.getStyle()?.styleURI.toString(),
+            style,
             // Build Style pack load options
             StylePackLoadOptions.Builder()
                 .glyphsRasterizationMode(GlyphsRasterizationMode.IDEOGRAPHS_RASTERIZED_LOCALLY)
@@ -396,7 +399,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
         val tilesetDescriptor = offlineManager.createTilesetDescriptor(
             TilesetDescriptorOptions.Builder()
-                .styleURI(mapView?.getMapboxMap()?.getStyle()?.styleURI!!)
+                .styleURI(style)
                 .minZoom(0)
                 .maxZoom(16)
                 .build()
@@ -553,12 +556,13 @@ class MapFragment : ScreenFragment("Map"), Logging {
             .setPositiveButton(
                 "Save"
             ) { dialog, _ ->
+                var userStyleURI: String = ""
                 if (uri.isVisible) {
                     // Save URI
                     userStyleURI = uri.text.toString()
                     uri.setText("") // clear text
                 }
-                if ((this::pointLat.isInitialized && this::pointLong.isInitialized) || this::userStyleURI.isInitialized) {
+                if ((this::pointLat.isInitialized && this::pointLong.isInitialized) || userStyleURI.isNotEmpty()) {
                     // Create new popup to handle download menu
                     // Name region and then confirm
                     // Save Button to start download and cancel
