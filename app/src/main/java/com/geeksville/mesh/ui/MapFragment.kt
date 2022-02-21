@@ -2,16 +2,13 @@ package com.geeksville.mesh.ui
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CheckBox
 import android.widget.EditText
-import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
@@ -40,7 +37,6 @@ import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.TextAnchor
 import com.mapbox.maps.extension.style.layers.properties.generated.TextJustify
-import com.mapbox.maps.extension.style.layers.properties.generated.Visibility
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
@@ -49,7 +45,6 @@ import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.viewannotation.ViewAnnotationManager
-import com.mapbox.maps.viewannotation.viewAnnotationOptions
 import dagger.hilt.android.AndroidEntryPoint
 
 
@@ -522,7 +517,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
         private const val TILE_REGION_METADATA = "my-outdoors-tile-region"
     }
 
-    //TODO: Investigate different UI elements (Rather than dialog)
     class DownloadRegionDialogFragment : DialogFragment() {
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -552,7 +546,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     }
                     .setPositiveButton(
                         "Save"
-                    ) { dialog, _ ->
+                    ) { _, _ ->
                         if (uri.text != null) {
                             // Save URI
                             MapFragment().userStyleURI = uri.text.toString()
@@ -562,8 +556,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     .setNegativeButton(
                         R.string.cancel
                     ) { dialog, _ ->
-                        dialog.cancel()
-                        // User cancelled the dialog
+                        dialog.cancel() // User cancelled the dialog
                     }
                 // Create the AlertDialog object and return it
                 builder.create()
