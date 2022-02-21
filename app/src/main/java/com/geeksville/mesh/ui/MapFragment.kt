@@ -2,6 +2,7 @@ package com.geeksville.mesh.ui
 
 import android.app.AlertDialog
 import android.app.Dialog
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -9,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
@@ -46,6 +48,7 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.viewannotation.ViewAnnotationManager
 import dagger.hilt.android.AndroidEntryPoint
+import java.lang.ClassCastException
 
 
 @AndroidEntryPoint
@@ -81,6 +84,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private lateinit var mapNotAllowedBinding: MapNotAllowedBinding
     private lateinit var viewAnnotationManager: ViewAnnotationManager
     private lateinit var userStyleURI: String
+    private lateinit var pointLat: String
+    private lateinit var pointLong: String
 
     private lateinit var point: Geometry
 
@@ -272,8 +277,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
             // Display menu for download region
 
             // Add option to pull custom published style with .mbtile (This will require a URI from mapbox)
-            val downloadMenuFragment = DownloadRegionDialogFragment()
-            downloadMenuFragment.show(this.parentFragmentManager, "Download Region")
+            this.downloadRegionDialogFragment()
+
             // Populate Coordinates on menu for downloadable region with specs
             // Show save button -> once save is clicked add option to name region and then confirm
             // Convert Save Button to cancel once download starts
@@ -464,6 +469,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 R.drawable.baseline_location_on_white_24dp
             )!!
                 .toBitmap()
+        pointLong = String.format("%.2f", it.longitude())
+        pointLat = String.format("%.2f", it.latitude())
         point = Point.fromLngLat(it.longitude(), it.latitude())
 
         mapView?.getMapboxMap()?.getStyle()?.let { style ->
@@ -517,54 +524,56 @@ class MapFragment : ScreenFragment("Map"), Logging {
         private const val TILE_REGION_METADATA = "my-outdoors-tile-region"
     }
 
-    class DownloadRegionDialogFragment : DialogFragment() {
+    private fun downloadRegionDialogFragment() {
+        val mapDownloadView = layoutInflater.inflate(R.layout.dialog_map_download, null)
+        val uri = mapDownloadView.findViewById<EditText>(R.id.uri)
+        val downloadRegionDialogFragment = AlertDialog.Builder(context)
 
-        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            return activity?.let {
-
-                val mapDownloadView = layoutInflater.inflate(R.layout.dialog_map_download, null)
-                val uri = mapDownloadView.findViewById<EditText>(R.id.uri)
-
-                // Use the Builder class for convenient dialog construction
-                val builder = AlertDialog.Builder(it)
-                builder.setView(mapDownloadView)
-                    .setMultiChoiceItems(
-                        R.array.MapMenuCheckbox,
-                        null,
-                    ) { _, _, isChecked ->
-                        if (isChecked) {
-                            if (!uri.isVisible) {
-                                uri.visibility =
-                                    View.VISIBLE
-                            }
-                        } else {
-                            if (uri.isVisible) {
-                                uri.visibility =
-                                    View.GONE
-                            }
-                        }
-                    }
-                    .setPositiveButton(
-                        "Save"
-                    ) { _, _ ->
-                        if (uri.text != null) {
-                            // Save URI
-                            MapFragment().userStyleURI = uri.text.toString()
-                            uri.setText("")// Clear Text
-                        }
-                    }
-                    .setNegativeButton(
-                        R.string.cancel
-                    ) { dialog, _ ->
-                        dialog.cancel() // User cancelled the dialog
-                    }
-                // Create the AlertDialog object and return it
-                builder.create()
-            } ?: throw IllegalStateException("Activity cannot be null")
+        if (this::pointLat.isInitialized && this::pointLat.isInitialized) {
+            "Lat: $pointLong".also {
+                mapDownloadView.findViewById<TextView>(R.id.longitude).text = it
+            }
+            "Long: $pointLat".also {
+                mapDownloadView.findViewById<TextView>(R.id.latitude).text = it
+            }
         }
+
+        downloadRegionDialogFragment.setView(mapDownloadView)
+            .setMultiChoiceItems(
+                R.array.MapMenuCheckbox,
+                null,
+            ) { _, _, isChecked ->
+                if (isChecked) {
+                    if (!uri.isVisible) {
+                        uri.visibility =
+                            View.VISIBLE
+                    }
+                } else {
+                    if (uri.isVisible) {
+                        uri.visibility =
+                            View.GONE
+                    }
+                }
+            }
+            .setPositiveButton(
+                "Save"
+            ) { _, _ ->
+                if (uri.text != null) {
+                    // Save URI
+                    userStyleURI = uri.text.toString()
+                    uri.setText("") // clear text
+                }
+            }
+            .setNegativeButton(
+                R.string.cancel
+            ) { dialog, _ ->
+                dialog.cancel()
+            }
+
+        downloadRegionDialogFragment.create()
+        downloadRegionDialogFragment.show()
     }
 }
-
 
 
 
