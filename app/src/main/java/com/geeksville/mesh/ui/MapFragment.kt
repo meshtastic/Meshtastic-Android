@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import com.geeksville.android.GeeksvilleApplication
@@ -44,6 +45,8 @@ import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.viewannotation.ViewAnnotationManager
 import dagger.hilt.android.AndroidEntryPoint
+import kotlin.math.cos
+import kotlin.math.sin
 
 
 @AndroidEntryPoint
@@ -80,7 +83,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private lateinit var pointLat: String
     private lateinit var pointLong: String
     private lateinit var userStyleURI: String
-
 
     private lateinit var point: Point
 
@@ -398,12 +400,23 @@ class MapFragment : ScreenFragment("Map"), Logging {
         )
         // Use the the default TileStore to load this region. You can create custom TileStores are are
         // unique for a particular file path, i.e. there is only ever one TileStore per unique path.
+        val right = calculateCoordinate(0.0, point.latitude(), point.longitude())
+        val top = calculateCoordinate(90.0, point.latitude(), point.longitude())
+        val left = calculateCoordinate(180.0, point.latitude(), point.longitude())
+        val bottom = calculateCoordinate(270.0, point.latitude(), point.longitude())
+
+        val pointList = listOf(right, top, left, bottom)
+
+        // val ploygonCoordList = listOf(pointList)
+        // Polygon.fromLngLats(ploygonCoordList)
+        val squareRegion = LineString.fromLngLats(pointList)
+
 
         // Note that the TileStore path must be the same with the TileStore used when initialise the MapView.
         tilePackCancelable = tileStore.loadTileRegion(
             TILE_REGION_ID, // Make this dynamic
             TileRegionLoadOptions.Builder()
-                .geometry(point)
+                .geometry(squareRegion)
                 .descriptors(listOf(tilesetDescriptor))
                 .metadata(Value(TILE_REGION_METADATA))
                 .acceptExpired(true)
@@ -463,7 +476,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
         mapView?.getMapboxMap()?.getStyle()?.let { style ->
             userTouchPosition.geometry(point)
-
             if (!style.styleLayerExists(userTouchLayerId)) {
                 style.addImage(userPointImageId, userDefinedPointImg)
                 style.addSource(userTouchPosition)
@@ -471,6 +483,15 @@ class MapFragment : ScreenFragment("Map"), Logging {
             }
         }
         return@OnMapLongClickListener true
+    }
+
+    private fun calculateCoordinate(degrees: Double, lat: Double, long: Double): Point {
+        val deg = Math.toRadians(degrees)
+        val distancesInMeters = 4023.36 // 2.5 miles
+
+        val newLong = long + (180 / Math.PI) * (distancesInMeters / 6378137) / cos(long) * cos(deg)
+        val newLat = lat + (180 / Math.PI) * (distancesInMeters / 6378137) / sin(lat) * sin(deg);
+        return Point.fromLngLat(newLong, newLat)
     }
 
     /*
@@ -515,7 +536,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
     }
 
     companion object {
-        private const val ZOOM = 12.0
+        private const val ZOOM = 9.0
         private const val TILE_REGION_ID = "myTileRegion"
         private const val STYLE_PACK_METADATA = "my-outdoor-style-pack"
         private const val TILE_REGION_METADATA = "my-outdoors-tile-region"
@@ -585,17 +606,20 @@ class MapFragment : ScreenFragment("Map"), Logging {
             .setNeutralButton("View Regions") { dialog, _ ->
 
                 //OfflineSwitch.getInstance().isMapboxStackConnected = false
-//                mapView = MapView(requireContext()).also { mapview ->
-//                    val mapboxMap = mapview.getMapboxMap()
-//                    mapboxMap.setCamera(CameraOptions.Builder().zoom(ZOOM).center(point).build())
-//                    debug(userStyleURI)
-//                    mapboxMap.loadStyleUri(userStyleURI) {
-//                        CircleAnnotationOptions()
-//                            .withPoint(point)
-//                            .withCircleColor(Color.RED)
-//                    }
-//                }
-//                mapView?.onStart()
+                mapView?.getMapboxMap().also {
+                    it?.flyTo(
+                        CameraOptions.Builder()
+                            .zoom(ZOOM)
+                            .center(point)
+                            .build(), MapAnimationOptions.mapAnimationOptions { duration(1000) })
+                    debug(userStyleURI)
+                    it?.loadStyleUri(userStyleURI) {
+                        CircleAnnotationOptions()
+                            .withPoint(point)
+                            .withCircleColor(Color.RED)
+                    }
+
+                }
                 // Open up Downloaded Region managers
             }
             .setNegativeButton(
