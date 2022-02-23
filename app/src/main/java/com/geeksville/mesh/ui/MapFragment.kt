@@ -400,6 +400,11 @@ class MapFragment : ScreenFragment("Map"), Logging {
         )
         // Use the the default TileStore to load this region. You can create custom TileStores are are
         // unique for a particular file path, i.e. there is only ever one TileStore per unique path.
+
+        /*
+        Calculate region from user specified position.
+        2.5 miles N,S,E,W from user center point.
+         */
         val right = calculateCoordinate(0.0, point.latitude(), point.longitude())
         val top = calculateCoordinate(90.0, point.latitude(), point.longitude())
         val left = calculateCoordinate(180.0, point.latitude(), point.longitude())
