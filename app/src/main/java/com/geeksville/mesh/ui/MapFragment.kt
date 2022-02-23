@@ -1,8 +1,6 @@
 package com.geeksville.mesh.ui
 
 import android.app.AlertDialog
-import android.app.Dialog
-import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -11,10 +9,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import com.geeksville.android.GeeksvilleApplication
@@ -27,10 +25,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.util.formatAgo
 import com.mapbox.bindgen.Value
 import com.mapbox.common.*
-import com.mapbox.geojson.Feature
-import com.mapbox.geojson.FeatureCollection
-import com.mapbox.geojson.Geometry
-import com.mapbox.geojson.Point
+import com.mapbox.geojson.*
 import com.mapbox.maps.*
 import com.mapbox.maps.dsl.cameraOptions
 import com.mapbox.maps.extension.style.expressions.generated.Expression
@@ -43,12 +38,12 @@ import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.flyTo
+import com.mapbox.maps.plugin.annotation.generated.CircleAnnotationOptions
 import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import com.mapbox.maps.viewannotation.ViewAnnotationManager
 import dagger.hilt.android.AndroidEntryPoint
-import java.lang.ClassCastException
 
 
 @AndroidEntryPoint
@@ -69,7 +64,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     //TODO: Setup menu when creating region for offline maps (On long press set a point to center region, then click that point to bring up menu)
     //TODO: View Offline Regions (This will allow you to select the region and the map will zoom to it)
     //TODO: Manage Offline Regions (Allow you to edit the name, delete, & select region)
-    //TODO: Add option to download mbtiles from existing tiles on MapBox (No mobile SDK supports mbtiles natively, they must be uploaded to MapBox studio first, and then they can be downloaded by specifying a URI)
     //TODO: Update download animation
 
     private val resourceOptions: ResourceOptions by lazy {
@@ -85,8 +79,10 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private lateinit var viewAnnotationManager: ViewAnnotationManager
     private lateinit var pointLat: String
     private lateinit var pointLong: String
+    private lateinit var userStyleURI: String
 
-    private lateinit var point: Geometry
+
+    private lateinit var point: Point
 
     private val model: UIViewModel by activityViewModels()
 
@@ -94,7 +90,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val nodeLayerId = "node-layer"
     private val labelLayerId = "label-layer"
     private val markerImageId = "my-marker-image"
-    private val userPointImageId = "user-image";
+    private val userPointImageId = "user-image"
 
     private var stylePackCancelable: Cancelable? = null
     private var tilePackCancelable: Cancelable? = null
@@ -128,7 +124,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         .textAllowOverlap(true)
 
 
-    private fun onNodesChanged(map: MapboxMap, nodes: Collection<NodeInfo>) {
+    private fun onNodesChanged(nodes: Collection<NodeInfo>) {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
 
         /**
@@ -274,10 +270,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 //        }
         binding.downloadRegion.setOnClickListener {
             // Display menu for download region
-
-            // Add option to pull custom published style with .mbtile (This will require a URI from mapbox)
             this.downloadRegionDialogFragment()
-            // Populate Coordinates on menu for downloadable region with specs
         }
         // We might not have a real mapview if running with analytics
         if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
@@ -311,14 +304,14 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
                     // Provide initial positions
                     model.nodeDB.nodes.value?.let { nodes ->
-                        onNodesChanged(map, nodes.values)
+                        onNodesChanged(nodes.values)
                     }
                 }
 
                 // Any times nodes change update our map
                 model.nodeDB.nodes.observe(viewLifecycleOwner, Observer { nodes ->
                     if (isViewVisible)
-                        onNodesChanged(map, nodes.values)
+                        onNodesChanged(nodes.values)
                 })
                 //viewAnnotationManager = v.viewAnnotationManager
                 zoomToNodes(map)
@@ -355,8 +348,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 // Update the download progress to UI
                 updateStylePackDownloadProgress(
                     progress.completedResourceCount,
-                    progress.requiredResourceCount,
-                    "StylePackLoadProgress: $progress"
+                    progress.requiredResourceCount
                 )
             },
             { expected ->
@@ -404,7 +396,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 .maxZoom(16)
                 .build()
         )
-
         // Use the the default TileStore to load this region. You can create custom TileStores are are
         // unique for a particular file path, i.e. there is only ever one TileStore per unique path.
 
@@ -422,7 +413,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 updateTileRegionDownloadProgress(
                     progress.completedResourceCount,
                     progress.requiredResourceCount,
-                    "TileRegionLoadProgress: $progress"
                 )
             }
         ) { expected ->
@@ -483,10 +473,21 @@ class MapFragment : ScreenFragment("Map"), Logging {
         return@OnMapLongClickListener true
     }
 
+    /*
+       if (this::point.isInitialized) {
+            if (it.latitude() == point.latitude() && it.longitude() == point.longitude()) {
+                mapView?.getMapboxMap()?.getStyle()?.let { style ->
+                    style.removeStyleImage(userPointImageId)
+                    style.removeStyleSource(userTouchPositionId)
+                    style.removeStyleLayer(userTouchLayerId)
+                }
+            }
+        }
+     */
+
     private fun updateStylePackDownloadProgress(
         progress: Long,
         max: Long,
-        message: String? = null
     ) {
         binding.stylePackDownloadProgress.visibility = View.VISIBLE
         binding.stylePackDownloadProgress.max = max.toInt()
@@ -496,13 +497,11 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private fun updateTileRegionDownloadProgress(
         progress: Long,
         max: Long,
-        message: String? = null
     ) {
         binding.stylePackDownloadProgress.max = max.toInt()
         binding.stylePackDownloadProgress.progress = progress.toInt()
     }
 
-    // TODO: Make this dynamic
     private val click = OnMapClickListener {
         //binding.fabStyleToggle.isVisible &&
         if (binding.downloadRegion.isVisible) {
@@ -528,15 +527,20 @@ class MapFragment : ScreenFragment("Map"), Logging {
         val downloadRegionDialogFragment = AlertDialog.Builder(context)
 
         if (this::pointLat.isInitialized && this::pointLat.isInitialized) {
+            val latText = mapDownloadView.findViewById<TextView>(R.id.longitude)
             "Lat: $pointLong".also {
-                mapDownloadView.findViewById<TextView>(R.id.longitude).text = it
+                latText.text = it
+                View.VISIBLE.also { latText.visibility = View.VISIBLE }
             }
+            val longText = mapDownloadView.findViewById<TextView>(R.id.latitude)
             "Long: $pointLat".also {
-                mapDownloadView.findViewById<TextView>(R.id.latitude).text = it
+                longText.text = it
+                View.VISIBLE.also { longText.visibility = View.VISIBLE }
             }
         }
 
         downloadRegionDialogFragment.setView(mapDownloadView)
+            .setTitle("Download Region")
             .setMultiChoiceItems(
                 R.array.MapMenuCheckbox,
                 null,
@@ -555,27 +559,49 @@ class MapFragment : ScreenFragment("Map"), Logging {
             }
             .setPositiveButton(
                 "Save"
-            ) { dialog, _ ->
-                var userStyleURI: String = ""
+            ) { _, _ ->
+
                 if (uri.isVisible) {
                     // Save URI
                     userStyleURI = uri.text.toString()
                     uri.setText("") // clear text
                 }
-                if ((this::pointLat.isInitialized && this::pointLong.isInitialized) || userStyleURI.isNotEmpty()) {
-                    // Create new popup to handle download menu
-                    // Name region and then confirm
-                    // Save Button to start download and cancel
+                if ((this::point.isInitialized) && userStyleURI.isNotEmpty()) {
+                    //TODO Create new popup to handle download menu
+                    //TODO Name region and then confirm
+                    //TODO Save Button to start download and cancel to stop download
+                    downloadOfflineRegion(userStyleURI)
+                } else if ((this::point.isInitialized) && userStyleURI.isEmpty()) {
                     downloadOfflineRegion()
                 } else {
-                    dialog.cancel()
                     // Tell user to select region
+                    val text =
+                        "You must select a region on the map, long press the region you want to download"
+                    val duration = Toast.LENGTH_LONG
+                    val toast = Toast.makeText(requireContext(), text, duration)
+                    toast.show()
                 }
+            }
+            .setNeutralButton("View Regions") { dialog, _ ->
+
+                //OfflineSwitch.getInstance().isMapboxStackConnected = false
+//                mapView = MapView(requireContext()).also { mapview ->
+//                    val mapboxMap = mapview.getMapboxMap()
+//                    mapboxMap.setCamera(CameraOptions.Builder().zoom(ZOOM).center(point).build())
+//                    debug(userStyleURI)
+//                    mapboxMap.loadStyleUri(userStyleURI) {
+//                        CircleAnnotationOptions()
+//                            .withPoint(point)
+//                            .withCircleColor(Color.RED)
+//                    }
+//                }
+//                mapView?.onStart()
+                // Open up Downloaded Region managers
             }
             .setNegativeButton(
                 R.string.cancel
             ) { dialog, _ ->
-                removeOfflineRegions()
+                removeOfflineRegions() //TODO: Add to offline manager window
                 dialog.cancel()
             }
 
