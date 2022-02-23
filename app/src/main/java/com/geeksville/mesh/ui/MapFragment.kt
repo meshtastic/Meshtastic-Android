@@ -485,21 +485,31 @@ class MapFragment : ScreenFragment("Map"), Logging {
         */
         val topFromCenter = calculateCoordinate(90.0, point.latitude(), point.longitude())
         val bottomFromCenter = calculateCoordinate(270.0, point.latitude(), point.longitude())
+        val rightFromCenter = calculateCoordinate(360.0, point.latitude(), point.longitude())
+        val leftFromCenter = calculateCoordinate(180.0, point.latitude(), point.longitude())
 
         val topLeft =
             calculateCoordinate(180.0, topFromCenter.latitude(), topFromCenter.longitude())
-        val topRight = calculateCoordinate(0.0, topFromCenter.latitude(), topFromCenter.longitude())
+        val topRight =
+            calculateCoordinate(360.0, topFromCenter.latitude(), topFromCenter.longitude())
         val bottomLeft =
             calculateCoordinate(180.0, bottomFromCenter.latitude(), bottomFromCenter.longitude())
         val bottomRight =
             calculateCoordinate(0.0, bottomFromCenter.latitude(), bottomFromCenter.longitude())
 
-        val pointList = listOf(
-            topRight,
+        /*
+         topRight,
             topLeft,
             bottomLeft,
             bottomRight,
             topRight
+         */
+        val pointList = listOf(
+            rightFromCenter,
+            topFromCenter,
+            leftFromCenter,
+            bottomFromCenter,
+            rightFromCenter
         )
 
         // val ploygonCoordList = listOf(pointList)
@@ -538,7 +548,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     private fun calculateCoordinate(degrees: Double, lat: Double, long: Double): Point {
         val deg = Math.toRadians(degrees)
-        val distancesInMeters = 8046.72 // 5 miles
+        val distancesInMeters = 8046.72 / 2 // 2.5 miles
 
         val newLong =
             long + (180 / Math.PI) * (distancesInMeters / 6378137) / cos(lat) * cos(deg)  //cos(long) * cos(deg)
