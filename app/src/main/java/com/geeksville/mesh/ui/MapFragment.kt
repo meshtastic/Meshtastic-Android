@@ -13,7 +13,6 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import com.geeksville.android.GeeksvilleApplication
@@ -32,11 +31,11 @@ import com.mapbox.maps.dsl.cameraOptions
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.addLayer
 import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
-import com.mapbox.maps.extension.style.layers.properties.generated.IconAnchor
-import com.mapbox.maps.extension.style.layers.properties.generated.TextAnchor
-import com.mapbox.maps.extension.style.layers.properties.generated.TextJustify
+import com.mapbox.maps.extension.style.layers.generated.lineLayer
+import com.mapbox.maps.extension.style.layers.properties.generated.*
 import com.mapbox.maps.extension.style.sources.addSource
 import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
+import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.flyTo
 import com.mapbox.maps.plugin.annotation.generated.CircleAnnotationOptions
@@ -479,12 +478,59 @@ class MapFragment : ScreenFragment("Map"), Logging {
         pointLat = String.format("%.2f", it.latitude())
         point = Point.fromLngLat(it.longitude(), it.latitude())
 
+
+        /*
+            Calculate region from user specified position.
+            2.5 miles N,S,E,W from user center point.
+        */
+        val topFromCenter = calculateCoordinate(90.0, point.latitude(), point.longitude())
+        val bottomFromCenter = calculateCoordinate(270.0, point.latitude(), point.longitude())
+
+        val topLeft =
+            calculateCoordinate(180.0, topFromCenter.latitude(), topFromCenter.longitude())
+        val topRight = calculateCoordinate(0.0, topFromCenter.latitude(), topFromCenter.longitude())
+        val bottomLeft =
+            calculateCoordinate(180.0, bottomFromCenter.latitude(), bottomFromCenter.longitude())
+        val bottomRight =
+            calculateCoordinate(0.0, bottomFromCenter.latitude(), bottomFromCenter.longitude())
+
+        val pointList = listOf(
+            topRight,
+            topLeft,
+            bottomLeft,
+            bottomRight,
+            topRight
+        )
+
+        // val ploygonCoordList = listOf(pointList)
+        // Polygon.fromLngLats(ploygonCoordList)
+        val squareRegion = LineString.fromLngLats(pointList)
+        val geoJsonSource = geoJsonSource("BOUNDING_BOX_ID") {
+            geometry(squareRegion)
+        }
+        val lineLayer = lineLayer("lineLayer", "BOUNDING_BOX_ID") {
+            lineCap(LineCap.ROUND)
+            lineJoin(LineJoin.MITER)
+            lineOpacity(0.7)
+            lineWidth(1.5)
+            lineColor("#888")
+        }
+
+
         mapView?.getMapboxMap()?.getStyle()?.let { style ->
             userTouchPosition.geometry(point)
+            geoJsonSource.geometry(squareRegion)
             if (!style.styleLayerExists(userTouchLayerId)) {
                 style.addImage(userPointImageId, userDefinedPointImg)
                 style.addSource(userTouchPosition)
+                style.addSource(geoJsonSource)
+                style.addLayer(lineLayer)
                 style.addLayer(userTouchLayer)
+            } else {
+                style.removeStyleLayer("lineLayer")
+                style.removeStyleSource("BOUNDING_BOX_ID")
+                style.addSource(geoJsonSource)
+                style.addLayer(lineLayer)
             }
         }
         return@OnMapLongClickListener true
@@ -492,10 +538,12 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     private fun calculateCoordinate(degrees: Double, lat: Double, long: Double): Point {
         val deg = Math.toRadians(degrees)
-        val distancesInMeters = 4023.36 // 2.5 miles
+        val distancesInMeters = 8046.72 // 5 miles
 
-        val newLong = long + (180 / Math.PI) * (distancesInMeters / 6378137) / cos(long) * cos(deg)
-        val newLat = lat + (180 / Math.PI) * (distancesInMeters / 6378137) / sin(lat) * sin(deg);
+        val newLong =
+            long + (180 / Math.PI) * (distancesInMeters / 6378137) / cos(lat) * cos(deg)  //cos(long) * cos(deg)
+        val newLat =
+            lat + (180 / Math.PI) * (distancesInMeters / 6378137) * sin(deg) // sin(lat) * sin(deg)
         return Point.fromLngLat(newLong, newLat)
     }
 
