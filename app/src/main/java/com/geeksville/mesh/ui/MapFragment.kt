@@ -100,7 +100,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private var stylePackCancelable: Cancelable? = null
     private var tilePackCancelable: Cancelable? = null
 
-    private lateinit var circleRegion: LineString
+    private lateinit var squareRegion: Geometry
 
 
     private val userTouchPositionId = "user-touch-position"
@@ -406,27 +406,11 @@ class MapFragment : ScreenFragment("Map"), Logging {
         // Use the the default TileStore to load this region. You can create custom TileStores are are
         // unique for a particular file path, i.e. there is only ever one TileStore per unique path.
 
-        /*
-        Calculate region from user specified position.
-        2.5 miles N,S,E,W from user center point.
-         */
-        val right = calculateCoordinate(0.0, point.latitude(), point.longitude())
-        val top = calculateCoordinate(90.0, point.latitude(), point.longitude())
-        val left = calculateCoordinate(180.0, point.latitude(), point.longitude())
-        val bottom = calculateCoordinate(270.0, point.latitude(), point.longitude())
-
-        val pointList = listOf(right, top, left, bottom)
-
-        // val ploygonCoordList = listOf(pointList)
-        // Polygon.fromLngLats(ploygonCoordList)
-        val squareRegion = LineString.fromLngLats(pointList)
-
-
         // Note that the TileStore path must be the same with the TileStore used when initialise the MapView.
         tilePackCancelable = tileStore.loadTileRegion(
             TILE_REGION_ID, // Make this dynamic
             TileRegionLoadOptions.Builder()
-                .geometry(circleRegion)
+                .geometry(squareRegion)
                 .descriptors(listOf(tilesetDescriptor))
                 .metadata(Value(TILE_REGION_METADATA))
                 .acceptExpired(true)
@@ -469,16 +453,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
 //        )
 //    }
 
-
-    private fun circleCoordinateGenerator(): List<Point> {
-        val circleCoordinates = mutableListOf<Point>()
-        for (i in 0..360) {
-            val point = calculateCoordinate(i.toDouble(), point.latitude(), point.longitude())
-            circleCoordinates.add(point)
-        }
-        return circleCoordinates
-    }
-
     /**
      * OnLongClick of the map set a position marker.
      * If a user long-clicks again, the position of the first marker will be updated
@@ -494,9 +468,24 @@ class MapFragment : ScreenFragment("Map"), Logging {
         pointLat = String.format("%.2f", it.latitude())
         point = Point.fromLngLat(it.longitude(), it.latitude())
 
-        circleRegion = LineString.fromLngLats(circleCoordinateGenerator())
+
+        /*
+        Calculate region from user specified position.
+        10 miles NE,NW,SE,SW from user center point.
+        100 Sq Mile Region
+        */
+        val topRight = calculateCoordinate(45.0, point.latitude(), point.longitude())
+        val topLeft = calculateCoordinate(135.0, point.latitude(), point.longitude())
+        val bottomLeft = calculateCoordinate(225.0, point.latitude(), point.longitude())
+        val bottomRight = calculateCoordinate(315.0, point.latitude(), point.longitude())
+
+        val pointList = listOf(topRight, topLeft, bottomLeft, bottomRight, topRight)
+
+        val squareLineString = LineString.fromLngLats(pointList)
+
+        squareRegion = squareLineString//LineString.fromLngLats(circleCoordinateGenerator())
         val geoJsonSource = geoJsonSource(boundingBoxId) {
-            geometry(circleRegion)
+            geometry(squareRegion)
         }
         val lineLayer = lineLayer(lineLayerId, boundingBoxId) {
             lineCap(LineCap.ROUND)
@@ -527,27 +516,14 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     private fun calculateCoordinate(degrees: Double, lat: Double, long: Double): Point {
         val deg = Math.toRadians(degrees)
-        val distancesInMeters = 8046.72 // 2.5 miles
+        val distancesInMeters = 16093.44// 10 miles
         val radiusOfEarthInMeters = 6378137
-        if (degrees in 0.1..89.9) {
-
-        }
-        if (degrees in 90.1..179.9) {
-
-        }
-        if (degrees in 180.1..2.0) {
-
-        }
-        if (degrees in 270.0..360.0) {
-
-        }
-
         val x =
-            long + (180 / Math.PI) * (distancesInMeters / radiusOfEarthInMeters) / cos(lat) * cos(
+            long + (180 / Math.PI) * (distancesInMeters / radiusOfEarthInMeters) * cos(
                 deg
             )
         val y =
-            lat + (180 / Math.PI) * (distancesInMeters / radiusOfEarthInMeters) * sin(deg) // sin(lat) * sin(deg)
+            lat + (180 / Math.PI) * (distancesInMeters / radiusOfEarthInMeters) * sin(deg)
         return Point.fromLngLat(x, y)
     }
 
