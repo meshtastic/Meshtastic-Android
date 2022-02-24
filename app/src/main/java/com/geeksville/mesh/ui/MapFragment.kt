@@ -38,7 +38,9 @@ import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.flyTo
+import com.mapbox.maps.plugin.annotation.annotations
 import com.mapbox.maps.plugin.annotation.generated.CircleAnnotationOptions
+import com.mapbox.maps.plugin.annotation.generated.createCircleAnnotationManager
 import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
@@ -92,9 +94,13 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val labelLayerId = "label-layer"
     private val markerImageId = "my-marker-image"
     private val userPointImageId = "user-image"
+    private val boundingBoxId = "BOUNDING_BOX_ID"
+    private val lineLayerId = "lineLayer"
 
     private var stylePackCancelable: Cancelable? = null
     private var tilePackCancelable: Cancelable? = null
+
+    private lateinit var circleRegion: LineString
 
 
     private val userTouchPositionId = "user-touch-position"
@@ -420,7 +426,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         tilePackCancelable = tileStore.loadTileRegion(
             TILE_REGION_ID, // Make this dynamic
             TileRegionLoadOptions.Builder()
-                .geometry(squareRegion)
+                .geometry(circleRegion)
                 .descriptors(listOf(tilesetDescriptor))
                 .metadata(Value(TILE_REGION_METADATA))
                 .acceptExpired(true)
@@ -463,6 +469,16 @@ class MapFragment : ScreenFragment("Map"), Logging {
 //        )
 //    }
 
+
+    private fun circleCoordinateGenerator(): List<Point> {
+        val circleCoordinates = mutableListOf<Point>()
+        for (i in 0..360) {
+            val point = calculateCoordinate(i.toDouble(), point.latitude(), point.longitude())
+            circleCoordinates.add(point)
+        }
+        return circleCoordinates
+    }
+
     /**
      * OnLongClick of the map set a position marker.
      * If a user long-clicks again, the position of the first marker will be updated
@@ -478,47 +494,11 @@ class MapFragment : ScreenFragment("Map"), Logging {
         pointLat = String.format("%.2f", it.latitude())
         point = Point.fromLngLat(it.longitude(), it.latitude())
 
-
-        /*
-            Calculate region from user specified position.
-            2.5 miles N,S,E,W from user center point.
-        */
-        val topFromCenter = calculateCoordinate(90.0, point.latitude(), point.longitude())
-        val bottomFromCenter = calculateCoordinate(270.0, point.latitude(), point.longitude())
-        val rightFromCenter = calculateCoordinate(360.0, point.latitude(), point.longitude())
-        val leftFromCenter = calculateCoordinate(180.0, point.latitude(), point.longitude())
-
-        val topLeft =
-            calculateCoordinate(180.0, topFromCenter.latitude(), topFromCenter.longitude())
-        val topRight =
-            calculateCoordinate(360.0, topFromCenter.latitude(), topFromCenter.longitude())
-        val bottomLeft =
-            calculateCoordinate(180.0, bottomFromCenter.latitude(), bottomFromCenter.longitude())
-        val bottomRight =
-            calculateCoordinate(0.0, bottomFromCenter.latitude(), bottomFromCenter.longitude())
-
-        /*
-         topRight,
-            topLeft,
-            bottomLeft,
-            bottomRight,
-            topRight
-         */
-        val pointList = listOf(
-            rightFromCenter,
-            topFromCenter,
-            leftFromCenter,
-            bottomFromCenter,
-            rightFromCenter
-        )
-
-        // val ploygonCoordList = listOf(pointList)
-        // Polygon.fromLngLats(ploygonCoordList)
-        val squareRegion = LineString.fromLngLats(pointList)
-        val geoJsonSource = geoJsonSource("BOUNDING_BOX_ID") {
-            geometry(squareRegion)
+        circleRegion = LineString.fromLngLats(circleCoordinateGenerator())
+        val geoJsonSource = geoJsonSource(boundingBoxId) {
+            geometry(circleRegion)
         }
-        val lineLayer = lineLayer("lineLayer", "BOUNDING_BOX_ID") {
+        val lineLayer = lineLayer(lineLayerId, boundingBoxId) {
             lineCap(LineCap.ROUND)
             lineJoin(LineJoin.MITER)
             lineOpacity(0.7)
@@ -529,7 +509,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
         mapView?.getMapboxMap()?.getStyle()?.let { style ->
             userTouchPosition.geometry(point)
-            geoJsonSource.geometry(squareRegion)
             if (!style.styleLayerExists(userTouchLayerId)) {
                 style.addImage(userPointImageId, userDefinedPointImg)
                 style.addSource(userTouchPosition)
@@ -537,8 +516,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 style.addLayer(lineLayer)
                 style.addLayer(userTouchLayer)
             } else {
-                style.removeStyleLayer("lineLayer")
-                style.removeStyleSource("BOUNDING_BOX_ID")
+                style.removeStyleLayer(lineLayerId)
+                style.removeStyleSource(boundingBoxId)
                 style.addSource(geoJsonSource)
                 style.addLayer(lineLayer)
             }
@@ -548,13 +527,28 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     private fun calculateCoordinate(degrees: Double, lat: Double, long: Double): Point {
         val deg = Math.toRadians(degrees)
-        val distancesInMeters = 8046.72 / 2 // 2.5 miles
+        val distancesInMeters = 8046.72 // 2.5 miles
+        val radiusOfEarthInMeters = 6378137
+        if (degrees in 0.1..89.9) {
 
-        val newLong =
-            long + (180 / Math.PI) * (distancesInMeters / 6378137) / cos(lat) * cos(deg)  //cos(long) * cos(deg)
-        val newLat =
-            lat + (180 / Math.PI) * (distancesInMeters / 6378137) * sin(deg) // sin(lat) * sin(deg)
-        return Point.fromLngLat(newLong, newLat)
+        }
+        if (degrees in 90.1..179.9) {
+
+        }
+        if (degrees in 180.1..2.0) {
+
+        }
+        if (degrees in 270.0..360.0) {
+
+        }
+
+        val x =
+            long + (180 / Math.PI) * (distancesInMeters / radiusOfEarthInMeters) / cos(lat) * cos(
+                deg
+            )
+        val y =
+            lat + (180 / Math.PI) * (distancesInMeters / radiusOfEarthInMeters) * sin(deg) // sin(lat) * sin(deg)
+        return Point.fromLngLat(x, y)
     }
 
     /*
@@ -650,12 +644,12 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     userStyleURI = uri.text.toString()
                     uri.setText("") // clear text
                 }
-                if ((this::point.isInitialized) && userStyleURI.isNotEmpty()) {
+                if ((this::point.isInitialized) && this::userStyleURI.isInitialized) {
                     //TODO Create new popup to handle download menu
                     //TODO Name region and then confirm
                     //TODO Save Button to start download and cancel to stop download
                     downloadOfflineRegion(userStyleURI)
-                } else if ((this::point.isInitialized) && userStyleURI.isEmpty()) {
+                } else if ((this::point.isInitialized) && !this::userStyleURI.isInitialized) {
                     downloadOfflineRegion()
                 } else {
                     // Tell user to select region
@@ -675,16 +669,19 @@ class MapFragment : ScreenFragment("Map"), Logging {
                             .zoom(ZOOM)
                             .center(point)
                             .build(), MapAnimationOptions.mapAnimationOptions { duration(1000) })
-                    debug(userStyleURI)
-                    it?.loadStyleUri(userStyleURI) {
-                        CircleAnnotationOptions()
-                            .withPoint(point)
-                            .withCircleColor(Color.RED)
-                    }
+                    //debug(userStyleURI)
+                    it?.loadStyleUri(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString()) {
 
+                    }
                 }
                 // Open up Downloaded Region managers
+                mapView?.annotations?.createCircleAnnotationManager()?.create(
+                    CircleAnnotationOptions()
+                        .withPoint(point)
+                        .withCircleColor(Color.RED)
+                )
             }
+
             .setNegativeButton(
                 R.string.cancel
             ) { dialog, _ ->
