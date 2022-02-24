@@ -65,7 +65,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
         }
     }
 
-    //TODO: Setup menu when creating region for offline maps (On long press set a point to center region, then click that point to bring up menu)
     //TODO: View Offline Regions (This will allow you to select the region and the map will zoom to it)
     //TODO: Manage Offline Regions (Allow you to edit the name, delete, & select region)
     //TODO: Update download animation
@@ -80,7 +79,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private lateinit var handler: Handler
     private lateinit var binding: MapViewBinding
     private lateinit var mapNotAllowedBinding: MapNotAllowedBinding
-    private lateinit var viewAnnotationManager: ViewAnnotationManager
     private lateinit var pointLat: String
     private lateinit var pointLong: String
     private lateinit var userStyleURI: String
@@ -504,10 +502,17 @@ class MapFragment : ScreenFragment("Map"), Logging {
         return@OnMapLongClickListener true
     }
 
+    /**
+     * Find's coordinates (Lat,Lon) a specified distance from given (lat,lon) using degrees to determine direction
+     * @param degrees Angle
+     * @param lat latitude position
+     * @param long longitude position
+     * @return Point
+     */
     private fun calculateCoordinate(degrees: Double, lat: Double, long: Double): Point {
         val deg = Math.toRadians(degrees)
         val distancesInMeters =
-            1609.344 * 10 // 1609.344 is 1 mile in meters -> multiplier will be user specified up to a max of 10
+            1609.344 * 5 // 1609.344 is 1 mile in meters -> multiplier will be user specified up to a max of 10
         val radiusOfEarthInMeters = 6378137
         val x =
             long + (180 / Math.PI) * (distancesInMeters / radiusOfEarthInMeters) * cos(
@@ -616,15 +621,12 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 }
             }
             .setNeutralButton("View Regions") { dialog, _ ->
-
-                //OfflineSwitch.getInstance().isMapboxStackConnected = false
                 mapView?.getMapboxMap().also {
                     it?.flyTo(
                         CameraOptions.Builder()
                             .zoom(ZOOM)
                             .center(point)
                             .build(), MapAnimationOptions.mapAnimationOptions { duration(1000) })
-                    //debug(userStyleURI)
                     it?.loadStyleUri(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
                 }
                 // Open up Downloaded Region managers
@@ -634,7 +636,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
                         .withCircleColor(Color.RED)
                 )
             }
-
             .setNegativeButton(
                 R.string.cancel
             ) { dialog, _ ->
