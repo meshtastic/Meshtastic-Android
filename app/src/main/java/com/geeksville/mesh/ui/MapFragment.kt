@@ -443,16 +443,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
         // prepareCancelButton()
     }
 
-
-//    private fun addViewAnnotation(point: Point) {
-//        viewAnnotationManager?.addViewAnnotation(
-//            resId = R.layout.user_icon_menu,
-//            options = viewAnnotationOptions {
-//                geometry(point)
-//            }
-//        )
-//    }
-
     /**
      * OnLongClick of the map set a position marker.
      * If a user long-clicks again, the position of the first marker will be updated
@@ -516,7 +506,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     private fun calculateCoordinate(degrees: Double, lat: Double, long: Double): Point {
         val deg = Math.toRadians(degrees)
-        val distancesInMeters = 1609.344 * 10 // 1609.344 is 1 mile in meters -> multiplier will be user specified up to a max of 10
+        val distancesInMeters =
+            1609.344 * 10 // 1609.344 is 1 mile in meters -> multiplier will be user specified up to a max of 10
         val radiusOfEarthInMeters = 6378137
         val x =
             long + (180 / Math.PI) * (distancesInMeters / radiusOfEarthInMeters) * cos(
@@ -647,6 +638,13 @@ class MapFragment : ScreenFragment("Map"), Logging {
             .setNegativeButton(
                 R.string.cancel
             ) { dialog, _ ->
+                mapView?.getMapboxMap()?.getStyle { style ->
+                    style.removeStyleLayer(lineLayerId)
+                    style.removeStyleSource(boundingBoxId)
+                    style.removeStyleLayer(userTouchLayerId)
+                    style.removeStyleSource(userTouchPositionId)
+                    style.removeStyleImage(userPointImageId)
+                }
                 removeOfflineRegions() //TODO: Add to offline manager window
                 dialog.cancel()
             }
