@@ -16,8 +16,8 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
         packetDao.getAllPacket(MAX_ITEMS)
     }
 
-    suspend fun getAllPacketsInReceiveOrder(): Flow<List<Packet>> = withContext(Dispatchers.IO) {
-        packetDao.getAllPacketsInReceiveOrder(MAX_ITEMS)
+    suspend fun getAllPacketsInReceiveOrder(maxItems: Int = MAX_ITEMS): Flow<List<Packet>> = withContext(Dispatchers.IO) {
+        packetDao.getAllPacketsInReceiveOrder(maxItems)
     }
 
     suspend fun insert(packet: Packet) = withContext(Dispatchers.IO) {

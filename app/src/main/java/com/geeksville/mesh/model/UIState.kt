@@ -283,65 +283,82 @@ class UIViewModel @Inject constructor(
             // Capture the current node value while we're still on main thread
             val nodes = nodeDB.nodes.value ?: emptyMap()
 
+            val positionToPos: (MeshProtos.Position?) -> Position? = { meshPosition ->
+                meshPosition?.let { Position(it) }.takeIf {
+                    it?.isValid() == true
+                }
+            }
+
             writeToUri(file_uri) { writer ->
                 // Create a map of nodes keyed by their ID
-                val nodesById = nodes.values.associateBy { it.num }
+                val nodesById = nodes.values.associateBy { it.num }.toMutableMap()
+                val nodePositions = mutableMapOf<Int, MeshProtos.Position?>()
 
                 writer.appendLine("date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload")
 
                 // Packets are ordered by time, we keep most recent position of
                 // our device in localNodePosition.
-                var localNodePosition: MeshProtos.Position? = null
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd,HH:mm:ss", Locale.getDefault())
-                repository.getAllPacketsInReceiveOrder().first().forEach { packet ->
-                    packet.proto?.let { proto ->
+                repository.getAllPacketsInReceiveOrder(Int.MAX_VALUE).first().forEach { packet ->
+                    // If we get a NodeInfo packet, use it to update our position data (if valid)
+                    packet.nodeInfo?.let { nodeInfo ->
+                        positionToPos.invoke(nodeInfo.position)?.let { _ ->
+                            nodePositions[nodeInfo.num] = nodeInfo.position
+                        }
+                    }
+
+                    packet.meshPacket?.let { proto ->
+                        // If the packet contains position data then use it to update, if valid
                         packet.position?.let { position ->
-                            if (proto.from == myNodeNum) {
-                                localNodePosition = position
-                            } else {
-                                val rxDateTime = dateFormat.format(packet.received_date)
-                                val rxFrom = proto.from.toUInt()
-                                val senderName = nodesById[proto.from]?.user?.longName ?: ""
-
-                                // sender lat & long
-                                val senderPos = packet.position
-                                    ?.let { p -> Position(p) }
-                                    ?.takeIf { p -> p.isValid() }
-                                val senderLat = senderPos?.latitude ?: ""
-                                val senderLong = senderPos?.longitude ?: ""
-
-                                // rx lat, long, and elevation
-                                val rxPos = localNodePosition
-                                    ?.let { p -> Position(p) }
-                                    ?.takeIf { p -> p.isValid() }
-                                val rxLat = rxPos?.latitude ?: ""
-                                val rxLong = rxPos?.longitude ?: ""
-                                val rxAlt = rxPos?.altitude ?: ""
-                                val rxSnr = "%f".format(proto.rxSnr)
-
-                                // Calculate the distance if both positions are valid
-                                val dist = if (senderPos == null || rxPos == null) {
-                                    ""
-                                } else {
-                                    positionToMeter(
-                                        localNodePosition!!,
-                                        position
-                                    ).roundToInt().toString()
-                                }
-
-                                val hopLimit = proto.hopLimit
-
-                                val payload = when {
-                                    proto.decoded.portnumValue != Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> "<${proto.decoded.portnum}>"
-                                    proto.hasDecoded() -> "\"" + proto.decoded.payload.toStringUtf8()
-                                        .replace("\"", "\\\"") + "\""
-                                    proto.hasEncrypted() -> "${proto.encrypted.size()} encrypted bytes"
-                                    else -> ""
-                                }
-
-                                //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload
-                                writer.appendLine("$rxDateTime,$rxFrom,$senderName,$senderLat,$senderLong,$rxLat,$rxLong,$rxAlt,$rxSnr,$dist,$hopLimit,$payload")
+                            positionToPos.invoke(position)?.let { _ ->
+                                nodePositions[proto.from] = position
                             }
+                        }
+
+                        // Filter out of our results any packet that doesn't report SNR.  This
+                        // is primarily ADMIN_APP.
+                        if (proto.rxSnr > 0.0f) {
+                            val rxDateTime = dateFormat.format(packet.received_date)
+                            val rxFrom = proto.from.toUInt()
+                            val senderName = nodesById[proto.from]?.user?.longName ?: ""
+
+                            // sender lat & long
+                            val senderPosition = nodePositions[proto.from]
+                            val senderPos = positionToPos.invoke(senderPosition)
+                            val senderLat = senderPos?.latitude ?: ""
+                            val senderLong = senderPos?.longitude ?: ""
+
+                            // rx lat, long, and elevation
+                            val rxPosition = nodePositions[myNodeNum]
+                            val rxPos = positionToPos.invoke(rxPosition)
+                            val rxLat = rxPos?.latitude ?: ""
+                            val rxLong = rxPos?.longitude ?: ""
+                            val rxAlt = rxPos?.altitude ?: ""
+                            val rxSnr = "%f".format(proto.rxSnr)
+
+                            // Calculate the distance if both positions are valid
+
+                            val dist = if (senderPos == null || rxPos == null) {
+                                ""
+                            } else {
+                                positionToMeter(
+                                    rxPosition!!, // Use rxPosition but only if rxPos was valid
+                                    senderPosition!! // Use senderPosition but only if senderPos was valid
+                                ).roundToInt().toString()
+                            }
+
+                            val hopLimit = proto.hopLimit
+
+                            val payload = when {
+                                proto.decoded.portnumValue != Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> "<${proto.decoded.portnum}>"
+                                proto.hasDecoded() -> "\"" + proto.decoded.payload.toStringUtf8()
+                                    .replace("\"", "\\\"") + "\""
+                                proto.hasEncrypted() -> "${proto.encrypted.size()} encrypted bytes"
+                                else -> ""
+                            }
+
+                            //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload
+                            writer.appendLine("$rxDateTime,$rxFrom,$senderName,$senderLat,$senderLong,$rxLat,$rxLong,$rxAlt,$rxSnr,$dist,$hopLimit,$payload")
                         }
                     }
                 }
