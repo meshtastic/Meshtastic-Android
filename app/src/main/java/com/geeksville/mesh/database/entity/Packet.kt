@@ -16,7 +16,7 @@ data class Packet(@PrimaryKey val uuid: String,
                   @ColumnInfo(name = "message") val raw_message: String
 ) {
 
-    val proto: MeshProtos.MeshPacket?
+    val meshPacket: MeshProtos.MeshPacket?
         get() {
             if (message_type == "packet") {
                 val builder = MeshProtos.MeshPacket.newBuilder()
@@ -28,13 +28,27 @@ data class Packet(@PrimaryKey val uuid: String,
             }
             return null
         }
+
+    val nodeInfo: MeshProtos.NodeInfo?
+        get() {
+            if (message_type == "NodeInfo") {
+                val builder = MeshProtos.NodeInfo.newBuilder()
+                try {
+                    TextFormat.getParser().merge(raw_message, builder)
+                    return builder.build()
+                } catch (e: IOException) {
+                }
+            }
+            return null
+        }
+
     val position: MeshProtos.Position?
         get() {
-            return proto?.run {
+            return meshPacket?.run {
                 if (hasDecoded() && decoded.portnumValue == Portnums.PortNum.POSITION_APP_VALUE) {
                     return MeshProtos.Position.parseFrom(decoded.payload)
                 }
                 return null
-            }
+            } ?: nodeInfo?.position
         }
 }
