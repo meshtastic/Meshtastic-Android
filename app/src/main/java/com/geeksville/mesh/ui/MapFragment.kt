@@ -481,9 +481,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
         val pointList = listOf(topRight, topLeft, bottomLeft, bottomRight, topRight)
 
-        val squareLineString = LineString.fromLngLats(pointList)
+        squareRegion = LineString.fromLngLats(pointList)
 
-        squareRegion = squareLineString//LineString.fromLngLats(circleCoordinateGenerator())
         val geoJsonSource = geoJsonSource(boundingBoxId) {
             geometry(squareRegion)
         }
@@ -494,7 +493,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
             lineWidth(1.5)
             lineColor("#888")
         }
-
 
         mapView?.getMapboxMap()?.getStyle()?.let { style ->
             userTouchPosition.geometry(point)
@@ -526,18 +524,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
             lat + (180 / Math.PI) * (distancesInMeters / radiusOfEarthInMeters) * sin(deg)
         return Point.fromLngLat(x, y)
     }
-
-    /*
-       if (this::point.isInitialized) {
-            if (it.latitude() == point.latitude() && it.longitude() == point.longitude()) {
-                mapView?.getMapboxMap()?.getStyle()?.let { style ->
-                    style.removeStyleImage(userPointImageId)
-                    style.removeStyleSource(userTouchPositionId)
-                    style.removeStyleLayer(userTouchLayerId)
-                }
-            }
-        }
-     */
 
     private fun updateStylePackDownloadProgress(
         progress: Long,
@@ -614,7 +600,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
             .setPositiveButton(
                 "Save"
             ) { _, _ ->
-
                 if (uri.isVisible) {
                     // Save URI
                     userStyleURI = uri.text.toString()
@@ -630,7 +615,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 } else {
                     // Tell user to select region
                     val text =
-                        "You must select a region on the map, long press the region you want to download"
+                        "You must select a region on the map, long press to set the region you want to download"
                     val duration = Toast.LENGTH_LONG
                     val toast = Toast.makeText(requireContext(), text, duration)
                     toast.show()
