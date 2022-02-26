@@ -65,7 +65,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
         }
     }
 
-    //TODO: Setup menu when creating region for offline maps (On long press set a point to center region, then click that point to bring up menu)
     //TODO: View Offline Regions (This will allow you to select the region and the map will zoom to it)
     //TODO: Manage Offline Regions (Allow you to edit the name, delete, & select region)
     //TODO: Update download animation
@@ -80,7 +79,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private lateinit var handler: Handler
     private lateinit var binding: MapViewBinding
     private lateinit var mapNotAllowedBinding: MapNotAllowedBinding
-    private lateinit var viewAnnotationManager: ViewAnnotationManager
     private lateinit var pointLat: String
     private lateinit var pointLong: String
     private lateinit var userStyleURI: String
@@ -443,16 +441,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
         // prepareCancelButton()
     }
 
-
-//    private fun addViewAnnotation(point: Point) {
-//        viewAnnotationManager?.addViewAnnotation(
-//            resId = R.layout.user_icon_menu,
-//            options = viewAnnotationOptions {
-//                geometry(point)
-//            }
-//        )
-//    }
-
     /**
      * OnLongClick of the map set a position marker.
      * If a user long-clicks again, the position of the first marker will be updated
@@ -464,8 +452,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 R.drawable.baseline_location_on_white_24dp
             )!!
                 .toBitmap()
-        pointLong = String.format("%.2f", it.longitude())
-        pointLat = String.format("%.2f", it.latitude())
+        pointLong = String.format("%.6f", it.longitude())
+        pointLat = String.format("%.6f", it.latitude())
         point = Point.fromLngLat(it.longitude(), it.latitude())
 
 
@@ -512,9 +500,17 @@ class MapFragment : ScreenFragment("Map"), Logging {
         return@OnMapLongClickListener true
     }
 
+    /**
+     * Find's coordinates (Lat,Lon) a specified distance from given (lat,lon) using degrees to determine direction
+     * @param degrees Angle
+     * @param lat latitude position
+     * @param long longitude position
+     * @return Point
+     */
     private fun calculateCoordinate(degrees: Double, lat: Double, long: Double): Point {
         val deg = Math.toRadians(degrees)
-        val distancesInMeters = 16093.44// 10 miles
+        val distancesInMeters =
+            1609.344 * 5 // 1609.344 is 1 mile in meters -> multiplier will be user specified up to a max of 10
         val radiusOfEarthInMeters = 6378137
         val x =
             long + (180 / Math.PI) * (distancesInMeters / radiusOfEarthInMeters) * cos(
@@ -568,12 +564,12 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
         if (this::pointLat.isInitialized && this::pointLat.isInitialized) {
             val latText = mapDownloadView.findViewById<TextView>(R.id.longitude)
-            "Lat: $pointLong".also {
+            "Lon: $pointLong".also {
                 latText.text = it
                 View.VISIBLE.also { latText.visibility = View.VISIBLE }
             }
             val longText = mapDownloadView.findViewById<TextView>(R.id.latitude)
-            "Long: $pointLat".also {
+            "Lat: $pointLat".also {
                 longText.text = it
                 View.VISIBLE.also { longText.visibility = View.VISIBLE }
             }
@@ -622,18 +618,13 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 }
             }
             .setNeutralButton("View Regions") { dialog, _ ->
-
-                //OfflineSwitch.getInstance().isMapboxStackConnected = false
                 mapView?.getMapboxMap().also {
                     it?.flyTo(
                         CameraOptions.Builder()
                             .zoom(ZOOM)
                             .center(point)
                             .build(), MapAnimationOptions.mapAnimationOptions { duration(1000) })
-                    //debug(userStyleURI)
-                    it?.loadStyleUri(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString()) {
-
-                    }
+                    it?.loadStyleUri(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
                 }
                 // Open up Downloaded Region managers
                 mapView?.annotations?.createCircleAnnotationManager()?.create(
@@ -642,10 +633,16 @@ class MapFragment : ScreenFragment("Map"), Logging {
                         .withCircleColor(Color.RED)
                 )
             }
-
             .setNegativeButton(
                 R.string.cancel
             ) { dialog, _ ->
+                mapView?.getMapboxMap()?.getStyle { style ->
+                    style.removeStyleLayer(lineLayerId)
+                    style.removeStyleSource(boundingBoxId)
+                    style.removeStyleLayer(userTouchLayerId)
+                    style.removeStyleSource(userTouchPositionId)
+                    style.removeStyleImage(userPointImageId)
+                }
                 removeOfflineRegions() //TODO: Add to offline manager window
                 dialog.cancel()
             }
