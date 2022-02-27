@@ -14,13 +14,13 @@ import dagger.hilt.components.SingletonComponent
 interface BluetoothRepositoryModule {
     companion object {
         @Provides
-        fun provideBluetoothManager(application: Application): BluetoothManager {
-            return application.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        fun provideBluetoothManager(application: Application): BluetoothManager? {
+            return application.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?
         }
 
         @Provides
-        fun provideBluetoothAdapter(service: BluetoothManager): BluetoothAdapter {
-            return service.adapter
+        fun provideBluetoothAdapter(service: BluetoothManager?): BluetoothAdapter? {
+            return service?.adapter
         }
     }
 }
