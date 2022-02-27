@@ -74,10 +74,6 @@ class UIViewModel @Inject constructor(
         debug("ViewModel created")
     }
 
-    fun insertPacket(packet: Packet) = viewModelScope.launch(Dispatchers.IO) {
-        repository.insert(packet)
-    }
-
     fun deleteAllPacket() = viewModelScope.launch(Dispatchers.IO) {
         repository.deleteAll()
     }
@@ -229,10 +225,6 @@ class UIViewModel @Inject constructor(
     val ownerName = object : MutableLiveData<String>("MrIDE Test") {
     }
 
-
-    val bluetoothEnabled = object : MutableLiveData<Boolean>(false) {
-    }
-
     val provideLocation = object : MutableLiveData<Boolean>(preferences.getBoolean(MyPreferences.provideLocationKey, false)) {
         override fun setValue(value: Boolean) {
             super.setValue(value)
@@ -242,9 +234,6 @@ class UIViewModel @Inject constructor(
             }
         }
     }
-
-    /// If the app was launched because we received a new channel intent, the Url will be here
-    var requestedChannelUrl: Uri? = null
 
     // clean up all this nasty owner state management FIXME
     fun setOwner(s: String? = null) {
