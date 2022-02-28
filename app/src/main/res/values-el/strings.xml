@@ -48,7 +48,7 @@
     <string name="share">Κοινοποίηση</string>
     <string name="disconnected">Αποσυνδεδεμένο</string>
     <string name="device_sleeping">Συσκευή σε ύπνωση</string>
-    <string name="connected_count">Συνδεδεμένος: %s από %s online</string>
+    <string name="connected_count">Συνδεδεμένος: %1$s από %2$s online</string>
     <string name="list_of_nodes">Λίστα κόμβων δικτύου</string>
     <string name="update_firmware">Αναβάθμιση Firmware</string>
     <string name="connected">Συνδεδεμένο στο radio</string>

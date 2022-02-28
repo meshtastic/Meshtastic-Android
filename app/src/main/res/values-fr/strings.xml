@@ -49,7 +49,7 @@
     <string name="share">Partager</string>
     <string name="disconnected">Déconnecté</string>
     <string name="device_sleeping">Appareil en veille</string>
-    <string name="connected_count">Connecté: %s sur %s en ligne</string>
+    <string name="connected_count">Connecté: %1$s sur %2$s en ligne</string>
     <string name="list_of_nodes">Une liste de nœuds dans le réseau</string>
     <string name="update_firmware">Mise à jour du Firmware</string>
     <string name="connected">Connecté à une radio</string>
