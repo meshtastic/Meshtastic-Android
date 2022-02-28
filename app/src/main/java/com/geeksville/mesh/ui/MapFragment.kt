@@ -65,6 +65,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         }
     }
 
+
     //TODO: View Offline Regions (This will allow you to select the region and the map will zoom to it)
     //TODO: Manage Offline Regions (Allow you to edit the name, delete, & select region)
     //TODO: Update download animation
