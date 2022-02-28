@@ -47,6 +47,7 @@ jobs:
       with:
         repository: meshtastic/Meshtastic-device
         releases-only: true
+        prefix: 'v1.2.'
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Create version strings
