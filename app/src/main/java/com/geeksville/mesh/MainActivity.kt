@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothManager
 import android.content.*
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -40,6 +39,7 @@ import com.geeksville.android.ServiceClient
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.ActivityMainBinding
+import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
@@ -134,11 +134,7 @@ class MainActivity : AppCompatActivity(), Logging,
     // Used to schedule a coroutine in the GUI thread
     private val mainScope = CoroutineScope(Dispatchers.Main + Job())
 
-    private val bluetoothAdapter: BluetoothAdapter? by lazy(LazyThreadSafetyMode.NONE) {
-        val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        bluetoothManager.adapter
-    }
-
+    val bluetoothViewModel: BluetoothViewModel by viewModels()
     val model: UIViewModel by viewModels()
 
     data class TabInfo(val text: String, val icon: Int, val content: Fragment)
@@ -185,28 +181,6 @@ class MainActivity : AppCompatActivity(), Logging,
             } */
             return tabInfos[position].content
         }
-    }
-
-    private val btStateReceiver = BluetoothStateReceiver {
-        updateBluetoothEnabled()
-    }
-
-    /**
-     * Don't tell our app we have bluetooth until we have bluetooth _and_ location access
-     */
-    private fun updateBluetoothEnabled() {
-        var enabled = false // assume failure
-
-        if (hasConnectPermission()) {
-            /// ask the adapter if we have access
-            bluetoothAdapter?.apply {
-                enabled = isEnabled
-            }
-        } else
-            errormsg("Still missing needed bluetooth permissions")
-
-        debug("Detected our bluetooth access=$enabled")
-        model.bluetoothEnabled.value = enabled
     }
 
     /** Get the minimum permissions our app needs to run correctly
@@ -381,7 +355,7 @@ class MainActivity : AppCompatActivity(), Logging,
             }
         }
 
-        updateBluetoothEnabled()
+        bluetoothViewModel.refreshState()
     }
 
 
@@ -444,12 +418,6 @@ class MainActivity : AppCompatActivity(), Logging,
 
         /// Set theme
         setUITheme(prefs)
-
-        /// Set initial bluetooth state
-        updateBluetoothEnabled()
-
-        /// We now want to be informed of bluetooth state
-        registerReceiver(btStateReceiver, btStateReceiver.intentFilter)
 
         /*  not yet working
         // Configure sign-in to request the user's ID, email address, and basic
@@ -569,7 +537,6 @@ class MainActivity : AppCompatActivity(), Logging,
     }
 
     override fun onDestroy() {
-        unregisterReceiver(btStateReceiver)
         unregisterMeshReceiver()
         mainScope.cancel("Activity going away")
         super.onDestroy()
@@ -1003,17 +970,17 @@ class MainActivity : AppCompatActivity(), Logging,
     override fun onStart() {
         super.onStart()
 
-        // Ask to start bluetooth if no USB devices are visible
-        val hasUSB = SerialInterface.findDrivers(this).isNotEmpty()
-        if (!isInTestLab && !hasUSB) {
-            if (hasConnectPermission()) {
-                bluetoothAdapter?.let {
-                    if (!it.isEnabled) {
+        bluetoothViewModel.enabled.observe(this) { enabled ->
+            if (!enabled) {
+                // Ask to start bluetooth if no USB devices are visible
+                val hasUSB = SerialInterface.findDrivers(this).isNotEmpty()
+                if (!isInTestLab && !hasUSB) {
+                    if (hasConnectPermission()) {
                         val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                         startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
-                    }
+                    } else requestPermission()
                 }
-            } else requestPermission()
+            }
         }
 
         try {
