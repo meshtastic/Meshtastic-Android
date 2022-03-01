@@ -7,18 +7,18 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
+import com.geeksville.mesh.databinding.AdapterRegionLayoutBinding
 import com.geeksville.mesh.databinding.MapNotAllowedBinding
 import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
@@ -44,7 +44,6 @@ import com.mapbox.maps.plugin.annotation.generated.createCircleAnnotationManager
 import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
-import com.mapbox.maps.viewannotation.ViewAnnotationManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.cos
 import kotlin.math.sin
@@ -80,8 +79,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private lateinit var handler: Handler
     private lateinit var binding: MapViewBinding
     private lateinit var mapNotAllowedBinding: MapNotAllowedBinding
-    private lateinit var pointLat: String
-    private lateinit var pointLong: String
     private lateinit var userStyleURI: String
 
     private lateinit var point: Point
@@ -100,7 +97,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private var tilePackCancelable: Cancelable? = null
 
     private lateinit var squareRegion: Geometry
-
 
     private val userTouchPositionId = "user-touch-position"
     private val userTouchLayerId = "user-touch-layer"
@@ -453,15 +449,13 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 R.drawable.baseline_location_on_white_24dp
             )!!
                 .toBitmap()
-        pointLong = String.format("%.6f", it.longitude())
-        pointLat = String.format("%.6f", it.latitude())
         point = Point.fromLngLat(it.longitude(), it.latitude())
 
 
         /*
         Calculate region from user specified position.
-        10 miles NE,NW,SE,SW from user center point.
-        100 Sq Mile Region
+        5 miles NE,NW,SE,SW from user center point.
+        25 Sq Mile Region
         */
         val topRight = calculateCoordinate(45.0, point.latitude(), point.longitude())
         val topLeft = calculateCoordinate(135.0, point.latitude(), point.longitude())
@@ -563,18 +557,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
         val uri = mapDownloadView.findViewById<EditText>(R.id.uri)
         val downloadRegionDialogFragment = AlertDialog.Builder(context)
 
-        if (this::pointLat.isInitialized && this::pointLat.isInitialized) {
-            val latText = mapDownloadView.findViewById<TextView>(R.id.longitude)
-            "Lon: $pointLong".also {
-                latText.text = it
-                View.VISIBLE.also { latText.visibility = View.VISIBLE }
-            }
-            val longText = mapDownloadView.findViewById<TextView>(R.id.latitude)
-            "Lat: $pointLat".also {
-                longText.text = it
-                View.VISIBLE.also { longText.visibility = View.VISIBLE }
-            }
-        }
 
         downloadRegionDialogFragment.setView(mapDownloadView)
             .setTitle("Download Region")
@@ -603,12 +585,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     uri.setText("") // clear text
                 }
                 if ((this::point.isInitialized) && this::userStyleURI.isInitialized) {
-                    //TODO Create new popup to handle download menu
-                    //TODO Name region and then confirm
-                    //TODO Save Button to start download and cancel to stop download
-                    downloadOfflineRegion(userStyleURI)
-                } else if ((this::point.isInitialized) && !this::userStyleURI.isInitialized) {
-                    downloadOfflineRegion()
+                    saveDialog(userStyleURI)
                 } else {
                     // Tell user to select region
                     val text =
@@ -619,20 +596,22 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 }
             }
             .setNeutralButton("View Regions") { dialog, _ ->
-                mapView?.getMapboxMap().also {
-                    it?.flyTo(
-                        CameraOptions.Builder()
-                            .zoom(ZOOM)
-                            .center(point)
-                            .build(), MapAnimationOptions.mapAnimationOptions { duration(1000) })
-                    it?.loadStyleUri(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
-                }
+                val regions = layoutInflater.inflate(R.layout.adapter_region_layout, null)
+                val regionFragment = AlertDialog.Builder(context)
+                regionFragment.setView(regions)
+                regionFragment.create()
+                regionFragment.show()
+
+
                 // Open up Downloaded Region managers
-                mapView?.annotations?.createCircleAnnotationManager()?.create(
-                    CircleAnnotationOptions()
-                        .withPoint(point)
-                        .withCircleColor(Color.RED)
-                )
+//                mapView?.getMapboxMap().also {
+//                    it?.flyTo(
+//                        CameraOptions.Builder()
+//                            .zoom(ZOOM)
+//                            .center(point)
+//                            .build(), MapAnimationOptions.mapAnimationOptions { duration(1000) })
+//                    it?.loadStyleUri(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
+//                }
             }
             .setNegativeButton(
                 R.string.cancel
@@ -650,6 +629,66 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
         downloadRegionDialogFragment.create()
         downloadRegionDialogFragment.show()
+    }
+
+    class ViewHolder(itemView: AdapterRegionLayoutBinding) :
+        RecyclerView.ViewHolder(itemView.root) {
+        val offlineRegion: ImageView = itemView.offlineRegion
+        val regionName: TextView = itemView.regionName
+    }
+
+    private fun saveDialog(styleURI: String = "") {
+
+        val nameRegionDialog = AlertDialog.Builder(context)
+        nameRegionDialog.setView(R.layout.dialog_map_name)
+        nameRegionDialog.setTitle("Name")
+        nameRegionDialog.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.cancel()
+        }
+        nameRegionDialog.setPositiveButton("Save") { _, _ ->
+            downloadOfflineRegion(styleURI)
+        }
+        nameRegionDialog.create()
+        nameRegionDialog.show()
+    }
+
+    private val offlineRegionAdapter = object : RecyclerView.Adapter<ViewHolder>() {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val inflater = LayoutInflater.from(requireContext())
+
+            val regionViewBinding = AdapterRegionLayoutBinding.inflate(inflater, parent, false)
+
+            return ViewHolder(regionViewBinding)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            var regionList = mutableListOf<TileRegion>()
+            val region = regionList[position]
+            val name = ""
+            tileStore.getAllTileRegions { expected ->
+                if (expected.isValue) {
+                    expected.value?.let { tileRegionList ->
+                        regionList = tileRegionList
+                    }
+                }
+            }
+        }
+
+        override fun getItemCount(): Int {
+            var count = 0
+            tileStore.getAllTileRegions { expected ->
+                if (expected.isValue) {
+                    expected.value?.let { tileRegionList ->
+                        count = tileRegionList.size
+                    }
+                }
+                expected.error?.let { tileRegionError ->
+                    debug("TileRegionError: $tileRegionError")
+                }
+            }
+            return count
+        }
+
     }
 }
 
