@@ -1,15 +1,19 @@
 package com.geeksville.mesh.repository.bluetooth
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.le.BluetoothLeScanner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.geeksville.android.Logging
 import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.android.hasConnectPermission
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,18 +23,22 @@ import javax.inject.Singleton
 @Singleton
 class BluetoothRepository @Inject constructor(
     private val application: Application,
-    private val bluetoothAdapterLazy: dagger.Lazy<BluetoothAdapter>,
-    private val bluetoothStateReceiverLazy: dagger.Lazy<BluetoothStateReceiver>,
+    private val bluetoothAdapterLazy: dagger.Lazy<BluetoothAdapter?>,
+    private val bluetoothBroadcastReceiverLazy: dagger.Lazy<BluetoothBroadcastReceiver>,
     private val dispatchers: CoroutineDispatchers,
     private val processLifecycle: Lifecycle,
 ) : Logging {
-    internal val enabledInternal = MutableStateFlow(false)
-    val enabled: StateFlow<Boolean> = enabledInternal
+    private val _state = MutableStateFlow(BluetoothState(
+        // Assume we have permission until we get our initial state update to prevent premature
+        // notifications to the user.
+        hasPermissions = true
+    ))
+    val state: StateFlow<BluetoothState> = _state.asStateFlow()
 
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) {
-            updateBluetoothEnabled()
-            bluetoothStateReceiverLazy.get().let { receiver ->
+            updateBluetoothState()
+            bluetoothBroadcastReceiverLazy.get().let { receiver ->
                 application.registerReceiver(receiver, receiver.intentFilter)
             }
         }
@@ -38,19 +46,57 @@ class BluetoothRepository @Inject constructor(
 
     fun refreshState() {
         processLifecycle.coroutineScope.launch(dispatchers.default) {
-            updateBluetoothEnabled()
+            updateBluetoothState()
         }
     }
 
-    private suspend fun updateBluetoothEnabled() {
-        if (application.hasConnectPermission()) {
-            /// ask the adapter if we have access
-            bluetoothAdapterLazy.get()?.let { adapter ->
-                enabledInternal.emit(adapter.isEnabled)
-            }
-        } else
-            errormsg("Still missing needed bluetooth permissions")
+    fun getRemoteDevice(address: String): BluetoothDevice? {
+        return bluetoothAdapterLazy.get()?.getRemoteDevice(address)
+    }
 
-        debug("Detected our bluetooth access=${enabled.value}")
+    fun getBluetoothLeScanner(): BluetoothLeScanner? {
+        return bluetoothAdapterLazy.get()?.bluetoothLeScanner
+    }
+
+    @SuppressLint("MissingPermission")
+    internal suspend fun updateBluetoothState() {
+        val newState: BluetoothState = bluetoothAdapterLazy.get()?.takeIf {
+            application.hasConnectPermission().also { hasPerms ->
+                if (!hasPerms) errormsg("Still missing needed bluetooth permissions")
+            }
+        }?.let { adapter ->
+            /// ask the adapter if we have access
+            BluetoothState(
+                hasPermissions = true,
+                enabled = adapter.isEnabled,
+                bondedDevices = createBondedDevicesFlow(adapter),
+            )
+        } ?: BluetoothState()
+
+        _state.emit(newState)
+        debug("Detected our bluetooth access=$newState")
+    }
+
+    /**
+     * Creates a cold Flow used to obtain the set of bonded devices.
+     */
+    @SuppressLint("MissingPermission") // Already checked prior to calling
+    private suspend fun createBondedDevicesFlow(adapter: BluetoothAdapter): Flow<Set<BluetoothDevice>>? {
+        return if (adapter.isEnabled) {
+            flow<Set<BluetoothDevice>> {
+                withContext(dispatchers.default) {
+                    while (true) {
+                        emit(adapter.bondedDevices)
+                        delay(REFRESH_DELAY_MS)
+                    }
+                }
+            }.flowOn(dispatchers.default)
+        } else {
+            null
+        }
+    }
+
+    companion object {
+        const val REFRESH_DELAY_MS = 1000L
     }
 }

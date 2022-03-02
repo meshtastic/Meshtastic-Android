@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity(), Logging,
     // Used to schedule a coroutine in the GUI thread
     private val mainScope = CoroutineScope(Dispatchers.Main + Job())
 
-    val bluetoothViewModel: BluetoothViewModel by viewModels()
+    private val bluetoothViewModel: BluetoothViewModel by viewModels()
     val model: UIViewModel by viewModels()
 
     data class TabInfo(val text: String, val icon: Int, val content: Fragment)
@@ -355,7 +355,7 @@ class MainActivity : AppCompatActivity(), Logging,
             }
         }
 
-        bluetoothViewModel.refreshState()
+        bluetoothViewModel.permissionsUpdated()
     }
 
 

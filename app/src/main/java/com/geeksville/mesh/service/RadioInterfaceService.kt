@@ -204,8 +204,8 @@ class RadioInterfaceService : Service(), Logging {
         super.onCreate()
 
         lifecycleOwner.lifecycle.coroutineScope.launch {
-            bluetoothRepository.enabled.collect { enabled ->
-                if (enabled) {
+            bluetoothRepository.state.collect { state ->
+                if (state.enabled) {
                     startInterface()
                 } else {
                     stopInterface()
