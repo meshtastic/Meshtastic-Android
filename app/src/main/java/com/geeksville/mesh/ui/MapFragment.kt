@@ -578,22 +578,25 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 "Save", null
             )
             .setNeutralButton("View Regions") { _, _ ->
-                val regions = layoutInflater.inflate(R.layout.adapter_region_layout, null)
-                val regionFragment = AlertDialog.Builder(context)
-                regionFragment.setView(regions)
-                regionFragment.create()
-                regionFragment.show()
-
+//                val regions = layoutInflater.inflate(R.layout.adapter_region_layout, null)
+//                val regionFragment = AlertDialog.Builder(context)
+//                regionFragment.setView(regions)
+//                regionFragment.create()
+//                regionFragment.show()
 
                 // Open up Downloaded Region managers
-//                mapView?.getMapboxMap().also {
-//                    it?.flyTo(
-//                        CameraOptions.Builder()
-//                            .zoom(ZOOM)
-//                            .center(point)
-//                            .build(), MapAnimationOptions.mapAnimationOptions { duration(1000) })
-//                    it?.loadStyleUri(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
-//                }
+                mapView?.getMapboxMap().also {
+                    it?.flyTo(
+                        CameraOptions.Builder()
+                            .zoom(ZOOM)
+                            .center(point)
+                            .build(), MapAnimationOptions.mapAnimationOptions { duration(1000) })
+                    if (userStyleURI != null) {
+                        it?.loadStyleUri(userStyleURI.toString())
+                    } else {
+                        it?.loadStyleUri(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
+                    }
+                }
             }
             .setNegativeButton(
                 R.string.cancel
