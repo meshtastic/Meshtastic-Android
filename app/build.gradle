@@ -122,7 +122,7 @@ protobuf {
 
 dependencies {
 
-    def room_version = '2.4.1'
+    def room_version = '2.4.2'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.4.1'
@@ -134,7 +134,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.5.0'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
     implementation "androidx.room:room-runtime:$room_version"
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "androidx.room:room-compiler:$room_version"
