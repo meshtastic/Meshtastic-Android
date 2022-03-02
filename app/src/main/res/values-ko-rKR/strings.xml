@@ -46,7 +46,7 @@
     <string name="share">공유</string>
     <string name="disconnected">연결 해제</string>
     <string name="device_sleeping">장치 잠자기</string>
-    <string name="connected_count">연결: %s 온라인( 전체 %s)</string>
+    <string name="connected_count">연결: %1$s 온라인( 전체 %2$s)</string>
     <string name="list_of_nodes">네트워크안은 모든 노드의 목록</string>
     <string name="update_firmware">펌웨어 업데이트</string>
     <string name="connected">라디오로 연결됨</string>

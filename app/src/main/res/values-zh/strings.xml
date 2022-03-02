@@ -48,7 +48,7 @@
     <string name="share">分享</string>
     <string name="disconnected">断开连接</string>
     <string name="device_sleeping">设备休眠中</string>
-    <string name="connected_count">连接: %s 中 %s 在线</string>
+    <string name="connected_count">连接: %1$s 中 %2$s 在线</string>
     <string name="list_of_nodes">网络中节点列表</string>
     <string name="update_firmware">更新固件</string>
     <string name="connected">连接设备</string>

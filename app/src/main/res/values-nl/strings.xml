@@ -48,7 +48,7 @@
     <string name="share">Deel</string>
     <string name="disconnected">Niet verbonden</string>
     <string name="device_sleeping">Apparaat in slaapstand</string>
-    <string name="connected_count">Verbonden: %s van %s online</string>
+    <string name="connected_count">Verbonden: %1$s van %2$s online</string>
     <string name="list_of_nodes">Een lijst van de aansluitpunten in het netwerk</string>
     <string name="update_firmware">Programma Updaten</string>
     <string name="connected">Verbonden met een radio</string>

@@ -2,24 +2,27 @@ package com.geeksville.mesh.service
 
 import android.annotation.SuppressLint
 import android.app.Service
-import android.companion.CompanionDeviceManager
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.IBinder
 import androidx.core.content.edit
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ServiceLifecycleDispatcher
+import androidx.lifecycle.coroutineScope
 import com.geeksville.android.BinaryLogFile
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.IRadioInterfaceService
+import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.util.anonymize
 import com.geeksville.util.ignoreException
 import com.geeksville.util.toRemoteExceptions
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
+import javax.inject.Inject
 
 
 open class RadioNotConnectedException(message: String = "Not connected to radio") :
@@ -35,7 +38,17 @@ open class RadioNotConnectedException(message: String = "Not connected to radio"
  * Note - this class intentionally dumb.  It doesn't understand protobuf framing etc...
  * It is designed to be simple so it can be stubbed out with a simulated version as needed.
  */
+@AndroidEntryPoint
 class RadioInterfaceService : Service(), Logging {
+
+    // The following is due to the fact that AIDL prevents us from extending from `LifecycleService`:
+    private val lifecycleOwner: LifecycleOwner = LifecycleOwner { lifecycleDispatcher.lifecycle }
+    private val lifecycleDispatcher: ServiceLifecycleDispatcher by lazy {
+        ServiceLifecycleDispatcher(lifecycleOwner)
+    }
+
+    @Inject
+    lateinit var bluetoothRepository: BluetoothRepository
 
     companion object : Logging {
         /**
@@ -104,7 +117,7 @@ class RadioInterfaceService : Service(), Logging {
         @SuppressLint("NewApi")
         fun getBondedDeviceAddress(context: Context): String? {
             // If the user has unpaired our device, treat things as if we don't have one
-            var address = getDeviceAddress(context)
+            val address = getDeviceAddress(context)
 
             /// Interfaces can filter addresses to indicate that address is no longer acceptable
             if (address != null) {
@@ -141,16 +154,6 @@ class RadioInterfaceService : Service(), Logging {
 
     /// true if our interface is currently connected to a device
     private var isConnected = false
-
-    /**
-     * If the user turns on bluetooth after we start, make sure to try and reconnected then
-     */
-    private val bluetoothStateReceiver = BluetoothStateReceiver { enabled ->
-        if (enabled)
-            startInterface() // If bluetooth just got turned on, try to restart our ble link (which might be bluetooth)
-        else if (radioIf is BluetoothInterface)
-            stopInterface() // Was using bluetooth, need to shutdown
-    }
 
     private fun broadcastConnectionChanged(isConnected: Boolean, isPermanent: Boolean) {
         debug("Broadcasting connection=$isConnected")
@@ -197,19 +200,35 @@ class RadioInterfaceService : Service(), Logging {
 
     override fun onCreate() {
         runningService = this
+        lifecycleDispatcher.onServicePreSuperOnCreate()
         super.onCreate()
-        registerReceiver(bluetoothStateReceiver, bluetoothStateReceiver.intentFilter)
+
+        lifecycleOwner.lifecycle.coroutineScope.launch {
+            bluetoothRepository.state.collect { state ->
+                if (state.enabled) {
+                    startInterface()
+                } else {
+                    stopInterface()
+                }
+            }
+        }
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        lifecycleDispatcher.onServicePreSuperOnStart()
+        return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {
-        unregisterReceiver(bluetoothStateReceiver)
         stopInterface()
         serviceScope.cancel("Destroying RadioInterface")
         runningService = null
+        lifecycleDispatcher.onServicePreSuperOnDestroy()
         super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): IBinder? {
+        lifecycleDispatcher.onServicePreSuperOnBind()
         return binder
     }
 

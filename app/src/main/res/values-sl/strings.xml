@@ -46,7 +46,7 @@
     <string name="share">Deliti</string>
     <string name="disconnected">Prekinjeno</string>
     <string name="device_sleeping">Naprava je v "spanju"</string>
-    <string name="connected_count">Povezano: %s od %s je na mreži</string>
+    <string name="connected_count">Povezano: %1$s od %2$s je na mreži</string>
     <string name="list_of_nodes">Seznam vozlišč v omrežju</string>
     <string name="update_firmware">Posodobite vdelano programsko opremo</string>
     <string name="connected">Povezana z radiem</string>

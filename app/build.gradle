@@ -43,8 +43,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 30 // 30 can't work until an explicit location permissions dialog is added
-        versionCode 20258 // format is Mmmss (where M is 1+the numeric major number
-        versionName "1.2.58"
+        versionCode 20259 // format is Mmmss (where M is 1+the numeric major number
+        versionName "1.2.59"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
@@ -122,7 +122,7 @@ protobuf {
 
 dependencies {
 
-    def room_version = '2.4.1'
+    def room_version = '2.4.2'
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.4.1'
@@ -134,7 +134,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.5.0'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
     implementation "androidx.room:room-runtime:$room_version"
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "androidx.room:room-compiler:$room_version"

@@ -46,7 +46,7 @@
     <string name="share">Pataje</string>
     <string name="disconnected">Dekonekte</string>
     <string name="device_sleeping">Aparèy ap dòmi</string>
-    <string name="connected_count">Konekte: %s nan %s disponib</string>
+    <string name="connected_count">Konekte: %1$s nan %2$s disponib</string>
     <string name="list_of_nodes">Yon lis ne elektwonik nan rezo a</string>
     <string name="update_firmware">Mete ajou mikrolojisyèl</string>
     <string name="connected">Konekte ak radyo</string>
