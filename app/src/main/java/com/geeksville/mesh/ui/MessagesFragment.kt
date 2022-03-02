@@ -124,7 +124,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         }
 
         var messages = arrayOf<DataPacket>()
-        var positionList = ArrayList<Int>()
+        var selectedList = ArrayList<DataPacket>()
 
         /**
          * Returns the total number of items in the data set held by the adapter.
@@ -245,24 +245,19 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
                                 R.id.deleteButton -> {
                                     val deleteMessagesString = resources.getQuantityString(
                                         R.plurals.delete_messages,
-                                        positionList.size,
-                                        positionList.size
+                                        selectedList.size,
+                                        selectedList.size
                                     )
                                     MaterialAlertDialogBuilder(requireContext())
                                         .setMessage(deleteMessagesString)
                                         .setPositiveButton(getString(R.string.delete)) { _, _ ->
                                             debug("User clicked deleteButton")
                                             // all items selected --> deleteAllMessages()
-                                            if (positionList.size == messages.size) {
+                                            if (selectedList.size == messages.size) {
                                                 model.messagesState.deleteAllMessages()
                                             } else {
-                                                // remove selectedList in reverse so we don't break the index
-                                                positionList.sortedDescending().forEach {
-                                                    try {
-                                                        model.messagesState.deleteMessage((messages[it]), it)
-                                                    } catch (ex: ArrayIndexOutOfBoundsException) {
-                                                        errormsg("error deleting messages ${ex.message}")
-                                                    }
+                                                selectedList.forEach {
+                                                    model.messagesState.deleteMessage(it)
                                                 }
                                                 mode.finish()
                                             }
@@ -273,15 +268,15 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
                                 }
                                 R.id.selectAllButton -> {
                                     // if all selected -> unselect all
-                                    if (positionList.size == messages.size) {
-                                        positionList.clear()
+                                    if (selectedList.size == messages.size) {
+                                        selectedList.clear()
                                         mode.finish()
                                     } else {
                                         // else --> select all
-                                        positionList.clear()
-                                        positionList.addAll(messages.indices)
+                                        selectedList.clear()
+                                        selectedList.addAll(messages)
                                     }
-                                    actionMode?.title = positionList.size.toString()
+                                    actionMode?.title = selectedList.size.toString()
                                     notifyDataSetChanged()
                                 }
                             }
@@ -289,7 +284,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
                         }
 
                         override fun onDestroyActionMode(mode: ActionMode) {
-                            positionList.clear()
+                            selectedList.clear()
                             notifyDataSetChanged()
                             actionMode = null
                         }
@@ -304,7 +299,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
                 if (actionMode != null) clickItem(holder)
             }
 
-            if (positionList.contains(position)) {
+            if (selectedList.contains(msg)) {
                 holder.itemView.background = GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
                     cornerRadius = 32f
@@ -321,17 +316,17 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
 
         private fun clickItem(holder: ViewHolder) {
             val position = holder.bindingAdapterPosition
-            if (!positionList.contains(position)) {
-                positionList.add(position)
+            if (!selectedList.contains(messages[position])) {
+                selectedList.add(messages[position])
             } else {
-                positionList.remove(position)
+                selectedList.remove(messages[position])
             }
-            if (positionList.isEmpty()) {
+            if (selectedList.isEmpty()) {
                 // finish action mode when no items selected
                 actionMode?.finish()
             } else {
                 // show total items selected on action mode title
-                actionMode?.title = "${positionList.size}"
+                actionMode?.title = "${selectedList.size}"
             }
             notifyItemChanged(position)
         }
