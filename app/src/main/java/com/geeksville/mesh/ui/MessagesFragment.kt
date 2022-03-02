@@ -123,6 +123,9 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             return ViewHolder(contactViewBinding)
         }
 
+        var messages = arrayOf<DataPacket>()
+        var selectedList = ArrayList<DataPacket>()
+
         /**
          * Returns the total number of items in the data set held by the adapter.
          *
@@ -212,9 +215,114 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
 
             } else
                 holder.messageStatusIcon.visibility = View.INVISIBLE
+
+            holder.itemView.setOnLongClickListener {
+                if (actionMode == null) {
+                    actionMode = (activity as MainActivity).startActionMode(object : ActionMode.Callback {
+                        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+                            mode.menuInflater.inflate(R.menu.menu_messages, menu)
+                            mode.title = "1"
+                            return true
+                        }
+
+                        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+                            clickItem(holder)
+                            return true
+                        }
+
+                        override fun onActionItemClicked(
+                            mode: ActionMode,
+                            item: MenuItem
+                        ): Boolean {
+                            when (item.itemId) {
+                                R.id.deleteButton -> {
+                                    val deleteMessagesString = resources.getQuantityString(
+                                        R.plurals.delete_messages,
+                                        selectedList.size,
+                                        selectedList.size
+                                    )
+                                    MaterialAlertDialogBuilder(requireContext())
+                                        .setMessage(deleteMessagesString)
+                                        .setPositiveButton(getString(R.string.delete)) { _, _ ->
+                                            debug("User clicked deleteButton")
+                                            // all items selected --> deleteAllMessages()
+                                            if (selectedList.size == messages.size) {
+                                                model.messagesState.deleteAllMessages()
+                                            } else {
+                                                selectedList.forEach {
+                                                    model.messagesState.deleteMessage(it)
+                                                }
+                                                mode.finish()
+                                            }
+                                        }
+                                        .setNeutralButton(R.string.cancel) { _, _ ->
+                                        }
+                                        .show()
+                                }
+                                R.id.selectAllButton -> {
+                                    // if all selected -> unselect all
+                                    if (selectedList.size == messages.size) {
+                                        selectedList.clear()
+                                        mode.finish()
+                                    } else {
+                                        // else --> select all
+                                        selectedList.clear()
+                                        selectedList.addAll(messages)
+                                    }
+                                    actionMode?.title = selectedList.size.toString()
+                                    notifyDataSetChanged()
+                                }
+                            }
+                            return true
+                        }
+
+                        override fun onDestroyActionMode(mode: ActionMode) {
+                            selectedList.clear()
+                            notifyDataSetChanged()
+                            actionMode = null
+                        }
+                    })
+                } else {
+                    // when action mode is enabled
+                    clickItem(holder)
+                }
+                true
+            }
+            holder.itemView.setOnClickListener {
+                if (actionMode != null) clickItem(holder)
+            }
+
+            if (selectedList.contains(msg)) {
+                holder.itemView.background = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 32f
+                    setColor(Color.rgb(127, 127, 127))
+                }
+            } else {
+                holder.itemView.background = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 32f
+                    setColor(ContextCompat.getColor(holder.itemView.context, R.color.colorAdvancedBackground))
+                }
+            }
         }
 
-        private var messages = arrayOf<DataPacket>()
+        private fun clickItem(holder: ViewHolder) {
+            val position = holder.bindingAdapterPosition
+            if (!selectedList.contains(messages[position])) {
+                selectedList.add(messages[position])
+            } else {
+                selectedList.remove(messages[position])
+            }
+            if (selectedList.isEmpty()) {
+                // finish action mode when no items selected
+                actionMode?.finish()
+            } else {
+                // show total items selected on action mode title
+                actionMode?.title = "${selectedList.size}"
+            }
+            notifyItemChanged(position)
+        }
 
         /// Called when our node DB changes
         fun onMessagesChanged(msgIn: Collection<DataPacket>) {

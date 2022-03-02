@@ -66,8 +66,7 @@ interface IMeshService {
     */
     void send(inout DataPacket packet);
 
-
-    void delete(int position);
+    void deleteMessage(int packetId);
 
     void deleteAllMessages();
 

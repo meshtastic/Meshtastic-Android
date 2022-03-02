@@ -1782,10 +1782,12 @@ class MeshService : Service(), Logging {
                 this@MeshService.setOwner(myId, longName, shortName)
             }
 
-        override fun delete(position: Int) {
-            if (position >= 0) {
-                recentDataPackets.removeAt(position)
-            }
+        override fun deleteMessage(packetId: Int) {
+            val packet = recentDataPackets.find {it.id == packetId}
+            if (packet != null) {
+                recentDataPackets.remove(packet)
+                debug("Deleting message id=${packet.id}")
+            } else debug("Nothing to delete, message id=${packetId} not found")
         }
 
         override fun deleteAllMessages() {
