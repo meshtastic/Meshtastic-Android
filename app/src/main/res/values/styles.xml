@@ -11,7 +11,8 @@
 
         <item name="windowNoTitle">true</item>
         <item name="android:itemTextAppearance">@style/menu_item_color</item>
-
+        <item name="actionModeStyle">@style/MyActionMode</item>
+        <item name="windowActionModeOverlay">true</item>
     </style>
 
     <style name="AppTheme.Spinner">
@@ -71,6 +72,12 @@
 
     <style name="MyToolbar" parent="Widget.MaterialComponents.Toolbar">
         <item name="materialThemeOverlay">@style/MyThemeOverlay_Toolbar</item>
+    </style>
+
+    <style name="MyActionMode" parent="Base.Widget.AppCompat.ActionMode">
+        <item name="background">@color/colorPrimary</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColorPrimary">@color/colorOnPrimary</item>
     </style>
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">

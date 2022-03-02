@@ -95,12 +95,12 @@ class MessagesState(private val ui: UIViewModel) : Logging {
         addMessage(p)
     }
 
-    fun deleteMessage(packet: DataPacket, position: Int) {
+    fun deleteMessage(packet: DataPacket) {
         val service = ui.meshService
 
         if (service != null) {
             try {
-                service.delete(position)
+                service.deleteMessage(packet.id)
             } catch (ex: RemoteException) {
                 packet.errorMessage = "Error: ${ex.message}"
             }
@@ -116,7 +116,7 @@ class MessagesState(private val ui: UIViewModel) : Logging {
             try {
                 service.deleteAllMessages()
             } catch (ex: RemoteException) {
-
+                errormsg("Error: ${ex.message}")
             }
             removeAllMessages()
         }

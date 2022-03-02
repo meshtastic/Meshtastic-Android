@@ -42,7 +42,6 @@
                 android:layout_marginEnd="8dp"
                 android:autoLink="all"
                 android:text="@string/sample_message"
-                android:textIsSelectable="true"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/username"
                 app:layout_constraintTop_toTopOf="parent" />
