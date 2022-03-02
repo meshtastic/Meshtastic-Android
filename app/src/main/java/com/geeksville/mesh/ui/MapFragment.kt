@@ -77,9 +77,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private lateinit var handler: Handler
     private lateinit var binding: MapViewBinding
     private lateinit var mapNotAllowedBinding: MapNotAllowedBinding
-    private lateinit var userStyleURI: String
+    private var userStyleURI: String? = null
 
-    private lateinit var point: Point
+    private var point: Point? = null
 
     private val model: UIViewModel by activityViewModels()
 
@@ -346,7 +346,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 .metadata(Value(STYLE_PACK_METADATA))
                 .build(),
             { progress ->
-                // Update the download progress to UI
+                //TODO: Update the download progress to UI
                 updateStylePackDownloadProgress(
                     progress.completedResourceCount,
                     progress.requiredResourceCount
@@ -434,7 +434,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 debug("TileRegionError: $it")
             }
         }
-        // prepareCancelButton()
     }
 
     /**
@@ -456,10 +455,10 @@ class MapFragment : ScreenFragment("Map"), Logging {
         5 miles NE,NW,SE,SW from user center point.
         25 Sq Mile Region
         */
-        val topRight = calculateCoordinate(45.0, point.latitude(), point.longitude())
-        val topLeft = calculateCoordinate(135.0, point.latitude(), point.longitude())
-        val bottomLeft = calculateCoordinate(225.0, point.latitude(), point.longitude())
-        val bottomRight = calculateCoordinate(315.0, point.latitude(), point.longitude())
+        val topRight = calculateCoordinate(45.0, point?.latitude()!!, point?.longitude()!!)
+        val topLeft = calculateCoordinate(135.0, point?.latitude()!!, point?.longitude()!!)
+        val bottomLeft = calculateCoordinate(225.0, point?.latitude()!!, point?.longitude()!!)
+        val bottomRight = calculateCoordinate(315.0, point?.latitude()!!, point?.longitude()!!)
 
         val pointList = listOf(topRight, topLeft, bottomLeft, bottomRight, topRight)
 
@@ -477,7 +476,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         }
 
         mapView?.getMapboxMap()?.getStyle()?.let { style ->
-            userTouchPosition.geometry(point)
+            userTouchPosition.geometry(point!!)
             if (!style.styleLayerExists(userTouchLayerId)) {
                 style.addImage(userPointImageId, userDefinedPointImg)
                 style.addSource(userTouchPosition)
@@ -576,27 +575,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 }
             }
             .setPositiveButton(
-                "Save"
-            ) { _, _ ->
-                if (uri.isVisible) {
-                    // Save URI
-                    userStyleURI = uri.text.toString()
-                    uri.setText("") // clear text
-                }
-                if ((this::point.isInitialized) && this::userStyleURI.isInitialized) {
-                    saveDialog(userStyleURI)
-                } else if (this::point.isInitialized && !this::userStyleURI.isInitialized) {
-                    saveDialog()
-                } else {
-                    // Tell user to select region
-                    val text =
-                        "You must select a region on the map, long press to set the region you want to download"
-                    val duration = Toast.LENGTH_LONG
-                    val toast = Toast.makeText(requireContext(), text, duration)
-                    toast.show()
-                }
-            }
-            .setNeutralButton("View Regions") { dialog, _ ->
+                "Save", null
+            )
+            .setNeutralButton("View Regions") { _, _ ->
                 val regions = layoutInflater.inflate(R.layout.adapter_region_layout, null)
                 val regionFragment = AlertDialog.Builder(context)
                 regionFragment.setView(regions)
@@ -618,6 +599,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 R.string.cancel
             ) { dialog, _ ->
                 mapView?.getMapboxMap()?.getStyle { style ->
+                    point = null
+                    userStyleURI = null
                     style.removeStyleLayer(lineLayerId)
                     style.removeStyleSource(boundingBoxId)
                     style.removeStyleLayer(userTouchLayerId)
@@ -628,8 +611,48 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 dialog.cancel()
             }
 
-        downloadRegionDialogFragment.create()
-        downloadRegionDialogFragment.show()
+        val dialog = downloadRegionDialogFragment.create()
+        dialog.show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+            if (uri.isVisible) {
+                if (uri.text.isNotEmpty()) {
+                    // Save URI
+                    userStyleURI = uri.text.toString()
+                    uri.setText("") // clear text
+                }
+            }
+            if ((this.point != null) && (this.userStyleURI != null)) {
+                if (this.userStyleURI!!.isNotEmpty()) {
+                    saveDialog(userStyleURI!!)
+                    dialog.dismiss()
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "Style URI cannot be empty",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } else if (this.point != null) {
+                if (this.userStyleURI == null && uri.isVisible) {
+                    Toast.makeText(
+                        requireContext(),
+                        "Style URI cannot be empty",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    saveDialog()
+                    dialog.dismiss()
+                }
+            } else {
+                dialog.dismiss()
+                // Tell user to select region
+                Toast.makeText(
+                    requireContext(),
+                    "You must select a region on the map, long press to set the region you want to download",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     class ViewHolder(itemView: AdapterRegionLayoutBinding) :
@@ -659,7 +682,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 if (userInput.text.isEmpty()) {
                     val text =
                         "You must enter a name"
-                    val duration = Toast.LENGTH_LONG
+                    val duration = Toast.LENGTH_SHORT
                     val toast = Toast.makeText(requireContext(), text, duration)
                     toast.show()
                 } else {
