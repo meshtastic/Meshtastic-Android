@@ -1,12 +1,10 @@
 package com.geeksville.mesh.ui
 
-import android.app.AlertDialog
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.text.InputType
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageView
@@ -14,11 +12,11 @@ import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.android.Logging
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.AdapterMessageLayoutBinding
@@ -26,6 +24,7 @@ import com.geeksville.mesh.databinding.MessagesFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.google.android.material.chip.Chip
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.DateFormat
 import java.util.*
@@ -37,7 +36,6 @@ fun EditText.on(actionId: Int, func: () -> Unit) {
         if (actionId == receivedActionId) {
             func()
         }
-
         true
     }
 }
@@ -45,6 +43,7 @@ fun EditText.on(actionId: Int, func: () -> Unit) {
 @AndroidEntryPoint
 class MessagesFragment : ScreenFragment("Messages"), Logging {
 
+    private var actionMode: ActionMode? = null
     private var _binding: MessagesFragmentBinding? = null
 
     // This property is only valid between onCreateView and onDestroyView.
@@ -53,7 +52,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
     private val model: UIViewModel by activityViewModels()
 
     // Allows textMultiline with IME_ACTION_SEND
-    fun EditText.onActionSend(func: () -> Unit) {
+    private fun EditText.onActionSend(func: () -> Unit) {
         setImeOptions(EditorInfo.IME_ACTION_SEND)
         setRawInputType(InputType.TYPE_CLASS_TEXT)
         setOnEditorActionListener { _, actionId, _ ->
@@ -61,7 +60,6 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             if (actionId == EditorInfo.IME_ACTION_SEND) {
                 func()
             }
-
             true
         }
     }
@@ -73,22 +71,21 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
 
     private fun getShortDateTime(time: Date): String {
         // return time if within 24 hours, otherwise date/time
-        val one_day = 60 * 60 * 24 * 1000
-        if (System.currentTimeMillis() - time.time > one_day) {
-            return dateTimeFormat.format(time)
-        } else return timeFormat.format(time)
+        val oneDayMsec = 60 * 60 * 24 * 1000L
+        return if (System.currentTimeMillis() - time.time > oneDayMsec) {
+            dateTimeFormat.format(time)
+        } else timeFormat.format(time)
     }
-
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
     class ViewHolder(itemView: AdapterMessageLayoutBinding) :
         RecyclerView.ViewHolder(itemView.root) {
+        val card: CardView = itemView.Card
         val username: Chip = itemView.username
         val messageText: TextView = itemView.messageText
         val messageTime: TextView = itemView.messageTime
         val messageStatusIcon: ImageView = itemView.messageStatusIcon
-        val card: CardView = itemView.Card
     }
 
     private val messagesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
@@ -118,8 +115,6 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
          */
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val inflater = LayoutInflater.from(requireContext())
-
-            // Inflate the custom layout
 
             // Inflate the custom layout
             val contactViewBinding = AdapterMessageLayoutBinding.inflate(inflater, parent, false)
@@ -159,7 +154,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val msg = messages[position]
             val nodes = model.nodeDB.nodes.value!!
-            val node = nodes.get(msg.from)
+
             // Determine if this is my message (originated on this device).
             // val isMe = model.myNodeInfo.value?.myNodeNum == node?.num
             val isMe = msg.from == "^local"
@@ -167,48 +162,19 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             // Set cardview offset and color.
             val marginParams = holder.card.layoutParams as ViewGroup.MarginLayoutParams
             val messageOffset = resources.getDimensionPixelOffset(R.dimen.message_offset)
-            holder.card.setOnLongClickListener {
-                val deleteMessageDialog = AlertDialog.Builder(context)
-                deleteMessageDialog.setMessage(R.string.delete_selected_message)
-                deleteMessageDialog.setPositiveButton(
-                    R.string.delete
-                ) { _, _ ->
-                    model.messagesState.deleteMessage((messages[position]), position)
-                }
-                deleteMessageDialog.setNeutralButton(
-                    R.string.cancel
-                ) { _, _ ->
-                }
-                deleteMessageDialog.setNegativeButton(
-                    R.string.delete_all_messages
-                ) { _, _ ->
-                    model.messagesState.deleteAllMessages()
-                }
-                deleteMessageDialog.create()
-                deleteMessageDialog.show()
-                true
-            }
             if (isMe) {
+                holder.messageText.textAlignment = View.TEXT_ALIGNMENT_TEXT_END
                 marginParams.leftMargin = messageOffset
                 marginParams.rightMargin = 0
                 context?.let {
-                    holder.card.setCardBackgroundColor(
-                        ContextCompat.getColor(
-                            it,
-                            R.color.colorMyMsg
-                        )
-                    )
+                    holder.card.setCardBackgroundColor(ContextCompat.getColor(it, R.color.colorMyMsg))
                 }
             } else {
+                holder.messageText.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
                 marginParams.rightMargin = messageOffset
                 marginParams.leftMargin = 0
                 context?.let {
-                    holder.card.setCardBackgroundColor(
-                        ContextCompat.getColor(
-                            it,
-                            R.color.colorMsg
-                        )
-                    )
+                    holder.card.setCardBackgroundColor(ContextCompat.getColor(it, R.color.colorMsg))
                 }
             }
             // Hide the username chip for my messages
@@ -217,11 +183,14 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             } else {
                 holder.username.visibility = View.VISIBLE
                 // If we can't find the sender, just use the ID
+                val node = nodes[msg.from]
                 val user = node?.user
                 holder.username.text = user?.shortName ?: msg.from
             }
             if (msg.errorMessage != null) {
-                context?.let { holder.card.setCardBackgroundColor(Color.RED) }
+                holder.itemView.context?.let {
+                    holder.card.setCardBackgroundColor(Color.RED)
+                }
                 holder.messageText.text = msg.errorMessage
             } else {
                 holder.messageText.text = msg.text
@@ -258,10 +227,15 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         }
     }
 
+    override fun onPause() {
+        actionMode?.finish()
+        super.onPause()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = MessagesFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -269,7 +243,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.sendButton.setOnClickListener {
-            debug("sendButton click")
+            debug("User clicked sendButton")
 
             val str = binding.messageInputText.text.toString().trim()
             if (str.isNotEmpty())
@@ -295,34 +269,20 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
         layoutManager.stackFromEnd = true // We want the last rows to always be shown
         binding.messageListView.layoutManager = layoutManager
 
-        model.messagesState.messages.observe(viewLifecycleOwner, Observer {
+        model.messagesState.messages.observe(viewLifecycleOwner) {
             debug("New messages received: ${it.size}")
             messagesAdapter.onMessagesChanged(it)
-        })
+        }
 
         // If connection state _OR_ myID changes we have to fix our ability to edit outgoing messages
-        fun updateTextEnabled() {
-            binding.textInputLayout.isEnabled =
-                model.isConnected.value != MeshService.ConnectionState.DISCONNECTED
+        model.isConnected.observe(viewLifecycleOwner) { connectionState ->
+            // If we don't know our node ID and we are offline don't let user try to send
+            val connected = connectionState == MeshService.ConnectionState.CONNECTED
+            binding.textInputLayout.isEnabled = connected
+            binding.sendButton.isEnabled = connected
 
             // Just being connected is enough to allow sending texts I think
             // && model.nodeDB.myId.value != null && model.radioConfig.value != null
         }
-
-        model.isConnected.observe(viewLifecycleOwner, Observer { _ ->
-            // If we don't know our node ID and we are offline don't let user try to send
-            updateTextEnabled()
-        })
-
-        /* model.nodeDB.myId.observe(viewLifecycleOwner, Observer { _ ->
-            // If we don't know our node ID and we are offline don't let user try to send
-            updateTextEnabled()
-        })
-
-        model.radioConfig.observe(viewLifecycleOwner, Observer { _ ->
-            // If we don't know our node ID and we are offline don't let user try to send
-            updateTextEnabled()
-        }) */
     }
-
 }
