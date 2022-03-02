@@ -38,9 +38,6 @@ import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.flyTo
-import com.mapbox.maps.plugin.annotation.annotations
-import com.mapbox.maps.plugin.annotation.generated.CircleAnnotationOptions
-import com.mapbox.maps.plugin.annotation.generated.createCircleAnnotationManager
 import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
@@ -96,6 +93,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private var stylePackCancelable: Cancelable? = null
     private var tilePackCancelable: Cancelable? = null
 
+    private lateinit var regionName: String
     private lateinit var squareRegion: Geometry
 
     private val userTouchPositionId = "user-touch-position"
@@ -586,6 +584,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 }
                 if ((this::point.isInitialized) && this::userStyleURI.isInitialized) {
                     saveDialog(userStyleURI)
+                } else if (this::point.isInitialized && !this::userStyleURI.isInitialized) {
+                    saveDialog()
                 } else {
                     // Tell user to select region
                     val text =
@@ -638,18 +638,27 @@ class MapFragment : ScreenFragment("Map"), Logging {
     }
 
     private fun saveDialog(styleURI: String = "") {
-
+        val regionDialogNameView = layoutInflater.inflate(R.layout.dialog_map_name, null)
+        val userInput = regionDialogNameView.findViewById<EditText>(R.id.mapName)
         val nameRegionDialog = AlertDialog.Builder(context)
-        nameRegionDialog.setView(R.layout.dialog_map_name)
-        nameRegionDialog.setTitle("Name")
+        nameRegionDialog.setView(regionDialogNameView)
+
+        nameRegionDialog.setTitle("Set Region Name")
         nameRegionDialog.setNegativeButton("Cancel") { dialog, _ ->
             dialog.cancel()
         }
         nameRegionDialog.setPositiveButton("Save") { _, _ ->
-            downloadOfflineRegion(styleURI)
+            if (userInput.text.isEmpty()) {
+                // Error out dialog
+            } else {
+                this.regionName = userInput.text.toString()
+                userInput.setText("")
+                downloadOfflineRegion(styleURI)
+            }
         }
         nameRegionDialog.create()
         nameRegionDialog.show()
+
     }
 
     private val offlineRegionAdapter = object : RecyclerView.Adapter<ViewHolder>() {
