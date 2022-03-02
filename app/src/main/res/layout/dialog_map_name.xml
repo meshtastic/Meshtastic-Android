@@ -12,7 +12,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginRight="4dp"
         android:layout_marginBottom="4dp"
-        android:hint="Name"
+        android:hint="@string/name"
         android:inputType="text" />
 
 </LinearLayout>
