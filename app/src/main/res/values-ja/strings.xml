@@ -48,7 +48,7 @@ mapboxの有償プラン（または代替地図プロバイダ）を検討さ�
     <string name="share">シェア</string>
     <string name="disconnected">切断</string>
     <string name="device_sleeping">スリープ</string>
-    <string name="connected_count">接続済み：%s人オンライン%s人中</string>
+    <string name="connected_count">接続済み：%1$s人オンライン%2$s人中</string>
     <string name="list_of_nodes">ネットワーク内のノードリスト</string>
     <string name="update_firmware">ファームウェアアップデート</string>
     <string name="connected_to">Meshtasticデバイスに接続しました。(%s)</string>

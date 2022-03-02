@@ -47,7 +47,7 @@
     <string name="share">Megosztás</string>
     <string name="disconnected">Szétkapcsolva</string>
     <string name="device_sleeping">Az eszköz alszik</string>
-    <string name="connected_count">Kapcsolódva: %s a %s-ból(ből) elérhető</string>
+    <string name="connected_count">Kapcsolódva: %1$s a %2$s-ból(ből) elérhető</string>
     <string name="list_of_nodes">Hálózati állomások listája</string>
     <string name="update_firmware">Firmware frissítés</string>
     <string name="connected">Kapcsolódva a rádióhoz</string>

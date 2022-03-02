@@ -48,7 +48,7 @@
     <string name="share">Distribuie</string>
     <string name="disconnected">Deconectat</string>
     <string name="device_sleeping">Dispozitiv în sleep mode</string>
-    <string name="connected_count">Connectat: %s din %s online</string>
+    <string name="connected_count">Connectat: %1$s din %2$s online</string>
     <string name="list_of_nodes">O lista cu nodurile din rețea</string>
     <string name="update_firmware">Updateaza firmware-ul</string>
     <string name="connected">Connectat la dispozitiv</string>
