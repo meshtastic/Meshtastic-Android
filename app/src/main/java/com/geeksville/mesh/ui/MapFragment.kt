@@ -1,6 +1,7 @@
 package com.geeksville.mesh.ui
 
 import android.app.AlertDialog
+import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
@@ -647,18 +648,27 @@ class MapFragment : ScreenFragment("Map"), Logging {
         nameRegionDialog.setNegativeButton("Cancel") { dialog, _ ->
             dialog.cancel()
         }
-        nameRegionDialog.setPositiveButton("Save") { _, _ ->
-            if (userInput.text.isEmpty()) {
-                // Error out dialog
-            } else {
-                this.regionName = userInput.text.toString()
-                userInput.setText("")
-                downloadOfflineRegion(styleURI)
-            }
-        }
-        nameRegionDialog.create()
-        nameRegionDialog.show()
+        nameRegionDialog.setPositiveButton(
+            "Save", null
+        )
 
+        val dialog = nameRegionDialog.create()
+        dialog.show()
+        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            .setOnClickListener {
+                if (userInput.text.isEmpty()) {
+                    val text =
+                        "You must enter a name"
+                    val duration = Toast.LENGTH_LONG
+                    val toast = Toast.makeText(requireContext(), text, duration)
+                    toast.show()
+                } else {
+                    this.regionName = userInput.text.toString()
+                    userInput.setText("")
+                    dialog.dismiss()
+                    downloadOfflineRegion(styleURI)
+                }
+            }
     }
 
     private val offlineRegionAdapter = object : RecyclerView.Adapter<ViewHolder>() {
