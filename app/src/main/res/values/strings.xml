@@ -120,7 +120,10 @@
     <string name="why_camera_required">We must be granted access to the camera to read QR codes. No pictures or videos will be saved.</string>
     <string name="modem_config_slow_short">Short Range / Slow</string>
     <string name="modem_config_slow_medium">Medium Range / Slow</string>
-    <string name="delete_selected_message">Delete selected message?</string>
+    <plurals name="delete_messages">
+        <item quantity="one">Delete message?</item>
+        <item quantity="other">Delete %s messages?</item>
+    </plurals>
     <string name="delete">Delete</string>
-    <string name="delete_all_messages">Delete All Messages</string>
+    <string name="select_all">Select all</string>
 </resources>

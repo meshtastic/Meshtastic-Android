@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="action_settings">Configurações</string>
     <string name="channel_name">Nome do canal</string>
     <string name="channel_options">Opções do canal</string>
@@ -113,7 +113,13 @@
     <string name="allow_will_show">Permitir (exibe diálogo)</string>
     <string name="provide_location_to_mesh">Fornecer localização para mesh</string>
     <string name="camera_required">Permissão da câmera</string>
-    <string name="why_camera_required">Precisamos acessar a câmera para escanear códigos QR. Nenhuma foto ou video são armazenados.</string>
+    <string name="why_camera_required">Precisamos acessar a câmera para escanear códigos QR. Nenhuma foto ou vídeo são armazenados.</string>
     <string name="modem_config_slow_short">Curto alcance / lento</string>
     <string name="modem_config_slow_medium">Médio alcance / lento</string>
+    <plurals name="delete_messages">
+        <item quantity="one" tools:ignore="ImpliedQuantity">Excluir mensagem?</item>
+        <item quantity="other">Excluir %s mensagens?</item>
+    </plurals>
+    <string name="delete">Excluir</string>
+    <string name="select_all">Selecionar tudo</string>
 </resources>
