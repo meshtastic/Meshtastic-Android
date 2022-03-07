@@ -301,7 +301,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
                     v.gestures.rotateEnabled = false
                     v.gestures.addOnMapLongClickListener(this.longClick)
-                    v.gestures.addOnMapClickListener(this.click)
 
                     // Provide initial positions
                     model.nodeDB.nodes.value?.let { nodes ->
@@ -475,6 +474,10 @@ class MapFragment : ScreenFragment("Map"), Logging {
             lineColor("#888")
         }
 
+        if (point != null) {
+            binding.downloadRegion.visibility = View.VISIBLE
+        }
+
         mapView?.getMapboxMap()?.getStyle()?.let { style ->
             userTouchPosition.geometry(point!!)
             if (!style.styleLayerExists(userTouchLayerId)) {
@@ -489,6 +492,13 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 style.addSource(geoJsonSource)
                 style.addLayer(lineLayer)
             }
+        }
+        mapView?.getMapboxMap().also { mapboxMap ->
+            mapboxMap?.flyTo(
+                CameraOptions.Builder()
+                    .zoom(ZOOM)
+                    .center(point)
+                    .build(), MapAnimationOptions.mapAnimationOptions { duration(1000) })
         }
         return@OnMapLongClickListener true
     }
@@ -531,20 +541,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
         binding.stylePackDownloadProgress.progress = progress.toInt()
     }
 
-    private val click = OnMapClickListener {
-        //binding.fabStyleToggle.isVisible &&
-        if (binding.downloadRegion.isVisible) {
-            //binding.fabStyleToggle.visibility = View.INVISIBLE
-            binding.downloadRegion.visibility = View.INVISIBLE
-        } else {
-            //binding.fabStyleToggle.visibility = View.VISIBLE
-            binding.downloadRegion.visibility = View.VISIBLE
-        }
-        return@OnMapClickListener true
-    }
-
     companion object {
-        private const val ZOOM = 9.0
+        private const val ZOOM = 11.0
         private const val TILE_REGION_ID = "myTileRegion"
         private const val STYLE_PACK_METADATA = "my-outdoor-style-pack"
         private const val TILE_REGION_METADATA = "my-outdoors-tile-region"
@@ -610,6 +608,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     style.removeStyleSource(userTouchPositionId)
                     style.removeStyleImage(userPointImageId)
                 }
+                binding.downloadRegion.visibility = View.INVISIBLE
+
                 removeOfflineRegions() //TODO: Add to offline manager window
                 dialog.cancel()
             }
@@ -624,35 +624,14 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     uri.setText("") // clear text
                 }
             }
-            if ((this.point != null) && (this.userStyleURI != null)) {
-                if (this.userStyleURI!!.isNotEmpty()) {
-                    saveDialog(userStyleURI!!)
-                    dialog.dismiss()
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        "Style URI cannot be empty",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            } else if (this.point != null) {
-                if (this.userStyleURI == null && uri.isVisible) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Style URI cannot be empty",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {
-                    saveDialog()
-                    dialog.dismiss()
-                }
-            } else {
+            if (uri.isVisible && (this.userStyleURI != null)) {
+                downloadOfflineRegion(userStyleURI!!)
                 dialog.dismiss()
-                // Tell user to select region
+            } else {
                 Toast.makeText(
                     requireContext(),
-                    "You must select a region on the map, long press to set the region you want to download",
-                    Toast.LENGTH_LONG
+                    "Style URI cannot be empty",
+                    Toast.LENGTH_SHORT
                 ).show()
             }
         }
@@ -662,39 +641,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
         RecyclerView.ViewHolder(itemView.root) {
         val offlineRegion: ImageView = itemView.offlineRegion
         val regionName: TextView = itemView.regionName
-    }
-
-    private fun saveDialog(styleURI: String = "") {
-        val regionDialogNameView = layoutInflater.inflate(R.layout.dialog_map_name, null)
-        val userInput = regionDialogNameView.findViewById<EditText>(R.id.mapName)
-        val nameRegionDialog = AlertDialog.Builder(context)
-        nameRegionDialog.setView(regionDialogNameView)
-
-        nameRegionDialog.setTitle("Set Region Name")
-        nameRegionDialog.setNegativeButton("Cancel") { dialog, _ ->
-            dialog.cancel()
-        }
-        nameRegionDialog.setPositiveButton(
-            "Save", null
-        )
-
-        val dialog = nameRegionDialog.create()
-        dialog.show()
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            .setOnClickListener {
-                if (userInput.text.isEmpty()) {
-                    val text =
-                        "You must enter a name"
-                    val duration = Toast.LENGTH_SHORT
-                    val toast = Toast.makeText(requireContext(), text, duration)
-                    toast.show()
-                } else {
-                    this.regionName = userInput.text.toString()
-                    userInput.setText("")
-                    dialog.dismiss()
-                    downloadOfflineRegion(styleURI)
-                }
-            }
     }
 
     private val offlineRegionAdapter = object : RecyclerView.Adapter<ViewHolder>() {
