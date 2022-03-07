@@ -53,6 +53,7 @@
             android:layout_margin="16dp"
             android:backgroundTint="@color/buttonColor"
             android:contentDescription="@string/download_region"
+            android:visibility="invisible"
             android:src="@drawable/baseline_download_white_24dp"
             tools:background="@color/buttonColor" />
     </LinearLayout>

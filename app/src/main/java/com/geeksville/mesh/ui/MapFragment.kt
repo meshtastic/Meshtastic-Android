@@ -592,7 +592,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     if (userStyleURI != null) {
                         it?.loadStyleUri(userStyleURI.toString())
                     } else {
-                        it?.loadStyleUri(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
+                        it?.getStyle().also { style ->
+                            style?.removeStyleImage(userPointImageId)
+                        }
                     }
                 }
             }
