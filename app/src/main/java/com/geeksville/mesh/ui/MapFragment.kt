@@ -622,17 +622,19 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     // Save URI
                     userStyleURI = uri.text.toString()
                     uri.setText("") // clear text
+
+                    downloadOfflineRegion(userStyleURI!!)
+                    dialog.dismiss()
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "Style URI cannot be empty",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }
-            if (uri.isVisible && (this.userStyleURI != null)) {
-                downloadOfflineRegion(userStyleURI!!)
-                dialog.dismiss()
             } else {
-                Toast.makeText(
-                    requireContext(),
-                    "Style URI cannot be empty",
-                    Toast.LENGTH_SHORT
-                ).show()
+                downloadOfflineRegion()
+                dialog.dismiss()
             }
         }
     }
