@@ -72,7 +72,7 @@ jobs:
       run: |
         rm -rf ./app/src/main/assets/firmware
         mkdir -p ./app/src/main/assets/firmware
-        unzip -qq ./firmware.zip 'spiffs-*.bin' 'firmware-heltec*.bin' 'firmware-tbeam*.bin' 'firmware-tlora*.bin' -d ./app/src/main/assets/firmware
+        unzip -qq ./firmware.zip 'littlefs-*.bin' 'firmware-heltec*.bin' 'firmware-tbeam*.bin' 'firmware-tlora*.bin' -d ./app/src/main/assets/firmware
         rm ./firmware.zip
 
     - name: Validate Gradle wrapper
