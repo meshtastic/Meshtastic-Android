@@ -1,8 +1,6 @@
 package com.geeksville.mesh.ui
 
-import android.app.AlertDialog
-import android.content.DialogInterface
-import android.graphics.Color
+import android.app.AlertDialog import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
@@ -39,7 +37,6 @@ import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
 import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
 import com.mapbox.maps.plugin.animation.MapAnimationOptions
 import com.mapbox.maps.plugin.animation.flyTo
-import com.mapbox.maps.plugin.gestures.OnMapClickListener
 import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
 import com.mapbox.maps.plugin.gestures.gestures
 import dagger.hilt.android.AndroidEntryPoint
@@ -62,9 +59,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
         }
     }
 
-
-    //TODO: View Offline Regions (This will allow you to select the region and the map will zoom to it)
-    //TODO: Manage Offline Regions (Allow you to edit the name, delete, & select region)
     //TODO: Update download animation
 
     private val resourceOptions: ResourceOptions by lazy {
@@ -74,7 +68,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
         OfflineManager(resourceOptions)
     }
 
-    private lateinit var handler: Handler
     private lateinit var binding: MapViewBinding
     private lateinit var mapNotAllowedBinding: MapNotAllowedBinding
     private var userStyleURI: String? = null
@@ -88,13 +81,12 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val labelLayerId = "label-layer"
     private val markerImageId = "my-marker-image"
     private val userPointImageId = "user-image"
-    private val boundingBoxId = "BOUNDING_BOX_ID"
-    private val lineLayerId = "lineLayer"
+    private val boundingBoxId = "bounding-box-id"
+    private val lineLayerId = "line-layer-id"
 
     private var stylePackCancelable: Cancelable? = null
     private var tilePackCancelable: Cancelable? = null
 
-    private lateinit var regionName: String
     private lateinit var squareRegion: Geometry
 
     private val userTouchPositionId = "user-touch-position"
@@ -113,7 +105,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val userTouchLayer = SymbolLayer(userTouchLayerId, userTouchPositionId)
         .iconImage(userPointImageId)
         .iconAnchor(IconAnchor.BOTTOM)
-        .iconAllowOverlap(true)
 
     private val labelLayer = SymbolLayer(labelLayerId, nodeSourceId)
         .textField(Expression.get("name"))
@@ -575,7 +566,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
             .setPositiveButton(
                 "Save", null
             )
-            .setNeutralButton("View Regions") { _, _ ->
+            .setNeutralButton("View Region") { _, _ ->
 //                val regions = layoutInflater.inflate(R.layout.adapter_region_layout, null)
 //                val regionFragment = AlertDialog.Builder(context)
 //                regionFragment.setView(regions)
