@@ -33,6 +33,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.RadioConfigProtos
 import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
+import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ACTION_UPDATE_PROGRESS
@@ -447,6 +448,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private val binding get() = _binding!!
 
     private val scanModel: BTScanModel by activityViewModels()
+    private val bluetoothViewModel: BluetoothViewModel by activityViewModels()
     private val model: UIViewModel by activityViewModels()
 
     // FIXME - move this into a standard GUI helper class
@@ -624,7 +626,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = regionAdapter
 
-        model.bluetoothEnabled.observe(viewLifecycleOwner) {
+        bluetoothViewModel.enabled.observe(viewLifecycleOwner) {
             if (it) binding.changeRadioButton.show()
             else binding.changeRadioButton.hide()
         }
@@ -813,7 +815,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (curRadio != null && !MockInterface.addressValid(requireContext(), "")) {
             binding.warningNotPaired.visibility = View.GONE
             // binding.scanStatusText.text = getString(R.string.current_pair).format(curRadio)
-        } else if (model.bluetoothEnabled.value == true){
+        } else if (bluetoothViewModel.enabled.value == true){
             binding.warningNotPaired.visibility = View.VISIBLE
             binding.scanStatusText.text = getString(R.string.not_paired_yet)
         }
