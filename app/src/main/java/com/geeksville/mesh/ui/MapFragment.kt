@@ -1,8 +1,8 @@
 package com.geeksville.mesh.ui
 
-import android.app.AlertDialog import android.graphics.Color
+import android.app.AlertDialog
+import android.graphics.Color
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -239,7 +239,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
         // Note this will not remove the downloaded style pack, instead, it will just mark the resources
         // not a part of the existing style pack. The resources still exists as disk cache.
         offlineManager.removeStylePack(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
-
         MapboxMap.clearData(resourceOptions) {
             it.error?.let { error ->
                 debug(error)
@@ -445,10 +444,12 @@ class MapFragment : ScreenFragment("Map"), Logging {
         5 miles NE,NW,SE,SW from user center point.
         25 Sq Mile Region
         */
+        //____________________________________________________________________________________________
         val topRight = calculateCoordinate(45.0, point?.latitude()!!, point?.longitude()!!)
         val topLeft = calculateCoordinate(135.0, point?.latitude()!!, point?.longitude()!!)
         val bottomLeft = calculateCoordinate(225.0, point?.latitude()!!, point?.longitude()!!)
         val bottomRight = calculateCoordinate(315.0, point?.latitude()!!, point?.longitude()!!)
+        //____________________________________________________________________________________________
 
         val pointList = listOf(topRight, topLeft, bottomLeft, bottomRight, topRight)
 
@@ -496,18 +497,18 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     /**
      * Find's coordinates (Lat,Lon) a specified distance from given (lat,lon) using degrees to determine direction
-     * @param degrees Angle
-     * @param lat latitude position
-     * @param long longitude position
+     * @param degrees degree of desired position from current position. (center point is 0,0 and desired point, top right corner, is 45 degrees from 0,0)
+     * @param lat latitude position (current position lat)
+     * @param lon longitude position (current position lon)
      * @return Point
      */
-    private fun calculateCoordinate(degrees: Double, lat: Double, long: Double): Point {
+    private fun calculateCoordinate(degrees: Double, lat: Double, lon: Double): Point {
         val deg = Math.toRadians(degrees)
         val distancesInMeters =
             1609.344 * 5 // 1609.344 is 1 mile in meters -> multiplier will be user specified up to a max of 10
         val radiusOfEarthInMeters = 6378137
         val x =
-            long + (180 / Math.PI) * (distancesInMeters / radiusOfEarthInMeters) * cos(
+            lon + (180 / Math.PI) * (distancesInMeters / radiusOfEarthInMeters) * cos(
                 deg
             )
         val y =
@@ -582,8 +583,13 @@ class MapFragment : ScreenFragment("Map"), Logging {
                             .build(), MapAnimationOptions.mapAnimationOptions { duration(1000) })
                     if (userStyleURI != null) {
                         it?.loadStyleUri(userStyleURI.toString())
+                        it?.getStyle().also { style ->
+                            //TODO: Add box for downloaded region
+                        }
                     } else {
-                        it?.loadStyleUri(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
+                        it?.getStyle().also { style ->
+                            style?.removeStyleImage(userPointImageId)
+                        }
                     }
                 }
             }
@@ -613,17 +619,19 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     // Save URI
                     userStyleURI = uri.text.toString()
                     uri.setText("") // clear text
+
+                    downloadOfflineRegion(userStyleURI!!)
+                    dialog.dismiss()
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "Style URI cannot be empty",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-            }
-            if (uri.isVisible && (this.userStyleURI != null)) {
-                downloadOfflineRegion(userStyleURI!!)
-                dialog.dismiss()
             } else {
-                Toast.makeText(
-                    requireContext(),
-                    "Style URI cannot be empty",
-                    Toast.LENGTH_SHORT
-                ).show()
+                downloadOfflineRegion()
+                dialog.dismiss()
             }
         }
     }
