@@ -48,7 +48,7 @@
     <string name="share">Paylaş</string>
     <string name="disconnected">Bağlantı sonlandı</string>
     <string name="device_sleeping">Cihaz uyku durumunda</string>
-    <string name="connected_count">Bağlandı: %s / %s online</string>
+    <string name="connected_count">Bağlandı: %1$s / %2$s online</string>
     <string name="list_of_nodes">Ağdaki node listesi</string>
     <string name="update_firmware">Yazılım güncelle</string>
     <string name="connected">Radyoya bağlandı</string>

@@ -48,7 +48,7 @@
     <string name="share">Del</string>
     <string name="disconnected">Frakoblet</string>
     <string name="device_sleeping">Enhet sover</string>
-    <string name="connected_count">Tilkoblet: %s av %s på nett</string>
+    <string name="connected_count">Tilkoblet: %1$s av %2$s på nett</string>
     <string name="list_of_nodes">En liste over noder i nettverket</string>
     <string name="update_firmware">Oppdater Firmware</string>
     <string name="connected">Tilkoblet radio</string>

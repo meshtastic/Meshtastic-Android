@@ -105,7 +105,7 @@ class MeshService : Service(), Logging {
 
         /** The minimmum firmware version we know how to talk to. We'll still be able to talk to 1.0 firmwares but only well enough to ask them to firmware update
          */
-        val minFirmwareVersion = DeviceVersion("1.2.0")
+        val minFirmwareVersion = DeviceVersion("1.3.0")
     }
 
     enum class ConnectionState {
@@ -1531,7 +1531,7 @@ class MeshService : Service(), Logging {
         try {
             val mi = myNodeInfo
             if (mi != null) {
-                debug("Sending our position/time to=$destNum lat=$lat, lon=$lon, alt=$alt")
+                debug("Sending our position/time to=$destNum lat=${lat.anonymize}, lon=${lon.anonymize}, alt=$alt")
 
                 val position = MeshProtos.Position.newBuilder().also {
                     it.longitudeI = Position.degI(lon)
