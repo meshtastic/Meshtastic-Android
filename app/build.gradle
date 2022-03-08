@@ -122,8 +122,6 @@ protobuf {
 
 dependencies {
 
-    def room_version = '2.4.1'
-
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'androidx.core:core-ktx:1.7.0'
@@ -134,12 +132,11 @@ dependencies {
     implementation 'com.google.android.material:material:1.5.0'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
     implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
     implementation "androidx.room:room-runtime:$room_version"
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "androidx.room:room-compiler:$room_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
-
 
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:$room_version"
@@ -161,14 +158,14 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
     // For now I'm not using javalite, because I want JSON printing
-    implementation('com.google.protobuf:protobuf-java:3.15.8')
+    implementation 'com.google.protobuf:protobuf-java:3.15.8'
 
     // For UART access
     // implementation 'com.google.android.things:androidthings:1.0'
     implementation 'com.github.mik3y:usb-serial-for-android:3.4.3'
 
     // mapbox
-    implementation('com.mapbox.maps:android:10.2.0')
+    implementation 'com.mapbox.maps:android:10.2.0'
 
     // mapbox specifies a really old version of okhttp3 which causes lots of API warnings.  trying a newer version
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
