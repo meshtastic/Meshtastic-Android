@@ -29,6 +29,8 @@ import com.mapbox.maps.*
 import com.mapbox.maps.dsl.cameraOptions
 import com.mapbox.maps.extension.style.expressions.generated.Expression
 import com.mapbox.maps.extension.style.layers.addLayer
+import com.mapbox.maps.extension.style.layers.addPersistentLayer
+import com.mapbox.maps.extension.style.layers.generated.LineLayer
 import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
 import com.mapbox.maps.extension.style.layers.generated.lineLayer
 import com.mapbox.maps.extension.style.layers.properties.generated.*
@@ -71,6 +73,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private lateinit var binding: MapViewBinding
     private lateinit var mapNotAllowedBinding: MapNotAllowedBinding
     private var userStyleURI: String? = null
+
+    private lateinit var geoJsonSource: GeoJsonSource
+    private lateinit var lineLayer: LineLayer
 
     private var point: Point? = null
 
@@ -284,8 +289,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
                         if (it.isStyleLoaded) {
                             it.addSource(nodePositions)
                             it.addImage(markerImageId, markerIcon)
-                            it.addLayer(nodeLayer)
-                            it.addLayer(labelLayer)
+                            it.addPersistentLayer(nodeLayer)
+                            it.addPersistentLayer(labelLayer)
                         }
                     }
 
@@ -455,10 +460,10 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
         squareRegion = LineString.fromLngLats(pointList)
 
-        val geoJsonSource = geoJsonSource(boundingBoxId) {
+        geoJsonSource = geoJsonSource(boundingBoxId) {
             geometry(squareRegion)
         }
-        val lineLayer = lineLayer(lineLayerId, boundingBoxId) {
+        lineLayer = lineLayer(lineLayerId, boundingBoxId) {
             lineCap(LineCap.ROUND)
             lineJoin(LineJoin.MITER)
             lineOpacity(0.7)
@@ -476,7 +481,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 style.addImage(userPointImageId, userDefinedPointImg)
                 style.addSource(userTouchPosition)
                 style.addSource(geoJsonSource)
-                style.addLayer(lineLayer)
+                style.addPersistentLayer(lineLayer)
                 style.addLayer(userTouchLayer)
             } else {
                 style.removeStyleLayer(lineLayerId)
@@ -568,13 +573,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 "Save", null
             )
             .setNeutralButton("View Region") { _, _ ->
-//                val regions = layoutInflater.inflate(R.layout.adapter_region_layout, null)
-//                val regionFragment = AlertDialog.Builder(context)
-//                regionFragment.setView(regions)
-//                regionFragment.create()
-//                regionFragment.show()
-
-                // Open up Downloaded Region managers
                 mapView?.getMapboxMap().also {
                     it?.flyTo(
                         CameraOptions.Builder()
@@ -583,9 +581,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
                             .build(), MapAnimationOptions.mapAnimationOptions { duration(1000) })
                     if (userStyleURI != null) {
                         it?.loadStyleUri(userStyleURI.toString())
-                        it?.getStyle().also { style ->
-                            //TODO: Add box for downloaded region
-                        }
                     } else {
                         it?.getStyle().also { style ->
                             style?.removeStyleImage(userPointImageId)
