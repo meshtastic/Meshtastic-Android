@@ -12,12 +12,10 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
-import com.geeksville.mesh.databinding.AdapterRegionLayoutBinding
 import com.geeksville.mesh.databinding.MapNotAllowedBinding
 import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
@@ -629,51 +627,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 dialog.dismiss()
             }
         }
-    }
-
-    class ViewHolder(itemView: AdapterRegionLayoutBinding) :
-        RecyclerView.ViewHolder(itemView.root) {
-        val offlineRegion: ImageView = itemView.offlineRegion
-        val regionName: TextView = itemView.regionName
-    }
-
-    private val offlineRegionAdapter = object : RecyclerView.Adapter<ViewHolder>() {
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val inflater = LayoutInflater.from(requireContext())
-
-            val regionViewBinding = AdapterRegionLayoutBinding.inflate(inflater, parent, false)
-
-            return ViewHolder(regionViewBinding)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            var regionList = mutableListOf<TileRegion>()
-            val region = regionList[position]
-            val name = ""
-            tileStore.getAllTileRegions { expected ->
-                if (expected.isValue) {
-                    expected.value?.let { tileRegionList ->
-                        regionList = tileRegionList
-                    }
-                }
-            }
-        }
-
-        override fun getItemCount(): Int {
-            var count = 0
-            tileStore.getAllTileRegions { expected ->
-                if (expected.isValue) {
-                    expected.value?.let { tileRegionList ->
-                        count = tileRegionList.size
-                    }
-                }
-                expected.error?.let { tileRegionError ->
-                    debug("TileRegionError: $tileRegionError")
-                }
-            }
-            return count
-        }
-
     }
 }
 
