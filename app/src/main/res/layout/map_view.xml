@@ -43,7 +43,7 @@
 <!--            android:layout_margin="8dp"-->
 <!--            android:backgroundTint="@color/buttonColor"-->
 <!--            android:contentDescription="@string/style_selection"-->
-<!--            android:src="@drawable/baseline_layers_white_24dp"-->
+<!--            android:src="@drawadownload_regionble/baseline_layers_white_24dp"-->
 <!--            tools:background="@color/buttonColor" />-->
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -52,6 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:backgroundTint="@color/buttonColor"
+            android:visibility="invisible"
             android:contentDescription="@string/download_region"
             android:src="@drawable/baseline_download_white_24dp"
             tools:background="@color/buttonColor" />
