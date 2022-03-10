@@ -96,6 +96,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val userTouchLayerId = "user-touch-layer"
     private var nodePositions = GeoJsonSource(GeoJsonSource.Builder(nodeSourceId))
 
+    private var tileRegionDownloadSuccess = false
+    private var stylePackDownloadSuccess = false
 
     private val userTouchPosition = GeoJsonSource(GeoJsonSource.Builder(userTouchPositionId))
 
@@ -200,32 +202,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     var mapView: MapView? = null
 
 
-    private fun showDownloadedRegions() {
-        // Get a list of tile regions that are currently available.
-        tileStore.getAllTileRegions { expected ->
-            if (expected.isValue) {
-                expected.value?.let { tileRegionList ->
-                    debug("Existing tile regions: $tileRegionList")
-                }
-            }
-            expected.error?.let { tileRegionError ->
-                debug("TileRegionError: $tileRegionError")
-            }
-        }
-        // Get a list of style packs that are currently available.
-        offlineManager.getAllStylePacks { expected ->
-            if (expected.isValue) {
-                expected.value?.let { stylePackList ->
-                    debug("Existing style packs: $stylePackList")
-                }
-            }
-            expected.error?.let { stylePackError ->
-                debug("StylePackError: $stylePackError")
-            }
-        }
-    }
-
-
     private fun removeOfflineRegions() {
         // Remove the tile region with the tile region ID.
         // Note this will not remove the downloaded tile packs, instead, it will just mark the tileset
@@ -241,7 +217,12 @@ class MapFragment : ScreenFragment("Map"), Logging {
         // Remove the style pack with the style url.
         // Note this will not remove the downloaded style pack, instead, it will just mark the resources
         // not a part of the existing style pack. The resources still exists as disk cache.
-        offlineManager.removeStylePack(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
+
+        if (userStyleURI != null) {
+            offlineManager.removeStylePack(userStyleURI!!)
+        } else {
+            offlineManager.removeStylePack(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
+        }
         MapboxMap.clearData(resourceOptions) {
             it.error?.let { error ->
                 debug(error)
@@ -313,118 +294,140 @@ class MapFragment : ScreenFragment("Map"), Logging {
     }
 
     private fun downloadOfflineRegion(styleURI: String = "") {
+
         val style = styleURI.ifEmpty {
             mapView?.getMapboxMap()
                 ?.getStyle()?.styleURI.toString()
         }
-        // By default, users may download up to 250MB of data for offline use without incurring
-        // additional charges. This limit is subject to change during the beta.
 
-        // - - - - - - - -
+        if (OfflineSwitch.getInstance().isMapboxStackConnected) {
+            // By default, users may download up to 250MB of data for offline use without incurring
+            // additional charges. This limit is subject to change during the beta.
 
-        // 1. Create style package with loadStylePack() call.
+            // - - - - - - - -
 
-        // A style pack (a Style offline package) contains the loaded style and its resources: loaded
-        // sources, fonts, sprites. Style packs are identified with their style URI.
+            // 1. Create style package with loadStylePack() call.
 
-        // Style packs are stored in the disk cache database, but their resources are not subject to
-        // the data eviction algorithm and are not considered when calculating the disk cache size.
+            // A style pack (a Style offline package) contains the loaded style and its resources: loaded
+            // sources, fonts, sprites. Style packs are identified with their style URI.
 
-        stylePackCancelable = offlineManager.loadStylePack(
-            style,
-            // Build Style pack load options
-            StylePackLoadOptions.Builder()
-                .glyphsRasterizationMode(GlyphsRasterizationMode.IDEOGRAPHS_RASTERIZED_LOCALLY)
-                .metadata(Value(STYLE_PACK_METADATA))
-                .build(),
-            { progress ->
-                //TODO: Update the download progress to UI
-                updateStylePackDownloadProgress(
-                    progress.completedResourceCount,
-                    progress.requiredResourceCount
-                )
-            },
-            { expected ->
+            // Style packs are stored in the disk cache database, but their resources are not subject to
+            // the data eviction algorithm and are not considered when calculating the disk cache size.
+
+            stylePackCancelable = offlineManager.loadStylePack(
+                style,
+                // Build Style pack load options
+                StylePackLoadOptions.Builder()
+                    .glyphsRasterizationMode(GlyphsRasterizationMode.IDEOGRAPHS_RASTERIZED_LOCALLY)
+                    .metadata(Value(STYLE_PACK_METADATA))
+                    .build(),
+                { progress ->
+                    //TODO: Update the download progress to UI
+                    updateStylePackDownloadProgress(
+                        progress.completedResourceCount,
+                        progress.requiredResourceCount
+                    )
+                },
+                { expected ->
+                    if (expected.isValue) {
+                        expected.value?.let { stylePack ->
+                            // Style pack download finishes successfully
+                            debug("StylePack downloaded: $stylePack")
+                            if (binding.stylePackDownloadProgress.progress == binding.stylePackDownloadProgress.max) {
+                                debug("Doing stuff")
+                                binding.stylePackDownloadProgress.visibility = View.INVISIBLE
+                                stylePackDownloadSuccess = true
+                            } else {
+                                debug("Waiting for tile region download to be finished.")
+                            }
+                        }
+                    }
+                    expected.error?.let {
+                        Toast.makeText(
+                            requireContext(),
+                            "Unable to download style pack",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        // Handle error occurred during the style pack download.
+                        debug("StylePackError: $it")
+                    }
+                }
+            )
+
+            // - - - - - - - -
+
+            // 2. Create a tile region with tiles for the outdoors style
+
+            // A Tile Region represents an identifiable geographic tile region with metadata, consisting of
+            // a set of tiles packs that cover a given area (a polygon). Tile Regions allow caching tiles
+            // packs in an explicit way: By creating a Tile Region, developers can ensure that all tiles in
+            // that region will be downloaded and remain cached until explicitly deleted.
+
+            // Creating a Tile Region requires supplying a description of the area geometry, the tilesets
+            // and zoom ranges of the tiles within the region.
+
+            // The tileset descriptor encapsulates the tile-specific data, such as which tilesets, zoom ranges,
+            // pixel ratio etc. the cached tile packs should have. It is passed to the Tile Store along with
+            // the region area geometry to load a new Tile Region.
+
+            // The OfflineManager is responsible for creating tileset descriptors for the given style and zoom range.
+
+            val tilesetDescriptor = offlineManager.createTilesetDescriptor(
+                TilesetDescriptorOptions.Builder()
+                    .styleURI(style)
+                    .minZoom(0)
+                    .maxZoom(10)
+                    .build()
+            )
+            // Use the the default TileStore to load this region. You can create custom TileStores are are
+            // unique for a particular file path, i.e. there is only ever one TileStore per unique path.
+
+            // Note that the TileStore path must be the same with the TileStore used when initialise the MapView.
+            tilePackCancelable = tileStore.loadTileRegion(
+                TILE_REGION_ID, // Make this dynamic
+                TileRegionLoadOptions.Builder()
+                    .geometry(squareRegion)
+                    .descriptors(listOf(tilesetDescriptor))
+                    .metadata(Value(TILE_REGION_METADATA))
+                    .acceptExpired(true)
+                    .networkRestriction(NetworkRestriction.NONE)
+                    .build(),
+                { progress ->
+                    updateTileRegionDownloadProgress(
+                        progress.completedResourceCount,
+                        progress.requiredResourceCount,
+                    )
+                }
+            ) { expected ->
                 if (expected.isValue) {
-                    expected.value?.let { stylePack ->
-                        // Style pack download finishes successfully
-                        debug("StylePack downloaded: $stylePack")
+                    // Tile pack download finishes successfully
+                    expected.value?.let { region ->
+                        debug("TileRegion downloaded: $region")
                         if (binding.stylePackDownloadProgress.progress == binding.stylePackDownloadProgress.max) {
-                            debug("Doing stuff")
+                            debug("Finished tilepack download")
                             binding.stylePackDownloadProgress.visibility = View.INVISIBLE
+                            tileRegionDownloadSuccess = true
                         } else {
-                            debug("Waiting for tile region download to be finished.")
+                            debug("Waiting for style pack download to be finished.")
                         }
                     }
                 }
                 expected.error?.let {
-                    // Handle error occurred during the style pack download.
-                    debug("StylePackError: $it")
+                    Toast.makeText(
+                        requireContext(),
+                        "Unable to download TileRegion",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    // Handle error occurred during the tile region download.
+                    debug("TileRegionError: $it")
                 }
             }
-        )
-
-        // - - - - - - - -
-
-        // 2. Create a tile region with tiles for the outdoors style
-
-        // A Tile Region represents an identifiable geographic tile region with metadata, consisting of
-        // a set of tiles packs that cover a given area (a polygon). Tile Regions allow caching tiles
-        // packs in an explicit way: By creating a Tile Region, developers can ensure that all tiles in
-        // that region will be downloaded and remain cached until explicitly deleted.
-
-        // Creating a Tile Region requires supplying a description of the area geometry, the tilesets
-        // and zoom ranges of the tiles within the region.
-
-        // The tileset descriptor encapsulates the tile-specific data, such as which tilesets, zoom ranges,
-        // pixel ratio etc. the cached tile packs should have. It is passed to the Tile Store along with
-        // the region area geometry to load a new Tile Region.
-
-        // The OfflineManager is responsible for creating tileset descriptors for the given style and zoom range.
-
-        val tilesetDescriptor = offlineManager.createTilesetDescriptor(
-            TilesetDescriptorOptions.Builder()
-                .styleURI(style)
-                .minZoom(0)
-                .maxZoom(16)
-                .build()
-        )
-        // Use the the default TileStore to load this region. You can create custom TileStores are are
-        // unique for a particular file path, i.e. there is only ever one TileStore per unique path.
-
-        // Note that the TileStore path must be the same with the TileStore used when initialise the MapView.
-        tilePackCancelable = tileStore.loadTileRegion(
-            TILE_REGION_ID, // Make this dynamic
-            TileRegionLoadOptions.Builder()
-                .geometry(squareRegion)
-                .descriptors(listOf(tilesetDescriptor))
-                .metadata(Value(TILE_REGION_METADATA))
-                .acceptExpired(true)
-                .networkRestriction(NetworkRestriction.NONE)
-                .build(),
-            { progress ->
-                updateTileRegionDownloadProgress(
-                    progress.completedResourceCount,
-                    progress.requiredResourceCount,
-                )
-            }
-        ) { expected ->
-            if (expected.isValue) {
-                // Tile pack download finishes successfully
-                expected.value?.let { region ->
-                    debug("TileRegion downloaded: $region")
-                    if (binding.stylePackDownloadProgress.progress == binding.stylePackDownloadProgress.max) {
-                        debug("Finished tilepack download")
-                        binding.stylePackDownloadProgress.visibility = View.INVISIBLE
-                    } else {
-                        debug("Waiting for style pack download to be finished.")
-                    }
-                }
-            }
-            expected.error?.let {
-                // Handle error occurred during the tile region download.
-                debug("TileRegionError: $it")
-            }
+        } else {
+            Toast.makeText(
+                requireContext(),
+                "You are not connected to the internet, you cannot download an offline map",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 
@@ -571,19 +574,28 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 "Save", null
             )
             .setNeutralButton("View Region") { _, _ ->
-                mapView?.getMapboxMap().also {
-                    it?.flyTo(
-                        CameraOptions.Builder()
-                            .zoom(ZOOM)
-                            .center(point)
-                            .build(), MapAnimationOptions.mapAnimationOptions { duration(1000) })
-                    if (userStyleURI != null) {
-                        it?.loadStyleUri(userStyleURI.toString())
-                    } else {
-                        it?.getStyle().also { style ->
-                            style?.removeStyleImage(userPointImageId)
+                if (tileRegionDownloadSuccess && stylePackDownloadSuccess) {
+                    mapView?.getMapboxMap().also {
+                        it?.flyTo(
+                            CameraOptions.Builder()
+                                .zoom(ZOOM)
+                                .center(point)
+                                .build(),
+                            MapAnimationOptions.mapAnimationOptions { duration(1000) })
+                        if (userStyleURI != null) {
+                            it?.loadStyleUri(userStyleURI.toString())
+                        } else {
+                            it?.getStyle().also { style ->
+                                style?.removeStyleImage(userPointImageId)
+                            }
                         }
                     }
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        "No downloaded region available",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
             .setNegativeButton(
