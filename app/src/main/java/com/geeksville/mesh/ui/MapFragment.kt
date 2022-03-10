@@ -345,7 +345,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     expected.error?.let {
                         Toast.makeText(
                             requireContext(),
-                            "Unable to download style pack",
+                            R.string.stylepack_download_error_alert,
                             Toast.LENGTH_SHORT
                         ).show()
                         // Handle error occurred during the style pack download.
@@ -415,7 +415,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 expected.error?.let {
                     Toast.makeText(
                         requireContext(),
-                        "Unable to download TileRegion",
+                        R.string.tileregion_error_alert,
                         Toast.LENGTH_SHORT
                     ).show()
                     // Handle error occurred during the tile region download.
@@ -425,7 +425,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         } else {
             Toast.makeText(
                 requireContext(),
-                "You are not connected to the internet, you cannot download an offline map",
+                R.string.download_region_connection_alert,
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -553,7 +553,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
 
         downloadRegionDialogFragment.setView(mapDownloadView)
-            .setTitle("Download Region")
+            .setTitle(R.string.download_region_dialog_title)
             .setMultiChoiceItems(
                 R.array.MapMenuCheckbox,
                 null,
@@ -571,9 +571,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 }
             }
             .setPositiveButton(
-                "Save", null
+                R.string.save_btn, null
             )
-            .setNeutralButton("View Region") { _, _ ->
+            .setNeutralButton(R.string.view_region_btn) { _, _ ->
                 if (tileRegionDownloadSuccess && stylePackDownloadSuccess) {
                     mapView?.getMapboxMap().also {
                         it?.flyTo(
@@ -593,7 +593,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 } else {
                     Toast.makeText(
                         requireContext(),
-                        "No downloaded region available",
+                        R.string.no_download_region_alert,
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -630,7 +630,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 } else {
                     Toast.makeText(
                         requireContext(),
-                        "Style URI cannot be empty",
+                        R.string.style_uri_empty_alert,
                         Toast.LENGTH_SHORT
                     ).show()
                 }
