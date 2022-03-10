@@ -98,7 +98,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     private var tileRegionDownloadSuccess = false
     private var stylePackDownloadSuccess = false
-
     private val userTouchPosition = GeoJsonSource(GeoJsonSource.Builder(userTouchPositionId))
 
 
@@ -574,29 +573,28 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 R.string.save_btn, null
             )
             .setNeutralButton(R.string.view_region_btn) { _, _ ->
-                if (tileRegionDownloadSuccess && stylePackDownloadSuccess) {
-                    mapView?.getMapboxMap().also {
-                        it?.flyTo(
-                            CameraOptions.Builder()
-                                .zoom(ZOOM)
-                                .center(point)
-                                .build(),
-                            MapAnimationOptions.mapAnimationOptions { duration(1000) })
-                        if (userStyleURI != null) {
-                            it?.loadStyleUri(userStyleURI.toString())
-                        } else {
-                            it?.getStyle().also { style ->
-                                style?.removeStyleImage(userPointImageId)
-                            }
+                mapView?.getMapboxMap().also {
+                    it?.flyTo(
+                        CameraOptions.Builder()
+                            .zoom(ZOOM)
+                            .center(point)
+                            .build(),
+                        MapAnimationOptions.mapAnimationOptions { duration(1000) })
+                    if (userStyleURI != null) {
+                        it?.loadStyleUri(userStyleURI.toString())
+                    } else {
+                        it?.getStyle().also { style ->
+                            style?.removeStyleImage(userPointImageId)
                         }
                     }
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        R.string.no_download_region_alert,
-                        Toast.LENGTH_SHORT
-                    ).show()
                 }
+//                } else {
+//                    Toast.makeText(
+//                        requireContext(),
+//                        R.string.no_download_region_alert,
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
             }
             .setNegativeButton(
                 R.string.cancel
