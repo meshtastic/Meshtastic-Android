@@ -1304,13 +1304,14 @@ class MeshService : Service(), Logging {
                 myInfo.myNodeNum // Note: can't use the normal property because myNodeInfo not yet setup
             val ni = nodeDBbyNodeNum[nodeNum] // can't use toNodeInfo because too early
             val hwModelStr = ni?.user?.hwModelString
+            setFirmwareUpdateFilename(hwModelStr)
             val mi = with(myInfo) {
                 MyNodeInfo(
                     myNodeNum,
                     hasGps,
                     hwModelStr,
                     firmwareVersion,
-                    firmwareUpdateFilename != null,
+                    firmwareUpdateFilename?.appLoad != null && firmwareUpdateFilename?.littlefs != null,
                     isBluetoothInterface && SoftwareUpdateService.shouldUpdate(
                         this@MeshService,
                         DeviceVersion(firmwareVersion)
@@ -1323,9 +1324,7 @@ class MeshService : Service(), Logging {
                     airUtilTx
                 )
             }
-
             newMyNodeInfo = mi
-            setFirmwareUpdateFilename(mi)
         }
     }
 
@@ -1641,12 +1640,12 @@ class MeshService : Service(), Logging {
     /***
      * Return the filename we will install on the device
      */
-    private fun setFirmwareUpdateFilename(info: MyNodeInfo) {
+    private fun setFirmwareUpdateFilename(model: String?) {
         firmwareUpdateFilename = try {
-            if (info.firmwareVersion != null && info.model != null)
+            if (model != null)
                 SoftwareUpdateService.getUpdateFilename(
                     this,
-                    info.model
+                    model
                 )
             else
                 null
