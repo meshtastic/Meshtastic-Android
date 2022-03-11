@@ -219,14 +219,18 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
         if (userStyleURI != null) {
             offlineManager.removeStylePack(userStyleURI!!)
+            mapView?.getMapboxMap()?.loadStyleUri(Style.OUTDOORS)
         } else {
             offlineManager.removeStylePack(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
+            mapView?.getMapboxMap()?.loadStyleUri(Style.OUTDOORS)
         }
         MapboxMap.clearData(resourceOptions) {
             it.error?.let { error ->
                 debug(error)
             }
         }
+        updateStylePackDownloadProgress(0, 0)
+        updateTileRegionDownloadProgress(0, 0)
     }
 
     /**
@@ -300,6 +304,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         }
 
         if (OfflineSwitch.getInstance().isMapboxStackConnected) {
+
             // By default, users may download up to 250MB of data for offline use without incurring
             // additional charges. This limit is subject to change during the beta.
 
@@ -313,6 +318,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
             // Style packs are stored in the disk cache database, but their resources are not subject to
             // the data eviction algorithm and are not considered when calculating the disk cache size.
 
+            binding.stylePackDownloadProgress.visibility = View.VISIBLE
+            binding.stylePackText.visibility = View.VISIBLE
             stylePackCancelable = offlineManager.loadStylePack(
                 style,
                 // Build Style pack load options
@@ -321,10 +328,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     .metadata(Value(STYLE_PACK_METADATA))
                     .build(),
                 { progress ->
-                    //TODO: Update the download progress to UI
                     updateStylePackDownloadProgress(
                         progress.completedResourceCount,
-                        progress.requiredResourceCount
+                        progress.requiredResourceCount,
                     )
                 },
                 { expected ->
@@ -333,9 +339,11 @@ class MapFragment : ScreenFragment("Map"), Logging {
                             // Style pack download finishes successfully
                             debug("StylePack downloaded: $stylePack")
                             if (binding.stylePackDownloadProgress.progress == binding.stylePackDownloadProgress.max) {
-                                debug("Doing stuff")
+                                debug("Style pack download complete")
+                                binding.stylePackText.visibility = View.INVISIBLE
                                 binding.stylePackDownloadProgress.visibility = View.INVISIBLE
                                 stylePackDownloadSuccess = true
+
                             } else {
                                 debug("Waiting for tile region download to be finished.")
                             }
@@ -382,6 +390,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
             // unique for a particular file path, i.e. there is only ever one TileStore per unique path.
 
             // Note that the TileStore path must be the same with the TileStore used when initialise the MapView.
+            binding.tilePackText.visibility = View.VISIBLE
+            binding.tilePackDownloadProgress.visibility = View.VISIBLE
             tilePackCancelable = tileStore.loadTileRegion(
                 TILE_REGION_ID, // Make this dynamic
                 TileRegionLoadOptions.Builder()
@@ -402,10 +412,12 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     // Tile pack download finishes successfully
                     expected.value?.let { region ->
                         debug("TileRegion downloaded: $region")
-                        if (binding.stylePackDownloadProgress.progress == binding.stylePackDownloadProgress.max) {
+                        if (binding.tilePackDownloadProgress.progress == binding.tilePackDownloadProgress.max) {
                             debug("Finished tilepack download")
-                            binding.stylePackDownloadProgress.visibility = View.INVISIBLE
+                            binding.tilePackDownloadProgress.visibility = View.INVISIBLE
+                            binding.tilePackText.visibility = View.INVISIBLE
                             tileRegionDownloadSuccess = true
+
                         } else {
                             debug("Waiting for style pack download to be finished.")
                         }
@@ -510,7 +522,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private fun calculateCoordinate(degrees: Double, lat: Double, lon: Double): Point {
         val deg = Math.toRadians(degrees)
         val distancesInMeters =
-            1609.344 * 5 // 1609.344 is 1 mile in meters -> multiplier will be user specified up to a max of 10
+            1609.344 * 2.5 // 1609.344 is 1 mile in meters -> multiplier will be user specified up to a max of 10
         val radiusOfEarthInMeters = 6378137
         val x =
             lon + (180 / Math.PI) * (distancesInMeters / radiusOfEarthInMeters) * cos(
@@ -525,7 +537,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
         progress: Long,
         max: Long,
     ) {
-        binding.stylePackDownloadProgress.visibility = View.VISIBLE
         binding.stylePackDownloadProgress.max = max.toInt()
         binding.stylePackDownloadProgress.progress = progress.toInt()
     }
@@ -534,15 +545,15 @@ class MapFragment : ScreenFragment("Map"), Logging {
         progress: Long,
         max: Long,
     ) {
-        binding.stylePackDownloadProgress.max = max.toInt()
-        binding.stylePackDownloadProgress.progress = progress.toInt()
+        binding.tilePackDownloadProgress.max = max.toInt()
+        binding.tilePackDownloadProgress.progress = progress.toInt()
     }
 
     companion object {
-        private const val ZOOM = 11.0
-        private const val TILE_REGION_ID = "myTileRegion"
-        private const val STYLE_PACK_METADATA = "my-outdoor-style-pack"
-        private const val TILE_REGION_METADATA = "my-outdoors-tile-region"
+        private const val ZOOM = 12.5
+        private const val TILE_REGION_ID = "tile-region"
+        private const val STYLE_PACK_METADATA = "outdoor-style-pack"
+        private const val TILE_REGION_METADATA = "outdoor-tile-region"
     }
 
     private fun downloadRegionDialogFragment() {
@@ -573,28 +584,29 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 R.string.save_btn, null
             )
             .setNeutralButton(R.string.view_region_btn) { _, _ ->
-                mapView?.getMapboxMap().also {
-                    it?.flyTo(
-                        CameraOptions.Builder()
-                            .zoom(ZOOM)
-                            .center(point)
-                            .build(),
-                        MapAnimationOptions.mapAnimationOptions { duration(1000) })
-                    if (userStyleURI != null) {
-                        it?.loadStyleUri(userStyleURI.toString())
-                    } else {
-                        it?.getStyle().also { style ->
-                            style?.removeStyleImage(userPointImageId)
+                if (tileRegionDownloadSuccess && stylePackDownloadSuccess) {
+                    mapView?.getMapboxMap().also {
+                        it?.flyTo(
+                            CameraOptions.Builder()
+                                .zoom(ZOOM)
+                                .center(point)
+                                .build(),
+                            MapAnimationOptions.mapAnimationOptions { duration(1000) })
+                        if (userStyleURI != null) {
+                            it?.loadStyleUri(userStyleURI.toString())
+                        } else {
+                            it?.getStyle().also { style ->
+                                style?.removeStyleImage(userPointImageId)
+                            }
                         }
                     }
+                } else {
+                    Toast.makeText(
+                        requireContext(),
+                        R.string.no_download_region_alert,
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
-//                } else {
-//                    Toast.makeText(
-//                        requireContext(),
-//                        R.string.no_download_region_alert,
-//                        Toast.LENGTH_SHORT
-//                    ).show()
-//                }
             }
             .setNegativeButton(
                 R.string.cancel

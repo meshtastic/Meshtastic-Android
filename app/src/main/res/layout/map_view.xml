@@ -13,20 +13,55 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/mapView">
+
+        <TextView
+            android:id="@+id/style_pack_text"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Style Pack"
+            android:textColor="@color/colorPrimaryDark"
+            android:visibility="invisible" />
 
         <ProgressBar
             android:id="@+id/style_pack_download_progress"
             style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_weight="8"
             android:clickable="false"
             android:indeterminate="false"
             android:max="100"
-            android:progressTint="@color/colorPrimaryDark"
-            android:visibility="gone" />
+            android:progressTint="@color/colorPrimary"
+            android:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/tile_pack_text"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Tile Pack"
+            android:textColor="@color/colorPrimaryDark"
+            android:visibility="invisible" />
+
+        <ProgressBar
+            android:id="@+id/tile_pack_download_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="8"
+            android:clickable="false"
+            android:indeterminate="false"
+            android:max="100"
+            android:progressTint="@color/colorPrimary"
+            android:visibility="invisible" />
     </LinearLayout>
 
     <LinearLayout
@@ -36,15 +71,15 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-<!--        <com.google.android.material.floatingactionbutton.FloatingActionButton-->
-<!--            android:id="@+id/fab_style_toggle"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_margin="8dp"-->
-<!--            android:backgroundTint="@color/buttonColor"-->
-<!--            android:contentDescription="@string/style_selection"-->
-<!--            android:src="@drawadownload_regionble/baseline_layers_white_24dp"-->
-<!--            tools:background="@color/buttonColor" />-->
+        <!--        <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+        <!--            android:id="@+id/fab_style_toggle"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_margin="8dp"-->
+        <!--            android:backgroundTint="@color/buttonColor"-->
+        <!--            android:contentDescription="@string/style_selection"-->
+        <!--            android:src="@drawadownload_regionble/baseline_layers_white_24dp"-->
+        <!--            tools:background="@color/buttonColor" />-->
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/download_region"
@@ -52,12 +87,11 @@
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:backgroundTint="@color/buttonColor"
-            android:visibility="invisible"
             android:contentDescription="@string/download_region"
             android:src="@drawable/baseline_download_white_24dp"
+            android:visibility="invisible"
             tools:background="@color/buttonColor" />
     </LinearLayout>
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
