@@ -24,6 +24,7 @@ import android.widget.*
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
@@ -474,6 +475,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         model.meshService?.let { service ->
 
             debug("User started firmware update")
+            GeeksvilleApplication.analytics.track(
+                "firmware_update",
+                DataPair("content_type", "start")
+            )
             binding.updateFirmwareButton.isEnabled = false // Disable until things complete
             binding.updateProgressBar.visibility = View.VISIBLE
             binding.updateProgressBar.progress = 0 // start from scratch
@@ -515,6 +520,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             } else
                 when (progress) {
                     ProgressSuccess -> {
+                        GeeksvilleApplication.analytics.track(
+                            "firmware_update",
+                            DataPair("content_type", "success")
+                        )
                         binding.scanStatusText.setText(R.string.update_successful)
                         binding.updateProgressBar.visibility = View.GONE
                     }
@@ -523,6 +532,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                         binding.updateProgressBar.visibility = View.GONE
                     }
                     else -> {
+                        GeeksvilleApplication.analytics.track(
+                            "firmware_update",
+                            DataPair("content_type", "failure")
+                        )
                         binding.scanStatusText.setText(R.string.update_failed)
                         binding.updateProgressBar.visibility = View.VISIBLE
                     }

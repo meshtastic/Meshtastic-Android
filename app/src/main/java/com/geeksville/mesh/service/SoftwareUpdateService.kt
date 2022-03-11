@@ -243,7 +243,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             false // If we fail parsing our update info
         }
 
-        /** Return a Pair of apploadfilename, spiffs filename this device needs to use as an update (or null if no update needed)
+        /** Return a Pair of appload filename, spiffs filename this device needs to use as an update (or null if no update needed)
          */
         fun getUpdateFilename(
             context: Context,
@@ -290,9 +290,15 @@ class SoftwareUpdateService : JobIntentService(), Logging {
          * you can use it for the software update.
          */
         fun doUpdate(context: Context, sync: SafeBluetooth, assets: UpdateFilenames) {
+            // calculate total firmware size (spiffs + appLoad)
+            var totalFirmwareSize = 0
+            if (assets.appLoad != null && assets.spiffs != null) {
+                totalFirmwareSize += context.assets.open(assets.appLoad).available()
+                totalFirmwareSize += context.assets.open(assets.spiffs).available()
+            }
             // we must attempt spiffs first, because if we update the appload the device will reboot afterwards
             try {
-                assets.spiffs?.let { doUpdate(context, sync, it, FLASH_REGION_SPIFFS) }
+                assets.spiffs?.let { doUpdate(context, sync, it, FLASH_REGION_SPIFFS, totalFirmwareSize) }
             } catch (_: BLECharacteristicNotFoundException) {
                 // If we can't update spiffs (because not supported by target), do not fail
                 errormsg("Ignoring failure to update spiffs on old appload")
@@ -301,7 +307,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 errormsg("Device rejected invalid spiffs partition")
             }
 
-            assets.appLoad?.let { doUpdate(context, sync, it, FLASH_REGION_APPLOAD) }
+            assets.appLoad?.let { doUpdate(context, sync, it, FLASH_REGION_APPLOAD, totalFirmwareSize) }
             sendProgress(context, ProgressSuccess, true)
         }
 
@@ -317,7 +323,8 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             context: Context,
             sync: SafeBluetooth,
             assetName: String,
-            flashRegion: Int = FLASH_REGION_APPLOAD
+            flashRegion: Int = FLASH_REGION_APPLOAD,
+            totalFirmwareSize: Int = 0
         ) {
             val isAppload = flashRegion == FLASH_REGION_APPLOAD
 
@@ -378,13 +385,15 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                     // Send all the blocks
                     var oldProgress = -1 // used to limit # of log spam
                     while (firmwareNumSent < firmwareSize) {
-                        // If we are doing the spiffs partition, we limit progress to a max of 50%, so that the user doesn't think we are done
-                        // yet
-                        val maxProgress = if (flashRegion != FLASH_REGION_APPLOAD)
-                            50 else 100
+                        // If we are doing the spiffs partition, we limit progress to a max of maxProgress
+                        //  when updating the appload partition, progress from (100 - maxProgress) to 100%
+                        //  maxProgress = spiffs% = 100% - appLoad%; (int * 10 + 5) / 10 used for rounding
+                        val maxProgress = ((firmwareSize * 1000 / totalFirmwareSize) + 5) / 10
+                        val minProgress = if (flashRegion != FLASH_REGION_APPLOAD)
+                            0 else (100 - maxProgress)
                         sendProgress(
                             context,
-                            firmwareNumSent * maxProgress / firmwareSize,
+                            minProgress + firmwareNumSent * maxProgress / firmwareSize,
                             isAppload
                         )
                         if (progress != oldProgress) {
