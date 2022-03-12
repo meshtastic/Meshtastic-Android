@@ -59,7 +59,14 @@ class MapFragment : ScreenFragment("Map"), Logging {
         }
     }
 
-    //TODO: Update download animation
+    /**
+     * DEVELOPER OPTION TO ENABLE OFFLINE MAPS
+     * Set this variable to true to enable offline maps
+     */
+    //___________________________________________________
+    private val offlineEnabled = false
+    //___________________________________________________
+
 
     private val resourceOptions: ResourceOptions by lazy {
         ResourceOptions.Builder().applyDefaultParams(requireContext()).tileStore(tileStore).build()
@@ -277,14 +284,15 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     }
 
                     v.gestures.rotateEnabled = false
-                    v.gestures.addOnMapLongClickListener(this.longClick)
+                    if (offlineEnabled) {
+                        v.gestures.addOnMapLongClickListener(this.longClick)
+                    }
 
                     // Provide initial positions
                     model.nodeDB.nodes.value?.let { nodes ->
                         onNodesChanged(nodes.values)
                     }
                 }
-
                 // Any times nodes change update our map
                 model.nodeDB.nodes.observe(viewLifecycleOwner, Observer { nodes ->
                     if (isViewVisible)
@@ -343,19 +351,16 @@ class MapFragment : ScreenFragment("Map"), Logging {
                                 binding.stylePackText.visibility = View.INVISIBLE
                                 binding.stylePackDownloadProgress.visibility = View.INVISIBLE
                                 stylePackDownloadSuccess = true
-
                             } else {
                                 debug("Waiting for tile region download to be finished.")
                             }
                         }
                     }
                     expected.error?.let {
-                        Toast.makeText(
-                            requireContext(),
-                            R.string.stylepack_download_error_alert,
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        stylePackDownloadSuccess = false
                         // Handle error occurred during the style pack download.
+                        binding.stylePackText.visibility = View.INVISIBLE
+                        binding.stylePackDownloadProgress.visibility = View.INVISIBLE
                         debug("StylePackError: $it")
                     }
                 }
@@ -424,12 +429,10 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     }
                 }
                 expected.error?.let {
-                    Toast.makeText(
-                        requireContext(),
-                        R.string.tileregion_error_alert,
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    tileRegionDownloadSuccess = false
                     // Handle error occurred during the tile region download.
+                    binding.tilePackDownloadProgress.visibility = View.INVISIBLE
+                    binding.tilePackText.visibility = View.INVISIBLE
                     debug("TileRegionError: $it")
                 }
             }

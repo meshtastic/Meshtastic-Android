@@ -136,6 +136,5 @@
     <string name="style_uri_empty_alert">Style URI cannot be empty</string>
     <string name="download_region_dialog_title">Download Region</string>
     <string name="download_region_connection_alert">You are not connected to the internet, you cannot download an offline map</string>
-    <string name="tileregion_error_alert">Unable to download TileRegion</string>
-    <string name="stylepack_download_error_alert">Unable to download style pack</string>
+    <string name="download_failed">Unable to download style pack</string>
 </resources>
