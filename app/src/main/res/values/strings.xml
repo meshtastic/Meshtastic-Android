@@ -127,4 +127,14 @@
     <string name="delete">Delete</string>
     <string name="select_all">Select all</string>
     <string name="modem_config_slow_long">Long Range / Slow</string>
+    <string name="style_selection">Style Selection</string>
+    <string name="download_region">Download Region</string>
+    <string name="name">Name</string>
+    <string name="view_region_btn">View Region</string>
+    <string name="save_btn">Save</string>
+    <string name="no_download_region_alert">No downloaded region available</string>
+    <string name="style_uri_empty_alert">Style URI cannot be empty</string>
+    <string name="download_region_dialog_title">Download Region</string>
+    <string name="download_region_connection_alert">You are not connected to the internet, you cannot download an offline map</string>
+    <string name="download_failed">Unable to download style pack</string>
 </resources>
