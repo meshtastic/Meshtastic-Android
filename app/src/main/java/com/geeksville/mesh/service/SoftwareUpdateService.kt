@@ -70,7 +70,7 @@ fun toNetworkByteArray(value: Int, formatType: Int): ByteArray {
 }
 
 
-data class UpdateFilenames(val appLoad: String?, val spiffs: String?)
+data class UpdateFilenames(val appLoad: String?, val littlefs: String?)
 
 /**
  * typical flow
@@ -172,7 +172,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         private val SW_UPDATE_RESULT_CHARACTER =
             UUID.fromString("5e134862-7411-4424-ac4a-210937432c77") // read|notify         result code, readable but will notify when the OTA operation completes
         private val SW_UPDATE_REGION_CHARACTER =
-            UUID.fromString("5e134862-7411-4424-ac4a-210937432c67") // write - used to set the region we are setting (appload vs spiffs)
+            UUID.fromString("5e134862-7411-4424-ac4a-210937432c67") // write - used to set the region we are setting (appload vs littlefs)
 
         private val SW_VERSION_CHARACTER = longBLEUUID("2a28")
         private val MANUFACTURE_CHARACTER = longBLEUUID("2a29")
@@ -208,11 +208,11 @@ class SoftwareUpdateService : JobIntentService(), Logging {
         /**
          * Update our progress indication for GUIs
          *
-         * @param isAppload if false, we don't report failure indications (because we consider spiffs non critical for now).  But do report to analytics
+         * @param isAppload if false, we don't report failure indications (because we consider littlefs non critical for now).  But do report to analytics
          */
         fun sendProgress(context: Context, p: Int, isAppload: Boolean) {
             if (!isAppload && p < 0)
-                errormsg("Error while writing spiffs $p") // treat errors writing spiffs as non fatal for now (user partition probably missized and most people don't need it)
+                errormsg("Error while writing littlefs $p") // treat errors writing littlefs as non fatal for now (user partition probably missized and most people don't need it)
             else
                 if (progress != p) {
                     progress = p
@@ -243,7 +243,7 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             false // If we fail parsing our update info
         }
 
-        /** Return a Pair of apploadfilename, spiffs filename this device needs to use as an update (or null if no update needed)
+        /** Return a Pair of appload filename, littlefs filename this device needs to use as an update (or null if no update needed)
          */
         fun getUpdateFilename(
             context: Context,
@@ -255,15 +255,15 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             val firmwareFiles = context.assets.list("firmware") ?: arrayOf()
 
             val appLoad = "firmware-$mfg-$curVer.bin"
-            val spiffs = "spiffs-$curVer.bin"
+            val littlefs = "littlefs-$curVer.bin"
 
             return UpdateFilenames(
                 if (firmwareFiles.contains(appLoad))
                     "firmware/$appLoad"
                 else
                     null,
-                if (firmwareFiles.contains(spiffs))
-                    "firmware/$spiffs"
+                if (firmwareFiles.contains(littlefs))
+                    "firmware/$littlefs"
                 else
                     null
             )
@@ -290,24 +290,30 @@ class SoftwareUpdateService : JobIntentService(), Logging {
          * you can use it for the software update.
          */
         fun doUpdate(context: Context, sync: SafeBluetooth, assets: UpdateFilenames) {
-            // we must attempt spiffs first, because if we update the appload the device will reboot afterwards
+            // calculate total firmware size (littlefs + appLoad)
+            var totalFirmwareSize = 0
+            if (assets.appLoad != null && assets.littlefs != null) {
+                totalFirmwareSize += context.assets.open(assets.appLoad).available()
+                totalFirmwareSize += context.assets.open(assets.littlefs).available()
+            }
+            // we must attempt littlefs first, because if we update the appload the device will reboot afterwards
             try {
-                assets.spiffs?.let { doUpdate(context, sync, it, FLASH_REGION_SPIFFS) }
+                assets.littlefs?.let { doUpdate(context, sync, it, FLASH_REGION_LITTLEFS, totalFirmwareSize) }
             } catch (_: BLECharacteristicNotFoundException) {
-                // If we can't update spiffs (because not supported by target), do not fail
-                errormsg("Ignoring failure to update spiffs on old appload")
+                // If we can't update littlefs (because not supported by target), do not fail
+                errormsg("Ignoring failure to update littlefs on old appload")
             } catch (_: DeviceRejectedException) {
                 // the spi filesystem of this device is malformatted, fail silently because most users don't need the web server
-                errormsg("Device rejected invalid spiffs partition")
+                errormsg("Device rejected invalid littlefs partition")
             }
 
-            assets.appLoad?.let { doUpdate(context, sync, it, FLASH_REGION_APPLOAD) }
+            assets.appLoad?.let { doUpdate(context, sync, it, FLASH_REGION_APPLOAD, totalFirmwareSize) }
             sendProgress(context, ProgressSuccess, true)
         }
 
         // writable region codes in the ESP32 update code
         private val FLASH_REGION_APPLOAD = 0
-        private val FLASH_REGION_SPIFFS = 100
+        private val FLASH_REGION_LITTLEFS = 100
 
         /**
          * A public function so that if you have your own SafeBluetooth connection already open
@@ -317,7 +323,8 @@ class SoftwareUpdateService : JobIntentService(), Logging {
             context: Context,
             sync: SafeBluetooth,
             assetName: String,
-            flashRegion: Int = FLASH_REGION_APPLOAD
+            flashRegion: Int = FLASH_REGION_APPLOAD,
+            totalFirmwareSize: Int = 0
         ) {
             val isAppload = flashRegion == FLASH_REGION_APPLOAD
 
@@ -341,9 +348,9 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                 val crc32Desc = getCharacteristic(SW_UPDATE_CRC32_CHARACTER)
                 val updateResultDesc = getCharacteristic(SW_UPDATE_RESULT_CHARACTER)
 
-                /// Try to set the destination region for programming (spiffs vs appload etc)
+                /// Try to set the destination region for programming (littlefs vs appload etc)
                 /// Old apploads don't have this feature, but we only fail if the user was trying to set a
-                /// spiffs - otherwise we assume appload.
+                /// littlefs - otherwise we assume appload.
                 try {
                     val updateRegionDesc = getCharacteristic(SW_UPDATE_REGION_CHARACTER)
                     sync.writeCharacteristic(
@@ -378,13 +385,15 @@ class SoftwareUpdateService : JobIntentService(), Logging {
                     // Send all the blocks
                     var oldProgress = -1 // used to limit # of log spam
                     while (firmwareNumSent < firmwareSize) {
-                        // If we are doing the spiffs partition, we limit progress to a max of 50%, so that the user doesn't think we are done
-                        // yet
-                        val maxProgress = if (flashRegion != FLASH_REGION_APPLOAD)
-                            50 else 100
+                        // If we are doing the littlefs partition, we limit progress to a max of maxProgress
+                        //  when updating the appload partition, progress from (100 - maxProgress) to 100%
+                        //  maxProgress = littlefs% = 100% - appLoad%; (int * 10 + 5) / 10 used for rounding
+                        val maxProgress = ((firmwareSize * 1000 / totalFirmwareSize) + 5) / 10
+                        val minProgress = if (flashRegion != FLASH_REGION_APPLOAD)
+                            0 else (100 - maxProgress)
                         sendProgress(
                             context,
-                            firmwareNumSent * maxProgress / firmwareSize,
+                            minProgress + firmwareNumSent * maxProgress / firmwareSize,
                             isAppload
                         )
                         if (progress != oldProgress) {

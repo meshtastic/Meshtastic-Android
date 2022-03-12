@@ -105,7 +105,7 @@ class MeshService : Service(), Logging {
 
         /** The minimmum firmware version we know how to talk to. We'll still be able to talk to 1.0 firmwares but only well enough to ask them to firmware update
          */
-        val minFirmwareVersion = DeviceVersion("1.2.0")
+        val minFirmwareVersion = DeviceVersion("1.3.0")
     }
 
     enum class ConnectionState {
@@ -1304,13 +1304,14 @@ class MeshService : Service(), Logging {
                 myInfo.myNodeNum // Note: can't use the normal property because myNodeInfo not yet setup
             val ni = nodeDBbyNodeNum[nodeNum] // can't use toNodeInfo because too early
             val hwModelStr = ni?.user?.hwModelString
+            setFirmwareUpdateFilename(hwModelStr)
             val mi = with(myInfo) {
                 MyNodeInfo(
                     myNodeNum,
                     hasGps,
                     hwModelStr,
                     firmwareVersion,
-                    firmwareUpdateFilename != null,
+                    firmwareUpdateFilename?.appLoad != null && firmwareUpdateFilename?.littlefs != null,
                     isBluetoothInterface && SoftwareUpdateService.shouldUpdate(
                         this@MeshService,
                         DeviceVersion(firmwareVersion)
@@ -1323,9 +1324,7 @@ class MeshService : Service(), Logging {
                     airUtilTx
                 )
             }
-
             newMyNodeInfo = mi
-            setFirmwareUpdateFilename(mi)
         }
     }
 
@@ -1531,7 +1530,7 @@ class MeshService : Service(), Logging {
         try {
             val mi = myNodeInfo
             if (mi != null) {
-                debug("Sending our position/time to=$destNum lat=$lat, lon=$lon, alt=$alt")
+                debug("Sending our position/time to=$destNum lat=${lat.anonymize}, lon=${lon.anonymize}, alt=$alt")
 
                 val position = MeshProtos.Position.newBuilder().also {
                     it.longitudeI = Position.degI(lon)
@@ -1641,12 +1640,12 @@ class MeshService : Service(), Logging {
     /***
      * Return the filename we will install on the device
      */
-    private fun setFirmwareUpdateFilename(info: MyNodeInfo) {
+    private fun setFirmwareUpdateFilename(model: String?) {
         firmwareUpdateFilename = try {
-            if (info.firmwareVersion != null && info.model != null)
+            if (model != null)
                 SoftwareUpdateService.getUpdateFilename(
                     this,
-                    info.model
+                    model
                 )
             else
                 null

@@ -47,7 +47,7 @@
     <string name="share">Partilha</string>
     <string name="disconnected">Desconectado</string>
     <string name="device_sleeping">Dispositivo a dormir</string>
-    <string name="connected_count">Conectado: %s de %s online</string>
+    <string name="connected_count">Conectado: %1$s de %2$s online</string>
     <string name="list_of_nodes">Lista de nós na rede</string>
     <string name="update_firmware">Atualizar Firmware</string>
     <string name="connected">Conectado ao rádio</string>
