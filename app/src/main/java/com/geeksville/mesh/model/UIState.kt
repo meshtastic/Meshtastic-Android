@@ -108,7 +108,6 @@ class UIViewModel @Inject constructor(
             radioConfig.value?.preferences?.let {
                 if (it.positionBroadcastSecs > 0) return it.positionBroadcastSecs
                 // These default values are borrowed from the device code.
-                if (it.isRouter) return 60 * 60
                 return 15 * 60
             }
             return null
