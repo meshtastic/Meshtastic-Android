@@ -22,14 +22,15 @@ jobs:
         rm ./app/google-services.json
         echo $GSERVICES > ./app/google-services.json
         rm ./app/src/main/res/values/mapbox-token.xml
-        echo -e "<resources>\n    <string name=\"mapbox_access_token\">$MAPBOXTOKEN</string>\n</resources>" > ./app/src/main/res/values/mapbox-token.xml
+        echo -e "<resources>\n    <string name=\"mapbox_access_token\">$MAPBOX_ACCESS_TOKEN</string>\n</resources>" > ./app/src/main/res/values/mapbox-token.xml
         mkdir -p ~/.gradle
-        echo "MAPBOX_DOWNLOADS_TOKEN=$MAPBOXTOKEN" >> ~/.gradle/gradle.properties
+        echo "MAPBOX_DOWNLOADS_TOKEN=$MAPBOX_DOWNLOADS_TOKEN" >> ~/.gradle/gradle.properties
         echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
         echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
       env:
           GSERVICES: ${{ secrets.GSERVICES }}
-          MAPBOXTOKEN: ${{ secrets.MAPBOXTOKEN }}
+          MAPBOX_ACCESS_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
+          MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
           KEYSTORE: ${{ secrets.KEYSTORE }}
           KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
           KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
