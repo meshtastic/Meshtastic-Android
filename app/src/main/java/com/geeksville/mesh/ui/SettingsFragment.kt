@@ -656,8 +656,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         model.radioConfig.observe(viewLifecycleOwner) {
             binding.provideLocationCheckbox.isEnabled =
-                isGooglePlayAvailable(requireContext()) && model.locationShare ?: true
-            if (model.locationShare == false) {
+                isGooglePlayAvailable(requireContext()) && !model.locationShareDisabled
+            if (model.locationShareDisabled) {
                 model.provideLocation.value = false
                 binding.provideLocationCheckbox.isChecked = false
             }

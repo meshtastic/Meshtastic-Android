@@ -37,24 +37,24 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        model.radioConfig.observe(viewLifecycleOwner, {
+        model.radioConfig.observe(viewLifecycleOwner) {
             binding.positionBroadcastPeriodEditText.setText(model.positionBroadcastSecs.toString())
             binding.lsSleepEditText.setText(model.lsSleepSecs.toString())
-            binding.positionBroadcastPeriodView.isEnabled = model.locationShare ?: true
-            binding.positionBroadcastSwitch.isChecked = model.locationShare ?: true
+            binding.positionBroadcastPeriodView.isEnabled = !model.locationShareDisabled
+            binding.positionBroadcastSwitch.isChecked = !model.locationShareDisabled
             binding.lsSleepView.isEnabled = model.isPowerSaving ?: false
             binding.lsSleepSwitch.isChecked = model.isPowerSaving ?: false
             binding.isAlwaysPoweredSwitch.isChecked = model.isAlwaysPowered ?: false
-        })
+        }
 
-        model.isConnected.observe(viewLifecycleOwner, { connectionState ->
+        model.isConnected.observe(viewLifecycleOwner) { connectionState ->
             val connected = connectionState == MeshService.ConnectionState.CONNECTED
-            binding.positionBroadcastPeriodView.isEnabled = connected && model.locationShare ?: true
+            binding.positionBroadcastPeriodView.isEnabled = connected && !model.locationShareDisabled
             binding.lsSleepView.isEnabled = connected && model.isPowerSaving ?: false
             binding.positionBroadcastSwitch.isEnabled = connected
             binding.lsSleepSwitch.isEnabled = connected
             binding.isAlwaysPoweredSwitch.isEnabled = connected
-        })
+        }
 
         binding.positionBroadcastPeriodEditText.on(EditorInfo.IME_ACTION_DONE) {
             val textEdit = binding.positionBroadcastPeriodEditText
@@ -83,7 +83,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
 
         binding.positionBroadcastSwitch.setOnCheckedChangeListener { view, isChecked ->
             if (view.isPressed) {
-                model.locationShare = isChecked
+                model.locationShareDisabled = !isChecked
                 debug("User changed locationShare to $isChecked")
             }
         }

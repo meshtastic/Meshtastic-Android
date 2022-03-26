@@ -132,22 +132,13 @@ class UIViewModel @Inject constructor(
             }
         }
 
-    var locationShare: Boolean?
-        get() {
-            return radioConfig.value?.preferences?.locationShare == RadioConfigProtos.LocationSharing.LocEnabled
-                    || radioConfig.value?.preferences?.locationShare == RadioConfigProtos.LocationSharing.LocUnset
-        }
-    set(value) {
+    var locationShareDisabled: Boolean
+        get() = radioConfig.value?.preferences?.locationShareDisabled ?: false
+        set(value) {
             val config = radioConfig.value
-            if (value != null && config != null) {
+            if (config != null) {
                 val builder = config.toBuilder()
-                if (value == true) {
-                    builder.preferencesBuilder.locationShare =
-                        RadioConfigProtos.LocationSharing.LocUnset
-                } else {
-                    builder.preferencesBuilder.locationShare =
-                        RadioConfigProtos.LocationSharing.LocDisabled
-                }
+                builder.preferencesBuilder.locationShareDisabled = value
                 setRadioConfig(builder.build())
             }
         }
