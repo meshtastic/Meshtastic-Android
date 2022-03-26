@@ -1017,7 +1017,7 @@ class MeshService : Service(), Logging {
             else
                 broadcastSecs * 1000L
 
-            if (prefs.locationShare == RadioConfigProtos.LocationSharing.LocDisabled) {
+            if (prefs.locationShareDisabled) {
                 info("GPS location sharing is disabled")
                 desiredInterval = 0
             }
