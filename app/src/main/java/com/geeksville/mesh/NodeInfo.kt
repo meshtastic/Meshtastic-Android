@@ -19,8 +19,7 @@ data class MeshUser(
     val longName: String,
     val shortName: String,
     val hwModel: MeshProtos.HardwareModel
-) :
-    Parcelable {
+) : Parcelable {
 
     override fun toString(): String {
         return "MeshUser(id=${id.anonymize}, longName=${longName.anonymize}, shortName=${shortName.anonymize}, hwModel=${hwModelString})"
@@ -31,10 +30,8 @@ data class MeshUser(
      * */
     val hwModelString: String?
         get() =
-            if (hwModel == MeshProtos.HardwareModel.UNSET)
-                null
-            else
-                hwModel.name.replace('_', '-').replace('p', '.').toLowerCase()
+            if (hwModel == MeshProtos.HardwareModel.UNSET) null
+            else hwModel.name.replace('_', '-').replace('p', '.').lowercase()
 }
 
 @Serializable
@@ -43,8 +40,7 @@ data class Position(
     val latitude: Double,
     val longitude: Double,
     val altitude: Int,
-    val time: Int = currentTime(), // default to current time in secs (NOT MILLISECONDS!)
-    val batteryPctLevel: Int = 0
+    val time: Int = currentTime() // default to current time in secs (NOT MILLISECONDS!)
 ) : Parcelable {
     companion object {
         /// Convert to a double representation of degrees
@@ -61,8 +57,7 @@ data class Position(
         degD(p.latitudeI),
         degD(p.longitudeI),
         p.altitude,
-        if (p.time != 0) p.time else defaultTime,
-        p.batteryLevel
+        if (p.time != 0) p.time else defaultTime
     )
 
     /// @return distance in meters to some other node (or null if unknown)
@@ -79,7 +74,31 @@ data class Position(
     }
 
     override fun toString(): String {
-        return "Position(lat=${latitude.anonymize}, lon=${longitude.anonymize}, alt=${altitude.anonymize}, time=${time}, batteryPctLevel=${batteryPctLevel})"
+        return "Position(lat=${latitude.anonymize}, lon=${longitude.anonymize}, alt=${altitude.anonymize}, time=${time})"
+    }
+}
+
+
+@Serializable
+@Parcelize
+data class Telemetry(
+    val batteryLevel: Int = 0,
+    val voltage: Float,
+    val channelUtilization: Float,
+    val airUtilTx: Float,
+) : Parcelable {
+
+    /** Create our model object from a protobuf.
+     */
+    constructor(t: TelemetryProtos.Telemetry) : this(
+        t.batteryLevel,
+        t.voltage,
+        t.channelUtilization,
+        t.airUtilTx,
+    )
+
+    override fun toString(): String {
+        return "Telemetry(batteryLevel=${batteryLevel}, voltage=${voltage}, channelUtilization=${channelUtilization}, airUtilTx=${airUtilTx})"
     }
 }
 
@@ -95,11 +114,7 @@ data class NodeInfo(
     var lastHeard: Int = 0 // the last time we've seen this node in secs since 1970
 ) : Parcelable {
 
-    /**
-     * Return the last time we've seen this node in secs since 1970
-     */
-
-    val batteryPctLevel get() = position?.batteryPctLevel
+    val batteryPctLevel get() = telemetry?.batteryLevel
 
     /**
      * true if the device was heard from recently
