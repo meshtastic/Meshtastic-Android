@@ -90,7 +90,7 @@ data class Telemetry(
 
     /** Create our model object from a protobuf.
      */
-    constructor(t: TelemetryProtos.Telemetry) : this(
+    constructor(t: TelemetryProtos.DeviceMetrics) : this(
         t.batteryLevel,
         t.voltage,
         t.channelUtilization,
