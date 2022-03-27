@@ -109,6 +109,7 @@ data class NodeInfo(
     val num: Int, // This is immutable, and used as a key
     var user: MeshUser? = null,
     var position: Position? = null,
+    var telemetry: Telemetry? = null,
     var snr: Float = Float.MAX_VALUE,
     var rssi: Int = Int.MAX_VALUE,
     var lastHeard: Int = 0 // the last time we've seen this node in secs since 1970
