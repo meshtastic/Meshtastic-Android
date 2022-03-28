@@ -16,15 +16,15 @@
     <string name="some_username" translatable="false">SKH</string>
     <string name="send_text">Wyślij</string>
     <string name="warning_not_paired">Urządzenie Meshtastic nie jest  jeszcze połączone z telefonem. Połącz urządzenie i ustaw nazwę użytkownika.\n\nTo jest aplikacja open-source i jest w fazie rozwoju, jeśli znajdziesz błąd lub problem napisz o tym na naszym forum: meshtastic.discourse.group.\n\nJeśli potrzebujesz więcej informacji odwiedź naszą stronę - www.meshtastic.org.</string>
-    <string name="username_unset">Brak nazwy użytkownika.</string>
-    <string name="your_name">Twoje imię.</string>
+    <string name="username_unset">Brak nazwy użytkownika</string>
+    <string name="your_name">Twoje imię</string>
     <string name="analytics_okay">Anonimowe statystyki użycia aplikacji i raporty błędów.</string>
     <string name="looking_for_meshtastic_devices">Szukam urządzeń Meshtastic…</string>
     <string name="test__devname1" translatable="false">Meshtastic_ac23</string>
     <string name="test_devname2" translatable="false">Meshtastic_1267</string>
     <string name="requires_bluetooth">Ta aplikacja wymaga dostępu do Bluetooth. Proszę zezwól aplikacji na to w ustawieniach systemu.</string>
     <string name="error_bluetooth">Błąd - aplikacja wymaga połączenia Bluetooth</string>
-    <string name="starting_pairing">Rozpoczęcie parowania.</string>
+    <string name="starting_pairing">Rozpoczęcie parowania</string>
     <string name="pairing_failed">Parowanie nieudane</string>
     <string name="url_for_join">Adres dołączenia do sieci Meshtastic.</string>
     <string name="accept">Akceptuj</string>
@@ -38,11 +38,11 @@
         </string>
     <string name="permission_missing">Brakuje wymaganego zezwolenia, Meshtastic nie będzie w stanie działać poprawnie. Nadaj uprawnienia w Ustawieniach systemu.</string>
     <string name="radio_sleeping">Urządzenie było uśpione, nie można było zmienić kanału.</string>
-    <string name="report_bug">Zgłoś błąd.</string>
-    <string name="report_a_bug">Zgłoś błąd.</string>
+    <string name="report_bug">Zgłoś błąd</string>
+    <string name="report_a_bug">Zgłoś błąd</string>
     <string name="report_bug_text">Potwierdź, że chcesz zgłosić błąd. Po zgłoszeniu proszę napisz post na meshtastic.discourse.group co umożliwi nam dopasowanie zgłoszenia z tym co znalazłeś.</string>
     <string name="report">Zgłoś</string>
-    <string name="select_radio">Wybierz urządzenie.</string>
+    <string name="select_radio">Wybierz urządzenie</string>
     <string name="current_pair">Obecnie połączono z %s</string>
     <string name="not_paired_yet">Urządzenie nie jest jeszcze połączone.</string>
     <string name="change_radio">Zmień urządzenie</string>
@@ -52,10 +52,10 @@
     <string name="location_disabled">Dostęp do lokalizacji wyłączony, nie można udostępniać pozycji do innych użytkowników.</string>
     <string name="share">Udostępnij</string>
     <string name="disconnected">Rozłączone</string>
-    <string name="device_sleeping">Urządzenie uśpione.</string>
+    <string name="device_sleeping">Urządzenie uśpione</string>
     <string name="connected_count">Połączono: %1$s of %2$s online</string>
     <string name="list_of_nodes">Lista użytkowników w sieci</string>
-    <string name="update_firmware">Aktualizuj oprogramowanie.</string>
+    <string name="update_firmware">Aktualizuj oprogramowanie</string>
     <string name="connected">Połączony z urządzeniem</string>
     <string name="connected_to">Połączony z urządzeniem (%s)</string>
     <string name="not_connected">Niepołączony, wybierz urządzenie poniżej.</string>
@@ -75,11 +75,11 @@
     <string name="a_list_of_nodes_in_the_mesh">Lista użytkowników sieci.</string>
     <string name="text_messages">Wiadomości</string>
     <string name="channel_invalid">Ten adres kanału jest nieprawidłowy i nie może być użyty</string>
-    <string name="debug_panel">Panel kontrolny.</string>
+    <string name="debug_panel">Komunikaty</string>
     <string name="debug_last_messages">500 ostatnich wiadomości</string>
     <string name="clear_last_messages">Wyczyść</string>
     <string name="updating_firmware">Aktualizowanie oprogramowania, czekaj do 8 minut…</string>
-    <string name="update_successful">Aktualizacja udana.</string>
+    <string name="update_successful">Aktualizacja udana</string>
     <string name="update_failed">Aktualizacja nieudana</string>
     <string name="message_reception_time">Czas odbioru wiadomości</string>
     <string name="message_reception_state">Status odbioru wiadomości</string>
@@ -88,7 +88,7 @@
     <string name="ls_sleep_secs">Uśpienie urządzenia (w sekundach)</string>
     <string name="meshtastic_messages_notifications">Powiadomienie o wiadomościach</string>
     <string name="broadcast_period_too_small">Minimalny okres rozgłaszania dla tego kanału wynosi %d</string>
-    <string name="protocol_stress_test">Próba działania protokołu.</string>
+    <string name="protocol_stress_test">Próba działania protokołu</string>
     <string name="advanced_settings">Zaawansowane ustawienia</string>
     <string name="firmware_too_old">Wymagana aktualizacja oprogramowania urządzenia.</string>
     <string name="firmware_old">Oprogramowanie urządzenia jest za stare, żeby komunikować się z tą aplikacją. Wejdź w Ustawienia aplikacji i wybierz "Aktualizuj oprogramowanie". Więcej informacji na ten temat znajdziesz na <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">Nasz przewodnik instalacji oprogramowania</a> na Github.</string>
@@ -98,7 +98,7 @@
     <string name="cant_change_no_radio">Nie można zmienić kanału, ponieważ urządzenie nie jest jeszcze połączone. Proszę spróbuj jeszcze raz.</string>
     <string name="sample_coords">55.332244 34.442211</string>
     <string name="set_channel_options">Ustaw właściwości kanału.</string>
-    <string name="reset">Reset</string>
+    <string name="reset">Domyślny</string>
     <string name="are_you_shure_change_default">Na pewno chcesz zmienić na domyślny kanał?</string>
     <string name="reset_to_defaults">Powrót do ustawień domyślnych.</string>
     <string name="apply">Zastosuj</string>
@@ -106,9 +106,33 @@
     <string name="theme">Motyw</string>
     <string name="theme_light">Jasny</string>
     <string name="theme_dark">Ciemny</string>
-    <string name="theme_system">Domyślny systemu</string>
+    <string name="theme_system">Domyślny (systemowy)</string>
     <string name="choose_theme_title">Wybierz motyw</string>
     <string name="modem_config_slow_short">Bliski zasięg (wolny)</string>
     <string name="modem_config_slow_medium">Średni zasięg (wolny)</string>
     <string name="modem_config_slow_long">Daleki zasięg (wolny)</string>
+    <string name="save_messages">Wyeksportuj rangetest.csv</string>
+    <string name="scan">Skanuj</string>
+    <string name="background_required">Lokalizacja w tle</string>
+    <string name="show_system_settings">Wyświetl ustawienia systmowe</string>
+    <string name="required_permissions">Wymagane uprawnienia</string>
+    <string name="location">lokalizacja</string>
+    <string name="provide_location_to_mesh">Przekaż lokalizację do sieci mesh</string>
+    <string name="delete">Usuń</string>
+    <string name="select_all">Wybierz wszystkie</string>
+    <string name="style_selection">Wybór stylu</string>
+    <string name="download_region">Pobierz region</string>
+    <string name="name">Nazwa</string>
+    <string name="view_region_btn">Wyświetl region</string>
+    <string name="save_btn">Zapisz</string>
+    <string name="no_download_region_alert">Brak pobranych regionów</string>
+    <string name="style_uri_empty_alert">Adres stylu nie może być pusty</string>
+    <string name="download_region_dialog_title">Pobierz region</string>
+    <string name="download_region_connection_alert">Brak połączenia z internetem</string>
+    <string name="download_failed">Nie można pobrać stylu</string>
+    <string name="camera_required">Uprawnienia do nagrywania</string>
+    <string name="why_camera_required">Ta aplikacja wymaga dostępu do kamery, aby wykonać skan QR kodu. Żadne zdjęcia nie będą wykonywane.</string>
+    <string name="why_background_required">Ta opcja wymaga dostępu \"Pozwól cały czas\" do lokalizacji.</string>
+    <string name="cancel_no_radio">Anuluj (brak dostępu)</string>
+    <string name="allow_will_show">Pozwól</string>
 </resources>
