@@ -20,7 +20,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -150,17 +149,6 @@ class UIViewModel @Inject constructor(
             if (value != null && config != null) {
                 val builder = config.toBuilder()
                 builder.preferencesBuilder.isPowerSaving = value
-                setRadioConfig(builder.build())
-            }
-        }
-
-    var isAlwaysPowered: Boolean?
-        get() = radioConfig.value?.preferences?.isAlwaysPowered
-        set(value) {
-            val config = radioConfig.value
-            if (value != null && config != null) {
-                val builder = config.toBuilder()
-                builder.preferencesBuilder.isAlwaysPowered = value
                 setRadioConfig(builder.build())
             }
         }

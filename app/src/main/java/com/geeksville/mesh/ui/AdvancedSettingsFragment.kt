@@ -44,7 +44,6 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             binding.positionBroadcastSwitch.isChecked = !model.locationShareDisabled
             binding.lsSleepView.isEnabled = model.isPowerSaving ?: false
             binding.lsSleepSwitch.isChecked = model.isPowerSaving ?: false
-            binding.isAlwaysPoweredSwitch.isChecked = model.isAlwaysPowered ?: false
         }
 
         model.isConnected.observe(viewLifecycleOwner) { connectionState ->
@@ -53,7 +52,6 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             binding.lsSleepView.isEnabled = connected && model.isPowerSaving ?: false
             binding.positionBroadcastSwitch.isEnabled = connected
             binding.lsSleepSwitch.isEnabled = connected
-            binding.isAlwaysPoweredSwitch.isEnabled = connected
         }
 
         binding.positionBroadcastPeriodEditText.on(EditorInfo.IME_ACTION_DONE) {
@@ -106,13 +104,6 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             if (view.isPressed) {
                 model.isPowerSaving = isChecked
                 debug("User changed isPowerSaving to $isChecked")
-            }
-        }
-
-        binding.isAlwaysPoweredSwitch.setOnCheckedChangeListener { view, isChecked ->
-            if (view.isPressed) {
-                model.isAlwaysPowered = isChecked
-                debug("User changed isAlwaysPowered to $isChecked")
             }
         }
     }
