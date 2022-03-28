@@ -82,23 +82,28 @@ data class Position(
 @Serializable
 @Parcelize
 data class Telemetry(
+    val time: Int = currentTime(), // default to current time in secs (NOT MILLISECONDS!)
     val batteryLevel: Int = 0,
     val voltage: Float,
     val channelUtilization: Float,
-    val airUtilTx: Float,
+    val airUtilTx: Float
 ) : Parcelable {
+    companion object {
+        fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
+    }
 
     /** Create our model object from a protobuf.
      */
-    constructor(t: TelemetryProtos.DeviceMetrics) : this(
-        t.batteryLevel,
-        t.voltage,
-        t.channelUtilization,
-        t.airUtilTx,
+    constructor(p: TelemetryProtos.Telemetry, defaultTime: Int = currentTime()) : this(
+        if (p.time != 0) p.time else defaultTime,
+        p.deviceMetrics.batteryLevel,
+        p.deviceMetrics.voltage,
+        p.deviceMetrics.channelUtilization,
+        p.deviceMetrics.airUtilTx
     )
 
     override fun toString(): String {
-        return "Telemetry(batteryLevel=${batteryLevel}, voltage=${voltage}, channelUtilization=${channelUtilization}, airUtilTx=${airUtilTx})"
+        return "Telemetry(time=${time}, batteryLevel=${batteryLevel}, voltage=${voltage}, channelUtilization=${channelUtilization}, airUtilTx=${airUtilTx})"
     }
 }
 
@@ -109,10 +114,10 @@ data class NodeInfo(
     val num: Int, // This is immutable, and used as a key
     var user: MeshUser? = null,
     var position: Position? = null,
-    var telemetry: Telemetry? = null,
     var snr: Float = Float.MAX_VALUE,
     var rssi: Int = Int.MAX_VALUE,
-    var lastHeard: Int = 0 // the last time we've seen this node in secs since 1970
+    var lastHeard: Int = 0, // the last time we've seen this node in secs since 1970
+    var telemetry: Telemetry? = null
 ) : Parcelable {
 
     val batteryPctLevel get() = telemetry?.batteryLevel
