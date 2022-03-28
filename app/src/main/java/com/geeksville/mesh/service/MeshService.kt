@@ -780,6 +780,14 @@ class MeshService : Service(), Logging {
                             handleReceivedUser(packet.from, u)
                         }
 
+                    // Handle new telemetry info
+                    Portnums.PortNum.TELEMETRY_APP_VALUE -> {
+                        var u = TelemetryProtos.Telemetry.parseFrom(data.payload)
+                        if (u.time == 0 && packet.rxTime != 0)
+                            u = u.toBuilder().setTime(packet.rxTime).build()
+                        handleReceivedTelemetry(packet.from, u, dataPacket.time)
+                        }
+
                     // Handle new style routing info
                     Portnums.PortNum.ROUTING_APP_VALUE -> {
                         shouldBroadcast =
@@ -890,6 +898,17 @@ class MeshService : Service(), Logging {
                 debug("update position: ${it.user?.longName?.toPIIString()} with ${p.toPIIString()}")
                 it.position = Position(p, (defaultTime / 1000L).toInt())
             }
+    }
+
+    /// Update our DB of users based on someone sending out a User subpacket
+    private fun handleReceivedTelemetry(
+        fromNum: Int,
+        p: TelemetryProtos.Telemetry,
+        defaultTime: Long = System.currentTimeMillis()
+    ) {
+        updateNodeInfo(fromNum) {
+            it.telemetry = Telemetry(p, (defaultTime / 1000L).toInt())
+        }
     }
 
     /// If packets arrive before we have our node DB, we delay parsing them until the DB is ready
@@ -1269,12 +1288,18 @@ class MeshService : Service(), Logging {
                 it.position = Position(info.position)
             }
 
+            if (info.hasTelemetry()) {
+                // For the local node, it might not be able to update its times because it doesn't have a valid GPS reading yet
+                // so if the info is for _our_ node we always assume time is current
+                it.telemetry = Telemetry(info.telemetry)
+            }
+
             it.lastHeard = info.lastHeard
         }
     }
 
     private fun handleNodeInfo(info: MeshProtos.NodeInfo) {
-        debug("Received nodeinfo num=${info.num}, hasUser=${info.hasUser()}, hasPosition=${info.hasPosition()}")
+        debug("Received nodeinfo num=${info.num}, hasUser=${info.hasUser()}, hasPosition=${info.hasPosition()}, hasTelemetry=${info.hasTelemetry()}")
 
         val packetToSave = Packet(
             UUID.randomUUID().toString(),
