@@ -159,7 +159,6 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
                     position = MeshProtos.Position.newBuilder().apply {
                         latitudeI = Position.degI(lat)
                         longitudeI = Position.degI(lon)
-                        batteryLevel = 42
                         altitude = 35
                         time = (System.currentTimeMillis() / 1000).toInt()
                     }.build()

@@ -1,7 +1,6 @@
 package com.geeksville.mesh.ui
 
 import android.os.Bundle
-import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
@@ -20,7 +19,6 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.util.formatAgo
 import dagger.hilt.android.AndroidEntryPoint
 import java.net.URLEncoder
-import kotlin.math.roundToInt
 
 @AndroidEntryPoint
 class UsersFragment : ScreenFragment("Users"), Logging {
@@ -123,7 +121,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                             "utf-8"
                         )
                     }'>${coords}</a>"
-                holder.coordsView.text = HtmlCompat.fromHtml(html, Html.FROM_HTML_MODE_LEGACY)
+                holder.coordsView.text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
                 holder.coordsView.movementMethod = LinkMovementMethod.getInstance()
                 holder.coordsView.visibility = View.VISIBLE
             } else {
@@ -138,31 +136,29 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             } else {
                 holder.distanceView.visibility = View.INVISIBLE
             }
-            renderBattery(n.batteryPctLevel, holder)
+            renderBattery(n.batteryPctLevel, n.telemetry?.voltage, holder)
 
             holder.lastTime.text = formatAgo(n.lastHeard)
-
-            if ((n.num == ourNodeInfo?.num) || (n.snr > 100f)) {
-                holder.signalView.visibility = View.INVISIBLE
-            } else {
-                val text = if (n.rssi < 0) {
-                    "rssi:${n.rssi}  snr:${n.snr.roundToInt()}"
-                } else {
-                    // Older devices do not send rssi. Remove this branch once upgraded past 1.2.1
-                    "snr:${n.snr.roundToInt()}"
-                }
-                holder.signalView.text = text
-                holder.signalView.visibility = View.VISIBLE
-            }
 
             if (n.num == ourNodeInfo?.num) {
                 val info = model.myNodeInfo.value
                 if (info != null) {
-                    val channelUtilizationText = String.format("%.1f", info.channelUtilization)
-                    val airUtilTxText = String.format("%.1f", info.airUtilTx)
-                    val combinedText = "ChUtil $channelUtilizationText% AirUtilTX $airUtilTxText%"
-                    holder.signalView.text = combinedText
+                    val text =
+                        String.format(
+                            "ChUtil %.1f%% AirUtilTX %.1f%%",
+                            n.telemetry?.channelUtilization ?: info.channelUtilization,
+                            n.telemetry?.airUtilTx ?: info.airUtilTx
+                        )
+                    holder.signalView.text = text
                     holder.signalView.visibility = View.VISIBLE
+                }
+            } else {
+                if ((n.snr < 100f) && (n.rssi < 0)) {
+                    val text = String.format("rssi:%d snr:%.1f", n.rssi, n.snr)
+                    holder.signalView.text = text
+                    holder.signalView.visibility = View.VISIBLE
+                } else {
+                    holder.signalView.visibility = View.INVISIBLE
                 }
             }
         }
@@ -178,11 +174,15 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
     private fun renderBattery(
         battery: Int?,
+        voltage: Float?,
         holder: ViewHolder
     ) {
 
         val (image, text) = when (battery) {
-            in 1..100 -> Pair(R.drawable.ic_battery_full_24, "$battery%")
+            in 1..100 -> Pair(
+                R.drawable.ic_battery_full_24,
+                String.format("%d%% %.2fV", battery, voltage ?: 0)
+            )
             0 -> Pair(R.drawable.ic_power_plug_24, "")
             else -> Pair(R.drawable.ic_battery_full_24, "?")
         }
@@ -199,7 +199,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = NodelistFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -210,53 +210,8 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         binding.nodeListView.adapter = nodesAdapter
         binding.nodeListView.layoutManager = LinearLayoutManager(requireContext())
 
-        model.nodeDB.nodes.observe(viewLifecycleOwner, {
+        model.nodeDB.nodes.observe(viewLifecycleOwner) {
             nodesAdapter.onNodesChanged(it.values)
-        })
-    }
-}
-
-
-/*
-
-
-                if (false) { // hide the firmware update button for now, it is kinda ugly and users don't need it yet
-                    /// Create a software update button
-                    val context = ContextAmbient.current
-                    RadioInterfaceService.getBondedDeviceAddress(context)?.let { macAddress ->
-                        Button(
-                            onClick = {
-                                SoftwareUpdateService.enqueueWork(
-                                    context,
-                                    SoftwareUpdateService.startUpdateIntent(macAddress)
-                                )
-                            }
-                        ) {
-                            Text(text = "Update firmware")
-                        }
-                    }
-                }
-            }
         }
-
-
-
-        /* FIXME - doens't work yet - probably because I'm not using release keys
-        // If account is null, then show the signin button, otherwise
-        val context = ambient(ContextAmbient)
-        val account = GoogleSignIn.getLastSignedInAccount(context)
-        if (account != null)
-            Text("We have an account")
-        else {
-            Text("No account yet")
-            if (context is Activity) {
-                Button("Google sign-in", onClick = {
-                    val signInIntent: Intent = UIState.googleSignInClient.signInIntent
-                    context.startActivityForResult(signInIntent, MainActivity.RC_SIGN_IN)
-                })
-            }
-        } */
     }
 }
-
-*/
