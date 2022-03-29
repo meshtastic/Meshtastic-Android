@@ -938,6 +938,16 @@ class MeshService : Service(), Logging {
         p.time = System.currentTimeMillis() // update time to the actual time we started sending
         // debug("Sending to radio: ${packet.toPIIString()}")
         sendToRadio(packet)
+
+        if (packet.hasDecoded()) {
+            val packetToSave = Packet(
+                UUID.randomUUID().toString(),
+                "packet",
+                System.currentTimeMillis(),
+                packet.toString()
+            )
+            insertPacket(packetToSave)
+        }
     }
 
     private fun processQueuedPackets() {
