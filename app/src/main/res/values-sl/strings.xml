@@ -18,7 +18,7 @@
     <string name="analytics_okay">Anonimna statistika uporabe in poročila o zrušitvah.</string>
     <string name="looking_for_meshtastic_devices">Iščem Meshtastic naprave…</string>
     <string name="requires_bluetooth">Ta aplikacija zahteva dostop do bluetooth. Dovolite dostop v nastavitvah za Android.</string>
-    <string name="error_bluetooth">Napaka - aplikacija potrebuje Bluetooth povezavo</string>
+    <string name="error_bluetooth">Gumb za skupno rabopovezavo</string>
     <string name="starting_pairing">Začetek seznanjanja naprav</string>
     <string name="pairing_failed">Napaka seznanjanja naprav</string>
     <string name="url_for_join">URL za pridružitev Meshtastic mreže</string>
@@ -68,4 +68,6 @@
     <string name="modem_config_slow_short">Kratek doseg (počasen)</string>
     <string name="modem_config_slow_medium">Srednji doseg (počasen)</string>
     <string name="modem_config_slow_long">Dolg doseg (počasen)</string>
+    <string name="preferences_language">Jezik</string>
+    <string name="preferences_system_default">Privzeta sistemska</string>
 </resources>

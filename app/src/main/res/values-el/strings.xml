@@ -73,4 +73,6 @@
     <string name="modem_config_slow_short">Μικρή εμβέλεια (αργό)</string>
     <string name="modem_config_slow_medium">Μεσαία εμβέλεια (αργό)</string>
     <string name="modem_config_slow_long">μεγάλη εμβέλεια (αργό)</string>
+    <string name="preferences_language">Γλώσσα</string>
+    <string name="preferences_system_default">Προκαθορισμένο του συστήματος</string>
 </resources>

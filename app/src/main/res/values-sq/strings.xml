@@ -28,4 +28,6 @@
     <string name="are_you_sure_channel">Je i sigurtë për ndërrimin e kanalit radio ? I gjithë komunikimi me nyjet e tjera do të përfundojë derisa të shprëndani parametrat e reja të kanalit radio.</string>
     <string name="new_channel_rcvd">Ju keni një kanal radio të ri URL</string>
     <string name="do_you_want_switch">Dëshiron të kalosh në këtë kanal radio ? \'%s\' ?</string>
+    <string name="preferences_language">Gjuhë</string>
+    <string name="preferences_system_default">Parazgjedhje sistemi</string>
 </resources>

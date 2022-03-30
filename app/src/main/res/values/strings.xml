@@ -138,4 +138,6 @@
     <string name="download_region_dialog_title">Download Region</string>
     <string name="download_region_connection_alert">You are not connected to the internet, you cannot download an offline map</string>
     <string name="download_failed">Unable to download style pack</string>
+    <string name="preferences_language">Language (restart needed)</string>
+    <string name="preferences_system_default">System default</string>
 </resources>

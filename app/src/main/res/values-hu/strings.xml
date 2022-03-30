@@ -105,4 +105,6 @@
     <string name="modem_config_slow_short">Rövid hatótáv (lassú)</string>
     <string name="modem_config_slow_medium">Közepes hatótáv (lassú)</string>
     <string name="modem_config_slow_long">Távoli hatótáv (lassú)</string>
+    <string name="preferences_language">Nyelv</string>
+    <string name="preferences_system_default">Alapbeállítás</string>
 </resources>

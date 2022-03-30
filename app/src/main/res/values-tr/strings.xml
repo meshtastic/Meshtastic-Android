@@ -70,4 +70,6 @@
     <string name="modem_config_slow_short">Kısa menzilli (yavaş)</string>
     <string name="modem_config_slow_medium">Orta menzilli (yavaş)</string>
     <string name="modem_config_slow_long">Uzun menzilli (yavaş)</string>
+    <string name="preferences_system_default">Sistem varsayılanı</string>
+    <string name="preferences_language">Dil</string>
 </resources>

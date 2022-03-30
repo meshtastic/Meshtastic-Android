@@ -43,4 +43,5 @@
     <string name="current_pair">Tá tú péireáilte faoi láthair le raidió %s</string>
     <string name="not_paired_yet">Níl raidió péireálite agat fós.</string>
     <string name="change_radio">Athraigh raidió</string>
+    <string name="preferences_language">Teanga</string>
 </resources>

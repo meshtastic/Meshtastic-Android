@@ -42,4 +42,6 @@
     <string name="current_pair">Attualmente sei associato alla radio %s</string>
     <string name="not_paired_yet">Non hai ancora associato alcuna radio..</string>
     <string name="change_radio">Cambia radio</string>
+    <string name="preferences_language">Lingua</string>
+    <string name="preferences_system_default">Predefinito di sistema</string>
 </resources>

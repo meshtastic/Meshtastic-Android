@@ -28,4 +28,6 @@
     <string name="are_you_sure_channel">Är du säker på att du vill byta kanal? All kommunikation med andra noder avbryts tills du delar de nya kanalinställningarna.</string>
     <string name="new_channel_rcvd">Ny kanal-länk mottagen</string>
     <string name="do_you_want_switch">Vill du växla till kanalen \'%s\' </string>
+    <string name="preferences_language">Språk</string>
+    <string name="preferences_system_default">Systemets standard</string>
 </resources>

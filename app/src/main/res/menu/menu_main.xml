@@ -29,6 +29,10 @@
         android:title="@string/theme"
         app:showAsAction="withText" />
     <item
+        android:id="@+id/preferences_language"
+        android:title="@string/preferences_language"
+        app:showAsAction="withText" />
+    <item
         android:id="@+id/about"
         android:title="@string/about"
         app:showAsAction="withText" />

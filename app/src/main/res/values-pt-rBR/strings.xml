@@ -123,4 +123,6 @@
     </plurals>
     <string name="delete">Excluir</string>
     <string name="select_all">Selecionar tudo</string>
+    <string name="preferences_language">Idioma</string>
+    <string name="preferences_system_default">Padrão do sistema</string>
 </resources>

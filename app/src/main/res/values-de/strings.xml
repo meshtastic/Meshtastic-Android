@@ -28,4 +28,6 @@
     <string name="are_you_sure_channel">Möchten Sie wirklich den Kanal wechseln? Die gesamte Kommunikation mit anderen Knoten wird unterbrochen, bis Sie die neuen Kanaleinstellungen freigeben.</string>
     <string name="new_channel_rcvd">Neuen Kanal-Link empfangen</string>
     <string name="do_you_want_switch">Möchten Sie zum Kanal wechseln? \'%s\' </string>
+    <string name="preferences_language">Sprache</string>
+    <string name="preferences_system_default">System</string>
 </resources>

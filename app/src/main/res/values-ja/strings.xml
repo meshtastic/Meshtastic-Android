@@ -55,4 +55,6 @@ mapboxの有償プラン（または代替地図プロバイダ）を検討さ�
     <string name="not_connected">接続されていません。下記のMeshtasticデバイスを選択してください。</string>
     <string name="connected_sleeping">接続しましたが、Meshtasticデバイスはスリープ状態です。</string>
     <string name="update_to">%s更新</string>
+    <string name="preferences_language">言語</string>
+    <string name="preferences_system_default">システム既定</string>
 </resources>

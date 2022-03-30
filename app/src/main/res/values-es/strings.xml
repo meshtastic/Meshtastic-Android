@@ -96,4 +96,6 @@
     <string name="modem_config_slow_short">Curto alcance / lento</string>
     <string name="modem_config_slow_medium">Médio alcance / lento</string>
     <string name="modem_config_slow_long">Largo alcance / lento)</string>
+    <string name="preferences_language">Idioma</string>
+    <string name="preferences_system_default">Predeterminado del sistema</string>
 </resources>

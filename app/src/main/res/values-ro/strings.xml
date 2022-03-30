@@ -73,4 +73,6 @@
     <string name="modem_config_slow_short">Rază scurtă (încet)</string>
     <string name="modem_config_slow_medium">Rază medie (încet)</string>
     <string name="modem_config_slow_long">Rază lungă (încet)</string>
+    <string name="preferences_language">Limba</string>
+    <string name="preferences_system_default">Setarea telefonului</string>
 </resources>
