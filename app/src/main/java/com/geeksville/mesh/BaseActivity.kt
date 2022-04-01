@@ -15,14 +15,14 @@ open class BaseActivity: AppCompatActivity(), Logging {
 
         // get chosen language from preference
         val prefs = UIViewModel.getPreferences(newBase)
-        val langCode = prefs.getString("lang","zz")
+        val langCode: String = prefs.getString("lang","zz") ?: ""
         debug("langCode is $langCode")
 
         if (Build.VERSION.SDK_INT >= 17) {
             val locale = if (langCode == "zz")
                 Locale.getDefault()
             else
-                Locale(langCode)
+                createLocale(langCode)
             config.setLocale(locale)
 
             if(Build.VERSION.SDK_INT > 24) {
@@ -34,6 +34,15 @@ open class BaseActivity: AppCompatActivity(), Logging {
             }
         } else {
             super.attachBaseContext(newBase)
+        }
+    }
+
+    private fun createLocale(language: String):Locale {
+        var langArray = language.split("_")
+        if (langArray.size == 2) {
+            return Locale(langArray[0], langArray[1]);
+        } else {
+            return Locale(langArray[0]);
         }
     }
 
