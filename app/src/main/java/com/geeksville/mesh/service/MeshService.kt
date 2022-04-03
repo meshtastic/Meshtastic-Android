@@ -696,7 +696,9 @@ class MeshService : Service(), Logging {
                         id = packet.id,
                         dataType = data.portnumValue,
                         bytes = bytes,
-                        hopLimit = hopLimit
+                        hopLimit = hopLimit,
+                        channel = packet.channel,
+                        delayed = packet.delayedValue
                     )
                 }
             }
@@ -719,7 +721,7 @@ class MeshService : Service(), Logging {
         // we only care about old text messages, we just store those...
         if (dataPacket.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) {
             // discard old messages if needed then add the new one
-            while (recentDataPackets.size > 50)
+            while (recentDataPackets.size > 100)
                 recentDataPackets.removeAt(0)
 
             // FIXME - possible kotlin bug in 1.3.72 - it seems that if we start with the (globally shared) emptyList,
