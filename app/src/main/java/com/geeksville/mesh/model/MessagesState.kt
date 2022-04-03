@@ -30,10 +30,40 @@ class MessagesState(private val ui: UIViewModel) : Logging {
 
         }
 
+    private var contactsList = emptyMap<String?, DataPacket>().toMutableMap()
+    val contacts = object : MutableLiveData<MutableMap<String?, DataPacket>>() {
+
+    }
+
+    private fun emptyDataPacket(to: String? = DataPacket.ID_BROADCAST): DataPacket {
+        return DataPacket(to, null, 1, DataPacket.ID_LOCAL, 0L)
+    }
+
+    // Map each contactId to last DataPacket message sent or received
+    // Broadcast: it.to == DataPacket.ID_BROADCAST; Direct Messages: it.to != DataPacket.ID_BROADCAST
+    private fun buildContacts() {
+        contactsList = messagesList.associateBy {
+            if (it.from == DataPacket.ID_LOCAL || it.to == DataPacket.ID_BROADCAST)
+                it.to else it.from
+        }.toMutableMap()
+
+        val all = DataPacket.ID_BROADCAST // always show contacts, even when empty
+        if (contactsList[all] == null)
+            contactsList[all] = emptyDataPacket()
+
+        val nodes = ui.nodeDB.nodes.value!!
+        nodes.keys.forEachIndexed { index, node ->
+            if (index != 0 && contactsList[node] == null)
+                contactsList[node] = emptyDataPacket(node)
+        }
+        contacts.value = contactsList
+    }
+
     fun setMessages(m: List<DataPacket>) {
         messagesList.clear()
         messagesList.addAll(m)
         messages.value = messagesList
+        buildContacts()
     }
 
     /// add a message our GUI list of past msgs
@@ -44,6 +74,7 @@ class MessagesState(private val ui: UIViewModel) : Logging {
         messagesList.add(m)
 
         messages.value = messagesList
+        buildContacts()
     }
 
     fun removeMessage(m: DataPacket) {
@@ -51,6 +82,7 @@ class MessagesState(private val ui: UIViewModel) : Logging {
 
         messagesList.remove(m)
         messages.value = messagesList
+        buildContacts()
     }
 
     private fun removeAllMessages() {
@@ -58,6 +90,7 @@ class MessagesState(private val ui: UIViewModel) : Logging {
 
         messagesList.clear()
         messages.value = messagesList
+        buildContacts()
     }
 
     fun updateStatus(id: Int, status: MessageStatus) {

@@ -29,7 +29,9 @@ data class DataPacket(
     var time: Long = System.currentTimeMillis(), // msecs since 1970
     var id: Int = 0, // 0 means unassigned
     var status: MessageStatus? = MessageStatus.UNKNOWN,
-    var hopLimit: Int = 0
+    var hopLimit: Int = 0,
+    var channel: Int = 0, // channel index
+    var delayed: Int = 0 // S&F MeshProtos.MeshPacket.Delayed.(...)_VALUE
 ) : Parcelable {
 
     /**
@@ -64,6 +66,8 @@ data class DataPacket(
         parcel.readLong(),
         parcel.readInt(),
         parcel.readParcelable(MessageStatus::class.java.classLoader),
+        parcel.readInt(),
+        parcel.readInt(),
         parcel.readInt()
     )
 
@@ -75,6 +79,7 @@ data class DataPacket(
 
         if (from != other.from) return false
         if (to != other.to) return false
+        if (channel != other.channel) return false
         if (time != other.time) return false
         if (id != other.id) return false
         if (dataType != other.dataType) return false
@@ -94,6 +99,8 @@ data class DataPacket(
         result = 31 * result + bytes!!.contentHashCode()
         result = 31 * result + status.hashCode()
         result = 31 * result + hopLimit
+        result = 31 * result + channel
+        result = 31 * result + delayed
         return result
     }
 
@@ -106,6 +113,8 @@ data class DataPacket(
         parcel.writeInt(id)
         parcel.writeParcelable(status, flags)
         parcel.writeInt(hopLimit)
+        parcel.writeInt(channel)
+        parcel.writeInt(delayed)
     }
 
     override fun describeContents(): Int {
@@ -122,6 +131,8 @@ data class DataPacket(
         id = parcel.readInt()
         status = parcel.readParcelable(MessageStatus::class.java.classLoader)
         hopLimit = parcel.readInt()
+        channel = parcel.readInt()
+        delayed = parcel.readInt()
     }
 
     companion object CREATOR : Parcelable.Creator<DataPacket> {
@@ -145,7 +156,7 @@ data class DataPacket(
         override fun newArray(size: Int): Array<DataPacket?> {
             return arrayOfNulls(size)
         }
-        val utf8 = Charset.forName("UTF-8")
+        val utf8: Charset = Charset.forName("UTF-8")
     }
 
 
