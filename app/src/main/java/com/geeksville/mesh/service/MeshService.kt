@@ -902,14 +902,17 @@ class MeshService : Service(), Logging {
             }
     }
 
-    /// Update our DB of users based on someone sending out a User subpacket
+    /// Update our DB of users based on someone sending out a Telemetry subpacket
     private fun handleReceivedTelemetry(
         fromNum: Int,
         p: TelemetryProtos.Telemetry,
         defaultTime: Long = System.currentTimeMillis()
     ) {
         updateNodeInfo(fromNum) {
-            it.telemetry = Telemetry(p, (defaultTime / 1000L).toInt())
+            it.deviceMetrics = DeviceMetrics(
+                p.deviceMetrics,
+                if (p.time != 0) p.time else (defaultTime / 1000L).toInt()
+            )
         }
     }
 
@@ -1300,10 +1303,8 @@ class MeshService : Service(), Logging {
                 it.position = Position(info.position)
             }
 
-            if (info.hasTelemetry()) {
-                // For the local node, it might not be able to update its times because it doesn't have a valid GPS reading yet
-                // so if the info is for _our_ node we always assume time is current
-                it.telemetry = Telemetry(info.telemetry)
+            if (info.hasDeviceMetrics()) {
+                it.deviceMetrics = DeviceMetrics(info.deviceMetrics)
             }
 
             it.lastHeard = info.lastHeard
@@ -1311,7 +1312,7 @@ class MeshService : Service(), Logging {
     }
 
     private fun handleNodeInfo(info: MeshProtos.NodeInfo) {
-        debug("Received nodeinfo num=${info.num}, hasUser=${info.hasUser()}, hasPosition=${info.hasPosition()}, hasTelemetry=${info.hasTelemetry()}")
+        debug("Received nodeinfo num=${info.num}, hasUser=${info.hasUser()}, hasPosition=${info.hasPosition()}, hasDeviceMetrics=${info.hasDeviceMetrics()}")
 
         val packetToSave = Packet(
             UUID.randomUUID().toString(),
