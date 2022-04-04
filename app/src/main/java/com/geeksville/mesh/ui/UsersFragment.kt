@@ -136,7 +136,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             } else {
                 holder.distanceView.visibility = View.INVISIBLE
             }
-            renderBattery(n.batteryPctLevel, n.telemetry?.voltage, holder)
+            renderBattery(n.batteryPctLevel, n.deviceMetrics?.voltage, holder)
 
             holder.lastTime.text = formatAgo(n.lastHeard)
 
@@ -146,8 +146,8 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                     val text =
                         String.format(
                             "ChUtil %.1f%% AirUtilTX %.1f%%",
-                            n.telemetry?.channelUtilization ?: info.channelUtilization,
-                            n.telemetry?.airUtilTx ?: info.airUtilTx
+                            n.deviceMetrics?.channelUtilization ?: info.channelUtilization,
+                            n.deviceMetrics?.airUtilTx ?: info.airUtilTx
                         )
                     holder.signalView.text = text
                     holder.signalView.visibility = View.VISIBLE

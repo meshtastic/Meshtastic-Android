@@ -81,7 +81,7 @@ data class Position(
 
 @Serializable
 @Parcelize
-data class Telemetry(
+data class DeviceMetrics(
     val time: Int = currentTime(), // default to current time in secs (NOT MILLISECONDS!)
     val batteryLevel: Int = 0,
     val voltage: Float,
@@ -94,16 +94,16 @@ data class Telemetry(
 
     /** Create our model object from a protobuf.
      */
-    constructor(p: TelemetryProtos.Telemetry, defaultTime: Int = currentTime()) : this(
-        if (p.time != 0) p.time else defaultTime,
-        p.deviceMetrics.batteryLevel,
-        p.deviceMetrics.voltage,
-        p.deviceMetrics.channelUtilization,
-        p.deviceMetrics.airUtilTx
+    constructor(p: TelemetryProtos.DeviceMetrics, telemetryTime: Int = currentTime()) : this(
+        telemetryTime,
+        p.batteryLevel,
+        p.voltage,
+        p.channelUtilization,
+        p.airUtilTx
     )
 
     override fun toString(): String {
-        return "Telemetry(time=${time}, batteryLevel=${batteryLevel}, voltage=${voltage}, channelUtilization=${channelUtilization}, airUtilTx=${airUtilTx})"
+        return "DeviceMetrics(time=${time}, batteryLevel=${batteryLevel}, voltage=${voltage}, channelUtilization=${channelUtilization}, airUtilTx=${airUtilTx})"
     }
 }
 
@@ -117,10 +117,10 @@ data class NodeInfo(
     var snr: Float = Float.MAX_VALUE,
     var rssi: Int = Int.MAX_VALUE,
     var lastHeard: Int = 0, // the last time we've seen this node in secs since 1970
-    var telemetry: Telemetry? = null
+    var deviceMetrics: DeviceMetrics? = null
 ) : Parcelable {
 
-    val batteryPctLevel get() = telemetry?.batteryLevel
+    val batteryPctLevel get() = deviceMetrics?.batteryLevel
 
     /**
      * true if the device was heard from recently
