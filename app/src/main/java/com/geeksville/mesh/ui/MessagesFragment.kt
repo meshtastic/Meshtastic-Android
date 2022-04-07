@@ -11,7 +11,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.android.Logging
@@ -41,13 +43,15 @@ fun EditText.on(actionId: Int, func: () -> Unit) {
 }
 
 @AndroidEntryPoint
-class MessagesFragment : ScreenFragment("Messages"), Logging {
+class MessagesFragment : Fragment(), Logging {
 
     private var actionMode: ActionMode? = null
     private var _binding: MessagesFragmentBinding? = null
 
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
+    private var contactId: String = DataPacket.ID_BROADCAST
+    private var contactName: String = DataPacket.ID_BROADCAST
 
     private val model: UIViewModel by activityViewModels()
 
@@ -158,14 +162,27 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
             val msg = messages[position]
             val nodes = model.nodeDB.nodes.value!!
             val node = nodes.get(msg.from)
-            // Determine if this is my message (originated on this device).
-            // val isMe = model.myNodeInfo.value?.myNodeNum == node?.num
-            val isMe = msg.from == "^local"
+            // Determine if this is my message (originated on this device)
+            val isLocal = msg.from == DataPacket.ID_LOCAL
+            val isBroadcast = (msg.to == DataPacket.ID_BROADCAST
+                    || msg.delayed == 1) // MeshProtos.MeshPacket.Delayed.DELAYED_BROADCAST_VALUE == 1
+
+            // Filter messages by contactId
+            if (contactId == DataPacket.ID_BROADCAST) {
+                if (isBroadcast) {
+                    holder.card.visibility = View.VISIBLE
+                } else holder.card.visibility = View.GONE
+            } else {
+                if (msg.from == contactId && msg.to != DataPacket.ID_BROADCAST
+                        || msg.from == DataPacket.ID_LOCAL && msg.to == contactId) {
+                    holder.card.visibility = View.VISIBLE
+                } else holder.card.visibility = View.GONE
+            }
 
             // Set cardview offset and color.
             val marginParams = holder.card.layoutParams as ViewGroup.MarginLayoutParams
             val messageOffset = resources.getDimensionPixelOffset(R.dimen.message_offset)
-            if (isMe) {
+            if (isLocal) {
                 marginParams.leftMargin = messageOffset
                 marginParams.rightMargin = 0
                 holder.messageText.textAlignment = View.TEXT_ALIGNMENT_TEXT_END
@@ -191,7 +208,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
                 }
             }
             // Hide the username chip for my messages
-            if (isMe) {
+            if (isLocal) {
                 holder.username.visibility = View.GONE
             } else {
                 holder.username.visibility = View.VISIBLE
@@ -259,22 +276,30 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
                                                 selectedList.forEach {
                                                     model.messagesState.deleteMessage(it)
                                                 }
-                                                mode.finish()
                                             }
+                                            mode.finish()
                                         }
                                         .setNeutralButton(R.string.cancel) { _, _ ->
                                         }
                                         .show()
                                 }
                                 R.id.selectAllButton -> {
+                                    // filter messages by ContactId
+                                    val messagesByContactId = messages.filter {
+                                        if (contactId == DataPacket.ID_BROADCAST)
+                                            it.to == DataPacket.ID_BROADCAST
+                                        else
+                                            it.from == contactId && it.to != DataPacket.ID_BROADCAST
+                                                    || it.from == DataPacket.ID_LOCAL && it.to == contactId
+                                    }
                                     // if all selected -> unselect all
-                                    if (selectedList.size == messages.size) {
+                                    if (selectedList.size == messagesByContactId.size) {
                                         selectedList.clear()
                                         mode.finish()
                                     } else {
                                         // else --> select all
                                         selectedList.clear()
-                                        selectedList.addAll(messages)
+                                        selectedList.addAll(messagesByContactId)
                                     }
                                     actionMode?.title = selectedList.size.toString()
                                     notifyDataSetChanged()
@@ -326,7 +351,7 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
                 actionMode?.finish()
             } else {
                 // show total items selected on action mode title
-                actionMode?.title = "${selectedList.size}"
+                actionMode?.title = selectedList.size.toString()
             }
             notifyItemChanged(position)
         }
@@ -357,12 +382,20 @@ class MessagesFragment : ScreenFragment("Messages"), Logging {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        setFragmentResultListener("requestKey") { _, bundle->
+            // get the result from bundle
+            contactId = bundle.getString("contactId").toString()
+            contactName = bundle.getString("contactName").toString()
+            binding.messageTitle.text = contactName
+        }
+
         binding.sendButton.setOnClickListener {
             debug("User clicked sendButton")
 
             val str = binding.messageInputText.text.toString().trim()
             if (str.isNotEmpty())
-                model.messagesState.sendMessage(str)
+                model.messagesState.sendMessage(str, contactId)
             binding.messageInputText.setText("") // blow away the string the user just entered
 
             // requireActivity().hideKeyboard()

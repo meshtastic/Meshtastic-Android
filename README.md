@@ -3,6 +3,7 @@
 [![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/meshtastic/Meshtastic-Android)
 [![Android CI](https://github.com/meshtastic/Meshtastic-Android/actions/workflows/android.yml/badge.svg)](https://github.com/meshtastic/Meshtastic-Android/actions/workflows/android.yml)
 ![GitHub all releases](https://img.shields.io/github/downloads/meshtastic/meshtastic-android/total)
+[![CLA assistant](https://cla-assistant.io/readme/badge/meshtastic/Meshtastic-Android)](https://cla-assistant.io/meshtastic/Meshtastic-Android)
 
 This is a tool for using Android with open-source mesh radios. For more information see our webpage: [meshtastic.org](https://www.meshtastic.org). If you are looking for the the device side code, see [here](https://github.com/meshtastic/Meshtastic-esp32).
 
@@ -28,7 +29,7 @@ However, if you must use 'raw' APKs you can get them from our [github releases](
 If you would like to develop this application we'd love your help! These build instructions are brief
 and should be improved, please send a PR if you can.
 
-- Use Android Studio 4.1.2 to build/debug (other versions might work but no promises)
+- Use Android Studio to build/debug
 - Use "git submodule update --init --recursive" to pull in the various submodules we depend on
 - There are a few config files which you'll need to copy from templates included in the project.
   Run the following commands to do so:

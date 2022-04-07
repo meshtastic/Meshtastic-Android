@@ -13,6 +13,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.os.RemoteException
 import android.text.method.LinkMovementMethod
 import android.view.Menu
@@ -144,7 +145,7 @@ class MainActivity : BaseActivity(), Logging,
         TabInfo(
             "Messages",
             R.drawable.ic_twotone_message_24,
-            MessagesFragment()
+            ContactsFragment()
         ),
         TabInfo(
             "Users",
@@ -1010,7 +1011,7 @@ class MainActivity : BaseActivity(), Logging,
     }
 
     val handler: Handler by lazy {
-        Handler(mainLooper)
+        Handler(Looper.getMainLooper())
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
