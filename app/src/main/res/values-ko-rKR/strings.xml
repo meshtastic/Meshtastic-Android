@@ -76,4 +76,6 @@
     <string name="modem_config_slow_short">짧은 거리 (느린 속도)</string>
     <string name="modem_config_slow_medium">중간 거리 (느린 속도)</string>
     <string name="modem_config_slow_long">>먼 거리 (느린 속도)</string>
+    <string name="preferences_language">언어</string>
+    <string name="preferences_system_default">시스템 기본값</string>
 </resources>

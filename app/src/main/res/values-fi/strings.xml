@@ -28,4 +28,6 @@
     <string name="are_you_sure_channel">Oletko varma, että haluat vaihtaa kanavaa? Kaikki yhteydet katkeavat, ennen kuin olet jakanut uudet kanavan asetukset.</string>
     <string name="new_channel_rcvd">Vastaanotettu uuden kanavan URL</string>
     <string name="do_you_want_switch">Haluatko siirtyä kanavalle \'%s\'?</string>
+    <string name="preferences_language">Kieli</string>
+    <string name="preferences_system_default">Järjestelmän oletus</string>
 </resources>

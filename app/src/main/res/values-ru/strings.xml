@@ -37,4 +37,6 @@
     <string name="report_a_bug">Сообщить об ошибке</string>
     <string name="report_bug_text">Вы уверены, что хотите сообщить об ошибке? После сообщения, пожалуйста, напишите в meshtastic.discourse.group, чтобы мы могли сопоставить отчет с тем, что вы нашли.</string>
     <string name="report">Отчет</string>
+    <string name="preferences_language">Язык</string>
+    <string name="preferences_system_default">По умолчанию</string>
 </resources>

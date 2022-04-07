@@ -73,4 +73,6 @@
     <string name="modem_config_slow_short">Kort rekkevidde (langsom)</string>
     <string name="modem_config_slow_medium">Medium rekkevidde (langsom)</string>
     <string name="modem_config_slow_long">Lang rekkevidde (langsom)</string>
+    <string name="preferences_language">Språk</string>
+    <string name="preferences_system_default">System standard</string>
 </resources>

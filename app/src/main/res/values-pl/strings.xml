@@ -135,4 +135,6 @@
     <string name="why_background_required">Ta opcja wymaga dostępu \"Pozwól cały czas\" do lokalizacji.</string>
     <string name="cancel_no_radio">Anuluj (brak dostępu)</string>
     <string name="allow_will_show">Pozwól</string>
+    <string name="preferences_language">Język (wymagany restart)</string>
+    <string name="preferences_system_default">Domyślny systemu</string>
 </resources>

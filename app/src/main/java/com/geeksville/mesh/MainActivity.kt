@@ -119,7 +119,7 @@ eventually:
 val utf8 = Charset.forName("UTF-8")
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), Logging,
+class MainActivity : BaseActivity(), Logging,
     ActivityCompat.OnRequestPermissionsResultCallback {
 
     companion object {
@@ -1080,6 +1080,10 @@ class MainActivity : AppCompatActivity(), Logging,
                 chooseThemeDialog()
                 return true
             }
+            R.id.preferences_language -> {
+                chooseLangDialog()
+                return true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -1166,6 +1170,32 @@ class MainActivity : AppCompatActivity(), Logging,
                 delegate.applyDayNight()
             }
         }
+    }
+
+    private fun chooseLangDialog() {
+
+        /// Prepare dialog and its items
+        val builder = MaterialAlertDialogBuilder(this)
+        builder.setTitle(getString(R.string.preferences_language))
+
+        val languageLabels by lazy { resources.getStringArray(R.array.language_entries) }
+        val languageValues by lazy { resources.getStringArray(R.array.language_values) }
+
+        /// Load preferences and its value
+        val prefs = UIViewModel.getPreferences(this)
+        val editor: SharedPreferences.Editor = prefs.edit()
+        val lang = prefs.getString("lang", "zz")
+        debug("Lang from prefs: $lang")
+
+        builder.setSingleChoiceItems(languageLabels, languageValues.indexOf(lang)) { dialog, which ->
+            var lang = languageValues[which];
+            debug("Set lang pref to $lang")
+            editor.putString("lang", lang)
+            editor.apply()
+            dialog.dismiss()
+        }
+        val dialog = builder.create()
+        dialog.show()
     }
 
 }

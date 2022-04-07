@@ -62,4 +62,6 @@
     <string name="rate_dialog_cancel_en">Připomenout později</string>
     <string name="rate_dialog_ok_en">Ohodnotit teď</string>
     <string name="rate_dialog_title_en">Ohodnoťte Meshtastic</string>
+    <string name="preferences_language">Jazyk</string>
+    <string name="preferences_system_default">Podle systému</string>
 </resources>

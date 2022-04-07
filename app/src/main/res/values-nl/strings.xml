@@ -73,4 +73,6 @@
     <string name="modem_config_slow_short">Klein bereik (traag)</string>
     <string name="modem_config_slow_medium">Medium bereik (traag)</string>
     <string name="modem_config_slow_long">Groot bereik (traag)</string>
+    <string name="preferences_language">Taal</string>
+    <string name="preferences_system_default">Systeemstandaard</string>
 </resources>

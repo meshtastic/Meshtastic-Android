@@ -106,4 +106,6 @@
     <string name="modem_config_slow_short">短距离（速度慢）</string>
     <string name="modem_config_slow_medium">中等距离（速度慢）</string>
     <string name="modem_config_slow_long">长距离（速度慢）</string>
+    <string name="preferences_language">语言</string>
+    <string name="preferences_system_default">系统默认</string>
 </resources>
