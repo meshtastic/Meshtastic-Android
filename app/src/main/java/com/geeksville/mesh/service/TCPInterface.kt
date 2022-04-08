@@ -1,6 +1,7 @@
 package com.geeksville.mesh.service
 
 import com.geeksville.android.Logging
+import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.util.Exceptions
 import java.io.BufferedOutputStream
 import java.io.IOException
@@ -18,6 +19,7 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
     companion object : Logging, InterfaceFactory('t') {
         override fun createInterface(
             service: RadioInterfaceService,
+            usbRepository: UsbRepository, // Temporary until dependency injection transition is completed
             rest: String
         ): IRadioInterface = TCPInterface(service, rest)
 

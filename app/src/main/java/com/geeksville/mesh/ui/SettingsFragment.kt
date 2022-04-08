@@ -36,6 +36,7 @@ import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ACTION_UPDATE_PROGRESS
 import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressNotStarted
@@ -50,10 +51,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import java.util.regex.Pattern
+import javax.inject.Inject
 
 object SLogging : Logging
 
@@ -108,7 +109,11 @@ private fun requestBonding(
     }
 }
 
-class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
+@HiltViewModel
+class BTScanModel @Inject constructor(
+    private val usbRepository: UsbRepository,
+    app: Application
+) : AndroidViewModel(app), Logging {
 
     private val context: Context get() = getApplication<Application>().applicationContext
 
@@ -243,9 +248,9 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
      * returns true if we could start scanning, false otherwise
      */
     fun setupScan(): Boolean {
-        selectedAddress = RadioInterfaceService.getDeviceAddress(context)
+        selectedAddress = RadioInterfaceService.getDeviceAddress(context, usbRepository)
 
-        return if (bluetoothAdapter == null || MockInterface.addressValid(context, "")) {
+        return if (bluetoothAdapter == null || MockInterface.addressValid(context, usbRepository, "")) {
             warn("No bluetooth adapter.  Running under emulation?")
 
             val testnodes = listOf(
@@ -270,11 +275,11 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
             true
         } else {
-            val usbDrivers = SerialInterface.findDrivers(context)
-
             /* model.bluetoothEnabled.value */
-
-            if (bluetoothAdapter.bluetoothLeScanner == null && usbDrivers.isEmpty()) {
+            val serialDevices by lazy {
+                usbRepository.serialDevicesWithDrivers.value
+            }
+            if (bluetoothAdapter.bluetoothLeScanner == null && serialDevices.isEmpty()) {
                 errorText.value =
                     context.getString(R.string.requires_bluetooth)
 
@@ -288,10 +293,8 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     // Include a placeholder for "None"
                     addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
 
-                    usbDrivers.forEach { d ->
-                        addDevice(
-                            USBDeviceListEntry(usbManager, d)
-                        )
+                    serialDevices.forEach { (_, d) ->
+                        addDevice(USBDeviceListEntry(usbManager, d))
                     }
                 } else {
                     debug("scan already running")
@@ -454,7 +457,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     // FIXME - move this into a standard GUI helper class
     private val guiJob = Job()
-    private val mainScope = CoroutineScope(Dispatchers.Main + guiJob)
+
+    @Inject
+    internal lateinit var usbRepository: UsbRepository
 
     private val hasCompanionDeviceApi: Boolean by lazy {
         BluetoothInterface.hasCompanionDeviceApi(requireContext())
@@ -823,9 +828,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         // get rid of the warning text once at least one device is paired.
         // If we are running on an emulator, always leave this message showing so we can test the worst case layout
-        val curRadio = RadioInterfaceService.getBondedDeviceAddress(requireContext())
+        val curRadio = RadioInterfaceService.getBondedDeviceAddress(requireContext(), usbRepository)
 
-        if (curRadio != null && !MockInterface.addressValid(requireContext(), "")) {
+        if (curRadio != null && !MockInterface.addressValid(requireContext(), usbRepository, "")) {
             binding.warningNotPaired.visibility = View.GONE
             // binding.scanStatusText.text = getString(R.string.current_pair).format(curRadio)
         } else if (bluetoothViewModel.enabled.value == true){
@@ -1041,7 +1046,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         myActivity.registerReceiver(updateProgressReceiver, updateProgressFilter)
 
         // Keep reminding user BLE is still off
-        val hasUSB = SerialInterface.findDrivers(myActivity).isNotEmpty()
+        val hasUSB = usbRepository.serialDevicesWithDrivers.value.isNotEmpty()
         if (!hasUSB) {
             // Warn user if BLE is disabled
             if (scanModel.bluetoothAdapter?.isEnabled != true) {

@@ -10,11 +10,7 @@ import android.content.pm.PackageManager
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.os.RemoteException
+import android.os.*
 import android.text.method.LinkMovementMethod
 import android.view.Menu
 import android.view.MenuItem
@@ -23,7 +19,6 @@ import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.app.ActivityCompat
@@ -44,6 +39,7 @@ import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
 import com.geeksville.util.Exceptions
@@ -66,6 +62,7 @@ import kotlinx.coroutines.cancel
 import java.nio.charset.Charset
 import java.text.DateFormat
 import java.util.*
+import javax.inject.Inject
 
 /*
 UI design
@@ -137,6 +134,9 @@ class MainActivity : BaseActivity(), Logging,
 
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
     val model: UIViewModel by viewModels()
+
+    @Inject
+    internal lateinit var usbRepository: UsbRepository
 
     data class TabInfo(val text: String, val icon: Int, val content: Fragment)
 
@@ -974,7 +974,7 @@ class MainActivity : BaseActivity(), Logging,
         bluetoothViewModel.enabled.observe(this) { enabled ->
             if (!enabled) {
                 // Ask to start bluetooth if no USB devices are visible
-                val hasUSB = SerialInterface.findDrivers(this).isNotEmpty()
+                val hasUSB = usbRepository.serialDevicesWithDrivers.value.isNotEmpty()
                 if (!isInTestLab && !hasUSB) {
                     if (hasConnectPermission()) {
                         val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
@@ -991,7 +991,7 @@ class MainActivity : BaseActivity(), Logging,
             errormsg("Bind of MeshService failed")
         }
 
-        val bonded = RadioInterfaceService.getBondedDeviceAddress(this) != null
+        val bonded = RadioInterfaceService.getBondedDeviceAddress(this, usbRepository) != null
         if (!bonded && usbDevice == null) // we will handle USB later
             showSettingsPage()
     }

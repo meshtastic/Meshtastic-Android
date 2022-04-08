@@ -1,31 +1,30 @@
 package com.geeksville.mesh.service
 
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import com.geeksville.android.Logging
 import com.geeksville.mesh.android.usbManager
-import com.geeksville.util.exceptionReporter
+import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.util.ignoreException
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
-import com.hoho.android.usbserial.driver.UsbSerialProber
 import com.hoho.android.usbserial.util.SerialInputOutputManager
 
 
 /**
  * An interface that assumes we are talking to a meshtastic device via USB serial
  */
-class SerialInterface(service: RadioInterfaceService, private val address: String) :
+class SerialInterface(
+    service: RadioInterfaceService,
+    private val usbRepository: UsbRepository,
+    private val address: String) :
     StreamInterface(service), Logging, SerialInputOutputManager.Listener {
     companion object : Logging, InterfaceFactory('s') {
         override fun createInterface(
             service: RadioInterfaceService,
+            usbRepository: UsbRepository,
             rest: String
-        ): IRadioInterface = SerialInterface(service, rest)
+        ): IRadioInterface = SerialInterface(service, usbRepository, rest)
 
         init {
             registerFactory()
@@ -36,75 +35,42 @@ class SerialInterface(service: RadioInterfaceService, private val address: Strin
          * we should never ask for USB permissions ourselves, instead we should rely on the external dialog printed by the system.  If
          * we do that the system will remember we have accesss
          */
-        const val assumePermission = true
+        const val assumePermission = false
 
         fun toInterfaceName(deviceName: String) = "s$deviceName"
 
-        fun findDrivers(context: Context): List<UsbSerialDriver> {
-            val drivers = UsbSerialProber.getDefaultProber().findAllDrivers(context.usbManager)
-            val devices = drivers.map { it.device }
-            devices.forEach { d ->
-                debug("Found serial port ${d.deviceName}")
+        override fun addressValid(
+            context: Context,
+            usbRepository: UsbRepository,
+            rest: String
+        ): Boolean {
+            usbRepository.serialDevicesWithDrivers.value.filterValues {
+                assumePermission || context.usbManager.hasPermission(it.device)
             }
-            return drivers
-        }
-
-        override fun addressValid(context: Context, rest: String): Boolean {
-            findSerial(context, rest)?.let { d ->
+            findSerial(usbRepository, rest)?.let { d ->
                 return assumePermission || context.usbManager.hasPermission(d.device)
             }
             return false
         }
 
-        private fun findSerial(context: Context, rest: String): UsbSerialDriver? {
-            val drivers = findDrivers(context)
-
-            return if (drivers.isEmpty())
-                null
-            else  // Open a connection to the first available driver.
-                drivers[0] // FIXME, instead we should find by name
+        private fun findSerial(usbRepository: UsbRepository, rest: String): UsbSerialDriver? {
+            val deviceMap = usbRepository.serialDevicesWithDrivers.value
+            deviceMap.forEach { (path, _) ->
+                debug("Found serial port: $path")
+            }
+            return if (deviceMap.containsKey(rest)) {
+                deviceMap[rest]!!
+            } else {
+                deviceMap.map { (_, driver) -> driver }.firstOrNull()
+            }
         }
     }
 
     private var uart: UsbSerialDriver? = null
     private var ioManager: SerialInputOutputManager? = null
 
-    private var usbReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
-
-            if (UsbManager.ACTION_USB_DEVICE_DETACHED == intent.action) {
-                debug("A USB device was detached")
-                val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
-                if (uart?.device == device)
-                    onDeviceDisconnect(true)
-            }
-
-            if (UsbManager.ACTION_USB_DEVICE_ATTACHED == intent.action) {
-                debug("attaching USB")
-                val device: UsbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
-                if (assumePermission || context.usbManager.hasPermission(device)) {
-                    // reinit the port from scratch and reopen
-                    onDeviceDisconnect(true)
-                    connect()
-                } else {
-                    warn("We don't have permissions for this USB device")
-                }
-            }
-        }
-    }
-
     init {
-        val filter = IntentFilter()
-        filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
-        filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
-        service.registerReceiver(usbReceiver, filter)
-
         connect()
-    }
-
-    override fun close() {
-        service.unregisterReceiver(usbReceiver)
-        super.close()
     }
 
     /** Tell MeshService our device has gone away, but wait for it to come back
@@ -145,7 +111,7 @@ class SerialInterface(service: RadioInterfaceService, private val address: Strin
 
     override fun connect() {
         val manager = service.getSystemService(Context.USB_SERVICE) as UsbManager
-        val device = findSerial(service, address)
+        val device = findSerial(usbRepository, address)
 
         if (device != null) {
             info("Opening $device")
