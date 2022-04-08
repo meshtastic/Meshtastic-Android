@@ -25,6 +25,7 @@ import com.geeksville.mesh.android.hasBackgroundPermission
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.DeviceVersion
+import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressNotStarted
 import com.geeksville.util.*
 import com.google.android.gms.common.api.ApiException
@@ -55,6 +56,9 @@ import kotlin.math.max
 class MeshService : Service(), Logging {
     @Inject
     lateinit var packetRepository: Lazy<PacketRepository>
+
+    @Inject
+    lateinit var usbRepository: Lazy<UsbRepository>
 
     companion object : Logging {
 
@@ -306,7 +310,7 @@ class MeshService : Service(), Logging {
      * tell android not to kill us
      */
     private fun startForeground() {
-        val a = RadioInterfaceService.getBondedDeviceAddress(this)
+        val a = RadioInterfaceService.getBondedDeviceAddress(this, usbRepository.get())
         val wantForeground = a != null && a != "n"
 
         info("Requesting foreground service=$wantForeground")
@@ -1337,7 +1341,7 @@ class MeshService : Service(), Logging {
     private fun regenMyNodeInfo() {
         val myInfo = rawMyNodeInfo
         if (myInfo != null) {
-            val a = RadioInterfaceService.getBondedDeviceAddress(this)
+            val a = RadioInterfaceService.getBondedDeviceAddress(this, usbRepository.get())
             val isBluetoothInterface = a != null && a.startsWith("x")
 
             val nodeNum =

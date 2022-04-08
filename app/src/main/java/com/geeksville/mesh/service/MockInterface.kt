@@ -6,6 +6,7 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.mesh.*
 import com.geeksville.mesh.model.getInitials
+import com.geeksville.mesh.repository.usb.UsbRepository
 import com.google.protobuf.ByteString
 import okhttp3.internal.toHexString
 
@@ -14,10 +15,15 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
     companion object : Logging, InterfaceFactory('m') {
         override fun createInterface(
             service: RadioInterfaceService,
+            usbRepository: UsbRepository, // Temporary until dependency injection transition is completed
             rest: String
         ): IRadioInterface = MockInterface(service)
 
-        override fun addressValid(context: Context, rest: String): Boolean =
+        override fun addressValid(
+            context: Context,
+            usbRepository: UsbRepository, // Temporary until dependency injection transition is completed
+            rest: String
+        ): Boolean =
             BuildUtils.isEmulator || ((context.applicationContext as GeeksvilleApplication).isInTestLab)
 
         init {

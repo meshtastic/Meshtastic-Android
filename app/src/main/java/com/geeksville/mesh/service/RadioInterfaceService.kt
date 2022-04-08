@@ -16,12 +16,12 @@ import com.geeksville.android.Logging
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.IRadioInterfaceService
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
+import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.util.anonymize
 import com.geeksville.util.ignoreException
 import com.geeksville.util.toRemoteExceptions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.collect
 import javax.inject.Inject
 
 
@@ -49,6 +49,9 @@ class RadioInterfaceService : Service(), Logging {
 
     @Inject
     lateinit var bluetoothRepository: BluetoothRepository
+
+    @Inject
+    lateinit var usbRepository: UsbRepository
 
     companion object : Logging {
         /**
@@ -95,13 +98,13 @@ class RadioInterfaceService : Service(), Logging {
          * and t is an interface specific address (macaddr or a device path)
          */
         @SuppressLint("NewApi")
-        fun getDeviceAddress(context: Context): String? {
+        fun getDeviceAddress(context: Context, usbRepository: UsbRepository): String? {
             // If the user has unpaired our device, treat things as if we don't have one
             val prefs = getPrefs(context)
             var address = prefs.getString(DEVADDR_KEY, null)
 
             // If we are running on the emulator we default to the mock interface, so we can have some data to show to the user
-            if (address == null && MockInterface.addressValid(context, ""))
+            if (address == null && MockInterface.addressValid(context, usbRepository, ""))
                 address = MockInterface.prefix.toString()
 
             return address
@@ -115,15 +118,15 @@ class RadioInterfaceService : Service(), Logging {
          * and t is an interface specific address (macaddr or a device path)
          */
         @SuppressLint("NewApi")
-        fun getBondedDeviceAddress(context: Context): String? {
+        fun getBondedDeviceAddress(context: Context, usbRepository: UsbRepository): String? {
             // If the user has unpaired our device, treat things as if we don't have one
-            val address = getDeviceAddress(context)
+            val address = getDeviceAddress(context, usbRepository)
 
             /// Interfaces can filter addresses to indicate that address is no longer acceptable
             if (address != null) {
                 val c = address[0]
                 val rest = address.substring(1)
-                val isValid = InterfaceFactory.getFactory(c)?.addressValid(context, rest) ?: false
+                val isValid = InterfaceFactory.getFactory(c)?.addressValid(context, usbRepository, rest) ?: false
                 if (!isValid)
                     return null
             }
@@ -238,7 +241,7 @@ class RadioInterfaceService : Service(), Logging {
         if (radioIf !is NopInterface)
             warn("Can't start interface - $radioIf is already running")
         else {
-            val address = getBondedDeviceAddress(this)
+            val address = getBondedDeviceAddress(this, usbRepository)
             if (address == null)
                 warn("No bonded mesh radio, can't start interface")
             else {
@@ -253,7 +256,7 @@ class RadioInterfaceService : Service(), Logging {
                 val c = address[0]
                 val rest = address.substring(1)
                 radioIf =
-                    InterfaceFactory.getFactory(c)?.createInterface(this, rest) ?: NopInterface()
+                    InterfaceFactory.getFactory(c)?.createInterface(this, usbRepository, rest) ?: NopInterface()
             }
         }
     }
@@ -287,7 +290,7 @@ class RadioInterfaceService : Service(), Logging {
      */
     @SuppressLint("NewApi")
     private fun setBondedDeviceAddress(address: String?): Boolean {
-        return if (getBondedDeviceAddress(this) == address && isStarted) {
+        return if (getBondedDeviceAddress(this, usbRepository) == address && isStarted) {
             warn("Ignoring setBondedDevice ${address.anonymize}, because we are already using that device")
             false
         } else {

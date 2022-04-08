@@ -5,12 +5,12 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import android.bluetooth.BluetoothManager
-import android.companion.CompanionDeviceManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.handledLaunch
+import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
 import com.geeksville.util.ignoreException
@@ -85,6 +85,7 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
     companion object : Logging, InterfaceFactory('x') {
         override fun createInterface(
             service: RadioInterfaceService,
+            usbRepository: UsbRepository, // Temporary until dependency injection transition is completed
             rest: String
         ): IRadioInterface = BluetoothInterface(service, rest)
 
@@ -111,7 +112,11 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
 
         /** Return true if this address is still acceptable. For BLE that means, still bonded */
         @SuppressLint("NewApi", "MissingPermission")
-        override fun addressValid(context: Context, rest: String): Boolean {
+        override fun addressValid(
+            context: Context,
+            usbRepository: UsbRepository, // Temporary until dependency injection transition is completed
+            rest: String
+        ): Boolean {
             /* val allPaired = if (hasCompanionDeviceApi(context)) {
                 val deviceManager: CompanionDeviceManager by lazy {
                     context.getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager
