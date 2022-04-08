@@ -57,7 +57,7 @@
     <string name="update_firmware">Update Firmware</string>
     <string name="connected">Connected to radio</string>
     <string name="connected_to">Connected to radio (%s)</string>
-    <string name="not_connected">Not connected, select radio below</string>
+    <string name="not_connected">Not connected</string>
     <string name="connected_sleeping">Connected to radio, but it is sleeping</string>
     <string name="update_to">Update to %s</string>
     <string name="app_too_old">Application update required</string>

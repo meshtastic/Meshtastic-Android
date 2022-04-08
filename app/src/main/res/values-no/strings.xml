@@ -53,7 +53,7 @@
     <string name="update_firmware">Oppdater Firmware</string>
     <string name="connected">Tilkoblet radio</string>
     <string name="connected_to">Tilkoblet til radio (%s)</string>
-    <string name="not_connected">Ikke tilkoblet. velg radio nedenfor</string>
+    <string name="not_connected">Ikke tilkoblet</string>
     <string name="connected_sleeping">Tilkoblet radio, men den sover</string>
     <string name="update_to">Oppdater til %s</string>
     <string name="app_too_old">Applikasjon for gammel</string>

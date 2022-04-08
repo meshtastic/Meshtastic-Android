@@ -51,7 +51,7 @@
     <string name="update_firmware">Posodobite vdelano programsko opremo</string>
     <string name="connected">Povezana z radiem</string>
     <string name="connected_to">Povezana z radiem (%s)</string>
-    <string name="not_connected">Ni povezano. Izberite radio spodaj</string>
+    <string name="not_connected">Ni povezano</string>
     <string name="connected_sleeping">Povezan z radiem, vendar radio "spi"</string>
     <string name="update_to">Posodobi v %s</string>
     <string name="app_too_old">Aplikacija je prestara</string>

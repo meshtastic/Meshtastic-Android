@@ -53,7 +53,7 @@
     <string name="update_firmware">Αναβάθμιση Firmware</string>
     <string name="connected">Συνδεδεμένο στο radio</string>
     <string name="connected_to">Συνδεδεμένο στο radio (%s)</string>
-    <string name="not_connected">Αποσυνδεδεμένο, επιλέξτε radio </string>
+    <string name="not_connected">Αποσυνδεδεμένο</string>
     <string name="connected_sleeping">Συνδεδεμένο στο radio, αλλά βρίσκεται σε ύπνωση</string>
     <string name="update_to">Αναβάθμιση σε %s</string>
     <string name="app_too_old">Εφαρμογή πολύ παλαιά</string>

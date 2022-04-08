@@ -53,7 +53,7 @@
     <string name="update_firmware">Programma Updaten</string>
     <string name="connected">Verbonden met een radio</string>
     <string name="connected_to">Verbonden met radio (%s)</string>
-    <string name="not_connected">Niet verbonden, selecteer radio hieronder</string>
+    <string name="not_connected">Niet verbonden</string>
     <string name="connected_sleeping">Verbonden met radio in slaapstand</string>
     <string name="update_to">Updaten naar %s</string>
     <string name="app_too_old">Applicatie te oud</string>

@@ -52,7 +52,7 @@
     <string name="list_of_nodes">Seznam vysílačů v síti</string>
     <string name="update_firmware">Aktualizace softwaru</string>
     <string name="connected_to">Připojeno k vysílači (%s)</string>
-    <string name="not_connected">Nepřipojeno, zvolte si vysílač</string>
+    <string name="not_connected">Nepřipojeno</string>
     <string name="connected_sleeping">Připojené k uspanému vysílači.</string>
     <string name="update_to">Aktualizovat na %s</string>
     <string name="app_too_old">Aplikace je příliš stará</string>
