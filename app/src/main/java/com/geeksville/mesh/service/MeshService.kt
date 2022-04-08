@@ -1203,8 +1203,10 @@ class MeshService : Service(), Logging {
             when (intent.action) {
                 RadioInterfaceService.RADIO_CONNECTED_ACTION -> {
                     try {
+                        // sleep now disabled by default on ESP32, permanent is true unless isPowerSaving enabled
+                        val lsEnabled = radioConfig?.preferences?.isPowerSaving ?: false
                         val connected = intent.getBooleanExtra(EXTRA_CONNECTED, false)
-                        val permanent = intent.getBooleanExtra(EXTRA_PERMANENT, false)
+                        val permanent = intent.getBooleanExtra(EXTRA_PERMANENT, false) || !lsEnabled
                         onConnectionChanged(
                             when {
                                 connected -> ConnectionState.CONNECTED
