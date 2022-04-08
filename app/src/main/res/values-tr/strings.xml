@@ -53,7 +53,7 @@
     <string name="update_firmware">Yazılım güncelle</string>
     <string name="connected">Radyoya bağlandı</string>
     <string name="connected_to">(%s) telsizine bağlandı </string>
-    <string name="not_connected">Bağlı değil, aşağıdan bir radyo seçiniz</string>
+    <string name="not_connected">Bağlı değil</string>
     <string name="connected_sleeping">Telsize bağlandı, ancak uyku durumunda</string>
     <string name="update_to">%s\'e güncelle</string>
     <string name="app_too_old">Uygulama çok eski</string>

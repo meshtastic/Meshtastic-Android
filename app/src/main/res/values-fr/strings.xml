@@ -54,7 +54,7 @@
     <string name="update_firmware">Mise à jour du Firmware</string>
     <string name="connected">Connecté à une radio</string>
     <string name="connected_to">Connecté à la radio (%s)</string>
-    <string name="not_connected">Non connecté, veuillez sélectionner une radio ci-dessous</string>
+    <string name="not_connected">Non connecté</string>
     <string name="connected_sleeping">Connecté à la radio, mais en mode veille</string>
     <string name="none">Aucun (désactivé)</string>
     <string name="must_update">Vous devez mettre à jour l\'application sur le Google Play Store (ou Github). Cette version n\'est plus compatible avec la radio.</string>
