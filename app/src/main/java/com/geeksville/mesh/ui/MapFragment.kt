@@ -6,7 +6,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.EditText
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
@@ -249,16 +250,16 @@ class MapFragment : ScreenFragment("Map"), Logging {
     override fun onViewCreated(viewIn: View, savedInstanceState: Bundle?) {
         super.onViewCreated(viewIn, savedInstanceState)
 
-//        binding.fabStyleToggle.setOnClickListener {
-//
-//            //TODO: Setup Style menu for satellite view, street view, & outdoor view
-//        }
-        binding.downloadRegion.setOnClickListener {
-            // Display menu for download region
-            this.downloadRegionDialogFragment()
-        }
         // We might not have a real mapview if running with analytics
         if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
+//            binding.fabStyleToggle.setOnClickListener {
+//                //TODO: Setup Style menu for satellite view, street view, & outdoor view
+//            }
+            binding.downloadRegion.setOnClickListener {
+                // Display menu for download region
+                this.downloadRegionDialogFragment()
+            }
+
             val vIn = viewIn.findViewById<MapView>(R.id.mapView)
             mapView = vIn
             mapView?.let { v ->
