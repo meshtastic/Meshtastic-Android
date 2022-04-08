@@ -53,7 +53,7 @@
     <string name="update_firmware">Updateaza firmware-ul</string>
     <string name="connected">Connectat la dispozitiv</string>
     <string name="connected_to">Conectat la dispozitivul (%s)</string>
-    <string name="not_connected">Neconectat, selectează dispozitivul din lista de jos</string>
+    <string name="not_connected">Neconectat</string>
     <string name="connected_sleeping">Connectat la dispozitivi, dar e în modul de sleep</string>
     <string name="update_to">Updateaza către %s</string>
     <string name="app_too_old">Aplicație prea veche</string>

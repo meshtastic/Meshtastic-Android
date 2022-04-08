@@ -51,7 +51,7 @@
     <string name="update_firmware">펌웨어 업데이트</string>
     <string name="connected">라디오로 연결됨</string>
     <string name="connected_to">라디오로 연결됨 (%s)</string>
-    <string name="not_connected">연결되지 않음, 아래에서 라이오를 선택하세요.</string>
+    <string name="not_connected">연결되지 않음</string>
     <string name="connected_sleeping">라디오에 연결됨, 해당 라이도는 잠자기중.</string>
     <string name="update_to">%s로 업데이트</string>
     <string name="app_too_old">너무 오래된 앱</string>

@@ -51,7 +51,7 @@
     <string name="update_firmware">Mete ajou mikrolojisyèl</string>
     <string name="connected">Konekte ak radyo</string>
     <string name="connected_to">Konekte ak radyo (%s)</string>
-    <string name="not_connected">Pa konekte, chwazi radyo anba a</string>
+    <string name="not_connected">Pa konekte</string>
     <string name="connected_sleeping">Konekte ak radyo, men li ap dòmi</string>
     <string name="update_to">Mizajou %s</string>
     <string name="app_too_old">Aplikasyon twò ansyen</string>

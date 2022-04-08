@@ -52,7 +52,7 @@
     <string name="update_firmware">Firmware frissítés</string>
     <string name="connected">Kapcsolódva a rádióhoz</string>
     <string name="connected_to">Kapcsolódva a(z) %s rádióhoz</string>
-    <string name="not_connected">Nincs kapcsolat, válasszon egy rádiót alább</string>
+    <string name="not_connected">Nincs kapcsolat</string>
     <string name="connected_sleeping">Kapcsolódva a rádióhoz, de az alvó üzemmódban van</string>
     <string name="update_to">Frissítés %s verzióra</string>
     <string name="app_too_old">Az alkalmazás frissítése szükséges</string>

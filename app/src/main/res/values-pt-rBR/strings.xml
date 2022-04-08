@@ -53,7 +53,7 @@
     <string name="update_firmware">Atualizar Firmware</string>
     <string name="connected">Conectado ao rádio</string>
     <string name="connected_to">Conectado ao rádio (%s)</string>
-    <string name="not_connected">Não conectado, selecione um rádio abaixo</string>
+    <string name="not_connected">Não conectado</string>
     <string name="connected_sleeping">Conectado ao rádio, mas ele está em suspensão (sleep)</string>
     <string name="update_to">Atualização para %s</string>
     <string name="app_too_old">Atualização do aplicativo necessária</string>

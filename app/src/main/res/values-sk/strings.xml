@@ -53,7 +53,7 @@
     <string name="update_firmware">Aktualizácia firmvéru</string>
     <string name="connected">Pripojené k vysielaču</string>
     <string name="connected_to">Pripojené k vysielaču (%s)</string>
-    <string name="not_connected">Nepripojené, zvoľte si vysielač.</string>
+    <string name="not_connected">Nepripojené</string>
     <string name="connected_sleeping">Pripojené k uspatému vysielaču.</string>
     <string name="update_to">Aktualizovať na %s</string>
     <string name="app_too_old">Aplikácia je príliš stará</string>

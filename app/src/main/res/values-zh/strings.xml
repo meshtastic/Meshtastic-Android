@@ -53,7 +53,7 @@
     <string name="update_firmware">更新固件</string>
     <string name="connected">连接设备</string>
     <string name="connected_to">连接到设备(%s)</string>
-    <string name="not_connected">未连接，请选择下方的设备</string>
+    <string name="not_connected">未连接</string>
     <string name="connected_sleeping">已连接到设备，正在休眠中</string>
     <string name="update_to">更新到%s</string>
     <string name="app_too_old">需要应用程序更新</string>

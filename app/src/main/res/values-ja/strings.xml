@@ -52,7 +52,7 @@ mapboxの有償プラン（または代替地図プロバイダ）を検討さ�
     <string name="list_of_nodes">ネットワーク内のノードリスト</string>
     <string name="update_firmware">ファームウェアアップデート</string>
     <string name="connected_to">Meshtasticデバイスに接続しました。(%s)</string>
-    <string name="not_connected">接続されていません。下記のMeshtasticデバイスを選択してください。</string>
+    <string name="not_connected">接続されていません</string>
     <string name="connected_sleeping">接続しましたが、Meshtasticデバイスはスリープ状態です。</string>
     <string name="update_to">%s更新</string>
 </resources>
