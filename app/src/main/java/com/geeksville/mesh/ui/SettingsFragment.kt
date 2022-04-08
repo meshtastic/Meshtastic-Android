@@ -1025,7 +1025,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 }
                 .show()
         } catch (ex: IllegalStateException) {
-            reportError("Snackbar couldn't find view for msgString $msg")
+            errormsg("Snackbar couldn't find view for msgString $msg")
         }
     }
 

@@ -712,7 +712,7 @@ class MainActivity : BaseActivity(), Logging,
                 Snackbar.LENGTH_LONG
             ).show()
         } catch (ex: IllegalStateException) {
-            reportError("Snackbar couldn't find view for msgId $msgId")
+            errormsg("Snackbar couldn't find view for msgId $msgId")
         }
     }
 
@@ -729,7 +729,7 @@ class MainActivity : BaseActivity(), Logging,
                 }
                 .show()
         } catch (ex: IllegalStateException) {
-            reportError("Snackbar couldn't find view for msgString $msg")
+            errormsg("Snackbar couldn't find view for msgString $msg")
         }
     }
 
