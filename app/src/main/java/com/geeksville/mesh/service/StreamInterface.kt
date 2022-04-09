@@ -35,7 +35,7 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) :
      * @param waitForStopped if true we should wait for the manager to finish - must be false if called from inside the manager callbacks
      *  */
     protected open fun onDeviceDisconnect(waitForStopped: Boolean) {
-        service.onDisconnect(isPermanent = true) // if USB device disconnects it is definitely permantently gone, not sleeping)
+        service.onDisconnect(isPermanent = true) // if USB device disconnects it is definitely permanently gone, not sleeping)
     }
 
     protected open fun connect() {
