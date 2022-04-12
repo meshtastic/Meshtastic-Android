@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/resendButton"
+        android:icon="@drawable/ic_retry_24"
+        android:title="@string/resend"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/deleteButton"
         android:icon="@drawable/ic_twotone_delete_24"
         android:title="@string/delete"

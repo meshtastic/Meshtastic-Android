@@ -137,4 +137,5 @@
     <string name="allow_will_show">Pozwól</string>
     <string name="preferences_language">Język (wymagany restart)</string>
     <string name="preferences_system_default">Domyślny systemu</string>
+    <string name="resend">Ponów</string>
 </resources>
