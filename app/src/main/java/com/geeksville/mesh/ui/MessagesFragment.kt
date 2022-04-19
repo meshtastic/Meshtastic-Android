@@ -307,11 +307,14 @@ class MessagesFragment : Fragment(), Logging {
                                 }
                                 R.id.resendButton -> {
                                     debug("User clicked resendButton")
-                                    var resendText:String = ""
+                                    var resendText = ""
                                     selectedList.forEach {
                                         resendText = resendText + it.text + System.lineSeparator()
-                                        binding.messageInputText.setText(resendText)
                                     }
+                                    if (resendText!="")
+                                        resendText = resendText.substring(0, resendText.length - 1)
+                                    binding.messageInputText.setText(resendText)
+                                    mode.finish()
                                 }
                             }
                             return true
