@@ -607,10 +607,7 @@ class MainActivity : BaseActivity(), Logging,
     private fun updateNodesFromDevice() {
         model.meshService?.let { service ->
             // Update our nodeinfos based on data from the device
-            val nodes = service.nodes.map {
-                it.user?.id!! to it
-            }.toMap()
-
+            val nodes = service.nodes.associateBy { it.user?.id!! }
             model.nodeDB.nodes.value = nodes
 
             try {

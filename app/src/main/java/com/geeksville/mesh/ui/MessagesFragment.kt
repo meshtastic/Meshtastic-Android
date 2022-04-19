@@ -9,6 +9,8 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ActionMode
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -18,7 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.android.Logging
 import com.geeksville.mesh.DataPacket
-import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.AdapterMessageLayoutBinding
@@ -45,6 +46,7 @@ fun EditText.on(actionId: Int, func: () -> Unit) {
 @AndroidEntryPoint
 class MessagesFragment : Fragment(), Logging {
 
+    private val actionModeCallback: ActionModeCallback = ActionModeCallback()
     private var actionMode: ActionMode? = null
     private var _binding: MessagesFragmentBinding? = null
 
@@ -69,19 +71,6 @@ class MessagesFragment : Fragment(), Logging {
         }
     }
 
-    private val dateTimeFormat: DateFormat =
-        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-    private val timeFormat: DateFormat =
-        DateFormat.getTimeInstance(DateFormat.SHORT)
-
-    private fun getShortDateTime(time: Date): String {
-        // return time if within 24 hours, otherwise date/time
-        val oneDayMsec = 60 * 60 * 24 * 1000L
-        return if (System.currentTimeMillis() - time.time > oneDayMsec) {
-            dateTimeFormat.format(time)
-        } else timeFormat.format(time)
-    }
-
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
     class ViewHolder(itemView: AdapterMessageLayoutBinding) :
@@ -95,29 +84,19 @@ class MessagesFragment : Fragment(), Logging {
 
     private val messagesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
 
-        /**
-         * Called when RecyclerView needs a new [ViewHolder] of the given type to represent
-         * an item.
-         *
-         *
-         * This new ViewHolder should be constructed with a new View that can represent the items
-         * of the given type. You can either create a new View manually or inflate it from an XML
-         * layout file.
-         *
-         *
-         * The new ViewHolder will be used to display items of the adapter using
-         * [.onBindViewHolder]. Since it will be re-used to display
-         * different items in the data set, it is a good idea to cache references to sub views of
-         * the View to avoid unnecessary [View.findViewById] calls.
-         *
-         * @param parent The ViewGroup into which the new View will be added after it is bound to
-         * an adapter position.
-         * @param viewType The view type of the new View.
-         *
-         * @return A new ViewHolder that holds a View of the given view type.
-         * @see .getItemViewType
-         * @see .onBindViewHolder
-         */
+        private val dateTimeFormat: DateFormat =
+            DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+        private val timeFormat: DateFormat =
+            DateFormat.getTimeInstance(DateFormat.SHORT)
+
+        private fun getShortDateTime(time: Date): String {
+            // return time if within 24 hours, otherwise date/time
+            val oneDayMsec = 60 * 60 * 24 * 1000L
+            return if (System.currentTimeMillis() - time.time > oneDayMsec) {
+                dateTimeFormat.format(time)
+            } else timeFormat.format(time)
+        }
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val inflater = LayoutInflater.from(requireContext())
 
@@ -131,54 +110,14 @@ class MessagesFragment : Fragment(), Logging {
         var messages = arrayOf<DataPacket>()
         var selectedList = ArrayList<DataPacket>()
 
-        /**
-         * Returns the total number of items in the data set held by the adapter.
-         *
-         * @return The total number of items in this adapter.
-         */
         override fun getItemCount(): Int = messages.size
 
-        /**
-         * Called by RecyclerView to display the data at the specified position. This method should
-         * update the contents of the [ViewHolder.itemView] to reflect the item at the given
-         * position.
-         *
-         *
-         * Note that unlike [android.widget.ListView], RecyclerView will not call this method
-         * again if the position of the item changes in the data set unless the item itself is
-         * invalidated or the new position cannot be determined. For this reason, you should only
-         * use the `position` parameter while acquiring the related data item inside
-         * this method and should not keep a copy of it. If you need the position of an item later
-         * on (e.g. in a click listener), use [ViewHolder.getAdapterPosition] which will
-         * have the updated adapter position.
-         *
-         * Override [.onBindViewHolder] instead if Adapter can
-         * handle efficient partial bind.
-         *
-         * @param holder The ViewHolder which should be updated to represent the contents of the
-         * item at the given position in the data set.
-         * @param position The position of the item within the adapter's data set.
-         */
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val msg = messages[position]
             val nodes = model.nodeDB.nodes.value!!
-            val node = nodes.get(msg.from)
+            val node = nodes[msg.from]
             // Determine if this is my message (originated on this device)
             val isLocal = msg.from == DataPacket.ID_LOCAL
-            val isBroadcast = (msg.to == DataPacket.ID_BROADCAST
-                    || msg.delayed == 1) // MeshProtos.MeshPacket.Delayed.DELAYED_BROADCAST_VALUE == 1
-
-            // Filter messages by contactId
-            if (contactId == DataPacket.ID_BROADCAST) {
-                if (isBroadcast) {
-                    holder.card.visibility = View.VISIBLE
-                } else holder.card.visibility = View.GONE
-            } else {
-                if (msg.from == contactId && msg.to != DataPacket.ID_BROADCAST
-                        || msg.from == DataPacket.ID_LOCAL && msg.to == contactId) {
-                    holder.card.visibility = View.VISIBLE
-                } else holder.card.visibility = View.GONE
-            }
 
             // Set cardview offset and color.
             val marginParams = holder.card.layoutParams as ViewGroup.MarginLayoutParams
@@ -237,98 +176,14 @@ class MessagesFragment : Fragment(), Logging {
             if (icon != null) {
                 holder.messageStatusIcon.setImageResource(icon)
                 holder.messageStatusIcon.visibility = View.VISIBLE
-
             } else
-                holder.messageStatusIcon.visibility = View.INVISIBLE
+                holder.messageStatusIcon.visibility = View.GONE
 
             holder.itemView.setOnLongClickListener {
+                clickItem(holder)
                 if (actionMode == null) {
-                    actionMode = (activity as MainActivity).startActionMode(object : ActionMode.Callback {
-                        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-                            mode.menuInflater.inflate(R.menu.menu_messages, menu)
-                            mode.title = "1"
-                            return true
-                        }
-
-                        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-                            clickItem(holder)
-                            return true
-                        }
-
-                        override fun onActionItemClicked(
-                            mode: ActionMode,
-                            item: MenuItem
-                        ): Boolean {
-                            when (item.itemId) {
-                                R.id.deleteButton -> {
-                                    val deleteMessagesString = resources.getQuantityString(
-                                        R.plurals.delete_messages,
-                                        selectedList.size,
-                                        selectedList.size
-                                    )
-                                    MaterialAlertDialogBuilder(requireContext())
-                                        .setMessage(deleteMessagesString)
-                                        .setPositiveButton(getString(R.string.delete)) { _, _ ->
-                                            debug("User clicked deleteButton")
-                                            // all items selected --> deleteAllMessages()
-                                            if (selectedList.size == messages.size) {
-                                                model.messagesState.deleteAllMessages()
-                                            } else {
-                                                selectedList.forEach {
-                                                    model.messagesState.deleteMessage(it)
-                                                }
-                                            }
-                                            mode.finish()
-                                        }
-                                        .setNeutralButton(R.string.cancel) { _, _ ->
-                                        }
-                                        .show()
-                                }
-                                R.id.selectAllButton -> {
-                                    // filter messages by ContactId
-                                    val messagesByContactId = messages.filter {
-                                        if (contactId == DataPacket.ID_BROADCAST)
-                                            it.to == DataPacket.ID_BROADCAST
-                                        else
-                                            it.from == contactId && it.to != DataPacket.ID_BROADCAST
-                                                    || it.from == DataPacket.ID_LOCAL && it.to == contactId
-                                    }
-                                    // if all selected -> unselect all
-                                    if (selectedList.size == messagesByContactId.size) {
-                                        selectedList.clear()
-                                        mode.finish()
-                                    } else {
-                                        // else --> select all
-                                        selectedList.clear()
-                                        selectedList.addAll(messagesByContactId)
-                                    }
-                                    actionMode?.title = selectedList.size.toString()
-                                    notifyDataSetChanged()
-                                }
-                                R.id.resendButton -> {
-                                    debug("User clicked resendButton")
-                                    var resendText = ""
-                                    selectedList.forEach {
-                                        resendText = resendText + it.text + System.lineSeparator()
-                                    }
-                                    if (resendText!="")
-                                        resendText = resendText.substring(0, resendText.length - 1)
-                                    binding.messageInputText.setText(resendText)
-                                    mode.finish()
-                                }
-                            }
-                            return true
-                        }
-
-                        override fun onDestroyActionMode(mode: ActionMode) {
-                            selectedList.clear()
-                            notifyDataSetChanged()
-                            actionMode = null
-                        }
-                    })
-                } else {
-                    // when action mode is enabled
-                    clickItem(holder)
+                    actionMode =
+                        (activity as AppCompatActivity).startSupportActionMode(actionModeCallback)
                 }
                 true
             }
@@ -370,7 +225,11 @@ class MessagesFragment : Fragment(), Logging {
 
         /// Called when our node DB changes
         fun onMessagesChanged(msgIn: Collection<DataPacket>) {
-            messages = msgIn.toTypedArray()
+            messages = msgIn.filter {
+                if (contactId == DataPacket.ID_BROADCAST)
+                    it.to == DataPacket.ID_BROADCAST || it.delayed == 1 // MeshPacket.Delayed.DELAYED_BROADCAST_VALUE == 1
+                else it.from == contactId && it.to != DataPacket.ID_BROADCAST || it.from == DataPacket.ID_LOCAL && it.to == contactId
+            }.toTypedArray()
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all messages
 
             // scroll to the last line
@@ -443,6 +302,79 @@ class MessagesFragment : Fragment(), Logging {
 
             // Just being connected is enough to allow sending texts I think
             // && model.nodeDB.myId.value != null && model.radioConfig.value != null
+        }
+    }
+
+    private inner class ActionModeCallback : ActionMode.Callback {
+        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+            mode.menuInflater.inflate(R.menu.menu_messages, menu)
+            mode.title = "1"
+            return true
+        }
+
+        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+            return false
+        }
+
+        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+            when (item.itemId) {
+                R.id.deleteButton -> {
+                    val selectedList = messagesAdapter.selectedList
+                    val deleteMessagesString = resources.getQuantityString(
+                        R.plurals.delete_messages,
+                        selectedList.size,
+                        selectedList.size
+                    )
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setMessage(deleteMessagesString)
+                        .setPositiveButton(getString(R.string.delete)) { _, _ ->
+                            debug("User clicked deleteButton")
+                            // all items selected --> deleteAllMessages()
+                            val messagesTotal = model.messagesState.messages.value
+                            if (messagesTotal != null && selectedList.size == messagesTotal.size) {
+                                model.messagesState.deleteAllMessages()
+                            } else {
+                                model.messagesState.deleteMessages(selectedList)
+                            }
+                            mode.finish()
+                        }
+                        .setNeutralButton(R.string.cancel) { _, _ ->
+                        }
+                        .show()
+                }
+                R.id.selectAllButton -> {
+                    // if all selected -> unselect all
+                    if (messagesAdapter.selectedList.size == messagesAdapter.messages.size) {
+                        messagesAdapter.selectedList.clear()
+                        mode.finish()
+                    } else {
+                        // else --> select all
+                        messagesAdapter.selectedList.clear()
+                        messagesAdapter.selectedList.addAll(messagesAdapter.messages)
+                    }
+                    actionMode?.title = messagesAdapter.selectedList.size.toString()
+                    messagesAdapter.notifyDataSetChanged()
+                }
+                R.id.resendButton -> {
+                    debug("User clicked resendButton")
+                    val selectedList = messagesAdapter.selectedList
+                    var resendText = ""
+                    selectedList.forEach {
+                        resendText = resendText + it.text + System.lineSeparator()
+                    }
+                    if (resendText!="")
+                        resendText = resendText.substring(0, resendText.length - 1)
+                    binding.messageInputText.setText(resendText)
+                    mode.finish()
+                }
+            }
+            return true
+        }
+
+        override fun onDestroyActionMode(mode: ActionMode) {
+            messagesAdapter.selectedList.clear()
+            messagesAdapter.notifyDataSetChanged()
+            actionMode = null
         }
     }
 }
