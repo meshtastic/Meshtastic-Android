@@ -95,7 +95,7 @@
     <string name="must_set_region">You must set a region!</string>
     <string name="region">Region</string>
     <string name="cant_change_no_radio">Couldn\'t change channel, because radio is not yet connected. Please try again.</string>
-    <string name="sample_coords">55.332244 34.442211</string>
+    <string name="sample_coords" translatable="false">55.332244 34.442211</string>
     <string name="save_messages">Export rangetest.csv</string>
     <string name="set_channel_options">Set channel options</string>
     <string name="reset">Reset</string>

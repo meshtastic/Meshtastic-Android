@@ -91,7 +91,6 @@
     <string name="must_set_region">你必须选择一个地区</string>
     <string name="region">地区</string>
     <string name="cant_change_no_radio">Couldn\'t change channel, because radio is not yet connected. Please try again.</string>
-    <string name="sample_coords">55.332244 34.442211</string>
     <string name="set_channel_options">设置频道选项</string>
     <string name="reset">重置</string>
     <string name="are_you_shure_change_default">您确定要更改为默认频道吗？</string>

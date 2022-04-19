@@ -91,7 +91,6 @@
     <string name="must_set_region">Você deve informar uma região!</string>
     <string name="region">Região</string>
     <string name="cant_change_no_radio">Não foi possível mudar de canal, rádio não conectado. Tente novamente.</string>
-    <string name="sample_coords">55.332244 34.442211</string>
     <string name="save_messages">Exportar rangetest.csv</string>
     <string name="set_channel_options">Configurar opções do canal</string>
     <string name="reset">Redefinir</string>
