@@ -198,7 +198,7 @@ dependencies {
     // implementation "androidx.work:work-runtime:$work_version"
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
-    implementation "androidx.core:core-splashscreen:1.0.0-beta01"
+    implementation "androidx.core:core-splashscreen:1.0.0-beta02"
 
     implementation project(':geeksville-androidlib')
 }
