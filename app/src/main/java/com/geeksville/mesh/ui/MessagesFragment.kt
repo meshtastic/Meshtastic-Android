@@ -305,6 +305,17 @@ class MessagesFragment : Fragment(), Logging {
                                     actionMode?.title = selectedList.size.toString()
                                     notifyDataSetChanged()
                                 }
+                                R.id.resendButton -> {
+                                    debug("User clicked resendButton")
+                                    var resendText = ""
+                                    selectedList.forEach {
+                                        resendText = resendText + it.text + System.lineSeparator()
+                                    }
+                                    if (resendText!="")
+                                        resendText = resendText.substring(0, resendText.length - 1)
+                                    binding.messageInputText.setText(resendText)
+                                    mode.finish()
+                                }
                             }
                             return true
                         }
