@@ -357,6 +357,7 @@ class MessagesFragment : Fragment(), Logging {
                 }
                 R.id.resendButton -> {
                     debug("User clicked resendButton")
+                    val selectedList = messagesAdapter.selectedList
                     var resendText = ""
                     selectedList.forEach {
                         resendText = resendText + it.text + System.lineSeparator()
