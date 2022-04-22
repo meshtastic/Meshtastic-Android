@@ -1,4 +1,4 @@
-package com.geeksville.mesh.service
+package com.geeksville.mesh.repository.radio
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
@@ -11,6 +11,7 @@ import android.os.Build
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.repository.usb.UsbRepository
+import com.geeksville.mesh.service.*
 import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
 import com.geeksville.util.ignoreException
