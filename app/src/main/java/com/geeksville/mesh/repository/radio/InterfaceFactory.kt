@@ -1,4 +1,4 @@
-package com.geeksville.mesh.service
+package com.geeksville.mesh.repository.radio
 
 import android.content.Context
 import com.geeksville.mesh.repository.usb.UsbRepository

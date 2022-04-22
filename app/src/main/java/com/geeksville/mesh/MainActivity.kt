@@ -39,6 +39,8 @@ import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.repository.radio.RadioInterfaceService
+import com.geeksville.mesh.repository.radio.SerialInterface
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*

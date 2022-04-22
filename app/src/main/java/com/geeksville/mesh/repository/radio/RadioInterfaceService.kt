@@ -1,4 +1,4 @@
-package com.geeksville.mesh.service
+package com.geeksville.mesh.repository.radio
 
 import android.annotation.SuppressLint
 import android.app.Service
@@ -17,16 +17,16 @@ import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.IRadioInterfaceService
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.usb.UsbRepository
+import com.geeksville.mesh.service.EXTRA_CONNECTED
+import com.geeksville.mesh.service.EXTRA_PAYLOAD
+import com.geeksville.mesh.service.EXTRA_PERMANENT
+import com.geeksville.mesh.service.prefix
 import com.geeksville.util.anonymize
 import com.geeksville.util.ignoreException
 import com.geeksville.util.toRemoteExceptions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import javax.inject.Inject
-
-
-open class RadioNotConnectedException(message: String = "Not connected to radio") :
-    BLEException(message)
 
 
 /**
@@ -126,7 +126,8 @@ class RadioInterfaceService : Service(), Logging {
             if (address != null) {
                 val c = address[0]
                 val rest = address.substring(1)
-                val isValid = InterfaceFactory.getFactory(c)?.addressValid(context, usbRepository, rest) ?: false
+                val isValid = InterfaceFactory.getFactory(c)
+                    ?.addressValid(context, usbRepository, rest) ?: false
                 if (!isValid)
                     return null
             }

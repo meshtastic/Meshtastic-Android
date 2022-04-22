@@ -8,7 +8,7 @@ import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
 import android.os.Build
 import androidx.core.content.ContextCompat
-import com.geeksville.mesh.service.BluetoothInterface
+import com.geeksville.mesh.repository.radio.BluetoothInterface
 
 /**
  * @return null on platforms without a BlueTooth driver (i.e. the emulator)

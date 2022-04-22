@@ -25,6 +25,8 @@ import com.geeksville.mesh.android.hasBackgroundPermission
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.DeviceVersion
+import com.geeksville.mesh.repository.radio.BluetoothInterface
+import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressNotStarted
 import com.geeksville.util.*
