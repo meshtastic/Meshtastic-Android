@@ -33,6 +33,10 @@
         android:title="@string/preferences_language"
         app:showAsAction="withText" />
     <item
+        android:id="@+id/preferences_map_style"
+        android:title="@string/preferences_map_style"
+        app:showAsAction="withText" />
+    <item
         android:id="@+id/about"
         android:title="@string/about"
         app:showAsAction="withText" />
