@@ -568,7 +568,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         binding.provideLocationCheckbox.visibility = if (isConnected) View.VISIBLE else View.GONE
 
         if (connected == MeshService.ConnectionState.DISCONNECTED)
-            model.ownerName.value = ""
+            model.setOwner("")
 
         // update the region selection from the device
         val region = model.region

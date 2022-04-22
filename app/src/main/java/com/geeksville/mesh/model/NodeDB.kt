@@ -1,5 +1,6 @@
 package com.geeksville.mesh.model
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshUser
@@ -26,7 +27,7 @@ class NodeDB(private val ui: UIViewModel) {
         null
     )
 
-    val testNodes = testPositions.mapIndexed { index, it ->
+    private val testNodes = testPositions.mapIndexed { index, it ->
         NodeInfo(
             9 + index,
             MeshUser(
@@ -42,13 +43,21 @@ class NodeDB(private val ui: UIViewModel) {
     private val seedWithTestNodes = false
 
     /// The unique ID of our node
-    val myId = object : MutableLiveData<String?>(if (seedWithTestNodes) "+16508765309" else null) {}
+    private val _myId = MutableLiveData<String?>(if (seedWithTestNodes) "+16508765309" else null)
+    val myId: LiveData<String?> get() = _myId
+
+    fun setMyId(myId: String?) {
+        _myId.value = myId
+    }
 
     /// A map from nodeid to to nodeinfo
-    val nodes =
-        object :
-            MutableLiveData<Map<String, NodeInfo>>(mapOf(*(if (seedWithTestNodes) testNodes else listOf()).map { it.user!!.id to it }
-                .toTypedArray())) {}
+    private val _nodes = MutableLiveData<Map<String, NodeInfo>>(mapOf(*(if (seedWithTestNodes) testNodes else listOf()).map { it.user!!.id to it }
+                .toTypedArray()))
+    val nodes: LiveData<Map<String, NodeInfo>> get() = _nodes
+
+    fun setNodes(nodes: Map<String, NodeInfo>) {
+        _nodes.value = nodes
+    }
 
     /// Could be null if we haven't received our node DB yet
     val ourNodeInfo get() = nodes.value?.get(myId.value)
