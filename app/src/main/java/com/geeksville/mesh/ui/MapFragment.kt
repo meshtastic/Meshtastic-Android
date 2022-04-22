@@ -1,6 +1,8 @@
 package com.geeksville.mesh.ui
 
 import android.app.AlertDialog
+import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -227,10 +229,10 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
         if (userStyleURI != null) {
             offlineManager.removeStylePack(userStyleURI!!)
-            mapView?.getMapboxMap()?.loadStyleUri(Style.OUTDOORS)
+            mapView?.getMapboxMap()?.loadStyleUri(loadMapStyleFromPref())
         } else {
             offlineManager.removeStylePack(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
-            mapView?.getMapboxMap()?.loadStyleUri(Style.OUTDOORS)
+            mapView?.getMapboxMap()?.loadStyleUri(loadMapStyleFromPref())
         }
         MapboxMap.clearData(resourceOptions) {
             it.error?.let { error ->
@@ -275,7 +277,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                             R.drawable.ic_twotone_person_pin_24
                         )!!.toBitmap()
 
-                    map.loadStyleUri(Style.OUTDOORS) {
+                    map.loadStyleUri(loadMapStyleFromPref()) {
                         if (it.isStyleLoaded) {
                             it.addSource(nodePositions)
                             it.addImage(markerImageId, markerIcon)
@@ -654,6 +656,25 @@ class MapFragment : ScreenFragment("Map"), Logging {
             }
         }
     }
+
+    private fun loadMapStyleFromPref():String {
+        val prefs = context?.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
+        val mapStyleId = prefs?.getInt("map_style_id", 1)
+        debug("mapStyleId from prefs: $mapStyleId")
+        val mapStyle = when (mapStyleId) {
+            0 -> Style.MAPBOX_STREETS
+            1 -> Style.OUTDOORS
+            2 -> Style.LIGHT
+            3 -> Style.DARK
+            4 -> Style.SATELLITE
+            5 -> Style.SATELLITE_STREETS
+            6 -> Style.TRAFFIC_DAY
+            7 -> Style.TRAFFIC_NIGHT
+            else -> Style.OUTDOORS
+        }
+        return mapStyle
+    }
+
 }
 
 

@@ -1083,6 +1083,10 @@ class MainActivity : BaseActivity(), Logging,
                 chooseLangDialog()
                 return true
             }
+            R.id.preferences_map_style -> {
+                chooseMapStyle()
+                return true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
@@ -1187,9 +1191,31 @@ class MainActivity : BaseActivity(), Logging,
         debug("Lang from prefs: $lang")
 
         builder.setSingleChoiceItems(languageLabels, languageValues.indexOf(lang)) { dialog, which ->
-            var lang = languageValues[which];
-            debug("Set lang pref to $lang")
-            editor.putString("lang", lang)
+            val selectedLang = languageValues[which]
+            debug("Set lang pref to $selectedLang")
+            editor.putString("lang", selectedLang)
+            editor.apply()
+            dialog.dismiss()
+        }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    private fun chooseMapStyle() {
+        /// Prepare dialog and its items
+        val builder = MaterialAlertDialogBuilder(this)
+        builder.setTitle(getString(R.string.preferences_map_style))
+        val mapStyles by lazy { resources.getStringArray(R.array.map_styles) }
+
+        /// Load preferences and its value
+        val prefs = UIViewModel.getPreferences(this)
+        val editor: SharedPreferences.Editor = prefs.edit()
+        val mapStyleId = prefs.getInt("map_style_id", 1)
+        debug("mapStyleId from prefs: $mapStyleId")
+
+        builder.setSingleChoiceItems(mapStyles, mapStyleId) { dialog, which ->
+            debug("Set mapStyleId pref to $which")
+            editor.putInt("map_style_id", which)
             editor.apply()
             dialog.dismiss()
         }
