@@ -204,6 +204,10 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             contactsAdapter.onChannelsChanged()
         }
 
+        model.nodeDB.nodes.observe(viewLifecycleOwner) {
+            contactsAdapter.notifyDataSetChanged()
+        }
+
         model.messagesState.contacts.observe(viewLifecycleOwner) {
             debug("New contacts received: ${it.size}")
             contactsAdapter.onContactsChanged(it.values)
