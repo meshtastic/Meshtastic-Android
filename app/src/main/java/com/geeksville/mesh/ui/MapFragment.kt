@@ -229,10 +229,10 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
         if (userStyleURI != null) {
             offlineManager.removeStylePack(userStyleURI!!)
-            mapView?.getMapboxMap()?.loadStyleUri(Style.OUTDOORS)
+            mapView?.getMapboxMap()?.loadStyleUri(loadMapStyleFromPref())
         } else {
             offlineManager.removeStylePack(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
-            mapView?.getMapboxMap()?.loadStyleUri(Style.OUTDOORS)
+            mapView?.getMapboxMap()?.loadStyleUri(loadMapStyleFromPref())
         }
         MapboxMap.clearData(resourceOptions) {
             it.error?.let { error ->
