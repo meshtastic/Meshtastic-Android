@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.RemoteException
 import android.view.Menu
 import androidx.core.content.edit
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -89,22 +90,26 @@ class UIViewModel @Inject constructor(
     val nodeDB = NodeDB(this)
     val messagesState = MessagesState(this)
 
-    /// Are we connected to our radio device
-    val isConnected =
-        object :
-            MutableLiveData<MeshService.ConnectionState>(MeshService.ConnectionState.DISCONNECTED) {
-        }
+    /// Connection state to our radio device
+    private val _connectionState = MutableLiveData(MeshService.ConnectionState.DISCONNECTED)
+    val isConnected: LiveData<MeshService.ConnectionState> get() = _connectionState
+
+    // fun isConnected() = _connectionState.value == MeshService.ConnectionState.CONNECTED
+
+    fun setConnectionState(connectionState: MeshService.ConnectionState) {
+        _connectionState.value = connectionState
+    }
 
     /// various radio settings (including the channel)
-    val radioConfig = object : MutableLiveData<RadioConfigProtos.RadioConfig?>(null) {
-    }
+    private val _radioConfig = MutableLiveData<RadioConfigProtos.RadioConfig?>()
+    val radioConfig: LiveData<RadioConfigProtos.RadioConfig?> get() = _radioConfig
 
-    val channels = object : MutableLiveData<ChannelSet?>(null) {
-    }
+    private val _channels = MutableLiveData<ChannelSet?>()
+    val channels: LiveData<ChannelSet?> get() = _channels
 
     var positionBroadcastSecs: Int?
         get() {
-            radioConfig.value?.preferences?.let {
+            _radioConfig.value?.preferences?.let {
                 if (it.positionBroadcastSecs > 0) return it.positionBroadcastSecs
                 // These default values are borrowed from the device code.
                 return 15 * 60
@@ -112,7 +117,7 @@ class UIViewModel @Inject constructor(
             return null
         }
         set(value) {
-            val config = radioConfig.value
+            val config = _radioConfig.value
             if (value != null && config != null) {
                 val builder = config.toBuilder()
                 builder.preferencesBuilder.positionBroadcastSecs = value
@@ -121,9 +126,9 @@ class UIViewModel @Inject constructor(
         }
 
     var lsSleepSecs: Int?
-        get() = radioConfig.value?.preferences?.lsSecs
+        get() = _radioConfig.value?.preferences?.lsSecs
         set(value) {
-            val config = radioConfig.value
+            val config = _radioConfig.value
             if (value != null && config != null) {
                 val builder = config.toBuilder()
                 builder.preferencesBuilder.lsSecs = value
@@ -132,9 +137,9 @@ class UIViewModel @Inject constructor(
         }
 
     var locationShareDisabled: Boolean
-        get() = radioConfig.value?.preferences?.locationShareDisabled ?: false
+        get() = _radioConfig.value?.preferences?.locationShareDisabled ?: false
         set(value) {
-            val config = radioConfig.value
+            val config = _radioConfig.value
             if (config != null) {
                 val builder = config.toBuilder()
                 builder.preferencesBuilder.locationShareDisabled = value
@@ -143,9 +148,9 @@ class UIViewModel @Inject constructor(
         }
 
     var isPowerSaving: Boolean?
-        get() = radioConfig.value?.preferences?.isPowerSaving
+        get() = _radioConfig.value?.preferences?.isPowerSaving
         set(value) {
-            val config = radioConfig.value
+            val config = _radioConfig.value
             if (value != null && config != null) {
                 val builder = config.toBuilder()
                 builder.preferencesBuilder.isPowerSaving = value
@@ -161,24 +166,46 @@ class UIViewModel @Inject constructor(
         }
 
     /// hardware info about our local device (can be null)
-    val myNodeInfo = object : MutableLiveData<MyNodeInfo?>(null) {}
+    private val _myNodeInfo = MutableLiveData<MyNodeInfo?>()
+    val myNodeInfo: LiveData<MyNodeInfo?> get() = _myNodeInfo
+
+    fun setMyNodeInfo(info: MyNodeInfo?) {
+        _myNodeInfo.value = info
+    }
 
     override fun onCleared() {
         super.onCleared()
         debug("ViewModel cleared")
     }
 
+    /// Pull our latest node db from the device
+    fun updateNodesFromDevice() {
+        meshService?.let { service ->
+            // Update our nodeinfos based on data from the device
+            val nodes = service.nodes.associateBy { it.user?.id!! }
+            nodeDB.setNodes(nodes)
+
+            try {
+                // Pull down our real node ID - This must be done AFTER reading the nodedb because we need the DB to find our nodeinof object
+                nodeDB.setMyId(service.myId)
+                val ownerName = nodeDB.ourNodeInfo?.user?.longName
+                _ownerName.value = ownerName
+            } catch (ex: Exception) {
+                warn("Ignoring failure to get myId, service is probably just uninited... ${ex.message}")
+            }
+        }
+    }
+
     /**
      * Return the primary channel info
      */
-    val primaryChannel: Channel? get() = channels.value?.primaryChannel
+    val primaryChannel: Channel? get() = _channels.value?.primaryChannel
 
-    ///
     // Set the radio config (also updates our saved copy in preferences)
-    private fun setRadioConfig(c: RadioConfigProtos.RadioConfig) {
+    fun setRadioConfig(c: RadioConfigProtos.RadioConfig) {
         debug("Setting new radio config!")
         meshService?.radioConfig = c.toByteArray()
-        radioConfig.value =
+        _radioConfig.value =
             c // Must be done after calling the service, so we will will properly throw if the service failed (and therefore not cache invalid new settings)
     }
 
@@ -186,10 +213,10 @@ class UIViewModel @Inject constructor(
     fun setChannels(c: ChannelSet) {
         debug("Setting new channels!")
         meshService?.channels = c.protobuf.toByteArray()
-        channels.value =
+        _channels.value =
             c // Must be done after calling the service, so we will will properly throw if the service failed (and therefore not cache invalid new settings)
 
-        preferences.edit(commit = true) {
+        preferences.edit {
             this.putString("channel-url", c.getChannelUrl().toString())
         }
     }
@@ -200,14 +227,14 @@ class UIViewModel @Inject constructor(
     /// our name in hte radio
     /// Note, we generate owner initials automatically for now
     /// our activity will read this from prefs or set it to the empty string
-    val ownerName = object : MutableLiveData<String>("MrIDE Test") {
-    }
+    private val _ownerName = MutableLiveData<String?>()
+    val ownerName: LiveData<String?> get() = _ownerName
 
     val provideLocation = object : MutableLiveData<Boolean>(preferences.getBoolean(MyPreferences.provideLocationKey, false)) {
         override fun setValue(value: Boolean) {
             super.setValue(value)
 
-            preferences.edit(commit = true) {
+            preferences.edit {
                 this.putBoolean(MyPreferences.provideLocationKey, value)
             }
         }
@@ -217,21 +244,21 @@ class UIViewModel @Inject constructor(
     fun setOwner(s: String? = null) {
 
         if (s != null) {
-            ownerName.value = s
+            _ownerName.value = s
 
             // note: we allow an empty userstring to be written to prefs
-            preferences.edit(commit = true) {
+            preferences.edit {
                 putString("owner", s)
             }
         }
 
         // Note: we are careful to not set a new unique ID
-        if (ownerName.value!!.isNotEmpty())
+        if (_ownerName.value!!.isNotEmpty())
             try {
                 meshService?.setOwner(
                     null,
-                    ownerName.value,
-                    getInitials(ownerName.value!!)
+                    _ownerName.value,
+                    getInitials(_ownerName.value!!)
                 ) // Note: we use ?. here because we might be running in the emulator
             } catch (ex: RemoteException) {
                 errormsg("Can't set username on device, is device offline? ${ex.message}")
