@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="map_styles">
+        <item>Ulice</item>
+        <item>Teren</item>
+        <item>Jasny</item>
+        <item>Ciemny</item>
+        <item>Satelita</item>
+        <item>Satelita (wraz z ulicami)</item>
+        <item>Natężenie ruchu (jasny)</item>
+        <item>Natężenie ruchu (ciemy)</item>
+    </string-array>
+</resources>
