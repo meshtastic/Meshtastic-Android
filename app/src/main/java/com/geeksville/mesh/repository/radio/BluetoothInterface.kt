@@ -80,15 +80,19 @@ A variable keepAllPackets, if set to true will suppress this behavior and instea
  * Note - this class intentionally dumb.  It doesn't understand protobuf framing etc...
  * It is designed to be simple so it can be stubbed out with a simulated version as needed.
  */
-class BluetoothInterface(val service: RadioInterfaceService, val address: String) : IRadioInterface,
+class BluetoothInterface(
+    val context: Context,
+    val service: RadioInterfaceService,
+    val address: String) : IRadioInterface,
     Logging {
 
     companion object : Logging, InterfaceFactory('x') {
         override fun createInterface(
+            context: Context,
             service: RadioInterfaceService,
             usbRepository: UsbRepository, // Temporary until dependency injection transition is completed
             rest: String
-        ): IRadioInterface = BluetoothInterface(service, rest)
+        ): IRadioInterface = BluetoothInterface(context, service, rest)
 
         init {
             registerFactory()
@@ -226,12 +230,12 @@ class BluetoothInterface(val service: RadioInterfaceService, val address: String
     init {
         // Note: this call does no comms, it just creates the device object (even if the
         // device is off/not connected)
-        val device = getBluetoothAdapter(service)?.getRemoteDevice(address)
+        val device = getBluetoothAdapter(context)?.getRemoteDevice(address)
         if (device != null) {
             info("Creating radio interface service.  device=${address.anonymize}")
 
             // Note this constructor also does no comm
-            val s = SafeBluetooth(service, device)
+            val s = SafeBluetooth(context, device)
             safe = s
 
             startConnect()

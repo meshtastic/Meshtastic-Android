@@ -1,31 +1,30 @@
 package com.geeksville.mesh.repository.radio
 
 import android.annotation.SuppressLint
-import android.app.Service
+import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
-import android.os.IBinder
 import androidx.core.content.edit
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ServiceLifecycleDispatcher
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.geeksville.android.BinaryLogFile
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.concurrent.handledLaunch
-import com.geeksville.mesh.IRadioInterfaceService
+import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.usb.UsbRepository
-import com.geeksville.mesh.service.EXTRA_CONNECTED
 import com.geeksville.mesh.service.EXTRA_PAYLOAD
-import com.geeksville.mesh.service.EXTRA_PERMANENT
 import com.geeksville.mesh.service.prefix
 import com.geeksville.util.anonymize
 import com.geeksville.util.ignoreException
 import com.geeksville.util.toRemoteExceptions
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 
@@ -38,20 +37,31 @@ import javax.inject.Inject
  * Note - this class intentionally dumb.  It doesn't understand protobuf framing etc...
  * It is designed to be simple so it can be stubbed out with a simulated version as needed.
  */
-@AndroidEntryPoint
-class RadioInterfaceService : Service(), Logging {
+class RadioInterfaceService @Inject constructor(
+    private val context: Application,
+    private val dispatchers: CoroutineDispatchers,
+    private val bluetoothRepository: BluetoothRepository,
+    private val processLifecycle: Lifecycle,
+    private val usbRepository: UsbRepository
+): Logging {
 
-    // The following is due to the fact that AIDL prevents us from extending from `LifecycleService`:
-    private val lifecycleOwner: LifecycleOwner = LifecycleOwner { lifecycleDispatcher.lifecycle }
-    private val lifecycleDispatcher: ServiceLifecycleDispatcher by lazy {
-        ServiceLifecycleDispatcher(lifecycleOwner)
+    private val _connectionState = MutableStateFlow(RadioServiceConnectionState())
+    val connectionState = _connectionState.asStateFlow()
+
+    private val _receivedData = MutableSharedFlow<ByteArray>()
+    val receivedData: SharedFlow<ByteArray> = _receivedData
+
+    init {
+        processLifecycle.coroutineScope.launch {
+            bluetoothRepository.state.collect { state ->
+                if (state.enabled) {
+                    startInterface()
+                } else {
+                    stopInterface()
+                }
+            }
+        }
     }
-
-    @Inject
-    lateinit var bluetoothRepository: BluetoothRepository
-
-    @Inject
-    lateinit var usbRepository: UsbRepository
 
     companion object : Logging {
         /**
@@ -133,9 +143,6 @@ class RadioInterfaceService : Service(), Logging {
             }
             return address
         }
-
-        /// If our service is currently running, this pointer can be used to reach it (in case setBondedDeviceAddress is called)
-        private var runningService: RadioInterfaceService? = null
     }
 
     private val logSends = false
@@ -161,10 +168,12 @@ class RadioInterfaceService : Service(), Logging {
 
     private fun broadcastConnectionChanged(isConnected: Boolean, isPermanent: Boolean) {
         debug("Broadcasting connection=$isConnected")
-        val intent = Intent(RADIO_CONNECTED_ACTION)
-        intent.putExtra(EXTRA_CONNECTED, isConnected)
-        intent.putExtra(EXTRA_PERMANENT, isPermanent)
-        sendBroadcast(intent)
+
+        processLifecycle.coroutineScope.launch(dispatchers.default) {
+            _connectionState.emit(
+                RadioServiceConnectionState(isConnected, isPermanent)
+            )
+        }
     }
 
     /// Send a packet/command out the radio link, this routine can block if it needs to
@@ -181,10 +190,9 @@ class RadioInterfaceService : Service(), Logging {
 
         // ignoreException { debug("FromRadio: ${MeshProtos.FromRadio.parseFrom(p)}") }
 
-        broadcastReceivedFromRadio(
-            this,
-            p
-        )
+        processLifecycle.coroutineScope.launch(dispatchers.io) {
+            _receivedData.emit(p)
+        }
     }
 
     fun onConnect() {
@@ -201,48 +209,12 @@ class RadioInterfaceService : Service(), Logging {
         }
     }
 
-
-    override fun onCreate() {
-        runningService = this
-        lifecycleDispatcher.onServicePreSuperOnCreate()
-        super.onCreate()
-
-        lifecycleOwner.lifecycle.coroutineScope.launch {
-            bluetoothRepository.state.collect { state ->
-                if (state.enabled) {
-                    startInterface()
-                } else {
-                    stopInterface()
-                }
-            }
-        }
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        lifecycleDispatcher.onServicePreSuperOnStart()
-        return super.onStartCommand(intent, flags, startId)
-    }
-
-    override fun onDestroy() {
-        stopInterface()
-        serviceScope.cancel("Destroying RadioInterface")
-        runningService = null
-        lifecycleDispatcher.onServicePreSuperOnDestroy()
-        super.onDestroy()
-    }
-
-    override fun onBind(intent: Intent?): IBinder? {
-        lifecycleDispatcher.onServicePreSuperOnBind()
-        return binder
-    }
-
-
     /** Start our configured interface (if it isn't already running) */
     private fun startInterface() {
         if (radioIf !is NopInterface)
             warn("Can't start interface - $radioIf is already running")
         else {
-            val address = getBondedDeviceAddress(this, usbRepository)
+            val address = getBondedDeviceAddress(context, usbRepository)
             if (address == null)
                 warn("No bonded mesh radio, can't start interface")
             else {
@@ -250,14 +222,14 @@ class RadioInterfaceService : Service(), Logging {
                 isStarted = true
 
                 if (logSends)
-                    sentPacketsLog = BinaryLogFile(this, "sent_log.pb")
+                    sentPacketsLog = BinaryLogFile(context, "sent_log.pb")
                 if (logReceives)
-                    receivedPacketsLog = BinaryLogFile(this, "receive_log.pb")
+                    receivedPacketsLog = BinaryLogFile(context, "receive_log.pb")
 
                 val c = address[0]
                 val rest = address.substring(1)
                 radioIf =
-                    InterfaceFactory.getFactory(c)?.createInterface(this, usbRepository, rest) ?: NopInterface()
+                    InterfaceFactory.getFactory(c)?.createInterface(context, this, usbRepository, rest) ?: NopInterface()
             }
         }
     }
@@ -291,7 +263,7 @@ class RadioInterfaceService : Service(), Logging {
      */
     @SuppressLint("NewApi")
     private fun setBondedDeviceAddress(address: String?): Boolean {
-        return if (getBondedDeviceAddress(this, usbRepository) == address && isStarted) {
+        return if (getBondedDeviceAddress(context, usbRepository) == address && isStarted) {
             warn("Ignoring setBondedDevice ${address.anonymize}, because we are already using that device")
             false
         } else {
@@ -309,7 +281,7 @@ class RadioInterfaceService : Service(), Logging {
 
             debug("Setting bonded device to ${address.anonymize}")
 
-            getPrefs(this).edit(commit = true) {
+            getPrefs(context).edit(commit = true) {
                 if (address == null)
                     this.remove(DEVADDR_KEY)
                 else
@@ -322,23 +294,20 @@ class RadioInterfaceService : Service(), Logging {
         }
     }
 
-    private val binder = object : IRadioInterfaceService.Stub() {
+    fun setDeviceAddress(deviceAddr: String?): Boolean = toRemoteExceptions {
+        setBondedDeviceAddress(deviceAddr)
+    }
 
-        override fun setDeviceAddress(deviceAddr: String?): Boolean = toRemoteExceptions {
-            setBondedDeviceAddress(deviceAddr)
-        }
+    /** If the service is not currently connected to the radio, try to connect now.  At boot the radio interface service will
+     * not connect to a radio until this call is received.  */
+    fun connect() = toRemoteExceptions {
+        // We don't start actually talking to our device until MeshService binds to us - this prevents
+        // broadcasting connection events before MeshService is ready to receive them
+        startInterface()
+    }
 
-        /** If the service is not currently connected to the radio, try to connect now.  At boot the radio interface service will
-         * not connect to a radio until this call is received.  */
-        override fun connect() = toRemoteExceptions {
-            // We don't start actually talking to our device until MeshService binds to us - this prevents
-            // broadcasting connection events before MeshService is ready to receive them
-            startInterface()
-        }
-
-        override fun sendToRadio(a: ByteArray) {
-            // Do this in the IO thread because it might take a while (and we don't care about the result code)
-            serviceScope.handledLaunch { handleSendToRadio(a) }
-        }
+    fun sendToRadio(a: ByteArray) {
+        // Do this in the IO thread because it might take a while (and we don't care about the result code)
+        serviceScope.handledLaunch { handleSendToRadio(a) }
     }
 }

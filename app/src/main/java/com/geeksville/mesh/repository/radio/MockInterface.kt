@@ -14,6 +14,7 @@ import okhttp3.internal.toHexString
 class MockInterface(private val service: RadioInterfaceService) : Logging, IRadioInterface {
     companion object : Logging, InterfaceFactory('m') {
         override fun createInterface(
+            context: Context,
             service: RadioInterfaceService,
             usbRepository: UsbRepository, // Temporary until dependency injection transition is completed
             rest: String

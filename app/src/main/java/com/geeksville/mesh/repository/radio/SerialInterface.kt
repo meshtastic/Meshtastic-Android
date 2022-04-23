@@ -19,6 +19,7 @@ class SerialInterface(
     StreamInterface(service), Logging {
     companion object : Logging, InterfaceFactory('s') {
         override fun createInterface(
+            context: Context,
             service: RadioInterfaceService,
             usbRepository: UsbRepository,
             rest: String

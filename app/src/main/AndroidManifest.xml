@@ -115,12 +115,6 @@
             </intent-filter>
         </service>
 
-        <!-- This is a private service which just does direct communication to the radio -->
-        <service
-            android:name="com.geeksville.mesh.repository.radio.RadioInterfaceService"
-            android:enabled="true"
-            android:exported="false" />
-
         <!-- zxing for QR Code scanning: lock portrait orientation -->
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"

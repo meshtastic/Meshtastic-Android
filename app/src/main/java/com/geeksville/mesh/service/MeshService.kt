@@ -2,10 +2,8 @@ package com.geeksville.mesh.service
 
 import android.annotation.SuppressLint
 import android.app.Service
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.os.IBinder
 import android.os.Looper
 import android.os.RemoteException
@@ -15,7 +13,6 @@ import androidx.core.content.edit
 import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
-import com.geeksville.android.ServiceClient
 import com.geeksville.android.isGooglePlayAvailable
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.*
@@ -27,6 +24,7 @@ import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
+import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressNotStarted
 import com.geeksville.util.*
@@ -41,6 +39,7 @@ import com.google.protobuf.InvalidProtocolBufferException
 import dagger.Lazy
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.json.Json
 import java.util.*
 import javax.inject.Inject
@@ -57,7 +56,13 @@ import kotlin.math.max
 @AndroidEntryPoint
 class MeshService : Service(), Logging {
     @Inject
+    lateinit var dispatchers: CoroutineDispatchers
+
+    @Inject
     lateinit var packetRepository: Lazy<PacketRepository>
+
+    @Inject
+    lateinit var radioInterfaceService: RadioInterfaceService
 
     @Inject
     lateinit var usbRepository: Lazy<UsbRepository>
@@ -134,13 +139,6 @@ class MeshService : Service(), Logging {
 
     // If we've ever read a valid region code from our device it will be here
     var curRegionValue = RadioConfigProtos.RegionCode.Unset_VALUE
-
-    val radio = ServiceClient {
-        IRadioInterfaceService.Stub.asInterface(it).apply {
-            // Now that we are connected to the radio service, tell it to connect to the radio
-            connect()
-        }
-    }
 
     private val locationCallback = MeshServiceLocationCallback(
         ::sendPositionScoped,
@@ -269,16 +267,11 @@ class MeshService : Service(), Logging {
         }
     }
 
-    /// Safely access the radio service, if not connected an exception will be thrown
-    private val connectedRadio: IRadioInterfaceService
-        get() = (if (connectionState == ConnectionState.CONNECTED) radio.serviceP else null)
-            ?: throw RadioNotConnectedException()
-
     /** Send a command/packet to our radio.  But cope with the possiblity that we might start up
     before we are fully bound to the RadioInterfaceService
     @param requireConnected set to false if you are okay with using a partially connected device (i.e. during startup)
      */
-    private fun sendToRadio(p: ToRadio.Builder, requireConnected: Boolean = true) {
+    private fun sendToRadio(p: ToRadio.Builder) {
         val built = p.build()
         debug("Sending to radio ${built.toPIIString()}")
         val b = built.toByteArray()
@@ -286,21 +279,16 @@ class MeshService : Service(), Logging {
         if (SoftwareUpdateService.isUpdating)
             throw IsUpdatingException()
 
-        if (requireConnected)
-            connectedRadio.sendToRadio(b)
-        else {
-            val s = radio.serviceP ?: throw RadioNotConnectedException()
-            s.sendToRadio(b)
-        }
+        radioInterfaceService.sendToRadio(b)
     }
 
     /**
      * Send a mesh packet to the radio, if the radio is not currently connected this function will throw NotConnectedException
      */
-    private fun sendToRadio(packet: MeshPacket, requireConnected: Boolean = true) {
+    private fun sendToRadio(packet: MeshPacket) {
         sendToRadio(ToRadio.newBuilder().apply {
             this.packet = packet
-        }, requireConnected)
+        })
     }
 
     private fun updateMessageNotification(message: DataPacket) =
@@ -338,17 +326,11 @@ class MeshService : Service(), Logging {
         serviceScope.handledLaunch {
             loadSettings() // Load our last known node DB
 
-            // we listen for messages from the radio receiver _before_ trying to create the service
-            val filter = IntentFilter().apply {
-                addAction(RadioInterfaceService.RECEIVE_FROMRADIO_ACTION)
-                addAction(RadioInterfaceService.RADIO_CONNECTED_ACTION)
-            }
-            registerReceiver(radioInterfaceReceiver, filter)
+            radioInterfaceService.receivedData.onEach(::onReceiveFromRadio)
+            radioInterfaceService.connectionState.onEach(::onRadioConnectionState)
 
             // We in turn need to use the radiointerface service
-            val intent = Intent(this@MeshService, RadioInterfaceService::class.java)
-            // intent.action = IMeshService::class.java.name
-            radio.connect(this@MeshService, intent, Context.BIND_AUTO_CREATE)
+            radioInterfaceService.connect()
 
             // the rest of our init will happen once we are in radioConnection.onServiceConnected
         }
@@ -375,12 +357,6 @@ class MeshService : Service(), Logging {
     override fun onDestroy() {
         info("Destroying mesh service")
 
-        // This might fail if we get destroyed before the handledLaunch completes
-        ignoreException(silent = true) {
-            unregisterReceiver(radioInterfaceReceiver)
-        }
-
-        radio.close()
         saveSettings()
 
         stopForeground(true) // Make sure we aren't using the notification first
@@ -1217,67 +1193,44 @@ class MeshService : Service(), Logging {
         }
     }
 
-    /**
-     * Receives messages from our BT radio service and processes them to update our model
-     * and send to clients as needed.
-     */
-    private val radioInterfaceReceiver = object : BroadcastReceiver() {
-
-        // Important to never throw exceptions out of onReceive
-        override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
-            // NOTE: Do not call handledLaunch here, because it can cause out of order message processing - because each routine is scheduled independently
-            // serviceScope.handledLaunch {
-            debug("Received broadcast ${intent.action}")
-            when (intent.action) {
-                RadioInterfaceService.RADIO_CONNECTED_ACTION -> {
-                    try {
-                        // sleep now disabled by default on ESP32, permanent is true unless isPowerSaving enabled
-                        val lsEnabled = radioConfig?.preferences?.isPowerSaving ?: false
-                        val connected = intent.getBooleanExtra(EXTRA_CONNECTED, false)
-                        val permanent = intent.getBooleanExtra(EXTRA_PERMANENT, false) || !lsEnabled
-                        onConnectionChanged(
-                            when {
-                                connected -> ConnectionState.CONNECTED
-                                permanent -> ConnectionState.DISCONNECTED
-                                else -> ConnectionState.DEVICE_SLEEP
-                            }
-                        )
-                    } catch (ex: RemoteException) {
-                        // This can happen sometimes (especially if the device is slowly dying due to killing power, don't report to crashlytics
-                        warn("Abandoning reconnect attempt, due to errors during init: ${ex.message}")
-                    }
-                }
-
-                RadioInterfaceService.RECEIVE_FROMRADIO_ACTION -> {
-                    val bytes = intent.getByteArrayExtra(EXTRA_PAYLOAD)!!
-                    try {
-                        val proto =
-                            MeshProtos.FromRadio.parseFrom(bytes)
-                        // info("Received from radio service: ${proto.toOneLineString()}")
-                        when (proto.payloadVariantCase.number) {
-                            MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(
-                                proto.packet
-                            )
-
-                            MeshProtos.FromRadio.CONFIG_COMPLETE_ID_FIELD_NUMBER -> handleConfigComplete(
-                                proto.configCompleteId
-                            )
-
-                            MeshProtos.FromRadio.MY_INFO_FIELD_NUMBER -> handleMyInfo(proto.myInfo)
-
-                            MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleNodeInfo(proto.nodeInfo)
-
-                            // MeshProtos.FromRadio.RADIO_FIELD_NUMBER -> handleRadioConfig(proto.radio)
-
-                            else -> errormsg("Unexpected FromRadio variant")
-                        }
-                    } catch (ex: InvalidProtocolBufferException) {
-                        errormsg("Invalid Protobuf from radio, len=${bytes.size}", ex)
-                    }
-                }
-
-                else -> errormsg("Unexpected radio interface broadcast")
+    private fun onRadioConnectionState(state: RadioServiceConnectionState) {
+        // sleep now disabled by default on ESP32, permanent is true unless isPowerSaving enabled
+        val lsEnabled = radioConfig?.preferences?.isPowerSaving ?: false
+        val connected = state.isConnected
+        val permanent = state.isPermanent || !lsEnabled
+        onConnectionChanged(
+            when {
+                connected -> ConnectionState.CONNECTED
+                permanent -> ConnectionState.DISCONNECTED
+                else -> ConnectionState.DEVICE_SLEEP
             }
+        )
+    }
+
+    private fun onReceiveFromRadio(bytes: ByteArray) {
+        try {
+            val proto =
+                MeshProtos.FromRadio.parseFrom(bytes)
+            // info("Received from radio service: ${proto.toOneLineString()}")
+            when (proto.payloadVariantCase.number) {
+                MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(
+                    proto.packet
+                )
+
+                MeshProtos.FromRadio.CONFIG_COMPLETE_ID_FIELD_NUMBER -> handleConfigComplete(
+                    proto.configCompleteId
+                )
+
+                MeshProtos.FromRadio.MY_INFO_FIELD_NUMBER -> handleMyInfo(proto.myInfo)
+
+                MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleNodeInfo(proto.nodeInfo)
+
+                // MeshProtos.FromRadio.RADIO_FIELD_NUMBER -> handleRadioConfig(proto.radio)
+
+                else -> errormsg("Unexpected FromRadio variant")
+            }
+        } catch (ex: InvalidProtocolBufferException) {
+            errormsg("Invalid Protobuf from radio, len=${bytes.size}", ex)
         }
     }
 
@@ -1533,13 +1486,13 @@ class MeshService : Service(), Logging {
     private fun requestRadioConfig() {
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
             getRadioRequest = true
-        }, requireConnected = false)
+        })
     }
 
     private fun requestChannel(channelIndex: Int) {
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
             getChannelRequest = channelIndex + 1
-        }, requireConnected = false)
+        })
     }
 
     private fun setChannel(channel: ChannelProtos.Channel) {
@@ -1759,7 +1712,7 @@ class MeshService : Service(), Logging {
         override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
             debug("Passing through device change to radio service: ${deviceAddr.anonymize}")
 
-            val res = radio.service.setDeviceAddress(deviceAddr)
+            val res = radioInterfaceService.setDeviceAddress(deviceAddr)
             if (res) {
                 discardNodeDB()
             }
