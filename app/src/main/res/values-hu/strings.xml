@@ -56,7 +56,7 @@
     <string name="connected_sleeping">Kapcsolódva a rádióhoz, de az alvó üzemmódban van</string>
     <string name="update_to">Frissítés %s verzióra</string>
     <string name="app_too_old">Az alkalmazás frissítése szükséges</string>
-    <string name="must_update">Frissítenie kell ezt az alkalmazást a Google Play áruházban (vagy a GitHub-ról), mert túl régi, hogy kommunikálni tudjob ezzel a rádió firmware-rel. Kérem olvassa el a tudnivalókat ebből a <a href="https://www.meshtastic.org/software/android-too-old.html">wiki</a>-ből.</string>
+    <string name="must_update">Frissítenie kell ezt az alkalmazást a Google Play áruházban (vagy a GitHub-ról), mert túl régi, hogy kommunikálni tudjob ezzel a rádió firmware-rel. Kérem olvassa el a tudnivalókat ebből a <a href="https://meshtastic.org/docs/software/android/android-installation">docs</a>-ből.</string>
     <string name="none">Egyik sem (letiltás)</string>
     <string name="modem_config_short">Rövid hatótáv (nagyon gyors)</string>
     <string name="modem_config_medium">Közepes hatótáv (gyors)</string>
