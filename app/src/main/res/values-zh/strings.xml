@@ -57,7 +57,7 @@
     <string name="connected_sleeping">已连接到设备，正在休眠中</string>
     <string name="update_to">更新到%s</string>
     <string name="app_too_old">需要应用程序更新</string>
-    <string name="must_update">您必须在 Google Play或Github上更新此应用程序.固件太旧，请阅读我们的 <a href="https://www.meshtastic.org/software/android-too-old.html">wiki</a> 这个话题.</string>
+    <string name="must_update">您必须在 Google Play或Github上更新此应用程序.固件太旧，请阅读我们的 <a href="https://meshtastic.org/docs/software/android/android-installation">docs</a> 这个话题.</string>
     <string name="none">无（禁用）</string>
     <string name="modem_config_short">短距离（速度快）</string>
     <string name="modem_config_medium">中等距离（速度快）</string>
