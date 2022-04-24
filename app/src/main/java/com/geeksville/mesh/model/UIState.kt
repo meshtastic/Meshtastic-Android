@@ -92,9 +92,9 @@ class UIViewModel @Inject constructor(
 
     /// Connection state to our radio device
     private val _connectionState = MutableLiveData(MeshService.ConnectionState.DISCONNECTED)
-    val isConnected: LiveData<MeshService.ConnectionState> get() = _connectionState
+    val connectionState: LiveData<MeshService.ConnectionState> get() = _connectionState
 
-    // fun isConnected() = _connectionState.value == MeshService.ConnectionState.CONNECTED
+    fun isConnected() = _connectionState.value == MeshService.ConnectionState.CONNECTED
 
     fun setConnectionState(connectionState: MeshService.ConnectionState) {
         _connectionState.value = connectionState

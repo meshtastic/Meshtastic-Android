@@ -294,7 +294,7 @@ class MessagesFragment : Fragment(), Logging {
         }
 
         // If connection state _OR_ myID changes we have to fix our ability to edit outgoing messages
-        model.isConnected.observe(viewLifecycleOwner) { connectionState ->
+        model.connectionState.observe(viewLifecycleOwner) { connectionState ->
             // If we don't know our node ID and we are offline don't let user try to send
             val connected = connectionState == MeshService.ConnectionState.CONNECTED
             binding.textInputLayout.isEnabled = connected
