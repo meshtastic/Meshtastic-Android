@@ -512,7 +512,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         debug("Reiniting the update button")
         val info = model.myNodeInfo.value
         val service = model.meshService
-        if (model.isConnected.value == MeshService.ConnectionState.CONNECTED && info != null && info.shouldUpdate && info.couldUpdate && service != null) {
+        if (model.isConnected() && info != null && info.shouldUpdate && info.couldUpdate && service != null) {
             binding.updateFirmwareButton.visibility = View.VISIBLE
             binding.updateFirmwareButton.text =
                 getString(R.string.update_to).format(getString(R.string.short_firmware_version))
@@ -561,7 +561,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
      * Pull the latest device info from the model and into the GUI
      */
     private fun updateNodeInfo() {
-        val connected = model.isConnected.value
+        val connected = model.connectionState.value
 
         val isConnected = connected == MeshService.ConnectionState.CONNECTED
         binding.nodeSettings.visibility = if (isConnected) View.VISIBLE else View.GONE
@@ -658,7 +658,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         // Only let user edit their name or set software update while connected to a radio
-        model.isConnected.observe(viewLifecycleOwner) {
+        model.connectionState.observe(viewLifecycleOwner) {
             updateNodeInfo()
             updateDevicesButtons(scanModel.devices.value)
         }
@@ -816,7 +816,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     )
                     addDeviceButton(
                         curDevice,
-                        model.isConnected.value == MeshService.ConnectionState.CONNECTED
+                        model.isConnected()
                     )
                 }
             } else if (scanModel.selectedUSB != null) {

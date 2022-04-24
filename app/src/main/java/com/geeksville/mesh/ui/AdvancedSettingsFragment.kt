@@ -46,7 +46,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             binding.lsSleepSwitch.isChecked = model.isPowerSaving ?: false
         }
 
-        model.isConnected.observe(viewLifecycleOwner) { connectionState ->
+        model.connectionState.observe(viewLifecycleOwner) { connectionState ->
             val connected = connectionState == MeshService.ConnectionState.CONNECTED
             binding.positionBroadcastPeriodView.isEnabled = connected && !model.locationShareDisabled
             binding.lsSleepView.isEnabled = connected && model.isPowerSaving ?: false

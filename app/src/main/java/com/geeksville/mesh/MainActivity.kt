@@ -451,7 +451,7 @@ class MainActivity : BaseActivity(), Logging,
             tab.icon = ContextCompat.getDrawable(this, tabInfos[position].icon)
         }.attach()
 
-        model.isConnected.observe(this) { connected ->
+        model.connectionState.observe(this) { connected ->
             updateConnectionStatusImage(connected)
         }
 
@@ -516,7 +516,7 @@ class MainActivity : BaseActivity(), Logging,
                 requestedChannelUrl = appLinkData
 
                 // if the device is connected already, process it now
-                if (model.isConnected.value == MeshService.ConnectionState.CONNECTED)
+                if (model.isConnected())
                     perhapsChangeChannel()
 
                 // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
@@ -629,7 +629,7 @@ class MainActivity : BaseActivity(), Logging,
 
     /// Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(newConnection: MeshService.ConnectionState) {
-        val oldConnection = model.isConnected.value!!
+        val oldConnection = model.connectionState.value!!
         debug("connchange $oldConnection -> $newConnection")
 
         if (newConnection == MeshService.ConnectionState.CONNECTED) {
@@ -889,7 +889,7 @@ class MainActivity : BaseActivity(), Logging,
                     connectionJob = null
                 }
 
-                debug("connected to mesh service, isConnected=${model.isConnected.value}")
+                debug("connected to mesh service, isConnected=${model.connectionState.value}")
             }
         }
 
@@ -983,7 +983,7 @@ class MainActivity : BaseActivity(), Logging,
         menuInflater.inflate(R.menu.menu_main, menu)
         model.actionBarMenu = menu
 
-        updateConnectionStatusImage(model.isConnected.value!!)
+        updateConnectionStatusImage(model.connectionState.value!!)
 
         return true
     }
