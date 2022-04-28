@@ -889,7 +889,7 @@ class MainActivity : BaseActivity(), Logging,
                     connectionJob = null
                 }
 
-                debug("connected to mesh service, isConnected=${model.connectionState.value}")
+                debug("connected to mesh service, connectionState=${model.connectionState.value}")
             }
         }
 
