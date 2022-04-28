@@ -1,7 +1,6 @@
 package com.geeksville.mesh.ui
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Application
 import android.app.PendingIntent
 import android.bluetooth.BluetoothDevice
@@ -21,6 +20,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.*
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
@@ -677,6 +678,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             updateNodeInfo()
         }
 
+        scanModel.devices.observe(viewLifecycleOwner) { devices ->
+            updateDevicesButtons(devices)
+        }
+
         scanModel.errorText.observe(viewLifecycleOwner) { errMsg ->
             if (errMsg != null) {
                 binding.scanStatusText.text = errMsg
@@ -845,10 +850,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private fun initClassicScan() {
 
-        scanModel.devices.observe(viewLifecycleOwner) { devices ->
-            updateDevicesButtons(devices)
-        }
-
         binding.changeRadioButton.setOnClickListener {
             debug("User clicked changeRadioButton")
             if (!myActivity.hasScanPermission()) {
@@ -881,10 +882,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
-    private fun startCompanionScan() {
-        // Disable the change button until our scan has some results
-        binding.changeRadioButton.isEnabled = false
-
+    private fun associationRequest(): AssociationRequest {
         // To skip filtering based on name and supported feature flags (UUIDs),
         // don't include calls to setNamePattern() and addServiceUuid(),
         // respectively. This example uses Bluetooth.
@@ -897,28 +895,46 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // The argument provided in setSingleDevice() determines whether a single
         // device name or a list of device names is presented to the user as
         // pairing options.
-        val pairingRequest: AssociationRequest = AssociationRequest.Builder()
+        return AssociationRequest.Builder()
             .addDeviceFilter(deviceFilter)
             .setSingleDevice(false)
             .build()
+    }
+
+    @SuppressLint("MissingPermission")
+    val associationResultLauncher = registerForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) {
+        it.data
+            ?.getParcelableExtra<BluetoothDevice>(CompanionDeviceManager.EXTRA_DEVICE)
+            ?.let { device ->
+                scanModel.onSelected(
+                    myActivity,
+                    BTScanModel.DeviceListEntry(
+                        device.name,
+                        "x${device.address}",
+                        device.bondState == BOND_BONDED
+                    )
+                )
+            }
+    }
+
+    private fun startCompanionScan() {
+        // Disable the change button until our scan has some results
+        binding.changeRadioButton.isEnabled = false
 
         // When the app tries to pair with the Bluetooth device, show the
         // appropriate pairing request dialog to the user.
         deviceManager.associate(
-            pairingRequest,
+            associationRequest(),
             object : CompanionDeviceManager.Callback() {
                 override fun onDeviceFound(chooserLauncher: IntentSender) {
                     debug("Found one device - enabling changeRadioButton")
                     binding.changeRadioButton.isEnabled = true
                     binding.changeRadioButton.setOnClickListener {
-                        debug("User clicked changeRadioButton")
-                        try {
-                            startIntentSenderForResult(
-                                chooserLauncher,
-                                MainActivity.SELECT_DEVICE_REQUEST_CODE, null, 0, 0, 0, null
-                            )
-                        } catch (ex: Throwable) {
-                            errormsg("CompanionDevice startIntentSenderForResult error")
+                        chooserLauncher.let {
+                            val request = IntentSenderRequest.Builder(it).build()
+                            associationResultLauncher.launch(request)
                         }
                     }
                 }
@@ -933,8 +949,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private fun initModernScan() {
 
-        scanModel.devices.observe(viewLifecycleOwner) { devices ->
-            updateDevicesButtons(devices)
+        scanModel.devices.observe(viewLifecycleOwner) {
             startCompanionScan()
         }
     }
@@ -1059,35 +1074,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 if (binding.provideLocationCheckbox.isChecked)
                     checkLocationEnabled(getString(R.string.location_disabled))
             }
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (hasCompanionDeviceApi && myActivity.hasConnectPermission()
-            && requestCode == MainActivity.SELECT_DEVICE_REQUEST_CODE
-            && resultCode == Activity.RESULT_OK
-        ) {
-            val deviceToPair: BluetoothDevice =
-                data?.getParcelableExtra(CompanionDeviceManager.EXTRA_DEVICE)!!
-
-            // We only keep an association to one device at a time...
-            deviceManager.associations.forEach { old ->
-                if (deviceToPair.address != old) {
-                    debug("Forgetting old BLE association ${old.anonymize}")
-                    deviceManager.disassociate(old)
-                }
-            }
-            scanModel.onSelected(
-                myActivity,
-                BTScanModel.DeviceListEntry(
-                    deviceToPair.name,
-                    "x${deviceToPair.address}",
-                    deviceToPair.bondState == BOND_BONDED
-                )
-            )
-        } else {
-            super.onActivityResult(requestCode, resultCode, data)
         }
     }
 }
