@@ -126,7 +126,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     null
 
         override fun toString(): String {
-            return "DeviceListEntry(name=${name.anonymize}, addr=${address.anonymize})"
+            return "DeviceListEntry(name=${name.anonymize}, addr=${address.anonymize}, bonded=$bonded)"
         }
 
         val isBluetooth: Boolean get() = address[0] == 'x'
@@ -145,7 +145,9 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     }
 
     val bluetoothAdapter = context.bluetoothManager?.adapter
+    private val deviceManager get() = context.deviceManager
     val hasCompanionDeviceApi get() = context.hasCompanionDeviceApi()
+    private val hasConnectPermission get() = context.hasConnectPermission()
     private val usbManager get() = context.usbManager
 
     var selectedAddress: String? = null
@@ -222,6 +224,8 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         }
     }
 
+
+
     private fun addDevice(entry: DeviceListEntry) {
         val oldDevs = devices.value!!
         oldDevs[entry.address] = entry // Add/replace entry
@@ -290,6 +294,9 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     // Include a placeholder for "None"
                     addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
 
+                    if (hasCompanionDeviceApi && hasConnectPermission)
+                        addAssociations()
+
                     usbDrivers.forEach { d ->
                         addDevice(
                             USBDeviceListEntry(usbManager, d)
@@ -325,6 +332,22 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                     .build()
             bluetoothLeScanner.startScan(listOf(filter), settings, scanCallback)
             scanner = bluetoothLeScanner
+        }
+    }
+
+    @SuppressLint("MissingPermission", "NewApi")
+    private fun addAssociations() {
+        deviceManager?.associations?.forEach { bleAddress ->
+            bluetoothAdapter?.getRemoteDevice(bleAddress)?.let { device ->
+                if (device.name.startsWith("Mesh")) {
+                    val entry = DeviceListEntry(
+                        device.name,
+                        "x${device.address}", // full address with the bluetooth prefix added
+                        device.bondState == BOND_BONDED
+                    )
+                    addDevice(entry)
+                }
+            }
         }
     }
 
