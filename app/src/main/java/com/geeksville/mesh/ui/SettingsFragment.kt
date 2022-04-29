@@ -37,7 +37,6 @@ import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.MockInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.SerialInterface
@@ -154,6 +153,7 @@ class BTScanModel @Inject constructor(
     }
 
     val bluetoothAdapter = context.bluetoothManager?.adapter
+    val hasCompanionDeviceApi get() = context.hasCompanionDeviceApi()
     private val usbManager get() = context.usbManager
 
     var selectedAddress: String? = null
@@ -465,10 +465,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     @Inject
     internal lateinit var usbRepository: UsbRepository
-
-    private val hasCompanionDeviceApi: Boolean by lazy {
-        BluetoothInterface.hasCompanionDeviceApi(requireContext())
-    }
 
     private val deviceManager: CompanionDeviceManager by lazy {
         requireContext().getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager
@@ -958,7 +954,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         super.onViewCreated(view, savedInstanceState)
 
         initCommonUI()
-        if (hasCompanionDeviceApi)
+        if (scanModel.hasCompanionDeviceApi)
             initModernScan()
         else
             initClassicScan()
