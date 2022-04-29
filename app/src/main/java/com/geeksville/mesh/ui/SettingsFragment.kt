@@ -145,6 +145,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     }
 
     val bluetoothAdapter = context.bluetoothManager?.adapter
+    val hasCompanionDeviceApi get() = context.hasCompanionDeviceApi()
     private val usbManager get() = context.usbManager
 
     var selectedAddress: String? = null
@@ -456,10 +457,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     // FIXME - move this into a standard GUI helper class
     private val guiJob = Job()
     private val mainScope = CoroutineScope(Dispatchers.Main + guiJob)
-
-    private val hasCompanionDeviceApi: Boolean by lazy {
-        BluetoothInterface.hasCompanionDeviceApi(requireContext())
-    }
 
     private val deviceManager: CompanionDeviceManager by lazy {
         requireContext().getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager
@@ -949,7 +946,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         super.onViewCreated(view, savedInstanceState)
 
         initCommonUI()
-        if (hasCompanionDeviceApi)
+        if (scanModel.hasCompanionDeviceApi)
             initModernScan()
         else
             initClassicScan()

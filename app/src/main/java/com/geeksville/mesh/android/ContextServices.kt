@@ -8,7 +8,6 @@ import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
 import android.os.Build
 import androidx.core.content.ContextCompat
-import com.geeksville.mesh.service.BluetoothInterface
 
 /**
  * @return null on platforms without a BlueTooth driver (i.e. the emulator)
@@ -18,6 +17,14 @@ val Context.bluetoothManager: BluetoothManager? get() = getSystemService(Context
 val Context.usbManager: UsbManager get() = requireNotNull(getSystemService(Context.USB_SERVICE) as? UsbManager?) { "USB_SERVICE is not available"}
 
 val Context.notificationManager: NotificationManager get() = requireNotNull(getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager?)
+
+/**
+ * @return true if CompanionDeviceManager API is present
+ */
+fun Context.hasCompanionDeviceApi(): Boolean =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        packageManager.hasSystemFeature(PackageManager.FEATURE_COMPANION_DEVICE_SETUP)
+    else false
 
 /**
  * return a list of the permissions we don't have
@@ -62,7 +69,7 @@ fun Context.getScanPermissions(): List<String> {
         perms.add(Manifest.permission.BLUETOOTH_ADMIN)
     }
 */
-    if (!BluetoothInterface.hasCompanionDeviceApi(this)) {
+    if (!hasCompanionDeviceApi()) {
         perms.add(Manifest.permission.ACCESS_FINE_LOCATION)
         perms.add(Manifest.permission.BLUETOOTH_ADMIN)
     }
