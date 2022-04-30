@@ -51,11 +51,6 @@ class MessagesState(private val ui: UIViewModel) : Logging {
         if (contactsList[all] == null)
             contactsList[all] = emptyDataPacket()
 
-        val nodes = ui.nodeDB.nodes.value!!
-        nodes.keys.forEachIndexed { index, node ->
-            if (index != 0 && contactsList[node] == null)
-                contactsList[node] = emptyDataPacket(node)
-        }
         contacts.value = contactsList
     }
 

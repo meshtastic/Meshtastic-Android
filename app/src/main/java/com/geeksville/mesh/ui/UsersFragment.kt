@@ -7,8 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.android.Logging
@@ -165,13 +167,29 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                     holder.signalView.visibility = View.VISIBLE
                 }
             }
+            holder.itemView.setOnLongClickListener {
+                if (position > 0) {
+                    debug("calling MessagesFragment filter:${n.user?.id}")
+                    setFragmentResult(
+                        "requestKey",
+                        bundleOf("contactId" to n.user?.id, "contactName" to name)
+                    )
+                    parentFragmentManager.beginTransaction()
+                        .replace(R.id.mainActivityLayout, MessagesFragment())
+                        .addToBackStack(null)
+                        .commit()
+                }
+                true
+            }
         }
 
         private var nodes = arrayOf<NodeInfo>()
 
         /// Called when our node DB changes
-        fun onNodesChanged(nodesIn: Collection<NodeInfo>) {
-            nodes = nodesIn.toTypedArray()
+        fun onNodesChanged(nodesIn: Array<NodeInfo>) {
+            if (nodesIn.size > 1)
+                nodesIn.sortWith(compareByDescending { it.lastHeard }, 1)
+            nodes = nodesIn
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all nodes
         }
     }
@@ -210,9 +228,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         binding.nodeListView.adapter = nodesAdapter
         binding.nodeListView.layoutManager = LinearLayoutManager(requireContext())
 
-        model.nodeDB.nodes.observe(viewLifecycleOwner, {
-            nodesAdapter.onNodesChanged(it.values)
-        })
+        model.nodeDB.nodes.observe(viewLifecycleOwner) {
+            nodesAdapter.onNodesChanged(it.values.toTypedArray())
+        }
     }
 }
 
