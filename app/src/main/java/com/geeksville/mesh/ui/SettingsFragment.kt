@@ -37,7 +37,6 @@ import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.MockInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.SerialInterface
@@ -135,7 +134,7 @@ class BTScanModel @Inject constructor(
                     null
 
         override fun toString(): String {
-            return "DeviceListEntry(name=${name.anonymize}, addr=${address.anonymize})"
+            return "DeviceListEntry(name=${name.anonymize}, addr=${address.anonymize}, bonded=$bonded)"
         }
 
         val isBluetooth: Boolean get() = address[0] == 'x'
@@ -153,7 +152,10 @@ class BTScanModel @Inject constructor(
         debug("BTScanModel cleared")
     }
 
-    val bluetoothAdapter = context.bluetoothManager?.adapter
+    private val bluetoothAdapter = context.bluetoothManager?.adapter
+    private val deviceManager get() = context.deviceManager
+    val hasCompanionDeviceApi get() = context.hasCompanionDeviceApi()
+    private val hasConnectPermission get() = context.hasConnectPermission()
     private val usbManager get() = context.usbManager
 
     var selectedAddress: String? = null
@@ -298,6 +300,9 @@ class BTScanModel @Inject constructor(
                     // Include a placeholder for "None"
                     addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
 
+                    // Include CompanionDeviceManager valid associations
+                    addDeviceAssociations()
+
                     serialDevices.forEach { (_, d) ->
                         addDevice(USBDeviceListEntry(usbManager, d))
                     }
@@ -334,6 +339,37 @@ class BTScanModel @Inject constructor(
         }
     }
 
+    /**
+     * @return DeviceListEntry from Bluetooth Address.
+     * Only valid if name begins with "Meshtastic"...
+     */
+    @SuppressLint("MissingPermission")
+    fun bleDeviceFrom(bleAddress: String): DeviceListEntry {
+        val device =
+            if (hasConnectPermission) bluetoothAdapter?.getRemoteDevice(bleAddress) else null
+
+        return if (device != null && device.name != null) {
+            DeviceListEntry(
+                device.name,
+                "x${device.address}", // full address with the bluetooth prefix added
+                device.bondState == BOND_BONDED
+            )
+        } else DeviceListEntry("", "", false)
+    }
+
+    @SuppressLint("NewApi")
+    private fun addDeviceAssociations() {
+        if (hasCompanionDeviceApi) deviceManager?.associations?.forEach { bleAddress ->
+            val bleDevice = bleDeviceFrom(bleAddress)
+            if (!bleDevice.bonded) { // Clean up associations after pairing is removed
+                debug("Forgetting old BLE association ${bleAddress.anonymize}")
+                deviceManager?.disassociate(bleAddress)
+            } else if (bleDevice.name.startsWith("Mesh")) {
+                addDevice(bleDevice)
+            }
+        }
+    }
+
     val devices = object : MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf()) {
 
         /**
@@ -349,7 +385,7 @@ class BTScanModel @Inject constructor(
          */
         override fun onInactive() {
             super.onInactive()
-            // stopScan()
+            if (!hasCompanionDeviceApi) stopScan()
         }
     }
 
@@ -465,10 +501,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     @Inject
     internal lateinit var usbRepository: UsbRepository
-
-    private val hasCompanionDeviceApi: Boolean by lazy {
-        BluetoothInterface.hasCompanionDeviceApi(requireContext())
-    }
 
     private val deviceManager: CompanionDeviceManager by lazy {
         requireContext().getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager
@@ -649,9 +681,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = regionAdapter
 
-        bluetoothViewModel.enabled.observe(viewLifecycleOwner) {
-            if (it) binding.changeRadioButton.show()
-            else binding.changeRadioButton.hide()
+        bluetoothViewModel.enabled.observe(viewLifecycleOwner) { enabled ->
+            if (enabled) {
+                binding.changeRadioButton.show()
+                if (scanModel.devices.value.isNullOrEmpty()) scanModel.setupScan()
+                if (binding.scanStatusText.text == getString(R.string.requires_bluetooth)) updateNodeInfo()
+            } else binding.changeRadioButton.hide()
         }
 
         model.ownerName.observe(viewLifecycleOwner) { name ->
@@ -770,8 +805,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         b.text = device.name
         b.id = View.generateViewId()
         b.isEnabled = enabled
-        b.isChecked =
-            device.address == scanModel.selectedNotNull && device.bonded // Only show checkbox if device is still paired
+        b.isChecked = device.address == scanModel.selectedNotNull
         binding.deviceRadioGroup.addView(b)
 
         b.setOnClickListener {
@@ -780,21 +814,15 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
             b.isChecked =
                 scanModel.onSelected(myActivity, device)
-
-            if (!b.isSelected) {
-                binding.scanStatusText.text = getString(R.string.please_pair)
-            }
         }
     }
 
-    @SuppressLint("MissingPermission")
     private fun updateDevicesButtons(devices: MutableMap<String, BTScanModel.DeviceListEntry>?) {
         // Remove the old radio buttons and repopulate
         binding.deviceRadioGroup.removeAllViews()
 
         if (devices == null) return
 
-        val adapter = scanModel.bluetoothAdapter
         var hasShownOurDevice = false
         devices.values.forEach { device ->
             if (device.address == scanModel.selectedNotNull)
@@ -810,14 +838,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             // and before use
             val bleAddr = scanModel.selectedBluetooth
 
-            if (bleAddr != null && adapter != null && myActivity.hasConnectPermission()) {
-                val bDevice =
-                    adapter.getRemoteDevice(bleAddr)
-                if (bDevice.name != null) { // ignore nodes that node have a name, that means we've lost them since they appeared
+            if (bleAddr != null) {
+                debug("bleAddr= $bleAddr selected= ${scanModel.selectedAddress}")
+                val bleDevice = scanModel.bleDeviceFrom(bleAddr)
+                if (bleDevice.name.startsWith("Mesh")) { // ignore nodes that node have a name, that means we've lost them since they appeared
                     val curDevice = BTScanModel.DeviceListEntry(
-                        bDevice.name,
-                        scanModel.selectedAddress!!,
-                        bDevice.bondState == BOND_BONDED
+                        bleDevice.name,
+                        bleDevice.address,
+                        bleDevice.bonded
                     )
                     addDeviceButton(
                         curDevice,
@@ -958,7 +986,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         super.onViewCreated(view, savedInstanceState)
 
         initCommonUI()
-        if (hasCompanionDeviceApi)
+        if (scanModel.hasCompanionDeviceApi)
             initModernScan()
         else
             initClassicScan()
@@ -1068,7 +1096,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val hasUSB = usbRepository.serialDevicesWithDrivers.value.isNotEmpty()
         if (!hasUSB) {
             // Warn user if BLE is disabled
-            if (scanModel.bluetoothAdapter?.isEnabled != true) {
+            if (bluetoothViewModel.enabled.value == false) {
                 showSnackbar(getString(R.string.error_bluetooth))
             } else {
                 if (binding.provideLocationCheckbox.isChecked)
