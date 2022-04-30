@@ -681,9 +681,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = regionAdapter
 
-        bluetoothViewModel.enabled.observe(viewLifecycleOwner) {
-            if (it) binding.changeRadioButton.show()
-            else binding.changeRadioButton.hide()
+        bluetoothViewModel.enabled.observe(viewLifecycleOwner) { enabled ->
+            if (enabled) {
+                binding.changeRadioButton.show()
+                if (scanModel.devices.value.isNullOrEmpty()) scanModel.setupScan()
+                if (binding.scanStatusText.text == getString(R.string.requires_bluetooth)) updateNodeInfo()
+            } else binding.changeRadioButton.hide()
         }
 
         model.ownerName.observe(viewLifecycleOwner) { name ->
