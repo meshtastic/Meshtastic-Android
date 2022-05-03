@@ -24,6 +24,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
@@ -246,9 +247,11 @@ class BTScanModel @Inject constructor(
                 scanner?.stopScan(scanCallback)
             } catch (ex: Throwable) {
                 warn("Ignoring error stopping scan, probably BT adapter was disabled suddenly: ${ex.message}")
+            } finally {
+                scanner = null
+                _spinner.value = false
             }
-            scanner = null
-        }
+        } else _spinner.value = false
     }
 
     /**
@@ -314,13 +317,20 @@ class BTScanModel @Inject constructor(
         }
     }
 
+    fun startScan () {
+        if (hasCompanionDeviceApi) {
+            startCompanionScan()
+        } else startClassicScan()
+    }
+
     @SuppressLint("MissingPermission")
-    fun startScan() {
+    private fun startClassicScan() {
         /// The following call might return null if the user doesn't have bluetooth access permissions
         val bluetoothLeScanner: BluetoothLeScanner? = bluetoothAdapter?.bluetoothLeScanner
 
         if (bluetoothLeScanner != null) { // could be null if bluetooth is disabled
-            debug("starting scan")
+            debug("starting classic scan")
+            _spinner.value = true
 
             // filter and only accept devices that have our service
             val filter =
@@ -370,6 +380,63 @@ class BTScanModel @Inject constructor(
         }
     }
 
+    private val _spinner = MutableLiveData(false)
+    val spinner: LiveData<Boolean> get() = _spinner
+
+    private val _associationRequest = MutableLiveData<IntentSenderRequest?>(null)
+    val associationRequest: LiveData<IntentSenderRequest?> get() = _associationRequest
+
+    /**
+     * Called immediately after fragment observes CompanionDeviceManager activity result
+     */
+    fun clearAssociationRequest() {
+        _associationRequest.value = null
+    }
+
+    @SuppressLint("NewApi")
+    private fun associationRequest(): AssociationRequest {
+        // To skip filtering based on name and supported feature flags (UUIDs),
+        // don't include calls to setNamePattern() and addServiceUuid(),
+        // respectively. This example uses Bluetooth.
+        // We only look for Mesh (rather than the full name) because NRF52 uses a very short name
+        val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
+            .setNamePattern(Pattern.compile("Mesh.*"))
+            // .addServiceUuid(ParcelUuid(RadioInterfaceService.BTM_SERVICE_UUID), null)
+            .build()
+
+        // The argument provided in setSingleDevice() determines whether a single
+        // device name or a list of device names is presented to the user as
+        // pairing options.
+        return AssociationRequest.Builder()
+            .addDeviceFilter(deviceFilter)
+            .setSingleDevice(false)
+            .build()
+    }
+
+    @SuppressLint("NewApi")
+    private fun startCompanionScan() {
+        debug("starting companion scan")
+        _spinner.value = true
+        deviceManager?.associate(
+            associationRequest(),
+            @SuppressLint("NewApi")
+            object : CompanionDeviceManager.Callback() {
+                override fun onDeviceFound(chooserLauncher: IntentSender) {
+                    debug("CompanionDeviceManager - device found")
+                    _spinner.value = false
+                    chooserLauncher.let {
+                        val request: IntentSenderRequest = IntentSenderRequest.Builder(it).build()
+                        _associationRequest.value = request
+                    }
+                }
+
+                override fun onFailure(error: CharSequence?) {
+                    warn("BLE selection service failed $error")
+                }
+            }, null
+        )
+    }
+
     val devices = object : MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf()) {
 
         /**
@@ -385,7 +452,7 @@ class BTScanModel @Inject constructor(
          */
         override fun onInactive() {
             super.onInactive()
-            if (!hasCompanionDeviceApi) stopScan()
+            stopScan()
         }
     }
 
@@ -501,10 +568,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     @Inject
     internal lateinit var usbRepository: UsbRepository
-
-    private val deviceManager: CompanionDeviceManager by lazy {
-        requireContext().getSystemService(Context.COMPANION_DEVICE_SERVICE) as CompanionDeviceManager
-    }
 
     private val myActivity get() = requireActivity() as MainActivity
 
@@ -723,6 +786,18 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
         }
 
+        // show the spinner when [spinner] is true
+        scanModel.spinner.observe(viewLifecycleOwner) { show ->
+            binding.scanProgressBar.visibility = if (show) View.VISIBLE else View.GONE
+        }
+
+        scanModel.associationRequest.observe(viewLifecycleOwner) { request ->
+            request?.let {
+                associationResultLauncher.launch(request)
+                scanModel.clearAssociationRequest()
+            }
+        }
+
         binding.updateFirmwareButton.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
                 .setMessage("${getString(R.string.update_firmware)}?")
@@ -876,57 +951,22 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
-    private fun initClassicScan() {
-
-        binding.changeRadioButton.setOnClickListener {
-            debug("User clicked changeRadioButton")
-            if (!myActivity.hasScanPermission()) {
-                myActivity.requestScanPermission()
-            } else {
-                checkLocationEnabled()
-                scanLeDevice()
-            }
-        }
-    }
-
     // per https://developer.android.com/guide/topics/connectivity/bluetooth/find-ble-devices
     private fun scanLeDevice() {
         var scanning = false
-        val SCAN_PERIOD: Long = 5000 // Stops scanning after 5 seconds
+        val SCAN_PERIOD: Long = 10000 // Stops scanning after 10 seconds
 
         if (!scanning) { // Stops scanning after a pre-defined scan period.
             Handler(Looper.getMainLooper()).postDelayed({
                 scanning = false
-                binding.scanProgressBar.visibility = View.GONE
                 scanModel.stopScan()
             }, SCAN_PERIOD)
             scanning = true
-            binding.scanProgressBar.visibility = View.VISIBLE
             scanModel.startScan()
         } else {
             scanning = false
-            binding.scanProgressBar.visibility = View.GONE
             scanModel.stopScan()
         }
-    }
-
-    private fun associationRequest(): AssociationRequest {
-        // To skip filtering based on name and supported feature flags (UUIDs),
-        // don't include calls to setNamePattern() and addServiceUuid(),
-        // respectively. This example uses Bluetooth.
-        // We only look for Mesh (rather than the full name) because NRF52 uses a very short name
-        val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
-            .setNamePattern(Pattern.compile("Mesh.*"))
-            // .addServiceUuid(ParcelUuid(RadioInterfaceService.BTM_SERVICE_UUID), null)
-            .build()
-
-        // The argument provided in setSingleDevice() determines whether a single
-        // device name or a list of device names is presented to the user as
-        // pairing options.
-        return AssociationRequest.Builder()
-            .addDeviceFilter(deviceFilter)
-            .setSingleDevice(false)
-            .build()
     }
 
     @SuppressLint("MissingPermission")
@@ -947,49 +987,20 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
     }
 
-    private fun startCompanionScan() {
-        // Disable the change button until our scan has some results
-        binding.changeRadioButton.isEnabled = false
-
-        // When the app tries to pair with the Bluetooth device, show the
-        // appropriate pairing request dialog to the user.
-        deviceManager.associate(
-            associationRequest(),
-            object : CompanionDeviceManager.Callback() {
-                override fun onDeviceFound(chooserLauncher: IntentSender) {
-                    debug("Found one device - enabling changeRadioButton")
-                    binding.changeRadioButton.isEnabled = true
-                    binding.changeRadioButton.setOnClickListener {
-                        chooserLauncher.let {
-                            val request = IntentSenderRequest.Builder(it).build()
-                            associationResultLauncher.launch(request)
-                        }
-                    }
-                }
-
-                override fun onFailure(error: CharSequence?) {
-                    warn("BLE selection service failed $error")
-                    // changeDeviceSelection(myActivity, null) // deselect any device
-                }
-            }, null
-        )
-    }
-
-    private fun initModernScan() {
-
-        scanModel.devices.observe(viewLifecycleOwner) {
-            startCompanionScan()
-        }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         initCommonUI()
-        if (scanModel.hasCompanionDeviceApi)
-            initModernScan()
-        else
-            initClassicScan()
+
+        binding.changeRadioButton.setOnClickListener {
+            debug("User clicked changeRadioButton")
+            if (!myActivity.hasScanPermission()) {
+                myActivity.requestScanPermission()
+            } else {
+                if (!scanModel.hasCompanionDeviceApi) checkLocationEnabled()
+                scanLeDevice()
+            }
+        }
     }
 
     // If the user has not turned on location access throw up a toast warning
