@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import android.widget.ImageView
+import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.activityViewModels
 import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
@@ -31,7 +32,9 @@ import com.geeksville.mesh.model.UIViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.protobuf.ByteString
-import com.google.zxing.integration.android.IntentIntegrator
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanIntentResult
+import com.journeyapps.barcodescanner.ScanOptions
 import dagger.hilt.android.AndroidEntryPoint
 import java.security.SecureRandom
 
@@ -64,7 +67,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = ChannelFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -193,7 +196,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             requireActivity().hideKeyboard()
         }
 
-        binding.resetButton.setOnClickListener { _ ->
+        binding.resetButton.setOnClickListener {
             // User just locked it, we should warn and then apply changes to radio
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.reset_to_defaults)
@@ -211,12 +214,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         binding.scanButton.setOnClickListener {
             if ((requireActivity() as MainActivity).hasCameraPermission()) {
                 debug("Starting QR code scanner")
-                val zxingScan = IntentIntegrator.forSupportFragment(this)
+                val zxingScan = ScanOptions()
                 zxingScan.setCameraId(0)
                 zxingScan.setPrompt("")
                 zxingScan.setBeepEnabled(false)
-                zxingScan.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
-                zxingScan.initiateScan()
+                zxingScan.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                barcodeLauncher.launch(zxingScan)
             } else {
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.camera_required)
@@ -232,7 +235,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
 
         // Note: Do not use setOnCheckedChanged here because we don't want to be called when we programmatically disable editing
-        binding.editableCheckbox.setOnClickListener { _ ->
+        binding.editableCheckbox.setOnClickListener {
 
             /// We use this to determine if the user tried to install a custom name
             var originalName = ""
@@ -316,14 +319,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         return ChannelProtos.ChannelSettings.ModemConfig.UNRECOGNIZED
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-        if (result != null) {
-            if (result.contents != null) {
-                ((requireActivity() as MainActivity).perhapsChangeChannel(Uri.parse(result.contents)))
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data)
+    // Register the launcher and result handler
+    private val barcodeLauncher: ActivityResultLauncher<ScanOptions> = registerForActivityResult(
+        ScanContract()
+    ) { result: ScanIntentResult ->
+        if (result.contents != null) {
+            ((requireActivity() as MainActivity).perhapsChangeChannel(Uri.parse(result.contents)))
         }
     }
 }
