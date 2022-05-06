@@ -39,7 +39,6 @@ import com.google.protobuf.InvalidProtocolBufferException
 import dagger.Lazy
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.json.Json
 import java.util.*
 import javax.inject.Inject
@@ -326,14 +325,17 @@ class MeshService : Service(), Logging {
         serviceScope.handledLaunch {
             loadSettings() // Load our last known node DB
 
-            radioInterfaceService.receivedData.onEach(::onReceiveFromRadio)
-            radioInterfaceService.connectionState.onEach(::onRadioConnectionState)
-
             // We in turn need to use the radiointerface service
             radioInterfaceService.connect()
-
-            // the rest of our init will happen once we are in radioConnection.onServiceConnected
         }
+        serviceScope.handledLaunch {
+            radioInterfaceService.connectionState.collect(::onRadioConnectionState)
+        }
+        serviceScope.handledLaunch {
+            radioInterfaceService.receivedData.collect(::onReceiveFromRadio)
+        }
+
+        // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
 
     /**
