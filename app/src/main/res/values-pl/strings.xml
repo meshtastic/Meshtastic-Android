@@ -57,7 +57,7 @@ Jeśli jesteś zainteresowany opłaceniem przez nas mapboxa (lub przejściem do 
     <string name="connected_sleeping">Połączono z radiem w stanie uśpienia</string>
     <string name="update_to">Aktualizuj do %s</string>
     <string name="app_too_old">Konieczna aktualizacja aplikacji</string>
-    <string name="must_update">Należy zaktualizować aplikację za pomocą Sklepu Play lub Githuba, bo jest zbyt stara aby dogadać się z oprogramowaniem zainstalowanym na tym tadiu. <a href="https://www.meshtastic.org/software/android-too-old.html">Więcej informacji (ang.)</a></string>
+    <string name="must_update">Należy zaktualizować aplikację za pomocą Sklepu Play lub Githuba, bo jest zbyt stara aby dogadać się z oprogramowaniem zainstalowanym na tym tadiu. <a href="https://meshtastic.org/docs/software/android/android-installation">Więcej informacji (ang.)</a></string>
     <string name="none">Brak (wyłącz)</string>
     <string name="modem_config_short">Krótki zasięg / Szybko</string>
     <string name="modem_config_medium">Średni zasięg / Szybko</string>
