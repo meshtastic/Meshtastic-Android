@@ -51,6 +51,27 @@ class RadioInterfaceService @Inject constructor(
     private val _receivedData = MutableSharedFlow<ByteArray>()
     val receivedData: SharedFlow<ByteArray> = _receivedData
 
+    private val logSends = false
+    private val logReceives = false
+    private lateinit var sentPacketsLog: BinaryLogFile // inited in onCreate
+    private lateinit var receivedPacketsLog: BinaryLogFile
+
+    /**
+     * We recreate this scope each time we stop an interface
+     */
+    var serviceScope = CoroutineScope(Dispatchers.IO + Job())
+
+    private var radioIf: IRadioInterface = NopInterface()
+
+    /** true if we have started our interface
+     *
+     * Note: an interface may be started without necessarily yet having a connection
+     */
+    private var isStarted = false
+
+    /// true if our interface is currently connected to a device
+    private var isConnected = false
+
     init {
         processLifecycle.coroutineScope.launch {
             bluetoothRepository.state.collect { state ->
@@ -144,27 +165,6 @@ class RadioInterfaceService @Inject constructor(
             return address
         }
     }
-
-    private val logSends = false
-    private val logReceives = false
-    private lateinit var sentPacketsLog: BinaryLogFile // inited in onCreate
-    private lateinit var receivedPacketsLog: BinaryLogFile
-
-    /**
-     * We recreate this scope each time we stop an interface
-     */
-    var serviceScope = CoroutineScope(Dispatchers.IO + Job())
-
-    private var radioIf: IRadioInterface = NopInterface()
-
-    /** true if we have started our interface
-     *
-     * Note: an interface may be started without necessarily yet having a connection
-     */
-    private var isStarted = false
-
-    /// true if our interface is currently connected to a device
-    private var isConnected = false
 
     private fun broadcastConnectionChanged(isConnected: Boolean, isPermanent: Boolean) {
         debug("Broadcasting connection=$isConnected")
