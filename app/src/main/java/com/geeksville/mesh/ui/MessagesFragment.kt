@@ -59,9 +59,6 @@ class MessagesFragment : Fragment(), Logging {
 
     // Allows textMultiline with IME_ACTION_SEND
     private fun EditText.onActionSend(func: () -> Unit) {
-        imeOptions = EditorInfo.IME_ACTION_SEND
-        InputType.TYPE_TEXT_FLAG_MULTI_LINE
-        setRawInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES)
         setOnEditorActionListener { _, actionId, _ ->
 
             if (actionId == EditorInfo.IME_ACTION_SEND) {
