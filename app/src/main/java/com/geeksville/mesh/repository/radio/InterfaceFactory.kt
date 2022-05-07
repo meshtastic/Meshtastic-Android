@@ -17,7 +17,7 @@ abstract class InterfaceFactory(val prefix: Char) {
         factories[prefix] = this
     }
 
-    abstract fun createInterface(service: RadioInterfaceService, usbRepository: UsbRepository, rest: String): IRadioInterface
+    abstract fun createInterface(context: Context, service: RadioInterfaceService, usbRepository: UsbRepository, rest: String): IRadioInterface
 
     /** Return true if this address is still acceptable. For BLE that means, still bonded */
     open fun addressValid(context: Context, usbRepository: UsbRepository, rest: String): Boolean = true
