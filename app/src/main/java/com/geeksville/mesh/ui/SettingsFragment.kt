@@ -906,7 +906,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             val bleAddr = scanModel.selectedBluetooth
 
             if (bleAddr != null) {
-                debug("bleAddr= $bleAddr selected= ${scanModel.selectedAddress}")
                 val bleDevice = scanModel.bleDeviceFrom(bleAddr)
                 if (bleDevice.name.startsWith("Mesh")) { // ignore nodes that node have a name, that means we've lost them since they appeared
                     val curDevice = BTScanModel.DeviceListEntry(
@@ -1095,16 +1094,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         myActivity.registerReceiver(updateProgressReceiver, updateProgressFilter)
 
-        // Keep reminding user BLE is still off
-        val hasUSB = SerialInterface.findDrivers(myActivity).isNotEmpty()
-        if (!hasUSB) {
-            // Warn user if BLE is disabled
-            if (bluetoothViewModel.enabled.value == false) {
-                showSnackbar(getString(R.string.error_bluetooth))
-            } else {
-                if (binding.provideLocationCheckbox.isChecked)
-                    checkLocationEnabled(getString(R.string.location_disabled))
-            }
-        }
+        // Warn user if BLE is disabled
+        if (scanModel.selectedBluetooth != null && bluetoothViewModel.enabled.value == false) {
+            Toast.makeText(
+                requireContext(),
+                getString(R.string.error_bluetooth),
+                Toast.LENGTH_LONG
+            ).show()
+        } else if (binding.provideLocationCheckbox.isChecked)
+            checkLocationEnabled(getString(R.string.location_disabled))
     }
 }
