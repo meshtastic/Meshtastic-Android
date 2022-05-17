@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.ColorMatrix
@@ -13,14 +14,15 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ArrayAdapter
 import android.widget.ImageView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
+import com.geeksville.android.isGooglePlayAvailable
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos
-import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.hasCameraPermission
 import com.geeksville.mesh.databinding.ChannelFragmentBinding
@@ -31,8 +33,12 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.mlkit.vision.barcode.common.Barcode
+import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
+import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import com.google.protobuf.ByteString
-import com.google.zxing.integration.android.IntentIntegrator
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import dagger.hilt.android.AndroidEntryPoint
 import java.security.SecureRandom
 
@@ -65,7 +71,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = ChannelFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -188,6 +194,52 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
     }
 
+    private fun zxingScan() {
+        debug("Starting zxing QR code scanner")
+        val zxingScan = ScanOptions()
+        zxingScan.setCameraId(0)
+        zxingScan.setPrompt("")
+        zxingScan.setBeepEnabled(false)
+        zxingScan.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+        barcodeLauncher.launch(zxingScan)
+    }
+
+    private fun requestPermissionAndScan() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.camera_required)
+            .setMessage(R.string.why_camera_required)
+            .setNeutralButton(R.string.cancel) { _, _ ->
+                debug("Camera permission denied")
+            }
+            .setPositiveButton(getString(R.string.accept)) { _, _ ->
+                requestPermissionAndScanLauncher.launch(Manifest.permission.CAMERA)
+            }
+            .show()
+    }
+
+
+    private fun mlkitScan() {
+        debug("Starting ML Kit QR code scanner")
+        val options = GmsBarcodeScannerOptions.Builder()
+            .setBarcodeFormats(
+                Barcode.FORMAT_QR_CODE
+            )
+            .build()
+        val scanner = GmsBarcodeScanning.getClient(requireContext(), options)
+        scanner.startScan()
+            .addOnSuccessListener { barcode ->
+                if (barcode.rawValue != null)
+                    model.setRequestChannelUrl(Uri.parse(barcode.rawValue))
+            }
+            .addOnFailureListener {
+                Snackbar.make(
+                    requireView(),
+                    R.string.channel_invalid,
+                    Snackbar.LENGTH_SHORT
+                ).show()
+            }
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -195,7 +247,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             requireActivity().hideKeyboard()
         }
 
-        binding.resetButton.setOnClickListener { _ ->
+        binding.resetButton.setOnClickListener {
             // User just locked it, we should warn and then apply changes to radio
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.reset_to_defaults)
@@ -211,30 +263,19 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
 
         binding.scanButton.setOnClickListener {
-            if ((requireActivity() as MainActivity).hasCameraPermission()) {
-                debug("Starting QR code scanner")
-                val zxingScan = IntentIntegrator.forSupportFragment(this)
-                zxingScan.setCameraId(0)
-                zxingScan.setPrompt("")
-                zxingScan.setBeepEnabled(false)
-                zxingScan.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
-                zxingScan.initiateScan()
+            if (isGooglePlayAvailable(requireContext())) {
+                mlkitScan()
             } else {
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(R.string.camera_required)
-                    .setMessage(R.string.why_camera_required)
-                    .setNeutralButton(R.string.cancel) { _, _ ->
-                        debug("Camera permission denied")
-                    }
-                    .setPositiveButton(getString(R.string.accept)) { _, _ ->
-                        (requireActivity() as MainActivity).requestCameraPermission()
-                    }
-                    .show()
+                if (requireContext().hasCameraPermission()) {
+                    zxingScan()
+                } else {
+                    requestPermissionAndScan()
+                }
             }
         }
 
         // Note: Do not use setOnCheckedChanged here because we don't want to be called when we programmatically disable editing
-        binding.editableCheckbox.setOnClickListener { _ ->
+        binding.editableCheckbox.setOnClickListener {
 
             /// We use this to determine if the user tried to install a custom name
             var originalName = ""
@@ -299,14 +340,14 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             shareChannel()
         }
 
-        model.channels.observe(viewLifecycleOwner, {
+        model.channels.observe(viewLifecycleOwner) {
             setGUIfromModel()
-        })
+        }
 
         // If connection state changes, we might need to enable/disable buttons
-        model.isConnected.observe(viewLifecycleOwner, {
+        model.isConnected.observe(viewLifecycleOwner) {
             setGUIfromModel()
-        })
+        }
     }
 
     private fun getModemConfig(selectedChannelOptionString: String): ChannelProtos.ChannelSettings.ModemConfig {
@@ -314,18 +355,18 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             if (getString(item.configRes) == selectedChannelOptionString)
                 return item.modemConfig
         }
-
         return ChannelProtos.ChannelSettings.ModemConfig.UNRECOGNIZED
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-        if (result != null) {
-            if (result.contents != null) {
-                ((requireActivity() as MainActivity).perhapsChangeChannel(Uri.parse(result.contents)))
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data)
+    private val requestPermissionAndScanLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { allowed ->
+            if (allowed) zxingScan()
+        }
+
+    // Register zxing launcher and result handler
+    private val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
+        if (result.contents != null) {
+            model.setRequestChannelUrl(Uri.parse(result.contents))
         }
     }
 }

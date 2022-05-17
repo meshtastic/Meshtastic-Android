@@ -126,7 +126,7 @@ class MainActivity : AppCompatActivity(), Logging,
         const val REQUEST_ENABLE_BT = 10
         const val DID_REQUEST_PERM = 11
         const val RC_SIGN_IN = 12 // google signin completed
-        const val SELECT_DEVICE_REQUEST_CODE = 13
+        // const val SELECT_DEVICE_REQUEST_CODE = 13
         const val CREATE_CSV_FILE = 14
     }
 
@@ -514,8 +514,7 @@ class MainActivity : AppCompatActivity(), Logging,
                 requestedChannelUrl = appLinkData
 
                 // if the device is connected already, process it now
-                if (model.isConnected.value == MeshService.ConnectionState.CONNECTED)
-                    perhapsChangeChannel()
+                perhapsChangeChannel()
 
                 // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
             }
@@ -733,16 +732,16 @@ class MainActivity : AppCompatActivity(), Logging,
         }
     }
 
-    fun perhapsChangeChannel(url: Uri? = requestedChannelUrl) {
-        // If the is opening a channel URL, handle it now
-        if (url != null) {
+    private fun perhapsChangeChannel(url: Uri? = requestedChannelUrl) {
+        // if the device is connected already, process it now
+        if (url != null && model.isConnected.value == MeshService.ConnectionState.CONNECTED) {
+            requestedChannelUrl = null
             try {
                 val channels = ChannelSet(url)
                 val primary = channels.primaryChannel
                 if (primary == null)
                     showSnackbar(R.string.channel_invalid)
                 else {
-                    requestedChannelUrl = null
 
                     MaterialAlertDialogBuilder(this)
                         .setTitle(R.string.new_channel_rcvd)
@@ -981,6 +980,15 @@ class MainActivity : AppCompatActivity(), Logging,
                         startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
                     } else requestPermission()
                 }
+            }
+        }
+
+        // Call perhapsChangeChannel() whenever [changeChannelUrl] updates with a non-null value
+        model.requestChannelUrl.observe(this) { url ->
+            url?.let {
+                requestedChannelUrl = url
+                model.clearRequestChannelUrl()
+                perhapsChangeChannel()
             }
         }
 

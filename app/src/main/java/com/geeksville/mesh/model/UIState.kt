@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.RemoteException
 import android.view.Menu
 import androidx.core.content.edit
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,7 +21,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -101,6 +101,20 @@ class UIViewModel @Inject constructor(
     }
 
     val channels = object : MutableLiveData<ChannelSet?>(null) {
+    }
+
+    private val _requestChannelUrl = MutableLiveData<Uri?>(null)
+    val requestChannelUrl: LiveData<Uri?> get() = _requestChannelUrl
+
+    fun setRequestChannelUrl(channelUrl: Uri) {
+        _requestChannelUrl.value = channelUrl
+    }
+
+    /**
+     * Called immediately after activity observes requestChannelUrl
+     */
+    fun clearRequestChannelUrl() {
+        _requestChannelUrl.value = null
     }
 
     var positionBroadcastSecs: Int?
