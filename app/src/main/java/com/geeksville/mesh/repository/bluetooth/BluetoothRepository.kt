@@ -50,8 +50,13 @@ class BluetoothRepository @Inject constructor(
         }
     }
 
+    /** @return true for a valid Bluetooth address, false otherwise */
+    fun isValid(bleAddress: String): Boolean {
+        return BluetoothAdapter.checkBluetoothAddress(bleAddress)
+    }
+
     fun getRemoteDevice(address: String): BluetoothDevice? {
-        return bluetoothAdapterLazy.get()?.getRemoteDevice(address)
+        return bluetoothAdapterLazy.get()?.takeIf { isValid(address) }?.getRemoteDevice(address)
     }
 
     fun getBluetoothLeScanner(): BluetoothLeScanner? {
