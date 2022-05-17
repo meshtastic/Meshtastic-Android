@@ -42,6 +42,7 @@ import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
+import com.geeksville.mesh.repository.nsd.NsdRepository
 import com.geeksville.mesh.repository.radio.MockInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.SerialInterface
@@ -59,7 +60,11 @@ import com.google.android.material.snackbar.Snackbar
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import java.util.regex.Pattern
 import javax.inject.Inject
 
@@ -121,7 +126,7 @@ class BTScanModel @Inject constructor(
     private val application: Application,
     private val bluetoothRepository: BluetoothRepository,
     private val usbRepository: UsbRepository,
-    // private val nsdRepository: NsdRepository,
+    private val nsdRepository: NsdRepository,
 ) : ViewModel(), Logging {
 
     private val context: Context get() = application.applicationContext
@@ -233,6 +238,9 @@ class BTScanModel @Inject constructor(
 
     @SuppressLint("MissingPermission")
     fun stopScan() {
+        // Stop Network Service Discovery (for TCP)
+        networkDiscovery?.cancel()
+
         if (scanner != null) {
             debug("stopping scan")
             try {
@@ -288,9 +296,9 @@ class BTScanModel @Inject constructor(
                 addDeviceAssociations()
 
                 // Include Network Service Discovery
-                // nsdRepository.resolvedList?.forEach { service ->
-                //     addDevice(TCPDeviceListEntry(service))
-                // }
+                nsdRepository.resolvedList?.forEach { service ->
+                    addDevice(TCPDeviceListEntry(service))
+                }
 
                 val serialDevices by lazy { usbRepository.serialDevicesWithDrivers.value }
                 serialDevices.forEach { (_, d) ->
@@ -303,7 +311,13 @@ class BTScanModel @Inject constructor(
         }
     }
 
-    fun startScan () {
+    private var networkDiscovery: Job? = null
+    fun startScan() {
+        // Start Network Service Discovery (find TCP devices)
+        networkDiscovery = nsdRepository.networkDiscoveryFlow()
+            .onEach { addDevice(TCPDeviceListEntry(it)) }
+            .launchIn(CoroutineScope(Dispatchers.Main))
+
         if (hasCompanionDeviceApi) {
             startCompanionScan()
         } else startClassicScan()
