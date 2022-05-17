@@ -87,7 +87,6 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
                         } else
                             readChar(c.toByte())
                     } catch (ex: SocketTimeoutException) {
-                        errormsg("SocketTimeoutException in TCP reader: $ex")
                         // Ignore and start another read
                     }
                 }
