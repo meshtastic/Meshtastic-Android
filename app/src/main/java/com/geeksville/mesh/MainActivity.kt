@@ -18,6 +18,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
@@ -115,17 +116,17 @@ eventually:
   make a custom theme: https://github.com/material-components/material-components-android/tree/master/material-theme-builder
 */
 
-val utf8 = Charset.forName("UTF-8")
+val utf8: Charset = Charset.forName("UTF-8")
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity(), Logging,
     ActivityCompat.OnRequestPermissionsResultCallback {
 
     companion object {
-        const val REQUEST_ENABLE_BT = 10
+        // const val REQUEST_ENABLE_BT = 10
         const val DID_REQUEST_PERM = 11
         const val RC_SIGN_IN = 12 // google signin completed
-        const val SELECT_DEVICE_REQUEST_CODE = 13
+        // const val SELECT_DEVICE_REQUEST_CODE = 13
         const val CREATE_CSV_FILE = 14
     }
 
@@ -135,6 +136,7 @@ class MainActivity : BaseActivity(), Logging,
     private val mainScope = CoroutineScope(Dispatchers.Main + Job())
 
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
+    private val scanModel: BTScanModel by viewModels()
     val model: UIViewModel by viewModels()
 
     @Inject
@@ -537,6 +539,13 @@ class MainActivity : BaseActivity(), Logging,
                 warn("Unexpected action $appLinkAction")
             }
         }
+    }
+
+    private var requestedEnable = false
+    private val bleRequestEnable = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        requestedEnable = false
     }
 
     override fun onDestroy() {
@@ -945,19 +954,15 @@ class MainActivity : BaseActivity(), Logging,
         super.onStop()
     }
 
-    @SuppressLint("MissingPermission")
     override fun onStart() {
         super.onStart()
 
         bluetoothViewModel.enabled.observe(this) { enabled ->
-            if (!enabled) {
-                // Ask to start bluetooth if no USB devices are visible
-                val hasUSB = usbRepository.serialDevicesWithDrivers.value.isNotEmpty()
-                if (!isInTestLab && !hasUSB) {
-                    if (hasConnectPermission()) {
-                        val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                        startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
-                    } else requestPermission()
+            if (!enabled && !requestedEnable) {
+                if (!isInTestLab && scanModel.selectedBluetooth) {
+                    requestedEnable = true
+                    val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                    bleRequestEnable.launch(enableBtIntent)
                 }
             }
         }

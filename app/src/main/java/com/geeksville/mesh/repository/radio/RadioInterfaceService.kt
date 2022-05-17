@@ -77,7 +77,7 @@ class RadioInterfaceService @Inject constructor(
             bluetoothRepository.state.collect { state ->
                 if (state.enabled) {
                     startInterface()
-                } else {
+                } else if (radioIf is BluetoothInterface) {
                     stopInterface()
                 }
             }
@@ -281,7 +281,7 @@ class RadioInterfaceService @Inject constructor(
 
             debug("Setting bonded device to ${address.anonymize}")
 
-            getPrefs(context).edit(commit = true) {
+            getPrefs(context).edit {
                 if (address == null)
                     this.remove(DEVADDR_KEY)
                 else

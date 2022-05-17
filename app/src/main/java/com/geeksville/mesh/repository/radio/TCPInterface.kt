@@ -59,9 +59,6 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
     }
 
     override fun connect() {
-        //here you must put your computer's IP address.
-        //here you must put your computer's IP address.
-
         // No need to keep a reference to this thread - it will exit when we close inStream
         thread(start = true, isDaemon = true, name = "TCP reader") {
             try {
@@ -90,6 +87,7 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
                         } else
                             readChar(c.toByte())
                     } catch (ex: SocketTimeoutException) {
+                        errormsg("SocketTimeoutException in TCP reader: $ex")
                         // Ignore and start another read
                     }
                 }
