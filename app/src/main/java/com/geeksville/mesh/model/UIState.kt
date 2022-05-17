@@ -107,6 +107,20 @@ class UIViewModel @Inject constructor(
     private val _channels = MutableLiveData<ChannelSet?>()
     val channels: LiveData<ChannelSet?> get() = _channels
 
+    private val _requestChannelUrl = MutableLiveData<Uri?>(null)
+    val requestChannelUrl: LiveData<Uri?> get() = _requestChannelUrl
+
+    fun setRequestChannelUrl(channelUrl: Uri) {
+        _requestChannelUrl.value = channelUrl
+    }
+
+    /**
+     * Called immediately after activity observes requestChannelUrl
+     */
+    fun clearRequestChannelUrl() {
+        _requestChannelUrl.value = null
+    }
+
     var positionBroadcastSecs: Int?
         get() {
             _radioConfig.value?.preferences?.let {

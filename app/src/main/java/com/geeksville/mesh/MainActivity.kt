@@ -518,8 +518,7 @@ class MainActivity : BaseActivity(), Logging,
                 requestedChannelUrl = appLinkData
 
                 // if the device is connected already, process it now
-                if (model.isConnected())
-                    perhapsChangeChannel()
+                perhapsChangeChannel()
 
                 // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
             }
@@ -721,16 +720,16 @@ class MainActivity : BaseActivity(), Logging,
         }
     }
 
-    fun perhapsChangeChannel(url: Uri? = requestedChannelUrl) {
-        // If the is opening a channel URL, handle it now
-        if (url != null) {
+    private fun perhapsChangeChannel(url: Uri? = requestedChannelUrl) {
+        // if the device is connected already, process it now
+        if (url != null && model.isConnected()) {
+            requestedChannelUrl = null
             try {
                 val channels = ChannelSet(url)
                 val primary = channels.primaryChannel
                 if (primary == null)
                     showSnackbar(R.string.channel_invalid)
                 else {
-                    requestedChannelUrl = null
 
                     MaterialAlertDialogBuilder(this)
                         .setTitle(R.string.new_channel_rcvd)
@@ -964,6 +963,15 @@ class MainActivity : BaseActivity(), Logging,
                     val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                     bleRequestEnable.launch(enableBtIntent)
                 }
+            }
+        }
+
+        // Call perhapsChangeChannel() whenever [changeChannelUrl] updates with a non-null value
+        model.requestChannelUrl.observe(this) { url ->
+            url?.let {
+                requestedChannelUrl = url
+                model.clearRequestChannelUrl()
+                perhapsChangeChannel()
             }
         }
 
