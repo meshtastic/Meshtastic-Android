@@ -120,7 +120,7 @@ interface IMeshService {
     void setRegion(int regionCode);
 
     /// Start providing location (from phone GPS) to mesh
-    void setupProvideLocation();
+    void startProvideLocation();
 
     /// Stop providing location (from phone GPS) to mesh
     void stopProvideLocation();

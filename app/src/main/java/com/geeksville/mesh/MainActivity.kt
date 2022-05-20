@@ -683,7 +683,7 @@ class MainActivity : BaseActivity(), Logging,
                 }
                 // if provideLocation enabled: Start providing location (from phone GPS) to mesh
                 if (model.provideLocation.value == true)
-                    service.setupProvideLocation()
+                    service.startProvideLocation()
             }
         } else {
             // For other connection states, just slam them in

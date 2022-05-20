@@ -1,14 +1,10 @@
 package com.geeksville.mesh.service
 
-import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import android.os.Looper
 import android.os.RemoteException
-import android.widget.Toast
-import androidx.annotation.UiThread
 import androidx.core.content.edit
 import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
@@ -22,22 +18,19 @@ import com.geeksville.mesh.android.hasBackgroundPermission
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.DeviceVersion
+import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.util.*
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.LocationSettingsRequest
 import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
 import dagger.Lazy
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.json.Json
 import java.util.*
 import javax.inject.Inject
@@ -64,6 +57,9 @@ class MeshService : Service(), Logging {
 
     @Inject
     lateinit var usbRepository: Lazy<UsbRepository>
+
+    @Inject
+    lateinit var locationRepository: LocationRepository
 
     companion object : Logging {
 
@@ -133,16 +129,10 @@ class MeshService : Service(), Logging {
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
     private var connectionState = ConnectionState.DISCONNECTED
 
-    private var fusedLocationClient: FusedLocationProviderClient? = null
+    private var locationFlow: Job? = null
 
     // If we've ever read a valid region code from our device it will be here
     var curRegionValue = RadioConfigProtos.RegionCode.Unset_VALUE
-
-    private val locationCallback = MeshServiceLocationCallback(
-        ::sendPositionScoped,
-        onSendPositionFailed = { onConnectionChanged(ConnectionState.DEVICE_SLEEP) },
-        getNodeNum = { myNodeNum }
-    )
 
     private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
@@ -159,109 +149,32 @@ class MeshService : Service(), Logging {
             ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
         }
 
-    private fun warnUserAboutLocation() {
-        Toast.makeText(
-            this,
-            getString(R.string.location_disabled),
-            Toast.LENGTH_LONG
-        ).show()
-    }
-
-    private var locationIntervalMsec = 0L
-
-    /**
-     * a periodic callback that perhaps send our position to other nodes.
-     * We first check to see if our local device has already sent a position and if so, we punt until the next check.
-     * This allows us to only 'fill in' with GPS positions when the local device happens to have no good GPS sats.
-     */
-    private fun sendPositionScoped(
-        lat: Double = 0.0,
-        lon: Double = 0.0,
-        alt: Int = 0,
-        destNum: Int = DataPacket.NODENUM_BROADCAST,
-        wantResponse: Boolean = false
-    ) {
-        // This operation can take a while, so instead of staying in the callback (location services) context
-        // do most of the work in my service thread
-        serviceScope.handledLaunch {
-            // if android called us too soon, just ignore
-            sendPosition(lat, lon, alt, destNum, wantResponse)
-        }
-    }
-
     /**
      * start our location requests (if they weren't already running)
-     *
-     * per https://developer.android.com/training/location/change-location-settings
-     *   & https://developer.android.com/training/location/request-updates
      */
-    @SuppressLint("MissingPermission")
-    @UiThread
-    private fun startLocationRequests(requestInterval: Long) {
-        // FIXME - currently we don't support location reading without google play
-        if (fusedLocationClient == null && hasBackgroundPermission() && isGooglePlayAvailable(this)) {
-            GeeksvilleApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
+    private fun startLocationRequests() {
+        // If we're already observing updates, don't register again
+        if (locationFlow?.isActive == true) return
 
-            locationIntervalMsec = requestInterval
-            val request = LocationRequest.create().apply {
-                interval = requestInterval
-                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            }
-            val builder = LocationSettingsRequest.Builder().addLocationRequest(request)
-            val locationClient = LocationServices.getSettingsClient(this)
-            val locationSettingsResponse = locationClient.checkLocationSettings(builder.build())
-
-            locationSettingsResponse.addOnSuccessListener {
-                debug("We are now successfully listening to the GPS")
-            }
-
-            locationSettingsResponse.addOnFailureListener { exception ->
-                errormsg("Failed to listen to GPS")
-
-                when (exception) {
-                    is ResolvableApiException ->
-                        exceptionReporter {
-                            // Location settings are not satisfied, but this can be fixed
-                            // by showing the user a dialog.
-
-                            // Show the dialog by calling startResolutionForResult(),
-                            // and check the result in onActivityResult().
-                            // exception.startResolutionForResult(this@MainActivity, REQUEST_CHECK_SETTINGS)
-
-                            // For now just punt and show a dialog
-                            warnUserAboutLocation()
-                        }
-                    is ApiException ->
-                        when (exception.statusCode) {
-                            17 ->
-                                // error: cancelled by user
-                                errormsg("User cancelled location access", exception)
-                            8502 ->
-                                // error: settings change unavailable
-                                errormsg(
-                                    "Settings-change-unavailable, user disabled location access (globally?)",
-                                    exception
-                                )
-                            else ->
-                                Exceptions.report(exception)
-                        }
-                    else ->
-                        Exceptions.report(exception)
+        if (hasBackgroundPermission() && isGooglePlayAvailable(this)) {
+            locationFlow = locationRepository.getLocations()
+                .onEach { location ->
+                    sendPosition(
+                        location.latitude,
+                        location.longitude,
+                        location.altitude.toInt(),
+                        myNodeNum, // we just send to the local node
+                        false // and we never want ACKs
+                    )
                 }
-            }
-
-            val client = LocationServices.getFusedLocationProviderClient(this)
-            client.requestLocationUpdates(request, locationCallback, Looper.getMainLooper())
-            fusedLocationClient = client
+                .launchIn(CoroutineScope(Dispatchers.Default))
         }
     }
 
     private fun stopLocationRequests() {
-        if (fusedLocationClient != null) {
+        if (locationFlow?.isActive == true) {
             debug("Stopping location requests")
-            GeeksvilleApplication.analytics.track("location_stop")
-            fusedLocationClient?.removeLocationUpdates(locationCallback)
-            fusedLocationClient = null
+            locationFlow?.cancel()
         }
     }
 
@@ -1022,39 +935,6 @@ class MeshService : Service(), Logging {
         maybeUpdateServiceStatusNotification()
     }
 
-    private fun setupLocationRequests() {
-        stopLocationRequests()
-        val mi = myNodeInfo
-        val prefs = radioConfig?.preferences
-        if (mi != null && prefs != null) {
-            val broadcastSecs = prefs.positionBroadcastSecs
-
-            var desiredInterval = if (broadcastSecs == 0) // unset by device, use default
-                15 * 60 * 1000L
-            else
-                broadcastSecs * 1000L
-
-            if (prefs.locationShareDisabled) {
-                info("GPS location sharing is disabled")
-                desiredInterval = 0
-            }
-
-            // if (prefs.fixedPosition) {
-            //     info("Node has fixed position, therefore not overriding position")
-            //     desiredInterval = 0
-            // }
-
-            if (desiredInterval != 0L) {
-                info("desired GPS assistance interval $desiredInterval")
-                startLocationRequests(desiredInterval)
-            } else {
-                info("No GPS assistance desired, but sending UTC time to mesh")
-                warnUserAboutLocation()
-                sendPosition()
-            }
-        }
-    }
-
     /**
      * Send in analytics about mesh connection
      */
@@ -1125,6 +1005,9 @@ class MeshService : Service(), Logging {
         fun startDisconnect() {
             // Just in case the user uncleanly reboots the phone, save now (we normally save in onDestroy)
             saveSettings()
+
+            // lost radio connection, therefore no need to keep listening to GPS
+            stopLocationRequests()
 
             GeeksvilleApplication.analytics.track(
                 "mesh_disconnect",
@@ -1518,7 +1401,6 @@ class MeshService : Service(), Logging {
 
     /**
      * Send a position (typically from our built in GPS) into the mesh.
-     * Must be called from serviceScope. Use sendPositionScoped() for direct calls.
      */
     private fun sendPosition(
         lat: Double = 0.0,
@@ -1843,14 +1725,13 @@ class MeshService : Service(), Logging {
             r.toString()
         }
 
-        override fun setupProvideLocation() = toRemoteExceptions {
-            setupLocationRequests()
+        override fun startProvideLocation() = toRemoteExceptions {
+            startLocationRequests()
         }
 
         override fun stopProvideLocation() = toRemoteExceptions {
             stopLocationRequests()
         }
-
     }
 }
 

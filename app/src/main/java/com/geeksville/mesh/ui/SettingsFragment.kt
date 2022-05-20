@@ -826,7 +826,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     debug("User changed location tracking to $isChecked")
                     model.provideLocation.value = isChecked
                     checkLocationEnabled(getString(R.string.location_disabled))
-                    model.meshService?.setupProvideLocation()
+                    model.meshService?.startProvideLocation()
                 }
             } else {
                 model.provideLocation.value = isChecked
