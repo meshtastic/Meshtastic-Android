@@ -2,8 +2,6 @@ package com.geeksville.mesh.repository.radio
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
@@ -15,8 +13,6 @@ import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.usb.UsbRepository
-import com.geeksville.mesh.service.EXTRA_PAYLOAD
-import com.geeksville.mesh.service.prefix
 import com.geeksville.util.anonymize
 import com.geeksville.util.ignoreException
 import com.geeksville.util.toRemoteExceptions
@@ -42,7 +38,8 @@ class RadioInterfaceService @Inject constructor(
     private val dispatchers: CoroutineDispatchers,
     private val bluetoothRepository: BluetoothRepository,
     private val processLifecycle: Lifecycle,
-    private val usbRepository: UsbRepository
+    private val usbRepository: UsbRepository,
+    @RadioRepositoryQualifier private val prefs: SharedPreferences
 ): Logging {
 
     private val _connectionState = MutableStateFlow(RadioServiceConnectionState())
@@ -85,17 +82,6 @@ class RadioInterfaceService @Inject constructor(
     }
 
     companion object : Logging {
-        /**
-         * The RECEIVED_FROMRADIO
-         * Payload will be the raw bytes which were contained within a MeshProtos.FromRadio protobuf
-         */
-        const val RECEIVE_FROMRADIO_ACTION = "$prefix.RECEIVE_FROMRADIO"
-
-        /**
-         * This is broadcast when connection state changed
-         */
-        const val RADIO_CONNECTED_ACTION = "$prefix.CONNECT_CHANGED"
-
         const val DEVADDR_KEY = "devAddr2" // the new name for devaddr
 
         init {
@@ -109,61 +95,49 @@ class RadioInterfaceService @Inject constructor(
             )
             info("Using ${factories.size} interface factories")
         }
+    }
 
-        /// This is public only so that SimRadio can bootstrap our message flow
-        fun broadcastReceivedFromRadio(context: Context, payload: ByteArray) {
-            val intent = Intent(RECEIVE_FROMRADIO_ACTION)
-            intent.putExtra(EXTRA_PAYLOAD, payload)
-            context.sendBroadcast(intent)
+    /** Return the device we are configured to use, or null for none
+     * device address strings are of the form:
+     *
+     * at
+     *
+     * where a is either x for bluetooth or s for serial
+     * and t is an interface specific address (macaddr or a device path)
+     */
+    fun getDeviceAddress(): String? {
+        // If the user has unpaired our device, treat things as if we don't have one
+        var address = prefs.getString(DEVADDR_KEY, null)
+
+        // If we are running on the emulator we default to the mock interface, so we can have some data to show to the user
+        if (address == null && MockInterface.addressValid(context, usbRepository, ""))
+            address = MockInterface.prefix.toString()
+
+        return address
+    }
+
+    /** Like getDeviceAddress, but filtered to return only devices we are currently bonded with
+     *
+     * at
+     *
+     * where a is either x for bluetooth or s for serial
+     * and t is an interface specific address (macaddr or a device path)
+     */
+    @SuppressLint("NewApi")
+    fun getBondedDeviceAddress(): String? {
+        // If the user has unpaired our device, treat things as if we don't have one
+        val address = getDeviceAddress()
+
+        /// Interfaces can filter addresses to indicate that address is no longer acceptable
+        if (address != null) {
+            val c = address[0]
+            val rest = address.substring(1)
+            val isValid = InterfaceFactory.getFactory(c)
+                ?.addressValid(context, usbRepository, rest) ?: false
+            if (!isValid)
+                return null
         }
-
-        fun getPrefs(context: Context): SharedPreferences =
-            context.getSharedPreferences("radio-prefs", Context.MODE_PRIVATE)
-
-        /** Return the device we are configured to use, or null for none
-         * device address strings are of the form:
-         *
-         * at
-         *
-         * where a is either x for bluetooth or s for serial
-         * and t is an interface specific address (macaddr or a device path)
-         */
-        @SuppressLint("NewApi")
-        fun getDeviceAddress(context: Context, usbRepository: UsbRepository): String? {
-            // If the user has unpaired our device, treat things as if we don't have one
-            val prefs = getPrefs(context)
-            var address = prefs.getString(DEVADDR_KEY, null)
-
-            // If we are running on the emulator we default to the mock interface, so we can have some data to show to the user
-            if (address == null && MockInterface.addressValid(context, usbRepository, ""))
-                address = MockInterface.prefix.toString()
-
-            return address
-        }
-
-        /** Like getDeviceAddress, but filtered to return only devices we are currently bonded with
-         *
-         * at
-         *
-         * where a is either x for bluetooth or s for serial
-         * and t is an interface specific address (macaddr or a device path)
-         */
-        @SuppressLint("NewApi")
-        fun getBondedDeviceAddress(context: Context, usbRepository: UsbRepository): String? {
-            // If the user has unpaired our device, treat things as if we don't have one
-            val address = getDeviceAddress(context, usbRepository)
-
-            /// Interfaces can filter addresses to indicate that address is no longer acceptable
-            if (address != null) {
-                val c = address[0]
-                val rest = address.substring(1)
-                val isValid = InterfaceFactory.getFactory(c)
-                    ?.addressValid(context, usbRepository, rest) ?: false
-                if (!isValid)
-                    return null
-            }
-            return address
-        }
+        return address
     }
 
     private fun broadcastConnectionChanged(isConnected: Boolean, isPermanent: Boolean) {
@@ -214,7 +188,7 @@ class RadioInterfaceService @Inject constructor(
         if (radioIf !is NopInterface)
             warn("Can't start interface - $radioIf is already running")
         else {
-            val address = getBondedDeviceAddress(context, usbRepository)
+            val address = getBondedDeviceAddress()
             if (address == null)
                 warn("No bonded mesh radio, can't start interface")
             else {
@@ -263,7 +237,7 @@ class RadioInterfaceService @Inject constructor(
      */
     @SuppressLint("NewApi")
     private fun setBondedDeviceAddress(address: String?): Boolean {
-        return if (getBondedDeviceAddress(context, usbRepository) == address && isStarted) {
+        return if (getBondedDeviceAddress() == address && isStarted) {
             warn("Ignoring setBondedDevice ${address.anonymize}, because we are already using that device")
             false
         } else {
@@ -281,7 +255,7 @@ class RadioInterfaceService @Inject constructor(
 
             debug("Setting bonded device to ${address.anonymize}")
 
-            getPrefs(context).edit {
+            prefs.edit {
                 if (address == null)
                     this.remove(DEVADDR_KEY)
                 else

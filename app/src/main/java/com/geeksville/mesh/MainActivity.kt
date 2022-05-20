@@ -42,7 +42,6 @@ import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.SerialInterface
-import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
 import com.geeksville.util.Exceptions
@@ -140,7 +139,7 @@ class MainActivity : BaseActivity(), Logging,
     val model: UIViewModel by viewModels()
 
     @Inject
-    internal lateinit var usbRepository: UsbRepository
+    internal lateinit var radioInterfaceService: RadioInterfaceService
 
     data class TabInfo(val text: String, val icon: Int, val content: Fragment)
 
@@ -982,7 +981,7 @@ class MainActivity : BaseActivity(), Logging,
             errormsg("Bind of MeshService failed")
         }
 
-        val bonded = RadioInterfaceService.getBondedDeviceAddress(this, usbRepository) != null
+        val bonded = radioInterfaceService.getBondedDeviceAddress() != null
         if (!bonded && usbDevice == null) // we will handle USB later
             showSettingsPage()
     }

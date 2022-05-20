@@ -22,7 +22,6 @@ import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
-import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.util.*
 import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
@@ -54,9 +53,6 @@ class MeshService : Service(), Logging {
 
     @Inject
     lateinit var radioInterfaceService: RadioInterfaceService
-
-    @Inject
-    lateinit var usbRepository: Lazy<UsbRepository>
 
     @Inject
     lateinit var locationRepository: LocationRepository
@@ -211,7 +207,7 @@ class MeshService : Service(), Logging {
      * tell android not to kill us
      */
     private fun startForeground() {
-        val a = RadioInterfaceService.getBondedDeviceAddress(this, usbRepository.get())
+        val a = radioInterfaceService.getBondedDeviceAddress()
         val wantForeground = a != null && a != "n"
 
         info("Requesting foreground service=$wantForeground")
@@ -1180,7 +1176,7 @@ class MeshService : Service(), Logging {
     private fun regenMyNodeInfo() {
         val myInfo = rawMyNodeInfo
         if (myInfo != null) {
-            val a = RadioInterfaceService.getBondedDeviceAddress(this, usbRepository.get())
+            val a = radioInterfaceService.getBondedDeviceAddress()
             val isBluetoothInterface = a != null && a.startsWith("x")
 
             val nodeNum =
