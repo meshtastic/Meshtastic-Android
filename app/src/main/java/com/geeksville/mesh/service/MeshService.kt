@@ -26,7 +26,6 @@ import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
 import com.geeksville.mesh.repository.usb.UsbRepository
-import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressNotStarted
 import com.geeksville.util.*
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
@@ -493,7 +492,7 @@ class MeshService : Service(), Logging {
 
     /// given a nodenum, return a db entry - creating if necessary
     private fun getOrCreateNodeInfo(n: Int) =
-        nodeDBbyNodeNum.getOrPut(n) { -> NodeInfo(n) }
+        nodeDBbyNodeNum.getOrPut(n) { NodeInfo(n) }
 
     private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
 
@@ -605,7 +604,7 @@ class MeshService : Service(), Logging {
     /**
      * Helper to make it easy to build a subpacket in the proper protobufs
      */
-    private fun MeshProtos.MeshPacket.Builder.buildMeshPacket(
+    private fun MeshPacket.Builder.buildMeshPacket(
         wantAck: Boolean = false,
         id: Int = generatePacketId(), // always assign a packet ID if we didn't already have one
         hopLimit: Int = 0,
@@ -627,7 +626,7 @@ class MeshService : Service(), Logging {
     /**
      * Helper to make it easy to build a subpacket in the proper protobufs
      */
-    private fun MeshProtos.MeshPacket.Builder.buildAdminPacket(
+    private fun MeshPacket.Builder.buildAdminPacket(
         wantResponse: Boolean = false,
         initFn: AdminProtos.AdminMessage.Builder.() -> Unit
     ): MeshPacket = buildMeshPacket(
@@ -858,7 +857,7 @@ class MeshService : Service(), Logging {
         updateNodeInfo(fromNum) {
             val oldId = it.user?.id.orEmpty()
             it.user = MeshUser(
-                if (p.id.isNotEmpty()) p.id else oldId, // If the new update doesn't contain an ID keep our old value
+                p.id.ifEmpty { oldId }, // If the new update doesn't contain an ID keep our old value
                 p.longName,
                 p.shortName,
                 p.hwModel
@@ -1144,7 +1143,7 @@ class MeshService : Service(), Logging {
                 connectTimeMsec = System.currentTimeMillis()
                 SoftwareUpdateService.sendProgress(
                     this,
-                    ProgressNotStarted,
+                    SoftwareUpdateService.ProgressNotStarted,
                     true
                 ) // Kinda crufty way of reiniting software update
                 startConfig()
@@ -1317,7 +1316,7 @@ class MeshService : Service(), Logging {
                         this@MeshService,
                         DeviceVersion(firmwareVersion)
                     ),
-                    currentPacketId.toLong() and 0xffffffffL,
+                    currentPacketId and 0xffffffffL,
                     if (messageTimeoutMsec == 0) 5 * 60 * 1000 else messageTimeoutMsec, // constants from current device code
                     minAppVersion,
                     maxChannels,
@@ -1545,7 +1544,7 @@ class MeshService : Service(), Logging {
                 handleReceivedPosition(mi.myNodeNum, position)
 
                 val fullPacket =
-                    newMeshPacketTo(destNum).buildMeshPacket(priority = MeshProtos.MeshPacket.Priority.BACKGROUND) {
+                    newMeshPacketTo(destNum).buildMeshPacket(priority = MeshPacket.Priority.BACKGROUND) {
                         // Use the new position as data format
                         portnumValue = Portnums.PortNum.POSITION_APP_VALUE
                         payload = position.toByteString()
@@ -1626,7 +1625,7 @@ class MeshService : Service(), Logging {
     @Synchronized
     private fun generatePacketId(): Int {
         val numPacketIds =
-            ((1L shl 32) - 1).toLong() // A mask for only the valid packet ID bits, either 255 or maxint
+            ((1L shl 32) - 1) // A mask for only the valid packet ID bits, either 255 or maxint
 
         currentPacketId++
 
@@ -1766,14 +1765,7 @@ class MeshService : Service(), Logging {
         override fun send(p: DataPacket) {
             toRemoteExceptions {
                 // Init from and id
-                myNodeID?.let { myId ->
-                    // we no longer set from, we let the device do it
-                    //if (p.from == DataPacket.ID_LOCAL)
-                    //    p.from = myId
-
-                    if (p.id == 0)
-                        p.id = generatePacketId()
-                }
+                myNodeID?.let { if (p.id == 0) p.id = generatePacketId() }
 
                 info("sendData dest=${p.to}, id=${p.id} <- ${p.bytes!!.size} bytes (connectionState=$connectionState)")
 
