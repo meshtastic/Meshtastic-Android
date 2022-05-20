@@ -1,6 +1,9 @@
-package com.geeksville.mesh.ui
+package com.geeksville.mesh.util
 
 import com.geeksville.mesh.MeshProtos
+import kotlin.math.abs
+import kotlin.math.acos
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -28,15 +31,15 @@ fun degreesToDMS(
     val isPos = degIn >= 0
     val dirLetter =
         if (isLatitude) if (isPos) 'N' else 'S' else if (isPos) 'E' else 'W'
-    degIn = Math.abs(degIn)
+    degIn = abs(degIn)
     val degOut = degIn.toInt()
     val minutes = 60 * (degIn - degOut)
     val minwhole = minutes.toInt()
     val seconds = (minutes - minwhole) * 60
     return arrayOf(
-        Integer.toString(degOut), Integer.toString(minwhole),
-        java.lang.Double.toString(seconds),
-        Character.toString(dirLetter)
+        degOut.toString(), minwhole.toString(),
+        seconds.toString(),
+        dirLetter.toString()
     )
 }
 
@@ -45,14 +48,14 @@ fun degreesToDM(_degIn: Double, isLatitude: Boolean): Array<String> {
     val isPos = degIn >= 0
     val dirLetter =
         if (isLatitude) if (isPos) 'N' else 'S' else if (isPos) 'E' else 'W'
-    degIn = Math.abs(degIn)
+    degIn = abs(degIn)
     val degOut = degIn.toInt()
     val minutes = 60 * (degIn - degOut)
     val seconds = 0
     return arrayOf(
-        Integer.toString(degOut), java.lang.Double.toString(minutes),
-        Integer.toString(seconds),
-        Character.toString(dirLetter)
+        degOut.toString(), minutes.toString(),
+        seconds.toString(),
+        dirLetter.toString()
     )
 }
 
@@ -61,14 +64,14 @@ fun degreesToD(_degIn: Double, isLatitude: Boolean): Array<String> {
     val isPos = degIn >= 0
     val dirLetter =
         if (isLatitude) if (isPos) 'N' else 'S' else if (isPos) 'E' else 'W'
-    degIn = Math.abs(degIn)
+    degIn = abs(degIn)
     val degOut = degIn
     val minutes = 0
     val seconds = 0
     return arrayOf(
-        java.lang.Double.toString(degOut), Integer.toString(minutes),
-        Integer.toString(seconds),
-        Character.toString(dirLetter)
+        degOut.toString(), minutes.toString(),
+        seconds.toString(),
+        dirLetter.toString()
     )
 }
 
@@ -89,10 +92,10 @@ fun addDistance(
     distMeters: Double,
     theta: Double
 ): DoubleArray {
-    val dx = distMeters * Math.sin(theta) // theta measured clockwise
+    val dx = distMeters * sin(theta) // theta measured clockwise
     // from due north
-    val dy = distMeters * Math.cos(theta) // dx, dy same units as R
-    val dLong = dx / (111320 * Math.cos(lat)) // dx, dy in meters
+    val dy = distMeters * cos(theta) // dx, dy same units as R
+    val dLong = dx / (111320 * cos(lat)) // dx, dy in meters
     val dLat = dy / 110540 // result in degrees long/lat
     return doubleArrayOf(lat + dLat, longitude + dLong)
 }
@@ -111,16 +114,10 @@ fun latLongToMeter(
     val a2 = lng_a / pk
     val b1 = lat_b / pk
     val b2 = lng_b / pk
-    val t1 =
-        Math.cos(a1) * Math.cos(a2) * Math.cos(b1) * Math.cos(
-            b2
-        )
-    val t2 =
-        Math.cos(a1) * Math.sin(a2) * Math.cos(b1) * Math.sin(
-            b2
-        )
-    val t3 = Math.sin(a1) * Math.sin(b1)
-    var tt = Math.acos(t1 + t2 + t3)
+    val t1 = cos(a1) * cos(a2) * cos(b1) * cos(b2)
+    val t2 = cos(a1) * sin(a2) * cos(b1) * sin(b2)
+    val t3 = sin(a1) * sin(b1)
+    var tt = acos(t1 + t2 + t3)
     if (java.lang.Double.isNaN(tt)) tt = 0.0 // Must have been the same point?
     return 6366000 * tt
 }
@@ -186,10 +183,8 @@ fun bearing(
     val lat2Rad = Math.toRadians(lat2)
     val deltaLonRad = Math.toRadians(lon2 - lon1)
     val y = sin(deltaLonRad) * cos(lat2Rad)
-    val x =
-        cos(lat1Rad) * sin(lat2Rad) - (sin(lat1Rad) * cos(lat2Rad)
-            * Math.cos(deltaLonRad))
-    return radToBearing(Math.atan2(y, x))
+    val x = cos(lat1Rad) * sin(lat2Rad) - (sin(lat1Rad) * cos(lat2Rad) * cos(deltaLonRad))
+    return radToBearing(atan2(y, x))
 }
 
 /**
