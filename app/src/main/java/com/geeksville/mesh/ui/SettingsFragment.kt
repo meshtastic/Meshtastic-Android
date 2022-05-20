@@ -4,11 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.app.PendingIntent
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.le.BluetoothLeScanner
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanSettings
-import android.bluetooth.le.ScanFilter
-import android.bluetooth.le.ScanResult
+import android.bluetooth.le.*
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
@@ -127,6 +123,7 @@ class BTScanModel @Inject constructor(
     private val bluetoothRepository: BluetoothRepository,
     private val usbRepository: UsbRepository,
     private val nsdRepository: NsdRepository,
+    private val radioInterfaceService: RadioInterfaceService,
 ) : ViewModel(), Logging {
 
     private val context: Context get() = application.applicationContext
@@ -258,7 +255,7 @@ class BTScanModel @Inject constructor(
      * returns true if we could start scanning, false otherwise
      */
     fun setupScan(): Boolean {
-        selectedAddress = RadioInterfaceService.getDeviceAddress(context, usbRepository)
+        selectedAddress = radioInterfaceService.getDeviceAddress()
 
         return if (bluetoothAdapter == null || MockInterface.addressValid(context, usbRepository, "")) {
             warn("No bluetooth adapter.  Running under emulation?")
