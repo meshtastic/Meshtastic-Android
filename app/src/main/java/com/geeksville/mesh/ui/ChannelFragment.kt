@@ -316,7 +316,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                                 val random = SecureRandom()
                                 val bytes = ByteArray(32)
                                 random.nextBytes(bytes)
-                                newSettings.name = newName
+                                newSettings.name = newName.take(11)
                                 newSettings.psk = ByteString.copyFrom(bytes)
                             } else {
                                 debug("Switching back to default channel")
