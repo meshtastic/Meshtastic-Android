@@ -118,20 +118,17 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
         debug("BTScanModel created")
     }
 
-    open class DeviceListEntry(val name: String, val address: String, val bonded: Boolean) {
-        val bluetoothAddress
-            get() =
-                if (isBluetooth)
-                    address.substring(1)
-                else
-                    null
+    /** *fullAddress* = interface prefix + address (example: "x7C:9E:BD:F0:BE:BE") */
+    open class DeviceListEntry(val name: String, val fullAddress: String, val bonded: Boolean) {
+        val prefix get() = fullAddress[0]
+        val address get() = fullAddress.substring(1)
 
         override fun toString(): String {
-            return "DeviceListEntry(name=${name.anonymize}, addr=${address.anonymize}, bonded=$bonded)"
+            return "DeviceListEntry(name=${name.anonymize}, addr=${fullAddress.anonymize}, bonded=$bonded)"
         }
 
-        val isBluetooth: Boolean get() = address[0] == 'x'
-        val isSerial: Boolean get() = address[0] == 's'
+        val isBLE: Boolean get() = prefix == 'x'
+        val isUSB: Boolean get() = prefix == 's'
     }
 
     class USBDeviceListEntry(usbManager: UsbManager, val usb: UsbSerialDriver) : DeviceListEntry(
@@ -160,15 +157,6 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     val selectedBluetooth: String?
         get() = selectedAddress?.let { a ->
             if (a[0] == 'x')
-                a.substring(1)
-            else
-                null
-        }
-
-    /// If this address is for a USB device, return the macaddr portion, else null
-    val selectedUSB: String?
-        get() = selectedAddress?.let { a ->
-            if (a[0] == 's')
                 a.substring(1)
             else
                 null
@@ -227,7 +215,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
 
     private fun addDevice(entry: DeviceListEntry) {
         val oldDevs = devices.value!!
-        oldDevs[entry.address] = entry // Add/replace entry
+        oldDevs[entry.fullAddress] = entry // Add/replace entry
         devices.value = oldDevs // trigger gui updates
     }
 
@@ -266,13 +254,13 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                 DeviceListEntry("Meshtastic_32ac", "xbb", true) */
             )
 
-            devices.value = (testnodes.map { it.address to it }).toMap().toMutableMap()
+            devices.value = (testnodes.map { it.fullAddress to it }).toMap().toMutableMap()
 
             // If nothing was selected, by default select the first thing we see
             if (selectedAddress == null)
                 changeScanSelection(
                     GeeksvilleApplication.currentActivity as MainActivity,
-                    testnodes.first().address
+                    testnodes.first().fullAddress
                 )
 
             true
@@ -344,33 +332,30 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     }
 
     /**
-     * @return DeviceListEntry from Bluetooth Address.
-     * Only valid if name begins with "Meshtastic"...
+     * @return DeviceListEntry from full Address (prefix + address).
+     * If Bluetooth is enabled and BLE Address is valid, get remote device information.
      */
     @SuppressLint("MissingPermission")
-    fun bleDeviceFrom(bleAddress: String): DeviceListEntry {
-        val device =
-            if (hasConnectPermission) bluetoothAdapter?.getRemoteDevice(bleAddress) else null
-
+    fun getDeviceListEntry(fullAddress: String, bonded: Boolean = false): DeviceListEntry {
+        val address = fullAddress.substring(1)
+        val device = bluetoothAdapter?.getRemoteDevice(address)
         return if (device != null && device.name != null) {
-            DeviceListEntry(
-                device.name,
-                "x${device.address}", // full address with the bluetooth prefix added
-                device.bondState == BOND_BONDED
-            )
-        } else DeviceListEntry("", "", false)
+            DeviceListEntry(device.name, fullAddress, device.bondState != BluetoothDevice.BOND_NONE)
+        } else {
+            DeviceListEntry(address, fullAddress, bonded)
+        }
     }
 
     @SuppressLint("NewApi")
-    private fun addDeviceAssociations() {
+    fun addDeviceAssociations() {
         if (hasCompanionDeviceApi) deviceManager?.associations?.forEach { bleAddress ->
-            val bleDevice = bleDeviceFrom(bleAddress)
-            if (!bleDevice.bonded) { // Clean up associations after pairing is removed
+            val bleDevice = getDeviceListEntry("x$bleAddress", true)
+            // Disassociate after pairing is removed (if BLE is disabled, assume bonded)
+            if (bleDevice.name.startsWith("Mesh") && !bleDevice.bonded) {
                 debug("Forgetting old BLE association ${bleAddress.anonymize}")
                 deviceManager?.disassociate(bleAddress)
-            } else if (bleDevice.name.startsWith("Mesh")) {
-                addDevice(bleDevice)
             }
+            addDevice(bleDevice)
         }
     }
 
@@ -455,25 +440,24 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     fun onSelected(activity: MainActivity, it: DeviceListEntry): Boolean {
         // If the device is paired, let user select it, otherwise start the pairing flow
         if (it.bonded) {
-            changeScanSelection(activity, it.address)
+            changeScanSelection(activity, it.fullAddress)
             return true
         } else {
             // Handle requestng USB or bluetooth permissions for the device
             debug("Requesting permissions for the device")
 
             exceptionReporter {
-                val bleAddress = it.bluetoothAddress
-                if (bleAddress != null) {
+                if (it.isBLE) {
                     // Request bonding for bluetooth
                     // We ignore missing BT adapters, because it lets us run on the emulator
                     bluetoothAdapter
-                        ?.getRemoteDevice(bleAddress)?.let { device ->
+                        ?.getRemoteDevice(it.fullAddress)?.let { device ->
                             requestBonding(activity, device) { state ->
                                 if (state == BOND_BONDED) {
                                     errorText.value = activity.getString(R.string.pairing_completed)
                                     changeScanSelection(
                                         activity,
-                                        it.address
+                                        it.fullAddress
                                     )
                                 } else {
                                     errorText.value =
@@ -487,7 +471,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                 }
             }
 
-            if (it.isSerial) {
+            if (it.isUSB) {
                 it as USBDeviceListEntry
 
                 val ACTION_USB_PERMISSION = "com.geeksville.mesh.USB_PERMISSION"
@@ -506,7 +490,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                                 )
                             ) {
                                 info("User approved USB access")
-                                changeScanSelection(activity, it.address)
+                                changeScanSelection(activity, it.fullAddress)
 
                                 // Force the GUI to redraw
                                 devices.value = devices.value
@@ -739,7 +723,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         bluetoothViewModel.enabled.observe(viewLifecycleOwner) { enabled ->
             if (enabled) {
                 binding.changeRadioButton.show()
-                if (scanModel.devices.value.isNullOrEmpty()) scanModel.setupScan()
+                scanModel.setupScan()
                 if (binding.scanStatusText.text == getString(R.string.requires_bluetooth)) updateNodeInfo()
             } else binding.changeRadioButton.hide()
         }
@@ -872,7 +856,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         b.text = device.name
         b.id = View.generateViewId()
         b.isEnabled = enabled
-        b.isChecked = device.address == scanModel.selectedNotNull
+        b.isChecked = device.fullAddress == scanModel.selectedNotNull
         binding.deviceRadioGroup.addView(b)
 
         b.setOnClickListener {
@@ -892,7 +876,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         var hasShownOurDevice = false
         devices.values.forEach { device ->
-            if (device.address == scanModel.selectedNotNull)
+            if (device.fullAddress == scanModel.selectedNotNull)
                 hasShownOurDevice = true
             addDeviceButton(device, true)
         }
@@ -903,35 +887,19 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (!hasShownOurDevice) {
             // Note: we pull this into a tempvar, because otherwise some other thread can change selectedAddress after our null check
             // and before use
-            val bleAddr = scanModel.selectedBluetooth
-
-            if (bleAddr != null) {
-                val bleDevice = scanModel.bleDeviceFrom(bleAddr)
-                if (bleDevice.name.startsWith("Mesh")) { // ignore nodes that node have a name, that means we've lost them since they appeared
-                    val curDevice = BTScanModel.DeviceListEntry(
-                        bleDevice.name,
-                        bleDevice.address,
-                        bleDevice.bonded
-                    )
-                    addDeviceButton(
-                        curDevice,
-                        model.isConnected.value == MeshService.ConnectionState.CONNECTED
-                    )
-                }
-            } else if (scanModel.selectedUSB != null) {
-                // Must be a USB device, show a placeholder disabled entry
-                val curDevice = BTScanModel.DeviceListEntry(
-                    scanModel.selectedUSB!!,
-                    scanModel.selectedAddress!!,
-                    false
+            val curAddr = scanModel.selectedAddress
+            if (curAddr != null) {
+                val curDevice = scanModel.getDeviceListEntry(curAddr)
+                addDeviceButton(
+                    curDevice,
+                    model.isConnected.value == MeshService.ConnectionState.CONNECTED
                 )
-                addDeviceButton(curDevice, false)
             }
         }
 
         // get rid of the warning text once at least one device is paired.
         // If we are running on an emulator, always leave this message showing so we can test the worst case layout
-        val curRadio = RadioInterfaceService.getBondedDeviceAddress(requireContext())
+        val curRadio = scanModel.selectedAddress
 
         if (curRadio != null && !MockInterface.addressValid(requireContext(), "")) {
             binding.warningNotPaired.visibility = View.GONE
