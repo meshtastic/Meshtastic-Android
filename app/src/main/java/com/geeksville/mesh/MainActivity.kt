@@ -218,9 +218,6 @@ class MainActivity : BaseActivity(), Logging,
     /** Ask the user to grant Bluetooth scan/discovery permission */
     fun requestScanPermission() = requestPermission(getScanPermissions(), true)
 
-    /** Ask the user to grant camera permission */
-    fun requestCameraPermission() = requestPermission(getCameraPermissions())
-
     /** Ask the user to grant foreground location permission */
     fun requestLocationPermission() = requestPermission(getLocationPermissions())
 
@@ -644,7 +641,7 @@ class MainActivity : BaseActivity(), Logging,
 
                 model.setConnectionState(newConnection)
 
-                debug("Getting latest radioconfig from service")
+                debug("Getting latest DeviceConfig from service")
                 try {
                     val info: MyNodeInfo? = service.myNodeInfo // this can be null
                     model.setMyNodeInfo(info)
@@ -662,9 +659,9 @@ class MainActivity : BaseActivity(), Logging,
                                 if (curVer < MeshService.minFirmwareVersion)
                                     showAlert(R.string.firmware_too_old, R.string.firmware_old)
                                 else {
-                                    // If our app is too old/new, we probably don't understand the new radioconfig messages, so we don't read them until here
+                                    // If our app is too old/new, we probably don't understand the new DeviceConfig messages, so we don't read them until here
 
-                                    model.setRadioConfig(RadioConfigProtos.RadioConfig.parseFrom(service.radioConfig))
+                                    model.setDeviceConfig(ConfigProtos.Config.parseFrom(service.deviceConfig))
 
                                     model.setChannels(ChannelSet(AppOnlyProtos.ChannelSet.parseFrom(service.channels)))
 

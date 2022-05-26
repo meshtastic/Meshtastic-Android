@@ -87,7 +87,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             val nodes = model.nodeDB.nodes.value!!
             val node = nodes[if (isLocal) contact.to else contact.from]
 
-            //grab channel names from RadioConfig
+            //grab channel names from DeviceConfig
             val channels = model.channels.value
             val primaryChannel = channels?.primaryChannel
 

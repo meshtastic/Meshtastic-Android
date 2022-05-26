@@ -32,7 +32,7 @@ import com.geeksville.android.hideKeyboard
 import com.geeksville.android.isGooglePlayAvailable
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
-import com.geeksville.mesh.RadioConfigProtos
+import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BluetoothViewModel
@@ -659,7 +659,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // update the region selection from the device
         val region = model.region
         val spinner = binding.regionSpinner
-        val unsetIndex = regions.indexOf(RadioConfigProtos.RegionCode.Unset.name)
+        val unsetIndex = regions.indexOf(ConfigProtos.Config.LoRaConfig.RegionCode.Unset.name)
         spinner.onItemSelectedListener = null
 
         debug("current region is $region")
@@ -673,7 +673,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         spinner.isEnabled = true
 
         // If actively connected possibly let the user update firmware
-        refreshUpdateButton(region != RadioConfigProtos.RegionCode.Unset)
+        refreshUpdateButton(region != ConfigProtos.Config.LoRaConfig.RegionCode.Unset)
 
         // Update the status string (highest priority messages first)
         val info = model.myNodeInfo.value
@@ -683,7 +683,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             (permissionsWarning != null) ->
                 statusText.text = permissionsWarning
 
-            region == RadioConfigProtos.RegionCode.Unset ->
+            region == ConfigProtos.Config.LoRaConfig.RegionCode.Unset ->
                 statusText.text = getString(R.string.must_set_region)
 
             connected == MeshService.ConnectionState.CONNECTED -> {
@@ -705,7 +705,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             id: Long
         ) {
             val item = parent.getItemAtPosition(position) as String?
-            val asProto = item!!.let { RadioConfigProtos.RegionCode.valueOf(it) }
+            val asProto = item!!.let { ConfigProtos.Config.LoRaConfig.RegionCode.valueOf(it) }
             exceptionToSnackbar(requireView()) {
                 model.region = asProto
             }
@@ -718,8 +718,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     }
 
     /// the sorted list of region names like arrayOf("US", "CN", "EU488")
-    private val regions = RadioConfigProtos.RegionCode.values().filter {
-        it != RadioConfigProtos.RegionCode.UNRECOGNIZED
+    private val regions = ConfigProtos.Config.LoRaConfig.RegionCode.values().filter {
+        it != ConfigProtos.Config.LoRaConfig.RegionCode.UNRECOGNIZED
     }.map {
         it.name
     }.sorted()
@@ -746,10 +746,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             updateDevicesButtons(scanModel.devices.value)
         }
 
-        model.radioConfig.observe(viewLifecycleOwner) {
+        model.deviceConfig.observe(viewLifecycleOwner) {
             binding.provideLocationCheckbox.isEnabled =
-                isGooglePlayAvailable(requireContext()) && !model.locationShareDisabled
-            if (model.locationShareDisabled) {
+                isGooglePlayAvailable(requireContext()) && !model.gpsDisabled
+            if (model.gpsDisabled) {
                 model.provideLocation.value = false
                 binding.provideLocationCheckbox.isChecked = false
             }

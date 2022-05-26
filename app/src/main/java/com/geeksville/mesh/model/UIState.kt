@@ -43,8 +43,8 @@ fun getInitials(nameIn: String): String {
     val words = name.split(Regex("\\s+")).filter { it.isNotEmpty() }
 
     val initials = when (words.size) {
-        in 0..minchars - 1 -> {
-            val nm = if (name.length >= 1)
+        in 0 until minchars -> {
+            val nm = if (name.isNotEmpty())
                 name.first() + name.drop(1).filterNot { c -> c.lowercase() in "aeiou" }
             else
                 ""
@@ -101,8 +101,8 @@ class UIViewModel @Inject constructor(
     }
 
     /// various radio settings (including the channel)
-    private val _radioConfig = MutableLiveData<RadioConfigProtos.RadioConfig?>()
-    val radioConfig: LiveData<RadioConfigProtos.RadioConfig?> get() = _radioConfig
+    private val _deviceConfig = MutableLiveData<ConfigProtos.Config?>()
+    val deviceConfig: LiveData<ConfigProtos.Config?> get() = _deviceConfig
 
     private val _channels = MutableLiveData<ChannelSet?>()
     val channels: LiveData<ChannelSet?> get() = _channels
@@ -123,7 +123,7 @@ class UIViewModel @Inject constructor(
 
     var positionBroadcastSecs: Int?
         get() {
-            _radioConfig.value?.preferences?.let {
+            _deviceConfig.value?.position?.let {
                 if (it.positionBroadcastSecs > 0) return it.positionBroadcastSecs
                 // These default values are borrowed from the device code.
                 return 15 * 60
@@ -131,50 +131,50 @@ class UIViewModel @Inject constructor(
             return null
         }
         set(value) {
-            val config = _radioConfig.value
+            val config = _deviceConfig.value
             if (value != null && config != null) {
                 val builder = config.toBuilder()
-                builder.preferencesBuilder.positionBroadcastSecs = value
-                setRadioConfig(builder.build())
+                builder.positionBuilder.positionBroadcastSecs = value
+                setDeviceConfig(builder.build())
             }
         }
 
     var lsSleepSecs: Int?
-        get() = _radioConfig.value?.preferences?.lsSecs
+        get() = _deviceConfig.value?.power?.lsSecs
         set(value) {
-            val config = _radioConfig.value
+            val config = _deviceConfig.value
             if (value != null && config != null) {
                 val builder = config.toBuilder()
-                builder.preferencesBuilder.lsSecs = value
-                setRadioConfig(builder.build())
+                builder.powerBuilder.lsSecs = value
+                setDeviceConfig(builder.build())
             }
         }
 
-    var locationShareDisabled: Boolean
-        get() = _radioConfig.value?.preferences?.locationShareDisabled ?: false
+    var gpsDisabled: Boolean
+        get() = _deviceConfig.value?.position?.gpsDisabled ?: false
         set(value) {
-            val config = _radioConfig.value
+            val config = _deviceConfig.value
             if (config != null) {
                 val builder = config.toBuilder()
-                builder.preferencesBuilder.locationShareDisabled = value
-                setRadioConfig(builder.build())
+                builder.positionBuilder.gpsDisabled = value
+                setDeviceConfig(builder.build())
             }
         }
 
     var isPowerSaving: Boolean?
-        get() = _radioConfig.value?.preferences?.isPowerSaving
+        get() = _deviceConfig.value?.power?.isPowerSaving
         set(value) {
-            val config = _radioConfig.value
+            val config = _deviceConfig.value
             if (value != null && config != null) {
                 val builder = config.toBuilder()
-                builder.preferencesBuilder.isPowerSaving = value
-                setRadioConfig(builder.build())
+                builder.powerBuilder.isPowerSaving = value
+                setDeviceConfig(builder.build())
             }
         }
 
-    var region: RadioConfigProtos.RegionCode
-        get() = meshService?.region?.let { RadioConfigProtos.RegionCode.forNumber(it) }
-            ?: RadioConfigProtos.RegionCode.Unset
+    var region: ConfigProtos.Config.LoRaConfig.RegionCode
+        get() = meshService?.region?.let { ConfigProtos.Config.LoRaConfig.RegionCode.forNumber(it) }
+            ?: ConfigProtos.Config.LoRaConfig.RegionCode.Unset
         set(value) {
             meshService?.region = value.number
         }
@@ -216,10 +216,10 @@ class UIViewModel @Inject constructor(
     val primaryChannel: Channel? get() = _channels.value?.primaryChannel
 
     // Set the radio config (also updates our saved copy in preferences)
-    fun setRadioConfig(c: RadioConfigProtos.RadioConfig) {
+    fun setDeviceConfig(c: ConfigProtos.Config) {
         debug("Setting new radio config!")
-        meshService?.radioConfig = c.toByteArray()
-        _radioConfig.value =
+        meshService?.deviceConfig = c.toByteArray()
+        _deviceConfig.value =
             c // Must be done after calling the service, so we will will properly throw if the service failed (and therefore not cache invalid new settings)
     }
 

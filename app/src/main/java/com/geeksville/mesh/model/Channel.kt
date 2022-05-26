@@ -22,7 +22,7 @@ data class Channel(val settings: ChannelProtos.ChannelSettings) {
         // TH=he unsecured channel that devices ship with
         val default = Channel(
             ChannelProtos.ChannelSettings.newBuilder()
-                .setModemConfig(ChannelProtos.ChannelSettings.ModemConfig.LongFast)
+                // .setModemConfig(ChannelProtos.ChannelSettings.ModemConfig.LongFast)
                 .setPsk(ByteString.copyFrom(defaultPSK))
                 .build()
         )
@@ -30,26 +30,20 @@ data class Channel(val settings: ChannelProtos.ChannelSettings) {
 
     /// Return the name of our channel as a human readable string.  If empty string, assume "Default" per mesh.proto spec
     val name: String
-        get() = if (settings.name.isEmpty()) {
-            // We have a new style 'empty' channel name.  Use the same logic from the device to convert that to a human readable name
-            if (settings.bandwidth != 0)
-                "Unset"
-            else when (settings.modemConfig) {
-                ChannelProtos.ChannelSettings.ModemConfig.ShortFast -> "ShortFast"
-                ChannelProtos.ChannelSettings.ModemConfig.ShortSlow -> "ShortSlow"
-                ChannelProtos.ChannelSettings.ModemConfig.MidFast -> "MidFast"
-                ChannelProtos.ChannelSettings.ModemConfig.MidSlow -> "MidSlow"
-                ChannelProtos.ChannelSettings.ModemConfig.LongFast -> "LongFast"
-                ChannelProtos.ChannelSettings.ModemConfig.LongSlow -> "LongSlow"
-                ChannelProtos.ChannelSettings.ModemConfig.VLongSlow -> "VLongSlow"
+        get() = settings.name.ifEmpty { "Placeholder" /*
+            when (settings.modemConfig) {
+                ConfigProtos.Config.LoRaConfig.ModemPreset.ShortFast -> "ShortFast"
+                ConfigProtos.Config.LoRaConfig.ModemPreset.ShortSlow -> "ShortSlow"
+                ConfigProtos.Config.LoRaConfig.ModemPreset.MidFast -> "MidFast"
+                ConfigProtos.Config.LoRaConfig.ModemPreset.MidSlow -> "MidSlow"
+                ConfigProtos.Config.LoRaConfig.ModemPreset.LongFast -> "LongFast"
+                ConfigProtos.Config.LoRaConfig.ModemPreset.LongSlow -> "LongSlow"
+                ConfigProtos.Config.LoRaConfig.ModemPreset.VLongSlow -> "VLongSlow"
                 else -> "Invalid"
-            }
-        } else
-            settings.name
+            }*/
+        }
 
-    val modemConfig: ChannelProtos.ChannelSettings.ModemConfig get() = settings.modemConfig
-
-    val psk
+    val psk: ByteString
         get() = if (settings.psk.size() != 1)
             settings.psk // A standard PSK
         else {
@@ -86,4 +80,4 @@ data class Channel(val settings: ChannelProtos.ChannelSettings) {
         && name == o.name
 }
 
-fun xorHash(b: ByteArray) = b.fold(0, { acc, x -> acc xor (x.toInt() and 0xff) })
+fun xorHash(b: ByteArray) = b.fold(0) { acc, x -> acc xor (x.toInt() and 0xff) }

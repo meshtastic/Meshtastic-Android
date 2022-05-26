@@ -22,8 +22,6 @@ data class ChannelSet(
         private fun urlToChannels(url: Uri): AppOnlyProtos.ChannelSet {
             val urlStr = url.toString()
 
-            // We no longer support the super old (about 0.8ish? verison of the URLs that don't use the # separator - I doubt
-            // anyone is still using that old format
             val pathRegex = Regex("$prefix(.*)", RegexOption.IGNORE_CASE)
             val (base64) = pathRegex.find(urlStr)?.destructured
                 ?: throw MalformedURLException("Not a meshtastic URL: ${urlStr.take(40)}")
@@ -51,13 +49,13 @@ data class ChannelSet(
     /// Return an URL that represents the current channel values
     /// @param upperCasePrefix - portions of the URL can be upper case to make for more efficient QR codes
     fun getChannelUrl(upperCasePrefix: Boolean = false): Uri {
-        // If we have a valid radio config use it, othterwise use whatever we have saved in the prefs
+        // If we have a valid radio config use it, otherwise use whatever we have saved in the prefs
 
         val channelBytes = protobuf.toByteArray() ?: ByteArray(0) // if unset just use empty
         val enc = Base64.encodeToString(channelBytes, base64Flags)
 
         val p = if (upperCasePrefix)
-            prefix.toUpperCase()
+            prefix.uppercase()
         else
             prefix
         return Uri.parse("$p$enc")
