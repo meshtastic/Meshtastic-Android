@@ -80,12 +80,12 @@ interface IMeshService {
     List<DataPacket> getOldMessages();
 
     /// This method is only intended for use in our GUI, so the user can set radio options
-    /// It returns a RadioConfig protobuf.
-    byte []getRadioConfig();
+    /// It returns a DeviceConfig protobuf.
+    byte []getDeviceConfig();
 
     /// This method is only intended for use in our GUI, so the user can set radio options
-    /// It sets a RadioConfig protobuf
-    void setRadioConfig(in byte []payload);
+    /// It sets a DeviceConfig protobuf
+    void setDeviceConfig(in byte []payload);
 
     /// This method is only intended for use in our GUI, so the user can set radio options
     /// It returns a ChannelSet protobuf.

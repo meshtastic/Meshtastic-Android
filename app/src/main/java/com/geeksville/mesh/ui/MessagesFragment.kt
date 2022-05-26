@@ -296,9 +296,6 @@ class MessagesFragment : Fragment(), Logging {
             val connected = connectionState == MeshService.ConnectionState.CONNECTED
             binding.textInputLayout.isEnabled = connected
             binding.sendButton.isEnabled = connected
-
-            // Just being connected is enough to allow sending texts I think
-            // && model.nodeDB.myId.value != null && model.radioConfig.value != null
         }
     }
 

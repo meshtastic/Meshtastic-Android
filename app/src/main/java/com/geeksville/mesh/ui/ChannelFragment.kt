@@ -23,6 +23,7 @@ import com.geeksville.android.hideKeyboard
 import com.geeksville.android.isGooglePlayAvailable
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos
+import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.hasCameraPermission
 import com.geeksville.mesh.databinding.ChannelFragmentBinding
@@ -107,15 +108,15 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             binding.channelNameEdit.setText(channel.humanName)
 
             // For now, we only let the user edit/save channels while the radio is awake - because the service
-            // doesn't cache radioconfig writes.
+            // doesn't cache DeviceConfig writes.
             binding.editableCheckbox.isEnabled = connected
 
             val bitmap = channels.qrCode
             if (bitmap != null)
                 binding.qrView.setImageBitmap(bitmap)
 
-            val modemConfig = channel.modemConfig
-            val channelOption = ChannelOption.fromConfig(modemConfig)
+            val modemPreset = model.deviceConfig.value?.lora?.modemPreset
+            val channelOption = ChannelOption.fromConfig(modemPreset)
             binding.filledExposedDropdown.setText(
                 getString(
                     channelOption?.configRes ?: R.string.modem_config_unrecognized
@@ -128,12 +129,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             binding.editableCheckbox.isEnabled = false
         }
 
-        val modemConfigs = ChannelOption.values()
-        val modemConfigList = modemConfigs.map { getString(it.configRes) }
+        val modemPresets = ChannelOption.values()
+        val modemPresetList = modemPresets.map { getString(it.configRes) }
         val adapter = ArrayAdapter(
             requireContext(),
             R.layout.dropdown_menu_popup_item,
-            modemConfigList
+            modemPresetList
         )
 
         binding.filledExposedDropdown.setAdapter(adapter)
@@ -174,10 +175,10 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     private fun installSettings(newChannel: ChannelProtos.ChannelSettings) {
         val newSet =
             ChannelSet(AppOnlyProtos.ChannelSet.newBuilder().addSettings(newChannel).build())
-        // Try to change the radio, if it fails, tell the user why and throw away their redits
+        // Try to change the radio, if it fails, tell the user why and throw away their edits
         try {
             model.setChannels(newSet)
-            // Since we are writing to radioconfig, that will trigger the rest of the GUI update (QR code etc)
+            // Since we are writing to DeviceConfig, that will trigger the rest of the GUI update (QR code etc)
         } catch (ex: RemoteException) {
             errormsg("ignoring channel problem", ex)
 
@@ -282,7 +283,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             if (checked) {
                 // User just unlocked for editing - remove the # goo around the channel name
                 model.channels.value?.primaryChannel?.let { ch ->
-                    // Note: We are careful to show the emptystring here if the user was on a default channel, so the user knows they should it for any changes
+                    // Note: We are careful to show the empty string here if the user was on a default channel, so the user knows they should it for any changes
                     originalName = ch.settings.name
                     binding.channelNameEdit.setText(originalName)
                 }
@@ -303,18 +304,20 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                             // Find the new modem config
                             val selectedChannelOptionString =
                                 binding.filledExposedDropdown.editableText.toString()
-                            var modemConfig = getModemConfig(selectedChannelOptionString)
-                            if (modemConfig == ChannelProtos.ChannelSettings.ModemConfig.UNRECOGNIZED) // Huh? didn't find it - keep same
-                                modemConfig = oldPrimary.settings.modemConfig
+                            var modemPreset = getModemPreset(selectedChannelOptionString)
+                            // if (modemPreset == ConfigProtos.Config.LoRaConfig.ModemPreset.UNRECOGNIZED) // Huh? didn't find it - keep same
+                            //     modemPreset = oldPrimary.settings.modemConfig -> TODO add from LoraConfig.ModemPreset?
 
                             // Generate a new AES256 key if the user changes channel name or the name is non-default and the settings changed
-                            if (newName != originalName || (newName.isNotEmpty() && modemConfig != oldPrimary.settings.modemConfig)) {
+                            // if (newName != originalName || (newName.isNotEmpty() && modemConfig != oldPrimary.settings.modemConfig)) {
+                            if (newName != originalName || newName.isNotEmpty()) {
+
                                 // Install a new customized channel
                                 debug("ASSIGNING NEW AES256 KEY")
                                 val random = SecureRandom()
                                 val bytes = ByteArray(32)
                                 random.nextBytes(bytes)
-                                newSettings.name = newName
+                                newSettings.name = newName.take(11) // proto max_size:12
                                 newSettings.psk = ByteString.copyFrom(bytes)
                             } else {
                                 debug("Switching back to default channel")
@@ -322,7 +325,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                             }
 
                             // No matter what apply the speed selection from the user
-                            newSettings.modemConfig = modemConfig
+                            // newSettings.modemConfig = modemPreset -> TODO add from LoraConfig.ModemPreset?
 
                             installSettings(newSettings.build())
                         }
@@ -348,12 +351,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
     }
 
-    private fun getModemConfig(selectedChannelOptionString: String): ChannelProtos.ChannelSettings.ModemConfig {
+    private fun getModemPreset(selectedChannelOptionString: String): ConfigProtos.Config.LoRaConfig.ModemPreset {
         for (item in ChannelOption.values()) {
             if (getString(item.configRes) == selectedChannelOptionString)
-                return item.modemConfig
+                return item.modemPreset
         }
-        return ChannelProtos.ChannelSettings.ModemConfig.UNRECOGNIZED
+        return ConfigProtos.Config.LoRaConfig.ModemPreset.UNRECOGNIZED
     }
 
     private val requestPermissionAndScanLauncher =

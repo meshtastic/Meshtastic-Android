@@ -3,7 +3,7 @@ package com.geeksville.mesh.service
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
-import com.geeksville.mesh.RadioConfigProtos
+import com.geeksville.mesh.ConfigProtos
 import kotlinx.serialization.Serializable
 
 /// Our saved preferences as stored on disk
@@ -12,7 +12,7 @@ data class MeshServiceSettingsData(
     val nodeDB: Array<NodeInfo>,
     val myInfo: MyNodeInfo,
     val messages: Array<DataPacket>,
-    val regionCode: Int = RadioConfigProtos.RegionCode.Unset_VALUE
+    val regionCode: Int = ConfigProtos.Config.LoRaConfig.RegionCode.Unset_VALUE
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -83,7 +83,7 @@ class MeshService : Service(), Logging {
         class NodeNumNotFoundException(id: Int) : NodeNotFoundException("NodeNum not found $id")
         class IdNotFoundException(id: String) : NodeNotFoundException("ID not found $id")
 
-        class NoRadioConfigException(message: String = "No radio settings received (is our app too old?)") :
+        class NoDeviceConfigException(message: String = "No radio settings received (is our app too old?)") :
             RadioNotConnectedException(message)
 
         /** We treat software update as similar to loss of comms to the regular bluetooth service (so things like sendPosition for background GPS ignores the problem */
@@ -128,7 +128,7 @@ class MeshService : Service(), Logging {
     private var locationFlow: Job? = null
 
     // If we've ever read a valid region code from our device it will be here
-    var curRegionValue = RadioConfigProtos.RegionCode.Unset_VALUE
+    var curRegionValue = ConfigProtos.Config.LoRaConfig.RegionCode.Unset_VALUE
 
     private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
@@ -350,7 +350,7 @@ class MeshService : Service(), Logging {
 
     var myNodeInfo: MyNodeInfo? = null
 
-    private var radioConfig: RadioConfigProtos.RadioConfig? = null
+    private var deviceConfig: ConfigProtos.Config? = null
 
     private var channels = fixupChannelList(listOf())
 
@@ -725,9 +725,9 @@ class MeshService : Service(), Logging {
         // For the time being we only care about admin messages from our local node
         if (fromNodeNum == myNodeNum) {
             when (a.variantCase) {
-                AdminProtos.AdminMessage.VariantCase.GET_RADIO_RESPONSE -> {
-                    debug("Admin: received radioConfig")
-                    radioConfig = a.getRadioResponse
+                AdminProtos.AdminMessage.VariantCase.GET_CONFIG_RESPONSE -> {
+                    debug("Admin: received deviceConfig")
+                    deviceConfig = a.getConfigResponse
                     requestChannel(0) // Now start reading channels
                 }
 
@@ -983,7 +983,7 @@ class MeshService : Service(), Logging {
             sleepTimeout = serviceScope.handledLaunch {
                 try {
                     // If we have a valid timeout, wait that long (+30 seconds) otherwise, just wait 30 seconds
-                    val timeout = (radioConfig?.preferences?.lsSecs ?: 0) + 30
+                    val timeout = (deviceConfig?.power?.lsSecs ?: 0) + 30
 
                     debug("Waiting for sleeping device, timeout=$timeout secs")
                     delay(timeout * 1000L)
@@ -1075,7 +1075,7 @@ class MeshService : Service(), Logging {
 
     private fun onRadioConnectionState(state: RadioServiceConnectionState) {
         // sleep now disabled by default on ESP32, permanent is true unless isPowerSaving enabled
-        val lsEnabled = radioConfig?.preferences?.isPowerSaving ?: false
+        val lsEnabled = deviceConfig?.power?.isPowerSaving ?: false
         val connected = state.isConnected
         val permanent = state.isPermanent || !lsEnabled
         onConnectionChanged(
@@ -1105,7 +1105,7 @@ class MeshService : Service(), Logging {
 
                 MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleNodeInfo(proto.nodeInfo)
 
-                // MeshProtos.FromRadio.RADIO_FIELD_NUMBER -> handleRadioConfig(proto.radio)
+                // MeshProtos.FromRadio.RADIO_FIELD_NUMBER -> handleDeviceConfig(proto.radio)
 
                 else -> errormsg("Unexpected FromRadio variant")
             }
@@ -1249,7 +1249,7 @@ class MeshService : Service(), Logging {
         regenMyNodeInfo()
 
         // We'll need to get a new set of channels and settings now
-        radioConfig = null
+        deviceConfig = null
 
         // prefill the channel array with null channels
         channels = fixupChannelList(listOf<ChannelProtos.Channel>())
@@ -1272,21 +1272,21 @@ class MeshService : Service(), Logging {
 
     private fun setRegionOnDevice() {
         val curConfigRegion =
-            radioConfig?.preferences?.region ?: RadioConfigProtos.RegionCode.Unset
+            deviceConfig?.lora?.region ?: ConfigProtos.Config.LoRaConfig.RegionCode.Unset
 
-        if (curConfigRegion.number != curRegionValue && curRegionValue != RadioConfigProtos.RegionCode.Unset_VALUE)
+        if (curConfigRegion.number != curRegionValue && curRegionValue != ConfigProtos.Config.LoRaConfig.RegionCode.Unset_VALUE)
             if (deviceVersion >= minFirmwareVersion) {
                 info("Telling device to upgrade region")
 
                 // Tell the device to set the new region field (old devices will simply ignore this)
-                radioConfig?.let { currentConfig ->
+                deviceConfig?.let { currentConfig ->
                     val newConfig = currentConfig.toBuilder()
 
-                    val newPrefs = currentConfig.preferences.toBuilder()
+                    val newPrefs = currentConfig.lora.toBuilder()
                     newPrefs.regionValue = curRegionValue
-                    newConfig.preferences = newPrefs.build()
+                    newConfig.lora = newPrefs.build()
 
-                    sendRadioConfig(newConfig.build())
+                    sendDeviceConfig(newConfig.build())
                 }
             } else
                 warn("Device is too old to understand region changes")
@@ -1301,8 +1301,8 @@ class MeshService : Service(), Logging {
             // Try to pull our region code from the new preferences field
             // FIXME - do not check net - figuring out why board is rebooting
             val curConfigRegion =
-                radioConfig?.preferences?.region ?: RadioConfigProtos.RegionCode.Unset
-            if (curConfigRegion != RadioConfigProtos.RegionCode.Unset) {
+                deviceConfig?.lora?.region ?: ConfigProtos.Config.LoRaConfig.RegionCode.Unset
+            if (curConfigRegion != ConfigProtos.Config.LoRaConfig.RegionCode.Unset) {
                 info("Using device region $curConfigRegion (code ${curConfigRegion.number})")
                 curRegionValue = curConfigRegion.number
             }
@@ -1357,15 +1357,15 @@ class MeshService : Service(), Logging {
                     info("Device firmware is too old, faking config so firmware update can occur")
                     onHasSettings()
                 } else
-                    requestRadioConfig()
+                    requestDeviceConfig()
             }
         } else
             warn("Ignoring stale config complete")
     }
 
-    private fun requestRadioConfig() {
+    private fun requestDeviceConfig() {
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
-            getRadioRequest = true
+            getConfigRequest = AdminProtos.AdminMessage.ConfigType.DEVICE_CONFIG
         })
     }
 
@@ -1440,22 +1440,22 @@ class MeshService : Service(), Logging {
 
     /** Send our current radio config to the device
      */
-    private fun sendRadioConfig(c: RadioConfigProtos.RadioConfig) {
+    private fun sendDeviceConfig(c: ConfigProtos.Config) {
         // send the packet into the mesh
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
-            setRadio = c
+            setConfig = c
         })
 
         // Update our cached copy
-        this@MeshService.radioConfig = c
+        this@MeshService.deviceConfig = c
     }
 
     /** Set our radio config
      */
-    private fun setRadioConfig(payload: ByteArray) {
-        val parsed = RadioConfigProtos.RadioConfig.parseFrom(payload)
+    private fun setDeviceConfig(payload: ByteArray) {
+        val parsed = ConfigProtos.Config.parseFrom(payload)
 
-        sendRadioConfig(parsed)
+        sendDeviceConfig(parsed)
     }
 
     /**
@@ -1690,13 +1690,13 @@ class MeshService : Service(), Logging {
             }
         }
 
-        override fun getRadioConfig(): ByteArray = toRemoteExceptions {
-            this@MeshService.radioConfig?.toByteArray()
-                ?: throw NoRadioConfigException()
+        override fun getDeviceConfig(): ByteArray = toRemoteExceptions {
+            this@MeshService.deviceConfig?.toByteArray()
+                ?: throw NoDeviceConfigException()
         }
 
-        override fun setRadioConfig(payload: ByteArray) = toRemoteExceptions {
-            this@MeshService.setRadioConfig(payload)
+        override fun setDeviceConfig(payload: ByteArray) = toRemoteExceptions {
+            this@MeshService.setDeviceConfig(payload)
         }
 
         override fun getChannels(): ByteArray = toRemoteExceptions {

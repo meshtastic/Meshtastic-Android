@@ -60,13 +60,13 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
 
     private fun handleAdminPacket(pr: MeshProtos.ToRadio, d: AdminProtos.AdminMessage) {
         when {
-            d.getRadioRequest ->
+            d.getConfigRequest == AdminProtos.AdminMessage.ConfigType.LORA_CONFIG ->
                 sendAdmin(pr.packet.to, pr.packet.from, pr.packet.id) {
-                    getRadioResponse = RadioConfigProtos.RadioConfig.newBuilder().apply {
+                    getConfigResponse = ConfigProtos.Config.newBuilder().apply {
 
-                        preferences =
-                            RadioConfigProtos.RadioConfig.UserPreferences.newBuilder().apply {
-                                region = RadioConfigProtos.RegionCode.TW
+                        lora =
+                            ConfigProtos.Config.LoRaConfig.newBuilder().apply {
+                                region = ConfigProtos.Config.LoRaConfig.RegionCode.TW
                                 // FIXME set critical times?
                             }.build()
                     }.build()
