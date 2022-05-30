@@ -350,7 +350,7 @@ class MeshService : Service(), Logging {
 
     var myNodeInfo: MyNodeInfo? = null
 
-    private var deviceConfig: ConfigProtos.Config? = null
+    private var localConfig: LocalOnlyProtos.LocalConfig = LocalOnlyProtos.LocalConfig.getDefaultInstance()
 
     private var channels = fixupChannelList(listOf())
 
@@ -472,6 +472,7 @@ class MeshService : Service(), Logging {
 
             return AppOnlyProtos.ChannelSet.newBuilder().apply {
                 addAllSettings(cs)
+                loraConfig = localConfig.lora
             }.build()
         }
         set(value) {
@@ -489,6 +490,16 @@ class MeshService : Service(), Logging {
                 setChannel(it)
             }
 
+            localConfig.let { currentConfig ->
+                val newConfig = ConfigProtos.Config.newBuilder()
+
+                val newPrefs = currentConfig.lora.toBuilder()
+                newPrefs.modemPreset = value.loraConfig.modemPreset
+                newConfig.lora = newPrefs.build()
+
+                sendDeviceConfig(newConfig.build())
+            }
+
             channels = fixupChannelList(asChannels)
         }
 
@@ -497,7 +508,7 @@ class MeshService : Service(), Logging {
         if (myNodeInfo == null)
             throw RadioNotConnectedException()
 
-        from = myNodeNum
+        from = 0 // don't add myNodeNum
 
         to = idNum
     }
@@ -726,9 +737,21 @@ class MeshService : Service(), Logging {
         if (fromNodeNum == myNodeNum) {
             when (a.variantCase) {
                 AdminProtos.AdminMessage.VariantCase.GET_CONFIG_RESPONSE -> {
-                    debug("Admin: received deviceConfig")
-                    deviceConfig = a.getConfigResponse
-                    requestChannel(0) // Now start reading channels
+                    val response = a.getConfigResponse
+                    debug("Admin: received config ${response.payloadVariantCase}")
+                    localConfig.let { currentConfig ->
+                        val builder = currentConfig.toBuilder()
+                        if (response.hasDevice()) builder.device = response.device
+                        if (response.hasPosition()) builder.position = response.position
+                        if (response.hasPower()) builder.power = response.power
+                        if (response.hasWifi()) builder.wifi = response.wifi
+                        if (response.hasDisplay()) builder.display = response.display
+                        if (response.hasLora()) {
+                            builder.lora = response.lora
+                            requestChannel(0) // Now start reading channels
+                        }
+                        localConfig = builder.build()
+                    }
                 }
 
                 AdminProtos.AdminMessage.VariantCase.GET_CHANNEL_RESPONSE -> {
@@ -983,7 +1006,7 @@ class MeshService : Service(), Logging {
             sleepTimeout = serviceScope.handledLaunch {
                 try {
                     // If we have a valid timeout, wait that long (+30 seconds) otherwise, just wait 30 seconds
-                    val timeout = (deviceConfig?.power?.lsSecs ?: 0) + 30
+                    val timeout = (localConfig.power?.lsSecs ?: 0) + 30
 
                     debug("Waiting for sleeping device, timeout=$timeout secs")
                     delay(timeout * 1000L)
@@ -1075,7 +1098,7 @@ class MeshService : Service(), Logging {
 
     private fun onRadioConnectionState(state: RadioServiceConnectionState) {
         // sleep now disabled by default on ESP32, permanent is true unless isPowerSaving enabled
-        val lsEnabled = deviceConfig?.power?.isPowerSaving ?: false
+        val lsEnabled = localConfig.power?.isPowerSaving ?: false
         val connected = state.isConnected
         val permanent = state.isPermanent || !lsEnabled
         onConnectionChanged(
@@ -1249,7 +1272,7 @@ class MeshService : Service(), Logging {
         regenMyNodeInfo()
 
         // We'll need to get a new set of channels and settings now
-        deviceConfig = null
+        localConfig = LocalOnlyProtos.LocalConfig.getDefaultInstance()
 
         // prefill the channel array with null channels
         channels = fixupChannelList(listOf<ChannelProtos.Channel>())
@@ -1259,8 +1282,8 @@ class MeshService : Service(), Logging {
     private fun fixupChannelList(lIn: List<ChannelProtos.Channel>): Array<ChannelProtos.Channel> {
         // When updating old firmware, we will briefly be told that there is zero channels
         val maxChannels =
-            max(myNodeInfo?.maxChannels ?: 8, 8) // If we don't have my node info, assume 8 channels
-        var l = lIn
+            max(myNodeInfo?.maxChannels ?: 10, 10) // If we don't have my node info, assume 10 channels
+        val l = lIn.toMutableList()
         while (l.size < maxChannels) {
             val b = ChannelProtos.Channel.newBuilder()
             b.index = l.size
@@ -1272,15 +1295,15 @@ class MeshService : Service(), Logging {
 
     private fun setRegionOnDevice() {
         val curConfigRegion =
-            deviceConfig?.lora?.region ?: ConfigProtos.Config.LoRaConfig.RegionCode.Unset
+            localConfig.lora?.region ?: ConfigProtos.Config.LoRaConfig.RegionCode.Unset
 
         if (curConfigRegion.number != curRegionValue && curRegionValue != ConfigProtos.Config.LoRaConfig.RegionCode.Unset_VALUE)
             if (deviceVersion >= minFirmwareVersion) {
                 info("Telling device to upgrade region")
 
                 // Tell the device to set the new region field (old devices will simply ignore this)
-                deviceConfig?.let { currentConfig ->
-                    val newConfig = currentConfig.toBuilder()
+                localConfig.let { currentConfig ->
+                    val newConfig = ConfigProtos.Config.newBuilder()
 
                     val newPrefs = currentConfig.lora.toBuilder()
                     newPrefs.regionValue = curRegionValue
@@ -1301,7 +1324,7 @@ class MeshService : Service(), Logging {
             // Try to pull our region code from the new preferences field
             // FIXME - do not check net - figuring out why board is rebooting
             val curConfigRegion =
-                deviceConfig?.lora?.region ?: ConfigProtos.Config.LoRaConfig.RegionCode.Unset
+                localConfig.lora?.region ?: ConfigProtos.Config.LoRaConfig.RegionCode.Unset
             if (curConfigRegion != ConfigProtos.Config.LoRaConfig.RegionCode.Unset) {
                 info("Using device region $curConfigRegion (code ${curConfigRegion.number})")
                 curRegionValue = curConfigRegion.number
@@ -1364,9 +1387,11 @@ class MeshService : Service(), Logging {
     }
 
     private fun requestDeviceConfig() {
-        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
-            getConfigRequest = AdminProtos.AdminMessage.ConfigType.DEVICE_CONFIG
-        })
+        AdminProtos.AdminMessage.ConfigType.values().forEach {
+            sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
+                if (it != AdminProtos.AdminMessage.ConfigType.UNRECOGNIZED) getConfigRequest = it
+            })
+        }
     }
 
     private fun requestChannel(channelIndex: Int) {
@@ -1447,7 +1472,17 @@ class MeshService : Service(), Logging {
         })
 
         // Update our cached copy
-        this@MeshService.deviceConfig = c
+        localConfig.let { currentConfig ->
+            val builder = currentConfig.toBuilder()
+            if (c.hasDevice()) builder.device = c.device
+            if (c.hasPosition()) builder.position = c.position
+            if (c.hasPower()) builder.power = c.power
+            if (c.hasWifi()) builder.wifi = c.wifi
+            if (c.hasDisplay()) builder.display = c.display
+            if (c.hasLora()) builder.lora = c.lora
+            this@MeshService.localConfig = builder.build()
+            // debug("sendDeviceConfig: localConfig ${localConfig.toOneLineString()}")
+        }
     }
 
     /** Set our radio config
@@ -1691,7 +1726,7 @@ class MeshService : Service(), Logging {
         }
 
         override fun getDeviceConfig(): ByteArray = toRemoteExceptions {
-            this@MeshService.deviceConfig?.toByteArray()
+            this@MeshService.localConfig.toByteArray()
                 ?: throw NoDeviceConfigException()
         }
 

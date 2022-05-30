@@ -1,16 +1,20 @@
 package com.geeksville.mesh.model
 
 import com.geeksville.mesh.ChannelProtos
+import com.geeksville.mesh.ConfigProtos
 import com.google.protobuf.ByteString
 
 /** Utility function to make it easy to declare byte arrays - FIXME move someplace better */
 fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
+fun xorHash(b: ByteArray) = b.fold(0) { acc, x -> acc xor (x.toInt() and 0xff) }
 
-
-data class Channel(val settings: ChannelProtos.ChannelSettings) {
+data class Channel(
+    val settings: ChannelProtos.ChannelSettings,
+    val loraConfig: ConfigProtos.Config.LoRaConfig
+) {
     companion object {
         // These bytes must match the well known and not secret bytes used the default channel AES128 key device code
-        val channelDefaultKey = byteArrayOfInts(
+        private val channelDefaultKey = byteArrayOfInts(
             0xd4, 0xf1, 0xbb, 0x3a, 0x20, 0x29, 0x07, 0x59,
             0xf0, 0xbc, 0xff, 0xab, 0xcf, 0x4e, 0x69, 0x01
         )
@@ -19,19 +23,24 @@ data class Channel(val settings: ChannelProtos.ChannelSettings) {
         private val defaultPSK =
             byteArrayOfInts(1) // a shortstring code to indicate we need our default PSK
 
-        // TH=he unsecured channel that devices ship with
+        // The default channel that devices ship with
         val default = Channel(
             ChannelProtos.ChannelSettings.newBuilder()
-                // .setModemConfig(ChannelProtos.ChannelSettings.ModemConfig.LongFast)
                 .setPsk(ByteString.copyFrom(defaultPSK))
+                .build(),
+            ConfigProtos.Config.LoRaConfig.newBuilder()
+                .setModemPreset(ConfigProtos.Config.LoRaConfig.ModemPreset.LongFast)
                 .build()
         )
     }
 
     /// Return the name of our channel as a human readable string.  If empty string, assume "Default" per mesh.proto spec
     val name: String
-        get() = settings.name.ifEmpty { "Placeholder" /*
-            when (settings.modemConfig) {
+        get() = settings.name.ifEmpty {
+            // We have a new style 'empty' channel name.  Use the same logic from the device to convert that to a human readable name
+            if (loraConfig.bandwidth != 0)
+                "Unset"
+            else when (loraConfig.modemPreset) {
                 ConfigProtos.Config.LoRaConfig.ModemPreset.ShortFast -> "ShortFast"
                 ConfigProtos.Config.LoRaConfig.ModemPreset.ShortSlow -> "ShortSlow"
                 ConfigProtos.Config.LoRaConfig.ModemPreset.MidFast -> "MidFast"
@@ -40,7 +49,7 @@ data class Channel(val settings: ChannelProtos.ChannelSettings) {
                 ConfigProtos.Config.LoRaConfig.ModemPreset.LongSlow -> "LongSlow"
                 ConfigProtos.Config.LoRaConfig.ModemPreset.VLongSlow -> "VLongSlow"
                 else -> "Invalid"
-            }*/
+            }
         }
 
     val psk: ByteString
@@ -75,9 +84,13 @@ data class Channel(val settings: ChannelProtos.ChannelSettings) {
             return "#${name}-${suffix}"
         }
 
-    override fun equals(o: Any?): Boolean = (o is Channel)
-        && psk.toByteArray() contentEquals o.psk.toByteArray()
-        && name == o.name
-}
+    override fun equals(other: Any?): Boolean = (other is Channel)
+            && psk.toByteArray() contentEquals other.psk.toByteArray()
+            && name == other.name
 
-fun xorHash(b: ByteArray) = b.fold(0) { acc, x -> acc xor (x.toInt() and 0xff) }
+    override fun hashCode(): Int {
+        var result = settings.hashCode()
+        result = 31 * result + loraConfig.hashCode()
+        return result
+    }
+}

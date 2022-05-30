@@ -115,7 +115,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             if (bitmap != null)
                 binding.qrView.setImageBitmap(bitmap)
 
-            val modemPreset = model.deviceConfig.value?.lora?.modemPreset
+            val modemPreset = channel.loraConfig.modemPreset
             val channelOption = ChannelOption.fromConfig(modemPreset)
             binding.filledExposedDropdown.setText(
                 getString(
@@ -172,9 +172,17 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     }
 
     /// Send new channel settings to the device
-    private fun installSettings(newChannel: ChannelProtos.ChannelSettings) {
+    private fun installSettings(
+        newChannel: ChannelProtos.ChannelSettings,
+        newLoRaConfig: ConfigProtos.Config.LoRaConfig
+    ) {
         val newSet =
-            ChannelSet(AppOnlyProtos.ChannelSet.newBuilder().addSettings(newChannel).build())
+            ChannelSet(
+                AppOnlyProtos.ChannelSet.newBuilder()
+                    .addSettings(newChannel)
+                    .setLoraConfig(newLoRaConfig)
+                    .build()
+            )
         // Try to change the radio, if it fails, tell the user why and throw away their edits
         try {
             model.setChannels(newSet)
@@ -256,7 +264,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 }
                 .setPositiveButton(R.string.apply) { _, _ ->
                     debug("Switching back to default channel")
-                    installSettings(Channel.default.settings)
+                    installSettings(Channel.default.settings, Channel.default.loraConfig)
                 }
                 .show()
         }
@@ -302,15 +310,14 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                             val newName = binding.channelNameEdit.text.toString().trim()
 
                             // Find the new modem config
-                            val selectedChannelOptionString =
+                            val selectedModemPresetString =
                                 binding.filledExposedDropdown.editableText.toString()
-                            var modemPreset = getModemPreset(selectedChannelOptionString)
-                            // if (modemPreset == ConfigProtos.Config.LoRaConfig.ModemPreset.UNRECOGNIZED) // Huh? didn't find it - keep same
-                            //     modemPreset = oldPrimary.settings.modemConfig -> TODO add from LoraConfig.ModemPreset?
+                            var newModemPreset = getModemPreset(selectedModemPresetString)
+                            if (newModemPreset == ConfigProtos.Config.LoRaConfig.ModemPreset.UNRECOGNIZED) // Huh? didn't find it - keep same
+                                newModemPreset = oldPrimary.loraConfig.modemPreset
 
                             // Generate a new AES256 key if the user changes channel name or the name is non-default and the settings changed
-                            // if (newName != originalName || (newName.isNotEmpty() && modemConfig != oldPrimary.settings.modemConfig)) {
-                            if (newName != originalName || newName.isNotEmpty()) {
+                            if (newName != originalName || (newName.isNotEmpty() && newModemPreset != oldPrimary.loraConfig.modemPreset)) {
 
                                 // Install a new customized channel
                                 debug("ASSIGNING NEW AES256 KEY")
@@ -325,9 +332,10 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                             }
 
                             // No matter what apply the speed selection from the user
-                            // newSettings.modemConfig = modemPreset -> TODO add from LoraConfig.ModemPreset?
+                            val newLoRaConfig = ConfigProtos.Config.LoRaConfig.newBuilder()
+                                .setModemPreset(newModemPreset)
 
-                            installSettings(newSettings.build())
+                            installSettings(newSettings.build(),newLoRaConfig.build())
                         }
                     }
                     .show()

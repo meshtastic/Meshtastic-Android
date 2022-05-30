@@ -15,7 +15,7 @@ data class ChannelSet(
 ) : Logging {
     companion object {
 
-        const val prefix = "https://www.meshtastic.org/d/#"
+        const val prefix = "https://www.meshtastic.org/e/#"
 
         private const val base64Flags = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
 
@@ -42,7 +42,7 @@ data class ChannelSet(
     val primaryChannel: Channel?
         get() =
             if (protobuf.settingsCount > 0)
-                Channel(protobuf.getSettings(0))
+                Channel(protobuf.getSettings(0), protobuf.loraConfig)
             else
                 null
 
@@ -54,10 +54,7 @@ data class ChannelSet(
         val channelBytes = protobuf.toByteArray() ?: ByteArray(0) // if unset just use empty
         val enc = Base64.encodeToString(channelBytes, base64Flags)
 
-        val p = if (upperCasePrefix)
-            prefix.uppercase()
-        else
-            prefix
+        val p = if (upperCasePrefix) prefix.uppercase() else prefix
         return Uri.parse("$p$enc")
     }
 
