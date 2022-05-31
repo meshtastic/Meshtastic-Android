@@ -9,9 +9,9 @@ import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
 import android.content.*
-import android.content.pm.PackageManager
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
+import android.location.LocationManager
 import android.net.nsd.NsdServiceInfo
 import android.os.*
 import android.view.LayoutInflater
@@ -48,9 +48,6 @@ import com.geeksville.mesh.service.SoftwareUpdateService
 import com.geeksville.util.anonymize
 import com.geeksville.util.exceptionReporter
 import com.geeksville.util.exceptionToSnackbar
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.hoho.android.usbserial.driver.UsbSerialDriver
@@ -553,18 +550,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private val bluetoothViewModel: BluetoothViewModel by activityViewModels()
     private val model: UIViewModel by activityViewModels()
 
-    // FIXME - move this into a standard GUI helper class
-    private val guiJob = Job()
-
     @Inject
     internal lateinit var usbRepository: UsbRepository
 
     private val myActivity get() = requireActivity() as MainActivity
-
-    override fun onDestroy() {
-        guiJob.cancel()
-        super.onDestroy()
-    }
 
     private fun doFirmwareUpdate() {
         model.meshService?.let { service ->
@@ -967,62 +956,23 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
-    // If the user has not turned on location access throw up a toast warning
+    // If the user has not turned on location access throw up a warning
     private fun checkLocationEnabled(
         warningReason: String = getString(R.string.location_disabled_warning)
     ) {
+        val locationManager =
+            myActivity.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        var gpsEnabled = false
 
-        val hasGps: Boolean =
-            myActivity.packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+        try {
+            gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        } catch (ex: Throwable) {
+            debug("LocationManager GPS_PROVIDER error: ${ex.message}")
+        }
 
-        // FIXME If they don't have google play for now we don't check for location enabled
-        if (hasGps && isGooglePlayAvailable(requireContext())) {
-            // We do this painful process because LocationManager.isEnabled is only SDK28 or latest
-            val builder = LocationSettingsRequest.Builder()
-            builder.setNeedBle(true)
-
-            val request = LocationRequest.create().apply {
-                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            }
-            builder.addLocationRequest(request) // Make sure we are granted high accuracy permission
-
-            val locationSettingsResponse = LocationServices.getSettingsClient(requireActivity())
-                .checkLocationSettings(builder.build())
-
-            fun weNeedAccess(warningReason: String) {
-                warn("Telling user we need need location access")
-                showSnackbar(warningReason)
-            }
-
-            locationSettingsResponse.addOnSuccessListener {
-                if (!it.locationSettingsStates?.isBleUsable!! || !it.locationSettingsStates?.isLocationUsable!!)
-                    weNeedAccess(warningReason)
-                else
-                    debug("We have location access")
-            }
-
-            locationSettingsResponse.addOnFailureListener {
-                errormsg("Failed to get location access")
-                // We always show the toast regardless of what type of exception we receive.  Because even non
-                // resolvable api exceptions mean user still needs to fix something.
-
-                ///if (exception is ResolvableApiException) {
-
-                // Location settings are not satisfied, but this can be fixed
-                // by showing the user a dialog.
-
-                // Show the dialog by calling startResolutionForResult(),
-                // and check the result in onActivityResult().
-                // exception.startResolutionForResult(this@MainActivity, REQUEST_CHECK_SETTINGS)
-
-                // For now just punt and show a dialog
-
-                // The context might be gone (if activity is going away) by the time this handler is called
-                weNeedAccess(warningReason)
-
-                //} else
-                //    Exceptions.report(exception)
-            }
+        if (myActivity.hasGps() && !gpsEnabled) {
+            warn("Telling user we need need location access")
+            showSnackbar(warningReason)
         }
     }
 
@@ -1063,7 +1013,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         scanModel.setupScan()
 
         // system permissions might have changed while we were away
-        binding.provideLocationCheckbox.isChecked = myActivity.hasLocationPermission() && myActivity.hasBackgroundPermission() && (model.provideLocation.value ?: false) && isGooglePlayAvailable(requireContext())
+        binding.provideLocationCheckbox.isChecked = myActivity.hasBackgroundPermission() && (model.provideLocation.value ?: false) && isGooglePlayAvailable(requireContext())
 
         myActivity.registerReceiver(updateProgressReceiver, updateProgressFilter)
 

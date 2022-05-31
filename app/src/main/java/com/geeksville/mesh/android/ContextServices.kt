@@ -39,6 +39,12 @@ fun Context.hasCompanionDeviceApi(): Boolean =
     else false
 
 /**
+ * @return true if the device has a GPS receiver
+ */
+fun Context.hasGps(): Boolean =
+    packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+
+/**
  * return a list of the permissions we don't have
  */
 fun Context.getMissingPermissions(perms: List<String>) = perms.filter {
