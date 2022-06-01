@@ -47,17 +47,17 @@ fun Context.hasGps(): Boolean =
 /**
  * return a list of the permissions we don't have
  */
-fun Context.getMissingPermissions(perms: List<String>) = perms.filter {
+fun Context.getMissingPermissions(perms: List<String>): Array<String> = perms.filter {
     ContextCompat.checkSelfPermission(
         this,
         it
     ) != PackageManager.PERMISSION_GRANTED
-}
+}.toTypedArray()
 
 /**
  * Bluetooth connect permissions (or empty if we already have what we need)
  */
-fun Context.getConnectPermissions(): List<String> {
+fun Context.getConnectPermissions(): Array<String> {
     val perms = mutableListOf<String>()
 
 /*  TODO - wait for targetSdkVersion 31
@@ -76,7 +76,7 @@ fun Context.hasConnectPermission() = getConnectPermissions().isEmpty()
 /**
  * Bluetooth scan/discovery permissions (or empty if we already have what we need)
  */
-fun Context.getScanPermissions(): List<String> {
+fun Context.getScanPermissions(): Array<String> {
     val perms = mutableListOf<String>()
 
 /*  TODO - wait for targetSdkVersion 31
@@ -101,7 +101,7 @@ fun Context.hasScanPermission() = getScanPermissions().isEmpty()
 /**
  * Camera permission (or empty if we already have what we need)
  */
-fun Context.getCameraPermissions(): List<String> {
+fun Context.getCameraPermissions(): Array<String> {
     val perms = mutableListOf(Manifest.permission.CAMERA)
 
     return getMissingPermissions(perms)
@@ -113,7 +113,7 @@ fun Context.hasCameraPermission() = getCameraPermissions().isEmpty()
 /**
  * Location permission (or empty if we already have what we need)
  */
-fun Context.getLocationPermissions(): List<String> {
+fun Context.getLocationPermissions(): Array<String> {
     val perms = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
 
     return getMissingPermissions(perms)
@@ -125,8 +125,8 @@ fun Context.hasLocationPermission() = getLocationPermissions().isEmpty()
 /**
  * A list of missing background location permissions (or empty if we already have what we need)
  */
-fun Context.getBackgroundPermissions(): List<String> {
-    val perms = mutableListOf<String>()
+fun Context.getBackgroundPermissions(): Array<String> {
+    val perms = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
 
     if (Build.VERSION.SDK_INT >= 29) // only added later
         perms.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)

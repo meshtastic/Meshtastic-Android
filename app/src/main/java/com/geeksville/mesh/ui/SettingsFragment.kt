@@ -793,11 +793,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
             if (view.isPressed && isChecked) { // We want to ignore changes caused by code (as opposed to the user)
                 // Don't check the box until the system setting changes
-                view.isChecked = myActivity.hasLocationPermission() && myActivity.hasBackgroundPermission()
+                view.isChecked = myActivity.hasBackgroundPermission()
 
-                if (!myActivity.hasLocationPermission()) // Make sure we have location permission (prerequisite)
-                    myActivity.requestLocationPermission()
-                else if (!myActivity.hasBackgroundPermission())
+                if (!myActivity.hasBackgroundPermission())
                     MaterialAlertDialogBuilder(requireContext())
                         .setTitle(R.string.background_required)
                         .setMessage(R.string.why_background_required)
@@ -805,7 +803,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                             debug("User denied background permission")
                         }
                         .setPositiveButton(getString(R.string.accept)) { _, _ ->
-                            myActivity.requestBackgroundPermission()
+                            // Make sure we have location permission (prerequisite)
+                            if (!myActivity.hasLocationPermission()) {
+                                requestLocationAndBackgroundLauncher.launch(myActivity.getLocationPermissions())
+                            } else {
+                                requestBackgroundAndCheckLauncher.launch(myActivity.getBackgroundPermissions())
+                            }
                         }
                         .show()
                 if (view.isChecked) {
@@ -939,6 +942,23 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 )
             }
     }
+
+    private val requestLocationAndBackgroundLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (permissions.entries.all { it.value == true }) {
+                // Older versions of android only need Location permission
+                if (myActivity.hasBackgroundPermission()) {
+                    binding.provideLocationCheckbox.isChecked = true
+                } else requestBackgroundAndCheckLauncher.launch(myActivity.getBackgroundPermissions())
+            }
+        }
+
+    private val requestBackgroundAndCheckLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (permissions.entries.all { it.value == true }) {
+                binding.provideLocationCheckbox.isChecked = true
+            }
+        }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

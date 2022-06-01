@@ -1,6 +1,5 @@
 package com.geeksville.mesh.ui
 
-import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.graphics.ColorMatrix
@@ -25,6 +24,7 @@ import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.android.hasCameraPermission
 import com.geeksville.mesh.databinding.ChannelFragmentBinding
 import com.geeksville.mesh.model.Channel
@@ -219,11 +219,10 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 debug("Camera permission denied")
             }
             .setPositiveButton(getString(R.string.accept)) { _, _ ->
-                requestPermissionAndScanLauncher.launch(Manifest.permission.CAMERA)
+                requestPermissionAndScanLauncher.launch(requireContext().getCameraPermissions())
             }
             .show()
     }
-
 
     private fun mlkitScan() {
         debug("Starting ML Kit QR code scanner")
@@ -368,8 +367,8 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     }
 
     private val requestPermissionAndScanLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { allowed ->
-            if (allowed) zxingScan()
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (permissions.entries.all { it.value == true }) zxingScan()
         }
 
     // Register zxing launcher and result handler
