@@ -1,6 +1,7 @@
 [submodule "app/src/main/proto"]
 	path = app/src/main/proto
 	url = https://github.com/meshtastic/Meshtastic-protobufs.git
+	branch = 1.2-legacy
 [submodule "geeksville-androidlib"]
 	path = geeksville-androidlib
 	url = https://github.com/meshtastic/geeksville-androidlib.git
