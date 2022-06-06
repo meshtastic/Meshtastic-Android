@@ -23,9 +23,9 @@ import android.widget.*
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
@@ -38,6 +38,7 @@ import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ACTION_UPDATE_PROGRESS
 import com.geeksville.mesh.service.SoftwareUpdateService.Companion.ProgressNotStarted
@@ -52,10 +53,12 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import java.util.regex.Pattern
+import javax.inject.Inject
 
 object SLogging : Logging
 
@@ -110,9 +113,13 @@ private fun requestBonding(
     }
 }
 
-class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
+@HiltViewModel
+class BTScanModel @Inject constructor(
+    private val application: Application,
+    private val bluetoothRepository: BluetoothRepository,
+) : ViewModel(), Logging {
 
-    private val context: Context get() = getApplication<Application>().applicationContext
+    private val context: Context get() = application.applicationContext
 
     init {
         debug("BTScanModel created")
@@ -308,7 +315,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     @SuppressLint("MissingPermission")
     private fun startClassicScan() {
         /// The following call might return null if the user doesn't have bluetooth access permissions
-        val bluetoothLeScanner: BluetoothLeScanner? = bluetoothAdapter?.bluetoothLeScanner
+        val bluetoothLeScanner = bluetoothRepository.getBluetoothLeScanner()
 
         if (bluetoothLeScanner != null) { // could be null if bluetooth is disabled
             debug("starting classic scan")
@@ -338,7 +345,7 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
     @SuppressLint("MissingPermission")
     fun getDeviceListEntry(fullAddress: String, bonded: Boolean = false): DeviceListEntry {
         val address = fullAddress.substring(1)
-        val device = bluetoothAdapter?.getRemoteDevice(address)
+        val device = bluetoothRepository.getRemoteDevice(address)
         return if (device != null && device.name != null) {
             DeviceListEntry(device.name, fullAddress, device.bondState != BluetoothDevice.BOND_NONE)
         } else {
@@ -450,8 +457,8 @@ class BTScanModel(app: Application) : AndroidViewModel(app), Logging {
                 if (it.isBLE) {
                     // Request bonding for bluetooth
                     // We ignore missing BT adapters, because it lets us run on the emulator
-                    bluetoothAdapter
-                        ?.getRemoteDevice(it.fullAddress)?.let { device ->
+                    bluetoothRepository
+                        .getRemoteDevice(it.address)?.let { device ->
                             requestBonding(activity, device) { state ->
                                 if (state == BOND_BONDED) {
                                     errorText.value = activity.getString(R.string.pairing_completed)
