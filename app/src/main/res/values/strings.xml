@@ -142,4 +142,6 @@
     <string name="preferences_system_default">System default</string>
     <string name="preferences_map_style">Map style</string>
     <string name="resend">Resend</string>
+    <string name="shutdown">Shutdown</string>
+    <string name="reboot">Reboot</string>
 </resources>

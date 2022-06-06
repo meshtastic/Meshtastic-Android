@@ -112,7 +112,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
 
         binding.shutdownButton.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
-                .setMessage("${getString(R.string.update_firmware)}?")
+                .setMessage("${getString(R.string.shutdown)}?")
                 .setNeutralButton(R.string.cancel) { _, _ ->
                 }
                 .setPositiveButton(getString(R.string.okay)) { _, _ ->
@@ -123,7 +123,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
 
         binding.rebootButton.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
-                .setMessage("${getString(R.string.update_firmware)}?")
+                .setMessage("${getString(R.string.reboot)}?")
                 .setNeutralButton(R.string.cancel) { _, _ ->
                 }
                 .setPositiveButton(getString(R.string.okay)) { _, _ ->
