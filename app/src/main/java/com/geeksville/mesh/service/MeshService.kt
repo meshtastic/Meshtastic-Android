@@ -1406,6 +1406,18 @@ class MeshService : Service(), Logging {
         })
     }
 
+    private fun requestShutdown(nodeId: String) {
+        sendToRadio(newMeshPacketTo(toNodeNum(nodeId)).buildAdminPacket {
+            shutdownSeconds = 5
+        })
+    }
+
+    private fun requestReboot(nodeId: String) {
+        sendToRadio(newMeshPacketTo(toNodeNum(nodeId)).buildAdminPacket {
+            rebootSeconds = 5
+        })
+    }
+
     /**
      * Start the modern (REV2) API configuration flow
      */
@@ -1762,6 +1774,14 @@ class MeshService : Service(), Logging {
 
         override fun stopProvideLocation() = toRemoteExceptions {
             stopLocationRequests()
+        }
+
+        override fun requestShutdown(nodeId: String) = toRemoteExceptions {
+            this@MeshService.requestShutdown(nodeId)
+        }
+
+        override fun requestReboot(nodeId: String) = toRemoteExceptions {
+            this@MeshService.requestReboot(nodeId)
         }
     }
 }
