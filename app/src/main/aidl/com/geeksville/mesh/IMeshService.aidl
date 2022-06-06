@@ -95,6 +95,12 @@ interface IMeshService {
     /// It sets a ChannelSet protobuf
     void setChannels(in byte []payload);
 
+    /// Send Shutdown admin packet to nodeNum
+    void requestShutdown(in String nodeId);
+
+    /// Send Reboot admin packet to nodeNum
+    void requestReboot(in String nodeId);
+
     /**
     Is the packet radio currently connected to the phone?  Returns a ConnectionState string.
     */
