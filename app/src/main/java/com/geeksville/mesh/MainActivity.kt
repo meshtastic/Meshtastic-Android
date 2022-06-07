@@ -189,7 +189,7 @@ class MainActivity : BaseActivity(), Logging,
 
     /** Get the minimum permissions our app needs to run correctly
      */
-    private fun getMinimumPermissions(): List<String> {
+    private fun getMinimumPermissions(): Array<String> {
         val perms = mutableListOf(
             Manifest.permission.WAKE_LOCK
 
@@ -218,18 +218,12 @@ class MainActivity : BaseActivity(), Logging,
     /** Ask the user to grant Bluetooth scan/discovery permission */
     fun requestScanPermission() = requestPermission(getScanPermissions(), true)
 
-    /** Ask the user to grant foreground location permission */
-    fun requestLocationPermission() = requestPermission(getLocationPermissions())
-
-    /** Ask the user to grant background location permission */
-    fun requestBackgroundPermission() = requestPermission(getBackgroundPermissions())
-
     /**
      * @return a localized string warning user about missing permissions.  Or null if everything is find
      */
     @SuppressLint("InlinedApi")
     fun getMissingMessage(
-        missingPerms: List<String> = getMinimumPermissions()
+        missingPerms: Array<String> = getMinimumPermissions()
     ): String? {
         val renamedPermissions = mapOf(
             // Older versions of android don't know about these permissions - ignore failure to grant
@@ -262,7 +256,7 @@ class MainActivity : BaseActivity(), Logging,
      * @return true if we already have the needed permissions
      */
     private fun requestPermission(
-        missingPerms: List<String> = getMinimumPermissions(),
+        missingPerms: Array<String> = getMinimumPermissions(),
         shouldShowDialog: Boolean = false
     ): Boolean =
         if (missingPerms.isNotEmpty()) {
@@ -275,7 +269,7 @@ class MainActivity : BaseActivity(), Logging,
                 // Ask for all the missing perms
                 ActivityCompat.requestPermissions(
                     this,
-                    missingPerms.toTypedArray(),
+                    missingPerms,
                     DID_REQUEST_PERM
                 )
             }
