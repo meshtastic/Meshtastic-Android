@@ -123,10 +123,9 @@ class UIViewModel @Inject constructor(
 
     var positionBroadcastSecs: Int?
         get() {
-            _deviceConfig.value?.position?.let {
-                if (it.positionBroadcastSecs > 0) return it.positionBroadcastSecs
+            _deviceConfig.value?.position?.positionBroadcastSecs?.let {
                 // These default values are borrowed from the device code.
-                return 15 * 60
+                return if (it > 0) it else 15 * 60 // default 900 sec
             }
             return null
         }
@@ -140,7 +139,13 @@ class UIViewModel @Inject constructor(
         }
 
     var lsSleepSecs: Int?
-        get() = _deviceConfig.value?.power?.lsSecs
+        get() {
+            _deviceConfig.value?.power?.lsSecs?.let {
+                // These default values are borrowed from the device code.
+                return if (it > 0) return it else 5 * 60 // default 300 sec
+            }
+            return null
+        }
         set(value) {
             val config = _deviceConfig.value
             if (value != null && config != null) {
@@ -178,6 +183,9 @@ class UIViewModel @Inject constructor(
         set(value) {
             meshService?.region = value.number
         }
+
+    // We consider hasWifi = ESP32
+    var isESP32: Boolean = _deviceConfig.value?.hasWifi() == true
 
     /// hardware info about our local device (can be null)
     private val _myNodeInfo = MutableLiveData<MyNodeInfo?>()
