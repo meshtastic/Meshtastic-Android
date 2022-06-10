@@ -43,8 +43,8 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             binding.lsSleepEditText.setText(model.lsSleepSecs.toString())
             binding.positionBroadcastPeriodView.isEnabled = !model.gpsDisabled
             binding.positionBroadcastSwitch.isChecked = !model.gpsDisabled
-            binding.lsSleepView.isEnabled = model.isPowerSaving ?: false && model.isESP32
-            binding.lsSleepSwitch.isChecked = model.isPowerSaving ?: false && model.isESP32
+            binding.lsSleepView.isEnabled = model.isPowerSaving ?: false && model.isESP32()
+            binding.lsSleepSwitch.isChecked = model.isPowerSaving ?: false && model.isESP32()
         }
 
         model.connectionState.observe(viewLifecycleOwner) { connectionState ->
@@ -52,7 +52,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             binding.positionBroadcastPeriodView.isEnabled = connected && !model.gpsDisabled
             binding.lsSleepView.isEnabled = connected && model.isPowerSaving ?: false
             binding.positionBroadcastSwitch.isEnabled = connected
-            binding.lsSleepSwitch.isEnabled = connected && model.isESP32
+            binding.lsSleepSwitch.isEnabled = connected && model.isESP32()
             binding.shutdownButton.isEnabled = connected
             binding.rebootButton.isEnabled = connected
         }

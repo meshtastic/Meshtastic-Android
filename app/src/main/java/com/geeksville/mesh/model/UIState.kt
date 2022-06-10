@@ -184,8 +184,11 @@ class UIViewModel @Inject constructor(
             meshService?.region = value.number
         }
 
-    // We consider hasWifi = ESP32
-    var isESP32: Boolean = _deviceConfig.value?.hasWifi() == true
+    fun isESP32(): Boolean {
+        // List of 'HardwareModel' enum values for ESP32 devices from mesh.proto
+        val hwModelESP32 = listOf(1, 2, 3, 4, 5, 6, 8, 10, 11, 32, 35, 39, 40, 41, 43, 44)
+        return hwModelESP32.contains(nodeDB.ourNodeInfo?.user?.hwModel?.number)
+    }
 
     /// hardware info about our local device (can be null)
     private val _myNodeInfo = MutableLiveData<MyNodeInfo?>()
