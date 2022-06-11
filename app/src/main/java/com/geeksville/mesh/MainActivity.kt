@@ -655,7 +655,7 @@ class MainActivity : BaseActivity(), Logging,
                                 else {
                                     // If our app is too old/new, we probably don't understand the new DeviceConfig messages, so we don't read them until here
 
-                                    model.setDeviceConfig(ConfigProtos.Config.parseFrom(service.deviceConfig))
+                                    model.setLocalConfig(LocalOnlyProtos.LocalConfig.parseFrom(service.deviceConfig))
 
                                     model.setChannels(ChannelSet(AppOnlyProtos.ChannelSet.parseFrom(service.channels)))
 

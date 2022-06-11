@@ -735,7 +735,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             updateDevicesButtons(scanModel.devices.value)
         }
 
-        model.deviceConfig.observe(viewLifecycleOwner) {
+        model.localConfig.observe(viewLifecycleOwner) {
             binding.provideLocationCheckbox.isEnabled =
                 isGooglePlayAvailable(requireContext()) && !model.gpsDisabled
             if (model.gpsDisabled) {
