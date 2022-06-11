@@ -15,6 +15,7 @@ import com.geeksville.android.Logging
 import com.geeksville.mesh.*
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.repository.datastore.LocalConfigRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -59,6 +60,7 @@ fun getInitials(nameIn: String): String {
 class UIViewModel @Inject constructor(
     private val app: Application,
     private val packetRepository: PacketRepository,
+    private val localConfigRepository: LocalConfigRepository,
     private val preferences: SharedPreferences
 ) : ViewModel(), Logging {
 
@@ -67,8 +69,15 @@ class UIViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            packetRepository.getAllPackets().collect { packets ->
-                _allPacketState.value = packets
+            launch {
+                packetRepository.getAllPackets().collect { packets ->
+                    _allPacketState.value = packets
+                }
+            }
+            launch(Dispatchers.IO) {
+                localConfigRepository.localConfigFlow.collect { config ->
+                    _localConfig.postValue(config)
+                }
             }
         }
         debug("ViewModel created")
@@ -238,18 +247,6 @@ class UIViewModel @Inject constructor(
     private fun setDeviceConfig(config: ConfigProtos.Config) {
         debug("Setting new radio config!")
         meshService?.deviceConfig = config.toByteArray()
-
-        // Must be done after calling the service, so we will will properly throw if the service failed (and therefore not cache invalid new settings)
-        _localConfig.value?.let { localConfig ->
-            val builder = localConfig.toBuilder()
-            if (config.hasDevice()) builder.device = config.device
-            if (config.hasPosition()) builder.position = config.position
-            if (config.hasPower()) builder.power = config.power
-            if (config.hasWifi()) builder.wifi = config.wifi
-            if (config.hasDisplay()) builder.display = config.display
-            if (config.hasLora()) builder.lora = config.lora
-            _localConfig.value = builder.build()
-        }
     }
 
     fun setLocalConfig(localConfig: LocalOnlyProtos.LocalConfig) {

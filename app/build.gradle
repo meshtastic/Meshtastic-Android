@@ -136,6 +136,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.1'
     implementation "androidx.room:room-runtime:$room_version"
     implementation "com.google.dagger:hilt-android:$hilt_version"
+    implementation "androidx.datastore:datastore:$datastore_version"
     kapt "androidx.room:room-compiler:$room_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
 
