@@ -18,6 +18,7 @@ import com.geeksville.mesh.android.hasBackgroundPermission
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.DeviceVersion
+import com.geeksville.mesh.repository.datastore.LocalConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
@@ -56,6 +57,9 @@ class MeshService : Service(), Logging {
 
     @Inject
     lateinit var locationRepository: LocationRepository
+
+    @Inject
+    lateinit var localConfigRepository: LocalConfigRepository
 
     companion object : Logging {
 
@@ -241,6 +245,11 @@ class MeshService : Service(), Logging {
         }
         serviceScope.handledLaunch {
             radioInterfaceService.receivedData.collect(::onReceiveFromRadio)
+        }
+        serviceScope.handledLaunch {
+            localConfigRepository.localConfigFlow.collect { config ->
+                localConfig = config
+            }
         }
 
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
@@ -498,7 +507,7 @@ class MeshService : Service(), Logging {
                 newPrefs.regionValue = curRegionValue
 
             newConfig.lora = newPrefs.build()
-            sendDeviceConfig(newConfig.build())
+            if (localConfig.lora != newConfig.lora) sendDeviceConfig(newConfig.build())
 
             channels = fixupChannelList(asChannels)
         }
@@ -691,7 +700,7 @@ class MeshService : Service(), Logging {
                         if (u.time == 0 && packet.rxTime != 0)
                             u = u.toBuilder().setTime(packet.rxTime).build()
                         handleReceivedTelemetry(packet.from, u, dataPacket.time)
-                        }
+                    }
 
                     // Handle new style routing info
                     Portnums.PortNum.ROUTING_APP_VALUE -> {
@@ -932,6 +941,12 @@ class MeshService : Service(), Logging {
             // Do not log, because might contain PII
             // info("insert: ${packetToSave.message_type} = ${packetToSave.raw_message.toOneLineString()}")
             packetRepository.get().insert(packetToSave)
+        }
+    }
+
+    private fun setLocalConfig (config: ConfigProtos.Config) {
+        serviceScope.handledLaunch {
+            localConfigRepository.setLocalConfig(config)
         }
     }
 
@@ -1261,7 +1276,9 @@ class MeshService : Service(), Logging {
         regenMyNodeInfo()
 
         // We'll need to get a new set of channels and settings now
-        localConfig = LocalOnlyProtos.LocalConfig.getDefaultInstance()
+        serviceScope.handledLaunch {
+            localConfigRepository.clearLocalConfig()
+        }
 
         // prefill the channel array with null channels
         channels = fixupChannelList(listOf<ChannelProtos.Channel>())
@@ -1474,19 +1491,6 @@ class MeshService : Service(), Logging {
 
         // Update our cached copy
         setLocalConfig(c)
-    }
-
-    /** Set our localConfig
-     */
-    private fun setLocalConfig(config: ConfigProtos.Config) {
-        val builder = localConfig.toBuilder()
-        if (config.hasDevice()) builder.device = config.device
-        if (config.hasPosition()) builder.position = config.position
-        if (config.hasPower()) builder.power = config.power
-        if (config.hasWifi()) builder.wifi = config.wifi
-        if (config.hasDisplay()) builder.display = config.display
-        if (config.hasLora()) builder.lora = config.lora
-        localConfig = builder.build()
     }
 
     /**
