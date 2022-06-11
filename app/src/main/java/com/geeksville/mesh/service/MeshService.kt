@@ -490,15 +490,15 @@ class MeshService : Service(), Logging {
                 setChannel(it)
             }
 
-            localConfig.let { currentConfig ->
-                val newConfig = ConfigProtos.Config.newBuilder()
+            val newConfig = ConfigProtos.Config.newBuilder()
+            val newPrefs = (value.loraConfig).toBuilder()
 
-                val newPrefs = currentConfig.lora.toBuilder()
-                newPrefs.modemPreset = value.loraConfig.modemPreset
-                newConfig.lora = newPrefs.build()
+            // We don't change the current region frequency band, unless Unset
+            if (curRegionValue != ConfigProtos.Config.LoRaConfig.RegionCode.Unset_VALUE)
+                newPrefs.regionValue = curRegionValue
 
-                sendDeviceConfig(newConfig.build())
-            }
+            newConfig.lora = newPrefs.build()
+            sendDeviceConfig(newConfig.build())
 
             channels = fixupChannelList(asChannels)
         }
@@ -739,19 +739,8 @@ class MeshService : Service(), Logging {
                 AdminProtos.AdminMessage.VariantCase.GET_CONFIG_RESPONSE -> {
                     val response = a.getConfigResponse
                     debug("Admin: received config ${response.payloadVariantCase}")
-                    localConfig.let { currentConfig ->
-                        val builder = currentConfig.toBuilder()
-                        if (response.hasDevice()) builder.device = response.device
-                        if (response.hasPosition()) builder.position = response.position
-                        if (response.hasPower()) builder.power = response.power
-                        if (response.hasWifi()) builder.wifi = response.wifi
-                        if (response.hasDisplay()) builder.display = response.display
-                        if (response.hasLora()) {
-                            builder.lora = response.lora
-                            requestChannel(0) // Now start reading channels
-                        }
-                        localConfig = builder.build()
-                    }
+                    setLocalConfig(response)
+                    if (response.hasLora()) requestChannel(0) // Now start reading channels
                 }
 
                 AdminProtos.AdminMessage.VariantCase.GET_CHANNEL_RESPONSE -> {
@@ -1484,25 +1473,20 @@ class MeshService : Service(), Logging {
         })
 
         // Update our cached copy
-        localConfig.let { currentConfig ->
-            val builder = currentConfig.toBuilder()
-            if (c.hasDevice()) builder.device = c.device
-            if (c.hasPosition()) builder.position = c.position
-            if (c.hasPower()) builder.power = c.power
-            if (c.hasWifi()) builder.wifi = c.wifi
-            if (c.hasDisplay()) builder.display = c.display
-            if (c.hasLora()) builder.lora = c.lora
-            this@MeshService.localConfig = builder.build()
-            // debug("sendDeviceConfig: localConfig ${localConfig.toOneLineString()}")
-        }
+        setLocalConfig(c)
     }
 
-    /** Set our radio config
+    /** Set our localConfig
      */
-    private fun setDeviceConfig(payload: ByteArray) {
-        val parsed = ConfigProtos.Config.parseFrom(payload)
-
-        sendDeviceConfig(parsed)
+    private fun setLocalConfig(config: ConfigProtos.Config) {
+        val builder = localConfig.toBuilder()
+        if (config.hasDevice()) builder.device = config.device
+        if (config.hasPosition()) builder.position = config.position
+        if (config.hasPower()) builder.power = config.power
+        if (config.hasWifi()) builder.wifi = config.wifi
+        if (config.hasDisplay()) builder.display = config.display
+        if (config.hasLora()) builder.lora = config.lora
+        localConfig = builder.build()
     }
 
     /**
@@ -1743,7 +1727,8 @@ class MeshService : Service(), Logging {
         }
 
         override fun setDeviceConfig(payload: ByteArray) = toRemoteExceptions {
-            this@MeshService.setDeviceConfig(payload)
+            val parsed = ConfigProtos.Config.parseFrom(payload)
+            sendDeviceConfig(parsed)
         }
 
         override fun getChannels(): ByteArray = toRemoteExceptions {

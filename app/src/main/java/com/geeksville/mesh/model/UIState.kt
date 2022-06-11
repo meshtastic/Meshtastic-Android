@@ -58,7 +58,7 @@ fun getInitials(nameIn: String): String {
 @HiltViewModel
 class UIViewModel @Inject constructor(
     private val app: Application,
-    private val repository: PacketRepository,
+    private val packetRepository: PacketRepository,
     private val preferences: SharedPreferences
 ) : ViewModel(), Logging {
 
@@ -67,7 +67,7 @@ class UIViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            repository.getAllPackets().collect { packets ->
+            packetRepository.getAllPackets().collect { packets ->
                 _allPacketState.value = packets
             }
         }
@@ -75,7 +75,7 @@ class UIViewModel @Inject constructor(
     }
 
     fun deleteAllPacket() = viewModelScope.launch(Dispatchers.IO) {
-        repository.deleteAll()
+        packetRepository.deleteAll()
     }
 
     companion object {
@@ -101,8 +101,8 @@ class UIViewModel @Inject constructor(
     }
 
     /// various radio settings (including the channel)
-    private val _deviceConfig = MutableLiveData<ConfigProtos.Config?>()
-    val deviceConfig: LiveData<ConfigProtos.Config?> get() = _deviceConfig
+    private val _localConfig = MutableLiveData<LocalOnlyProtos.LocalConfig?>()
+    val localConfig: LiveData<LocalOnlyProtos.LocalConfig?> get() = _localConfig
 
     private val _channels = MutableLiveData<ChannelSet?>()
     val channels: LiveData<ChannelSet?> get() = _channels
@@ -123,57 +123,65 @@ class UIViewModel @Inject constructor(
 
     var positionBroadcastSecs: Int?
         get() {
-            _deviceConfig.value?.position?.positionBroadcastSecs?.let {
+            _localConfig.value?.position?.positionBroadcastSecs?.let {
                 // These default values are borrowed from the device code.
                 return if (it > 0) it else 15 * 60 // default 900 sec
             }
             return null
         }
         set(value) {
-            val config = _deviceConfig.value
+            val config = _localConfig.value
             if (value != null && config != null) {
-                val builder = config.toBuilder()
-                builder.positionBuilder.positionBroadcastSecs = value
-                setDeviceConfig(builder.build())
+                val builder = config.position.toBuilder()
+                builder.positionBroadcastSecs = value
+                val newConfig = ConfigProtos.Config.newBuilder()
+                newConfig.position = builder.build()
+                setDeviceConfig(newConfig.build())
             }
         }
 
     var lsSleepSecs: Int?
         get() {
-            _deviceConfig.value?.power?.lsSecs?.let {
+            _localConfig.value?.power?.lsSecs?.let {
                 // These default values are borrowed from the device code.
                 return if (it > 0) return it else 5 * 60 // default 300 sec
             }
             return null
         }
         set(value) {
-            val config = _deviceConfig.value
+            val config = _localConfig.value
             if (value != null && config != null) {
-                val builder = config.toBuilder()
-                builder.powerBuilder.lsSecs = value
-                setDeviceConfig(builder.build())
+                val builder = config.power.toBuilder()
+                builder.lsSecs = value
+                val newConfig = ConfigProtos.Config.newBuilder()
+                newConfig.power = builder.build()
+                setDeviceConfig(newConfig.build())
             }
         }
 
     var gpsDisabled: Boolean
-        get() = _deviceConfig.value?.position?.gpsDisabled ?: false
+        get() = _localConfig.value?.position?.gpsDisabled ?: false
         set(value) {
-            val config = _deviceConfig.value
+            val config = _localConfig.value
             if (config != null) {
-                val builder = config.toBuilder()
-                builder.positionBuilder.gpsDisabled = value
-                setDeviceConfig(builder.build())
+                val builder = config.position.toBuilder()
+                builder.gpsDisabled = value
+                val newConfig = ConfigProtos.Config.newBuilder()
+                newConfig.position = builder.build()
+                setDeviceConfig(newConfig.build())
             }
         }
 
     var isPowerSaving: Boolean?
-        get() = _deviceConfig.value?.power?.isPowerSaving
+        get() = _localConfig.value?.power?.isPowerSaving
         set(value) {
-            val config = _deviceConfig.value
+            val config = _localConfig.value
             if (value != null && config != null) {
-                val builder = config.toBuilder()
-                builder.powerBuilder.isPowerSaving = value
-                setDeviceConfig(builder.build())
+                val builder = config.power.toBuilder()
+                builder.isPowerSaving = value
+                val newConfig = ConfigProtos.Config.newBuilder()
+                newConfig.power = builder.build()
+                setDeviceConfig(newConfig.build())
             }
         }
 
@@ -184,8 +192,11 @@ class UIViewModel @Inject constructor(
             meshService?.region = value.number
         }
 
-    // We consider hasWifi = ESP32
-    var isESP32: Boolean = _deviceConfig.value?.hasWifi() == true
+    fun isESP32(): Boolean {
+        // List of 'HardwareModel' enum values for ESP32 devices from mesh.proto
+        val hwModelESP32 = listOf(1, 2, 3, 4, 5, 6, 8, 10, 11, 32, 35, 39, 40, 41, 43, 44)
+        return hwModelESP32.contains(nodeDB.ourNodeInfo?.user?.hwModel?.number)
+    }
 
     /// hardware info about our local device (can be null)
     private val _myNodeInfo = MutableLiveData<MyNodeInfo?>()
@@ -224,11 +235,25 @@ class UIViewModel @Inject constructor(
     val primaryChannel: Channel? get() = _channels.value?.primaryChannel
 
     // Set the radio config (also updates our saved copy in preferences)
-    fun setDeviceConfig(c: ConfigProtos.Config) {
+    private fun setDeviceConfig(config: ConfigProtos.Config) {
         debug("Setting new radio config!")
-        meshService?.deviceConfig = c.toByteArray()
-        _deviceConfig.value =
-            c // Must be done after calling the service, so we will will properly throw if the service failed (and therefore not cache invalid new settings)
+        meshService?.deviceConfig = config.toByteArray()
+
+        // Must be done after calling the service, so we will will properly throw if the service failed (and therefore not cache invalid new settings)
+        _localConfig.value?.let { localConfig ->
+            val builder = localConfig.toBuilder()
+            if (config.hasDevice()) builder.device = config.device
+            if (config.hasPosition()) builder.position = config.position
+            if (config.hasPower()) builder.power = config.power
+            if (config.hasWifi()) builder.wifi = config.wifi
+            if (config.hasDisplay()) builder.display = config.display
+            if (config.hasLora()) builder.lora = config.lora
+            _localConfig.value = builder.build()
+        }
+    }
+
+    fun setLocalConfig(localConfig: LocalOnlyProtos.LocalConfig) {
+        _localConfig.value = localConfig
     }
 
     /// Set the radio config (also updates our saved copy in preferences)
@@ -323,7 +348,7 @@ class UIViewModel @Inject constructor(
                 // Packets are ordered by time, we keep most recent position of
                 // our device in localNodePosition.
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd,HH:mm:ss", Locale.getDefault())
-                repository.getAllPacketsInReceiveOrder(Int.MAX_VALUE).first().forEach { packet ->
+                packetRepository.getAllPacketsInReceiveOrder(Int.MAX_VALUE).first().forEach { packet ->
                     // If we get a NodeInfo packet, use it to update our position data (if valid)
                     packet.nodeInfo?.let { nodeInfo ->
                         positionToPos.invoke(nodeInfo.position)?.let { _ ->

@@ -38,13 +38,13 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        model.deviceConfig.observe(viewLifecycleOwner) {
+        model.localConfig.observe(viewLifecycleOwner) {
             binding.positionBroadcastPeriodEditText.setText(model.positionBroadcastSecs.toString())
             binding.lsSleepEditText.setText(model.lsSleepSecs.toString())
             binding.positionBroadcastPeriodView.isEnabled = !model.gpsDisabled
             binding.positionBroadcastSwitch.isChecked = !model.gpsDisabled
-            binding.lsSleepView.isEnabled = model.isPowerSaving ?: false && model.isESP32
-            binding.lsSleepSwitch.isChecked = model.isPowerSaving ?: false && model.isESP32
+            binding.lsSleepView.isEnabled = model.isPowerSaving ?: false && model.isESP32()
+            binding.lsSleepSwitch.isChecked = model.isPowerSaving ?: false && model.isESP32()
         }
 
         model.connectionState.observe(viewLifecycleOwner) { connectionState ->
@@ -52,7 +52,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             binding.positionBroadcastPeriodView.isEnabled = connected && !model.gpsDisabled
             binding.lsSleepView.isEnabled = connected && model.isPowerSaving ?: false
             binding.positionBroadcastSwitch.isEnabled = connected
-            binding.lsSleepSwitch.isEnabled = connected && model.isESP32
+            binding.lsSleepSwitch.isEnabled = connected && model.isESP32()
             binding.shutdownButton.isEnabled = connected
             binding.rebootButton.isEnabled = connected
         }
@@ -61,7 +61,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             val textEdit = binding.positionBroadcastPeriodEditText
             val n = textEdit.text.toString().toIntOrNull()
             val minBroadcastPeriodSecs =
-                ChannelOption.fromConfig(model.deviceConfig.value?.lora?.modemPreset)?.minBroadcastPeriodSecs
+                ChannelOption.fromConfig(model.localConfig.value?.lora?.modemPreset)?.minBroadcastPeriodSecs
                     ?: ChannelOption.defaultMinBroadcastPeriod
 
             if (n != null && n < MAX_INT_DEVICE && (n == 0 || n >= minBroadcastPeriodSecs)) {
