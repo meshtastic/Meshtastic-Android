@@ -36,6 +36,7 @@ import com.geeksville.android.ServiceClient
 import com.geeksville.concurrent.handledLaunch
 import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.ActivityMainBinding
+import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.DeviceVersion
