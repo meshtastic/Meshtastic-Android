@@ -204,6 +204,11 @@ class UIViewModel @Inject constructor(
     // We consider hasWifi = ESP32
     var isESP32: Boolean = _localConfig.value?.hasWifi() == true
 
+    fun hasAXP(): Boolean {
+        val hasAXP = listOf(4, 7, 9) // mesh.proto 'HardwareModel' enums with AXP192 chip
+        return hasAXP.contains(nodeDB.ourNodeInfo?.user?.hwModel?.number)
+    }
+
     /// hardware info about our local device (can be null)
     private val _myNodeInfo = MutableLiveData<MyNodeInfo?>()
     val myNodeInfo: LiveData<MyNodeInfo?> get() = _myNodeInfo

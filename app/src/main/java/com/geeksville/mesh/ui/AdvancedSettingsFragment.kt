@@ -53,7 +53,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             binding.lsSleepView.isEnabled = connected && model.isPowerSaving ?: false
             binding.positionBroadcastSwitch.isEnabled = connected
             binding.lsSleepSwitch.isEnabled = connected && model.isESP32
-            binding.shutdownButton.isEnabled = connected
+            binding.shutdownButton.isEnabled = connected && model.hasAXP()
             binding.rebootButton.isEnabled = connected
         }
 
