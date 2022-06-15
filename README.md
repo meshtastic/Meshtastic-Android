@@ -1,9 +1,10 @@
 # Meshtastic-Android
 
-[![Open in Visual Studio Code](https://open.vscode.dev/badges/open-in-vscode.svg)](https://open.vscode.dev/meshtastic/Meshtastic-Android)
-[![Android CI](https://github.com/meshtastic/Meshtastic-Android/actions/workflows/android.yml/badge.svg)](https://github.com/meshtastic/Meshtastic-Android/actions/workflows/android.yml)
 ![GitHub all releases](https://img.shields.io/github/downloads/meshtastic/meshtastic-android/total)
+[![Android CI](https://github.com/meshtastic/Meshtastic-Android/actions/workflows/android.yml/badge.svg)](https://github.com/meshtastic/Meshtastic-Android/actions/workflows/android.yml)
 [![CLA assistant](https://cla-assistant.io/readme/badge/meshtastic/Meshtastic-Android)](https://cla-assistant.io/meshtastic/Meshtastic-Android)
+[![Fiscal Contributors](https://opencollective.com/meshtastic/tiers/badge.svg?label=Fiscal%20Contributors&color=deeppink)](https://opencollective.com/meshtastic/)
+[![Vercel](https://img.shields.io/static/v1?label=Powered%20by&message=Vercel&style=flat&logo=vercel&color=000000)](https://vercel.com?utm_source=meshtastic&utm_campaign=oss)
 
 This is a tool for using Android with open-source mesh radios. For more information see our webpage: [meshtastic.org](https://www.meshtastic.org). If you are looking for the the device side code, see [here](https://github.com/meshtastic/Meshtastic-esp32).
 
