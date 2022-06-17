@@ -59,7 +59,7 @@ internal class SerialConnectionImpl(
         }
 
         port.open(usbDeviceConnection)
-        port.setParameters(921600, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
+        port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
 
         debug("Starting serial reader thread")
         val io = SerialInputOutputManager(port, object : SerialInputOutputManager.Listener {
