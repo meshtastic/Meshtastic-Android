@@ -69,15 +69,13 @@ class UIViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            launch {
-                packetRepository.getAllPackets().collect { packets ->
-                    _allPacketState.value = packets
-                }
+            packetRepository.getAllPackets().collect { packets ->
+                _allPacketState.value = packets
             }
-            launch(Dispatchers.IO) {
-                localConfigRepository.localConfigFlow.collect { config ->
-                    _localConfig.postValue(config)
-                }
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            localConfigRepository.localConfigFlow.collect { config ->
+                _localConfig.postValue(config)
             }
         }
         debug("ViewModel created")
@@ -133,8 +131,7 @@ class UIViewModel @Inject constructor(
     var positionBroadcastSecs: Int?
         get() {
             _localConfig.value?.position?.positionBroadcastSecs?.let {
-                // These default values are borrowed from the device code.
-                return if (it > 0) it else 15 * 60 // default 900 sec
+                return if (it > 0) it else defaultPositionBroadcastSecs
             }
             return null
         }
@@ -142,7 +139,8 @@ class UIViewModel @Inject constructor(
             val config = _localConfig.value
             if (value != null && config != null) {
                 val builder = config.position.toBuilder()
-                builder.positionBroadcastSecs = value
+                builder.positionBroadcastSecs =
+                    if (value == defaultPositionBroadcastSecs) 0 else value
                 val newConfig = ConfigProtos.Config.newBuilder()
                 newConfig.position = builder.build()
                 setDeviceConfig(newConfig.build())
@@ -152,8 +150,7 @@ class UIViewModel @Inject constructor(
     var lsSleepSecs: Int?
         get() {
             _localConfig.value?.power?.lsSecs?.let {
-                // These default values are borrowed from the device code.
-                return if (it > 0) return it else 5 * 60 // default 300 sec
+                return if (it > 0) it else defaultLsSecs
             }
             return null
         }
@@ -161,7 +158,7 @@ class UIViewModel @Inject constructor(
             val config = _localConfig.value
             if (value != null && config != null) {
                 val builder = config.power.toBuilder()
-                builder.lsSecs = value
+                builder.lsSecs = if (value == defaultLsSecs) 0 else value
                 val newConfig = ConfigProtos.Config.newBuilder()
                 newConfig.power = builder.build()
                 setDeviceConfig(newConfig.build())
@@ -201,8 +198,18 @@ class UIViewModel @Inject constructor(
             meshService?.region = value.number
         }
 
-    // We consider hasWifi = ESP32
-    var isESP32: Boolean = _localConfig.value?.hasWifi() == true
+    val isRouter: Boolean =
+        localConfig.value?.device?.role == ConfigProtos.Config.DeviceConfig.Role.Router
+
+    // These default values are borrowed from the device code.
+    private val defaultPositionBroadcastSecs = if (isRouter) 12 * 60 * 60 else 15 * 60
+    private val defaultLsSecs = if (isRouter) 24 * 60 * 60 else 5 * 60
+
+    fun isESP32(): Boolean {
+        // mesh.proto 'HardwareModel' enums for ESP32 devices
+        val hwModelESP32 = listOf(1, 2, 3, 4, 5, 6, 8, 10, 11, 32, 35, 39, 40, 41, 43, 44)
+        return hwModelESP32.contains(nodeDB.ourNodeInfo?.user?.hwModel?.number)
+    }
 
     fun hasAXP(): Boolean {
         val hasAXP = listOf(4, 7, 9) // mesh.proto 'HardwareModel' enums with AXP192 chip
@@ -252,11 +259,13 @@ class UIViewModel @Inject constructor(
     }
 
     fun setLocalConfig(localConfig: LocalOnlyProtos.LocalConfig) {
+        if (_localConfig.value == localConfig) return
         _localConfig.value = localConfig
     }
 
     /// Set the radio config (also updates our saved copy in preferences)
     fun setChannels(c: ChannelSet) {
+        if (_channels.value == c) return
         debug("Setting new channels!")
         meshService?.channels = c.protobuf.toByteArray()
         _channels.value =
