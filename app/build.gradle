@@ -106,7 +106,7 @@ play {
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:3.15.3'
+        artifact = 'com.google.protobuf:protoc:3.21.1'
     }
     generateProtoTasks {
         all().each { task ->
@@ -160,7 +160,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
     // For now I'm not using javalite, because I want JSON printing
-    implementation 'com.google.protobuf:protobuf-java:3.15.8'
+    implementation 'com.google.protobuf:protobuf-java:3.21.1'
 
     // For UART access
     // implementation 'com.google.android.things:androidthings:1.0'
