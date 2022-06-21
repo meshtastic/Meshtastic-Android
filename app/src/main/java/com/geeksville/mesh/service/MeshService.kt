@@ -303,7 +303,7 @@ class MeshService : Service(), Logging {
             val json = Json { isLenient = true }
             val asString = json.encodeToString(MeshServiceSettingsData.serializer(), settings)
             debug("Saving settings")
-            getPrefs().edit(commit = true) {
+            getPrefs().edit {
                 // FIXME, not really ideal to store this bigish blob in preferences
                 putString("json", asString)
             }
@@ -319,10 +319,7 @@ class MeshService : Service(), Logging {
         nodeDBbyNodeNum.putAll(nodes.map { Pair(it.num, it) })
         nodeDBbyID.putAll(nodes.mapNotNull {
             it.user?.let { user -> // ignore records that don't have a valid user
-                Pair(
-                    user.id,
-                    it
-                )
+                Pair(user.id, it)
             }
         })
     }
@@ -359,7 +356,8 @@ class MeshService : Service(), Logging {
 
     var myNodeInfo: MyNodeInfo? = null
 
-    private var localConfig: LocalOnlyProtos.LocalConfig = LocalOnlyProtos.LocalConfig.getDefaultInstance()
+    private var localConfig: LocalOnlyProtos.LocalConfig =
+        LocalOnlyProtos.LocalConfig.newBuilder().build()
 
     private var channels = fixupChannelList(listOf())
 
@@ -749,7 +747,6 @@ class MeshService : Service(), Logging {
                     val response = a.getConfigResponse
                     debug("Admin: received config ${response.payloadVariantCase}")
                     setLocalConfig(response)
-                    if (response.hasLora()) requestChannel(0) // Now start reading channels
                 }
 
                 AdminProtos.AdminMessage.VariantCase.GET_CHANNEL_RESPONSE -> {
@@ -844,7 +841,7 @@ class MeshService : Service(), Logging {
             processReceivedMeshPacket(packet)
             onNodeDBChanged()
         } else {
-            warn("Ignoring early received packet: $packet")
+            warn("Ignoring early received packet: ${packet.toOneLineString()}")
             //earlyReceivedPackets.add(packet)
             //logAssert(earlyReceivedPackets.size < 128) // The max should normally be about 32, but if the device is messed up it might try to send forever
         }
@@ -944,9 +941,15 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private fun setLocalConfig (config: ConfigProtos.Config) {
+    private fun setLocalConfig(config: ConfigProtos.Config) {
         serviceScope.handledLaunch {
             localConfigRepository.setLocalConfig(config)
+        }
+    }
+
+    private fun clearLocalConfig() {
+        serviceScope.handledLaunch {
+            localConfigRepository.clearLocalConfig()
         }
     }
 
@@ -1116,24 +1119,14 @@ class MeshService : Service(), Logging {
 
     private fun onReceiveFromRadio(bytes: ByteArray) {
         try {
-            val proto =
-                MeshProtos.FromRadio.parseFrom(bytes)
+            val proto = MeshProtos.FromRadio.parseFrom(bytes)
             // info("Received from radio service: ${proto.toOneLineString()}")
             when (proto.payloadVariantCase.number) {
-                MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(
-                    proto.packet
-                )
-
-                MeshProtos.FromRadio.CONFIG_COMPLETE_ID_FIELD_NUMBER -> handleConfigComplete(
-                    proto.configCompleteId
-                )
-
+                MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(proto.packet)
+                MeshProtos.FromRadio.CONFIG_COMPLETE_ID_FIELD_NUMBER -> handleConfigComplete(proto.configCompleteId)
                 MeshProtos.FromRadio.MY_INFO_FIELD_NUMBER -> handleMyInfo(proto.myInfo)
-
                 MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleNodeInfo(proto.nodeInfo)
-
-                // MeshProtos.FromRadio.RADIO_FIELD_NUMBER -> handleDeviceConfig(proto.radio)
-
+                MeshProtos.FromRadio.CONFIG_FIELD_NUMBER -> handleDeviceConfig(proto.config)
                 else -> errormsg("Unexpected FromRadio variant")
             }
         } catch (ex: InvalidProtocolBufferException) {
@@ -1149,6 +1142,18 @@ class MeshService : Service(), Logging {
 
     /// Used to make sure we never get foold by old BLE packets
     private var configNonce = 1
+
+    private fun handleDeviceConfig(config: ConfigProtos.Config) {
+        debug("Received config ${config.toOneLineString()}")
+        val packetToSave = Packet(
+            UUID.randomUUID().toString(),
+            "Config ${config.payloadVariantCase}",
+            System.currentTimeMillis(),
+            config.toString()
+        )
+        insertPacket(packetToSave)
+        setLocalConfig(config)
+    }
 
     /**
      * Convert a protobuf NodeInfo into our model objects and update our node DB
@@ -1276,9 +1281,7 @@ class MeshService : Service(), Logging {
         regenMyNodeInfo()
 
         // We'll need to get a new set of channels and settings now
-        serviceScope.handledLaunch {
-            localConfigRepository.clearLocalConfig()
-        }
+        clearLocalConfig()
 
         // prefill the channel array with null channels
         channels = fixupChannelList(listOf<ChannelProtos.Channel>())
@@ -1384,9 +1387,9 @@ class MeshService : Service(), Logging {
 
                 if (deviceVersion < minFirmwareVersion) {
                     info("Device firmware is too old, faking config so firmware update can occur")
+                    clearLocalConfig()
                     onHasSettings()
-                } else
-                    requestDeviceConfig()
+                } else requestChannel(0) // Now start reading channels
             }
         } else
             warn("Ignoring stale config complete")
