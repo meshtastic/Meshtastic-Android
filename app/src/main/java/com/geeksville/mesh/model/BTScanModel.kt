@@ -158,7 +158,7 @@ class BTScanModel @Inject constructor(
         @SuppressLint("MissingPermission")
         override fun onScanResult(callbackType: Int, result: ScanResult) {
 
-            if ((result.device.name?.startsWith("Mesh") == true)) {
+            if (result.device.name != null) {
                 val addr = result.device.address
                 val fullAddr = "x$addr" // full address with the bluetooth prefix added
                 // prevent log spam because we'll get lots of redundant scan results
@@ -328,7 +328,7 @@ class BTScanModel @Inject constructor(
         if (hasCompanionDeviceApi) deviceManager?.associations?.forEach { bleAddress ->
             val bleDevice = getDeviceListEntry("x$bleAddress", true)
             // Disassociate after pairing is removed (if BLE is disabled, assume bonded)
-            if (bleDevice.name.startsWith("Mesh") && !bleDevice.bonded) {
+            if (!bleDevice.bonded) {
                 debug("Forgetting old BLE association ${bleAddress.anonymize}")
                 deviceManager?.disassociate(bleAddress)
             }
@@ -356,8 +356,8 @@ class BTScanModel @Inject constructor(
         // respectively. This example uses Bluetooth.
         // We only look for Mesh (rather than the full name) because NRF52 uses a very short name
         val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
-            .setNamePattern(Pattern.compile("Mesh.*"))
-            // .addServiceUuid(ParcelUuid(RadioInterfaceService.BTM_SERVICE_UUID), null)
+            // .setNamePattern(Pattern.compile("Mesh.*"))
+            // .addServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID), null)
             .build()
 
         // The argument provided in setSingleDevice() determines whether a single
