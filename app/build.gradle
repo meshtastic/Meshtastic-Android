@@ -43,8 +43,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 30 // 30 can't work until an explicit location permissions dialog is added
-        versionCode 20319 // format is Mmmss (where M is 1+the numeric major number
-        versionName "1.3.19"
+        versionCode 20321 // format is Mmmss (where M is 1+the numeric major number
+        versionName "1.3.21"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
