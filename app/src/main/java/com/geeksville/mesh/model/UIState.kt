@@ -67,15 +67,18 @@ class UIViewModel @Inject constructor(
     private val _allPacketState = MutableStateFlow<List<Packet>>(emptyList())
     val allPackets: StateFlow<List<Packet>> = _allPacketState
 
+    private val _localConfig = MutableLiveData<LocalOnlyProtos.LocalConfig?>()
+    val localConfig: LiveData<LocalOnlyProtos.LocalConfig?> get() = _localConfig
+
     init {
         viewModelScope.launch {
             packetRepository.getAllPackets().collect { packets ->
                 _allPacketState.value = packets
             }
         }
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             localConfigRepository.localConfigFlow.collect { config ->
-                _localConfig.postValue(config)
+                _localConfig.value = config
             }
         }
         debug("ViewModel created")
@@ -106,10 +109,6 @@ class UIViewModel @Inject constructor(
     fun setConnectionState(connectionState: MeshService.ConnectionState) {
         _connectionState.value = connectionState
     }
-
-    /// various radio settings (including the channel)
-    private val _localConfig = MutableLiveData<LocalOnlyProtos.LocalConfig?>()
-    val localConfig: LiveData<LocalOnlyProtos.LocalConfig?> get() = _localConfig
 
     private val _channels = MutableLiveData<ChannelSet?>()
     val channels: LiveData<ChannelSet?> get() = _channels
