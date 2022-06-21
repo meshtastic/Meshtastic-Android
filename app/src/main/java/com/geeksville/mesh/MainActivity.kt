@@ -937,6 +937,14 @@ class MainActivity : BaseActivity(), Logging,
         model.meshService = null
     }
 
+    override fun onBackPressed() { // FIXME Override back button to avoid closing
+        if (supportFragmentManager.backStackEntryCount == 0) {
+            moveTaskToBack(false)
+        } else {
+            super.onBackPressed()
+        }
+    }
+
     override fun onStop() {
         unregisterMeshReceiver() // No point in receiving updates while the GUI is gone, we'll get them when the user launches the activity
         unbindMeshService()
