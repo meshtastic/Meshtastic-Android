@@ -68,9 +68,9 @@ data class Position(
 
     // If GPS gives a crap position don't crash our app
     fun isValid(): Boolean {
-        return (latitude <= 90.0 && latitude >= -90) &&
-                latitude != 0.0 &&
-                longitude != 0.0
+        return latitude != 0.0 && longitude != 0.0 &&
+                (latitude >= -90 && latitude <= 90.0) &&
+                (longitude >= -180 && longitude <= 180)
     }
 
     override fun toString(): String {
@@ -147,10 +147,7 @@ data class NodeInfo(
     fun distance(o: NodeInfo?): Int? {
         val p = validPosition
         val op = o?.validPosition
-        return if (p != null && op != null)
-            p.distance(op).toInt()
-        else
-            null
+        return if (p != null && op != null) p.distance(op).toInt() else null
     }
 
     /// @return a nice human readable string for the distance, or null for unknown
