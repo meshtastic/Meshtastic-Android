@@ -284,12 +284,12 @@ class UIViewModel @Inject constructor(
     private val _ownerName = MutableLiveData<String?>()
     val ownerName: LiveData<String?> get() = _ownerName
 
-    val provideLocation = object : MutableLiveData<Boolean>(preferences.getBoolean(MyPreferences.provideLocationKey, false)) {
+    val provideLocation = object : MutableLiveData<Boolean>(preferences.getBoolean("provide-location", false)) {
         override fun setValue(value: Boolean) {
             super.setValue(value)
 
             preferences.edit {
-                this.putBoolean(MyPreferences.provideLocationKey, value)
+                this.putBoolean("provide-location", value)
             }
         }
     }
