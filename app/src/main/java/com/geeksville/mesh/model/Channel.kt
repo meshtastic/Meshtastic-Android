@@ -43,8 +43,8 @@ data class Channel(
             else when (loraConfig.modemPreset) {
                 ConfigProtos.Config.LoRaConfig.ModemPreset.ShortFast -> "ShortFast"
                 ConfigProtos.Config.LoRaConfig.ModemPreset.ShortSlow -> "ShortSlow"
-                ConfigProtos.Config.LoRaConfig.ModemPreset.MidFast -> "MidFast"
-                ConfigProtos.Config.LoRaConfig.ModemPreset.MidSlow -> "MidSlow"
+                ConfigProtos.Config.LoRaConfig.ModemPreset.MedFast -> "MidFast"
+                ConfigProtos.Config.LoRaConfig.ModemPreset.MedSlow -> "MidSlow"
                 ConfigProtos.Config.LoRaConfig.ModemPreset.LongFast -> "LongFast"
                 ConfigProtos.Config.LoRaConfig.ModemPreset.LongSlow -> "LongSlow"
                 ConfigProtos.Config.LoRaConfig.ModemPreset.VLongSlow -> "VLongSlow"
