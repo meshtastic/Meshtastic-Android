@@ -40,7 +40,7 @@ class RadioInterfaceService @Inject constructor(
     private val processLifecycle: Lifecycle,
     private val usbRepository: UsbRepository,
     @RadioRepositoryQualifier private val prefs: SharedPreferences
-): Logging {
+) : Logging {
 
     private val _connectionState = MutableStateFlow(RadioServiceConnectionState())
     val connectionState = _connectionState.asStateFlow()
@@ -73,7 +73,7 @@ class RadioInterfaceService @Inject constructor(
         processLifecycle.coroutineScope.launch {
             bluetoothRepository.state.collect { state ->
                 if (state.enabled) {
-                    startInterface()
+                    // startInterface() FIXME no longer safe to call here, crashing SafeBluetooth.asyncConnect
                 } else if (radioIf is BluetoothInterface) {
                     stopInterface()
                 }
