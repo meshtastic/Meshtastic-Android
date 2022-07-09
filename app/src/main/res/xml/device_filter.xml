@@ -56,4 +56,7 @@
         vendor-id="3368"
         product-id="516" /> <!-- 0x0d28 / 0x0204: ARM mbed -->
     <usb-device vendor-id="9114" /> <!-- 0x239A RAK Wireless -->
+    <usb-device
+        vendor-id="6790"
+        product-id="21972" /> <!-- 0x1a86 / 0x55d4: Qinheng CH9102F -->
 </resources>
