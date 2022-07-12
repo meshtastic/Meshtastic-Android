@@ -8,7 +8,6 @@ import com.geeksville.mesh.*
 import com.geeksville.mesh.model.getInitials
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.google.protobuf.ByteString
-import okhttp3.internal.toHexString
 
 /** A simulated interface that is used for testing in the simulator */
 class MockInterface(private val service: RadioInterfaceService) : Logging, IRadioInterface {
@@ -159,7 +158,7 @@ class MockInterface(private val service: RadioInterfaceService) : Logging, IRadi
                     num = numIn
                     user = MeshProtos.User.newBuilder().apply {
                         id = DataPacket.nodeNumToDefaultId(numIn)
-                        longName = "Sim " + num.toHexString()
+                        longName = "Sim " + Integer.toHexString(num)
                         shortName = getInitials(longName)
                         hwModel = MeshProtos.HardwareModel.ANDROID_SIM
                     }.build()

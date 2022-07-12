@@ -169,9 +169,6 @@ dependencies {
     // mapbox
     implementation 'com.mapbox.maps:android:10.2.0'
 
-    // mapbox specifies a really old version of okhttp3 which causes lots of API warnings.  trying a newer version
-    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
-
     // location services
     implementation 'com.google.android.gms:play-services-location:19.0.1'
     // For Google Sign-In (owner name accesss)
