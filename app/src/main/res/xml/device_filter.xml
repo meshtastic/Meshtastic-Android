@@ -31,10 +31,28 @@
         vendor-id="4292"
         product-id="60032" /> <!-- 0xea80: CP2110 -->
 
-    <!-- 0x067B / 0x2303: Prolific PL2303 -->
+    <!-- 0x067B / 0x23x3: Prolific PL2303 -->
     <usb-device
         vendor-id="1659"
-        product-id="8963" />
+        product-id="8963" /> <!-- 0x067B / 0x2303: PL2303Hx -->
+    <usb-device
+        vendor-id="1659"
+        product-id="9123" /> <!-- 0x067B / 0x23a3: PL2303GC -->
+    <usb-device
+        vendor-id="1659"
+        product-id="9139" /> <!-- 0x067B / 0x23b3: PL2303GB -->
+    <usb-device
+        vendor-id="1659"
+        product-id="9155" /> <!-- 0x067B / 0x23c3: PL2303GT -->
+    <usb-device
+        vendor-id="1659"
+        product-id="9171" /> <!-- 0x23d3: PL2303GL -->
+    <usb-device
+        vendor-id="1659"
+        product-id="9187" /> <!-- 0x23e3: PL2303GE -->
+    <usb-device
+        vendor-id="1659"
+        product-id="9203" /> <!-- 0x23f3: PL2303GS -->
 
     <!-- 0x1a86 / 0x7523: Qinheng CH340 -->
     <usb-device
