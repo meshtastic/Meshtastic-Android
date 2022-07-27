@@ -68,6 +68,17 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
     private val model: UIViewModel by activityViewModels()
 
+    private val requestPermissionAndScanLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (permissions.entries.all { it.value }) zxingScan()
+        }
+
+    private val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
+        if (result.contents != null) {
+            model.setRequestChannelUrl(Uri.parse(result.contents))
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -368,17 +379,5 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 return item.modemPreset
         }
         return ConfigProtos.Config.LoRaConfig.ModemPreset.UNRECOGNIZED
-    }
-
-    private val requestPermissionAndScanLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions.entries.all { it.value == true }) zxingScan()
-        }
-
-    // Register zxing launcher and result handler
-    private val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
-        if (result.contents != null) {
-            model.setRequestChannelUrl(Uri.parse(result.contents))
-        }
     }
 }
