@@ -239,6 +239,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         model.ownerName.observe(viewLifecycleOwner) { name ->
+            binding.usernameEditText.isEnabled = !name.isNullOrEmpty()
             binding.usernameEditText.setText(name)
         }
 
