@@ -356,7 +356,7 @@ class BTScanModel @Inject constructor(
         // respectively. This example uses Bluetooth.
         // We only look for Mesh (rather than the full name) because NRF52 uses a very short name
         val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
-            // .setNamePattern(Pattern.compile("Mesh.*"))
+            .setNamePattern(Pattern.compile("^\\S+\$"))
             // .addServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID), null)
             .build()
 
