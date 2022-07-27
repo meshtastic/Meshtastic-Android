@@ -204,6 +204,7 @@ class UIViewModel @Inject constructor(
     private val defaultPositionBroadcastSecs = if (isRouter) 12 * 60 * 60 else 15 * 60
     private val defaultLsSecs = if (isRouter) 24 * 60 * 60 else 5 * 60
 
+    // val isESP32: Boolean = _localConfig.value?.hasWifi() == true (not working)
     fun isESP32(): Boolean {
         // mesh.proto 'HardwareModel' enums for ESP32 devices
         val hwModelESP32 = listOf(1, 2, 3, 4, 5, 6, 8, 10, 11, 32, 35, 39, 40, 41, 43, 44)
