@@ -145,12 +145,18 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private fun updateNodeInfo() {
         val connected = model.connectionState.value
 
-        val isConnected = connected == MeshService.ConnectionState.CONNECTED
-        binding.nodeSettings.visibility = if (isConnected) View.VISIBLE else View.GONE
-        binding.provideLocationCheckbox.visibility = if (isConnected) View.VISIBLE else View.GONE
+        binding.nodeSettings.visibility = if (model.isConnected()) View.VISIBLE else View.GONE
+        binding.provideLocationCheckbox.visibility = if (model.isConnected()) View.VISIBLE else View.GONE
 
         if (connected == MeshService.ConnectionState.DISCONNECTED)
             model.setOwner("")
+
+        if (model.gpsDisabled) {
+            model.provideLocation.value = false
+            binding.provideLocationCheckbox.isChecked = false
+        } else {
+            binding.provideLocationCheckbox.isEnabled = isGooglePlayAvailable(requireContext())
+        }
 
         // update the region selection from the device
         val region = model.region
@@ -243,12 +249,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         model.localConfig.observe(viewLifecycleOwner) {
-            binding.provideLocationCheckbox.isEnabled =
-                isGooglePlayAvailable(requireContext()) && !model.gpsDisabled
-            if (model.gpsDisabled) {
-                model.provideLocation.value = false
-                binding.provideLocationCheckbox.isChecked = false
-            }
+            updateNodeInfo()
         }
 
         // Also watch myNodeInfo because it might change later
