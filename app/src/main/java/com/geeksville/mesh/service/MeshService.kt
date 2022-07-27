@@ -131,9 +131,6 @@ class MeshService : Service(), Logging {
 
     private var locationFlow: Job? = null
 
-    // If we've ever read a valid region code from our device it will be here
-    var curRegionValue = ConfigProtos.Config.LoRaConfig.RegionCode.Unset_VALUE
-
     private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
         return name ?: "Unknown username"
@@ -298,7 +295,6 @@ class MeshService : Service(), Logging {
                 myInfo = myInfo,
                 nodeDB = nodeDBbyNodeNum.values.toTypedArray(),
                 messages = recentDataPackets.toTypedArray(),
-                regionCode = curRegionValue
             )
             val json = Json { isLenient = true }
             val asString = json.encodeToString(MeshServiceSettingsData.serializer(), settings)
@@ -331,7 +327,6 @@ class MeshService : Service(), Logging {
                 val json = Json { isLenient = true }
                 val settings = json.decodeFromString(MeshServiceSettingsData.serializer(), asString)
                 installNewNodeDB(settings.myInfo, settings.nodeDB)
-                curRegionValue = settings.regionCode
 
                 // Note: we do not haveNodeDB = true because that means we've got a valid db from a real device (rather than this possibly stale hint)
 
@@ -499,11 +494,6 @@ class MeshService : Service(), Logging {
 
             val newConfig = ConfigProtos.Config.newBuilder()
             val newPrefs = (value.loraConfig).toBuilder()
-
-            // We don't change the current region frequency band, unless Unset
-            if (curRegionValue != ConfigProtos.Config.LoRaConfig.RegionCode.Unset_VALUE)
-                newPrefs.regionValue = curRegionValue
-
             newConfig.lora = newPrefs.build()
             if (localConfig.lora != newConfig.lora) sendDeviceConfig(newConfig.build())
 
@@ -1301,48 +1291,6 @@ class MeshService : Service(), Logging {
         return l.toTypedArray()
     }
 
-
-    private fun setRegionOnDevice() {
-        val curConfigRegion =
-            localConfig.lora?.region ?: ConfigProtos.Config.LoRaConfig.RegionCode.Unset
-
-        if (curConfigRegion.number != curRegionValue && curRegionValue != ConfigProtos.Config.LoRaConfig.RegionCode.Unset_VALUE)
-            if (deviceVersion >= minFirmwareVersion) {
-                info("Telling device to upgrade region")
-
-                // Tell the device to set the new region field (old devices will simply ignore this)
-                localConfig.let { currentConfig ->
-                    val newConfig = ConfigProtos.Config.newBuilder()
-
-                    val newPrefs = currentConfig.lora.toBuilder()
-                    newPrefs.regionValue = curRegionValue
-                    newConfig.lora = newPrefs.build()
-
-                    sendDeviceConfig(newConfig.build())
-                }
-            } else
-                warn("Device is too old to understand region changes")
-    }
-
-    /**
-     * This function updates our saved preferences region info and if the device has an unset new
-     * region info, we set it.
-     */
-    private fun updateRegion() {
-        ignoreException {
-            // Try to pull our region code from the new preferences field
-            // FIXME - do not check net - figuring out why board is rebooting
-            val curConfigRegion =
-                localConfig.lora?.region ?: ConfigProtos.Config.LoRaConfig.RegionCode.Unset
-            if (curConfigRegion != ConfigProtos.Config.LoRaConfig.RegionCode.Unset) {
-                info("Using device region $curConfigRegion (code ${curConfigRegion.number})")
-                curRegionValue = curConfigRegion.number
-            }
-            // If nothing was set in our (new style radio preferences, but we now have a valid setting - slam it in)
-            setRegionOnDevice()
-        }
-    }
-
     /// If we've received our initial config, our radio settings and all of our channels, send any queued packets and broadcast connected to clients
     private fun onHasSettings() {
 
@@ -1352,8 +1300,6 @@ class MeshService : Service(), Logging {
         serviceBroadcasts.broadcastConnection()
         onNodeDBChanged()
         reportConnection()
-
-        updateRegion()
     }
 
     private fun handleConfigComplete(configCompleteId: Int) {
@@ -1487,7 +1433,8 @@ class MeshService : Service(), Logging {
     /** Send our current radio config to the device
      */
     private fun sendDeviceConfig(c: ConfigProtos.Config) {
-        // send the packet into the mesh
+        if (deviceVersion < minFirmwareVersion) return
+        debug("Setting new radio config!")
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
             setConfig = c
         })
@@ -1648,12 +1595,6 @@ class MeshService : Service(), Logging {
         }
 
         override fun getUpdateStatus(): Int = SoftwareUpdateService.progress
-        override fun getRegion(): Int = curRegionValue
-
-        override fun setRegion(regionCode: Int) = toRemoteExceptions {
-            curRegionValue = regionCode
-            setRegionOnDevice()
-        }
 
         override fun startFirmwareUpdate() = toRemoteExceptions {
             doFirmwareUpdate()

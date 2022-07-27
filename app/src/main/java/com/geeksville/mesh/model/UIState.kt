@@ -191,12 +191,19 @@ class UIViewModel @Inject constructor(
         }
 
     var region: ConfigProtos.Config.LoRaConfig.RegionCode
-        get() = meshService?.region?.let { ConfigProtos.Config.LoRaConfig.RegionCode.forNumber(it) }
-            ?: ConfigProtos.Config.LoRaConfig.RegionCode.Unset
+        get() = localConfig.value?.lora?.region ?: ConfigProtos.Config.LoRaConfig.RegionCode.Unset
         set(value) {
-            meshService?.region = value.number
+            val config = _localConfig.value
+            if (config != null) {
+                val builder = config.lora.toBuilder()
+                builder.region = value
+                val newConfig = ConfigProtos.Config.newBuilder()
+                newConfig.lora = builder.build()
+                setDeviceConfig(newConfig.build())
+            }
         }
 
+    @Suppress("MemberVisibilityCanBePrivate")
     val isRouter: Boolean =
         localConfig.value?.device?.role == ConfigProtos.Config.DeviceConfig.Role.Router
 
@@ -254,7 +261,6 @@ class UIViewModel @Inject constructor(
 
     // Set the radio config (also updates our saved copy in preferences)
     private fun setDeviceConfig(config: ConfigProtos.Config) {
-        debug("Setting new radio config!")
         meshService?.deviceConfig = config.toByteArray()
     }
 

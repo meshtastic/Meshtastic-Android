@@ -263,7 +263,10 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 }
                 .setPositiveButton(R.string.apply) { _, _ ->
                     debug("Switching back to default channel")
-                    installSettings(Channel.default.settings, Channel.default.loraConfig)
+                    installSettings(
+                        Channel.default.settings,
+                        Channel.default.loraConfig.toBuilder().setRegion(model.region).build()
+                    )
                 }
                 .show()
         }
@@ -332,6 +335,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
                             // No matter what apply the speed selection from the user
                             val newLoRaConfig = ConfigProtos.Config.LoRaConfig.newBuilder()
+                                .setRegion(model.region)
                                 .setModemPreset(newModemPreset)
 
                             installSettings(newSettings.build(),newLoRaConfig.build())
