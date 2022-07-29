@@ -59,7 +59,9 @@ internal class SerialConnectionImpl(
         }
 
         port.open(usbDeviceConnection)
-        port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
+        port.setParameters(115200, UsbSerialPort.DATABITS_8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
+        port.dtr = true
+        port.rts = true
 
         debug("Starting serial reader thread")
         val io = SerialInputOutputManager(port, object : SerialInputOutputManager.Listener {
@@ -70,6 +72,8 @@ internal class SerialConnectionImpl(
             override fun onRunError(e: Exception?) {
                 closed.set(true)
                 ignoreException {
+                    port.dtr = false
+                    port.rts = false
                     port.close()
                 }
                 closedLatch.countDown()
