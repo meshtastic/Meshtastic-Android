@@ -1,6 +1,5 @@
 package com.geeksville.mesh.ui
 
-import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.companion.CompanionDeviceManager
 import android.content.*
@@ -62,8 +61,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private val myActivity get() = requireActivity() as MainActivity
 
-    @SuppressLint("MissingPermission")
-    val associationResultLauncher = registerForActivityResult(
+    private val associationResultLauncher = registerForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
     ) {
         it.data
@@ -210,7 +208,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         spinner.isEnabled = true
 
         // If actively connected possibly let the user update firmware
-        refreshUpdateButton(region != ConfigProtos.Config.LoRaConfig.RegionCode.Unset)
+        refreshUpdateButton(model.isConnected())
 
         // Update the status string (highest priority messages first)
         val info = model.myNodeInfo.value
@@ -220,12 +218,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             (permissionsWarning != null) ->
                 statusText.text = permissionsWarning
 
-            region == ConfigProtos.Config.LoRaConfig.RegionCode.Unset ->
-                statusText.text = getString(R.string.must_set_region)
-
             connected == MeshService.ConnectionState.CONNECTED -> {
-                val fwStr = info?.firmwareString ?: "unknown"
-                statusText.text = getString(R.string.connected_to).format(fwStr)
+                statusText.text = if (region.number == 0) getString(R.string.must_set_region)
+                else getString(R.string.connected_to).format(info?.firmwareString ?: "unknown")
             }
             connected == MeshService.ConnectionState.DISCONNECTED ->
                 statusText.text = getString(R.string.not_connected)
