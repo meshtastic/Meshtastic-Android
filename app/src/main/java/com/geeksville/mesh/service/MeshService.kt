@@ -746,6 +746,15 @@ class MeshService : Service(), Logging {
                         // add new entries if needed
                         channels[ch.index] = ch
                         debug("Admin: Received channel ${ch.index}")
+
+                        val packetToSave = Packet(
+                            UUID.randomUUID().toString(),
+                            "Channel",
+                            System.currentTimeMillis(),
+                            ch.toString()
+                        )
+                        insertPacket(packetToSave)
+
                         if (ch.index + 1 < mi.maxChannels) {
 
                             // Stop once we get to the first disabled entry
@@ -847,7 +856,7 @@ class MeshService : Service(), Logging {
         if (packet.hasDecoded()) {
             val packetToSave = Packet(
                 UUID.randomUUID().toString(),
-                "packet",
+                "Packet",
                 System.currentTimeMillis(),
                 packet.toString()
             )
@@ -893,7 +902,7 @@ class MeshService : Service(), Logging {
         if (packet.hasDecoded()) {
             val packetToSave = Packet(
                 UUID.randomUUID().toString(),
-                "packet",
+                "Packet",
                 System.currentTimeMillis(),
                 packet.toString()
             )
