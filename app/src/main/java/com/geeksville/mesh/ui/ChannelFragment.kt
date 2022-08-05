@@ -68,17 +68,6 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 
     private val model: UIViewModel by activityViewModels()
 
-    private val requestPermissionAndScanLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions.entries.all { it.value }) zxingScan()
-        }
-
-    private val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
-        if (result.contents != null) {
-            model.setRequestChannelUrl(Uri.parse(result.contents))
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -212,53 +201,65 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
     }
 
-    private fun zxingScan() {
-        debug("Starting zxing QR code scanner")
-        val zxingScan = ScanOptions()
-        zxingScan.setCameraId(0)
-        zxingScan.setPrompt("")
-        zxingScan.setBeepEnabled(false)
-        zxingScan.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-        barcodeLauncher.launch(zxingScan)
-    }
-
-    private fun requestPermissionAndScan() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.camera_required)
-            .setMessage(R.string.why_camera_required)
-            .setNeutralButton(R.string.cancel) { _, _ ->
-                debug("Camera permission denied")
-            }
-            .setPositiveButton(getString(R.string.accept)) { _, _ ->
-                requestPermissionAndScanLauncher.launch(requireContext().getCameraPermissions())
-            }
-            .show()
-    }
-
-    private fun mlkitScan() {
-        debug("Starting ML Kit QR code scanner")
-        val options = GmsBarcodeScannerOptions.Builder()
-            .setBarcodeFormats(
-                Barcode.FORMAT_QR_CODE
-            )
-            .build()
-        val scanner = GmsBarcodeScanning.getClient(requireContext(), options)
-        scanner.startScan()
-            .addOnSuccessListener { barcode ->
-                if (barcode.rawValue != null)
-                    model.setRequestChannelUrl(Uri.parse(barcode.rawValue))
-            }
-            .addOnFailureListener {
-                Snackbar.make(
-                    requireView(),
-                    R.string.channel_invalid,
-                    Snackbar.LENGTH_SHORT
-                ).show()
-            }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
+            if (result.contents != null) {
+                model.setRequestChannelUrl(Uri.parse(result.contents))
+            }
+        }
+
+        fun zxingScan() {
+            debug("Starting zxing QR code scanner")
+            val zxingScan = ScanOptions()
+            zxingScan.setCameraId(0)
+            zxingScan.setPrompt("")
+            zxingScan.setBeepEnabled(false)
+            zxingScan.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+            barcodeLauncher.launch(zxingScan)
+        }
+
+        fun mlkitScan() {
+            debug("Starting ML Kit QR code scanner")
+            val options = GmsBarcodeScannerOptions.Builder()
+                .setBarcodeFormats(
+                    Barcode.FORMAT_QR_CODE
+                )
+                .build()
+            val scanner = GmsBarcodeScanning.getClient(requireContext(), options)
+            scanner.startScan()
+                .addOnSuccessListener { barcode ->
+                    if (barcode.rawValue != null)
+                        model.setRequestChannelUrl(Uri.parse(barcode.rawValue))
+                }
+                .addOnFailureListener { ex ->
+                    errormsg("ML Kit scanner error: ${ex.message}")
+                    Snackbar.make(
+                        requireView(),
+                        "${ex.message}",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                }
+        }
+
+        val requestPermissionAndScanLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                if (permissions.entries.all { it.value }) zxingScan()
+            }
+
+        fun requestPermissionAndScan() {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.camera_required)
+                .setMessage(R.string.why_camera_required)
+                .setNeutralButton(R.string.cancel) { _, _ ->
+                    debug("Camera permission denied")
+                }
+                .setPositiveButton(getString(R.string.accept)) { _, _ ->
+                    requestPermissionAndScanLauncher.launch(requireContext().getCameraPermissions())
+                }
+                .show()
+        }
 
         binding.channelNameEdit.on(EditorInfo.IME_ACTION_DONE) {
             requireActivity().hideKeyboard()
