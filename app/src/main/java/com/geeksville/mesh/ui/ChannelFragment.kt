@@ -19,13 +19,13 @@ import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
-import com.geeksville.android.isGooglePlayAvailable
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.android.hasCameraPermission
+import com.geeksville.mesh.android.installSource
 import com.geeksville.mesh.databinding.ChannelFragmentBinding
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
@@ -284,7 +284,9 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
 
         binding.scanButton.setOnClickListener {
-            if (isGooglePlayAvailable(requireContext())) {
+            val installSource = requireContext().installSource()
+            debug("Using scanner for installSource: $installSource")
+            if (installSource != null) { // only use ML Kit when install from PlayStore
                 mlkitScan()
             } else {
                 if (requireContext().hasCameraPermission()) {
