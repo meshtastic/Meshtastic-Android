@@ -37,6 +37,10 @@
         android:title="@string/preferences_map_style"
         app:showAsAction="withText" />
     <item
+        android:id="@+id/prefernces_quick_chat"
+        android:title="Quick chat options"
+        app:showAsAction="withText" />
+    <item
         android:id="@+id/about"
         android:title="@string/about"
         app:showAsAction="withText" />

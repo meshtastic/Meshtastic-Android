@@ -6,9 +6,7 @@ import android.os.Bundle
 import android.text.InputType
 import android.view.*
 import android.view.inputmethod.EditorInfo
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.cardview.widget.CardView
@@ -297,6 +295,16 @@ class MessagesFragment : Fragment(), Logging {
             binding.textInputLayout.isEnabled = connected
             binding.sendButton.isEnabled = connected
         }
+
+        val test = Button(context)
+        test.setLayoutParams(LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT))
+        test.setText("RGR")
+        test.setOnClickListener {
+            //model.messagesState.sendMessage("Roger", contactId)
+            binding.messageInputText.setText(binding.messageInputText.text?.append(" Roger"))
+            binding.messageInputText.setSelection(binding.messageInputText.text?.length ?: 0)
+        }
+        binding.quickChatLayout.addView(test)
     }
 
     private inner class ActionModeCallback : ActionMode.Callback {

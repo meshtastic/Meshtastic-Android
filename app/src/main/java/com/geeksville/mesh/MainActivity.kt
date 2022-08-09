@@ -1070,6 +1070,15 @@ class MainActivity : BaseActivity(), Logging,
                 chooseMapStyle()
                 return true
             }
+            R.id.prefernces_quick_chat -> {
+                val fragmentManager: FragmentManager = supportFragmentManager
+                val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
+                val nameFragment = QuickChatSettingsFragment()
+                fragmentTransaction.add(R.id.mainActivityLayout, nameFragment)
+                fragmentTransaction.addToBackStack(null)
+                fragmentTransaction.commit()
+                return true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
