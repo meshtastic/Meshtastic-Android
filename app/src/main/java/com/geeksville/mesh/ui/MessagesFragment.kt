@@ -22,6 +22,7 @@ import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.AdapterMessageLayoutBinding
 import com.geeksville.mesh.databinding.MessagesFragmentBinding
+import com.geeksville.mesh.model.QuickChatAction
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.google.android.material.chip.Chip
@@ -296,15 +297,30 @@ class MessagesFragment : Fragment(), Logging {
             binding.sendButton.isEnabled = connected
         }
 
-        val test = Button(context)
-        test.setLayoutParams(LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT))
-        test.setText("RGR")
-        test.setOnClickListener {
-            //model.messagesState.sendMessage("Roger", contactId)
-            binding.messageInputText.setText(binding.messageInputText.text?.append(" Roger"))
-            binding.messageInputText.setSelection(binding.messageInputText.text?.length ?: 0)
+        for (action in model.quickChatActions) {
+            val button = Button(context)
+            button.setText(action.name)
+            if (action.mode == QuickChatAction.Mode.Instant) {
+                button.backgroundTintList = ContextCompat.getColorStateList(requireActivity(), R.color.colorMyMsg)
+
+            }
+            button.setOnClickListener {
+                if (action.mode == QuickChatAction.Mode.Append) {
+                    val originalText = binding.messageInputText.text ?: ""
+                    val needsSpace = !originalText.endsWith(' ') && originalText.isNotEmpty()
+                    val newText = buildString {
+                        append(originalText)
+                        if (needsSpace) append(' ')
+                        append(action.message)
+                    }
+                    binding.messageInputText.setText(newText)
+                    binding.messageInputText.setSelection(newText.length)
+                } else {
+                    model.messagesState.sendMessage(action.message, contactId)
+                }
+            }
+            binding.quickChatLayout.addView(button)
         }
-        binding.quickChatLayout.addView(test)
     }
 
     private inner class ActionModeCallback : ActionMode.Callback {
