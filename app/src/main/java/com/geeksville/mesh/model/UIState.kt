@@ -445,5 +445,12 @@ class UIViewModel @Inject constructor(
         }
     }
 
+    private val _quickChatActions = mutableListOf<QuickChatAction>()
+    val quickChatActions: List<QuickChatAction> get() = _quickChatActions
+
+    fun addQuickChatAction(name: String, value: String, mode: QuickChatAction.Mode) {
+        val action = QuickChatAction(name, value, mode)
+        _quickChatActions.add(action)
+    }
 }
 
