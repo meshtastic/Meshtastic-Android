@@ -1070,7 +1070,7 @@ class MainActivity : BaseActivity(), Logging,
                 chooseMapStyle()
                 return true
             }
-            R.id.prefernces_quick_chat -> {
+            R.id.preferences_quick_chat -> {
                 val fragmentManager: FragmentManager = supportFragmentManager
                 val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
                 val nameFragment = QuickChatSettingsFragment()
