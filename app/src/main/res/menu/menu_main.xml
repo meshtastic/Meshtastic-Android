@@ -37,6 +37,10 @@
         android:title="@string/preferences_map_style"
         app:showAsAction="withText" />
     <item
+        android:id="@+id/show_intro"
+        android:title="@string/show_intro"
+        app:showAsAction="withText" />
+    <item
         android:id="@+id/about"
         android:title="@string/about"
         app:showAsAction="withText" />

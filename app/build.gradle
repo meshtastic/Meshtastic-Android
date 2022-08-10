@@ -200,8 +200,15 @@ dependencies {
     implementation "androidx.core:core-splashscreen:1.0.0-beta02"
 
     implementation project(':geeksville-androidlib')
+
+    // App intro
+    implementation 'com.github.AppIntro:AppIntro:6.2.0'
 }
 
 kapt {
     correctErrorTypes true
+}
+
+repositories {
+    maven { url "https://jitpack.io" }
 }

@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.geeksville.mesh"
     xmlns:tools="http://schemas.android.com/tools"
+    package="com.geeksville.mesh"
     tools:ignore="GoogleAppIndexingWarning">
-
-    <!-- If a device is missing a GPS - we will still be able to work though , must be before uses-permission-->
+    <!-- If a device is missing a GPS - we will still be able to work though , must be before uses-permission -->
     <uses-feature
         android:name="android.hardware.location"
         android:required="false" />
     <uses-feature
         android:name="android.hardware.location.gps"
         android:required="false" />
-
-<!-- TODO - wait for targetSdkVersion 31
+    <!--
+ TODO - wait for targetSdkVersion 31
     &lt;!&ndash; Request legacy Bluetooth permissions on older devices &ndash;&gt;
     <uses-permission android:name="android.permission.BLUETOOTH"
         android:maxSdkVersion="30" />
@@ -23,74 +22,65 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
         android:usesPermissionFlags="neverForLocation" />
--->
+    -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-
-    <!-- Permissions required for providing location (from phone GPS) to mesh -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /> <!-- Permissions required for providing location (from phone GPS) to mesh -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-
-    <!-- This permission is required for analytics - and soon the MQTT gateway -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- This permission is required for analytics - and soon the MQTT gateway -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
     <!--
       This permission is optional but recommended so we can be smart
       about when to send data.
-     -->
+    -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-    <!-- Only for debug log writing, disable for production
+    <!--
+ Only for debug log writing, disable for production
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     -->
-
     <!-- We run our mesh code as a foreground service - FIXME, find a way to stop doing this -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
-    <!-- Needed to open our bluetooth connection to our paired device (after reboot) -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
-    <!-- For android >=26 we can use the new BLE scanning API, which allows auto launching our service when our device is seen -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- Needed to open our bluetooth connection to our paired device (after reboot) -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- For android >=26 we can use the new BLE scanning API, which allows auto launching our service when our device is seen -->
     <uses-permission android:name="android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND" />
-    <uses-permission android:name="android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND" />
-
-    <!-- Uart access -->
-
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND" /> <!-- Uart access -->
     <!-- zxing library for QR Code scanning using camera -->
     <uses-permission android:name="android.permission.CAMERA" />
 
     <uses-feature
         android:name="android.hardware.bluetooth_le"
-        android:required="false" />
-
-    <!-- For the modern BLE scanning API -->
+        android:required="false" /> <!-- For the modern BLE scanning API -->
     <uses-feature
         android:name="android.software.companion_device_setup"
-        android:required="false" />
-
-    <!-- for USB serial access -->
+        android:required="false" /> <!-- for USB serial access -->
     <uses-feature
         android:name="android.hardware.usb.host"
         android:required="false" />
 
-    <!-- hardware acceleration is required for zxing barcode lib -->
     <application
-        tools:replace="android:icon"
-        android:name="com.geeksville.mesh.MeshUtilApplication"
+        android:name=".MeshUtilApplication"
         android:allowBackup="false"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher2"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher2_round"
         android:supportsRtl="true"
-        android:hardwareAccelerated="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:replace="android:icon">
+        <activity
+            android:name=".AppIntroduction"
+            android:label="Meshtastic">
+        <!--
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
+        -->
+        </activity>
 
         <meta-data
             android:name="com.mixpanel.android.MPConfig.DisableViewCrawler"
-            android:value="true" />
-
-        <!-- Default crash collection and analytics off until we (possibly) turn it on in application.onCreate -->
+            android:value="true" /> <!-- Default crash collection and analytics off until we (possibly) turn it on in application.onCreate -->
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"
             android:value="false" />
@@ -99,45 +89,41 @@
             android:value="false" />
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
-            android:value="barcode_ui"/>
-
-        <!-- we need bind job service for oreo -->
+            android:value="barcode_ui" /> <!-- we need bind job service for oreo -->
         <service
-            android:name="com.geeksville.mesh.service.SoftwareUpdateService"
+            android:name=".service.SoftwareUpdateService"
             android:enabled="true"
             android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-
-        <!-- This is the public API for doing mesh radio operations from android apps -->
+            android:permission="android.permission.BIND_JOB_SERVICE" /> <!-- This is the public API for doing mesh radio operations from android apps -->
         <service
-            android:name="com.geeksville.mesh.service.MeshService"
+            android:name=".service.MeshService"
             android:enabled="true"
-            android:exported="true" tools:ignore="ExportedActivity">
+            android:exported="true"
+            tools:ignore="ExportedActivity">
             <intent-filter>
                 <action android:name="com.geeksville.mesh.Service" />
             </intent-filter>
-        </service>
-
-        <!-- zxing for QR Code scanning: lock portrait orientation -->
+        </service> <!-- zxing for QR Code scanning: lock portrait orientation -->
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
             android:screenOrientation="portrait"
             tools:replace="screenOrientation" />
-
         <activity
-            android:name="com.geeksville.mesh.MainActivity"
+            android:name=".MainActivity"
+            android:exported="true"
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateAlwaysHidden"
             android:theme="@style/Theme.App.Starting"
-            android:exported="true">
+            android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
             <intent-filter android:autoVerify="true">
-                <!-- The QR codes to share channel settings are shared as meshtastic URLS
+
+                <!--
+                The QR codes to share channel settings are shared as meshtastic URLS
 
                 an approximate example:
                 http://www.meshtastic.org/d/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
@@ -148,15 +134,14 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="https"
                     android:host="www.meshtastic.org"
-                    android:pathPrefix="/d/" />
+                    android:pathPrefix="/d/"
+                    android:scheme="https" />
                 <data
-                    android:scheme="https"
                     android:host="www.meshtastic.org"
-                    android:pathPrefix="/D/" />
+                    android:pathPrefix="/D/"
+                    android:scheme="https" />
             </intent-filter>
-
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
             </intent-filter>
@@ -167,15 +152,17 @@
                 android:resource="@xml/device_filter" />
         </activity>
 
-        <receiver android:name="com.geeksville.mesh.service.BootCompleteReceiver"
+        <receiver
+            android:name=".service.BootCompleteReceiver"
             android:exported="false">
+
             <!-- handle boot events -->
             <intent-filter>
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-                <!--For HTC devices per https://stackoverflow.com/questions/20441308/boot-completed-not-working-android/46294732#46294732 -->
+                <!-- For HTC devices per https://stackoverflow.com/questions/20441308/boot-completed-not-working-android/46294732#46294732 -->
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
 
                 <!-- for testing -->
@@ -185,12 +172,15 @@
             <!-- Also restart our service if the app gets upgraded -->
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-                <!-- I was using PACKAGE_REPLACED, but MY_PACKAGE_REPLACED is newer and seems cleaner
+                <!--
+                I was using PACKAGE_REPLACED, but MY_PACKAGE_REPLACED is newer and seems cleaner
                 <data
                     android:scheme="package"
-                    android:path="com.geeksville.mesh" /> -->
+                    android:path="com.geeksville.mesh" />
+                -->
             </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>

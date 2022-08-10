@@ -21,9 +21,11 @@ val Context.bluetoothManager: BluetoothManager? get() = getSystemService(Context
 val Context.deviceManager: CompanionDeviceManager?
     @SuppressLint("InlinedApi")
     get() {
-        val activity: MainActivity? = GeeksvilleApplication.currentActivity as MainActivity?
-        return if (hasCompanionDeviceApi()) activity?.getSystemService(Context.COMPANION_DEVICE_SERVICE) as? CompanionDeviceManager?
-        else null
+        if (GeeksvilleApplication.currentActivity is MainActivity) {
+            val activity = GeeksvilleApplication.currentActivity
+            if (hasCompanionDeviceApi()) return activity?.getSystemService(Context.COMPANION_DEVICE_SERVICE) as? CompanionDeviceManager?
+        }
+        return null
     }
 
 val Context.usbManager: UsbManager get() = requireNotNull(getSystemService(Context.USB_SERVICE) as? UsbManager?) { "USB_SERVICE is not available"}
