@@ -3,7 +3,6 @@ package com.geeksville.mesh.ui
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.text.InputType
 import android.view.*
 import android.view.inputmethod.EditorInfo
 import android.widget.*
@@ -11,18 +10,20 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.core.view.allViews
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
+import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.android.Logging
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
+import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.databinding.AdapterMessageLayoutBinding
 import com.geeksville.mesh.databinding.MessagesFragmentBinding
-import com.geeksville.mesh.model.QuickChatAction
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.google.android.material.chip.Chip
@@ -55,6 +56,8 @@ class MessagesFragment : Fragment(), Logging {
     private var contactName: String = DataPacket.ID_BROADCAST
 
     private val model: UIViewModel by activityViewModels()
+
+    private var isConnected = false
 
     // Allows textMultiline with IME_ACTION_SEND
     private fun EditText.onActionSend(func: () -> Unit) {
@@ -292,34 +295,45 @@ class MessagesFragment : Fragment(), Logging {
         // If connection state _OR_ myID changes we have to fix our ability to edit outgoing messages
         model.connectionState.observe(viewLifecycleOwner) { connectionState ->
             // If we don't know our node ID and we are offline don't let user try to send
-            val connected = connectionState == MeshService.ConnectionState.CONNECTED
-            binding.textInputLayout.isEnabled = connected
-            binding.sendButton.isEnabled = connected
-        }
-
-        for (action in model.quickChatActions) {
-            val button = Button(context)
-            button.setText(action.name)
-            if (action.mode == QuickChatAction.Mode.Instant) {
-                button.backgroundTintList = ContextCompat.getColorStateList(requireActivity(), R.color.colorMyMsg)
-
-            }
-            button.setOnClickListener {
-                if (action.mode == QuickChatAction.Mode.Append) {
-                    val originalText = binding.messageInputText.text ?: ""
-                    val needsSpace = !originalText.endsWith(' ') && originalText.isNotEmpty()
-                    val newText = buildString {
-                        append(originalText)
-                        if (needsSpace) append(' ')
-                        append(action.message)
-                    }
-                    binding.messageInputText.setText(newText)
-                    binding.messageInputText.setSelection(newText.length)
-                } else {
-                    model.messagesState.sendMessage(action.message, contactId)
+            isConnected = connectionState == MeshService.ConnectionState.CONNECTED
+            binding.textInputLayout.isEnabled = isConnected
+            binding.sendButton.isEnabled = isConnected
+            for (subView: View in binding.quickChatLayout.allViews) {
+                if (subView is Button) {
+                    subView.isEnabled = isConnected
                 }
             }
-            binding.quickChatLayout.addView(button)
+        }
+
+        model.quickChatActions.asLiveData().observe(viewLifecycleOwner) { actions ->
+            actions?.let {
+                for (action in actions) {
+                    val button = Button(context)
+                    button.setText(action.name)
+                    button.isEnabled = isConnected
+                    if (action.mode == QuickChatAction.Mode.Instant) {
+                        //button.setBackgroundColor(Color.rgb(200, 200, 200))
+                        button.backgroundTintList = ContextCompat.getColorStateList(requireActivity(), R.color.colorMyMsg)
+
+                    }
+                    button.setOnClickListener {
+                        if (action.mode == QuickChatAction.Mode.Append) {
+                            val originalText = binding.messageInputText.text ?: ""
+                            val needsSpace = !originalText.endsWith(' ') && originalText.isNotEmpty()
+                            val newText = buildString {
+                                append(originalText)
+                                if (needsSpace) append(' ')
+                                append(action.message)
+                            }
+                            binding.messageInputText.setText(newText)
+                            binding.messageInputText.setSelection(newText.length)
+                        } else {
+                            model.messagesState.sendMessage(action.message, contactId)
+                        }
+                    }
+                    binding.quickChatLayout.addView(button)
+                }
+            }
         }
     }
 

@@ -1,14 +1,22 @@
 package com.geeksville.mesh.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.asLiveData
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.geeksville.android.Logging
-import com.geeksville.mesh.databinding.AdvancedSettingsBinding
+import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.QuickChatSettingsFragmentBinding
+import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.model.UIViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.switchmaterial.SwitchMaterial
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -41,23 +49,17 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
 
                 val name = builder.nameInput.text.toString().trim()
                 val message = builder.messageInput.text.toString()
-                if (name.isNotEmpty() and message.isNotEmpty())
+                if (builder.isNotEmpty())
                     model.addQuickChatAction(
                         name, message,
                         if (builder.modeSwitch.isChecked) QuickChatAction.Mode.Instant else QuickChatAction.Mode.Append
                     )
-                // TODO
-            }
-            builder.builder.setNegativeButton("Cancel") { _, _ ->
-                // TODO
             }
 
             val dialog = builder.builder.create()
-            dialog.getButton(0).isEnabled = false
             dialog.show()
         }
 
-        model.addQuickChatAction("TST", "Test", QuickChatAction.Mode.Append)
         val quickChatActionAdapter =
             QuickChatActionAdapter(requireContext()) { action: QuickChatAction ->
                 val builder = createEditDialog(requireContext(), "Edit quick chat")
@@ -65,9 +67,18 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
                 builder.messageInput.setText(action.message)
                 builder.modeSwitch.isChecked = action.mode == QuickChatAction.Mode.Instant
 
-                builder.builder.setNegativeButton(R.string.cancel) { _, _ -> }
+                builder.builder.setNegativeButton(R.string.delete) { _, _ ->
+                    model.deleteQuickChatAction(action)
+                }
                 builder.builder.setPositiveButton(R.string.save_btn) { _, _ ->
-                    // TODO
+                    if (builder.isNotEmpty()) {
+                        model.updateQuickChatAction(
+                            action,
+                            builder.nameInput.text.toString(),
+                            builder.messageInput.text.toString(),
+                            if (builder.modeSwitch.isChecked) QuickChatAction.Mode.Instant else QuickChatAction.Mode.Append
+                        )
+                    }
                 }
                 val dialog = builder.builder.create()
                 dialog.show()
@@ -78,7 +89,10 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
             this.adapter = quickChatActionAdapter
         }
 
-        quickChatActionAdapter.setActions(model.quickChatActions)
+        model.quickChatActions.asLiveData().observe(viewLifecycleOwner) { actions ->
+            actions?.let { quickChatActionAdapter.setActions(actions) }
+        }
+
         Log.d(TAG, "viewCreation done")
     }
 
@@ -87,7 +101,9 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
         val nameInput: EditText,
         val messageInput: EditText,
         val modeSwitch: SwitchMaterial
-    )
+    ) {
+        fun isNotEmpty(): Boolean = nameInput.text.isNotEmpty() and messageInput.text.isNotEmpty()
+    }
 
     private fun getMessageName(message: String): String {
         return if (message.length <= 3) {
@@ -128,7 +144,6 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
             if (nameInput.isFocused) nameHasChanged = true
         }
 
-        // TODO: Don't enable positive button until there is name and message
         builder.setView(layout)
 
         return DialogBuilder(builder, nameInput, messageInput, modeSwitch)

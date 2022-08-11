@@ -14,7 +14,9 @@ import androidx.lifecycle.viewModelScope
 import com.geeksville.android.Logging
 import com.geeksville.mesh.*
 import com.geeksville.mesh.database.PacketRepository
+import com.geeksville.mesh.database.QuickChatActionRepository
 import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.repository.datastore.LocalConfigRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.util.positionToMeter
@@ -61,6 +63,7 @@ class UIViewModel @Inject constructor(
     private val app: Application,
     private val packetRepository: PacketRepository,
     private val localConfigRepository: LocalConfigRepository,
+    private val quickChatActionRepository: QuickChatActionRepository,
     private val preferences: SharedPreferences
 ) : ViewModel(), Logging {
 
@@ -69,6 +72,12 @@ class UIViewModel @Inject constructor(
 
     private val _localConfig = MutableLiveData<LocalOnlyProtos.LocalConfig?>()
     val localConfig: LiveData<LocalOnlyProtos.LocalConfig?> get() = _localConfig
+
+    private val _quickChatActions =
+        MutableStateFlow<List<com.geeksville.mesh.database.entity.QuickChatAction>>(
+            emptyList()
+        )
+    val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
 
     init {
         viewModelScope.launch {
@@ -79,6 +88,11 @@ class UIViewModel @Inject constructor(
         viewModelScope.launch {
             localConfigRepository.localConfigFlow.collect { config ->
                 _localConfig.value = config
+            }
+        }
+        viewModelScope.launch {
+            quickChatActionRepository.getAllActions().collect { actions ->
+                _quickChatActions.value = actions
             }
         }
         debug("ViewModel created")
@@ -445,12 +459,34 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    private val _quickChatActions = mutableListOf<QuickChatAction>()
-    val quickChatActions: List<QuickChatAction> get() = _quickChatActions
-
     fun addQuickChatAction(name: String, value: String, mode: QuickChatAction.Mode) {
-        val action = QuickChatAction(name, value, mode)
-        _quickChatActions.add(action)
+        viewModelScope.launch(Dispatchers.Main) {
+            val action = QuickChatAction(0, name, value, mode)
+            quickChatActionRepository.insert(action)
+        }
+    }
+
+    fun deleteQuickChatAction(action: QuickChatAction) {
+        viewModelScope.launch(Dispatchers.Main) {
+            quickChatActionRepository.delete(action.uuid)
+        }
+    }
+
+    fun updateQuickChatAction(
+        action: QuickChatAction,
+        name: String?,
+        message: String?,
+        mode: QuickChatAction.Mode?
+    ) {
+        viewModelScope.launch(Dispatchers.Main) {
+            val newAction = QuickChatAction(
+                action.uuid,
+                name ?: action.name,
+                message ?: action.message,
+                mode ?: action.mode
+            )
+            quickChatActionRepository.update(newAction)
+        }
     }
 }
 

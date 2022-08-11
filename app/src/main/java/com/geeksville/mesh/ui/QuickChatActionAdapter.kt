@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.R
-import com.geeksville.mesh.model.QuickChatAction
+import com.geeksville.mesh.database.entity.QuickChatAction
 
 class QuickChatActionAdapter internal constructor(
     context: Context,
