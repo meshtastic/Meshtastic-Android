@@ -461,14 +461,14 @@ class UIViewModel @Inject constructor(
 
     fun addQuickChatAction(name: String, value: String, mode: QuickChatAction.Mode) {
         viewModelScope.launch(Dispatchers.Main) {
-            val action = QuickChatAction(0, name, value, mode)
+            val action = QuickChatAction(0, name, value, mode, _quickChatActions.value.size)
             quickChatActionRepository.insert(action)
         }
     }
 
     fun deleteQuickChatAction(action: QuickChatAction) {
         viewModelScope.launch(Dispatchers.Main) {
-            quickChatActionRepository.delete(action.uuid)
+            quickChatActionRepository.delete(action)
         }
     }
 
@@ -483,9 +483,16 @@ class UIViewModel @Inject constructor(
                 action.uuid,
                 name ?: action.name,
                 message ?: action.message,
-                mode ?: action.mode
+                mode ?: action.mode,
+                action.position
             )
             quickChatActionRepository.update(newAction)
+        }
+    }
+
+    fun moveQuickChatAction(action: QuickChatAction, newPos: Int) {
+        viewModelScope.launch(Dispatchers.Main) {
+            quickChatActionRepository.moveAction(action, newPos)
         }
     }
 }

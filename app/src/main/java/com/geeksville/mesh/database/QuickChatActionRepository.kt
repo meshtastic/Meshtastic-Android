@@ -24,11 +24,15 @@ class QuickChatActionRepository @Inject constructor(private val quickChatDaoLazy
         quickChatActionDao.deleteAll()
     }
 
-    suspend fun delete(uuid: Long) = withContext(Dispatchers.IO) {
-        quickChatActionDao.delete(uuid)
+    suspend fun delete(action: QuickChatAction) = withContext(Dispatchers.IO) {
+        quickChatActionDao.delete(action)
     }
 
-    suspend fun update(action:QuickChatAction) = withContext(Dispatchers.IO) {
+    suspend fun update(action: QuickChatAction) = withContext(Dispatchers.IO) {
         quickChatActionDao.update(action)
+    }
+
+    suspend fun moveAction(action: QuickChatAction, newPos: Int) = withContext(Dispatchers.IO) {
+        quickChatActionDao.moveAction(action, newPos)
     }
 }

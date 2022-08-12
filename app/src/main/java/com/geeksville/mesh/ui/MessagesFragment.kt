@@ -307,6 +307,7 @@ class MessagesFragment : Fragment(), Logging {
 
         model.quickChatActions.asLiveData().observe(viewLifecycleOwner) { actions ->
             actions?.let {
+                binding.quickChatLayout.removeAllViews()
                 for (action in actions) {
                     val button = Button(context)
                     button.setText(action.name)

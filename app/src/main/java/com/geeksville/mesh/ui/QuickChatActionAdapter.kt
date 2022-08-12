@@ -13,7 +13,7 @@ import com.geeksville.mesh.database.entity.QuickChatAction
 class QuickChatActionAdapter internal constructor(
     context: Context,
     private val onEdit: (action: QuickChatAction) -> Unit
-) : RecyclerView.Adapter<QuickChatActionAdapter.ActionViewHolder>() {
+) : RecyclerView.Adapter<QuickChatActionAdapter.ActionViewHolder>(), DragManageAdapter.SwapAdapter {
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     private var actions = emptyList<QuickChatAction>()
@@ -49,5 +49,10 @@ class QuickChatActionAdapter internal constructor(
     }
 
     override fun getItemCount() = actions.size
+
+    override fun swapItems(fromPosition: Int, toPosition: Int) {
+        // TODO: Update data
+        notifyItemMoved(fromPosition, toPosition)
+    }
 
 }

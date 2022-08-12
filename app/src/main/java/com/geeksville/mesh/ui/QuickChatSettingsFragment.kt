@@ -9,6 +9,7 @@ import android.widget.EditText
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.geeksville.android.Logging
 import com.geeksville.mesh.R
@@ -84,10 +85,15 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
                 dialog.show()
             }
 
+        val dragCallback = DragManageAdapter(quickChatActionAdapter, requireContext(), ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0)
+        val helper = ItemTouchHelper(dragCallback)
+
         binding.quickChatSettingsView.apply {
             this.layoutManager = LinearLayoutManager(requireContext())
             this.adapter = quickChatActionAdapter
+            helper.attachToRecyclerView(this)
         }
+
 
         model.quickChatActions.asLiveData().observe(viewLifecycleOwner) { actions ->
             actions?.let { quickChatActionAdapter.setActions(actions) }
