@@ -220,29 +220,6 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             barcodeLauncher.launch(zxingScan)
         }
 
-        fun mlkitScan() {
-            debug("Starting ML Kit QR code scanner")
-            val options = GmsBarcodeScannerOptions.Builder()
-                .setBarcodeFormats(
-                    Barcode.FORMAT_QR_CODE
-                )
-                .build()
-            val scanner = GmsBarcodeScanning.getClient(requireContext(), options)
-            scanner.startScan()
-                .addOnSuccessListener { barcode ->
-                    if (barcode.rawValue != null)
-                        model.setRequestChannelUrl(Uri.parse(barcode.rawValue))
-                }
-                .addOnFailureListener { ex ->
-                    errormsg("ML Kit scanner error: ${ex.message}")
-                    Snackbar.make(
-                        requireView(),
-                        "${ex.message}",
-                        Snackbar.LENGTH_SHORT
-                    ).show()
-                }
-        }
-
         val requestPermissionAndScanLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 if (permissions.entries.all { it.value }) zxingScan()
@@ -259,6 +236,24 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                     requestPermissionAndScanLauncher.launch(requireContext().getCameraPermissions())
                 }
                 .show()
+        }
+
+        fun mlkitScan() {
+            debug("Starting ML Kit code scanner")
+            val options = GmsBarcodeScannerOptions.Builder()
+                .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+                .build()
+            val scanner = GmsBarcodeScanning.getClient(requireContext(), options)
+            scanner.startScan()
+                .addOnSuccessListener { barcode ->
+                    if (barcode.rawValue != null)
+                        model.setRequestChannelUrl(Uri.parse(barcode.rawValue))
+                }
+                .addOnFailureListener { ex ->
+                    errormsg("code scanner failed: ${ex.message}")
+                    if (requireContext().hasCameraPermission()) zxingScan()
+                    else requestPermissionAndScan()
+                }
         }
 
         binding.channelNameEdit.on(EditorInfo.IME_ACTION_DONE) {
@@ -284,16 +279,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
 
         binding.scanButton.setOnClickListener {
-            val installSource = requireContext().installSource()
-            debug("Using scanner for installSource: $installSource")
-            if (installSource != null) { // only use ML Kit when install from PlayStore
+            // only use ML Kit for play store installs
+            if (requireContext().installSource() == "com.android.vending") {
                 mlkitScan()
             } else {
-                if (requireContext().hasCameraPermission()) {
-                    zxingScan()
-                } else {
-                    requestPermissionAndScan()
-                }
+                if (requireContext().hasCameraPermission()) zxingScan()
+                else requestPermissionAndScan()
             }
         }
 
