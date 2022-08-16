@@ -19,13 +19,13 @@ import com.geeksville.analytics.DataPair
 import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.hideKeyboard
-import com.geeksville.android.isGooglePlayAvailable
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.android.hasCameraPermission
+import com.geeksville.mesh.android.installSource
 import com.geeksville.mesh.databinding.ChannelFragmentBinding
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
@@ -67,17 +67,6 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     private val binding get() = _binding!!
 
     private val model: UIViewModel by activityViewModels()
-
-    private val requestPermissionAndScanLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions.entries.all { it.value }) zxingScan()
-        }
-
-    private val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
-        if (result.contents != null) {
-            model.setRequestChannelUrl(Uri.parse(result.contents))
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -212,53 +201,60 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
     }
 
-    private fun zxingScan() {
-        debug("Starting zxing QR code scanner")
-        val zxingScan = ScanOptions()
-        zxingScan.setCameraId(0)
-        zxingScan.setPrompt("")
-        zxingScan.setBeepEnabled(false)
-        zxingScan.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-        barcodeLauncher.launch(zxingScan)
-    }
-
-    private fun requestPermissionAndScan() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.camera_required)
-            .setMessage(R.string.why_camera_required)
-            .setNeutralButton(R.string.cancel) { _, _ ->
-                debug("Camera permission denied")
-            }
-            .setPositiveButton(getString(R.string.accept)) { _, _ ->
-                requestPermissionAndScanLauncher.launch(requireContext().getCameraPermissions())
-            }
-            .show()
-    }
-
-    private fun mlkitScan() {
-        debug("Starting ML Kit QR code scanner")
-        val options = GmsBarcodeScannerOptions.Builder()
-            .setBarcodeFormats(
-                Barcode.FORMAT_QR_CODE
-            )
-            .build()
-        val scanner = GmsBarcodeScanning.getClient(requireContext(), options)
-        scanner.startScan()
-            .addOnSuccessListener { barcode ->
-                if (barcode.rawValue != null)
-                    model.setRequestChannelUrl(Uri.parse(barcode.rawValue))
-            }
-            .addOnFailureListener {
-                Snackbar.make(
-                    requireView(),
-                    R.string.channel_invalid,
-                    Snackbar.LENGTH_SHORT
-                ).show()
-            }
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
+            if (result.contents != null) {
+                model.setRequestChannelUrl(Uri.parse(result.contents))
+            }
+        }
+
+        fun zxingScan() {
+            debug("Starting zxing QR code scanner")
+            val zxingScan = ScanOptions()
+            zxingScan.setCameraId(0)
+            zxingScan.setPrompt("")
+            zxingScan.setBeepEnabled(false)
+            zxingScan.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+            barcodeLauncher.launch(zxingScan)
+        }
+
+        val requestPermissionAndScanLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                if (permissions.entries.all { it.value }) zxingScan()
+            }
+
+        fun requestPermissionAndScan() {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.camera_required)
+                .setMessage(R.string.why_camera_required)
+                .setNeutralButton(R.string.cancel) { _, _ ->
+                    debug("Camera permission denied")
+                }
+                .setPositiveButton(getString(R.string.accept)) { _, _ ->
+                    requestPermissionAndScanLauncher.launch(requireContext().getCameraPermissions())
+                }
+                .show()
+        }
+
+        fun mlkitScan() {
+            debug("Starting ML Kit code scanner")
+            val options = GmsBarcodeScannerOptions.Builder()
+                .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
+                .build()
+            val scanner = GmsBarcodeScanning.getClient(requireContext(), options)
+            scanner.startScan()
+                .addOnSuccessListener { barcode ->
+                    if (barcode.rawValue != null)
+                        model.setRequestChannelUrl(Uri.parse(barcode.rawValue))
+                }
+                .addOnFailureListener { ex ->
+                    errormsg("code scanner failed: ${ex.message}")
+                    if (requireContext().hasCameraPermission()) zxingScan()
+                    else requestPermissionAndScan()
+                }
+        }
 
         binding.channelNameEdit.on(EditorInfo.IME_ACTION_DONE) {
             requireActivity().hideKeyboard()
@@ -283,14 +279,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
 
         binding.scanButton.setOnClickListener {
-            if (isGooglePlayAvailable(requireContext())) {
+            // only use ML Kit for play store installs
+            if (requireContext().installSource() == "com.android.vending") {
                 mlkitScan()
             } else {
-                if (requireContext().hasCameraPermission()) {
-                    zxingScan()
-                } else {
-                    requestPermissionAndScan()
-                }
+                if (requireContext().hasCameraPermission()) zxingScan()
+                else requestPermissionAndScan()
             }
         }
 

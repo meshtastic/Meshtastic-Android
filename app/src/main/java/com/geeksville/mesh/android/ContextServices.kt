@@ -47,6 +47,16 @@ fun Context.hasGps(): Boolean =
     packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
 
 /**
+ * return app install source (sideload = null)
+ */
+fun Context.installSource(): String? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+        packageManager.getInstallSourceInfo(packageName).installingPackageName
+    else
+        packageManager.getInstallerPackageName(packageName)
+}
+
+/**
  * return a list of the permissions we don't have
  */
 fun Context.getMissingPermissions(perms: List<String>): Array<String> = perms.filter {

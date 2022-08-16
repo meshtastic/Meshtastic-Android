@@ -1080,6 +1080,15 @@ class MainActivity : BaseActivity(), Logging,
             R.id.show_intro -> {
                 startActivity(Intent(this, AppIntroduction::class.java))
                 return true
+            }            
+            R.id.preferences_quick_chat -> {
+                val fragmentManager: FragmentManager = supportFragmentManager
+                val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
+                val nameFragment = QuickChatSettingsFragment()
+                fragmentTransaction.add(R.id.mainActivityLayout, nameFragment)
+                fragmentTransaction.addToBackStack(null)
+                fragmentTransaction.commit()
+                return true
             }
             else -> super.onOptionsItemSelected(item)
         }

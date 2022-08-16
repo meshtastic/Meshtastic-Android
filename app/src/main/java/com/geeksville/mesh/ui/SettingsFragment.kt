@@ -61,40 +61,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private val myActivity get() = requireActivity() as MainActivity
 
-    private val associationResultLauncher = registerForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
-    ) {
-        it.data
-            ?.getParcelableExtra<BluetoothDevice>(CompanionDeviceManager.EXTRA_DEVICE)
-            ?.let { device ->
-                scanModel.onSelected(
-                    myActivity,
-                    BTScanModel.DeviceListEntry(
-                        device.name,
-                        "x${device.address}",
-                        device.bondState == BluetoothDevice.BOND_BONDED
-                    )
-                )
-            }
-    }
-
-    private val requestLocationAndBackgroundLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions.entries.all { it.value }) {
-                // Older versions of android only need Location permission
-                if (myActivity.hasBackgroundPermission()) {
-                    binding.provideLocationCheckbox.isChecked = true
-                } else requestBackgroundAndCheckLauncher.launch(myActivity.getBackgroundPermissions())
-            }
-        }
-
-    private val requestBackgroundAndCheckLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions.entries.all { it.value }) {
-                binding.provideLocationCheckbox.isChecked = true
-            }
-        }
-
     private fun doFirmwareUpdate() {
         model.meshService?.let { service ->
 
@@ -257,6 +223,41 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     }.sorted()
 
     private fun initCommonUI() {
+
+        val associationResultLauncher = registerForActivityResult(
+            ActivityResultContracts.StartIntentSenderForResult()
+        ) {
+            it.data
+                ?.getParcelableExtra<BluetoothDevice>(CompanionDeviceManager.EXTRA_DEVICE)
+                ?.let { device ->
+                    scanModel.onSelected(
+                        myActivity,
+                        BTScanModel.DeviceListEntry(
+                            device.name,
+                            "x${device.address}",
+                            device.bondState == BluetoothDevice.BOND_BONDED
+                        )
+                    )
+                }
+        }
+
+        val requestBackgroundAndCheckLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                if (permissions.entries.all { it.value }) {
+                    binding.provideLocationCheckbox.isChecked = true
+                }
+            }
+
+        val requestLocationAndBackgroundLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                if (permissions.entries.all { it.value }) {
+                    // Older versions of android only need Location permission
+                    if (myActivity.hasBackgroundPermission()) {
+                        binding.provideLocationCheckbox.isChecked = true
+                    } else requestBackgroundAndCheckLauncher.launch(myActivity.getBackgroundPermissions())
+                }
+            }
+
         // init our region spinner
         val spinner = binding.regionSpinner
         val regionAdapter =
