@@ -6,6 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ImageView
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
@@ -65,7 +68,9 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
                 val builder = createEditDialog(requireContext(), "Edit quick chat")
                 builder.nameInput.setText(action.name)
                 builder.messageInput.setText(action.message)
-                builder.modeSwitch.isChecked = action.mode == QuickChatAction.Mode.Instant
+                val isInstant = action.mode == QuickChatAction.Mode.Instant
+                builder.modeSwitch.isChecked = isInstant
+                builder.instantImage.visibility = if (isInstant) View.VISIBLE else View.INVISIBLE
 
                 builder.builder.setNegativeButton(R.string.delete) { _, _ ->
                     model.deleteQuickChatAction(action)
@@ -110,7 +115,8 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
         val builder: MaterialAlertDialogBuilder,
         val nameInput: EditText,
         val messageInput: EditText,
-        val modeSwitch: SwitchMaterial
+        val modeSwitch: SwitchMaterial,
+        val instantImage: ImageView
     ) {
         fun isNotEmpty(): Boolean = nameInput.text.isNotEmpty() and messageInput.text.isNotEmpty()
     }
@@ -137,11 +143,19 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
         val nameInput: EditText = layout.findViewById(R.id.addQuickChatName)
         val messageInput: EditText = layout.findViewById(R.id.addQuickChatMessage)
         val modeSwitch: SwitchMaterial = layout.findViewById(R.id.addQuickChatMode)
+        val instantImage: ImageView = layout.findViewById(R.id.addQuickChatInsant)
+        instantImage.visibility = if (modeSwitch.isChecked) View.VISIBLE else View.INVISIBLE
 
         var nameHasChanged = false
 
         modeSwitch.setOnCheckedChangeListener { _, _ ->
-            modeSwitch.setText(if (modeSwitch.isChecked) R.string.mode_instant else R.string.mode_append)
+            if (modeSwitch.isChecked) {
+                modeSwitch.setText(R.string.mode_instant)
+                instantImage.visibility = View.VISIBLE
+            } else {
+                modeSwitch.setText(R.string.mode_append)
+                instantImage.visibility = View.INVISIBLE
+            }
         }
 
         messageInput.addTextChangedListener { text ->
@@ -156,6 +170,6 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
 
         builder.setView(layout)
 
-        return DialogBuilder(builder, nameInput, messageInput, modeSwitch)
+        return DialogBuilder(builder, nameInput, messageInput, modeSwitch, instantImage)
     }
 }
