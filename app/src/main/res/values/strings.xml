@@ -150,7 +150,7 @@
     <string name="intro_welcome_title">Welcome to Meshtastic</string>
     <string name="intro_meshtastic_desc">Meshtastic is an open-source, off-grid, encrypted communication platform. The meshtastic radios form a mesh network and communicate using the LoRa protocol to send text messages</string>
     <string name="intro_get_started">...Let\'s get started!</string>
-    <string name="intro_started_text">Connect your meshtastic device by using either bluetooth or serial. \n\nYou may need to wake your node if they are battery powered. \n\nYou can see which devices are compatible at www.meshtastic.org/docs/hardware</string>
+    <string name="intro_started_text">Connect your meshtastic device by using either Bluetooth, Serial or WiFi. \n\nYou can see which devices are compatible at www.meshtastic.org/docs/hardware</string>
     <string name="intro_encryption_title">"Setting up encryption"</string>
     <string name="intro_encryption_text">To enable encryption, go to the channel tab and change the channel name. This will set a random key and enable AES256 encryption. \n\nTo communicate with other devices they will need to scan your QR code or follow the shared link to configure the channel settings.</string>
 </resources>
