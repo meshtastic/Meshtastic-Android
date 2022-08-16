@@ -1,7 +1,6 @@
 package com.geeksville.mesh.ui
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,12 +11,13 @@ import com.geeksville.mesh.database.entity.QuickChatAction
 
 class QuickChatActionAdapter internal constructor(
     context: Context,
-    private val onEdit: (action: QuickChatAction) -> Unit
+    private val onEdit: (action: QuickChatAction) -> Unit,
+    private val repositionAction: (fromPos: Int, toPos: Int) -> Unit,
+    private val commitAction: () -> Unit,
 ) : RecyclerView.Adapter<QuickChatActionAdapter.ActionViewHolder>(), DragManageAdapter.SwapAdapter {
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     private var actions = emptyList<QuickChatAction>()
-    private val TAG = "QuickChatAdapter"
 
     inner class ActionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val actionName: TextView = itemView.findViewById(R.id.quickChatActionName)
@@ -27,7 +27,6 @@ class QuickChatActionAdapter internal constructor(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ActionViewHolder {
         val itemView = inflater.inflate(R.layout.adapter_quick_chat_action_layout, parent, false)
-        Log.d(TAG, "Created view holder")
         return ActionViewHolder(itemView)
     }
 
@@ -35,24 +34,26 @@ class QuickChatActionAdapter internal constructor(
         val current = actions[position]
         holder.actionName.text = current.name
         holder.actionValue.text = current.message
-        holder.actionEdit.setOnClickListener{
+        holder.actionEdit.setOnClickListener {
             onEdit(current)
         }
-        Log.d(TAG, "Bound actions")
     }
 
 
     internal fun setActions(actions: List<QuickChatAction>) {
         this.actions = actions
         notifyDataSetChanged()
-        Log.d(TAG, String.format("setActions(size=%d, count=%d)", actions.size, itemCount))
     }
 
     override fun getItemCount() = actions.size
 
     override fun swapItems(fromPosition: Int, toPosition: Int) {
-        // TODO: Update data
+        repositionAction(fromPosition, toPosition)
         notifyItemMoved(fromPosition, toPosition)
+    }
+
+    override fun commitSwaps() {
+        commitAction()
     }
 
 }

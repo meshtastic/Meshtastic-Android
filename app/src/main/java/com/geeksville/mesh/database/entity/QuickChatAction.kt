@@ -5,7 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "quick_chat", indices = [Index(value=["position"], unique=true)])
+@Entity(tableName = "quick_chat")
 data class QuickChatAction(
     @PrimaryKey(autoGenerate = true) val uuid: Long,
     @ColumnInfo(name="name") val name: String,

@@ -21,6 +21,7 @@ import com.geeksville.mesh.repository.datastore.LocalConfigRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -490,9 +491,11 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun moveQuickChatAction(action: QuickChatAction, newPos: Int) {
+    fun updateActionPositions(actions: List<QuickChatAction>) {
         viewModelScope.launch(Dispatchers.Main) {
-            quickChatActionRepository.moveAction(action, newPos)
+            for (position in 0..actions.size) {
+                quickChatActionRepository.setItemPosition(actions[position].uuid, position)
+            }
         }
     }
 }

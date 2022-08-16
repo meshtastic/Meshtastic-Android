@@ -32,7 +32,7 @@ class QuickChatActionRepository @Inject constructor(private val quickChatDaoLazy
         quickChatActionDao.update(action)
     }
 
-    suspend fun moveAction(action: QuickChatAction, newPos: Int) = withContext(Dispatchers.IO) {
-        quickChatActionDao.moveAction(action, newPos)
+    suspend fun setItemPosition(uuid: Long, newPos: Int) = withContext(Dispatchers.IO) {
+        quickChatActionDao.updateActionPosition(uuid, newPos)
     }
 }

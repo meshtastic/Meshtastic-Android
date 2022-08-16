@@ -13,12 +13,13 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.geeksville.android.Logging
 import com.geeksville.mesh.R
-import com.geeksville.mesh.databinding.QuickChatSettingsFragmentBinding
 import com.geeksville.mesh.database.entity.QuickChatAction
+import com.geeksville.mesh.databinding.QuickChatSettingsFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.switchmaterial.SwitchMaterial
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.*
 
 @AndroidEntryPoint
 class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging {
@@ -27,6 +28,8 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
     private val binding get() = _binding!!
 
     private val model: UIViewModel by activityViewModels()
+
+    private lateinit var actions: List<QuickChatAction>
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,11 +42,7 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Log.d(TAG, "viewCreated")
-
         binding.quickChatSettingsCreateButton.setOnClickListener {
-            Log.d(TAG, "Create quick chat")
-
             val builder = createEditDialog(requireContext(), "New quick chat")
 
             builder.builder.setPositiveButton("Add") { view, x ->
@@ -62,7 +61,7 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
         }
 
         val quickChatActionAdapter =
-            QuickChatActionAdapter(requireContext()) { action: QuickChatAction ->
+            QuickChatActionAdapter(requireContext(), { action: QuickChatAction ->
                 val builder = createEditDialog(requireContext(), "Edit quick chat")
                 builder.nameInput.setText(action.name)
                 builder.messageInput.setText(action.message)
@@ -83,9 +82,14 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
                 }
                 val dialog = builder.builder.create()
                 dialog.show()
-            }
+            }, { fromPos, toPos ->
+                Collections.swap(actions, fromPos, toPos)
+            }, {
+                model.updateActionPositions(actions)
+            })
 
-        val dragCallback = DragManageAdapter(quickChatActionAdapter, requireContext(), ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0)
+        val dragCallback =
+            DragManageAdapter(quickChatActionAdapter, ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0)
         val helper = ItemTouchHelper(dragCallback)
 
         binding.quickChatSettingsView.apply {
@@ -94,12 +98,12 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
             helper.attachToRecyclerView(this)
         }
 
-
         model.quickChatActions.asLiveData().observe(viewLifecycleOwner) { actions ->
-            actions?.let { quickChatActionAdapter.setActions(actions) }
+            actions?.let {
+                quickChatActionAdapter.setActions(actions)
+                this.actions = actions
+            }
         }
-
-        Log.d(TAG, "viewCreation done")
     }
 
     data class DialogBuilder(
