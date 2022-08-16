@@ -33,7 +33,7 @@ class AppIntroduction : AppIntro() {
             descriptionColorRes = R.color.colorOnPrimary
         ))
         addSlide(AppIntroFragment.createInstance(
-            title = resources.getString(R.string.intro_ecryption_title),
+            title = resources.getString(R.string.intro_encryption_title),
             description = resources.getString(R.string.intro_encryption_text),
             imageDrawable = R.drawable.channel_name_image,
             backgroundColorRes = R.color.colourGrey,
