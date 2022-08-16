@@ -144,4 +144,7 @@
     <string name="resend">Resend</string>
     <string name="shutdown">Shutdown</string>
     <string name="reboot">Reboot</string>
+    <string name="message">Message</string>
+    <string name="mode_append">Append to message</string>
+    <string name="mode_instant">Instantly send</string>
 </resources>
