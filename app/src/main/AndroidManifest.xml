@@ -198,6 +198,9 @@
                     android:path="com.geeksville.mesh" /> -->
             </intent-filter>
         </receiver>
+
+        <activity
+            android:name=".AppIntroduction"/>
     </application>
 
 </manifest>
