@@ -493,7 +493,7 @@ class UIViewModel @Inject constructor(
 
     fun updateActionPositions(actions: List<QuickChatAction>) {
         viewModelScope.launch(Dispatchers.Main) {
-            for (position in 0..actions.size) {
+            for (position in actions.indices) {
                 quickChatActionRepository.setItemPosition(actions[position].uuid, position)
             }
         }

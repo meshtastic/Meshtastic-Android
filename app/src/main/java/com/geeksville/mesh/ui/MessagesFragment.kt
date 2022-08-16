@@ -307,15 +307,14 @@ class MessagesFragment : Fragment(), Logging {
 
         model.quickChatActions.asLiveData().observe(viewLifecycleOwner) { actions ->
             actions?.let {
+                // This seems kinda hacky it might be better to replace with a recycler view
                 binding.quickChatLayout.removeAllViews()
                 for (action in actions) {
                     val button = Button(context)
                     button.setText(action.name)
                     button.isEnabled = isConnected
                     if (action.mode == QuickChatAction.Mode.Instant) {
-                        //button.setBackgroundColor(Color.rgb(200, 200, 200))
                         button.backgroundTintList = ContextCompat.getColorStateList(requireActivity(), R.color.colorMyMsg)
-
                     }
                     button.setOnClickListener {
                         if (action.mode == QuickChatAction.Mode.Append) {
