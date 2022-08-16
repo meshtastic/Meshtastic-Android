@@ -404,8 +404,15 @@ class MainActivity : BaseActivity(), Logging,
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val preferences = getSharedPreferences("PREFERENCES", Context.MODE_PRIVATE)
+
         installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        if (preferences.getBoolean("app_intro_completed", false) == false) {
+            startActivity(Intent(this, AppIntroduction::class.java))
+        }
+
 
         binding = ActivityMainBinding.inflate(layoutInflater)
 
@@ -1070,6 +1077,10 @@ class MainActivity : BaseActivity(), Logging,
                 chooseMapStyle()
                 return true
             }
+            R.id.show_intro -> {
+                startActivity(Intent(this, AppIntroduction::class.java))
+                return true
+            }            
             R.id.preferences_quick_chat -> {
                 val fragmentManager: FragmentManager = supportFragmentManager
                 val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
