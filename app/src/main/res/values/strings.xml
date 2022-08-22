@@ -147,7 +147,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="show_intro">Show Introduction</string>
     <string name="intro_welcome_title">Welcome to Meshtastic</string>
-    <string name="intro_meshtastic_desc">Meshtastic is an open-source, off-grid, encrypted communication platform. The meshtastic radios form a mesh network and communicate using the LoRa protocol to send text messages</string>
+    <string name="intro_meshtastic_desc">Meshtastic is an open-source, off-grid, encrypted communication platform. The Meshtastic radios form a mesh network and communicate using the LoRa protocol to send text messages.</string>
     <string name="intro_get_started">...Let\'s get started!</string>
     <string name="intro_started_text">Connect your meshtastic device by using either Bluetooth, Serial or WiFi. \n\nYou can see which devices are compatible at www.meshtastic.org/docs/hardware</string>
     <string name="intro_encryption_title">"Setting up encryption"</string>
