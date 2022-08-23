@@ -1,1 +1,1 @@
-Lots of improvements - see meshtastic.discourse.group
+For more information visit <a href="https://meshtastic.org">meshtastic.org</a>. This application is made by volunteers. We are friendly and actively respond to forum posts with any questions you have. Post at <a href="https://meshtastic.discourse.group">meshtastic.discourse.group</a> and we'll help.
