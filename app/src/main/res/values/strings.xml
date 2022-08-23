@@ -155,4 +155,5 @@
     <string name="message">Message</string>
     <string name="mode_append">Append to message</string>
     <string name="mode_instant">Instantly send</string>
+    <string name="warning_default_psk">Empty channel names use the default encryption key (any device on %s can read your messages).</string>
 </resources>

@@ -304,49 +304,62 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 }
             } else {
                 // User just locked it, we should warn and then apply changes to radio
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(R.string.change_channel)
-                    .setMessage(R.string.are_you_sure_channel)
-                    .setNeutralButton(R.string.cancel) { _, _ ->
-                        setGUIfromModel()
+
+                model.channels.value?.primaryChannel?.let { oldPrimary ->
+                    var newSettings = oldPrimary.settings.toBuilder()
+                    val newName = binding.channelNameEdit.text.toString().trim()
+
+                    // Find the new modem config
+                    val selectedModemPresetString =
+                        binding.filledExposedDropdown.editableText.toString()
+                    var newModemPreset = getModemPreset(selectedModemPresetString)
+                    if (newModemPreset == ConfigProtos.Config.LoRaConfig.ModemPreset.UNRECOGNIZED) // Huh? didn't find it - keep same
+                        newModemPreset = oldPrimary.loraConfig.modemPreset
+
+                    // Generate a new AES256 key if the user changes channel name or the name is non-default and the settings changed
+                    val shouldUseRandomKey =
+                        newName != originalName || (newName.isNotEmpty() && newModemPreset != oldPrimary.loraConfig.modemPreset)
+                    if (shouldUseRandomKey) {
+
+                        // Install a new customized channel
+                        debug("ASSIGNING NEW AES256 KEY")
+                        val random = SecureRandom()
+                        val bytes = ByteArray(32)
+                        random.nextBytes(bytes)
+                        newSettings.name = newName.take(11) // proto max_size:12
+                        newSettings.psk = ByteString.copyFrom(bytes)
+                    } else {
+                        debug("Switching back to default channel")
+                        newSettings = Channel.default.settings.toBuilder()
                     }
-                    .setPositiveButton(getString(R.string.accept)) { _, _ ->
-                        // Generate a new channel with only the changes the user can change in the GUI
-                        model.channels.value?.primaryChannel?.let { oldPrimary ->
-                            var newSettings = oldPrimary.settings.toBuilder()
-                            val newName = binding.channelNameEdit.text.toString().trim()
 
-                            // Find the new modem config
-                            val selectedModemPresetString =
-                                binding.filledExposedDropdown.editableText.toString()
-                            var newModemPreset = getModemPreset(selectedModemPresetString)
-                            if (newModemPreset == ConfigProtos.Config.LoRaConfig.ModemPreset.UNRECOGNIZED) // Huh? didn't find it - keep same
-                                newModemPreset = oldPrimary.loraConfig.modemPreset
+                    // No matter what apply the speed selection from the user
+                    val newLoRaConfig = ConfigProtos.Config.LoRaConfig.newBuilder()
+                        .setRegion(model.region)
+                        .setModemPreset(newModemPreset)
 
-                            // Generate a new AES256 key if the user changes channel name or the name is non-default and the settings changed
-                            if (newName != originalName || (newName.isNotEmpty() && newModemPreset != oldPrimary.loraConfig.modemPreset)) {
+                    val humanName = Channel(newSettings.build(), newLoRaConfig.build()).humanName
+                    binding.channelNameEdit.setText(humanName)
 
-                                // Install a new customized channel
-                                debug("ASSIGNING NEW AES256 KEY")
-                                val random = SecureRandom()
-                                val bytes = ByteArray(32)
-                                random.nextBytes(bytes)
-                                newSettings.name = newName.take(11) // proto max_size:12
-                                newSettings.psk = ByteString.copyFrom(bytes)
-                            } else {
-                                debug("Switching back to default channel")
-                                newSettings = Channel.default.settings.toBuilder()
-                            }
+                    val message = buildString {
+                        append(getString(R.string.are_you_sure_channel))
+                        if (!shouldUseRandomKey)
+                            append("\n\n" + getString(R.string.warning_default_psk).format(humanName))
+                    }
 
-                            // No matter what apply the speed selection from the user
-                            val newLoRaConfig = ConfigProtos.Config.LoRaConfig.newBuilder()
-                                .setRegion(model.region)
-                                .setModemPreset(newModemPreset)
-
-                            installSettings(newSettings.build(),newLoRaConfig.build())
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.change_channel)
+                        .setMessage(message)
+                        .setNeutralButton(R.string.cancel) { _, _ ->
+                            setGUIfromModel()
                         }
-                    }
-                    .show()
+                        .setPositiveButton(getString(R.string.accept)) { _, _ ->
+                            // Generate a new channel with only the changes the user can change in the GUI
+
+                            installSettings(newSettings.build(), newLoRaConfig.build())
+                        }
+                        .show()
+                }
             }
 
             onEditingChanged() // update GUI on what user is allowed to edit/share
