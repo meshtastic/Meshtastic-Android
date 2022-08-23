@@ -338,16 +338,18 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                         .setRegion(model.region)
                         .setModemPreset(newModemPreset)
 
+                    val humanName = Channel(newSettings.build(), newLoRaConfig.build()).humanName
+                    binding.channelNameEdit.setText(humanName)
+
+                    val message = buildString {
+                        append(getString(R.string.are_you_sure_channel))
+                        if (!shouldUseRandomKey)
+                            append("\n\n" + getString(R.string.warning_default_psk).format(humanName))
+                    }
 
                     MaterialAlertDialogBuilder(requireContext())
                         .setTitle(R.string.change_channel)
-                        .setMessage(buildString {
-                            append(getString(R.string.are_you_sure_channel))
-                            if (!shouldUseRandomKey) {
-                                append("\n\n")
-                                append(getString(R.string.warning_default_channel))
-                            }
-                        })
+                        .setMessage(message)
                         .setNeutralButton(R.string.cancel) { _, _ ->
                             setGUIfromModel()
                         }
