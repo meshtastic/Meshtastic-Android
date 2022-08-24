@@ -126,6 +126,7 @@ class MainActivity : BaseActivity(), Logging,
         // const val REQUEST_ENABLE_BT = 10
         const val DID_REQUEST_PERM = 11
         const val RC_SIGN_IN = 12 // google signin completed
+
         // const val SELECT_DEVICE_REQUEST_CODE = 13
         const val CREATE_CSV_FILE = 14
     }
@@ -331,7 +332,7 @@ class MainActivity : BaseActivity(), Logging,
             DID_REQUEST_PERM -> {
                 // If request is cancelled, the result arrays are empty.
                 if ((grantResults.isNotEmpty() &&
-                        grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                            grantResults[0] == PackageManager.PERMISSION_GRANTED)
                 ) {
                     // Permission is granted. Continue the action or workflow
                     // in your app.
@@ -665,7 +666,13 @@ class MainActivity : BaseActivity(), Logging,
 
                                     // model.setLocalConfig(LocalOnlyProtos.LocalConfig.parseFrom(service.deviceConfig))
 
-                                    model.setChannels(ChannelSet(AppOnlyProtos.ChannelSet.parseFrom(service.channels)))
+                                    model.setChannels(
+                                        ChannelSet(
+                                            AppOnlyProtos.ChannelSet.parseFrom(
+                                                service.channels
+                                            )
+                                        )
+                                    )
 
                                     model.updateNodesFromDevice()
 
@@ -1073,14 +1080,10 @@ class MainActivity : BaseActivity(), Logging,
                 chooseLangDialog()
                 return true
             }
-            R.id.preferences_map_style -> {
-                chooseMapStyle()
-                return true
-            }
             R.id.show_intro -> {
                 startActivity(Intent(this, AppIntroduction::class.java))
                 return true
-            }            
+            }
             R.id.preferences_quick_chat -> {
                 val fragmentManager: FragmentManager = supportFragmentManager
                 val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
@@ -1193,7 +1196,10 @@ class MainActivity : BaseActivity(), Logging,
         val lang = prefs.getString("lang", "zz")
         debug("Lang from prefs: $lang")
 
-        builder.setSingleChoiceItems(languageLabels, languageValues.indexOf(lang)) { dialog, which ->
+        builder.setSingleChoiceItems(
+            languageLabels,
+            languageValues.indexOf(lang)
+        ) { dialog, which ->
             val selectedLang = languageValues[which]
             debug("Set lang pref to $selectedLang")
             editor.putString("lang", selectedLang)
@@ -1203,27 +1209,4 @@ class MainActivity : BaseActivity(), Logging,
         val dialog = builder.create()
         dialog.show()
     }
-
-    private fun chooseMapStyle() {
-        /// Prepare dialog and its items
-        val builder = MaterialAlertDialogBuilder(this)
-        builder.setTitle(getString(R.string.preferences_map_style))
-        val mapStyles by lazy { resources.getStringArray(R.array.map_styles) }
-
-        /// Load preferences and its value
-        val prefs = UIViewModel.getPreferences(this)
-        val editor: SharedPreferences.Editor = prefs.edit()
-        val mapStyleId = prefs.getInt("map_style_id", 1)
-        debug("mapStyleId from prefs: $mapStyleId")
-
-        builder.setSingleChoiceItems(mapStyles, mapStyleId) { dialog, which ->
-            debug("Set mapStyleId pref to $which")
-            editor.putInt("map_style_id", which)
-            editor.apply()
-            dialog.dismiss()
-        }
-        val dialog = builder.create()
-        dialog.show()
-    }
-
 }

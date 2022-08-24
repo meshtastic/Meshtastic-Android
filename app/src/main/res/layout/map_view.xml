@@ -8,9 +8,19 @@
     <org.osmdroid.views.MapView
         android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="110dp"
-        tools:layout_editor_absoluteY="16dp" />
+        android:layout_height="match_parent" />
 
-
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_style_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:backgroundTint="@color/design_default_color_secondary"
+        android:contentDescription="@string/style_selection"
+        android:orientation="vertical"
+        android:src="@drawable/baseline_layers_white_24dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:background="@color/design_default_color_secondary" />
 </androidx.constraintlayout.widget.ConstraintLayout>

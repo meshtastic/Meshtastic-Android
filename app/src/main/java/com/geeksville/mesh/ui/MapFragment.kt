@@ -13,8 +13,10 @@ import com.geeksville.android.Logging
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
+import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.util.formatAgo
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
@@ -31,6 +33,7 @@ import org.osmdroid.views.overlay.Marker
 @AndroidEntryPoint
 class MapFragment : ScreenFragment("Map"), Logging {
 
+    private lateinit var binding: MapViewBinding
     private lateinit var map: MapView
     private lateinit var mapController: IMapController
     private lateinit var mPrefs: SharedPreferences
@@ -54,10 +57,11 @@ class MapFragment : ScreenFragment("Map"), Logging {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        map = MapView(inflater.context)
+        binding = MapViewBinding.inflate(inflater, container, false)
+        map = binding.map
         map.setDestroyMode(false)
         map.tag = mapTag
-        return map
+        return binding.root
     }
 
     override fun onViewCreated(viewIn: View, savedInstanceState: Bundle?) {
@@ -74,6 +78,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
         val point = GeoPoint(defaultLat, defaultLong) //White House Coordinates, Washington DC
         mapController.animateTo(point, defaultZoomLevel, defaultZoomSpeed)
         if (view != null) {
+            binding.fabStyleToggle.setOnClickListener {
+                chooseMapStyle()
+            }
             model.nodeDB.nodes.value?.let { nodes ->
                 onNodesChanged(nodes.values)
             }
@@ -85,6 +92,28 @@ class MapFragment : ScreenFragment("Map"), Logging {
             }
 
         }
+    }
+
+    private fun chooseMapStyle() {
+        /// Prepare dialog and its items
+        val builder = MaterialAlertDialogBuilder(context!!)
+        builder.setTitle(getString(R.string.preferences_map_style))
+        val mapStyles by lazy { resources.getStringArray(R.array.map_styles) }
+
+        /// Load preferences and its value
+        val prefs = UIViewModel.getPreferences(context!!)
+        val editor: SharedPreferences.Editor = prefs.edit()
+        val mapStyleId = prefs.getInt("map_style_id", 1)
+        debug("mapStyleId from prefs: $mapStyleId")
+
+        builder.setSingleChoiceItems(mapStyles, mapStyleId) { dialog, which ->
+            debug("Set mapStyleId pref to $which")
+            editor.putInt("map_style_id", which)
+            editor.apply()
+            dialog.dismiss()
+        }
+        val dialog = builder.create()
+        dialog.show()
     }
 
     private fun onNodesChanged(nodes: Collection<NodeInfo>) {
