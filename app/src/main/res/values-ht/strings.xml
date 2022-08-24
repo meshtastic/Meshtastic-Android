@@ -28,7 +28,6 @@
     <string name="are_you_sure_channel">Èske ou sèten ke ou vle chanje chènn nan? Tout kominikasyon ak lòt ne elektwonik yo ap kanpe jiskaske ou pataje nouvo paramèt chènn yo.</string>
     <string name="new_channel_rcvd">Te resevwa nouvo Chènn URL</string>
     <string name="do_you_want_switch">Eke ou vle chanje a chènn \'%s\'?</string>
-    <string name="map_not_allowed">Ou gen analitik ki enfim. Malerezman founisè kat jeyografik nou an (mapbox) mande pou analitik yo pèmèt plan gratis. Se konsa, nou te etènn kat la. Si ou ta renmen wè kat jeyografik la ou pral bezwen ouvri analytics nan Paramèt (si ou enterese pou nou peye pou mapbox (oswa pou nou chanje founisè kat jeyografik la) tanpri poste nan meshtastic.discourse.group</string>
     <string name="permission_missing">Manke pèmisyon obligatwa, Meshtastic pap ka fonksyone byen. Tanpri ale bay pèmisyon an nan paramèt aplikasyon android.</string>
     <string name="radio_sleeping">Radyo t\'ap dòmi, pat ka chanje chènn</string>
     <string name="report_bug">Report Bug</string>

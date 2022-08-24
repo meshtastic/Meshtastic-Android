@@ -28,9 +28,6 @@
     <string name="are_you_sure_channel">Ben je zeker van kanaal te willen veranderen? Alle communicatie met andere nodes wordt gestopt tot je de nieuwe instellingen deelt.</string>
     <string name="new_channel_rcvd">Nieuw kanaal URL ontvangen</string>
     <string name="do_you_want_switch">Wil je veranderen naar kanaal \'%s\' ?</string>
-	<string name="map_not_allowed">Je hebt analytics uitgeschakeld. Spijtig want onze kaartprovider (mapbox) vereist ingeschakelde analytics voor het \'gratis\' plan. Daarom hebben we de kaartmodus uitgeschakeld.\n\n
-        Indien je de kaart wil zien, is het nodig analytics aan te zetten in de Instellingen (ook is het mogelijk, voorlopig, dat een herstart van de applicatie nodig is).\n\n
-        Indien je het nodig acht dat we betalen voor mapbox (of veranderen naar een andere kaartprovider), post dan een berichtje in de meshtastic.discourse.group</string>
     <string name="permission_missing">Een vereiste toelating ontbreekt, Meshtastic kan niet goed werken. Graag aanzetten in Instellingen.</string>
     <string name="radio_sleeping">Radio was in slaapmodus, kon het kanaal niet veranderen</string>
     <string name="report_bug">Rapporteer Bug</string>

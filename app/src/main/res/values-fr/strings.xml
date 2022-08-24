@@ -28,9 +28,6 @@
     <string name="are_you_sure_channel">Vous êtes sur de vouloir changer de canal? Toute communication aux autres nœuds va s\'arrêter jusqu\'à ce que vous partagez les nouveaux réglages.</string>
     <string name="new_channel_rcvd">Nouveau URL canal reçu</string>
     <string name="do_you_want_switch">Voulez-vous changer vers canal \'%s\' ?</string>
-    <string name="map_not_allowed">Vous avez désactivé les analytiques. Malheureusement notre fournisseur de carte (mapbox) a besoin d\'analytiques activés pour le plan \'gratuit\'. Désormais nous avons désactivé l\'apercu carte.\n\n
-        Si vous désirez voir la carte, vous avez besoin d\'activer les analytiques dans les Réglages (également, provisoirement, il peut être nécessaire de redémarrer l\'application).\n\n
-        Si vous trouvez que nous devons payer pour mapbox (ou changer de fournisseur de carte), veuillez poster dans meshtastic.discourse.group</string>
     <string name="permission_missing">Une permission indispensable manque, Meshtastic ne peut pas fonctionner. Veuillez modifier dans Réglages.</string>
     <string name="radio_sleeping">Radio en veille, change de Canal impossible</string>
     <string name="report_bug">Rapporter Bogue</string>

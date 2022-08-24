@@ -69,7 +69,6 @@ android {
         // doesn't like and we need to strip them (gr)
         resConfigs "cs", "de", "el", "en", "es", "fi", "fr", "ga", "ht", "it", "ja", "ko-rKR", "nl", "no", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sq", "sv", "tr", "zh"
 
-        // Needed to make mapbox work inside the firebase testlab - FIXME, alas, still doesn't work
         ndk {
             // abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }

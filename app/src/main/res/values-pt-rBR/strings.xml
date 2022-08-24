@@ -28,9 +28,6 @@
     <string name="are_you_sure_channel">Tem certeza que deseja mudar de canal? Toda comunicação com os outros dispositivos será interrompida até serem compartilhadas as novas configurações do canal.</string>
     <string name="new_channel_rcvd">Novo link de canal recebido</string>
     <string name="do_you_want_switch">Deseja mudar para o canal \'%s\'?</string>
-    <string name="map_not_allowed">O Google Analytics está desativado. Infelizmente a plataforma de mapas utilizada (Mapbox) requer este recurso ativado para uso do plano \’gratuito\’ . Tivemos que desativar a visualização do mapa.\n\n
-        Para poder visualizar o mapa será necessário ativar o Google Analytics na configuração do Android (pode ser necessário forçar o reinício do aplicativo).\n\n
-        Se tiver interesse em que o Meshtastic use um plano pago do Mapbox (ou mude para uma plataforma de mapas diferente), por favor envie uma mensagem em meshtastic.discourse.group</string>
     <string name="permission_missing">Meshtastic precisa da permissão de %s e da localização ativada para encontrar novos dispositivos via bluetooth. Você pode desativar novamente depois.</string>
     <string name="radio_sleeping">Rádio estava em suspensão (sleep), não foi possível mudar de canal</string>
     <string name="report_bug">Informar Bug</string>

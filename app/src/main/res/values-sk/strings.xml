@@ -28,9 +28,6 @@
     <string name="are_you_sure_channel">Ste si istý, že chcete zmeniť kanál? Všetka komunikácia s ostatnými vysielačmi prestane fungovať až do momentu distribúcie rovnakého nastavenia na ostatné vysielače.</string>
     <string name="new_channel_rcvd">Obdržaná nová URL kanálu.</string>
     <string name="do_you_want_switch">Chcete sa prpnúť na kanál \'%s\' ?</string>
-    <string name="map_not_allowed">You have analytics disabled. Unfortunately our map provider (mapbox) requires analytics to be allowed for their \'free\' plan. So we have turned off the map view.\n\n
-        If you would like to see the map, you\'ll need to turn on analytics in the Settings pane (also, for the time being you might need to force restart the application).\n\n
-        If you are interested in us paying for mapbox (or switching to a different map provider), please post in meshtastic.discourse.group</string>
     <string name="permission_missing">Aplikácia Meshtastic nemá pridelené požadované oprávnenie a pravdepodobne nebude fungovať správne.  Prosím povoľte tieto oprávnenia v nastaveniach aplikácie.</string>
     <string name="radio_sleeping">Vysielač je uspatý, nepodarilo sa zmeniť kanál</string>
     <string name="report_bug">Nahlásenie chyby</string>

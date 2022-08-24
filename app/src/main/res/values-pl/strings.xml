@@ -28,9 +28,6 @@
     <string name="are_you_sure_channel">Are you sure you want to change the channel? All communication with other nodes will stop until you share the new channel settings.</string>
     <string name="new_channel_rcvd">Odebrano nowy URL kanału</string>
     <string name="do_you_want_switch">Chcesz przełączyć na \'%s\' kanał?</string>
-    <string name="map_not_allowed">Masz wyłączone analizy. Niestety nasz dostawca map (mapbox) wymaga, aby analizy były dozwolone w ich planie \'free\'Dlatego wyłączyliśmy widok mapy.\n\n
-Jeśli chcesz zobaczyć mapę, musisz włączyć analitykę w panelu Ustawienia (również na razie może być konieczne wymuszenie ponownego uruchomienia aplikacji).\n\n
-Jeśli jesteś zainteresowany opłaceniem przez nas mapboxa (lub przejściem do innego dostawcy map), napisz na meshtastic.discourse.group</string>
     <string name="permission_missing">Meshtastic potrzebuje %s zezwolenie i lokalizacja muszą być włączone, aby można było znaleźć nowe urządzenia przez Bluetooth. Możesz go później wyłączyć.</string>
     <string name="radio_sleeping">Radio było w trybie uśpienia, nie mogło zmienić kanału</string>
     <string name="report_bug">Zgłoś bug</string>

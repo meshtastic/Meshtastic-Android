@@ -27,9 +27,6 @@
     <string name="are_you_sure_channel">Biztosan csatornát akar váltani? Minden kommunikáció a többi állomással megszakad amíg nem osztja meg velük az új csatorna beállításokat.</string>
     <string name="new_channel_rcvd">Új csatorna URL érkezett</string>
     <string name="do_you_want_switch">Átkapcsol a(z) \'%s\' csatornára?</string>
-    <string name="map_not_allowed">Az analitikák küldése ki van kapcsolva. Sajnos a térkép szolgáltatónk (mapbox) megköveteli az analitikák küldését számukra az \'ingyenes\' előfizetéshez. Ezért a térkép nézetet ki kellett kapcsolnunk.\n\n
-        Ha szeretné látni a térképet, ahhoz be kell kapcsolja az analitikák küldését a program beállítások oldalán (és lehet, hogy az alkalmazást is újra kell indítani hozzá).\n\n
-        Ha érdeklődne az általunk történő fizetéses megoldás iránt a mapbox felé (vagy egy másik térkép szolgáltatóra váltásról), kérem írjon bejegyzést a meshtastic.discourse.group fórumba.</string>
     <string name="permission_missing">Egy szükséges engedély hiányzik, ezért a Meshtastic nem fog tudni rendesen működni. Kérem engedélyezze az Android alkalmazások beállításai között.</string>
     <string name="radio_sleeping">A rádió alvó üzemmódban volt, ezért nem lehetett csatornát váltani.</string>
     <string name="report_bug">Hiba jelentése</string>
