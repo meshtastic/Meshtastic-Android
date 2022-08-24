@@ -140,7 +140,7 @@
     <string name="download_failed">Unable to download style pack</string>
     <string name="preferences_language">Language (restart needed)</string>
     <string name="preferences_system_default">System default</string>
-    <string name="preferences_map_style">Map style</string>
+    <string name="preferences_map_style">Map Source</string>
     <string name="resend">Resend</string>
     <string name="shutdown">Shutdown</string>
     <string name="reboot">Reboot</string>
