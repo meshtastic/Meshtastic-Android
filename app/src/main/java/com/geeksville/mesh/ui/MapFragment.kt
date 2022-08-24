@@ -2,6 +2,7 @@ package com.geeksville.mesh.ui
 
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -32,6 +33,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     private lateinit var map: MapView
     private lateinit var mapController: IMapController
+    private lateinit var mPrefs: SharedPreferences
     private val model: UIViewModel by activityViewModels()
 
 
@@ -40,13 +42,46 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val defaultZoomLevel = 6.0
     private val defaultZoomSpeed = 3000L
     private val defaultMinZoom = 3.0
+    private val prefsName = "org.andnav.osm.prefs"
+    private val prefsZoomLevelDouble = "prefsZoomLevelDouble"
+    private val prefsTileSource = "prefsTileSource"
 
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.map_view, container, false)
+        map = MapView(inflater.context)
+        map.setDestroyMode(false)
+        map.tag = "mapView"
+        return map
+    }
+
+    override fun onViewCreated(viewIn: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(viewIn, savedInstanceState)
+        Configuration.getInstance().userAgentValue =
+            BuildConfig.APPLICATION_ID // Required to get online tiles
+
+        mPrefs = context!!.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+
+        addCopyright() // Copyright is required for certain map sources
+        setupMapProperties()
+        loadOnlineTileSourceBase()
+        mapController = map.controller
+        val point = GeoPoint(defaultLat, defaultLong) //White House Coordinates, Washington DC
+        mapController.animateTo(point, defaultZoomLevel, defaultZoomSpeed)
+        if (view != null) {
+            model.nodeDB.nodes.value?.let { nodes ->
+                onNodesChanged(nodes.values)
+            }
+
+            zoomToNodes(mapController)
+            // Any times nodes change update our map
+            model.nodeDB.nodes.observe(viewLifecycleOwner) { nodes ->
+                onNodesChanged(nodes.values)
+            }
+
+        }
     }
 
     private fun onNodesChanged(nodes: Collection<NodeInfo>) {
@@ -71,56 +106,32 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     requireActivity(),
                     R.drawable.ic_twotone_person_pin_24
                 )
-                map.overlays.add(marker)
                 map.invalidate()
+                map.overlays.add(marker)
             }
             f
         }
     }
 
-    override fun onViewCreated(viewIn: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(viewIn, savedInstanceState)
-        Configuration.getInstance().userAgentValue =
-            BuildConfig.APPLICATION_ID // Required to get online tiles
-
-        map = viewIn.findViewById(R.id.map) as MapView
-
-        /**
-         * Copyright layer required
-         */
-        ////////////////////////////////////////////////////////////
+    /**
+     * Adds copyright to map depending on what source is showing
+     */
+    private fun addCopyright() {
         val copyrightNotice: String =
             map.tileProvider.tileSource.copyrightNotice
         val copyrightOverlay = CopyrightOverlay(context)
         copyrightOverlay.setCopyrightNotice(copyrightNotice)
         map.overlays.add(copyrightOverlay)
-        ///////////////////////////////////////////////////////////
-
-        setupMapProperties()
-        if (view != null) {
-            model.nodeDB.nodes.value?.let { nodes ->
-                onNodesChanged(nodes.values)
-            }
-
-            zoomToNodes(mapController)
-            // Any times nodes change update our map
-            model.nodeDB.nodes.observe(viewLifecycleOwner) { nodes ->
-                onNodesChanged(nodes.values)
-            }
-
-        }
-
-
     }
 
     private fun setupMapProperties() {
         if (this::map.isInitialized) {
-            map.minZoomLevel = defaultMinZoom
+            map.isTilesScaledToDpi =
+                true // scales the map tiles to the display density of the
+            map.minZoomLevel =
+                defaultMinZoom // sets the minimum zoom level (the furthest out you can zoom)
             map.setMultiTouchControls(true) // Sets gesture controls to true
             map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
-            mapController = map.controller
-            val point = GeoPoint(defaultLat, defaultLong) //White House Coordinates, Washington DC
-            mapController.animateTo(point, defaultZoomLevel, defaultZoomSpeed)
         }
     }
 
@@ -168,17 +179,31 @@ class MapFragment : ScreenFragment("Map"), Logging {
     }
 
     override fun onPause() {
+        val edit = mPrefs.edit()
+        edit.putString(prefsTileSource, loadOnlineTileSourceBase().name())
+        edit.putFloat(prefsZoomLevelDouble, map.zoomLevelDouble.toFloat())
+        edit.commit()
+
         map.onPause()
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
-        map.onResume()
+        val tileSourceName = mPrefs.getString(
+            prefsTileSource,
+            TileSourceFactory.DEFAULT_TILE_SOURCE.name()
+        )
+        try {
+            val tileSource = TileSourceFactory.getTileSource(tileSourceName)
+            map.setTileSource(tileSource)
+        } catch (e: IllegalArgumentException) {
+            map.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE)
+        }
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        super.onDestroyView()
         map.onDetach()
     }
 }
