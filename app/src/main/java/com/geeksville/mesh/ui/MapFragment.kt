@@ -20,6 +20,7 @@ import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
@@ -141,8 +142,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                         )
                     )
                 }
-                // TODO: zoom to the middle of all points
-                controller.animateTo(points[0])
+                map.zoomToBoundingBox(BoundingBox.fromGeoPoints(points), true)
             } else {
                 // Only one node, just zoom in on it
                 val it = nodesWithPosition[0].position!!
