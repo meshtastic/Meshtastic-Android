@@ -103,12 +103,12 @@ class MapFragment : ScreenFragment("Map"), Logging {
         /// Load preferences and its value
         val prefs = UIViewModel.getPreferences(context!!)
         val editor: SharedPreferences.Editor = prefs.edit()
-        val mapStyleId = prefs.getInt("map_style_id", 1)
-        debug("mapStyleId from prefs: $mapStyleId")
+        val mapStyleInt = prefs.getInt(mapStyleId, 1)
+        debug("mapStyleId from prefs: $mapStyleInt")
 
-        builder.setSingleChoiceItems(mapStyles, mapStyleId) { dialog, which ->
+        builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
             debug("Set mapStyleId pref to $which")
-            editor.putInt("map_style_id", which)
+            editor.putInt(mapStyleId, which)
             editor.apply()
             dialog.dismiss()
         }
@@ -159,7 +159,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private fun setupMapProperties() {
         if (this::map.isInitialized) {
             map.isTilesScaledToDpi =
-                true // scales the map tiles to the display density of the
+                true // scales the map tiles to the display density of the screen
             map.minZoomLevel =
                 defaultMinZoom // sets the minimum zoom level (the furthest out you can zoom)
             map.setMultiTouchControls(true) // Sets gesture controls to true
