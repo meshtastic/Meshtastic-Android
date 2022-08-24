@@ -39,9 +39,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private lateinit var mPrefs: SharedPreferences
     private val model: UIViewModel by activityViewModels()
 
-
-    private val defaultLat = 38.8976763
-    private val defaultLong = -77.0365298
     private val defaultMinZoom = 3.0
     private val defaultZoomLevel = 6.0
     private val defaultZoomSpeed = 3000L
@@ -75,23 +72,22 @@ class MapFragment : ScreenFragment("Map"), Logging {
         setupMapProperties()
         loadOnlineTileSourceBase()
         mapController = map.controller
-        val point = GeoPoint(defaultLat, defaultLong) //White House Coordinates, Washington DC
-        mapController.animateTo(point, defaultZoomLevel, defaultZoomSpeed)
-        if (view != null) {
-            binding.fabStyleToggle.setOnClickListener {
-                chooseMapStyle()
+        map.let {
+            if (view != null) {
+                binding.fabStyleToggle.setOnClickListener {
+                    chooseMapStyle()
+                }
+                model.nodeDB.nodes.value?.let { nodes ->
+                    onNodesChanged(nodes.values)
+                }
             }
-            model.nodeDB.nodes.value?.let { nodes ->
-                onNodesChanged(nodes.values)
-            }
-
-            zoomToNodes(mapController)
-            // Any times nodes change update our map
-            model.nodeDB.nodes.observe(viewLifecycleOwner) { nodes ->
-                onNodesChanged(nodes.values)
-            }
-
         }
+
+        // Any times nodes change update our map
+        model.nodeDB.nodes.observe(viewLifecycleOwner) { nodes ->
+            onNodesChanged(nodes.values)
+        }
+        zoomToNodes(mapController)
     }
 
     private fun chooseMapStyle() {
@@ -205,7 +201,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
             5 -> TileSourceFactory.CLOUDMADESMALLTILES
             6 -> TileSourceFactory.ChartbundleENRH
             7 -> TileSourceFactory.ChartbundleWAC
-            else -> TileSourceFactory.MAPNIK
+            else -> TileSourceFactory.CLOUDMADESMALLTILES
         }
         return mapSource
     }
