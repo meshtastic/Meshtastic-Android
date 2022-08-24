@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.activityViewModels
 import com.geeksville.android.Logging
 import com.geeksville.mesh.BuildConfig
@@ -25,7 +24,7 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.CopyrightOverlay
-import org.osmdroid.views.overlay.OverlayItem
+import org.osmdroid.views.overlay.Marker
 
 
 @AndroidEntryPoint
@@ -33,7 +32,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     private lateinit var map: MapView
     private lateinit var mapController: IMapController
-    private lateinit var nodePositions: List<GeoPoint>
     private val model: UIViewModel by activityViewModels()
 
 
@@ -59,17 +57,25 @@ class MapFragment : ScreenFragment("Map"), Logging {
          */
         // Find all nodes with valid locations
 
-        val locations = nodesWithPosition.map { node ->
+        nodesWithPosition.map { node ->
             val p = node.position!!
             debug("Showing on map: $node")
             val f = GeoPoint(p.latitude, p.longitude)
 
             node.user?.let {
-                OverlayItem("name", it.longName + " " + formatAgo(p.time), f)
+                val marker = Marker(map)
+                marker.title = it.longName + " " + formatAgo(p.time)
+                marker.setAnchor(Marker.ANCHOR_BOTTOM, Marker.ANCHOR_CENTER)
+                marker.position = f
+                marker.icon = ContextCompat.getDrawable(
+                    requireActivity(),
+                    R.drawable.ic_twotone_person_pin_24
+                )
+                map.overlays.add(marker)
+                map.invalidate()
             }
             f
         }
-        nodePositions = locations
     }
 
     override fun onViewCreated(viewIn: View, savedInstanceState: Bundle?) {
@@ -92,14 +98,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
         setupMapProperties()
         if (view != null) {
-            val markerIcon =
-                ContextCompat.getDrawable(
-                    requireActivity(),
-                    R.drawable.ic_twotone_person_pin_24
-                )!!.toBitmap()
-
-
-            // Provide initial positions
             model.nodeDB.nodes.value?.let { nodes ->
                 onNodesChanged(nodes.values)
             }
@@ -117,7 +115,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     private fun setupMapProperties() {
         if (this::map.isInitialized) {
-            map.setTileSource(loadOnlineTileSourceBase())
             map.minZoomLevel = defaultMinZoom
             map.setMultiTouchControls(true) // Sets gesture controls to true
             map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
