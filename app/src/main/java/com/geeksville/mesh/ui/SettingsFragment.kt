@@ -281,7 +281,17 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         model.localConfig.observe(viewLifecycleOwner) {
-            updateNodeInfo()
+            if (!model.isConnected()) {
+                val configCount = it.allFields.size
+                binding.scanStatusText.text = "Device config ($configCount / 7)"
+            } else updateNodeInfo()
+        }
+
+        model.channels.observe(viewLifecycleOwner) {
+            if (!model.isConnected()) {
+                val channelCount = it?.protobuf?.settingsCount ?: 0
+                binding.scanStatusText.text = "Channels ($channelCount / 8)"
+            }
         }
 
         // Also watch myNodeInfo because it might change later
