@@ -1,6 +1,5 @@
 package com.geeksville.mesh.ui
 
-
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -29,7 +28,6 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.CopyrightOverlay
 import org.osmdroid.views.overlay.Marker
 
-
 @AndroidEntryPoint
 class MapFragment : ScreenFragment("Map"), Logging {
 
@@ -40,7 +38,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val model: UIViewModel by activityViewModels()
 
     private val defaultMinZoom = 3.0
-    private val defaultZoomLevel = 6.0
+
+    private val nodeZoomLevel = 8.5
     private val defaultZoomSpeed = 3000L
     private val prefsName = "org.andnav.osm.prefs"
     private val prefsZoomLevelDouble = "prefsZoomLevelDouble"
@@ -56,7 +55,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
     ): View {
         binding = MapViewBinding.inflate(inflater, container, false)
         map = binding.map
-        map.setDestroyMode(false)
         map.tag = mapTag
         return binding.root
     }
@@ -134,7 +132,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     requireActivity(),
                     R.drawable.ic_twotone_person_pin_24
                 )
-                map.invalidate()
+
                 map.overlays.add(marker)
             }
             f
@@ -168,22 +166,28 @@ class MapFragment : ScreenFragment("Map"), Logging {
         val nodesWithPosition =
             model.nodeDB.nodes.value?.values?.filter { it.validPosition != null }
         if ((nodesWithPosition != null) && nodesWithPosition.isNotEmpty()) {
-            val unit = if (nodesWithPosition.size >= 2) {
+            if (nodesWithPosition.size >= 2) {
                 // Multiple nodes, make them all fit on the map view
                 nodesWithPosition.forEach {
                     points.add(
                         GeoPoint(
-                            it.position!!.longitude,
-                            it.position!!.latitude
+                            it.position!!.latitude,
+                            it.position!!.longitude
                         )
                     )
                 }
-                map.zoomToBoundingBox(BoundingBox.fromGeoPoints(points), true)
+                map.zoomToBoundingBox(
+                    BoundingBox.fromGeoPoints(points),
+                    true,
+                    15,
+                    nodeZoomLevel,
+                    defaultZoomSpeed
+                )
             } else {
                 // Only one node, just zoom in on it
                 val it = nodesWithPosition[0].position!!
-                points.add(GeoPoint(it.longitude, it.latitude))
-                controller.animateTo(points[0], defaultZoomLevel, defaultZoomSpeed)
+                points.add(GeoPoint(it.latitude, it.longitude))
+                controller.animateTo(points[0], nodeZoomLevel, defaultZoomSpeed)
             }
         }
     }
