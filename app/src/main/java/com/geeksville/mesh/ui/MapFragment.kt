@@ -39,12 +39,15 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     private val defaultLat = 38.8976763
     private val defaultLong = -77.0365298
+    private val defaultMinZoom = 3.0
     private val defaultZoomLevel = 6.0
     private val defaultZoomSpeed = 3000L
-    private val defaultMinZoom = 3.0
     private val prefsName = "org.andnav.osm.prefs"
     private val prefsZoomLevelDouble = "prefsZoomLevelDouble"
     private val prefsTileSource = "prefsTileSource"
+    private val mapStyleId = "map_style_id"
+    private val mapTag = "mapView"
+    private val uiPrefs = "ui-prefs"
 
 
     override fun onCreateView(
@@ -53,7 +56,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
     ): View {
         map = MapView(inflater.context)
         map.setDestroyMode(false)
-        map.tag = "mapView"
+        map.tag = mapTag
         return map
     }
 
@@ -161,8 +164,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
     }
 
     private fun loadOnlineTileSourceBase(): OnlineTileSourceBase {
-        val prefs = context?.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
-        val mapSourceId = prefs?.getInt("map_style_id", 1)
+        val prefs = context?.getSharedPreferences(uiPrefs, Context.MODE_PRIVATE)
+        val mapSourceId = prefs?.getInt(mapStyleId, 1)
         debug("mapStyleId from prefs: $mapSourceId")
         val mapSource = when (mapSourceId) {
             0 -> TileSourceFactory.MAPNIK
