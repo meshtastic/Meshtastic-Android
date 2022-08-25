@@ -93,9 +93,6 @@
         <item>OpenStreetMap</item>
         <item>USGS TOPO</item>
         <item>USGS Satellite</item>
-        <item>OpenTopo</item>
-        <item>Roads Overlay NL</item>
-        <item>Chartbundle ENRH</item>
-        <item>Chartbundle WAC</item>
+        <item>ESRI</item>
     </string-array>
 </resources>

@@ -21,8 +21,10 @@ import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.util.MapTileIndex
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.CopyrightOverlay
@@ -37,15 +39,15 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private lateinit var mPrefs: SharedPreferences
     private val model: UIViewModel by activityViewModels()
 
-    private val defaultMinZoom = 3.0
+    private lateinit var esriTileSource: OnlineTileSourceBase
 
+    private val defaultMinZoom = 3.0
     private val nodeZoomLevel = 8.5
     private val defaultZoomSpeed = 3000L
     private val prefsName = "org.andnav.osm.prefs"
     private val prefsZoomLevelDouble = "prefsZoomLevelDouble"
     private val prefsTileSource = "prefsTileSource"
     private val mapStyleId = "map_style_id"
-    private val mapTag = "mapView"
     private val uiPrefs = "ui-prefs"
 
 
@@ -149,13 +151,14 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     private fun setupMapProperties() {
         if (this::map.isInitialized) {
-            map.setDestroyMode(false)
+            map.setDestroyMode(false) // keeps map instance alive when in the background.
             map.isTilesScaledToDpi =
                 true // scales the map tiles to the display density of the screen
             map.minZoomLevel =
                 defaultMinZoom // sets the minimum zoom level (the furthest out you can zoom)
-            map.setMultiTouchControls(true) // Sets gesture controls to true
+            map.setMultiTouchControls(true) // Sets gesture controls to true.
             map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
+            setESRITileSource()
         }
     }
 
@@ -190,6 +193,30 @@ class MapFragment : ScreenFragment("Map"), Logging {
         }
     }
 
+    private fun setESRITileSource() {
+        esriTileSource = object : OnlineTileSourceBase(
+            "ESRI Clarity", 0, 18, 256, "", arrayOf(
+                "https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/WMTS/1.0.0/default028mm/MapServer/tile/"
+            ), "Esri, Maxar, Earthstar Geographics, and the GIS User Community" +
+                    "URL\n" +
+                    "View\n",
+            TileSourcePolicy(
+                2, TileSourcePolicy.FLAG_NO_BULK
+                        or TileSourcePolicy.FLAG_NO_PREVENTIVE
+                        or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
+                        or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
+            )
+        ) {
+            override fun getTileURLString(pMapTileIndex: Long): String {
+                return baseUrl + (MapTileIndex.getZoom(pMapTileIndex)
+                    .toString() + "/" + MapTileIndex.getY(pMapTileIndex)
+                        + "/" + MapTileIndex.getX(pMapTileIndex)
+                        + mImageFilenameEnding)
+            }
+
+        }
+    }
+
     private fun loadOnlineTileSourceBase(): OnlineTileSourceBase {
         val prefs = context?.getSharedPreferences(uiPrefs, Context.MODE_PRIVATE)
         val mapSourceId = prefs?.getInt(mapStyleId, 1)
@@ -198,11 +225,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
             0 -> TileSourceFactory.MAPNIK
             1 -> TileSourceFactory.USGS_TOPO
             2 -> TileSourceFactory.USGS_SAT
-            3 -> TileSourceFactory.OpenTopo
-            4 -> TileSourceFactory.ROADS_OVERLAY_NL
-            6 -> TileSourceFactory.ChartbundleENRH
-            7 -> TileSourceFactory.ChartbundleWAC
-            else -> TileSourceFactory.OpenTopo
+            3 -> esriTileSource
+            else -> TileSourceFactory.DEFAULT_TILE_SOURCE
         }
         return mapSource
     }
@@ -219,6 +243,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     override fun onResume() {
         super.onResume()
+        map.invalidate()
         val tileSourceName = mPrefs.getString(
             prefsTileSource,
             TileSourceFactory.DEFAULT_TILE_SOURCE.name()
@@ -236,9 +261,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
             TileSourceFactory.MAPNIK.name() -> TileSourceFactory.MAPNIK
             TileSourceFactory.USGS_TOPO.name() -> TileSourceFactory.USGS_TOPO
             TileSourceFactory.USGS_SAT.name() -> TileSourceFactory.USGS_SAT
-            TileSourceFactory.ROADS_OVERLAY_NL.name() -> TileSourceFactory.ROADS_OVERLAY_NL
-            TileSourceFactory.ChartbundleENRH.name() -> TileSourceFactory.ChartbundleENRH
-            TileSourceFactory.ChartbundleWAC.name() -> TileSourceFactory.ChartbundleWAC
+            esriTileSource.name() -> esriTileSource
             else -> TileSourceFactory.DEFAULT_TILE_SOURCE
         }
         return tileSourceBase
