@@ -25,7 +25,6 @@ import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.android.hasCameraPermission
-import com.geeksville.mesh.android.installSource
 import com.geeksville.mesh.databinding.ChannelFragmentBinding
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
@@ -33,9 +32,6 @@ import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.UIViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.codescanner.GmsBarcodeScannerOptions
-import com.google.mlkit.vision.codescanner.GmsBarcodeScanning
 import com.google.protobuf.ByteString
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
@@ -238,24 +234,6 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 .show()
         }
 
-        fun mlkitScan() {
-            debug("Starting ML Kit code scanner")
-            val options = GmsBarcodeScannerOptions.Builder()
-                .setBarcodeFormats(Barcode.FORMAT_QR_CODE)
-                .build()
-            val scanner = GmsBarcodeScanning.getClient(requireContext(), options)
-            scanner.startScan()
-                .addOnSuccessListener { barcode ->
-                    if (barcode.rawValue != null)
-                        model.setRequestChannelUrl(Uri.parse(barcode.rawValue))
-                }
-                .addOnFailureListener { ex ->
-                    errormsg("code scanner failed: ${ex.message}")
-                    if (requireContext().hasCameraPermission()) zxingScan()
-                    else requestPermissionAndScan()
-                }
-        }
-
         binding.channelNameEdit.on(EditorInfo.IME_ACTION_DONE) {
             requireActivity().hideKeyboard()
         }
@@ -279,13 +257,8 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
 
         binding.scanButton.setOnClickListener {
-            // only use ML Kit for play store installs
-            if (requireContext().installSource() == "com.android.vending") {
-                mlkitScan()
-            } else {
-                if (requireContext().hasCameraPermission()) zxingScan()
-                else requestPermissionAndScan()
-            }
+            if (requireContext().hasCameraPermission()) zxingScan()
+            else requestPermissionAndScan()
         }
 
         // Note: Do not use setOnCheckedChanged here because we don't want to be called when we programmatically disable editing
