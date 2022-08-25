@@ -1,7 +1,6 @@
 package com.geeksville.mesh.android
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.bluetooth.BluetoothManager
 import android.companion.CompanionDeviceManager
@@ -19,7 +18,6 @@ import com.geeksville.mesh.MainActivity
 val Context.bluetoothManager: BluetoothManager? get() = getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager?
 
 val Context.deviceManager: CompanionDeviceManager?
-    @SuppressLint("InlinedApi")
     get() {
         if (GeeksvilleApplication.currentActivity is MainActivity) {
             val activity = GeeksvilleApplication.currentActivity
@@ -47,7 +45,7 @@ fun Context.hasGps(): Boolean =
     packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
 
 /**
- * return app install source (sideload = null)
+ * return app install source (play store = com.android.vending)
  */
 fun Context.installSource(): String? {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)

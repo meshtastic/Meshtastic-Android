@@ -410,10 +410,9 @@ class MainActivity : BaseActivity(), Logging,
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        if (preferences.getBoolean("app_intro_completed", false) == false) {
+        if (!preferences.getBoolean("app_intro_completed", false)) {
             startActivity(Intent(this, AppIntroduction::class.java))
         }
-
 
         binding = ActivityMainBinding.inflate(layoutInflater)
 
