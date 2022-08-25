@@ -60,21 +60,26 @@ jobs:
         rm ./app/src/main/res/values/curfirmwareversion.xml
         echo -e "<resources>\n    <string name=\"cur_firmware_version\" translatable=\"false\">${{ env.CUR_FIRMWARE_VERSION }}</string>\n    <string name=\"short_firmware_version\" translatable=\"false\">${{ env.SHORT_FIRMWARE_VERSION }}</string>\n</resources>" > ./app/src/main/res/values/curfirmwareversion.xml
 
-    - name: Fetch firmware release
-      uses: dsaltares/fetch-gh-release-asset@master
-      with:
-        repo: meshtastic/Meshtastic-device
-        file: firmware-${{ env.CUR_FIRMWARE_VERSION }}.zip
-        version: tags/${{ steps.firmware_version.outputs.tag }}
-        target: firmware.zip
-        token: ${{ secrets.GITHUB_TOKEN }}
+#    - name: Fetch firmware release
+#      uses: dsaltares/fetch-gh-release-asset@master
+#      with:
+#        repo: meshtastic/Meshtastic-device
+#        file: firmware-${{ env.CUR_FIRMWARE_VERSION }}.zip
+#        version: tags/${{ steps.firmware_version.outputs.tag }}
+#        target: firmware.zip
+#        token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Unzip firmware into assets/firmware
+#    - name: Unzip firmware into assets/firmware
+#      run: |
+#        rm -rf ./app/src/main/assets/firmware
+#        mkdir -p ./app/src/main/assets/firmware
+#        unzip -qq ./firmware.zip 'littlefs-*.bin' 'firmware-heltec*.bin' 'firmware-tbeam*.bin' 'firmware-tlora*.bin' 'firmware-nano*.bin' -d ./app/src/main/assets/firmware
+#        rm ./firmware.zip
+
+    - name: Mock firmware assets for release
       run: |
         rm -rf ./app/src/main/assets/firmware
         mkdir -p ./app/src/main/assets/firmware
-        unzip -qq ./firmware.zip 'littlefs-*.bin' 'firmware-heltec*.bin' 'firmware-tbeam*.bin' 'firmware-tlora*.bin' 'firmware-nano*.bin' -d ./app/src/main/assets/firmware
-        rm ./firmware.zip
 
     - name: Validate Gradle wrapper
       uses: gradle/wrapper-validation-action@v1

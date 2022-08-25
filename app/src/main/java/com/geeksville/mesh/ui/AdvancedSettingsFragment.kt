@@ -116,6 +116,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
                 .setNeutralButton(R.string.cancel) { _, _ ->
                 }
                 .setPositiveButton(getString(R.string.okay)) { _, _ ->
+                    debug("User clicked requestShutdown")
                     model.requestShutdown()
                 }
                 .show()
@@ -127,6 +128,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
                 .setNeutralButton(R.string.cancel) { _, _ ->
                 }
                 .setPositiveButton(getString(R.string.okay)) { _, _ ->
+                    debug("User clicked requestReboot")
                     model.requestReboot()
                 }
                 .show()

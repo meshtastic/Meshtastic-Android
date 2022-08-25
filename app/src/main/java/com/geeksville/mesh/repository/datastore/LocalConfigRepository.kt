@@ -61,6 +61,7 @@ class LocalConfigRepository @Inject constructor(
         if (config.hasWifi()) setWifiConfig(config.wifi)
         if (config.hasDisplay()) setDisplayConfig(config.display)
         if (config.hasLora()) setLoraConfig(config.lora)
+        if (config.hasBluetooth()) setBluetoothConfig(config.bluetooth)
     }
 
     private suspend fun setDeviceConfig(config: ConfigProtos.Config.DeviceConfig) {
@@ -96,6 +97,12 @@ class LocalConfigRepository @Inject constructor(
     private suspend fun setLoraConfig(config: ConfigProtos.Config.LoRaConfig) {
         localConfigStore.updateData { preference ->
             preference.toBuilder().setLora(config).build()
+        }
+    }
+
+    private suspend fun setBluetoothConfig(config: ConfigProtos.Config.BluetoothConfig) {
+        localConfigStore.updateData { preference ->
+            preference.toBuilder().setBluetooth(config).build()
         }
     }
 

@@ -155,6 +155,7 @@
     <string name="message">Message</string>
     <string name="mode_append">Append to message</string>
     <string name="mode_instant">Instantly send</string>
+    <string name="warning_default_psk">Empty channel names use the default encryption key (any device on %s can read your messages).</string>
     <string name="factory_reset">Factory reset</string>
     <string name="are_you_sure_factory_reset">Are you sure you want to factory reset?</string>
     <string name="factory_reset_description">This will clear all device configuration you have done.</string>

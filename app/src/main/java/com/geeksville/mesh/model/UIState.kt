@@ -71,13 +71,10 @@ class UIViewModel @Inject constructor(
     private val _allPacketState = MutableStateFlow<List<Packet>>(emptyList())
     val allPackets: StateFlow<List<Packet>> = _allPacketState
 
-    private val _localConfig = MutableLiveData<LocalOnlyProtos.LocalConfig?>()
-    val localConfig: LiveData<LocalOnlyProtos.LocalConfig?> get() = _localConfig
+    private val _localConfig = MutableLiveData<LocalOnlyProtos.LocalConfig>()
+    val localConfig: LiveData<LocalOnlyProtos.LocalConfig> get() = _localConfig
 
-    private val _quickChatActions =
-        MutableStateFlow<List<com.geeksville.mesh.database.entity.QuickChatAction>>(
-            emptyList()
-        )
+    private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
     val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
 
     init {

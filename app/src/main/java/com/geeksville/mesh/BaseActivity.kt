@@ -37,12 +37,12 @@ open class BaseActivity: AppCompatActivity(), Logging {
         }
     }
 
-    private fun createLocale(language: String):Locale {
-        var langArray = language.split("_")
-        if (langArray.size == 2) {
-            return Locale(langArray[0], langArray[1]);
+    private fun createLocale(language: String): Locale {
+        val langArray = language.split("_")
+        return if (langArray.size == 2) {
+            Locale(langArray[0], langArray[1])
         } else {
-            return Locale(langArray[0]);
+            Locale(langArray[0])
         }
     }
 
