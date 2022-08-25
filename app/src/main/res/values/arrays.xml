@@ -4,33 +4,60 @@
         <item>Use Custom URI?</item>
     </array>
     <string-array name="language_entries" translatable="false">
-        <!-- zz --><item>@string/preferences_system_default</item>
-        <!-- en --><item>English</item>
-        <!-- cs --><item>Čeština</item>
-        <!-- zh --><item>Chinese 中文 </item>
-        <!-- de --><item>Deutsch</item>
-        <!-- es --><item>Español</item>
-        <!-- fr --><item>Français</item>
-        <!-- ga --><item>Gaeilge</item>
-        <!-- el --><item>Greek ελληνικά</item>
-        <!-- ht --><item>Haiti</item>
-        <!-- it --><item>Italiano</item>
-        <!-- ja --><item>Japanese 日本語</item>
-        <!-- ko-rKR --><item>Korean 한국어</item>
-        <!-- hu --><item>Magyar</item>
-        <!-- nl --><item>Nederlands</item>
-        <!-- no --><item>Norge</item>
-        <!-- pl --><item>Polski</item>
-        <!-- pt --><item>Português</item>
-        <!-- pt_BR --><item>Português do Brasil</item>
-        <!-- ro --><item>Română</item>
-        <!-- ru --><item>Russian Pусский</item>
-        <!-- sq --><item>Shqip</item>
-        <!-- sk --><item>Slovenský</item>
-        <!-- sl --><item>Slovenščina</item>
-        <!-- fi --><item>Suomi</item>
-        <!-- sv --><item>Svenska</item>
-        <!-- tr --><item>Türkçe</item>
+        <!-- zz -->
+        <item>@string/preferences_system_default</item>
+        <!-- en -->
+        <item>English</item>
+        <!-- cs -->
+        <item>Čeština</item>
+        <!-- zh -->
+        <item>Chinese 中文 </item>
+        <!-- de -->
+        <item>Deutsch</item>
+        <!-- es -->
+        <item>Español</item>
+        <!-- fr -->
+        <item>Français</item>
+        <!-- ga -->
+        <item>Gaeilge</item>
+        <!-- el -->
+        <item>Greek ελληνικά</item>
+        <!-- ht -->
+        <item>Haiti</item>
+        <!-- it -->
+        <item>Italiano</item>
+        <!-- ja -->
+        <item>Japanese 日本語</item>
+        <!-- ko-rKR -->
+        <item>Korean 한국어</item>
+        <!-- hu -->
+        <item>Magyar</item>
+        <!-- nl -->
+        <item>Nederlands</item>
+        <!-- no -->
+        <item>Norge</item>
+        <!-- pl -->
+        <item>Polski</item>
+        <!-- pt -->
+        <item>Português</item>
+        <!-- pt_BR -->
+        <item>Português do Brasil</item>
+        <!-- ro -->
+        <item>Română</item>
+        <!-- ru -->
+        <item>Russian Pусский</item>
+        <!-- sq -->
+        <item>Shqip</item>
+        <!-- sk -->
+        <item>Slovenský</item>
+        <!-- sl -->
+        <item>Slovenščina</item>
+        <!-- fi -->
+        <item>Suomi</item>
+        <!-- sv -->
+        <item>Svenska</item>
+        <!-- tr -->
+        <item>Türkçe</item>
     </string-array>
 
     <string-array name="language_values" translatable="false">
@@ -68,7 +95,6 @@
         <item>USGS Satellite</item>
         <item>OpenTopo</item>
         <item>Roads Overlay NL</item>
-        <item>Cloud Made Small Tiles</item>
         <item>Chartbundle ENRH</item>
         <item>Chartbundle WAC</item>
     </string-array>
