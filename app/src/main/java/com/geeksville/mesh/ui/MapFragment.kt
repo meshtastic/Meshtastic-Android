@@ -41,7 +41,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     private lateinit var esriTileSource: OnlineTileSourceBase
 
-    private val defaultMinZoom = 3.0
+    private val defaultMinZoom = 1.5
     private val nodeZoomLevel = 8.5
     private val defaultZoomSpeed = 3000L
     private val prefsName = "org.andnav.osm.prefs"
@@ -152,6 +152,12 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private fun setupMapProperties() {
         if (this::map.isInitialized) {
             map.setDestroyMode(false) // keeps map instance alive when in the background.
+            map.isVerticalMapRepetitionEnabled = false // disables map repetition
+            map.setScrollableAreaLimitLatitude(
+                map.overlayManager.tilesOverlay.bounds.actualNorth,
+                map.overlayManager.tilesOverlay.bounds.actualSouth,
+                0
+            ) // bounds scollable map
             map.isTilesScaledToDpi =
                 true // scales the map tiles to the display density of the screen
             map.minZoomLevel =
