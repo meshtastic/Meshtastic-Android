@@ -346,6 +346,17 @@ class UIViewModel @Inject constructor(
         meshService?.requestReboot(DataPacket.ID_LOCAL)
     }
 
+    fun requestFactoryReset() {
+        val config = _localConfig.value
+        if (config != null) {
+            val builder = config.device.toBuilder()
+            builder.factoryReset = true
+            val newConfig = ConfigProtos.Config.newBuilder()
+            newConfig.device = builder.build()
+            setDeviceConfig(newConfig.build())
+        }
+    }
+
     /**
      * Write the persisted packet data out to a CSV file in the specified location.
      */
