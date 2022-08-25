@@ -134,6 +134,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     R.drawable.ic_twotone_person_pin_24
                 )
                 map.overlays.add(marker)
+                map.invalidate()
             }
             f
         }
