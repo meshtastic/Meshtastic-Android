@@ -53,9 +53,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = MapViewBinding.inflate(inflater, container, false)
-        map = binding.map
-        map.tag = mapTag
+        binding = MapViewBinding.inflate(inflater)
         return binding.root
     }
 
@@ -63,7 +61,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         super.onViewCreated(viewIn, savedInstanceState)
         Configuration.getInstance().userAgentValue =
             BuildConfig.APPLICATION_ID // Required to get online tiles
-
+        map = viewIn.findViewById(R.id.map)
         mPrefs = context!!.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
 
         addCopyright() // Copyright is required for certain map sources
@@ -132,7 +130,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     requireActivity(),
                     R.drawable.ic_twotone_person_pin_24
                 )
-
                 map.overlays.add(marker)
             }
             f
@@ -152,6 +149,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     private fun setupMapProperties() {
         if (this::map.isInitialized) {
+            map.setDestroyMode(false)
             map.isTilesScaledToDpi =
                 true // scales the map tiles to the display density of the screen
             map.minZoomLevel =
@@ -202,10 +200,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
             2 -> TileSourceFactory.USGS_SAT
             3 -> TileSourceFactory.OpenTopo
             4 -> TileSourceFactory.ROADS_OVERLAY_NL
-            5 -> TileSourceFactory.CLOUDMADESMALLTILES
             6 -> TileSourceFactory.ChartbundleENRH
             7 -> TileSourceFactory.ChartbundleWAC
-            else -> TileSourceFactory.CLOUDMADESMALLTILES
+            else -> TileSourceFactory.OpenTopo
         }
         return mapSource
     }
@@ -227,11 +224,25 @@ class MapFragment : ScreenFragment("Map"), Logging {
             TileSourceFactory.DEFAULT_TILE_SOURCE.name()
         )
         try {
-            val tileSource = TileSourceFactory.getTileSource(tileSourceName)
-            map.setTileSource(tileSource)
+            map.setTileSource(matchOnlineTileSourceBase(tileSourceName!!))
         } catch (e: IllegalArgumentException) {
             map.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE)
         }
+        map.onResume()
+    }
+
+    private fun matchOnlineTileSourceBase(name: String): OnlineTileSourceBase {
+        val tileSourceBase = when (name) {
+            TileSourceFactory.MAPNIK.name() -> TileSourceFactory.MAPNIK
+            TileSourceFactory.USGS_TOPO.name() -> TileSourceFactory.USGS_TOPO
+            TileSourceFactory.USGS_SAT.name() -> TileSourceFactory.USGS_SAT
+            TileSourceFactory.ROADS_OVERLAY_NL.name() -> TileSourceFactory.ROADS_OVERLAY_NL
+            TileSourceFactory.ChartbundleENRH.name() -> TileSourceFactory.ChartbundleENRH
+            TileSourceFactory.ChartbundleWAC.name() -> TileSourceFactory.ChartbundleWAC
+            else -> TileSourceFactory.DEFAULT_TILE_SOURCE
+        }
+        return tileSourceBase
+
     }
 
     override fun onDestroy() {
