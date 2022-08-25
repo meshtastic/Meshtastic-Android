@@ -66,8 +66,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
         map = viewIn.findViewById(R.id.map)
         mPrefs = context!!.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
 
-        addCopyright() // Copyright is required for certain map sources
         setupMapProperties()
+        addCopyright() // Copyright is required for certain map sources
         loadOnlineTileSourceBase()
         mapController = map.controller
         map.let {
@@ -105,6 +105,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
             editor.putInt(mapStyleId, which)
             editor.apply()
             dialog.dismiss()
+            map.setTileSource(loadOnlineTileSourceBase())
         }
         val dialog = builder.create()
         dialog.show()
@@ -157,7 +158,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 map.overlayManager.tilesOverlay.bounds.actualNorth,
                 map.overlayManager.tilesOverlay.bounds.actualSouth,
                 0
-            ) // bounds scollable map
+            ) // bounds scrollable map
             map.isTilesScaledToDpi =
                 true // scales the map tiles to the display density of the screen
             map.minZoomLevel =
@@ -201,7 +202,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     private fun setESRITileSource() {
         esriTileSource = object : OnlineTileSourceBase(
-            "ESRI Clarity", 0, 18, 256, "", arrayOf(
+            "ESRI World Overview", 0, 18, 256, "", arrayOf(
                 "https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/WMTS/1.0.0/default028mm/MapServer/tile/"
             ), "Esri, Maxar, Earthstar Geographics, and the GIS User Community" +
                     "URL\n" +
