@@ -97,9 +97,6 @@
         <meta-data
             android:name="firebase_analytics_collection_enabled"
             android:value="false" />
-        <meta-data
-            android:name="com.google.mlkit.vision.DEPENDENCIES"
-            android:value="barcode_ui"/>
 
         <!-- we need bind job service for oreo -->
         <service

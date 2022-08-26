@@ -172,8 +172,6 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:19.0.1'
     // For Google Sign-In (owner name accesss)
     implementation 'com.google.android.gms:play-services-auth:20.2.0'
-    // ML Kit barcode scanning
-    implementation 'com.google.android.gms:play-services-code-scanner:16.0.0-beta2'
 
     // Add the Firebase SDK for Crashlytics.
     implementation 'com.google.firebase:firebase-crashlytics:18.2.6'
