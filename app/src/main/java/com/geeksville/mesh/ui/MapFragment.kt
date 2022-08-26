@@ -16,12 +16,14 @@ import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.MapViewBinding
+import com.geeksville.mesh.model.CustomTileSource
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.util.formatAgo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
@@ -179,7 +181,6 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 defaultMinZoom // sets the minimum zoom level (the furthest out you can zoom)
             map.setMultiTouchControls(true) // Sets gesture controls to true.
             map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
-            setESRITileSource()
         }
     }
 
@@ -210,79 +211,21 @@ class MapFragment : ScreenFragment("Map"), Logging {
         }
     }
 
-    private fun setESRITileSource() {
-        esriTileSource = object : OnlineTileSourceBase(
-            "ESRI World Overview", 0, 18, 256, "", arrayOf(
-                "https://wayback.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/WMTS/1.0.0/default028mm/MapServer/tile/"
-            ), "Esri, Maxar, Earthstar Geographics, and the GIS User Community" +
-                    "URL\n" +
-                    "View\n",
-            TileSourcePolicy(
-                2, TileSourcePolicy.FLAG_NO_BULK
-                        or TileSourcePolicy.FLAG_NO_PREVENTIVE
-                        or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
-                        or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
-            )
-        ) {
-            override fun getTileURLString(pMapTileIndex: Long): String {
-                return baseUrl + (MapTileIndex.getZoom(pMapTileIndex)
-                    .toString() + "/" + MapTileIndex.getY(pMapTileIndex)
-                        + "/" + MapTileIndex.getX(pMapTileIndex)
-                        + mImageFilenameEnding)
-            }
-
-        }
-    }
-
-    private fun loadOnlineTileSourceBase(): OnlineTileSourceBase {
+    private fun loadOnlineTileSourceBase(): ITileSource {
         val prefs = context?.getSharedPreferences(uiPrefs, Context.MODE_PRIVATE)
         val mapSourceId = prefs?.getInt(mapStyleId, 1)
         debug("mapStyleId from prefs: $mapSourceId")
-        val mapSource = when (mapSourceId) {
-            0 -> TileSourceFactory.MAPNIK
-            1 -> TileSourceFactory.USGS_TOPO
-            2 -> TileSourceFactory.USGS_SAT
-            3 -> esriTileSource
-            else -> TileSourceFactory.DEFAULT_TILE_SOURCE
-        }
-        return mapSource
+        return CustomTileSource.mTileSources[mapSourceId!!]
     }
 
     override fun onPause() {
-        val edit = mPrefs.edit()
-        edit.putString(prefsTileSource, map.tileProvider.tileSource.name())
-        edit.putFloat(prefsZoomLevelDouble, map.zoomLevelDouble.toFloat())
-        edit.commit()
-
         map.onPause()
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
-        map.invalidate()
-        val tileSourceName = mPrefs.getString(
-            prefsTileSource,
-            TileSourceFactory.DEFAULT_TILE_SOURCE.name()
-        )
-        try {
-            map.setTileSource(matchOnlineTileSourceBase(tileSourceName!!))
-        } catch (e: IllegalArgumentException) {
-            map.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE)
-        }
         map.onResume()
-    }
-
-    private fun matchOnlineTileSourceBase(name: String): OnlineTileSourceBase {
-        val tileSourceBase = when (name) {
-            TileSourceFactory.MAPNIK.name() -> TileSourceFactory.MAPNIK
-            TileSourceFactory.USGS_TOPO.name() -> TileSourceFactory.USGS_TOPO
-            TileSourceFactory.USGS_SAT.name() -> TileSourceFactory.USGS_SAT
-            esriTileSource.name() -> esriTileSource
-            else -> TileSourceFactory.DEFAULT_TILE_SOURCE
-        }
-        return tileSourceBase
-
     }
 
     override fun onDestroy() {
