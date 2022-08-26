@@ -2,6 +2,9 @@ package com.geeksville.mesh.ui
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -49,6 +52,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val prefsTileSource = "prefsTileSource"
     private val mapStyleId = "map_style_id"
     private val uiPrefs = "ui-prefs"
+    private var nodePositions = listOf<Marker>()
+    private val nodeLayer = 1
 
 
     override fun onCreateView(
@@ -67,25 +72,25 @@ class MapFragment : ScreenFragment("Map"), Logging {
         mPrefs = context!!.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
 
         setupMapProperties()
-        addCopyright() // Copyright is required for certain map sources
         loadOnlineTileSourceBase()
-        mapController = map.controller
         map.let {
             if (view != null) {
+                mapController = map.controller
                 binding.fabStyleToggle.setOnClickListener {
                     chooseMapStyle()
                 }
                 model.nodeDB.nodes.value?.let { nodes ->
                     onNodesChanged(nodes.values)
+                    drawOverlays()
                 }
             }
+            // Any times nodes change update our map
+            model.nodeDB.nodes.observe(viewLifecycleOwner) { nodes ->
+                onNodesChanged(nodes.values)
+                drawOverlays()
+            }
+            zoomToNodes(mapController)
         }
-
-        // Any times nodes change update our map
-        model.nodeDB.nodes.observe(viewLifecycleOwner) { nodes ->
-            onNodesChanged(nodes.values)
-        }
-        zoomToNodes(mapController)
     }
 
     private fun chooseMapStyle() {
@@ -118,26 +123,34 @@ class MapFragment : ScreenFragment("Map"), Logging {
          * Using the latest nodedb, generate GeoPoint
          */
         // Find all nodes with valid locations
-
-        nodesWithPosition.map { node ->
-            val p = node.position!!
-            debug("Showing on map: $node")
-            val f = GeoPoint(p.latitude, p.longitude)
-
-            node.user?.let {
-                val marker = Marker(map)
-                marker.title = it.longName + " " + formatAgo(p.time)
-                marker.setAnchor(Marker.ANCHOR_BOTTOM, Marker.ANCHOR_CENTER)
-                marker.position = f
-                marker.icon = ContextCompat.getDrawable(
-                    requireActivity(),
-                    R.drawable.ic_twotone_person_pin_24
-                )
-                map.overlays.add(marker)
-                map.invalidate()
+        fun getCurrentNodes(): List<Marker> {
+            val mrkr = nodesWithPosition.map { node ->
+                val p = node.position!!
+                debug("Showing on map: $node")
+                val f = GeoPoint(p.latitude, p.longitude)
+                lateinit var marker: MarkerWithLabel
+                node.user?.let {
+                    val label = it.longName + " " + formatAgo(p.time)
+                    marker = MarkerWithLabel(map, label)
+                    marker.title = label
+                    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                    marker.position = f
+                    marker.icon = ContextCompat.getDrawable(
+                        requireActivity(),
+                        R.drawable.ic_twotone_person_pin_24
+                    )
+                }
+                marker
             }
-            f
+            return mrkr
         }
+        nodePositions = getCurrentNodes()
+    }
+
+    private fun drawOverlays() {
+        map.overlayManager.overlays().clear()
+        addCopyright()  // Copyright is required for certain map sources
+        map.overlayManager.addAll(nodeLayer, nodePositions)
     }
 
     /**
@@ -185,13 +198,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
                         )
                     )
                 }
-                map.zoomToBoundingBox(
-                    BoundingBox.fromGeoPoints(points),
-                    true,
-                    15,
-                    nodeZoomLevel,
-                    defaultZoomSpeed
-                )
+                val box = BoundingBox.fromGeoPoints(points)
+                val point = GeoPoint(box.centerLatitude, box.centerLongitude)
+                controller.animateTo(point, nodeZoomLevel, defaultZoomSpeed)
             } else {
                 // Only one node, just zoom in on it
                 val it = nodesWithPosition[0].position!!
@@ -241,7 +250,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
     override fun onPause() {
         val edit = mPrefs.edit()
-        edit.putString(prefsTileSource, loadOnlineTileSourceBase().name())
+        edit.putString(prefsTileSource, map.tileProvider.tileSource.name())
         edit.putFloat(prefsZoomLevelDouble, map.zoomLevelDouble.toFloat())
         edit.commit()
 
@@ -279,6 +288,28 @@ class MapFragment : ScreenFragment("Map"), Logging {
     override fun onDestroy() {
         super.onDestroyView()
         map.onDetach()
+    }
+
+    private inner class MarkerWithLabel(mapView: MapView?, label: String) : Marker(mapView) {
+        val mLabel = label
+
+        override fun draw(c: Canvas, osmv: MapView?, shadow: Boolean) {
+            draw(c, osmv)
+        }
+
+        fun draw(c: Canvas, osmv: MapView?) {
+            super.draw(c, osmv, false)
+
+            val p = mPositionPixels
+
+            val textPaint = Paint()
+            textPaint.textSize = 50f
+            textPaint.color = Color.RED
+            textPaint.isAntiAlias = true
+            textPaint.textAlign = Paint.Align.CENTER
+
+            c.drawText(mLabel, (p.x - 0).toFloat(), (p.y - 60).toFloat(), textPaint)
+        }
     }
 }
 

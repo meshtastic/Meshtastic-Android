@@ -93,6 +93,6 @@
         <item>OpenStreetMap</item>
         <item>USGS TOPO</item>
         <item>USGS Satellite</item>
-        <item>ESRI</item>
+        <item>ESRI World Overview</item>
     </string-array>
 </resources>
