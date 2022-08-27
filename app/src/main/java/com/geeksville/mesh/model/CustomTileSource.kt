@@ -35,6 +35,9 @@ class CustomTileSource {
         val USGS_SAT: OnlineTileSourceBase = TileSourceFactory.USGS_SAT
         val DEFAULT_TILE_SOURCE: OnlineTileSourceBase = TileSourceFactory.DEFAULT_TILE_SOURCE
 
+        /**
+         * The order in this list must match that in the arrays.xml under map_styles
+         */
         val mTileSources: List<ITileSource> =
             listOf(MAPNIK, USGS_TOPO, USGS_SAT, ESRI_IMAGERY)
 

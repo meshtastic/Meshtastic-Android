@@ -25,11 +25,8 @@ import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.util.MapTileIndex
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.CopyrightOverlay
@@ -44,14 +41,10 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private lateinit var mPrefs: SharedPreferences
     private val model: UIViewModel by activityViewModels()
 
-    private lateinit var esriTileSource: OnlineTileSourceBase
-
     private val defaultMinZoom = 1.5
     private val nodeZoomLevel = 8.5
     private val defaultZoomSpeed = 3000L
     private val prefsName = "org.andnav.osm.prefs"
-    private val prefsZoomLevelDouble = "prefsZoomLevelDouble"
-    private val prefsTileSource = "prefsTileSource"
     private val mapStyleId = "map_style_id"
     private val uiPrefs = "ui-prefs"
     private var nodePositions = listOf<Marker>()
