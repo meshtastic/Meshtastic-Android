@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <array name="MapMenuCheckbox">
-        <item>Use Custom URI?</item>
-    </array>
     <string-array name="language_entries" translatable="false">
         <!-- zz -->
         <item>@string/preferences_system_default</item>
