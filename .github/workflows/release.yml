@@ -21,10 +21,6 @@ jobs:
       run: |
         rm ./app/google-services.json
         echo $GSERVICES > ./app/google-services.json
-        rm ./app/src/main/res/values/mapbox-token.xml
-        echo -e "<resources>\n    <string name=\"mapbox_access_token\">$MAPBOX_ACCESS_TOKEN</string>\n</resources>" > ./app/src/main/res/values/mapbox-token.xml
-        mkdir -p ~/.gradle
-        echo "MAPBOX_DOWNLOADS_TOKEN=$MAPBOX_DOWNLOADS_TOKEN" >> ~/.gradle/gradle.properties
         echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
         echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
       env:

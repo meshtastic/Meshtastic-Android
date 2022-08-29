@@ -21,6 +21,3 @@ keystore.properties
 
 # AGP profiling traces
 *.trace
-
-# Mapbox token file
-/app/src/main/res/values/mapbox-token.xml
