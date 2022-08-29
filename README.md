@@ -6,34 +6,27 @@
 [![Fiscal Contributors](https://opencollective.com/meshtastic/tiers/badge.svg?label=Fiscal%20Contributors&color=deeppink)](https://opencollective.com/meshtastic/)
 [![Vercel](https://img.shields.io/static/v1?label=Powered%20by&message=Vercel&style=flat&logo=vercel&color=000000)](https://vercel.com?utm_source=meshtastic&utm_campaign=oss)
 
-This is a tool for using Android with open-source mesh radios. For more information see our
-webpage: [meshtastic.org](https://www.meshtastic.org). If you are looking for the the device side
-code, see [here](https://github.com/meshtastic/Meshtastic-esp32).
+This is a tool for using Android with open-source mesh radios. For more information see our webpage: [meshtastic.org](https://www.meshtastic.org). If you are looking for the the device side code, see [here](https://github.com/meshtastic/Meshtastic-device).
 
 This project is currently beta testing, if you have questions or feedback
 please [Join our discussion forum](https://meshtastic.discourse.group/). We would love to hear from
 you!
 
-The production version of our application is here:
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+alt="Get it on F-Droid"
+width="49%">](https://mesh.tastic.app/fdroid/repo)
+[<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
+alt="Download at https://play.google.com/store/apps/details?id=com.geeksville.mesh]"
+width="49%">](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dgithub-android-readme)
 
-[![Download at https://play.google.com/store/apps/details?id=com.geeksville.mesh](https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png)](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dgithub-android-readme)
+If you want to join the Play Store beta program go to [this URL](https://play.google.com/apps/testing/com.geeksville.mesh) and opt-in to the alpha/beta test.
+If you encounter any problems or have questions, [post in the forum](https://meshtastic.discourse.group/) and we'll help.
 
-To join the beta program for the app go to
-this [URL](https://play.google.com/apps/testing/com.geeksville.mesh) to opt-in to the alpha/beta
-test. If you encounter any problems or have
-questions, [post in the forum](https://meshtastic.discourse.group/) and we'll help.
-
-The app is also distributed via F-Droid
-repo: [https://mesh.tastic.app/fdroid/repo](https://mesh.tastic.app/fdroid/repo)
-
-However, if you must use 'raw' APKs you can get them from
-our [github releases](https://github.com/meshtastic/Meshtastic-Android/releases). This is not
-recommended because if you manually install an APK it will not automatically update.
+However, if you must use 'raw' APKs you can get them from our [github releases](https://github.com/meshtastic/Meshtastic-Android/releases). This is not recommended because if you manually install an APK it will not automatically update.
 
 ## Build instructions
 
-If you would like to develop this application we'd love your help! These build instructions are
-brief and should be improved, please send a PR if you can.
+If you would like to develop this application we'd love your help! These build instructions are brief and should be improved, please send a PR if you can.
 
 - Use Android Studio to build/debug
 - Use "git submodule update --init --recursive" to pull in the various submodules we depend on
