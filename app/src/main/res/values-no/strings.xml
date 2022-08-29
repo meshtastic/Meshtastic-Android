@@ -28,9 +28,6 @@
     <string name="are_you_sure_channel">Er du sikker på at du vil endre kanalen? All kommunikasjon med andre noder vil stanse, intill du deler de nye kanalinstillingene.</string>
     <string name="new_channel_rcvd">Ny kanal URL mottatt</string>
     <string name="do_you_want_switch">Vil du bytte til \'%s\' kanal?</string>
-    <string name="map_not_allowed">Du har slått av analytics. Desverre krever kartleverandøren vår (mapbox) at analytics er slått på for deres \'grtis\' plan. Så vi har slått av kartvisning.\n\n
-    Hvis du vil se kartet, må du slå på analytics i instillingspanelet (også, for øyeblikket, må du kanskje tvangsstoppe og restarte applikasjonen).\n\n
-    Hvis du er interessert i at vi betaler for mapbox(eller bytter kartleveradøt), vennligst post i meshtastic.discourse.group</string>
     <string name="permission_missing">En påkrevet tilgang mangler, Meshtastic vil ikke fungere korrekt.  Vennligst slå på i Android appliksjonsinstillinger.</string>
     <string name="radio_sleeping">Radio sov.kunne ikke endre kanal</string>
     <string name="report_bug">Rapporter Feil</string>

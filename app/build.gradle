@@ -69,7 +69,6 @@ android {
         // doesn't like and we need to strip them (gr)
         resConfigs "cs", "de", "el", "en", "es", "fi", "fr", "ga", "ht", "it", "ja", "ko-rKR", "nl", "no", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sq", "sv", "tr", "zh"
 
-        // Needed to make mapbox work inside the firebase testlab - FIXME, alas, still doesn't work
         ndk {
             // abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
@@ -88,7 +87,7 @@ android {
 
     kotlinOptions {
         jvmTarget = "1.8"
-        freeCompilerArgs += [ '-opt-in=kotlin.RequiresOptIn' ]
+        freeCompilerArgs += ['-opt-in=kotlin.RequiresOptIn']
     }
     lint {
         abortOnError false
@@ -140,6 +139,9 @@ dependencies {
     kapt "androidx.room:room-compiler:$room_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
 
+    //OSMAND
+    implementation 'org.osmdroid:osmdroid-android:6.1.14'
+
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:$room_version"
 
@@ -165,9 +167,6 @@ dependencies {
     // For UART access
     // implementation 'com.google.android.things:androidthings:1.0'
     implementation 'com.github.mik3y:usb-serial-for-android:3.4.6'
-
-    // mapbox
-    implementation 'com.mapbox.maps:android:10.2.0'
 
     // location services
     implementation 'com.google.android.gms:play-services-location:19.0.1'

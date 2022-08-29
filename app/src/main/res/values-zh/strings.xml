@@ -28,9 +28,6 @@
     <string name="are_you_sure_channel">您确定要修改通信频道吗？这将会使你与其他节点断开通信. </string>
     <string name="new_channel_rcvd">收到新的频道URL</string>
     <string name="do_you_want_switch">您是否要切换到\'%s\'频道?</string>
-    <string name="map_not_allowed">您已禁用分析。 不幸的是，我们的地图提供商 (mapbox) 要求允许分析 \“免费”\计划。 所以我们关闭了地图视图.\n\n
- 如果您想查看地图，您将需要在“设置”窗格中打开分析（此外，您可能暂时需要强制重新启动应用程序）.\n\n
-   如果您对我们为 mapbox付费或切换到不同的地图提供商感兴趣，请在 meshtastic.discourse.group 中发帖</string>
     <string name="permission_missing">缺少所需的权限，Mesh网络将无法正常工作.请在应用程序设置中启用.</string>
     <string name="radio_sleeping">设备正在休眠，无法更改频道</string>
     <string name="report_bug">报告BUG</string>

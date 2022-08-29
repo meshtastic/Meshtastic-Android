@@ -32,9 +32,6 @@
     <string name="are_you_sure_channel">Are you sure you want to change the channel? All communication with other nodes will stop until you share the new channel settings.</string>
     <string name="new_channel_rcvd">New Channel URL received</string>
     <string name="do_you_want_switch">Do you want to switch to the \'%s\' channel?</string>
-    <string name="map_not_allowed">You have analytics disabled. Unfortunately our map provider (mapbox) requires analytics to be allowed for their \'free\' plan. So we have turned off the map view.\n\n
-        If you would like to see the map, you\'ll need to turn on analytics in the Settings pane (also, for the time being you might need to force restart the application).\n\n
-        If you are interested in us paying for mapbox (or switching to a different map provider), please post in meshtastic.discourse.group</string>
     <string name="permission_missing">Meshtastic needs %s permission and location must be turned on to find new devices via bluetooth. You can turn it off again afterwards.</string>
     <string name="radio_sleeping">Radio was sleeping, could not change channel</string>
     <string name="report_bug">Report Bug</string>
@@ -140,7 +137,7 @@
     <string name="download_failed">Unable to download style pack</string>
     <string name="preferences_language">Language (restart needed)</string>
     <string name="preferences_system_default">System default</string>
-    <string name="preferences_map_style">Map style</string>
+    <string name="preferences_map_style">Map Source</string>
     <string name="resend">Resend</string>
     <string name="shutdown">Shutdown</string>
     <string name="reboot">Reboot</string>

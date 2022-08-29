@@ -28,10 +28,6 @@
     <string name="are_you_sure_channel">An bhfuil tú cinnte gur mhaith leat an cainéal a athrú? Stopfaidh gach cumarsáid le nóid eile go dtí go roinnfidh tú na socruithe nua cainéil.</string>
     <string name="new_channel_rcvd">URL Cainéal nua faighte</string>
     <string name="do_you_want_switch">Ar mhaith leat aistriú go dtí an cainéal \'%s\'?</string>
-    <string name="map_not_allowed">Tá anailísíocht díchumasaithe agat. Ar an drochuair, éilíonn ár soláthraí léarscáileanna (bosca léarscáileanna) go gceadófar anailísíocht dá phlean \'saor in aisce\'.
-        Mar sin, táimid tar éis an radharc léarscáile a mhúchadh. Más mian leat an léarscáil a fheiceáil, beidh ort anailísíocht a chur ar siúl sa phána Socruithe (freisin, faoi
-        láthair, b’fhéidir go mbeidh ort iallach a chur ar an bhfeidhmchlár atosú). Má tá suim agat muid a íoc as bosca léarscáileanna (nó aistriú chuig soláthraí léarscáileanna eile),
-        abair é le do thoil i meshtastic.discourse.group.</string>
     <string name="permission_missing">Tá cead riachtanach ar iarraidh, ní bheidh Meshtastic in ann oibriú i gceart. Cumasaigh i socruithe feidhmchláir le do thoil.</string>
     <string name="radio_sleeping">Bhí an raidió ina chodladh, ní raibh sé in ann an cainéal a athrú</string>
     <string name="report_bug">Tuairiscigh fabht</string>

@@ -27,9 +27,6 @@
     <string name="are_you_sure_channel">Tem certeza que deseja mudar de canal? Todas as comunicações com outros nós serão interrompidas até que partilhe as novas configurações do canal.</string>
     <string name="new_channel_rcvd">Novo Link Recebido do Canal</string>
     <string name="do_you_want_switch">Pretende mudar para o canal \'%s\' ?</string>
-    <string name="map_not_allowed">Tem os dados analícos desativados. Infelizmente o fornecedor do mapa (mapbox) requer dos dados analíticos estejam activados para o seu plano \'gratuito\' . Por isso a visualização do mapa esta desativado.\n\n
-        Se pretender visualizar o mapa, vai necessitar de ativar os dados anaíticos no painel Configurações (também pode ser necessário forçar o reinício do aplicativo). \n\n
-        Se estiver interessado em pagarmos pelo mapbox (ou mudar para um provedor de mapas diferente), contacte através de meshtastic.discourse.group</string>
     <string name="permission_missing">Meshtastic precisa da permissão de %s e da localização ativada para encontrar novos dispositivos via bluetooth. Você pode desativar novamente depois.</string>
     <string name="radio_sleeping">O rádio estava a dormir, não conseguia mudar de canal</string>
     <string name="report_bug">Reportar Bug</string>

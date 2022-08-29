@@ -28,9 +28,6 @@
     <string name="are_you_sure_channel">Kanalı değiştirmek istediğinize emin misiniz? Yeni kanal ayarlarını paylaşana dek tüm node\'lar ile iletişim sonlanacak.</string>
     <string name="new_channel_rcvd">Yeni Kanal Adresi alındı</string>
     <string name="do_you_want_switch">\'%s\' kanalına geçmek istiyor musunuz?</string>
-    <string name="map_not_allowed">Analitik raporları kapattınız. Harita sağlayıcımız (mapbox) ücretsiz kullanım paketi için analitik raporları gerektiriyor maalesef. Bu yüzden harita görünümü pasif hale getirdik.\n\n
-    Haritayı görmek istiyorsanız, Ayarlar bölümünden analitik raporları aktif hale getirmeniz gerekiyor. (ayrıca, şu an bunun için uygulamayı tümüyle kapatıp yeniden açmanız gerekebilir).\n\n
-    Eğer mapbox için ödeme yapmamız (ya da başka bir harita sağlayıcıya geçme) konusunda ilgiliyseniz, lütfen meshtastic.discourse.group sayfasında paylaşınız.</string>
     <string name="permission_missing">Gerekli bir izin eksik, Meshtastic düzgün çalışamayacak. Lütfen Android ayarlarından izni aktif hale getiriniz.</string>
     <string name="radio_sleeping">Telsiz uyku durumundaydı, kanal değiştirilemedi</string>
     <string name="report_bug">Hata Bildir</string>

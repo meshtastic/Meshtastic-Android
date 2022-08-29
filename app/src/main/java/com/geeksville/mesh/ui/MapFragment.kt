@@ -1,680 +1,251 @@
 package com.geeksville.mesh.ui
 
-import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
-import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
-import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
+import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
-import com.geeksville.mesh.databinding.MapNotAllowedBinding
 import com.geeksville.mesh.databinding.MapViewBinding
+import com.geeksville.mesh.model.CustomTileSource
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.util.formatAgo
-import com.mapbox.bindgen.Value
-import com.mapbox.common.*
-import com.mapbox.geojson.*
-import com.mapbox.maps.*
-import com.mapbox.maps.dsl.cameraOptions
-import com.mapbox.maps.extension.style.expressions.generated.Expression
-import com.mapbox.maps.extension.style.layers.addLayer
-import com.mapbox.maps.extension.style.layers.addPersistentLayer
-import com.mapbox.maps.extension.style.layers.generated.LineLayer
-import com.mapbox.maps.extension.style.layers.generated.SymbolLayer
-import com.mapbox.maps.extension.style.layers.generated.lineLayer
-import com.mapbox.maps.extension.style.layers.properties.generated.*
-import com.mapbox.maps.extension.style.sources.addSource
-import com.mapbox.maps.extension.style.sources.generated.GeoJsonSource
-import com.mapbox.maps.extension.style.sources.generated.geoJsonSource
-import com.mapbox.maps.plugin.animation.MapAnimationOptions
-import com.mapbox.maps.plugin.animation.flyTo
-import com.mapbox.maps.plugin.gestures.OnMapLongClickListener
-import com.mapbox.maps.plugin.gestures.gestures
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import kotlin.math.cos
-import kotlin.math.sin
-
+import org.osmdroid.api.IMapController
+import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.ITileSource
+import org.osmdroid.util.BoundingBox
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.CustomZoomButtonsController
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.CopyrightOverlay
+import org.osmdroid.views.overlay.Marker
 
 @AndroidEntryPoint
 class MapFragment : ScreenFragment("Map"), Logging {
 
-
-    private val tileStore: TileStore by lazy {
-        TileStore.create().also {
-            // Set default access token for the created tile store instance
-            it.setOption(
-                TileStoreOptions.MAPBOX_ACCESS_TOKEN,
-                TileDataDomain.MAPS,
-                Value(getString(R.string.mapbox_access_token))
-            )
-        }
-    }
-
-    /**
-     * DEVELOPER OPTION TO ENABLE OFFLINE MAPS
-     * Set this variable to true to enable offline maps
-     */
-    //___________________________________________________
-    private val offlineEnabled = false
-    //___________________________________________________
-
-
-    private val resourceOptions: ResourceOptions by lazy {
-        ResourceOptions.Builder().applyDefaultParams(requireContext()).tileStore(tileStore).build()
-    }
-    private val offlineManager: OfflineManager by lazy {
-        OfflineManager(resourceOptions)
-    }
-
     private lateinit var binding: MapViewBinding
-    private lateinit var mapNotAllowedBinding: MapNotAllowedBinding
-    private var userStyleURI: String? = null
-
-    private lateinit var geoJsonSource: GeoJsonSource
-    private lateinit var lineLayer: LineLayer
-
-    private var point: Point? = null
-
+    private lateinit var map: MapView
+    private lateinit var mapController: IMapController
+    private lateinit var mPrefs: SharedPreferences
     private val model: UIViewModel by activityViewModels()
 
-    private val nodeSourceId = "node-positions"
-    private val nodeLayerId = "node-layer"
-    private val labelLayerId = "label-layer"
-    private val markerImageId = "my-marker-image"
-    private val userPointImageId = "user-image"
-    private val boundingBoxId = "bounding-box-id"
-    private val lineLayerId = "line-layer-id"
+    private val defaultMinZoom = 1.5
+    private val nodeZoomLevel = 8.5
+    private val defaultZoomSpeed = 3000L
+    private val prefsName = "org.andnav.osm.prefs"
+    private val mapStyleId = "map_style_id"
+    private val uiPrefs = "ui-prefs"
+    private var nodePositions = listOf<Marker>()
+    private val nodeLayer = 1
 
-    private var stylePackCancelable: Cancelable? = null
-    private var tilePackCancelable: Cancelable? = null
-
-    private lateinit var squareRegion: Geometry
-
-    private val userTouchPositionId = "user-touch-position"
-    private val userTouchLayerId = "user-touch-layer"
-    private var nodePositions = GeoJsonSource(GeoJsonSource.Builder(nodeSourceId))
-
-    private var tileRegionDownloadSuccess = false
-    private var stylePackDownloadSuccess = false
-    private val userTouchPosition = GeoJsonSource(GeoJsonSource.Builder(userTouchPositionId))
-
-
-    private val nodeLayer = SymbolLayer(nodeLayerId, nodeSourceId)
-        .iconImage(markerImageId)
-        .iconAnchor(IconAnchor.BOTTOM)
-        .iconAllowOverlap(true)
-
-    private val userTouchLayer = SymbolLayer(userTouchLayerId, userTouchPositionId)
-        .iconImage(userPointImageId)
-        .iconAnchor(IconAnchor.BOTTOM)
-
-    private val labelLayer = SymbolLayer(labelLayerId, nodeSourceId)
-        .textField(Expression.get("name"))
-        .textSize(12.0)
-        .textColor(Color.RED)
-        .textAnchor(TextAnchor.TOP)
-        //.textVariableAnchor(TextAnchor.TOP) //TODO investigate need for variable anchor vs normal anchor
-        .textJustify(TextJustify.AUTO)
-        .textAllowOverlap(true)
-
-
-    private fun onNodesChanged(nodes: Collection<NodeInfo>) {
-        val nodesWithPosition = nodes.filter { it.validPosition != null }
-
-        /**
-         * Using the latest nodedb, generate geojson features
-         */
-        fun getCurrentNodes(): FeatureCollection {
-            // Find all nodes with valid locations
-
-            val locations = nodesWithPosition.map { node ->
-                val p = node.position!!
-                debug("Showing on map: $node")
-
-                val f = Feature.fromGeometry(
-                    Point.fromLngLat(
-                        p.longitude,
-                        p.latitude
-                    )
-                )
-                node.user?.let {
-                    f.addStringProperty("name", it.longName + " " + formatAgo(p.time))
-                }
-                f
-            }
-
-            return FeatureCollection.fromFeatures(locations)
-        }
-        nodePositions.featureCollection(getCurrentNodes())
-    }
-
-    private fun zoomToNodes(map: MapboxMap) {
-        val points: MutableList<Point> = mutableListOf()
-        val nodesWithPosition =
-            model.nodeDB.nodes.value?.values?.filter { it.validPosition != null }
-        if (nodesWithPosition != null && nodesWithPosition.isNotEmpty()) {
-            val unit = if (nodesWithPosition.size >= 2) {
-
-                // Multiple nodes, make them all fit on the map view
-                nodesWithPosition.forEach {
-                    points.add(
-                        Point.fromLngLat(
-                            it.position!!.longitude,
-                            it.position!!.latitude
-                        )
-                    )
-                }
-                map.cameraForCoordinates(points)
-            } else {
-                // Only one node, just zoom in on it
-                val it = nodesWithPosition[0].position!!
-                points.add(Point.fromLngLat(it.longitude, it.latitude))
-                map.cameraForCoordinates(points)
-                cameraOptions {
-                    this.zoom(9.0)
-                    this.center(points[0])
-                }
-            }
-            map.flyTo(
-                unit,
-                MapAnimationOptions.mapAnimationOptions { duration(1000) })
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // We can't allow mapbox if user doesn't want analytics
-        return if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
-            // Mapbox Access token
-            binding = MapViewBinding.inflate(inflater, container, false)
-            binding.root
-        } else {
-            mapNotAllowedBinding = MapNotAllowedBinding.inflate(inflater, container, false)
-            mapNotAllowedBinding.root
-        }
+        binding = MapViewBinding.inflate(inflater)
+        return binding.root
     }
-
-    var mapView: MapView? = null
-
-
-    private fun removeOfflineRegions() {
-        // Remove the tile region with the tile region ID.
-        // Note this will not remove the downloaded tile packs, instead, it will just mark the tileset
-        // not a part of a tile region. The tiles still exists as a predictive cache in TileStore.
-        tileStore.removeTileRegion(TILE_REGION_ID)
-
-        // Set the disk quota to zero, so that tile regions are fully evicted
-        // when removed. The TileStore is also used when `ResourceOptions.isLoadTilePacksFromNetwork`
-        // is `true`, and also by the Navigation SDK.
-        // This removes the tiles that do not belong to any tile regions.
-        tileStore.setOption(TileStoreOptions.DISK_QUOTA, Value(0))
-
-        // Remove the style pack with the style url.
-        // Note this will not remove the downloaded style pack, instead, it will just mark the resources
-        // not a part of the existing style pack. The resources still exists as disk cache.
-
-        if (userStyleURI != null) {
-            offlineManager.removeStylePack(userStyleURI!!)
-            mapView?.getMapboxMap()?.loadStyleUri(loadMapStyleFromPref())
-        } else {
-            offlineManager.removeStylePack(mapView?.getMapboxMap()?.getStyle()?.styleURI.toString())
-            mapView?.getMapboxMap()?.loadStyleUri(loadMapStyleFromPref())
-        }
-        MapboxMap.clearData(resourceOptions) {
-            it.error?.let { error ->
-                debug(error)
-            }
-        }
-        updateStylePackDownloadProgress(0, 0)
-        updateTileRegionDownloadProgress(0, 0)
-    }
-
-    /**
-     * Mapbox native code can crash painfully if you ever call a mapbox view function while the view is not actively being show
-     */
-    private val isViewVisible: Boolean
-        get() = mapView?.isVisible == true
 
     override fun onViewCreated(viewIn: View, savedInstanceState: Bundle?) {
         super.onViewCreated(viewIn, savedInstanceState)
+        Configuration.getInstance().userAgentValue =
+            BuildConfig.APPLICATION_ID // Required to get online tiles
+        map = viewIn.findViewById(R.id.map)
+        mPrefs = context!!.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
 
-        // We might not have a real mapview if running with analytics
-        if ((requireContext().applicationContext as GeeksvilleApplication).isAnalyticsAllowed) {
-//            binding.fabStyleToggle.setOnClickListener {
-//                //TODO: Setup Style menu for satellite view, street view, & outdoor view
-//            }
-            binding.downloadRegion.setOnClickListener {
-                // Display menu for download region
-                this.downloadRegionDialogFragment()
-            }
-
-            val vIn = viewIn.findViewById<MapView>(R.id.mapView)
-            mapView = vIn
-            mapView?.let { v ->
-
-                // Each time the pane is shown start fetching new map info (we do this here instead of
-                // onCreate because getMapAsync can die in native code if the view goes away)
-
-                val map = v.getMapboxMap()
-                if (view != null) { // it might have gone away by now
-                    val markerIcon =
-                        ContextCompat.getDrawable(
-                            requireActivity(),
-                            R.drawable.ic_twotone_person_pin_24
-                        )!!.toBitmap()
-
-                    map.loadStyleUri(loadMapStyleFromPref()) {
-                        if (it.isStyleLoaded) {
-                            it.addSource(nodePositions)
-                            it.addImage(markerImageId, markerIcon)
-                            it.addPersistentLayer(nodeLayer)
-                            it.addPersistentLayer(labelLayer)
-                        }
-                    }
-
-                    v.gestures.rotateEnabled = false
-                    if (offlineEnabled) {
-                        v.gestures.addOnMapLongClickListener(this.longClick)
-                    }
-
-                    // Provide initial positions
-                    model.nodeDB.nodes.value?.let { nodes ->
-                        onNodesChanged(nodes.values)
-                    }
+        setupMapProperties()
+        loadOnlineTileSourceBase()
+        map.let {
+            if (view != null) {
+                mapController = map.controller
+                binding.fabStyleToggle.setOnClickListener {
+                    chooseMapStyle()
                 }
-                // Any times nodes change update our map
-                model.nodeDB.nodes.observe(viewLifecycleOwner, Observer { nodes ->
-                    if (isViewVisible)
-                        onNodesChanged(nodes.values)
-                })
-                //viewAnnotationManager = v.viewAnnotationManager
-                zoomToNodes(map)
+                model.nodeDB.nodes.value?.let { nodes ->
+                    onNodesChanged(nodes.values)
+                    drawOverlays()
+                }
             }
+            // Any times nodes change update our map
+            model.nodeDB.nodes.observe(viewLifecycleOwner) { nodes ->
+                onNodesChanged(nodes.values)
+                drawOverlays()
+            }
+            zoomToNodes(mapController)
         }
     }
 
-    private fun downloadOfflineRegion(styleURI: String = "") {
+    private fun chooseMapStyle() {
+        /// Prepare dialog and its items
+        val builder = MaterialAlertDialogBuilder(context!!)
+        builder.setTitle(getString(R.string.preferences_map_style))
+        val mapStyles by lazy { resources.getStringArray(R.array.map_styles) }
 
-        val style = styleURI.ifEmpty {
-            mapView?.getMapboxMap()
-                ?.getStyle()?.styleURI.toString()
+        /// Load preferences and its value
+        val prefs = UIViewModel.getPreferences(context!!)
+        val editor: SharedPreferences.Editor = prefs.edit()
+        val mapStyleInt = prefs.getInt(mapStyleId, 1)
+        debug("mapStyleId from prefs: $mapStyleInt")
+
+        builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
+            debug("Set mapStyleId pref to $which")
+            editor.putInt(mapStyleId, which)
+            editor.apply()
+            dialog.dismiss()
+            map.setTileSource(loadOnlineTileSourceBase())
         }
-
-        if (OfflineSwitch.getInstance().isMapboxStackConnected) {
-
-            // By default, users may download up to 250MB of data for offline use without incurring
-            // additional charges. This limit is subject to change during the beta.
-
-            // - - - - - - - -
-
-            // 1. Create style package with loadStylePack() call.
-
-            // A style pack (a Style offline package) contains the loaded style and its resources: loaded
-            // sources, fonts, sprites. Style packs are identified with their style URI.
-
-            // Style packs are stored in the disk cache database, but their resources are not subject to
-            // the data eviction algorithm and are not considered when calculating the disk cache size.
-
-            binding.stylePackDownloadProgress.visibility = View.VISIBLE
-            binding.stylePackText.visibility = View.VISIBLE
-            stylePackCancelable = offlineManager.loadStylePack(
-                style,
-                // Build Style pack load options
-                StylePackLoadOptions.Builder()
-                    .glyphsRasterizationMode(GlyphsRasterizationMode.IDEOGRAPHS_RASTERIZED_LOCALLY)
-                    .metadata(Value(STYLE_PACK_METADATA))
-                    .build(),
-                { progress ->
-                    updateStylePackDownloadProgress(
-                        progress.completedResourceCount,
-                        progress.requiredResourceCount,
-                    )
-                },
-                { expected ->
-                    if (expected.isValue) {
-                        expected.value?.let { stylePack ->
-                            // Style pack download finishes successfully
-                            debug("StylePack downloaded: $stylePack")
-                            if (binding.stylePackDownloadProgress.progress == binding.stylePackDownloadProgress.max) {
-                                debug("Style pack download complete")
-                                binding.stylePackText.visibility = View.INVISIBLE
-                                binding.stylePackDownloadProgress.visibility = View.INVISIBLE
-                                stylePackDownloadSuccess = true
-                            } else {
-                                debug("Waiting for tile region download to be finished.")
-                            }
-                        }
-                    }
-                    expected.error?.let {
-                        stylePackDownloadSuccess = false
-                        // Handle error occurred during the style pack download.
-                        binding.stylePackText.visibility = View.INVISIBLE
-                        binding.stylePackDownloadProgress.visibility = View.INVISIBLE
-                        debug("StylePackError: $it")
-                    }
-                }
-            )
-
-            // - - - - - - - -
-
-            // 2. Create a tile region with tiles for the outdoors style
-
-            // A Tile Region represents an identifiable geographic tile region with metadata, consisting of
-            // a set of tiles packs that cover a given area (a polygon). Tile Regions allow caching tiles
-            // packs in an explicit way: By creating a Tile Region, developers can ensure that all tiles in
-            // that region will be downloaded and remain cached until explicitly deleted.
-
-            // Creating a Tile Region requires supplying a description of the area geometry, the tilesets
-            // and zoom ranges of the tiles within the region.
-
-            // The tileset descriptor encapsulates the tile-specific data, such as which tilesets, zoom ranges,
-            // pixel ratio etc. the cached tile packs should have. It is passed to the Tile Store along with
-            // the region area geometry to load a new Tile Region.
-
-            // The OfflineManager is responsible for creating tileset descriptors for the given style and zoom range.
-
-            val tilesetDescriptor = offlineManager.createTilesetDescriptor(
-                TilesetDescriptorOptions.Builder()
-                    .styleURI(style)
-                    .minZoom(0)
-                    .maxZoom(10)
-                    .build()
-            )
-            // Use the the default TileStore to load this region. You can create custom TileStores are are
-            // unique for a particular file path, i.e. there is only ever one TileStore per unique path.
-
-            // Note that the TileStore path must be the same with the TileStore used when initialise the MapView.
-            binding.tilePackText.visibility = View.VISIBLE
-            binding.tilePackDownloadProgress.visibility = View.VISIBLE
-            tilePackCancelable = tileStore.loadTileRegion(
-                TILE_REGION_ID, // Make this dynamic
-                TileRegionLoadOptions.Builder()
-                    .geometry(squareRegion)
-                    .descriptors(listOf(tilesetDescriptor))
-                    .metadata(Value(TILE_REGION_METADATA))
-                    .acceptExpired(true)
-                    .networkRestriction(NetworkRestriction.NONE)
-                    .build(),
-                { progress ->
-                    updateTileRegionDownloadProgress(
-                        progress.completedResourceCount,
-                        progress.requiredResourceCount,
-                    )
-                }
-            ) { expected ->
-                if (expected.isValue) {
-                    // Tile pack download finishes successfully
-                    expected.value?.let { region ->
-                        debug("TileRegion downloaded: $region")
-                        if (binding.tilePackDownloadProgress.progress == binding.tilePackDownloadProgress.max) {
-                            debug("Finished tilepack download")
-                            binding.tilePackDownloadProgress.visibility = View.INVISIBLE
-                            binding.tilePackText.visibility = View.INVISIBLE
-                            tileRegionDownloadSuccess = true
-
-                        } else {
-                            debug("Waiting for style pack download to be finished.")
-                        }
-                    }
-                }
-                expected.error?.let {
-                    tileRegionDownloadSuccess = false
-                    // Handle error occurred during the tile region download.
-                    binding.tilePackDownloadProgress.visibility = View.INVISIBLE
-                    binding.tilePackText.visibility = View.INVISIBLE
-                    debug("TileRegionError: $it")
-                }
-            }
-        } else {
-            Toast.makeText(
-                requireContext(),
-                R.string.download_region_connection_alert,
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
-
-    /**
-     * OnLongClick of the map set a position marker.
-     * If a user long-clicks again, the position of the first marker will be updated
-     */
-    private val longClick = OnMapLongClickListener {
-        val userDefinedPointImg =
-            ContextCompat.getDrawable(
-                requireActivity(),
-                R.drawable.baseline_location_on_white_24dp
-            )!!
-                .toBitmap()
-        point = Point.fromLngLat(it.longitude(), it.latitude())
-
-
-        /*
-        Calculate region from user specified position.
-        5 miles NE,NW,SE,SW from user center point.
-        25 Sq Mile Region
-        */
-        //____________________________________________________________________________________________
-        val topRight = calculateCoordinate(45.0, point?.latitude()!!, point?.longitude()!!)
-        val topLeft = calculateCoordinate(135.0, point?.latitude()!!, point?.longitude()!!)
-        val bottomLeft = calculateCoordinate(225.0, point?.latitude()!!, point?.longitude()!!)
-        val bottomRight = calculateCoordinate(315.0, point?.latitude()!!, point?.longitude()!!)
-        //____________________________________________________________________________________________
-
-        val pointList = listOf(topRight, topLeft, bottomLeft, bottomRight, topRight)
-
-        squareRegion = LineString.fromLngLats(pointList)
-
-        geoJsonSource = geoJsonSource(boundingBoxId) {
-            geometry(squareRegion)
-        }
-        lineLayer = lineLayer(lineLayerId, boundingBoxId) {
-            lineCap(LineCap.ROUND)
-            lineJoin(LineJoin.MITER)
-            lineOpacity(0.7)
-            lineWidth(1.5)
-            lineColor("#888")
-        }
-
-        if (point != null) {
-            binding.downloadRegion.visibility = View.VISIBLE
-        }
-
-        mapView?.getMapboxMap()?.getStyle()?.let { style ->
-            userTouchPosition.geometry(point!!)
-            if (!style.styleLayerExists(userTouchLayerId)) {
-                style.addImage(userPointImageId, userDefinedPointImg)
-                style.addSource(userTouchPosition)
-                style.addSource(geoJsonSource)
-                style.addPersistentLayer(lineLayer)
-                style.addLayer(userTouchLayer)
-            } else {
-                style.removeStyleLayer(lineLayerId)
-                style.removeStyleSource(boundingBoxId)
-                style.addSource(geoJsonSource)
-                style.addLayer(lineLayer)
-            }
-        }
-        mapView?.getMapboxMap().also { mapboxMap ->
-            mapboxMap?.flyTo(
-                CameraOptions.Builder()
-                    .zoom(ZOOM)
-                    .center(point)
-                    .build(), MapAnimationOptions.mapAnimationOptions { duration(1000) })
-        }
-        return@OnMapLongClickListener true
-    }
-
-    /**
-     * Find's coordinates (Lat,Lon) a specified distance from given (lat,lon) using degrees to determine direction
-     * @param degrees degree of desired position from current position. (center point is 0,0 and desired point, top right corner, is 45 degrees from 0,0)
-     * @param lat latitude position (current position lat)
-     * @param lon longitude position (current position lon)
-     * @return Point
-     */
-    private fun calculateCoordinate(degrees: Double, lat: Double, lon: Double): Point {
-        val deg = Math.toRadians(degrees)
-        val distancesInMeters =
-            1609.344 * 2.5 // 1609.344 is 1 mile in meters -> multiplier will be user specified up to a max of 10
-        val radiusOfEarthInMeters = 6378137
-        val x =
-            lon + (180 / Math.PI) * (distancesInMeters / radiusOfEarthInMeters) * cos(
-                deg
-            )
-        val y =
-            lat + (180 / Math.PI) * (distancesInMeters / radiusOfEarthInMeters) * sin(deg)
-        return Point.fromLngLat(x, y)
-    }
-
-    private fun updateStylePackDownloadProgress(
-        progress: Long,
-        max: Long,
-    ) {
-        binding.stylePackDownloadProgress.max = max.toInt()
-        binding.stylePackDownloadProgress.progress = progress.toInt()
-    }
-
-    private fun updateTileRegionDownloadProgress(
-        progress: Long,
-        max: Long,
-    ) {
-        binding.tilePackDownloadProgress.max = max.toInt()
-        binding.tilePackDownloadProgress.progress = progress.toInt()
-    }
-
-    companion object {
-        private const val ZOOM = 12.5
-        private const val TILE_REGION_ID = "tile-region"
-        private const val STYLE_PACK_METADATA = "outdoor-style-pack"
-        private const val TILE_REGION_METADATA = "outdoor-tile-region"
-    }
-
-    private fun downloadRegionDialogFragment() {
-        val mapDownloadView = layoutInflater.inflate(R.layout.dialog_map_download, null)
-        val uri = mapDownloadView.findViewById<EditText>(R.id.uri)
-        val downloadRegionDialogFragment = AlertDialog.Builder(context)
-
-
-        downloadRegionDialogFragment.setView(mapDownloadView)
-            .setTitle(R.string.download_region_dialog_title)
-            .setMultiChoiceItems(
-                R.array.MapMenuCheckbox,
-                null,
-            ) { _, _, isChecked ->
-                if (isChecked) {
-                    if (!uri.isVisible) {
-                        uri.visibility =
-                            View.VISIBLE
-                    }
-                } else {
-                    if (uri.isVisible) {
-                        uri.visibility =
-                            View.GONE
-                    }
-                }
-            }
-            .setPositiveButton(
-                R.string.save_btn, null
-            )
-            .setNeutralButton(R.string.view_region_btn) { _, _ ->
-                if (tileRegionDownloadSuccess && stylePackDownloadSuccess) {
-                    mapView?.getMapboxMap().also {
-                        it?.flyTo(
-                            CameraOptions.Builder()
-                                .zoom(ZOOM)
-                                .center(point)
-                                .build(),
-                            MapAnimationOptions.mapAnimationOptions { duration(1000) })
-                        if (userStyleURI != null) {
-                            it?.loadStyleUri(userStyleURI.toString())
-                        } else {
-                            it?.getStyle().also { style ->
-                                style?.removeStyleImage(userPointImageId)
-                            }
-                        }
-                    }
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        R.string.no_download_region_alert,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
-            .setNegativeButton(
-                R.string.cancel
-            ) { dialog, _ ->
-                mapView?.getMapboxMap()?.getStyle { style ->
-                    point = null
-                    userStyleURI = null
-                    style.removeStyleLayer(lineLayerId)
-                    style.removeStyleSource(boundingBoxId)
-                    style.removeStyleLayer(userTouchLayerId)
-                    style.removeStyleSource(userTouchPositionId)
-                    style.removeStyleImage(userPointImageId)
-                }
-                binding.downloadRegion.visibility = View.INVISIBLE
-
-                removeOfflineRegions() //TODO: Add to offline manager window
-                dialog.cancel()
-            }
-
-        val dialog = downloadRegionDialogFragment.create()
+        val dialog = builder.create()
         dialog.show()
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-            if (uri.isVisible) {
-                if (uri.text.isNotEmpty()) {
-                    // Save URI
-                    userStyleURI = uri.text.toString()
-                    uri.setText("") // clear text
+    }
 
-                    downloadOfflineRegion(userStyleURI!!)
-                    dialog.dismiss()
-                } else {
-                    Toast.makeText(
-                        requireContext(),
-                        R.string.style_uri_empty_alert,
-                        Toast.LENGTH_SHORT
-                    ).show()
+    private fun onNodesChanged(nodes: Collection<NodeInfo>) {
+        val nodesWithPosition = nodes.filter { it.validPosition != null }
+
+        /**
+         * Using the latest nodedb, generate GeoPoint
+         */
+        // Find all nodes with valid locations
+        fun getCurrentNodes(): List<Marker> {
+            val mrkr = nodesWithPosition.map { node ->
+                val p = node.position!!
+                debug("Showing on map: $node")
+                val f = GeoPoint(p.latitude, p.longitude)
+                lateinit var marker: MarkerWithLabel
+                node.user?.let {
+                    val label = it.longName + " " + formatAgo(p.time)
+                    marker = MarkerWithLabel(map, label)
+                    marker.title = label
+                    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                    marker.position = f
+                    marker.icon = ContextCompat.getDrawable(
+                        requireActivity(),
+                        R.drawable.ic_twotone_person_pin_24
+                    )
                 }
+                marker
+            }
+            return mrkr
+        }
+        nodePositions = getCurrentNodes()
+    }
+
+    private fun drawOverlays() {
+        map.overlayManager.overlays().clear()
+        addCopyright()  // Copyright is required for certain map sources
+        map.overlayManager.addAll(nodeLayer, nodePositions)
+    }
+
+    /**
+     * Adds copyright to map depending on what source is showing
+     */
+    private fun addCopyright() {
+        val copyrightNotice: String =
+            map.tileProvider.tileSource.copyrightNotice
+        val copyrightOverlay = CopyrightOverlay(context)
+        copyrightOverlay.setCopyrightNotice(copyrightNotice)
+        map.overlays.add(copyrightOverlay)
+    }
+
+    private fun setupMapProperties() {
+        if (this::map.isInitialized) {
+            map.setDestroyMode(false) // keeps map instance alive when in the background.
+            map.isVerticalMapRepetitionEnabled = false // disables map repetition
+            map.setScrollableAreaLimitLatitude(
+                map.overlayManager.tilesOverlay.bounds.actualNorth,
+                map.overlayManager.tilesOverlay.bounds.actualSouth,
+                0
+            ) // bounds scrollable map
+            map.isTilesScaledToDpi =
+                true // scales the map tiles to the display density of the screen
+            map.minZoomLevel =
+                defaultMinZoom // sets the minimum zoom level (the furthest out you can zoom)
+            map.setMultiTouchControls(true) // Sets gesture controls to true.
+            map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
+        }
+    }
+
+    private fun zoomToNodes(controller: IMapController) {
+        val points: MutableList<GeoPoint> = mutableListOf()
+        val nodesWithPosition =
+            model.nodeDB.nodes.value?.values?.filter { it.validPosition != null }
+        if ((nodesWithPosition != null) && nodesWithPosition.isNotEmpty()) {
+            if (nodesWithPosition.size >= 2) {
+                // Multiple nodes, make them all fit on the map view
+                nodesWithPosition.forEach {
+                    points.add(
+                        GeoPoint(
+                            it.position!!.latitude,
+                            it.position!!.longitude
+                        )
+                    )
+                }
+                val box = BoundingBox.fromGeoPoints(points)
+                val point = GeoPoint(box.centerLatitude, box.centerLongitude)
+                controller.animateTo(point, nodeZoomLevel, defaultZoomSpeed)
             } else {
-                downloadOfflineRegion()
-                dialog.dismiss()
+                // Only one node, just zoom in on it
+                val it = nodesWithPosition[0].position!!
+                points.add(GeoPoint(it.latitude, it.longitude))
+                controller.animateTo(points[0], nodeZoomLevel, defaultZoomSpeed)
             }
         }
     }
 
-    private fun loadMapStyleFromPref():String {
-        val prefs = context?.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
-        val mapStyleId = prefs?.getInt("map_style_id", 1)
-        debug("mapStyleId from prefs: $mapStyleId")
-        val mapStyle = when (mapStyleId) {
-            0 -> Style.MAPBOX_STREETS
-            1 -> Style.OUTDOORS
-            2 -> Style.LIGHT
-            3 -> Style.DARK
-            4 -> Style.SATELLITE
-            5 -> Style.SATELLITE_STREETS
-            6 -> Style.TRAFFIC_DAY
-            7 -> Style.TRAFFIC_NIGHT
-            else -> Style.OUTDOORS
-        }
-        return mapStyle
+    private fun loadOnlineTileSourceBase(): ITileSource {
+        val prefs = context?.getSharedPreferences(uiPrefs, Context.MODE_PRIVATE)
+        val mapSourceId = prefs?.getInt(mapStyleId, 1)
+        debug("mapStyleId from prefs: $mapSourceId")
+        return CustomTileSource.mTileSources[mapSourceId!!]
     }
 
+    override fun onPause() {
+        map.onPause()
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        map.onResume()
+    }
+
+    override fun onDestroy() {
+        super.onDestroyView()
+        map.onDetach()
+    }
+
+    private inner class MarkerWithLabel(mapView: MapView?, label: String) : Marker(mapView) {
+        val mLabel = label
+
+        override fun draw(c: Canvas, osmv: MapView?, shadow: Boolean) {
+            draw(c, osmv)
+        }
+
+        fun draw(c: Canvas, osmv: MapView?) {
+            super.draw(c, osmv, false)
+
+            val p = mPositionPixels
+
+            val textPaint = Paint()
+            textPaint.textSize = 50f
+            textPaint.color = Color.RED
+            textPaint.isAntiAlias = true
+            textPaint.textAlign = Paint.Align.CENTER
+
+            c.drawText(mLabel, (p.x - 0).toFloat(), (p.y - 60).toFloat(), textPaint)
+        }
+    }
 }
 
 

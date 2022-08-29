@@ -28,9 +28,6 @@
     <string name="are_you_sure_channel">Ești sigur că vrei să schimbi canalul? Toate comunicațiile cu alte noduri vor fi oprite până când setezi aceleași detalii pe alte noduri.</string>
     <string name="new_channel_rcvd">Am primit un nou URL de canal</string>
     <string name="do_you_want_switch">Vrei să faci schimbul \'%s\' canalului?</string>
-    <string name="map_not_allowed">Ai analiticele dezactivate. Din nefericire providerul hărților (mapbox) necesită analitice în planul \'gratuit\'. Așadar am dezactivat harta.\n\n
-        Dacă vrei să vezi harta, trebuie să pornești analiticele în panoul de setări (s-ar putea să fii nevoit să restartezi aplicația).\n\n
-        Dacă sugerezi să plătim pentru mapbox (sau să schimbăm providerul hărții), te rog, postează în meshtastic.discourse.group</string>
     <string name="permission_missing">O permisiune necesară lipsește, Meshtastic nu o să funcționeze corespunzător.  Te rugăm activează-o în setările Android.</string>
     <string name="radio_sleeping">Nu am putut să schimb canalul deoarece dispozitivul era în sleep mode</string>
     <string name="report_bug">Raportează Bug</string>

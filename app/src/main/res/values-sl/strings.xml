@@ -28,7 +28,6 @@
     <string name="are_you_sure_channel">Ali ste prepričani, da želite spremeniti kanal? Vsa komunikacija z drugimi vozlišči se ustavi, dokler ne delite novih nastavitev kanala.</string>
     <string name="new_channel_rcvd">Prejet je bil novi URL kanala</string>
     <string name="do_you_want_switch">Ali želite preklopiti na kanal \'%s\' ?</string>
-    <string name="map_not_allowed">Vaša analitika je onemogočena. Na žalost naš ponudnik zemljevidov (mapbox) zahteva analitiko, ki je dovoljena za njihov "brezplačen" načrt. Torej smo izključili prikaz zemljevida. \n\nČe želite videti zemljevid, boste morali v podoknu z nastavitvami vklopiti analitiko (morda boste morali znova zagnati aplikacijo). \n\nČe vas zanima, kako plačujemo za karto (ali preklopiti na drugega ponudnika zemljevidov), pošljite sporočilo v meshtastic.discourse.group</string>
     <string name="permission_missing">Manjka zahtevano dovoljenje: Meshtastic ne bo mogel pravilno delovati. Omogočite v nastavitvah aplikacije za Android.</string>
     <string name="radio_sleeping">Radio je "spal", sprememba kanala ni bila izvedena.</string>
     <string name="report_bug">Prijavi napako</string>
