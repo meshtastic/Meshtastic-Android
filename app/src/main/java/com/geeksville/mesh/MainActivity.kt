@@ -658,7 +658,7 @@ class MainActivity : BaseActivity(), Logging,
                             if (!isUpdating) {
                                 val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
 
-                                if (curVer < MeshService.minFirmwareVersion)
+                                if (curVer < MeshService.minDeviceVersion)
                                     showAlert(R.string.firmware_too_old, R.string.firmware_old)
                                 else {
                                     // If our app is too old/new, we probably don't understand the new DeviceConfig messages, so we don't read them until here

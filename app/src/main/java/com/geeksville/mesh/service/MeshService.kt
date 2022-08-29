@@ -110,7 +110,7 @@ class MeshService : Service(), Logging {
 
         /** The minimmum firmware version we know how to talk to. We'll still be able to talk to 1.0 firmwares but only well enough to ask them to firmware update
          */
-        val minFirmwareVersion = DeviceVersion("1.3.0")
+        val minDeviceVersion = DeviceVersion("1.3.0")
     }
 
     enum class ConnectionState {
@@ -374,6 +374,8 @@ class MeshService : Service(), Logging {
     ///
 
     val deviceVersion get() = DeviceVersion(myNodeInfo?.firmwareVersion ?: "")
+    val appVersion get() = BuildConfig.VERSION_CODE
+    val minAppVersion get() = myNodeInfo?.minAppVersion ?: 0
 
     /// Map a nodenum to a node, or throw an exception if not found
     private fun toNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: throw NodeNumNotFoundException(
@@ -1341,8 +1343,8 @@ class MeshService : Service(), Logging {
 
                 sendAnalytics()
 
-                if (deviceVersion < minFirmwareVersion) {
-                    info("Device firmware is too old, faking config so firmware update can occur")
+                if (deviceVersion < minDeviceVersion || appVersion < minAppVersion) {
+                    info("Device firmware or app is too old, faking config so firmware update can occur")
                     clearLocalConfig()
                     onHasSettings()
                 } else requestChannel(0) // Now start reading channels
@@ -1443,7 +1445,7 @@ class MeshService : Service(), Logging {
     /** Send our current radio config to the device
      */
     private fun sendDeviceConfig(c: ConfigProtos.Config) {
-        if (deviceVersion < minFirmwareVersion) return
+        if (deviceVersion < minDeviceVersion) return
         debug("Setting new radio config!")
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
             setConfig = c
