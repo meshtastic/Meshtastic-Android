@@ -1230,6 +1230,7 @@ class MeshService : Service(), Logging {
                     if (messageTimeoutMsec == 0) 5 * 60 * 1000 else messageTimeoutMsec, // constants from current device code
                     minAppVersion,
                     maxChannels,
+                    hasWifi,
                     channelUtilization,
                     airUtilTx
                 )

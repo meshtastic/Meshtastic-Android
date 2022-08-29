@@ -17,6 +17,7 @@ data class MyNodeInfo(
     val messageTimeoutMsec: Int,
     val minAppVersion: Int,
     val maxChannels: Int,
+    val hasWifi: Boolean,
     val channelUtilization: Float,
     val airUtilTx: Float
 ) : Parcelable {
@@ -34,6 +35,7 @@ data class MyNodeInfo(
         parcel.readInt(),
         parcel.readInt(),
         parcel.readInt(),
+        parcel.readByte() != 0.toByte(),
         parcel.readFloat(),
         parcel.readFloat()
         )
@@ -49,6 +51,7 @@ data class MyNodeInfo(
         parcel.writeInt(messageTimeoutMsec)
         parcel.writeInt(minAppVersion)
         parcel.writeInt(maxChannels)
+        parcel.writeByte(if (hasWifi) 1 else 0)
         parcel.writeFloat(channelUtilization)
         parcel.writeFloat(airUtilTx)
     }
