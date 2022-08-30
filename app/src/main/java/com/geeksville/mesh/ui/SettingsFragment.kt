@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.companion.CompanionDeviceManager
 import android.content.*
@@ -485,6 +486,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             if (!myActivity.hasScanPermission()) {
                 myActivity.requestScanPermission()
             } else {
+                checkBTEnabled()
                 if (!scanModel.hasCompanionDeviceApi) checkLocationEnabled()
                 scanLeDevice()
             }
@@ -507,6 +509,15 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         if (myActivity.hasGps() && !gpsEnabled) {
             warn("Telling user we need need location access")
+            showSnackbar(warningReason)
+        }
+    }
+
+    private fun checkBTEnabled(
+        warningReason: String = getString(R.string.requires_bluetooth)
+    ) {
+        if (bluetoothViewModel.enabled.value == false) {
+            warn("We need bluetooth")
             showSnackbar(warningReason)
         }
     }
