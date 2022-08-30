@@ -19,9 +19,9 @@ import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.repository.datastore.LocalConfigRepository
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -214,6 +214,16 @@ class UIViewModel @Inject constructor(
                 setDeviceConfig(newConfig.build())
             }
         }
+
+    fun gpsString(pos: Position): String {
+        return when (_localConfig.value?.display?.gpsFormat) {
+            ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat.GpsFormatDec -> GPSFormat.dec(pos)
+            ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat.GpsFormatDMS -> GPSFormat.toDMS(pos)
+            ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat.GpsFormatUTM -> GPSFormat.toUTM(pos)
+            ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat.GpsFormatMGRS -> GPSFormat.toMGRS(pos)
+            else -> GPSFormat.dec(pos)
+        }
+    }
 
     @Suppress("MemberVisibilityCanBePrivate")
     val isRouter: Boolean =

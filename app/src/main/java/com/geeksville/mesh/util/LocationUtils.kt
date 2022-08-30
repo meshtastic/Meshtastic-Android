@@ -1,6 +1,10 @@
 package com.geeksville.mesh.util
 
 import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.Position
+import mil.nga.grid.features.Point
+import mil.nga.mgrs.MGRS
+import mil.nga.mgrs.utm.UTM
 import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.atan2
@@ -15,6 +19,42 @@ import kotlin.math.sin
  * text of this license is included in the Gaggle source, see assets/manual/gpl-2.0.txt.
  ******************************************************************************/
 
+object GPSFormat {
+    fun dec(p: Position): String {
+        return String.format("%.5f %.5f", p.latitude, p.longitude).replace(",", ".")
+    }
+
+    fun toDMS(p: Position): String {
+        val lat = degreesToDMS(p.latitude, true)
+        val lon = degreesToDMS(p.longitude, false)
+        fun string(a: Array<String>) = String.format("%s°%s'%.5s\"%s", a[0], a[1], a[2], a[3])
+        return string(lat) + " " + string(lon)
+    }
+
+    fun toUTM(p: Position): String {
+        val UTM = UTM.from(Point.point(p.longitude, p.latitude))
+        return String.format(
+            "%s%s %.6s %.7s",
+            UTM.zone,
+            UTM.toMGRS().band,
+            UTM.easting,
+            UTM.northing
+        )
+    }
+
+    fun toMGRS(p: Position): String {
+        val MGRS = MGRS.from(Point.point(p.longitude, p.latitude))
+        return String.format(
+            "%s%s %s%s %05d %05d",
+            MGRS.zone,
+            MGRS.band,
+            MGRS.column,
+            MGRS.row,
+            MGRS.easting,
+            MGRS.northing
+        )
+    }
+}
 
 /**
  * Format as degrees, minutes, secs
