@@ -17,8 +17,6 @@
     <string name="your_name">Je Naam</string>
     <string name="analytics_okay">Anonieme gebruikersnaam en foutrapporten.</string>
     <string name="looking_for_meshtastic_devices">Zoekt Meshtastic apparaten…</string>
-    <string name="requires_bluetooth">Deze applicatie vereist bluetooth toegang. Geef toegang in android settings.</string>
-    <string name="error_bluetooth">Fout - deze app vereist bluetooth</string>
     <string name="starting_pairing">Start koppeling</string>
     <string name="pairing_failed">Koppeling mislukt</string>
     <string name="url_for_join">Een URL om te verbinden met een Meshtastic net</string>

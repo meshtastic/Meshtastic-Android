@@ -17,8 +17,6 @@
     <string name="your_name">Emri juaj</string>
     <string name="analytics_okay">Statistikat e përdorimit dhe raportet e keq funksionimit mblidhen në mënyre krejtësisht anonime</string>
     <string name="looking_for_meshtastic_devices">Në kërkim për paisje Meshtastic…</string>
-    <string name="requires_bluetooth">Ky aplikacion kërkon leje për ndezjen e Bluetooth, ju lutem jepni të drejten e aksesit tek menuja e konfigurimit të android.</string>
-    <string name="error_bluetooth">Errore - Ky aplikacion kërkon paisjen Bluetooth</string>
     <string name="starting_pairing">Duke filluar lidhjen</string>
     <string name="pairing_failed">Lidhja nuk përfundoi me sukses</string>
     <string name="url_for_join">Një adresë URL për tu lidhur me rrjetin Meshtastic</string>

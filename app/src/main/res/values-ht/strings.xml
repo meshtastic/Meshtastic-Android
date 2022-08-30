@@ -17,8 +17,6 @@
     <string name="your_name">Non Ou</string>
     <string name="analytics_okay">Statistik itilizasyon anonim ak rapò aksidantèl.</string>
     <string name="looking_for_meshtastic_devices">Ap chache pou aparèy Meshtastic…</string>
-    <string name="requires_bluetooth">Aplikasyon sa a mande pou aksè Bloutouf. Tanpri bay aksè nan paramèt android.</string>
-    <string name="error_bluetooth">Erè - aplikasyon sa a mande pou Bloutouf</string>
     <string name="starting_pairing">Kòmanse koneksyon</string>
     <string name="pairing_failed">Koneksyon echwe</string>
     <string name="url_for_join">Yon URL pou rantre nan yon mesh Meshtastic</string>

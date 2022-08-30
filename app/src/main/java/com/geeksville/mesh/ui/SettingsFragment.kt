@@ -1,6 +1,5 @@
 package com.geeksville.mesh.ui
 
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.companion.CompanionDeviceManager
 import android.content.*
@@ -495,6 +494,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     // If the user has not turned on location access throw up a warning
     private fun checkLocationEnabled(
+        // Default warning valid only for classic bluetooth scan
         warningReason: String = getString(R.string.location_disabled_warning)
     ) {
         val locationManager =
@@ -514,11 +514,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     }
 
     private fun checkBTEnabled(
-        warningReason: String = getString(R.string.requires_bluetooth)
+        warningReason: String = getString(R.string.bluetooth_disabled)
     ) {
         if (bluetoothViewModel.enabled.value == false) {
-            warn("We need bluetooth")
-            showSnackbar(warningReason)
+            warn("Telling user bluetooth is disabled")
+            Toast.makeText(requireContext(), warningReason, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -563,14 +563,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         myActivity.registerReceiver(updateProgressReceiver, updateProgressFilter)
 
-        // Warn user if BLE is disabled
-        if (scanModel.selectedBluetooth && bluetoothViewModel.enabled.value == false) {
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.error_bluetooth),
-                Toast.LENGTH_LONG
-            ).show()
-        } else if (binding.provideLocationCheckbox.isChecked)
+        // Warn user if BLE device is selected but BLE disabled
+        if (scanModel.selectedBluetooth) checkBTEnabled()
+
+        // Warn user if provide location is selected but location disabled
+        if (binding.provideLocationCheckbox.isChecked)
             checkLocationEnabled(getString(R.string.location_disabled))
     }
 }

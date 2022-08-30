@@ -17,8 +17,6 @@
     <string name="your_name">Tu nombre</string>
     <string name="analytics_okay">Estadísticas de uso anónimo e informes de fallos.</string>
     <string name="looking_for_meshtastic_devices">Buscando dispositivos Meshtastic…</string>
-    <string name="requires_bluetooth">Esta aplicación requiere acceso a bluetooth. Por favor conceda acceso en la configuración de Android.</string>
-    <string name="error_bluetooth">Error - esta aplicación requiere bluetooth</string>
     <string name="starting_pairing">Iniciando emparejamiento</string>
     <string name="pairing_failed">Emparejamiento fallido</string>
     <string name="url_for_join">Una URL para unirse a una malla Meshtastic</string>

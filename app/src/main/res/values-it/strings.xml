@@ -17,8 +17,6 @@
     <string name="your_name">Il tuo nome</string>
     <string name="analytics_okay">Le statistiche di utilizzo e i rapporti sugli arresti anomali sono anonimi</string>
     <string name="looking_for_meshtastic_devices">Ricerca di dispositivi Meshtastic…</string>
-    <string name="requires_bluetooth">Questa applicazione richiede l\'accesso Bluetooth, si prega di dare l\'accesso nelle impostazioni android.</string>
-    <string name="error_bluetooth">Errore - questa applicazione richiede il bluetooth</string>
     <string name="starting_pairing">Inizio abbinamento</string>
     <string name="pairing_failed">Abbinamento non riusciuto</string>
     <string name="url_for_join">Una URL per unirti a una rete Meshtastic</string>

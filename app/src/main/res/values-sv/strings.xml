@@ -17,8 +17,6 @@
     <string name="your_name">Ditt Namn</string>
     <string name="analytics_okay">Anonym användningsstatistik och kraschrapporter.</string>
     <string name="looking_for_meshtastic_devices">Letar efter Meshtastic-enheter…</string>
-    <string name="requires_bluetooth">Denna applikation kräver Bluetooth-åtkomst. Vänligen ge åtkomst i Android-inställningar.</string>
-    <string name="error_bluetooth">Fel - den här appen kräver Bluetooth</string>
     <string name="starting_pairing">Börjar para ihop</string>
     <string name="pairing_failed">Parning misslyckades</string>
     <string name="url_for_join">En länk för att gå med i ett Meshtastic-nät</string>

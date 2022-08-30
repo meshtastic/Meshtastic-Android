@@ -17,8 +17,6 @@
     <string name="your_name">Adınız</string>
     <string name="analytics_okay">Anonim kullanim istatistikleri ve hata raporları.</string>
     <string name="looking_for_meshtastic_devices">Meshtastic cihazları aranıyor…</string>
-    <string name="requires_bluetooth">Bu cihaz bluetooth erişimi gerektiriyor. Lütfen Android ayarlarından izin veriniz.</string>
-    <string name="error_bluetooth">Hata - bu uygulama bluetooth gerektiriyor</string>
     <string name="starting_pairing">Eşleşme başlatılıyor</string>
     <string name="pairing_failed">Eşleşme başarız</string>
     <string name="url_for_join">Meshtastic mesh ağına bağlanmak için adres</string>

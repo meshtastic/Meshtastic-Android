@@ -16,8 +16,6 @@
     <string name="your_name">A neve</string>
     <string name="analytics_okay">Névtelen felhasználási statisztikák és hibajelentések.</string>
     <string name="looking_for_meshtastic_devices">Meshtastic eszközök keresése…</string>
-    <string name="requires_bluetooth">Az alkalmazásnak szüksége van Bluetooth hozzáférésre. Kérem adjon engedélyt az android beállításoknál.</string>
-    <string name="error_bluetooth">Hiba - az alkalmazásnak bluetooth hozzáférésre van szüksége</string>
     <string name="starting_pairing">Pároztatás megkezdése</string>
     <string name="pairing_failed">A pároztatás sikertelen</string>
     <string name="url_for_join">Meshtastic mesh hálózat URL</string>

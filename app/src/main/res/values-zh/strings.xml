@@ -17,8 +17,6 @@
     <string name="your_name">用户名</string>
     <string name="analytics_okay">匿名使用情况统计信息和崩溃报告.</string>
     <string name="looking_for_meshtastic_devices">Mesh设备扫描中...</string>
-    <string name="requires_bluetooth">此应用程序需要蓝牙权限.请在Android设置中授予权限.</string>
-    <string name="error_bluetooth">错误：此应用需要蓝牙</string>
     <string name="starting_pairing">开始配对</string>
     <string name="pairing_failed">配对失败</string>
     <string name="url_for_join">用于连接Mesh网络的URL</string>

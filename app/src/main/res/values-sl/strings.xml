@@ -17,8 +17,6 @@
     <string name="your_name">Tvoje ime</string>
     <string name="analytics_okay">Anonimna statistika uporabe in poročila o zrušitvah.</string>
     <string name="looking_for_meshtastic_devices">Iščem Meshtastic naprave…</string>
-    <string name="requires_bluetooth">Ta aplikacija zahteva dostop do bluetooth. Dovolite dostop v nastavitvah za Android.</string>
-    <string name="error_bluetooth">Napaka - aplikacija potrebuje Bluetooth povezavo</string>
     <string name="starting_pairing">Začetek seznanjanja naprav</string>
     <string name="pairing_failed">Napaka seznanjanja naprav</string>
     <string name="url_for_join">URL za pridružitev Meshtastic mreže</string>

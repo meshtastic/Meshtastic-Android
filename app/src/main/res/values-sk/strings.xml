@@ -17,8 +17,6 @@
     <string name="your_name">Vaše meno</string>
     <string name="analytics_okay">Anonymné hlásenia o používaní aplikácie a jej chybách.</string>
     <string name="looking_for_meshtastic_devices">Vyhľadávam Meshtastic zariadenia…</string>
-    <string name="requires_bluetooth">Táto aplikácia vyžaduje prístup k Bluetooth. Prosím povoľte jej prístup v nastaveniach telefónu.</string>
-    <string name="error_bluetooth">Chyba - táto aplikácia potrebuje bluetooth.</string>
     <string name="starting_pairing">Spúšťam párovanie</string>
     <string name="pairing_failed">Párovanie zlyhalo</string>
     <string name="url_for_join">URL pre pripojenie sa do Meshtastic MESH siete</string>
