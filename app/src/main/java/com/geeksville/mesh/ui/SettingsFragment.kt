@@ -506,10 +506,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private fun checkBTEnabled(
         warningReason: String = getString(R.string.requires_bluetooth)
     ) {
-
-        var btAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        if (!(btAdapter.isEnabled())) {
+        if (bluetoothViewModel.enabled.value == false) {
             warn("We need bluetooth")
             showSnackbar(warningReason)
         }
