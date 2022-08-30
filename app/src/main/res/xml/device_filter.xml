@@ -54,13 +54,16 @@
         vendor-id="1659"
         product-id="9203" /> <!-- 0x23f3: PL2303GS -->
 
-    <!-- 0x1a86 / 0x7523: Qinheng CH340 -->
+    <!-- 0x1a86 Qinheng -->
     <usb-device
         vendor-id="6790"
-        product-id="29987" />
+        product-id="29987" /> <!-- 0x1a86 / 0x7523: Qinheng CH340 -->
+    <usb-device
+        vendor-id="6790"
+        product-id="21972" /> <!-- 0x1a86 / 0x55d4: Qinheng CH9102F -->
 
     <!-- CDC driver -->
-    <usb-device vendor-id="9025" />                   <!-- 0x2341 / ……: Arduino -->
+    <usb-device vendor-id="9025" /> <!-- 0x2341 / ……: Arduino -->
     <usb-device
         vendor-id="5824"
         product-id="1155" /> <!-- 0x16C0 / 0x0483: Teensyduino  -->
@@ -73,8 +76,10 @@
     <usb-device
         vendor-id="3368"
         product-id="516" /> <!-- 0x0d28 / 0x0204: ARM mbed -->
-    <usb-device vendor-id="9114" /> <!-- 0x239A RAK Wireless -->
     <usb-device
-        vendor-id="6790"
-        product-id="21972" /> <!-- 0x1a86 / 0x55d4: Qinheng CH9102F -->
+        vendor-id="9114"
+        product-id="32809" /> <!-- 0x239A / 0x8029: Adafruit (RAK4631) -->
+    <usb-device
+        vendor-id="9114"
+        product-id="17413" /> <!-- 0x239A / 0x4405: Adafruit (T-Echo) -->
 </resources>
