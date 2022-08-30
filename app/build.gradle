@@ -141,6 +141,7 @@ dependencies {
 
     //OSMAND
     implementation 'org.osmdroid:osmdroid-android:6.1.14'
+    implementation 'mil.nga:mgrs:2.0.0'
 
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:$room_version"

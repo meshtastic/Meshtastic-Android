@@ -120,7 +120,9 @@ data class NodeInfo(
     var deviceMetrics: DeviceMetrics? = null
 ) : Parcelable {
 
-    val batteryPctLevel get() = deviceMetrics?.batteryLevel
+    val batteryLevel get() = deviceMetrics?.batteryLevel
+    val voltage get() = deviceMetrics?.voltage
+    val batteryStr get() = String.format("%d%% %.2fV", batteryLevel, voltage ?: 0)
 
     /**
      * true if the device was heard from recently
@@ -148,6 +150,13 @@ data class NodeInfo(
         val p = validPosition
         val op = o?.validPosition
         return if (p != null && op != null) p.distance(op).toInt() else null
+    }
+
+    /// @return bearing to the other position in degrees
+    fun bearing(o: NodeInfo?): Int? {
+        val p = validPosition
+        val op = o?.validPosition
+        return if (p != null && op != null) p.bearing(op).toInt() else null
     }
 
     /// @return a nice human readable string for the distance, or null for unknown

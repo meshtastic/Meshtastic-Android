@@ -10,6 +10,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/mapStyleButton"
+        android:layout_width="48sp"
+        android:layout_height="56sp"
+        android:layout_margin="8dp"
+        android:backgroundTint="@color/colorAdvancedBackground"
+        android:contentDescription="@string/style_selection"
+        app:icon="@drawable/ic_twotone_layers_24"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconTint="@color/colorIconTint"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_style_toggle"
         android:layout_width="wrap_content"
@@ -18,9 +32,8 @@
         android:backgroundTint="@color/design_default_color_secondary"
         android:contentDescription="@string/style_selection"
         android:orientation="vertical"
-        android:src="@drawable/baseline_layers_white_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:visibility="visible"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         tools:background="@color/design_default_color_secondary" />
 </androidx.constraintlayout.widget.ConstraintLayout>

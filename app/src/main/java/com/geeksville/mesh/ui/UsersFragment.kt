@@ -114,15 +114,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
             val pos = n.validPosition
             if (pos != null) {
-                val coords =
-                    String.format("%.5f %.5f", pos.latitude, pos.longitude).replace(",", ".")
-                val html =
-                    "<a href='geo:${pos.latitude},${pos.longitude}?z=17&label=${
-                        URLEncoder.encode(
-                            name,
-                            "utf-8"
-                        )
-                    }'>${coords}</a>"
+                val html = "<a href='geo:${pos.latitude},${pos.longitude}?z=17&label=${
+                    URLEncoder.encode(name, "utf-8")
+                }'>${model.gpsString(pos)}</a>"
                 holder.coordsView.text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
                 holder.coordsView.movementMethod = LinkMovementMethod.getInstance()
                 holder.coordsView.visibility = View.VISIBLE
@@ -138,7 +132,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             } else {
                 holder.distanceView.visibility = View.INVISIBLE
             }
-            renderBattery(n.batteryPctLevel, n.deviceMetrics?.voltage, holder)
+            renderBattery(n.batteryLevel, n.voltage, holder)
 
             holder.lastTime.text = formatAgo(n.lastHeard)
 

@@ -70,7 +70,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         map.let {
             if (view != null) {
                 mapController = map.controller
-                binding.fabStyleToggle.setOnClickListener {
+                binding.mapStyleButton.setOnClickListener {
                     chooseMapStyle()
                 }
                 model.nodeDB.nodes.value?.let { nodes ->
@@ -121,17 +121,22 @@ class MapFragment : ScreenFragment("Map"), Logging {
             val mrkr = nodesWithPosition.map { node ->
                 val p = node.position!!
                 debug("Showing on map: $node")
-                val f = GeoPoint(p.latitude, p.longitude)
                 lateinit var marker: MarkerWithLabel
                 node.user?.let {
                     val label = it.longName + " " + formatAgo(p.time)
                     marker = MarkerWithLabel(map, label)
-                    marker.title = label
-                    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                    marker.position = f
+                    marker.title = buildString {
+                        append("$label ${node.batteryStr}\n${model.gpsString(p)}")
+                        model.nodeDB.ourNodeInfo?.let { our ->
+                            val dist = our.distanceStr(node)
+                            if (dist != null) append(" (${our.bearing(node)}° $dist)")
+                        }
+                    }
+                    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                    marker.position = GeoPoint(p.latitude, p.longitude)
                     marker.icon = ContextCompat.getDrawable(
                         requireActivity(),
-                        R.drawable.ic_twotone_person_pin_24
+                        R.drawable.ic_twotone_location_on_24
                     )
                 }
                 marker
@@ -238,12 +243,12 @@ class MapFragment : ScreenFragment("Map"), Logging {
             val p = mPositionPixels
 
             val textPaint = Paint()
-            textPaint.textSize = 50f
+            textPaint.textSize = 40f
             textPaint.color = Color.RED
             textPaint.isAntiAlias = true
             textPaint.textAlign = Paint.Align.CENTER
 
-            c.drawText(mLabel, (p.x - 0).toFloat(), (p.y - 60).toFloat(), textPaint)
+            c.drawText(mLabel, (p.x - 0f), (p.y - 80f), textPaint)
         }
     }
 }
