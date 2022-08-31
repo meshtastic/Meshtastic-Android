@@ -47,11 +47,8 @@ import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
 import com.geeksville.util.Exceptions
 import com.geeksville.util.exceptionReporter
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.gms.tasks.Task
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
@@ -125,10 +122,9 @@ class MainActivity : BaseActivity(), Logging,
     companion object {
         // const val REQUEST_ENABLE_BT = 10
         const val DID_REQUEST_PERM = 11
-        const val RC_SIGN_IN = 12 // google signin completed
-
+        // const val RC_SIGN_IN = 12 // google signin completed
         // const val SELECT_DEVICE_REQUEST_CODE = 13
-        const val CREATE_CSV_FILE = 14
+        // const val CREATE_CSV_FILE = 14
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -545,50 +541,18 @@ class MainActivity : BaseActivity(), Logging,
         requestedEnable = false
     }
 
+    private val createDocumentLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            it.data?.data?.let { file_uri -> model.saveMessagesCSV(file_uri) }
+        }
+    }
+
     override fun onDestroy() {
         unregisterMeshReceiver()
         mainScope.cancel("Activity going away")
         super.onDestroy()
-    }
-
-    /**
-     * Dispatch incoming result to the correct fragment.
-     */
-    override fun onActivityResult(
-        requestCode: Int,
-        resultCode: Int,
-        data: Intent?
-    ) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
-        when (requestCode) {
-            RC_SIGN_IN -> {
-                // The Task returned from this call is always completed, no need to attach
-                // a listener.
-                val task: Task<GoogleSignInAccount> =
-                    GoogleSignIn.getSignedInAccountFromIntent(data)
-                handleSignInResult(task)
-            }
-            CREATE_CSV_FILE -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    data?.data?.let { file_uri -> model.saveMessagesCSV(file_uri) }
-                }
-            }
-        }
-    }
-
-    private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
-        /*
-        try {
-            val account = completedTask.getResult(ApiException::class.java)
-            // Signed in successfully, show authenticated UI.
-            //updateUI(account)
-        } catch (e: ApiException) { // The ApiException status code indicates the detailed failure reason.
-// Please refer to the GoogleSignInStatusCodes class reference for more information.
-            warn("signInResult:failed code=" + e.statusCode)
-            //updateUI(null)
-        } */
     }
 
     private var receiverRegistered = false
@@ -1068,7 +1032,7 @@ class MainActivity : BaseActivity(), Logging,
                     type = "application/csv"
                     putExtra(Intent.EXTRA_TITLE, "rangetest.csv")
                 }
-                startActivityForResult(intent, CREATE_CSV_FILE)
+                createDocumentLauncher.launch(intent)
                 return true
             }
             R.id.theme -> {

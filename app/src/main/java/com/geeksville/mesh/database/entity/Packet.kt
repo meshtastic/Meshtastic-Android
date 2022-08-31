@@ -18,7 +18,7 @@ data class Packet(@PrimaryKey val uuid: String,
 
     val meshPacket: MeshProtos.MeshPacket?
         get() {
-            if (message_type == "packet") {
+            if (message_type == "Packet") {
                 val builder = MeshProtos.MeshPacket.newBuilder()
                 try {
                     TextFormat.getParser().merge(raw_message, builder)
