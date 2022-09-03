@@ -131,7 +131,7 @@ class BTScanModel @Inject constructor(
     private val bluetoothAdapter = context.bluetoothManager?.adapter
     private val deviceManager get() = context.deviceManager
     val hasCompanionDeviceApi get() = context.hasCompanionDeviceApi()
-    private val hasConnectPermission get() = application.hasConnectPermission()
+    private val hasBluetoothPermission get() = application.hasBluetoothPermission()
     private val usbManager get() = context.usbManager
 
     var selectedAddress: String? = null

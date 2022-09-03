@@ -9,7 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.geeksville.android.Logging
 import com.geeksville.mesh.CoroutineDispatchers
-import com.geeksville.mesh.android.hasConnectPermission
+import com.geeksville.mesh.android.hasBluetoothPermission
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -66,7 +66,7 @@ class BluetoothRepository @Inject constructor(
     @SuppressLint("MissingPermission")
     internal suspend fun updateBluetoothState() {
         val newState: BluetoothState = bluetoothAdapterLazy.get()?.takeIf {
-            application.hasConnectPermission().also { hasPerms ->
+            application.hasBluetoothPermission().also { hasPerms ->
                 if (!hasPerms) errormsg("Still missing needed bluetooth permissions")
             }
         }?.let { adapter ->

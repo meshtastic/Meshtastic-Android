@@ -26,7 +26,7 @@
     <string name="are_you_sure_channel">Are you sure you want to change the channel? All communication with other nodes will stop until you share the new channel settings.</string>
     <string name="new_channel_rcvd">Odebrano nowy URL kanału</string>
     <string name="do_you_want_switch">Chcesz przełączyć na \'%s\' kanał?</string>
-    <string name="permission_missing">Meshtastic potrzebuje %s zezwolenie i lokalizacja muszą być włączone, aby można było znaleźć nowe urządzenia przez Bluetooth. Możesz go później wyłączyć.</string>
+    <string name="permission_missing">Meshtastic potrzebuje lokalizacja zezwolenie i lokalizacja muszą być włączone, aby można było znaleźć nowe urządzenia przez Bluetooth. Możesz go później wyłączyć.</string>
     <string name="radio_sleeping">Radio było w trybie uśpienia, nie mogło zmienić kanału</string>
     <string name="report_bug">Zgłoś bug</string>
     <string name="report_a_bug">Zgłoś bug</string>
@@ -105,7 +105,6 @@
     <string name="background_required">Lokalizacja w tle</string>
     <string name="show_system_settings">Pokaż ustawienia systemowe</string>
     <string name="required_permissions">Wymagane uprawnienia</string>
-    <string name="location">Lokalizacja</string>
     <string name="provide_location_to_mesh">Podaj lokalizację do sieci</string>
     <plurals name="delete_messages">
         <item quantity="one">Usunąć wiadomość?</item>

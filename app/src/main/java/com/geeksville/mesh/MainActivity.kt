@@ -1,7 +1,6 @@
 package com.geeksville.mesh
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.*
@@ -34,7 +33,7 @@ import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.android.Logging
 import com.geeksville.android.ServiceClient
 import com.geeksville.concurrent.handledLaunch
-import com.geeksville.mesh.android.*
+import com.geeksville.mesh.android.getMissingPermissions
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
@@ -116,16 +115,7 @@ eventually:
 val utf8: Charset = Charset.forName("UTF-8")
 
 @AndroidEntryPoint
-class MainActivity : BaseActivity(), Logging,
-    ActivityCompat.OnRequestPermissionsResultCallback {
-
-    companion object {
-        // const val REQUEST_ENABLE_BT = 10
-        const val DID_REQUEST_PERM = 11
-        // const val RC_SIGN_IN = 12 // google signin completed
-        // const val SELECT_DEVICE_REQUEST_CODE = 13
-        // const val CREATE_CSV_FILE = 14
-    }
+class MainActivity : BaseActivity(), Logging {
 
     private lateinit var binding: ActivityMainBinding
 
@@ -138,6 +128,15 @@ class MainActivity : BaseActivity(), Logging,
 
     @Inject
     internal lateinit var radioInterfaceService: RadioInterfaceService
+
+    private val requestPermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (!permissions.entries.all { it.value }) {
+                errormsg("User denied permissions")
+                showSnackbar(getString(R.string.permission_missing_31))
+            }
+            bluetoothViewModel.permissionsUpdated()
+        }
 
     data class TabInfo(val text: String, val icon: Int, val content: Fragment)
 
@@ -188,74 +187,28 @@ class MainActivity : BaseActivity(), Logging,
     /** Get the minimum permissions our app needs to run correctly
      */
     private fun getMinimumPermissions(): Array<String> {
-        val perms = mutableListOf(
-            Manifest.permission.WAKE_LOCK
+        val perms = mutableListOf<String>()
 
-            // We only need this for logging to capture files for the simulator - turn off for most users
-            // Manifest.permission.WRITE_EXTERNAL_STORAGE
-        )
+        // We only need this for logging to capture files for the simulator - turn off for production
+        // perms.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
 
 /*      TODO - wait for targetSdkVersion 31
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            perms.add(Manifest.permission.BLUETOOTH_SCAN)
             perms.add(Manifest.permission.BLUETOOTH_CONNECT)
-        } else {
-            perms.add(Manifest.permission.BLUETOOTH)
         }
 */
-        perms.add(Manifest.permission.BLUETOOTH)
-
-        // Some old phones complain about requesting perms they don't understand
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            perms.add(Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND)
-            perms.add(Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND)
-        }
-
         return getMissingPermissions(perms)
     }
 
-    /** Ask the user to grant Bluetooth scan/discovery permission */
-    fun requestScanPermission() = requestPermission(getScanPermissions(), true)
-
-    /**
-     * @return a localized string warning user about missing permissions.  Or null if everything is find
-     */
-    @SuppressLint("InlinedApi")
-    fun getMissingMessage(
-        missingPerms: Array<String> = getMinimumPermissions()
-    ): String? {
-        val renamedPermissions = mapOf(
-            // Older versions of android don't know about these permissions - ignore failure to grant
-            Manifest.permission.ACCESS_COARSE_LOCATION to null,
-            Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND to null,
-            Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND to null,
-            Manifest.permission.ACCESS_FINE_LOCATION to getString(R.string.location),
-            Manifest.permission.BLUETOOTH_CONNECT to "Bluetooth"
-        )
-
-        val deniedPermissions = missingPerms.mapNotNull {
-            if (renamedPermissions.containsKey(it))
-                renamedPermissions[it]
-            else // No localization found - just show the nasty android string
-                it
-        }
-
-        return if (deniedPermissions.isEmpty())
-            null
-        else {
-            val asEnglish = deniedPermissions.joinToString(" & ")
-
-            getString(R.string.permission_missing).format(asEnglish)
-        }
-    }
-
     /** Possibly prompt user to grant permissions
-     * @param shouldShowDialog usually false in cases where we've already shown a dialog elsewhere we skip it.
+     * @param shouldShowDialog usually true, but in cases where we've already shown a dialog elsewhere we skip it.
      *
      * @return true if we already have the needed permissions
      */
     private fun requestPermission(
         missingPerms: Array<String> = getMinimumPermissions(),
-        shouldShowDialog: Boolean = false
+        shouldShowDialog: Boolean = true
     ): Boolean =
         if (missingPerms.isNotEmpty()) {
             val shouldShow = missingPerms.filter {
@@ -265,11 +218,7 @@ class MainActivity : BaseActivity(), Logging,
             fun doRequest() {
                 info("requesting permissions")
                 // Ask for all the missing perms
-                ActivityCompat.requestPermissions(
-                    this,
-                    missingPerms,
-                    DID_REQUEST_PERM
-                )
+                requestPermissionsLauncher.launch(missingPerms)
             }
 
             if (shouldShow.isNotEmpty() && shouldShowDialog) {
@@ -280,7 +229,7 @@ class MainActivity : BaseActivity(), Logging,
 
                 MaterialAlertDialogBuilder(this)
                     .setTitle(getString(R.string.required_permissions))
-                    .setMessage(getMissingMessage(missingPerms))
+                    .setMessage(getString(R.string.permission_missing_31))
                     .setNeutralButton(R.string.cancel) { _, _ ->
                         warn("User bailed due to permissions")
                     }
@@ -299,81 +248,6 @@ class MainActivity : BaseActivity(), Logging,
             debug("We have our required permissions")
             true
         }
-
-    /**
-     * Remind user he's disabled permissions we need
-     *
-     * @return true if we did warn
-     */
-    @SuppressLint("InlinedApi") // This function is careful to work with old APIs correctly
-    fun warnMissingPermissions(): Boolean {
-        val message = getMissingMessage()
-
-        return if (message != null) {
-            errormsg("Denied permissions: $message")
-            showSnackbar(message)
-            true
-        } else
-            false
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-
-        when (requestCode) {
-            DID_REQUEST_PERM -> {
-                // If request is cancelled, the result arrays are empty.
-                if ((grantResults.isNotEmpty() &&
-                            grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                ) {
-                    // Permission is granted. Continue the action or workflow
-                    // in your app.
-
-                    // yay!
-                } else {
-                    // Explain to the user that the feature is unavailable because
-                    // the features requires a permission that the user has denied.
-                    // At the same time, respect the user's decision. Don't link to
-                    // system settings in an effort to convince the user to change
-                    // their decision.
-                    warnMissingPermissions()
-                }
-            }
-            else -> {
-                // ignore other requests
-            }
-        }
-
-        bluetoothViewModel.permissionsUpdated()
-    }
-
-
-    private fun sendTestPackets() {
-        exceptionReporter {
-            val m = model.meshService!!
-
-            // Do some test operations
-            val testPayload = "hello world".toByteArray()
-            m.send(
-                DataPacket(
-                    "+16508675310",
-                    testPayload,
-                    Portnums.PortNum.PRIVATE_APP_VALUE
-                )
-            )
-            m.send(
-                DataPacket(
-                    "+16508675310",
-                    testPayload,
-                    Portnums.PortNum.TEXT_MESSAGE_APP_VALUE
-                )
-            )
-        }
-    }
 
     /// Ask user to rate in play store
     private fun askToRate() {
@@ -417,23 +291,6 @@ class MainActivity : BaseActivity(), Logging,
 
         /// Set theme
         setUITheme(prefs)
-
-        /*  not yet working
-        // Configure sign-in to request the user's ID, email address, and basic
-// profile. ID and basic profile are included in DEFAULT_SIGN_IN.
-        val gso =
-            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build()
-
-        // Build a GoogleSignInClient with the options specified by gso.
-        UIState.googleSignInClient = GoogleSignIn.getClient(this, gso);
-
-         */
-
-        /* setContent {
-            MeshApp()
-        } */
         setContentView(binding.root)
 
         initToolbar()

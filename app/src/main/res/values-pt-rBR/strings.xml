@@ -26,7 +26,7 @@
     <string name="are_you_sure_channel">Tem certeza que deseja mudar de canal? Toda comunicação com os outros dispositivos será interrompida até serem compartilhadas as novas configurações do canal.</string>
     <string name="new_channel_rcvd">Novo link de canal recebido</string>
     <string name="do_you_want_switch">Deseja mudar para o canal \'%s\'?</string>
-    <string name="permission_missing">Meshtastic precisa da permissão de %s e da localização ativada para encontrar novos dispositivos via bluetooth. Você pode desativar novamente depois.</string>
+    <string name="permission_missing">Meshtastic precisa da permissão de localização e localização ativada para encontrar novos dispositivos via bluetooth. Você pode desativar novamente depois.</string>
     <string name="radio_sleeping">Rádio estava em suspensão (sleep), não foi possível mudar de canal</string>
     <string name="report_bug">Informar Bug</string>
     <string name="report_a_bug">Informar um bug</string>
@@ -102,7 +102,6 @@
     <string name="show_system_settings">Exibir configurações do sistema</string>
     <string name="why_background_required">Para este recurso, você deve conceder permissão para acessar Local com a opção \"Permitir o tempo todo\".\nIsto permite ao Meshtastic ler a localização do seu smartphone e enviar aos membros da sua mesh, mesmo quando o aplicativo está fechado ou não em uso.</string>
     <string name="required_permissions">Permissões necessárias</string>
-    <string name="location">localização</string>
     <string name="cancel_no_radio">Cancelar (sem acesso ao rádio)</string>
     <string name="allow_will_show">Permitir (exibe diálogo)</string>
     <string name="provide_location_to_mesh">Fornecer localização para mesh</string>

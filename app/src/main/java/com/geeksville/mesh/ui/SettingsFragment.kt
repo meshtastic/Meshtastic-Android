@@ -179,19 +179,16 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // Update the status string (highest priority messages first)
         val info = model.myNodeInfo.value
         val statusText = binding.scanStatusText
-        val permissionsWarning = myActivity.getMissingMessage()
-        when {
-            (permissionsWarning != null) ->
-                statusText.text = permissionsWarning
-
-            connected == MeshService.ConnectionState.CONNECTED -> {
+        when (connected) {
+            MeshService.ConnectionState.CONNECTED -> {
                 statusText.text = if (region.number == 0) getString(R.string.must_set_region)
                 else getString(R.string.connected_to).format(info?.firmwareString ?: "unknown")
             }
-            connected == MeshService.ConnectionState.DISCONNECTED ->
+            MeshService.ConnectionState.DISCONNECTED ->
                 statusText.text = getString(R.string.not_connected)
-            connected == MeshService.ConnectionState.DEVICE_SLEEP ->
+            MeshService.ConnectionState.DEVICE_SLEEP ->
                 statusText.text = getString(R.string.connected_sleeping)
+            else -> {}
         }
     }
 
@@ -480,14 +477,40 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         initCommonUI()
 
+        val requestPermissionAndScanLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+                if (permissions.entries.all { it.value }) {
+                    checkLocationEnabled()
+                    scanLeDevice()
+                } else {
+                    errormsg("User denied scan permissions")
+                    showSnackbar(getString(R.string.permission_missing))
+                }
+            }
+
         binding.changeRadioButton.setOnClickListener {
             debug("User clicked changeRadioButton")
-            if (!myActivity.hasScanPermission()) {
-                myActivity.requestScanPermission()
-            } else {
-                checkBTEnabled()
-                if (!scanModel.hasCompanionDeviceApi) checkLocationEnabled()
+            checkBTEnabled()
+            if ((scanModel.hasCompanionDeviceApi)) {
                 scanLeDevice()
+            } else  {
+                // Location is the only runtime permission for classic bluetooth scan
+                if (myActivity.hasLocationPermission()) {
+                    checkLocationEnabled()
+                    scanLeDevice()
+                } else {
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(getString(R.string.required_permissions))
+                        .setMessage(getString(R.string.permission_missing))
+                        .setNeutralButton(R.string.cancel) { _, _ ->
+                            warn("User bailed due to permissions")
+                        }
+                        .setPositiveButton(R.string.accept) { _, _ ->
+                            info("requesting scan permissions")
+                            requestPermissionAndScanLauncher.launch(myActivity.getLocationPermissions())
+                        }
+                        .show()
+                }
             }
         }
     }

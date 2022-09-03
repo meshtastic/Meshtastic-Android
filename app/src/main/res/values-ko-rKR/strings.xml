@@ -113,7 +113,6 @@
     <string name="show_system_settings">시스템 설정 보기</string>
     <string name="why_background_required">기능을위해서, 옵션에서 위치권한을 \"항상 허용\" 으로 설정해야합니다.앱이 닫혀있거나 사용중이지 않을때에도 메쉬태스틱이 당신의 스마트폰의 위치를 읽어 당신의 메쉬의 다른 사용자에게 위치를 전송할수있게합니다.</string>
     <string name="required_permissions">권한부여 필요</string>
-    <string name="location">장소</string>
     <string name="cancel_no_radio">취소 (no radio access)</string>
     <string name="allow_will_show">허용 (대화에 보일것입니다)</string>
     <string name="provide_location_to_mesh">메쉬에 현재 위치 공유</string>

@@ -30,7 +30,7 @@
     <string name="are_you_sure_channel">Are you sure you want to change the channel? All communication with other nodes will stop until you share the new channel settings.</string>
     <string name="new_channel_rcvd">New Channel URL received</string>
     <string name="do_you_want_switch">Do you want to switch to the \'%s\' channel?</string>
-    <string name="permission_missing">Meshtastic needs %s permission and location must be turned on to find new devices via bluetooth. You can turn it off again afterwards.</string>
+    <string name="permission_missing">Meshtastic needs location permission and location must be turned on to find new devices via Bluetooth. You can turn it off again afterwards.</string>
     <string name="radio_sleeping">Radio was sleeping, could not change channel</string>
     <string name="report_bug">Report Bug</string>
     <string name="report_a_bug">Report a bug</string>
@@ -108,7 +108,6 @@
     <string name="show_system_settings">Show system settings</string>
     <string name="why_background_required">For this feature, you must grant Location permission option \"Allow all the time\".\nThis allows Meshtastic to read your smartphone location and send it to other members of your mesh, even when the app is closed or not in use.</string>
     <string name="required_permissions">Required permissions</string>
-    <string name="location">location</string>
     <string name="cancel_no_radio">Cancel (no radio access)</string>
     <string name="allow_will_show">Allow (will show dialog)</string>
     <string name="provide_location_to_mesh">Provide location to mesh</string>
@@ -155,4 +154,5 @@
     <string name="are_you_sure_factory_reset">Are you sure you want to factory reset?</string>
     <string name="factory_reset_description">This will clear all device configuration you have done.</string>
     <string name="bluetooth_disabled">Bluetooth disabled.</string>
+    <string name="permission_missing_31">Meshtastic needs Nearby devices permission to find and connect to devices via Bluetooth. You can turn it off when not in use.</string>
 </resources>
