@@ -66,7 +66,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
         mPrefs = context!!.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
 
         setupMapProperties()
-        loadOnlineTileSourceBase()
+        map.setTileSource(loadOnlineTileSourceBase())
         map.let {
             if (view != null) {
                 mapController = map.controller
