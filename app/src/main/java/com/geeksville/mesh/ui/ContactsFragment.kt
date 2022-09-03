@@ -235,8 +235,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                     // find messages for each contactId
                     selectedList.forEach { contactId ->
                         deleteList += messagesTotal.filter {
-                            if (contactId == DataPacket.ID_BROADCAST)
-                                it.to == DataPacket.ID_BROADCAST || it.delayed == 1 // MeshPacket.Delayed.DELAYED_BROADCAST_VALUE == 1
+                            if (contactId == DataPacket.ID_BROADCAST) it.to == DataPacket.ID_BROADCAST
                             else it.from == contactId && it.to != DataPacket.ID_BROADCAST || it.from == DataPacket.ID_LOCAL && it.to == contactId
                         }
                     }

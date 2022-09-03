@@ -225,8 +225,7 @@ class MessagesFragment : Fragment(), Logging {
         /// Called when our node DB changes
         fun onMessagesChanged(msgIn: Collection<DataPacket>) {
             messages = msgIn.filter {
-                if (contactId == DataPacket.ID_BROADCAST)
-                    it.to == DataPacket.ID_BROADCAST || it.delayed == 1 // MeshPacket.Delayed.DELAYED_BROADCAST_VALUE == 1
+                if (contactId == DataPacket.ID_BROADCAST) it.to == DataPacket.ID_BROADCAST
                 else it.from == contactId && it.to != DataPacket.ID_BROADCAST || it.from == DataPacket.ID_LOCAL && it.to == contactId
             }.toTypedArray()
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all messages
