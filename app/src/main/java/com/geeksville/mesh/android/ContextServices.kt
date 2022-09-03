@@ -55,48 +55,22 @@ fun Context.getMissingPermissions(perms: List<String>): Array<String> = perms.fi
 }.toTypedArray()
 
 /**
- * Bluetooth connect permissions (or empty if we already have what we need)
+ * Bluetooth permissions (or empty if we already have what we need)
  */
-fun Context.getConnectPermissions(): Array<String> {
+fun Context.getBluetoothPermissions(): Array<String> {
     val perms = mutableListOf<String>()
 
 /*  TODO - wait for targetSdkVersion 31
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        perms.add(Manifest.permission.BLUETOOTH_SCAN)
         perms.add(Manifest.permission.BLUETOOTH_CONNECT)
-    } else {
-        perms.add(Manifest.permission.BLUETOOTH)
     }
 */
     return getMissingPermissions(perms)
 }
 
 /** @return true if the user already has Bluetooth connect permission */
-fun Context.hasConnectPermission() = getConnectPermissions().isEmpty()
-
-/**
- * Bluetooth scan/discovery permissions (or empty if we already have what we need)
- */
-fun Context.getScanPermissions(): Array<String> {
-    val perms = mutableListOf<String>()
-
-/*  TODO - wait for targetSdkVersion 31
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        perms.add(Manifest.permission.BLUETOOTH_SCAN)
-    } else if (!BluetoothInterface.hasCompanionDeviceApi(this)) {
-        perms.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        perms.add(Manifest.permission.BLUETOOTH_ADMIN)
-    }
-*/
-    if (!hasCompanionDeviceApi()) {
-        perms.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        perms.add(Manifest.permission.BLUETOOTH_ADMIN)
-    }
-
-    return getMissingPermissions(perms)
-}
-
-/** @return true if the user already has Bluetooth scan/discovery permission */
-fun Context.hasScanPermission() = getScanPermissions().isEmpty()
+fun Context.hasBluetoothPermission() = getBluetoothPermissions().isEmpty()
 
 /**
  * Camera permission (or empty if we already have what we need)
