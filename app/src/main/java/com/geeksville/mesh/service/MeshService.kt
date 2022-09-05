@@ -9,7 +9,6 @@ import androidx.core.content.edit
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.isGooglePlayAvailable
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.*
 import com.geeksville.mesh.MeshProtos.MeshPacket
@@ -153,7 +152,7 @@ class MeshService : Service(), Logging {
         // If we're already observing updates, don't register again
         if (locationFlow?.isActive == true) return
 
-        if (hasBackgroundPermission() && isGooglePlayAvailable(this)) {
+        if (hasBackgroundPermission()) {
             locationFlow = locationRepository.getLocations()
                 .onEach { location ->
                     sendPosition(
