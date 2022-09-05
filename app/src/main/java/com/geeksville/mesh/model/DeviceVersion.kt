@@ -1,6 +1,6 @@
 package com.geeksville.mesh.model
 
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 
 /**
  * Provide structured access to parse and compare device version strings

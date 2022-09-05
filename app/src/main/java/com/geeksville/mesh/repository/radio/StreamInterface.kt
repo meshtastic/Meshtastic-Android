@@ -1,6 +1,6 @@
 package com.geeksville.mesh.repository.radio
 
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 
 
 /**

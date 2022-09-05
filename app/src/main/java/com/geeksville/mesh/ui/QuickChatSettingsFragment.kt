@@ -7,14 +7,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
-import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.databinding.QuickChatSettingsFragmentBinding

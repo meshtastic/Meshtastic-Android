@@ -1,7 +1,7 @@
 package com.geeksville.mesh.ui
 
 import androidx.fragment.app.Fragment
-import com.geeksville.android.GeeksvilleApplication
+import com.geeksville.mesh.android.GeeksvilleApplication
 
 /**
  * A fragment that represents a current 'screen' in our app.

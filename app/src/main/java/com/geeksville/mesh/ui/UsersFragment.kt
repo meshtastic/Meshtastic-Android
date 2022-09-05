@@ -12,13 +12,13 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
 import com.geeksville.mesh.databinding.NodelistFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.util.formatAgo
+import com.geeksville.mesh.util.formatAgo
 import dagger.hilt.android.AndroidEntryPoint
 import java.net.URLEncoder
 

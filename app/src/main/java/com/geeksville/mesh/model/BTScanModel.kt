@@ -17,8 +17,8 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.geeksville.android.GeeksvilleApplication
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.*
@@ -30,8 +30,8 @@ import com.geeksville.mesh.repository.radio.SerialInterface
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.ui.SLogging
 import com.geeksville.mesh.ui.changeDeviceSelection
-import com.geeksville.util.anonymize
-import com.geeksville.util.exceptionReporter
+import com.geeksville.mesh.util.anonymize
+import com.geeksville.mesh.util.exceptionReporter
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope

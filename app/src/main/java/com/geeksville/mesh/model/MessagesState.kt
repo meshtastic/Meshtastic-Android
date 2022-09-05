@@ -2,7 +2,7 @@ package com.geeksville.mesh.model
 
 import android.os.RemoteException
 import androidx.lifecycle.MutableLiveData
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 

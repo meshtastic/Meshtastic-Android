@@ -6,14 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.activityViewModels
-import com.geeksville.android.Logging
-import com.geeksville.android.hideKeyboard
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.hideKeyboard
 import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.AdvancedSettingsBinding
 import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.util.exceptionToSnackbar
+import com.geeksville.mesh.util.exceptionToSnackbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint

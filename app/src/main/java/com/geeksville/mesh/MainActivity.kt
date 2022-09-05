@@ -1,6 +1,5 @@
 package com.geeksville.mesh
 
-import android.Manifest
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.content.*
@@ -28,11 +27,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.geeksville.android.BindFailedException
-import com.geeksville.android.GeeksvilleApplication
-import com.geeksville.android.Logging
-import com.geeksville.android.ServiceClient
-import com.geeksville.concurrent.handledLaunch
+import com.geeksville.mesh.android.BindFailedException
+import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.ServiceClient
+import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.android.getMissingPermissions
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.BTScanModel
@@ -44,8 +43,8 @@ import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.SerialInterface
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
-import com.geeksville.util.Exceptions
-import com.geeksville.util.exceptionReporter
+import com.geeksville.mesh.util.Exceptions
+import com.geeksville.mesh.util.exceptionReporter
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -656,21 +655,21 @@ class MainActivity : BaseActivity(), Logging {
                 - waiting on an unknown object
                   at java.util.concurrent.locks.LockSupport.park (LockSupport.java:190)
                   at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await (AbstractQueuedSynchronizer.java:2067)
-                  at com.geeksville.android.ServiceClient.waitConnect (ServiceClient.java:46)
-                  at com.geeksville.android.ServiceClient.getService (ServiceClient.java:27)
+                  at com.geeksville.mesh.android.ServiceClient.waitConnect (ServiceClient.java:46)
+                  at com.geeksville.mesh.android.ServiceClient.getService (ServiceClient.java:27)
                   at com.geeksville.mesh.service.MeshService$binder$1$setDeviceAddress$1.invoke (MeshService.java:1519)
                   at com.geeksville.mesh.service.MeshService$binder$1$setDeviceAddress$1.invoke (MeshService.java:1514)
-                  at com.geeksville.util.ExceptionsKt.toRemoteExceptions (ExceptionsKt.java:56)
+                  at com.geeksville.mesh.util.ExceptionsKt.toRemoteExceptions (ExceptionsKt.java:56)
                   at com.geeksville.mesh.service.MeshService$binder$1.setDeviceAddress (MeshService.java:1516)
                   at com.geeksville.mesh.MainActivity$mesh$1$onConnected$1.invoke (MainActivity.java:743)
                   at com.geeksville.mesh.MainActivity$mesh$1$onConnected$1.invoke (MainActivity.java:734)
-                  at com.geeksville.util.ExceptionsKt.exceptionReporter (ExceptionsKt.java:34)
+                  at com.geeksville.mesh.util.ExceptionsKt.exceptionReporter (ExceptionsKt.java:34)
                   at com.geeksville.mesh.MainActivity$mesh$1.onConnected (MainActivity.java:738)
                   at com.geeksville.mesh.MainActivity$mesh$1.onConnected (MainActivity.java:734)
-                  at com.geeksville.android.ServiceClient$connection$1$onServiceConnected$1.invoke (ServiceClient.java:89)
-                  at com.geeksville.android.ServiceClient$connection$1$onServiceConnected$1.invoke (ServiceClient.java:84)
-                  at com.geeksville.util.ExceptionsKt.exceptionReporter (ExceptionsKt.java:34)
-                  at com.geeksville.android.ServiceClient$connection$1.onServiceConnected (ServiceClient.java:85)
+                  at com.geeksville.mesh.android.ServiceClient$connection$1$onServiceConnected$1.invoke (ServiceClient.java:89)
+                  at com.geeksville.mesh.android.ServiceClient$connection$1$onServiceConnected$1.invoke (ServiceClient.java:84)
+                  at com.geeksville.mesh.util.ExceptionsKt.exceptionReporter (ExceptionsKt.java:34)
+                  at com.geeksville.mesh.android.ServiceClient$connection$1.onServiceConnected (ServiceClient.java:85)
                   at android.app.LoadedApk$ServiceDispatcher.doConnected (LoadedApk.java:2067)
                   at android.app.LoadedApk$ServiceDispatcher$RunConnection.run (LoadedApk.java:2099)
                   at android.os.Handler.handleCallback (Handler.java:883)

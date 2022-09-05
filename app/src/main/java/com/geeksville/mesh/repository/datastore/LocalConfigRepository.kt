@@ -1,7 +1,7 @@
 package com.geeksville.mesh.repository.datastore
 
 import androidx.datastore.core.DataStore
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import kotlinx.coroutines.flow.Flow

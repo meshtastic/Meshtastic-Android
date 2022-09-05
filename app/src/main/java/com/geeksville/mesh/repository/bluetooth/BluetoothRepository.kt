@@ -7,7 +7,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.BluetoothLeScanner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.android.hasBluetoothPermission
 import kotlinx.coroutines.delay

@@ -3,7 +3,7 @@ package com.geeksville.mesh
 import android.content.Context
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.UIViewModel
 import java.util.*
 

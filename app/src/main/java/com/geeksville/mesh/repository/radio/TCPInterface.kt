@@ -1,9 +1,9 @@
 package com.geeksville.mesh.repository.radio
 
 import android.content.Context
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.repository.usb.UsbRepository
-import com.geeksville.util.Exceptions
+import com.geeksville.mesh.util.Exceptions
 import java.io.BufferedOutputStream
 import java.io.IOException
 import java.io.InputStream

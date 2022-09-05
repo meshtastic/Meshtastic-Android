@@ -6,8 +6,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import com.geeksville.android.Logging
-import com.geeksville.util.exceptionReporter
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.util.exceptionReporter
 import javax.inject.Inject
 
 /**

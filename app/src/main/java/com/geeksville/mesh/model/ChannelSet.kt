@@ -3,7 +3,7 @@ package com.geeksville.mesh.model
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Base64
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.AppOnlyProtos
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter

@@ -1,11 +1,11 @@
 package com.geeksville.mesh
 
 import android.os.Debug
-import com.geeksville.android.AppPrefs
-import com.geeksville.android.BuildUtils.isEmulator
-import com.geeksville.android.GeeksvilleApplication
-import com.geeksville.android.Logging
-import com.geeksville.util.Exceptions
+import com.geeksville.mesh.android.AppPrefs
+import com.geeksville.mesh.android.BuildUtils.isEmulator
+import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.util.Exceptions
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.HiltAndroidApp
 
