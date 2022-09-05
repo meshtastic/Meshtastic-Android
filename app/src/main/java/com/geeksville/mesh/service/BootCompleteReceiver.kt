@@ -3,7 +3,7 @@ package com.geeksville.mesh.service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 
 
 class BootCompleteReceiver : BroadcastReceiver(), Logging {

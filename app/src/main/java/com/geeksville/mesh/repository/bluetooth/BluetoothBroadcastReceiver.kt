@@ -5,7 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import com.geeksville.util.exceptionReporter
+import com.geeksville.mesh.util.exceptionReporter
 import javax.inject.Inject
 
 /**

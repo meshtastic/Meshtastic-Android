@@ -12,11 +12,11 @@ import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
-import com.geeksville.analytics.DataPair
-import com.geeksville.android.GeeksvilleApplication
-import com.geeksville.android.Logging
-import com.geeksville.android.hideKeyboard
-import com.geeksville.android.isGooglePlayAvailable
+import com.geeksville.mesh.analytics.DataPair
+import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.hideKeyboard
+import com.geeksville.mesh.android.isGooglePlayAvailable
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ConfigProtos
@@ -29,7 +29,7 @@ import com.geeksville.mesh.repository.radio.MockInterface
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.SoftwareUpdateService
-import com.geeksville.util.exceptionToSnackbar
+import com.geeksville.mesh.util.exceptionToSnackbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint

@@ -12,7 +12,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.AdapterContactLayoutBinding

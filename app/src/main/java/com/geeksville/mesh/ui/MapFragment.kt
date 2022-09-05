@@ -11,14 +11,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.CustomTileSource
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.util.formatAgo
+import com.geeksville.mesh.util.formatAgo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.api.IMapController

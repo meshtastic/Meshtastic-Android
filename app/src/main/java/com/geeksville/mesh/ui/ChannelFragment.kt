@@ -15,10 +15,10 @@ import android.widget.ArrayAdapter
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
-import com.geeksville.analytics.DataPair
-import com.geeksville.android.GeeksvilleApplication
-import com.geeksville.android.Logging
-import com.geeksville.android.hideKeyboard
+import com.geeksville.mesh.analytics.DataPair
+import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.hideKeyboard
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ConfigProtos

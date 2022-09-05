@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
 import android.os.Looper
-import com.geeksville.android.GeeksvilleApplication
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hasBackgroundPermission
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest

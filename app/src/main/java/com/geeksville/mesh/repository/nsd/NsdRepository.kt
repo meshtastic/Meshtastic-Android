@@ -2,7 +2,7 @@ package com.geeksville.mesh.repository.nsd
 
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.CoroutineDispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow

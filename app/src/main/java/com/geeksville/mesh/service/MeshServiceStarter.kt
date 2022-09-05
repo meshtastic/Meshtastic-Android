@@ -4,7 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.Build
 import androidx.work.*
-import com.geeksville.andlib.BuildConfig
+import com.geeksville.mesh.BuildConfig
 import java.util.concurrent.TimeUnit
 
 /**

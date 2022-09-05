@@ -6,13 +6,13 @@ import android.os.Build
 import android.os.DeadObjectException
 import android.os.Handler
 import android.os.Looper
-import com.geeksville.android.GeeksvilleApplication
-import com.geeksville.android.Logging
-import com.geeksville.concurrent.CallbackContinuation
-import com.geeksville.concurrent.Continuation
-import com.geeksville.concurrent.SyncContinuation
+import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.concurrent.CallbackContinuation
+import com.geeksville.mesh.concurrent.Continuation
+import com.geeksville.mesh.concurrent.SyncContinuation
 import com.geeksville.mesh.android.bluetoothManager
-import com.geeksville.util.exceptionReporter
+import com.geeksville.mesh.util.exceptionReporter
 import kotlinx.coroutines.*
 import java.io.Closeable
 import java.util.*
@@ -75,7 +75,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
      */
     private class BluetoothContinuation(
         val tag: String,
-        val completion: com.geeksville.concurrent.Continuation<*>,
+        val completion: com.geeksville.mesh.concurrent.Continuation<*>,
         val timeoutMillis: Long = 0, // If we want to timeout this operation at a certain time, use a non zero value
         private val startWorkFn: () -> Boolean
     ) : Logging {

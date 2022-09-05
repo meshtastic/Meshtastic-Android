@@ -5,7 +5,7 @@ import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.CoroutineDispatchers
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialProber

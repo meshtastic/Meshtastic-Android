@@ -9,7 +9,6 @@ import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
 import android.os.Build
 import androidx.core.content.ContextCompat
-import com.geeksville.android.GeeksvilleApplication
 import com.geeksville.mesh.MainActivity
 
 /**

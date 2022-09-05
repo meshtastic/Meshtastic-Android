@@ -6,11 +6,11 @@ import android.content.Intent
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.content.edit
-import com.geeksville.analytics.DataPair
-import com.geeksville.android.GeeksvilleApplication
-import com.geeksville.android.Logging
-import com.geeksville.android.isGooglePlayAvailable
-import com.geeksville.concurrent.handledLaunch
+import com.geeksville.mesh.analytics.DataPair
+import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.isGooglePlayAvailable
+import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.*
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
@@ -23,7 +23,7 @@ import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
-import com.geeksville.util.*
+import com.geeksville.mesh.util.*
 import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
 import dagger.Lazy

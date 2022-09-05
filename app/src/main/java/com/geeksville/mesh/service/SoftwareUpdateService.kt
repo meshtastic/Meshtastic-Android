@@ -6,11 +6,11 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.JobIntentService
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceVersion
-import com.geeksville.util.exceptionReporter
+import com.geeksville.mesh.util.exceptionReporter
 import java.util.*
 import java.util.zip.CRC32
 

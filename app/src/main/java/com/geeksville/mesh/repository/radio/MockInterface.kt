@@ -1,9 +1,9 @@
 package com.geeksville.mesh.repository.radio
 
 import android.content.Context
-import com.geeksville.android.BuildUtils
-import com.geeksville.android.GeeksvilleApplication
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.BuildUtils
+import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.*
 import com.geeksville.mesh.model.getInitials
 import com.geeksville.mesh.repository.usb.UsbRepository

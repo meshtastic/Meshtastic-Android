@@ -1,7 +1,7 @@
 package com.geeksville.mesh.repository.radio
 
 import android.content.Context
-import com.geeksville.android.Logging
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.usbManager
 import com.geeksville.mesh.repository.usb.SerialConnection
 import com.geeksville.mesh.repository.usb.SerialConnectionListener

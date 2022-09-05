@@ -1,8 +1,8 @@
 package com.geeksville.mesh.repository.usb
 
 import android.hardware.usb.UsbManager
-import com.geeksville.android.Logging
-import com.geeksville.util.ignoreException
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.util.ignoreException
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.util.SerialInputOutputManager
