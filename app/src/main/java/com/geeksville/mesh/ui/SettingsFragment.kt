@@ -16,7 +16,6 @@ import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hideKeyboard
-import com.geeksville.mesh.android.isGooglePlayAvailable
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ConfigProtos
@@ -154,7 +153,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             model.provideLocation.value = false
             binding.provideLocationCheckbox.isChecked = false
         } else {
-            binding.provideLocationCheckbox.isEnabled = isGooglePlayAvailable(requireContext())
+            binding.provideLocationCheckbox.isEnabled = true
         }
 
         // update the region selection from the device
@@ -582,7 +581,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         scanModel.setupScan()
 
         // system permissions might have changed while we were away
-        binding.provideLocationCheckbox.isChecked = myActivity.hasBackgroundPermission() && (model.provideLocation.value ?: false) && isGooglePlayAvailable(requireContext())
+        binding.provideLocationCheckbox.isChecked = myActivity.hasBackgroundPermission() && (model.provideLocation.value ?: false)
 
         myActivity.registerReceiver(updateProgressReceiver, updateProgressFilter)
 

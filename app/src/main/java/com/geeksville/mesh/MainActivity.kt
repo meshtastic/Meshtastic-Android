@@ -33,6 +33,7 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.ServiceClient
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.android.getMissingPermissions
+import com.geeksville.mesh.android.isGooglePlayAvailable
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
@@ -45,8 +46,6 @@ import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.exceptionReporter
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
@@ -252,15 +251,12 @@ class MainActivity : BaseActivity(), Logging {
     private fun askToRate() {
         exceptionReporter { // Got one IllegalArgumentException from inside this lib, but we don't want to crash our app because of bugs in this optional feature
 
-            val hasGooglePlay = GoogleApiAvailability.getInstance()
-                .isGooglePlayServicesAvailable(this) != ConnectionResult.SERVICE_MISSING
-
             val rater = AppRate.with(this)
                 .setInstallDays(10.toByte()) // default is 10, 0 means install day, 10 means app is launched 10 or more days later than installation
                 .setLaunchTimes(10.toByte()) // default is 10, 3 means app is launched 3 or more times
                 .setRemindInterval(1.toByte()) // default is 1, 1 means app is launched 1 or more days after neutral button clicked
                 .setRemindLaunchesNumber(1.toByte()) // default is 0, 1 means app is launched 1 or more times after neutral button clicked
-                .setStoreType(if (hasGooglePlay) StoreType.GOOGLEPLAY else StoreType.AMAZON)
+                .setStoreType(StoreType.GOOGLEPLAY)
 
             rater.monitor() // Monitors the app launch times
 
@@ -310,7 +306,7 @@ class MainActivity : BaseActivity(), Logging {
         // Handle any intent
         handleIntent(intent)
 
-        askToRate()
+        if (isGooglePlayAvailable(this)) askToRate()
 
         // if (!isInTestLab) - very important - even in test lab we must request permissions because we need location perms for some of our tests to pass
         requestPermission()

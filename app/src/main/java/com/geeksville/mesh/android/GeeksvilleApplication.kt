@@ -10,11 +10,11 @@ import android.provider.Settings
 import androidx.core.content.edit
 import com.geeksville.mesh.analytics.AnalyticsProvider
 import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.common.GoogleApiAvailabilityLight
 
 
 fun isGooglePlayAvailable(context: Context): Boolean {
-    val a = GoogleApiAvailability.getInstance()
+    val a = GoogleApiAvailabilityLight.getInstance()
     val r = a.isGooglePlayServicesAvailable(context)
     return r != ConnectionResult.SERVICE_MISSING && r != ConnectionResult.SERVICE_INVALID
 }
