@@ -85,12 +85,15 @@ jobs:
       run: ./gradlew assembleRelease
 
 #    - name: Upload Release to Play Store
-#      uses: r0adkll/upload-google-play@v1
+#      run: cp ./app/src/main/play/release-notes/en-US/production.txt ./app/src/main/play/release-notes/whatsnew-en-US.txt
+#    - uses: r0adkll/upload-google-play@v1
 #      with:
 #        serviceAccountJsonPlainText: ${{ secrets.GSERVICES }}
-#        packageName: # TODO put your package name here
-#        releaseFiles: app/build/outputs/bundle/release/app-release.apk
-#        track: # TODO specify track here
+#        packageName: com.geeksville.mesh
+#        releaseFiles: app/build/outputs/bundle/release/app-release.aab
+#        track: internal
+#        whatsNewDirectory: app/src/main/play/release-notes
+#        mappingFile: app/build/outputs/mapping/release/mapping.txt
 
     - name: Create GitHub release
       uses: actions/create-release@v1
@@ -124,3 +127,6 @@ jobs:
         asset_path: app/build/outputs/apk/release/app-release.apk
         asset_name: app-release-${{ github.event.inputs.version}}.apk
         asset_content_type: application/zip
+
+#    - name: Gradle publishBundle
+#      run: ./gradlew publishBundle
