@@ -49,8 +49,7 @@ import com.geeksville.mesh.util.exceptionReporter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
-import com.vorlonsoft.android.rate.AppRate
-import com.vorlonsoft.android.rate.StoreType
+import com.suddenh4x.ratingdialog.AppRating
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -249,19 +248,13 @@ class MainActivity : BaseActivity(), Logging {
 
     /// Ask user to rate in play store
     private fun askToRate() {
-        exceptionReporter { // Got one IllegalArgumentException from inside this lib, but we don't want to crash our app because of bugs in this optional feature
-
-            val rater = AppRate.with(this)
-                .setInstallDays(10.toByte()) // default is 10, 0 means install day, 10 means app is launched 10 or more days later than installation
-                .setLaunchTimes(10.toByte()) // default is 10, 3 means app is launched 3 or more times
-                .setRemindInterval(1.toByte()) // default is 1, 1 means app is launched 1 or more days after neutral button clicked
-                .setRemindLaunchesNumber(1.toByte()) // default is 0, 1 means app is launched 1 or more times after neutral button clicked
-                .setStoreType(StoreType.GOOGLEPLAY)
-
-            rater.monitor() // Monitors the app launch times
-
-            // Only ask to rate if the user has a suitable store
-            AppRate.showRateDialogIfMeetsConditions(this)     // Shows the Rate Dialog when conditions are met
+        exceptionReporter { // we don't want to crash our app because of bugs in this optional feature
+            AppRating.Builder(this)
+                .setMinimumLaunchTimes(10) // default is 5, 3 means app is launched 3 or more times
+                .setMinimumDays(10) // default is 5, 0 means install day, 10 means app is launched 10 or more days later than installation
+                .setMinimumLaunchTimesToShowAgain(5) // default is 5, 1 means app is launched 1 or more times after neutral button clicked
+                .setMinimumDaysToShowAgain(14) // default is 14, 1 means app is launched 1 or more days after neutral button clicked
+                .showIfMeetsConditions()
         }
     }
 
