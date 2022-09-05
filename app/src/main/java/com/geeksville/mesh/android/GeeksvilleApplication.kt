@@ -9,8 +9,6 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.core.content.edit
 import com.geeksville.mesh.analytics.AnalyticsProvider
-import com.geeksville.mesh.analytics.MixpanelAnalytics
-import com.geeksville.mesh.analytics.TeeAnalytics
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 
@@ -37,7 +35,6 @@ open class GeeksvilleApplication(
     }
 
     var splunk: AnalyticsProvider? = null
-    var mixAnalytics: MixpanelAnalytics? = null
 
     private val lifecycleCallbacks = object : ActivityLifecycleCallbacks {
         override fun onActivityPaused(activity: Activity) {
@@ -95,19 +92,8 @@ open class GeeksvilleApplication(
     override fun onCreate() {
         super<Application>.onCreate()
 
-        /*
-        if(splunkKey != null)
-            splunk = SplunkAnalytics(this, splunkKey) // Only used for crash reports
-        */
-
         val googleAnalytics = com.geeksville.mesh.analytics.GoogleAnalytics(this)
-        if (mixpanelKey != null) {
-            val mix = com.geeksville.mesh.analytics.MixpanelAnalytics(this, mixpanelKey, pushKey)
-            mixAnalytics = mix
-
-            analytics = TeeAnalytics(googleAnalytics, mix)
-        } else
-            analytics = googleAnalytics
+        analytics = googleAnalytics
 
         // Set analytics per prefs
         isAnalyticsAllowed = isAnalyticsAllowed
