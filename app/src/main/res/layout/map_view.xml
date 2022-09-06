@@ -20,7 +20,7 @@
         app:icon="@drawable/ic_twotone_layers_24"
         app:iconGravity="textStart"
         app:iconPadding="0dp"
-        app:iconTint="@color/colorIconTint"
+        app:iconTint="@color/unselectedColor"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

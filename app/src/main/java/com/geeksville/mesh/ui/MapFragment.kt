@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -136,7 +137,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
                     marker.position = GeoPoint(p.latitude, p.longitude)
                     marker.icon = ContextCompat.getDrawable(
                         requireActivity(),
-                        R.drawable.ic_twotone_location_on_24
+                        R.drawable.ic_baseline_location_on_24
                     )
                 }
                 marker
@@ -233,6 +234,17 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private inner class MarkerWithLabel(mapView: MapView?, label: String) : Marker(mapView) {
         val mLabel = label
 
+        private fun getTextBackgroundSize(text: String, x: Float, y: Float, paint: Paint): Rect {
+            val fontMetrics: Paint.FontMetrics = paint.fontMetrics
+            val halfTextLength: Float = paint.measureText(text) / 2 + 3
+            return Rect(
+                (x - halfTextLength).toInt(),
+                (y + fontMetrics.top).toInt(),
+                (x + halfTextLength).toInt(),
+                (y + fontMetrics.bottom).toInt()
+            )
+        }
+
         override fun draw(c: Canvas, osmv: MapView?, shadow: Boolean) {
             draw(c, osmv)
         }
@@ -244,11 +256,17 @@ class MapFragment : ScreenFragment("Map"), Logging {
 
             val textPaint = Paint()
             textPaint.textSize = 40f
-            textPaint.color = Color.RED
+            textPaint.color = Color.DKGRAY
             textPaint.isAntiAlias = true
+            textPaint.isFakeBoldText = true
             textPaint.textAlign = Paint.Align.CENTER
 
-            c.drawText(mLabel, (p.x - 0f), (p.y - 80f), textPaint)
+            val bgRect = getTextBackgroundSize(mLabel, (p.x - 0f), (p.y - 110f), textPaint)
+            val bgPaint = Paint()
+            bgPaint.color = Color.WHITE
+
+            c.drawRect(bgRect, bgPaint)
+            c.drawText(mLabel, (p.x - 0f), (p.y - 110f), textPaint)
         }
     }
 }
