@@ -36,11 +36,6 @@
     <string name="current_pair">Vous êtes actuellement jumelé à radio %s</string>
     <string name="not_paired_yet">Vous n\'avez pas encore jumelé une radio.</string>
     <string name="change_radio">Changer radio</string>
-    <string name="rate_dialog_title_en">Évaluer Meshtastic</string>
-    <string name="rate_dialog_message_en">Ceci est une application faite par des amateurs, cela vous dérangerait de prendre un moment pour la noter? Si vous trouvez des bugs, merci de poster sur notre forum. Merci pour votre aide!</string>
-    <string name="rate_dialog_ok_en">Évaluer maintenant</string>
-    <string name="rate_dialog_cancel_en">Évaluer plus tard</string>
-    <string name="rate_dialog_no_en">Non merci</string>
     <string name="share">Partager</string>
     <string name="disconnected">Déconnecté</string>
     <string name="device_sleeping">Appareil en veille</string>

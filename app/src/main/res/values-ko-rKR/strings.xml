@@ -65,11 +65,6 @@
     <string name="a_list_of_nodes_in_the_mesh">매쉬망 안의 모든 노드 목록</string>
     <string name="text_messages">문자 메세지</string>
     <string name="channel_invalid">이 채널 URL은 잘못 되었습니다. 따라서 사용할 수 없습니다.</string>
-    <string name="rate_dialog_cancel_en">다음에</string>
-    <string name="rate_dialog_ok_en">지금 평가</string>
-    <string name="rate_dialog_message_en">이 앱은 상업적인 목적으로 만들어 진 것이 아닙니다. 개발자의 노고를 치하하기 위해서 평가를 해주시겠어요? 만약 버그를 발견하면 해당 포럼에 알려주세요. 고맙습니다.</string>
-    <string name="rate_dialog_no_en">하지 않음</string>
-    <string name="rate_dialog_title_en">Meshtastic 평가</string>
     <string name="modem_config_slow_short">단거리 (저속)</string>
     <string name="modem_config_slow_medium">중거리 (저속)</string>
     <string name="modem_config_slow_long">장거리 (저속)</string>

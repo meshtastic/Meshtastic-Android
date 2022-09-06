@@ -54,10 +54,6 @@
     <string name="app_too_old">Aplikácia je príliš stará</string>
     <string name="must_update">Musíte aktualizovať aplikáciu na Google Play store (alebo z Github). Je príliš stará pre komunikáciu s touto verziou firmvéru vysielača. Viac informácií k tejto téme nájdete na <a href="https://meshtastic.org/docs/software/android/android-installation">Meshtastic docs</a>.</string>
     <string name="none">Žiaden (zakázať)</string>
-    <string name="rate_dialog_no_en">Nie, ďakujem</string>
-    <string name="rate_dialog_cancel_en">Pripomenúť neskôr</string>
-    <string name="rate_dialog_ok_en">Ohodnotiť teraz</string>
-    <string name="rate_dialog_title_en">Ohodnoťte Meshtastic</string>
     <string name="modem_config_short">Krátky dosah / Rýchle</string>
     <string name="modem_config_medium">Stredný dosah / Rýchle</string>
     <string name="modem_config_long">Dlhý dosah / Rýchle</string>
@@ -66,7 +62,6 @@
     <string name="about">O aplikácii (verzia)</string>
     <string name="location_disabled_warning">Musíte zapnúť služby o polohe zariadenia (GPS) v nastaveniach systému Android.</string>
     <string name="modem_config_unrecognized">UNRECOGNIZED</string>
-    <string name="rate_dialog_message_en">Táto aplikácia je vyvíjaná hobbystami, našli by ste si chvíľku pre jej hodnotenie? Ak nájdete chyby, proím oznámte ich na našom fóre - meshtastic.discourse.group . Ďakujeme za Vašu podporu!</string>
     <string name="a_list_of_nodes_in_the_mesh">Zoznam zariadení v mesh sieti</string>
     <string name="text_messages">Textové správy</string>
     <string name="channel_invalid">URL tohoto kanála nie je platá a nemôže byť použitá</string>

@@ -53,10 +53,6 @@
     <string name="app_too_old">Aplikace je příliš stará</string>
     <string name="must_update">Musíte aktualizovat aplikci na Google Play store (nebo z Github). Je příliš stará pro komunikaci s touto verzí firmware vysílače.</string>
     <string name="none">Žádný (zakázat)</string>
-    <string name="rate_dialog_no_en">Ne, děkuju</string>
-    <string name="rate_dialog_cancel_en">Připomenout později</string>
-    <string name="rate_dialog_ok_en">Ohodnotit teď</string>
-    <string name="rate_dialog_title_en">Ohodnoťte Meshtastic</string>
     <string name="preferences_language">Jazyk</string>
     <string name="preferences_system_default">Podle systému</string>
 </resources>
