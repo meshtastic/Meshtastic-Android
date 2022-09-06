@@ -12,6 +12,9 @@ import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
@@ -24,6 +27,7 @@ import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.radio.MockInterface
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.MeshService
@@ -32,6 +36,9 @@ import com.geeksville.mesh.util.exceptionToSnackbar
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 object SLogging : Logging
@@ -57,6 +64,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     @Inject
     internal lateinit var usbRepository: UsbRepository
+
+    @Inject
+    internal lateinit var locationRepository: LocationRepository
+    private var receivingLocationUpdates: Job? = null
 
     private val myActivity get() = requireActivity() as MainActivity
 
@@ -241,7 +252,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 if (permissions.entries.all { it.value }) {
                     binding.provideLocationCheckbox.isChecked = true
-                }
+                } else debug("User denied background permission")
             }
 
         val requestLocationAndBackgroundLauncher =
@@ -251,7 +262,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     if (myActivity.hasBackgroundPermission()) {
                         binding.provideLocationCheckbox.isChecked = true
                     } else requestBackgroundAndCheckLauncher.launch(myActivity.getBackgroundPermissions())
-                }
+                } else debug("User denied location permission")
             }
 
         // init our region spinner
@@ -336,12 +347,21 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             requireActivity().hideKeyboard()
         }
 
-        binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
-            if (view.isPressed && isChecked) { // We want to ignore changes caused by code (as opposed to the user)
-                // Don't check the box until the system setting changes
-                view.isChecked = myActivity.hasBackgroundPermission()
+        // Observe receivingLocationUpdates state and update provideLocationCheckbox
+        if (receivingLocationUpdates?.isActive == true) return
+        else receivingLocationUpdates = locationRepository.receivingLocationUpdates
+            .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
+            .onEach { binding.provideLocationCheckbox.isChecked = it }
+            .launchIn(lifecycleScope)
 
-                if (!myActivity.hasBackgroundPermission())
+        binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
+            model.provideLocation.value = isChecked
+            // Don't check the box until the system setting changes
+            view.isChecked = isChecked && myActivity.hasBackgroundPermission()
+
+            if (view.isPressed) { // We want to ignore changes caused by code (as opposed to the user)
+                debug("User changed location tracking to $isChecked")
+                if (isChecked && !view.isChecked)
                     MaterialAlertDialogBuilder(requireContext())
                         .setTitle(R.string.background_required)
                         .setMessage(R.string.why_background_required)
@@ -357,14 +377,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                             }
                         }
                         .show()
-                if (view.isChecked) {
-                    debug("User changed location tracking to $isChecked")
-                    model.provideLocation.value = isChecked
-                    checkLocationEnabled(getString(R.string.location_disabled))
-                    model.meshService?.startProvideLocation()
-                }
+            }
+            if (view.isChecked) {
+                checkLocationEnabled(getString(R.string.location_disabled))
+                model.meshService?.startProvideLocation()
             } else {
-                model.provideLocation.value = isChecked
                 model.meshService?.stopProvideLocation()
             }
         }
@@ -587,9 +604,5 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         // Warn user if BLE device is selected but BLE disabled
         if (scanModel.selectedBluetooth) checkBTEnabled()
-
-        // Warn user if provide location is selected but location disabled
-        if (binding.provideLocationCheckbox.isChecked)
-            checkLocationEnabled(getString(R.string.location_disabled))
     }
 }
