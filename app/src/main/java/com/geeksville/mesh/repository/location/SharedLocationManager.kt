@@ -31,32 +31,35 @@ class SharedLocationManager constructor(
     private val _receivingLocationUpdates: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val receivingLocationUpdates: StateFlow<Boolean> get() = _receivingLocationUpdates
 
-    // TODO use positionBroadcastSecs / test locationRequest settings
-    // if unset, use positionBroadcastSecs default
-    // positionBroadcastSecs.takeIf { it != 0L }?.times(1000L) ?: (15 * 60 * 1000L)
-    private val fastestInterval = 30 * 1000L
-    private val smallestDisplacement = 50F // 50 meters
+    // Defaults from device positionBroadcastSmart
+    private val timeTravelMinimum = 30 * 1000L // 30 seconds
+    private val distanceTravelMinimum = 30F // 30 meters
 
     @SuppressLint("MissingPermission")
     private val _locationUpdates = callbackFlow {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val callback = LocationListener { location ->
-            // info("New location: ${result.lastLocation}")
-            trySend(location)
+        val callback = object: LocationListener {
+            override fun onLocationChanged(location: Location) {
+                // info("New location: $location")
+                trySend(location)
+            }
+
+            override fun onProviderDisabled(provider: String) {
+                close()
+            }
         }
 
         if (!context.hasBackgroundPermission()) close()
 
-
-        info("Starting location updates with minTime=${fastestInterval}ms and minDistance=${smallestDisplacement}m")
+        info("Starting location updates with minTimeMs=${timeTravelMinimum}ms and minDistanceM=${distanceTravelMinimum}m")
         _receivingLocationUpdates.value = true
         GeeksvilleApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
 
         try {
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
-                fastestInterval,
-                smallestDisplacement,
+                timeTravelMinimum,
+                distanceTravelMinimum,
                 callback,
                 context.mainLooper
             )
