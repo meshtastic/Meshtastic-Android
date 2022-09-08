@@ -95,9 +95,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
         val mapStyles by lazy { resources.getStringArray(R.array.map_styles) }
 
         /// Load preferences and its value
-        val prefs = UIViewModel.getPreferences(context!!)
-        val editor: SharedPreferences.Editor = prefs.edit()
-        val mapStyleInt = prefs.getInt(mapStyleId, 1)
+        val editor: SharedPreferences.Editor = mPrefs.edit()
+        val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
         debug("mapStyleId from prefs: $mapStyleInt")
 
         builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
@@ -210,10 +209,9 @@ class MapFragment : ScreenFragment("Map"), Logging {
     }
 
     private fun loadOnlineTileSourceBase(): ITileSource {
-        val prefs = context?.getSharedPreferences(uiPrefs, Context.MODE_PRIVATE)
-        val mapSourceId = prefs?.getInt(mapStyleId, 1)
-        debug("mapStyleId from prefs: $mapSourceId")
-        return CustomTileSource.mTileSources[mapSourceId!!]
+        val id = mPrefs.getInt(mapStyleId, 1)
+        debug("mapStyleId from prefs: $id")
+        return CustomTileSource.mTileSources.getOrNull(id) ?: CustomTileSource.DEFAULT_TILE_SOURCE
     }
 
     override fun onPause() {
