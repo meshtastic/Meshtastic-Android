@@ -46,8 +46,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val defaultZoomSpeed = 3000L
     private val prefsName = "org.andnav.osm.prefs"
     private val mapStyleId = "map_style_id"
-    private val uiPrefs = "ui-prefs"
-    private var nodePositions = listOf<Marker>()
+    private var nodePositions = listOf<MarkerWithLabel>()
     private val nodeLayer = 1
 
 
@@ -117,7 +116,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
          * Using the latest nodedb, generate GeoPoint
          */
         // Find all nodes with valid locations
-        fun getCurrentNodes(): List<Marker> {
+        fun getCurrentNodes(): List<MarkerWithLabel> {
             val mrkr = nodesWithPosition.map { node ->
                 val p = node.position!!
                 debug("Showing on map: $node")
@@ -125,11 +124,11 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 node.user?.let {
                     val label = it.longName + " " + formatAgo(p.time)
                     marker = MarkerWithLabel(map, label)
-                    marker.title = buildString {
-                        append("$label ${node.batteryStr}\n${model.gpsString(p)}")
-                        model.nodeDB.ourNodeInfo?.let { our ->
-                            val dist = our.distanceStr(node)
-                            if (dist != null) append(" (${our.bearing(node)}° $dist)")
+                    marker.title = "${it.longName} ${node.batteryStr}"
+                    marker.snippet = model.gpsString(p)
+                    model.nodeDB.ourNodeInfo?.let { our ->
+                        our.distanceStr(node)?.let { dist ->
+                            marker.subDescription = "bearing: ${our.bearing(node)}° distance: $dist"
                         }
                     }
                     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
