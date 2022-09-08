@@ -122,7 +122,7 @@ data class NodeInfo(
 
     val batteryLevel get() = deviceMetrics?.batteryLevel
     val voltage get() = deviceMetrics?.voltage
-    val batteryStr get() = String.format("%d%% %.2fV", batteryLevel, voltage ?: 0)
+    val batteryStr get() = if (batteryLevel in 1..100) String.format("%d%%", batteryLevel) else ""
 
     /**
      * true if the device was heard from recently
