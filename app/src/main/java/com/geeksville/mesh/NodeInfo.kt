@@ -107,6 +107,37 @@ data class DeviceMetrics(
     }
 }
 
+@Serializable
+@Parcelize
+data class EnvironmentMetrics(
+    val time: Int = currentTime(), // default to current time in secs (NOT MILLISECONDS!)
+    val temperature: Float,
+    val relativeHumidity: Float,
+    val barometricPressure: Float,
+    val gasResistance: Float,
+    val voltage: Float,
+    val current: Float,
+) : Parcelable {
+    companion object {
+        fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
+    }
+
+    /** Create our model object from a protobuf.
+     */
+    constructor(t: TelemetryProtos.EnvironmentMetrics, telemetryTime: Int = currentTime()) : this(
+        telemetryTime,
+        t.temperature,
+        t.relativeHumidity,
+        t.barometricPressure,
+        t.gasResistance,
+        t.voltage,
+        t.current
+    )
+
+    override fun toString(): String {
+        return "EnvironmentMetrics(time=${time}, temperature=${temperature}, humidity=${relativeHumidity}, pressure=${barometricPressure}), resistance=${gasResistance}, voltage=${voltage}, current=${current}"
+    }
+}
 
 @Serializable
 @Parcelize
@@ -117,7 +148,8 @@ data class NodeInfo(
     var snr: Float = Float.MAX_VALUE,
     var rssi: Int = Int.MAX_VALUE,
     var lastHeard: Int = 0, // the last time we've seen this node in secs since 1970
-    var deviceMetrics: DeviceMetrics? = null
+    var deviceMetrics: DeviceMetrics? = null,
+    var environmentMetrics: EnvironmentMetrics? = null,
 ) : Parcelable {
 
     val batteryLevel get() = deviceMetrics?.batteryLevel

@@ -815,13 +815,17 @@ class MeshService : Service(), Logging {
     /// Update our DB of users based on someone sending out a Telemetry subpacket
     private fun handleReceivedTelemetry(
         fromNum: Int,
-        p: TelemetryProtos.Telemetry,
+        t: TelemetryProtos.Telemetry,
         defaultTime: Long = System.currentTimeMillis()
     ) {
         updateNodeInfo(fromNum) {
             it.deviceMetrics = DeviceMetrics(
-                p.deviceMetrics,
-                if (p.time != 0) p.time else (defaultTime / 1000L).toInt()
+                t.deviceMetrics,
+                if (t.time != 0) t.time else (defaultTime / 1000L).toInt()
+            )
+            it.environmentMetrics = EnvironmentMetrics(
+                t.environmentMetrics,
+                if (t.time != 0) t.time else (defaultTime / 1000L).toInt()
             )
         }
     }
