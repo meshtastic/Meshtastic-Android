@@ -2,9 +2,14 @@ package com.geeksville.mesh.ui
 
 import android.bluetooth.BluetoothDevice
 import android.companion.CompanionDeviceManager
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.location.LocationManager
-import android.os.*
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,20 +20,17 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import com.geeksville.mesh.analytics.DataPair
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.hideKeyboard
+import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
-import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.repository.location.LocationRepository
-import com.geeksville.mesh.repository.radio.MockInterface
+import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.SoftwareUpdateService
@@ -64,6 +66,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     @Inject
     internal lateinit var usbRepository: UsbRepository
+
+    @Inject
+    internal lateinit var radioInterfaceServiceLazy: dagger.Lazy<RadioInterfaceService>
 
     @Inject
     internal lateinit var locationRepository: LocationRepository
@@ -461,7 +466,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // If we are running on an emulator, always leave this message showing so we can test the worst case layout
         val curRadio = scanModel.selectedAddress
 
-        if (curRadio != null && !MockInterface.addressValid(requireContext(), usbRepository, "")) {
+        val radioInterfaceService = radioInterfaceServiceLazy.get()
+        if (curRadio != null && !radioInterfaceService.isAddressValid(radioInterfaceService.mockInterfaceAddress)) {
             binding.warningNotPaired.visibility = View.GONE
             // binding.scanStatusText.text = getString(R.string.current_pair).format(curRadio)
         } else if (bluetoothViewModel.enabled.value == true){

@@ -17,16 +17,13 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.*
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.nsd.NsdRepository
-import com.geeksville.mesh.repository.radio.MockInterface
+import com.geeksville.mesh.repository.radio.InterfaceId
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.geeksville.mesh.repository.radio.SerialInterface
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.ui.SLogging
 import com.geeksville.mesh.ui.changeDeviceSelection
@@ -111,10 +108,10 @@ class BTScanModel @Inject constructor(
         val isTCP: Boolean get() = prefix == 't'
     }
 
-    class USBDeviceListEntry(usbManager: UsbManager, val usb: UsbSerialDriver) : DeviceListEntry(
+    class USBDeviceListEntry(radioInterfaceService: RadioInterfaceService, usbManager: UsbManager, val usb: UsbSerialDriver) : DeviceListEntry(
         usb.device.deviceName,
-        SerialInterface.toInterfaceName(usb.device.deviceName),
-        SerialInterface.assumePermission || usbManager.hasPermission(usb.device)
+        radioInterfaceService.toInterfaceAddress(InterfaceId.SERIAL, usb.device.deviceName),
+        usbManager.hasPermission(usb.device)
     )
 
     class TCPDeviceListEntry(val service: NsdServiceInfo) : DeviceListEntry(
@@ -219,7 +216,7 @@ class BTScanModel @Inject constructor(
     fun setupScan(): Boolean {
         selectedAddress = radioInterfaceService.getDeviceAddress()
 
-        return if (bluetoothAdapter == null || MockInterface.addressValid(context, usbRepository, "")) {
+        return if (bluetoothAdapter == null || radioInterfaceService.isAddressValid(radioInterfaceService.mockInterfaceAddress)) {
             warn("No bluetooth adapter.  Running under emulation?")
 
             val testnodes = listOf(
@@ -261,7 +258,7 @@ class BTScanModel @Inject constructor(
 
                 val serialDevices by lazy { usbRepository.serialDevicesWithDrivers.value }
                 serialDevices.forEach { (_, d) ->
-                    addDevice(USBDeviceListEntry(usbManager, d))
+                    addDevice(USBDeviceListEntry(radioInterfaceService, usbManager, d))
                 }
             } else {
                 debug("scan already running")

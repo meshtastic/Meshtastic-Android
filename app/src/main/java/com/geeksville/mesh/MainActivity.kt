@@ -8,7 +8,10 @@ import android.content.pm.PackageManager
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.net.Uri
-import android.os.*
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.RemoteException
 import android.text.method.LinkMovementMethod
 import android.view.Menu
 import android.view.MenuItem
@@ -27,21 +30,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.geeksville.mesh.android.BindFailedException
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.ServiceClient
+import com.geeksville.mesh.android.*
 import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.android.getMissingPermissions
-import com.geeksville.mesh.android.isGooglePlayAvailable
 import com.geeksville.mesh.databinding.ActivityMainBinding
-import com.geeksville.mesh.model.BTScanModel
-import com.geeksville.mesh.model.BluetoothViewModel
-import com.geeksville.mesh.model.ChannelSet
-import com.geeksville.mesh.model.DeviceVersion
-import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.model.*
+import com.geeksville.mesh.repository.radio.InterfaceId
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.geeksville.mesh.repository.radio.SerialInterface
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
 import com.geeksville.mesh.util.Exceptions
@@ -675,7 +669,8 @@ class MainActivity : BaseActivity(), Logging {
                 try {
                     usbDevice?.let { usb ->
                         debug("Switching to USB radio ${usb.deviceName}")
-                        service.setDeviceAddress(SerialInterface.toInterfaceName(usb.deviceName))
+                        val address = radioInterfaceService.toInterfaceAddress(InterfaceId.SERIAL, usb.deviceName)
+                        service.setDeviceAddress(address)
                         usbDevice =
                             null // Only switch once - thereafter it should be stored in settings
                     }

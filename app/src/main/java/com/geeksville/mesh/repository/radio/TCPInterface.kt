@@ -1,9 +1,8 @@
 package com.geeksville.mesh.repository.radio
 
-import android.content.Context
-import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.util.Exceptions
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import java.io.BufferedOutputStream
 import java.io.IOException
 import java.io.InputStream
@@ -13,23 +12,10 @@ import java.net.Socket
 import java.net.SocketTimeoutException
 import kotlin.concurrent.thread
 
-
-class TCPInterface(service: RadioInterfaceService, private val address: String) :
-    StreamInterface(service) {
-
-    companion object : Logging, InterfaceFactory('t') {
-        override fun createInterface(
-            context: Context,
-            service: RadioInterfaceService,
-            usbRepository: UsbRepository, // Temporary until dependency injection transition is completed
-            rest: String
-        ): IRadioInterface = TCPInterface(service, rest)
-
-        init {
-            registerFactory()
-        }
-    }
-
+class TCPInterface @AssistedInject constructor(
+    service: RadioInterfaceService,
+    @Assisted private val address: String
+) : StreamInterface(service) {
     var socket: Socket? = null
     lateinit var outStream: OutputStream
     lateinit var inStream: InputStream

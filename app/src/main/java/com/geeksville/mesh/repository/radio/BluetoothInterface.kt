@@ -1,18 +1,17 @@
 package com.geeksville.mesh.repository.radio
 
-import android.annotation.SuppressLint
+import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
-import android.bluetooth.BluetoothManager
-import android.content.Context
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.exceptionReporter
 import com.geeksville.mesh.util.ignoreException
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -78,25 +77,15 @@ A variable keepAllPackets, if set to true will suppress this behavior and instea
  * Note - this class intentionally dumb.  It doesn't understand protobuf framing etc...
  * It is designed to be simple so it can be stubbed out with a simulated version as needed.
  */
-class BluetoothInterface(
-    val context: Context,
-    val service: RadioInterfaceService,
-    val address: String) : IRadioInterface,
+class BluetoothInterface @AssistedInject constructor(
+    context: Application,
+    bluetoothAdapter: dagger.Lazy<BluetoothAdapter?>,
+    private val service: RadioInterfaceService,
+    @Assisted val address: String) : IRadioInterface,
     Logging {
 
-    companion object : Logging, InterfaceFactory('x') {
-        override fun createInterface(
-            context: Context,
-            service: RadioInterfaceService,
-            usbRepository: UsbRepository, // Temporary until dependency injection transition is completed
-            rest: String
-        ): IRadioInterface = BluetoothInterface(context, service, rest)
-
-        init {
-            registerFactory()
-        }
-
-        /// this service UUID is publically visible for scanning
+    companion object : Logging {
+        /// this service UUID is publicly visible for scanning
         val BTM_SERVICE_UUID: UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
 
         val BTM_FROMRADIO_CHARACTER: UUID =
@@ -105,29 +94,6 @@ class BluetoothInterface(
             UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
         val BTM_FROMNUM_CHARACTER: UUID =
             UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
-
-        /// Get our bluetooth adapter (should always succeed except on emulator
-        private fun getBluetoothAdapter(context: Context): BluetoothAdapter? {
-            val bluetoothManager =
-                context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            return bluetoothManager.adapter
-        }
-
-        /** Return true if this address is still acceptable. For BLE that means, still bonded */
-        @SuppressLint("NewApi", "MissingPermission")
-        override fun addressValid(
-            context: Context,
-            usbRepository: UsbRepository, // Temporary until dependency injection transition is completed
-            rest: String
-        ): Boolean {
-            val allPaired = getBluetoothAdapter(context)?.bondedDevices.orEmpty()
-                    .map { it.address }.toSet()
-            return if (!allPaired.contains(rest)) {
-                warn("Ignoring stale bond to ${rest.anonymize}")
-                false
-            } else
-                true
-        }
 
         /**
          * this is created in onCreate()
@@ -165,7 +131,7 @@ class BluetoothInterface(
     init {
         // Note: this call does no comms, it just creates the device object (even if the
         // device is off/not connected)
-        val device = getBluetoothAdapter(context)?.getRemoteDevice(address)
+        val device = bluetoothAdapter.get()?.getRemoteDevice(address)
         if (device != null) {
             info("Creating radio interface service.  device=${address.anonymize}")
 

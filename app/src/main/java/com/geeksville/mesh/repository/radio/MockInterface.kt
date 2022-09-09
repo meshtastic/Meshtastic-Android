@@ -1,36 +1,17 @@
 package com.geeksville.mesh.repository.radio
 
-import android.content.Context
-import com.geeksville.mesh.android.BuildUtils
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.*
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.getInitials
-import com.geeksville.mesh.repository.usb.UsbRepository
 import com.google.protobuf.ByteString
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 
 /** A simulated interface that is used for testing in the simulator */
-class MockInterface(private val service: RadioInterfaceService) : Logging, IRadioInterface {
-    companion object : Logging, InterfaceFactory('m') {
-        override fun createInterface(
-            context: Context,
-            service: RadioInterfaceService,
-            usbRepository: UsbRepository, // Temporary until dependency injection transition is completed
-            rest: String
-        ): IRadioInterface = MockInterface(service)
-
-        override fun addressValid(
-            context: Context,
-            usbRepository: UsbRepository, // Temporary until dependency injection transition is completed
-            rest: String
-        ): Boolean =
-            BuildUtils.isEmulator || ((context.applicationContext as GeeksvilleApplication).isInTestLab)
-
-        init {
-            registerFactory()
-        }
-    }
-
+class MockInterface @AssistedInject constructor(
+    private val service: RadioInterfaceService,
+    @Assisted val address: String
+) : Logging, IRadioInterface {
     private var messageCount = 50
 
     // an infinite sequence of ints
