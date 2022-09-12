@@ -493,10 +493,8 @@ class MeshService : Service(), Logging {
                 setChannel(it)
             }
 
-            val newConfig = ConfigProtos.Config.newBuilder()
-            val newPrefs = (value.loraConfig).toBuilder()
-            newConfig.lora = newPrefs.build()
-            if (localConfig.lora != newConfig.lora) sendDeviceConfig(newConfig.build())
+            val newConfig = config { lora = value.loraConfig }
+            if (localConfig.lora != newConfig.lora) sendDeviceConfig(newConfig)
 
             channels = fixupChannelList(asChannels)
         }

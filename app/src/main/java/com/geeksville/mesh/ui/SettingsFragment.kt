@@ -13,6 +13,7 @@ import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.geeksville.mesh.analytics.DataPair
@@ -160,9 +161,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (connected == MeshService.ConnectionState.DISCONNECTED)
             model.setOwner("")
 
-        if (model.gpsDisabled) {
-            model.provideLocation.value = false
+        if (model.config.position.gpsDisabled) {
             binding.provideLocationCheckbox.isChecked = false
+            binding.provideLocationCheckbox.isEnabled = false
         } else {
             binding.provideLocationCheckbox.isEnabled = true
         }
@@ -287,7 +288,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             updateDevicesButtons(scanModel.devices.value)
         }
 
-        model.localConfig.observe(viewLifecycleOwner) {
+        model.localConfig.asLiveData().observe(viewLifecycleOwner) {
             if (!model.isConnected()) {
                 val configCount = it.allFields.size
                 binding.scanStatusText.text = "Device config ($configCount / 7)"

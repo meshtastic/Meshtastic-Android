@@ -13,10 +13,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.*
+import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
+import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.repository.datastore.LocalConfigRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.util.GPSFormat
@@ -71,8 +73,9 @@ class UIViewModel @Inject constructor(
     private val _allPacketState = MutableStateFlow<List<Packet>>(emptyList())
     val allPackets: StateFlow<List<Packet>> = _allPacketState
 
-    private val _localConfig = MutableLiveData<LocalOnlyProtos.LocalConfig>()
-    val localConfig: LiveData<LocalOnlyProtos.LocalConfig> get() = _localConfig
+    private val _localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
+    val localConfig: StateFlow<LocalConfig> = _localConfig
+    val config get() = _localConfig.value
 
     private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
     val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
@@ -139,80 +142,10 @@ class UIViewModel @Inject constructor(
         _requestChannelUrl.value = null
     }
 
-    var positionBroadcastSecs: Int?
-        get() {
-            _localConfig.value?.position?.positionBroadcastSecs?.let {
-                return if (it > 0) it else defaultPositionBroadcastSecs
-            }
-            return null
-        }
+    var region: Config.LoRaConfig.RegionCode
+        get() = config.lora?.region ?: Config.LoRaConfig.RegionCode.Unset
         set(value) {
-            val config = _localConfig.value
-            if (value != null && config != null) {
-                val builder = config.position.toBuilder()
-                builder.positionBroadcastSecs =
-                    if (value == defaultPositionBroadcastSecs) 0 else value
-                val newConfig = ConfigProtos.Config.newBuilder()
-                newConfig.position = builder.build()
-                setDeviceConfig(newConfig.build())
-            }
-        }
-
-    var lsSleepSecs: Int?
-        get() {
-            _localConfig.value?.power?.lsSecs?.let {
-                return if (it > 0) it else defaultLsSecs
-            }
-            return null
-        }
-        set(value) {
-            val config = _localConfig.value
-            if (value != null && config != null) {
-                val builder = config.power.toBuilder()
-                builder.lsSecs = if (value == defaultLsSecs) 0 else value
-                val newConfig = ConfigProtos.Config.newBuilder()
-                newConfig.power = builder.build()
-                setDeviceConfig(newConfig.build())
-            }
-        }
-
-    var gpsDisabled: Boolean
-        get() = _localConfig.value?.position?.gpsDisabled ?: false
-        set(value) {
-            val config = _localConfig.value
-            if (config != null) {
-                val builder = config.position.toBuilder()
-                builder.gpsDisabled = value
-                val newConfig = ConfigProtos.Config.newBuilder()
-                newConfig.position = builder.build()
-                setDeviceConfig(newConfig.build())
-            }
-        }
-
-    var isPowerSaving: Boolean?
-        get() = _localConfig.value?.power?.isPowerSaving
-        set(value) {
-            val config = _localConfig.value
-            if (value != null && config != null) {
-                val builder = config.power.toBuilder()
-                builder.isPowerSaving = value
-                val newConfig = ConfigProtos.Config.newBuilder()
-                newConfig.power = builder.build()
-                setDeviceConfig(newConfig.build())
-            }
-        }
-
-    var region: ConfigProtos.Config.LoRaConfig.RegionCode
-        get() = localConfig.value?.lora?.region ?: ConfigProtos.Config.LoRaConfig.RegionCode.Unset
-        set(value) {
-            val config = _localConfig.value
-            if (config != null) {
-                val builder = config.lora.toBuilder()
-                builder.region = value
-                val newConfig = ConfigProtos.Config.newBuilder()
-                newConfig.lora = builder.build()
-                setDeviceConfig(newConfig.build())
-            }
+            updateLoraConfig { it.copy { region = value } }
         }
 
     fun gpsString(pos: Position): String {
@@ -226,12 +159,7 @@ class UIViewModel @Inject constructor(
     }
 
     @Suppress("MemberVisibilityCanBePrivate")
-    val isRouter: Boolean =
-        localConfig.value?.device?.role == ConfigProtos.Config.DeviceConfig.Role.Router
-
-    // These default values are borrowed from the device code.
-    private val defaultPositionBroadcastSecs = if (isRouter) 12 * 60 * 60 else 15 * 60
-    private val defaultLsSecs = if (isRouter) 24 * 60 * 60 else 5 * 60
+    val isRouter: Boolean = config.device?.role == Config.DeviceConfig.Role.Router
 
     // We consider hasWifi = ESP32
     fun isESP32() = myNodeInfo.value?.hasWifi == true
@@ -272,19 +200,44 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Return the primary channel info
-     */
-    val primaryChannel: Channel? get() = _channels.value?.primaryChannel
-
-    // Set the radio config (also updates our saved copy in preferences)
-    private fun setDeviceConfig(config: ConfigProtos.Config) {
-        meshService?.deviceConfig = config.toByteArray()
+    inline fun updateDeviceConfig(crossinline body: (Config.DeviceConfig) -> Config.DeviceConfig) {
+        val data = body(config.device)
+        setDeviceConfig(config { device = data })
     }
 
-    fun setLocalConfig(localConfig: LocalOnlyProtos.LocalConfig) {
-        if (_localConfig.value == localConfig) return
-        _localConfig.value = localConfig
+    inline fun updatePositionConfig(crossinline body: (Config.PositionConfig) -> Config.PositionConfig) {
+        val data = body(config.position)
+        setDeviceConfig(config { position = data })
+    }
+
+    inline fun updatePowerConfig(crossinline body: (Config.PowerConfig) -> Config.PowerConfig) {
+        val data = body(config.power)
+        setDeviceConfig(config { power = data })
+    }
+
+    inline fun updateNetworkConfig(crossinline body: (Config.WiFiConfig) -> Config.WiFiConfig) {
+        val data = body(config.wifi)
+        setDeviceConfig(config { wifi = data })
+    }
+
+    inline fun updateDisplayConfig(crossinline body: (Config.DisplayConfig) -> Config.DisplayConfig) {
+        val data = body(config.display)
+        setDeviceConfig(config { display = data })
+    }
+
+    inline fun updateLoraConfig(crossinline body: (Config.LoRaConfig) -> Config.LoRaConfig) {
+        val data = body(config.lora)
+        setDeviceConfig(config { lora = data })
+    }
+
+    inline fun updateBluetoothConfig(crossinline body: (Config.BluetoothConfig) -> Config.BluetoothConfig) {
+        val data = body(config.bluetooth)
+        setDeviceConfig(config { bluetooth = data })
+    }
+
+    // Set the radio config (also updates our saved copy in preferences)
+    fun setDeviceConfig(config: Config) {
+        meshService?.deviceConfig = config.toByteArray()
     }
 
     /// Set the radio config (also updates our saved copy in preferences)

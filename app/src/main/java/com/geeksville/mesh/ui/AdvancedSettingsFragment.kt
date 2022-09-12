@@ -6,9 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.asLiveData
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hideKeyboard
 import com.geeksville.mesh.R
+import com.geeksville.mesh.copy
 import com.geeksville.mesh.databinding.AdvancedSettingsBinding
 import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
@@ -38,19 +40,19 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        model.localConfig.observe(viewLifecycleOwner) {
-            binding.positionBroadcastPeriodEditText.setText(model.positionBroadcastSecs.toString())
-            binding.lsSleepEditText.setText(model.lsSleepSecs.toString())
-            binding.positionBroadcastPeriodView.isEnabled = !model.gpsDisabled
-            binding.positionBroadcastSwitch.isChecked = !model.gpsDisabled
-            binding.lsSleepView.isEnabled = model.isPowerSaving ?: false && model.isESP32()
-            binding.lsSleepSwitch.isChecked = model.isPowerSaving ?: false && model.isESP32()
+        model.localConfig.asLiveData().observe(viewLifecycleOwner) {
+            binding.positionBroadcastPeriodEditText.setText(model.config.position.positionBroadcastSecs.toString())
+            binding.lsSleepEditText.setText(model.config.power.lsSecs.toString())
+            binding.positionBroadcastPeriodView.isEnabled = !model.config.position.gpsDisabled
+            binding.positionBroadcastSwitch.isChecked = !model.config.position.gpsDisabled
+            binding.lsSleepView.isEnabled = model.config.power.isPowerSaving && model.isESP32()
+            binding.lsSleepSwitch.isChecked = model.config.power.isPowerSaving && model.isESP32()
         }
 
         model.connectionState.observe(viewLifecycleOwner) { connectionState ->
             val connected = connectionState == MeshService.ConnectionState.CONNECTED
-            binding.positionBroadcastPeriodView.isEnabled = connected && !model.gpsDisabled
-            binding.lsSleepView.isEnabled = connected && model.isPowerSaving ?: false
+            binding.positionBroadcastPeriodView.isEnabled = connected && !model.config.position.gpsDisabled
+            binding.lsSleepView.isEnabled = connected && model.config.power.isPowerSaving
             binding.positionBroadcastSwitch.isEnabled = connected
             binding.lsSleepSwitch.isEnabled = connected && model.isESP32()
             binding.shutdownButton.isEnabled = connected && model.hasAXP()
@@ -62,16 +64,16 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             val textEdit = binding.positionBroadcastPeriodEditText
             val n = textEdit.text.toString().toIntOrNull()
             val minBroadcastPeriodSecs =
-                ChannelOption.fromConfig(model.localConfig.value?.lora?.modemPreset)?.minBroadcastPeriodSecs
+                ChannelOption.fromConfig(model.config.lora.modemPreset)?.minBroadcastPeriodSecs
                     ?: ChannelOption.defaultMinBroadcastPeriod
 
             if (n != null && n < MAX_INT_DEVICE && (n == 0 || n >= minBroadcastPeriodSecs)) {
                 exceptionToSnackbar(requireView()) {
-                    model.positionBroadcastSecs = n
+                    model.updatePositionConfig { it.copy { positionBroadcastSecs = n } }
                 }
             } else {
                 // restore the value in the edit field
-                textEdit.setText(model.positionBroadcastSecs.toString())
+                textEdit.setText(model.config.position.positionBroadcastSecs.toString())
                 val errorText =
                     if (n == null || n < 0 || n >= MAX_INT_DEVICE)
                         "Bad value: ${textEdit.text.toString()}"
@@ -83,9 +85,9 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             requireActivity().hideKeyboard()
         }
 
-        binding.positionBroadcastSwitch.setOnCheckedChangeListener { view, isChecked ->
-            if (view.isPressed) {
-                model.gpsDisabled = !isChecked
+        binding.positionBroadcastSwitch.setOnCheckedChangeListener { btn, isChecked ->
+            if (btn.isPressed) {
+                model.updatePositionConfig { it.copy { gpsDisabled = !isChecked } }
                 debug("User changed locationShare to $isChecked")
             }
         }
@@ -95,7 +97,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             val n = str.toIntOrNull()
             if (n != null && n < MAX_INT_DEVICE && n >= 0) {
                 exceptionToSnackbar(requireView()) {
-                    model.lsSleepSecs = n
+                    model.updatePowerConfig { it.copy { lsSecs = n } }
                 }
             } else {
                 Snackbar.make(requireView(), "Bad value: $str", Snackbar.LENGTH_LONG).show()
@@ -103,9 +105,9 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             requireActivity().hideKeyboard()
         }
 
-        binding.lsSleepSwitch.setOnCheckedChangeListener { view, isChecked ->
-            if (view.isPressed) {
-                model.isPowerSaving = isChecked
+        binding.lsSleepSwitch.setOnCheckedChangeListener { btn, isChecked ->
+            if (btn.isPressed) {
+                model.updatePowerConfig { it.copy { isPowerSaving = isChecked } }
                 debug("User changed isPowerSaving to $isChecked")
             }
         }
