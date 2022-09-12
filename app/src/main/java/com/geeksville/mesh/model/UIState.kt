@@ -19,6 +19,7 @@ import com.geeksville.mesh.database.QuickChatActionRepository
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
+import com.geeksville.mesh.repository.datastore.ChannelSetRepository
 import com.geeksville.mesh.repository.datastore.LocalConfigRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.util.GPSFormat
@@ -65,6 +66,7 @@ fun getInitials(nameIn: String): String {
 class UIViewModel @Inject constructor(
     private val app: Application,
     private val packetRepository: PacketRepository,
+    private val channelSetRepository: ChannelSetRepository,
     private val localConfigRepository: LocalConfigRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
     private val preferences: SharedPreferences
@@ -76,6 +78,9 @@ class UIViewModel @Inject constructor(
     private val _localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
     val localConfig: StateFlow<LocalConfig> = _localConfig
     val config get() = _localConfig.value
+
+    private val _channels = MutableStateFlow(ChannelSet())
+    val channels: StateFlow<ChannelSet> = _channels
 
     private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
     val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
@@ -94,6 +99,11 @@ class UIViewModel @Inject constructor(
         viewModelScope.launch {
             quickChatActionRepository.getAllActions().collect { actions ->
                 _quickChatActions.value = actions
+            }
+        }
+        viewModelScope.launch {
+            channelSetRepository.channelSetFlow.collect { channelSet ->
+                _channels.value = ChannelSet(channelSet)
             }
         }
         debug("ViewModel created")
@@ -124,9 +134,6 @@ class UIViewModel @Inject constructor(
     fun setConnectionState(connectionState: MeshService.ConnectionState) {
         _connectionState.value = connectionState
     }
-
-    private val _channels = MutableLiveData<ChannelSet?>()
-    val channels: LiveData<ChannelSet?> get() = _channels
 
     private val _requestChannelUrl = MutableLiveData<Uri?>(null)
     val requestChannelUrl: LiveData<Uri?> get() = _requestChannelUrl
@@ -242,19 +249,9 @@ class UIViewModel @Inject constructor(
 
     /// Set the radio config (also updates our saved copy in preferences)
     fun setChannels(c: ChannelSet) {
-        if (_channels.value == c) return
         debug("Setting new channels!")
         meshService?.channels = c.protobuf.toByteArray()
-        _channels.value =
-            c // Must be done after calling the service, so we will will properly throw if the service failed (and therefore not cache invalid new settings)
-
-        preferences.edit {
-            this.putString("channel-url", c.getChannelUrl().toString())
-        }
     }
-
-    /// Kinda ugly - created in the activity but used from Compose - figure out if there is a cleaner way GIXME
-    // lateinit var googleSignInClient: GoogleSignInClient
 
     /// our name in hte radio
     /// Note, we generate owner initials automatically for now

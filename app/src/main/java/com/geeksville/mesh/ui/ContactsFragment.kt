@@ -10,6 +10,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
+import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.android.Logging
@@ -89,7 +90,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
 
             //grab channel names from DeviceConfig
             val channels = model.channels.value
-            val primaryChannel = channels?.primaryChannel
+            val primaryChannel = channels.primaryChannel
 
             val shortName = node?.user?.shortName ?: "???"
             val longName =
@@ -200,7 +201,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         binding.contactsView.adapter = contactsAdapter
         binding.contactsView.layoutManager = LinearLayoutManager(requireContext())
 
-        model.channels.observe(viewLifecycleOwner) {
+        model.channels.asLiveData().observe(viewLifecycleOwner) {
             contactsAdapter.onChannelsChanged()
         }
 

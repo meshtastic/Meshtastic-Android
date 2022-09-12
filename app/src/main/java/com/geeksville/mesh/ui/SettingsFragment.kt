@@ -295,10 +295,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             } else updateNodeInfo()
         }
 
-        model.channels.observe(viewLifecycleOwner) {
+        model.channels.asLiveData().observe(viewLifecycleOwner) {
             if (!model.isConnected()) {
-                val channelCount = it?.protobuf?.settingsCount ?: 0
-                binding.scanStatusText.text = "Channels ($channelCount / 8)"
+                val channelCount = it.protobuf.settingsCount
+                if (channelCount > 0) binding.scanStatusText.text = "Channels ($channelCount / 8)"
             }
         }
 

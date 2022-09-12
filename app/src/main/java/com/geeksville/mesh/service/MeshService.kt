@@ -11,12 +11,14 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.*
+import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.mesh.android.hasBackgroundPermission
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.DeviceVersion
+import com.geeksville.mesh.repository.datastore.ChannelSetRepository
 import com.geeksville.mesh.repository.datastore.LocalConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.radio.BluetoothInterface
@@ -34,7 +36,6 @@ import kotlinx.serialization.json.Json
 import java.util.*
 import javax.inject.Inject
 import kotlin.math.absoluteValue
-import kotlin.math.max
 
 /**
  * Handles all the communication with android apps.  Also keeps an internal model
@@ -59,6 +60,9 @@ class MeshService : Service(), Logging {
 
     @Inject
     lateinit var localConfigRepository: LocalConfigRepository
+
+    @Inject
+    lateinit var channelSetRepository: ChannelSetRepository
 
     companion object : Logging {
 
@@ -350,10 +354,7 @@ class MeshService : Service(), Logging {
 
     var myNodeInfo: MyNodeInfo? = null
 
-    private var localConfig: LocalOnlyProtos.LocalConfig =
-        LocalOnlyProtos.LocalConfig.newBuilder().build()
-
-    private var channels = fixupChannelList(listOf())
+    private var localConfig: LocalConfig = LocalConfig.getDefaultInstance()
 
     /// True after we've done our initial node db init
     @Volatile
@@ -467,16 +468,8 @@ class MeshService : Service(), Logging {
     /// Convert the channels array into a ChannelSet
     private var channelSet: AppOnlyProtos.ChannelSet
         get() {
-            val cs = channels.filter {
-                it.role != ChannelProtos.Channel.Role.DISABLED
-            }.map {
-                it.settings
-            }
-
-            return AppOnlyProtos.ChannelSet.newBuilder().apply {
-                addAllSettings(cs)
-                loraConfig = localConfig.lora
-            }.build()
+            // this is never called
+            return AppOnlyProtos.ChannelSet.getDefaultInstance()
         }
         set(value) {
             val asChannels = value.settingsList.mapIndexed { i, c ->
@@ -493,10 +486,13 @@ class MeshService : Service(), Logging {
                 setChannel(it)
             }
 
+            serviceScope.handledLaunch {
+                channelSetRepository.clearSettings()
+                channelSetRepository.addAllSettings(value)
+            }
+
             val newConfig = config { lora = value.loraConfig }
             if (localConfig.lora != newConfig.lora) sendDeviceConfig(newConfig)
-
-            channels = fixupChannelList(asChannels)
         }
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
@@ -742,8 +738,6 @@ class MeshService : Service(), Logging {
                     val mi = myNodeInfo
                     if (mi != null) {
                         val ch = a.getChannelResponse
-                        // add new entries if needed
-                        channels[ch.index] = ch
                         debug("Admin: Received channel ${ch.index}")
 
                         val packetToSave = Packet(
@@ -758,7 +752,8 @@ class MeshService : Service(), Logging {
 
                             // Stop once we get to the first disabled entry
                             if (/* ch.hasSettings() || */ ch.role != ChannelProtos.Channel.Role.DISABLED) {
-                                // Not done yet, request next channel
+                                // Not done yet, add new entries and request next channel
+                                addChannelSettings(ch)
                                 requestChannel(ch.index + 1)
                             } else {
                                 debug("We've received the last channel, allowing rest of app to start...")
@@ -952,6 +947,12 @@ class MeshService : Service(), Logging {
     private fun clearLocalConfig() {
         serviceScope.handledLaunch {
             localConfigRepository.clearLocalConfig()
+        }
+    }
+
+    private fun addChannelSettings(channel: ChannelProtos.Channel) {
+        serviceScope.handledLaunch {
+            channelSetRepository.addSettings(channel)
         }
     }
 
@@ -1284,24 +1285,10 @@ class MeshService : Service(), Logging {
         regenMyNodeInfo()
 
         // We'll need to get a new set of channels and settings now
-        clearLocalConfig()
-
-        // prefill the channel array with null channels
-        channels = fixupChannelList(listOf<ChannelProtos.Channel>())
-    }
-
-    /// scan the channel list and make sure it has one PRIMARY channel and is maxChannels long
-    private fun fixupChannelList(lIn: List<ChannelProtos.Channel>): Array<ChannelProtos.Channel> {
-        // When updating old firmware, we will briefly be told that there is zero channels
-        val maxChannels =
-            max(myNodeInfo?.maxChannels ?: 8, 8) // If we don't have my node info, assume 8 channels (source: apponly.options)
-        val l = lIn.toMutableList()
-        while (l.size < maxChannels) {
-            val b = ChannelProtos.Channel.newBuilder()
-            b.index = l.size
-            l += b.build()
+        serviceScope.handledLaunch {
+            channelSetRepository.clearChannelSet()
+            localConfigRepository.clearLocalConfig()
         }
-        return l.toTypedArray()
     }
 
     /// If we've received our initial config, our radio settings and all of our channels, send any queued packets and broadcast connected to clients

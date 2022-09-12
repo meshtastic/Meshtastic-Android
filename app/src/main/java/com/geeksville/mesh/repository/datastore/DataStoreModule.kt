@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.dataStoreFile
+import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import dagger.Module
 import dagger.Provides
@@ -28,6 +29,19 @@ object DataStoreModule {
             produceFile = { appContext.dataStoreFile("local_config.pb") },
             corruptionHandler = ReplaceFileCorruptionHandler(
                 produceNewData = { LocalConfig.getDefaultInstance() }
+            ),
+            scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+        )
+    }
+
+    @Singleton
+    @Provides
+    fun provideChannelSetDataStore(@ApplicationContext appContext: Context): DataStore<ChannelSet> {
+        return DataStoreFactory.create(
+            serializer = ChannelSetSerializer,
+            produceFile = { appContext.dataStoreFile("channel_set.pb") },
+            corruptionHandler = ReplaceFileCorruptionHandler(
+                produceNewData = { ChannelSet.getDefaultInstance() }
             ),
             scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         )
