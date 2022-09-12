@@ -156,6 +156,17 @@ data class NodeInfo(
     val voltage get() = deviceMetrics?.voltage
     val batteryStr get() = if (batteryLevel in 1..100) String.format("%d%%", batteryLevel) else ""
 
+    private fun envFormat(f: String, unit: String, env: Float?): String =
+        if (env != null && env > 0f) String.format(f + unit, env) else ""
+
+    val envMetricStr
+        get() = envFormat("%.1f", "°C ", environmentMetrics?.temperature) +
+                envFormat("%.0f", "%% ", environmentMetrics?.relativeHumidity) +
+                envFormat("%.1f", "hPa ", environmentMetrics?.barometricPressure) +
+                envFormat("%.0f", "KΩ ", environmentMetrics?.gasResistance) +
+                envFormat("%.2f", "V ", environmentMetrics?.voltage) +
+                envFormat("%.1f", "mA", environmentMetrics?.current)
+
     /**
      * true if the device was heard from recently
      *

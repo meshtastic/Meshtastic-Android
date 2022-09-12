@@ -42,6 +42,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         val lastTime = itemView.lastConnectionView
         val powerIcon = itemView.batteryIcon
         val signalView = itemView.signalView
+        val envMetrics = itemView.envMetrics
     }
 
     private val nodesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
@@ -135,6 +136,13 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             renderBattery(n.batteryLevel, n.voltage, holder)
 
             holder.lastTime.text = formatAgo(n.lastHeard)
+
+            if (n.envMetricStr.isNotEmpty()) {
+                holder.envMetrics.text = n.envMetricStr
+                holder.envMetrics.visibility = View.VISIBLE
+            } else {
+                holder.envMetrics.visibility = View.GONE
+            }
 
             if (n.num == ourNodeInfo?.num) {
                 val info = model.myNodeInfo.value
