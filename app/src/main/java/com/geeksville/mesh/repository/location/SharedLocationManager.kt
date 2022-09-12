@@ -3,8 +3,8 @@ package com.geeksville.mesh.repository.location
 import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager
+import androidx.core.location.LocationListenerCompat
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hasBackgroundPermission
@@ -38,15 +38,9 @@ class SharedLocationManager constructor(
     @SuppressLint("MissingPermission")
     private val _locationUpdates = callbackFlow {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val callback = object: LocationListener {
-            override fun onLocationChanged(location: Location) {
-                // info("New location: $location")
-                trySend(location)
-            }
-
-            override fun onProviderDisabled(provider: String) {
-                close()
-            }
+        val callback = LocationListenerCompat { location ->
+            // info("New location: $location")
+            trySend(location)
         }
 
         if (!context.hasBackgroundPermission()) close()

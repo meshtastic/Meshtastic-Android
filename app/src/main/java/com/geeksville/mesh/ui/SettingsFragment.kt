@@ -605,5 +605,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         // Warn user if BLE device is selected but BLE disabled
         if (scanModel.selectedBluetooth) checkBTEnabled()
+
+        // Warn user if provide location is selected but location disabled
+        if (binding.provideLocationCheckbox.isChecked)
+            checkLocationEnabled(getString(R.string.location_disabled))
     }
 }
