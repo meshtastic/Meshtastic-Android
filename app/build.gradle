@@ -114,6 +114,8 @@ protobuf {
                     // use the smaller android version of the library
                     //option "lite"
                 }
+                kotlin {
+                }
             }
         }
     }
@@ -162,7 +164,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
     // For now I'm not using javalite, because I want JSON printing
-    implementation 'com.google.protobuf:protobuf-java:3.21.1'
+    implementation 'com.google.protobuf:protobuf-kotlin:3.21.5'
 
     // For UART access
     // implementation 'com.google.android.things:androidthings:1.0'
