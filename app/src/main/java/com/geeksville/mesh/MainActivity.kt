@@ -473,14 +473,7 @@ class MainActivity : BaseActivity(), Logging {
                                     // If our app is too old/new, we probably don't understand the new DeviceConfig messages, so we don't read them until here
 
                                     // model.setLocalConfig(LocalOnlyProtos.LocalConfig.parseFrom(service.deviceConfig))
-
-                                    model.setChannels(
-                                        ChannelSet(
-                                            AppOnlyProtos.ChannelSet.parseFrom(
-                                                service.channels
-                                            )
-                                        )
-                                    )
+                                    // model.setChannels(ChannelSet(AppOnlyProtos.ChannelSet.parseFrom(service.channels)))
 
                                     model.updateNodesFromDevice()
 

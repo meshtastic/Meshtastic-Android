@@ -16,7 +16,8 @@ import javax.inject.Inject
  * Class that handles saving and retrieving config settings
  */
 class LocalConfigRepository @Inject constructor(
-    private val localConfigStore: DataStore<LocalConfig>
+    private val localConfigStore: DataStore<LocalConfig>,
+    private val channelSetRepository: ChannelSetRepository,
 ) : Logging {
     val localConfigFlow: Flow<LocalConfig> = localConfigStore.data
         .catch { exception ->
@@ -98,6 +99,7 @@ class LocalConfigRepository @Inject constructor(
         localConfigStore.updateData { preference ->
             preference.toBuilder().setLora(config).build()
         }
+        channelSetRepository.setLoraConfig(config)
     }
 
     private suspend fun setBluetoothConfig(config: ConfigProtos.Config.BluetoothConfig) {

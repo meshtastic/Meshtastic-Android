@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.asLiveData
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
@@ -90,7 +91,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     /// Pull the latest data from the model (discarding any user edits)
     private fun setGUIfromModel() {
         val channels = model.channels.value
-        val channel = channels?.primaryChannel
+        val channel = channels.primaryChannel
         val connected = model.isConnected()
 
         // Only let buttons work if we are connected to the radio
@@ -137,7 +138,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     }
 
     private fun shareChannel() {
-        model.channels.value?.let { channels ->
+        model.channels.value.let { channels ->
 
             GeeksvilleApplication.analytics.track(
                 "share",
@@ -270,7 +271,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             val checked = binding.editableCheckbox.isChecked
             if (checked) {
                 // User just unlocked for editing - remove the # goo around the channel name
-                model.channels.value?.primaryChannel?.let { ch ->
+                model.channels.value.primaryChannel?.let { ch ->
                     // Note: We are careful to show the empty string here if the user was on a default channel, so the user knows they should it for any changes
                     originalName = ch.settings.name
                     binding.channelNameEdit.setText(originalName)
@@ -278,7 +279,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             } else {
                 // User just locked it, we should warn and then apply changes to radio
 
-                model.channels.value?.primaryChannel?.let { oldPrimary ->
+                model.channels.value.primaryChannel?.let { oldPrimary ->
                     var newSettings = oldPrimary.settings.toBuilder()
                     val newName = binding.channelNameEdit.text.toString().trim()
 
@@ -343,7 +344,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             shareChannel()
         }
 
-        model.channels.observe(viewLifecycleOwner) {
+        model.channels.asLiveData().observe(viewLifecycleOwner) {
             setGUIfromModel()
         }
 
