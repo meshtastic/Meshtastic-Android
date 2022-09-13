@@ -263,19 +263,15 @@ class MainActivity : BaseActivity(), Logging {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val preferences = getSharedPreferences("PREFERENCES", Context.MODE_PRIVATE)
-
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        if (!preferences.getBoolean("app_intro_completed", false)) {
+        val prefs = UIViewModel.getPreferences(this)
+        if (!prefs.getBoolean("app_intro_completed", false)) {
             startActivity(Intent(this, AppIntroduction::class.java))
         }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
-
-        val prefs = UIViewModel.getPreferences(this)
-        model.setOwner(prefs.getString("owner", ""))
 
         /// Set theme
         setUITheme(prefs)

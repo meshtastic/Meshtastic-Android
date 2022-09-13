@@ -1,10 +1,9 @@
 package com.geeksville.mesh
 
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
+import androidx.core.content.edit
 import androidx.fragment.app.Fragment
+import com.geeksville.mesh.model.UIViewModel
 import com.github.appintro.AppIntro
 import com.github.appintro.AppIntroFragment
 
@@ -42,27 +41,21 @@ class AppIntroduction : AppIntro() {
         //addSlide(SlideTwoFragment())
     }
 
+    private fun done() {
+        val prefs = UIViewModel.getPreferences(this)
+        prefs.edit { putBoolean("app_intro_completed", true) }
+        finish()
+    }
+
     override fun onSkipPressed(currentFragment: Fragment?) {
         super.onSkipPressed(currentFragment)
         // Decide what to do when the user clicks on "Skip"
-        finish()
-        val preferences = getSharedPreferences("PREFERENCES", Context.MODE_PRIVATE)
-        var editor = preferences.edit()
-        editor.putBoolean("app_intro_completed", true)
-        editor.apply()
-
-        startActivity(Intent(this, MainActivity::class.java))
+        done()
     }
 
     override fun onDonePressed(currentFragment: Fragment?) {
         super.onDonePressed(currentFragment)
         // Decide what to do when the user clicks on "Done"
-        finish()
-        val preferences = getSharedPreferences("PREFERENCES", Context.MODE_PRIVATE)
-        var editor = preferences.edit()
-        editor.putBoolean("app_intro_completed", true)
-        editor.apply()
-
-        startActivity(Intent(this, MainActivity::class.java))
+        done()
     }
 }

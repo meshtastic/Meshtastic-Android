@@ -32,9 +32,8 @@ open class GeeksvilleApplication(
     companion object {
         lateinit var analytics: AnalyticsProvider
         var currentActivity: Activity? = null
+        private val backstack = mutableListOf<Activity>()
     }
-
-    var splunk: AnalyticsProvider? = null
 
     private val lifecycleCallbacks = object : ActivityLifecycleCallbacks {
         override fun onActivityPaused(activity: Activity) {
@@ -44,7 +43,8 @@ open class GeeksvilleApplication(
         }
 
         override fun onActivityDestroyed(activity: Activity) {
-            currentActivity = null
+            if (backstack.contains(activity)) backstack.remove(activity)
+            currentActivity = backstack.lastOrNull()
         }
 
         override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
@@ -54,7 +54,8 @@ open class GeeksvilleApplication(
         }
 
         override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-            currentActivity = activity
+            backstack.add(activity)
+            currentActivity = backstack.lastOrNull()
         }
 
         override fun onActivityResumed(activity: Activity) {
@@ -72,16 +73,13 @@ open class GeeksvilleApplication(
         }
 
     private val analyticsPrefs: SharedPreferences by lazy {
-        getSharedPreferences(
-            "analytics-prefs",
-            Context.MODE_PRIVATE
-        )
+        getSharedPreferences("analytics-prefs", Context.MODE_PRIVATE)
     }
 
     var isAnalyticsAllowed: Boolean
         get() = analyticsPrefs.getBoolean("allowed", true)
         set(value) {
-            analyticsPrefs.edit(commit = true) {
+            analyticsPrefs.edit {
                 putBoolean("allowed", value)
             }
 
@@ -110,15 +108,5 @@ open class GeeksvilleApplication(
 
         return isConnected
     }
-
-}
-
-
-fun geeksvilleApp(context: Context) = context.applicationContext as GeeksvilleApplication
-
-
-interface GeeksvilleApplicationClient {
-
-    fun getAnalytics() = GeeksvilleApplication.analytics
 
 }
