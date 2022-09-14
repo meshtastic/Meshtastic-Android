@@ -16,9 +16,11 @@ import com.geeksville.mesh.*
 import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
+import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
+import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.repository.datastore.ChannelSetRepository
 import com.geeksville.mesh.repository.datastore.LocalConfigRepository
 import com.geeksville.mesh.service.MeshService
@@ -67,6 +69,7 @@ class UIViewModel @Inject constructor(
     private val app: Application,
     private val meshLogRepository: MeshLogRepository,
     private val channelSetRepository: ChannelSetRepository,
+    private val packetRepository: PacketRepository,
     private val localConfigRepository: LocalConfigRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
     private val preferences: SharedPreferences
@@ -74,6 +77,9 @@ class UIViewModel @Inject constructor(
 
     private val _meshLog = MutableStateFlow<List<MeshLog>>(emptyList())
     val meshLog: StateFlow<List<MeshLog>> = _meshLog
+
+    private val _packets = MutableStateFlow<List<Packet>>(emptyList())
+    val packets: StateFlow<List<Packet>> = _packets
 
     private val _localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
     val localConfig: StateFlow<LocalConfig> = _localConfig
@@ -89,6 +95,11 @@ class UIViewModel @Inject constructor(
         viewModelScope.launch {
             meshLogRepository.getAllLogs().collect { logs ->
                 _meshLog.value = logs
+            }
+        }
+        viewModelScope.launch {
+            packetRepository.getAll().collect { meshPackets ->
+                _packets.value = meshPackets
             }
         }
         viewModelScope.launch {
