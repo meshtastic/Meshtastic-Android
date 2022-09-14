@@ -1130,6 +1130,7 @@ class MeshService : Service(), Logging {
                 MeshProtos.FromRadio.MY_INFO_FIELD_NUMBER -> handleMyInfo(proto.myInfo)
                 MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleNodeInfo(proto.nodeInfo)
                 MeshProtos.FromRadio.CONFIG_FIELD_NUMBER -> handleDeviceConfig(proto.config)
+                MeshProtos.FromRadio.MODULECONFIG_FIELD_NUMBER -> handleModuleConfig(proto.moduleConfig)
                 else -> errormsg("Unexpected FromRadio variant")
             }
         } catch (ex: InvalidProtocolBufferException) {
@@ -1156,6 +1157,18 @@ class MeshService : Service(), Logging {
         )
         insertMeshLog(packetToSave)
         setLocalConfig(config)
+    }
+
+    private fun handleModuleConfig(module: ModuleConfigProtos.ModuleConfig) {
+        debug("Received moduleConfig ${module.toOneLineString()}")
+        val packetToSave = MeshLog(
+            UUID.randomUUID().toString(),
+            "ModuleConfig ${module.payloadVariantCase}",
+            System.currentTimeMillis(),
+            module.toString()
+        )
+        insertMeshLog(packetToSave)
+        // setModuleConfig(config)
     }
 
     /**
