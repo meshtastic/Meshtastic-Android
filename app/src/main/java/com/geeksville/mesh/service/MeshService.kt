@@ -15,8 +15,8 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.mesh.android.hasBackgroundPermission
-import com.geeksville.mesh.database.PacketRepository
-import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.database.MeshLogRepository
+import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.repository.datastore.ChannelSetRepository
 import com.geeksville.mesh.repository.datastore.LocalConfigRepository
@@ -50,7 +50,7 @@ class MeshService : Service(), Logging {
     lateinit var dispatchers: CoroutineDispatchers
 
     @Inject
-    lateinit var packetRepository: Lazy<PacketRepository>
+    lateinit var meshLogRepository: Lazy<MeshLogRepository>
 
     @Inject
     lateinit var radioInterfaceService: RadioInterfaceService
@@ -740,13 +740,13 @@ class MeshService : Service(), Logging {
                         val ch = a.getChannelResponse
                         debug("Admin: Received channel ${ch.index}")
 
-                        val packetToSave = Packet(
+                        val packetToSave = MeshLog(
                             UUID.randomUUID().toString(),
                             "Channel",
                             System.currentTimeMillis(),
                             ch.toString()
                         )
-                        insertPacket(packetToSave)
+                        insertMeshLog(packetToSave)
 
                         if (ch.index + 1 < mi.maxChannels) {
 
@@ -852,13 +852,13 @@ class MeshService : Service(), Logging {
         sendToRadio(packet)
 
         if (packet.hasDecoded()) {
-            val packetToSave = Packet(
+            val packetToSave = MeshLog(
                 UUID.randomUUID().toString(),
                 "Packet",
                 System.currentTimeMillis(),
                 packet.toString()
             )
-            insertPacket(packetToSave)
+            insertMeshLog(packetToSave)
         }
     }
 
@@ -898,13 +898,13 @@ class MeshService : Service(), Logging {
 
         // debug("Recieved: $packet")
         if (packet.hasDecoded()) {
-            val packetToSave = Packet(
+            val packetToSave = MeshLog(
                 UUID.randomUUID().toString(),
                 "Packet",
                 System.currentTimeMillis(),
                 packet.toString()
             )
-            insertPacket(packetToSave)
+            insertMeshLog(packetToSave)
 
             // Update last seen for the node that sent the packet, but also for _our node_ because anytime a packet passes
             // through our node on the way to the phone that means that local node is also alive in the mesh
@@ -930,11 +930,11 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private fun insertPacket(packetToSave: Packet) {
+    private fun insertMeshLog(packetToSave: MeshLog) {
         serviceScope.handledLaunch {
             // Do not log, because might contain PII
             // info("insert: ${packetToSave.message_type} = ${packetToSave.raw_message.toOneLineString()}")
-            packetRepository.get().insert(packetToSave)
+            meshLogRepository.get().insert(packetToSave)
         }
     }
 
@@ -1148,13 +1148,13 @@ class MeshService : Service(), Logging {
 
     private fun handleDeviceConfig(config: ConfigProtos.Config) {
         debug("Received config ${config.toOneLineString()}")
-        val packetToSave = Packet(
+        val packetToSave = MeshLog(
             UUID.randomUUID().toString(),
             "Config ${config.payloadVariantCase}",
             System.currentTimeMillis(),
             config.toString()
         )
-        insertPacket(packetToSave)
+        insertMeshLog(packetToSave)
         setLocalConfig(config)
     }
 
@@ -1190,13 +1190,13 @@ class MeshService : Service(), Logging {
     private fun handleNodeInfo(info: MeshProtos.NodeInfo) {
         debug("Received nodeinfo num=${info.num}, hasUser=${info.hasUser()}, hasPosition=${info.hasPosition()}, hasDeviceMetrics=${info.hasDeviceMetrics()}")
 
-        val packetToSave = Packet(
+        val packetToSave = MeshLog(
             UUID.randomUUID().toString(),
             "NodeInfo",
             System.currentTimeMillis(),
             info.toString()
         )
-        insertPacket(packetToSave)
+        insertMeshLog(packetToSave)
 
         logAssert(newNodes.size <= 256) // Sanity check to make sure a device bug can't fill this list forever
         newNodes.add(info)
@@ -1273,13 +1273,13 @@ class MeshService : Service(), Logging {
      * Update the nodeinfo (called from either new API version or the old one)
      */
     private fun handleMyInfo(myInfo: MeshProtos.MyNodeInfo) {
-        val packetToSave = Packet(
+        val packetToSave = MeshLog(
             UUID.randomUUID().toString(),
             "MyNodeInfo",
             System.currentTimeMillis(),
             myInfo.toString()
         )
-        insertPacket(packetToSave)
+        insertMeshLog(packetToSave)
 
         rawMyNodeInfo = myInfo
         regenMyNodeInfo()
@@ -1305,13 +1305,13 @@ class MeshService : Service(), Logging {
     private fun handleConfigComplete(configCompleteId: Int) {
         if (configCompleteId == configNonce) {
 
-            val packetToSave = Packet(
+            val packetToSave = MeshLog(
                 UUID.randomUUID().toString(),
                 "ConfigComplete",
                 System.currentTimeMillis(),
                 configCompleteId.toString()
             )
-            insertPacket(packetToSave)
+            insertMeshLog(packetToSave)
 
             // This was our config request
             if (newMyNodeInfo == null || newNodes.isEmpty())

@@ -14,9 +14,9 @@ import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.*
 import com.geeksville.mesh.ConfigProtos.Config
-import com.geeksville.mesh.database.PacketRepository
+import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
-import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.repository.datastore.ChannelSetRepository
@@ -65,15 +65,15 @@ fun getInitials(nameIn: String): String {
 @HiltViewModel
 class UIViewModel @Inject constructor(
     private val app: Application,
-    private val packetRepository: PacketRepository,
+    private val meshLogRepository: MeshLogRepository,
     private val channelSetRepository: ChannelSetRepository,
     private val localConfigRepository: LocalConfigRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
     private val preferences: SharedPreferences
 ) : ViewModel(), Logging {
 
-    private val _allPacketState = MutableStateFlow<List<Packet>>(emptyList())
-    val allPackets: StateFlow<List<Packet>> = _allPacketState
+    private val _meshLog = MutableStateFlow<List<MeshLog>>(emptyList())
+    val meshLog: StateFlow<List<MeshLog>> = _meshLog
 
     private val _localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
     val localConfig: StateFlow<LocalConfig> = _localConfig
@@ -87,8 +87,8 @@ class UIViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            packetRepository.getAllPackets().collect { packets ->
-                _allPacketState.value = packets
+            meshLogRepository.getAllLogs().collect { logs ->
+                _meshLog.value = logs
             }
         }
         viewModelScope.launch {
@@ -109,8 +109,8 @@ class UIViewModel @Inject constructor(
         debug("ViewModel created")
     }
 
-    fun deleteAllPacket() = viewModelScope.launch(Dispatchers.IO) {
-        packetRepository.deleteAll()
+    fun deleteAllLogs() = viewModelScope.launch(Dispatchers.IO) {
+        meshLogRepository.deleteAll()
     }
 
     companion object {
@@ -341,7 +341,7 @@ class UIViewModel @Inject constructor(
                 // Packets are ordered by time, we keep most recent position of
                 // our device in localNodePosition.
                 val dateFormat = SimpleDateFormat("yyyy-MM-dd,HH:mm:ss", Locale.getDefault())
-                packetRepository.getAllPacketsInReceiveOrder(Int.MAX_VALUE).first().forEach { packet ->
+                meshLogRepository.getAllLogsInReceiveOrder(Int.MAX_VALUE).first().forEach { packet ->
                     // If we get a NodeInfo packet, use it to update our position data (if valid)
                     packet.nodeInfo?.let { nodeInfo ->
                         positionToPos.invoke(nodeInfo.position)?.let { _ ->

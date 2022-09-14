@@ -1,7 +1,7 @@
 package com.geeksville.mesh.database
 
 import android.app.Application
-import com.geeksville.mesh.database.dao.PacketDao
+import com.geeksville.mesh.database.dao.MeshLogDao
 import com.geeksville.mesh.database.dao.QuickChatActionDao
 import dagger.Module
 import dagger.Provides
@@ -18,8 +18,8 @@ class DatabaseModule {
         MeshtasticDatabase.getDatabase(app)
 
     @Provides
-    fun providePacketDao(database: MeshtasticDatabase): PacketDao {
-        return database.packetDao()
+    fun provideMeshLogDao(database: MeshtasticDatabase): MeshLogDao {
+        return database.meshLogDao()
     }
 
     @Provides

@@ -8,7 +8,7 @@
     >
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/packets_recyclerview"
+        android:id="@+id/debug_recyclerview"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
@@ -19,7 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/clearButton"
         tools:itemCount="8"
-        tools:listitem="@layout/adapter_packet_layout" />
+        tools:listitem="@layout/adapter_debug_layout" />
 
     <Button
         android:id="@+id/clearButton"
@@ -57,7 +57,7 @@
         android:layout_height="wrap_content"
         android:text="@string/debug_last_messages"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/packets_recyclerview"
+        app:layout_constraintBottom_toTopOf="@+id/debug_recyclerview"
         app:layout_constraintEnd_toStartOf="@+id/clearButton"
         app:layout_constraintStart_toEndOf="@+id/closeButton"
         app:layout_constraintTop_toTopOf="parent" />
