@@ -1,7 +1,9 @@
 package com.geeksville.mesh.model
 
 import com.geeksville.mesh.ChannelProtos
+import com.geeksville.mesh.ConfigKt.loRaConfig
 import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.channelSettings
 import com.google.protobuf.ByteString
 
 /** Utility function to make it easy to declare byte arrays - FIXME move someplace better */
@@ -25,12 +27,8 @@ data class Channel(
 
         // The default channel that devices ship with
         val default = Channel(
-            ChannelProtos.ChannelSettings.newBuilder()
-                .setPsk(ByteString.copyFrom(defaultPSK))
-                .build(),
-            ConfigProtos.Config.LoRaConfig.newBuilder()
-                .setModemPreset(ConfigProtos.Config.LoRaConfig.ModemPreset.LongFast)
-                .build()
+            channelSettings { psk = ByteString.copyFrom(defaultPSK) },
+            loRaConfig { modemPreset = ConfigProtos.Config.LoRaConfig.ModemPreset.LongFast }
         )
     }
 

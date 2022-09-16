@@ -20,12 +20,14 @@ import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hideKeyboard
-import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos
+import com.geeksville.mesh.ConfigKt.loRaConfig
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.android.hasCameraPermission
+import com.geeksville.mesh.channelSet
+import com.geeksville.mesh.copy
 import com.geeksville.mesh.databinding.ChannelFragmentBinding
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
@@ -173,13 +175,11 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         newChannel: ChannelProtos.ChannelSettings,
         newLoRaConfig: ConfigProtos.Config.LoRaConfig
     ) {
-        val newSet =
-            ChannelSet(
-                AppOnlyProtos.ChannelSet.newBuilder()
-                    .addSettings(newChannel)
-                    .setLoraConfig(newLoRaConfig)
-                    .build()
-            )
+        val newSet = ChannelSet(
+            channelSet {
+                settings[0] = newChannel
+                loraConfig = newLoRaConfig
+            })
         // Try to change the radio, if it fails, tell the user why and throw away their edits
         try {
             model.setChannels(newSet)
@@ -251,7 +251,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                     debug("Switching back to default channel")
                     installSettings(
                         Channel.default.settings,
-                        Channel.default.loraConfig.toBuilder().setRegion(model.region).build()
+                        Channel.default.loraConfig.copy { region = model.region }
                     )
                 }
                 .show()
@@ -280,7 +280,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 // User just locked it, we should warn and then apply changes to radio
 
                 model.channels.value.primaryChannel?.let { oldPrimary ->
-                    var newSettings = oldPrimary.settings.toBuilder()
+                    var newSettings = oldPrimary.settings
                     val newName = binding.channelNameEdit.text.toString().trim()
 
                     // Find the new modem config
@@ -300,19 +300,22 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                         val random = SecureRandom()
                         val bytes = ByteArray(32)
                         random.nextBytes(bytes)
-                        newSettings.name = newName.take(11) // proto max_size:12
-                        newSettings.psk = ByteString.copyFrom(bytes)
+                        newSettings.copy {
+                            name = newName.take(11) // proto max_size:12
+                            psk = ByteString.copyFrom(bytes)
+                        }
                     } else {
                         debug("Switching back to default channel")
-                        newSettings = Channel.default.settings.toBuilder()
+                        newSettings = Channel.default.settings
                     }
 
                     // No matter what apply the speed selection from the user
-                    val newLoRaConfig = ConfigProtos.Config.LoRaConfig.newBuilder()
-                        .setRegion(model.region)
-                        .setModemPreset(newModemPreset)
+                    val newLoRaConfig = loRaConfig {
+                        region = model.region
+                        modemPreset = newModemPreset
+                    }
 
-                    val humanName = Channel(newSettings.build(), newLoRaConfig.build()).humanName
+                    val humanName = Channel(newSettings, newLoRaConfig).humanName
                     binding.channelNameEdit.setText(humanName)
 
                     val message = buildString {
@@ -330,7 +333,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                         .setPositiveButton(getString(R.string.accept)) { _, _ ->
                             // Generate a new channel with only the changes the user can change in the GUI
 
-                            installSettings(newSettings.build(), newLoRaConfig.build())
+                            installSettings(newSettings, newLoRaConfig)
                         }
                         .show()
                 }
