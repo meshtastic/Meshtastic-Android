@@ -10,6 +10,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.*
@@ -28,9 +29,12 @@ import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedWriter
@@ -98,8 +102,8 @@ class UIViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            packetRepository.getAll().collect { meshPackets ->
-                _packets.value = meshPackets
+            packetRepository.getAllPackets().collect { packets ->
+                _packets.value = packets
             }
         }
         viewModelScope.launch {
@@ -120,8 +124,51 @@ class UIViewModel @Inject constructor(
         debug("ViewModel created")
     }
 
+    private val contactKey: MutableStateFlow<String> = MutableStateFlow(DataPacket.ID_BROADCAST)
+    fun setContactKey(contact: String) {
+        contactKey.value = contact
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val messages: LiveData<List<Packet>> = contactKey.flatMapLatest { contactKey ->
+        packetRepository.getMessagesFrom(contactKey)
+    }.asLiveData()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val contacts: LiveData<Map<String, Packet>> = _packets.mapLatest { list ->
+        list.associateBy { packet -> packet.contact_key }
+            .filter { it.value.port_num == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE }
+    }.asLiveData()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val waypoints: LiveData<Map<Int?, Packet>> = _packets.mapLatest { list ->
+        list.associateBy { packet -> packet.data.waypoint?.id }
+            .filter { it.value.port_num == Portnums.PortNum.WAYPOINT_APP_VALUE }
+    }.asLiveData()
+
+    fun sendMessage(str: String, channel: Int = 0, dest: String = DataPacket.ID_BROADCAST) {
+        val p = DataPacket(dest, channel, str)
+        sendDataPacket(p)
+    }
+
+    fun sendDataPacket(p: DataPacket) {
+        try {
+            meshService?.send(p)
+        } catch (ex: RemoteException) {
+            errormsg("Send DataPacket error: ${ex.message}")
+        }
+    }
+
     fun deleteAllLogs() = viewModelScope.launch(Dispatchers.IO) {
         meshLogRepository.deleteAll()
+    }
+
+    fun deleteAllMessages() = viewModelScope.launch(Dispatchers.IO) {
+        packetRepository.deleteAllMessages()
+    }
+
+    fun deleteMessages(uuidList: List<Long>) = viewModelScope.launch(Dispatchers.IO) {
+        packetRepository.deleteMessages(uuidList)
     }
 
     companion object {
@@ -134,7 +181,6 @@ class UIViewModel @Inject constructor(
     var meshService: IMeshService? = null
 
     val nodeDB = NodeDB(this)
-    val messagesState = MessagesState(this)
 
     /// Connection state to our radio device
     private val _connectionState = MutableLiveData(MeshService.ConnectionState.DISCONNECTED)

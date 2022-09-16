@@ -403,7 +403,6 @@ class MainActivity : BaseActivity(), Logging {
         val filter = IntentFilter()
         filter.addAction(MeshService.ACTION_MESH_CONNECTED)
         filter.addAction(MeshService.ACTION_NODE_CHANGE)
-        filter.addAction(MeshService.actionReceived(Portnums.PortNum.TEXT_MESSAGE_APP_VALUE))
         filter.addAction((MeshService.ACTION_MESSAGE_STATUS))
         registerReceiver(meshServiceReceiver, filter)
         receiverRegistered = true
@@ -588,22 +587,6 @@ class MainActivity : BaseActivity(), Logging {
                         }
                     }
 
-                    MeshService.actionReceived(Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) -> {
-                        debug("received new message from service")
-                        val payload =
-                            intent.getParcelableExtra<DataPacket>(EXTRA_PAYLOAD)!!
-
-                        model.messagesState.addMessage(payload)
-                    }
-
-                    MeshService.ACTION_MESSAGE_STATUS -> {
-                        debug("received message status from service")
-                        val id = intent.getIntExtra(EXTRA_PACKET_ID, 0)
-                        val status = intent.getParcelableExtra<MessageStatus>(EXTRA_STATUS)!!
-
-                        model.messagesState.updateStatus(id, status)
-                    }
-
                     MeshService.ACTION_MESH_CONNECTED -> {
                         val extra = intent.getStringExtra(EXTRA_CONNECTED)
                         if (extra != null) {
@@ -672,15 +655,8 @@ class MainActivity : BaseActivity(), Logging {
                     // We don't start listening for packets until after we are connected to the service
                     registerMeshReceiver()
 
-                    // Init our messages table with the service's record of past text messages (ignore all other message types)
-                    val allMsgs = service.oldMessages
-                    val msgs =
-                        allMsgs.filter { p -> p.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE }
-
                     model.setMyNodeInfo(service.myNodeInfo) // Note: this could be NULL!
-                    debug("Service provided ${msgs.size} messages and myNodeNum ${model.myNodeInfo.value?.myNodeNum}")
 
-                    model.messagesState.setMessages(msgs)
                     val connectionState =
                         MeshService.ConnectionState.valueOf(service.connectionState())
 
@@ -841,7 +817,7 @@ class MainActivity : BaseActivity(), Logging {
                     debug("Sending ping")
                     val str = "Ping " + DateFormat.getTimeInstance(DateFormat.MEDIUM)
                         .format(Date(System.currentTimeMillis()))
-                    model.messagesState.sendMessage(str)
+                    model.sendMessage(str)
                     handler.postDelayed({ postPing() }, 30000)
                 }
                 item.isChecked = !item.isChecked // toggle ping test

@@ -41,9 +41,11 @@ data class DataPacket(
     /**
      * Syntactic sugar to make it easy to create text messages
      */
-    constructor(to: String? = ID_BROADCAST, text: String) : this(
-        to, text.toByteArray(utf8),
-        Portnums.PortNum.TEXT_MESSAGE_APP_VALUE
+    constructor(to: String?, channel: Int, text: String) : this(
+        to = to,
+        bytes = text.toByteArray(utf8),
+        dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+        channel = channel
     )
 
     /**

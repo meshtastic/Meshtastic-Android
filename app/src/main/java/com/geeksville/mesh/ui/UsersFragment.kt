@@ -166,11 +166,12 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 }
             }
             holder.itemView.setOnLongClickListener {
-                if (position > 0) {
-                    debug("calling MessagesFragment filter:${n.user?.id}")
+                val node = n.user
+                if (position > 0 && node != null) {
+                    debug("calling MessagesFragment filter:${node.id}")
                     setFragmentResult(
                         "requestKey",
-                        bundleOf("contactId" to n.user?.id, "contactName" to name)
+                        bundleOf("contactKey" to "0${node.id}", "contactName" to name)
                     )
                     parentFragmentManager.beginTransaction()
                         .replace(R.id.mainActivityLayout, MessagesFragment())
