@@ -83,6 +83,10 @@ class MapFragment : ScreenFragment("Map"), Logging {
                 onNodesChanged(nodes.values)
                 drawOverlays()
             }
+            model.waypoints.observe(viewLifecycleOwner) {
+                debug("New waypoints received: ${it.size}")
+                // build Collection<Packet> from (it.values)
+            }
             zoomToNodes(mapController)
         }
     }
