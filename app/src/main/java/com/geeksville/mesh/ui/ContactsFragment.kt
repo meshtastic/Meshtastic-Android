@@ -170,17 +170,22 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             notifyItemChanged(position)
         }
 
-        /// Called when our contacts DB changes
-        fun onContactsChanged(contacts: Collection<Packet>) {
-            this.contacts = contacts.sortedByDescending { it.received_time }.toTypedArray()
+        fun onContactsChanged(contacts: Map<String, Packet>) {
+            // Add empty channel placeholders (always show Broadcast contacts, even when empty)
+            val mutableMap = contacts.toMutableMap()
+            for (ch in 0 until model.channels.value.protobuf.settingsCount) {
+                val contactKey = "$ch${DataPacket.ID_BROADCAST}"
+                if (mutableMap[contactKey] == null) mutableMap[contactKey] = Packet(
+                    0L, 1, contactKey, 0L,
+                    DataPacket(bytes = null, dataType = 1, time = 0L, channel = ch)
+                )
+            }
+            this.contacts = mutableMap.values.sortedByDescending { it.received_time }.toTypedArray()
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all nodes
         }
 
         fun onChannelsChanged() {
-            val oldBroadcast = contacts.find { it.contact_key == DataPacket.ID_BROADCAST }
-            if (oldBroadcast != null) {
-                notifyItemChanged(contacts.indexOf(oldBroadcast))
-            }
+            onContactsChanged(contacts.associateBy { it.contact_key })
         }
     }
 
@@ -213,21 +218,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
 
         model.contacts.observe(viewLifecycleOwner) {
             debug("New contacts received: ${it.size}")
-            fun emptyDataPacket(channel: Int = 0): DataPacket {
-                return DataPacket(bytes = null, dataType = 1, time = 0L, channel = channel)
-            }
-
-            fun emptyPacket(contactKey: String, channel: Int = 0): Packet {
-                return Packet(0L, 1, contactKey, 0L, emptyDataPacket(channel))
-            }
-
-            // Add empty channel placeholders
-            val mutableContacts = it.toMutableMap()
-            val all = DataPacket.ID_BROADCAST // always show Broadcast contacts, even when empty
-            for (ch in 0 until model.channels.value.protobuf.settingsCount)
-                if (it["$ch$all"] == null) mutableContacts["$ch$all"] = emptyPacket("$ch$all", ch)
-
-            contactsAdapter.onContactsChanged(mutableContacts.values)
+            contactsAdapter.onContactsChanged(it)
         }
     }
 
