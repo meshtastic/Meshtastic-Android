@@ -1,9 +1,7 @@
 package com.geeksville.mesh.service
 
-import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
-import com.geeksville.mesh.ConfigProtos
 import kotlinx.serialization.Serializable
 
 /// Our saved preferences as stored on disk
@@ -11,8 +9,6 @@ import kotlinx.serialization.Serializable
 data class MeshServiceSettingsData(
     val nodeDB: Array<NodeInfo>,
     val myInfo: MyNodeInfo,
-    val messages: Array<DataPacket>,
-    val regionCode: Int = ConfigProtos.Config.LoRaConfig.RegionCode.Unset_VALUE
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -22,8 +18,6 @@ data class MeshServiceSettingsData(
 
         if (!nodeDB.contentEquals(other.nodeDB)) return false
         if (myInfo != other.myInfo) return false
-        if (!messages.contentEquals(other.messages)) return false
-        if (regionCode != other.regionCode) return false
 
         return true
     }
@@ -31,8 +25,6 @@ data class MeshServiceSettingsData(
     override fun hashCode(): Int {
         var result = nodeDB.contentHashCode()
         result = 31 * result + myInfo.hashCode()
-        result = 31 * result + messages.contentHashCode()
-        result = 31 * result + regionCode
         return result
     }
 }

@@ -403,7 +403,6 @@ class MainActivity : BaseActivity(), Logging {
         val filter = IntentFilter()
         filter.addAction(MeshService.ACTION_MESH_CONNECTED)
         filter.addAction(MeshService.ACTION_NODE_CHANGE)
-        filter.addAction((MeshService.ACTION_MESSAGE_STATUS))
         registerReceiver(meshServiceReceiver, filter)
         receiverRegistered = true
     }

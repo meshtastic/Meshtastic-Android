@@ -66,18 +66,10 @@ interface IMeshService {
     */
     void send(inout DataPacket packet);
 
-    void deleteMessages(in List<DataPacket> deleteList);
-
-    void deleteAllMessages();
-
     /**
     Get the IDs of everyone on the mesh.  You should also subscribe for NODE_CHANGE broadcasts.
     */
     List<NodeInfo> getNodes();
-
-    /// Return an list of MeshPacket protobuf (byte arrays) which were received while your client app was offline (recent messages only).
-    /// Also includes any messages we have sent recently (useful for finding current message status)
-    List<DataPacket> getOldMessages();
 
     /// This method is only intended for use in our GUI, so the user can set radio options
     /// It returns a DeviceConfig protobuf.

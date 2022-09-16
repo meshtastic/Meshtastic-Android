@@ -88,7 +88,6 @@ class MeshService : Service(), Logging {
 
         const val ACTION_NODE_CHANGE = "$prefix.NODE_CHANGE"
         const val ACTION_MESH_CONNECTED = "$prefix.MESH_CONNECTED"
-        const val ACTION_MESSAGE_STATUS = "$prefix.MESSAGE_STATUS"
 
         open class NodeNotFoundException(reason: String) : Exception(reason)
         class InvalidNodeIdException : NodeNotFoundException("Invalid NodeId")
@@ -169,7 +168,6 @@ class MeshService : Service(), Logging {
                         location.longitude,
                         location.altitude.toInt(),
                         myNodeNum, // we just send to the local node
-                        false // and we never want ACKs
                     )
                 }
                 .launchIn(CoroutineScope(Dispatchers.Default))
@@ -263,7 +261,7 @@ class MeshService : Service(), Logging {
     /**
      * If someone binds to us, this will be called after on create
      */
-    override fun onBind(intent: Intent?): IBinder? {
+    override fun onBind(intent: Intent?): IBinder {
         startForeground()
 
         return binder
@@ -302,7 +300,6 @@ class MeshService : Service(), Logging {
             val settings = MeshServiceSettingsData(
                 myInfo = myInfo,
                 nodeDB = nodeDBbyNodeNum.values.toTypedArray(),
-                messages = recentDataPackets.toTypedArray(),
             )
             val json = Json { isLenient = true }
             val asString = json.encodeToString(MeshServiceSettingsData.serializer(), settings)
@@ -337,8 +334,6 @@ class MeshService : Service(), Logging {
                 installNewNodeDB(settings.myInfo, settings.nodeDB)
 
                 // Note: we do not haveNodeDB = true because that means we've got a valid db from a real device (rather than this possibly stale hint)
-
-                recentDataPackets.addAll(settings.messages)
             }
         } catch (ex: Exception) {
             errormsg("Ignoring error loading saved state for service: ${ex.message}")
@@ -353,7 +348,6 @@ class MeshService : Service(), Logging {
         myNodeInfo = null
         nodeDBbyNodeNum.clear()
         nodeDBbyID.clear()
-        // recentDataPackets.clear() We do NOT want to clear this, because it is the record of old messages the GUI still might want to show
         haveNodeDB = false
     }
 
@@ -560,12 +554,6 @@ class MeshService : Service(), Logging {
         }.build().toByteString()
     }
 
-
-    // FIXME - possible kotlin bug in 1.3.72 - it seems that if we start with the (globally shared) emptyList,
-    // then adding items are affecting that shared list rather than a copy.   This was causing aliasing of
-    // recentDataPackets with messages.value in the GUI.  So if the current list is empty we are careful to make a new list
-    private var recentDataPackets = mutableListOf<DataPacket>()
-
     /// Generate a DataPacket from a MeshPacket, or null if we didn't have enough data to do so
     private fun toDataPacket(packet: MeshPacket): DataPacket? {
         return if (!packet.hasDecoded()) {
@@ -640,18 +628,6 @@ class MeshService : Service(), Logging {
                 dataPacket
             )
             insertPacket(packetToSave)
-
-            // discard old messages if needed then add the new one
-            while (recentDataPackets.size > 100)
-                recentDataPackets.removeAt(0)
-
-            // FIXME - possible kotlin bug in 1.3.72 - it seems that if we start with the (globally shared) emptyList,
-            // then adding items are affecting that shared list rather than a copy.   This was causing aliasing of
-            // recentDataPackets with messages.value in the GUI.  So if the current list is empty we are careful to make a new list
-            if (recentDataPackets.isEmpty())
-                recentDataPackets = mutableListOf(dataPacket)
-            else
-                recentDataPackets.add(dataPacket)
         }
     }
 
@@ -1441,7 +1417,6 @@ class MeshService : Service(), Logging {
         lon: Double = 0.0,
         alt: Int = 0,
         destNum: Int = DataPacket.NODENUM_BROADCAST,
-        wantResponse: Boolean = false
     ) {
         try {
             val mi = myNodeInfo
@@ -1464,8 +1439,7 @@ class MeshService : Service(), Logging {
                         // Use the new position as data format
                         portnumValue = Portnums.PortNum.POSITION_APP_VALUE
                         payload = position.toByteString()
-
-                        this.wantResponse = wantResponse
+                        this.wantResponse = false
                     }
 
                 // send the packet into the mesh
@@ -1544,7 +1518,7 @@ class MeshService : Service(), Logging {
         return ((currentPacketId % numPacketIds) + 1L).toInt()
     }
 
-    var firmwareUpdateFilename: UpdateFilenames? = null
+    private var firmwareUpdateFilename: UpdateFilenames? = null
 
     /***
      * Return the filename we will install on the device
@@ -1636,10 +1610,6 @@ class MeshService : Service(), Logging {
                 clientPackages[receiverName] = packageName
             }
 
-        override fun getOldMessages(): MutableList<DataPacket> {
-            return recentDataPackets
-        }
-
         override fun getUpdateStatus(): Int = SoftwareUpdateService.progress
 
         override fun startFirmwareUpdate() = toRemoteExceptions {
@@ -1654,16 +1624,6 @@ class MeshService : Service(), Logging {
             toRemoteExceptions {
                 this@MeshService.setOwner(myId, longName, shortName)
             }
-
-        override fun deleteMessages(deleteList: List<DataPacket>) {
-            debug("Deleting ${deleteList.size} messages")
-            recentDataPackets.removeAll(deleteList)
-        }
-
-        override fun deleteAllMessages() {
-            debug("Deleting all messages")
-            recentDataPackets.clear()
-        }
 
         override fun send(p: DataPacket) {
             toRemoteExceptions {
