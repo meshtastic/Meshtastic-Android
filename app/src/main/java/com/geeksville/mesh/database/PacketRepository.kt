@@ -1,5 +1,7 @@
 package com.geeksville.mesh.database
 
+import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.database.dao.PacketDao
 import com.geeksville.mesh.database.entity.Packet
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +14,7 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
         packetDaoLazy.get()
     }
 
-    suspend fun getAll(): Flow<List<Packet>> = withContext(Dispatchers.IO) {
+    suspend fun getAllPackets(): Flow<List<Packet>> = withContext(Dispatchers.IO) {
         packetDao.getAllPackets()
     }
 
@@ -20,10 +22,21 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
         packetDao.insert(packet)
     }
 
-    suspend fun deleteAll() = withContext(Dispatchers.IO) {
-        packetDao.deleteAll()
+    suspend fun getMessagesFrom(contact: String) = withContext(Dispatchers.IO) {
+        packetDao.getMessagesFrom(contact)
     }
 
+    suspend fun updateMessageStatus(d: DataPacket, m: MessageStatus) = withContext(Dispatchers.IO) {
+        packetDao.updateMessageStatus(d, m)
+    }
+
+    suspend fun deleteAllMessages() = withContext(Dispatchers.IO) {
+        packetDao.deleteAllMessages()
+    }
+
+    suspend fun deleteMessages(uuidList: List<Long>) = withContext(Dispatchers.IO) {
+        packetDao.deleteMessages(uuidList)
+    }
     suspend fun delete(packet: Packet) = withContext(Dispatchers.IO) {
         packetDao.delete(packet)
     }

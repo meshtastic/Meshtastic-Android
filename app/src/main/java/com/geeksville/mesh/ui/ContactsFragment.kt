@@ -16,8 +16,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
+import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.AdapterContactLayoutBinding
 import com.geeksville.mesh.databinding.FragmentContactsBinding
+import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.UIViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -71,36 +73,36 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             return ViewHolder(contactsView)
         }
 
-        var contacts = arrayOf<DataPacket>()
+        var contacts = arrayOf<Packet>()
         var selectedList = ArrayList<String>()
 
         override fun getItemCount(): Int = contacts.size
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val contact = contacts[position]
+            val packet = contacts[position]
+            val contact = packet.data
 
             // Determine if this is my message (originated on this device)
-            val isLocal = contact.from == DataPacket.ID_LOCAL
-            val isBroadcast = contact.to == DataPacket.ID_BROADCAST
-            val contactId = if (isLocal || isBroadcast) contact.to else contact.from
+            val fromLocal = contact.from == DataPacket.ID_LOCAL
+            val toBroadcast = contact.to == DataPacket.ID_BROADCAST
 
             // grab usernames from NodeInfo
             val nodes = model.nodeDB.nodes.value!!
-            val node = nodes[if (isLocal) contact.to else contact.from]
+            val node = nodes[if (fromLocal) contact.to else contact.from]
 
             //grab channel names from DeviceConfig
-            val channels = model.channels.value
-            val primaryChannel = channels.primaryChannel
+            val channels = model.channels.value.protobuf
+            val channelName = if (channels.settingsCount > contact.channel)
+                Channel(channels.settingsList[contact.channel], channels.loraConfig).name else null
 
             val shortName = node?.user?.shortName ?: "???"
-            val longName =
-                if (isBroadcast) primaryChannel?.name ?: getString(R.string.channel_name)
-                else node?.user?.longName ?: getString(R.string.unknown_username)
+            val longName = if (toBroadcast) channelName ?: getString(R.string.channel_name)
+            else node?.user?.longName ?: getString(R.string.unknown_username)
 
-            holder.shortName.text = if (isBroadcast) "All" else shortName
+            holder.shortName.text = if (toBroadcast) "${contact.channel}" else shortName
             holder.longName.text = longName
 
-            val text = if (isLocal) contact.text else "$shortName: ${contact.text}"
+            val text = if (fromLocal) contact.text else "$shortName: ${contact.text}"
             holder.lastMessageText.text = text
 
             if (contact.time != 0L) {
@@ -109,7 +111,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             } else holder.lastMessageTime.visibility = View.INVISIBLE
 
             holder.itemView.setOnLongClickListener {
-                clickItem(holder, contactId)
+                clickItem(holder, packet.contact_key)
                 if (actionMode == null) {
                     actionMode =
                         (activity as AppCompatActivity).startSupportActionMode(actionModeCallback)
@@ -117,12 +119,12 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                 true
             }
             holder.itemView.setOnClickListener {
-                if (actionMode != null) clickItem(holder, contactId)
+                if (actionMode != null) clickItem(holder, packet.contact_key)
                 else {
-                    debug("calling MessagesFragment filter:$contactId")
+                    debug("calling MessagesFragment filter:${packet.contact_key}")
                     setFragmentResult(
                         "requestKey",
-                        bundleOf("contactId" to contactId, "contactName" to longName)
+                        bundleOf("contactKey" to packet.contact_key, "contactName" to longName)
                     )
                     parentFragmentManager.beginTransaction()
                         .replace(R.id.mainActivityLayout, MessagesFragment())
@@ -131,7 +133,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                 }
             }
 
-            if (selectedList.contains(contactId)) {
+            if (selectedList.contains(packet.contact_key)) {
                 holder.itemView.background = GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
                     cornerRadius = 32f
@@ -151,12 +153,12 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             }
         }
 
-        private fun clickItem(holder: ViewHolder, contactId: String? = DataPacket.ID_BROADCAST) {
+        private fun clickItem(holder: ViewHolder, contactKey: String) {
             val position = holder.bindingAdapterPosition
-            if (contactId != null && !selectedList.contains(contactId)) {
-                selectedList.add(contactId)
+            if (!selectedList.contains(contactKey)) {
+                selectedList.add(contactKey)
             } else {
-                selectedList.remove(contactId)
+                selectedList.remove(contactKey)
             }
             if (selectedList.isEmpty()) {
                 // finish action mode when no items selected
@@ -169,13 +171,13 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         }
 
         /// Called when our contacts DB changes
-        fun onContactsChanged(contactsIn: Collection<DataPacket>) {
-            contacts = contactsIn.sortedByDescending { it.time }.toTypedArray()
+        fun onContactsChanged(contacts: Collection<Packet>) {
+            this.contacts = contacts.sortedByDescending { it.received_time }.toTypedArray()
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all nodes
         }
 
         fun onChannelsChanged() {
-            val oldBroadcast = contacts.find { it.to == DataPacket.ID_BROADCAST }
+            val oldBroadcast = contacts.find { it.contact_key == DataPacket.ID_BROADCAST }
             if (oldBroadcast != null) {
                 notifyItemChanged(contacts.indexOf(oldBroadcast))
             }
@@ -209,9 +211,23 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             contactsAdapter.notifyDataSetChanged()
         }
 
-        model.messagesState.contacts.observe(viewLifecycleOwner) {
+        model.contacts.observe(viewLifecycleOwner) {
             debug("New contacts received: ${it.size}")
-            contactsAdapter.onContactsChanged(it.values)
+            fun emptyDataPacket(channel: Int = 0): DataPacket {
+                return DataPacket(bytes = null, dataType = 1, time = 0L, channel = channel)
+            }
+
+            fun emptyPacket(contactKey: String, channel: Int = 0): Packet {
+                return Packet(0L, 1, contactKey, 0L, emptyDataPacket(channel))
+            }
+
+            // Add empty channel placeholders
+            val mutableContacts = it.toMutableMap()
+            val all = DataPacket.ID_BROADCAST // always show Broadcast contacts, even when empty
+            for (ch in 0 until model.channels.value.protobuf.settingsCount)
+                if (it["$ch$all"] == null) mutableContacts["$ch$all"] = emptyPacket("$ch$all", ch)
+
+            contactsAdapter.onContactsChanged(mutableContacts.values)
         }
     }
 
@@ -230,15 +246,12 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             when (item.itemId) {
                 R.id.deleteButton -> {
-                    val messagesTotal = model.messagesState.messages.value!!
+                    val messagesTotal = model.packets.value.filter { it.port_num == 1 }
                     val selectedList = contactsAdapter.selectedList
-                    val deleteList = ArrayList<DataPacket>()
+                    val deleteList = ArrayList<Packet>()
                     // find messages for each contactId
-                    selectedList.forEach { contactId ->
-                        deleteList += messagesTotal.filter {
-                            if (contactId == DataPacket.ID_BROADCAST) it.to == DataPacket.ID_BROADCAST
-                            else it.from == contactId && it.to != DataPacket.ID_BROADCAST || it.from == DataPacket.ID_LOCAL && it.to == contactId
-                        }
+                    selectedList.forEach { contact ->
+                        deleteList += messagesTotal.filter { it.contact_key == contact }
                     }
                     val deleteMessagesString = resources.getQuantityString(
                         R.plurals.delete_messages,
@@ -251,9 +264,9 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                             debug("User clicked deleteButton")
                             // all items selected --> deleteAllMessages()
                             if (deleteList.size == messagesTotal.size) {
-                                model.messagesState.deleteAllMessages()
+                                model.deleteAllMessages()
                             } else {
-                                model.messagesState.deleteMessages(deleteList)
+                                model.deleteMessages(deleteList.map { it.uuid })
                             }
                             mode.finish()
                         }
@@ -270,9 +283,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                         // else --> select all
                         contactsAdapter.selectedList.clear()
                         contactsAdapter.contacts.forEach {
-                            if (it.from == DataPacket.ID_LOCAL || it.to == DataPacket.ID_BROADCAST)
-                                contactsAdapter.selectedList.add(it.to!!)
-                            else contactsAdapter.selectedList.add(it.from!!)
+                            contactsAdapter.selectedList.add(it.contact_key)
                         }
                     }
                     actionMode?.title = contactsAdapter.selectedList.size.toString()

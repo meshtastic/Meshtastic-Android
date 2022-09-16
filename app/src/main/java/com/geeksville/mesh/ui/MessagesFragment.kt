@@ -21,6 +21,7 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
+import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.databinding.AdapterMessageLayoutBinding
 import com.geeksville.mesh.databinding.MessagesFragmentBinding
@@ -52,7 +53,7 @@ class MessagesFragment : Fragment(), Logging {
 
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
-    private var contactId: String = DataPacket.ID_BROADCAST
+    private var contactKey: String = DataPacket.ID_BROADCAST
     private var contactName: String = DataPacket.ID_BROADCAST
 
     private val model: UIViewModel by activityViewModels()
@@ -106,13 +107,14 @@ class MessagesFragment : Fragment(), Logging {
             return ViewHolder(contactViewBinding)
         }
 
-        var messages = arrayOf<DataPacket>()
-        var selectedList = ArrayList<DataPacket>()
+        var messages = listOf<Packet>()
+        var selectedList = ArrayList<Packet>()
 
         override fun getItemCount(): Int = messages.size
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val msg = messages[position]
+            val packet = messages[position]
+            val msg = packet.data
             val nodes = model.nodeDB.nodes.value!!
             val node = nodes[msg.from]
             // Determine if this is my message (originated on this device)
@@ -190,7 +192,7 @@ class MessagesFragment : Fragment(), Logging {
                 if (actionMode != null) clickItem(holder)
             }
 
-            if (selectedList.contains(msg)) {
+            if (selectedList.contains(packet)) {
                 holder.itemView.background = GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
                     cornerRadius = 32f
@@ -223,11 +225,8 @@ class MessagesFragment : Fragment(), Logging {
         }
 
         /// Called when our node DB changes
-        fun onMessagesChanged(msgIn: Collection<DataPacket>) {
-            messages = msgIn.filter {
-                if (contactId == DataPacket.ID_BROADCAST) it.to == DataPacket.ID_BROADCAST
-                else it.from == contactId && it.to != DataPacket.ID_BROADCAST || it.from == DataPacket.ID_LOCAL && it.to == contactId
-            }.toTypedArray()
+        fun onMessagesChanged(messages: List<Packet>) {
+            this.messages = messages
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all messages
 
             // scroll to the last line
@@ -254,9 +253,19 @@ class MessagesFragment : Fragment(), Logging {
 
         setFragmentResultListener("requestKey") { _, bundle->
             // get the result from bundle
-            contactId = bundle.getString("contactId").toString()
+            contactKey = bundle.getString("contactKey").toString()
             contactName = bundle.getString("contactName").toString()
+            model.setContactKey(contactKey)
             binding.messageTitle.text = contactName
+        }
+
+        // contactKey: unique contact key filter (channel)+(nodeId)
+        fun sendMessage(str: String, contactKey: String) {
+            model.sendMessage(
+                str,
+                contactKey[0].digitToInt(), // Channel
+                contactKey.substring(1) // NodeID
+            )
         }
 
         binding.sendButton.setOnClickListener {
@@ -264,7 +273,7 @@ class MessagesFragment : Fragment(), Logging {
 
             val str = binding.messageInputText.text.toString().trim()
             if (str.isNotEmpty())
-                model.messagesState.sendMessage(str, contactId)
+                sendMessage(str, contactKey)
             binding.messageInputText.setText("") // blow away the string the user just entered
 
             // requireActivity().hideKeyboard()
@@ -274,8 +283,7 @@ class MessagesFragment : Fragment(), Logging {
             debug("did IME action")
 
             val str = binding.messageInputText.text.toString().trim()
-            if (str.isNotEmpty())
-                model.messagesState.sendMessage(str)
+            if (str.isNotEmpty()) sendMessage(str, contactKey)
             binding.messageInputText.setText("") // blow away the string the user just entered
 
             // requireActivity().hideKeyboard()
@@ -286,7 +294,7 @@ class MessagesFragment : Fragment(), Logging {
         layoutManager.stackFromEnd = true // We want the last rows to always be shown
         binding.messageListView.layoutManager = layoutManager
 
-        model.messagesState.messages.observe(viewLifecycleOwner) {
+        model.messages.observe(viewLifecycleOwner) {
             debug("New messages received: ${it.size}")
             messagesAdapter.onMessagesChanged(it)
         }
@@ -310,7 +318,7 @@ class MessagesFragment : Fragment(), Logging {
                 binding.quickChatLayout.removeAllViews()
                 for (action in actions) {
                     val button = Button(context)
-                    button.setText(action.name)
+                    button.text = action.name
                     button.isEnabled = isConnected
                     if (action.mode == QuickChatAction.Mode.Instant) {
                         button.backgroundTintList = ContextCompat.getColorStateList(requireActivity(), R.color.colorMyMsg)
@@ -327,7 +335,7 @@ class MessagesFragment : Fragment(), Logging {
                             binding.messageInputText.setText(newText)
                             binding.messageInputText.setSelection(newText.length)
                         } else {
-                            model.messagesState.sendMessage(action.message, contactId)
+                            sendMessage(action.message, contactKey)
                         }
                     }
                     binding.quickChatLayout.addView(button)
@@ -361,11 +369,11 @@ class MessagesFragment : Fragment(), Logging {
                         .setPositiveButton(getString(R.string.delete)) { _, _ ->
                             debug("User clicked deleteButton")
                             // all items selected --> deleteAllMessages()
-                            val messagesTotal = model.messagesState.messages.value
-                            if (messagesTotal != null && selectedList.size == messagesTotal.size) {
-                                model.messagesState.deleteAllMessages()
+                            val messagesTotal = model.packets.value.filter { it.port_num == 1 }
+                            if (selectedList.size == messagesTotal.size) {
+                                model.deleteAllMessages()
                             } else {
-                                model.messagesState.deleteMessages(selectedList)
+                                model.deleteMessages(selectedList.map { it.uuid })
                             }
                             mode.finish()
                         }
@@ -391,7 +399,7 @@ class MessagesFragment : Fragment(), Logging {
                     val selectedList = messagesAdapter.selectedList
                     var resendText = ""
                     selectedList.forEach {
-                        resendText = resendText + it.text + System.lineSeparator()
+                        resendText = resendText + it.data.text + System.lineSeparator()
                     }
                     if (resendText!="")
                         resendText = resendText.substring(0, resendText.length - 1)
