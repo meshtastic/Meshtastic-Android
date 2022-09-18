@@ -177,7 +177,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
     ) {
         val newSet = ChannelSet(
             channelSet {
-                settings[0] = newChannel
+                settings.add(newChannel)
                 loraConfig = newLoRaConfig
             })
         // Try to change the radio, if it fails, tell the user why and throw away their edits
@@ -303,7 +303,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                         val random = SecureRandom()
                         val bytes = ByteArray(32)
                         random.nextBytes(bytes)
-                        newSettings.copy {
+                        newSettings = newSettings.copy {
                             name = newName.take(11) // proto max_size:12
                             psk = ByteString.copyFrom(bytes)
                         }

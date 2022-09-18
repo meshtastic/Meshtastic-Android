@@ -42,8 +42,8 @@ data class Channel(
             else when (loraConfig.modemPreset) {
                 ModemPreset.SHORT_FAST -> "ShortFast"
                 ModemPreset.SHORT_SLOW -> "ShortSlow"
-                ModemPreset.MEDIUM_FAST -> "MidFast"
-                ModemPreset.MEDIUM_SLOW -> "MidSlow"
+                ModemPreset.MEDIUM_FAST -> "MediumFast"
+                ModemPreset.MEDIUM_SLOW -> "MediumSlow"
                 ModemPreset.LONG_FAST -> "LongFast"
                 ModemPreset.LONG_SLOW -> "LongSlow"
                 ModemPreset.VERY_LONG_SLOW -> "VLongSlow"
