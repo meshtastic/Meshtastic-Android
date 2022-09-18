@@ -43,15 +43,15 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
         model.localConfig.asLiveData().observe(viewLifecycleOwner) {
             binding.positionBroadcastPeriodEditText.setText(model.config.position.positionBroadcastSecs.toString())
             binding.lsSleepEditText.setText(model.config.power.lsSecs.toString())
-            binding.positionBroadcastPeriodView.isEnabled = !model.config.position.gpsDisabled
-            binding.positionBroadcastSwitch.isChecked = !model.config.position.gpsDisabled
+            binding.positionBroadcastPeriodView.isEnabled = model.config.position.gpsEnabled
+            binding.positionBroadcastSwitch.isChecked = model.config.position.gpsEnabled
             binding.lsSleepView.isEnabled = model.config.power.isPowerSaving && model.isESP32()
             binding.lsSleepSwitch.isChecked = model.config.power.isPowerSaving && model.isESP32()
         }
 
         model.connectionState.observe(viewLifecycleOwner) { connectionState ->
             val connected = connectionState == MeshService.ConnectionState.CONNECTED
-            binding.positionBroadcastPeriodView.isEnabled = connected && !model.config.position.gpsDisabled
+            binding.positionBroadcastPeriodView.isEnabled = connected && model.config.position.gpsEnabled
             binding.lsSleepView.isEnabled = connected && model.config.power.isPowerSaving
             binding.positionBroadcastSwitch.isEnabled = connected
             binding.lsSleepSwitch.isEnabled = connected && model.isESP32()
@@ -87,7 +87,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
 
         binding.positionBroadcastSwitch.setOnCheckedChangeListener { btn, isChecked ->
             if (btn.isPressed) {
-                model.updatePositionConfig { it.copy { gpsDisabled = !isChecked } }
+                model.updatePositionConfig { it.copy { gpsEnabled = isChecked } }
                 debug("User changed locationShare to $isChecked")
             }
         }

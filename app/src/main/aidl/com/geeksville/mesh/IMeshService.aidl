@@ -93,6 +93,9 @@ interface IMeshService {
     /// Send Reboot admin packet to nodeNum
     void requestReboot(in String nodeId);
 
+    /// Send FactoryReset admin packet to nodeNum
+    void requestFactoryReset(in String nodeId);
+
     /**
     Is the packet radio currently connected to the phone?  Returns a ConnectionState string.
     */

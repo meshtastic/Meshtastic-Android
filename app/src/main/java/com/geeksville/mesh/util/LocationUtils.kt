@@ -20,18 +20,18 @@ import kotlin.math.sin
  ******************************************************************************/
 
 object GPSFormat {
-    fun dec(p: Position): String {
+    fun DEC(p: Position): String {
         return String.format("%.5f %.5f", p.latitude, p.longitude).replace(",", ".")
     }
 
-    fun toDMS(p: Position): String {
+    fun DMS(p: Position): String {
         val lat = degreesToDMS(p.latitude, true)
         val lon = degreesToDMS(p.longitude, false)
         fun string(a: Array<String>) = String.format("%s°%s'%.5s\"%s", a[0], a[1], a[2], a[3])
         return string(lat) + " " + string(lon)
     }
 
-    fun toUTM(p: Position): String {
+    fun UTM(p: Position): String {
         val UTM = UTM.from(Point.point(p.longitude, p.latitude))
         return String.format(
             "%s%s %.6s %.7s",
@@ -42,7 +42,7 @@ object GPSFormat {
         )
     }
 
-    fun toMGRS(p: Position): String {
+    fun MGRS(p: Position): String {
         val MGRS = MGRS.from(Point.point(p.longitude, p.latitude))
         return String.format(
             "%s%s %s%s %05d %05d",

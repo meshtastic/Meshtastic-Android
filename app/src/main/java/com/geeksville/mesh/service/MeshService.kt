@@ -729,14 +729,14 @@ class MeshService : Service(), Logging {
     private fun handleReceivedAdmin(fromNodeNum: Int, a: AdminProtos.AdminMessage) {
         // For the time being we only care about admin messages from our local node
         if (fromNodeNum == myNodeNum) {
-            when (a.variantCase) {
-                AdminProtos.AdminMessage.VariantCase.GET_CONFIG_RESPONSE -> {
+            when (a.payloadVariantCase) {
+                AdminProtos.AdminMessage.PayloadVariantCase.GET_CONFIG_RESPONSE -> {
                     val response = a.getConfigResponse
                     debug("Admin: received config ${response.payloadVariantCase}")
                     setLocalConfig(response)
                 }
 
-                AdminProtos.AdminMessage.VariantCase.GET_CHANNEL_RESPONSE -> {
+                AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
                     val mi = myNodeInfo
                     if (mi != null) {
                         val ch = a.getChannelResponse
@@ -768,7 +768,7 @@ class MeshService : Service(), Logging {
                     }
                 }
                 else ->
-                    warn("No special processing needed for ${a.variantCase}")
+                    warn("No special processing needed for ${a.payloadVariantCase}")
 
             }
         }
@@ -1277,7 +1277,7 @@ class MeshService : Service(), Logging {
                 DataPair("dev_error_count", myInfo.errorCount)
             )
 
-            if (myInfo.errorCode != MeshProtos.CriticalErrorCode.Unspecified && myInfo.errorCode != MeshProtos.CriticalErrorCode.None) {
+            if (myInfo.errorCode != MeshProtos.CriticalErrorCode.UNSPECIFIED && myInfo.errorCode != MeshProtos.CriticalErrorCode.NONE) {
                 GeeksvilleApplication.analytics.track(
                     "dev_error",
                     DataPair("code", myInfo.errorCode.number),
@@ -1392,6 +1392,12 @@ class MeshService : Service(), Logging {
     private fun requestReboot(nodeId: String) {
         sendToRadio(newMeshPacketTo(toNodeNum(nodeId)).buildAdminPacket {
             rebootSeconds = 5
+        })
+    }
+
+    private fun requestFactoryReset(nodeId: String) {
+        sendToRadio(newMeshPacketTo(toNodeNum(nodeId)).buildAdminPacket {
+            factoryReset = 1
         })
     }
 
@@ -1721,6 +1727,10 @@ class MeshService : Service(), Logging {
 
         override fun requestReboot(nodeId: String) = toRemoteExceptions {
             this@MeshService.requestReboot(nodeId)
+        }
+
+        override fun requestFactoryReset(nodeId: String) = toRemoteExceptions {
+            this@MeshService.requestFactoryReset(nodeId)
         }
     }
 }

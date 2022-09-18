@@ -1,6 +1,7 @@
 package com.geeksville.mesh.model
 
 import com.geeksville.mesh.ChannelProtos
+import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.ModemPreset
 import com.geeksville.mesh.ConfigKt.loRaConfig
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.channelSettings
@@ -28,7 +29,7 @@ data class Channel(
         // The default channel that devices ship with
         val default = Channel(
             channelSettings { psk = ByteString.copyFrom(defaultPSK) },
-            loRaConfig { modemPreset = ConfigProtos.Config.LoRaConfig.ModemPreset.LongFast }
+            loRaConfig { usePreset = true; modemPreset = ModemPreset.LONG_FAST }
         )
     }
 
@@ -39,13 +40,13 @@ data class Channel(
             if (loraConfig.bandwidth != 0)
                 "Unset"
             else when (loraConfig.modemPreset) {
-                ConfigProtos.Config.LoRaConfig.ModemPreset.ShortFast -> "ShortFast"
-                ConfigProtos.Config.LoRaConfig.ModemPreset.ShortSlow -> "ShortSlow"
-                ConfigProtos.Config.LoRaConfig.ModemPreset.MedFast -> "MidFast"
-                ConfigProtos.Config.LoRaConfig.ModemPreset.MedSlow -> "MidSlow"
-                ConfigProtos.Config.LoRaConfig.ModemPreset.LongFast -> "LongFast"
-                ConfigProtos.Config.LoRaConfig.ModemPreset.LongSlow -> "LongSlow"
-                ConfigProtos.Config.LoRaConfig.ModemPreset.VLongSlow -> "VLongSlow"
+                ModemPreset.SHORT_FAST -> "ShortFast"
+                ModemPreset.SHORT_SLOW -> "ShortSlow"
+                ModemPreset.MEDIUM_FAST -> "MidFast"
+                ModemPreset.MEDIUM_SLOW -> "MidSlow"
+                ModemPreset.LONG_FAST -> "LongFast"
+                ModemPreset.LONG_SLOW -> "LongSlow"
+                ModemPreset.VERY_LONG_SLOW -> "VLongSlow"
                 else -> "Invalid"
             }
         }

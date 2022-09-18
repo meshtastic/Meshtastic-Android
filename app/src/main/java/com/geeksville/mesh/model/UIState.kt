@@ -206,24 +206,30 @@ class UIViewModel @Inject constructor(
         _requestChannelUrl.value = null
     }
 
+    var txEnabled: Boolean
+        get() = config.lora.txEnabled
+        set(value) {
+            updateLoraConfig { it.copy { txEnabled = value } }
+        }
+
     var region: Config.LoRaConfig.RegionCode
-        get() = config.lora?.region ?: Config.LoRaConfig.RegionCode.Unset
+        get() = config.lora.region
         set(value) {
             updateLoraConfig { it.copy { region = value } }
         }
 
-    fun gpsString(pos: Position): String {
-        return when (_localConfig.value?.display?.gpsFormat) {
-            ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat.GpsFormatDec -> GPSFormat.dec(pos)
-            ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat.GpsFormatDMS -> GPSFormat.toDMS(pos)
-            ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat.GpsFormatUTM -> GPSFormat.toUTM(pos)
-            ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat.GpsFormatMGRS -> GPSFormat.toMGRS(pos)
-            else -> GPSFormat.dec(pos)
+    fun gpsString(p: Position): String {
+        return when (config.display.gpsFormat) {
+            Config.DisplayConfig.GpsCoordinateFormat.DEC -> GPSFormat.DEC(p)
+            Config.DisplayConfig.GpsCoordinateFormat.DMS -> GPSFormat.DMS(p)
+            Config.DisplayConfig.GpsCoordinateFormat.UTM -> GPSFormat.UTM(p)
+            Config.DisplayConfig.GpsCoordinateFormat.MGRS -> GPSFormat.MGRS(p)
+            else -> GPSFormat.DEC(p)
         }
     }
 
     @Suppress("MemberVisibilityCanBePrivate")
-    val isRouter: Boolean = config.device?.role == Config.DeviceConfig.Role.Router
+    val isRouter: Boolean = config.device.role == Config.DeviceConfig.Role.ROUTER
 
     // We consider hasWifi = ESP32
     fun isESP32() = myNodeInfo.value?.hasWifi == true
@@ -279,9 +285,9 @@ class UIViewModel @Inject constructor(
         setDeviceConfig(config { power = data })
     }
 
-    inline fun updateNetworkConfig(crossinline body: (Config.WiFiConfig) -> Config.WiFiConfig) {
-        val data = body(config.wifi)
-        setDeviceConfig(config { wifi = data })
+    inline fun updateNetworkConfig(crossinline body: (Config.NetworkConfig) -> Config.NetworkConfig) {
+        val data = body(config.network)
+        setDeviceConfig(config { network = data })
     }
 
     inline fun updateDisplayConfig(crossinline body: (Config.DisplayConfig) -> Config.DisplayConfig) {
@@ -360,14 +366,7 @@ class UIViewModel @Inject constructor(
     }
 
     fun requestFactoryReset() {
-        val config = _localConfig.value
-        if (config != null) {
-            val builder = config.device.toBuilder()
-            builder.factoryReset = true
-            val newConfig = ConfigProtos.Config.newBuilder()
-            newConfig.device = builder.build()
-            setDeviceConfig(newConfig.build())
-        }
+        meshService?.requestFactoryReset(DataPacket.ID_LOCAL)
     }
 
     /**

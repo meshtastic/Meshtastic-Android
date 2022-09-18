@@ -59,7 +59,7 @@ class LocalConfigRepository @Inject constructor(
         if (config.hasDevice()) setDeviceConfig(config.device)
         if (config.hasPosition()) setPositionConfig(config.position)
         if (config.hasPower()) setPowerConfig(config.power)
-        if (config.hasWifi()) setWifiConfig(config.wifi)
+        if (config.hasNetwork()) setWifiConfig(config.network)
         if (config.hasDisplay()) setDisplayConfig(config.display)
         if (config.hasLora()) setLoraConfig(config.lora)
         if (config.hasBluetooth()) setBluetoothConfig(config.bluetooth)
@@ -83,9 +83,9 @@ class LocalConfigRepository @Inject constructor(
         }
     }
 
-    private suspend fun setWifiConfig(config: ConfigProtos.Config.WiFiConfig) {
+    private suspend fun setWifiConfig(config: ConfigProtos.Config.NetworkConfig) {
         localConfigStore.updateData { preference ->
-            preference.toBuilder().setWifi(config).build()
+            preference.toBuilder().setNetwork(config).build()
         }
     }
 

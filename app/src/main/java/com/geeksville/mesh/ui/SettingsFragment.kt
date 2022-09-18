@@ -161,17 +161,17 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (connected == MeshService.ConnectionState.DISCONNECTED)
             model.setOwner("")
 
-        if (model.config.position.gpsDisabled) {
+        if (model.config.position.gpsEnabled) {
+            binding.provideLocationCheckbox.isEnabled = true
+        } else {
             binding.provideLocationCheckbox.isChecked = false
             binding.provideLocationCheckbox.isEnabled = false
-        } else {
-            binding.provideLocationCheckbox.isEnabled = true
         }
 
         // update the region selection from the device
         val region = model.region
         val spinner = binding.regionSpinner
-        val unsetIndex = regions.indexOf(ConfigProtos.Config.LoRaConfig.RegionCode.Unset.name)
+        val unsetIndex = regions.indexOf(ConfigProtos.Config.LoRaConfig.RegionCode.UNSET.name)
         spinner.onItemSelectedListener = null
 
         debug("current region is $region")

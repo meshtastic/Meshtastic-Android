@@ -251,7 +251,10 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                     debug("Switching back to default channel")
                     installSettings(
                         Channel.default.settings,
-                        Channel.default.loraConfig.copy { region = model.region }
+                        Channel.default.loraConfig.copy {
+                            region = model.region
+                            txEnabled = model.txEnabled
+                        }
                     )
                 }
                 .show()
@@ -312,6 +315,8 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                     // No matter what apply the speed selection from the user
                     val newLoRaConfig = loRaConfig {
                         region = model.region
+                        txEnabled = model.txEnabled
+                        usePreset = true
                         modemPreset = newModemPreset
                     }
 
