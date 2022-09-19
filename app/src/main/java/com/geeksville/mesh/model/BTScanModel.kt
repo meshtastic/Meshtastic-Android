@@ -236,9 +236,10 @@ class BTScanModel @Inject constructor(
             devices.value = (testnodes.map { it.fullAddress to it }).toMap().toMutableMap()
 
             // If nothing was selected, by default select the first thing we see
-            if (selectedAddress == null)
+            val activity = GeeksvilleApplication.currentActivity
+            if (selectedAddress == null && activity is MainActivity)
                 changeScanSelection(
-                    GeeksvilleApplication.currentActivity as MainActivity,
+                    activity,
                     testnodes.first().fullAddress
                 )
 
