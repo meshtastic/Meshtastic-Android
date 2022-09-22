@@ -94,6 +94,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
 
         setupMapProperties()
         map.setTileSource(loadOnlineTileSourceBase())
+        cacheManager = CacheManager(map)
         map.let {
             if (view != null) {
                 mapController = map.controller
@@ -260,7 +261,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
                         downloadPrompt!!.dismiss()
                         downloadPrompt = null
                     }
-
                     //this triggers the download
                     cacheManager.downloadAreaAsync(activity,
                         bb,
@@ -376,7 +376,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
 
     private fun setupMapProperties() {
         if (this::map.isInitialized) {
-            cacheManager = CacheManager(map)
             map.setDestroyMode(false) // keeps map instance alive when in the background.
             map.isVerticalMapRepetitionEnabled = false // disables map repetition
             map.setScrollableAreaLimitLatitude(
