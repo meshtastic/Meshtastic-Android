@@ -25,15 +25,15 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_style_toggle"
+        android:id="@+id/downloadButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:backgroundTint="@color/design_default_color_secondary"
         android:contentDescription="@string/style_selection"
         android:orientation="vertical"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         tools:background="@color/design_default_color_secondary" />
 </androidx.constraintlayout.widget.ConstraintLayout>

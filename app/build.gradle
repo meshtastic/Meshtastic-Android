@@ -140,9 +140,11 @@ dependencies {
     kapt "androidx.room:room-compiler:$room_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
 
-    //OSMAND
+    //OSMDROID, mgrs,
     implementation 'org.osmdroid:osmdroid-android:6.1.14'
+    implementation 'com.github.MKergall:osmbonuspack:6.9.0'
     implementation 'mil.nga:mgrs:2.0.0'
+    implementation 'org.osmdroid:osmdroid-geopackage:6.1.14'
 
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:$room_version"
