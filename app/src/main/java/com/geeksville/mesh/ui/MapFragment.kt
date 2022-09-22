@@ -12,10 +12,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.CustomTileSource
 import com.geeksville.mesh.model.UIViewModel
@@ -47,6 +48,7 @@ class MapFragment : ScreenFragment("Map"), Logging {
     private val prefsName = "org.andnav.osm.prefs"
     private val mapStyleId = "map_style_id"
     private var nodePositions = listOf<MarkerWithLabel>()
+    private var wayPoints = listOf<MarkerWithLabel>()
     private val nodeLayer = 1
 
 
@@ -85,7 +87,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
             }
             model.waypoints.observe(viewLifecycleOwner) {
                 debug("New waypoints received: ${it.size}")
-                // build Collection<Packet> from (it.values)
+                onWaypointChanged(it.values)
+                drawOverlays()
             }
             zoomToNodes(mapController)
         }
@@ -111,6 +114,34 @@ class MapFragment : ScreenFragment("Map"), Logging {
         }
         val dialog = builder.create()
         dialog.show()
+    }
+
+    private fun onWaypointChanged(wayPt: Collection<Packet>) {
+
+        /**
+         * Using the latest waypoint, generate GeoPoint
+         */
+        // Find all waypoints
+        fun getCurrentWayPoints(): List<MarkerWithLabel> {
+            val wayPoint = wayPt.map { pt ->
+                debug("Showing on map: $pt")
+                lateinit var marker: MarkerWithLabel
+                pt.data.waypoint?.let {
+                    val label = it.name + " " + formatAgo(it.expire)
+                    marker = MarkerWithLabel(map, label)
+                    marker.title = it.name
+                    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                    marker.position = GeoPoint(it.latitudeI.toDouble(), it.longitudeI.toDouble())
+                    marker.icon = ContextCompat.getDrawable(
+                        requireActivity(),
+                        R.drawable.ic_baseline_location_on_24
+                    )
+                }
+                marker
+            }
+            return wayPoint
+        }
+        wayPoints = getCurrentWayPoints()
     }
 
     private fun onNodesChanged(nodes: Collection<NodeInfo>) {
@@ -153,6 +184,8 @@ class MapFragment : ScreenFragment("Map"), Logging {
         map.overlayManager.overlays().clear()
         addCopyright()  // Copyright is required for certain map sources
         map.overlayManager.addAll(nodeLayer, nodePositions)
+        map.overlayManager.addAll(nodeLayer, wayPoints)
+        map.invalidate()
     }
 
     /**
