@@ -23,7 +23,7 @@ interface PacketDao {
     fun getMessagesFrom(contact: String): Flow<List<Packet>>
 
     @Query("Select * from packet where data = :data")
-    fun findDataPacket(data: DataPacket): Packet
+    fun findDataPacket(data: DataPacket): Packet?
 
     @Query("Delete from packet where port_num = 1")
     fun deleteAllMessages()
@@ -45,6 +45,6 @@ interface PacketDao {
     @Transaction
     fun updateMessageStatus(data: DataPacket, m: MessageStatus) {
         val new = data.copy(status = m)
-        update(findDataPacket(data).copy(data = new))
+        findDataPacket(data)?.let { update(it.copy(data = new)) }
     }
 }
