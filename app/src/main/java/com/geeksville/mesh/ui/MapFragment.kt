@@ -133,7 +133,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
         )
         // set title
         alertDialogBuilder.setTitle("Cache Manager")
-        //.setMessage(R.string.cache_manager_description);
 
         // set dialog message
         alertDialogBuilder.setItems(
@@ -223,16 +222,15 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
         cacheSouth.addTextChangedListener(this)
         cacheWest.addTextChangedListener(this)
         executeJob = view.findViewById(R.id.executeJob)
-        executeJob.setOnClickListener {
-            builder.setOnCancelListener {
-                cacheEast.text = null
-                cacheSouth.text = null
-                cacheEstimate.text = ""
-                cacheNorth.text = null
-                cacheWest.text = null
-                zoomMin.progress = 0
-                zoomMax.progress = 0
-            }
+        executeJob.setOnClickListener(this)
+        builder.setOnCancelListener {
+            cacheEast.text = null
+            cacheSouth.text = null
+            cacheEstimate.text = ""
+            cacheNorth.text = null
+            cacheWest.text = null
+            zoomMin.progress = 0
+            zoomMax.progress = 0
         }
         builder.setView(view)
         builder.setCancelable(true)
@@ -246,7 +244,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
      */
     private fun updateEstimate(startJob: Boolean) {
         try {
-            if (cacheWest.text != null && cacheNorth.text != null && cacheSouth.text != null && zoomMax.progress != 0 && zoomMin.progress != 0) {
+            if (cacheWest.text != null && cacheNorth.text != null && cacheSouth.text != null && ::zoomMax.isInitialized && ::zoomMin.isInitialized) {
                 val n: Double = cacheNorth.text.toString().toDouble()
                 val s: Double = cacheSouth.text.toString().toDouble()
                 val e: Double = cacheEast.text.toString().toDouble()
