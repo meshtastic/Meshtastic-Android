@@ -8,19 +8,19 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.os.Bundle
+import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.util.Log
+import android.view.*
 import android.widget.*
 import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.CustomTileSource
@@ -32,12 +32,17 @@ import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.cachemanager.CacheManager
+import org.osmdroid.tileprovider.cachemanager.CacheManager.CacheManagerCallback
+import org.osmdroid.tileprovider.modules.SqliteArchiveTileWriter
 import org.osmdroid.tileprovider.tilesource.ITileSource
+import org.osmdroid.tileprovider.tilesource.TileSourcePolicyException
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.*
+import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
+import java.io.File
 import kotlin.math.pow
 
 
@@ -49,6 +54,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
     private lateinit var map: MapView
     private lateinit var mapController: IMapController
     private lateinit var mPrefs: SharedPreferences
+    private lateinit var writer: SqliteArchiveTileWriter
     private val model: UIViewModel by activityViewModels()
 
     private lateinit var cacheManager: CacheManager
@@ -58,6 +64,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
     private lateinit var cacheSouth: EditText
     private lateinit var cacheEast: EditText
     private lateinit var cacheWest: EditText
+    private lateinit var cacheOutput: EditText
 
     private lateinit var cacheEstimate: TextView
 
@@ -77,7 +84,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
     private var nodePositions = listOf<MarkerWithLabel>()
     private var wayPoints = listOf<MarkerWithLabel>()
     private val nodeLayer = 1
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -218,6 +224,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
         cacheSouth.setText(boundingBox.latSouth.toString() + "")
         cacheWest = view.findViewById(R.id.cache_west)
         cacheWest.setText(boundingBox.lonWest.toString() + "")
+        cacheOutput = view.findViewById(R.id.cache_output)
         cacheEstimate = view.findViewById(R.id.cache_estimate)
 
         //change listeners for both validation and to trigger the download estimation
@@ -235,6 +242,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
             cacheWest.text = null
             zoomMin.progress = 0
             zoomMax.progress = 0
+            cacheOutput.text = null;
         }
         builder.setView(view)
         builder.setCancelable(true)
@@ -247,13 +255,31 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
      * if false, just update the dialog box
      */
     private fun updateEstimate(startJob: Boolean) {
-        cacheManager = CacheManager(map) // Make sure cacheManager has latest from map
         try {
-            if (cacheWest.text != null && cacheNorth.text != null && cacheSouth.text != null && ::zoomMax.isInitialized && ::zoomMin.isInitialized) {
+            if (cacheWest.text != null && cacheNorth.text != null && cacheSouth.text != null && cacheOutput.text != null && ::zoomMax.isInitialized && ::zoomMin.isInitialized) {
                 val n: Double = cacheNorth.text.toString().toDouble()
                 val s: Double = cacheSouth.text.toString().toDouble()
                 val e: Double = cacheEast.text.toString().toDouble()
                 val w: Double = cacheWest.text.toString().toDouble()
+
+                if (startJob) {
+                    val outputName =
+                        Configuration.getInstance().osmdroidBasePath.absolutePath + File.separator + "outputName.sqlite"
+                    writer = SqliteArchiveTileWriter(outputName)
+                    try {
+                        cacheManager = CacheManager(map, writer)
+                    } catch (ex: TileSourcePolicyException) {
+                        Log.e("MapFragment", ex.message!!)
+                        return
+                    }
+                } else {
+                    try {
+                        cacheManager = CacheManager(map)
+                    } catch (ex: TileSourcePolicyException) {
+                        Log.e("MapFragment", ex.message!!)
+                        return
+                    }
+                }
                 val zoommin: Int = zoomMin.progress
                 val zoommax: Int = zoomMax.progress
                 //nesw
@@ -265,15 +291,24 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
                         downloadPrompt!!.dismiss()
                         downloadPrompt = null
                     }
+                    try {
+                        cacheManager =
+                            CacheManager(map, writer) // Make sure cacheManager has latest from map
+                    } catch (ex: TileSourcePolicyException) {
+                        Log.d("MapFragment", "Tilesource does not allow archiving: ${ex.message}")
+                        return
+                    }
                     //this triggers the download
-                    cacheManager.downloadAreaAsync(activity,
+                    cacheManager.downloadAreaAsync(
+                        activity,
                         bb,
                         zoommin,
                         zoommax,
-                        object : CacheManager.CacheManagerCallback {
+                        object : CacheManagerCallback {
                             override fun onTaskComplete() {
                                 Toast.makeText(activity, "Download complete!", Toast.LENGTH_LONG)
                                     .show()
+                                writer.onDetach()
                             }
 
                             override fun onTaskFailed(errors: Int) {
@@ -282,10 +317,14 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
                                     "Download complete with $errors errors",
                                     Toast.LENGTH_LONG
                                 ).show()
+                                writer.onDetach()
                             }
 
                             override fun updateProgress(
-                                progress: Int, currentZoomLevel: Int, zoomMin: Int, zoomMax: Int
+                                progress: Int,
+                                currentZoomLevel: Int,
+                                zoomMin: Int,
+                                zoomMax: Int
                             ) {
                                 //NOOP since we are using the build in UI
                             }
@@ -390,9 +429,33 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
         nodePositions = getCurrentNodes()
     }
 
+
+    /**
+     * Create LatLong Grid line overlay
+     * @param enabled: turn on/off gridlines
+     */
+    private fun createLatLongGrid(enabled: Boolean) {
+        val latLongGridOverlay = LatLonGridlineOverlay2()
+        latLongGridOverlay.isEnabled = enabled
+        if (latLongGridOverlay.isEnabled) {
+            val textPaint = Paint()
+            textPaint.textSize = 40f
+            textPaint.color = Color.GRAY
+            textPaint.isAntiAlias = true
+            textPaint.isFakeBoldText = true
+            textPaint.textAlign = Paint.Align.CENTER
+            latLongGridOverlay.textPaint = textPaint
+            latLongGridOverlay.setBackgroundColor(Color.TRANSPARENT)
+            latLongGridOverlay.setLineWidth(3.0f)
+            latLongGridOverlay.setLineColor(Color.GRAY)
+            map.overlayManager.add(latLongGridOverlay)
+        }
+    }
+
     private fun drawOverlays() {
         map.overlayManager.overlays().clear()
         addCopyright()  // Copyright is required for certain map sources
+        createLatLongGrid(false)
         map.overlayManager.addAll(nodeLayer, nodePositions)
         map.overlayManager.addAll(nodeLayer, wayPoints)
         map.invalidate()
