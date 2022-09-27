@@ -35,6 +35,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
     class ViewHolder(itemView: AdapterNodeLayoutBinding) : RecyclerView.ViewHolder(itemView.root) {
+        val chipNode = itemView.chipNode
         val nodeNameView = itemView.nodeNameView
         val distanceView = itemView.distanceView
         val coordsView = itemView.coordsView
@@ -110,7 +111,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
          */
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val n = nodes[position]
-            val name = n.user?.longName ?: n.user?.id ?: "Unknown node"
+            val user = n.user
+            holder.chipNode.text = user?.shortName ?: "UNK"
+            val name = user?.longName ?: "Unknown node"
             holder.nodeNameView.text = name
 
             val pos = n.validPosition
@@ -165,19 +168,21 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                     holder.signalView.visibility = View.INVISIBLE
                 }
             }
-            holder.itemView.setOnLongClickListener {
-                val node = n.user
-                if (position > 0 && node != null) {
-                    debug("calling MessagesFragment filter:${node.id}")
+            holder.chipNode.setOnClickListener {
+                if (position > 0 && user != null) {
+                    debug("calling MessagesFragment filter:${user.id}")
                     setFragmentResult(
                         "requestKey",
-                        bundleOf("contactKey" to "0${node.id}", "contactName" to name)
+                        bundleOf("contactKey" to "0${user.id}", "contactName" to name)
                     )
                     parentFragmentManager.beginTransaction()
                         .replace(R.id.mainActivityLayout, MessagesFragment())
                         .addToBackStack(null)
                         .commit()
                 }
+            }
+            holder.itemView.setOnLongClickListener {
+                // do something else
                 true
             }
         }
@@ -210,10 +215,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
         holder.batteryPctView.text = text
         holder.powerIcon.setImageDrawable(context?.let {
-            ContextCompat.getDrawable(
-                it,
-                image
-            )
+            ContextCompat.getDrawable(it, image)
         })
     }
 
