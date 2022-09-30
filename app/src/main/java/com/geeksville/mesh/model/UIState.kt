@@ -237,11 +237,6 @@ class UIViewModel @Inject constructor(
     // We consider hasWifi = ESP32
     fun isESP32() = myNodeInfo.value?.hasWifi == true
 
-    fun hasAXP(): Boolean {
-        val hasAXP = listOf(4, 7, 9) // mesh.proto 'HardwareModel' enums with AXP192 chip
-        return hasAXP.contains(nodeDB.ourNodeInfo?.user?.hwModel?.number)
-    }
-
     /// hardware info about our local device (can be null)
     private val _myNodeInfo = MutableLiveData<MyNodeInfo?>()
     val myNodeInfo: LiveData<MyNodeInfo?> get() = _myNodeInfo
@@ -360,16 +355,36 @@ class UIViewModel @Inject constructor(
             }
     }
 
-    fun requestShutdown() {
-        meshService?.requestShutdown(DataPacket.ID_LOCAL)
+    fun requestShutdown(idNum: Int) {
+        try {
+            meshService?.requestShutdown(idNum)
+        } catch (ex: RemoteException) {
+            errormsg("RemoteException: ${ex.message}")
+        }
     }
 
-    fun requestReboot() {
-        meshService?.requestReboot(DataPacket.ID_LOCAL)
+    fun requestReboot(idNum: Int) {
+        try {
+            meshService?.requestReboot(idNum)
+        } catch (ex: RemoteException) {
+            errormsg("RemoteException: ${ex.message}")
+        }
     }
 
-    fun requestFactoryReset() {
-        meshService?.requestFactoryReset(DataPacket.ID_LOCAL)
+    fun requestFactoryReset(idNum: Int) {
+        try {
+            meshService?.requestFactoryReset(idNum)
+        } catch (ex: RemoteException) {
+            errormsg("RemoteException: ${ex.message}")
+        }
+    }
+
+    fun requestNodedbReset(idNum: Int) {
+        try {
+            meshService?.requestNodedbReset(idNum)
+        } catch (ex: RemoteException) {
+            errormsg("RemoteException: ${ex.message}")
+        }
     }
 
     /**
