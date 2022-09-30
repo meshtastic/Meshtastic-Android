@@ -58,7 +58,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="16dp"
-            android:entries="@array/regions"
             android:theme="@style/AppTheme.Spinner"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/regionLabel"
