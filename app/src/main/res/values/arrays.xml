@@ -91,5 +91,6 @@
         <item>USGS TOPO</item>
         <item>USGS Satellite</item>
         <item>ESRI World Overview</item>
+        <item>NOAA GOES Radar</item>
     </string-array>
 </resources>

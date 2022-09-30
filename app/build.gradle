@@ -143,7 +143,8 @@ dependencies {
     //OSMDROID, mgrs,
     implementation 'org.osmdroid:osmdroid-android:6.1.14'
     implementation 'com.github.MKergall:osmbonuspack:6.9.0'
-    implementation 'mil.nga:mgrs:2.0.0'
+    implementation 'org.osmdroid:osmdroid-wms:6.1.14'
+    api 'mil.nga.mgrs:mgrs-android:2.2.0'
     implementation 'org.osmdroid:osmdroid-geopackage:6.1.14'
 
     // optional - Kotlin Extensions and Coroutines support for Room

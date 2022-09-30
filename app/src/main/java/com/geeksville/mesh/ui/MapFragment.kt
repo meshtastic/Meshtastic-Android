@@ -8,7 +8,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.os.Bundle
-import android.os.Environment
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -264,7 +263,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
 
                 if (startJob) {
                     val outputName =
-                        Configuration.getInstance().osmdroidBasePath.absolutePath + File.separator + "outputName.sqlite"
+                        Configuration.getInstance().osmdroidBasePath.absolutePath + File.separator + "mainFile.sqlite" // TODO: Accept filename input param from user
                     writer = SqliteArchiveTileWriter(outputName)
                     try {
                         cacheManager = CacheManager(map, writer)
@@ -465,10 +464,12 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
      * Adds copyright to map depending on what source is showing
      */
     private fun addCopyright() {
-        val copyrightNotice: String = map.tileProvider.tileSource.copyrightNotice
-        val copyrightOverlay = CopyrightOverlay(context)
-        copyrightOverlay.setCopyrightNotice(copyrightNotice)
-        map.overlays.add(copyrightOverlay)
+        if (map.tileProvider.tileSource.copyrightNotice != null) {
+            val copyrightNotice: String = map.tileProvider.tileSource.copyrightNotice
+            val copyrightOverlay = CopyrightOverlay(context)
+            copyrightOverlay.setCopyrightNotice(copyrightNotice)
+            map.overlays.add(copyrightOverlay)
+        }
     }
 
     private fun setupMapProperties() {
