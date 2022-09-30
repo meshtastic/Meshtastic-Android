@@ -55,9 +55,6 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             binding.lsSleepView.isEnabled = connected && model.config.power.isPowerSaving
             binding.positionBroadcastSwitch.isEnabled = connected
             binding.lsSleepSwitch.isEnabled = connected && model.isESP32()
-            binding.shutdownButton.isEnabled = connected && model.hasAXP()
-            binding.rebootButton.isEnabled = connected
-            binding.factoryResetButton.isEnabled = connected
         }
 
         binding.positionBroadcastPeriodEditText.on(EditorInfo.IME_ACTION_DONE) {
@@ -110,42 +107,6 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
                 model.updatePowerConfig { it.copy { isPowerSaving = isChecked } }
                 debug("User changed isPowerSaving to $isChecked")
             }
-        }
-
-        binding.shutdownButton.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
-                .setMessage("${getString(R.string.shutdown)}?")
-                .setNeutralButton(R.string.cancel) { _, _ ->
-                }
-                .setPositiveButton(getString(R.string.okay)) { _, _ ->
-                    debug("User clicked requestShutdown")
-                    model.requestShutdown()
-                }
-                .show()
-        }
-
-        binding.rebootButton.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
-                .setMessage("${getString(R.string.reboot)}?")
-                .setNeutralButton(R.string.cancel) { _, _ ->
-                }
-                .setPositiveButton(getString(R.string.okay)) { _, _ ->
-                    debug("User clicked requestReboot")
-                    model.requestReboot()
-                }
-                .show()
-        }
-
-        binding.factoryResetButton.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.are_you_sure_factory_reset)
-                .setMessage(R.string.factory_reset_description)
-                .setNeutralButton(R.string.cancel) { _, _ ->
-                }
-                .setPositiveButton(R.string.okay) { _, _ ->
-                    model.requestFactoryReset()
-                }
-                .show()
         }
     }
 }

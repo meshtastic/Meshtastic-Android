@@ -3,8 +3,10 @@ package com.geeksville.mesh.ui
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.text.HtmlCompat
@@ -12,13 +14,14 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
 import com.geeksville.mesh.databinding.NodelistFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.util.formatAgo
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import java.net.URLEncoder
 
@@ -35,6 +38,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
     class ViewHolder(itemView: AdapterNodeLayoutBinding) : RecyclerView.ViewHolder(itemView.root) {
+        val chipNode = itemView.chipNode
         val nodeNameView = itemView.nodeNameView
         val distanceView = itemView.distanceView
         val coordsView = itemView.coordsView
@@ -46,6 +50,90 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     }
 
     private val nodesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
+
+        private var nodes = arrayOf<NodeInfo>()
+
+        private fun popup(view: View, position: Int) {
+            val node = nodes[position]
+            val user = node.user
+            val showAdmin = position == 0 // TODO add admin channel check
+            val popup = PopupMenu(requireContext(), view)
+            popup.inflate(R.menu.menu_nodes)
+            popup.menu.findItem(R.id.direct_message).isVisible = position > 0
+            popup.menu.setGroupVisible(R.id.group_admin, showAdmin)
+            popup.setOnMenuItemClickListener { item: MenuItem ->
+                when (item.itemId) {
+                    R.id.direct_message -> {
+                        if (position > 0 && user != null) {
+                            debug("calling MessagesFragment filter: 0${user.id}")
+                            setFragmentResult(
+                                "requestKey",
+                                bundleOf(
+                                    "contactKey" to "0${user.id}",
+                                    "contactName" to user.longName
+                                )
+                            )
+                            parentFragmentManager.beginTransaction()
+                                .replace(R.id.mainActivityLayout, MessagesFragment())
+                                .addToBackStack(null)
+                                .commit()
+                        }
+                    }
+                    R.id.reboot -> {
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("${getString(R.string.reboot)}\n${user?.longName}?")
+                            .setIcon(R.drawable.ic_twotone_warning_24)
+                            .setNeutralButton(R.string.cancel) { _, _ ->
+                            }
+                            .setPositiveButton(getString(R.string.okay)) { _, _ ->
+                                debug("User clicked requestReboot")
+                                model.requestReboot(node.num)
+                            }
+                            .show()
+                    }
+                    R.id.shutdown -> {
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("${getString(R.string.shutdown)}\n${user?.longName}?")
+                            .setIcon(R.drawable.ic_twotone_warning_24)
+                            .setNeutralButton(R.string.cancel) { _, _ ->
+                            }
+                            .setPositiveButton(getString(R.string.okay)) { _, _ ->
+                                debug("User clicked requestShutdown")
+                                model.requestShutdown(node.num)
+                            }
+                            .show()
+                    }
+                    R.id.factory_reset -> {
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("${getString(R.string.factory_reset)}\n${user?.longName}?")
+                            .setIcon(R.drawable.ic_twotone_warning_24)
+                            .setMessage(R.string.factory_reset_description)
+                            .setNeutralButton(R.string.cancel) { _, _ ->
+                            }
+                            .setPositiveButton(R.string.okay) { _, _ ->
+                                debug("User clicked requestFactoryReset")
+                                model.requestFactoryReset(node.num)
+                            }
+                            .show()
+                    }
+                    R.id.nodedb_reset -> {
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("${getString(R.string.nodedb_reset)}\n${user?.longName}?")
+                            .setIcon(R.drawable.ic_twotone_warning_24)
+                            .setMessage(R.string.nodedb_reset_description)
+                            .setNeutralButton(R.string.cancel) { _, _ ->
+                            }
+                            .setPositiveButton(getString(R.string.okay)) { _, _ ->
+                                debug("User clicked requestNodedbReset")
+                                model.requestNodedbReset(node.num)
+                            }
+                            .show()
+                    }
+                }
+                true
+            }
+            popup.show()
+        }
 
         /**
          * Called when RecyclerView needs a new [ViewHolder] of the given type to represent
@@ -110,7 +198,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
          */
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val n = nodes[position]
-            val name = n.user?.longName ?: n.user?.id ?: "Unknown node"
+            val user = n.user
+            holder.chipNode.text = user?.shortName ?: "UNK"
+            val name = user?.longName ?: "Unknown node"
             holder.nodeNameView.text = name
 
             val pos = n.validPosition
@@ -165,24 +255,14 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                     holder.signalView.visibility = View.INVISIBLE
                 }
             }
+            holder.chipNode.setOnClickListener {
+                popup(it, position)
+            }
             holder.itemView.setOnLongClickListener {
-                val node = n.user
-                if (position > 0 && node != null) {
-                    debug("calling MessagesFragment filter:${node.id}")
-                    setFragmentResult(
-                        "requestKey",
-                        bundleOf("contactKey" to "0${node.id}", "contactName" to name)
-                    )
-                    parentFragmentManager.beginTransaction()
-                        .replace(R.id.mainActivityLayout, MessagesFragment())
-                        .addToBackStack(null)
-                        .commit()
-                }
+                popup(it, position)
                 true
             }
         }
-
-        private var nodes = arrayOf<NodeInfo>()
 
         /// Called when our node DB changes
         fun onNodesChanged(nodesIn: Array<NodeInfo>) {
@@ -210,10 +290,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
         holder.batteryPctView.text = text
         holder.powerIcon.setImageDrawable(context?.let {
-            ContextCompat.getDrawable(
-                it,
-                image
-            )
+            ContextCompat.getDrawable(it, image)
         })
     }
 

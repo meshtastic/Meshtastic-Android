@@ -1341,7 +1341,7 @@ class MeshService : Service(), Logging {
             else {
                 discardNodeDB()
                 debug("Installing new node DB")
-                myNodeInfo = newMyNodeInfo// Install myNodeInfo as current
+                myNodeInfo = newMyNodeInfo // Install myNodeInfo as current
 
                 newNodes.forEach(::installNodeInfo)
                 newNodes.clear() // Just to save RAM ;-)
@@ -1383,21 +1383,27 @@ class MeshService : Service(), Logging {
         })
     }
 
-    private fun requestShutdown(nodeId: String) {
-        sendToRadio(newMeshPacketTo(toNodeNum(nodeId)).buildAdminPacket {
+    private fun requestShutdown(idNum: Int) {
+        sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
             shutdownSeconds = 5
         })
     }
 
-    private fun requestReboot(nodeId: String) {
-        sendToRadio(newMeshPacketTo(toNodeNum(nodeId)).buildAdminPacket {
+    private fun requestReboot(idNum: Int) {
+        sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
             rebootSeconds = 5
         })
     }
 
-    private fun requestFactoryReset(nodeId: String) {
-        sendToRadio(newMeshPacketTo(toNodeNum(nodeId)).buildAdminPacket {
+    private fun requestFactoryReset(idNum: Int) {
+        sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
             factoryReset = 1
+        })
+    }
+
+    private fun requestNodedbReset(idNum: Int) {
+        sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
+            nodedbReset = 1
         })
     }
 
@@ -1721,16 +1727,20 @@ class MeshService : Service(), Logging {
             stopLocationRequests()
         }
 
-        override fun requestShutdown(nodeId: String) = toRemoteExceptions {
-            this@MeshService.requestShutdown(nodeId)
+        override fun requestShutdown(idNum: Int) = toRemoteExceptions {
+            this@MeshService.requestShutdown(idNum)
         }
 
-        override fun requestReboot(nodeId: String) = toRemoteExceptions {
-            this@MeshService.requestReboot(nodeId)
+        override fun requestReboot(idNum: Int) = toRemoteExceptions {
+            this@MeshService.requestReboot(idNum)
         }
 
-        override fun requestFactoryReset(nodeId: String) = toRemoteExceptions {
-            this@MeshService.requestFactoryReset(nodeId)
+        override fun requestFactoryReset(idNum: Int) = toRemoteExceptions {
+            this@MeshService.requestFactoryReset(idNum)
+        }
+
+        override fun requestNodedbReset(idNum: Int) = toRemoteExceptions {
+            this@MeshService.requestNodedbReset(idNum)
         }
     }
 }
