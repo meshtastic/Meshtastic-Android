@@ -391,12 +391,9 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
                     val label = it.name + " " + formatAgo(it.expire)
                     marker = MarkerWithLabel(map, label)
                     marker.title = it.name
+                    marker.snippet = it.description
                     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     marker.position = GeoPoint(it.latitudeI.toDouble(), it.longitudeI.toDouble())
-                    marker.icon = ContextCompat.getDrawable(
-                        requireActivity(),
-                        R.drawable.ic_baseline_location_on_24
-                    )
                 }
                 marker
             }

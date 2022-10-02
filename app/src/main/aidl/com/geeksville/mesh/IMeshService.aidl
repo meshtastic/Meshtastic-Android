@@ -88,13 +88,16 @@ interface IMeshService {
     void setChannels(in byte []payload);
 
     /// Send Shutdown admin packet to nodeNum
-    void requestShutdown(in String nodeId);
+    void requestShutdown(in int idNum);
 
     /// Send Reboot admin packet to nodeNum
-    void requestReboot(in String nodeId);
+    void requestReboot(in int idNum);
 
     /// Send FactoryReset admin packet to nodeNum
-    void requestFactoryReset(in String nodeId);
+    void requestFactoryReset(in int idNum);
+
+    /// Send NodedbReset admin packet to nodeNum
+    void requestNodedbReset(in int idNum);
 
     /**
     Is the packet radio currently connected to the phone?  Returns a ConnectionState string.
