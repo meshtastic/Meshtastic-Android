@@ -60,7 +60,54 @@ class CustomTileSource {
                         + mImageFilenameEnding)
             }
         }
-
+        private val USGS_HYDRO_CACHE = object : OnlineTileSourceBase(
+            "USGS Hydro Cache",
+            0,
+            18,
+            256,
+            "",
+            arrayOf(
+                "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer/tile/"
+            ),
+            "USGS",
+            TileSourcePolicy(
+                2,
+                TileSourcePolicy.FLAG_NO_PREVENTIVE
+                        or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
+                        or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
+            )
+        ) {
+            override fun getTileURLString(pMapTileIndex: Long): String {
+                return baseUrl + (MapTileIndex.getZoom(pMapTileIndex)
+                    .toString() + "/" + MapTileIndex.getY(pMapTileIndex)
+                        + "/" + MapTileIndex.getX(pMapTileIndex)
+                        + mImageFilenameEnding)
+            }
+        }
+        private val USGS_SHADED_RELIEF = object : OnlineTileSourceBase(
+            "USGS Shaded Relief Only",
+            0,
+            18,
+            256,
+            "",
+            arrayOf(
+                "https://basemap.nationalmap.gov/arcgis/rest/services/USGSShadedReliefOnly/MapServer/tile/"
+            ),
+            "USGS",
+            TileSourcePolicy(
+                2,
+                TileSourcePolicy.FLAG_NO_PREVENTIVE
+                        or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
+                        or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
+            )
+        ) {
+            override fun getTileURLString(pMapTileIndex: Long): String {
+                return baseUrl + (MapTileIndex.getZoom(pMapTileIndex)
+                    .toString() + "/" + MapTileIndex.getY(pMapTileIndex)
+                        + "/" + MapTileIndex.getX(pMapTileIndex)
+                        + mImageFilenameEnding)
+            }
+        }
 
         /**
          * WMS TILE SERVER
