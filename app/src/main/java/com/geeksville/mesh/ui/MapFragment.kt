@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import android.opengl.Visibility
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -34,6 +35,7 @@ import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.tileprovider.cachemanager.CacheManager.CacheManagerCallback
 import org.osmdroid.tileprovider.modules.SqliteArchiveTileWriter
 import org.osmdroid.tileprovider.tilesource.ITileSource
+import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourcePolicyException
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
@@ -57,7 +59,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
     private val model: UIViewModel by activityViewModels()
 
     private lateinit var cacheManager: CacheManager
-    private lateinit var btnCache: FloatingActionButton
+    private lateinit var downloadBtn: FloatingActionButton
 
     private lateinit var cacheNorth: EditText
     private lateinit var cacheSouth: EditText
@@ -88,7 +90,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = MapViewBinding.inflate(inflater)
-        btnCache = binding.root.findViewById(R.id.downloadButton)
+        downloadBtn = binding.root.findViewById(R.id.downloadButton)
         return binding.root
     }
 
@@ -101,6 +103,11 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
 
         setupMapProperties()
         map.setTileSource(loadOnlineTileSourceBase())
+        if (!(map.tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()) {
+            downloadBtn.visibility = View.GONE
+        } else {
+            downloadBtn.visibility = View.VISIBLE
+        }
         map.let {
             if (view != null) {
                 mapController = map.controller
@@ -124,7 +131,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
             }
             zoomToNodes(mapController)
         }
-        btnCache.setOnClickListener(this)
+        downloadBtn.setOnClickListener(this)
     }
 
     override fun onClick(v: View) {
@@ -360,6 +367,11 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
             editor.apply()
             dialog.dismiss()
             map.setTileSource(loadOnlineTileSourceBase())
+            if (!(map.tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()) {
+                downloadBtn.visibility = View.GONE
+            } else {
+                downloadBtn.visibility = View.VISIBLE
+            }
         }
         val dialog = builder.create()
         dialog.show()

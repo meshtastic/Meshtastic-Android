@@ -32,8 +32,9 @@ class CustomTileSource {
                         + mImageFilenameEnding)
             }
         }
-        //https://nowcoast.noaa.gov/arcgis/rest/services/nowcoast/radar_meteo_imagery_nexrad_time/MapServer
 
+        //Transparent Background
+        //https://earthlive.maptiles.arcgis.com/arcgis/rest/services/GOES/GOES31D/MapServer/tile/
         private val NOAA_RADAR = object : OnlineTileSourceBase(
             "NOAA GOES Radar",
             0,
@@ -46,7 +47,8 @@ class CustomTileSource {
             "Dataset Citation: GOES-R Calibration Working Group and GOES-R Series Program, (2017): NOAA GOES-R Series Advanced Baseline Imager (ABI) Level 1b Radiances Band 13. NOAA National Centers for Environmental Information. doi:10.7289/V5BV7DSR",
             TileSourcePolicy(
                 2,
-                TileSourcePolicy.FLAG_NO_PREVENTIVE
+                TileSourcePolicy.FLAG_NO_BULK
+                        or TileSourcePolicy.FLAG_NO_PREVENTIVE
                         or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
                         or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
             )
