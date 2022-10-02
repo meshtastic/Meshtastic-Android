@@ -29,11 +29,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:backgroundTint="@color/design_default_color_secondary"
-        android:contentDescription="@string/style_selection"
+        android:backgroundTint="@color/buttonColor"
+        android:contentDescription="@string/download_region"
         android:orientation="vertical"
+        android:src="@android:drawable/stat_sys_download"
         android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:background="@color/design_default_color_secondary" />
+        tools:background="@color/buttonColor" />
 </androidx.constraintlayout.widget.ConstraintLayout>
