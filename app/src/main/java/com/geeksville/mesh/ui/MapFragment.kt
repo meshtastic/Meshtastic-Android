@@ -30,6 +30,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.tileprovider.cachemanager.CacheManager.CacheManagerCallback
 import org.osmdroid.tileprovider.modules.SqliteArchiveTileWriter
@@ -101,11 +104,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
 
         setupMapProperties()
         map.setTileSource(loadOnlineTileSourceBase())
-        if (!(map.tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()) {
-            downloadBtn.visibility = View.GONE
-        } else {
-            downloadBtn.visibility = View.VISIBLE
-        }
+        renderDownloadButton()
         map.let {
             if (view != null) {
                 mapController = map.controller
@@ -367,14 +366,18 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
             editor.apply()
             dialog.dismiss()
             map.setTileSource(loadOnlineTileSourceBase())
-            if (!(map.tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()) {
-                downloadBtn.visibility = View.GONE
-            } else {
-                downloadBtn.visibility = View.VISIBLE
-            }
+            renderDownloadButton()
         }
         val dialog = builder.create()
         dialog.show()
+    }
+
+    private fun renderDownloadButton() {
+        if (!(map.tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()) {
+            downloadBtn.visibility = View.GONE
+        } else {
+            downloadBtn.visibility = View.VISIBLE
+        }
     }
 
     private fun onWaypointChanged(wayPt: Collection<Packet>) {
@@ -496,6 +499,20 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
                 defaultMinZoom // sets the minimum zoom level (the furthest out you can zoom)
             map.setMultiTouchControls(true) // Sets gesture controls to true.
             map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
+            map.addMapListener(onMapLongPress())
+        }
+    }
+
+    private fun onMapLongPress(): MapListener {
+         return object : MapListener {
+            override fun onScroll(event: ScrollEvent?): Boolean {
+                return true
+            }
+
+            override fun onZoom(event: ZoomEvent?): Boolean {
+                return true
+            }
+
         }
     }
 
