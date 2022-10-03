@@ -7,7 +7,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
-import android.opengl.Visibility
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -65,7 +64,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
     private lateinit var cacheSouth: EditText
     private lateinit var cacheEast: EditText
     private lateinit var cacheWest: EditText
-    private lateinit var cacheOutput: EditText
 
     private lateinit var cacheEstimate: TextView
 
@@ -230,7 +228,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
         cacheSouth.setText(boundingBox.latSouth.toString() + "")
         cacheWest = view.findViewById(R.id.cache_west)
         cacheWest.setText(boundingBox.lonWest.toString() + "")
-        cacheOutput = view.findViewById(R.id.cache_output)
         cacheEstimate = view.findViewById(R.id.cache_estimate)
 
         //change listeners for both validation and to trigger the download estimation
@@ -248,7 +245,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
             cacheWest.text = null
             zoomMin.progress = 0
             zoomMax.progress = 0
-            cacheOutput.text = null;
         }
         builder.setView(view)
         builder.setCancelable(true)
@@ -262,7 +258,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
      */
     private fun updateEstimate(startJob: Boolean) {
         try {
-            if (cacheWest.text != null && cacheNorth.text != null && cacheSouth.text != null && cacheOutput.text != null && ::zoomMax.isInitialized && ::zoomMin.isInitialized) {
+            if (cacheWest.text != null && cacheNorth.text != null && cacheSouth.text != null && ::zoomMax.isInitialized && ::zoomMin.isInitialized) {
                 val n: Double = cacheNorth.text.toString().toDouble()
                 val s: Double = cacheSouth.text.toString().toDouble()
                 val e: Double = cacheEast.text.toString().toDouble()
@@ -305,49 +301,53 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
                         return
                     }
                     //this triggers the download
-                    cacheManager.downloadAreaAsync(
-                        activity,
-                        bb,
-                        zoommin,
-                        zoommax,
-                        object : CacheManagerCallback {
-                            override fun onTaskComplete() {
-                                Toast.makeText(activity, "Download complete!", Toast.LENGTH_LONG)
-                                    .show()
-                                writer.onDetach()
-                            }
-
-                            override fun onTaskFailed(errors: Int) {
-                                Toast.makeText(
-                                    activity,
-                                    "Download complete with $errors errors",
-                                    Toast.LENGTH_LONG
-                                ).show()
-                                writer.onDetach()
-                            }
-
-                            override fun updateProgress(
-                                progress: Int,
-                                currentZoomLevel: Int,
-                                zoomMin: Int,
-                                zoomMax: Int
-                            ) {
-                                //NOOP since we are using the build in UI
-                            }
-
-                            override fun downloadStarted() {
-                                //NOOP since we are using the build in UI
-                            }
-
-                            override fun setPossibleTilesInArea(total: Int) {
-                                //NOOP since we are using the build in UI
-                            }
-                        })
+                    downloadRegion(bb, zoommin, zoommax)
                 }
             }
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
+    }
+
+    private fun downloadRegion(bb: BoundingBox, zoommin: Int, zoommax: Int) {
+        cacheManager.downloadAreaAsync(
+            activity,
+            bb,
+            zoommin,
+            zoommax,
+            object : CacheManagerCallback {
+                override fun onTaskComplete() {
+                    Toast.makeText(activity, "Download complete!", Toast.LENGTH_LONG)
+                        .show()
+                    writer.onDetach()
+                }
+
+                override fun onTaskFailed(errors: Int) {
+                    Toast.makeText(
+                        activity,
+                        "Download complete with $errors errors",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    writer.onDetach()
+                }
+
+                override fun updateProgress(
+                    progress: Int,
+                    currentZoomLevel: Int,
+                    zoomMin: Int,
+                    zoomMax: Int
+                ) {
+                    //NOOP since we are using the build in UI
+                }
+
+                override fun downloadStarted() {
+                    //NOOP since we are using the build in UI
+                }
+
+                override fun setPossibleTilesInArea(total: Int) {
+                    //NOOP since we are using the build in UI
+                }
+            })
     }
 
     private fun chooseMapStyle() {

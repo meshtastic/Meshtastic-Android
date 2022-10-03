@@ -104,38 +104,12 @@
                 android:layout_height="wrap_content"
 
                 />
-
-            <LinearLayout
-                android:id="@+id/cache_archival_section"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Archive File name:"
-                    android:textAppearance="?android:attr/textAppearanceLarge" />
-
-                <EditText
-                    android:id="@+id/cache_output"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:hint="archive.sqlite"
-                    android:lines="1"
-                    android:text="archive.sqlite"
-
-                    />
-            </LinearLayout>
-
-
             <Button
                 android:id="@+id/executeJob"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Start Download" />
-
+            />
 
         </LinearLayout>
     </ScrollView>
