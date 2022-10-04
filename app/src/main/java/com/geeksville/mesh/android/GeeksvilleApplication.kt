@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import android.net.ConnectivityManager
 import android.os.Bundle
 import android.provider.Settings
 import androidx.core.content.edit
@@ -23,11 +22,7 @@ fun isGooglePlayAvailable(context: Context): Boolean {
  * Created by kevinh on 1/4/15.
  */
 
-open class GeeksvilleApplication(
-    val splunkKey: String? = null,
-    val mixpanelKey: String? = null,
-    val pushKey: String? = null
-) : Application(), Logging {
+open class GeeksvilleApplication : Application(), Logging {
 
     companion object {
         lateinit var analytics: AnalyticsProvider
@@ -88,7 +83,7 @@ open class GeeksvilleApplication(
         }
 
     override fun onCreate() {
-        super<Application>.onCreate()
+        super.onCreate()
 
         val googleAnalytics = com.geeksville.mesh.analytics.GoogleAnalytics(this)
         analytics = googleAnalytics
@@ -98,15 +93,4 @@ open class GeeksvilleApplication(
 
         registerActivityLifecycleCallbacks(lifecycleCallbacks)
     }
-
-    fun isInternetConnected(): Boolean {
-        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        val activeNetwork = cm.getActiveNetworkInfo();
-        val isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-
-        return isConnected
-    }
-
 }
