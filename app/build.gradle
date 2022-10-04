@@ -1,20 +1,21 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-parcelize'
-apply plugin: 'kotlinx-serialization'
-apply plugin: 'dagger.hilt.android.plugin'
-apply plugin: 'com.github.triplet.play'
-apply plugin: 'de.mobilej.unmock'
-// apply plugin: "app.brant.amazonappstorepublisher"
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'kotlin-parcelize'
+    id 'kotlinx-serialization'
+    id 'dagger.hilt.android.plugin'
+    id 'com.github.triplet.play'
+    id 'de.mobilej.unmock'
+    // id "app.brant.amazonappstorepublisher"
 
-// Firebase Crashlytics
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
+    // protobufs
+    id 'com.google.protobuf'
 
-// protobuf
-apply plugin: 'com.google.protobuf'
-
-apply plugin: 'kotlin-kapt'
+    // Firebase Crashlytics
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
+}
 
 unMock {
     keep "android.net.Uri"
