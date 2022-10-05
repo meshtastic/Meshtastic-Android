@@ -1,4 +1,4 @@
-package com.geeksville.mesh.model
+package com.geeksville.mesh.model.map
 
 import android.content.res.Resources
 import android.util.Log

@@ -1,11 +1,10 @@
-package com.geeksville.mesh.model
+package com.geeksville.mesh.model.map
 
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
 import org.osmdroid.util.MapTileIndex
-import org.osmdroid.wms.WMSTileSource
 
 
 class CustomTileSource {
@@ -153,7 +152,6 @@ class CustomTileSource {
                 USGS_TOPO,
                 USGS_SAT,
                 ESRI_IMAGERY,
-                NOAA_RADAR
             )
 
 

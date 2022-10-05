@@ -22,8 +22,9 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.MapViewBinding
-import com.geeksville.mesh.model.CustomTileSource
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.model.map.CirclePlottingOverlay
+import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.util.formatAgo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -51,7 +52,7 @@ import kotlin.math.pow
 
 @AndroidEntryPoint
 class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeekBarChangeListener,
-    TextWatcher {
+    TextWatcher, View.OnLongClickListener {
 
     private lateinit var binding: MapViewBinding
     private lateinit var map: MapView
@@ -127,6 +128,9 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
                 drawOverlays()
             }
             zoomToNodes(mapController)
+            map.setOnLongClickListener(this)
+            val plotter = CirclePlottingOverlay(100)
+            map.overlayManager.add(plotter)
         }
         downloadBtn.setOnClickListener(this)
     }
@@ -499,20 +503,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
                 defaultMinZoom // sets the minimum zoom level (the furthest out you can zoom)
             map.setMultiTouchControls(true) // Sets gesture controls to true.
             map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
-            map.addMapListener(onMapLongPress())
-        }
-    }
-
-    private fun onMapLongPress(): MapListener {
-         return object : MapListener {
-            override fun onScroll(event: ScrollEvent?): Boolean {
-                return true
-            }
-
-            override fun onZoom(event: ZoomEvent?): Boolean {
-                return true
-            }
-
         }
     }
 
@@ -568,6 +558,30 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
         super.onDestroyView()
         map.onDetach()
     }
+    override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+        updateEstimate(false)
+    }
+
+    override fun onStartTrackingTouch(p0: SeekBar?) {
+    }
+
+    override fun onStopTrackingTouch(p0: SeekBar?) {
+    }
+
+    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+    }
+
+    override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+        updateEstimate(false)
+    }
+
+    override fun afterTextChanged(p0: Editable?) {
+    }
+
+    override fun onLongClick(p0: View?): Boolean {
+        Log.d("MapFragment", "Long pressed map")
+        return true
+    }
 
     private inner class MarkerWithLabel(mapView: MapView?, label: String) : Marker(mapView) {
         val mLabel = label
@@ -606,26 +620,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
             c.drawRect(bgRect, bgPaint)
             c.drawText(mLabel, (p.x - 0f), (p.y - 110f), textPaint)
         }
-    }
-
-    override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-        updateEstimate(false)
-    }
-
-    override fun onStartTrackingTouch(p0: SeekBar?) {
-    }
-
-    override fun onStopTrackingTouch(p0: SeekBar?) {
-    }
-
-    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-    }
-
-    override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-        updateEstimate(false)
-    }
-
-    override fun afterTextChanged(p0: Editable?) {
     }
 }
 
