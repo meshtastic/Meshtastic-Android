@@ -43,8 +43,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 30
-        versionCode 20341 // format is Mmmss (where M is 1+the numeric major number
-        versionName "1.3.41"
+        versionCode 20342 // format is Mmmss (where M is 1+the numeric major number
+        versionName "1.3.42"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
