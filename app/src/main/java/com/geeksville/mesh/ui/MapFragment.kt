@@ -20,6 +20,7 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.model.map.CustomOverlayManager
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.util.formatAgo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -177,7 +178,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
     }
 
     private fun clearCache() {
-
+        map.canZoomIn()
     }
 
 
@@ -213,6 +214,8 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
 
     private fun downloadJobAlert() {
         //prompt for input params .
+        map.overlayManager = CustomOverlayManager.create(map, context)
+        binding.downloadButton.hide()
         binding.cacheLayout.visibility = View.VISIBLE
         val builder = AlertDialog.Builder(activity)
         fiveMileButton = binding.box5miles
@@ -225,11 +228,12 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         generateBoxOverlay(zoomLevelLowest)
         executeJob = binding.executeJob
         executeJob.setOnClickListener(this)
-        //cancelDownload = binding.cacheLayout.findViewById(R.id.cancelDownload)
-        builder.setOnCancelListener {
+        binding.cancelDownload.setOnClickListener {
             cacheEstimate.text = ""
             drawOverlays()
+            binding.downloadButton.show()
             binding.cacheLayout.visibility = View.GONE
+            setupMapProperties()
         }
         builder.setCancelable(true)
     }
@@ -248,7 +252,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         val polygon = Polygon()
         polygon.points = Polygon.pointsAsRect(downloadRegionBoundingBox) as MutableList<GeoPoint>
         map.overlayManager.add(polygon)
-        map.invalidate()
         mapController.setZoom(zoomLevel - 1.0)
         cacheManager = CacheManager(map)
         val tilecount: Int =

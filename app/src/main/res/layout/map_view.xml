@@ -26,8 +26,11 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cache_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <TextView
             android:layout_width="match_parent"
@@ -36,14 +39,16 @@
             android:text="Select download region"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/colourGrey"
-            app:layout_constraintBottom_toTopOf="@id/toggleButton" />
+            app:layout_constraintBottom_toTopOf="@id/toggleButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/toggleButton"
+            style="?attr/materialButtonToggleGroupStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            style="?attr/materialButtonToggleGroupStyle"
             app:layout_constraintBottom_toTopOf="@id/cache_estimate">
 
             <Button
@@ -81,8 +86,8 @@
             android:text="Tile download estimate:"
             android:textColor="@color/colourGrey"
             app:layout_constraintBottom_toTopOf="@id/executeJob"
-            app:layout_constraintEnd_toEndOf="@id/executeJob"
-            app:layout_constraintStart_toStartOf="@id/executeJob" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <Button
             android:id="@+id/executeJob"
@@ -90,17 +95,15 @@
             android:layout_height="wrap_content"
             android:text="Start Download"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <!--        <Button-->
-        <!--            android:id="@+id/cancelDownload"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:text="Cancel"-->
-        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--            app:layout_constraintEnd_toEndOf="parent"-->
-        <!--            />-->
+        <Button
+            android:id="@+id/cancelDownload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
