@@ -1116,8 +1116,9 @@ class MeshService : Service(), Logging {
     }
 
     private fun onRadioConnectionState(state: RadioServiceConnectionState) {
-        // sleep now disabled by default on ESP32, permanent is true unless isPowerSaving enabled
-        val lsEnabled = localConfig.power?.isPowerSaving ?: false
+        // sleep now disabled by default on ESP32, permanent is true unless light sleep enabled
+        val isRouter = localConfig.device.role == ConfigProtos.Config.DeviceConfig.Role.ROUTER
+        val lsEnabled = localConfig.power.isPowerSaving || isRouter
         val connected = state.isConnected
         val permanent = state.isPermanent || !lsEnabled
         onConnectionChanged(
