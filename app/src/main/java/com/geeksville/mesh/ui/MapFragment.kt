@@ -112,20 +112,24 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                 binding.mapStyleButton.setOnClickListener {
                     chooseMapStyle()
                 }
-                model.nodeDB.nodes.value?.let { nodes ->
+                if (binding.cacheLayout.visibility == View.GONE) {
+                    model.nodeDB.nodes.value?.let { nodes ->
+                        onNodesChanged(nodes.values)
+                        drawOverlays()
+                    }
+                }
+            }
+            if (binding.cacheLayout.visibility == View.GONE) {
+                // Any times nodes change update our map
+                model.nodeDB.nodes.observe(viewLifecycleOwner) { nodes ->
                     onNodesChanged(nodes.values)
                     drawOverlays()
                 }
-            }
-            // Any times nodes change update our map
-            model.nodeDB.nodes.observe(viewLifecycleOwner) { nodes ->
-                onNodesChanged(nodes.values)
-                drawOverlays()
-            }
-            model.waypoints.observe(viewLifecycleOwner) {
-                debug("New waypoints received: ${it.size}")
-                onWaypointChanged(it.values)
-                drawOverlays()
+                model.waypoints.observe(viewLifecycleOwner) {
+                    debug("New waypoints received: ${it.size}")
+                    onWaypointChanged(it.values)
+                    drawOverlays()
+                }
             }
             zoomToNodes(mapController)
         }
@@ -309,6 +313,9 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                     Toast.makeText(activity, "Download complete!", Toast.LENGTH_LONG)
                         .show()
                     writer.onDetach()
+                    binding.downloadButton.show()
+                    binding.cacheLayout.visibility = View.GONE
+                    setupMapProperties()
                     drawOverlays()
                 }
 
