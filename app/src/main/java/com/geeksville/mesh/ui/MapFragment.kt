@@ -7,14 +7,10 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
-import android.opengl.Visibility
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
 import android.view.*
 import android.widget.*
-import android.widget.SeekBar.OnSeekBarChangeListener
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import com.geeksville.mesh.BuildConfig
@@ -31,6 +27,9 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.tileprovider.cachemanager.CacheManager.CacheManagerCallback
 import org.osmdroid.tileprovider.modules.SqliteArchiveTileWriter
@@ -50,31 +49,20 @@ import kotlin.math.pow
 @AndroidEntryPoint
 class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
 
+    // UI Elements
     private lateinit var binding: MapViewBinding
     private lateinit var map: MapView
-    private lateinit var mapController: IMapController
-    private lateinit var mPrefs: SharedPreferences
-    private lateinit var writer: SqliteArchiveTileWriter
-    private val model: UIViewModel by activityViewModels()
-
-    private lateinit var cacheManager: CacheManager
     private lateinit var downloadBtn: FloatingActionButton
-
     private lateinit var cacheEstimate: TextView
-    private lateinit var downloadRegionBoundingBox: BoundingBox
     private lateinit var cancelDownload: Button
     private lateinit var fiveMileButton: Button
     private lateinit var tenMileButton: Button
     private lateinit var fifteenMileButton: Button
-
-    private var zoomLevelMin = 0.0
-    private var zoomLevelMax = 0.0
-
+    private lateinit var executeJob: Button
     private var downloadPrompt: AlertDialog? = null
     private var alertDialog: AlertDialog? = null
-    private lateinit var executeJob: Button
 
-
+    // constants
     private val defaultMinZoom = 1.5
     private val nodeZoomLevel = 8.5
     private val defaultZoomSpeed = 3000L
@@ -83,9 +71,20 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
     private var nodePositions = listOf<MarkerWithLabel>()
     private var wayPoints = listOf<MarkerWithLabel>()
     private val nodeLayer = 1
-    private val defaultZoomLevel = 16.0
-    private val midLevelZoom = 12.0
-    private val highestZoom = 10.0
+    private val zoomLevelLowest = 16.0
+    private val zoomLevelMiddle = 14.0
+    private val zoomLevelHighest = 10.0
+    private var zoomLevelMin = 0.0
+    private var zoomLevelMax = 0.0
+
+    // Map Elements
+    private lateinit var mapController: IMapController
+    private lateinit var mPrefs: SharedPreferences
+    private lateinit var writer: SqliteArchiveTileWriter
+    private val model: UIViewModel by activityViewModels()
+    private lateinit var cacheManager: CacheManager
+    private lateinit var downloadRegionBoundingBox: BoundingBox
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -136,9 +135,9 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         when (v.id) {
             R.id.executeJob -> updateEstimate()
             R.id.downloadButton -> showCacheManagerDialog()
-            R.id.box5miles -> generateBoxOverlay(defaultZoomLevel)
-            R.id.box10miles -> generateBoxOverlay(midLevelZoom)
-            R.id.box15miles -> generateBoxOverlay(highestZoom)
+            R.id.box5miles -> generateBoxOverlay(zoomLevelLowest)
+            R.id.box10miles -> generateBoxOverlay(zoomLevelMiddle)
+            R.id.box15miles -> generateBoxOverlay(zoomLevelHighest)
         }
     }
 
@@ -154,7 +153,8 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         alertDialogBuilder.setItems(
             arrayOf<CharSequence>(
                 "Cache current size",
-                "Cache Download",
+                "Download Region",
+                "Clear Cache",
                 resources.getString(R.string.cancel)
             )
         ) { dialog, which ->
@@ -164,16 +164,19 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                     downloadJobAlert()
                     dialog.dismiss()
                 }
+                2 -> clearCache()
                 else -> dialog.dismiss()
             }
         }
-
-
         // create alert dialog
         alertDialog = alertDialogBuilder.create()
 
         // show it
         alertDialog!!.show()
+
+    }
+
+    private fun clearCache() {
 
     }
 
@@ -185,8 +188,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
             val alertDialogBuilder = AlertDialog.Builder(
                 activity
             )
-
-
             // set title
             alertDialogBuilder.setTitle("Cache Manager")
                 .setMessage(
@@ -195,7 +196,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                     Cache Usage (mb): ${cacheManager.currentCacheUsage() * 2.0.pow(-20.0)}
                     """.trimIndent()
                 )
-
             // set dialog message
             alertDialogBuilder.setItems(
                 arrayOf<CharSequence>(
@@ -215,15 +215,15 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         //prompt for input params .
         binding.cacheLayout.visibility = View.VISIBLE
         val builder = AlertDialog.Builder(activity)
-        fiveMileButton = binding.cacheLayout.findViewById(R.id.box5miles)
+        fiveMileButton = binding.box5miles
         fiveMileButton.setOnClickListener(this)
-        tenMileButton = binding.cacheLayout.findViewById(R.id.box10miles)
+        tenMileButton = binding.box10miles
         tenMileButton.setOnClickListener(this)
-        fifteenMileButton = binding.cacheLayout.findViewById(R.id.box15miles)
+        fifteenMileButton = binding.box15miles
         fifteenMileButton.setOnClickListener(this)
-        cacheEstimate = binding.cacheLayout.findViewById(R.id.cache_estimate)
-        generateBoxOverlay(defaultZoomLevel)
-        executeJob = binding.cacheLayout.findViewById(R.id.executeJob)
+        cacheEstimate = binding.cacheEstimate
+        generateBoxOverlay(zoomLevelLowest)
+        executeJob = binding.executeJob
         executeJob.setOnClickListener(this)
         //cancelDownload = binding.cacheLayout.findViewById(R.id.cancelDownload)
         builder.setOnCancelListener {
@@ -238,6 +238,8 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
      * Creates Box overlay showing what area can be downloaded
      */
     private fun generateBoxOverlay(zoomLevel: Double) {
+        map.invalidate()
+        map.setMultiTouchControls(false)
         drawOverlays()
         zoomLevelMax = zoomLevel
         zoomLevelMin = map.minZoomLevel
@@ -258,6 +260,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         cacheEstimate.text = ("$tilecount tiles")
     }
 
+
     /**
      * if true, start the job
      * if false, just update the dialog box
@@ -268,33 +271,25 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                 val outputName =
                     Configuration.getInstance().osmdroidBasePath.absolutePath + File.separator + "mainFile.sqlite" // TODO: Accept filename input param from user
                 writer = SqliteArchiveTileWriter(outputName)
+                //nesw
+                if (downloadPrompt != null) {
+                    downloadPrompt!!.dismiss()
+                    downloadPrompt = null
+                }
                 try {
-                    cacheManager = CacheManager(map, writer)
+                    cacheManager =
+                        CacheManager(map, writer) // Make sure cacheManager has latest from map
                 } catch (ex: TileSourcePolicyException) {
-                    Log.e("MapFragment", ex.message!!)
+                    Log.d("MapFragment", "Tilesource does not allow archiving: ${ex.message}")
                     return
                 }
+                //this triggers the download
+                downloadRegion(
+                    downloadRegionBoundingBox,
+                    zoomLevelMin.toInt(),
+                    zoomLevelMax.toInt()
+                )
             }
-            //nesw
-            if (downloadPrompt != null) {
-                downloadPrompt!!.dismiss()
-                downloadPrompt = null
-            }
-            try {
-                cacheManager =
-                    CacheManager(map, writer) // Make sure cacheManager has latest from map
-            } catch (ex: TileSourcePolicyException) {
-                Log.d("MapFragment", "Tilesource does not allow archiving: ${ex.message}")
-                return
-            }
-            //this triggers the download
-            downloadRegion(
-                downloadRegionBoundingBox,
-                zoomLevelMin.toInt(),
-                zoomLevelMax.toInt()
-            )
-
-
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
@@ -492,6 +487,18 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                 defaultMinZoom // sets the minimum zoom level (the furthest out you can zoom)
             map.setMultiTouchControls(true) // Sets gesture controls to true.
             map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
+            map.addMapListener(object : MapListener {
+                override fun onScroll(event: ScrollEvent): Boolean {
+                    if (binding.cacheLayout.visibility == View.VISIBLE) {
+                        generateBoxOverlay(zoomLevelMax)
+                    }
+                    return true
+                }
+
+                override fun onZoom(event: ZoomEvent): Boolean {
+                    return false
+                }
+            })
         }
     }
 

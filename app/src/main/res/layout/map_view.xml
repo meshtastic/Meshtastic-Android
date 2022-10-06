@@ -33,37 +33,46 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:textColor="@color/colourGrey"
             android:text="Select download region"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            app:layout_constraintBottom_toTopOf="@id/box10miles" />
+            android:textColor="@color/colourGrey"
+            app:layout_constraintBottom_toTopOf="@id/toggleButton" />
 
-        <Button
-            android:id="@+id/box5miles"
-            android:layout_width="wrap_content"
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggleButton"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="5 Miles"
-            app:layout_constraintBottom_toTopOf="@id/cache_estimate"
-            app:layout_constraintEnd_toStartOf="@id/box10miles"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:gravity="center"
+            style="?attr/materialButtonToggleGroupStyle"
+            app:layout_constraintBottom_toTopOf="@id/cache_estimate">
 
-        <Button
-            android:id="@+id/box10miles"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="10 miles"
-            app:layout_constraintBottom_toTopOf="@id/cache_estimate"
-            app:layout_constraintEnd_toStartOf="@id/box15miles"
-            app:layout_constraintStart_toEndOf="@id/box5miles" />
+            <Button
+                android:id="@+id/box5miles"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="5 Miles"
+                app:layout_constraintBottom_toTopOf="@id/cache_estimate"
+                app:layout_constraintEnd_toStartOf="@id/box10miles"
+                app:layout_constraintStart_toStartOf="parent" />
 
-        <Button
-            android:id="@+id/box15miles"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="15 miles"
-            app:layout_constraintBottom_toTopOf="@id/cache_estimate"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/box10miles" />
+            <Button
+                android:id="@+id/box10miles"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10 miles"
+                app:layout_constraintBottom_toTopOf="@id/cache_estimate"
+                app:layout_constraintEnd_toStartOf="@id/box15miles"
+                app:layout_constraintStart_toEndOf="@id/box5miles" />
+
+            <Button
+                android:id="@+id/box15miles"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="15 miles"
+                app:layout_constraintBottom_toTopOf="@id/cache_estimate"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/box10miles" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
 
         <TextView
             android:id="@+id/cache_estimate"
@@ -84,14 +93,14 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
-<!--        <Button-->
-<!--            android:id="@+id/cancelDownload"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="Cancel"-->
-<!--            app:layout_constraintBottom_toBottomOf="parent"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            />-->
+        <!--        <Button-->
+        <!--            android:id="@+id/cancelDownload"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:text="Cancel"-->
+        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent"-->
+        <!--            />-->
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
