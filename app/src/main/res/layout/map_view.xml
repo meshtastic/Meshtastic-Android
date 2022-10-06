@@ -24,6 +24,76 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cache_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="@color/colourGrey"
+            android:text="Select download region"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            app:layout_constraintBottom_toTopOf="@id/box10miles" />
+
+        <Button
+            android:id="@+id/box5miles"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5 Miles"
+            app:layout_constraintBottom_toTopOf="@id/cache_estimate"
+            app:layout_constraintEnd_toStartOf="@id/box10miles"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/box10miles"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="10 miles"
+            app:layout_constraintBottom_toTopOf="@id/cache_estimate"
+            app:layout_constraintEnd_toStartOf="@id/box15miles"
+            app:layout_constraintStart_toEndOf="@id/box5miles" />
+
+        <Button
+            android:id="@+id/box15miles"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="15 miles"
+            app:layout_constraintBottom_toTopOf="@id/cache_estimate"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/box10miles" />
+
+        <TextView
+            android:id="@+id/cache_estimate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tile download estimate:"
+            android:textColor="@color/colourGrey"
+            app:layout_constraintBottom_toTopOf="@id/executeJob"
+            app:layout_constraintEnd_toEndOf="@id/executeJob"
+            app:layout_constraintStart_toStartOf="@id/executeJob" />
+
+        <Button
+            android:id="@+id/executeJob"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start Download"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+<!--        <Button-->
+<!--            android:id="@+id/cancelDownload"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Cancel"-->
+<!--            app:layout_constraintBottom_toBottomOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            />-->
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/downloadButton"
         android:layout_width="wrap_content"

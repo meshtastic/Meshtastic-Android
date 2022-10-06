@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
+import android.opengl.Visibility
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -23,7 +24,6 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.model.map.CirclePlottingOverlay
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.util.formatAgo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -31,9 +31,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
-import org.osmdroid.events.MapListener
-import org.osmdroid.events.ScrollEvent
-import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.tileprovider.cachemanager.CacheManager.CacheManagerCallback
 import org.osmdroid.tileprovider.modules.SqliteArchiveTileWriter
@@ -51,8 +48,7 @@ import kotlin.math.pow
 
 
 @AndroidEntryPoint
-class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeekBarChangeListener,
-    TextWatcher, View.OnLongClickListener {
+class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
 
     private lateinit var binding: MapViewBinding
     private lateinit var map: MapView
@@ -64,15 +60,15 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
     private lateinit var cacheManager: CacheManager
     private lateinit var downloadBtn: FloatingActionButton
 
-    private lateinit var cacheNorth: EditText
-    private lateinit var cacheSouth: EditText
-    private lateinit var cacheEast: EditText
-    private lateinit var cacheWest: EditText
-
     private lateinit var cacheEstimate: TextView
+    private lateinit var downloadRegionBoundingBox: BoundingBox
+    private lateinit var cancelDownload: Button
+    private lateinit var fiveMileButton: Button
+    private lateinit var tenMileButton: Button
+    private lateinit var fifteenMileButton: Button
 
-    private lateinit var zoomMin: SeekBar
-    private lateinit var zoomMax: SeekBar
+    private var zoomLevelMin = 0.0
+    private var zoomLevelMax = 0.0
 
     private var downloadPrompt: AlertDialog? = null
     private var alertDialog: AlertDialog? = null
@@ -87,12 +83,16 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
     private var nodePositions = listOf<MarkerWithLabel>()
     private var wayPoints = listOf<MarkerWithLabel>()
     private val nodeLayer = 1
+    private val defaultZoomLevel = 16.0
+    private val midLevelZoom = 12.0
+    private val highestZoom = 10.0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = MapViewBinding.inflate(inflater)
         downloadBtn = binding.root.findViewById(R.id.downloadButton)
+        binding.cacheLayout.visibility = View.GONE
         return binding.root
     }
 
@@ -128,17 +128,17 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
                 drawOverlays()
             }
             zoomToNodes(mapController)
-            map.setOnLongClickListener(this)
-            val plotter = CirclePlottingOverlay(100)
-            map.overlayManager.add(plotter)
         }
         downloadBtn.setOnClickListener(this)
     }
 
     override fun onClick(v: View) {
         when (v.id) {
-            R.id.executeJob -> updateEstimate(true)
+            R.id.executeJob -> updateEstimate()
             R.id.downloadButton -> showCacheManagerDialog()
+            R.id.box5miles -> generateBoxOverlay(defaultZoomLevel)
+            R.id.box10miles -> generateBoxOverlay(midLevelZoom)
+            R.id.box15miles -> generateBoxOverlay(highestZoom)
         }
     }
 
@@ -212,101 +212,89 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
 
 
     private fun downloadJobAlert() {
-        //prompt for input params
+        //prompt for input params .
+        binding.cacheLayout.visibility = View.VISIBLE
         val builder = AlertDialog.Builder(activity)
-        val view = View.inflate(activity, R.layout.cache_mgr_input, null)
-        val boundingBox: BoundingBox = map.boundingBox
-        zoomMax = view.findViewById(R.id.slider_zoom_max)
-        zoomMax.max = map.maxZoomLevel.toInt()
-        zoomMax.setOnSeekBarChangeListener(this)
-        zoomMin = view.findViewById(R.id.slider_zoom_min)
-        zoomMin.max = map.maxZoomLevel.toInt()
-        zoomMin.progress = map.minZoomLevel.toInt()
-        zoomMin.setOnSeekBarChangeListener(this)
-        cacheEast = view.findViewById(R.id.cache_east)
-        cacheEast.setText(boundingBox.lonEast.toString() + "")
-        cacheNorth = view.findViewById(R.id.cache_north)
-        cacheNorth.setText(boundingBox.latNorth.toString() + "")
-        cacheSouth = view.findViewById(R.id.cache_south)
-        cacheSouth.setText(boundingBox.latSouth.toString() + "")
-        cacheWest = view.findViewById(R.id.cache_west)
-        cacheWest.setText(boundingBox.lonWest.toString() + "")
-        cacheEstimate = view.findViewById(R.id.cache_estimate)
-
-        //change listeners for both validation and to trigger the download estimation
-        cacheEast.addTextChangedListener(this)
-        cacheNorth.addTextChangedListener(this)
-        cacheSouth.addTextChangedListener(this)
-        cacheWest.addTextChangedListener(this)
-        executeJob = view.findViewById(R.id.executeJob)
+        fiveMileButton = binding.cacheLayout.findViewById(R.id.box5miles)
+        fiveMileButton.setOnClickListener(this)
+        tenMileButton = binding.cacheLayout.findViewById(R.id.box10miles)
+        tenMileButton.setOnClickListener(this)
+        fifteenMileButton = binding.cacheLayout.findViewById(R.id.box15miles)
+        fifteenMileButton.setOnClickListener(this)
+        cacheEstimate = binding.cacheLayout.findViewById(R.id.cache_estimate)
+        generateBoxOverlay(defaultZoomLevel)
+        executeJob = binding.cacheLayout.findViewById(R.id.executeJob)
         executeJob.setOnClickListener(this)
+        //cancelDownload = binding.cacheLayout.findViewById(R.id.cancelDownload)
         builder.setOnCancelListener {
-            cacheEast.text = null
-            cacheSouth.text = null
             cacheEstimate.text = ""
-            cacheNorth.text = null
-            cacheWest.text = null
-            zoomMin.progress = 0
-            zoomMax.progress = 0
+            drawOverlays()
+            binding.cacheLayout.visibility = View.GONE
         }
-        builder.setView(view)
         builder.setCancelable(true)
-        downloadPrompt = builder.create()
-        downloadPrompt!!.show()
+    }
+
+    /**
+     * Creates Box overlay showing what area can be downloaded
+     */
+    private fun generateBoxOverlay(zoomLevel: Double) {
+        drawOverlays()
+        zoomLevelMax = zoomLevel
+        zoomLevelMin = map.minZoomLevel
+        mapController.setZoom(zoomLevel)
+        downloadRegionBoundingBox = map.boundingBox
+        val polygon = Polygon()
+        polygon.points = Polygon.pointsAsRect(downloadRegionBoundingBox) as MutableList<GeoPoint>
+        map.overlayManager.add(polygon)
+        map.invalidate()
+        mapController.setZoom(zoomLevel - 1.0)
+        cacheManager = CacheManager(map)
+        val tilecount: Int =
+            cacheManager.possibleTilesInArea(
+                downloadRegionBoundingBox,
+                zoomLevelMin.toInt(),
+                zoomLevelMax.toInt()
+            )
+        cacheEstimate.text = ("$tilecount tiles")
     }
 
     /**
      * if true, start the job
      * if false, just update the dialog box
      */
-    private fun updateEstimate(startJob: Boolean) {
+    private fun updateEstimate() {
         try {
-            if (cacheWest.text != null && cacheNorth.text != null && cacheSouth.text != null && ::zoomMax.isInitialized && ::zoomMin.isInitialized) {
-                val n: Double = cacheNorth.text.toString().toDouble()
-                val s: Double = cacheSouth.text.toString().toDouble()
-                val e: Double = cacheEast.text.toString().toDouble()
-                val w: Double = cacheWest.text.toString().toDouble()
-
-                if (startJob) {
-                    val outputName =
-                        Configuration.getInstance().osmdroidBasePath.absolutePath + File.separator + "mainFile.sqlite" // TODO: Accept filename input param from user
-                    writer = SqliteArchiveTileWriter(outputName)
-                    try {
-                        cacheManager = CacheManager(map, writer)
-                    } catch (ex: TileSourcePolicyException) {
-                        Log.e("MapFragment", ex.message!!)
-                        return
-                    }
-                } else {
-                    try {
-                        cacheManager = CacheManager(map)
-                    } catch (ex: TileSourcePolicyException) {
-                        Log.e("MapFragment", ex.message!!)
-                        return
-                    }
-                }
-                val zoommin: Int = zoomMin.progress
-                val zoommax: Int = zoomMax.progress
-                //nesw
-                val bb = BoundingBox(n, e, s, w)
-                val tilecount: Int = cacheManager.possibleTilesInArea(bb, zoommin, zoommax)
-                cacheEstimate.text = ("$tilecount tiles")
-                if (startJob) {
-                    if (downloadPrompt != null) {
-                        downloadPrompt!!.dismiss()
-                        downloadPrompt = null
-                    }
-                    try {
-                        cacheManager =
-                            CacheManager(map, writer) // Make sure cacheManager has latest from map
-                    } catch (ex: TileSourcePolicyException) {
-                        Log.d("MapFragment", "Tilesource does not allow archiving: ${ex.message}")
-                        return
-                    }
-                    //this triggers the download
-                    downloadRegion(bb, zoommin, zoommax)
+            if (this::downloadRegionBoundingBox.isInitialized) {
+                val outputName =
+                    Configuration.getInstance().osmdroidBasePath.absolutePath + File.separator + "mainFile.sqlite" // TODO: Accept filename input param from user
+                writer = SqliteArchiveTileWriter(outputName)
+                try {
+                    cacheManager = CacheManager(map, writer)
+                } catch (ex: TileSourcePolicyException) {
+                    Log.e("MapFragment", ex.message!!)
+                    return
                 }
             }
+            //nesw
+            if (downloadPrompt != null) {
+                downloadPrompt!!.dismiss()
+                downloadPrompt = null
+            }
+            try {
+                cacheManager =
+                    CacheManager(map, writer) // Make sure cacheManager has latest from map
+            } catch (ex: TileSourcePolicyException) {
+                Log.d("MapFragment", "Tilesource does not allow archiving: ${ex.message}")
+                return
+            }
+            //this triggers the download
+            downloadRegion(
+                downloadRegionBoundingBox,
+                zoomLevelMin.toInt(),
+                zoomLevelMax.toInt()
+            )
+
+
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
@@ -323,6 +311,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
                     Toast.makeText(activity, "Download complete!", Toast.LENGTH_LONG)
                         .show()
                     writer.onDetach()
+                    drawOverlays()
                 }
 
                 override fun onTaskFailed(errors: Int) {
@@ -378,9 +367,9 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
 
     private fun renderDownloadButton() {
         if (!(map.tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()) {
-            downloadBtn.visibility = View.GONE
+            downloadBtn.hide()
         } else {
-            downloadBtn.visibility = View.VISIBLE
+            downloadBtn.show()
         }
     }
 
@@ -557,30 +546,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener, OnSeek
     override fun onDestroy() {
         super.onDestroyView()
         map.onDetach()
-    }
-    override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
-        updateEstimate(false)
-    }
-
-    override fun onStartTrackingTouch(p0: SeekBar?) {
-    }
-
-    override fun onStopTrackingTouch(p0: SeekBar?) {
-    }
-
-    override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-    }
-
-    override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-        updateEstimate(false)
-    }
-
-    override fun afterTextChanged(p0: Editable?) {
-    }
-
-    override fun onLongClick(p0: View?): Boolean {
-        Log.d("MapFragment", "Long pressed map")
-        return true
     }
 
     private inner class MarkerWithLabel(mapView: MapView?, label: String) : Marker(mapView) {
