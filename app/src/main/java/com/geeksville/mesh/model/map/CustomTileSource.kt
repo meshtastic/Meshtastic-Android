@@ -140,7 +140,9 @@ class CustomTileSource {
 
         private val MAPNIK: OnlineTileSourceBase = TileSourceFactory.MAPNIK
         private val USGS_TOPO: OnlineTileSourceBase = TileSourceFactory.USGS_TOPO
+        private val OPEN_TOPO: OnlineTileSourceBase = TileSourceFactory.OpenTopo
         private val USGS_SAT: OnlineTileSourceBase = TileSourceFactory.USGS_SAT
+        private val SEAMAP: OnlineTileSourceBase = TileSourceFactory.OPEN_SEAMAP
         val DEFAULT_TILE_SOURCE: OnlineTileSourceBase = TileSourceFactory.DEFAULT_TILE_SOURCE
 
         /**
@@ -150,6 +152,7 @@ class CustomTileSource {
             listOf(
                 MAPNIK,
                 USGS_TOPO,
+                OPEN_TOPO,
                 USGS_SAT,
                 ESRI_IMAGERY,
             )

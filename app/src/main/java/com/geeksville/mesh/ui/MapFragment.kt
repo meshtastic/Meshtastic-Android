@@ -55,16 +55,13 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
     private lateinit var map: MapView
     private lateinit var downloadBtn: FloatingActionButton
     private lateinit var cacheEstimate: TextView
-    private lateinit var cancelDownload: Button
-    private lateinit var fiveMileButton: Button
-    private lateinit var tenMileButton: Button
-    private lateinit var fifteenMileButton: Button
     private lateinit var executeJob: Button
     private var downloadPrompt: AlertDialog? = null
     private var alertDialog: AlertDialog? = null
 
     // constants
     private val defaultMinZoom = 1.5
+    private val defaultMaxZoom = 18.0
     private val nodeZoomLevel = 8.5
     private val defaultZoomSpeed = 3000L
     private val prefsName = "org.geeksville.osm.prefs"
@@ -72,9 +69,12 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
     private var nodePositions = listOf<MarkerWithLabel>()
     private var wayPoints = listOf<MarkerWithLabel>()
     private val nodeLayer = 1
-    private val zoomLevelLowest = 16.0
-    private val zoomLevelMiddle = 14.0
-    private val zoomLevelHighest = 10.0
+
+    // Distance of bottom corner to top corner of bounding box
+    private val zoomLevelLowest = 13.0 // approx 5 miles long
+    private val zoomLevelMiddle = 12.25 // approx 10 miles long
+    private val zoomLevelHighest = 11.5 // approx 15 miles long
+
     private var zoomLevelMin = 0.0
     private var zoomLevelMax = 0.0
 
@@ -157,7 +157,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         // set dialog message
         alertDialogBuilder.setItems(
             arrayOf<CharSequence>(
-                "Cache current size",
+                "Current Cache size",
                 "Download Region",
                 "Clear Cache",
                 resources.getString(R.string.cancel)
@@ -182,7 +182,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
     }
 
     private fun clearCache() {
-        map.canZoomIn()
+
     }
 
 
@@ -222,12 +222,9 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         binding.downloadButton.hide()
         binding.cacheLayout.visibility = View.VISIBLE
         val builder = AlertDialog.Builder(activity)
-        fiveMileButton = binding.box5miles
-        fiveMileButton.setOnClickListener(this)
-        tenMileButton = binding.box10miles
-        tenMileButton.setOnClickListener(this)
-        fifteenMileButton = binding.box15miles
-        fifteenMileButton.setOnClickListener(this)
+        binding.box5miles.setOnClickListener(this)
+        binding.box10miles.setOnClickListener(this)
+        binding.box15miles.setOnClickListener(this)
         cacheEstimate = binding.cacheEstimate
         generateBoxOverlay(zoomLevelLowest)
         executeJob = binding.executeJob
@@ -246,11 +243,10 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
      * Creates Box overlay showing what area can be downloaded
      */
     private fun generateBoxOverlay(zoomLevel: Double) {
-        map.invalidate()
-        map.setMultiTouchControls(false)
         drawOverlays()
+        map.setMultiTouchControls(false)
         zoomLevelMax = zoomLevel
-        zoomLevelMin = map.minZoomLevel
+        zoomLevelMin = map.tileProvider.tileSource.minimumZoomLevel.toDouble()
         mapController.setZoom(zoomLevel)
         downloadRegionBoundingBox = map.boundingBox
         val polygon = Polygon()
@@ -495,6 +491,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                 true // scales the map tiles to the display density of the screen
             map.minZoomLevel =
                 defaultMinZoom // sets the minimum zoom level (the furthest out you can zoom)
+            map.maxZoomLevel = defaultMaxZoom
             map.setMultiTouchControls(true) // Sets gesture controls to true.
             map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
             map.addMapListener(object : MapListener {
