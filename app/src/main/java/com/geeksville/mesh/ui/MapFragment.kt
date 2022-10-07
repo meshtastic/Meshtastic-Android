@@ -33,6 +33,7 @@ import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.tileprovider.cachemanager.CacheManager.CacheManagerCallback
+import org.osmdroid.tileprovider.modules.SqlTileWriter
 import org.osmdroid.tileprovider.modules.SqliteArchiveTileWriter
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
@@ -153,7 +154,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         )
         // set title
         alertDialogBuilder.setTitle("Cache Manager")
-
         // set dialog message
         alertDialogBuilder.setItems(
             arrayOf<CharSequence>(
@@ -185,16 +185,11 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
      * Clears active tile source cache
      */
     private fun clearCache() {
-        map.tileProvider.clearTileCache()
-      //  cacheManager = CacheManager(map) // Make sure CacheManager has latest from map
-//        val boundingBox = BoundingBox(
-//            map.tileProvider.tileCache.clear(),
-//            map.tileProvider.tileCache.mapTileArea.right.toDouble(),
-//            map.tileProvider.tileCache.mapTileArea.bottom.toDouble(),
-//            map.tileProvider.tileCache.mapTileArea.left.toDouble()
-//        )
-        //cacheManager.cleanAreaAsync(context, boundingBox, map.minZoomLevel.toInt(), map.maxZoomLevel.toInt())
-        Toast.makeText(activity, "Cache Cleared", Toast.LENGTH_SHORT).show()
+        val b: Boolean = SqlTileWriter().purgeCache()
+        SqlTileWriter().onDetach()
+        val title = if (b) "SQL Cache purged" else "SQL Cache purge failed, see logcat for details"
+        val length = if (b) Toast.LENGTH_SHORT else Toast.LENGTH_LONG
+        Toast.makeText(activity, title, length).show()
         alertDialog!!.dismiss()
     }
 
