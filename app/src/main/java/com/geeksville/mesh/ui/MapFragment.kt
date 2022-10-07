@@ -218,8 +218,8 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
 
     private fun downloadJobAlert() {
         //prompt for input params .
-        map.overlayManager = CustomOverlayManager.create(map, context)
         binding.downloadButton.hide()
+        binding.mapStyleButton.visibility = View.GONE
         binding.cacheLayout.visibility = View.VISIBLE
         val builder = AlertDialog.Builder(activity)
         binding.box5miles.setOnClickListener(this)
@@ -231,10 +231,11 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         executeJob.setOnClickListener(this)
         binding.cancelDownload.setOnClickListener {
             cacheEstimate.text = ""
-            drawOverlays()
             binding.downloadButton.show()
+            binding.mapStyleButton.visibility = View.VISIBLE
             binding.cacheLayout.visibility = View.GONE
             setupMapProperties()
+            drawOverlays()
         }
         builder.setCancelable(true)
     }
@@ -482,6 +483,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         if (this::map.isInitialized) {
             map.setDestroyMode(false) // keeps map instance alive when in the background.
             map.isVerticalMapRepetitionEnabled = false // disables map repetition
+            map.overlayManager = CustomOverlayManager.create(map, context)
             map.setScrollableAreaLimitLatitude(
                 map.overlayManager.tilesOverlay.bounds.actualNorth,
                 map.overlayManager.tilesOverlay.bounds.actualSouth,
