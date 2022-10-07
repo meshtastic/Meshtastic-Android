@@ -181,8 +181,21 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
 
     }
 
+    /**
+     * Clears active tile source cache
+     */
     private fun clearCache() {
-
+        map.tileProvider.clearTileCache()
+      //  cacheManager = CacheManager(map) // Make sure CacheManager has latest from map
+//        val boundingBox = BoundingBox(
+//            map.tileProvider.tileCache.clear(),
+//            map.tileProvider.tileCache.mapTileArea.right.toDouble(),
+//            map.tileProvider.tileCache.mapTileArea.bottom.toDouble(),
+//            map.tileProvider.tileCache.mapTileArea.left.toDouble()
+//        )
+        //cacheManager.cleanAreaAsync(context, boundingBox, map.minZoomLevel.toInt(), map.maxZoomLevel.toInt())
+        Toast.makeText(activity, "Cache Cleared", Toast.LENGTH_SHORT).show()
+        alertDialog!!.dismiss()
     }
 
 
