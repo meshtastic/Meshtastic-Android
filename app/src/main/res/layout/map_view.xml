@@ -36,7 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Select download region"
+            android:text="@string/select_download_region"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="@color/colourGrey"
             app:layout_constraintBottom_toTopOf="@id/toggleButton"
@@ -55,7 +55,7 @@
                 android:id="@+id/box5miles"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="5 Miles"
+                android:text="@string/_5_miles"
                 app:layout_constraintBottom_toTopOf="@id/cache_estimate"
                 app:layout_constraintEnd_toStartOf="@id/box10miles"
                 app:layout_constraintStart_toStartOf="parent" />
@@ -64,7 +64,7 @@
                 android:id="@+id/box10miles"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="10 miles"
+                android:text="@string/_10_miles"
                 app:layout_constraintBottom_toTopOf="@id/cache_estimate"
                 app:layout_constraintEnd_toStartOf="@id/box15miles"
                 app:layout_constraintStart_toEndOf="@id/box5miles" />
@@ -73,7 +73,7 @@
                 android:id="@+id/box15miles"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="15 miles"
+                android:text="@string/_15_miles"
                 app:layout_constraintBottom_toTopOf="@id/cache_estimate"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/box10miles" />
@@ -83,7 +83,7 @@
             android:id="@+id/cache_estimate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tile download estimate:"
+            android:text="@string/tile_download_estimate"
             android:textColor="@color/colourGrey"
             app:layout_constraintBottom_toTopOf="@id/executeJob"
             app:layout_constraintEnd_toEndOf="parent"
@@ -93,7 +93,7 @@
             android:id="@+id/executeJob"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Start Download"
+            android:text="@string/start_download"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -101,7 +101,7 @@
             android:id="@+id/cancelDownload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cancel"
+            android:text="@string/cancel"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
