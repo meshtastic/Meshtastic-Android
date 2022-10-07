@@ -17,7 +17,7 @@ class CustomTileSource {
                 "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/"
             ), "Esri, Maxar, Earthstar Geographics, and the GIS User Community",
             TileSourcePolicy(
-                2,
+                4,
                 TileSourcePolicy.FLAG_NO_BULK
                         or TileSourcePolicy.FLAG_NO_PREVENTIVE
                         or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
