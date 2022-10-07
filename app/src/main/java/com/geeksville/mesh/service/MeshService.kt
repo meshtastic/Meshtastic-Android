@@ -117,7 +117,7 @@ class MeshService : Service(), Logging {
 
         /** The minimmum firmware version we know how to talk to. We'll still be able to talk to 1.0 firmwares but only well enough to ask them to firmware update
          */
-        val minDeviceVersion = DeviceVersion("1.3.0")
+        val minDeviceVersion = DeviceVersion("1.3.41")
     }
 
     enum class ConnectionState {
@@ -1116,8 +1116,9 @@ class MeshService : Service(), Logging {
     }
 
     private fun onRadioConnectionState(state: RadioServiceConnectionState) {
-        // sleep now disabled by default on ESP32, permanent is true unless isPowerSaving enabled
-        val lsEnabled = localConfig.power?.isPowerSaving ?: false
+        // sleep now disabled by default on ESP32, permanent is true unless light sleep enabled
+        val isRouter = localConfig.device.role == ConfigProtos.Config.DeviceConfig.Role.ROUTER
+        val lsEnabled = localConfig.power.isPowerSaving || isRouter
         val connected = state.isConnected
         val permanent = state.isPermanent || !lsEnabled
         onConnectionChanged(
