@@ -153,13 +153,13 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
             activity
         )
         // set title
-        alertDialogBuilder.setTitle("Cache Manager")
+        alertDialogBuilder.setTitle("Offline Manager")
         // set dialog message
         alertDialogBuilder.setItems(
             arrayOf<CharSequence>(
                 "Current Cache size",
                 "Download Region",
-                "Clear Cache",
+                "Clear Downloaded Tiles",
                 resources.getString(R.string.cancel)
             )
         ) { dialog, which ->
@@ -255,7 +255,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         drawOverlays()
         map.setMultiTouchControls(false)
         zoomLevelMax = zoomLevel
-        zoomLevelMin = map.tileProvider.tileSource.minimumZoomLevel.toDouble()
+        zoomLevelMin = map.tileProvider.tileSource.maximumZoomLevel.toDouble()
         mapController.setZoom(zoomLevel)
         downloadRegionBoundingBox = map.boundingBox
         val polygon = Polygon()
@@ -266,8 +266,8 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         val tilecount: Int =
             cacheManager.possibleTilesInArea(
                 downloadRegionBoundingBox,
-                zoomLevelMin.toInt(),
-                zoomLevelMax.toInt()
+                zoomLevelMax.toInt(),
+                zoomLevelMin.toInt()
             )
         cacheEstimate.text = ("$tilecount tiles")
     }
@@ -298,8 +298,8 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                 //this triggers the download
                 downloadRegion(
                     downloadRegionBoundingBox,
+                    zoomLevelMax.toInt(),
                     zoomLevelMin.toInt(),
-                    zoomLevelMax.toInt()
                 )
             }
         } catch (ex: Exception) {
