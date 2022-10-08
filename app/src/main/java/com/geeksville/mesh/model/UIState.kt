@@ -37,6 +37,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.osmdroid.bonuspack.kml.KmlDocument
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.FolderOverlay
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
@@ -492,6 +495,31 @@ class UIViewModel @Inject constructor(
             } catch (ex: FileNotFoundException) {
                 errormsg("Can't write file error: ${ex.message}")
             }
+        }
+    }
+
+
+    fun parseUrl(url: String, map: MapView) {
+        viewModelScope.launch(Dispatchers.IO) {
+            parseIt(url, map)
+        }
+    }
+
+    // For Future Use
+    //  model.parseUrl(
+    //                "https://www.google.com/maps/d/kml?forcekml=1&mid=1FmqWhZG3PG3dY92x9yf2RlREcK7kMZs&lid=-ivSjBCePsM",
+    //                map
+    //            )
+    private fun parseIt(url: String, map: MapView) {
+        val kmlDoc = KmlDocument()
+        try {
+            kmlDoc.parseKMLUrl(url)
+            val kmlOverlay = kmlDoc.mKmlRoot.buildOverlay(map, null, null, kmlDoc) as FolderOverlay
+            kmlDoc.mKmlRoot.mItems
+            kmlDoc.mKmlRoot.mName
+            map.overlayManager.overlays().add(kmlOverlay)
+        } catch (ex: Exception) {
+            debug("Failed to download .kml $ex")
         }
     }
 

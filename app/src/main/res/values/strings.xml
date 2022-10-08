@@ -157,4 +157,10 @@
     <string name="direct_message">Direct Message</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <string name="nodedb_reset_description">This will clear all nodes from this list.</string>
+    <string name="select_download_region">Select download region</string>
+    <string name="_5_miles">5 Miles</string>
+    <string name="_10_miles">10 miles</string>
+    <string name="_15_miles">15 miles</string>
+    <string name="tile_download_estimate">Tile download estimate:</string>
+    <string name="start_download">Start Download</string>
 </resources>

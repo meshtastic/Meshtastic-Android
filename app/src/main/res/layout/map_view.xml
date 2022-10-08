@@ -24,16 +24,99 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cache_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/select_download_region"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="@color/colourGrey"
+            app:layout_constraintBottom_toTopOf="@id/toggleButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggleButton"
+            style="?attr/materialButtonToggleGroupStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            app:layout_constraintBottom_toTopOf="@id/cache_estimate">
+
+            <Button
+                android:id="@+id/box5miles"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/_5_miles"
+                app:layout_constraintBottom_toTopOf="@id/cache_estimate"
+                app:layout_constraintEnd_toStartOf="@id/box10miles"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <Button
+                android:id="@+id/box10miles"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/_10_miles"
+                app:layout_constraintBottom_toTopOf="@id/cache_estimate"
+                app:layout_constraintEnd_toStartOf="@id/box15miles"
+                app:layout_constraintStart_toEndOf="@id/box5miles" />
+
+            <Button
+                android:id="@+id/box15miles"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/_15_miles"
+                app:layout_constraintBottom_toTopOf="@id/cache_estimate"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/box10miles" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <TextView
+            android:id="@+id/cache_estimate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/tile_download_estimate"
+            android:textColor="@color/colourGrey"
+            app:layout_constraintBottom_toTopOf="@id/executeJob"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/executeJob"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/start_download"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/cancelDownload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cancel"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_style_toggle"
+        android:id="@+id/downloadButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:backgroundTint="@color/design_default_color_secondary"
-        android:contentDescription="@string/style_selection"
+        android:backgroundTint="@color/buttonColor"
+        android:contentDescription="@string/download_region"
         android:orientation="vertical"
+        android:src="@android:drawable/stat_sys_download"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:background="@color/design_default_color_secondary" />
+        tools:background="@color/buttonColor" />
 </androidx.constraintlayout.widget.ConstraintLayout>
