@@ -239,13 +239,21 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         executeJob.setOnClickListener(this)
         binding.cancelDownload.setOnClickListener {
             cacheEstimate.text = ""
-            binding.downloadButton.show()
-            binding.mapStyleButton.visibility = View.VISIBLE
-            binding.cacheLayout.visibility = View.GONE
-            setupMapProperties()
-            drawOverlays()
+            defaultMapSettings()
+
         }
         builder.setCancelable(true)
+    }
+
+    /**
+     * Reset map to default settings & visible buttons
+     */
+    private fun defaultMapSettings() {
+        binding.downloadButton.show()
+        binding.mapStyleButton.visibility = View.VISIBLE
+        binding.cacheLayout.visibility = View.GONE
+        setupMapProperties()
+        drawOverlays()
     }
 
     /**
@@ -254,8 +262,9 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
     private fun generateBoxOverlay(zoomLevel: Double) {
         drawOverlays()
         map.setMultiTouchControls(false)
-        zoomLevelMax = zoomLevel
-        zoomLevelMin = map.tileProvider.tileSource.maximumZoomLevel.toDouble()
+        zoomLevelMax = zoomLevel // furthest back
+        zoomLevelMin =
+            map.tileProvider.tileSource.maximumZoomLevel.toDouble() // furthest in min should be > than max
         mapController.setZoom(zoomLevel)
         downloadRegionBoundingBox = map.boundingBox
         val polygon = Polygon()
@@ -318,10 +327,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                     Toast.makeText(activity, "Download complete!", Toast.LENGTH_LONG)
                         .show()
                     writer.onDetach()
-                    binding.downloadButton.show()
-                    binding.cacheLayout.visibility = View.GONE
-                    setupMapProperties()
-                    drawOverlays()
+                    defaultMapSettings()
                 }
 
                 override fun onTaskFailed(errors: Int) {
@@ -331,6 +337,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                         Toast.LENGTH_LONG
                     ).show()
                     writer.onDetach()
+                    defaultMapSettings()
                 }
 
                 override fun updateProgress(
