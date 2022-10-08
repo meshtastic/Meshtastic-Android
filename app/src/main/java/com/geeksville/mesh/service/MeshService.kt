@@ -562,7 +562,7 @@ class MeshService : Service(), Logging {
             val data = packet.decoded
             val bytes = data.payload.toByteArray()
             val fromId = toNodeID(packet.from)
-            val delayedBroadcast = packet.delayed.number == 1 // S&F DELAYED_BROADCAST_VALUE == 1
+            val delayedBroadcast = packet.delayed == MeshPacket.Delayed.DELAYED_BROADCAST
             val toId = if (delayedBroadcast) DataPacket.ID_BROADCAST else toNodeID(packet.to)
             val hopLimit = packet.hopLimit
 
