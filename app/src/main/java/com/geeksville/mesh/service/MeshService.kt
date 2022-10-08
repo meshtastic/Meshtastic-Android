@@ -167,10 +167,9 @@ class MeshService : Service(), Logging {
                         location.latitude,
                         location.longitude,
                         location.altitude.toInt(),
-                        myNodeNum, // we just send to the local node
+                        (location.time / 1000).toInt(),
                     )
-                }
-                .launchIn(CoroutineScope(Dispatchers.Default))
+                }.launchIn(CoroutineScope(Dispatchers.Default))
         }
     }
 
@@ -1429,19 +1428,20 @@ class MeshService : Service(), Logging {
         lat: Double = 0.0,
         lon: Double = 0.0,
         alt: Int = 0,
-        destNum: Int = DataPacket.NODENUM_BROADCAST,
+        time: Int = currentSecond(),
     ) {
         try {
             val mi = myNodeInfo
             if (mi != null) {
-                debug("Sending our position/time to=$destNum lat=${lat.anonymize}, lon=${lon.anonymize}, alt=$alt")
+                val destNum = mi.myNodeNum // we just send to the local node
+                debug("Sending our position/time to=$destNum lat=${lat.anonymize}, lon=${lon.anonymize}, alt=$alt, time=$time")
 
                 val position = MeshProtos.Position.newBuilder().also {
                     it.longitudeI = Position.degI(lon)
                     it.latitudeI = Position.degI(lat)
 
                     it.altitude = alt
-                    it.time = currentSecond() // Include our current timestamp
+                    it.time = time
                 }.build()
 
                 // Also update our own map for our nodenum, by handling the packet just like packets from other users
