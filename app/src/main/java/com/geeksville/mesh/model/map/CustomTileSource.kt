@@ -11,11 +11,32 @@ class CustomTileSource {
     companion object {
 
         // Map Server information: https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer
+        //"https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/"
         // Arcgis Information: https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9
         private val ESRI_IMAGERY = object : OnlineTileSourceBase(
-            "ESRI World Overview", 0, 18, 256, ".jpg", arrayOf(
-                "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/"
+            "ESRI World Overview", 1, 20, 256, ".jpg", arrayOf(
+                "https://clarity.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/"
             ), "Esri, Maxar, Earthstar Geographics, and the GIS User Community",
+            TileSourcePolicy(
+                4,
+                TileSourcePolicy.FLAG_NO_BULK
+                        or TileSourcePolicy.FLAG_NO_PREVENTIVE
+                        or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
+                        or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
+            )
+        ) {
+            override fun getTileURLString(pMapTileIndex: Long): String {
+                return baseUrl + (MapTileIndex.getZoom(pMapTileIndex)
+                    .toString() + "/" + MapTileIndex.getY(pMapTileIndex)
+                        + "/" + MapTileIndex.getX(pMapTileIndex)
+                        + mImageFilenameEnding)
+            }
+        }
+
+        private val ESRI_WORLD_TOPO = object : OnlineTileSourceBase(
+            "ESRI World TOPO", 1, 20, 256, ".jpg", arrayOf(
+                "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/"
+            ), "Esri, HERE, Garmin, FAO, NOAA, USGS, © OpenStreetMap contributors, and the GIS User Community  ",
             TileSourcePolicy(
                 4,
                 TileSourcePolicy.FLAG_NO_BULK
@@ -153,6 +174,7 @@ class CustomTileSource {
                 MAPNIK,
                 USGS_TOPO,
                 OPEN_TOPO,
+                ESRI_WORLD_TOPO,
                 USGS_SAT,
                 ESRI_IMAGERY,
             )
