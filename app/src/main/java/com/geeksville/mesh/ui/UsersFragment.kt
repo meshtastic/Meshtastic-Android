@@ -56,7 +56,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         private fun popup(view: View, position: Int) {
             val node = nodes[position]
             val user = node.user
-            val showAdmin = position == 0 // TODO add admin channel check
+            val showAdmin = position == 0 || model.adminChannelIndex > 0
             val popup = PopupMenu(requireContext(), view)
             popup.inflate(R.menu.menu_nodes)
             popup.menu.findItem(R.id.direct_message).isVisible = position > 0
