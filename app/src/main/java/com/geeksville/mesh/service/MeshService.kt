@@ -1363,12 +1363,16 @@ class MeshService : Service(), Logging {
             warn("Ignoring stale config complete")
     }
 
-    private fun requestDeviceConfig() {
-        AdminProtos.AdminMessage.ConfigType.values().forEach {
-            sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
-                if (it != AdminProtos.AdminMessage.ConfigType.UNRECOGNIZED) getConfigRequest = it
-            })
-        }
+    private fun requestConfig(config: AdminProtos.AdminMessage.ConfigType) {
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
+            getConfigRequest = config
+        })
+    }
+
+    private fun requestAllConfig() {
+        AdminProtos.AdminMessage.ConfigType.values().filter {
+            it != AdminProtos.AdminMessage.ConfigType.UNRECOGNIZED
+        }.forEach(::requestConfig)
     }
 
     private fun requestChannel(channelIndex: Int) {
