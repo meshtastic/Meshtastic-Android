@@ -3,6 +3,7 @@ package com.geeksville.mesh.android
 import android.Manifest
 import android.app.NotificationManager
 import android.bluetooth.BluetoothManager
+import android.location.LocationManager
 import android.companion.CompanionDeviceManager
 import android.content.Context
 import android.content.pm.PackageManager
@@ -29,6 +30,8 @@ val Context.usbManager: UsbManager get() = requireNotNull(getSystemService(Conte
 
 val Context.notificationManager: NotificationManager get() = requireNotNull(getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager?)
 
+val Context.locationManager: LocationManager get() = requireNotNull(getSystemService(Context.LOCATION_SERVICE) as? LocationManager?)
+
 /**
  * @return true if CompanionDeviceManager API is present
  */
@@ -40,8 +43,13 @@ fun Context.hasCompanionDeviceApi(): Boolean =
 /**
  * @return true if the device has a GPS receiver
  */
-fun Context.hasGps(): Boolean =
-    packageManager.hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS)
+fun Context.hasGps(): Boolean = locationManager.allProviders.contains(LocationManager.GPS_PROVIDER)
+
+/**
+ * @return true if the device has a GPS receiver and it is disabled (location turned off)
+ */
+fun Context.gpsDisabled(): Boolean =
+    if (hasGps()) !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) else false
 
 /**
  * return a list of the permissions we don't have

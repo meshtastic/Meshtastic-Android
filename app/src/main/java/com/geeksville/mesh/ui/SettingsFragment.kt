@@ -2,14 +2,22 @@ package com.geeksville.mesh.ui
 
 import android.bluetooth.BluetoothDevice
 import android.companion.CompanionDeviceManager
-import android.content.*
-import android.location.LocationManager
-import android.os.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.RadioButton
+import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -161,7 +169,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (connected == MeshService.ConnectionState.DISCONNECTED)
             model.setOwner("")
 
-        if (model.config.position.gpsEnabled) {
+        if (requireContext().hasGps() && model.config.position.gpsEnabled) {
             binding.provideLocationCheckbox.isEnabled = true
         } else {
             binding.provideLocationCheckbox.isChecked = false
@@ -537,17 +545,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // Default warning valid only for classic bluetooth scan
         warningReason: String = getString(R.string.location_disabled_warning)
     ) {
-        val locationManager =
-            myActivity.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        var gpsEnabled = false
-
-        try {
-            gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-        } catch (ex: Throwable) {
-            debug("LocationManager GPS_PROVIDER error: ${ex.message}")
-        }
-
-        if (myActivity.hasGps() && !gpsEnabled) {
+        if (requireContext().gpsDisabled()) {
             warn("Telling user we need need location access")
             showSnackbar(warningReason)
         }
