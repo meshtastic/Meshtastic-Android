@@ -15,10 +15,10 @@ open class NOAAWmsTileSource(
     layername: String,
     version: String,
     time: String?,
-    crs: String,
+    srs: String,
     style: String?,
-    format: String
-) : OnlineTileSourceBase(aName, 0, 22, 256, "png", aBaseUrl) {
+    format: String,
+) : OnlineTileSourceBase(aName, 0, 9, 256, "png", aBaseUrl) {
 
     // array indexes for array to hold bounding boxes.
     private val MINX = 0
@@ -37,8 +37,7 @@ open class NOAAWmsTileSource(
     private val MAP_SIZE = 20037508.34789244 * 2
     private var layer = ""
     private var version = "1.1.0"
-    private var crs = "EPSG:3A3857" //used by geo server
-    private var size = ""
+    private var srs = "EPSG%3A3857" //used by geo server
     private var format = ""
     private var time = ""
     private var style: String? = null
@@ -49,7 +48,7 @@ open class NOAAWmsTileSource(
         Log.i(IMapView.LOGTAG, "WMS support is BETA. Please report any issues")
         layer = layername
         this.version = version
-        this.crs = crs
+        this.srs = srs
         this.style = style
         this.format = format
         if (time != null) this.time = time
@@ -128,7 +127,8 @@ open class NOAAWmsTileSource(
         sb.append("&transparent=true")
         sb.append("&height=").append(Resources.getSystem().displayMetrics.heightPixels)
         sb.append("&width=").append(Resources.getSystem().displayMetrics.widthPixels)
-        sb.append("&crs=").append(crs)
+        sb.append("&srs=").append(srs)
+        sb.append("&size=").append(getSize())
         sb.append("&bbox=")
         val bbox = getBoundingBox(
             MapTileIndex.getX(pMapTileIndex),
@@ -139,8 +139,14 @@ open class NOAAWmsTileSource(
         sb.append(bbox[MINY]).append(",")
         sb.append(bbox[MAXX]).append(",")
         sb.append(bbox[MAXY])
-
         Log.i(IMapView.LOGTAG, sb.toString())
         return sb.toString()
+    }
+
+    private fun getSize(): String {
+        val height = Resources.getSystem().displayMetrics.heightPixels
+        val width = Resources.getSystem().displayMetrics.widthPixels
+        return "$width,$height"
+
     }
 }

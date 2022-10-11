@@ -8,11 +8,51 @@ import org.osmdroid.util.MapTileIndex
 
 
 class CustomTileSource {
-    companion object {
 
-        // Map Server information: https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer
-        //"https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/"
-        // Arcgis Information: https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9
+    //https://tile.openweathermap.org/map/{layer}/{z}/{x}/{y}.png?appid={API key}
+    companion object {
+        val OPENWEATHER_RADAR = object : OnlineTileSourceBase(
+            "Open Weather Map", 1, 15, 256, ".png", arrayOf(
+                "https://tile.openweathermap.org/map/"
+            ), "Openweathermap",
+            TileSourcePolicy(
+                4,
+                TileSourcePolicy.FLAG_NO_BULK
+                        or TileSourcePolicy.FLAG_NO_PREVENTIVE
+                        or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
+                        or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
+            )
+        ) {
+            //{layer}/{z}/{x}/{y}.png?appid={API key}
+            override fun getTileURLString(pMapTileIndex: Long): String {
+                return baseUrl + "precipitation/" + (MapTileIndex.getZoom(pMapTileIndex)
+                    .toString() + "/" + MapTileIndex.getX(pMapTileIndex)
+                        + "/" + MapTileIndex.getY(pMapTileIndex)
+                        + mImageFilenameEnding + "?appid=")
+            }
+        }
+        //
+//        val RAIN_VIEWER = object : OnlineTileSourceBase(
+//            "RainViewer", 1, 15, 256, ".png", arrayOf(
+//                "https://tilecache.rainviewer.com/v2/coverage/"
+//            ), "RainViewer",
+//            TileSourcePolicy(
+//                4,
+//                TileSourcePolicy.FLAG_NO_BULK
+//                        or TileSourcePolicy.FLAG_NO_PREVENTIVE
+//                        or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
+//                        or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
+//            )
+//        ) {
+//            override fun getTileURLString(pMapTileIndex: Long): String {
+//                return baseUrl + (MapTileIndex.getZoom(pMapTileIndex)
+//                    .toString() + "/" + MapTileIndex.getY(pMapTileIndex)
+//                        + "/" + MapTileIndex.getX(pMapTileIndex)
+//                        + mImageFilenameEnding)
+//            }
+//        }
+
+
         private val ESRI_IMAGERY = object : OnlineTileSourceBase(
             "ESRI World Overview", 1, 20, 256, ".jpg", arrayOf(
                 "https://clarity.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/"
@@ -34,9 +74,15 @@ class CustomTileSource {
         }
 
         private val ESRI_WORLD_TOPO = object : OnlineTileSourceBase(
-            "ESRI World TOPO", 1, 20, 256, ".jpg", arrayOf(
+            "ESRI World TOPO",
+            1,
+            20,
+            256,
+            ".jpg",
+            arrayOf(
                 "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/"
-            ), "Esri, HERE, Garmin, FAO, NOAA, USGS, © OpenStreetMap contributors, and the GIS User Community  ",
+            ),
+            "Esri, HERE, Garmin, FAO, NOAA, USGS, © OpenStreetMap contributors, and the GIS User Community  ",
             TileSourcePolicy(
                 4,
                 TileSourcePolicy.FLAG_NO_BULK
@@ -62,7 +108,7 @@ class CustomTileSource {
             256,
             "",
             arrayOf(
-                "https://earthlive.maptiles.arcgis.com/arcgis/rest/services/GOES/GOES31C/MapServer/tile/"
+                "https://earthlive.maptiles.arcgis.com/arcgis/rest/services/GOES/GOES31D/MapServer/tile/"
             ),
             "Dataset Citation: GOES-R Calibration Working Group and GOES-R Series Program, (2017): NOAA GOES-R Series Advanced Baseline Imager (ABI) Level 1b Radiances Band 13. NOAA National Centers for Environmental Information. doi:10.7289/V5BV7DSR",
             TileSourcePolicy(
@@ -137,18 +183,7 @@ class CustomTileSource {
             "Recent Weather Radar",
             arrayOf("https://new.nowcoast.noaa.gov/arcgis/services/nowcoast/radar_meteo_imagery_nexrad_time/MapServer/WmsServer?"),
             "1",
-            "1.3.0",
-            "",
-            "EPSG%3A3857",
-            "",
-            "image/png"
-        )
-
-        val NOAA_SATELLITE_RADAR_WMS = NOAAWmsTileSource(
-            "Weather Satellite Imagery",
-            arrayOf("https://new.nowcoast.noaa.gov/arcgis/services/nowcoast/sat_meteo_imagery_time/MapServer/WmsServer?"),
-            "1,5,9,13,17,21,25",
-            "1.3.0",
+            "1.1.0",
             "",
             "EPSG%3A3857",
             "",

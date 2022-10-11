@@ -3,6 +3,7 @@ package com.geeksville.mesh.ui
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
+import android.content.res.Resources
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -22,6 +23,7 @@ import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomOverlayManager
 import com.geeksville.mesh.model.map.CustomTileSource
+import com.geeksville.mesh.model.map.NOAAWmsTileSource
 import com.geeksville.mesh.util.formatAgo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -31,6 +33,7 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
+import org.osmdroid.tileprovider.MapTileProviderBasic
 import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.tileprovider.cachemanager.CacheManager.CacheManagerCallback
 import org.osmdroid.tileprovider.modules.SqlTileWriter
@@ -46,6 +49,7 @@ import org.osmdroid.views.overlay.*
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import java.io.File
 import kotlin.math.pow
+import android.util.DisplayMetrics
 
 
 @AndroidEntryPoint
@@ -377,6 +381,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
             dialog.dismiss()
             map.setTileSource(loadOnlineTileSourceBase())
             renderDownloadButton()
+            drawOverlays()
         }
         val dialog = builder.create()
         dialog.show()
@@ -479,6 +484,21 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         createLatLongGrid(false)
         map.overlayManager.addAll(nodeLayer, nodePositions)
         map.overlayManager.addAll(nodeLayer, wayPoints)
+        if (map.tileProvider.tileSource.name()
+                .equals(CustomTileSource.getTileSource("ESRI World TOPO").name())
+        ) {
+            val layer = TilesOverlay(
+                MapTileProviderBasic(
+                    activity,
+                    CustomTileSource.NOAA_RADAR_WMS
+                ), context
+            )
+            layer.loadingBackgroundColor = Color.TRANSPARENT
+            layer.loadingLineColor = Color.TRANSPARENT
+            map.overlayManager.add(layer)
+        } else {
+            map.overlays.clear()
+        }
         map.invalidate()
     }
 
