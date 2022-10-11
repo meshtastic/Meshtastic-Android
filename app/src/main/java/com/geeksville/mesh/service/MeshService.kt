@@ -463,6 +463,9 @@ class MeshService : Service(), Logging {
     /// My node ID string
     private val myNodeID get() = toNodeID(myNodeNum)
 
+    /// Admin channel index
+    private var adminChannelIndex: Int = 0
+
     /// Convert the channels array into a ChannelSet
     private var channelSet: AppOnlyProtos.ChannelSet
         get() {
@@ -543,6 +546,7 @@ class MeshService : Service(), Logging {
         initFn: AdminProtos.AdminMessage.Builder.() -> Unit
     ): MeshPacket = buildMeshPacket(
         wantAck = true,
+        channel = adminChannelIndex,
         priority = MeshPacket.Priority.RELIABLE
     )
     {
@@ -958,9 +962,10 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private fun addChannelSettings(channel: ChannelProtos.Channel) {
+    private fun addChannelSettings(ch: ChannelProtos.Channel) {
+        if (ch.index == 0 || ch.settings.name == "admin") adminChannelIndex = ch.index
         serviceScope.handledLaunch {
-            channelSetRepository.addSettings(channel)
+            channelSetRepository.addSettings(ch)
         }
     }
 
@@ -1363,12 +1368,16 @@ class MeshService : Service(), Logging {
             warn("Ignoring stale config complete")
     }
 
-    private fun requestDeviceConfig() {
-        AdminProtos.AdminMessage.ConfigType.values().forEach {
-            sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
-                if (it != AdminProtos.AdminMessage.ConfigType.UNRECOGNIZED) getConfigRequest = it
-            })
-        }
+    private fun requestConfig(config: AdminProtos.AdminMessage.ConfigType) {
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
+            getConfigRequest = config
+        })
+    }
+
+    private fun requestAllConfig() {
+        AdminProtos.AdminMessage.ConfigType.values().filter {
+            it != AdminProtos.AdminMessage.ConfigType.UNRECOGNIZED
+        }.forEach(::requestConfig)
     }
 
     private fun requestChannel(channelIndex: Int) {
@@ -1377,9 +1386,10 @@ class MeshService : Service(), Logging {
         })
     }
 
-    private fun setChannel(channel: ChannelProtos.Channel) {
+    private fun setChannel(ch: ChannelProtos.Channel) {
+        if (ch.index == 0 || ch.settings.name == "admin") adminChannelIndex = ch.index
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
-            setChannel = channel
+            setChannel = ch
         })
     }
 

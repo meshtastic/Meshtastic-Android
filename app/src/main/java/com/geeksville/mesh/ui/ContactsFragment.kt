@@ -91,7 +91,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             val node = nodes[if (fromLocal) contact.to else contact.from]
 
             //grab channel names from DeviceConfig
-            val channels = model.channels.value.protobuf
+            val channels = model.channelSet
             val channelName = if (channels.settingsCount > contact.channel)
                 Channel(channels.settingsList[contact.channel], channels.loraConfig).name else null
 
@@ -173,7 +173,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         fun onContactsChanged(contacts: Map<String, Packet>) {
             // Add empty channel placeholders (always show Broadcast contacts, even when empty)
             val mutableMap = contacts.toMutableMap()
-            for (ch in 0 until model.channels.value.protobuf.settingsCount) {
+            for (ch in 0 until model.channelSet.settingsCount) {
                 val contactKey = "$ch${DataPacket.ID_BROADCAST}"
                 if (mutableMap[contactKey] == null) mutableMap[contactKey] = Packet(
                     0L, 1, contactKey, 0L,

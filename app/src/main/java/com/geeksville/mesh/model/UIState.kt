@@ -94,6 +94,7 @@ class UIViewModel @Inject constructor(
 
     private val _channels = MutableStateFlow(ChannelSet())
     val channels: StateFlow<ChannelSet> = _channels
+    val channelSet get() = channels.value.protobuf
 
     private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
     val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
@@ -354,6 +355,8 @@ class UIViewModel @Inject constructor(
                 errormsg("Can't set username on device, is device offline? ${ex.message}")
             }
     }
+
+    val adminChannelIndex: Int get() = channelSet.settingsList.map { it.name }.indexOf("admin")
 
     fun requestShutdown(idNum: Int) {
         try {

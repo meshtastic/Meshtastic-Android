@@ -67,8 +67,8 @@ data class ChannelSet(
                 multiFormatWriter.encode(
                     getChannelUrl(true).toString(),
                     BarcodeFormat.QR_CODE,
-                    192,
-                    192
+                    960,
+                    960
                 )
             val barcodeEncoder = BarcodeEncoder()
             barcodeEncoder.createBitmap(bitMatrix)
