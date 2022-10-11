@@ -9,10 +9,9 @@ import org.osmdroid.util.MapTileIndex
 
 class CustomTileSource {
 
-    //https://tile.openweathermap.org/map/{layer}/{z}/{x}/{y}.png?appid={API key}
     companion object {
-        val OPENWEATHER_RADAR = object : OnlineTileSourceBase(
-            "Open Weather Map", 1, 15, 256, ".png", arrayOf(
+        val OPENWEATHER_RADAR = OnlineTileSourceAuth(
+            "Open Weather Map", 1, 22, 256, ".png", arrayOf(
                 "https://tile.openweathermap.org/map/"
             ), "Openweathermap",
             TileSourcePolicy(
@@ -21,16 +20,10 @@ class CustomTileSource {
                         or TileSourcePolicy.FLAG_NO_PREVENTIVE
                         or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
                         or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
-            )
-        ) {
-            //{layer}/{z}/{x}/{y}.png?appid={API key}
-            override fun getTileURLString(pMapTileIndex: Long): String {
-                return baseUrl + "precipitation/" + (MapTileIndex.getZoom(pMapTileIndex)
-                    .toString() + "/" + MapTileIndex.getX(pMapTileIndex)
-                        + "/" + MapTileIndex.getY(pMapTileIndex)
-                        + mImageFilenameEnding + "?appid=")
-            }
-        }
+            ),
+            "precipitation",
+            ""
+        )
         //
 //        val RAIN_VIEWER = object : OnlineTileSourceBase(
 //            "RainViewer", 1, 15, 256, ".png", arrayOf(
@@ -85,34 +78,6 @@ class CustomTileSource {
             "Esri, HERE, Garmin, FAO, NOAA, USGS, © OpenStreetMap contributors, and the GIS User Community  ",
             TileSourcePolicy(
                 4,
-                TileSourcePolicy.FLAG_NO_BULK
-                        or TileSourcePolicy.FLAG_NO_PREVENTIVE
-                        or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
-                        or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
-            )
-        ) {
-            override fun getTileURLString(pMapTileIndex: Long): String {
-                return baseUrl + (MapTileIndex.getZoom(pMapTileIndex)
-                    .toString() + "/" + MapTileIndex.getY(pMapTileIndex)
-                        + "/" + MapTileIndex.getX(pMapTileIndex)
-                        + mImageFilenameEnding)
-            }
-        }
-
-        //Transparent Background
-        //https://earthlive.maptiles.arcgis.com/arcgis/rest/services/GOES/GOES31D/MapServer/tile/
-        private val NOAA_RADAR = object : OnlineTileSourceBase(
-            "NOAA GOES Radar",
-            0,
-            18,
-            256,
-            "",
-            arrayOf(
-                "https://earthlive.maptiles.arcgis.com/arcgis/rest/services/GOES/GOES31D/MapServer/tile/"
-            ),
-            "Dataset Citation: GOES-R Calibration Working Group and GOES-R Series Program, (2017): NOAA GOES-R Series Advanced Baseline Imager (ABI) Level 1b Radiances Band 13. NOAA National Centers for Environmental Information. doi:10.7289/V5BV7DSR",
-            TileSourcePolicy(
-                2,
                 TileSourcePolicy.FLAG_NO_BULK
                         or TileSourcePolicy.FLAG_NO_PREVENTIVE
                         or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL

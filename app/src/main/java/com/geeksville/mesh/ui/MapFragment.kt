@@ -490,7 +490,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
             val layer = TilesOverlay(
                 MapTileProviderBasic(
                     activity,
-                    CustomTileSource.NOAA_RADAR_WMS
+                    CustomTileSource.OPENWEATHER_RADAR
                 ), context
             )
             layer.loadingBackgroundColor = Color.TRANSPARENT

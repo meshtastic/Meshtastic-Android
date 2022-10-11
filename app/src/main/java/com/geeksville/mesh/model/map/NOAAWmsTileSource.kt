@@ -4,6 +4,7 @@ import android.content.res.Resources
 import android.util.Log
 import org.osmdroid.api.IMapView
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
+import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
 import org.osmdroid.util.MapTileIndex
 import kotlin.math.atan
 import kotlin.math.pow
@@ -18,7 +19,15 @@ open class NOAAWmsTileSource(
     srs: String,
     style: String?,
     format: String,
-) : OnlineTileSourceBase(aName, 0, 9, 256, "png", aBaseUrl) {
+) : OnlineTileSourceBase(
+    aName, 0, 5, 256, "png", aBaseUrl, "", TileSourcePolicy(
+        2,
+        TileSourcePolicy.FLAG_NO_BULK
+                or TileSourcePolicy.FLAG_NO_PREVENTIVE
+                or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
+                or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
+    )
+) {
 
     // array indexes for array to hold bounding boxes.
     private val MINX = 0
