@@ -94,7 +94,6 @@ class UIViewModel @Inject constructor(
 
     private val _channels = MutableStateFlow(ChannelSet())
     val channels: StateFlow<ChannelSet> = _channels
-    val channelSet get() = channels.value.protobuf
 
     private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
     val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
@@ -271,48 +270,76 @@ class UIViewModel @Inject constructor(
 
     inline fun updateDeviceConfig(crossinline body: (Config.DeviceConfig) -> Config.DeviceConfig) {
         val data = body(config.device)
-        setDeviceConfig(config { device = data })
+        setConfig(config { device = data })
     }
 
     inline fun updatePositionConfig(crossinline body: (Config.PositionConfig) -> Config.PositionConfig) {
         val data = body(config.position)
-        setDeviceConfig(config { position = data })
+        setConfig(config { position = data })
     }
 
     inline fun updatePowerConfig(crossinline body: (Config.PowerConfig) -> Config.PowerConfig) {
         val data = body(config.power)
-        setDeviceConfig(config { power = data })
+        setConfig(config { power = data })
     }
 
     inline fun updateNetworkConfig(crossinline body: (Config.NetworkConfig) -> Config.NetworkConfig) {
         val data = body(config.network)
-        setDeviceConfig(config { network = data })
+        setConfig(config { network = data })
     }
 
     inline fun updateDisplayConfig(crossinline body: (Config.DisplayConfig) -> Config.DisplayConfig) {
         val data = body(config.display)
-        setDeviceConfig(config { display = data })
+        setConfig(config { display = data })
     }
 
     inline fun updateLoraConfig(crossinline body: (Config.LoRaConfig) -> Config.LoRaConfig) {
         val data = body(config.lora)
-        setDeviceConfig(config { lora = data })
+        setConfig(config { lora = data })
     }
 
     inline fun updateBluetoothConfig(crossinline body: (Config.BluetoothConfig) -> Config.BluetoothConfig) {
         val data = body(config.bluetooth)
-        setDeviceConfig(config { bluetooth = data })
+        setConfig(config { bluetooth = data })
     }
 
     // Set the radio config (also updates our saved copy in preferences)
-    fun setDeviceConfig(config: Config) {
-        meshService?.deviceConfig = config.toByteArray()
+    fun setConfig(config: Config) {
+        meshService?.setConfig(config.toByteArray())
     }
 
+    /// Convert the channels array to and from [AppOnlyProtos.ChannelSet]
+    private var _channelSet: AppOnlyProtos.ChannelSet
+        get() = channels.value.protobuf
+        set(value) {
+            val asChannels = value.settingsList.mapIndexed { i, c ->
+                channel {
+                    role = if (i == 0) ChannelProtos.Channel.Role.PRIMARY
+                    else ChannelProtos.Channel.Role.SECONDARY
+                    index = i
+                    settings = c
+                }
+            }
+
+            debug("Sending channels to device")
+            asChannels.forEach {
+                meshService?.setChannel(it.toByteArray())
+            }
+
+            viewModelScope.launch {
+                channelSetRepository.clearSettings()
+                channelSetRepository.addAllSettings(value)
+            }
+
+            val newConfig = config { lora = value.loraConfig }
+            if (config.lora != newConfig.lora) setConfig(newConfig)
+        }
+    val channelSet get() = _channelSet
+
     /// Set the radio config (also updates our saved copy in preferences)
-    fun setChannels(c: ChannelSet) {
+    fun setChannels(channelSet: ChannelSet) {
         debug("Setting new channels!")
-        meshService?.channels = c.protobuf.toByteArray()
+        this._channelSet = channelSet.protobuf
     }
 
     /// our name in hte radio
