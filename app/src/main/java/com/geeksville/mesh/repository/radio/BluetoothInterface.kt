@@ -100,7 +100,7 @@ class BluetoothInterface(
         val BTM_SERVICE_UUID: UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
 
         val BTM_FROMRADIO_CHARACTER: UUID =
-            UUID.fromString("8ba2bcc2-ee02-4a55-a531-c525c5e454d5")
+            UUID.fromString("2c55e69e-4993-11ed-b878-0242ac120002")
         val BTM_TORADIO_CHARACTER: UUID =
             UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
         val BTM_FROMNUM_CHARACTER: UUID =
