@@ -366,7 +366,10 @@ class BluetoothInterface(
                                     .contains(EOL_FROMRADIO_CHARACTER)) {
                                 invalidVersion = true
                                 getCharacteristic(EOL_FROMRADIO_CHARACTER)
-                            } else getCharacteristic(BTM_FROMRADIO_CHARACTER)
+                            } else {
+                                invalidVersion = false
+                                getCharacteristic(BTM_FROMRADIO_CHARACTER)
+                            }
 
                             // We treat the first send by a client as special
                             isFirstSend = true
