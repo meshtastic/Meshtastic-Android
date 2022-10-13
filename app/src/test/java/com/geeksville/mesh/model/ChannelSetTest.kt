@@ -8,7 +8,7 @@ class ChannelSetTest {
     /** make sure we match the python and device code behavior */
     @Test
     fun matchPython() {
-        val url = Uri.parse("https://www.meshtastic.org/e/#CgUYAiIBAQ")
+        val url = Uri.parse("https://meshtastic.org/e/#CgUYAiIBAQ")
         val cs = ChannelSet(url)
         Assert.assertEquals("LongFast", cs.primaryChannel!!.name)
         Assert.assertEquals("#LongFast-K", cs.primaryChannel!!.humanName)

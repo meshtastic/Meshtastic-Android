@@ -137,7 +137,7 @@
                 <!-- The QR codes to share channel settings are shared as meshtastic URLS
 
                 an approximate example:
-                http://www.meshtastic.org/e/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
+                http://meshtastic.org/e/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
                 -->
                 <action android:name="android.intent.action.VIEW" />
 
@@ -146,11 +146,11 @@
 
                 <data
                     android:scheme="https"
-                    android:host="www.meshtastic.org"
+                    android:host="meshtastic.org"
                     android:pathPrefix="/e/" />
                 <data
                     android:scheme="https"
-                    android:host="www.meshtastic.org"
+                    android:host="meshtastic.org"
                     android:pathPrefix="/E/" />
             </intent-filter>
 
