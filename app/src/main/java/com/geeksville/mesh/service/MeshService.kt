@@ -1391,6 +1391,9 @@ class MeshService : Service(), Logging {
         configNonce += 1
         newNodes.clear()
         newMyNodeInfo = null
+
+        if (BluetoothInterface.invalidVersion) onHasSettings() // Device firmware is too old
+
         debug("Starting config nonce=$configNonce")
 
         sendToRadio(ToRadio.newBuilder().apply {

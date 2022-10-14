@@ -40,6 +40,7 @@ import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.SerialInterface
 import com.geeksville.mesh.service.*
@@ -416,6 +417,7 @@ class MainActivity : BaseActivity(), Logging {
 
     /** Show an alert that may contain HTML */
     private fun showAlert(titleText: Int, messageText: Int) {
+
         // make links clickable per https://stackoverflow.com/a/62642807
         // val messageStr = getText(messageText)
 
@@ -476,6 +478,8 @@ class MainActivity : BaseActivity(), Logging {
                                 }
                             }
                         }
+                    } else if (BluetoothInterface.invalidVersion) {
+                        showAlert(R.string.firmware_too_old, R.string.firmware_old)
                     }
                 } catch (ex: RemoteException) {
                     warn("Abandoning connect $ex, because we probably just lost device connection")
