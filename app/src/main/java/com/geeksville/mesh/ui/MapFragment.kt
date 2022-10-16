@@ -24,7 +24,6 @@ import com.geeksville.mesh.model.map.CustomOverlayManager
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.util.formatAgo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
@@ -54,7 +53,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
     // UI Elements
     private lateinit var binding: MapViewBinding
     private lateinit var map: MapView
-    private lateinit var downloadBtn: FloatingActionButton
     private lateinit var cacheEstimate: TextView
     private lateinit var executeJob: Button
     private var downloadPrompt: AlertDialog? = null
@@ -92,8 +90,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         binding = MapViewBinding.inflate(inflater)
-        downloadBtn = binding.root.findViewById(R.id.downloadButton)
-        binding.cacheLayout.visibility = View.GONE
         return binding.root
     }
 
@@ -134,7 +130,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
             }
             zoomToNodes(mapController)
         }
-        downloadBtn.setOnClickListener(this)
+        binding.downloadButton.setOnClickListener(this)
     }
 
     override fun onClick(v: View) {
@@ -384,9 +380,9 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
 
     private fun renderDownloadButton() {
         if (!(map.tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()) {
-            downloadBtn.hide()
+            binding.downloadButton.hide()
         } else {
-            downloadBtn.show()
+            binding.downloadButton.show()
         }
     }
 
