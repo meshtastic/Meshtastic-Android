@@ -930,7 +930,7 @@ class MeshService : Service(), Logging {
     }
 
     private fun addChannelSettings(ch: ChannelProtos.Channel) {
-        if (ch.index == 0 || ch.settings.name == "admin") adminChannelIndex = ch.index
+        if (ch.index == 0 || ch.settings.name.lowercase() == "admin") adminChannelIndex = ch.index
         serviceScope.handledLaunch {
             channelSetRepository.addSettings(ch)
         }
@@ -1354,7 +1354,7 @@ class MeshService : Service(), Logging {
     }
 
     private fun setChannel(ch: ChannelProtos.Channel) {
-        if (ch.index == 0 || ch.settings.name == "admin") adminChannelIndex = ch.index
+        if (ch.index == 0 || ch.settings.name.lowercase() == "admin") adminChannelIndex = ch.index
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
             setChannel = ch
         })

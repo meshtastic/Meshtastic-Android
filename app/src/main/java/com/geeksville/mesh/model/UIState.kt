@@ -383,7 +383,8 @@ class UIViewModel @Inject constructor(
             }
     }
 
-    val adminChannelIndex: Int get() = channelSet.settingsList.map { it.name }.indexOf("admin")
+    val adminChannelIndex: Int
+        get() = channelSet.settingsList.map { it.name.lowercase() }.indexOf("admin")
 
     fun requestShutdown(idNum: Int) {
         try {
