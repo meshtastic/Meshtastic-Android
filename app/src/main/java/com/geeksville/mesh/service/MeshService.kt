@@ -712,28 +712,8 @@ class MeshService : Service(), Logging {
                         val ch = a.getChannelResponse
                         debug("Admin: Received channel ${ch.index}")
 
-                        val packetToSave = MeshLog(
-                            UUID.randomUUID().toString(),
-                            "Channel",
-                            System.currentTimeMillis(),
-                            ch.toString()
-                        )
-                        insertMeshLog(packetToSave)
-
                         if (ch.index + 1 < mi.maxChannels) {
-
-                            // Stop once we get to the first disabled entry
-                            if (/* ch.hasSettings() || */ ch.role != ChannelProtos.Channel.Role.DISABLED) {
-                                // Not done yet, add new entries and request next channel
-                                addChannelSettings(ch)
-                                requestChannel(ch.index + 1)
-                            } else {
-                                debug("We've received the last channel, allowing rest of app to start...")
-                                onHasSettings()
-                            }
-                        } else {
-                            debug("Received max channels, starting app")
-                            onHasSettings()
+                            handleChannel(ch)
                         }
                     }
                 }
@@ -930,7 +910,7 @@ class MeshService : Service(), Logging {
     }
 
     private fun addChannelSettings(ch: ChannelProtos.Channel) {
-        if (ch.index == 0 || ch.settings.name == "admin") adminChannelIndex = ch.index
+        if (ch.index == 0 || ch.settings.name.lowercase() == "admin") adminChannelIndex = ch.index
         serviceScope.handledLaunch {
             channelSetRepository.addSettings(ch)
         }
@@ -1110,6 +1090,7 @@ class MeshService : Service(), Logging {
                 MeshProtos.FromRadio.CONFIG_COMPLETE_ID_FIELD_NUMBER -> handleConfigComplete(proto.configCompleteId)
                 MeshProtos.FromRadio.MY_INFO_FIELD_NUMBER -> handleMyInfo(proto.myInfo)
                 MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleNodeInfo(proto.nodeInfo)
+                MeshProtos.FromRadio.CHANNEL_FIELD_NUMBER -> handleChannel(proto.channel)
                 MeshProtos.FromRadio.CONFIG_FIELD_NUMBER -> handleDeviceConfig(proto.config)
                 MeshProtos.FromRadio.MODULECONFIG_FIELD_NUMBER -> handleModuleConfig(proto.moduleConfig)
                 else -> errormsg("Unexpected FromRadio variant")
@@ -1150,6 +1131,18 @@ class MeshService : Service(), Logging {
         )
         insertMeshLog(packetToSave)
         // setModuleConfig(config)
+    }
+
+    private fun handleChannel(ch: ChannelProtos.Channel) {
+        debug("Received channel ${ch.index}")
+        val packetToSave = MeshLog(
+            UUID.randomUUID().toString(),
+            "Channel",
+            System.currentTimeMillis(),
+            ch.toString()
+        )
+        insertMeshLog(packetToSave)
+        if (ch.role != ChannelProtos.Channel.Role.DISABLED) addChannelSettings(ch)
     }
 
     /**
@@ -1328,8 +1321,8 @@ class MeshService : Service(), Logging {
                 if (deviceVersion < minDeviceVersion || appVersion < minAppVersion) {
                     info("Device firmware or app is too old, faking config so firmware update can occur")
                     clearLocalConfig()
-                    onHasSettings()
-                } else requestChannel(0) // Now start reading channels
+                }
+                onHasSettings()
             }
         } else
             warn("Ignoring stale config complete")
@@ -1354,7 +1347,7 @@ class MeshService : Service(), Logging {
     }
 
     private fun setChannel(ch: ChannelProtos.Channel) {
-        if (ch.index == 0 || ch.settings.name == "admin") adminChannelIndex = ch.index
+        if (ch.index == 0 || ch.settings.name.lowercase() == "admin") adminChannelIndex = ch.index
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
             setChannel = ch
         })

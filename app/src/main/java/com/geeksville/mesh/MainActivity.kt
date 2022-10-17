@@ -13,7 +13,6 @@ import android.text.method.LinkMovementMethod
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
-import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -58,7 +57,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import java.nio.charset.Charset
 import java.text.DateFormat
-import java.util.*
+import java.util.Date
 import javax.inject.Inject
 
 /*
@@ -303,8 +302,7 @@ class MainActivity : BaseActivity(), Logging {
     }
 
     private fun initToolbar() {
-        val toolbar =
-            findViewById<View>(R.id.toolbar) as Toolbar
+        val toolbar = binding.toolbar as Toolbar
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
     }
@@ -497,11 +495,7 @@ class MainActivity : BaseActivity(), Logging {
 
     private fun showSnackbar(msgId: Int) {
         try {
-            Snackbar.make(
-                findViewById(android.R.id.content),
-                msgId,
-                Snackbar.LENGTH_LONG
-            ).show()
+            Snackbar.make(binding.root, msgId, Snackbar.LENGTH_LONG).show()
         } catch (ex: IllegalStateException) {
             errormsg("Snackbar couldn't find view for msgId $msgId")
         }
@@ -509,11 +503,7 @@ class MainActivity : BaseActivity(), Logging {
 
     private fun showSnackbar(msg: String) {
         try {
-            Snackbar.make(
-                findViewById(android.R.id.content),
-                msg,
-                Snackbar.LENGTH_INDEFINITE
-            )
+            Snackbar.make(binding.root, msg, Snackbar.LENGTH_INDEFINITE)
                 .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
                 .setAction(R.string.okay) {
                     // dismiss

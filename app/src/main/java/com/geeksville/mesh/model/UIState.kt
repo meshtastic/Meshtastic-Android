@@ -44,8 +44,9 @@ import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
 import javax.inject.Inject
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 /// Given a human name, strip out the first letter of the first three words and return that as the initials for
@@ -312,17 +313,17 @@ class UIViewModel @Inject constructor(
     private var _channelSet: AppOnlyProtos.ChannelSet
         get() = channels.value.protobuf
         set(value) {
-            val asChannels = value.settingsList.mapIndexed { i, c ->
+            (0 until max(_channelSet.settingsCount, value.settingsCount)).map { i ->
                 channel {
-                    role = if (i == 0) ChannelProtos.Channel.Role.PRIMARY
-                    else ChannelProtos.Channel.Role.SECONDARY
+                    role = when (i) {
+                        0 -> ChannelProtos.Channel.Role.PRIMARY
+                        in 1 until value.settingsCount -> ChannelProtos.Channel.Role.SECONDARY
+                        else -> ChannelProtos.Channel.Role.DISABLED
+                    }
                     index = i
-                    settings = c
+                    settings = value.settingsList.getOrNull(i) ?: channelSettings { }
                 }
-            }
-
-            debug("Sending channels to device")
-            asChannels.forEach {
+            }.forEach {
                 meshService?.setChannel(it.toByteArray())
             }
 
@@ -383,7 +384,8 @@ class UIViewModel @Inject constructor(
             }
     }
 
-    val adminChannelIndex: Int get() = channelSet.settingsList.map { it.name }.indexOf("admin")
+    val adminChannelIndex: Int
+        get() = channelSet.settingsList.map { it.name.lowercase() }.indexOf("admin")
 
     fun requestShutdown(idNum: Int) {
         try {
