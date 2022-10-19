@@ -9,35 +9,35 @@ class MapStyleAdapter(itemView: AdapterMapMenuSelectionBinding) :
     RecyclerView.ViewHolder(itemView.root) {
     val card = itemView.cardview
     val text = itemView.textview1
-}
 
-private val mapStyleAdapater = object : RecyclerView.Adapter<MapStyleAdapter>() {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MapStyleAdapter {
-        val inflater = LayoutInflater.from(parent.context)
-        val mapMenuBinding = AdapterMapMenuSelectionBinding.inflate(inflater, parent, false)
-        return MapStyleAdapter(mapMenuBinding)
+    val mapStyleAdapater = object : RecyclerView.Adapter<MapStyleAdapter>() {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MapStyleAdapter {
+            val inflater = LayoutInflater.from(parent.context)
+            val mapMenuBinding = AdapterMapMenuSelectionBinding.inflate(inflater, parent, false)
+            return MapStyleAdapter(mapMenuBinding)
+        }
+
+        override fun onBindViewHolder(holder: MapStyleAdapter, position: Int) {
+            TODO("Not yet implemented")
+        }
+
+        val list = listOf<String>()
+        override fun getItemCount() = list.size
+
     }
 
-    override fun onBindViewHolder(holder: MapStyleAdapter, position: Int) {
-        TODO("Not yet implemented")
+    val mapLayerAdapater = object : RecyclerView.Adapter<MapStyleAdapter>() {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MapStyleAdapter {
+            val inflater = LayoutInflater.from(parent.context)
+            val mapMenuBinding = AdapterMapMenuSelectionBinding.inflate(inflater, parent, false)
+            return MapStyleAdapter(mapMenuBinding)
+        }
+
+        override fun onBindViewHolder(holder: MapStyleAdapter, position: Int) {
+            TODO("Not yet implemented")
+        }
+
+        val list = listOf<String>()
+        override fun getItemCount() = list.size
     }
-
-    val list = listOf<String>()
-    override fun getItemCount() = list.size
-
-}
-
-private val mapLayerAdapater = object : RecyclerView.Adapter<MapStyleAdapter>() {
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MapStyleAdapter {
-        val inflater = LayoutInflater.from(parent.context)
-        val mapMenuBinding = AdapterMapMenuSelectionBinding.inflate(inflater, parent, false)
-        return MapStyleAdapter(mapMenuBinding)
-    }
-
-    override fun onBindViewHolder(holder: MapStyleAdapter, position: Int) {
-        TODO("Not yet implemented")
-    }
-
-    val list = listOf<String>()
-    override fun getItemCount() = list.size
 }

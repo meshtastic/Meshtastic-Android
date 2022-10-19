@@ -14,11 +14,14 @@ import android.view.*
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.databinding.AdapterMapMenuSelectionBinding
+import com.geeksville.mesh.databinding.MapMenuBinding
 import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomOverlayManager
@@ -208,7 +211,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         builder.setMultiChoiceItems(
             sourceList.toTypedArray(),
             selected
-        ) { dialogInterface, i, b ->
+        ) { _, i, b ->
             if (b) {
                 selectedList.add(i)
             } else {
@@ -216,7 +219,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
             }
 
         }
-        builder.setPositiveButton("Clear") { dialogInterface, i ->
+        builder.setPositiveButton("Clear") { _, _ ->
             for (x in selectedList) {
                 val item = sources[x]
                 val b = cache!!.purgeCache(item.source)
@@ -234,7 +237,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         }
         builder.setNegativeButton(
             "Cancel"
-        ) { dialog, which -> dialog.cancel() }
+        ) { dialog, _ -> dialog.cancel() }
         builder.show()
     }
 
@@ -405,27 +408,37 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
     }
 
     private fun chooseMapStyle() {
-        /// Prepare dialog and its items
-        val builder = MaterialAlertDialogBuilder(context!!)
-        builder.setTitle(getString(R.string.preferences_map_style))
-        val mapStyles by lazy { resources.getStringArray(R.array.map_styles) }
+        val mapMenu = MapMenuBinding.inflate(layoutInflater, view as ViewGroup, true)
+        val layoutManager = LinearLayoutManager(requireContext())
+        val adapterMenuSelection = AdapterMapMenuSelectionBinding.inflate(layoutInflater)
+        val adapter = MapStyleAdapter(adapterMenuSelection)
+        mapMenu.mapLayerRecyclerView.adapter =
+            adapter.mapStyleAdapater
+        mapMenu.mapTypeRecyclerView.layoutManager = layoutManager
+        mapMenu.mapTypeRecyclerView.adapter = adapter.mapLayerAdapater
 
-        /// Load preferences and its value
-        val editor: SharedPreferences.Editor = mPrefs.edit()
-        val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
-        debug("mapStyleId from prefs: $mapStyleInt")
 
-        builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
-            debug("Set mapStyleId pref to $which")
-            editor.putInt(mapStyleId, which)
-            editor.apply()
-            dialog.dismiss()
-            map.setTileSource(loadOnlineTileSourceBase())
-            renderDownloadButton()
-            drawOverlays()
-        }
-        val dialog = builder.create()
-        dialog.show()
+//        /// Prepare dialog and its items
+//        val builder = MaterialAlertDialogBuilder(context!!)
+//        builder.setTitle(getString(R.string.preferences_map_style))
+//        val mapStyles by lazy { resources.getStringArray(R.array.map_styles) }
+//
+//        /// Load preferences and its value
+//        val editor: SharedPreferences.Editor = mPrefs.edit()
+//        val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
+//        debug("mapStyleId from prefs: $mapStyleInt")
+//
+//        builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
+//            debug("Set mapStyleId pref to $which")
+//            editor.putInt(mapStyleId, which)
+//            editor.apply()
+//            dialog.dismiss()
+//            map.setTileSource(loadOnlineTileSourceBase())
+//            renderDownloadButton()
+//            drawOverlays()
+//        }
+//        val dialog = builder.create()
+//        dialog.show()
     }
 
     private fun renderDownloadButton() {
