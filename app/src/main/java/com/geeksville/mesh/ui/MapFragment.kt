@@ -22,6 +22,8 @@ import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomOverlayManager
 import com.geeksville.mesh.model.map.CustomTileSource
+import com.geeksville.mesh.util.SqlTileWriterExt
+import com.geeksville.mesh.util.SqlTileWriterExt.SourceCount
 import com.geeksville.mesh.util.formatAgo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -60,6 +62,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
     private lateinit var executeJob: Button
     private var downloadPrompt: AlertDialog? = null
     private var alertDialog: AlertDialog? = null
+    private var cache: SqlTileWriterExt? = null
 
     // constants
     private val defaultMinZoom = 1.5
@@ -170,7 +173,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                     downloadJobAlert()
                     dialog.dismiss()
                 }
-                2 -> clearCache()
+                2 -> purgeTileSource()
                 else -> dialog.dismiss()
             }
         }
@@ -181,6 +184,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         alertDialog!!.show()
 
     }
+
     /**
      * Clears active tile source cache
      */
@@ -191,6 +195,36 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         val length = if (b) Toast.LENGTH_SHORT else Toast.LENGTH_LONG
         Toast.makeText(activity, title, length).show()
         alertDialog!!.dismiss()
+    }
+
+    private fun purgeTileSource() {
+        cache = SqlTileWriterExt()
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Tile Source")
+        val arrayAdapter: ArrayAdapter<String> =
+            ArrayAdapter(context!!, android.R.layout.select_dialog_singlechoice)
+        val sources = cache!!.sources
+        for (i in sources.indices) {
+            arrayAdapter.add(sources[i].source)
+        }
+        builder.setAdapter(arrayAdapter) { dialog, which ->
+            val item = arrayAdapter.getItem(which)
+            val b = cache!!.purgeCache(item)
+            if (b) Toast.makeText(
+                context,
+                "SQL Cache purged",
+                Toast.LENGTH_SHORT
+            )
+                .show() else Toast.makeText(
+                context,
+                "SQL Cache purge failed, see logcat for details",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+        builder.setNegativeButton(
+            "Cancel"
+        ) { dialog, which -> dialog.cancel() }
+        builder.show()
     }
 
 
