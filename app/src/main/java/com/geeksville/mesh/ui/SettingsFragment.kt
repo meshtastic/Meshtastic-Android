@@ -299,14 +299,15 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         model.localConfig.asLiveData().observe(viewLifecycleOwner) {
             if (!model.isConnected()) {
                 val configCount = it.allFields.size
-                binding.scanStatusText.text = "Device config ($configCount / 7)"
+                if (configCount > 0)
+                    binding.scanStatusText.text = "Device config ($configCount / 7)"
             } else updateNodeInfo()
         }
 
         model.channels.asLiveData().observe(viewLifecycleOwner) {
-            if (!model.isConnected()) {
-                val channelCount = it.protobuf.settingsCount
-                if (channelCount > 0) binding.scanStatusText.text = "Channels ($channelCount / 8)"
+            if (!model.isConnected()) it.protobuf.let { ch ->
+                if (!ch.hasLoraConfig() && ch.settingsCount > 0)
+                    binding.scanStatusText.text = "Channels (${ch.settingsCount} / 8)"
             }
         }
 

@@ -313,11 +313,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                     }
 
                     // No matter what apply the speed selection from the user
-                    val newLoRaConfig = loRaConfig {
-                        region = model.region
-                        txEnabled = model.txEnabled
+                    val newLoRaConfig = model.config.lora.copy {
                         usePreset = true
                         modemPreset = newModemPreset
+                        bandwidth = 0
+                        spreadFactor = 0
+                        codingRate = 0
                     }
 
                     val humanName = Channel(newSettings, newLoRaConfig).humanName

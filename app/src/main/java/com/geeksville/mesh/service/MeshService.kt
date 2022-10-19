@@ -94,9 +94,6 @@ class MeshService : Service(), Logging {
         class NodeNumNotFoundException(id: Int) : NodeNotFoundException("NodeNum not found $id")
         class IdNotFoundException(id: String) : NodeNotFoundException("ID not found $id")
 
-        class NoDeviceConfigException(message: String = "No radio settings received (is our app too old?)") :
-            RadioNotConnectedException(message)
-
         /** We treat software update as similar to loss of comms to the regular bluetooth service (so things like sendPosition for background GPS ignores the problem */
         class IsUpdatingException :
             RadioNotConnectedException("Operation prohibited during firmware update")
@@ -117,7 +114,7 @@ class MeshService : Service(), Logging {
 
         /** The minimmum firmware version we know how to talk to. We'll still be able to talk to 1.0 firmwares but only well enough to ask them to firmware update
          */
-        val minDeviceVersion = DeviceVersion("1.3.41")
+        val minDeviceVersion = DeviceVersion("1.3.43")
     }
 
     enum class ConnectionState {
@@ -466,36 +463,6 @@ class MeshService : Service(), Logging {
     /// Admin channel index
     private var adminChannelIndex: Int = 0
 
-    /// Convert the channels array into a ChannelSet
-    private var channelSet: AppOnlyProtos.ChannelSet
-        get() {
-            // this is never called
-            return AppOnlyProtos.ChannelSet.getDefaultInstance()
-        }
-        set(value) {
-            val asChannels = value.settingsList.mapIndexed { i, c ->
-                ChannelProtos.Channel.newBuilder().apply {
-                    role =
-                        if (i == 0) ChannelProtos.Channel.Role.PRIMARY else ChannelProtos.Channel.Role.SECONDARY
-                    index = i
-                    settings = c
-                }.build()
-            }
-
-            debug("Sending channels to device")
-            asChannels.forEach {
-                setChannel(it)
-            }
-
-            serviceScope.handledLaunch {
-                channelSetRepository.clearSettings()
-                channelSetRepository.addAllSettings(value)
-            }
-
-            val newConfig = config { lora = value.loraConfig }
-            if (localConfig.lora != newConfig.lora) sendDeviceConfig(newConfig)
-        }
-
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
     private fun newMeshPacketTo(idNum: Int) = MeshPacket.newBuilder().apply {
         if (myNodeInfo == null)
@@ -745,28 +712,8 @@ class MeshService : Service(), Logging {
                         val ch = a.getChannelResponse
                         debug("Admin: Received channel ${ch.index}")
 
-                        val packetToSave = MeshLog(
-                            UUID.randomUUID().toString(),
-                            "Channel",
-                            System.currentTimeMillis(),
-                            ch.toString()
-                        )
-                        insertMeshLog(packetToSave)
-
                         if (ch.index + 1 < mi.maxChannels) {
-
-                            // Stop once we get to the first disabled entry
-                            if (/* ch.hasSettings() || */ ch.role != ChannelProtos.Channel.Role.DISABLED) {
-                                // Not done yet, add new entries and request next channel
-                                addChannelSettings(ch)
-                                requestChannel(ch.index + 1)
-                            } else {
-                                debug("We've received the last channel, allowing rest of app to start...")
-                                onHasSettings()
-                            }
-                        } else {
-                            debug("Received max channels, starting app")
-                            onHasSettings()
+                            handleChannel(ch)
                         }
                     }
                 }
@@ -963,7 +910,7 @@ class MeshService : Service(), Logging {
     }
 
     private fun addChannelSettings(ch: ChannelProtos.Channel) {
-        if (ch.index == 0 || ch.settings.name == "admin") adminChannelIndex = ch.index
+        if (ch.index == 0 || ch.settings.name.lowercase() == "admin") adminChannelIndex = ch.index
         serviceScope.handledLaunch {
             channelSetRepository.addSettings(ch)
         }
@@ -1143,6 +1090,7 @@ class MeshService : Service(), Logging {
                 MeshProtos.FromRadio.CONFIG_COMPLETE_ID_FIELD_NUMBER -> handleConfigComplete(proto.configCompleteId)
                 MeshProtos.FromRadio.MY_INFO_FIELD_NUMBER -> handleMyInfo(proto.myInfo)
                 MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleNodeInfo(proto.nodeInfo)
+                MeshProtos.FromRadio.CHANNEL_FIELD_NUMBER -> handleChannel(proto.channel)
                 MeshProtos.FromRadio.CONFIG_FIELD_NUMBER -> handleDeviceConfig(proto.config)
                 MeshProtos.FromRadio.MODULECONFIG_FIELD_NUMBER -> handleModuleConfig(proto.moduleConfig)
                 else -> errormsg("Unexpected FromRadio variant")
@@ -1183,6 +1131,18 @@ class MeshService : Service(), Logging {
         )
         insertMeshLog(packetToSave)
         // setModuleConfig(config)
+    }
+
+    private fun handleChannel(ch: ChannelProtos.Channel) {
+        debug("Received channel ${ch.index}")
+        val packetToSave = MeshLog(
+            UUID.randomUUID().toString(),
+            "Channel",
+            System.currentTimeMillis(),
+            ch.toString()
+        )
+        insertMeshLog(packetToSave)
+        if (ch.role != ChannelProtos.Channel.Role.DISABLED) addChannelSettings(ch)
     }
 
     /**
@@ -1361,8 +1321,8 @@ class MeshService : Service(), Logging {
                 if (deviceVersion < minDeviceVersion || appVersion < minAppVersion) {
                     info("Device firmware or app is too old, faking config so firmware update can occur")
                     clearLocalConfig()
-                    onHasSettings()
-                } else requestChannel(0) // Now start reading channels
+                }
+                onHasSettings()
             }
         } else
             warn("Ignoring stale config complete")
@@ -1387,7 +1347,7 @@ class MeshService : Service(), Logging {
     }
 
     private fun setChannel(ch: ChannelProtos.Channel) {
-        if (ch.index == 0 || ch.settings.name == "admin") adminChannelIndex = ch.index
+        if (ch.index == 0 || ch.settings.name.lowercase() == "admin") adminChannelIndex = ch.index
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
             setChannel = ch
         })
@@ -1424,6 +1384,9 @@ class MeshService : Service(), Logging {
         configNonce += 1
         newNodes.clear()
         newMyNodeInfo = null
+
+        if (BluetoothInterface.invalidVersion) onHasSettings() // Device firmware is too old
+
         debug("Starting config nonce=$configNonce")
 
         sendToRadio(ToRadio.newBuilder().apply {
@@ -1475,15 +1438,13 @@ class MeshService : Service(), Logging {
 
     /** Send our current radio config to the device
      */
-    private fun sendDeviceConfig(c: ConfigProtos.Config) {
+    private fun setConfig(config: ConfigProtos.Config) {
         if (deviceVersion < minDeviceVersion) return
         debug("Setting new radio config!")
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
-            setConfig = c
+            setConfig = config
         })
-
-        // Update our cached copy
-        setLocalConfig(c)
+        setLocalConfig(config) // Update our cached copy
     }
 
     /**
@@ -1698,23 +1659,14 @@ class MeshService : Service(), Logging {
             }
         }
 
-        override fun getDeviceConfig(): ByteArray = toRemoteExceptions {
-            this@MeshService.localConfig.toByteArray()
-                ?: throw NoDeviceConfigException()
-        }
-
-        override fun setDeviceConfig(payload: ByteArray) = toRemoteExceptions {
+        override fun setConfig(payload: ByteArray) = toRemoteExceptions {
             val parsed = ConfigProtos.Config.parseFrom(payload)
-            sendDeviceConfig(parsed)
+            setConfig(parsed)
         }
 
-        override fun getChannels(): ByteArray = toRemoteExceptions {
-            channelSet.toByteArray()
-        }
-
-        override fun setChannels(payload: ByteArray?) = toRemoteExceptions {
-            val parsed = AppOnlyProtos.ChannelSet.parseFrom(payload)
-            channelSet = parsed
+        override fun setChannel(payload: ByteArray?) = toRemoteExceptions {
+            val parsed = ChannelProtos.Channel.parseFrom(payload)
+            setChannel(parsed)
         }
 
         override fun getNodes(): MutableList<NodeInfo> = toRemoteExceptions {

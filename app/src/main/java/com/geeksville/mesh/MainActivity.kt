@@ -13,7 +13,6 @@ import android.text.method.LinkMovementMethod
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
-import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -40,6 +39,7 @@ import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.SerialInterface
 import com.geeksville.mesh.service.*
@@ -57,7 +57,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import java.nio.charset.Charset
 import java.text.DateFormat
-import java.util.*
+import java.util.Date
 import javax.inject.Inject
 
 /*
@@ -302,8 +302,7 @@ class MainActivity : BaseActivity(), Logging {
     }
 
     private fun initToolbar() {
-        val toolbar =
-            findViewById<View>(R.id.toolbar) as Toolbar
+        val toolbar = binding.toolbar as Toolbar
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
     }
@@ -416,6 +415,7 @@ class MainActivity : BaseActivity(), Logging {
 
     /** Show an alert that may contain HTML */
     private fun showAlert(titleText: Int, messageText: Int) {
+
         // make links clickable per https://stackoverflow.com/a/62642807
         // val messageStr = getText(messageText)
 
@@ -476,6 +476,8 @@ class MainActivity : BaseActivity(), Logging {
                                 }
                             }
                         }
+                    } else if (BluetoothInterface.invalidVersion) {
+                        showAlert(R.string.firmware_too_old, R.string.firmware_old)
                     }
                 } catch (ex: RemoteException) {
                     warn("Abandoning connect $ex, because we probably just lost device connection")
@@ -493,11 +495,7 @@ class MainActivity : BaseActivity(), Logging {
 
     private fun showSnackbar(msgId: Int) {
         try {
-            Snackbar.make(
-                findViewById(android.R.id.content),
-                msgId,
-                Snackbar.LENGTH_LONG
-            ).show()
+            Snackbar.make(binding.root, msgId, Snackbar.LENGTH_LONG).show()
         } catch (ex: IllegalStateException) {
             errormsg("Snackbar couldn't find view for msgId $msgId")
         }
@@ -505,11 +503,7 @@ class MainActivity : BaseActivity(), Logging {
 
     private fun showSnackbar(msg: String) {
         try {
-            Snackbar.make(
-                findViewById(android.R.id.content),
-                msg,
-                Snackbar.LENGTH_INDEFINITE
-            )
+            Snackbar.make(binding.root, msg, Snackbar.LENGTH_INDEFINITE)
                 .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
                 .setAction(R.string.okay) {
                     // dismiss

@@ -15,7 +15,7 @@ data class ChannelSet(
 ) : Logging {
     companion object {
 
-        const val prefix = "https://www.meshtastic.org/e/#"
+        const val prefix = "https://meshtastic.org/e/#"
 
         private const val base64Flags = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
 
@@ -65,7 +65,7 @@ data class ChannelSet(
             // We encode as UPPER case for the QR code URL because QR codes are more efficient for that special case
             val bitMatrix =
                 multiFormatWriter.encode(
-                    getChannelUrl(true).toString(),
+                    getChannelUrl(false).toString(),
                     BarcodeFormat.QR_CODE,
                     960,
                     960
