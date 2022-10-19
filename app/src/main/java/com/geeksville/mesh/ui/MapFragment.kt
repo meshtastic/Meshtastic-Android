@@ -2,6 +2,7 @@ package com.geeksville.mesh.ui
 
 import android.app.AlertDialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.graphics.Canvas
 import android.graphics.Color
@@ -197,25 +198,39 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         cache = SqlTileWriterExt()
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Tile Source")
-        val arrayAdapter: ArrayAdapter<String> =
-            ArrayAdapter(context!!, android.R.layout.select_dialog_singlechoice)
         val sources = cache!!.sources
+        val sourceList = mutableListOf<String>()
         for (i in sources.indices) {
-            arrayAdapter.add(sources[i].source)
+            sourceList.add(sources[i].source as String)
         }
-        builder.setAdapter(arrayAdapter) { dialog, which ->
-            val item = arrayAdapter.getItem(which)
-            val b = cache!!.purgeCache(item)
-            if (b) Toast.makeText(
-                context,
-                "SQL Cache purged",
-                Toast.LENGTH_SHORT
-            )
-                .show() else Toast.makeText(
-                context,
-                "SQL Cache purge failed, see logcat for details",
-                Toast.LENGTH_LONG
-            ).show()
+        val selected: BooleanArray? = null
+        val selectedList = mutableListOf<Int>()
+        builder.setMultiChoiceItems(
+            sourceList.toTypedArray(),
+            selected
+        ) { dialogInterface, i, b ->
+            if (b) {
+                selectedList.add(i)
+            } else {
+                selectedList.remove(i)
+            }
+
+        }
+        builder.setPositiveButton("Clear") { dialogInterface, i ->
+            for (x in selectedList) {
+                val item = sources[x]
+                val b = cache!!.purgeCache(item.source)
+                if (b) Toast.makeText(
+                    context,
+                    "SQL Cache purged for ${item.source}",
+                    Toast.LENGTH_SHORT
+                )
+                    .show() else Toast.makeText(
+                    context,
+                    "SQL Cache purge failed, see logcat for details",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
         builder.setNegativeButton(
             "Cancel"
