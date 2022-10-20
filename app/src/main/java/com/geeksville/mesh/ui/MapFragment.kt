@@ -15,19 +15,20 @@ import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.Packet
-import com.geeksville.mesh.databinding.AdapterMapMenuSelectionBinding
-import com.geeksville.mesh.databinding.MapMenuBinding
+import com.geeksville.mesh.databinding.MapMenuLayoutBinding
 import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.model.map.ChildData
 import com.geeksville.mesh.model.map.CustomOverlayManager
 import com.geeksville.mesh.model.map.CustomTileSource
+import com.geeksville.mesh.model.map.MapParentData
 import com.geeksville.mesh.util.SqlTileWriterExt
-import com.geeksville.mesh.util.SqlTileWriterExt.SourceCount
 import com.geeksville.mesh.util.formatAgo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -92,7 +93,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
     private val model: UIViewModel by activityViewModels()
     private lateinit var cacheManager: CacheManager
     private lateinit var downloadRegionBoundingBox: BoundingBox
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -183,18 +183,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         // show it
         alertDialog!!.show()
 
-    }
-
-    /**
-     * Clears active tile source cache
-     */
-    private fun clearCache() {
-        val b: Boolean = SqlTileWriter().purgeCache()
-        SqlTileWriter().onDetach()
-        val title = if (b) "SQL Cache purged" else "SQL Cache purge failed, see logcat for details"
-        val length = if (b) Toast.LENGTH_SHORT else Toast.LENGTH_LONG
-        Toast.makeText(activity, title, length).show()
-        alertDialog!!.dismiss()
     }
 
     private fun purgeTileSource() {
@@ -408,26 +396,31 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
     }
 
     private fun chooseMapStyle() {
-        val mapMenu = MapMenuBinding.inflate(layoutInflater, view as ViewGroup, true)
-        val layoutManager = LinearLayoutManager(requireContext())
-        val adapterMenuSelection = AdapterMapMenuSelectionBinding.inflate(layoutInflater)
-        val adapter = MapStyleAdapter(adapterMenuSelection)
-        mapMenu.mapLayerRecyclerView.adapter =
-            adapter.mapStyleAdapater
-        mapMenu.mapTypeRecyclerView.layoutManager = layoutManager
-        mapMenu.mapTypeRecyclerView.adapter = adapter.mapLayerAdapater
+        /// Prepare dialog and its items
+        val mapStyles by lazy { resources.getStringArray(R.array.map_styles) }
 
+        val builder = MaterialAlertDialogBuilder(context!!)
+        val listData: MutableList<MapParentData> = ArrayList()
+        val parentData: Array<String> = arrayOf("Map Source", "Map Layer")
+        val mapStyleData: MutableList<ChildData> = mutableListOf()
+        mapStyles.forEach { style ->
+            mapStyleData.add(ChildData(style))
+        }
+        val mapLayerData: MutableList<ChildData> = mutableListOf(ChildData("test"))
 
-//        /// Prepare dialog and its items
-//        val builder = MaterialAlertDialogBuilder(context!!)
-//        builder.setTitle(getString(R.string.preferences_map_style))
-//        val mapStyles by lazy { resources.getStringArray(R.array.map_styles) }
-//
-//        /// Load preferences and its value
-//        val editor: SharedPreferences.Editor = mPrefs.edit()
-//        val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
-//        debug("mapStyleId from prefs: $mapStyleInt")
-//
+        val mapStyleObj = MapParentData(title = parentData[0], subList = mapStyleData)
+        val mapLayerObj = MapParentData(title = parentData[1], subList = mapLayerData)
+        listData.add(mapStyleObj)
+        listData.add(mapLayerObj)
+        val exRecycleView = MapMenuLayoutBinding.inflate(layoutInflater)
+        exRecycleView.exRecycle.layoutManager = LinearLayoutManager(context)
+        exRecycleView.exRecycle.adapter = MapMenuRecyclerAdapter(context!!, listData)
+
+        builder.setView(exRecycleView.root)
+        /// Load preferences and its value
+        val editor: SharedPreferences.Editor = mPrefs.edit()
+        val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
+        debug("mapStyleId from prefs: $mapStyleInt")
 //        builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
 //            debug("Set mapStyleId pref to $which")
 //            editor.putInt(mapStyleId, which)
@@ -437,8 +430,8 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
 //            renderDownloadButton()
 //            drawOverlays()
 //        }
-//        val dialog = builder.create()
-//        dialog.show()
+        val dialog = builder.create()
+        dialog.show()
     }
 
     private fun renderDownloadButton() {
