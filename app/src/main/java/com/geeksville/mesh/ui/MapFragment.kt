@@ -2,7 +2,6 @@ package com.geeksville.mesh.ui
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.graphics.Canvas
 import android.graphics.Color
@@ -14,20 +13,15 @@ import android.view.*
 import android.widget.*
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.Packet
-import com.geeksville.mesh.databinding.MapMenuLayoutBinding
 import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.model.map.ChildData
 import com.geeksville.mesh.model.map.CustomOverlayManager
 import com.geeksville.mesh.model.map.CustomTileSource
-import com.geeksville.mesh.model.map.MapParentData
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.formatAgo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -40,7 +34,6 @@ import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.MapTileProviderBasic
 import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.tileprovider.cachemanager.CacheManager.CacheManagerCallback
-import org.osmdroid.tileprovider.modules.SqlTileWriter
 import org.osmdroid.tileprovider.modules.SqliteArchiveTileWriter
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
@@ -400,36 +393,18 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         val mapStyles by lazy { resources.getStringArray(R.array.map_styles) }
 
         val builder = MaterialAlertDialogBuilder(context!!)
-        val listData: MutableList<MapParentData> = ArrayList()
-        val parentData: Array<String> = arrayOf("Map Source", "Map Layer")
-        val mapStyleData: MutableList<ChildData> = mutableListOf()
-        mapStyles.forEach { style ->
-            mapStyleData.add(ChildData(style))
-        }
-        val mapLayerData: MutableList<ChildData> = mutableListOf(ChildData("test"))
-
-        val mapStyleObj = MapParentData(title = parentData[0], subList = mapStyleData)
-        val mapLayerObj = MapParentData(title = parentData[1], subList = mapLayerData)
-        listData.add(mapStyleObj)
-        listData.add(mapLayerObj)
-        val exRecycleView = MapMenuLayoutBinding.inflate(layoutInflater)
-        exRecycleView.exRecycle.layoutManager = LinearLayoutManager(context)
-        exRecycleView.exRecycle.adapter = MapMenuRecyclerAdapter(context!!, listData)
-
-        builder.setView(exRecycleView.root)
         /// Load preferences and its value
-        val editor: SharedPreferences.Editor = mPrefs.edit()
         val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
-        debug("mapStyleId from prefs: $mapStyleInt")
-//        builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
-//            debug("Set mapStyleId pref to $which")
-//            editor.putInt(mapStyleId, which)
-//            editor.apply()
-//            dialog.dismiss()
-//            map.setTileSource(loadOnlineTileSourceBase())
-//            renderDownloadButton()
-//            drawOverlays()
-//        }
+        builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
+            debug("Set mapStyleId pref to $which")
+            val editor: SharedPreferences.Editor = mPrefs.edit()
+            editor.putInt(mapStyleId, which)
+            editor.apply()
+            dialog.dismiss()
+            map.setTileSource(loadOnlineTileSourceBase())
+            renderDownloadButton()
+            drawOverlays()
+        }
         val dialog = builder.create()
         dialog.show()
     }
