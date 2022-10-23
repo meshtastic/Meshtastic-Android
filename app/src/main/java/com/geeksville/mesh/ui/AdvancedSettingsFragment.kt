@@ -26,7 +26,6 @@ import com.geeksville.mesh.databinding.AdvancedSettingsBinding
 import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.ui.view.SettingsView
 import com.geeksville.mesh.util.exceptionToSnackbar
 import com.google.android.material.composethemeadapter.MdcTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
