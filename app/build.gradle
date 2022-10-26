@@ -133,13 +133,20 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
+
+    // Lifecycle
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-process:$lifecycle_version"
+
     implementation "androidx.room:room-runtime:$room_version"
-    implementation "com.google.dagger:hilt-android:$hilt_version"
-    implementation "androidx.datastore:datastore:$datastore_version"
     kapt "androidx.room:room-compiler:$room_version"
+    implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
+    implementation "androidx.datastore:datastore:$datastore_version"
 
     // Compose
     implementation "androidx.compose.runtime:runtime:$compose_version"
@@ -151,7 +158,7 @@ dependencies {
     implementation "androidx.compose.ui:ui-tooling:$compose_version"
     implementation "com.google.android.material:compose-theme-adapter:1.1.14"
 
-    //OSMDROID, mgrs,
+    // OSMDROID & Maps
     implementation 'org.osmdroid:osmdroid-android:6.1.14'
     implementation 'com.github.MKergall:osmbonuspack:6.9.0'
     implementation 'org.osmdroid:osmdroid-wms:6.1.14'
