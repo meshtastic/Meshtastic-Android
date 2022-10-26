@@ -465,7 +465,7 @@ class UIViewModel @Inject constructor(
 
                         // Filter out of our results any packet that doesn't report SNR.  This
                         // is primarily ADMIN_APP.
-                        if (proto.rxSnr > 0.0f) {
+                        if (proto.rxSnr != 0.0f) {
                             val rxDateTime = dateFormat.format(packet.received_date)
                             val rxFrom = proto.from.toUInt()
                             val senderName = nodesById[proto.from]?.user?.longName ?: ""
