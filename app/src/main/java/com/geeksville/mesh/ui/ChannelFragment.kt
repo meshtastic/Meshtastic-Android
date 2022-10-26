@@ -21,7 +21,6 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hideKeyboard
 import com.geeksville.mesh.ChannelProtos
-import com.geeksville.mesh.ConfigKt.loRaConfig
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.getCameraPermissions

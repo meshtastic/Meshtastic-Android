@@ -73,10 +73,8 @@
     <string name="message_reception_time">tiempo de recepción del mensaje</string>
     <string name="message_reception_state">estado de recepción de mensajes</string>
     <string name="message_delivery_status">Estado de entrega del mensaje</string>
-    <string name="broadcast_position_secs">Periodo de emisión de la posición (en segundos)</string>
     <string name="ls_sleep_secs">Período de reposo del dispositivo (en segundos)</string>
     <string name="meshtastic_messages_notifications">Notificaciones de mensajes</string>
-    <string name="broadcast_period_too_small">El periodo mínimo de emisión de este canal es %d</string>
     <string name="protocol_stress_test">Protocolo de prueba de esfuerzo</string>
     <string name="advanced_settings">Configuración avanzada</string>
     <string name="firmware_too_old">Es necesario actualizar el firmware</string>

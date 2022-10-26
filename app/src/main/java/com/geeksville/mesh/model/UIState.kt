@@ -34,7 +34,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.osmdroid.bonuspack.kml.KmlDocument
@@ -110,21 +112,17 @@ class UIViewModel @Inject constructor(
                 _packets.value = packets
             }
         }
-        viewModelScope.launch {
-            localConfigRepository.localConfigFlow.collect { config ->
-                _localConfig.value = config
-            }
-        }
+        localConfigRepository.localConfigFlow.onEach { config ->
+            _localConfig.value = config
+        }.launchIn(viewModelScope)
         viewModelScope.launch {
             quickChatActionRepository.getAllActions().collect { actions ->
                 _quickChatActions.value = actions
             }
         }
-        viewModelScope.launch {
-            channelSetRepository.channelSetFlow.collect { channelSet ->
-                _channels.value = ChannelSet(channelSet)
-            }
-        }
+        channelSetRepository.channelSetFlow.onEach { channelSet ->
+            _channels.value = ChannelSet(channelSet)
+        }.launchIn(viewModelScope)
         debug("ViewModel created")
     }
 

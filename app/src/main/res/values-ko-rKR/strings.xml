@@ -79,10 +79,8 @@
     <string name="message_reception_time">메시지 수신 시간</string>
     <string name="message_reception_state">메시지 수신 상태</string>
     <string name="message_delivery_status">메시지 전송 상태</string>
-    <string name="broadcast_position_secs">위치 전송 주기 (in seconds)</string>
     <string name="ls_sleep_secs">기기가 절전모드 들어가기까지의 시간 (in seconds)</string>
     <string name="meshtastic_messages_notifications">메시지 알림</string>
-    <string name="broadcast_period_too_small">이 채널의 최소 전송 주기는 %d 입니다.</string>
     <string name="protocol_stress_test">프로토콜 스트레스 테스트</string>
     <string name="advanced_settings">고급 설정</string>
     <string name="firmware_too_old">펌웨어 업데이트 필요</string>

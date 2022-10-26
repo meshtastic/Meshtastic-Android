@@ -74,10 +74,8 @@
     <string name="message_reception_time">czas odbioru wiadomości</string>
     <string name="message_reception_state">stan odbioru wiadomości</string>
     <string name="message_delivery_status">Status doręczenia wiadomości</string>
-    <string name="broadcast_position_secs">Okres pozycji transmisji (w sekundach)</string>
     <string name="ls_sleep_secs">Okres uśpienia urządzenia (w sekundach)</string>
     <string name="meshtastic_messages_notifications">Powiadomienia o wiadomościach</string>
-    <string name="broadcast_period_too_small">Minimalny okres nadawania dla tego kanału to %d</string>
     <string name="protocol_stress_test">Protokół testu warunków skrajnych</string>
     <string name="advanced_settings">Zaawansowane ustawienia</string>
     <string name="firmware_too_old">Wymagana aktualizacja oprogramowania układowego</string>
