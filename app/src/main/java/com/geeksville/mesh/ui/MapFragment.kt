@@ -506,21 +506,24 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         createLatLongGrid(false)
         map.overlayManager.addAll(nodeLayer, nodePositions)
         map.overlayManager.addAll(nodeLayer, wayPoints)
-        if (map.tileProvider.tileSource.name()
-                .equals(CustomTileSource.getTileSource("ESRI World TOPO").name())
-        ) {
-            val layer = TilesOverlay(
-                MapTileProviderBasic(
-                    activity,
-                    CustomTileSource.OPENWEATHER_RADAR
-                ), context
-            )
-            layer.loadingBackgroundColor = Color.TRANSPARENT
-            layer.loadingLineColor = Color.TRANSPARENT
-            map.overlayManager.add(layer)
-        }
         map.invalidate()
     }
+
+//    private fun addWeatherLayer() {
+    //        if (map.tileProvider.tileSource.name()
+//                .equals(CustomTileSource.getTileSource("ESRI World TOPO").name())
+//        ) {
+//            val layer = TilesOverlay(
+//                MapTileProviderBasic(
+//                    activity,
+//                    CustomTileSource.OPENWEATHER_RADAR
+//                ), context
+//            )
+//            layer.loadingBackgroundColor = Color.TRANSPARENT
+//            layer.loadingLineColor = Color.TRANSPARENT
+//            map.overlayManager.add(layer)
+//        }
+//    }
 
     /**
      * Adds copyright to map depending on what source is showing
