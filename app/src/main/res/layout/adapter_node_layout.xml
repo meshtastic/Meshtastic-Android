@@ -59,10 +59,10 @@
                 android:id="@+id/batteryIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/batteryPercentageView"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
                 app:layout_constraintEnd_toStartOf="@+id/batteryPercentageView"
-                app:layout_constraintTop_toTopOf="@+id/batteryPercentageView"
+                app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_battery_full_24" />
 
             <TextView
@@ -79,22 +79,24 @@
                 android:id="@+id/lastCommIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                app:layout_constraintBottom_toBottomOf="@+id/lastConnectionView"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="8dp"
+                android:visibility="visible"
+                app:layout_constraintBottom_toTopOf="@id/signalView"
                 app:layout_constraintEnd_toStartOf="@+id/lastConnectionView"
-                app:layout_constraintTop_toTopOf="@+id/lastConnectionView"
+                app:layout_constraintTop_toBottomOf="@id/batteryIcon"
                 app:srcCompat="@drawable/ic_antenna_24" />
 
             <TextView
                 android:id="@+id/lastConnectionView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
+                android:layout_marginEnd="8dp"
                 android:text="11h01 PM"
                 android:visibility="visible"
-                app:layout_constraintBottom_toBottomOf="@+id/coords_view"
+                app:layout_constraintBottom_toBottomOf="@+id/lastCommIcon"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/coords_view" />
+                app:layout_constraintTop_toTopOf="@+id/lastCommIcon" />
 
             <TextView
                 android:id="@+id/signalView"
