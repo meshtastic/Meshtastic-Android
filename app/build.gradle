@@ -93,6 +93,7 @@ android {
     lint {
         abortOnError false
     }
+    namespace 'com.geeksville.mesh'
 }
 
 play {
