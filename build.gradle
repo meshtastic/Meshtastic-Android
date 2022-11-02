@@ -8,6 +8,7 @@ buildscript {
         room_version = '2.4.3'
         hilt_version = '2.40.5'
         datastore_version = '1.0.0'
+        compose_version = '1.2.0-rc02'
     }
 
     repositories {
