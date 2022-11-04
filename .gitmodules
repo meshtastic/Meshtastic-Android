@@ -1,6 +1,6 @@
 [submodule "app/src/main/proto"]
 	path = app/src/main/proto
-	url = https://github.com/meshtastic/Meshtastic-protobufs.git
+	url = https://github.com/meshtastic/protobufs.git
 [submodule "design"]
 	path = design
-	url = https://github.com/meshtastic/meshtastic-design.git
+	url = https://github.com/meshtastic/design.git

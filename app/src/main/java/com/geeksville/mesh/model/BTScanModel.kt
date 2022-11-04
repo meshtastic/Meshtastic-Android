@@ -128,10 +128,9 @@ class BTScanModel @Inject constructor(
         debug("BTScanModel cleared")
     }
 
-    private val bluetoothAdapter = context.bluetoothManager?.adapter
     private val deviceManager get() = context.deviceManager
-    val hasCompanionDeviceApi get() = context.hasCompanionDeviceApi()
-    private val hasBluetoothPermission get() = application.hasBluetoothPermission()
+    val hasCompanionDeviceApi get() = application.hasCompanionDeviceApi()
+    val hasBluetoothPermission get() = application.hasBluetoothPermission()
     private val usbManager get() = context.usbManager
 
     var selectedAddress: String? = null
@@ -219,8 +218,8 @@ class BTScanModel @Inject constructor(
     fun setupScan(): Boolean {
         selectedAddress = radioInterfaceService.getDeviceAddress()
 
-        return if (bluetoothAdapter == null || MockInterface.addressValid(context, usbRepository, "")) {
-            warn("No bluetooth adapter.  Running under emulation?")
+        return if (MockInterface.addressValid(context, usbRepository, "")) {
+            warn("Running under emulator/test lab")
 
             val testnodes = listOf(
                 DeviceListEntry("Included simulator", "m", true),
@@ -273,14 +272,16 @@ class BTScanModel @Inject constructor(
 
     private var networkDiscovery: Job? = null
     fun startScan() {
+        _spinner.value = true
+
         // Start Network Service Discovery (find TCP devices)
         networkDiscovery = nsdRepository.networkDiscoveryFlow()
             .onEach { addDevice(TCPDeviceListEntry(it)) }
             .launchIn(CoroutineScope(Dispatchers.Main))
 
-        if (hasCompanionDeviceApi) {
-            startCompanionScan()
-        } else startClassicScan()
+        if (hasBluetoothPermission) {
+            if (hasCompanionDeviceApi) startCompanionScan() else startClassicScan()
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -290,7 +291,6 @@ class BTScanModel @Inject constructor(
 
         if (bluetoothLeScanner != null) { // could be null if bluetooth is disabled
             debug("starting classic scan")
-            _spinner.value = true
 
             // filter and only accept devices that have our service
             val filter =
@@ -373,7 +373,6 @@ class BTScanModel @Inject constructor(
     @SuppressLint("NewApi")
     private fun startCompanionScan() {
         debug("starting companion scan")
-        _spinner.value = true
         deviceManager?.associate(
             associationRequest(),
             @SuppressLint("NewApi")
@@ -479,7 +478,11 @@ class BTScanModel @Inject constructor(
                 }
 
                 val permissionIntent =
+                    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
                     PendingIntent.getBroadcast(activity, 0, Intent(ACTION_USB_PERMISSION), 0)
+                } else {
+                    PendingIntent.getBroadcast(activity, 0, Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE)
+                }
                 val filter = IntentFilter(ACTION_USB_PERMISSION)
                 activity.registerReceiver(usbReceiver, filter)
                 usbManager.requestPermission(it.usb.device, permissionIntent)

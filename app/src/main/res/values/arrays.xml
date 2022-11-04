@@ -90,6 +90,7 @@
         <item>OpenStreetMap</item>
         <item>USGS TOPO</item>
         <item>Open TOPO</item>
+        <item>ESRI World TOPO</item>
         <item>USGS Satellite</item>
         <item>ESRI World Overview</item>
     </string-array>

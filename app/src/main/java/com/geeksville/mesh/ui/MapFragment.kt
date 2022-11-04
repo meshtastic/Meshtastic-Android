@@ -22,6 +22,7 @@ import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomOverlayManager
 import com.geeksville.mesh.model.map.CustomTileSource
+import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.formatAgo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,9 +31,9 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
+import org.osmdroid.tileprovider.MapTileProviderBasic
 import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.tileprovider.cachemanager.CacheManager.CacheManagerCallback
-import org.osmdroid.tileprovider.modules.SqlTileWriter
 import org.osmdroid.tileprovider.modules.SqliteArchiveTileWriter
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
@@ -57,6 +58,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
     private lateinit var executeJob: Button
     private var downloadPrompt: AlertDialog? = null
     private var alertDialog: AlertDialog? = null
+    private var cache: SqlTileWriterExt? = null
 
     // constants
     private val defaultMinZoom = 1.5
@@ -84,7 +86,6 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
     private val model: UIViewModel by activityViewModels()
     private lateinit var cacheManager: CacheManager
     private lateinit var downloadRegionBoundingBox: BoundingBox
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -165,7 +166,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                     downloadJobAlert()
                     dialog.dismiss()
                 }
-                2 -> clearCache()
+                2 -> purgeTileSource()
                 else -> dialog.dismiss()
             }
         }
@@ -177,16 +178,48 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
 
     }
 
-    /**
-     * Clears active tile source cache
-     */
-    private fun clearCache() {
-        val b: Boolean = SqlTileWriter().purgeCache()
-        SqlTileWriter().onDetach()
-        val title = if (b) "SQL Cache purged" else "SQL Cache purge failed, see logcat for details"
-        val length = if (b) Toast.LENGTH_SHORT else Toast.LENGTH_LONG
-        Toast.makeText(activity, title, length).show()
-        alertDialog!!.dismiss()
+    private fun purgeTileSource() {
+        cache = SqlTileWriterExt()
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Tile Source")
+        val sources = cache!!.sources
+        val sourceList = mutableListOf<String>()
+        for (i in sources.indices) {
+            sourceList.add(sources[i].source as String)
+        }
+        val selected: BooleanArray? = null
+        val selectedList = mutableListOf<Int>()
+        builder.setMultiChoiceItems(
+            sourceList.toTypedArray(),
+            selected
+        ) { _, i, b ->
+            if (b) {
+                selectedList.add(i)
+            } else {
+                selectedList.remove(i)
+            }
+
+        }
+        builder.setPositiveButton("Clear") { _, _ ->
+            for (x in selectedList) {
+                val item = sources[x]
+                val b = cache!!.purgeCache(item.source)
+                if (b) Toast.makeText(
+                    context,
+                    "SQL Cache purged for ${item.source}",
+                    Toast.LENGTH_SHORT
+                )
+                    .show() else Toast.makeText(
+                    context,
+                    "SQL Cache purge failed, see logcat for details",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+        builder.setNegativeButton(
+            "Cancel"
+        ) { dialog, _ -> dialog.cancel() }
+        builder.show()
     }
 
 
@@ -357,22 +390,20 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
 
     private fun chooseMapStyle() {
         /// Prepare dialog and its items
-        val builder = MaterialAlertDialogBuilder(context!!)
-        builder.setTitle(getString(R.string.preferences_map_style))
         val mapStyles by lazy { resources.getStringArray(R.array.map_styles) }
 
+        val builder = MaterialAlertDialogBuilder(context!!)
         /// Load preferences and its value
-        val editor: SharedPreferences.Editor = mPrefs.edit()
         val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
-        debug("mapStyleId from prefs: $mapStyleInt")
-
         builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
             debug("Set mapStyleId pref to $which")
+            val editor: SharedPreferences.Editor = mPrefs.edit()
             editor.putInt(mapStyleId, which)
             editor.apply()
             dialog.dismiss()
             map.setTileSource(loadOnlineTileSourceBase())
             renderDownloadButton()
+            drawOverlays()
         }
         val dialog = builder.create()
         dialog.show()
@@ -477,6 +508,22 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         map.overlayManager.addAll(nodeLayer, wayPoints)
         map.invalidate()
     }
+
+//    private fun addWeatherLayer() {
+    //        if (map.tileProvider.tileSource.name()
+//                .equals(CustomTileSource.getTileSource("ESRI World TOPO").name())
+//        ) {
+//            val layer = TilesOverlay(
+//                MapTileProviderBasic(
+//                    activity,
+//                    CustomTileSource.OPENWEATHER_RADAR
+//                ), context
+//            )
+//            layer.loadingBackgroundColor = Color.TRANSPARENT
+//            layer.loadingLineColor = Color.TRANSPARENT
+//            map.overlayManager.add(layer)
+//        }
+//    }
 
     /**
      * Adds copyright to map depending on what source is showing

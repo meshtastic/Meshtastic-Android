@@ -29,8 +29,13 @@ data class Channel(
         // The default channel that devices ship with
         val default = Channel(
             channelSettings { psk = ByteString.copyFrom(defaultPSK) },
-            // reference: NodeDB::installDefaultConfig
-            loRaConfig { txEnabled = true; modemPreset = ModemPreset.LONG_FAST; hopLimit = 3 }
+            // references: NodeDB::installDefaultConfig / Channels::initDefaultChannel
+            loRaConfig {
+                usePreset = true
+                modemPreset = ModemPreset.LONG_FAST
+                hopLimit = 3
+                txEnabled = true
+            }
         )
     }
 

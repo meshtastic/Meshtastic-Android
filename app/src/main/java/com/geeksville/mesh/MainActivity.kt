@@ -8,7 +8,10 @@ import android.content.pm.PackageManager
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.net.Uri
-import android.os.*
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.RemoteException
 import android.text.method.LinkMovementMethod
 import android.view.Menu
 import android.view.MenuItem
@@ -19,20 +22,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.geeksville.mesh.android.BindFailedException
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.ServiceClient
+import com.geeksville.mesh.android.*
 import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.android.getMissingPermissions
-import com.geeksville.mesh.android.isGooglePlayAvailable
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
@@ -130,8 +127,9 @@ class MainActivity : BaseActivity(), Logging {
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             if (!permissions.entries.all { it.value }) {
                 errormsg("User denied permissions")
-                showSnackbar(getString(R.string.permission_missing_31))
+                showSnackbar(permissionMissing)
             }
+            requestedEnable = false
             bluetoothViewModel.permissionsUpdated()
         }
 
@@ -180,71 +178,6 @@ class MainActivity : BaseActivity(), Logging {
             return tabInfos[position].content
         }
     }
-
-    /** Get the minimum permissions our app needs to run correctly
-     */
-    private fun getMinimumPermissions(): Array<String> {
-        val perms = mutableListOf<String>()
-
-        // We only need this for logging to capture files for the simulator - turn off for production
-        // perms.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-
-/*      TODO - wait for targetSdkVersion 31
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            perms.add(Manifest.permission.BLUETOOTH_SCAN)
-            perms.add(Manifest.permission.BLUETOOTH_CONNECT)
-        }
-*/
-        return getMissingPermissions(perms)
-    }
-
-    /** Possibly prompt user to grant permissions
-     * @param shouldShowDialog usually true, but in cases where we've already shown a dialog elsewhere we skip it.
-     *
-     * @return true if we already have the needed permissions
-     */
-    private fun requestPermission(
-        missingPerms: Array<String> = getMinimumPermissions(),
-        shouldShowDialog: Boolean = true
-    ): Boolean =
-        if (missingPerms.isNotEmpty()) {
-            val shouldShow = missingPerms.filter {
-                ActivityCompat.shouldShowRequestPermissionRationale(this, it)
-            }
-
-            fun doRequest() {
-                info("requesting permissions")
-                // Ask for all the missing perms
-                requestPermissionsLauncher.launch(missingPerms)
-            }
-
-            if (shouldShow.isNotEmpty() && shouldShowDialog) {
-                // DID_REQUEST_PERM is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-                warn("Permissions $shouldShow missing, we should show dialog")
-
-                MaterialAlertDialogBuilder(this)
-                    .setTitle(getString(R.string.required_permissions))
-                    .setMessage(getString(R.string.permission_missing_31))
-                    .setNeutralButton(R.string.cancel) { _, _ ->
-                        warn("User bailed due to permissions")
-                    }
-                    .setPositiveButton(R.string.accept) { _, _ ->
-                        doRequest()
-                    }
-                    .show()
-            } else {
-                info("Permissions $missingPerms missing, no need to show dialog, just asking OS")
-                doRequest()
-            }
-
-            false
-        } else {
-            // Permission has already been granted
-            debug("We have our required permissions")
-            true
-        }
 
     /// Ask user to rate in play store
     private fun askToRate() {
@@ -296,9 +229,6 @@ class MainActivity : BaseActivity(), Logging {
         handleIntent(intent)
 
         if (isGooglePlayAvailable(this)) askToRate()
-
-        // if (!isInTestLab) - very important - even in test lab we must request permissions because we need location perms for some of our tests to pass
-        requestPermission()
     }
 
     private fun initToolbar() {
@@ -728,11 +658,22 @@ class MainActivity : BaseActivity(), Logging {
         super.onStart()
 
         bluetoothViewModel.enabled.observe(this) { enabled ->
-            if (!enabled && !requestedEnable) {
-                if (!isInTestLab && scanModel.selectedBluetooth) {
-                    requestedEnable = true
+            if (!enabled && !requestedEnable && scanModel.selectedBluetooth) {
+                requestedEnable = true
+                if (hasBluetoothPermission()) {
                     val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                     bleRequestEnable.launch(enableBtIntent)
+                } else {
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle(getString(R.string.required_permissions))
+                        .setMessage(permissionMissing)
+                        .setNeutralButton(R.string.cancel) { _, _ ->
+                            warn("User bailed due to permissions")
+                        }
+                        .setPositiveButton(R.string.accept) { _, _ ->
+                            info("requesting permissions")
+                            requestPermissionsLauncher.launch(getBluetoothPermissions())                    }
+                        .show()
                 }
             }
         }
