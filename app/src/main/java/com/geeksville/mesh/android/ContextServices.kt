@@ -8,14 +8,15 @@ import android.companion.CompanionDeviceManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
-import android.os.Build
 import androidx.core.content.ContextCompat
 import com.geeksville.mesh.MainActivity
+import com.geeksville.mesh.R
 
 /**
  * @return null on platforms without a BlueTooth driver (i.e. the emulator)
  */
-val Context.bluetoothManager: BluetoothManager? get() = getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager?
+val Context.bluetoothManager: BluetoothManager?
+    get() = getSystemService(Context.BLUETOOTH_SERVICE).takeIf { hasBluetoothPermission() } as? BluetoothManager?
 
 val Context.deviceManager: CompanionDeviceManager?
     get() {
@@ -36,7 +37,7 @@ val Context.locationManager: LocationManager get() = requireNotNull(getSystemSer
  * @return true if CompanionDeviceManager API is present
  */
 fun Context.hasCompanionDeviceApi(): Boolean =
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
         packageManager.hasSystemFeature(PackageManager.FEATURE_COMPANION_DEVICE_SETUP)
     else false
 
@@ -50,6 +51,16 @@ fun Context.hasGps(): Boolean = locationManager.allProviders.contains(LocationMa
  */
 fun Context.gpsDisabled(): Boolean =
     if (hasGps()) !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) else false
+
+/**
+ * return the text string of the permissions missing
+ */
+val Context.permissionMissing: String
+    get() = if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+        getString(R.string.permission_missing)
+    } else {
+        getString(R.string.permission_missing_31)
+    }
 
 /**
  * return a list of the permissions we don't have
@@ -67,12 +78,12 @@ fun Context.getMissingPermissions(perms: List<String>): Array<String> = perms.fi
 fun Context.getBluetoothPermissions(): Array<String> {
     val perms = mutableListOf<String>()
 
-/*  TODO - wait for targetSdkVersion 31
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
         perms.add(Manifest.permission.BLUETOOTH_SCAN)
         perms.add(Manifest.permission.BLUETOOTH_CONNECT)
+    } else if (!hasCompanionDeviceApi()) {
+        perms.add(Manifest.permission.ACCESS_FINE_LOCATION)
     }
-*/
     return getMissingPermissions(perms)
 }
 
@@ -109,7 +120,7 @@ fun Context.hasLocationPermission() = getLocationPermissions().isEmpty()
 fun Context.getBackgroundPermissions(): Array<String> {
     val perms = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
 
-    if (Build.VERSION.SDK_INT >= 29) // only added later
+    if (android.os.Build.VERSION.SDK_INT >= 29) // only added later
         perms.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
 
     return getMissingPermissions(perms)

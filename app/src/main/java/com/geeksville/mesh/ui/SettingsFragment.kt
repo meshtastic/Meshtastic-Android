@@ -261,7 +261,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 if (permissions.entries.all { it.value }) {
                     binding.provideLocationCheckbox.isChecked = true
-                } else debug("User denied background permission")
+                } else {
+                    debug("User denied background permission")
+                    showSnackbar(getString(R.string.why_background_required))
+                }
             }
 
         val requestLocationAndBackgroundLauncher =
@@ -271,7 +274,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     if (myActivity.hasBackgroundPermission()) {
                         binding.provideLocationCheckbox.isChecked = true
                     } else requestBackgroundAndCheckLauncher.launch(myActivity.getBackgroundPermissions())
-                } else debug("User denied location permission")
+                } else {
+                    debug("User denied location permission")
+                    showSnackbar(getString(R.string.why_background_required))
+                }
             }
 
         // init our region spinner
@@ -506,37 +512,34 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val requestPermissionAndScanLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 if (permissions.entries.all { it.value }) {
-                    checkLocationEnabled()
+                    checkBTEnabled()
+                    if (!scanModel.hasCompanionDeviceApi) checkLocationEnabled()
                     scanLeDevice()
                 } else {
                     errormsg("User denied scan permissions")
-                    showSnackbar(getString(R.string.permission_missing))
+                    showSnackbar(requireContext().permissionMissing)
                 }
+                bluetoothViewModel.permissionsUpdated()
             }
 
         binding.changeRadioButton.setOnClickListener {
             debug("User clicked changeRadioButton")
-            checkBTEnabled()
-            if ((scanModel.hasCompanionDeviceApi)) {
-                scanLeDevice()
-            } else  {
-                // Location is the only runtime permission for classic bluetooth scan
-                if (myActivity.hasLocationPermission()) {
-                    checkLocationEnabled()
-                    scanLeDevice()
-                } else {
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(getString(R.string.required_permissions))
-                        .setMessage(getString(R.string.permission_missing))
-                        .setNeutralButton(R.string.cancel) { _, _ ->
-                            warn("User bailed due to permissions")
-                        }
-                        .setPositiveButton(R.string.accept) { _, _ ->
-                            info("requesting scan permissions")
-                            requestPermissionAndScanLauncher.launch(myActivity.getLocationPermissions())
-                        }
-                        .show()
-                }
+            scanLeDevice()
+            if (scanModel.hasBluetoothPermission) {
+                checkBTEnabled()
+                if (!scanModel.hasCompanionDeviceApi) checkLocationEnabled()
+            } else {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(getString(R.string.required_permissions))
+                    .setMessage(requireContext().permissionMissing)
+                    .setNeutralButton(R.string.cancel) { _, _ ->
+                        warn("User bailed due to permissions")
+                    }
+                    .setPositiveButton(R.string.accept) { _, _ ->
+                        info("requesting scan permissions")
+                        requestPermissionAndScanLauncher.launch(myActivity.getBluetoothPermissions())
+                    }
+                    .show()
             }
         }
     }
