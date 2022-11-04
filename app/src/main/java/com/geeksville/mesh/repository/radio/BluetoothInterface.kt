@@ -1,12 +1,10 @@
 package com.geeksville.mesh.repository.radio
 
-import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
-import android.bluetooth.BluetoothManager
 import android.content.Context
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.bluetoothManager
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.*
@@ -110,22 +108,15 @@ class BluetoothInterface(
         val BTM_FROMNUM_CHARACTER: UUID =
             UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
 
-        /// Get our bluetooth adapter (should always succeed except on emulator
-        private fun getBluetoothAdapter(context: Context): BluetoothAdapter? {
-            val bluetoothManager =
-                context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            return bluetoothManager.adapter
-        }
-
         /** Return true if this address is still acceptable. For BLE that means, still bonded */
-        @SuppressLint("NewApi", "MissingPermission")
         override fun addressValid(
             context: Context,
             usbRepository: UsbRepository, // Temporary until dependency injection transition is completed
             rest: String
         ): Boolean {
-            val allPaired = getBluetoothAdapter(context)?.bondedDevices.orEmpty()
-                    .map { it.address }.toSet()
+            /// Get our bluetooth adapter (should always succeed except on emulator
+            val allPaired = context.bluetoothManager?.adapter?.bondedDevices.orEmpty()
+                .map { it.address }.toSet()
             return if (!allPaired.contains(rest)) {
                 warn("Ignoring stale bond to ${rest.anonymize}")
                 false
@@ -170,7 +161,7 @@ class BluetoothInterface(
     init {
         // Note: this call does no comms, it just creates the device object (even if the
         // device is off/not connected)
-        val device = getBluetoothAdapter(context)?.getRemoteDevice(address)
+        val device = context.bluetoothManager?.adapter?.getRemoteDevice(address)
         if (device != null) {
             info("Creating radio interface service.  device=${address.anonymize}")
 

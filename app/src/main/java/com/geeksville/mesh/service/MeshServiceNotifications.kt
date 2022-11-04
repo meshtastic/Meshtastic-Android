@@ -106,7 +106,11 @@ class MeshServiceNotifications(
         )
 
     private val openAppIntent: PendingIntent by lazy {
-        PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), 0)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), 0)
+        } else {
+            PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
+        }
     }
 
     /**
