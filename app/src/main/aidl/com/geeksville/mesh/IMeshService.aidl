@@ -79,6 +79,9 @@ interface IMeshService {
     /// It sets a Channel protobuf via admin packet
     void setChannel(in byte []payload);
 
+    /// Send position packet with wantResponse to nodeNum
+    void requestPosition(in int idNum);
+
     /// Send Shutdown admin packet to nodeNum
     void requestShutdown(in int idNum);
 
