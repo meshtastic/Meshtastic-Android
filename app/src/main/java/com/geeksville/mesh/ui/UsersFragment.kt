@@ -59,7 +59,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             val showAdmin = position == 0 || model.adminChannelIndex > 0
             val popup = PopupMenu(requireContext(), view)
             popup.inflate(R.menu.menu_nodes)
-            popup.menu.findItem(R.id.direct_message).isVisible = position > 0
+            popup.menu.setGroupVisible(R.id.group_remote, position > 0)
             popup.menu.setGroupVisible(R.id.group_admin, showAdmin)
             popup.setOnMenuItemClickListener { item: MenuItem ->
                 when (item.itemId) {
@@ -77,6 +77,12 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                                 .replace(R.id.mainActivityLayout, MessagesFragment())
                                 .addToBackStack(null)
                                 .commit()
+                        }
+                    }
+                    R.id.request_position -> {
+                        if (position > 0 && user != null) {
+                            debug("requesting position for ${user.longName}")
+                            model.requestPosition(node.num)
                         }
                     }
                     R.id.reboot -> {

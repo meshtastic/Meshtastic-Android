@@ -152,14 +152,18 @@ class UIViewModel @Inject constructor(
 
     fun sendMessage(str: String, channel: Int = 0, dest: String = DataPacket.ID_BROADCAST) {
         val p = DataPacket(dest, channel, str)
-        sendDataPacket(p)
-    }
-
-    fun sendDataPacket(p: DataPacket) {
         try {
             meshService?.send(p)
         } catch (ex: RemoteException) {
             errormsg("Send DataPacket error: ${ex.message}")
+        }
+    }
+
+    fun requestPosition(destNum: Int) {
+        try {
+            meshService?.requestPosition(destNum)
+        } catch (ex: RemoteException) {
+            errormsg("Request position error: ${ex.message}")
         }
     }
 
