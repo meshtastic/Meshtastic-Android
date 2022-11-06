@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item
-        android:id="@+id/direct_message"
-        android:title="@string/direct_message"
-        app:showAsAction="withText" />
+    <group android:id="@+id/group_remote">
+        <item
+            android:id="@+id/direct_message"
+            android:title="@string/direct_message"
+            app:showAsAction="withText" />
+        <item
+            android:id="@+id/request_position"
+            android:title="@string/request_position"
+            app:showAsAction="withText" />
+    </group>
     <group android:id="@+id/group_admin">
         <item
             android:id="@+id/reboot"

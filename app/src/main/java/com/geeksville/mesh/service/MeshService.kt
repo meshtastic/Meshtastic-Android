@@ -1351,6 +1351,10 @@ class MeshService : Service(), Logging {
         })
     }
 
+    private fun requestPosition(idNum: Int) {
+        sendPosition(time = 0, destNum = idNum, wantResponse = true)
+    }
+
     private fun requestShutdown(idNum: Int) {
         sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
             shutdownSeconds = 5
@@ -1400,12 +1404,14 @@ class MeshService : Service(), Logging {
         lon: Double = 0.0,
         alt: Int = 0,
         time: Int = currentSecond(),
+        destNum: Int? = null,
+        wantResponse: Boolean = false
     ) {
         try {
             val mi = myNodeInfo
             if (mi != null) {
-                val destNum = mi.myNodeNum // we just send to the local node
-                debug("Sending our position/time to=$destNum lat=${lat.anonymize}, lon=${lon.anonymize}, alt=$alt, time=$time")
+                val idNum = destNum ?: mi.myNodeNum // when null we just send to the local node
+                debug("Sending our position/time to=$idNum lat=${lat.anonymize}, lon=${lon.anonymize}, alt=$alt, time=$time")
 
                 val position = MeshProtos.Position.newBuilder().also {
                     it.longitudeI = Position.degI(lon)
@@ -1419,11 +1425,11 @@ class MeshService : Service(), Logging {
                 handleReceivedPosition(mi.myNodeNum, position)
 
                 val fullPacket =
-                    newMeshPacketTo(destNum).buildMeshPacket(priority = MeshPacket.Priority.BACKGROUND) {
+                    newMeshPacketTo(idNum).buildMeshPacket(priority = MeshPacket.Priority.BACKGROUND) {
                         // Use the new position as data format
                         portnumValue = Portnums.PortNum.POSITION_APP_VALUE
                         payload = position.toByteString()
-                        this.wantResponse = false
+                        this.wantResponse = wantResponse
                     }
 
                 // send the packet into the mesh
@@ -1686,6 +1692,10 @@ class MeshService : Service(), Logging {
 
         override fun stopProvideLocation() = toRemoteExceptions {
             stopLocationRequests()
+        }
+
+        override fun requestPosition(idNum: Int) = toRemoteExceptions {
+            this@MeshService.requestPosition(idNum)
         }
 
         override fun requestShutdown(idNum: Int) = toRemoteExceptions {
