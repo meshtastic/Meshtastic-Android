@@ -764,13 +764,11 @@ class MeshService : Service(), Logging {
         defaultTime: Long = System.currentTimeMillis()
     ) {
         updateNodeInfo(fromNum) {
-            it.deviceMetrics = DeviceMetrics(
-                t.deviceMetrics,
-                if (t.time != 0) t.time else (defaultTime / 1000L).toInt()
+            if (t.hasDeviceMetrics()) it.deviceMetrics = DeviceMetrics(
+                t.deviceMetrics, if (t.time != 0) t.time else (defaultTime / 1000L).toInt()
             )
-            it.environmentMetrics = EnvironmentMetrics(
-                t.environmentMetrics,
-                if (t.time != 0) t.time else (defaultTime / 1000L).toInt()
+            if (t.hasEnvironmentMetrics()) it.environmentMetrics = EnvironmentMetrics(
+                t.environmentMetrics, if (t.time != 0) t.time else (defaultTime / 1000L).toInt()
             )
         }
     }
