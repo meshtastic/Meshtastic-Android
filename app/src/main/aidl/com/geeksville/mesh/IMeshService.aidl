@@ -49,7 +49,7 @@ interface IMeshService {
 
     If myId is null, then the existing unique node ID is preserved, only the human visible longName/shortName is changed
     */
-    void setOwner(String myId, String longName, String shortName);
+    void setOwner(String myId, String longName, String shortName, boolean isLicensed);
 
     /// Return my unique user ID string
     String getMyId();

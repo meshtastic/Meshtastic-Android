@@ -22,7 +22,8 @@ class NodeDB(private val ui: UIViewModel) {
             "+16508765308".format(8),
             "Kevin MesterNoLoc",
             "KLO",
-            MeshProtos.HardwareModel.ANDROID_SIM
+            MeshProtos.HardwareModel.ANDROID_SIM,
+            false
         ),
         null
     )
@@ -34,7 +35,8 @@ class NodeDB(private val ui: UIViewModel) {
                 "+165087653%02d".format(9 + index),
                 "Kevin Mester$index",
                 "KM$index",
-                MeshProtos.HardwareModel.ANDROID_SIM
+                MeshProtos.HardwareModel.ANDROID_SIM,
+                false
             ),
             it
         )

@@ -1,4 +1,4 @@
-package com.geeksville.mesh.ui.view
+package com.geeksville.mesh.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
@@ -8,14 +8,14 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.geeksville.mesh.ui.theme.AppTheme
 
 @Composable
-fun PreferenceView(viewModel: UIViewModel = viewModel()) {
-    PreferenceItemList(viewModel = viewModel)
+fun PreferenceScreen(viewModel: UIViewModel = viewModel()) {
+    PreferenceItemList(viewModel)
 }
 
 //@Preview(showBackground = true)
 //@Composable
 //fun PreferencePreview() {
 //    AppTheme {
-//        PreferenceView(viewModel = viewModel(factory = viewModelFactory { }))
+//        PreferenceScreen(viewModel(factory = viewModelFactory { }))
 //    }
 //}

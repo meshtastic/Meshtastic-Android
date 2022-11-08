@@ -9,7 +9,6 @@ import androidx.fragment.app.activityViewModels
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.databinding.AdvancedSettingsBinding
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.view.PreferenceView
 import com.google.android.material.composethemeadapter.MdcTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -34,7 +33,7 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
                     )
                     setContent {
                         MdcTheme {
-                            PreferenceView(model)
+                            PreferenceScreen(model)
                         }
                     }
                 }
