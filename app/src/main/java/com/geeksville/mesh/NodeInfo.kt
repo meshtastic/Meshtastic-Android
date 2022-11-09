@@ -18,11 +18,12 @@ data class MeshUser(
     val id: String,
     val longName: String,
     val shortName: String,
-    val hwModel: MeshProtos.HardwareModel
+    val hwModel: MeshProtos.HardwareModel,
+    val isLicensed: Boolean,
 ) : Parcelable {
 
     override fun toString(): String {
-        return "MeshUser(id=${id.anonymize}, longName=${longName.anonymize}, shortName=${shortName.anonymize}, hwModel=${hwModelString})"
+        return "MeshUser(id=${id.anonymize}, longName=${longName.anonymize}, shortName=${shortName.anonymize}, hwModel=${hwModelString}, isLicensed=${isLicensed})"
     }
 
     /** a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot

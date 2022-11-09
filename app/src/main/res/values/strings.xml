@@ -78,10 +78,8 @@
     <string name="message_reception_time">message reception time</string>
     <string name="message_reception_state">message reception state</string>
     <string name="message_delivery_status">Message delivery status</string>
-    <string name="broadcast_position_secs">Broadcast position period (in seconds)</string>
     <string name="ls_sleep_secs">Device sleep period (in seconds)</string>
     <string name="meshtastic_messages_notifications">Notifications about messages</string>
-    <string name="broadcast_period_too_small">Minimum broadcast period for this channel is %d</string>
     <string name="protocol_stress_test">Protocol stress test</string>
     <string name="advanced_settings">Advanced settings</string>
     <string name="firmware_too_old">Firmware update required</string>

@@ -732,7 +732,8 @@ class MeshService : Service(), Logging {
                 p.id.ifEmpty { oldId }, // If the new update doesn't contain an ID keep our old value
                 p.longName,
                 p.shortName,
-                p.hwModel
+                p.hwModel,
+                p.isLicensed
             )
         }
     }
@@ -1155,7 +1156,8 @@ class MeshService : Service(), Logging {
                         info.user.id,
                         info.user.longName,
                         info.user.shortName,
-                        info.user.hwModel
+                        info.user.hwModel,
+                        info.user.isLicensed
                     )
 
             if (info.hasPosition()) {
@@ -1454,7 +1456,7 @@ class MeshService : Service(), Logging {
     /**
      * Set our owner with either the new or old API
      */
-    fun setOwner(myId: String?, longName: String, shortName: String) {
+    fun setOwner(myId: String?, longName: String, shortName: String, isLicensed: Boolean) {
         val myNode = myNodeInfo
         if (myNode != null) {
 
@@ -1468,6 +1470,7 @@ class MeshService : Service(), Logging {
                         it.id = myId
                     it.longName = longName
                     it.shortName = shortName
+                    it.isLicensed = isLicensed
                 }.build()
 
                 // Also update our own map for our nodenum, by handling the packet just like packets from other users
@@ -1608,9 +1611,9 @@ class MeshService : Service(), Logging {
 
         override fun getMyId() = toRemoteExceptions { myNodeID }
 
-        override fun setOwner(myId: String?, longName: String, shortName: String) =
+        override fun setOwner(myId: String?, longName: String, shortName: String, isLicensed: Boolean) =
             toRemoteExceptions {
-                this@MeshService.setOwner(myId, longName, shortName)
+                this@MeshService.setOwner(myId, longName, shortName, isLicensed)
             }
 
         override fun send(p: DataPacket) {

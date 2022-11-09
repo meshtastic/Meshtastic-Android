@@ -34,7 +34,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.osmdroid.bonuspack.kml.KmlDocument
@@ -110,21 +112,17 @@ class UIViewModel @Inject constructor(
                 _packets.value = packets
             }
         }
-        viewModelScope.launch {
-            localConfigRepository.localConfigFlow.collect { config ->
-                _localConfig.value = config
-            }
-        }
+        localConfigRepository.localConfigFlow.onEach { config ->
+            _localConfig.value = config
+        }.launchIn(viewModelScope)
         viewModelScope.launch {
             quickChatActionRepository.getAllActions().collect { actions ->
                 _quickChatActions.value = actions
             }
         }
-        viewModelScope.launch {
-            channelSetRepository.channelSetFlow.collect { channelSet ->
-                _channels.value = ChannelSet(channelSet)
-            }
-        }
+        channelSetRepository.channelSetFlow.onEach { channelSet ->
+            _channels.value = ChannelSet(channelSet)
+        }.launchIn(viewModelScope)
         debug("ViewModel created")
     }
 
@@ -240,7 +238,7 @@ class UIViewModel @Inject constructor(
     val isRouter: Boolean = config.device.role == Config.DeviceConfig.Role.ROUTER
 
     // We consider hasWifi = ESP32
-    fun isESP32() = myNodeInfo.value?.hasWifi == true
+    fun hasWifi() = myNodeInfo.value?.hasWifi == true
 
     /// hardware info about our local device (can be null)
     private val _myNodeInfo = MutableLiveData<MyNodeInfo?>()
@@ -364,14 +362,14 @@ class UIViewModel @Inject constructor(
     }
 
     // clean up all this nasty owner state management FIXME
-    fun setOwner(s: String? = null) {
+    fun setOwner(longName: String? = null, shortName: String? = null, isLicensed: Boolean? = null) {
 
-        if (s != null) {
-            _ownerName.value = s
+        if (longName != null) {
+            _ownerName.value = longName
 
             // note: we allow an empty userstring to be written to prefs
             preferences.edit {
-                putString("owner", s)
+                putString("owner", longName)
             }
         }
 
@@ -381,7 +379,8 @@ class UIViewModel @Inject constructor(
                 meshService?.setOwner(
                     null,
                     _ownerName.value,
-                    getInitials(_ownerName.value!!)
+                    shortName ?: getInitials(_ownerName.value!!),
+                    isLicensed ?: false
                 ) // Note: we use ?. here because we might be running in the emulator
             } catch (ex: RemoteException) {
                 errormsg("Can't set username on device, is device offline? ${ex.message}")
