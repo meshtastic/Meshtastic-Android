@@ -587,16 +587,16 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         }
         item { Divider() }
 
-//        item {
-//            DropDownPreference(title = "Override OLED auto-detect",
-//                enabled = connected,
-//                items = ConfigProtos.Config.DisplayConfig.OledType.values()
-//                    .filter { it != ConfigProtos.Config.DisplayConfig.OledType.UNRECOGNIZED }
-//                    .map { it to it.name },
-//                selectedItem = displayInput.oled,
-//                onItemSelected = { displayInput = displayInput.copy { oled = it } })
-//        }
-//        item { Divider() }
+        item {
+            DropDownPreference(title = "Override OLED auto-detect",
+                enabled = connected,
+                items = ConfigProtos.Config.DisplayConfig.OledType.values()
+                    .filter { it != ConfigProtos.Config.DisplayConfig.OledType.UNRECOGNIZED }
+                    .map { it to it.name },
+                selectedItem = displayInput.oled,
+                onItemSelected = { displayInput = displayInput.copy { oled = it } })
+        }
+        item { Divider() }
 
         item {
             PreferenceFooter(
