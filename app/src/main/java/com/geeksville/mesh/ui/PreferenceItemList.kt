@@ -70,6 +70,9 @@ fun PreferenceItemList(viewModel: UIViewModel) {
             EditTextPreference(title = "Long name",
                 value = userInput?.longName ?: stringResource(id = R.string.unknown_username),
                 enabled = connected && userInput?.longName != null,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Send
+                ),
                 keyboardActions = KeyboardActions(onSend = {
                     focusManager.clearFocus()
                 }),
@@ -82,6 +85,9 @@ fun PreferenceItemList(viewModel: UIViewModel) {
             EditTextPreference(title = "Short name",
                 value = userInput?.shortName ?: stringResource(id = R.string.unknown),
                 enabled = connected && userInput?.shortName != null,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Send
+                ),
                 keyboardActions = KeyboardActions(onSend = {
                     focusManager.clearFocus()
                 }),
@@ -99,7 +105,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            SwitchPreference(title = "Amateur radio licensed ",
+            SwitchPreference(title = "Licensed amateur radio",
                 checked = userInput?.isLicensed ?: false,
                 enabled = connected && userInput?.isLicensed != null,
                 onCheckedChange = { value ->
@@ -113,11 +119,8 @@ fun PreferenceItemList(viewModel: UIViewModel) {
                 enabled = userInput != user,
                 onCancelClicked = { userInput = user },
                 onSaveClicked = {
-                    viewModel.setOwner(
-                        userInput?.longName,
-                        userInput?.shortName,
-                        userInput?.isLicensed
-                    )
+                    focusManager.clearFocus()
+                    userInput?.let { viewModel.setOwner(it.longName, it.shortName, it.isLicensed) }
                 })
         }
 
@@ -135,7 +138,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            SwitchPreference(title = "Serial Output Enabled",
+            SwitchPreference(title = "Serial output enabled",
                 checked = deviceInput.serialEnabled,
                 enabled = connected,
                 onCheckedChange = { deviceInput = deviceInput.copy { serialEnabled = it } })
@@ -143,7 +146,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            SwitchPreference(title = "Enabled Debug Log",
+            SwitchPreference(title = "Debug log enabled",
                 checked = deviceInput.debugLogEnabled,
                 enabled = connected,
                 onCheckedChange = { deviceInput = deviceInput.copy { debugLogEnabled = it } })
@@ -154,13 +157,16 @@ fun PreferenceItemList(viewModel: UIViewModel) {
             PreferenceFooter(
                 enabled = deviceInput != localConfig.device,
                 onCancelClicked = { deviceInput = localConfig.device },
-                onSaveClicked = { viewModel.updateDeviceConfig { deviceInput } })
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    viewModel.updateDeviceConfig { deviceInput }
+                })
         }
 
         item { PreferenceCategory(text = "Position Config") }
 
         item {
-            EditTextPreference(title = "Position Broadcast Interval",
+            EditTextPreference(title = "Position broadcast interval",
                 value = positionInput.positionBroadcastSecs.uintToString(),
                 enabled = connected,
                 keyboardActions = KeyboardActions(onSend = {
@@ -173,7 +179,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         }
 
         item {
-            SwitchPreference(title = "Enable Smart Position",
+            SwitchPreference(title = "Smart position enabled",
                 checked = positionInput.positionBroadcastSmartEnabled,
                 enabled = connected,
                 onCheckedChange = {
@@ -183,7 +189,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            SwitchPreference(title = "Use Fixed Position",
+            SwitchPreference(title = "Use fixed position",
                 checked = positionInput.fixedPosition,
                 enabled = connected,
                 onCheckedChange = { positionInput = positionInput.copy { fixedPosition = it } })
@@ -191,7 +197,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            SwitchPreference(title = "GPS Enabled",
+            SwitchPreference(title = "GPS enabled",
                 checked = positionInput.gpsEnabled,
                 enabled = connected,
                 onCheckedChange = { positionInput = positionInput.copy { gpsEnabled = it } })
@@ -199,7 +205,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            EditTextPreference(title = "GPS Update Interval",
+            EditTextPreference(title = "GPS update interval",
                 value = positionInput.gpsUpdateInterval.uintToString(),
                 enabled = connected,
                 keyboardActions = KeyboardActions(onSend = {
@@ -212,7 +218,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         }
 
         item {
-            EditTextPreference(title = "Fix Attempt Duration",
+            EditTextPreference(title = "Fix attempt duration",
                 value = positionInput.gpsAttemptTime.uintToString(),
                 enabled = connected,
                 keyboardActions = KeyboardActions(onSend = {
@@ -224,14 +230,27 @@ fun PreferenceItemList(viewModel: UIViewModel) {
                 })
         }
 
+        // TODO add positionFlags
+
         item {
             PreferenceFooter(
                 enabled = positionInput != localConfig.position,
                 onCancelClicked = { positionInput = localConfig.position },
-                onSaveClicked = { viewModel.updatePositionConfig { positionInput } })
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    viewModel.updatePositionConfig { positionInput }
+                })
         }
 
         item { PreferenceCategory(text = "Power Config") }
+
+        item {
+            SwitchPreference(title = "Enable power saving mode",
+                checked = powerInput.isPowerSaving,
+                enabled = connected && hasWifi, // We consider hasWifi = ESP32
+                onCheckedChange = { powerInput = powerInput.copy { isPowerSaving = it } })
+        }
+        item { Divider() }
 
         item {
             EditTextPreference(
@@ -248,16 +267,8 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         }
 
         item {
-            SwitchPreference(title = "Enable power saving mode",
-                checked = powerInput.isPowerSaving,
-                enabled = connected && hasWifi, // We consider hasWifi = ESP32
-                onCheckedChange = { powerInput = powerInput.copy { isPowerSaving = it } })
-        }
-        item { Divider() }
-
-        item {
             EditTextPreference(
-                title = "ADC Multiplier Override ratio",
+                title = "ADC multiplier override ratio",
                 value = powerInput.adcMultiplierOverride.toString(),
                 enabled = connected,
                 keyboardActions = KeyboardActions(onSend = {
@@ -271,21 +282,21 @@ fun PreferenceItemList(viewModel: UIViewModel) {
 
         item {
             EditTextPreference(
-                title = "Minimum Wake Time",
-                value = powerInput.minWakeSecs.uintToString(),
+                title = "Wait for Bluetooth duration",
+                value = powerInput.waitBluetoothSecs.uintToString(),
                 enabled = connected,
                 keyboardActions = KeyboardActions(onSend = {
                     focusManager.clearFocus()
                 }),
                 onValueChanged = { value ->
                     value.stringToIntOrNull()
-                        ?.let { powerInput = powerInput.copy { minWakeSecs = it } }
+                        ?.let { powerInput = powerInput.copy { waitBluetoothSecs = it } }
                 })
         }
 
         item {
             EditTextPreference(
-                title = "Mesh SDS Timeout",
+                title = "Mesh SDS timeout",
                 value = powerInput.meshSdsTimeoutSecs.uintToString(),
                 enabled = connected,
                 keyboardActions = KeyboardActions(onSend = {
@@ -299,7 +310,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
 
         item {
             EditTextPreference(
-                title = "Super Deep Sleep Duration",
+                title = "Super deep sleep duration",
                 value = powerInput.sdsSecs.uintToString(),
                 enabled = connected,
                 keyboardActions = KeyboardActions(onSend = {
@@ -313,7 +324,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
 
         item {
             EditTextPreference(
-                title = "Light Sleep Duration",
+                title = "Light sleep duration",
                 value = powerInput.lsSecs.uintToString(),
                 enabled = connected && hasWifi, // we consider hasWifi = ESP32
                 keyboardActions = KeyboardActions(onSend = {
@@ -327,15 +338,15 @@ fun PreferenceItemList(viewModel: UIViewModel) {
 
         item {
             EditTextPreference(
-                title = "No Connection Bluetooth Disabled",
-                value = powerInput.waitBluetoothSecs.uintToString(),
+                title = "Minimum wake time",
+                value = powerInput.minWakeSecs.uintToString(),
                 enabled = connected,
                 keyboardActions = KeyboardActions(onSend = {
                     focusManager.clearFocus()
                 }),
                 onValueChanged = { value ->
                     value.stringToIntOrNull()
-                        ?.let { powerInput = powerInput.copy { waitBluetoothSecs = it } }
+                        ?.let { powerInput = powerInput.copy { minWakeSecs = it } }
                 })
         }
 
@@ -343,14 +354,17 @@ fun PreferenceItemList(viewModel: UIViewModel) {
             PreferenceFooter(
                 enabled = powerInput != localConfig.power,
                 onCancelClicked = { powerInput = localConfig.power },
-                onSaveClicked = { viewModel.updatePowerConfig { powerInput } })
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    viewModel.updatePowerConfig { powerInput }
+                })
         }
 
         item { PreferenceCategory(text = "Network Config") }
 
         item {
             SwitchPreference(
-                title = "WiFi Enabled",
+                title = "WiFi enabled",
                 checked = networkInput.wifiEnabled,
                 enabled = connected && hasWifi,
                 onCheckedChange = { networkInput = networkInput.copy { wifiEnabled = it } })
@@ -387,7 +401,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
 
         item {
             EditTextPreference(
-                title = "NTP Server",
+                title = "NTP server",
                 value = networkInput.ntpServer.toString(),
                 enabled = connected && hasWifi,
                 keyboardOptions = KeyboardOptions.Default.copy(
@@ -401,7 +415,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
 
         item {
             SwitchPreference(
-                title = "Ethernet Enabled",
+                title = "Ethernet enabled",
                 checked = networkInput.ethEnabled,
                 enabled = connected,
                 onCheckedChange = { networkInput = networkInput.copy { ethEnabled = it } })
@@ -409,7 +423,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            DropDownPreference(title = "Ethernet Mode",
+            DropDownPreference(title = "Ethernet mode",
                 enabled = connected,
                 items = ConfigProtos.Config.NetworkConfig.EthMode.values()
                     .filter { it != ConfigProtos.Config.NetworkConfig.EthMode.UNRECOGNIZED }
@@ -497,14 +511,17 @@ fun PreferenceItemList(viewModel: UIViewModel) {
             PreferenceFooter(
                 enabled = networkInput != localConfig.network,
                 onCancelClicked = { networkInput = localConfig.network },
-                onSaveClicked = { viewModel.updateNetworkConfig { networkInput } })
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    viewModel.updateNetworkConfig { networkInput }
+                })
         }
 
         item { PreferenceCategory(text = "Display Config") }
 
         item {
             EditTextPreference(
-                title = "Screen Timeout",
+                title = "Screen timeout",
                 value = displayInput.screenOnSecs.uintToString(),
                 enabled = connected,
                 keyboardActions = KeyboardActions(onSend = {
@@ -517,7 +534,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         }
 
         item {
-            DropDownPreference(title = "GPS Coordinate Format",
+            DropDownPreference(title = "GPS coordinates format",
                 enabled = connected,
                 items = ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat.values()
                     .filter { it != ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat.UNRECOGNIZED }
@@ -529,21 +546,21 @@ fun PreferenceItemList(viewModel: UIViewModel) {
 
         item {
             EditTextPreference(
-                title = "Screen Timeout",
-                value = displayInput.screenOnSecs.uintToString(),
+                title = "Auto screen carousel",
+                value = displayInput.autoScreenCarouselSecs.uintToString(),
                 enabled = connected,
                 keyboardActions = KeyboardActions(onSend = {
                     focusManager.clearFocus()
                 }),
                 onValueChanged = { value ->
                     value.stringToIntOrNull()
-                        ?.let { displayInput = displayInput.copy { screenOnSecs = it } }
+                        ?.let { displayInput = displayInput.copy { autoScreenCarouselSecs = it } }
                 })
         }
 
         item {
             SwitchPreference(
-                title = "Compass North Top",
+                title = "Compass north top",
                 checked = displayInput.compassNorthTop,
                 enabled = connected,
                 onCheckedChange = { displayInput = displayInput.copy { compassNorthTop = it } })
@@ -560,7 +577,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            DropDownPreference(title = "Display Units",
+            DropDownPreference(title = "Display units",
                 enabled = connected,
                 items = ConfigProtos.Config.DisplayConfig.DisplayUnits.values()
                     .filter { it != ConfigProtos.Config.DisplayConfig.DisplayUnits.UNRECOGNIZED }
@@ -585,7 +602,10 @@ fun PreferenceItemList(viewModel: UIViewModel) {
             PreferenceFooter(
                 enabled = displayInput != localConfig.display,
                 onCancelClicked = { displayInput = localConfig.display },
-                onSaveClicked = { viewModel.updateDisplayConfig { displayInput } })
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    viewModel.updateDisplayConfig { displayInput }
+                })
         }
 
         item { PreferenceCategory(text = "LoRa Config") }
@@ -732,7 +752,10 @@ fun PreferenceItemList(viewModel: UIViewModel) {
             PreferenceFooter(
                 enabled = loraInput != localConfig.lora,
                 onCancelClicked = { loraInput = localConfig.lora },
-                onSaveClicked = { viewModel.updateLoraConfig { loraInput } })
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    viewModel.updateLoraConfig { loraInput }
+                })
         }
 
         item { PreferenceCategory(text = "Bluetooth Config") }
@@ -775,7 +798,10 @@ fun PreferenceItemList(viewModel: UIViewModel) {
             PreferenceFooter(
                 enabled = bluetoothInput != localConfig.bluetooth,
                 onCancelClicked = { bluetoothInput = localConfig.bluetooth },
-                onSaveClicked = { viewModel.updateBluetoothConfig { bluetoothInput } })
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    viewModel.updateBluetoothConfig { bluetoothInput }
+                })
         }
     }
 }

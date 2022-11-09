@@ -40,15 +40,4 @@ class AdvancedSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
             }
         return binding.root
     }
-
-//        model.localConfig.asLiveData().observe(viewLifecycleOwner) {
-//            binding.positionBroadcastPeriodView.isEnabled = model.config.position.gpsEnabled
-//            binding.lsSleepView.isEnabled = model.config.power.isPowerSaving && model.isESP32()
-//        }
-//
-//        model.connectionState.observe(viewLifecycleOwner) { connectionState ->
-//            val connected = connectionState == MeshService.ConnectionState.CONNECTED
-//            binding.positionBroadcastPeriodView.isEnabled = connected && model.config.position.gpsEnabled
-//            binding.lsSleepView.isEnabled = connected && model.config.power.isPowerSaving
-//        }
 }
