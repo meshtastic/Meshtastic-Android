@@ -83,7 +83,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
 
         item {
             EditTextPreference(title = "Short name",
-                value = userInput?.shortName ?: stringResource(id = R.string.unknown),
+                value = userInput?.shortName?.take(4) ?: stringResource(id = R.string.unknown),
                 enabled = connected && userInput?.shortName != null,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Send
