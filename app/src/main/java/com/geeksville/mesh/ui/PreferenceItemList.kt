@@ -77,13 +77,14 @@ fun PreferenceItemList(viewModel: UIViewModel) {
                     focusManager.clearFocus()
                 }),
                 onValueChanged = { value ->
-                    userInput?.let { userInput = it.copy(longName = value) }
+                    if (value.toByteArray().size <= 39) // long_name max_size:40
+                        userInput?.let { userInput = it.copy(longName = value) }
                 })
         }
 
         item {
             EditTextPreference(title = "Short name",
-                value = userInput?.shortName?.take(4) ?: stringResource(id = R.string.unknown),
+                value = userInput?.shortName ?: stringResource(id = R.string.unknown),
                 enabled = connected && userInput?.shortName != null,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Send
@@ -92,7 +93,8 @@ fun PreferenceItemList(viewModel: UIViewModel) {
                     focusManager.clearFocus()
                 }),
                 onValueChanged = { value ->
-                    userInput?.let { userInput = it.copy(shortName = value) }
+                    if (value.toByteArray().size <= 4) // short_name max_size:5
+                        userInput?.let { userInput = it.copy(shortName = value) }
                 })
         }
 
@@ -117,8 +119,10 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item {
             PreferenceFooter(
                 enabled = userInput != user,
-                onCancelClicked = { userInput = user },
-                onSaveClicked = {
+                onCancelClicked = {
+                    focusManager.clearFocus()
+                    userInput = user
+                }, onSaveClicked = {
                     focusManager.clearFocus()
                     userInput?.let { viewModel.setOwner(it.longName, it.shortName, it.isLicensed) }
                 })
@@ -156,7 +160,10 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item {
             PreferenceFooter(
                 enabled = deviceInput != localConfig.device,
-                onCancelClicked = { deviceInput = localConfig.device },
+                onCancelClicked = {
+                    focusManager.clearFocus()
+                    deviceInput = localConfig.device
+                },
                 onSaveClicked = {
                     focusManager.clearFocus()
                     viewModel.updateDeviceConfig { deviceInput }
@@ -230,12 +237,26 @@ fun PreferenceItemList(viewModel: UIViewModel) {
                 })
         }
 
-        // TODO add positionFlags
+        item {
+            EditTextPreference(title = "Position flags",
+                value = positionInput.positionFlags.uintToString(),
+                enabled = connected,
+                keyboardActions = KeyboardActions(onSend = {
+                    focusManager.clearFocus()
+                }),
+                onValueChanged = { value ->
+                    value.stringToIntOrNull()
+                        ?.let { positionInput = positionInput.copy { positionFlags = it } }
+                })
+        }
 
         item {
             PreferenceFooter(
                 enabled = positionInput != localConfig.position,
-                onCancelClicked = { positionInput = localConfig.position },
+                onCancelClicked = {
+                    focusManager.clearFocus()
+                    positionInput = localConfig.position
+                },
                 onSaveClicked = {
                     focusManager.clearFocus()
                     viewModel.updatePositionConfig { positionInput }
@@ -353,7 +374,10 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item {
             PreferenceFooter(
                 enabled = powerInput != localConfig.power,
-                onCancelClicked = { powerInput = localConfig.power },
+                onCancelClicked = {
+                    focusManager.clearFocus()
+                    powerInput = localConfig.power
+                },
                 onSaveClicked = {
                     focusManager.clearFocus()
                     viewModel.updatePowerConfig { powerInput }
@@ -382,7 +406,10 @@ fun PreferenceItemList(viewModel: UIViewModel) {
                 keyboardActions = KeyboardActions(onSend = {
                     focusManager.clearFocus()
                 }),
-                onValueChanged = { networkInput = networkInput.copy { wifiSsid = it } })
+                onValueChanged = { value ->
+                    if (value.toByteArray().size <= 32) // wifi_ssid max_size:33
+                        networkInput = networkInput.copy { wifiSsid = value }
+                })
         }
 
         item {
@@ -396,7 +423,10 @@ fun PreferenceItemList(viewModel: UIViewModel) {
                 keyboardActions = KeyboardActions(onSend = {
                     focusManager.clearFocus()
                 }),
-                onValueChanged = { networkInput = networkInput.copy { wifiPsk = it } })
+                onValueChanged = { value ->
+                    if (value.toByteArray().size <= 63) // wifi_psk max_size:64
+                        networkInput = networkInput.copy { wifiPsk = value }
+                })
         }
 
         item {
@@ -410,7 +440,10 @@ fun PreferenceItemList(viewModel: UIViewModel) {
                 keyboardActions = KeyboardActions(onSend = {
                     focusManager.clearFocus()
                 }),
-                onValueChanged = { networkInput = networkInput.copy { ntpServer = it } })
+                onValueChanged = { value ->
+                    if (value.toByteArray().size <= 32) // ntp_server max_size:33
+                        networkInput = networkInput.copy { ntpServer = value }
+                })
         }
 
         item {
@@ -440,15 +473,13 @@ fun PreferenceItemList(viewModel: UIViewModel) {
                 title = "IP",
                 value = networkInput.ipv4Config.ip.toString(),
                 enabled = connected && networkInput.ethMode == ConfigProtos.Config.NetworkConfig.EthMode.STATIC,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Send
-                ),
                 keyboardActions = KeyboardActions(onSend = {
                     focusManager.clearFocus()
                 }),
                 onValueChanged = { value ->
-                    value.stringToIntOrNull()?.let {
-                        networkInput = networkInput.copy { ipv4Config.copy { ip = it } }
+                    value.toIntOrNull()?.let {
+                        val ipv4 = networkInput.ipv4Config.copy { ip = it }
+                        networkInput = networkInput.copy { ipv4Config = ipv4 }
                     }
                 })
         }
@@ -458,15 +489,13 @@ fun PreferenceItemList(viewModel: UIViewModel) {
                 title = "Gateway",
                 value = networkInput.ipv4Config.gateway.toString(),
                 enabled = connected && networkInput.ethMode == ConfigProtos.Config.NetworkConfig.EthMode.STATIC,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Send
-                ),
                 keyboardActions = KeyboardActions(onSend = {
                     focusManager.clearFocus()
                 }),
                 onValueChanged = { value ->
-                    value.stringToIntOrNull()?.let {
-                        networkInput = networkInput.copy { ipv4Config.copy { gateway = it } }
+                    value.toIntOrNull()?.let {
+                        val ipv4 = networkInput.ipv4Config.copy { gateway = it }
+                        networkInput = networkInput.copy { ipv4Config = ipv4 }
                     }
                 })
         }
@@ -476,15 +505,13 @@ fun PreferenceItemList(viewModel: UIViewModel) {
                 title = "Subnet",
                 value = networkInput.ipv4Config.subnet.toString(),
                 enabled = connected && networkInput.ethMode == ConfigProtos.Config.NetworkConfig.EthMode.STATIC,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Send
-                ),
                 keyboardActions = KeyboardActions(onSend = {
                     focusManager.clearFocus()
                 }),
                 onValueChanged = { value ->
-                    value.stringToIntOrNull()?.let {
-                        networkInput = networkInput.copy { ipv4Config.copy { subnet = it } }
+                    value.toIntOrNull()?.let {
+                        val ipv4 = networkInput.ipv4Config.copy { subnet = it }
+                        networkInput = networkInput.copy { ipv4Config = ipv4 }
                     }
                 })
         }
@@ -494,15 +521,13 @@ fun PreferenceItemList(viewModel: UIViewModel) {
                 title = "DNS",
                 value = networkInput.ipv4Config.dns.toString(),
                 enabled = connected && networkInput.ethMode == ConfigProtos.Config.NetworkConfig.EthMode.STATIC,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Send
-                ),
                 keyboardActions = KeyboardActions(onSend = {
                     focusManager.clearFocus()
                 }),
                 onValueChanged = { value ->
-                    value.stringToIntOrNull()?.let {
-                        networkInput = networkInput.copy { ipv4Config.copy { dns = it } }
+                    value.toIntOrNull()?.let {
+                        val ipv4 = networkInput.ipv4Config.copy { dns = it }
+                        networkInput = networkInput.copy { ipv4Config = ipv4 }
                     }
                 })
         }
@@ -510,7 +535,10 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item {
             PreferenceFooter(
                 enabled = networkInput != localConfig.network,
-                onCancelClicked = { networkInput = localConfig.network },
+                onCancelClicked = {
+                    focusManager.clearFocus()
+                    networkInput = localConfig.network
+                },
                 onSaveClicked = {
                     focusManager.clearFocus()
                     viewModel.updateNetworkConfig { networkInput }
@@ -601,7 +629,10 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item {
             PreferenceFooter(
                 enabled = displayInput != localConfig.display,
-                onCancelClicked = { displayInput = localConfig.display },
+                onCancelClicked = {
+                    focusManager.clearFocus()
+                    displayInput = localConfig.display
+                },
                 onSaveClicked = {
                     focusManager.clearFocus()
                     viewModel.updateDisplayConfig { displayInput }
@@ -751,7 +782,10 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item {
             PreferenceFooter(
                 enabled = loraInput != localConfig.lora,
-                onCancelClicked = { loraInput = localConfig.lora },
+                onCancelClicked = {
+                    focusManager.clearFocus()
+                    loraInput = localConfig.lora
+                },
                 onSaveClicked = {
                     focusManager.clearFocus()
                     viewModel.updateLoraConfig { loraInput }
@@ -797,7 +831,10 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item {
             PreferenceFooter(
                 enabled = bluetoothInput != localConfig.bluetooth,
-                onCancelClicked = { bluetoothInput = localConfig.bluetooth },
+                onCancelClicked = {
+                    focusManager.clearFocus()
+                    bluetoothInput = localConfig.bluetooth
+                },
                 onSaveClicked = {
                     focusManager.clearFocus()
                     viewModel.updateBluetoothConfig { bluetoothInput }
