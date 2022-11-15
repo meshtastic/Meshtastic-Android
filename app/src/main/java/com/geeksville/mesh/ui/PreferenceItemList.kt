@@ -21,7 +21,9 @@ import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.model.getInitials
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.ui.components.BitwisePreference
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
@@ -29,29 +31,26 @@ import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.RegularPreference
 import com.geeksville.mesh.ui.components.SwitchPreference
 
-private fun Int.uintToString(): String = this.toUInt().toString()
-private fun String.stringToIntOrNull(): Int? = this.toUIntOrNull()?.toInt()
-
 @Composable
 fun PreferenceItemList(viewModel: UIViewModel) {
     val focusManager = LocalFocusManager.current
 
     val hasWifi = viewModel.hasWifi()
-    val connectionState = viewModel.connectionState.observeAsState()
-    val connected = connectionState.value == MeshService.ConnectionState.CONNECTED
+    val connectionState by viewModel.connectionState.observeAsState()
+    val connected = connectionState == MeshService.ConnectionState.CONNECTED
 
     val localConfig by viewModel.localConfig.collectAsState()
-    val user = viewModel.nodeDB.ourNodeInfo?.user
+    val ourNodeInfo by viewModel.nodeDB.ourNodeInfo.observeAsState()
+    var userInput by remember(ourNodeInfo?.user) { mutableStateOf(ourNodeInfo?.user) }
 
     // Temporary [ConfigProtos.Config] state holders
-    var userInput by remember { mutableStateOf(user) }
-    var deviceInput by remember { mutableStateOf(localConfig.device) }
-    var positionInput by remember { mutableStateOf(localConfig.position) }
-    var powerInput by remember { mutableStateOf(localConfig.power) }
-    var networkInput by remember { mutableStateOf(localConfig.network) }
-    var displayInput by remember { mutableStateOf(localConfig.display) }
-    var loraInput by remember { mutableStateOf(localConfig.lora) }
-    var bluetoothInput by remember { mutableStateOf(localConfig.bluetooth) }
+    var deviceInput by remember(localConfig.device) { mutableStateOf(localConfig.device) }
+    var positionInput by remember(localConfig.position) { mutableStateOf(localConfig.position) }
+    var powerInput by remember(localConfig.power) { mutableStateOf(localConfig.power) }
+    var networkInput by remember(localConfig.network) { mutableStateOf(localConfig.network) }
+    var displayInput by remember(localConfig.display) { mutableStateOf(localConfig.display) }
+    var loraInput by remember(localConfig.lora) { mutableStateOf(localConfig.lora) }
+    var bluetoothInput by remember(localConfig.bluetooth) { mutableStateOf(localConfig.bluetooth) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -59,8 +58,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { PreferenceCategory(text = "User Config") }
 
         item {
-            RegularPreference(
-                title = "Node ID",
+            RegularPreference(title = "Node ID",
                 subtitle = userInput?.id ?: stringResource(id = R.string.unknown),
                 onClick = {})
         }
@@ -70,15 +68,16 @@ fun PreferenceItemList(viewModel: UIViewModel) {
             EditTextPreference(title = "Long name",
                 value = userInput?.longName ?: stringResource(id = R.string.unknown_username),
                 enabled = connected && userInput?.longName != null,
+                isError = userInput?.longName.isNullOrEmpty(),
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Send
+                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { value ->
                     if (value.toByteArray().size <= 39) // long_name max_size:40
                         userInput?.let { userInput = it.copy(longName = value) }
+                    if (getInitials(value).toByteArray().size <= 4) // short_name max_size:5
+                        userInput?.let { userInput = it.copy(shortName = getInitials(value)) }
                 })
         }
 
@@ -86,12 +85,11 @@ fun PreferenceItemList(viewModel: UIViewModel) {
             EditTextPreference(title = "Short name",
                 value = userInput?.shortName ?: stringResource(id = R.string.unknown),
                 enabled = connected && userInput?.shortName != null,
+                isError = userInput?.shortName.isNullOrEmpty(),
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Send
+                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { value ->
                     if (value.toByteArray().size <= 4) // short_name max_size:5
                         userInput?.let { userInput = it.copy(shortName = value) }
@@ -99,8 +97,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         }
 
         item {
-            RegularPreference(
-                title = "Hardware model",
+            RegularPreference(title = "Hardware model",
                 subtitle = userInput?.hwModel?.name ?: stringResource(id = R.string.unknown),
                 onClick = {})
         }
@@ -118,10 +115,10 @@ fun PreferenceItemList(viewModel: UIViewModel) {
 
         item {
             PreferenceFooter(
-                enabled = userInput != user,
+                enabled = userInput != ourNodeInfo?.user,
                 onCancelClicked = {
                     focusManager.clearFocus()
-                    userInput = user
+                    userInput = ourNodeInfo?.user
                 }, onSaveClicked = {
                     focusManager.clearFocus()
                     userInput?.let { viewModel.setOwner(it.longName, it.shortName, it.isLicensed) }
@@ -174,14 +171,11 @@ fun PreferenceItemList(viewModel: UIViewModel) {
 
         item {
             EditTextPreference(title = "Position broadcast interval",
-                value = positionInput.positionBroadcastSecs.uintToString(),
+                value = positionInput.positionBroadcastSecs,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { positionInput = positionInput.copy { positionBroadcastSecs = it } }
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    positionInput = positionInput.copy { positionBroadcastSecs = it }
                 })
         }
 
@@ -213,42 +207,31 @@ fun PreferenceItemList(viewModel: UIViewModel) {
 
         item {
             EditTextPreference(title = "GPS update interval",
-                value = positionInput.gpsUpdateInterval.uintToString(),
+                value = positionInput.gpsUpdateInterval,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { positionInput = positionInput.copy { gpsUpdateInterval = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { positionInput = positionInput.copy { gpsUpdateInterval = it } })
         }
 
         item {
             EditTextPreference(title = "Fix attempt duration",
-                value = positionInput.gpsAttemptTime.uintToString(),
+                value = positionInput.gpsAttemptTime,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { positionInput = positionInput.copy { gpsAttemptTime = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { positionInput = positionInput.copy { gpsAttemptTime = it } })
         }
 
         item {
-            EditTextPreference(title = "Position flags",
-                value = positionInput.positionFlags.uintToString(),
+            BitwisePreference(title = "Position flags",
+                value = positionInput.positionFlags,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { positionInput = positionInput.copy { positionFlags = it } }
-                })
+                items = ConfigProtos.Config.PositionConfig.PositionFlags.values()
+                    .filter { it != ConfigProtos.Config.PositionConfig.PositionFlags.UNSET && it != ConfigProtos.Config.PositionConfig.PositionFlags.UNRECOGNIZED }
+                    .map { it.number to it.name },
+                onItemSelected = { positionInput = positionInput.copy { positionFlags = it } }
+            )
         }
+        item { Divider() }
 
         item {
             PreferenceFooter(
@@ -274,101 +257,61 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            EditTextPreference(
-                title = "Shutdown on battery delay",
-                value = powerInput.onBatteryShutdownAfterSecs.uintToString(),
+            EditTextPreference(title = "Shutdown on battery delay",
+                value = powerInput.onBatteryShutdownAfterSecs,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { powerInput = powerInput.copy { onBatteryShutdownAfterSecs = it } }
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    powerInput = powerInput.copy { onBatteryShutdownAfterSecs = it }
                 })
         }
 
         item {
-            EditTextPreference(
-                title = "ADC multiplier override ratio",
-                value = powerInput.adcMultiplierOverride.toString(),
+            EditTextPreference(title = "ADC multiplier override ratio",
+                value = powerInput.adcMultiplierOverride,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.toFloatOrNull()
-                        ?.let { powerInput = powerInput.copy { adcMultiplierOverride = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { powerInput = powerInput.copy { adcMultiplierOverride = it } })
         }
 
         item {
-            EditTextPreference(
-                title = "Wait for Bluetooth duration",
-                value = powerInput.waitBluetoothSecs.uintToString(),
+            EditTextPreference(title = "Wait for Bluetooth duration",
+                value = powerInput.waitBluetoothSecs,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { powerInput = powerInput.copy { waitBluetoothSecs = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { powerInput = powerInput.copy { waitBluetoothSecs = it } })
         }
 
         item {
-            EditTextPreference(
-                title = "Mesh SDS timeout",
-                value = powerInput.meshSdsTimeoutSecs.uintToString(),
+            EditTextPreference(title = "Mesh SDS timeout",
+                value = powerInput.meshSdsTimeoutSecs,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { powerInput = powerInput.copy { meshSdsTimeoutSecs = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { powerInput = powerInput.copy { meshSdsTimeoutSecs = it } })
         }
 
         item {
-            EditTextPreference(
-                title = "Super deep sleep duration",
-                value = powerInput.sdsSecs.uintToString(),
+            EditTextPreference(title = "Super deep sleep duration",
+                value = powerInput.sdsSecs,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { powerInput = powerInput.copy { sdsSecs = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { powerInput = powerInput.copy { sdsSecs = it } })
         }
 
         item {
-            EditTextPreference(
-                title = "Light sleep duration",
-                value = powerInput.lsSecs.uintToString(),
+            EditTextPreference(title = "Light sleep duration",
+                value = powerInput.lsSecs,
                 enabled = connected && hasWifi, // we consider hasWifi = ESP32
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { powerInput = powerInput.copy { lsSecs = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { powerInput = powerInput.copy { lsSecs = it } })
         }
 
         item {
-            EditTextPreference(
-                title = "Minimum wake time",
-                value = powerInput.minWakeSecs.uintToString(),
+            EditTextPreference(title = "Minimum wake time",
+                value = powerInput.minWakeSecs,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { powerInput = powerInput.copy { minWakeSecs = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { powerInput = powerInput.copy { minWakeSecs = it } })
         }
 
         item {
@@ -387,8 +330,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { PreferenceCategory(text = "Network Config") }
 
         item {
-            SwitchPreference(
-                title = "WiFi enabled",
+            SwitchPreference(title = "WiFi enabled",
                 checked = networkInput.wifiEnabled,
                 enabled = connected && hasWifi,
                 onCheckedChange = { networkInput = networkInput.copy { wifiEnabled = it } })
@@ -396,16 +338,14 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            EditTextPreference(
-                title = "SSID",
-                value = networkInput.wifiSsid.toString(),
+            EditTextPreference(title = "SSID",
+                value = networkInput.wifiSsid,
                 enabled = connected && hasWifi,
+                isError = false,
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Send
+                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { value ->
                     if (value.toByteArray().size <= 32) // wifi_ssid max_size:33
                         networkInput = networkInput.copy { wifiSsid = value }
@@ -413,16 +353,14 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         }
 
         item {
-            EditTextPreference(
-                title = "PSK",
-                value = networkInput.wifiPsk .toString(),
+            EditTextPreference(title = "PSK",
+                value = networkInput.wifiPsk,
                 enabled = connected && hasWifi,
+                isError = false,
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Password, imeAction = ImeAction.Send
+                    keyboardType = KeyboardType.Password, imeAction = ImeAction.Done
                 ),
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { value ->
                     if (value.toByteArray().size <= 63) // wifi_psk max_size:64
                         networkInput = networkInput.copy { wifiPsk = value }
@@ -430,16 +368,14 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         }
 
         item {
-            EditTextPreference(
-                title = "NTP server",
-                value = networkInput.ntpServer.toString(),
+            EditTextPreference(title = "NTP server",
+                value = networkInput.ntpServer,
                 enabled = connected && hasWifi,
+                isError = networkInput.ntpServer.isEmpty(),
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Uri, imeAction = ImeAction.Send
+                    keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done
                 ),
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { value ->
                     if (value.toByteArray().size <= 32) // ntp_server max_size:33
                         networkInput = networkInput.copy { ntpServer = value }
@@ -447,8 +383,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         }
 
         item {
-            SwitchPreference(
-                title = "Ethernet enabled",
+            SwitchPreference(title = "Ethernet enabled",
                 checked = networkInput.ethEnabled,
                 enabled = connected,
                 onCheckedChange = { networkInput = networkInput.copy { ethEnabled = it } })
@@ -469,66 +404,46 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { PreferenceCategory(text = "IPv4 Config") }
 
         item {
-            EditTextPreference(
-                title = "IP",
-                value = networkInput.ipv4Config.ip.toString(),
+            EditTextPreference(title = "IP",
+                value = networkInput.ipv4Config.ip,
                 enabled = connected && networkInput.ethMode == ConfigProtos.Config.NetworkConfig.EthMode.STATIC,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.toIntOrNull()?.let {
-                        val ipv4 = networkInput.ipv4Config.copy { ip = it }
-                        networkInput = networkInput.copy { ipv4Config = ipv4 }
-                    }
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    val ipv4 = networkInput.ipv4Config.copy { ip = it }
+                    networkInput = networkInput.copy { ipv4Config = ipv4 }
                 })
         }
 
         item {
-            EditTextPreference(
-                title = "Gateway",
-                value = networkInput.ipv4Config.gateway.toString(),
+            EditTextPreference(title = "Gateway",
+                value = networkInput.ipv4Config.gateway,
                 enabled = connected && networkInput.ethMode == ConfigProtos.Config.NetworkConfig.EthMode.STATIC,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.toIntOrNull()?.let {
-                        val ipv4 = networkInput.ipv4Config.copy { gateway = it }
-                        networkInput = networkInput.copy { ipv4Config = ipv4 }
-                    }
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    val ipv4 = networkInput.ipv4Config.copy { gateway = it }
+                    networkInput = networkInput.copy { ipv4Config = ipv4 }
                 })
         }
 
         item {
-            EditTextPreference(
-                title = "Subnet",
-                value = networkInput.ipv4Config.subnet.toString(),
+            EditTextPreference(title = "Subnet",
+                value = networkInput.ipv4Config.subnet,
                 enabled = connected && networkInput.ethMode == ConfigProtos.Config.NetworkConfig.EthMode.STATIC,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.toIntOrNull()?.let {
-                        val ipv4 = networkInput.ipv4Config.copy { subnet = it }
-                        networkInput = networkInput.copy { ipv4Config = ipv4 }
-                    }
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    val ipv4 = networkInput.ipv4Config.copy { subnet = it }
+                    networkInput = networkInput.copy { ipv4Config = ipv4 }
                 })
         }
 
         item {
-            EditTextPreference(
-                title = "DNS",
-                value = networkInput.ipv4Config.dns.toString(),
+            EditTextPreference(title = "DNS",
+                value = networkInput.ipv4Config.dns,
                 enabled = connected && networkInput.ethMode == ConfigProtos.Config.NetworkConfig.EthMode.STATIC,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.toIntOrNull()?.let {
-                        val ipv4 = networkInput.ipv4Config.copy { dns = it }
-                        networkInput = networkInput.copy { ipv4Config = ipv4 }
-                    }
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    val ipv4 = networkInput.ipv4Config.copy { dns = it }
+                    networkInput = networkInput.copy { ipv4Config = ipv4 }
                 })
         }
 
@@ -548,17 +463,11 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { PreferenceCategory(text = "Display Config") }
 
         item {
-            EditTextPreference(
-                title = "Screen timeout",
-                value = displayInput.screenOnSecs.uintToString(),
+            EditTextPreference(title = "Screen timeout",
+                value = displayInput.screenOnSecs,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { displayInput = displayInput.copy { screenOnSecs = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { displayInput = displayInput.copy { screenOnSecs = it } })
         }
 
         item {
@@ -573,22 +482,17 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            EditTextPreference(
-                title = "Auto screen carousel",
-                value = displayInput.autoScreenCarouselSecs.uintToString(),
+            EditTextPreference(title = "Auto screen carousel",
+                value = displayInput.autoScreenCarouselSecs,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { displayInput = displayInput.copy { autoScreenCarouselSecs = it } }
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    displayInput = displayInput.copy { autoScreenCarouselSecs = it }
                 })
         }
 
         item {
-            SwitchPreference(
-                title = "Compass north top",
+            SwitchPreference(title = "Compass north top",
                 checked = displayInput.compassNorthTop,
                 enabled = connected,
                 onCheckedChange = { displayInput = displayInput.copy { compassNorthTop = it } })
@@ -596,8 +500,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            SwitchPreference(
-                title = "Flip screen",
+            SwitchPreference(title = "Flip screen",
                 checked = displayInput.flipScreen,
                 enabled = connected,
                 onCheckedChange = { displayInput = displayInput.copy { flipScreen = it } })
@@ -642,8 +545,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { PreferenceCategory(text = "LoRa Config") }
 
         item {
-            SwitchPreference(
-                title = "Use modem preset",
+            SwitchPreference(title = "Use modem preset",
                 checked = loraInput.usePreset,
                 enabled = connected,
                 onCheckedChange = { loraInput = loraInput.copy { usePreset = it } })
@@ -662,59 +564,35 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            EditTextPreference(
-                title = "Bandwidth",
-                value = loraInput.bandwidth.uintToString(),
+            EditTextPreference(title = "Bandwidth",
+                value = loraInput.bandwidth,
                 enabled = connected && !loraInput.usePreset,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { loraInput = loraInput.copy { bandwidth = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { loraInput = loraInput.copy { bandwidth = it } })
         }
 
         item {
-            EditTextPreference(
-                title = "Spread factor",
-                value = loraInput.spreadFactor.uintToString(),
+            EditTextPreference(title = "Spread factor",
+                value = loraInput.spreadFactor,
                 enabled = connected && !loraInput.usePreset,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { loraInput = loraInput.copy { spreadFactor = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { loraInput = loraInput.copy { spreadFactor = it } })
         }
 
         item {
-            EditTextPreference(
-                title = "Coding rate",
-                value = loraInput.codingRate.uintToString(),
+            EditTextPreference(title = "Coding rate",
+                value = loraInput.codingRate,
                 enabled = connected && !loraInput.usePreset,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { loraInput = loraInput.copy { codingRate = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { loraInput = loraInput.copy { codingRate = it } })
         }
 
         item {
-            EditTextPreference(
-                title = "Frequency offset",
-                value = loraInput.frequencyOffset.toString(),
+            EditTextPreference(title = "Frequency offset",
+                value = loraInput.frequencyOffset,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.toFloatOrNull()
-                        ?.let { loraInput = loraInput.copy { frequencyOffset = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { loraInput = loraInput.copy { frequencyOffset = it } })
         }
 
         item {
@@ -729,22 +607,15 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            EditTextPreference(
-                title = "Hop limit",
-                value = loraInput.hopLimit.uintToString(),
+            EditTextPreference(title = "Hop limit",
+                value = loraInput.hopLimit,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { loraInput = loraInput.copy { hopLimit = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { loraInput = loraInput.copy { hopLimit = it } })
         }
 
         item {
-            SwitchPreference(
-                title = "TX enabled",
+            SwitchPreference(title = "TX enabled",
                 checked = loraInput.txEnabled,
                 enabled = connected,
                 onCheckedChange = { loraInput = loraInput.copy { txEnabled = it } })
@@ -752,31 +623,19 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            EditTextPreference(
-                title = "TX power",
-                value = loraInput.txPower.uintToString(),
+            EditTextPreference(title = "TX power",
+                value = loraInput.txPower,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { loraInput = loraInput.copy { txPower = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { loraInput = loraInput.copy { txPower = it } })
         }
 
         item {
-            EditTextPreference(
-                title = "Channel number",
-                value = loraInput.channelNum.uintToString(),
+            EditTextPreference(title = "Channel number",
+                value = loraInput.channelNum,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { loraInput = loraInput.copy { channelNum = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { loraInput = loraInput.copy { channelNum = it } })
         }
 
         item {
@@ -795,8 +654,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { PreferenceCategory(text = "Bluetooth Config") }
 
         item {
-            SwitchPreference(
-                title = "Bluetooth enabled",
+            SwitchPreference(title = "Bluetooth enabled",
                 checked = bluetoothInput.enabled,
                 enabled = connected,
                 onCheckedChange = { bluetoothInput = bluetoothInput.copy { enabled = it } })
@@ -815,17 +673,11 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            EditTextPreference(
-                title = "Fixed PIN",
-                value = bluetoothInput.fixedPin.uintToString(),
+            EditTextPreference(title = "Fixed PIN",
+                value = bluetoothInput.fixedPin,
                 enabled = connected,
-                keyboardActions = KeyboardActions(onSend = {
-                    focusManager.clearFocus()
-                }),
-                onValueChanged = { value ->
-                    value.stringToIntOrNull()
-                        ?.let { bluetoothInput = bluetoothInput.copy { fixedPin = it } }
-                })
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { bluetoothInput = bluetoothInput.copy { fixedPin = it } })
         }
 
         item {

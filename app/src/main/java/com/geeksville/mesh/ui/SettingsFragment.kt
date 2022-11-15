@@ -334,6 +334,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         // show the spinner when [spinner] is true
         scanModel.spinner.observe(viewLifecycleOwner) { show ->
+            binding.changeRadioButton.isEnabled = !show
             binding.scanProgressBar.visibility = if (show) View.VISIBLE else View.GONE
         }
 

@@ -6,6 +6,9 @@ import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.twotone.KeyboardArrowDown
+import androidx.compose.material.icons.twotone.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,15 +36,10 @@ fun <T> DropDownPreference(
         onClick = {
             dropDownExpanded = true
         },
-        modifier = modifier
-            .background(
-                color = if (dropDownExpanded)
-                    MaterialTheme.colors.primary.copy(alpha = 0.2f)
-                else
-                    Color.Unspecified
-            ),
         enabled = enabled,
-    )
+        trailingIcon = if (dropDownExpanded) Icons.TwoTone.KeyboardArrowDown
+        else Icons.TwoTone.KeyboardArrowUp,
+        )
 
     Box {
         DropdownMenu(

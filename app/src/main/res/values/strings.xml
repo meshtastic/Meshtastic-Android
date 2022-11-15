@@ -162,4 +162,5 @@
     <string name="tile_download_estimate">Tile download estimate:</string>
     <string name="start_download">Start Download</string>
     <string name="request_position">Request position</string>
+    <string name="close">Close</string>
 </resources>

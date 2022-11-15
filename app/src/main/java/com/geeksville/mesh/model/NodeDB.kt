@@ -1,6 +1,7 @@
 package com.geeksville.mesh.model
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshUser
@@ -62,5 +63,14 @@ class NodeDB(private val ui: UIViewModel) {
     }
 
     /// Could be null if we haven't received our node DB yet
-    val ourNodeInfo get() = nodes.value?.get(myId.value)
+    val ourNodeInfo = MediatorLiveData<NodeInfo?>()
+
+    init {
+        ourNodeInfo.addSource(_nodes) { updatedValue ->
+            ourNodeInfo.value = updatedValue[_myId.value]
+        }
+        ourNodeInfo.addSource(_myId) { updatedValue ->
+            ourNodeInfo.value = _nodes.value?.get(updatedValue)
+        }
+    }
 }

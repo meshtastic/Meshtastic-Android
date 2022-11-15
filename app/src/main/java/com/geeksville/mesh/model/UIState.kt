@@ -56,7 +56,7 @@ import kotlin.math.roundToInt
 /// 3 or more characters, use the first three characters. If not, just take the first 3 characters of the
 /// original name.
 fun getInitials(nameIn: String): String {
-    val nchars = 3
+    val nchars = 4
     val minchars = 2
     val name = nameIn.trim()
     val words = name.split(Regex("\\s+")).filter { it.isNotEmpty() }
@@ -263,7 +263,7 @@ class UIViewModel @Inject constructor(
             try {
                 // Pull down our real node ID - This must be done AFTER reading the nodedb because we need the DB to find our nodeinof object
                 nodeDB.setMyId(service.myId)
-                val ownerName = nodeDB.ourNodeInfo?.user?.longName
+                val ownerName = nodeDB.ourNodeInfo.value?.user?.longName
                 _ownerName.value = ownerName
             } catch (ex: Exception) {
                 warn("Ignoring failure to get myId, service is probably just uninited... ${ex.message}")
@@ -364,13 +364,10 @@ class UIViewModel @Inject constructor(
     // clean up all this nasty owner state management FIXME
     fun setOwner(longName: String? = null, shortName: String? = null, isLicensed: Boolean? = null) {
 
-        if (longName != null) {
-            _ownerName.value = longName
-
-            // note: we allow an empty userstring to be written to prefs
-            preferences.edit {
-                putString("owner", longName)
-            }
+        longName?.trim()?.let { ownerName ->
+            // note: we allow an empty user string to be written to prefs
+            _ownerName.value = ownerName
+            preferences.edit { putString("owner", ownerName) }
         }
 
         // Note: we are careful to not set a new unique ID
@@ -379,7 +376,7 @@ class UIViewModel @Inject constructor(
                 meshService?.setOwner(
                     null,
                     _ownerName.value,
-                    shortName ?: getInitials(_ownerName.value!!),
+                    shortName?.trim() ?: getInitials(_ownerName.value!!),
                     isLicensed ?: false
                 ) // Note: we use ?. here because we might be running in the emulator
             } catch (ex: RemoteException) {
