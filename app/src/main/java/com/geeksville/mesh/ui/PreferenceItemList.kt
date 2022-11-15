@@ -42,6 +42,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
     val localConfig by viewModel.localConfig.collectAsState()
     val ourNodeInfo by viewModel.nodeDB.ourNodeInfo.observeAsState()
     var userInput by remember(ourNodeInfo?.user) { mutableStateOf(ourNodeInfo?.user) }
+    var positionInfo by remember(ourNodeInfo?.position) { mutableStateOf(ourNodeInfo?.position) }
 
     // Temporary [ConfigProtos.Config] state holders
     var deviceInput by remember(localConfig.device) { mutableStateOf(localConfig.device) }
@@ -197,6 +198,38 @@ fun PreferenceItemList(viewModel: UIViewModel) {
         }
         item { Divider() }
 
+        if (positionInput.fixedPosition) {
+            item {
+                EditTextPreference(title = "Latitude",
+                    value = positionInfo?.latitude ?: 0.0,
+                    enabled = connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { value ->
+                        if (value >= -180 && value <= 180.0)
+                            positionInfo?.let { positionInfo = it.copy(latitude = value) }
+                    })
+            }
+            item {
+                EditTextPreference(title = "Longitude",
+                    value = positionInfo?.longitude ?: 0.0,
+                    enabled = connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { value ->
+                        if (value >= -90 && value <= 90.0)
+                            positionInfo?.let { positionInfo = it.copy(longitude = value) }
+                    })
+            }
+            item {
+                EditTextPreference(title = "Altitude",
+                    value = positionInfo?.altitude ?: 0,
+                    enabled = connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { value ->
+                        positionInfo?.let { positionInfo = it.copy(altitude = value) }
+                    })
+            }
+        }
+
         item {
             SwitchPreference(title = "GPS enabled",
                 checked = positionInput.gpsEnabled,
@@ -235,14 +268,18 @@ fun PreferenceItemList(viewModel: UIViewModel) {
 
         item {
             PreferenceFooter(
-                enabled = positionInput != localConfig.position,
+                enabled = positionInput != localConfig.position || positionInfo != ourNodeInfo?.position,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     positionInput = localConfig.position
+                    positionInfo = ourNodeInfo?.position
                 },
                 onSaveClicked = {
                     focusManager.clearFocus()
-                    viewModel.updatePositionConfig { positionInput }
+                    if (positionInfo != ourNodeInfo?.position) positionInfo?.let {
+                        viewModel.requestPosition(0, it.latitude, it.longitude, it.altitude)
+                    }
+                    if (positionInput != localConfig.position) viewModel.updatePositionConfig { positionInput }
                 })
         }
 
