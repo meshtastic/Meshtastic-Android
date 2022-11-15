@@ -263,7 +263,7 @@ class UIViewModel @Inject constructor(
             try {
                 // Pull down our real node ID - This must be done AFTER reading the nodedb because we need the DB to find our nodeinof object
                 nodeDB.setMyId(service.myId)
-                val ownerName = nodeDB.ourNodeInfo.value?.user?.longName
+                val ownerName = nodes[service.myId]?.user?.longName
                 _ownerName.value = ownerName
             } catch (ex: Exception) {
                 warn("Ignoring failure to get myId, service is probably just uninited... ${ex.message}")
