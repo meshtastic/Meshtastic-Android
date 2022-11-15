@@ -297,7 +297,7 @@ class MeshService : Service(), Logging {
                 myInfo = myInfo,
                 nodeDB = nodeDBbyNodeNum.values.toTypedArray(),
             )
-            val json = Json { isLenient = true }
+            val json = Json { isLenient = true; allowSpecialFloatingPointValues = true }
             val asString = json.encodeToString(MeshServiceSettingsData.serializer(), settings)
             debug("Saving settings")
             getPrefs().edit {
@@ -325,7 +325,7 @@ class MeshService : Service(), Logging {
         try {
             getPrefs().getString("json", null)?.let { asString ->
 
-                val json = Json { isLenient = true }
+                val json = Json { isLenient = true; allowSpecialFloatingPointValues = true }
                 val settings = json.decodeFromString(MeshServiceSettingsData.serializer(), asString)
                 installNewNodeDB(settings.myInfo, settings.nodeDB)
 
