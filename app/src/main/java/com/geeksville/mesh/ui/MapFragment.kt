@@ -459,7 +459,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                     marker = MarkerWithLabel(map, label)
                     marker.title = "${it.longName} ${node.batteryStr}"
                     marker.snippet = model.gpsString(p)
-                    model.nodeDB.ourNodeInfo?.let { our ->
+                    model.nodeDB.ourNodeInfo.value?.let { our ->
                         our.distanceStr(node)?.let { dist ->
                             marker.subDescription = "bearing: ${our.bearing(node)}° distance: $dist"
                         }
