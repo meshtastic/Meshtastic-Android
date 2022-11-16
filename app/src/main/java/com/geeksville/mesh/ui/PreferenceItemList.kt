@@ -276,7 +276,7 @@ fun PreferenceItemList(viewModel: UIViewModel) {
                 },
                 onSaveClicked = {
                     focusManager.clearFocus()
-                    if (positionInfo != ourNodeInfo?.position) positionInfo?.let {
+                    if (positionInfo != ourNodeInfo?.position && positionInput.fixedPosition) positionInfo?.let {
                         viewModel.requestPosition(0, it.latitude, it.longitude, it.altitude)
                     }
                     if (positionInput != localConfig.position) viewModel.updatePositionConfig { positionInput }
