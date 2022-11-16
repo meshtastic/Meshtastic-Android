@@ -76,7 +76,9 @@ fun RegularPreference(
             trailingIcon, "trailingIcon",
             modifier = modifier
                 .fillMaxWidth()
-                .wrapContentWidth(Alignment.End)
+                .wrapContentWidth(Alignment.End),
+            tint = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+            else MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
         )
     }
 }

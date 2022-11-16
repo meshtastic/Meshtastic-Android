@@ -80,7 +80,7 @@ interface IMeshService {
     void setChannel(in byte []payload);
 
     /// Send position packet with wantResponse to nodeNum
-    void requestPosition(in int idNum);
+    void requestPosition(in int idNum, in double lat, in double lon, in int alt);
 
     /// Send Shutdown admin packet to nodeNum
     void requestShutdown(in int idNum);

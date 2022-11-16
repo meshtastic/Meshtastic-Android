@@ -157,9 +157,9 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun requestPosition(destNum: Int) {
+    fun requestPosition(destNum: Int, lat: Double = 0.0, lon: Double = 0.0, alt: Int = 0) {
         try {
-            meshService?.requestPosition(destNum)
+            meshService?.requestPosition(destNum, lat, lon, alt)
         } catch (ex: RemoteException) {
             errormsg("Request position error: ${ex.message}")
         }

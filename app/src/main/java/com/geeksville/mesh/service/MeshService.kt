@@ -1353,10 +1353,6 @@ class MeshService : Service(), Logging {
         })
     }
 
-    private fun requestPosition(idNum: Int) {
-        sendPosition(time = 0, destNum = idNum, wantResponse = true)
-    }
-
     private fun requestShutdown(idNum: Int) {
         sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
             shutdownSeconds = 5
@@ -1697,9 +1693,13 @@ class MeshService : Service(), Logging {
             stopLocationRequests()
         }
 
-        override fun requestPosition(idNum: Int) = toRemoteExceptions {
-            this@MeshService.requestPosition(idNum)
-        }
+        override fun requestPosition(idNum: Int, lat: Double, lon: Double, alt: Int) =
+            toRemoteExceptions {
+                // request position
+                if (idNum != 0) sendPosition(time = 0, destNum = idNum, wantResponse = true)
+                // set local node's fixed position
+                else sendPosition(time = 0, destNum = null, lat = lat, lon = lon, alt = alt)
+            }
 
         override fun requestShutdown(idNum: Int) = toRemoteExceptions {
             this@MeshService.requestShutdown(idNum)
