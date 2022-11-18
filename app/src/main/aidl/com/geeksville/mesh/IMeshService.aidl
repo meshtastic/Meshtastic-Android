@@ -76,6 +76,10 @@ interface IMeshService {
     void setConfig(in byte []payload);
 
     /// This method is only intended for use in our GUI, so the user can set radio options
+    /// It sets a ModuleConfig protobuf via admin packet
+    void setModuleConfig(in byte []payload);
+
+    /// This method is only intended for use in our GUI, so the user can set radio options
     /// It sets a Channel protobuf via admin packet
     void setChannel(in byte []payload);
 

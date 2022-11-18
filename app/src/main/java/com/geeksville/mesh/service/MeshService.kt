@@ -22,6 +22,7 @@ import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.repository.datastore.ChannelSetRepository
 import com.geeksville.mesh.repository.datastore.LocalConfigRepository
+import com.geeksville.mesh.repository.datastore.ModuleConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
@@ -65,6 +66,9 @@ class MeshService : Service(), Logging {
 
     @Inject
     lateinit var localConfigRepository: LocalConfigRepository
+
+    @Inject
+    lateinit var moduleConfigRepository: ModuleConfigRepository
 
     @Inject
     lateinit var channelSetRepository: ChannelSetRepository
@@ -902,9 +906,16 @@ class MeshService : Service(), Logging {
         }
     }
 
+    private fun setLocalModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
+        serviceScope.handledLaunch {
+            moduleConfigRepository.setLocalModuleConfig(config)
+        }
+    }
+
     private fun clearLocalConfig() {
         serviceScope.handledLaunch {
             localConfigRepository.clearLocalConfig()
+            moduleConfigRepository.clearLocalModuleConfig()
         }
     }
 
@@ -1120,16 +1131,16 @@ class MeshService : Service(), Logging {
         setLocalConfig(config)
     }
 
-    private fun handleModuleConfig(module: ModuleConfigProtos.ModuleConfig) {
-        debug("Received moduleConfig ${module.toOneLineString()}")
+    private fun handleModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
+        debug("Received moduleConfig ${config.toOneLineString()}")
         val packetToSave = MeshLog(
             UUID.randomUUID().toString(),
-            "ModuleConfig ${module.payloadVariantCase}",
+            "ModuleConfig ${config.payloadVariantCase}",
             System.currentTimeMillis(),
-            module.toString()
+            config.toString()
         )
         insertMeshLog(packetToSave)
-        // setModuleConfig(config)
+        setLocalModuleConfig(config)
     }
 
     private fun handleChannel(ch: ChannelProtos.Channel) {
@@ -1275,6 +1286,7 @@ class MeshService : Service(), Logging {
         serviceScope.handledLaunch {
             channelSetRepository.clearChannelSet()
             localConfigRepository.clearLocalConfig()
+            moduleConfigRepository.clearLocalModuleConfig()
         }
     }
 
@@ -1446,7 +1458,18 @@ class MeshService : Service(), Logging {
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
             setConfig = config
         })
-        setLocalConfig(config) // Update our cached copy
+        setLocalConfig(config) // Update our local copy
+    }
+
+    /** Send our current module config to the device
+     */
+    private fun setModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
+        if (deviceVersion < minDeviceVersion) return
+        debug("Setting new module config!")
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+            setModuleConfig = config
+        })
+        setLocalModuleConfig(config) // Update our local copy
     }
 
     /**
@@ -1665,6 +1688,11 @@ class MeshService : Service(), Logging {
         override fun setConfig(payload: ByteArray) = toRemoteExceptions {
             val parsed = ConfigProtos.Config.parseFrom(payload)
             setConfig(parsed)
+        }
+
+        override fun setModuleConfig(payload: ByteArray) = toRemoteExceptions {
+            val parsed = ModuleConfigProtos.ModuleConfig.parseFrom(payload)
+            setModuleConfig(parsed)
         }
 
         override fun setChannel(payload: ByteArray?) = toRemoteExceptions {
