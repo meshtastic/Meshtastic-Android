@@ -761,13 +761,18 @@ class MainActivity : BaseActivity(), Logging {
                     handler.removeCallbacksAndMessages(null)
                 return true
             }
-            R.id.advanced_settings -> {
-                val fragmentManager: FragmentManager = supportFragmentManager
-                val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-                val nameFragment = AdvancedSettingsFragment()
-                fragmentTransaction.add(R.id.mainActivityLayout, nameFragment)
-                fragmentTransaction.addToBackStack(null)
-                fragmentTransaction.commit()
+            R.id.device_settings -> {
+                supportFragmentManager.beginTransaction()
+                    .add(R.id.mainActivityLayout, DeviceSettingsFragment())
+                    .addToBackStack(null)
+                    .commit()
+                return true
+            }
+            R.id.module_settings -> {
+                supportFragmentManager.beginTransaction()
+                    .add(R.id.mainActivityLayout, ModuleSettingsFragment())
+                    .addToBackStack(null)
+                    .commit()
                 return true
             }
             R.id.save_messages_csv -> {

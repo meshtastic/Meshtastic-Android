@@ -17,9 +17,13 @@
         android:checked="false"
         android:title="@string/protocol_stress_test" />
     <item
-        android:id="@+id/advanced_settings"
+        android:id="@+id/device_settings"
         app:showAsAction="withText"
-        android:title="@string/advanced_settings" />
+        android:title="@string/device_settings" />
+    <item
+        android:id="@+id/module_settings"
+        app:showAsAction="withText"
+        android:title="@string/module_settings" />
     <item
         android:id="@+id/save_messages_csv"
         app:showAsAction="withText"

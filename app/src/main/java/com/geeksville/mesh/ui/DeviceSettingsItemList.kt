@@ -32,7 +32,7 @@ import com.geeksville.mesh.ui.components.RegularPreference
 import com.geeksville.mesh.ui.components.SwitchPreference
 
 @Composable
-fun PreferenceItemList(viewModel: UIViewModel) {
+fun DeviceSettingsItemList(viewModel: UIViewModel) {
     val focusManager = LocalFocusManager.current
 
     val hasWifi = viewModel.hasWifi()
