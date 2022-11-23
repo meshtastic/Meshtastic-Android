@@ -15,15 +15,18 @@ import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.*
 import com.geeksville.mesh.ConfigProtos.Config
+import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
+import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.repository.datastore.ChannelSetRepository
 import com.geeksville.mesh.repository.datastore.LocalConfigRepository
+import com.geeksville.mesh.repository.datastore.ModuleConfigRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.positionToMeter
@@ -81,6 +84,7 @@ class UIViewModel @Inject constructor(
     private val channelSetRepository: ChannelSetRepository,
     private val packetRepository: PacketRepository,
     private val localConfigRepository: LocalConfigRepository,
+    private val moduleConfigRepository: ModuleConfigRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
     private val preferences: SharedPreferences
 ) : ViewModel(), Logging {
@@ -94,6 +98,10 @@ class UIViewModel @Inject constructor(
     private val _localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
     val localConfig: StateFlow<LocalConfig> = _localConfig
     val config get() = _localConfig.value
+
+    private val _moduleConfig = MutableStateFlow<LocalModuleConfig>(LocalModuleConfig.getDefaultInstance())
+    val moduleConfig: StateFlow<LocalModuleConfig> = _moduleConfig
+    val module get() = _moduleConfig.value
 
     private val _channels = MutableStateFlow(ChannelSet())
     val channels: StateFlow<ChannelSet> = _channels
@@ -114,6 +122,9 @@ class UIViewModel @Inject constructor(
         }
         localConfigRepository.localConfigFlow.onEach { config ->
             _localConfig.value = config
+        }.launchIn(viewModelScope)
+        moduleConfigRepository.moduleConfigFlow.onEach { config ->
+            _moduleConfig.value = config
         }.launchIn(viewModelScope)
         viewModelScope.launch {
             quickChatActionRepository.getAllActions().collect { actions ->
@@ -238,6 +249,7 @@ class UIViewModel @Inject constructor(
     val isRouter: Boolean = config.device.role == Config.DeviceConfig.Role.ROUTER
 
     // We consider hasWifi = ESP32
+    fun hasGPS() = myNodeInfo.value?.hasGPS == true
     fun hasWifi() = myNodeInfo.value?.hasWifi == true
 
     /// hardware info about our local device (can be null)
@@ -309,6 +321,50 @@ class UIViewModel @Inject constructor(
     // Set the radio config (also updates our saved copy in preferences)
     fun setConfig(config: Config) {
         meshService?.setConfig(config.toByteArray())
+    }
+
+    inline fun updateMQTTConfig(crossinline body: (ModuleConfig.MQTTConfig) -> ModuleConfig.MQTTConfig) {
+        val data = body(module.mqtt)
+        setModuleConfig(moduleConfig { mqtt = data })
+    }
+
+    inline fun updateSerialConfig(crossinline body: (ModuleConfig.SerialConfig) -> ModuleConfig.SerialConfig) {
+        val data = body(module.serial)
+        setModuleConfig(moduleConfig { serial = data })
+    }
+
+    inline fun updateExternalNotificationConfig(crossinline body: (ModuleConfig.ExternalNotificationConfig) -> ModuleConfig.ExternalNotificationConfig) {
+        val data = body(module.externalNotification)
+        setModuleConfig(moduleConfig { externalNotification = data })
+    }
+
+    inline fun updateStoreForwardConfig(crossinline body: (ModuleConfig.StoreForwardConfig) -> ModuleConfig.StoreForwardConfig) {
+        val data = body(module.storeForward)
+        setModuleConfig(moduleConfig { storeForward = data })
+    }
+
+    inline fun updateRangeTestConfig(crossinline body: (ModuleConfig.RangeTestConfig) -> ModuleConfig.RangeTestConfig) {
+        val data = body(module.rangeTest)
+        setModuleConfig(moduleConfig { rangeTest = data })
+    }
+
+    inline fun updateTelemetryConfig(crossinline body: (ModuleConfig.TelemetryConfig) -> ModuleConfig.TelemetryConfig) {
+        val data = body(module.telemetry)
+        setModuleConfig(moduleConfig { telemetry = data })
+    }
+
+    inline fun updateCannedMessageConfig(crossinline body: (ModuleConfig.CannedMessageConfig) -> ModuleConfig.CannedMessageConfig) {
+        val data = body(module.cannedMessage)
+        setModuleConfig(moduleConfig { cannedMessage = data })
+    }
+
+    inline fun updateAudioConfig(crossinline body: (ModuleConfig.AudioConfig) -> ModuleConfig.AudioConfig) {
+        val data = body(module.audio)
+        setModuleConfig(moduleConfig { audio = data })
+    }
+
+    fun setModuleConfig(config: ModuleConfig) {
+        meshService?.setModuleConfig(config.toByteArray())
     }
 
     /// Convert the channels array to and from [AppOnlyProtos.ChannelSet]

@@ -77,7 +77,6 @@
     <string name="ls_sleep_secs">设备休眠时间（以秒为单位）</string>
     <string name="meshtastic_messages_notifications">关于消息的通知</string>
     <string name="protocol_stress_test">协议压力测试</string>
-    <string name="advanced_settings">高级设置</string>
     <string name="firmware_too_old">需要固件更新</string>
     <string name="firmware_old">固件太旧，无法与此应用程序对话，请转到设置窗头并选择"升级固件".  有关这方面的更多信息，请参阅<a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">固件安装指南</a> 在GitHub</string>
     <string name="okay">好的</string>

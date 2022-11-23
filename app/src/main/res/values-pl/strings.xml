@@ -77,7 +77,6 @@
     <string name="ls_sleep_secs">Okres uśpienia urządzenia (w sekundach)</string>
     <string name="meshtastic_messages_notifications">Powiadomienia o wiadomościach</string>
     <string name="protocol_stress_test">Protokół testu warunków skrajnych</string>
-    <string name="advanced_settings">Zaawansowane ustawienia</string>
     <string name="firmware_too_old">Wymagana aktualizacja oprogramowania układowego</string>
     <string name="firmware_old">Oprogramowanie układowe radia jest zbyt stare, aby rozmawiać z tą aplikacją, przejdź do panelu ustawień i wybierz „Aktualizuj oprogramowanie układowe”. Aby uzyskać więcej informacji na ten temat, zobacz <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">nasz przewodnik instalacji oprogramowania układowego</a> na Github.</string>
     <string name="okay">OK</string>

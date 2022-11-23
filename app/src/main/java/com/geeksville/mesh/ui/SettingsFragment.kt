@@ -310,6 +310,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             } else updateNodeInfo()
         }
 
+        model.moduleConfig.asLiveData().observe(viewLifecycleOwner) {
+            if (!model.isConnected()) {
+                val moduleCount = it.allFields.size
+                if (moduleCount > 0)
+                    binding.scanStatusText.text = "Module config ($moduleCount / 8)"
+            } else updateNodeInfo()
+        }
+
         model.channels.asLiveData().observe(viewLifecycleOwner) {
             if (!model.isConnected()) it.protobuf.let { ch ->
                 if (!ch.hasLoraConfig() && ch.settingsCount > 0)

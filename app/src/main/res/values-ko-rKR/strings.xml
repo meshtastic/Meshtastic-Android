@@ -82,7 +82,6 @@
     <string name="ls_sleep_secs">기기가 절전모드 들어가기까지의 시간 (in seconds)</string>
     <string name="meshtastic_messages_notifications">메시지 알림</string>
     <string name="protocol_stress_test">프로토콜 스트레스 테스트</string>
-    <string name="advanced_settings">고급 설정</string>
     <string name="firmware_too_old">펌웨어 업데이트 필요</string>
     <string name="firmware_old">이 기기의 펌웨어가 매우 오래되어 이 앱과 호환되지않습니다, 설정에서 "펌웨어 업데이트"를 선택하여주세요. 더 자세한정보는 깃허브의 <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation"> </a> 에서 펌웨어 업데이트 가이드를 참고해주세요..</string>
     <string name="okay">확인</string>

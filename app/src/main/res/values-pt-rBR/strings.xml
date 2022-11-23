@@ -77,7 +77,6 @@
     <string name="ls_sleep_secs">Intervalo de suspensão (sleep) (em segundos)</string>
     <string name="meshtastic_messages_notifications">Notificações sobre mensagens</string>
     <string name="protocol_stress_test">Stress test do protocolo</string>
-    <string name="advanced_settings">Configurações avançadas</string>
     <string name="firmware_too_old">Atualização do firmware necessária</string>
     <string name="firmware_old">Versão de firmware do rádio muito antiga para comunicar com este aplicativo, favor acessar opção "Atualizar firmware" nas Configurações.  Para mais informações consultar <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">Nosso guia de instalação de firmware</a> no Github.</string>
     <string name="okay">Okay</string>

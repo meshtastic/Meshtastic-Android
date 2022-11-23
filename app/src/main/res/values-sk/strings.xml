@@ -77,7 +77,6 @@
     <string name="ls_sleep_secs">Interval uspávania zariadenia (v sekundách)</string>
     <string name="meshtastic_messages_notifications">Upozornenia na správy</string>
     <string name="protocol_stress_test">Stres test protokolu</string>
-    <string name="advanced_settings">Rozšírené nastavenia</string>
     <string name="firmware_too_old">Nutná aktualizácia firmvéru vysielača</string>
     <string name="okay">Ok</string>
     <string name="must_set_region">Musíte nastaviť región!</string>
