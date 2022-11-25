@@ -380,12 +380,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             .launchIn(lifecycleScope)
 
         binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
-            model.provideLocation.value = isChecked
             // Don't check the box until the system setting changes
             view.isChecked = isChecked && myActivity.hasBackgroundPermission()
 
             if (view.isPressed) { // We want to ignore changes caused by code (as opposed to the user)
                 debug("User changed location tracking to $isChecked")
+                model.provideLocation.value = isChecked
                 if (isChecked && !view.isChecked)
                     MaterialAlertDialogBuilder(requireContext())
                         .setTitle(R.string.background_required)
