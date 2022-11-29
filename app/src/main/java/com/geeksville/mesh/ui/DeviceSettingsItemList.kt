@@ -156,6 +156,26 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
+            EditTextPreference(title = "Redefine PIN_BUTTON",
+                value = deviceInput.buttonGpio,
+                enabled = connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    deviceInput = deviceInput.copy { buttonGpio = it }
+                })
+        }
+
+        item {
+            EditTextPreference(title = "Redefine PIN_BUZZER",
+                value = deviceInput.buzzerGpio,
+                enabled = connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    deviceInput = deviceInput.copy { buzzerGpio = it }
+                })
+        }
+
+        item {
             PreferenceFooter(
                 enabled = deviceInput != localConfig.device,
                 onCancelClicked = {
@@ -265,6 +285,22 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
             )
         }
         item { Divider() }
+
+        item {
+            EditTextPreference(title = "Redefine GPS_RX_PIN",
+                value = positionInput.rxGpio,
+                enabled = connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { positionInput = positionInput.copy { rxGpio = it } })
+        }
+
+        item {
+            EditTextPreference(title = "Redefine GPS_TX_PIN",
+                value = positionInput.txGpio,
+                enabled = connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { positionInput = positionInput.copy { txGpio = it } })
+        }
 
         item {
             PreferenceFooter(

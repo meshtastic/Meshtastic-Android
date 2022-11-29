@@ -83,7 +83,7 @@ fun ModuleSettingsItemList(viewModel: UIViewModel) {
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { value ->
-                    if (value.toByteArray().size <= 31) // username max_size:32
+                    if (value.toByteArray().size <= 63) // username max_size:64
                         mqttInput = mqttInput.copy { username = value }
                 })
         }
@@ -98,7 +98,7 @@ fun ModuleSettingsItemList(viewModel: UIViewModel) {
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { value ->
-                    if (value.toByteArray().size <= 31) // password max_size:32
+                    if (value.toByteArray().size <= 63) // password max_size:64
                         mqttInput = mqttInput.copy { password = value }
                 })
         }
@@ -186,7 +186,7 @@ fun ModuleSettingsItemList(viewModel: UIViewModel) {
         }
 
         item {
-            DropDownPreference(title = "Serial baud rate",
+            DropDownPreference(title = "Serial mode",
                 enabled = connected,
                 items = ModuleConfig.SerialConfig.Serial_Mode.values()
                     .filter { it != ModuleConfig.SerialConfig.Serial_Mode.UNRECOGNIZED }
@@ -212,7 +212,7 @@ fun ModuleSettingsItemList(viewModel: UIViewModel) {
         item { PreferenceCategory(text = "External Notification Config") }
 
         item {
-            SwitchPreference(title = "External Notification enabled",
+            SwitchPreference(title = "External notification enabled",
                 checked = externalNotificationInput.enabled,
                 enabled = connected,
                 onCheckedChange = {
@@ -267,6 +267,16 @@ fun ModuleSettingsItemList(viewModel: UIViewModel) {
                 enabled = connected,
                 onCheckedChange = {
                     externalNotificationInput = externalNotificationInput.copy { alertBell = it }
+                })
+        }
+        item { Divider() }
+
+        item {
+            SwitchPreference(title = "Use PWM buzzer",
+                checked = externalNotificationInput.usePwm,
+                enabled = connected,
+                onCheckedChange = {
+                    externalNotificationInput = externalNotificationInput.copy { usePwm = it }
                 })
         }
         item { Divider() }
@@ -346,7 +356,7 @@ fun ModuleSettingsItemList(viewModel: UIViewModel) {
         item { PreferenceCategory(text = "Range Test Config") }
 
         item {
-            SwitchPreference(title = "Range Test enabled",
+            SwitchPreference(title = "Range test enabled",
                 checked = rangeTestInput.enabled,
                 enabled = connected,
                 onCheckedChange = { rangeTestInput = rangeTestInput.copy { enabled = it } })
@@ -450,7 +460,17 @@ fun ModuleSettingsItemList(viewModel: UIViewModel) {
         item { PreferenceCategory(text = "Canned Message Config") }
 
         item {
-            SwitchPreference(title = "Rotary encoder enabled",
+            SwitchPreference(title = "Canned message enabled",
+                checked = cannedMessageInput.enabled,
+                enabled = connected,
+                onCheckedChange = {
+                    cannedMessageInput = cannedMessageInput.copy { enabled = it }
+                })
+        }
+        item { Divider() }
+
+        item {
+            SwitchPreference(title = "Rotary encoder #1 enabled",
                 checked = cannedMessageInput.rotary1Enabled,
                 enabled = connected,
                 onCheckedChange = {
@@ -534,6 +554,31 @@ fun ModuleSettingsItemList(viewModel: UIViewModel) {
                 enabled = connected,
                 onCheckedChange = {
                     cannedMessageInput = cannedMessageInput.copy { updown1Enabled = it }
+                })
+        }
+        item { Divider() }
+
+        item {
+            EditTextPreference(title = "Allow input source",
+                value = cannedMessageInput.allowInputSource,
+                enabled = connected,
+                isError = false,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { value ->
+                    if (value.toByteArray().size <= 15) // allow_input_source max_size:16
+                        cannedMessageInput = cannedMessageInput.copy { allowInputSource = value }
+                })
+        }
+
+        item {
+            SwitchPreference(title = "Send bell",
+                checked = cannedMessageInput.sendBell,
+                enabled = connected,
+                onCheckedChange = {
+                    cannedMessageInput = cannedMessageInput.copy { sendBell = it }
                 })
         }
         item { Divider() }
