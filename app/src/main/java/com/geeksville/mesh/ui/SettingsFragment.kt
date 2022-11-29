@@ -221,7 +221,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             val item = parent.getItemAtPosition(position) as String?
             val asProto = item!!.let { ConfigProtos.Config.LoRaConfig.RegionCode.valueOf(it) }
             exceptionToSnackbar(requireView()) {
-                model.region = asProto
+                debug("regionSpinner onItemSelected $asProto")
+                if (asProto != model.region) model.region = asProto
             }
             updateNodeInfo() // We might have just changed Unset to set
         }
