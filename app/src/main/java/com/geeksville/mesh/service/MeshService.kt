@@ -92,6 +92,7 @@ class MeshService : Service(), Logging {
 
         const val ACTION_NODE_CHANGE = "$prefix.NODE_CHANGE"
         const val ACTION_MESH_CONNECTED = "$prefix.MESH_CONNECTED"
+        const val ACTION_MESSAGE_STATUS = "$prefix.MESSAGE_STATUS"
 
         open class NodeNotFoundException(reason: String) : Exception(reason)
         class InvalidNodeIdException : NodeNotFoundException("Invalid NodeId")
@@ -833,6 +834,7 @@ class MeshService : Service(), Logging {
         serviceScope.handledLaunch {
             packetRepository.get().updateMessageStatus(p, m)
         }
+        serviceBroadcasts.broadcastMessageStatus(p)
     }
 
     /**
