@@ -92,11 +92,15 @@ class MeshService : Service(), Logging {
 
         const val ACTION_NODE_CHANGE = "$prefix.NODE_CHANGE"
         const val ACTION_MESH_CONNECTED = "$prefix.MESH_CONNECTED"
+        const val ACTION_MESSAGE_STATUS = "$prefix.MESSAGE_STATUS"
 
         open class NodeNotFoundException(reason: String) : Exception(reason)
         class InvalidNodeIdException : NodeNotFoundException("Invalid NodeId")
         class NodeNumNotFoundException(id: Int) : NodeNotFoundException("NodeNum not found $id")
         class IdNotFoundException(id: String) : NodeNotFoundException("ID not found $id")
+
+        class NoDeviceConfigException(message: String = "No radio settings received (is our app too old?)") :
+            RadioNotConnectedException(message)
 
         /** We treat software update as similar to loss of comms to the regular bluetooth service (so things like sendPosition for background GPS ignores the problem */
         class IsUpdatingException :
@@ -833,6 +837,7 @@ class MeshService : Service(), Logging {
         serviceScope.handledLaunch {
             packetRepository.get().updateMessageStatus(p, m)
         }
+        serviceBroadcasts.broadcastMessageStatus(p)
     }
 
     /**
@@ -1365,30 +1370,6 @@ class MeshService : Service(), Logging {
         })
     }
 
-    private fun requestShutdown(idNum: Int) {
-        sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
-            shutdownSeconds = 5
-        })
-    }
-
-    private fun requestReboot(idNum: Int) {
-        sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
-            rebootSeconds = 5
-        })
-    }
-
-    private fun requestFactoryReset(idNum: Int) {
-        sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
-            factoryReset = 1
-        })
-    }
-
-    private fun requestNodedbReset(idNum: Int) {
-        sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
-            nodedbReset = 1
-        })
-    }
-
     /**
      * Start the modern (REV2) API configuration flow
      */
@@ -1609,6 +1590,8 @@ class MeshService : Service(), Logging {
             val res = radioInterfaceService.setDeviceAddress(deviceAddr)
             if (res) {
                 discardNodeDB()
+            } else {
+                serviceBroadcasts.broadcastConnection()
             }
             res
         }
@@ -1685,6 +1668,10 @@ class MeshService : Service(), Logging {
             }
         }
 
+        override fun getConfig(): ByteArray = toRemoteExceptions {
+            this@MeshService.localConfig.toByteArray() ?: throw NoDeviceConfigException()
+        }
+
         override fun setConfig(payload: ByteArray) = toRemoteExceptions {
             val parsed = ConfigProtos.Config.parseFrom(payload)
             setConfig(parsed)
@@ -1698,6 +1685,18 @@ class MeshService : Service(), Logging {
         override fun setChannel(payload: ByteArray?) = toRemoteExceptions {
             val parsed = ChannelProtos.Channel.parseFrom(payload)
             setChannel(parsed)
+        }
+
+        override fun beginEditSettings() = toRemoteExceptions {
+            sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+                beginEditSettings = true
+            })
+        }
+
+        override fun commitEditSettings() = toRemoteExceptions {
+            sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+                commitEditSettings = true
+            })
         }
 
         override fun getNodes(): MutableList<NodeInfo> = toRemoteExceptions {
@@ -1730,19 +1729,27 @@ class MeshService : Service(), Logging {
             }
 
         override fun requestShutdown(idNum: Int) = toRemoteExceptions {
-            this@MeshService.requestShutdown(idNum)
+            sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
+                shutdownSeconds = 5
+            })
         }
 
         override fun requestReboot(idNum: Int) = toRemoteExceptions {
-            this@MeshService.requestReboot(idNum)
+            sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
+                rebootSeconds = 5
+            })
         }
 
         override fun requestFactoryReset(idNum: Int) = toRemoteExceptions {
-            this@MeshService.requestFactoryReset(idNum)
+            sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
+                factoryReset = 1
+            })
         }
 
         override fun requestNodedbReset(idNum: Int) = toRemoteExceptions {
-            this@MeshService.requestNodedbReset(idNum)
+            sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
+                nodedbReset = 1
+            })
         }
     }
 }
