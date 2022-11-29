@@ -72,6 +72,8 @@ interface IMeshService {
     List<NodeInfo> getNodes();
 
     /// This method is only intended for use in our GUI, so the user can set radio options
+    /// It returns a DeviceConfig protobuf.
+    byte []getConfig();
     /// It sets a Config protobuf via admin packet
     void setConfig(in byte []payload);
 
@@ -82,6 +84,12 @@ interface IMeshService {
     /// This method is only intended for use in our GUI, so the user can set radio options
     /// It sets a Channel protobuf via admin packet
     void setChannel(in byte []payload);
+
+    /// Send beginEditSettings admin packet to nodeNum
+    void beginEditSettings();
+
+    /// Send commitEditSettings admin packet to nodeNum
+    void commitEditSettings();
 
     /// Send position packet with wantResponse to nodeNum
     void requestPosition(in int idNum, in double lat, in double lon, in int alt);
