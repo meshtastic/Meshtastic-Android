@@ -1609,6 +1609,8 @@ class MeshService : Service(), Logging {
             val res = radioInterfaceService.setDeviceAddress(deviceAddr)
             if (res) {
                 discardNodeDB()
+            } else {
+                serviceBroadcasts.broadcastConnection()
             }
             res
         }
