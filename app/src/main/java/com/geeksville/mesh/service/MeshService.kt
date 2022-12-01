@@ -837,7 +837,7 @@ class MeshService : Service(), Logging {
         serviceScope.handledLaunch {
             packetRepository.get().updateMessageStatus(p, m)
         }
-        serviceBroadcasts.broadcastMessageStatus(p)
+        serviceBroadcasts.broadcastMessageStatus(p.copy(status = m))
     }
 
     /**
@@ -1628,17 +1628,9 @@ class MeshService : Service(), Logging {
                 if (p.dataType == 0)
                     throw Exception("Port numbers must be non-zero!") // we are now more strict
 
-                // Keep a record of datapackets, so GUIs can show proper chat history
-                rememberDataPacket(p)
-
                 if (p.bytes.size >= MeshProtos.Constants.DATA_PAYLOAD_LEN.number) {
                     p.status = MessageStatus.ERROR
                     throw RemoteException("Message too long")
-                }
-
-                if (p.id != 0) { // If we have an ID we can wait for an ack or nak
-                    deleteOldPackets()
-                    sentPackets[p.id] = p
                 }
 
                 // If radio is sleeping or disconnected, queue the packet
@@ -1653,6 +1645,15 @@ class MeshService : Service(), Logging {
                         }
                     else -> // sleeping or disconnected
                         enqueueForSending(p)
+                }
+                serviceBroadcasts.broadcastMessageStatus(p)
+
+                // Keep a record of datapackets, so GUIs can show proper chat history
+                rememberDataPacket(p)
+
+                if (p.id != 0) { // If we have an ID we can wait for an ack or nak
+                    deleteOldPackets()
+                    sentPackets[p.id] = p
                 }
 
                 GeeksvilleApplication.analytics.track(
