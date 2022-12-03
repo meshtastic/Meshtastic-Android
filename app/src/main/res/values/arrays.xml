@@ -55,6 +55,8 @@
         <item>Svenska</item>
         <!-- tr -->
         <item>Türkçe</item>
+        <!-- uk -->
+        <item>Українська</item>
     </string-array>
 
     <string-array name="language_values" translatable="false">
@@ -85,6 +87,7 @@
         <item>fi</item>
         <item>sv</item>
         <item>tr</item>
+        <item>uk</item>
     </string-array>
     <string-array name="map_styles">
         <item>OpenStreetMap</item>
