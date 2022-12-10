@@ -225,7 +225,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
                     enabled = connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { value ->
-                        if (value >= -180 && value <= 180.0)
+                        if (value >= -90 && value <= 90.0)
                             positionInfo?.let { positionInfo = it.copy(latitude = value) }
                     })
             }
@@ -235,7 +235,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
                     enabled = connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { value ->
-                        if (value >= -90 && value <= 90.0)
+                        if (value >= -180 && value <= 180.0)
                             positionInfo?.let { positionInfo = it.copy(longitude = value) }
                     })
             }
