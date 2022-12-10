@@ -7,7 +7,7 @@
     <string name="unset">Não Definido</string>
     <string name="connection_status">Estado da Conexão</string>
     <string name="application_icon">icone da aplicação</string>
-    <string name="unknown_username">Nome Desconhecido</string>
+    <string name="unknown_username">Nome desconhecido</string>
     <string name="user_avatar">Avatar do Usuário</string>
     <string name="sample_message">Hey, encontrei o cache, está aqui ao lado do grande tigre. Estou um pouco assustado.</string>
     <string name="send_text">Enviar Texto</string>

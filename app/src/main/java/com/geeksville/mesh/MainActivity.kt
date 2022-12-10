@@ -20,6 +20,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -42,6 +43,7 @@ import com.geeksville.mesh.repository.radio.SerialInterface
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
 import com.geeksville.mesh.util.Exceptions
+import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.exceptionReporter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -106,7 +108,7 @@ eventually:
 */
 
 @AndroidEntryPoint
-class MainActivity : BaseActivity(), Logging {
+class MainActivity : AppCompatActivity(), Logging {
 
     private lateinit var binding: ActivityMainBinding
 
@@ -200,6 +202,11 @@ class MainActivity : BaseActivity(), Logging {
         if (!prefs.getBoolean("app_intro_completed", false)) {
             startActivity(Intent(this, AppIntroduction::class.java))
         }
+        // First run: migrate in-app language prefs to appcompat
+        if (prefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT) != LanguageUtils.SYSTEM_MANAGED) {
+            LanguageUtils.migrateLanguagePrefs(prefs)
+        }
+        info("in-app language is ${LanguageUtils.getLocale()}")
 
         binding = ActivityMainBinding.inflate(layoutInflater)
 
@@ -843,7 +850,6 @@ class MainActivity : BaseActivity(), Logging {
                     editor.putInt("theme", 0)
                     editor.apply()
 
-                    delegate.applyDayNight()
                     dialog.dismiss()
                 }
                 1 -> {
@@ -851,15 +857,13 @@ class MainActivity : BaseActivity(), Logging {
                     editor.putInt("theme", 1)
                     editor.apply()
 
-                    delegate.applyDayNight()
                     dialog.dismiss()
                 }
-                2 -> {
+                else -> {
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
                     editor.putInt("theme", 2)
                     editor.apply()
 
-                    delegate.applyDayNight()
                     dialog.dismiss()
                 }
 
@@ -875,34 +879,23 @@ class MainActivity : BaseActivity(), Logging {
         /// If nothing is found set FOLLOW SYSTEM option
 
         when (prefs.getInt("theme", 2)) {
-            0 -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                delegate.applyDayNight()
-            }
-            1 -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                delegate.applyDayNight()
-            }
-            2 -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                delegate.applyDayNight()
-            }
+            0 -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            1 -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         }
     }
 
     private fun chooseLangDialog() {
-
         /// Prepare dialog and its items
         val builder = MaterialAlertDialogBuilder(this)
         builder.setTitle(getString(R.string.preferences_language))
 
-        val languageLabels by lazy { resources.getStringArray(R.array.language_entries) }
-        val languageValues by lazy { resources.getStringArray(R.array.language_values) }
+        val languageTags = LanguageUtils.getLanguageTags(this)
+        val languageLabels = languageTags.map { it.first }.toTypedArray()
+        val languageValues = languageTags.map { it.second }
 
         /// Load preferences and its value
-        val prefs = UIViewModel.getPreferences(this)
-        val editor: SharedPreferences.Editor = prefs.edit()
-        val lang = prefs.getString("lang", "zz")
+        val lang = LanguageUtils.getLocale()
         debug("Lang from prefs: $lang")
 
         builder.setSingleChoiceItems(
@@ -911,8 +904,7 @@ class MainActivity : BaseActivity(), Logging {
         ) { dialog, which ->
             val selectedLang = languageValues[which]
             debug("Set lang pref to $selectedLang")
-            editor.putString("lang", selectedLang)
-            editor.apply()
+            LanguageUtils.setLocale(selectedLang)
             dialog.dismiss()
         }
         val dialog = builder.create()

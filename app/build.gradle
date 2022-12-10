@@ -37,7 +37,7 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
-    compileSdkVersion 32
+    compileSdkVersion 33
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
@@ -65,7 +65,7 @@ android {
     defaultConfig {
         // We have to list all translated languages here, because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
-        resConfigs "cs", "de", "el", "en", "es", "fi", "fr", "ga", "ht", "it", "ja", "ko-rKR", "nl", "no", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sq", "sv", "tr", "zh"
+        resConfigs "cs", "de", "el", "en", "es", "fi", "fr", "fr-rHT", "ga", "hu", "it", "ja", "ko", "nl", "nb", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sq", "sv", "tr", "zh", "uk"
 
         ndk {
             // abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
@@ -125,7 +125,11 @@ protobuf {
 dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.5.0'
+    def appcompat_version = '1.6.0-rc01'
+    implementation "androidx.appcompat:appcompat:$appcompat_version"
+    // For loading and tinting drawables on older versions of the platform
+    implementation "androidx.appcompat:appcompat-resources:$appcompat_version"
+
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.fragment:fragment-ktx:1.5.2'
     implementation 'androidx.cardview:cardview:1.0.0'

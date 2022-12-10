@@ -124,7 +124,7 @@
     <string name="download_region_dialog_title">Завантажити регіон</string>
     <string name="download_region_connection_alert">Ви не підключені до Інтернету, ви не можете завантажити офлайн-карту</string>
     <string name="download_failed">Не вдалося завантажити пакет стилів</string>
-    <string name="preferences_language">Мова (потрібне перезавантаження)</string>
+    <string name="preferences_language">Мова</string>
     <string name="preferences_system_default">Системні налаштунки за умовчанням</string>
     <string name="preferences_map_style">Джерело карти</string>
     <string name="resend">Перенадіслати</string>
