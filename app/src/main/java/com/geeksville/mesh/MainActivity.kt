@@ -52,7 +52,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
-import java.nio.charset.Charset
 import java.text.DateFormat
 import java.util.Date
 import javax.inject.Inject
@@ -105,8 +104,6 @@ eventually use bottom navigation bar to switch between, Members, Chat, Channel, 
 eventually:
   make a custom theme: https://github.com/material-components/material-components-android/tree/master/material-theme-builder
 */
-
-val utf8: Charset = Charset.forName("UTF-8")
 
 @AndroidEntryPoint
 class MainActivity : BaseActivity(), Logging {

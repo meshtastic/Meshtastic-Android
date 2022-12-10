@@ -211,7 +211,7 @@ class MeshService : Service(), Logging {
 
     private fun updateMessageNotification(message: DataPacket) =
         serviceNotifications.updateMessageNotification(
-            getSenderName(message), message.bytes!!.toString(utf8)
+            getSenderName(message), message.bytes!!.decodeToString()
         )
 
     /**
