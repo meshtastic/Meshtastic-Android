@@ -251,8 +251,8 @@ class BTScanModel @Inject constructor(
                 // Include a placeholder for "None"
                 addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
 
-                // Include CompanionDeviceManager valid associations
-                addDeviceAssociations()
+                // Include paired Bluetooth devices
+                addBluetoothDevices()
 
                 // Include Network Service Discovery
                 nsdRepository.resolvedList?.forEach { service ->
@@ -324,17 +324,13 @@ class BTScanModel @Inject constructor(
         }
     }
 
-    @SuppressLint("NewApi")
-    fun addDeviceAssociations() {
-        if (hasCompanionDeviceApi) deviceManager?.associations?.forEach { bleAddress ->
-            val bleDevice = getDeviceListEntry("x$bleAddress", true)
-            // Disassociate after pairing is removed (if BLE is disabled, assume bonded)
-            if (!bleDevice.bonded) {
-                debug("Forgetting old BLE association ${bleAddress.anonymize}")
-                deviceManager?.disassociate(bleAddress)
+    @SuppressLint("MissingPermission")
+    private fun addBluetoothDevices() {
+        bluetoothRepository.getBondedDevices()
+            ?.filter { it.name.matches(Regex("^\\S+\$")) }
+            ?.forEach {
+                addDevice(DeviceListEntry(it.name, "x${it.address}", true))
             }
-            addDevice(bleDevice)
-        }
     }
 
     private val _spinner = MutableLiveData(false)
