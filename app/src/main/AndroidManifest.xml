@@ -81,11 +81,8 @@
         android:roundIcon="@mipmap/ic_launcher2_round"
         android:supportsRtl="true"
         android:hardwareAccelerated="true"
-        android:theme="@style/AppTheme">
-
-        <meta-data
-            android:name="com.mixpanel.android.MPConfig.DisableViewCrawler"
-            android:value="true" />
+        android:theme="@style/AppTheme"
+        android:localeConfig="@xml/locales_config">
 
         <!-- Default crash collection and analytics off until we (possibly) turn it on in application.onCreate -->
         <meta-data
@@ -110,6 +107,15 @@
             <intent-filter>
                 <action android:name="com.geeksville.mesh.Service" />
             </intent-filter>
+        </service>
+
+        <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data
+                android:name="autoStoreLocales"
+                android:value="true" />
         </service>
 
         <!-- zxing for QR Code scanning: lock portrait orientation -->

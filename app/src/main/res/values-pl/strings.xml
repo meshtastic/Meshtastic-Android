@@ -126,7 +126,7 @@
     <string name="why_background_required">W przypadku tej funkcji musisz przyznać opcję uprawnień lokalizacji „Zezwalaj przez cały czas”.</string>
     <string name="cancel_no_radio">Anuluj (brak dostępu do radia)</string>
     <string name="allow_will_show">Zezwól (pokaże okno dialogowe)</string>
-    <string name="preferences_language">Język (wymagany restart)</string>
+    <string name="preferences_language">Język</string>
     <string name="preferences_system_default">Domyślny systemu</string>
     <string name="preferences_map_style">Typ map</string>
     <string name="resend">Ponów</string>

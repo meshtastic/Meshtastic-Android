@@ -8,7 +8,7 @@
     <string name="unset">Não definido</string>
     <string name="connection_status">Status da conexão</string>
     <string name="application_icon">icone da aplicação</string>
-    <string name="unknown_username">Nome de usuário desconhecido</string>
+    <string name="unknown_username">Nome desconhecido</string>
     <string name="user_avatar">Avatar do usuário</string>
     <string name="sample_message">ei, encontrei o esconderijo, está aqui ao lado do tigre grande. estou um pouco assustado.</string>
     <string name="send_text">Enviar Texto</string>
