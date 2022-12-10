@@ -302,7 +302,7 @@ class MessagesFragment : Fragment(), Logging {
         // If connection state _OR_ myID changes we have to fix our ability to edit outgoing messages
         model.connectionState.observe(viewLifecycleOwner) { connectionState ->
             // If we don't know our node ID and we are offline don't let user try to send
-            isConnected = connectionState == MeshService.ConnectionState.CONNECTED
+            isConnected = connectionState != MeshService.ConnectionState.DISCONNECTED
             binding.textInputLayout.isEnabled = isConnected
             binding.sendButton.isEnabled = isConnected
             for (subView: View in binding.quickChatLayout.allViews) {
