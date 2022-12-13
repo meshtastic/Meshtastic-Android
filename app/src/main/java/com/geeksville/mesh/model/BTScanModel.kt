@@ -157,7 +157,7 @@ class BTScanModel @Inject constructor(
         @SuppressLint("MissingPermission")
         override fun onScanResult(callbackType: Int, result: ScanResult) {
 
-            if (result.device.name != null) {
+            if (result.device.name.let { it != null && it.matches(Regex(BLE_NAME_PATTERN)) }) {
                 val addr = result.device.address
                 val fullAddr = "x$addr" // full address with the bluetooth prefix added
                 // prevent log spam because we'll get lots of redundant scan results
@@ -327,7 +327,7 @@ class BTScanModel @Inject constructor(
     @SuppressLint("MissingPermission")
     private fun addBluetoothDevices() {
         bluetoothRepository.getBondedDevices()
-            ?.filter { it.name.matches(Regex("^\\S+\$")) }
+            ?.filter { it.name.matches(Regex(BLE_NAME_PATTERN)) }
             ?.forEach {
                 addDevice(DeviceListEntry(it.name, "x${it.address}", true))
             }
@@ -353,7 +353,7 @@ class BTScanModel @Inject constructor(
         // respectively. This example uses Bluetooth.
         // We only look for Mesh (rather than the full name) because NRF52 uses a very short name
         val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
-            .setNamePattern(Pattern.compile("^\\S+\$"))
+            .setNamePattern(Pattern.compile(BLE_NAME_PATTERN))
             // .addServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID), null)
             .build()
 
@@ -444,8 +444,6 @@ class BTScanModel @Inject constructor(
             if (it.isUSB) {
                 it as USBDeviceListEntry
 
-                val ACTION_USB_PERMISSION = "com.geeksville.mesh.USB_PERMISSION"
-
                 val usbReceiver = object : BroadcastReceiver() {
 
                     override fun onReceive(context: Context, intent: Intent) {
@@ -500,5 +498,9 @@ class BTScanModel @Inject constructor(
             errormsg("Failed talking to service, probably it is shutting down $ex.message")
             // ignore the failure and the GUI won't be updating anyways
         }
+    }
+    companion object {
+        const val BLE_NAME_PATTERN = "^\\S+\$"
+        const val ACTION_USB_PERMISSION = "com.geeksville.mesh.USB_PERMISSION"
     }
 }
