@@ -607,22 +607,6 @@ fun ModuleSettingsItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            EditTextPreference(title = "ADC where Microphone is connected",
-                value = audioInput.micChan,
-                enabled = connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { audioInput = audioInput.copy { micChan = it } })
-        }
-
-        item {
-            EditTextPreference(title = "DAC where Speaker is connected",
-                value = audioInput.ampPin,
-                enabled = connected,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { audioInput = audioInput.copy { ampPin = it } })
-        }
-
-        item {
             EditTextPreference(title = "PTT pin",
                 value = audioInput.pttPin,
                 enabled = connected,
