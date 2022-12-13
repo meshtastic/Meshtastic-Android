@@ -20,6 +20,13 @@ The intent you use to reach the service should look like this:
             )
         }
 
+In Android 11+ you *may* need to add the following to the client app's manifest to allow binding of the mesh service:
+<queries>
+    <package android:name="com.geeksville.mesh" />
+</queries>
+For additional information, see https://developer.android.com/guide/topics/manifest/queries-element
+
+
 Once you have bound to the service you should register your broadcast receivers per https://developer.android.com/guide/components/broadcasts#context-registered-receivers
 
     // com.geeksville.mesh.x broadcast intents, where x is:
