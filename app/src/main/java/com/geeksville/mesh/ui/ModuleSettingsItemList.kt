@@ -626,6 +626,38 @@ fun ModuleSettingsItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
+            EditTextPreference(title = "I2S word select",
+                value = audioInput.i2SWs,
+                enabled = connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { audioInput = audioInput.copy { i2SWs = it } })
+        }
+
+        item {
+            EditTextPreference(title = "I2S data in",
+                value = audioInput.i2SSd,
+                enabled = connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { audioInput = audioInput.copy { i2SSd = it } })
+        }
+
+        item {
+            EditTextPreference(title = "I2S data out",
+                value = audioInput.i2SDin,
+                enabled = connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { audioInput = audioInput.copy { i2SDin = it } })
+        }
+
+        item {
+            EditTextPreference(title = "I2S clock",
+                value = audioInput.i2SSck,
+                enabled = connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { audioInput = audioInput.copy { i2SSck = it } })
+        }
+
+        item {
             PreferenceFooter(
                 enabled = audioInput != moduleConfig.audio,
                 onCancelClicked = {

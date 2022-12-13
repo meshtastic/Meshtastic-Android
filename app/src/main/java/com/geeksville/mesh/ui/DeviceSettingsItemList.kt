@@ -712,6 +712,14 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         }
 
         item {
+            SwitchPreference(title = "Override Duty Cycle",
+                checked = loraInput.overrideDutyCycle,
+                enabled = connected,
+                onCheckedChange = { loraInput = loraInput.copy { overrideDutyCycle = it } })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = loraInput != localConfig.lora,
                 onCancelClicked = {
