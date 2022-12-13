@@ -280,7 +280,8 @@ class BTScanModel @Inject constructor(
             .launchIn(CoroutineScope(Dispatchers.Main))
 
         if (hasBluetoothPermission) {
-            if (hasCompanionDeviceApi) startCompanionScan() else startClassicScan()
+            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S && hasCompanionDeviceApi)
+                startCompanionScan() else startClassicScan()
         }
     }
 
