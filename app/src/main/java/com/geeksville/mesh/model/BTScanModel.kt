@@ -328,7 +328,7 @@ class BTScanModel @Inject constructor(
     @SuppressLint("MissingPermission")
     private fun addBluetoothDevices() {
         bluetoothRepository.getBondedDevices()
-            ?.filter { it.name.matches(Regex(BLE_NAME_PATTERN)) }
+            ?.filter { it.name != null && it.name.matches(Regex(BLE_NAME_PATTERN)) }
             ?.forEach {
                 addDevice(DeviceListEntry(it.name, "x${it.address}", true))
             }
