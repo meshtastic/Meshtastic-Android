@@ -103,6 +103,7 @@
         <service
             android:name="com.geeksville.mesh.service.MeshService"
             android:enabled="true"
+            android:foregroundServiceType="connectedDevice"
             android:exported="true" tools:ignore="ExportedActivity">
             <intent-filter>
                 <action android:name="com.geeksville.mesh.Service" />
