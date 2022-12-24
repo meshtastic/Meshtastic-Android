@@ -1459,17 +1459,18 @@ class MeshService : Service(), Logging {
     fun setOwner(myId: String?, longName: String, shortName: String, isLicensed: Boolean) {
         val myNode = myNodeInfo
         if (myNode != null) {
-
-            if (longName == localNodeInfo?.user?.longName && shortName == localNodeInfo?.user?.shortName)
+            val my = localNodeInfo?.user
+            if (longName == my?.longName && shortName == my.shortName && isLicensed == my.isLicensed)
                 debug("Ignoring nop owner change")
             else {
-                debug("SetOwner $myId : ${longName.anonymize} : $shortName")
+                debug("SetOwner Id: $myId longName: ${longName.anonymize} shortName: $shortName isLicensed: $isLicensed")
 
                 val user = MeshProtos.User.newBuilder().also {
                     if (myId != null)  // Only set the id if it was provided
                         it.id = myId
                     it.longName = longName
                     it.shortName = shortName
+                    it.hwModel = my?.hwModel
                     it.isLicensed = isLicensed
                 }.build()
 
