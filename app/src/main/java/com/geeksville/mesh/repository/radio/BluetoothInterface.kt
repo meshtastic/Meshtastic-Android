@@ -272,7 +272,6 @@ class BluetoothInterface(
         safe?.setNotify(fromNum, true) {
             // We might get multiple notifies before we get around to reading from the radio - so just set one flag
             fromNumChanged = true
-            debug("fromNum changed")
             service.serviceScope.handledLaunch {
                 try {
                     if (fromNumChanged) {
