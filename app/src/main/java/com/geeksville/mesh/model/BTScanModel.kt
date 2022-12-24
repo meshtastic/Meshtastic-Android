@@ -17,6 +17,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.MainActivity
@@ -34,8 +35,6 @@ import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.exceptionReporter
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -277,7 +276,7 @@ class BTScanModel @Inject constructor(
         // Start Network Service Discovery (find TCP devices)
         networkDiscovery = nsdRepository.networkDiscoveryFlow()
             .onEach { addDevice(TCPDeviceListEntry(it)) }
-            .launchIn(CoroutineScope(Dispatchers.Main))
+            .launchIn(viewModelScope)
 
         if (hasBluetoothPermission) {
             if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S && hasCompanionDeviceApi)

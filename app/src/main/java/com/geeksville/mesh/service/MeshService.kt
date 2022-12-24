@@ -32,7 +32,11 @@ import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
 import dagger.Lazy
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.json.Json
@@ -174,7 +178,8 @@ class MeshService : Service(), Logging {
                         location.altitude.toInt(),
                         (location.time / 1000).toInt(),
                     )
-                }.launchIn(CoroutineScope(Dispatchers.Default))
+                }
+                .launchIn(serviceScope)
         }
     }
 
@@ -247,17 +252,12 @@ class MeshService : Service(), Logging {
             // We in turn need to use the radiointerface service
             radioInterfaceService.connect()
         }
-        serviceScope.handledLaunch {
-            radioInterfaceService.connectionState.collect(::onRadioConnectionState)
-        }
-        serviceScope.handledLaunch {
-            radioInterfaceService.receivedData.collect(::onReceiveFromRadio)
-        }
-        serviceScope.handledLaunch {
-            localConfigRepository.localConfigFlow.collect { config ->
-                localConfig = config
-            }
-        }
+        radioInterfaceService.connectionState.onEach(::onRadioConnectionState)
+            .launchIn(serviceScope)
+        radioInterfaceService.receivedData.onEach(::onReceiveFromRadio)
+            .launchIn(serviceScope)
+        localConfigRepository.localConfigFlow.onEach { localConfig = it }
+            .launchIn(serviceScope)
 
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
