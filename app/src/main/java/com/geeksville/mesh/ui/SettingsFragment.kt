@@ -413,18 +413,21 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         val app = (requireContext().applicationContext as GeeksvilleApplication)
+        val isGooglePlayAvailable = isGooglePlayAvailable(requireContext())
+        val isAnalyticsAllowed = app.isAnalyticsAllowed && isGooglePlayAvailable
 
         // Set analytics checkbox
-        binding.analyticsOkayCheckbox.isChecked = app.isAnalyticsAllowed
+        binding.analyticsOkayCheckbox.isEnabled = isGooglePlayAvailable
+        binding.analyticsOkayCheckbox.isChecked = isAnalyticsAllowed
 
         binding.analyticsOkayCheckbox.setOnCheckedChangeListener { _, isChecked ->
             debug("User changed analytics to $isChecked")
             app.isAnalyticsAllowed = isChecked
-            binding.reportBugButton.isEnabled = app.isAnalyticsAllowed
+            binding.reportBugButton.isEnabled = isAnalyticsAllowed
         }
 
         // report bug button only enabled if analytics is allowed
-        binding.reportBugButton.isEnabled = app.isAnalyticsAllowed
+        binding.reportBugButton.isEnabled = isAnalyticsAllowed
         binding.reportBugButton.setOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.report_a_bug)
