@@ -10,7 +10,6 @@
     <string name="application_icon">Ikona aplikace</string>
     <string name="unknown_username">Neznámé uživatelské jméno</string>
     <string name="user_avatar">Uživatelský avatar</string>
-    <string name="sample_message">Dobrý den, celý den! I cesta může být cíl, následuj mě!</string>
     <string name="send_text">Odeslat text</string>
     <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in alpha-testing, if you find problems please post on our forum: meshtastic.discourse.group.\n\nFor more information see our web page - www.meshtastic.org.</string>
     <string name="username_unset">Uživatelské jméno smazané</string>

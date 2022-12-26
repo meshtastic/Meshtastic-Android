@@ -10,7 +10,6 @@
     <string name="application_icon">Anwendungssymbol</string>
     <string name="unknown_username">unbekannter Nutzername</string>
     <string name="user_avatar">Benutzer Avatar</string>
-    <string name="sample_message">Hey, ich habe den Cache gefunden, er ist hier neben dem großen Tiger. Ich bin ein bisschen besorgt.</string>
     <string name="send_text">Text senden</string>
     <string name="warning_not_paired">Sie haben noch kein Meshtastic-kompatibles Funkgerät mit diesem Telefon gekoppelt. Bitte koppeln Sie ein Gerät und legen Sie Ihren Benutzernamen fest.\n\nDiese Open-Source-Anwendung befindet sich im Alpha-Test. Wenn Sie Probleme finden, veröffentlichen Sie diese bitte auf unserer Website im Chat.\n\nWeitere Informationen finden Sie auf unserer Webseite - www.meshtastic.org.</string>
     <string name="username_unset">Benutzername nicht gesetzt</string>

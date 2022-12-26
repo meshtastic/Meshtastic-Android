@@ -10,7 +10,6 @@
     <string name="application_icon">ikona aplikacji</string>
     <string name="unknown_username">Nieznana nazwa</string>
     <string name="user_avatar">Avatar użytkownika</string>
-    <string name="sample_message">Wiadomość przykładowa, proszę nie odpowiadaj ąęćńś.</string>
     <string name="send_text">Wyślij Text</string>
     <string name="warning_not_paired">Nie sparowałeś jeszcze radia kompatybilnego z Meshtastic z tym telefonem. Proszę sparować urządzenie i ustawić swoją nazwę użytkownika.\n\nTa aplikacja open-source jest w fazie rozwoju, jeśli znajdziesz problemy, napisz na naszym forum: meshtastic.discourse.group.\n\nWięcej informacji znajdziesz na naszej stronie internetowej -www.meshtastic.org.</string>
     <string name="username_unset">Nazwa unset</string>
@@ -67,7 +66,7 @@
     <string name="channel_invalid">Ten adres URL kanału jest nieprawidłowy i nie można go użyć</string>
     <string name="debug_panel">Panel debugowania</string>
     <string name="debug_last_messages">Ostatnie 500 wiadomości</string>
-    <string name="clear_last_messages">Czyść</string>
+    <string name="clear">Czyść</string>
     <string name="updating_firmware">Aktualizuję oprogramowanie, poczekaj chwilę…</string>
     <string name="update_successful">Aktualizacja zakończona sukcesem</string>
     <string name="update_failed">Aktualizacja nie udała się</string>
@@ -85,7 +84,7 @@
     <string name="cant_change_no_radio">Nie można zmienić kanału, ponieważ radio nie jest jeszcze podłączone. Proszę spróbuj ponownie.</string>
     <string name="set_channel_options">Ustaw opcje kanałów</string>
     <string name="reset">Reset</string>
-    <string name="are_you_shure_change_default">Czy na pewno chcesz zmienić kanał na domyślny??</string>
+    <string name="are_you_sure_change_default">Czy na pewno chcesz zmienić kanał na domyślny??</string>
     <string name="reset_to_defaults">Przywróć domyślne</string>
     <string name="apply">Potwierdź</string>
     <string name="no_app_found">Nie znaleziono aplikacji do wysyłania adresów URL</string>
@@ -93,7 +92,7 @@
     <string name="theme_light">Jasny</string>
     <string name="theme_dark">Ciemny</string>
     <string name="theme_system">Domyślne ustawienie systemowe</string>
-    <string name="choose_theme_title">Wybierz motyw</string>
+    <string name="choose_theme">Wybierz motyw</string>
     <string name="modem_config_slow_short">Bliski zasięg (wolny)</string>
     <string name="modem_config_slow_medium">Średni zasięg (wolny)</string>
     <string name="modem_config_slow_long">Daleki zasięg (wolny)</string>
@@ -111,16 +110,16 @@
     </plurals>
     <string name="delete">Usuń</string>
     <string name="select_all">Zaznacz wszystko</string>
-    <string name="style_selection">Wybór stylu</string>
-    <string name="download_region">Pobierz region</string>
+    <string name="map_style_selection">Wybór stylu</string>
+    <string name="map_download_region">Pobierz region</string>
     <string name="name">Nazwa</string>
-    <string name="view_region_btn">Zobacz region</string>
-    <string name="save_btn">Zapisz</string>
-    <string name="no_download_region_alert">Brak dostępnego pobranego regionu</string>
-    <string name="style_uri_empty_alert">URI stylu nie może być pusty</string>
-    <string name="download_region_dialog_title">Pobierz region</string>
-    <string name="download_region_connection_alert">Nie masz połączenia z internetem, nie możesz pobrać mapy offline</string>
-    <string name="download_failed">Nie można pobrać pakietu stylów</string>
+    <string name="map_view_region">Zobacz region</string>
+    <string name="save">Zapisz</string>
+    <string name="map_no_download_region_alert">Brak dostępnego pobranego regionu</string>
+    <string name="map_style_uri_empty_alert">URI stylu nie może być pusty</string>
+    <string name="map_download_region_title">Pobierz region</string>
+    <string name="map_download_region_connection_alert">Nie masz połączenia z internetem, nie możesz pobrać mapy offline</string>
+    <string name="map_download_failed">Nie można pobrać pakietu stylów</string>
     <string name="camera_required">Zezwolenie aparatu</string>
     <string name="why_camera_required">Aby odczytać kody QR, musimy mieć dostęp do aparatu. Żadne zdjęcia ani filmy nie zostaną zapisane.</string>
     <string name="why_background_required">W przypadku tej funkcji musisz przyznać opcję uprawnień lokalizacji „Zezwalaj przez cały czas”.</string>
@@ -128,6 +127,6 @@
     <string name="allow_will_show">Zezwól (pokaże okno dialogowe)</string>
     <string name="preferences_language">Język</string>
     <string name="preferences_system_default">Domyślny systemu</string>
-    <string name="preferences_map_style">Typ map</string>
+    <string name="map_preferences_map_style">Typ map</string>
     <string name="resend">Ponów</string>
 </resources>

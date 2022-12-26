@@ -10,7 +10,6 @@
     <string name="application_icon">icono de la aplicación</string>
     <string name="unknown_username">Nombre de usuario desconocido</string>
     <string name="user_avatar">Avatar de usuario</string>
-    <string name="sample_message">hey encontré el caché está aquí al lado del tigre grande. Estoy un poco asustado.</string>
     <string name="send_text">Enviar texto</string>
     <string name="warning_not_paired">Aún no ha emparejado un radio compatible con Meshtastic con este teléfono. Empareje un dispositivo y configure su nombre de usuario. \n\nEsta aplicación de código abierto es una prueba alfa; si encuentra un problema publique en el foro: meshtastic.discourse.group. \n\nPara obtener más información visite nuestra página web - www.meshtastic.org.</string>
     <string name="username_unset">Nombre de usuario sin configurar</string>
@@ -66,7 +65,7 @@
     <string name="channel_invalid">La URL de este canal no es válida y no puede utilizarse</string>
     <string name="debug_panel">Panel de depuración</string>
     <string name="debug_last_messages">500 últimos mensajes</string>
-    <string name="clear_last_messages">Limpiar</string>
+    <string name="clear">Limpiar</string>
     <string name="updating_firmware">Actualizando el firmware espera hasta ocho minutos...</string>
     <string name="update_successful">Actualización exitosa</string>
     <string name="update_failed">Actualización fallida</string>
@@ -85,7 +84,7 @@
     <string name="save_messages">Guardar rangetest.csv</string>
     <string name="set_channel_options">Establecer las opciones de los canales</string>
     <string name="reset">Reiniciar</string>
-    <string name="are_you_shure_change_default">¿Estás seguro de que quieres cambiar al canal por defecto?</string>
+    <string name="are_you_sure_change_default">¿Estás seguro de que quieres cambiar al canal por defecto?</string>
     <string name="reset_to_defaults">Restablecer los valores predeterminados</string>
     <string name="apply">Aplique</string>
     <string name="modem_config_slow_short">Curto alcance / lento</string>

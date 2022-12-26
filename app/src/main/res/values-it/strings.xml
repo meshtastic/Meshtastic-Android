@@ -10,7 +10,6 @@
     <string name="application_icon">Icona dell\'applicazione</string>
     <string name="unknown_username">Nome Utente Sconosciuto</string>
     <string name="user_avatar">Avatar Utente</string>
-    <string name="sample_message">Hey, ho trovato la cache, è qui vicino la grande tigre. Ho un pò paura.</string>
     <string name="send_text">Invia Messaggio</string>
     <string name="warning_not_paired">Non hai ancora abbinato un dispositivo radio compatibile Meshtastic a questo telefono. Perfavore abbina un dispositivo e imposta il tuo nome utente. Questa applicazione open-source è in alpha-testing. Se trovi dei problemi perfavore scrivi nella chat del nostro sito web. Per maggiori informazioni visita la nostra pagina web - www.meshtastic.org.</string>
     <string name="username_unset">Nome utente non impostato</string>

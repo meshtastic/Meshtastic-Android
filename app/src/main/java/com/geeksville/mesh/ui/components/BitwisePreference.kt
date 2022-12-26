@@ -91,7 +91,7 @@ fun BitwisePreference(
                     colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red)
                 ) {
                     Text(
-                        text = stringResource(id = R.string.clear_last_messages),
+                        text = stringResource(id = R.string.clear),
                         style = MaterialTheme.typography.body1,
                         color = Color.Unspecified,
                     )

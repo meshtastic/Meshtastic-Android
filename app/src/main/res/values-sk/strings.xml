@@ -10,7 +10,6 @@
     <string name="application_icon">Ikona aplikácie</string>
     <string name="unknown_username">Neznáme užívateľské meno</string>
     <string name="user_avatar">Užívateľov avatar</string>
-    <string name="sample_message">Ahoj, našiel som cache-ku, je to kúsok od mňa vedľa veľkého tigra. Trochu ma to desí.</string>
     <string name="send_text">Odoslať text</string>
     <string name="warning_not_paired">"K tomuto telefónu ste ešte nenapárovalii žiadne zariadenie kompatibilné s Meshtastic. Prosím napárujte zariadenie a nastavte svoje užívateľské meno. Táto open-source aplikácia je v alpha testovacej fáze, ak nájdete chybu, prosím popíšte ju na fóre: meshtastic.discourse.group.\n\n Pre viac informácií navštívte web stránku - www.meshtastic.org."</string>
     <string name="username_unset">Užívateľské meno vymazané</string>
@@ -67,7 +66,7 @@
     <string name="channel_invalid">URL tohoto kanála nie je platá a nemôže byť použitá</string>
     <string name="debug_panel">Debug okno</string>
     <string name="debug_last_messages">500 posledných správ</string>
-    <string name="clear_last_messages">Zmazať</string>
+    <string name="clear">Zmazať</string>
     <string name="updating_firmware">Aktualizácia firmvéru, môže to trvať do 8 minút...</string>
     <string name="update_successful">Aktualizácia úspešná</string>
     <string name="update_failed">Aktualizácia zlyhala</string>
@@ -86,7 +85,7 @@
     <string name="reset">Resetovať</string>
     <string name="reset_to_defaults">Resetovať na základné (default) nastavenia</string>
     <string name="apply">Použiť</string>
-    <string name="are_you_shure_change_default">Ste si istý, že chcete preladiť na základný (default) kanál?</string>
+    <string name="are_you_sure_change_default">Ste si istý, že chcete preladiť na základný (default) kanál?</string>
     <string name="cant_change_no_radio">Nie je možné zmeniť kanál, pretože vysielač ešte nie je pripojený. Skúste to neskôr.</string>
     <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Prosím choďte na panel nastavení a zvoľte možnosť \"Aktualizácia firmvéru\". Viac informácií nájdete na <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">našom sprievodcovi inštaláciou firmvéru</a> na Github-e.</string>
     <string name="no_app_found">Aplikácia pre odoslanie URL nebola nájdená</string>
@@ -94,7 +93,7 @@
     <string name="theme_light">Svetlá</string>
     <string name="theme_dark">Tmavá</string>
     <string name="theme_system">Predvolená systémom</string>
-    <string name="choose_theme_title">Výber témy</string>
+    <string name="choose_theme">Výber témy</string>
     <string name="background_required">Poloha na pozadí</string>
     <string name="show_system_settings">Zobraziť nastavenia systému</string>
     <string name="why_background_required">Pre túto možnosť musíte povoliť prístup ku polohe zariadenia v režime \"Vždy povolené\".\nTáto možnosť povolí aplikácii Meshtastic zistiť polohu Vášho zariadenia a odoslať ju členom Vašej siete aj keď je aplikácia Meshtastic vypnutá alebo sa nepoužíva.</string>

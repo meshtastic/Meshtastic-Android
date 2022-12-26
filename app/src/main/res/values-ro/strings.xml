@@ -10,7 +10,6 @@
     <string name="application_icon">Iconița aplicației</string>
     <string name="unknown_username">Username Necunoscut</string>
     <string name="user_avatar">Avatar</string>
-    <string name="sample_message">hey am găsit cache-ul, este chiar aici lângă marele tigru. Mi-e cam frică.</string>
     <string name="send_text">Trimite textul</string>
     <string name="warning_not_paired">Nu conectat vre-un dispozitiv care suportă Meshtastic cu acest telefon. Te rog, conectează un dispozitiv cu acest telefon.\n\n Acesta aplicație open-source se află în alpha-testing, dacă întâmpini probleme contactează-ne: meshtastic.discourse.group.\n\nPentru mai multe informații: - www.meshtastic.org.</string>
     <string name="username_unset">Username nesetat</string>

@@ -8,7 +8,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.core.content.ContextCompat
@@ -31,7 +30,6 @@ import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
-import org.osmdroid.tileprovider.MapTileProviderBasic
 import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.tileprovider.cachemanager.CacheManager.CacheManagerCallback
 import org.osmdroid.tileprovider.modules.SqliteArchiveTileWriter
@@ -49,7 +47,7 @@ import kotlin.math.pow
 
 
 @AndroidEntryPoint
-class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
+class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListener {
 
     // UI Elements
     private lateinit var binding: MapViewBinding
@@ -150,13 +148,13 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
             activity
         )
         // set title
-        alertDialogBuilder.setTitle("Offline Manager")
+        alertDialogBuilder.setTitle(R.string.map_offline_manager)
         // set dialog message
         alertDialogBuilder.setItems(
             arrayOf<CharSequence>(
-                "Current Cache size",
-                "Download Region",
-                "Clear Downloaded Tiles",
+                resources.getString(R.string.map_cache_size),
+                resources.getString(R.string.map_download_region),
+                resources.getString(R.string.map_clear_tiles),
                 resources.getString(R.string.cancel)
             )
         ) { dialog, which ->
@@ -181,7 +179,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
     private fun purgeTileSource() {
         cache = SqlTileWriterExt()
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("Tile Source")
+        builder.setTitle(R.string.map_tile_source)
         val sources = cache!!.sources
         val sourceList = mutableListOf<String>()
         for (i in sources.indices) {
@@ -200,38 +198,38 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
             }
 
         }
-        builder.setPositiveButton("Clear") { _, _ ->
+        builder.setPositiveButton(R.string.clear) { _, _ ->
             for (x in selectedList) {
                 val item = sources[x]
                 val b = cache!!.purgeCache(item.source)
                 if (b) Toast.makeText(
                     context,
-                    "SQL Cache purged for ${item.source}",
+                    getString(R.string.map_purge_success).format(item.source),
                     Toast.LENGTH_SHORT
                 )
                     .show() else Toast.makeText(
                     context,
-                    "SQL Cache purge failed, see logcat for details",
+                    R.string.map_purge_fail,
                     Toast.LENGTH_LONG
                 ).show()
             }
         }
         builder.setNegativeButton(
-            "Cancel"
+            R.string.cancel
         ) { dialog, _ -> dialog.cancel() }
         builder.show()
     }
 
 
     private fun showCurrentCacheInfo() {
-        Toast.makeText(activity, "Calculating...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(activity, R.string.calculating, Toast.LENGTH_SHORT).show()
         cacheManager = CacheManager(map) // Make sure CacheManager has latest from map
         Thread {
             val alertDialogBuilder = AlertDialog.Builder(
                 activity
             )
             // set title
-            alertDialogBuilder.setTitle("Cache Manager")
+            alertDialogBuilder.setTitle(R.string.map_cache_manager)
                 .setMessage(
                     """
                     Cache Capacity (mb): ${cacheManager.cacheCapacity() * 2.0.pow(-20.0)}
@@ -301,13 +299,13 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         map.overlayManager.add(polygon)
         mapController.setZoom(zoomLevel - 1.0)
         cacheManager = CacheManager(map)
-        val tilecount: Int =
+        val tileCount: Int =
             cacheManager.possibleTilesInArea(
                 downloadRegionBoundingBox,
                 zoomLevelMax.toInt(),
                 zoomLevelMin.toInt()
             )
-        cacheEstimate.text = ("$tilecount tiles")
+        cacheEstimate.text = getString(R.string.map_cache_tiles).format(tileCount)
     }
 
 
@@ -330,7 +328,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                     cacheManager =
                         CacheManager(map, writer) // Make sure cacheManager has latest from map
                 } catch (ex: TileSourcePolicyException) {
-                    Log.d("MapFragment", "Tilesource does not allow archiving: ${ex.message}")
+                    debug("Tile source does not allow archiving: ${ex.message}")
                     return
                 }
                 //this triggers the download
@@ -353,7 +351,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
             zoommax,
             object : CacheManagerCallback {
                 override fun onTaskComplete() {
-                    Toast.makeText(activity, "Download complete!", Toast.LENGTH_LONG)
+                    Toast.makeText(activity, R.string.map_download_complete, Toast.LENGTH_LONG)
                         .show()
                     writer.onDetach()
                     defaultMapSettings()
@@ -362,7 +360,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                 override fun onTaskFailed(errors: Int) {
                     Toast.makeText(
                         activity,
-                        "Download complete with $errors errors",
+                        getString(R.string.map_download_errors).format(errors),
                         Toast.LENGTH_LONG
                     ).show()
                     writer.onDetach()
@@ -390,9 +388,16 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
 
     private fun chooseMapStyle() {
         /// Prepare dialog and its items
-        val mapStyles by lazy { resources.getStringArray(R.array.map_styles) }
-
         val builder = MaterialAlertDialogBuilder(context!!)
+        val mapStyles = arrayOf<CharSequence>(
+            "OpenStreetMap",
+            "USGS TOPO",
+            "Open TOPO",
+            "ESRI World TOPO",
+            "USGS Satellite",
+            "ESRI World Overview",
+        )
+
         /// Load preferences and its value
         val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
         builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
@@ -461,7 +466,10 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
                     marker.snippet = model.gpsString(p)
                     model.nodeDB.ourNodeInfo.value?.let { our ->
                         our.distanceStr(node)?.let { dist ->
-                            marker.subDescription = "bearing: ${our.bearing(node)}° distance: $dist"
+                            marker.subDescription = getString(R.string.map_subDescription).format(
+                                our.bearing(node),
+                                dist
+                            )
                         }
                     }
                     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
@@ -617,7 +625,7 @@ class MapFragment : ScreenFragment("Map"), Logging, View.OnClickListener {
         map.onResume()
     }
 
-    override fun onDestroy() {
+    override fun onDestroyView() {
         super.onDestroyView()
         map.onDetach()
     }

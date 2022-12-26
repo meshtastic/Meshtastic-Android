@@ -10,7 +10,6 @@
     <string name="application_icon">アプリアイコン</string>
     <string name="unknown_username">Nanashisan</string>
     <string name="user_avatar">プロフィール画像</string>
-    <string name="sample_message">拝啓 時下ますますのご清栄のこととお慶び申し上げます。</string>
     <string name="send_text">メッセージを入力</string>
     <string name="warning_not_paired">このスマートフォンはMeshtasticデバイスとペアリングされていません。デバイスとペアリングしてユーザー名を設定してください。\n\nこのオープンソースアプリケーションはアルファテスト中です。問題を発見した場合はBBSに書き込んでください。 meshtastic.discourse.group \n\n詳しくはWEBページをご覧ください。 www.meshtastic.org</string>
     <string name="username_unset">ユーザー名削除</string>

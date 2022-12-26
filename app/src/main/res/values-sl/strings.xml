@@ -10,7 +10,6 @@
     <string name="application_icon">Ikona aplikacije</string>
     <string name="unknown_username">Neznan uporabnik</string>
     <string name="user_avatar">Uporabnuikov Avatar</string>
-    <string name="sample_message">Zdravo, našel sem denar. Nahaja se zraven velikega tigra. Malo sem prestrašen.</string>
     <string name="send_text">Pošlji tekst</string>
     <string name="warning_not_paired">S tem telefonom še niste seznanili združljivega Meshtastic radia. Prosimo povežite napravo in nastavite svoje uporabniško ime. \n\nTa odprtokodna aplikacija je v alfa testiranju, če imate težave, objavite na našem spletnem klepetu.\n\nZa več informacij glejte našo spletno stran - www.meshtastic.org.</string>
     <string name="username_unset">Uporabnik ni nastavljen</string>

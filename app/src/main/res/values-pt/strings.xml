@@ -9,7 +9,6 @@
     <string name="application_icon">icone da aplicação</string>
     <string name="unknown_username">Nome desconhecido</string>
     <string name="user_avatar">Avatar do Usuário</string>
-    <string name="sample_message">Hey, encontrei o cache, está aqui ao lado do grande tigre. Estou um pouco assustado.</string>
     <string name="send_text">Enviar Texto</string>
     <string name="warning_not_paired">Ainda não emparelhou um rádio compatível com Meshtastic com este telefone. Emparelhe um dispositivo e defina seu nome de usuário.\n\nEste aplicativo de código aberto está em teste alfa, se encontrar problemas, por favor reporte através do nosso forum em: meshtastic.discourse.group.\n\nPara obter mais informações, consulte a nossa página web - www.meshtastic.org.</string>
     <string name="username_unset">Nome indefinido</string>
@@ -67,7 +66,7 @@
     <!--Bellow copied from Brazillian Portuguese (values-pt-rBR)-->
     <string name="debug_panel">Painel de depuração</string>
     <string name="debug_last_messages">500 últimas mensagens</string>
-    <string name="clear_last_messages">Limpar</string>
+    <string name="clear">Limpar</string>
     <string name="updating_firmware">Atualizando firmware, aguarde até 8 minutos…</string>
     <string name="update_successful">Atualização bem sucedida</string>
     <string name="update_failed">Atualização falhou</string>
@@ -86,7 +85,7 @@
     <string name="save_messages">Exportar rangetest.csv</string>
     <string name="set_channel_options">Configurar opções do canal</string>
     <string name="reset">Redefinir</string>
-    <string name="are_you_shure_change_default">Tem certeza que quer mudar para o canal padrão?</string>
+    <string name="are_you_sure_change_default">Tem certeza que quer mudar para o canal padrão?</string>
     <string name="reset_to_defaults">Redefinir para configurações originais</string>
     <string name="apply">Aplicar</string>
     <string name="no_app_found">Aplicativo não encontrado para enviar link</string>
@@ -94,7 +93,7 @@
     <string name="theme_light">Claro</string>
     <string name="theme_dark">Escuro</string>
     <string name="theme_system">Padrão do sistema</string>
-    <string name="choose_theme_title">Escolher tema</string>
+    <string name="choose_theme">Escolher tema</string>
     <string name="background_required">Localização em segundo plano</string>
     <string name="show_system_settings">Exibir configurações do sistema</string>
     <string name="why_background_required">Para este recurso, você deve conceder permissão para acessar Local com a opção \"Permitir o tempo todo\".\nIsto permite ao Meshtastic ler a localização do seu smartphone e enviar aos membros da sua mesh, mesmo quando o aplicativo está fechado ou não em uso.</string>

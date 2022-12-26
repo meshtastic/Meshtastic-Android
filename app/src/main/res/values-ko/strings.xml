@@ -10,7 +10,6 @@
     <string name="application_icon">앱아이콘</string>
     <string name="unknown_username">미확인 유저</string>
     <string name="user_avatar">사용자 아바타</string>
-    <string name="sample_message">서연이를 찾았습니다. 커다란 호랑이 옆에 있는데, 좀 무섭습니다.</string>
     <string name="send_text">텍스트 전송</string>
     <string name="warning_not_paired">아직 스마트폰과 메쉬타스틱 기기와 페어링을 하지 않았습니다. 장치와 페어링을 하고 사용자 이름을 정하세요. 이 오픈소스 응용 프로그램은 개발중입니다. 문제가 발견되면 포럼(meshtastic.discourse.group)을 통해 알려주세요. 자세한 정보는 웹페이지(www.meshtastic.org)를 참조하세요.</string>
     <string name="username_unset">사용자 이름 해제</string>
@@ -72,7 +71,7 @@
     <string name="preferences_system_default">시스템 기본값</string>
     <string name="debug_panel">디버그 패널</string>
     <string name="debug_last_messages">500 last messages</string>
-    <string name="clear_last_messages">클리어</string>
+    <string name="clear">클리어</string>
     <string name="updating_firmware">펌웨어 업데이트중, 8분 기다리세요.…</string>
     <string name="update_successful">업데이트 성공</string>
     <string name="update_failed">업데이트 실패</string>
@@ -92,7 +91,7 @@
     <string name="set_channel_options">채널 옵션 설정</string>
     <string name="reset">리셋</string>
     <string name="scan">스캔</string>
-    <string name="are_you_shure_change_default">정말로 기본채널로 바꾸시겠습니까?</string>
+    <string name="are_you_sure_change_default">정말로 기본채널로 바꾸시겠습니까?</string>
     <string name="reset_to_defaults">기본값으로 리셋</string>
     <string name="apply">적용</string>
     <string name="no_app_found">URL을 보낼 앱을 찾지못했습니다</string>
@@ -100,7 +99,7 @@
     <string name="theme_light">라이트</string>
     <string name="theme_dark">다크</string>
     <string name="theme_system">시스템 기본</string>
-    <string name="choose_theme_title">테마 선택</string>
+    <string name="choose_theme">테마 선택</string>
     <string name="background_required">백그라운드 위치</string>
     <string name="show_system_settings">시스템 설정 보기</string>
     <string name="why_background_required">기능을위해서, 옵션에서 위치권한을 \"항상 허용\" 으로 설정해야합니다.앱이 닫혀있거나 사용중이지 않을때에도 메쉬태스틱이 당신의 스마트폰의 위치를 읽어 당신의 메쉬의 다른 사용자에게 위치를 전송할수있게합니다.</string>
@@ -116,17 +115,17 @@
     </plurals>
     <string name="delete">삭제</string>
     <string name="select_all">전부 선택</string>
-    <string name="style_selection">스타일 선택</string>
-    <string name="download_region">Download Region</string>
+    <string name="map_style_selection">스타일 선택</string>
+    <string name="map_download_region">Download Region</string>
     <string name="name">이름</string>
-    <string name="view_region_btn">지역 보기</string>
-    <string name="save_btn">저장</string>
-    <string name="no_download_region_alert">다운로드한 구역(지역)이 존재하지 않습니다</string>
-    <string name="style_uri_empty_alert">Style URI 은 비워둘수없습니다</string>
-    <string name="download_region_dialog_title">다운로드 구역(지역)</string>
-    <string name="download_region_connection_alert">인터넷에 연결되지않아, 오프라인 지도를 다운로드 할 수 없습니다.</string>
-    <string name="download_failed">Unable to download style pack</string>
-    <string name="preferences_map_style">맵 스타일</string>
+    <string name="map_view_region">지역 보기</string>
+    <string name="save">저장</string>
+    <string name="map_no_download_region_alert">다운로드한 구역(지역)이 존재하지 않습니다</string>
+    <string name="map_style_uri_empty_alert">Style URI 은 비워둘수없습니다</string>
+    <string name="map_download_region_title">다운로드 구역(지역)</string>
+    <string name="map_download_region_connection_alert">인터넷에 연결되지않아, 오프라인 지도를 다운로드 할 수 없습니다.</string>
+    <string name="map_download_failed">Unable to download style pack</string>
+    <string name="map_preferences_map_style">맵 스타일</string>
     <string name="resend">재전송</string>
     <string name="shutdown">종료</string>
     <string name="reboot">재부팅</string>

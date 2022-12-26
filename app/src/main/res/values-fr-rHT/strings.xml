@@ -10,7 +10,6 @@
     <string name="application_icon">ikònn aplikasyon an</string>
     <string name="unknown_username">Non itilizatè enkoni</string>
     <string name="user_avatar">Avata itilizatè</string>
-    <string name="sample_message">Mwen jwenn kachèt la, li bò isit  bòkote gwo tig la. Mwen pè.</string>
     <string name="send_text">Voye tèks</string>
     <string name="warning_not_paired">Ou ponkò koneke  yon radyo ki konpatib avek Meshtastic sou telefòn sa a. Tanpri konekte yon aparèy epi mete non itilizatè w lan.Sa se yon aplikasyon publik ki nan tès Alpha.  Si ou gen pwoblèm tanpri afichel sou fowòm nou an: meshtastic.discourse.groupPou plis enfòmasyon gade paj wèb nou an - www.meshtastic.org </string>
     <string name="username_unset">Non itilizatè a pa konfigire</string>

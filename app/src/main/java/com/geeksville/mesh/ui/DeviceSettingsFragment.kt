@@ -13,7 +13,7 @@ import com.google.android.material.composethemeadapter.MdcTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class DeviceSettingsFragment : ScreenFragment("Advanced Settings"), Logging {
+class DeviceSettingsFragment : ScreenFragment("Device Settings"), Logging {
 
     private var _binding: ComposeViewBinding? = null
     private val binding get() = _binding!!

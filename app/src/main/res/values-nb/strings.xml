@@ -10,7 +10,6 @@
     <string name="application_icon">applikasjon ikon</string>
     <string name="unknown_username">Ukjent Brukernavn</string>
     <string name="user_avatar">Bruker symbol</string>
-    <string name="sample_message">hei, jeg fant skatten, den er like ved den store tigeren. Jeg er litt redd.</string>
     <string name="send_text">Send Tekst</string>
     <string name="warning_not_paired">Du har ikke paret en Meshtastic kompatibel radio med denne telefonen. Vennligst parr en enhet, og sett ditt brukernavn.\n\nDenne åpen kildekode applikasjonen er i alfa-testing, Hvis du finner problemer, vennligst post på vårt forum: meshtastic.discourse.group.\n\nFor mer informasjon, se vår nettside - www.meshtastic.org.</string>
     <string name="username_unset">Brukernavn ikke satt</string>

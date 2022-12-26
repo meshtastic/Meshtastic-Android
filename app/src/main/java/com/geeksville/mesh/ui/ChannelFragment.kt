@@ -242,7 +242,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             // User just locked it, we should warn and then apply changes to radio
             MaterialAlertDialogBuilder(requireContext())
                 .setTitle(R.string.reset_to_defaults)
-                .setMessage(R.string.are_you_shure_change_default)
+                .setMessage(R.string.are_you_sure_change_default)
                 .setNeutralButton(R.string.cancel) { _, _ ->
                     setGUIfromModel() // throw away any edits
                 }

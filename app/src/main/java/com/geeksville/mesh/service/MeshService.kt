@@ -149,7 +149,7 @@ class MeshService : Service(), Logging {
 
     private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
-        return name ?: "Unknown username"
+        return name ?: getString(R.string.unknown_username)
     }
 
     private val notificationSummary

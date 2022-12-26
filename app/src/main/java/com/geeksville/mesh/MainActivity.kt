@@ -829,7 +829,7 @@ class MainActivity : AppCompatActivity(), Logging {
 
         /// Prepare dialog and its items
         val builder = MaterialAlertDialogBuilder(this)
-        builder.setTitle(getString(R.string.choose_theme_title))
+        builder.setTitle(getString(R.string.choose_theme))
 
         val styles = arrayOf(
             getString(R.string.theme_light),

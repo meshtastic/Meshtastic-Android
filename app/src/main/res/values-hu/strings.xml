@@ -9,7 +9,6 @@
     <string name="application_icon">alkalmazás ikonja</string>
     <string name="unknown_username">Ismeretlen felhasználónév</string>
     <string name="user_avatar">Felhaszáló avatarja</string>
-    <string name="sample_message">Hopp, megtaláltam a gyorsítótárat! Itt van a nagy tigris mellett. Kissé félek.</string>
     <string name="send_text">Szöveg elküldése</string>
     <string name="warning_not_paired">Még nem párosított egyetlen Meshtastic rádiót sem ehhez a telefonhoz. Kérem pároztasson egyet és állítsa be a felhasználónevet.\n\nEz a szabad forráskódú alkalmazás fejlesztés alatt áll, ha hibát talál kérem írjon a projekt fórumába: meshtastic.discourse.group.\n\nBővebb információért látogasson el a projekt veboldalára - www.meshtastic.org.</string>
     <string name="username_unset">A felhasználónév nincs beállítva</string>
@@ -66,7 +65,7 @@
     <string name="channel_invalid">Ez a csatorna URL érvénytelen, ezért nem használható.</string>
     <string name="debug_panel">Hibakereső panel</string>
     <string name="debug_last_messages">500 utolsó üzenet</string>
-    <string name="clear_last_messages">Töröl</string>
+    <string name="clear">Töröl</string>
     <string name="updating_firmware">Firmware frissítés, várjon körülbelül 8 percet…</string>
     <string name="update_successful">A frissítés sikeres</string>
     <string name="update_failed">A frissítés sikertelen</string>
@@ -84,7 +83,7 @@
     <string name="cant_change_no_radio">Nem lehet csatornát váltani, mert a rádió nincs csatlakoztatva. Kérem próbálja meg újra.</string>
     <string name="set_channel_options">Csatorna paraméterek beállítása</string>
     <string name="reset">Újraindítás</string>
-    <string name="are_you_shure_change_default">Biztosan meg akarja változtatni az alapértelmezett csatornát?</string>
+    <string name="are_you_sure_change_default">Biztosan meg akarja változtatni az alapértelmezett csatornát?</string>
     <string name="reset_to_defaults">Alapértelmezett beállítások visszaállítása</string>
     <string name="apply">Alkalmaz</string>
     <string name="no_app_found">Nem található alkalmazás, amivel az URL-ek elküldhetők</string>
@@ -92,7 +91,7 @@
     <string name="theme_light">Világos</string>
     <string name="theme_dark">Sötét</string>
     <string name="theme_system">Rendszer alapértelmezett</string>
-    <string name="choose_theme_title">Válasszon témát</string>
+    <string name="choose_theme">Válasszon témát</string>
     <string name="modem_config_slow_short">Rövid hatótáv (lassú)</string>
     <string name="modem_config_slow_medium">Közepes hatótáv (lassú)</string>
     <string name="modem_config_slow_long">Távoli hatótáv (lassú)</string>

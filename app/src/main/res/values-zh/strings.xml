@@ -10,7 +10,6 @@
     <string name="application_icon">应用图标</string>
     <string name="unknown_username">未知用户名</string>
     <string name="user_avatar">用户头像</string>
-    <string name="sample_message">在吗？我找到了快递，它就在一只大老虎旁边，我好害怕😨！</string>
     <string name="send_text">在此发送信息</string>
     <string name="warning_not_paired">Mesh设备未与此手机配对，请配对设备并设置好您的用户名.\n\n此开源应用程序正在进行alpha测试，如果您发现问题，请在我们的网站中发布.\n\n更多信息，请访问此网页 - www.meshtastic.org.</string>
     <string name="username_unset">用户名未设置</string>
@@ -67,7 +66,7 @@
     <string name="channel_invalid">此频道网址无效，无法使用</string>
     <string name="debug_panel">调试面板</string>
     <string name="debug_last_messages">500条最新消息</string>
-    <string name="clear_last_messages">清除</string>
+    <string name="clear">清除</string>
     <string name="updating_firmware">更新固件，请等待几分钟…</string>
     <string name="update_successful">更新成功</string>
     <string name="update_failed">更新失败</string>
@@ -85,7 +84,7 @@
     <string name="cant_change_no_radio">Couldn\'t change channel, because radio is not yet connected. Please try again.</string>
     <string name="set_channel_options">设置频道选项</string>
     <string name="reset">重置</string>
-    <string name="are_you_shure_change_default">您确定要更改为默认频道吗？</string>
+    <string name="are_you_sure_change_default">您确定要更改为默认频道吗？</string>
     <string name="reset_to_defaults">重置为默认</string>
     <string name="apply">申请</string>
     <string name="no_app_found">未找到可发送 URL 的应用程序</string>
@@ -93,7 +92,7 @@
     <string name="theme_light">亮丽</string>
     <string name="theme_dark">暗黑</string>
     <string name="theme_system">系统默认</string>
-    <string name="choose_theme_title">选择主题</string>
+    <string name="choose_theme">选择主题</string>
     <string name="modem_config_slow_short">短距离（速度慢）</string>
     <string name="modem_config_slow_medium">中等距离（速度慢）</string>
     <string name="modem_config_slow_long">长距离（速度慢）</string>

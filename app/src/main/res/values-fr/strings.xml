@@ -10,7 +10,6 @@
     <string name="application_icon">icône Application</string>
     <string name="unknown_username">Nom d\'Utilisateur inconnu</string>
     <string name="user_avatar">avatar Utilisateur</string>
-    <string name="sample_message">Alo j\'ai trouvé la planque, c\'est près du grand tigre. J\'ai un peu peur.</string>
     <string name="send_text">Envoyer Texte</string>
     <string name="warning_not_paired">Aucune radio Meshtastic compatible n\'a été jumelée à ce téléphone. Jumelez un appareil et spécifiez votre nom d\'utilisateur.\n\nL\'application open-source est en test alpha, si vous rencontrez des problèmes postez au chat sur notre site web.\n\nPour plus d\'information visitez notre site web - www.meshtastic.org.</string>
     <string name="username_unset">Enlever Nom d\'Utilisateur</string>

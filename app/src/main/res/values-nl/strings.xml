@@ -10,7 +10,6 @@
     <string name="application_icon">Applicatie icoon</string>
     <string name="unknown_username">Onbekende Gebruikersnaam</string>
     <string name="user_avatar">Gebruikers avatar</string>
-    <string name="sample_message">hallo ik heb de schuilplaats gevonden, hier naast de tijger. Ik ben een beetje bang.</string>
     <string name="send_text">Zend Tekst</string>
     <string name="warning_not_paired">Je hebt nog geen Meshtastic compatibele radio met deze telefoon gekoppeld. Paar alstublieft een apparaat en voer je gebruikersnaam in.\n\nDeze open-source applicatie is in alpha-test, indien je een probleem vaststelt, kan je het posten op onze website chat.\n\nVoor meer informatie bezoek onze web pagina - www.meshtastic.org.</string>
     <string name="username_unset">Gebruikersnaam terugzetten</string>
