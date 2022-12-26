@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="action_settings">Innstillinger</string>
     <string name="channel_name">Kanal Navn</string>
     <string name="channel_options">Kanal valg</string>
-    <string name="share_button">Delingsknapp</string>
     <string name="qr_code">QR kode</string>
     <string name="unset">Lås opp</string>
     <string name="connection_status">Tilkoblingsstatus</string>
     <string name="application_icon">applikasjon ikon</string>
     <string name="unknown_username">Ukjent Brukernavn</string>
-    <string name="user_avatar">Bruker symbol</string>
     <string name="send_text">Send Tekst</string>
     <string name="warning_not_paired">Du har ikke paret en Meshtastic kompatibel radio med denne telefonen. Vennligst parr en enhet, og sett ditt brukernavn.\n\nDenne åpen kildekode applikasjonen er i alfa-testing, Hvis du finner problemer, vennligst post på vårt forum: meshtastic.discourse.group.\n\nFor mer informasjon, se vår nettside - www.meshtastic.org.</string>
-    <string name="username_unset">Brukernavn ikke satt</string>
     <string name="your_name">Ditt Navn</string>
     <string name="analytics_okay">Anonym brukerstatistikk og kræsjrapporter.</string>
     <string name="looking_for_meshtastic_devices">Ser etter Meshtastic enheter…</string>
     <string name="starting_pairing">Starter paring</string>
-    <string name="pairing_failed">Paring feilet</string>
     <string name="url_for_join">En URL for å bli med i et Meshtastic nett</string>
     <string name="accept">Godta</string>
     <string name="cancel">Avbrytl</string>
@@ -31,11 +26,8 @@
     <string name="report_a_bug">Rapporter en feil</string>
     <string name="report_bug_text">Er du sikker på at du vil rapportere en feil? Etter rapportering, vennligst posti meshtastic.discourse.group så vi kan matche rapporten med hva du fant</string>
     <string name="report">Rapport</string>
-    <string name="select_radio">Velg radio</string>
-    <string name="current_pair">Du er nå paret med radio %s</string>
     <string name="not_paired_yet">Du har ikke paret med en radio ennå</string>
     <string name="change_radio">Endre radio</string>
-    <string name="please_pair">Venligst par enhet i Android instillinger.</string>
     <string name="pairing_completed">Paring fullført, starter tjeneste</string>
     <string name="pairing_failed_try_again">Paring feilet, vennligst velg igjen</string>
     <string name="location_disabled">Lokasjonstilgang er slått av,kan ikke gi posisjon til mesh.</string>

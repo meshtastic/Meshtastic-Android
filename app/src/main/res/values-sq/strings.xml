@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="action_settings">Konfiguro Parametrat</string>
     <string name="channel_name">Emri i kanalit radio</string>
     <string name="channel_options">Parametrat e kanalit radio</string>
-    <string name="share_button">Butoni shprëndaj</string>
     <string name="qr_code">Kodi QR</string>
     <string name="unset">I pa konfiguruar</string>
     <string name="connection_status">Gjendja e komunikimit radio</string>
     <string name="application_icon">Ikona e aplikacionit</string>
     <string name="unknown_username">Emri i përdoruesit është i panjohur</string>
-    <string name="user_avatar">Ikona e përdoruesit</string>
     <string name="send_text">Dërgo një Mesazh</string>
     <string name="warning_not_paired">Ju ende nuk keni lidhur një paisje radio Meshtastic me këtë telefon. Ju lutem lidhni një paisje radio dhe vendosni emrin e përdoruesit. Ky aplikacion është software i lire "open-source" dhe në variantin Alpha për testim. Nëse hasni probleme, ju lutem shkruani në çatin e faqes tonë të internetit. Për më shum informacione vizitoni faqen tonë në internet - www.meshtastic.org.</string>
-    <string name="username_unset">Emri i përdoruesit është i pa konfiguruar</string>
     <string name="your_name">Emri juaj</string>
     <string name="analytics_okay">Statistikat e përdorimit dhe raportet e keq funksionimit mblidhen në mënyre krejtësisht anonime</string>
     <string name="looking_for_meshtastic_devices">Në kërkim për paisje Meshtastic…</string>
     <string name="starting_pairing">Duke filluar lidhjen</string>
-    <string name="pairing_failed">Lidhja nuk përfundoi me sukses</string>
     <string name="url_for_join">Një adresë URL për tu lidhur me rrjetin Meshtastic</string>
     <string name="accept">Prano</string>
     <string name="cancel">Anullo</string>

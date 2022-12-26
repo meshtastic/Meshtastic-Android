@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="action_settings">Налаштування</string>
     <string name="channel_name">Ім`я каналу</string>
     <string name="channel_options">Налаштування каналу</string>
-    <string name="share_button">Поділитися</string>
     <string name="qr_code">QR код</string>
     <string name="unset">Скинути</string>
     <string name="connection_status">Статус з`єднання</string>
     <string name="application_icon">значок додатку</string>
     <string name="unknown_username">Невідомий юзернейм</string>
-    <string name="user_avatar">Аватар</string>
     <string name="send_text">Відправити повідомлення</string>
     <string name="warning_not_paired">Ви ще не підєднали пристрій, сумісний з Meshtastic. Будьласка приєднайте пристрій і введіть ім’я користувача.\n\nЦя програма з відкритим вихідним кодом знаходиться в розробці, якщо ви виявите проблеми, опублікуйте їх на нашому форумі: meshtastic.discourse.group.\n\nДля отримання додаткової інформації відвідайте нашу веб-сторінку - www.meshtastic.org.</string>
-    <string name="username_unset">Юзернейм скинутий</string>
     <string name="your_name">Ваше ім`я</string>
     <string name="analytics_okay">Анонімна статистика використання та звіти про збої.</string>
     <string name="looking_for_meshtastic_devices">Пошук пристроїв Meshtastic…</string>
     <string name="starting_pairing">Початок створення пари</string>
-    <string name="pairing_failed">Не вдалося створити пару</string>
     <string name="url_for_join">URL-адреса для приєднання до Meshtastic мережі</string>
     <string name="accept">Прийняти</string>
     <string name="cancel">Скасувати</string>
@@ -31,11 +26,8 @@
     <string name="report_a_bug">Повідомити про помилку</string>
     <string name="report_bug_text">Ви впевнені, що бажаєте повідомити про помилку? Після звіту опублікуйте його в meshtastic.discourse.group, щоб ми могли зіставити звіт із тим, що ви знайшли.</string>
     <string name="report">Звіт</string>
-    <string name="select_radio">Виберіть радіопристрій</string>
-    <string name="current_pair">Зараз ви підключені до радіопристрою %s</string>
     <string name="not_paired_yet">Ви ще не створили пару із радіопристроєм.</string>
     <string name="change_radio">Змінити радіопристрій</string>
-    <string name="please_pair">Створіть пару у налаштуваннях Android.</string>
     <string name="pairing_completed">Пара створена, запуск сервісу</string>
     <string name="pairing_failed_try_again">Не вдалося створити пару, виберіть ще раз</string>
     <string name="location_disabled">Доступ до місцезнаходження вимкнено, неможливо транслювати позицію.</string>
@@ -73,7 +65,6 @@
     <string name="message_reception_time">час отримання повідомлення</string>
     <string name="message_reception_state">стан отримання повідомлення</string>
     <string name="message_delivery_status">Статус доставки повідомлення</string>
-    <string name="ls_sleep_secs">Період сну пристрою (у секундах)</string>
     <string name="meshtastic_messages_notifications">Сповіщення про повідомлення</string>
     <string name="protocol_stress_test">Стрес-тест протоколу</string>
     <string name="firmware_too_old">Потрібне оновлення мікропрограми</string>
@@ -83,7 +74,6 @@
     <string name="region">Регіон</string>
     <string name="cant_change_no_radio">Не вдалося змінити канал, оскільки радіо ще не підключено. Будь ласка спробуйте ще раз.</string>
     <string name="save_messages">Експорт rangetest.csv</string>
-    <string name="set_channel_options">Налаштувати параметри каналу</string>
     <string name="reset">Скинути</string>
     <string name="scan">Сканувати</string>
     <string name="are_you_sure_change_default">Ви впевнені, що хочете змінити канал за умовчанням?</string>
@@ -96,11 +86,8 @@
     <string name="theme_system">Системна</string>
     <string name="choose_theme">Оберіть тему</string>
     <string name="background_required">Розташування у фоні</string>
-    <string name="show_system_settings">Показати налаштування системи</string>
     <string name="why_background_required">Для цієї функції ви повинні надати дозвіл на місцезнаходження параметром \"Дозволити весь час\".\nЦе дозволить Meshtastic зчитувати ваше місцезнаходження смартфона та надсилати його іншим членам вашої сітки, навіть коли програма закрита або не використовується.</string>
     <string name="required_permissions">Необхідні дозволи</string>
-    <string name="cancel_no_radio">Скасувати (немає доступу до радіомодуля)</string>
-    <string name="allow_will_show">Дозволити (буде відображено діалогове вікно)</string>
     <string name="provide_location_to_mesh">Укажіть розташування для мережі</string>
     <string name="camera_required">Дозвіл доступу до камери</string>
     <string name="why_camera_required">Потрібно надати доступ до камери, щоб розпізнати QR-код. Зображення чи відео не будуть збережені.</string>
@@ -116,20 +103,12 @@
     <string name="map_style_selection">Вибір стилю</string>
     <string name="map_download_region">Завантажити регіон</string>
     <string name="name">Ім`я</string>
-    <string name="map_view_region">Переглянути регіон</string>
     <string name="save">Зберегти</string>
-    <string name="map_no_download_region_alert">Немає доступних регіонів для завантаження</string>
-    <string name="map_style_uri_empty_alert">URI стилю не може бути порожнім</string>
-    <string name="map_download_region_title">Завантажити регіон</string>
-    <string name="map_download_region_connection_alert">Ви не підключені до Інтернету, ви не можете завантажити офлайн-карту</string>
-    <string name="map_download_failed">Не вдалося завантажити пакет стилів</string>
     <string name="preferences_language">Мова</string>
     <string name="preferences_system_default">Системні налаштунки за умовчанням</string>
-    <string name="map_preferences_map_style">Джерело карти</string>
     <string name="resend">Перенадіслати</string>
     <string name="shutdown">Вимкнути</string>
     <string name="reboot">Перезавантаження</string>
-    <string name="hello_blank_fragment">Привіт пустий фрагмент</string>
     <string name="intro_show">Показати підказки</string>
     <string name="intro_welcome">Ласкаво просимо до Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic — це автономна зашифрована комунікаційна платформа з відкритим кодом. Радіостанції Meshtastic утворюють сітчасту мережу та спілкуються за допомогою протоколу LoRa для надсилання текстових повідомлень.</string>

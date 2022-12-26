@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="action_settings">設定</string>
     <string name="channel_name">チャンネル名</string>
     <string name="channel_options">チャンネルオプション</string>
-    <string name="share_button">シェアボタン</string>
     <string name="qr_code">QRコード</string>
     <string name="unset">削除</string>
     <string name="connection_status">接続状態</string>
     <string name="application_icon">アプリアイコン</string>
     <string name="unknown_username">Nanashisan</string>
-    <string name="user_avatar">プロフィール画像</string>
     <string name="send_text">メッセージを入力</string>
     <string name="warning_not_paired">このスマートフォンはMeshtasticデバイスとペアリングされていません。デバイスとペアリングしてユーザー名を設定してください。\n\nこのオープンソースアプリケーションはアルファテスト中です。問題を発見した場合はBBSに書き込んでください。 meshtastic.discourse.group \n\n詳しくはWEBページをご覧ください。 www.meshtastic.org</string>
-    <string name="username_unset">ユーザー名削除</string>
     <string name="your_name">ユーザー名</string>
     <string name="analytics_okay">匿名の診断情報と不具合報告</string>
     <string name="looking_for_meshtastic_devices">Meshtasticデバイスを検索中…</string>
     <string name="starting_pairing">ペアとして設定中</string>
-    <string name="pairing_failed">ペアに設定できませんでした</string>
     <string name="url_for_join">メッシュネットワーク参加URL</string>
     <string name="accept">OK</string>
     <string name="cancel">キャンセル</string>
@@ -31,11 +26,8 @@
     <string name="report_a_bug">バグの報告</string>
     <string name="report_bug_text">不具合報告として診断情報を送信しますか？送信した場合は meshtastic.discourse.group に検証できる報告を書き込んでください。</string>
     <string name="report">報告</string>
-    <string name="select_radio">Meshtasticデバイス選択</string>
-    <string name="current_pair">Meshtasticデバイスとペアリングされています。%s</string>
     <string name="not_paired_yet">Meshtasticデバイスとペアリングされていません。</string>
     <string name="change_radio">Meshtasticデバイス変更</string>
-    <string name="please_pair">MeshtasticデバイスをBluetooth設定によりペアリングしてください。</string>
     <string name="pairing_completed">ペアリングが完了しました。サービスを開始します。</string>
     <string name="pairing_failed_try_again">ペアに設定できませんでした。もう一度選択してください。</string>
     <string name="location_disabled">位置情報が無効なため、メッシュネットワークで現在地を特定できません。</string>

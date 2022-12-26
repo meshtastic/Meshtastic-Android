@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?><!-- Contributed by @ochcdh -->
 <resources>
-    <string name="action_settings">Impostazioni</string>
     <string name="channel_name">Nome del canale</string>
     <string name="channel_options">Opzioni del canale</string>
-    <string name="share_button">Pulsante di condivisione</string>
     <string name="qr_code">Codice QR</string>
     <string name="unset">Non Settato</string>
     <string name="connection_status">Stato della Connessione</string>
     <string name="application_icon">Icona dell\'applicazione</string>
     <string name="unknown_username">Nome Utente Sconosciuto</string>
-    <string name="user_avatar">Avatar Utente</string>
     <string name="send_text">Invia Messaggio</string>
     <string name="warning_not_paired">Non hai ancora abbinato un dispositivo radio compatibile Meshtastic a questo telefono. Perfavore abbina un dispositivo e imposta il tuo nome utente. Questa applicazione open-source è in alpha-testing. Se trovi dei problemi perfavore scrivi nella chat del nostro sito web. Per maggiori informazioni visita la nostra pagina web - www.meshtastic.org.</string>
-    <string name="username_unset">Nome utente non impostato</string>
     <string name="your_name">Il tuo nome</string>
     <string name="analytics_okay">Le statistiche di utilizzo e i rapporti sugli arresti anomali sono anonimi</string>
     <string name="looking_for_meshtastic_devices">Ricerca di dispositivi Meshtastic…</string>
     <string name="starting_pairing">Inizio abbinamento</string>
-    <string name="pairing_failed">Abbinamento non riusciuto</string>
     <string name="url_for_join">Una URL per unirti a una rete Meshtastic</string>
     <string name="accept">Accetta</string>
     <string name="cancel">Cancella</string>
@@ -31,8 +26,6 @@
     <string name="report_a_bug">Segnala un bug</string>
     <string name="report_bug_text">Sei sicuro di voler segnalare un bug? Dopo averlo segnalato, si prega di postarlo in meshtastic.discourse.group in modo che possiamo abbinare la segnalazione con quello che hai trovato.</string>
     <string name="report">Segnalazione</string>
-    <string name="select_radio">Selezione la radio</string>
-    <string name="current_pair">Attualmente sei associato alla radio %s</string>
     <string name="not_paired_yet">Non hai ancora associato alcuna radio..</string>
     <string name="change_radio">Cambia radio</string>
     <string name="preferences_language">Lingua</string>

@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?><!-- Chinese contributed by @Mango-sauce -->
 <resources>
-    <string name="action_settings">设置</string>
     <string name="channel_name">频道名称</string>
     <string name="channel_options">频道选项</string>
-    <string name="share_button">分享</string>
     <string name="qr_code">QR码</string>
     <string name="unset">未设置</string>
     <string name="connection_status">连接状态</string>
     <string name="application_icon">应用图标</string>
     <string name="unknown_username">未知用户名</string>
-    <string name="user_avatar">用户头像</string>
     <string name="send_text">在此发送信息</string>
     <string name="warning_not_paired">Mesh设备未与此手机配对，请配对设备并设置好您的用户名.\n\n此开源应用程序正在进行alpha测试，如果您发现问题，请在我们的网站中发布.\n\n更多信息，请访问此网页 - www.meshtastic.org.</string>
-    <string name="username_unset">用户名未设置</string>
     <string name="your_name">用户名</string>
     <string name="analytics_okay">匿名使用情况统计信息和崩溃报告.</string>
     <string name="looking_for_meshtastic_devices">Mesh设备扫描中...</string>
     <string name="starting_pairing">开始配对</string>
-    <string name="pairing_failed">配对失败</string>
     <string name="url_for_join">用于连接Mesh网络的URL</string>
     <string name="accept">接受</string>
     <string name="cancel">取消</string>
@@ -31,11 +26,8 @@
     <string name="report_a_bug">报告错误</string>
     <string name="report_bug_text">您确定要报告错误吗？报告后，请在 meshtastic.discourse.group中发帖，以便我们将报告与您发现的内容进行匹配.</string>
     <string name="report">报告</string>
-    <string name="select_radio">选择设备</string>
-    <string name="current_pair">您目前已与%s配对</string>
     <string name="not_paired_yet">您还没有配对.</string>
     <string name="change_radio">改换设备</string>
-    <string name="please_pair">请在设置中配对设备</string>
     <string name="pairing_completed">配对完成，开始服务</string>
     <string name="pairing_failed_try_again">配对失败，请重新选择</string>
     <string name="location_disabled">位置访问被禁用，无法为设备提供位置。</string>
@@ -73,7 +65,6 @@
     <string name="message_reception_time">消息接收时间</string>
     <string name="message_reception_state">消息接收状态</string>
     <string name="message_delivery_status">消息传递状态</string>
-    <string name="ls_sleep_secs">设备休眠时间（以秒为单位）</string>
     <string name="meshtastic_messages_notifications">关于消息的通知</string>
     <string name="protocol_stress_test">协议压力测试</string>
     <string name="firmware_too_old">需要固件更新</string>
@@ -82,7 +73,6 @@
     <string name="must_set_region">你必须选择一个地区</string>
     <string name="region">地区</string>
     <string name="cant_change_no_radio">Couldn\'t change channel, because radio is not yet connected. Please try again.</string>
-    <string name="set_channel_options">设置频道选项</string>
     <string name="reset">重置</string>
     <string name="are_you_sure_change_default">您确定要更改为默认频道吗？</string>
     <string name="reset_to_defaults">重置为默认</string>

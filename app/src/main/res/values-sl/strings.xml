@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="action_settings">Nastavitve</string>
     <string name="channel_name">Ime kanala</string>
     <string name="channel_options">Možnosti kanala</string>
-    <string name="share_button">Gumb za skupno rabo</string>
     <string name="qr_code">QR-koda</string>
     <string name="unset">Ni nastavljeno</string>
     <string name="connection_status">Status povezave</string>
     <string name="application_icon">Ikona aplikacije</string>
     <string name="unknown_username">Neznan uporabnik</string>
-    <string name="user_avatar">Uporabnuikov Avatar</string>
     <string name="send_text">Pošlji tekst</string>
     <string name="warning_not_paired">S tem telefonom še niste seznanili združljivega Meshtastic radia. Prosimo povežite napravo in nastavite svoje uporabniško ime. \n\nTa odprtokodna aplikacija je v alfa testiranju, če imate težave, objavite na našem spletnem klepetu.\n\nZa več informacij glejte našo spletno stran - www.meshtastic.org.</string>
-    <string name="username_unset">Uporabnik ni nastavljen</string>
     <string name="your_name">Tvoje ime</string>
     <string name="analytics_okay">Anonimna statistika uporabe in poročila o zrušitvah.</string>
     <string name="looking_for_meshtastic_devices">Iščem Meshtastic naprave…</string>
     <string name="starting_pairing">Začetek seznanjanja naprav</string>
-    <string name="pairing_failed">Napaka seznanjanja naprav</string>
     <string name="url_for_join">URL za pridružitev Meshtastic mreže</string>
     <string name="accept">Potrdi</string>
     <string name="cancel">Prekliči/zavrzi</string>
@@ -31,11 +26,8 @@
     <string name="report_a_bug">Prijavite napako</string>
     <string name="report_bug_text">Ali ste prepričani, da želite prijaviti napako? Po poročanju objavite v meshtastic.discourse.group, da bomo lahko primerjali poročilo s tistim, kar ste našli.</string>
     <string name="report">Poročilo</string>
-    <string name="select_radio">Izberite radio</string>
-    <string name="current_pair">Trenutno ste seznanjeni z radiem %s</string>
     <string name="not_paired_yet">Radia še niste seznanili.</string>
     <string name="change_radio">Spremenite radio</string>
-    <string name="please_pair">Napravo seznanite v nastavitvah za Android.</string>
     <string name="pairing_completed">Seznanjanje zaključeno, zagon storitve</string>
     <string name="pairing_failed_try_again">Seznanjanje ni uspelo. Prosimo, izberite znova</string>
     <string name="location_disabled">Dostop do lokacije je onemogočen, mreža ne more prikazati položaja.</string>

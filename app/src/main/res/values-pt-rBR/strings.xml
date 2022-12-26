@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="action_settings">Configurações</string>
     <string name="channel_name">Nome do canal</string>
     <string name="channel_options">Opções do canal</string>
-    <string name="share_button">Botão de compartilhar</string>
     <string name="qr_code">QR code</string>
     <string name="unset">Não definido</string>
     <string name="connection_status">Status da conexão</string>
     <string name="application_icon">icone da aplicação</string>
     <string name="unknown_username">Nome desconhecido</string>
-    <string name="user_avatar">Avatar do usuário</string>
     <string name="send_text">Enviar Texto</string>
     <string name="warning_not_paired">Você ainda não pareou um rádio compatível ao Meshtastic com este smartphone. Por favor pareie um dispositivo e configure seu nome de usuário.\n\nEste aplicativo open source está em desenvolvimento, caso encontre algum problema por favor publique em nosso fórum: meshtastic.discourse.group.\n\nPara mais informações acesse nossa página: www.meshtastic.org.</string>
-    <string name="username_unset">Nome de usuário não configurado</string>
     <string name="your_name">Seu Nome</string>
     <string name="analytics_okay">Estatísticas anônimas de uso e relatórios de erros.</string>
     <string name="looking_for_meshtastic_devices">Procurando por dispositivos Meshtastic…</string>
     <string name="starting_pairing">Iniciando pareamento</string>
-    <string name="pairing_failed">Pareamento falhou</string>
     <string name="url_for_join">Link para fazer parte de um canal Meshtastic</string>
     <string name="accept">Aceitar</string>
     <string name="cancel">Cancelar</string>
@@ -31,11 +26,8 @@
     <string name="report_a_bug">Informar um bug</string>
     <string name="report_bug_text">Tem certeza que deseja informar um bug? Após o envio, por favor envie uma mensagem em meshtastic.discourse.group para que possamos comparar o relatório com o problema encontrado.</string>
     <string name="report">Informar</string>
-    <string name="select_radio">Selecionar rádio</string>
-    <string name="current_pair">Atualmente pareado com rádio %s</string>
     <string name="not_paired_yet">Ainda não pareado com um rádio.</string>
     <string name="change_radio">Mudar rádio</string>
-    <string name="please_pair">Favor parear dispositivo nas Configurações Android.</string>
     <string name="pairing_completed">Pareamento concluído, iniciando serviço</string>
     <string name="pairing_failed_try_again">Pareamento falhou, favor selecionar novamente</string>
     <string name="location_disabled">Localização desativada, não será possível informar sua posição.</string>
@@ -73,7 +65,6 @@
     <string name="message_reception_time">tempo de recebimento de mensagem</string>
     <string name="message_reception_state">estado de recebimento de mensagem</string>
     <string name="message_delivery_status">Status de entrega de mensagem</string>
-    <string name="ls_sleep_secs">Intervalo de suspensão (sleep) (em segundos)</string>
     <string name="meshtastic_messages_notifications">Notificações sobre mensagens</string>
     <string name="protocol_stress_test">Stress test do protocolo</string>
     <string name="firmware_too_old">Atualização do firmware necessária</string>
@@ -83,7 +74,6 @@
     <string name="region">Região</string>
     <string name="cant_change_no_radio">Não foi possível mudar de canal, rádio não conectado. Tente novamente.</string>
     <string name="save_messages">Exportar rangetest.csv</string>
-    <string name="set_channel_options">Configurar opções do canal</string>
     <string name="reset">Redefinir</string>
     <string name="are_you_sure_change_default">Tem certeza que quer mudar para o canal padrão?</string>
     <string name="reset_to_defaults">Redefinir para configurações originais</string>
@@ -95,11 +85,8 @@
     <string name="theme_system">Padrão do sistema</string>
     <string name="choose_theme">Escolher tema</string>
     <string name="background_required">Localização em segundo plano</string>
-    <string name="show_system_settings">Exibir configurações do sistema</string>
     <string name="why_background_required">Para este recurso, você deve conceder permissão para acessar Local com a opção \"Permitir o tempo todo\".\nIsto permite ao Meshtastic ler a localização do seu smartphone e enviar aos membros da sua mesh, mesmo quando o aplicativo está fechado ou não em uso.</string>
     <string name="required_permissions">Permissões necessárias</string>
-    <string name="cancel_no_radio">Cancelar (sem acesso ao rádio)</string>
-    <string name="allow_will_show">Permitir (exibe diálogo)</string>
     <string name="provide_location_to_mesh">Fornecer localização para mesh</string>
     <string name="camera_required">Permissão da câmera</string>
     <string name="why_camera_required">Precisamos acessar a câmera para escanear códigos QR. Nenhuma foto ou vídeo são armazenados.</string>

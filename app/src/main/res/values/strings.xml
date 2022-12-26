@@ -11,24 +11,19 @@
     <string name="sample_coords" translatable="false">55.332244 34.442211</string>
     <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
 
-    <string name="action_settings">Settings</string>
     <string name="channel_name">Channel Name</string>
     <string name="channel_options">Channel options</string>
-    <string name="share_button">Share button</string>
     <string name="qr_code">QR code</string>
     <string name="unset">Unset</string>
     <string name="connection_status">Connection status</string>
     <string name="application_icon">application icon</string>
     <string name="unknown_username">Unknown Username</string>
-    <string name="user_avatar">User avatar</string>
     <string name="send_text">Send Text</string>
     <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: meshtastic.discourse.group.\n\nFor more information see our web page - www.meshtastic.org.</string>
-    <string name="username_unset">Username unset</string>
     <string name="your_name">Your Name</string>
     <string name="analytics_okay">Anonymous usage statistics and crash reports.</string>
     <string name="looking_for_meshtastic_devices">Looking for Meshtastic devices…</string>
     <string name="starting_pairing">Starting pairing</string>
-    <string name="pairing_failed">Pairing failed</string>
     <string name="url_for_join">A URL for joining a Meshtastic mesh</string>
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
@@ -42,11 +37,8 @@
     <string name="report_a_bug">Report a bug</string>
     <string name="report_bug_text">Are you sure you want to report a bug? After reporting, please post in meshtastic.discourse.group so we can match up the report with what you found.</string>
     <string name="report">Report</string>
-    <string name="select_radio">Select radio</string>
-    <string name="current_pair">You are currently paired with radio %s</string>
     <string name="not_paired_yet">You have not paired a radio yet.</string>
     <string name="change_radio">Change radio</string>
-    <string name="please_pair">Please pair device in Android Settings.</string>
     <string name="pairing_completed">Pairing completed, starting service</string>
     <string name="pairing_failed_try_again">Pairing failed, please select again</string>
     <string name="location_disabled">Location access is turned off, can not provide position to mesh.</string>
@@ -84,7 +76,6 @@
     <string name="message_reception_time">message reception time</string>
     <string name="message_reception_state">message reception state</string>
     <string name="message_delivery_status">Message delivery status</string>
-    <string name="ls_sleep_secs">Device sleep period (in seconds)</string>
     <string name="meshtastic_messages_notifications">Notifications about messages</string>
     <string name="protocol_stress_test">Protocol stress test</string>
     <string name="firmware_too_old">Firmware update required</string>
@@ -94,7 +85,6 @@
     <string name="region">Region</string>
     <string name="cant_change_no_radio">Couldn\'t change channel, because radio is not yet connected. Please try again.</string>
     <string name="save_messages">Export rangetest.csv</string>
-    <string name="set_channel_options">Set channel options</string>
     <string name="reset">Reset</string>
     <string name="scan">Scan</string>
     <string name="are_you_sure_change_default">Are you sure you want to change to the default channel?</string>
@@ -107,11 +97,8 @@
     <string name="theme_system">System default</string>
     <string name="choose_theme">Choose theme</string>
     <string name="background_required">Background location</string>
-    <string name="show_system_settings">Show system settings</string>
     <string name="why_background_required">For this feature, you must grant Location permission option \"Allow all the time\".\nThis allows Meshtastic to read your smartphone location and send it to other members of your mesh, even when the app is closed or not in use.</string>
     <string name="required_permissions">Required permissions</string>
-    <string name="cancel_no_radio">Cancel (no radio access)</string>
-    <string name="allow_will_show">Allow (will show dialog)</string>
     <string name="provide_location_to_mesh">Provide location to mesh</string>
     <string name="camera_required">Camera permission</string>
     <string name="why_camera_required">We must be granted access to the camera to read QR codes. No pictures or videos will be saved.</string>
@@ -127,20 +114,12 @@
     <string name="map_style_selection">Style Selection</string>
     <string name="map_download_region">Download Region</string>
     <string name="name">Name</string>
-    <string name="map_view_region">View Region</string>
     <string name="save">Save</string>
-    <string name="map_no_download_region_alert">No downloaded region available</string>
-    <string name="map_style_uri_empty_alert">Style URI cannot be empty</string>
-    <string name="map_download_region_title">Download Region</string>
-    <string name="map_download_region_connection_alert">You are not connected to the internet, you cannot download an offline map</string>
-    <string name="map_download_failed">Unable to download style pack</string>
     <string name="preferences_language">Language</string>
     <string name="preferences_system_default">System default</string>
-    <string name="map_preferences_map_style">Map Source</string>
     <string name="resend">Resend</string>
     <string name="shutdown">Shutdown</string>
     <string name="reboot">Reboot</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="intro_show">Show Introduction</string>
     <string name="intro_welcome">Welcome to Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic is an open-source, off-grid, encrypted communication platform. The Meshtastic radios form a mesh network and communicate using the LoRa protocol to send text messages.</string>

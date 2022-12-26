@@ -1,23 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <!-- Created by The Translator <https://play.google.com/store/apps/details?id=com.sunilpaulmathew.translator> -->
-    <string name="action_settings">Configuración</string>
     <string name="channel_name">Nombre del canal</string>
     <string name="channel_options">Opciones del canal</string>
-    <string name="share_button">Botón de compartir</string>
     <string name="qr_code">Código QR</string>
     <string name="unset">Sin configurar</string>
     <string name="connection_status">Estado de conexión</string>
     <string name="application_icon">icono de la aplicación</string>
     <string name="unknown_username">Nombre de usuario desconocido</string>
-    <string name="user_avatar">Avatar de usuario</string>
     <string name="send_text">Enviar texto</string>
     <string name="warning_not_paired">Aún no ha emparejado un radio compatible con Meshtastic con este teléfono. Empareje un dispositivo y configure su nombre de usuario. \n\nEsta aplicación de código abierto es una prueba alfa; si encuentra un problema publique en el foro: meshtastic.discourse.group. \n\nPara obtener más información visite nuestra página web - www.meshtastic.org.</string>
-    <string name="username_unset">Nombre de usuario sin configurar</string>
     <string name="your_name">Tu nombre</string>
     <string name="analytics_okay">Estadísticas de uso anónimo e informes de fallos.</string>
     <string name="looking_for_meshtastic_devices">Buscando dispositivos Meshtastic…</string>
     <string name="starting_pairing">Iniciando emparejamiento</string>
-    <string name="pairing_failed">Emparejamiento fallido</string>
     <string name="url_for_join">Una URL para unirse a una malla Meshtastic</string>
     <string name="accept">Aceptar</string>
     <string name="cancel">Cancelar</string>
@@ -31,11 +26,8 @@
     <string name="report_a_bug">Informar de un error</string>
     <string name="report_bug_text">¿Estás seguro de que quieres informar de un error? Después de informar por favor publique en meshtastic.discourse.group para que podamos comparar el informe con lo que encontró.</string>
     <string name="report">Reportar</string>
-    <string name="select_radio">Seleccione la radio</string>
-    <string name="current_pair">Actualmente estás emparejado con la radio %s</string>
     <string name="not_paired_yet">Todavía no has emparejado una radio.</string>
     <string name="change_radio">Cambiar la radio</string>
-    <string name="please_pair">Por favor empareja el dispositivo en los Ajustes de Android.</string>
     <string name="pairing_completed">Emparejamiento completado iniciando el servicio</string>
     <string name="pairing_failed_try_again">El emparejamiento ha fallado por favor seleccione de nuevo</string>
     <string name="location_disabled">El acceso a la localización está desactivado no puede proporcionar la posición a la malla.</string>
@@ -72,7 +64,6 @@
     <string name="message_reception_time">tiempo de recepción del mensaje</string>
     <string name="message_reception_state">estado de recepción de mensajes</string>
     <string name="message_delivery_status">Estado de entrega del mensaje</string>
-    <string name="ls_sleep_secs">Período de reposo del dispositivo (en segundos)</string>
     <string name="meshtastic_messages_notifications">Notificaciones de mensajes</string>
     <string name="protocol_stress_test">Protocolo de prueba de esfuerzo</string>
     <string name="firmware_too_old">Es necesario actualizar el firmware</string>
@@ -82,7 +73,6 @@
     <string name="cant_change_no_radio">No se puede cambiar de canal porque la radio aún no está conectada. Por favor inténtelo de nuevo.</string>
     <string name="sample_coords">55.332244 34.442211</string>
     <string name="save_messages">Guardar rangetest.csv</string>
-    <string name="set_channel_options">Establecer las opciones de los canales</string>
     <string name="reset">Reiniciar</string>
     <string name="are_you_sure_change_default">¿Estás seguro de que quieres cambiar al canal por defecto?</string>
     <string name="reset_to_defaults">Restablecer los valores predeterminados</string>

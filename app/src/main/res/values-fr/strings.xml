@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?><!-- Contributed by @eriktheV-king -->
 <resources>
-    <string name="action_settings">Réglages</string>
     <string name="channel_name">nom Canal</string>
     <string name="channel_options">options Canal</string>
-    <string name="share_button">bouton Partage</string>
     <string name="qr_code">code QR</string>
     <string name="unset">Enlever</string>
     <string name="connection_status">état Connection</string>
     <string name="application_icon">icône Application</string>
     <string name="unknown_username">Nom d\'Utilisateur inconnu</string>
-    <string name="user_avatar">avatar Utilisateur</string>
     <string name="send_text">Envoyer Texte</string>
     <string name="warning_not_paired">Aucune radio Meshtastic compatible n\'a été jumelée à ce téléphone. Jumelez un appareil et spécifiez votre nom d\'utilisateur.\n\nL\'application open-source est en test alpha, si vous rencontrez des problèmes postez au chat sur notre site web.\n\nPour plus d\'information visitez notre site web - www.meshtastic.org.</string>
-    <string name="username_unset">Enlever Nom d\'Utilisateur</string>
     <string name="your_name">Votre Nom</string>
     <string name="analytics_okay">Statistiques et rapports d\'erreur anonymes.</string>
     <string name="looking_for_meshtastic_devices">Recherche d\'appareils Meshtastic…</string>
     <string name="starting_pairing">Démarre jumelage</string>
-    <string name="pairing_failed">Jumelage échoué</string>
     <string name="url_for_join">Un URL pour rejoindre une toile Meshtastic</string>
     <string name="accept">Accepter</string>
     <string name="cancel">Annuler</string>
@@ -31,8 +26,6 @@
     <string name="report_a_bug">Rapporter un Bogue</string>
     <string name="report_bug_text">Vous êtes certain de vouloir rapporter un bogue? Après l\'envoi, veuillez poster dans meshtastic.discourse.group afin que nous puissions examiner ce que vous avez trouvé.</string>
     <string name="report">Rapport</string>
-    <string name="select_radio">Selectionner radio</string>
-    <string name="current_pair">Vous êtes actuellement jumelé à radio %s</string>
     <string name="not_paired_yet">Vous n\'avez pas encore jumelé une radio.</string>
     <string name="change_radio">Changer radio</string>
     <string name="share">Partager</string>
@@ -48,7 +41,6 @@
     <string name="none">Aucun (désactivé)</string>
     <string name="must_update">Vous devez mettre à jour l\'application sur le Google Play Store (ou Github). Cette version n\'est plus compatible avec la radio.</string>
     <string name="app_too_old">Application désuète</string>
-    <string name="please_pair">Veuillez jumeler l\'appareil dans les Paramètres Android.</string>
     <string name="pairing_completed">Jumelage  terminé, démarrage du service</string>
     <string name="pairing_failed_try_again">Le jumelage a échoué, veuillez sélectionner à nouveau</string>
     <string name="location_disabled">L\'accès à la position est désactivé, ne peut pas fournir de position au mesh.</string>

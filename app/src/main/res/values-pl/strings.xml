@@ -1,23 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?> <!-- Contributed by @wkawecki & @aloisy -->
 <resources>
-    <string name="action_settings">Ustawienia</string>
     <string name="channel_name">Nazwa Kanału</string>
     <string name="channel_options">Opcje kanału</string>
-    <string name="share_button">Udostępnij</string>
     <string name="qr_code">Kod QR</string>
     <string name="unset">Unset</string>
     <string name="connection_status">Status połączenia</string>
     <string name="application_icon">ikona aplikacji</string>
     <string name="unknown_username">Nieznana nazwa</string>
-    <string name="user_avatar">Avatar użytkownika</string>
     <string name="send_text">Wyślij Text</string>
     <string name="warning_not_paired">Nie sparowałeś jeszcze radia kompatybilnego z Meshtastic z tym telefonem. Proszę sparować urządzenie i ustawić swoją nazwę użytkownika.\n\nTa aplikacja open-source jest w fazie rozwoju, jeśli znajdziesz problemy, napisz na naszym forum: meshtastic.discourse.group.\n\nWięcej informacji znajdziesz na naszej stronie internetowej -www.meshtastic.org.</string>
-    <string name="username_unset">Nazwa unset</string>
     <string name="your_name">Twoja Nazwa</string>
     <string name="analytics_okay">Anonimowe statystyki użycia i raporty o błędach.</string>
     <string name="looking_for_meshtastic_devices">Szukanie urządzeń Meshtastic…</string>
     <string name="starting_pairing">Rozpoczynanie parowania</string>
-    <string name="pairing_failed">Parowanie nieudane</string>
     <string name="url_for_join">A URL for joining a Meshtastic mesh</string>
     <string name="accept">Akceptuj</string>
     <string name="cancel">Anuluj</string>
@@ -31,11 +26,8 @@
     <string name="report_a_bug">Zgłoś bug</string>
     <string name="report_bug_text">Czy na pewno chcesz zgłosić błąd? Po zgłoszeniu opublikuj post na meshtastic.discourse.group, abyśmy mogli dopasować raport do tego, co znalazłeś.</string>
     <string name="report">Raport</string>
-    <string name="select_radio">Wybierz radio</string>
-    <string name="current_pair">Aktualnie sparowano z %s</string>
     <string name="not_paired_yet">Radio nie zostało sparowane.</string>
     <string name="change_radio">Zmień radio</string>
-    <string name="please_pair">Proszę sparować urządzenie w ustawieniach systemu Android.</string>
     <string name="pairing_completed">Parowanie zakończone, usługa startowa</string>
     <string name="pairing_failed_try_again">Parowanie nie powiodło się, wybierz ponownie</string>
     <string name="location_disabled">Brak dostępu do lokalizacji, nie można udostępnić pozycji w sieci.</string>
@@ -73,7 +65,6 @@
     <string name="message_reception_time">czas odbioru wiadomości</string>
     <string name="message_reception_state">stan odbioru wiadomości</string>
     <string name="message_delivery_status">Status doręczenia wiadomości</string>
-    <string name="ls_sleep_secs">Okres uśpienia urządzenia (w sekundach)</string>
     <string name="meshtastic_messages_notifications">Powiadomienia o wiadomościach</string>
     <string name="protocol_stress_test">Protokół testu warunków skrajnych</string>
     <string name="firmware_too_old">Wymagana aktualizacja oprogramowania układowego</string>
@@ -82,7 +73,6 @@
     <string name="must_set_region">Musisz ustawić region!</string>
     <string name="region">Region</string>
     <string name="cant_change_no_radio">Nie można zmienić kanału, ponieważ radio nie jest jeszcze podłączone. Proszę spróbuj ponownie.</string>
-    <string name="set_channel_options">Ustaw opcje kanałów</string>
     <string name="reset">Reset</string>
     <string name="are_you_sure_change_default">Czy na pewno chcesz zmienić kanał na domyślny??</string>
     <string name="reset_to_defaults">Przywróć domyślne</string>
@@ -99,7 +89,6 @@
     <string name="save_messages">Eksport rangetest.csv</string>
     <string name="scan">Skanowanie</string>
     <string name="background_required">Lokalizacja w tle</string>
-    <string name="show_system_settings">Pokaż ustawienia systemowe</string>
     <string name="required_permissions">Wymagane uprawnienia</string>
     <string name="provide_location_to_mesh">Podaj lokalizację do sieci</string>
     <plurals name="delete_messages">
@@ -113,20 +102,11 @@
     <string name="map_style_selection">Wybór stylu</string>
     <string name="map_download_region">Pobierz region</string>
     <string name="name">Nazwa</string>
-    <string name="map_view_region">Zobacz region</string>
     <string name="save">Zapisz</string>
-    <string name="map_no_download_region_alert">Brak dostępnego pobranego regionu</string>
-    <string name="map_style_uri_empty_alert">URI stylu nie może być pusty</string>
-    <string name="map_download_region_title">Pobierz region</string>
-    <string name="map_download_region_connection_alert">Nie masz połączenia z internetem, nie możesz pobrać mapy offline</string>
-    <string name="map_download_failed">Nie można pobrać pakietu stylów</string>
     <string name="camera_required">Zezwolenie aparatu</string>
     <string name="why_camera_required">Aby odczytać kody QR, musimy mieć dostęp do aparatu. Żadne zdjęcia ani filmy nie zostaną zapisane.</string>
     <string name="why_background_required">W przypadku tej funkcji musisz przyznać opcję uprawnień lokalizacji „Zezwalaj przez cały czas”.</string>
-    <string name="cancel_no_radio">Anuluj (brak dostępu do radia)</string>
-    <string name="allow_will_show">Zezwól (pokaże okno dialogowe)</string>
     <string name="preferences_language">Język</string>
     <string name="preferences_system_default">Domyślny systemu</string>
-    <string name="map_preferences_map_style">Typ map</string>
     <string name="resend">Ponów</string>
 </resources>
