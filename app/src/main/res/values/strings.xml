@@ -61,7 +61,7 @@
     <string name="modem_config_long">Long Range / Fast</string>
     <string name="modem_config_very_long">Very Long Range / Slow</string>
     <string name="modem_config_unrecognized">UNRECOGNIZED</string>
-    <string name="meshtastic_service_notifications">Meshtastic Service Notifications</string>
+    <string name="meshtastic_service_notifications">Service notifications</string>
     <string name="location_disabled_warning">Location must be turned on (high accuracy) to find new devices via bluetooth. You can turn it off again afterwards.</string>
     <string name="about">About</string>
     <string name="a_list_of_nodes_in_the_mesh">A list of nodes in the mesh</string>
@@ -76,7 +76,7 @@
     <string name="message_reception_time">message reception time</string>
     <string name="message_reception_state">message reception state</string>
     <string name="message_delivery_status">Message delivery status</string>
-    <string name="meshtastic_messages_notifications">Notifications about messages</string>
+    <string name="meshtastic_messages_notifications">Message notifications</string>
     <string name="protocol_stress_test">Protocol stress test</string>
     <string name="firmware_too_old">Firmware update required</string>
     <string name="firmware_old">The radio firmware is too old to talk to this application, please go to the settings pane and choose "Update Firmware".  For more information on this see <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">our Firmware Installation guide</a> on Github.</string>

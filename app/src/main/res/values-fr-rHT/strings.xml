@@ -50,7 +50,7 @@
     <string name="modem_config_long">Anpil distans (men vit)</string>
     <string name="modem_config_very_long">Distans vrèman long (men lan)</string>
     <string name="modem_config_unrecognized">PA REKONÈT</string>
-    <string name="meshtastic_service_notifications">Notifikasyon Sèvis Meshtastic</string>
+    <string name="meshtastic_service_notifications">Notifikasyon sèvis</string>
     <string name="location_disabled_warning">Ou dwe ouvri sèvis lokasyon an nan paramèt android</string>
     <string name="about">De</string>
     <string name="a_list_of_nodes_in_the_mesh">Yon lis ne elektronik nan mesh la</string>

@@ -49,7 +49,7 @@
     <string name="modem_config_medium">Moyenne distance (rapide)</string>
     <string name="modem_config_long">Longue distance (rapide)</string>
     <string name="modem_config_very_long">Très longue distance (lent)</string>
-    <string name="meshtastic_service_notifications">Meshtastic Notifications de Service</string>
+    <string name="meshtastic_service_notifications">Notifications de service</string>
     <string name="location_disabled_warning">Besoin d\'activer l\'accès à la position dans les Paramètres Android</string>
     <string name="about">Infos</string>
     <string name="a_list_of_nodes_in_the_mesh">Une liste des nœuds dans le réseau</string>

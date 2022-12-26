@@ -50,7 +50,7 @@
     <string name="modem_config_long">Μεγάλη εμβέλεια (γρήγορο)</string>
     <string name="modem_config_very_long">Πολύ μεγάλη εμβέλεια (αργό)</string>
     <string name="modem_config_unrecognized">ΜΗ ΑΝΑΓΝΩΡΙΣΙΜΟ</string>
-    <string name="meshtastic_service_notifications">Ειδοποιήσεις Υπηρεσίας Meshtastic</string>
+    <string name="meshtastic_service_notifications">Ειδοποιήσεις Υπηρεσίας</string>
     <string name="location_disabled_warning">Πρέπει να ενεργοποιήσετε τις υπηρεσίες εντοπισμού τοποθεσίας στις ρυθμίσεις Android</string>
     <string name="about">Σχετικά</string>
     <string name="a_list_of_nodes_in_the_mesh">Λίστα κόμβων στο mesh</string>

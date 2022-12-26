@@ -49,7 +49,7 @@
     <string name="modem_config_medium">Stredný dosah / Rýchle</string>
     <string name="modem_config_long">Dlhý dosah / Rýchle</string>
     <string name="modem_config_very_long">Veľmi dlhý dosah / Pomalé</string>
-    <string name="meshtastic_service_notifications">Notifikácie zo služby Meshtastic</string>
+    <string name="meshtastic_service_notifications">Notifikácie zo služby</string>
     <string name="about">O aplikácii (verzia)</string>
     <string name="location_disabled_warning">Musíte zapnúť služby o polohe zariadenia (GPS) v nastaveniach systému Android.</string>
     <string name="modem_config_unrecognized">UNRECOGNIZED</string>
@@ -65,7 +65,7 @@
     <string name="message_reception_time">čas prijatia správy</string>
     <string name="message_reception_state">stav prijatia správy</string>
     <string name="message_delivery_status">stav doručenia správy</string>
-    <string name="meshtastic_messages_notifications">Upozornenia na správy</string>
+    <string name="meshtastic_messages_notifications">Notifikácie správy</string>
     <string name="protocol_stress_test">Stres test protokolu</string>
     <string name="firmware_too_old">Nutná aktualizácia firmvéru vysielača</string>
     <string name="okay">Ok</string>

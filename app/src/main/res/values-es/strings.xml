@@ -49,7 +49,7 @@
     <string name="modem_config_long">Largo alcance / rápido</string>
     <string name="modem_config_very_long">Muy largo alcance / lento</string>
     <string name="modem_config_unrecognized">SIN RECONOCIMIENTO</string>
-    <string name="meshtastic_service_notifications">Notificaciones de servicio de Meshtastic</string>
+    <string name="meshtastic_service_notifications">Notificaciones de servicio</string>
     <string name="location_disabled_warning">Debes activar los servicios de localización (de alta precisión) en los Ajustes de Android</string>
     <string name="about">Acerca de</string>
     <string name="a_list_of_nodes_in_the_mesh">Una lista de nodos en la malla</string>

@@ -49,7 +49,7 @@
     <string name="modem_config_long">Távoli hatótáv (gyors)</string>
     <string name="modem_config_very_long">Nagyon távoli hatótáv (lassú)</string>
     <string name="modem_config_unrecognized">FELISMERHETETLEN</string>
-    <string name="meshtastic_service_notifications">Meshtastic szolgáltatás értesítések</string>
+    <string name="meshtastic_service_notifications">Szolgáltatás értesítések</string>
     <string name="location_disabled_warning">Be kell kapcsolja a (nagy pontosságú) helyzet szolgáltatásokat az Android beállításokban</string>
     <string name="about">A programról</string>
     <string name="a_list_of_nodes_in_the_mesh">A mesh hálózatban található állomások listája</string>
@@ -64,7 +64,7 @@
     <string name="message_reception_time">üzenet fogadásának ideje</string>
     <string name="message_reception_state">üzenet fogadásának állapota</string>
     <string name="message_delivery_status">Üzenet kézbesítésének állapota</string>
-    <string name="meshtastic_messages_notifications">Értesítések az üzenetekről</string>
+    <string name="meshtastic_messages_notifications">Üzenet értesítések</string>
     <string name="protocol_stress_test">Protokoll stressz teszt</string>
     <string name="firmware_too_old">Firmware frissítés szükséges</string>
     <string name="firmware_old">A rádió firmware túl régi ahhoz, hogy a programmal kommunikálni tudjon, kérem menjen a beállítások oldalra és válassza a "firmware frissítés" gombot. További tudnivalókat a <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">firmware frissítés leírásában</a> talál, a Github-on.</string>

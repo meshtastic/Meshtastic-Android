@@ -50,7 +50,7 @@
     <string name="modem_config_long">Uzun menzilli (hızlı)</string>
     <string name="modem_config_very_long">Çok uzun menzilli (yavaş)</string>
     <string name="modem_config_unrecognized">TANIMLANAMADI</string>
-    <string name="meshtastic_service_notifications">Meshtastic Servis Bildirimleri</string>
+    <string name="meshtastic_service_notifications">Servis bildirimleri</string>
     <string name="location_disabled_warning">Android ayarlarında konum servislerine izin vermelisiniz</string>
     <string name="about">Hakkında</string>
     <string name="modem_config_slow_short">Kısa menzilli (yavaş)</string>

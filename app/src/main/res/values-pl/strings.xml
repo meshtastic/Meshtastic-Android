@@ -50,7 +50,7 @@
     <string name="modem_config_long">Daleki zasięg / Szybko</string>
     <string name="modem_config_very_long">Bardzo daleki zasięg / Wolno</string>
     <string name="modem_config_unrecognized">NIE ROZPOZNANO</string>
-    <string name="meshtastic_service_notifications">Powiadomienia o usługach Meshtastic</string>
+    <string name="meshtastic_service_notifications">Powiadomienia o usługach</string>
     <string name="location_disabled_warning">Lokalizacja musi być włączona (wysoka dokładność), aby znaleźć nowe urządzenia przez bluetooth. Możesz go później wyłączyć.</string>
     <string name="about">o aplikacji</string>
     <string name="a_list_of_nodes_in_the_mesh">Lista węzłów w sieci</string>
@@ -65,7 +65,7 @@
     <string name="message_reception_time">czas odbioru wiadomości</string>
     <string name="message_reception_state">stan odbioru wiadomości</string>
     <string name="message_delivery_status">Status doręczenia wiadomości</string>
-    <string name="meshtastic_messages_notifications">Powiadomienia o wiadomościach</string>
+    <string name="meshtastic_messages_notifications">Powiadomienia wiadomościach</string>
     <string name="protocol_stress_test">Protokół testu warunków skrajnych</string>
     <string name="firmware_too_old">Wymagana aktualizacja oprogramowania układowego</string>
     <string name="firmware_old">Oprogramowanie układowe radia jest zbyt stare, aby rozmawiać z tą aplikacją, przejdź do panelu ustawień i wybierz „Aktualizuj oprogramowanie układowe”. Aby uzyskać więcej informacji na ten temat, zobacz <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">nasz przewodnik instalacji oprogramowania układowego</a> na Github.</string>

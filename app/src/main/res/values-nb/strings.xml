@@ -50,7 +50,7 @@
     <string name="modem_config_long">Lang rekkevidde (rask)</string>
     <string name="modem_config_very_long">Veldig lang rekkevidde (langsom)</string>
     <string name="modem_config_unrecognized">IKKE GJENKJENT</string>
-    <string name="meshtastic_service_notifications">Meshtastic Tjeneste meldinger</string>
+    <string name="meshtastic_service_notifications">Tjeneste meldinger</string>
     <string name="location_disabled_warning">Du må slå på (høy presisjon) lokasjonstjenester i Android Innstillinger</string>
     <string name="about">Om</string>
     <string name="a_list_of_nodes_in_the_mesh">En liste over noder i nettet</string>

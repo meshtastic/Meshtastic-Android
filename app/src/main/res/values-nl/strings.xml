@@ -50,7 +50,7 @@
     <string name="modem_config_long">Groot bereik (snel)</string>
     <string name="modem_config_very_long">Zeer groot bereik (traag)</string>
     <string name="modem_config_unrecognized">ONBEKEND</string>
-    <string name="meshtastic_service_notifications">Meshtastic Service Berichten</string>
+    <string name="meshtastic_service_notifications">Service berichten</string>
     <string name="location_disabled_warning">Noodzakelijk de positioneringsservice te activeren in Android Instellingen</string>
     <string name="about">Over</string>
     <string name="a_list_of_nodes_in_the_mesh">Een lijst van de aansluitpunten in het netwerk</string>

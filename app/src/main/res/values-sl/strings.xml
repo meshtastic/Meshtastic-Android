@@ -50,7 +50,7 @@
     <string name="modem_config_long">Dolg doseg (hitro)</string>
     <string name="modem_config_very_long">Zelo dolg doseg (počasen)</string>
     <string name="modem_config_unrecognized">NEZNANO</string>
-    <string name="meshtastic_service_notifications">Obvestila storitve Meshtastic</string>
+    <string name="meshtastic_service_notifications">Obvestila storitve</string>
     <string name="location_disabled_warning">V nastavitvah za Android morate vključiti lokacijske storitve</string>
     <string name="about">O programu</string>
     <string name="modem_config_slow_short">Kratek doseg (počasen)</string>

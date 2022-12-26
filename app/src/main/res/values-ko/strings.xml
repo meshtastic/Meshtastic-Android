@@ -50,7 +50,7 @@
     <string name="modem_config_long">장거리 (고속)</string>
     <string name="modem_config_very_long">초장거리 (저속)</string>
     <string name="modem_config_unrecognized">모뎀 설정 미인식</string>
-    <string name="meshtastic_service_notifications">메쉬태스틱 서비스 알림</string>
+    <string name="meshtastic_service_notifications">서비스 알림들</string>
     <string name="location_disabled_warning">블루투스를 통해서 새로운 디바이스를 찾기위해서는 위치정보가 켜져있어야합니다(높은 정확도)</string>
     <string name="about">About</string>
     <string name="a_list_of_nodes_in_the_mesh">매쉬망 안의 모든 노드 목록</string>

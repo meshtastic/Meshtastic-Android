@@ -50,7 +50,7 @@
     <string name="modem_config_long">Rază lungă (rapidă)</string>
     <string name="modem_config_very_long">Rază foarte lungă (încet)</string>
     <string name="modem_config_unrecognized">NERECUNOSCUT</string>
-    <string name="meshtastic_service_notifications">Notificările Sistemului Meshtastic</string>
+    <string name="meshtastic_service_notifications">Notificările serviciului</string>
     <string name="location_disabled_warning">Trepuie să pornești serviciile de locație (de high accuracy) în setările Android</string>
     <string name="about">Despre</string>
     <string name="a_list_of_nodes_in_the_mesh">O lista cu nodurile din rețea</string>

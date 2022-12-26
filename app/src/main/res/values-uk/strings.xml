@@ -50,7 +50,7 @@
     <string name="modem_config_long">Long Range / Fast</string>
     <string name="modem_config_very_long">Very Long Range / Slow</string>
     <string name="modem_config_unrecognized">НЕРОЗПІЗНАНИЙ</string>
-    <string name="meshtastic_service_notifications">Meshtastic сервісні сповіщення</string>
+    <string name="meshtastic_service_notifications">Сервісні сповіщення</string>
     <string name="location_disabled_warning">Для пошуку нових пристроїв через bluetooth необхідно ввімкнути локацію (висока точність). Ви можете вимкнути його пізніше.</string>
     <string name="about">Про</string>
     <string name="a_list_of_nodes_in_the_mesh">Список вузлів у мережі</string>
@@ -65,7 +65,7 @@
     <string name="message_reception_time">час отримання повідомлення</string>
     <string name="message_reception_state">стан отримання повідомлення</string>
     <string name="message_delivery_status">Статус доставки повідомлення</string>
-    <string name="meshtastic_messages_notifications">Сповіщення про повідомлення</string>
+    <string name="meshtastic_messages_notifications">Сповіщення повідомлення</string>
     <string name="protocol_stress_test">Стрес-тест протоколу</string>
     <string name="firmware_too_old">Потрібне оновлення мікропрограми</string>
     <string name="firmware_old">Прошивка радіо застаріла для зв’язку з цією програмою. Перейдіть на панель налаштувань і виберіть «Оновити мікропрограму». Для отримання додаткової інформації дивіться <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">наш посібник із встановлення мікропрограми</a> на Github.</string>
