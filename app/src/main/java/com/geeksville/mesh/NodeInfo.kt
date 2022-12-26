@@ -19,7 +19,7 @@ data class MeshUser(
     val longName: String,
     val shortName: String,
     val hwModel: MeshProtos.HardwareModel,
-    val isLicensed: Boolean,
+    val isLicensed: Boolean = false,
 ) : Parcelable {
 
     override fun toString(): String {
