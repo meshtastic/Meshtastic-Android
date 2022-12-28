@@ -1,24 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?><!-- Translation contributed by @ohcdh -->
 <resources>
-    <string name="action_settings">Socruithe</string>
     <string name="channel_name">Ainm Cainéal</string>
     <string name="channel_options">Roghanna cainéil</string>
-    <string name="share_button">Cnaipe comhroinne</string>
     <string name="qr_code">Cód QR</string>
     <string name="unset">Díshocraigh</string>
     <string name="connection_status">Stádas ceangail</string>
     <string name="application_icon">deilbhín feidhmchláir</string>
     <string name="unknown_username">Ainm Úsáideora Anaithnid</string>
-    <string name="user_avatar">Abhatár an úsáideora</string>
-    <string name="sample_message">Hóigh, fuair ​​mé an taisce, tá sé thall anseo in aice leis an tíogar mór. Tá cineál eagla orm.</string>
     <string name="send_text">Seol Téacs</string>
     <string name="warning_not_paired">Níl raidió comhoiriúnach Meshtastic péireáilte leis an bhfón seo agat fós. Péireáil gléas le do thoil agus socraigh d’ainm úsáideora. Tá an feidhmchlár foinse oscailte seo faoi alfa-thástáil, má aimsíonn tú fadhbanna cuir leis an gcomhrá ar ár suíomh gréasáin iad le do thoil. Le haghaidh tuilleadh faisnéise féach ar ár leathanach gréasáin - www.meshtastic.org.</string>
-    <string name="username_unset">Ainm úsáideora díshocraithe</string>
     <string name="your_name">D\'ainm</string>
     <string name="analytics_okay">Staitisticí úsáide gan ainm agus tuairiscí tuairteála.</string>
     <string name="looking_for_meshtastic_devices">Ag lorg gléasanna Meshtastic …</string>
     <string name="starting_pairing">Ag tosú ag péireáil</string>
-    <string name="pairing_failed">Theip ar phéireáil</string>
     <string name="url_for_join">URL chun dul isteach i mogalra Meshtastic</string>
     <string name="accept">Glac</string>
     <string name="cancel">Cealaigh</string>
@@ -33,8 +27,6 @@
     <string name="report_bug_text">An bhfuil tú cinnte gur mhaith leat fabht a thuairisciú? Tar éis tuairisciú a dhéanamh, cuir sa phost é le do thoil i meshtastic.discourse.group ionas gur féidir
         linn an tuarascáil a mheaitseáil leis an méid a d\'aimsigh tú.</string>
     <string name="report">Tuairiscigh</string>
-    <string name="select_radio">Roghnaigh raidió</string>
-    <string name="current_pair">Tá tú péireáilte faoi láthair le raidió %s</string>
     <string name="not_paired_yet">Níl raidió péireálite agat fós.</string>
     <string name="change_radio">Athraigh raidió</string>
     <string name="preferences_language">Teanga</string>

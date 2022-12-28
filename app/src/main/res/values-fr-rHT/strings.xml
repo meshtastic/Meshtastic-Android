@@ -1,24 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="action_settings">Paramèt</string>
     <string name="channel_name">Non Chènn</string>
     <string name="channel_options">Opsyon Chènn</string>
-    <string name="share_button">Bouton pataje</string>
     <string name="qr_code">Kòd QR</string>
     <string name="unset">Pa konfigire</string>
     <string name="connection_status">Sitiyasyon koneksyon</string>
     <string name="application_icon">ikònn aplikasyon an</string>
     <string name="unknown_username">Non itilizatè enkoni</string>
-    <string name="user_avatar">Avata itilizatè</string>
-    <string name="sample_message">Mwen jwenn kachèt la, li bò isit  bòkote gwo tig la. Mwen pè.</string>
     <string name="send_text">Voye tèks</string>
     <string name="warning_not_paired">Ou ponkò koneke  yon radyo ki konpatib avek Meshtastic sou telefòn sa a. Tanpri konekte yon aparèy epi mete non itilizatè w lan.Sa se yon aplikasyon publik ki nan tès Alpha.  Si ou gen pwoblèm tanpri afichel sou fowòm nou an: meshtastic.discourse.groupPou plis enfòmasyon gade paj wèb nou an - www.meshtastic.org </string>
-    <string name="username_unset">Non itilizatè a pa konfigire</string>
     <string name="your_name">Non Ou</string>
     <string name="analytics_okay">Statistik itilizasyon anonim ak rapò aksidantèl.</string>
     <string name="looking_for_meshtastic_devices">Ap chache pou aparèy Meshtastic…</string>
     <string name="starting_pairing">Kòmanse koneksyon</string>
-    <string name="pairing_failed">Koneksyon echwe</string>
     <string name="url_for_join">Yon URL pou rantre nan yon mesh Meshtastic</string>
     <string name="accept">Aksepte</string>
     <string name="cancel">Anile</string>
@@ -32,11 +26,8 @@
     <string name="report_a_bug">Rapòte pwoblèm</string>
     <string name="report_bug_text">Èske ou sèten ou vle rapòte yon pwoblèm? Aprew fin rapòte, tanpri afichel nan meshtastic.discourse.group pou nou ka konpare rapò a ak sa ou jwenn nan.</string>
     <string name="report">Rapò</string>
-    <string name="select_radio">Chwazi radyo</string>
-    <string name="current_pair">Ou konekte ak radyo %s konya</string>
     <string name="not_paired_yet">Ou ponkò konekte ak yon radyo.</string>
     <string name="change_radio">Chanje radyo</string>
-    <string name="please_pair">Tanpri konekte aparèy la nan paramèt android.</string>
     <string name="pairing_completed">Koneksyon konplèt, sèvis kòmanse</string>
     <string name="pairing_failed_try_again">Koneksyon echwe, tanpri chwazi ankò</string>
     <string name="location_disabled">Aksè lokasyon enfim, pa ka bay pozisyon mesh la.</string>
@@ -59,7 +50,7 @@
     <string name="modem_config_long">Anpil distans (men vit)</string>
     <string name="modem_config_very_long">Distans vrèman long (men lan)</string>
     <string name="modem_config_unrecognized">PA REKONÈT</string>
-    <string name="meshtastic_service_notifications">Notifikasyon Sèvis Meshtastic</string>
+    <string name="meshtastic_service_notifications">Notifikasyon sèvis</string>
     <string name="location_disabled_warning">Ou dwe ouvri sèvis lokasyon an nan paramèt android</string>
     <string name="about">De</string>
     <string name="a_list_of_nodes_in_the_mesh">Yon lis ne elektronik nan mesh la</string>

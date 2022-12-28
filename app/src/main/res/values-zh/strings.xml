@@ -1,24 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?><!-- Chinese contributed by @Mango-sauce -->
 <resources>
-    <string name="action_settings">设置</string>
     <string name="channel_name">频道名称</string>
     <string name="channel_options">频道选项</string>
-    <string name="share_button">分享</string>
     <string name="qr_code">QR码</string>
     <string name="unset">未设置</string>
     <string name="connection_status">连接状态</string>
     <string name="application_icon">应用图标</string>
     <string name="unknown_username">未知用户名</string>
-    <string name="user_avatar">用户头像</string>
-    <string name="sample_message">在吗？我找到了快递，它就在一只大老虎旁边，我好害怕😨！</string>
     <string name="send_text">在此发送信息</string>
     <string name="warning_not_paired">Mesh设备未与此手机配对，请配对设备并设置好您的用户名.\n\n此开源应用程序正在进行alpha测试，如果您发现问题，请在我们的网站中发布.\n\n更多信息，请访问此网页 - www.meshtastic.org.</string>
-    <string name="username_unset">用户名未设置</string>
     <string name="your_name">用户名</string>
     <string name="analytics_okay">匿名使用情况统计信息和崩溃报告.</string>
     <string name="looking_for_meshtastic_devices">Mesh设备扫描中...</string>
     <string name="starting_pairing">开始配对</string>
-    <string name="pairing_failed">配对失败</string>
     <string name="url_for_join">用于连接Mesh网络的URL</string>
     <string name="accept">接受</string>
     <string name="cancel">取消</string>
@@ -32,11 +26,8 @@
     <string name="report_a_bug">报告错误</string>
     <string name="report_bug_text">您确定要报告错误吗？报告后，请在 meshtastic.discourse.group中发帖，以便我们将报告与您发现的内容进行匹配.</string>
     <string name="report">报告</string>
-    <string name="select_radio">选择设备</string>
-    <string name="current_pair">您目前已与%s配对</string>
     <string name="not_paired_yet">您还没有配对.</string>
     <string name="change_radio">改换设备</string>
-    <string name="please_pair">请在设置中配对设备</string>
     <string name="pairing_completed">配对完成，开始服务</string>
     <string name="pairing_failed_try_again">配对失败，请重新选择</string>
     <string name="location_disabled">位置访问被禁用，无法为设备提供位置。</string>
@@ -59,7 +50,7 @@
     <string name="modem_config_long">长距离（速度快）</string>
     <string name="modem_config_very_long">远距离（速度慢）</string>
     <string name="modem_config_unrecognized">无法识别</string>
-    <string name="meshtastic_service_notifications">Mesh网络服务通知</string>
+    <string name="meshtastic_service_notifications">服务通知</string>
     <string name="location_disabled_warning">您必须在设置中开启高精度定位服务</string>
     <string name="about">关于</string>
     <string name="a_list_of_nodes_in_the_mesh">节点列表</string>
@@ -67,15 +58,14 @@
     <string name="channel_invalid">此频道网址无效，无法使用</string>
     <string name="debug_panel">调试面板</string>
     <string name="debug_last_messages">500条最新消息</string>
-    <string name="clear_last_messages">清除</string>
+    <string name="clear">清除</string>
     <string name="updating_firmware">更新固件，请等待几分钟…</string>
     <string name="update_successful">更新成功</string>
     <string name="update_failed">更新失败</string>
     <string name="message_reception_time">消息接收时间</string>
     <string name="message_reception_state">消息接收状态</string>
     <string name="message_delivery_status">消息传递状态</string>
-    <string name="ls_sleep_secs">设备休眠时间（以秒为单位）</string>
-    <string name="meshtastic_messages_notifications">关于消息的通知</string>
+    <string name="meshtastic_messages_notifications">消息通知</string>
     <string name="protocol_stress_test">协议压力测试</string>
     <string name="firmware_too_old">需要固件更新</string>
     <string name="firmware_old">固件太旧，无法与此应用程序对话，请转到设置窗头并选择"升级固件".  有关这方面的更多信息，请参阅<a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">固件安装指南</a> 在GitHub</string>
@@ -83,9 +73,8 @@
     <string name="must_set_region">你必须选择一个地区</string>
     <string name="region">地区</string>
     <string name="cant_change_no_radio">Couldn\'t change channel, because radio is not yet connected. Please try again.</string>
-    <string name="set_channel_options">设置频道选项</string>
     <string name="reset">重置</string>
-    <string name="are_you_shure_change_default">您确定要更改为默认频道吗？</string>
+    <string name="are_you_sure_change_default">您确定要更改为默认频道吗？</string>
     <string name="reset_to_defaults">重置为默认</string>
     <string name="apply">申请</string>
     <string name="no_app_found">未找到可发送 URL 的应用程序</string>
@@ -93,7 +82,7 @@
     <string name="theme_light">亮丽</string>
     <string name="theme_dark">暗黑</string>
     <string name="theme_system">系统默认</string>
-    <string name="choose_theme_title">选择主题</string>
+    <string name="choose_theme">选择主题</string>
     <string name="modem_config_slow_short">短距离（速度慢）</string>
     <string name="modem_config_slow_medium">中等距离（速度慢）</string>
     <string name="modem_config_slow_long">长距离（速度慢）</string>

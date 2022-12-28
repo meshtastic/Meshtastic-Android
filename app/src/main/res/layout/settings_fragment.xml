@@ -102,7 +102,7 @@
                 android:id="@+id/radioButton2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/test__devname1" />
+                android:text="@string/test_devname1" />
 
             <RadioButton
                 android:id="@+id/radioButton"

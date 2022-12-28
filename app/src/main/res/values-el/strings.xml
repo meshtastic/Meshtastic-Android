@@ -1,24 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="action_settings">Ρυθμίσεις</string>
     <string name="channel_name">Όνομα Καναλιού</string>
     <string name="channel_options">Επιλογές Καναλιού</string>
-    <string name="share_button">Κοινή χρήση</string>
     <string name="qr_code">Κώδικας QR</string>
     <string name="unset">Αναίρεση</string>
     <string name="connection_status">Κατάσταση Σύνδεσης</string>
     <string name="application_icon">Εικονίδιο εφαρμογής </string>
     <string name="unknown_username">Άγνωστο Όνομα Χρήστη</string>
-    <string name="user_avatar">Avatar Χρήστη</string>
-    <string name="sample_message">Βρήκα το σημείο, είναι διπλα στη τίγρη. Φοβάμαι λίγο.</string>
     <string name="send_text">Αποστολή κειμένου</string>
     <string name="warning_not_paired">Δεν έχετε κάνει ακόμη pair μια συσκευή συμβατή με Meshtastic με το τηλέφωνο. Παρακαλώ κάντε pair μια συσκευή και ορίστε το όνομα χρήστη.\n\nΗ εφαρμογή ανοιχτού κώδικα βρίσκεται σε alpha-testing, αν εντοπίσετε προβλήματα παρακαλώ δημοσιεύστε τα στο forum: meshtastic.discourse.group.\n\nΠερισσότερες πληροφορίες στην ιστοσελίδα - www.meshtastic.org.</string>
-    <string name="username_unset">Όνομα Χρήστη αναιρέθηκε</string>
     <string name="your_name">Όνομα</string>
     <string name="analytics_okay">Ανώνυμα στατιστικά χρήσης και αναφορές crash.</string>
     <string name="looking_for_meshtastic_devices">Αναζήτηση συσκευών Meshtastic …</string>
     <string name="starting_pairing">Αρχή pairing</string>
-    <string name="pairing_failed">Pairing απέτυχε</string>
     <string name="url_for_join">Διεύθυνση URL για συμμετοχή σε Meshtastic mesh</string>
     <string name="accept">Αποδοχή</string>
     <string name="cancel">Ακύρωση</string>
@@ -32,11 +26,8 @@
     <string name="report_a_bug">Αναφέρετε ένα bug</string>
     <string name="report_bug_text">Είστε σίγουροι ότι θέλετε να αναφέρετε ένα bug? Μετά την αναφορά δημοσιεύστε στο meshtastic.discourse.group ώστε να συνδέσουμε την αναφορά με το συμβάν.</string>
     <string name="report">Αναφορά</string>
-    <string name="select_radio">Επιλογή radio</string>
-    <string name="current_pair">Έχετε κάνει pair με radio %s</string>
     <string name="not_paired_yet">Δεν έχετε κάνει pair με radio ακόμη.</string>
     <string name="change_radio">Αλλαγή radio</string>
-    <string name="please_pair">Παρακαλώ κάντε pair μια συσκευή στις ρυθμίσεις Android.</string>
     <string name="pairing_completed">Η διαδικασία pairing ολοκληρώθηκε, εκκίνηση υπηρεσίας</string>
     <string name="pairing_failed_try_again">Η διαδικασία pairing απέτυχε, παρακαλώ επιλέξτε πάλι</string>
     <string name="location_disabled">Ο εντοπισμός τοποθεσίας είναι απενεργοποιημένος, δε μπορούμε να μοιραστούμε τη θέση σας με το mesh.</string>
@@ -59,7 +50,7 @@
     <string name="modem_config_long">Μεγάλη εμβέλεια (γρήγορο)</string>
     <string name="modem_config_very_long">Πολύ μεγάλη εμβέλεια (αργό)</string>
     <string name="modem_config_unrecognized">ΜΗ ΑΝΑΓΝΩΡΙΣΙΜΟ</string>
-    <string name="meshtastic_service_notifications">Ειδοποιήσεις Υπηρεσίας Meshtastic</string>
+    <string name="meshtastic_service_notifications">Ειδοποιήσεις Υπηρεσίας</string>
     <string name="location_disabled_warning">Πρέπει να ενεργοποιήσετε τις υπηρεσίες εντοπισμού τοποθεσίας στις ρυθμίσεις Android</string>
     <string name="about">Σχετικά</string>
     <string name="a_list_of_nodes_in_the_mesh">Λίστα κόμβων στο mesh</string>

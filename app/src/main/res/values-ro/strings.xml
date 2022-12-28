@@ -1,24 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="action_settings">Setări</string>
     <string name="channel_name">Numele Canalului</string>
     <string name="channel_options">Opțiunile Canalului</string>
-    <string name="share_button">Buton de share</string>
     <string name="qr_code">Cod QR</string>
     <string name="unset">Nesetat</string>
     <string name="connection_status">Statusul conexiunii</string>
     <string name="application_icon">Iconița aplicației</string>
     <string name="unknown_username">Username Necunoscut</string>
-    <string name="user_avatar">Avatar</string>
-    <string name="sample_message">hey am găsit cache-ul, este chiar aici lângă marele tigru. Mi-e cam frică.</string>
     <string name="send_text">Trimite textul</string>
     <string name="warning_not_paired">Nu conectat vre-un dispozitiv care suportă Meshtastic cu acest telefon. Te rog, conectează un dispozitiv cu acest telefon.\n\n Acesta aplicație open-source se află în alpha-testing, dacă întâmpini probleme contactează-ne: meshtastic.discourse.group.\n\nPentru mai multe informații: - www.meshtastic.org.</string>
-    <string name="username_unset">Username nesetat</string>
     <string name="your_name">Numele tău</string>
     <string name="analytics_okay">Trimite în mod anonim statistici de utilizare și reporturi de crash.</string>
     <string name="looking_for_meshtastic_devices">Caut dispozitive Meshtastic…</string>
     <string name="starting_pairing">Încep să mă conectez</string>
-    <string name="pairing_failed">Conectare eșuată</string>
     <string name="url_for_join">Un URL pentru a intră în rețeaua Meshtastic</string>
     <string name="accept">Accept</string>
     <string name="cancel">Renunta</string>
@@ -32,11 +26,8 @@
     <string name="report_a_bug">Raportează un bug</string>
     <string name="report_bug_text">Ești sigur că vrei să raportezi un bug? După ce ai raportat, te rog postează în meshtastic.discourse.group că să reușim să potrivim reportul tău cu ce ai găsit.</string>
     <string name="report">Raportare</string>
-    <string name="select_radio">Selectează un dispozitiv</string>
-    <string name="current_pair">Ești conectat la dispozitiv-ul %s</string>
     <string name="not_paired_yet">Nu ai conectat un dispozitiv încă.</string>
     <string name="change_radio">Schimbă dispozitivul</string>
-    <string name="please_pair">Te rog connecteaza dispozitivul în setările Android.</string>
     <string name="pairing_completed">Conectare reușită, începem serviciul</string>
     <string name="pairing_failed_try_again">Conectare eșuată, te rog reselecteaza</string>
     <string name="location_disabled">Accesul locației este dezactivat, nu putem furniza locația ta la rețea.</string>
@@ -59,7 +50,7 @@
     <string name="modem_config_long">Rază lungă (rapidă)</string>
     <string name="modem_config_very_long">Rază foarte lungă (încet)</string>
     <string name="modem_config_unrecognized">NERECUNOSCUT</string>
-    <string name="meshtastic_service_notifications">Notificările Sistemului Meshtastic</string>
+    <string name="meshtastic_service_notifications">Notificările serviciului</string>
     <string name="location_disabled_warning">Trepuie să pornești serviciile de locație (de high accuracy) în setările Android</string>
     <string name="about">Despre</string>
     <string name="a_list_of_nodes_in_the_mesh">O lista cu nodurile din rețea</string>

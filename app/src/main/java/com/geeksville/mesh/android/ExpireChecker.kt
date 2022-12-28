@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import com.geeksville.mesh.R
 import java.util.*
 
 /**
@@ -26,7 +27,7 @@ class ExpireChecker(val context: Activity) : Logging {
 
         Toast.makeText(
             context,
-            "This application is out of date and must be updated",
+            R.string.app_too_old,
             Toast.LENGTH_LONG
         ).show()
         val i = Intent(Intent.ACTION_VIEW)

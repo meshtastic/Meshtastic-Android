@@ -38,11 +38,11 @@
         app:showAsAction="withText" />
     <item
         android:id="@+id/show_intro"
-        android:title="@string/show_intro"
+        android:title="@string/intro_show"
         app:showAsAction="withText" />
     <item
         android:id="@+id/preferences_quick_chat"
-        android:title="Quick chat options"
+        android:title="@string/quick_chat"
         app:showAsAction="withText" />
     <item
         android:id="@+id/about"

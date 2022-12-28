@@ -18,21 +18,21 @@ class AppIntroduction : AppIntro() {
         // You can use AppIntroFragment to use a pre-built fragment
         addSlide(
             AppIntroFragment.createInstance(
-            title = resources.getString(R.string.intro_welcome_title),
-            description = resources.getString(R.string.intro_meshtastic_desc),
+            title = resources.getString(R.string.intro_welcome),
+            description = resources.getString(R.string.intro_welcome_text),
             imageDrawable = R.mipmap.ic_launcher2_round,
             backgroundColorRes = R.color.colourGrey,
             descriptionColorRes = R.color.colorOnPrimary
         ))
         addSlide(AppIntroFragment.createInstance(
-            title = resources.getString(R.string.intro_get_started),
+            title = resources.getString(R.string.intro_started),
             description = resources.getString(R.string.intro_started_text),
             imageDrawable = R.drawable.icon_meanings,
             backgroundColorRes = R.color.colourGrey,
             descriptionColorRes = R.color.colorOnPrimary
         ))
         addSlide(AppIntroFragment.createInstance(
-            title = resources.getString(R.string.intro_encryption_title),
+            title = resources.getString(R.string.intro_encryption),
             description = resources.getString(R.string.intro_encryption_text),
             imageDrawable = R.drawable.channel_name_image,
             backgroundColorRes = R.color.colourGrey,
