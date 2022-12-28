@@ -155,6 +155,7 @@
     <string name="calculating">Calculating…</string>
     <string name="map_offline_manager">Offline Manager</string>
     <string name="map_cache_size">Current Cache size</string>
+    <string name="map_cache_info">Cache Capacity: %1$.2f MB\nCache Usage: %2$.2f MB</string>
     <string name="map_clear_tiles">Clear Downloaded Tiles</string>
     <string name="map_tile_source">Tile Source</string>
     <string name="map_purge_success">SQL Cache purged for %s</string>

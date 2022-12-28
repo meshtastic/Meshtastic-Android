@@ -43,7 +43,6 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.*
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import java.io.File
-import kotlin.math.pow
 
 
 @AndroidEntryPoint
@@ -231,10 +230,10 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
             // set title
             alertDialogBuilder.setTitle(R.string.map_cache_manager)
                 .setMessage(
-                    """
-                    Cache Capacity (mb): ${cacheManager.cacheCapacity() * 2.0.pow(-20.0)}
-                    Cache Usage (mb): ${cacheManager.currentCacheUsage() * 2.0.pow(-20.0)}
-                    """.trimIndent()
+                    getString(R.string.map_cache_info).format(
+                        cacheManager.cacheCapacity() / (1024.0 * 1024.0),
+                        cacheManager.currentCacheUsage() / (1024.0 * 1024.0)
+                    )
                 )
             // set dialog message
             alertDialogBuilder.setItems(
