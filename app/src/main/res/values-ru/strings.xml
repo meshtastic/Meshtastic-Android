@@ -1,24 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?><!-- Translations contributed by @Eugene -->
 <resources>
-    <string name="action_settings">Настройки</string>
     <string name="channel_name">Имя канала</string>
     <string name="channel_options">Настройки канала</string>
-    <string name="share_button">Поделиться</string>
     <string name="qr_code">QR код</string>
     <string name="unset">Сбросить</string>
     <string name="connection_status">Статус соединения</string>
     <string name="application_icon">значок приложения</string>
     <string name="unknown_username">Неизвестное имя пользователя</string>
-    <string name="user_avatar">Аватар</string>
     <string name="sample_message">Эй, я нашел тайник, он здесь, рядом с большим тигром. Я немного напуган.</string>
     <string name="send_text">Отправить текст</string>
     <string name="warning_not_paired">Вы еще не подключили к телефону устройство, совместимое с Meshtastic радио. Пожалуйста, подключите устройство и задайте имя пользователя.\n\nЭто приложение с открытым исходным кодом находится в альфа-тестировании, если вы обнаружите проблемы, пожалуйста, напишите в чате на нашем сайте.\n\nДля получения дополнительной информации посетите нашу веб-страницу - www.meshtastic.org.</string>
-    <string name="username_unset">Имя пользователя не установлено</string>
     <string name="your_name">Ваше имя</string>
     <string name="analytics_okay">Анонимная статистика использования и отчеты о сбоях.</string>
     <string name="looking_for_meshtastic_devices">Поиск устройств Meshtastic…</string>
     <string name="starting_pairing">Сопряжение</string>
-    <string name="pairing_failed">Ошибка сопряжения</string>
     <string name="url_for_join">URL для присоединения к сети Meshtastic</string>
     <string name="accept">Принять</string>
     <string name="cancel">Отмена</string>
