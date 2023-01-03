@@ -159,8 +159,12 @@ class UIViewModel @Inject constructor(
             .filter { it.value.port_num == Portnums.PortNum.WAYPOINT_APP_VALUE }
     }.asLiveData()
 
-    fun sendMessage(str: String, channel: Int = 0, dest: String = DataPacket.ID_BROADCAST) {
-        val p = DataPacket(dest, channel, str)
+    fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
+        // contactKey: unique contact key filter (channel)+(nodeId)
+        val channel = contactKey[0].digitToIntOrNull()
+        val dest = if (channel != null) contactKey.substring(1) else contactKey
+
+        val p = DataPacket(dest, channel ?: 0, str)
         try {
             meshService?.send(p)
         } catch (ex: RemoteException) {

@@ -259,21 +259,12 @@ class MessagesFragment : Fragment(), Logging {
             binding.messageTitle.text = contactName
         }
 
-        // contactKey: unique contact key filter (channel)+(nodeId)
-        fun sendMessage(str: String, contactKey: String) {
-            model.sendMessage(
-                str,
-                contactKey[0].digitToInt(), // Channel
-                contactKey.substring(1) // NodeID
-            )
-        }
-
         binding.sendButton.setOnClickListener {
             debug("User clicked sendButton")
 
             val str = binding.messageInputText.text.toString().trim()
             if (str.isNotEmpty())
-                sendMessage(str, contactKey)
+                model.sendMessage(str, contactKey)
             binding.messageInputText.setText("") // blow away the string the user just entered
 
             // requireActivity().hideKeyboard()
@@ -283,7 +274,7 @@ class MessagesFragment : Fragment(), Logging {
             debug("did IME action")
 
             val str = binding.messageInputText.text.toString().trim()
-            if (str.isNotEmpty()) sendMessage(str, contactKey)
+            if (str.isNotEmpty()) model.sendMessage(str, contactKey)
             binding.messageInputText.setText("") // blow away the string the user just entered
 
             // requireActivity().hideKeyboard()
@@ -335,7 +326,7 @@ class MessagesFragment : Fragment(), Logging {
                             binding.messageInputText.setText(newText)
                             binding.messageInputText.setSelection(newText.length)
                         } else {
-                            sendMessage(action.message, contactKey)
+                            model.sendMessage(action.message, contactKey)
                         }
                     }
                     binding.quickChatLayout.addView(button)
