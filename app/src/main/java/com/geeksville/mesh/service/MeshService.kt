@@ -219,27 +219,6 @@ class MeshService : Service(), Logging {
             getSenderName(message), message.bytes!!.decodeToString()
         )
 
-    /**
-     * tell android not to kill us
-     */
-    private fun startForeground() {
-        val a = radioInterfaceService.getBondedDeviceAddress()
-        val wantForeground = a != null && a != "n"
-
-        info("Requesting foreground service=$wantForeground")
-
-        // We always start foreground because that's how our service is always started (if we didn't then android would kill us)
-        // but if we don't really need foreground we immediately stop it.
-        val notification = serviceNotifications.createServiceStateNotification(
-            notificationSummary
-        )
-
-        startForeground(serviceNotifications.notifyId, notification)
-        if (!wantForeground) {
-            stopForeground(true)
-        }
-    }
-
     override fun onCreate() {
         super.onCreate()
 
@@ -266,8 +245,6 @@ class MeshService : Service(), Logging {
      * If someone binds to us, this will be called after on create
      */
     override fun onBind(intent: Intent?): IBinder {
-        startForeground()
-
         return binder
     }
 
@@ -275,9 +252,22 @@ class MeshService : Service(), Logging {
      * If someone starts us (or restarts us) this will be called after onCreate)
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        startForeground()
+        val a = radioInterfaceService.getBondedDeviceAddress()
+        val wantForeground = a != null && a != "n"
 
-        return super.onStartCommand(intent, flags, startId)
+        info("Requesting foreground service=$wantForeground")
+
+        // We always start foreground because that's how our service is always started (if we didn't then android would kill us)
+        // but if we don't really need foreground we immediately stop it.
+        val notification = serviceNotifications.createServiceStateNotification(notificationSummary)
+
+        startForeground(serviceNotifications.notifyId, notification)
+        return if (!wantForeground) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            START_NOT_STICKY
+        } else {
+            START_STICKY
+        }
     }
 
     override fun onDestroy() {
