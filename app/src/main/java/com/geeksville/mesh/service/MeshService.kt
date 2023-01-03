@@ -275,7 +275,7 @@ class MeshService : Service(), Logging {
 
         saveSettings()
 
-        stopForeground(true) // Make sure we aren't using the notification first
+        stopForeground(STOP_FOREGROUND_REMOVE) // Make sure we aren't using the notification first
         serviceNotifications.close()
 
         super.onDestroy()
