@@ -586,19 +586,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     }
 
     private fun showSnackbar(msg: String) {
-        try {
-            Snackbar.make(
-                requireView(),
-                msg,
-                Snackbar.LENGTH_INDEFINITE
-            )
+        if (isAdded) {
+            Snackbar.make(binding.root, msg, Snackbar.LENGTH_INDEFINITE)
                 .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
                 .setAction(R.string.okay) {
                     // dismiss
                 }
                 .show()
-        } catch (ex: IllegalStateException) {
-            errormsg("Snackbar couldn't find view for msgString $msg")
         }
     }
 
