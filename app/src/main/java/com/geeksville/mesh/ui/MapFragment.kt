@@ -43,6 +43,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.*
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import java.io.File
+import kotlin.math.log2
 
 
 @AndroidEntryPoint
@@ -60,7 +61,6 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
     // constants
     private val defaultMinZoom = 1.5
     private val defaultMaxZoom = 18.0
-    private val nodeZoomLevel = 8.5
     private val defaultZoomSpeed = 3000L
     private val prefsName = "org.geeksville.osm.prefs"
     private val mapStyleId = "map_style_id"
@@ -454,9 +454,9 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
          */
         // Find all nodes with valid locations
         fun getCurrentNodes(): List<MarkerWithLabel> {
+            debug("Showing on map: ${nodesWithPosition.size} nodes")
             val mrkr = nodesWithPosition.map { node ->
                 val p = node.position!!
-                debug("Showing on map: $node")
                 lateinit var marker: MarkerWithLabel
                 node.user?.let {
                     val label = it.longName + " " + formatAgo(p.time)
@@ -581,6 +581,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
         val nodesWithPosition =
             model.nodeDB.nodes.value?.values?.filter { it.validPosition != null }
         if ((nodesWithPosition != null) && nodesWithPosition.isNotEmpty()) {
+            val maximumZoomLevel = map.tileProvider.tileSource.maximumZoomLevel.toDouble()
             if (nodesWithPosition.size >= 2) {
                 // Multiple nodes, make them all fit on the map view
                 nodesWithPosition.forEach {
@@ -592,12 +593,20 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
                 }
                 val box = BoundingBox.fromGeoPoints(points)
                 val point = GeoPoint(box.centerLatitude, box.centerLongitude)
-                controller.animateTo(point, nodeZoomLevel, defaultZoomSpeed)
+                val topLeft = GeoPoint(box.latNorth, box.lonWest)
+                val bottomRight = GeoPoint(box.latSouth, box.lonEast)
+                val latLonWidth = topLeft.distanceToAsDouble(GeoPoint(topLeft.latitude, bottomRight.longitude))
+                val latLonHeight = topLeft.distanceToAsDouble(GeoPoint(bottomRight.latitude, topLeft.longitude))
+                val requiredLatZoom = log2(360.0 / (latLonHeight / 111320))
+                val requiredLonZoom = log2(360.0 / (latLonWidth / 111320))
+                val requiredZoom = requiredLatZoom.coerceAtLeast(requiredLonZoom)
+                val finalZoomLevel = (requiredZoom * 0.8).coerceAtMost(maximumZoomLevel)
+                controller.animateTo(point, finalZoomLevel, defaultZoomSpeed)
             } else {
                 // Only one node, just zoom in on it
                 val it = nodesWithPosition[0].position!!
                 points.add(GeoPoint(it.latitude, it.longitude))
-                controller.animateTo(points[0], nodeZoomLevel, defaultZoomSpeed)
+                controller.animateTo(points[0], maximumZoomLevel, defaultZoomSpeed)
             }
         }
     }
