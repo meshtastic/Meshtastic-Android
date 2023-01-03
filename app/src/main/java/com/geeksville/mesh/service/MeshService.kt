@@ -660,10 +660,8 @@ class MeshService : Service(), Logging {
                         shouldBroadcast =
                             true // We always send acks to other apps, because they might care about the messages they sent
                         val u = MeshProtos.Routing.parseFrom(data.payload)
-                        if (u.errorReasonValue == MeshProtos.Routing.Error.NONE_VALUE)
-                            handleAckNak(true, data.requestId)
-                        else
-                            handleAckNak(false, data.requestId)
+                        val isAck = u.errorReasonValue == MeshProtos.Routing.Error.NONE_VALUE
+                        handleAckNak(isAck, fromId, data.requestId)
                     }
 
                     Portnums.PortNum.ADMIN_APP_VALUE -> {
@@ -778,9 +776,6 @@ class MeshService : Service(), Logging {
     /// If apps try to send packets when our radio is sleeping, we queue them here instead
     private val offlineSentPackets = mutableListOf<DataPacket>()
 
-    /** Keep a record of recently sent packets, so we can properly handle ack/nak */
-    private val sentPackets = mutableMapOf<Int, DataPacket>()
-
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
         if (haveNodeDB) {
@@ -824,6 +819,7 @@ class MeshService : Service(), Logging {
      * Change the status on a data packet and update watchers
      */
     private fun changeStatus(p: DataPacket, m: MessageStatus) {
+        if (p.status == m) return
         serviceScope.handledLaunch {
             packetRepository.get().updateMessageStatus(p, m)
         }
@@ -833,9 +829,17 @@ class MeshService : Service(), Logging {
     /**
      * Handle an ack/nak packet by updating sent message status
      */
-    private fun handleAckNak(isAck: Boolean, id: Int) {
-        sentPackets.remove(id)?.let { p ->
-            changeStatus(p, if (isAck) MessageStatus.DELIVERED else MessageStatus.ERROR)
+    private fun handleAckNak(isAck: Boolean, fromId: String?, requestId: Int) {
+        serviceScope.handledLaunch {
+            val p = packetRepository.get().getDataPacketById(requestId)
+            if (p != null && p.status != MessageStatus.RECEIVED) {
+                val m = when {
+                    isAck && fromId == p.to -> MessageStatus.RECEIVED
+                    isAck -> MessageStatus.DELIVERED
+                    else -> MessageStatus.ERROR
+                }
+                changeStatus(p, m)
+            }
         }
     }
 
@@ -1546,28 +1550,6 @@ class MeshService : Service(), Logging {
         }
     }
 
-    /**
-     * Remove any sent packets that have been sitting around too long
-     *
-     * Note: we give each message what the timeout the device code is using, though in the normal
-     * case the device will fail after 3 retries much sooner than that (and it will provide a nak to us)
-     */
-    private fun deleteOldPackets() {
-        myNodeInfo?.apply {
-            val now = System.currentTimeMillis()
-
-            val old = sentPackets.values.filter { p ->
-                (p.status == MessageStatus.ENROUTE && p.time + messageTimeoutMsec < now)
-            }
-
-            // Do this using a separate list to prevent concurrent modification exceptions
-            old.forEach { p ->
-                handleAckNak(false, p.id)
-            }
-        }
-    }
-
-
     private fun enqueueForSending(p: DataPacket) {
         p.status = MessageStatus.QUEUED
         offlineSentPackets.add(p)
@@ -1641,11 +1623,6 @@ class MeshService : Service(), Logging {
 
                 // Keep a record of datapackets, so GUIs can show proper chat history
                 rememberDataPacket(p)
-
-                if (p.id != 0) { // If we have an ID we can wait for an ack or nak
-                    deleteOldPackets()
-                    sentPackets[p.id] = p
-                }
 
                 GeeksvilleApplication.analytics.track(
                     "data_send",

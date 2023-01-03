@@ -167,6 +167,7 @@ class MessagesFragment : Fragment(), Logging {
             holder.messageTime.text = getShortDateTime(Date(msg.time))
 
             val icon = when (msg.status) {
+                MessageStatus.RECEIVED -> R.drawable.ic_twotone_how_to_reg_24
                 MessageStatus.QUEUED -> R.drawable.ic_twotone_cloud_upload_24
                 MessageStatus.DELIVERED -> R.drawable.cloud_on
                 MessageStatus.ENROUTE -> R.drawable.ic_twotone_cloud_24
@@ -174,11 +175,17 @@ class MessagesFragment : Fragment(), Logging {
                 else -> null
             }
 
-            if (icon != null) {
+            if (icon != null && isLocal) {
                 holder.messageStatusIcon.setImageResource(icon)
                 holder.messageStatusIcon.visibility = View.VISIBLE
             } else
                 holder.messageStatusIcon.visibility = View.GONE
+
+            holder.messageStatusIcon.setOnClickListener {
+                if (isAdded) {
+                    Toast.makeText(context, "${msg.status}", Toast.LENGTH_SHORT).show()
+                }
+            }
 
             holder.itemView.setOnLongClickListener {
                 clickItem(holder)
