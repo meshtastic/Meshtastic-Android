@@ -47,4 +47,12 @@ interface PacketDao {
         val new = data.copy(status = m)
         findDataPacket(data)?.let { update(it.copy(data = new)) }
     }
+
+    @Query("Select data from packet")
+    fun getDataPackets(): List<DataPacket>
+
+    @Transaction
+    fun getDataPacketById(requestId: Int): DataPacket? {
+        return getDataPackets().firstOrNull { it.id == requestId }
+    }
 }
