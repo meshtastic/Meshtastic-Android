@@ -263,7 +263,7 @@ class MeshService : Service(), Logging {
 
         startForeground(serviceNotifications.notifyId, notification)
         return if (!wantForeground) {
-            stopForeground(true)
+            stopForeground(STOP_FOREGROUND_REMOVE)
             START_NOT_STICKY
         } else {
             START_STICKY
