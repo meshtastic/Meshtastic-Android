@@ -720,6 +720,19 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
+            EditTextPreference(title = "Ignore incoming", // FIXME use proper Composable component
+                value = loraInput.ignoreIncomingList.getOrNull(0) ?: 0,
+                enabled = connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    loraInput = loraInput.copy {
+                        if (loraInput.ignoreIncomingCount == 0) ignoreIncoming.add(it)
+                        else ignoreIncoming[0] = it
+                    }
+                })
+        }
+
+        item {
             PreferenceFooter(
                 enabled = loraInput != localConfig.lora,
                 onCancelClicked = {
