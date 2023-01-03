@@ -282,6 +282,80 @@ fun ModuleSettingsItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
+            EditTextPreference(title = "Output vibra",
+                value = externalNotificationInput.outputVibra,
+                enabled = connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    externalNotificationInput = externalNotificationInput.copy { outputVibra = it }
+                })
+        }
+
+        item {
+            EditTextPreference(title = "Output buzzer",
+                value = externalNotificationInput.outputBuzzer,
+                enabled = connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    externalNotificationInput = externalNotificationInput.copy { outputBuzzer = it }
+                })
+        }
+
+        item {
+            SwitchPreference(title = "Alert message vibra",
+                checked = externalNotificationInput.alertMessageVibra,
+                enabled = connected,
+                onCheckedChange = {
+                    externalNotificationInput =
+                        externalNotificationInput.copy { alertMessageVibra = it }
+                })
+        }
+        item { Divider() }
+
+        item {
+            SwitchPreference(title = "Alert message buzzer",
+                checked = externalNotificationInput.alertMessageBuzzer,
+                enabled = connected,
+                onCheckedChange = {
+                    externalNotificationInput =
+                        externalNotificationInput.copy { alertMessageBuzzer = it }
+                })
+        }
+        item { Divider() }
+
+        item {
+            SwitchPreference(title = "Alert bell vibra",
+                checked = externalNotificationInput.alertBellVibra,
+                enabled = connected,
+                onCheckedChange = {
+                    externalNotificationInput =
+                        externalNotificationInput.copy { alertBellVibra = it }
+                })
+        }
+        item { Divider() }
+
+        item {
+            SwitchPreference(title = "Alert bell buzzer",
+                checked = externalNotificationInput.alertBellBuzzer,
+                enabled = connected,
+                onCheckedChange = {
+                    externalNotificationInput =
+                        externalNotificationInput.copy { alertBellBuzzer = it }
+                })
+        }
+        item { Divider() }
+
+        item {
+            EditTextPreference(title = "Nag timeout",
+                value = externalNotificationInput.nagTimeout,
+                enabled = connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    externalNotificationInput = externalNotificationInput.copy { nagTimeout = it }
+                })
+        }
+
+        item {
             PreferenceFooter(
                 enabled = externalNotificationInput != moduleConfig.externalNotification,
                 onCancelClicked = {
