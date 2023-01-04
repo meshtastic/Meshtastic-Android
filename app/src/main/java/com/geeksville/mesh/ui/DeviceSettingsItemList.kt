@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.ConfigProtos.Config.NetworkConfig
 import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.UIViewModel
@@ -466,11 +467,11 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         item {
             DropDownPreference(title = "Ethernet mode",
                 enabled = connected,
-                items = ConfigProtos.Config.NetworkConfig.EthMode.values()
-                    .filter { it != ConfigProtos.Config.NetworkConfig.EthMode.UNRECOGNIZED }
+                items = NetworkConfig.AddressMode.values()
+                    .filter { it != NetworkConfig.AddressMode.UNRECOGNIZED }
                     .map { it to it.name },
-                selectedItem = networkInput.ethMode,
-                onItemSelected = { networkInput = networkInput.copy { ethMode = it } })
+                selectedItem = networkInput.addressMode,
+                onItemSelected = { networkInput = networkInput.copy { addressMode = it } })
         }
         item { Divider() }
 
@@ -479,7 +480,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         item {
             EditTextPreference(title = "IP",
                 value = networkInput.ipv4Config.ip,
-                enabled = connected && networkInput.ethMode == ConfigProtos.Config.NetworkConfig.EthMode.STATIC,
+                enabled = connected && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     val ipv4 = networkInput.ipv4Config.copy { ip = it }
@@ -490,7 +491,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         item {
             EditTextPreference(title = "Gateway",
                 value = networkInput.ipv4Config.gateway,
-                enabled = connected && networkInput.ethMode == ConfigProtos.Config.NetworkConfig.EthMode.STATIC,
+                enabled = connected && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     val ipv4 = networkInput.ipv4Config.copy { gateway = it }
@@ -501,7 +502,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         item {
             EditTextPreference(title = "Subnet",
                 value = networkInput.ipv4Config.subnet,
-                enabled = connected && networkInput.ethMode == ConfigProtos.Config.NetworkConfig.EthMode.STATIC,
+                enabled = connected && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     val ipv4 = networkInput.ipv4Config.copy { subnet = it }
@@ -512,7 +513,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         item {
             EditTextPreference(title = "DNS",
                 value = networkInput.ipv4Config.dns,
-                enabled = connected && networkInput.ethMode == ConfigProtos.Config.NetworkConfig.EthMode.STATIC,
+                enabled = connected && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     val ipv4 = networkInput.ipv4Config.copy { dns = it }
