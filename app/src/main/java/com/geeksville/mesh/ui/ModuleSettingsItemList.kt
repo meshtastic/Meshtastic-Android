@@ -44,6 +44,7 @@ fun ModuleSettingsItemList(viewModel: UIViewModel) {
     var telemetryInput by remember(moduleConfig.telemetry) { mutableStateOf(moduleConfig.telemetry) }
     var cannedMessageInput by remember(moduleConfig.cannedMessage) { mutableStateOf(moduleConfig.cannedMessage) }
     var audioInput by remember(moduleConfig.audio) { mutableStateOf(moduleConfig.audio) }
+    var remoteHardwareInput by remember(moduleConfig.remoteHardware) { mutableStateOf(moduleConfig.remoteHardware) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -741,6 +742,31 @@ fun ModuleSettingsItemList(viewModel: UIViewModel) {
                 onSaveClicked = {
                     focusManager.clearFocus()
                     viewModel.updateAudioConfig { audioInput }
+                })
+        }
+
+        item { PreferenceCategory(text = "Remote Hardware Config") }
+
+        item {
+            SwitchPreference(title = "Remote Hardware enabled",
+                checked = remoteHardwareInput.enabled,
+                enabled = connected,
+                onCheckedChange = {
+                    remoteHardwareInput = remoteHardwareInput.copy { enabled = it }
+                })
+        }
+        item { Divider() }
+
+        item {
+            PreferenceFooter(
+                enabled = remoteHardwareInput != moduleConfig.remoteHardware,
+                onCancelClicked = {
+                    focusManager.clearFocus()
+                    remoteHardwareInput = moduleConfig.remoteHardware
+                },
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    viewModel.updateRemoteHardwareConfig { remoteHardwareInput }
                 })
         }
     }

@@ -604,6 +604,25 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
+            DropDownPreference(title = "Display mode",
+                enabled = connected,
+                items = ConfigProtos.Config.DisplayConfig.DisplayMode.values()
+                    .filter { it != ConfigProtos.Config.DisplayConfig.DisplayMode.UNRECOGNIZED }
+                    .map { it to it.name },
+                selectedItem = displayInput.displaymode,
+                onItemSelected = { displayInput = displayInput.copy { displaymode = it } })
+        }
+        item { Divider() }
+
+        item {
+            SwitchPreference(title = "Heading bold",
+                checked = displayInput.headingBold,
+                enabled = connected,
+                onCheckedChange = { displayInput = displayInput.copy { headingBold = it } })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = displayInput != localConfig.display,
                 onCancelClicked = {

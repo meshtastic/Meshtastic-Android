@@ -45,6 +45,7 @@ class ModuleConfigRepository @Inject constructor(
         if (config.hasTelemetry()) setTelemetryConfig(config.telemetry)
         if (config.hasCannedMessage()) setCannedMessageConfig(config.cannedMessage)
         if (config.hasAudio()) setAudioConfig(config.audio)
+        if (config.hasRemoteHardware()) setRemoteHardwareConfig(config.remoteHardware)
     }
 
     private suspend fun setMQTTConfig(config: ModuleConfig.MQTTConfig) {
@@ -92,6 +93,12 @@ class ModuleConfigRepository @Inject constructor(
     private suspend fun setAudioConfig(config: ModuleConfig.AudioConfig) {
         moduleConfigStore.updateData { preference ->
             preference.toBuilder().setAudio(config).build()
+        }
+    }
+
+    private suspend fun setRemoteHardwareConfig(config: ModuleConfig.RemoteHardwareConfig) {
+        moduleConfigStore.updateData { preference ->
+            preference.toBuilder().setRemoteHardware(config).build()
         }
     }
 

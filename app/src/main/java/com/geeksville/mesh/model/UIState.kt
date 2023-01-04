@@ -367,6 +367,11 @@ class UIViewModel @Inject constructor(
         setModuleConfig(moduleConfig { audio = data })
     }
 
+    inline fun updateRemoteHardwareConfig(crossinline body: (ModuleConfig.RemoteHardwareConfig) -> ModuleConfig.RemoteHardwareConfig) {
+        val data = body(module.remoteHardware)
+        setModuleConfig(moduleConfig { remoteHardware = data })
+    }
+
     fun setModuleConfig(config: ModuleConfig) {
         meshService?.setModuleConfig(config.toByteArray())
     }
