@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.IBinder
 import android.os.RemoteException
+import androidx.core.app.ServiceCompat
 import androidx.core.content.edit
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
@@ -263,7 +264,7 @@ class MeshService : Service(), Logging {
 
         startForeground(serviceNotifications.notifyId, notification)
         return if (!wantForeground) {
-            stopForeground(STOP_FOREGROUND_REMOVE)
+            ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
             START_NOT_STICKY
         } else {
             START_STICKY
@@ -275,7 +276,8 @@ class MeshService : Service(), Logging {
 
         saveSettings()
 
-        stopForeground(STOP_FOREGROUND_REMOVE) // Make sure we aren't using the notification first
+        // Make sure we aren't using the notification first
+        ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         serviceNotifications.close()
 
         super.onDestroy()
