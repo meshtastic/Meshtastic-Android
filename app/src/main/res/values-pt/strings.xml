@@ -46,7 +46,7 @@
     <string name="none">Nenhum (desabilitado)</string>
     <string name="modem_config_short">Curto alcance / rápido</string>
     <string name="modem_config_medium">Médio alcance / rápido</string>
-    <string name="modem_config_long">Longo alcance / lento</string>
+    <string name="modem_config_long">Longo alcance / rápido</string>
     <string name="modem_config_very_long">Muito longo alcance / lento</string>
     <string name="modem_config_unrecognized">DESCONHECIDO</string>
     <string name="meshtastic_service_notifications">Notificações de serviço</string>
