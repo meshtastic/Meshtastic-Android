@@ -31,6 +31,7 @@ import com.geeksville.mesh.android.hideKeyboard
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.ModuleConfigProtos
 import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BTScanModel
@@ -306,23 +307,26 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         model.localConfig.asLiveData().observe(viewLifecycleOwner) {
             if (!model.isConnected()) {
                 val configCount = it.allFields.size
+                val configTotal = ConfigProtos.Config.getDescriptor().fields.size
                 if (configCount > 0)
-                    binding.scanStatusText.text = "Device config ($configCount / 7)"
+                    binding.scanStatusText.text = "Device config ($configCount / $configTotal)"
             } else updateNodeInfo()
         }
 
         model.moduleConfig.asLiveData().observe(viewLifecycleOwner) {
             if (!model.isConnected()) {
                 val moduleCount = it.allFields.size
+                val moduleTotal = ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size
                 if (moduleCount > 0)
-                    binding.scanStatusText.text = "Module config ($moduleCount / 8)"
+                    binding.scanStatusText.text = "Module config ($moduleCount / $moduleTotal)"
             } else updateNodeInfo()
         }
 
         model.channels.asLiveData().observe(viewLifecycleOwner) {
             if (!model.isConnected()) it.protobuf.let { ch ->
+                val maxChannels = model.myNodeInfo.value?.maxChannels
                 if (!ch.hasLoraConfig() && ch.settingsCount > 0)
-                    binding.scanStatusText.text = "Channels (${ch.settingsCount} / 8)"
+                    binding.scanStatusText.text = "Channels (${ch.settingsCount} / $maxChannels)"
             }
         }
 
@@ -502,7 +506,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     // per https://developer.android.com/guide/topics/connectivity/bluetooth/find-ble-devices
     private fun scanLeDevice() {
         var scanning = false
-        val SCAN_PERIOD: Long = 10000 // Stops scanning after 10 seconds
 
         if (!scanning) { // Stops scanning after a pre-defined scan period.
             Handler(Looper.getMainLooper()).postDelayed({
@@ -618,5 +621,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // Warn user if provide location is selected but location disabled
         if (binding.provideLocationCheckbox.isChecked)
             checkLocationEnabled(getString(R.string.location_disabled))
+    }
+    companion object {
+        const val SCAN_PERIOD: Long = 10000 // Stops scanning after 10 seconds
     }
 }
