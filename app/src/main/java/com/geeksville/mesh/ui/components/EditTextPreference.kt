@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui.components
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -113,6 +114,49 @@ fun EditTextPreference(
 }
 
 @Composable
+fun EditIPv4Preference(
+    title: String,
+    value: Int,
+    enabled: Boolean,
+    keyboardActions: KeyboardActions,
+    onValueChanged: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    fun convertIntToIpAddress(int: Int): String {
+        return "${int shr 24 and 0xff}.${int shr 16 and 0xff}.${int shr 8 and 0xff}.${int and 0xff}"
+    }
+    fun convertIpAddressToInt(ipAddress: String): Int? {
+        return ipAddress.split(".")
+            .map { it.toIntOrNull() }
+            .fold(0) { total, next ->
+                if (next == null) return null else total shl 8 or next
+            }
+    }
+    var valueState by remember(value) { mutableStateOf(convertIntToIpAddress(value)) }
+
+    EditTextPreference(
+        title = title,
+        value = valueState,
+        enabled = enabled,
+        isError = convertIntToIpAddress(value) != valueState,
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
+        ),
+        keyboardActions = keyboardActions,
+        onValueChanged = {
+            val pattern = """\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b""".toRegex()
+            val isValid = pattern.matches(it)
+            if (it.isEmpty() || !isValid) valueState = it
+            else convertIpAddressToInt(it)?.let { int ->
+                valueState = it
+                onValueChanged(int)
+            }
+        },
+        modifier = modifier
+    )
+}
+
+@Composable
 fun EditTextPreference(
     title: String,
     value: String,
@@ -142,11 +186,20 @@ fun EditTextPreference(
 @Preview(showBackground = true)
 @Composable
 private fun EditTextPreferencePreview() {
-    EditTextPreference(
-        title = "Advanced Settings",
-        value = UInt.MAX_VALUE.toInt(),
-        enabled = true,
-        keyboardActions = KeyboardActions {},
-        onValueChanged = {}
-    )
+    Column {
+        EditTextPreference(
+            title = "Advanced Settings",
+            value = UInt.MAX_VALUE.toInt(),
+            enabled = true,
+            keyboardActions = KeyboardActions {},
+            onValueChanged = {}
+        )
+        EditIPv4Preference(
+            title = "IP Address",
+            value = 3232235521.toInt(),
+            enabled = true,
+            keyboardActions = KeyboardActions {},
+            onValueChanged = {}
+        )
+    }
 }

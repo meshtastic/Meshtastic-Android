@@ -26,6 +26,7 @@ import com.geeksville.mesh.model.getInitials
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.BitwisePreference
 import com.geeksville.mesh.ui.components.DropDownPreference
+import com.geeksville.mesh.ui.components.EditIPv4Preference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
@@ -478,7 +479,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         item { PreferenceCategory(text = "IPv4 Config") }
 
         item {
-            EditTextPreference(title = "IP",
+            EditIPv4Preference(title = "IP",
                 value = networkInput.ipv4Config.ip,
                 enabled = connected && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -489,7 +490,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         }
 
         item {
-            EditTextPreference(title = "Gateway",
+            EditIPv4Preference(title = "Gateway",
                 value = networkInput.ipv4Config.gateway,
                 enabled = connected && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -500,7 +501,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         }
 
         item {
-            EditTextPreference(title = "Subnet",
+            EditIPv4Preference(title = "Subnet",
                 value = networkInput.ipv4Config.subnet,
                 enabled = connected && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -511,7 +512,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         }
 
         item {
-            EditTextPreference(title = "DNS",
+            EditIPv4Preference(title = "DNS",
                 value = networkInput.ipv4Config.dns,
                 enabled = connected && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
