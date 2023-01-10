@@ -50,10 +50,10 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
         val s = socket
         if (s != null) {
             debug("Closing TCP socket")
-            socket = null
             outStream.close()
             inStream.close()
             s.close()
+            socket = null
         }
         super.onDeviceDisconnect(waitForStopped)
     }
