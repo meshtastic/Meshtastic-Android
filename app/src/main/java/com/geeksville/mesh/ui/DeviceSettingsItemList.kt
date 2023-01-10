@@ -466,7 +466,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
-            DropDownPreference(title = "Ethernet mode",
+            DropDownPreference(title = "IPv4 mode",
                 enabled = connected,
                 items = NetworkConfig.AddressMode.values()
                     .filter { it != NetworkConfig.AddressMode.UNRECOGNIZED }
