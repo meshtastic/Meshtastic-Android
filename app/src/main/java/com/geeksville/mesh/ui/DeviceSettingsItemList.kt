@@ -792,7 +792,10 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
                 value = bluetoothInput.fixedPin,
                 enabled = connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { bluetoothInput = bluetoothInput.copy { fixedPin = it } })
+                onValueChanged = {
+                    if (it.toString().length == 6) // ensure 6 digits
+                        bluetoothInput = bluetoothInput.copy { fixedPin = it }
+                })
         }
 
         item {
