@@ -203,6 +203,16 @@ class MeshService : Service(), Logging {
         if (SoftwareUpdateService.isUpdating) throw IsUpdatingException()
 
         radioInterfaceService.sendToRadio(b)
+
+        if (p.packet.hasDecoded()) {
+            val packetToSave = MeshLog(
+                UUID.randomUUID().toString(),
+                "Packet",
+                System.currentTimeMillis(),
+                p.packet.toString()
+            )
+            insertMeshLog(packetToSave)
+        }
     }
 
     /**
@@ -779,16 +789,6 @@ class MeshService : Service(), Logging {
         p.time = System.currentTimeMillis() // update time to the actual time we started sending
         // debug("Sending to radio: ${packet.toPIIString()}")
         sendToRadio(packet)
-
-        if (packet.hasDecoded()) {
-            val packetToSave = MeshLog(
-                UUID.randomUUID().toString(),
-                "Packet",
-                System.currentTimeMillis(),
-                packet.toString()
-            )
-            insertMeshLog(packetToSave)
-        }
     }
 
     private fun processQueuedPackets() {
