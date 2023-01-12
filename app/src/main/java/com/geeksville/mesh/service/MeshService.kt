@@ -100,7 +100,7 @@ class MeshService : Service(), Logging {
         const val ACTION_MESSAGE_STATUS = "$prefix.MESSAGE_STATUS"
 
         open class NodeNotFoundException(reason: String) : Exception(reason)
-        class InvalidNodeIdException : NodeNotFoundException("Invalid NodeId")
+        class InvalidNodeIdException(id: String) : NodeNotFoundException("Invalid NodeId $id")
         class NodeNumNotFoundException(id: Int) : NodeNotFoundException("NodeNum not found $id")
         class IdNotFoundException(id: String) : NodeNotFoundException("ID not found $id")
 
@@ -188,20 +188,19 @@ class MeshService : Service(), Logging {
         if (locationFlow?.isActive == true) {
             debug("Stopping location requests")
             locationFlow?.cancel()
+            locationFlow = null
         }
     }
 
-    /** Send a command/packet to our radio.  But cope with the possiblity that we might start up
+    /** Send a command/packet to our radio.  But cope with the possibility that we might start up
     before we are fully bound to the RadioInterfaceService
-    @param requireConnected set to false if you are okay with using a partially connected device (i.e. during startup)
      */
     private fun sendToRadio(p: ToRadio.Builder) {
         val built = p.build()
         debug("Sending to radio ${built.toPIIString()}")
         val b = built.toByteArray()
 
-        if (SoftwareUpdateService.isUpdating)
-            throw IsUpdatingException()
+        if (SoftwareUpdateService.isUpdating) throw IsUpdatingException()
 
         radioInterfaceService.sendToRadio(b)
     }
@@ -368,14 +367,12 @@ class MeshService : Service(), Logging {
     /// END OF MODEL
     ///
 
-    val deviceVersion get() = DeviceVersion(myNodeInfo?.firmwareVersion ?: "")
-    val appVersion get() = BuildConfig.VERSION_CODE
-    val minAppVersion get() = myNodeInfo?.minAppVersion ?: 0
+    private val deviceVersion get() = DeviceVersion(myNodeInfo?.firmwareVersion ?: "")
+    private val appVersion get() = BuildConfig.VERSION_CODE
+    private val minAppVersion get() = myNodeInfo?.minAppVersion ?: 0
 
     /// Map a nodenum to a node, or throw an exception if not found
-    private fun toNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: throw NodeNumNotFoundException(
-        n
-    )
+    private fun toNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: throw NodeNumNotFoundException(n)
 
     /**
      * Return the nodeinfo for the local node, or null if not found
@@ -388,15 +385,13 @@ class MeshService : Service(), Logging {
                 null
             }
 
-    /** Map a nodenum to the nodeid string, or return null if not present
+    /** Map a nodeNum to the nodeId string
     If we have a NodeInfo for this ID we prefer to return the string ID inside the user record.
     but some nodes might not have a user record at all (because not yet received), in that case, we return
     a hex version of the ID just based on the number */
-    private fun toNodeID(n: Int): String? =
-        if (n == DataPacket.NODENUM_BROADCAST)
-            DataPacket.ID_BROADCAST
-        else
-            nodeDBbyNodeNum[n]?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
+    private fun toNodeID(n: Int): String =
+        if (n == DataPacket.NODENUM_BROADCAST) DataPacket.ID_BROADCAST
+        else nodeDBbyNodeNum[n]?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
 
     /// given a nodenum, return a db entry - creating if necessary
     private fun getOrCreateNodeInfo(n: Int) =
@@ -416,7 +411,7 @@ class MeshService : Service(), Logging {
                 val n = hexStr.toLong(16).toInt()
                 nodeDBbyNodeNum[n] ?: throw IdNotFoundException(id)
             }
-            else -> throw InvalidNodeIdException()
+            else -> throw InvalidNodeIdException(id)
         }
     }
 
@@ -540,28 +535,16 @@ class MeshService : Service(), Logging {
             // If the rxTime was not set by the device (because device software was old), guess at a time
             val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
 
-            when {
-                fromId == null -> {
-                    errormsg("Ignoring data from ${packet.from} because we don't yet know its ID")
-                    null
-                }
-                toId == null -> {
-                    errormsg("Ignoring data to ${packet.to} because we don't yet know its ID")
-                    null
-                }
-                else -> {
-                    DataPacket(
-                        from = fromId,
-                        to = toId,
-                        time = rxTime * 1000L,
-                        id = packet.id,
-                        dataType = data.portnumValue,
-                        bytes = bytes,
-                        hopLimit = hopLimit,
-                        channel = packet.channel,
-                    )
-                }
-            }
+            DataPacket(
+                from = fromId,
+                to = toId,
+                time = rxTime * 1000L,
+                id = packet.id,
+                dataType = data.portnumValue,
+                bytes = bytes,
+                hopLimit = hopLimit,
+                channel = packet.channel,
+            )
         }
     }
 
@@ -824,8 +807,8 @@ class MeshService : Service(), Logging {
         if (p.status == m) return
         serviceScope.handledLaunch {
             packetRepository.get().updateMessageStatus(p, m)
+            serviceBroadcasts.broadcastMessageStatus(p.copy(status = m))
         }
-        serviceBroadcasts.broadcastMessageStatus(p.copy(status = m))
     }
 
     /**
@@ -1552,11 +1535,6 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private fun enqueueForSending(p: DataPacket) {
-        p.status = MessageStatus.QUEUED
-        offlineSentPackets.add(p)
-    }
-
     private val binder = object : IMeshService.Stub() {
 
         override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
@@ -1595,8 +1573,7 @@ class MeshService : Service(), Logging {
 
         override fun send(p: DataPacket) {
             toRemoteExceptions {
-                // Init from and id
-                myNodeID?.let { if (p.id == 0) p.id = generatePacketId() }
+                if (p.id == 0) p.id = generatePacketId()
 
                 info("sendData dest=${p.to}, id=${p.id} <- ${p.bytes!!.size} bytes (connectionState=$connectionState)")
 
@@ -1606,24 +1583,16 @@ class MeshService : Service(), Logging {
                 if (p.bytes.size >= MeshProtos.Constants.DATA_PAYLOAD_LEN.number) {
                     p.status = MessageStatus.ERROR
                     throw RemoteException("Message too long")
-                }
+                } else p.status = MessageStatus.QUEUED
 
-                // If radio is sleeping or disconnected, queue the packet
-                when (connectionState) {
-                    ConnectionState.CONNECTED ->
-                        try {
-                            sendNow(p)
-                        } catch (ex: Exception) {
-                            // This can happen if a user is unlucky and the device goes to sleep after the GUI starts a send, but before we update connectionState
-                            errormsg("Error sending message, so enqueueing", ex)
-                            enqueueForSending(p)
-                        }
-                    else -> // sleeping or disconnected
-                        enqueueForSending(p)
+                if (connectionState == ConnectionState.CONNECTED) try {
+                    sendNow(p)
+                } catch (ex: Exception) {
+                    errormsg("Error sending message, so enqueueing", ex)
                 }
                 serviceBroadcasts.broadcastMessageStatus(p)
 
-                // Keep a record of datapackets, so GUIs can show proper chat history
+                // Keep a record of DataPackets, so GUIs can show proper chat history
                 rememberDataPacket(p)
 
                 GeeksvilleApplication.analytics.track(
