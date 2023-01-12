@@ -765,12 +765,6 @@ class MeshService : Service(), Logging {
         }
     }
 
-    /// If packets arrive before we have our node DB, we delay parsing them until the DB is ready
-    // private val earlyReceivedPackets = mutableListOf<MeshPacket>()
-
-    /// If apps try to send packets when our radio is sleeping, we queue them here instead
-    private val offlineSentPackets = mutableListOf<DataPacket>()
-
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
         if (haveNodeDB) {
@@ -792,12 +786,16 @@ class MeshService : Service(), Logging {
     }
 
     private fun processQueuedPackets() {
-        offlineSentPackets.forEach { p ->
-            // encapsulate our payload in the proper protobufs and fire it off
-            sendNow(p)
-            changeStatus(p, MessageStatus.ENROUTE)
+        serviceScope.handledLaunch {
+            packetRepository.get().getQueuedPackets()?.forEach { p ->
+                try {
+                    sendNow(p)
+                    changeStatus(p, MessageStatus.ENROUTE)
+                } catch (ex: Exception) {
+                    errormsg("Error sending queued message:", ex)
+                }
+            }
         }
-        offlineSentPackets.clear()
     }
 
     /**

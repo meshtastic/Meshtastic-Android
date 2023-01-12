@@ -48,11 +48,15 @@ interface PacketDao {
         findDataPacket(data)?.let { update(it.copy(data = new)) }
     }
 
-    @Query("Select data from packet")
+    @Query("Select data from packet order by received_time asc")
     fun getDataPackets(): List<DataPacket>
 
     @Transaction
     fun getDataPacketById(requestId: Int): DataPacket? {
         return getDataPackets().firstOrNull { it.id == requestId }
     }
+
+    @Transaction
+    fun getQueuedPackets(): List<DataPacket>? =
+        getDataPackets().filter { it.status in setOf(MessageStatus.ENROUTE, MessageStatus.QUEUED) }
 }

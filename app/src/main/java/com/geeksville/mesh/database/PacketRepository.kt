@@ -18,6 +18,10 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
         packetDao.getAllPackets()
     }
 
+    suspend fun getQueuedPackets(): List<DataPacket>? = withContext(Dispatchers.IO) {
+        packetDao.getQueuedPackets()
+    }
+
     suspend fun insert(packet: Packet) = withContext(Dispatchers.IO) {
         packetDao.insert(packet)
     }
