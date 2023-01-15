@@ -123,8 +123,8 @@
     <string name="intro_show">Show Introduction</string>
     <string name="intro_welcome">Welcome to Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic is an open-source, off-grid, encrypted communication platform. The Meshtastic radios form a mesh network and communicate using the LoRa protocol to send text messages.</string>
-    <string name="intro_started">...Let\'s get started!</string>
-    <string name="intro_started_text">Connect your meshtastic device by using either Bluetooth, Serial or WiFi. \n\nYou can see which devices are compatible at www.meshtastic.org/docs/hardware</string>
+    <string name="intro_started">…Let\'s get started!</string>
+    <string name="intro_started_text">Connect your Meshtastic device by using either Bluetooth, Serial or WiFi. \n\nYou can see which devices are compatible at www.meshtastic.org/docs/hardware</string>
     <string name="intro_encryption">"Setting up encryption"</string>
     <string name="intro_encryption_text">As standard, a default encryption key is set. To enable your own channel and enhanced encryption, go to the channel tab and change the channel name, this will set a random key for AES256 encryption. \n\nTo communicate with other devices they will need to scan your QR code or follow the shared link to configure the channel settings.</string>
     <string name="message">Message</string>
@@ -136,7 +136,7 @@
     <string name="warning_default_psk">Empty channel names use the default encryption key (any device on %s can read your messages).</string>
     <string name="factory_reset">Factory reset</string>
     <string name="factory_reset_description">This will clear all device configuration you have done.</string>
-    <string name="bluetooth_disabled">Bluetooth disabled.</string>
+    <string name="bluetooth_disabled">Bluetooth disabled</string>
     <string name="permission_missing_31">Meshtastic needs Nearby devices permission to find and connect to devices via Bluetooth. You can turn it off when not in use.</string>
     <string name="direct_message">Direct Message</string>
     <string name="nodedb_reset">NodeDB reset</string>
