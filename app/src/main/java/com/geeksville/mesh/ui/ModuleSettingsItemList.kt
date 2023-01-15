@@ -69,7 +69,7 @@ fun ModuleSettingsItemList(viewModel: UIViewModel) {
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { value ->
-                    if (value.toByteArray().size <= 31) // address max_size:32
+                    if (value.toByteArray().size <= 63) // address max_size:64
                         mqttInput = mqttInput.copy { address = value }
                 })
         }
