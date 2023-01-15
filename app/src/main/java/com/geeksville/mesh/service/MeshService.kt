@@ -737,11 +737,10 @@ class MeshService : Service(), Logging {
         p: MeshProtos.Position,
         defaultTime: Long = System.currentTimeMillis()
     ) {
-        // Nodes periodically send out position updates, but those updates might not contain a lat & lon (because no GPS lock)
-        // We like to look at the local node to see if it has been sending out valid lat/lon, so for the LOCAL node (only)
+        // Nodes periodically send out position updates, but those updates might not contain valid data so
         // we don't record these nop position updates
-        if (myNodeNum == fromNum && p.latitudeI == 0 && p.longitudeI == 0)
-            debug("Ignoring nop position update for the local node")
+        if (!Position(p).isValid() && currentSecond() - p.time > 2592000) // 30 days in seconds
+            debug("Ignoring nop position update for node $fromNum")
         else
             updateNodeInfo(fromNum) {
                 debug("update position: ${it.user?.longName?.toPIIString()} with ${p.toPIIString()}")
@@ -1661,7 +1660,7 @@ class MeshService : Service(), Logging {
         override fun requestPosition(idNum: Int, lat: Double, lon: Double, alt: Int) =
             toRemoteExceptions {
                 // request position
-                if (idNum != 0) sendPosition(time = 0, destNum = idNum, wantResponse = true)
+                if (idNum != 0) sendPosition(time = 1, destNum = idNum, wantResponse = true)
                 // set local node's fixed position
                 else sendPosition(time = 0, destNum = null, lat = lat, lon = lon, alt = alt)
             }
