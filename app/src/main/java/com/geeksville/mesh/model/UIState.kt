@@ -156,7 +156,10 @@ class UIViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val waypoints: LiveData<Map<Int?, Packet>> = _packets.mapLatest { list ->
         list.associateBy { packet -> packet.data.waypoint?.id }
-            .filter { it.value.port_num == Portnums.PortNum.WAYPOINT_APP_VALUE }
+            .filterValues {
+                val expired = (it.data.waypoint?.expire ?: 0) < System.currentTimeMillis() / 1000
+                it.port_num == Portnums.PortNum.WAYPOINT_APP_VALUE && !expired
+            }
     }.asLiveData()
 
     fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
