@@ -293,8 +293,10 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
             map.tileProvider.tileSource.maximumZoomLevel.toDouble() // furthest in min should be > than max
         mapController.setZoom(zoomLevel)
         downloadRegionBoundingBox = map.boundingBox
-        val polygon = Polygon()
-        polygon.points = Polygon.pointsAsRect(downloadRegionBoundingBox) as MutableList<GeoPoint>
+        val polygon = Polygon().apply {
+            points = Polygon.pointsAsRect(downloadRegionBoundingBox)
+                .map { GeoPoint(it.latitude, it.longitude) }
+        }
         map.overlayManager.add(polygon)
         mapController.setZoom(zoomLevel - 1.0)
         cacheManager = CacheManager(map)
@@ -433,11 +435,12 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
                 lateinit var marker: MarkerWithLabel
                 pt.data.waypoint?.let {
                     val label = it.name + " " + formatAgo(it.expire)
-                    marker = MarkerWithLabel(map, label)
+                    marker = MarkerWithLabel(map, label, String(Character.toChars(it.icon)))
                     marker.title = it.name
                     marker.snippet = it.description
                     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     marker.position = GeoPoint(it.latitudeI.toDouble(), it.longitudeI.toDouble())
+                    marker.icon = android.graphics.drawable.ColorDrawable(Color.TRANSPARENT)
                 }
                 marker
             }
@@ -638,12 +641,28 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
         map.onDetach()
     }
 
-    private inner class MarkerWithLabel(mapView: MapView?, label: String) : Marker(mapView) {
-        val mLabel = label
+    private inner class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
+        Marker(mapView) {
+        private val mLabel = label
+        private val mEmoji = emoji
+        private val textPaint = Paint().apply {
+            textSize = 40f
+            color = Color.DKGRAY
+            isAntiAlias = true
+            isFakeBoldText = true
+            textAlign = Paint.Align.CENTER
+        }
+        private val emojiPaint = Paint().apply {
+            textSize = 80f
+            isAntiAlias = true
+            textAlign = Paint.Align.CENTER
+        }
 
-        private fun getTextBackgroundSize(text: String, x: Float, y: Float, paint: Paint): Rect {
-            val fontMetrics: Paint.FontMetrics = paint.fontMetrics
-            val halfTextLength: Float = paint.measureText(text) / 2 + 3
+        private val bgPaint = Paint().apply { color = Color.WHITE }
+
+        private fun getTextBackgroundSize(text: String, x: Float, y: Float): Rect {
+            val fontMetrics = textPaint.fontMetrics
+            val halfTextLength = textPaint.measureText(text) / 2 + 3
             return Rect(
                 (x - halfTextLength).toInt(),
                 (y + fontMetrics.top).toInt(),
@@ -653,27 +672,12 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
         }
 
         override fun draw(c: Canvas, osmv: MapView?, shadow: Boolean) {
-            draw(c, osmv)
-        }
-
-        fun draw(c: Canvas, osmv: MapView?) {
             super.draw(c, osmv, false)
-
             val p = mPositionPixels
-
-            val textPaint = Paint()
-            textPaint.textSize = 40f
-            textPaint.color = Color.DKGRAY
-            textPaint.isAntiAlias = true
-            textPaint.isFakeBoldText = true
-            textPaint.textAlign = Paint.Align.CENTER
-
-            val bgRect = getTextBackgroundSize(mLabel, (p.x - 0f), (p.y - 110f), textPaint)
-            val bgPaint = Paint()
-            bgPaint.color = Color.WHITE
-
+            val bgRect = getTextBackgroundSize(mLabel, (p.x - 0f), (p.y - 110f))
             c.drawRect(bgRect, bgPaint)
             c.drawText(mLabel, (p.x - 0f), (p.y - 110f), textPaint)
+            mEmoji?.let { c.drawText(it, (p.x - 0f), (p.y - 30f), emojiPaint) }
         }
     }
 }
