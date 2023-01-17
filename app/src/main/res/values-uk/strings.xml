@@ -95,6 +95,8 @@
     <string name="modem_config_slow_medium">Medium Range / Slow</string>
     <plurals name="delete_messages">
         <item quantity="one">Видалити повідомлення?</item>
+        <item quantity="few">Видалити %s повідомлення?</item>
+        <item quantity="many">Видалити %s повідомлення?</item>
         <item quantity="other">Видалити %s повідомлення?</item>
     </plurals>
     <string name="delete">Видалити</string>
@@ -117,6 +119,9 @@
     <string name="intro_encryption">"Налаштування шифрування"</string>
     <string name="intro_encryption_text">Стандартно встановлюється ключ шифрування за умовчанням. Щоб увімкнути власний канал і розширене шифрування, перейдіть на вкладку каналу та змініть назву каналу, це встановить випадковий ключ для шифрування AES256. \n\nЩоб спілкуватися з іншими пристроями, їм потрібно буде відсканувати ваш QR-код або перейти за спільним посиланням, щоб налаштувати параметри каналу.</string>
     <string name="message">Повідомлення</string>
+    <string name="quick_chat">Налаштування швидкого чату</string>
+    <string name="quick_chat_new">Новий швидкий чат</string>
+    <string name="quick_chat_edit">Редагувати швидкий чат</string>
     <string name="quick_chat_append">Додати до повідомлення</string>
     <string name="quick_chat_instant">Миттєво відправити</string>
     <string name="warning_default_psk">Відсутня назва каналу використовує ключ шифрування за умовчанням (будь який прситрій %s може читати ваші повідомлення).</string>
@@ -137,5 +142,18 @@
     <string name="close">Закрити</string>
     <string name="device_settings">Налаштування пристрою</string>
     <string name="module_settings">Налаштування модуля</string>
-    <string name="quick_chat">Налаштування швидкого чату</string>
+    <string name="add">Додати</string>
+    <string name="calculating">Обчислюю…</string>
+    <string name="map_offline_manager">Управління в автономному режимі</string>
+    <string name="map_cache_size">Поточний розмір кешу</string>
+    <string name="map_cache_info">Місткість кешу: %1$.2f МБ\nВикористання кешу: %2$.2f МБ</string>
+    <string name="map_clear_tiles">Очистити завантажені плитки</string>
+    <string name="map_tile_source">Джерело плиток</string>
+    <string name="map_purge_success">SQL кеш очищено для %s</string>
+    <string name="map_purge_fail">Помилка очищення кешу SQL, перегляньте logcat для деталей</string>
+    <string name="map_cache_manager">Керування кешем</string>
+    <string name="map_download_complete">Звантаження завершено!</string>
+    <string name="map_download_errors">Завантаження завершено з %s помилками</string>
+    <string name="map_cache_tiles">%s плиток</string>
+    <string name="map_subDescription">прийом: %1$s° відстань: %2$s</string>
 </resources>
