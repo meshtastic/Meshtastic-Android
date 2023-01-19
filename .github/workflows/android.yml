@@ -36,9 +36,16 @@ jobs:
     - name: Build debug APK
       run: ./gradlew assembleDebug
 
-    - name: Upload APK
+    - name: Upload F-Droid APK
       uses: actions/upload-artifact@v3
       with:
-        name: app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
+        name: fdroidDebug
+        path: app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
+        retention-days: 30
+
+    - name: Upload Google APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: googleDebug
+        path: app/build/outputs/apk/google/debug/app-google-debug.apk
         retention-days: 30
