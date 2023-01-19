@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="channel_name">Csatorna neve</string>
     <string name="channel_options">Csatorna opciók</string>
@@ -67,12 +68,14 @@
     <string name="meshtastic_messages_notifications">Üzenet értesítések</string>
     <string name="protocol_stress_test">Protokoll stressz teszt</string>
     <string name="firmware_too_old">Firmware frissítés szükséges</string>
-    <string name="firmware_old">A rádió firmware túl régi ahhoz, hogy a programmal kommunikálni tudjon, kérem menjen a beállítások oldalra és válassza a "firmware frissítés" gombot. További tudnivalókat a <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">firmware frissítés leírásában</a> talál, a Github-on.</string>
+    <string name="firmware_old">A rádió firmware túl régi ahhoz, hogy a programmal kommunikálni tudjon, kérem menjen a beállítások oldalra és válassza a \"firmware frissítés\" gombot. További tudnivalókat a <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">firmware frissítés leírásában</a> talál, a Github-on.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Be kell állítania egy régiót</string>
     <string name="region">Régió</string>
     <string name="cant_change_no_radio">Nem lehet csatornát váltani, mert a rádió nincs csatlakoztatva. Kérem próbálja meg újra.</string>
+    <string name="save_messages">Rangetest.csv exportálása</string>
     <string name="reset">Újraindítás</string>
+    <string name="scan">Keresés</string>
     <string name="are_you_sure_change_default">Biztosan meg akarja változtatni az alapértelmezett csatornát?</string>
     <string name="reset_to_defaults">Alapértelmezett beállítások visszaállítása</string>
     <string name="apply">Alkalmaz</string>
@@ -82,9 +85,73 @@
     <string name="theme_dark">Sötét</string>
     <string name="theme_system">Rendszer alapértelmezett</string>
     <string name="choose_theme">Válasszon témát</string>
+    <string name="background_required">Háttér pozíció</string>
+    <string name="why_background_required">Ehhez a szolgáltatáshoz a pozíció engedélyt \"Mindig engedélyezve\" állásba kell állítni.\nÍgy a Meshtastic akkor is tudja olvasni és továbbítani a telefon pozíció információit, ha az applikáció éppen a háttérben van.</string>
+    <string name="required_permissions">Szükséges engedélyek</string>
+    <string name="provide_location_to_mesh">Pozíció hozzáférés a mesh számára</string>
+    <string name="camera_required">Kamera hozzáférés engedély</string>
+    <string name="why_camera_required">A QR kód olvasáshoz kötelező megadni a kamera hozzáférést. A képek vagy videók nem kerülnek mentésre.</string>
     <string name="modem_config_slow_short">Rövid hatótáv (lassú)</string>
     <string name="modem_config_slow_medium">Közepes hatótáv (lassú)</string>
+    <plurals name="delete_messages">
+        <item quantity="one">Töröljem az üzenetet?</item>
+        <item quantity="other">Töröljek %s üzenetet?</item>
+    </plurals>
+    <string name="delete">Törlés</string>
+    <string name="select_all">Összes kijelölése</string>
     <string name="modem_config_slow_long">Távoli hatótáv (lassú)</string>
+    <string name="map_style_selection">Stílus választás</string>
+    <string name="map_download_region">Letöltési régió</string>
+    <string name="name">Név</string>
+    <string name="save">Mentés</string>
     <string name="preferences_language">Nyelv</string>
     <string name="preferences_system_default">Alapbeállítás</string>
+    <string name="resend">Újraküldés</string>
+    <string name="shutdown">Leállítás</string>
+    <string name="reboot">Újraindítás</string>
+    <string name="intro_show">Bemutatkozás megjelenítése</string>
+    <string name="intro_welcome">Üdvözöl a Meshtastic</string>
+    <string name="intro_welcome_text">A Meshtastic egy nyílt forráskódú, hálózatot nem igénylő, titkosított kommunikációs platform. A Meshtastic rádiók mesh hálózatot alakítanak ki, és a LoRa protokollt használják szöveges üzenetek küldésére.</string>
+    <string name="intro_started">Kezdjük el!</string>
+    <string name="intro_started_text">Csatlakoztasd a Meshtastic eszközödet Bluetooth-on, Soros porton vagy Wifi-n keresztül. \n\nA kompatibilis eszközök listáját a www.meshtastic.org/docs/hardware oldalon találod.</string>
+    <string name="intro_encryption">"Titkosítás beállítása"</string>
+    <string name="intro_encryption_text">Szabványosan az alapértelemezett titkosító kulcs kerül beállításra. Ahhoz, hogy a saját csatornádat és titkosításodat használni tudd, válts át a csatorna fülre és változtasd meg a csatorna nevét, ami új véletlen AES256 titkosító kulcsot fog létrehozni. \n\nTovábbi eszközökkel való kommunikációhoz a többieknek be kell olvasni a te QR kódodat, vagy meg kell velük osztanod a csatornádhoz tartozó linket.</string>
+    <string name="message">Üzenet</string>
+    <string name="quick_chat">Gyors csevegés opciók</string>
+    <string name="quick_chat_new">Új gyors csevegés</string>
+    <string name="quick_chat_edit">Gyors csevegés szerkesztése</string>
+    <string name="quick_chat_append">Hozzáfűzés az üzenethez</string>
+    <string name="quick_chat_instant">Azonnali küldés</string>
+    <string name="warning_default_psk">Az üres csatorna nevek az alapértelmezett titkosító kulcsot használják. (minden eszköz el tudja olvasni az üzeneteket, amelyik itt van: %s ).</string>
+    <string name="factory_reset">Gyári beállítások visszaállítása</string>
+    <string name="factory_reset_description">Ez törölni fogja az összes eddig elvégzett beállítást.</string>
+    <string name="bluetooth_disabled">Bluetooth kikapcsolva</string>
+    <string name="permission_missing_31">A meshtastic-nak szüksége van a \"közeli eszközök\" engedélyre, hogy kapcsolódni tudjon a bluetooth eszközökhöz. Kikapcsolhatod, ha nincs használatban.</string>
+    <string name="direct_message">Közvetlen üzenet</string>
+    <string name="nodedb_reset">NodeDB törlése</string>
+    <string name="nodedb_reset_description">Ezzel minden állomást törölni fogsz erről listáról.</string>
+    <string name="map_select_download_region">Válassz letöltési régiót</string>
+    <string name="map_5_miles">5 mérföld</string>
+    <string name="map_10_miles">10 mérföld</string>
+    <string name="map_15_miles">15 mérföld</string>
+    <string name="map_tile_download_estimate">Csempe letöltés számítása:</string>
+    <string name="map_start_download">Letöltés indítása</string>
+    <string name="request_position">Pozíció kérése</string>
+    <string name="close">Bezárás</string>
+    <string name="device_settings">Eszköz beállítások</string>
+    <string name="module_settings">Modul beállítások</string>
+    <string name="add">Új hozzáadása</string>
+    <string name="calculating">Számolás…</string>
+    <string name="map_offline_manager">Offline kezelő</string>
+    <string name="map_cache_size">Gyorsítótár mérete jelenleg</string>
+    <string name="map_cache_info">Gyorsítótár kapacitása: %1$.2f MB\nGyorsítótár kihasználtsága: %2$.2f MB</string>
+    <string name="map_clear_tiles">Letöltött csempék törlése</string>
+    <string name="map_tile_source">Csempe forrás</string>
+    <string name="map_purge_success">SQL gyorsítótár kiürítve %s számára</string>
+    <string name="map_purge_fail">SQL gyorsítótár kiürítése sikertelen, a részleteket lásd a logcat-ben</string>
+    <string name="map_cache_manager">Gyorsítótár kezelő</string>
+    <string name="map_download_complete">A letöltés befejeződött!</string>
+    <string name="map_download_errors">A letöltés %s hibával fejeződött be</string>
+    <string name="map_cache_tiles">%s csempe</string>
+    <string name="map_subDescription">irányszög: %1$s° távolság: %2$s</string>
 </resources>
