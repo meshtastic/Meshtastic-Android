@@ -78,11 +78,14 @@ jobs:
     - name: Validate Gradle wrapper
       uses: gradle/wrapper-validation-action@v1
 
-    - name: Gradle bundleRelease
-      run: ./gradlew bundleRelease
+    - name: Build F-Droid release
+      run: ./gradlew assembleFdroidRelease
 
-    - name: Gradle assembleRelease
-      run: ./gradlew assembleRelease
+    - name: Enable Crashlytics
+      run: sed -i 's/useCrashlytics = false/useCrashlytics = true/g' ./build.gradle
+
+    - name: Build Play Store release
+      run: ./gradlew bundleGoogleRelease assembleGoogleRelease
 
 #    - name: Upload Release to Play Store
 #      run: cp ./app/src/main/play/release-notes/en-US/production.txt ./app/src/main/play/release-notes/whatsnew-en-US.txt
@@ -108,24 +111,34 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Add AAB to release
+    - name: Add F-Droid APK to release
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: app/build/outputs/bundle/release/app-release.aab
-        asset_name: app-release-${{ github.event.inputs.version}}.aab
+        asset_path: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+        asset_name: fdroidRelease-${{ github.event.inputs.version}}.apk
         asset_content_type: application/zip
 
-    - name: Add APK to release
+    - name: Add Play Store AAB to release
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: app/build/outputs/apk/release/app-release.apk
-        asset_name: app-release-${{ github.event.inputs.version}}.apk
+        asset_path: app/build/outputs/bundle/googleRelease/app-google-release.aab
+        asset_name: googleRelease-${{ github.event.inputs.version}}.aab
+        asset_content_type: application/zip
+
+    - name: Add Play Store APK to release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: app/build/outputs/apk/google/release/app-google-release.apk
+        asset_name: googleRelease-${{ github.event.inputs.version}}.apk
         asset_content_type: application/zip
 
 #    - name: Gradle publishBundle
