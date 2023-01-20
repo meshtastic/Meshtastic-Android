@@ -846,11 +846,14 @@ class MeshService : Service(), Logging {
     }
 
     private fun processQueuedPackets() {
+        val m = MessageStatus.ENROUTE
         serviceScope.handledLaunch {
             packetRepository.get().getQueuedPackets()?.forEach { p ->
                 try {
                     sendNow(p)
-                    changeStatus(p, MessageStatus.ENROUTE)
+                    if (p.status == m) return@forEach
+                    packetRepository.get().updateMessageStatus(p, m)
+                    serviceBroadcasts.broadcastMessageStatus(p.id, m)
                 } catch (ex: Exception) {
                     errormsg("Error sending queued message:", ex)
                 }
@@ -859,30 +862,17 @@ class MeshService : Service(), Logging {
     }
 
     /**
-     * Change the status on a data packet and update watchers
-     */
-    private fun changeStatus(p: DataPacket, m: MessageStatus) {
-        if (p.status == m) return
-        serviceScope.handledLaunch {
-            packetRepository.get().updateMessageStatus(p, m)
-            serviceBroadcasts.broadcastMessageStatus(p.copy(status = m))
-        }
-    }
-
-    /**
      * Handle an ack/nak packet by updating sent message status
      */
-    private fun handleAckNak(isAck: Boolean, fromId: String?, requestId: Int) {
+    private fun handleAckNak(isAck: Boolean, fromId: String, requestId: Int) {
         serviceScope.handledLaunch {
             val p = packetRepository.get().getDataPacketById(requestId)
-            if (p != null && p.status != MessageStatus.RECEIVED) {
-                val m = when {
-                    isAck && fromId == p.to -> MessageStatus.RECEIVED
-                    isAck -> MessageStatus.DELIVERED
-                    else -> MessageStatus.ERROR
-                }
-                changeStatus(p, m)
-            }
+            // distinguish real ACKs coming from the intended receiver
+            val m = if (isAck && fromId == p?.to) MessageStatus.RECEIVED
+            else if (isAck) MessageStatus.DELIVERED else MessageStatus.ERROR
+            if (p != null && p.status != MessageStatus.RECEIVED)
+                packetRepository.get().updateMessageStatus(p, m)
+            serviceBroadcasts.broadcastMessageStatus(requestId, m)
         }
     }
 
