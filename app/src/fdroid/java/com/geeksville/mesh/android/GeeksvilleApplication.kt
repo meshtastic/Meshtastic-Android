@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import android.net.ConnectivityManager
 import android.os.Bundle
 import android.provider.Settings
 import androidx.core.content.edit
@@ -73,7 +72,7 @@ open class GeeksvilleApplication : Application(), Logging {
         }
 
     override fun onCreate() {
-        super<Application>.onCreate()
+        super.onCreate()
 
         val googleAnalytics = com.geeksville.mesh.analytics.GoogleAnalytics(this)
         analytics = googleAnalytics
@@ -83,25 +82,4 @@ open class GeeksvilleApplication : Application(), Logging {
 
         registerActivityLifecycleCallbacks(lifecycleCallbacks)
     }
-
-    fun isInternetConnected(): Boolean {
-        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        val activeNetwork = cm.getActiveNetworkInfo();
-        val isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-
-        return isConnected
-    }
-
-}
-
-
-fun geeksvilleApp(context: Context) = context.applicationContext as GeeksvilleApplication
-
-
-interface GeeksvilleApplicationClient {
-
-    fun getAnalytics() = GeeksvilleApplication.analytics
-
 }
