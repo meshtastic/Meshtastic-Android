@@ -13,9 +13,9 @@ This project is currently beta testing, if you have questions or feedback
 please [Join our discussion forum](https://meshtastic.discourse.group/). We would love to hear from
 you!
 
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+<!-- [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
 alt="Get it on F-Droid"
-width="49%">](https://mesh.tastic.app/fdroid/repo)
+width="49%">](https://mesh.tastic.app/fdroid/repo) -->
 [<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
 alt="Download at https://play.google.com/store/apps/details?id=com.geeksville.mesh]"
 width="49%">](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dgithub-android-readme)
