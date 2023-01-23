@@ -34,18 +34,11 @@ jobs:
       uses: gradle/wrapper-validation-action@v1
 
     - name: Build debug APK
-      run: ./gradlew assembleDebug
+      run: ./gradlew assembleFdroidDebug
 
-    - name: Upload F-Droid APK
+    - name: Upload debug APK
       uses: actions/upload-artifact@v3
       with:
         name: fdroidDebug
         path: app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
-        retention-days: 30
-
-    - name: Upload Google APK
-      uses: actions/upload-artifact@v3
-      with:
-        name: googleDebug
-        path: app/build/outputs/apk/google/debug/app-google-debug.apk
         retention-days: 30
