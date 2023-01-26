@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.provider.Settings
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import com.geeksville.mesh.analytics.AnalyticsProvider
 
@@ -70,6 +71,10 @@ open class GeeksvilleApplication : Application(), Logging {
             // Change the flag with the providers
             analytics.setEnabled(value && !isInTestLab) // Never do analytics in the test lab
         }
+
+    fun askToRate(activity: AppCompatActivity) {
+        // do nothing
+    }
 
     override fun onCreate() {
         super.onCreate()

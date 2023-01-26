@@ -192,7 +192,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc"
 
     // rate this app
-    implementation 'com.suddenh4x.ratingdialog:awesome-app-rating:2.4.0'
+    googleImplementation 'com.suddenh4x.ratingdialog:awesome-app-rating:2.4.0'
 
     // Coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
