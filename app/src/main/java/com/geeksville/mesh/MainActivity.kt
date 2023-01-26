@@ -48,7 +48,6 @@ import com.geeksville.mesh.util.exceptionReporter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
-import com.suddenh4x.ratingdialog.AppRating
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -178,18 +177,6 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    /// Ask user to rate in play store
-    private fun askToRate() {
-        exceptionReporter { // we don't want to crash our app because of bugs in this optional feature
-            AppRating.Builder(this)
-                .setMinimumLaunchTimes(10) // default is 5, 3 means app is launched 3 or more times
-                .setMinimumDays(10) // default is 5, 0 means install day, 10 means app is launched 10 or more days later than installation
-                .setMinimumLaunchTimesToShowAgain(5) // default is 5, 1 means app is launched 1 or more times after neutral button clicked
-                .setMinimumDaysToShowAgain(14) // default is 14, 1 means app is launched 1 or more days after neutral button clicked
-                .showIfMeetsConditions()
-        }
-    }
-
     private val isInTestLab: Boolean by lazy {
         (application as GeeksvilleApplication).isInTestLab
     }
@@ -199,14 +186,19 @@ class MainActivity : AppCompatActivity(), Logging {
         super.onCreate(savedInstanceState)
 
         val prefs = UIViewModel.getPreferences(this)
-        if (!prefs.getBoolean("app_intro_completed", false)) {
-            startActivity(Intent(this, AppIntroduction::class.java))
+        if (savedInstanceState == null) {
+            // First run: show AppIntroduction
+            if (!prefs.getBoolean("app_intro_completed", false)) {
+                startActivity(Intent(this, AppIntroduction::class.java))
+            }
+            // First run: migrate in-app language prefs to appcompat
+            prefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT).let {
+                if (it != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(prefs)
+            }
+            info("in-app language is ${LanguageUtils.getLocale()}")
+            // Ask user to rate in play store
+            (application as GeeksvilleApplication).askToRate(this)
         }
-        // First run: migrate in-app language prefs to appcompat
-        if (prefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT) != LanguageUtils.SYSTEM_MANAGED) {
-            LanguageUtils.migrateLanguagePrefs(prefs)
-        }
-        info("in-app language is ${LanguageUtils.getLocale()}")
 
         binding = ActivityMainBinding.inflate(layoutInflater)
 
@@ -231,8 +223,6 @@ class MainActivity : AppCompatActivity(), Logging {
 
         // Handle any intent
         handleIntent(intent)
-
-        if (isGooglePlayAvailable(this)) askToRate()
     }
 
     private fun initToolbar() {
