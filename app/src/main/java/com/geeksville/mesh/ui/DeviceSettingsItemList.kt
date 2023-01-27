@@ -458,6 +458,21 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         }
 
         item {
+            EditTextPreference(title = "rsyslog server",
+                value = networkInput.rsyslogServer,
+                enabled = connected && hasWifi,
+                isError = false,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { value ->
+                    if (value.toByteArray().size <= 32) // rsyslog_server max_size:33
+                        networkInput = networkInput.copy { rsyslogServer = value }
+                })
+        }
+
+        item {
             SwitchPreference(title = "Ethernet enabled",
                 checked = networkInput.ethEnabled,
                 enabled = connected,
@@ -752,6 +767,14 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
                     }
                 })
         }
+
+        item {
+            SwitchPreference(title = "SX126X RX boosted gain",
+                checked = loraInput.sx126XRxBoostedGain,
+                enabled = connected,
+                onCheckedChange = { loraInput = loraInput.copy { sx126XRxBoostedGain = it } })
+        }
+        item { Divider() }
 
         item {
             PreferenceFooter(
