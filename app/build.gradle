@@ -221,6 +221,9 @@ dependencies {
 
     implementation "androidx.core:core-splashscreen:1.0.0-beta02"
 
+    // CompletableFuture backport for API 14+
+    implementation 'net.sourceforge.streamsupport:streamsupport-minifuture:1.7.4'
+
     // App intro
     implementation 'com.github.AppIntro:AppIntro:6.2.0'
 }
