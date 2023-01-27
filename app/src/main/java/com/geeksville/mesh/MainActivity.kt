@@ -185,25 +185,25 @@ class MainActivity : AppCompatActivity(), Logging {
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        val prefs = UIViewModel.getPreferences(this)
         if (savedInstanceState == null) {
+            val prefs = UIViewModel.getPreferences(this)
             // First run: show AppIntroduction
             if (!prefs.getBoolean("app_intro_completed", false)) {
                 startActivity(Intent(this, AppIntroduction::class.java))
             }
             // First run: migrate in-app language prefs to appcompat
-            prefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT).let {
-                if (it != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(prefs)
-            }
+            val lang = prefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT)
+            if (lang != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(prefs)
             info("in-app language is ${LanguageUtils.getLocale()}")
+            // Set theme
+            AppCompatDelegate.setDefaultNightMode(
+                prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+            )
             // Ask user to rate in play store
             (application as GeeksvilleApplication).askToRate(this)
         }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
-
-        /// Set theme
-        setUITheme(prefs)
         setContentView(binding.root)
 
         initToolbar()
@@ -821,58 +821,30 @@ class MainActivity : AppCompatActivity(), Logging {
         val builder = MaterialAlertDialogBuilder(this)
         builder.setTitle(getString(R.string.choose_theme))
 
-        val styles = arrayOf(
-            getString(R.string.theme_light),
-            getString(R.string.theme_dark),
-            getString(R.string.theme_system)
+        val styles = mapOf(
+            getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
+            getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
+            getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         )
 
         /// Load preferences and its value
         val prefs = UIViewModel.getPreferences(this)
-        val editor: SharedPreferences.Editor = prefs.edit()
-        val checkedItem = prefs.getInt("theme", 2)
+        val theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        debug("Theme from prefs: $theme")
 
-        builder.setSingleChoiceItems(styles, checkedItem) { dialog, which ->
-
-            when (which) {
-                0 -> {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                    editor.putInt("theme", 0)
-                    editor.apply()
-
-                    dialog.dismiss()
-                }
-                1 -> {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                    editor.putInt("theme", 1)
-                    editor.apply()
-
-                    dialog.dismiss()
-                }
-                else -> {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                    editor.putInt("theme", 2)
-                    editor.apply()
-
-                    dialog.dismiss()
-                }
-
-            }
+        builder.setSingleChoiceItems(
+            styles.keys.toTypedArray(),
+            styles.values.indexOf(theme)
+        ) { dialog, position ->
+            val selectedTheme = styles.values.elementAt(position)
+            debug("Set theme pref to $selectedTheme")
+            prefs.edit().putInt("theme", selectedTheme).apply()
+            AppCompatDelegate.setDefaultNightMode(selectedTheme)
+            dialog.dismiss()
         }
 
         val dialog = builder.create()
         dialog.show()
-    }
-
-    private fun setUITheme(prefs: SharedPreferences) {
-        /// Read theme settings from preferences and set it
-        /// If nothing is found set FOLLOW SYSTEM option
-
-        when (prefs.getInt("theme", 2)) {
-            0 -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            1 -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            else -> AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-        }
     }
 
     private fun chooseLangDialog() {
@@ -881,18 +853,16 @@ class MainActivity : AppCompatActivity(), Logging {
         builder.setTitle(getString(R.string.preferences_language))
 
         val languageTags = LanguageUtils.getLanguageTags(this)
-        val languageLabels = languageTags.map { it.first }.toTypedArray()
-        val languageValues = languageTags.map { it.second }
 
         /// Load preferences and its value
         val lang = LanguageUtils.getLocale()
         debug("Lang from prefs: $lang")
 
         builder.setSingleChoiceItems(
-            languageLabels,
-            languageValues.indexOf(lang)
-        ) { dialog, which ->
-            val selectedLang = languageValues[which]
+            languageTags.keys.toTypedArray(),
+            languageTags.values.indexOf(lang)
+        ) { dialog, position ->
+            val selectedLang = languageTags.values.elementAt(position)
             debug("Set lang pref to $selectedLang")
             LanguageUtils.setLocale(selectedLang)
             dialog.dismiss()

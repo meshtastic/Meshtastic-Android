@@ -37,7 +37,7 @@ object LanguageUtils : Logging {
      * Build a list from locales_config.xml
      * of native language names paired to its Locale tag (ex: "English", "en")
      */
-    fun getLanguageTags(context: Context): List<Pair<String, String>> {
+    fun getLanguageTags(context: Context): Map<String, String> {
         val languageTags = mutableListOf(SYSTEM_DEFAULT)
         try {
             context.resources.getXml(R.xml.locales_config).use {
@@ -51,7 +51,7 @@ object LanguageUtils : Logging {
         } catch (e: Exception) {
             errormsg("Error parsing locale_config.xml ${e.message}")
         }
-        return languageTags.map { tag ->
+        return languageTags.associateBy { tag ->
             val loc = Locale(tag)
             when (tag) {
                 SYSTEM_DEFAULT -> context.getString(R.string.preferences_system_default)
@@ -59,7 +59,7 @@ object LanguageUtils : Logging {
                 "pt-BR" -> context.getString(R.string.pt_BR)
                 else -> loc.getDisplayLanguage(loc)
                     .replaceFirstChar { if (it.isLowerCase()) it.titlecase(loc) else it.toString() }
-            } to tag
+            }
         }
     }
 }
