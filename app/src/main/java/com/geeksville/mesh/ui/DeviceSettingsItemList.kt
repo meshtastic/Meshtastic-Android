@@ -763,7 +763,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
                 onValueChanged = {
                     loraInput = loraInput.copy {
                         if (loraInput.ignoreIncomingCount == 0) ignoreIncoming.add(it)
-                        else ignoreIncoming[0] = it
+                        else if (it == 0) ignoreIncoming.clear() else ignoreIncoming[0] = it
                     }
                 })
         }
