@@ -13,10 +13,10 @@ class UIUnitTest {
     @Test
     fun initialsGood() {
         Assert.assertEquals("KH", getInitials("Kevin Hester"))
-        Assert.assertEquals("KHL", getInitials("  Kevin Hester Lesser Cat  "))
+        Assert.assertEquals("KHLC", getInitials("  Kevin Hester Lesser Cat  "))
         Assert.assertEquals("", getInitials("  "))
-        Assert.assertEquals("gks", getInitials("geeksville"))
-        Assert.assertEquals("gee", getInitials("geek"))
-        Assert.assertEquals("gks", getInitials("geeks"))
+        Assert.assertEquals("gksv", getInitials("geeksville"))
+        Assert.assertEquals("geek", getInitials("geek"))
+        Assert.assertEquals("gks1", getInitials("geeks1"))
     }
 }
