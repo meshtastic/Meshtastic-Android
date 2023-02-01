@@ -61,6 +61,9 @@ interface IMeshService {
     /// Return my unique user ID string
     String getMyId();
 
+    /// Return a unique packet ID
+    int getPacketId();
+
     /*
     Send a packet to a specified node name
 

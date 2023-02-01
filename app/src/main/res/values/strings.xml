@@ -18,8 +18,10 @@
     <string name="connection_status">Connection status</string>
     <string name="application_icon">application icon</string>
     <string name="unknown_username">Unknown Username</string>
+    <string name="send">Send</string>
     <string name="send_text">Send Text</string>
     <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: meshtastic.discourse.group.\n\nFor more information see our web page - www.meshtastic.org.</string>
+    <string name="you">You</string>
     <string name="your_name">Your Name</string>
     <string name="analytics_okay">Anonymous usage statistics and crash reports.</string>
     <string name="looking_for_meshtastic_devices">Looking for Meshtastic devices…</string>
@@ -114,6 +116,8 @@
     <string name="map_style_selection">Style Selection</string>
     <string name="map_download_region">Download Region</string>
     <string name="name">Name</string>
+    <string name="description">Description</string>
+    <string name="locked">Locked</string>
     <string name="save">Save</string>
     <string name="preferences_language">Language</string>
     <string name="preferences_system_default">System default</string>
