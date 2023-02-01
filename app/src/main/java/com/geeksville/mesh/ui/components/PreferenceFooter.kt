@@ -48,7 +48,7 @@ fun PreferenceFooter(
             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green)
         ) {
             Text(
-                text = stringResource(id = R.string.save),
+                text = stringResource(id = R.string.send),
                 style = MaterialTheme.typography.body1,
                 color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.DarkGray,
             )

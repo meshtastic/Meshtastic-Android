@@ -578,7 +578,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
                     .setNeutralButton(R.string.cancel) { _, _ ->
                         debug("User canceled marker create dialog")
                     }
-                    .setPositiveButton(getString(R.string.save)) { _, _ ->
+                    .setPositiveButton(getString(R.string.send)) { _, _ ->
                         debug("User created waypoint")
                         model.sendWaypoint(waypoint {
                             name = nameInput.text.toString().ifEmpty { return@setPositiveButton }
