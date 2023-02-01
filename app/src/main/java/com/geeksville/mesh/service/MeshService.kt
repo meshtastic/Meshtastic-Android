@@ -1627,6 +1627,8 @@ class MeshService : Service(), Logging {
 
         override fun getMyId() = toRemoteExceptions { myNodeID }
 
+        override fun getPacketId() = toRemoteExceptions { generatePacketId() }
+
         override fun setOwner(myId: String?, longName: String, shortName: String, isLicensed: Boolean) =
             toRemoteExceptions {
                 this@MeshService.setOwner(myId, longName, shortName, isLicensed)

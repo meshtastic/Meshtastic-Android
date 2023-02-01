@@ -162,12 +162,34 @@ class UIViewModel @Inject constructor(
             }
     }.asLiveData()
 
+    fun generatePacketId(): Int? {
+        return try {
+            meshService?.packetId
+        } catch (ex: RemoteException) {
+            errormsg("RemoteException: ${ex.message}")
+            return null
+        }
+    }
+
     fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
 
         val p = DataPacket(dest, channel ?: 0, str)
+        sendDataPacket(p)
+    }
+
+    fun sendWaypoint(wpt: MeshProtos.Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
+        // contactKey: unique contact key filter (channel)+(nodeId)
+        val channel = contactKey[0].digitToIntOrNull()
+        val dest = if (channel != null) contactKey.substring(1) else contactKey
+
+        val p = DataPacket(dest, channel ?: 0, wpt)
+        if (wpt.id != 0) sendDataPacket(p.copy(id = wpt.id))
+    }
+
+    private fun sendDataPacket(p: DataPacket) {
         try {
             meshService?.send(p)
         } catch (ex: RemoteException) {
@@ -195,6 +217,10 @@ class UIViewModel @Inject constructor(
         packetRepository.deleteMessages(uuidList)
     }
 
+    fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) {
+        packetRepository.deleteWaypoint(id)
+    }
+
     companion object {
         fun getPreferences(context: Context): SharedPreferences =
             context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
@@ -210,7 +236,7 @@ class UIViewModel @Inject constructor(
     private val _connectionState = MutableLiveData(MeshService.ConnectionState.DISCONNECTED)
     val connectionState: LiveData<MeshService.ConnectionState> get() = _connectionState
 
-    fun isConnected() = _connectionState.value == MeshService.ConnectionState.CONNECTED
+    fun isConnected() = _connectionState.value != MeshService.ConnectionState.DISCONNECTED
 
     fun setConnectionState(connectionState: MeshService.ConnectionState) {
         _connectionState.value = connectionState

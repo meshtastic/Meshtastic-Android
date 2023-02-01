@@ -55,6 +55,13 @@ data class DataPacket(
         else
             null
 
+    constructor(to: String?, channel: Int, waypoint: MeshProtos.Waypoint) : this(
+        to = to,
+        bytes = waypoint.toByteArray(),
+        dataType = Portnums.PortNum.WAYPOINT_APP_VALUE,
+        channel = channel
+    )
+
     val waypoint: MeshProtos.Waypoint?
         get() = if (dataType == Portnums.PortNum.WAYPOINT_APP_VALUE)
             MeshProtos.Waypoint.parseFrom(bytes)
@@ -149,6 +156,7 @@ data class DataPacket(
         const val NODENUM_BROADCAST = (0xffffffff).toInt()
 
         fun nodeNumToDefaultId(n: Int): String = "!%08x".format(n)
+        fun idToDefaultNodeNum(id: String?): Int? = id?.toLong(16)?.toInt()
 
         override fun createFromParcel(parcel: Parcel): DataPacket {
             return DataPacket(parcel)

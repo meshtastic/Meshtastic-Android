@@ -45,6 +45,11 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
     suspend fun deleteMessages(uuidList: List<Long>) = withContext(Dispatchers.IO) {
         packetDao.deleteMessages(uuidList)
     }
+
+    suspend fun deleteWaypoint(id: Int) = withContext(Dispatchers.IO) {
+        packetDao.deleteWaypoint(id)
+    }
+
     suspend fun delete(packet: Packet) = withContext(Dispatchers.IO) {
         packetDao.delete(packet)
     }

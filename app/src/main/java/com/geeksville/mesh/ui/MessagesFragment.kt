@@ -26,7 +26,6 @@ import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.databinding.AdapterMessageLayoutBinding
 import com.geeksville.mesh.databinding.MessagesFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.service.MeshService
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -298,9 +297,9 @@ class MessagesFragment : Fragment(), Logging {
         }
 
         // If connection state _OR_ myID changes we have to fix our ability to edit outgoing messages
-        model.connectionState.observe(viewLifecycleOwner) { connectionState ->
+        model.connectionState.observe(viewLifecycleOwner) {
             // If we don't know our node ID and we are offline don't let user try to send
-            isConnected = connectionState != MeshService.ConnectionState.DISCONNECTED
+            isConnected = model.isConnected()
             binding.textInputLayout.isEnabled = isConnected
             binding.sendButton.isEnabled = isConnected
             for (subView: View in binding.quickChatLayout.allViews) {

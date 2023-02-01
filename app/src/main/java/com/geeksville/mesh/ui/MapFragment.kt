@@ -8,11 +8,19 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Rect
 import android.os.Bundle
-import android.view.*
-import android.widget.*
+import android.view.HapticFeedbackConstants
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import com.geeksville.mesh.BuildConfig
+import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
@@ -23,10 +31,13 @@ import com.geeksville.mesh.model.map.CustomOverlayManager
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.formatAgo
+import com.geeksville.mesh.waypoint
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.switchmaterial.SwitchMaterial
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
+import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
@@ -40,8 +51,12 @@ import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.*
+import org.osmdroid.views.overlay.CopyrightOverlay
+import org.osmdroid.views.overlay.MapEventsOverlay
+import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
+import org.osmdroid.views.overlay.infowindow.InfoWindow
 import java.io.File
 import kotlin.math.log2
 
@@ -141,6 +156,10 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
         }
     }
 
+    private fun performHapticFeedback() = requireView().performHapticFeedback(
+        HapticFeedbackConstants.LONG_PRESS,
+        HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING
+    )
 
     private fun showCacheManagerDialog() {
         val alertDialogBuilder = AlertDialog.Builder(
@@ -249,6 +268,22 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
         }.start()
     }
 
+    fun showMarkerLongPressDialog(id: Int) {
+        debug("marker long pressed id=${id}")
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("${getString(R.string.delete)}?")
+            .setNeutralButton(R.string.cancel) { _, _ ->
+                debug("User canceled marker edit dialog")
+            }
+//            .setNegativeButton(R.string.edit) { _, _ ->
+//                debug("Negative button pressed") // TODO add Edit option
+//            }
+            .setPositiveButton(getString(R.string.delete)) { _, _ ->
+                debug("User deleted local waypoint $id")
+                model.deleteWaypoint(id)
+            }
+            .show()
+    }
 
     private fun downloadJobAlert() {
         //prompt for input params .
@@ -423,6 +458,9 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
         }
     }
 
+    private fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) getString(R.string.you)
+    else model.nodeDB.nodes.value?.get(id)?.user?.longName ?: getString(R.string.unknown_username)
+
     private fun onWaypointChanged(wayPt: Collection<Packet>) {
 
         /**
@@ -430,17 +468,19 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
          */
         // Find all waypoints
         fun getCurrentWayPoints(): List<MarkerWithLabel> {
+            debug("Showing on map: ${wayPt.size} waypoints")
             val wayPoint = wayPt.map { pt ->
-                debug("Showing on map: $pt")
                 lateinit var marker: MarkerWithLabel
                 pt.data.waypoint?.let {
-                    val label = it.name + " " + formatAgo(it.expire)
-                    marker = MarkerWithLabel(map, label, String(Character.toChars(it.icon)))
-                    marker.title = it.name
+                    val lock = if (it.lockedTo != 0) "\uD83D\uDD12" else ""
+                    val label = it.name + " " + formatAgo((pt.received_time / 1000).toInt())
+                    val emoji = String(Character.toChars(if (it.icon == 0) 128205 else it.icon))
+                    marker = MarkerWithLabel(map, label, emoji)
+                    marker.id = "${it.id}"
+                    marker.title = "${it.name} (${getUsername(pt.data.from)}$lock)"
                     marker.snippet = it.description
-                    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    marker.position = GeoPoint(it.latitudeI.toDouble(), it.longitudeI.toDouble())
-                    marker.icon = android.graphics.drawable.ColorDrawable(Color.TRANSPARENT)
+                    marker.position = GeoPoint(it.latitudeI * 1e-7, it.longitudeI * 1e-7)
+                    marker.setVisible(false)
                 }
                 marker
             }
@@ -516,6 +556,46 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
         createLatLongGrid(false)
         map.overlayManager.addAll(nodeLayer, nodePositions)
         map.overlayManager.addAll(nodeLayer, wayPoints)
+        map.overlayManager.add(nodeLayer, MapEventsOverlay(object : MapEventsReceiver {
+            override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
+                InfoWindow.closeAllInfoWindowsOn(map)
+                return true
+            }
+
+            override fun longPressHelper(p: GeoPoint): Boolean {
+                performHapticFeedback()
+                if (!model.isConnected()) return true
+
+                val layout = LayoutInflater.from(requireContext())
+                    .inflate(R.layout.dialog_add_waypoint, null)
+
+                val nameInput: EditText = layout.findViewById(R.id.waypointName)
+                val descriptionInput: EditText= layout.findViewById(R.id.waypointDescription)
+                val lockedInput: SwitchMaterial = layout.findViewById(R.id.waypointLocked)
+
+                MaterialAlertDialogBuilder(requireContext())
+                    .setView(layout)
+                    .setNeutralButton(R.string.cancel) { _, _ ->
+                        debug("User canceled marker create dialog")
+                    }
+                    .setPositiveButton(getString(R.string.save)) { _, _ ->
+                        debug("User created waypoint")
+                        model.sendWaypoint(waypoint {
+                            name = nameInput.text.toString().ifEmpty { return@setPositiveButton }
+                            description = descriptionInput.text.toString()
+                            id = model.generatePacketId() ?: return@setPositiveButton
+                            latitudeI = (p.latitude * 1e7).toInt()
+                            longitudeI = (p.longitude * 1e7).toInt()
+                            expire = Int.MAX_VALUE // TODO add expire picker
+                            icon = 0 // TODO add emoji picker
+                            lockedTo = if (!lockedInput.isChecked) 0
+                            else model.myNodeInfo.value?.myNodeNum ?: 0
+                        })
+                    }
+                    .show()
+                return true
+            }
+        }))
         map.invalidate()
     }
 
@@ -669,6 +749,15 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
                 (x + halfTextLength).toInt(),
                 (y + fontMetrics.bottom).toInt()
             )
+        }
+
+        override fun onLongPress(event: MotionEvent?, mapView: MapView?): Boolean {
+            val touched = hitTest(event, mapView)
+            if (touched && this.id != null) {
+                performHapticFeedback()
+                this.id.toIntOrNull()?.run(::showMarkerLongPressDialog)
+            }
+            return super.onLongPress(event, mapView)
         }
 
         override fun draw(c: Canvas, osmv: MapView?, shadow: Boolean) {
