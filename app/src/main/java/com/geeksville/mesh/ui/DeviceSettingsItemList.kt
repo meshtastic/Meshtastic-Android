@@ -178,6 +178,17 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         }
 
         item {
+            DropDownPreference(title = "Rebroadcast mode",
+                enabled = connected,
+                items = ConfigProtos.Config.DeviceConfig.RebroadcastMode.values()
+                    .filter { it != ConfigProtos.Config.DeviceConfig.RebroadcastMode.UNRECOGNIZED }
+                    .map { it to it.name },
+                selectedItem = deviceInput.rebroadcastMode,
+                onItemSelected = { deviceInput = deviceInput.copy { rebroadcastMode = it } })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = deviceInput != localConfig.device,
                 onCancelClicked = {
