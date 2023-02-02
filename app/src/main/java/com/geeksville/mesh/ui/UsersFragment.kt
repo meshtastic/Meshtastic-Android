@@ -221,7 +221,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 holder.coordsView.visibility = View.INVISIBLE
             }
 
-            val ourNodeInfo = model.nodeDB.nodes.value?.get(model.nodeDB.myId.value)
+            val ourNodeInfo = model.ourNodeInfo.value
             val distance = ourNodeInfo?.distanceStr(n)
             if (distance != null) {
                 holder.distanceView.text = distance

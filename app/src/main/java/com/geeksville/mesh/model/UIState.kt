@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.RemoteException
 import android.view.Menu
 import androidx.core.content.edit
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -33,6 +34,7 @@ import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -89,6 +91,10 @@ class UIViewModel @Inject constructor(
     private val preferences: SharedPreferences
 ) : ViewModel(), Logging {
 
+    var actionBarMenu: Menu? = null
+    var meshService: IMeshService? = null
+    val nodeDB = NodeDB(this)
+
     private val _meshLog = MutableStateFlow<List<MeshLog>>(emptyList())
     val meshLog: StateFlow<List<MeshLog>> = _meshLog
 
@@ -108,6 +114,9 @@ class UIViewModel @Inject constructor(
 
     private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
     val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
+
+    private val _ourNodeInfo = MutableStateFlow<NodeInfo?>(null)
+    val ourNodeInfo: StateFlow<NodeInfo?> = _ourNodeInfo
 
     init {
         viewModelScope.launch {
@@ -133,6 +142,9 @@ class UIViewModel @Inject constructor(
         }
         channelSetRepository.channelSetFlow.onEach { channelSet ->
             _channels.value = ChannelSet(channelSet)
+        }.launchIn(viewModelScope)
+        combine(nodeDB.nodes.asFlow(), nodeDB.myId.asFlow()) { nodes, id -> nodes[id] }.onEach {
+            _ourNodeInfo.value = it
         }.launchIn(viewModelScope)
         debug("ViewModel created")
     }
@@ -225,12 +237,6 @@ class UIViewModel @Inject constructor(
         fun getPreferences(context: Context): SharedPreferences =
             context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
     }
-
-    var actionBarMenu: Menu? = null
-
-    var meshService: IMeshService? = null
-
-    val nodeDB = NodeDB(this)
 
     /// Connection state to our radio device
     private val _connectionState = MutableLiveData(MeshService.ConnectionState.DISCONNECTED)

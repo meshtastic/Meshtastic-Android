@@ -42,7 +42,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
     val connected = connectionState == MeshService.ConnectionState.CONNECTED
 
     val localConfig by viewModel.localConfig.collectAsState()
-    val ourNodeInfo by viewModel.nodeDB.ourNodeInfo.observeAsState()
+    val ourNodeInfo by viewModel.ourNodeInfo.collectAsState()
     var userInput by remember(ourNodeInfo?.user) { mutableStateOf(ourNodeInfo?.user) }
     var positionInfo by remember(ourNodeInfo?.position) { mutableStateOf(ourNodeInfo?.position) }
 

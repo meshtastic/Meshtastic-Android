@@ -506,7 +506,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
                     marker = MarkerWithLabel(map, label)
                     marker.title = "${it.longName} ${node.batteryStr}"
                     marker.snippet = model.gpsString(p)
-                    model.nodeDB.nodes.value?.get(model.nodeDB.myId.value)?.let { our ->
+                    model.ourNodeInfo.value?.let { our ->
                         our.distanceStr(node)?.let { dist ->
                             marker.subDescription = getString(R.string.map_subDescription).format(
                                 our.bearing(node),
