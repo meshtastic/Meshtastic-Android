@@ -1,6 +1,5 @@
 package com.geeksville.mesh.ui
 
-import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Canvas
@@ -13,10 +12,10 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import com.geeksville.mesh.BuildConfig
@@ -62,15 +61,12 @@ import kotlin.math.log2
 
 
 @AndroidEntryPoint
-class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListener {
+class MapFragment : ScreenFragment("Map Fragment"), Logging {
 
     // UI Elements
     private lateinit var binding: MapViewBinding
     private lateinit var map: MapView
     private lateinit var cacheEstimate: TextView
-    private lateinit var executeJob: Button
-    private var downloadPrompt: AlertDialog? = null
-    private var alertDialog: AlertDialog? = null
     private var cache: SqlTileWriterExt? = null
 
     // constants
@@ -143,17 +139,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
             }
             zoomToNodes(mapController)
         }
-        binding.downloadButton.setOnClickListener(this)
-    }
-
-    override fun onClick(v: View) {
-        when (v.id) {
-            R.id.executeJob -> updateEstimate()
-            R.id.downloadButton -> showCacheManagerDialog()
-            R.id.box5miles -> generateBoxOverlay(zoomLevelLowest)
-            R.id.box10miles -> generateBoxOverlay(zoomLevelMiddle)
-            R.id.box15miles -> generateBoxOverlay(zoomLevelHighest)
-        }
+        binding.downloadButton.setOnClickListener { showCacheManagerDialog() }
     }
 
     private fun performHapticFeedback() = requireView().performHapticFeedback(
@@ -162,13 +148,9 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
     )
 
     private fun showCacheManagerDialog() {
-        val alertDialogBuilder = AlertDialog.Builder(
-            activity
-        )
-        // set title
-        alertDialogBuilder.setTitle(R.string.map_offline_manager)
-        // set dialog message
-        alertDialogBuilder.setItems(
+        MaterialAlertDialogBuilder(requireContext())
+        .setTitle(R.string.map_offline_manager)
+        .setItems(
             arrayOf<CharSequence>(
                 resources.getString(R.string.map_cache_size),
                 resources.getString(R.string.map_download_region),
@@ -186,17 +168,13 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
                 else -> dialog.dismiss()
             }
         }
-        // create alert dialog
-        alertDialog = alertDialogBuilder.create()
-
-        // show it
-        alertDialog!!.show()
+        .show()
 
     }
 
     private fun purgeTileSource() {
         cache = SqlTileWriterExt()
-        val builder = AlertDialog.Builder(context)
+        val builder = MaterialAlertDialogBuilder(requireContext())
         builder.setTitle(R.string.map_tile_source)
         val sources = cache!!.sources
         val sourceList = mutableListOf<String>()
@@ -243,9 +221,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
         Toast.makeText(activity, R.string.calculating, Toast.LENGTH_SHORT).show()
         cacheManager = CacheManager(map) // Make sure CacheManager has latest from map
         Thread {
-            val alertDialogBuilder = AlertDialog.Builder(
-                activity
-            )
+            val alertDialogBuilder = MaterialAlertDialogBuilder(requireContext())
             // set title
             alertDialogBuilder.setTitle(R.string.map_cache_manager)
                 .setMessage(
@@ -290,14 +266,13 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
         binding.downloadButton.hide()
         binding.mapStyleButton.visibility = View.GONE
         binding.cacheLayout.visibility = View.VISIBLE
-        val builder = AlertDialog.Builder(activity)
-        binding.box5miles.setOnClickListener(this)
-        binding.box10miles.setOnClickListener(this)
-        binding.box15miles.setOnClickListener(this)
+        val builder = MaterialAlertDialogBuilder(requireContext())
+        binding.box5miles.setOnClickListener{ generateBoxOverlay(zoomLevelLowest) }
+        binding.box10miles.setOnClickListener { generateBoxOverlay(zoomLevelMiddle) }
+        binding.box15miles.setOnClickListener { generateBoxOverlay(zoomLevelHighest) }
         cacheEstimate = binding.cacheEstimate
         generateBoxOverlay(zoomLevelLowest)
-        executeJob = binding.executeJob
-        executeJob.setOnClickListener(this)
+        binding.executeJob.setOnClickListener { updateEstimate() }
         binding.cancelDownload.setOnClickListener {
             cacheEstimate.text = ""
             defaultMapSettings()
@@ -356,10 +331,6 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
                     Configuration.getInstance().osmdroidBasePath.absolutePath + File.separator + "mainFile.sqlite" // TODO: Accept filename input param from user
                 writer = SqliteArchiveTileWriter(outputName)
                 //nesw
-                if (downloadPrompt != null) {
-                    downloadPrompt!!.dismiss()
-                    downloadPrompt = null
-                }
                 try {
                     cacheManager =
                         CacheManager(map, writer) // Make sure cacheManager has latest from map
@@ -424,7 +395,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
 
     private fun chooseMapStyle() {
         /// Prepare dialog and its items
-        val builder = MaterialAlertDialogBuilder(context!!)
+        val builder = MaterialAlertDialogBuilder(requireContext())
         val mapStyles = arrayOf<CharSequence>(
             "OpenStreetMap",
             "USGS TOPO",
@@ -491,6 +462,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
 
     private fun onNodesChanged(nodes: Collection<NodeInfo>) {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
+        val ic = ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_location_on_24)
 
         /**
          * Using the latest nodedb, generate GeoPoint
@@ -516,9 +488,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
                     }
                     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                     marker.position = GeoPoint(p.latitude, p.longitude)
-                    marker.icon = ContextCompat.getDrawable(
-                        requireActivity(), R.drawable.ic_baseline_location_on_24
-                    )
+                    marker.icon = ic
                 }
                 marker
             }
@@ -566,7 +536,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
                 performHapticFeedback()
                 if (!model.isConnected()) return true
 
-                val layout = LayoutInflater.from(requireContext())
+                val layout = LayoutInflater.from(context)
                     .inflate(R.layout.dialog_add_waypoint, null)
 
                 val nameInput: EditText = layout.findViewById(R.id.waypointName)
@@ -702,12 +672,6 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging, View.OnClickListene
 
     override fun onPause() {
         map.onPause()
-        if (alertDialog != null && alertDialog!!.isShowing) {
-            alertDialog!!.dismiss()
-        }
-        if (downloadPrompt != null && downloadPrompt!!.isShowing) {
-            downloadPrompt!!.dismiss()
-        }
         super.onPause()
     }
 
