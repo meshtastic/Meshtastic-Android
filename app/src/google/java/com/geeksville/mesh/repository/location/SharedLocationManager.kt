@@ -7,6 +7,7 @@ import android.os.Looper
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hasBackgroundPermission
+import com.geeksville.mesh.android.isGooglePlayAvailable
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -54,7 +55,7 @@ class SharedLocationManager constructor(
                 trySend(result.lastLocation)
             }
         }
-        if (!context.hasBackgroundPermission()) close()
+        if (!context.hasBackgroundPermission() || !isGooglePlayAvailable(context)) close()
 
         info("Starting location requests with interval=${desiredInterval}ms")
         _receivingLocationUpdates.value = true
