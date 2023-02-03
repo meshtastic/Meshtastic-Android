@@ -161,17 +161,15 @@ class UIViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val contacts: LiveData<Map<String, Packet>> = _packets.mapLatest { list ->
-        list.associateBy { packet -> packet.contact_key }
-            .filter { it.value.port_num == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE }
+        list.filter { it.port_num == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE }
+            .associateBy { packet -> packet.contact_key }
     }.asLiveData()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val waypoints: LiveData<Map<Int?, Packet>> = _packets.mapLatest { list ->
-        list.associateBy { packet -> packet.data.waypoint?.id }
-            .filterValues {
-                val expired = (it.data.waypoint?.expire ?: 0) < System.currentTimeMillis() / 1000
-                it.port_num == Portnums.PortNum.WAYPOINT_APP_VALUE && !expired
-            }
+    val waypoints: LiveData<Map<Int, Packet>> = _packets.mapLatest { list ->
+        list.filter { it.port_num == Portnums.PortNum.WAYPOINT_APP_VALUE }
+            .associateBy { packet -> packet.data.waypoint!!.id }
+            .filterValues { it.data.waypoint!!.expire > System.currentTimeMillis() / 1000 }
     }.asLiveData()
 
     fun generatePacketId(): Int? {
@@ -198,7 +196,7 @@ class UIViewModel @Inject constructor(
         val dest = if (channel != null) contactKey.substring(1) else contactKey
 
         val p = DataPacket(dest, channel ?: 0, wpt)
-        if (wpt.id != 0) sendDataPacket(p.copy(id = wpt.id))
+        if (wpt.id != 0) sendDataPacket(p)
     }
 
     private fun sendDataPacket(p: DataPacket) {
@@ -294,6 +292,7 @@ class UIViewModel @Inject constructor(
     /// hardware info about our local device (can be null)
     private val _myNodeInfo = MutableLiveData<MyNodeInfo?>()
     val myNodeInfo: LiveData<MyNodeInfo?> get() = _myNodeInfo
+    val myNodeNum get() = _myNodeInfo.value?.myNodeNum
 
     fun setMyNodeInfo(info: MyNodeInfo?) {
         _myNodeInfo.value = info
@@ -526,7 +525,7 @@ class UIViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.Main) {
             // Extract distances to this device from position messages and put (node,SNR,distance) in
             // the file_uri
-            val myNodeNum = myNodeInfo.value?.myNodeNum ?: return@launch
+            val myNodeNum = myNodeNum ?: return@launch
 
             // Capture the current node value while we're still on main thread
             val nodes = nodeDB.nodes.value ?: emptyMap()

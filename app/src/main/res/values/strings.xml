@@ -111,6 +111,8 @@
         <item quantity="other">Delete %s messages?</item>
     </plurals>
     <string name="delete">Delete</string>
+    <string name="delete_for_everyone">Delete for everyone</string>
+    <string name="delete_for_me">Delete for me</string>
     <string name="select_all">Select all</string>
     <string name="modem_config_slow_long">Long Range / Slow</string>
     <string name="map_style_selection">Style Selection</string>
@@ -169,4 +171,7 @@
     <string name="map_download_errors">Download complete with %s errors</string>
     <string name="map_cache_tiles">%s tiles</string>
     <string name="map_subDescription">bearing: %1$s° distance: %2$s</string>
+    <string name="waypoint_edit">Edit waypoint</string>
+    <string name="waypoint_delete">Delete waypoint?</string>
+    <string name="waypoint_new">New waypoint</string>
 </resources>

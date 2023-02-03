@@ -53,7 +53,7 @@ interface PacketDao {
 
     @Transaction
     fun getDataPacketById(requestId: Int): DataPacket? {
-        return getDataPackets().firstOrNull { it.id == requestId }
+        return getDataPackets().lastOrNull { it.id == requestId }
     }
 
     @Transaction

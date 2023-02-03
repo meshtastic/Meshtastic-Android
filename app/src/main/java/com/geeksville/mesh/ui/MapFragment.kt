@@ -20,9 +20,11 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
@@ -57,6 +59,7 @@ import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import java.io.File
+import java.text.DateFormat
 import kotlin.math.log2
 
 
@@ -76,7 +79,8 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
     private val prefsName = "org.geeksville.osm.prefs"
     private val mapStyleId = "map_style_id"
     private var nodePositions = listOf<MarkerWithLabel>()
-    private var wayPoints = listOf<MarkerWithLabel>()
+    private var waypoints = mapOf<Int, Waypoint?>()
+    private var waypointMarkers = listOf<MarkerWithLabel>()
     private val nodeLayer = 1
 
     // Distance of bottom corner to top corner of bounding box
@@ -133,6 +137,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
                 }
                 model.waypoints.observe(viewLifecycleOwner) {
                     debug("New waypoints received: ${it.size}")
+                    waypoints = it.mapValues { p -> p.value.data.waypoint }
                     onWaypointChanged(it.values)
                     drawOverlays()
                 }
@@ -244,21 +249,88 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
         }.start()
     }
 
-    fun showMarkerLongPressDialog(id: Int) {
-        debug("marker long pressed id=${id}")
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("${getString(R.string.delete)}?")
-            .setNeutralButton(R.string.cancel) { _, _ ->
-                debug("User canceled marker edit dialog")
-            }
-//            .setNegativeButton(R.string.edit) { _, _ ->
-//                debug("Negative button pressed") // TODO add Edit option
-//            }
-            .setPositiveButton(getString(R.string.delete)) { _, _ ->
-                debug("User deleted local waypoint $id")
+    private data class DialogBuilder(
+        val builder: MaterialAlertDialogBuilder,
+        val nameInput: EditText,
+        val descInput: EditText,
+        val lockedSwitch: SwitchMaterial,
+    ) {
+        val name get() = nameInput.text.toString().trim()
+        val description get() = descInput.text.toString().trim()
+    }
+
+    private fun createEditDialog(context: Context, title: String): DialogBuilder {
+        val builder = MaterialAlertDialogBuilder(context)
+        val layout = LayoutInflater.from(context).inflate(R.layout.dialog_add_waypoint, null)
+
+        val nameInput: EditText = layout.findViewById(R.id.waypointName)
+        val descInput: EditText= layout.findViewById(R.id.waypointDescription)
+        val lockedSwitch: SwitchMaterial = layout.findViewById(R.id.waypointLocked)
+
+        builder.setTitle(title)
+        builder.setView(layout)
+
+        return DialogBuilder(builder, nameInput, descInput, lockedSwitch)
+    }
+
+    private fun showDeleteMarkerDialog(id: Int) {
+        val waypoint = waypoints[id]
+        val builder = MaterialAlertDialogBuilder(requireContext())
+        builder.setTitle(R.string.waypoint_delete)
+        builder.setNeutralButton(R.string.cancel) { _, _ ->
+            debug("User canceled marker delete dialog")
+        }
+        builder.setNegativeButton(R.string.delete_for_me) { _, _ ->
+            debug("User deleted waypoint $id for me")
+            model.deleteWaypoint(id)
+        }
+        if (waypoint != null && waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0))
+            builder.setPositiveButton(R.string.delete_for_everyone) { _, _ ->
+                debug("User deleted waypoint $id for everyone")
+                model.sendWaypoint(waypoint.copy { expire = 1 })
                 model.deleteWaypoint(id)
             }
-            .show()
+        val dialog = builder.show()
+        for (button in setOf(
+            AlertDialog.BUTTON_NEUTRAL,
+            AlertDialog.BUTTON_NEGATIVE,
+            AlertDialog.BUTTON_POSITIVE
+        )) with(dialog.getButton(button)) { textSize = 12F; isAllCaps = false }
+    }
+
+    private fun showEditMarkerDialog(waypoint: Waypoint) {
+        val dialog = createEditDialog(requireContext(), getString(R.string.waypoint_edit))
+        dialog.nameInput.setText(waypoint.name)
+        dialog.descInput.setText(waypoint.description)
+        dialog.lockedSwitch.isEnabled = false
+        dialog.lockedSwitch.isChecked = waypoint.lockedTo != 0
+        dialog.builder.setNeutralButton(R.string.cancel) { _, _ ->
+            debug("User canceled marker edit dialog")
+        }
+        dialog.builder.setNegativeButton(R.string.delete) { _, _ ->
+            debug("User clicked delete waypoint ${waypoint.id}")
+            showDeleteMarkerDialog(waypoint.id)
+        }
+        dialog.builder.setPositiveButton(getString(R.string.send)) { _, _ ->
+            debug("User edited waypoint ${waypoint.id}")
+            model.sendWaypoint(waypoint.copy {
+                name = dialog.name.ifEmpty { return@setPositiveButton }
+                description = dialog.description
+                expire = Int.MAX_VALUE // TODO add expire picker
+                icon = 0 // TODO add emoji picker
+            })
+        }
+        dialog.builder.show()
+    }
+
+    fun showMarkerLongPressDialog(id: Int) {
+        debug("marker long pressed id=${id}")
+        val waypoint = waypoints[id]
+        // edit only when unlocked or lockedTo myNodeNum
+        if (waypoint != null && waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0))
+            showEditMarkerDialog(waypoint)
+        else
+            showDeleteMarkerDialog(id)
     }
 
     private fun downloadJobAlert() {
@@ -444,12 +516,14 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
                 lateinit var marker: MarkerWithLabel
                 pt.data.waypoint?.let {
                     val lock = if (it.lockedTo != 0) "\uD83D\uDD12" else ""
+                    val time = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+                        .format(pt.received_time)
                     val label = it.name + " " + formatAgo((pt.received_time / 1000).toInt())
                     val emoji = String(Character.toChars(if (it.icon == 0) 128205 else it.icon))
                     marker = MarkerWithLabel(map, label, emoji)
                     marker.id = "${it.id}"
                     marker.title = "${it.name} (${getUsername(pt.data.from)}$lock)"
-                    marker.snippet = it.description
+                    marker.snippet = "[$time] " + it.description
                     marker.position = GeoPoint(it.latitudeI * 1e-7, it.longitudeI * 1e-7)
                     marker.setVisible(false)
                 }
@@ -457,7 +531,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
             }
             return wayPoint
         }
-        wayPoints = getCurrentWayPoints()
+        waypointMarkers = getCurrentWayPoints()
     }
 
     private fun onNodesChanged(nodes: Collection<NodeInfo>) {
@@ -525,7 +599,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
         addCopyright()  // Copyright is required for certain map sources
         createLatLongGrid(false)
         map.overlayManager.addAll(nodeLayer, nodePositions)
-        map.overlayManager.addAll(nodeLayer, wayPoints)
+        map.overlayManager.addAll(nodeLayer, waypointMarkers)
         map.overlayManager.add(nodeLayer, MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
                 InfoWindow.closeAllInfoWindowsOn(map)
@@ -536,33 +610,24 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
                 performHapticFeedback()
                 if (!model.isConnected()) return true
 
-                val layout = LayoutInflater.from(context)
-                    .inflate(R.layout.dialog_add_waypoint, null)
-
-                val nameInput: EditText = layout.findViewById(R.id.waypointName)
-                val descriptionInput: EditText= layout.findViewById(R.id.waypointDescription)
-                val lockedInput: SwitchMaterial = layout.findViewById(R.id.waypointLocked)
-
-                MaterialAlertDialogBuilder(requireContext())
-                    .setView(layout)
-                    .setNeutralButton(R.string.cancel) { _, _ ->
-                        debug("User canceled marker create dialog")
-                    }
-                    .setPositiveButton(getString(R.string.send)) { _, _ ->
-                        debug("User created waypoint")
-                        model.sendWaypoint(waypoint {
-                            name = nameInput.text.toString().ifEmpty { return@setPositiveButton }
-                            description = descriptionInput.text.toString()
-                            id = model.generatePacketId() ?: return@setPositiveButton
-                            latitudeI = (p.latitude * 1e7).toInt()
-                            longitudeI = (p.longitude * 1e7).toInt()
-                            expire = Int.MAX_VALUE // TODO add expire picker
-                            icon = 0 // TODO add emoji picker
-                            lockedTo = if (!lockedInput.isChecked) 0
-                            else model.myNodeInfo.value?.myNodeNum ?: 0
-                        })
-                    }
-                    .show()
+                val dialog = createEditDialog(requireContext(), getString(R.string.waypoint_new))
+                dialog.builder.setNeutralButton(R.string.cancel) { _, _ ->
+                    debug("User canceled marker create dialog")
+                }
+                dialog.builder.setPositiveButton(getString(R.string.send)) { _, _ ->
+                    debug("User created waypoint")
+                    model.sendWaypoint(waypoint {
+                        name = dialog.name.ifEmpty { return@setPositiveButton }
+                        description = dialog.description
+                        id = model.generatePacketId() ?: return@setPositiveButton
+                        latitudeI = (p.latitude * 1e7).toInt()
+                        longitudeI = (p.longitude * 1e7).toInt()
+                        expire = Int.MAX_VALUE // TODO add expire picker
+                        icon = 0 // TODO add emoji picker
+                        lockedTo = if (!dialog.lockedSwitch.isChecked) 0 else model.myNodeNum ?: 0
+                    })
+                }
+                dialog.builder.show()
                 return true
             }
         }))
