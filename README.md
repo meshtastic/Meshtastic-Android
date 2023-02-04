@@ -13,9 +13,9 @@ This project is currently beta testing, if you have questions or feedback
 please [Join our discussion forum](https://meshtastic.discourse.group/). We would love to hear from
 you!
 
-<!-- [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png"
 alt="Get it on F-Droid"
-width="49%">](https://mesh.tastic.app/fdroid/repo) -->
+width="49%">](https://apt.izzysoft.de/fdroid/repo)
 [<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
 alt="Download at https://play.google.com/store/apps/details?id=com.geeksville.mesh]"
 width="49%">](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dgithub-android-readme)
@@ -62,21 +62,4 @@ for verbose logging:
 adb shell setprop log.tag.FA VERBOSE
 ```
 
-# Credits
-
-This project is the work of volunteers:
-
-- @artemisoftnian: Contributed Spanish translations.
-- @CycloMies: Contributed Swedish, Finnish and German translations.
-- @eriktheV-king: Contributed Dutch and French translations.
-- @Lgoix: Contributed tooltip for radio mode
-- @Eugene: Contributed Russian translation.
-- @Jinx17: Contributed Slovenian translation.
-- @Konradrundfunk: Contributed German fixes.
-- @Mango-sauce: Contributed Chinese translation.
-- @NEKLAN: Contributed Japanese translation.
-- @Ohcdh: Contributed Irish and Italian translations.
-- @Slavino: Contributed Slovak translation.
-- @Zone: Contributed Turkish translation.
-
-Copyright 2022, Geeksville Industries, LLC. GPL V3 license
+Copyright 2023, Meshtastic LLC. GPL V3 license
