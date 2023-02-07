@@ -7,9 +7,6 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id 'com.github.triplet.play'
     id 'de.mobilej.unmock'
-    // id "app.brant.amazonappstorepublisher"
-
-    // protobufs
     id 'com.google.protobuf'
 }
 
@@ -87,6 +84,9 @@ android {
     buildFeatures {
         compose true
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion compose_version
+    }
     // Set both the Java and Kotlin compilers to target Java 8.
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -95,9 +95,6 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
         freeCompilerArgs += ['-opt-in=kotlin.RequiresOptIn']
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion compose_version
     }
     lint {
         abortOnError false
@@ -115,7 +112,7 @@ play {
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:3.21.1'
+        artifact = "com.google.protobuf:protoc:$protobuf_version"
     }
     generateProtoTasks {
         all().each { task ->
@@ -141,7 +138,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat-resources:$appcompat_version"
 
     implementation 'androidx.core:core-ktx:1.8.0'
-    implementation 'androidx.fragment:fragment-ktx:1.5.2'
+    implementation 'androidx.fragment:fragment-ktx:1.5.5'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
@@ -173,11 +170,12 @@ dependencies {
     implementation "com.google.android.material:compose-theme-adapter:1.1.14"
 
     // Osmdroid & Maps
-    implementation 'org.osmdroid:osmdroid-android:6.1.14'
+    def osmdroid_version = '6.1.14'
+    implementation "org.osmdroid:osmdroid-android:$osmdroid_version"
+    implementation "org.osmdroid:osmdroid-wms:$osmdroid_version"
+    implementation "org.osmdroid:osmdroid-geopackage:$osmdroid_version"
     implementation 'com.github.MKergall:osmbonuspack:6.9.0'
-    implementation 'org.osmdroid:osmdroid-wms:6.1.14'
     implementation('mil.nga.mgrs:mgrs-android:2.2.1') { exclude group: 'com.google.android.gms' }
-    implementation 'org.osmdroid:osmdroid-geopackage:6.1.14'
 
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:$room_version"
@@ -185,8 +183,8 @@ dependencies {
     // optional - Test helpers
     testImplementation "androidx.room:room-testing:$room_version"
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
     // kotlin serialization
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc"
@@ -199,7 +197,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
     // For now I'm not using javalite, because I want JSON printing
-    implementation 'com.google.protobuf:protobuf-kotlin:3.21.5'
+    implementation "com.google.protobuf:protobuf-kotlin:$protobuf_version"
 
     // For UART access
     // implementation 'com.google.android.things:androidthings:1.0'
