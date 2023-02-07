@@ -5,7 +5,6 @@ plugins {
     id 'kotlin-parcelize'
     id 'kotlinx-serialization'
     id 'dagger.hilt.android.plugin'
-    id 'com.github.triplet.play'
     id 'de.mobilej.unmock'
     id 'com.google.protobuf'
 }
@@ -100,13 +99,6 @@ android {
         abortOnError false
     }
     namespace 'com.geeksville.mesh'
-}
-
-play {
-    // configure per https://github.com/Triple-T/gradle-play-publisher#authenticating-gradle-play-publisher
-    track = 'internal'
-    defaultToAppBundles = true
-    serviceAccountCredentials = file("../../play-credentials.json")
 }
 
 // per protobuf-gradle-plugin docs, this is recommended for android
