@@ -708,7 +708,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         }
 
         item {
-            EditTextPreference(title = "Frequency offset",
+            EditTextPreference(title = "Frequency offset (MHz)",
                 value = loraInput.frequencyOffset,
                 enabled = connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -786,6 +786,14 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
                 onCheckedChange = { loraInput = loraInput.copy { sx126XRxBoostedGain = it } })
         }
         item { Divider() }
+
+        item {
+            EditTextPreference(title = "Override frequency (MHz)",
+                value = loraInput.overrideFrequency,
+                enabled = connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { loraInput = loraInput.copy { overrideFrequency = it } })
+        }
 
         item {
             PreferenceFooter(
