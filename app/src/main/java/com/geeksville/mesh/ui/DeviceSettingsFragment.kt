@@ -9,7 +9,7 @@ import androidx.fragment.app.activityViewModels
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.databinding.ComposeViewBinding
 import com.geeksville.mesh.model.UIViewModel
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.accompanist.themeadapter.material.MdcTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

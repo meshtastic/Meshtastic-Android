@@ -3,13 +3,12 @@
 buildscript {
     ext {
         useCrashlytics = false
-        kotlin_version = '1.6.21'
+        kotlin_version = '1.7.20'
         coroutines_version = '1.6.4'
         lifecycle_version = "2.5.1"
         room_version = '2.4.3'
         hilt_version = '2.44.2'
         datastore_version = '1.0.0'
-        compose_version = '1.2.0-rc02'
         protobuf_version = '3.21.12'
     }
 
