@@ -43,7 +43,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.json.Json
 import java.util.*
-import java.util.concurrent.ConcurrentLinkedDeque
+import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import javax.inject.Inject
@@ -781,7 +781,7 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private val queuedPackets = ConcurrentLinkedDeque<MeshPacket>()
+    private val queuedPackets = ConcurrentLinkedQueue<MeshPacket>()
     private val queueResponse = mutableMapOf<Int, CompletableFuture<Boolean>>()
     private var queueJob: Job? = null
 
@@ -807,22 +807,25 @@ class MeshService : Service(), Logging {
         queueJob = serviceScope.handledLaunch {
             debug("packet queueJob started")
             while (connectionState == ConnectionState.CONNECTED) {
+                var retryCount = 0
                 // take the first packet from the queue head
                 val packet = queuedPackets.poll() ?: break
-                // send packet to the radio and wait for response
-                val response = sendPacket(packet)
-                try {
-                    debug("queueJob packet id=${packet.id.toUInt()} waiting")
+                while (retryCount < 3) try {
+                    // send packet to the radio and wait for response
+                    val response = sendPacket(packet)
+                    debug("queueJob packet id=${packet.id.toUInt()} waiting (retry $retryCount)")
                     @Suppress("BlockingMethodInNonBlockingContext")
                     val success = response.get(45, TimeUnit.SECONDS)
                     debug("queueJob packet id=${packet.id.toUInt()} success $success")
-                    if (!success) {
-                        // if send operation fails, add packet back to queue head and retry
-                        queuedPackets.addFirst(packet)
-                    }
+                    if (success) break
+                    retryCount++ // if send operation fails, retry
                 } catch (e: TimeoutException) {
                     debug("queueJob timeout waiting packet id=${packet.id.toUInt()}")
-                    queuedPackets.addFirst(packet)
+                    retryCount++ // if send operation fails, retry
+                }
+                if (retryCount >= 3) {
+                    debug("queueJob packet id=${packet.id.toUInt()} failed")
+                    handleAckNak(false, myNodeID, packet.id)
                 }
             }
         }
