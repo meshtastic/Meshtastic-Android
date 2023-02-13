@@ -42,6 +42,23 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
+-keep public class com.google.android.gms.* { public *; }
+-dontwarn com.google.android.gms.**
+
+# ormlite
+-dontwarn com.j256.ormlite.android.**
+-dontwarn com.j256.ormlite.logger.**
+-dontwarn com.j256.ormlite.misc.**
+
+# OkHttp
+-dontwarn okhttp3.internal.platform.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**
+
+#-dontwarn java.awt.image.**
+#-dontwarn com.google.errorprone.annotations.**
+
 # Our app is opensource no need to obsfucate
 -dontobfuscate
 -optimizations !code/simplification/arithmetic,!field/*,!class/merging/*,!code/allocation/variable
