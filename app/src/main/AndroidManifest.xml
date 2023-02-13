@@ -73,7 +73,6 @@
 
     <!-- hardware acceleration is required for zxing barcode lib -->
     <application
-        tools:replace="android:icon"
         android:name="com.geeksville.mesh.MeshUtilApplication"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
