@@ -13,7 +13,7 @@ class NodeInfoTest {
     val ni2 = NodeInfo(5, MeshUser("+two", "User Two", "U2", model), Position(37.11, 121.1, 40))
     val ni3 = NodeInfo(6, MeshUser("+three", "User Three", "U3", model), Position(37.101, 121.1, 40))
 
-    private val currentDefaultLocale = LocaleListCompat.getDefault().get(0)
+    private val currentDefaultLocale = LocaleListCompat.getDefault().get(0) ?: Locale.US
 
     @Before
     fun setup()
