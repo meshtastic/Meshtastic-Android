@@ -4,7 +4,7 @@ plugins {
     id 'kotlin-kapt'
     id 'kotlin-parcelize'
     id 'kotlinx-serialization'
-    id 'dagger.hilt.android.plugin'
+    id 'com.google.dagger.hilt.android'
     id 'de.mobilej.unmock'
     id 'com.google.protobuf'
 }
@@ -124,20 +124,22 @@ protobuf {
 dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    def appcompat_version = '1.6.0'
+    def appcompat_version = '1.6.1'
     implementation "androidx.appcompat:appcompat:$appcompat_version"
     // For loading and tinting drawables on older versions of the platform
     implementation "androidx.appcompat:appcompat-resources:$appcompat_version"
 
-    implementation 'androidx.core:core-ktx:1.8.0'
+    implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.fragment:fragment-ktx:1.5.5'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
+    implementation 'androidx.datastore:datastore:1.0.0'
 
     // Lifecycle
+    def lifecycle_version = '2.5.1'
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
@@ -145,11 +147,19 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-process:$lifecycle_version"
 
+    // Room
+    def room_version = '2.5.0'
     implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation "androidx.room:room-ktx:$room_version"
+    // optional - Test helpers
+    testImplementation "androidx.room:room-testing:$room_version"
+
+    // Hilt
     implementation "com.google.dagger:hilt-android:$hilt_version"
     kapt "com.google.dagger:hilt-compiler:$hilt_version"
-    implementation "androidx.datastore:datastore:$datastore_version"
 
     // Compose
     def composeBom = platform('androidx.compose:compose-bom:2022.12.00')
@@ -176,22 +186,19 @@ dependencies {
     implementation 'com.github.MKergall:osmbonuspack:6.9.0'
     implementation('mil.nga.mgrs:mgrs-android:2.2.1') { exclude group: 'com.google.android.gms' }
 
-    // optional - Kotlin Extensions and Coroutines support for Room
-    implementation "androidx.room:room-ktx:$room_version"
-
-    // optional - Test helpers
-    testImplementation "androidx.room:room-testing:$room_version"
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
     // kotlin serialization
+    // implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1" FIXME
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc"
 
     // rate this app
     googleImplementation 'com.suddenh4x.ratingdialog:awesome-app-rating:2.4.0'
 
     // Coroutines
+    def coroutines_version = '1.6.4'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
 
