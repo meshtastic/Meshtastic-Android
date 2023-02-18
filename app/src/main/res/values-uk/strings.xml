@@ -7,8 +7,10 @@
     <string name="connection_status">Статус з`єднання</string>
     <string name="application_icon">значок додатку</string>
     <string name="unknown_username">Невідомий юзернейм</string>
+    <string name="send">Надіслати</string>
     <string name="send_text">Відправити повідомлення</string>
     <string name="warning_not_paired">Ви ще не підєднали пристрій, сумісний з Meshtastic. Будьласка приєднайте пристрій і введіть ім’я користувача.\n\nЦя програма з відкритим вихідним кодом знаходиться в розробці, якщо ви виявите проблеми, опублікуйте їх на нашому форумі: meshtastic.discourse.group.\n\nДля отримання додаткової інформації відвідайте нашу веб-сторінку - www.meshtastic.org.</string>
+    <string name="you">Ви</string>
     <string name="your_name">Ваше ім`я</string>
     <string name="analytics_okay">Анонімна статистика використання та звіти про збої.</string>
     <string name="looking_for_meshtastic_devices">Пошук пристроїв Meshtastic…</string>
@@ -100,11 +102,15 @@
         <item quantity="other">Видалити %s повідомлення?</item>
     </plurals>
     <string name="delete">Видалити</string>
+    <string name="delete_for_everyone">Видалити для всіх</string>
+    <string name="delete_for_me">Видалити для мене</string>
     <string name="select_all">Вибрати все</string>
     <string name="modem_config_slow_long">Long Range / Slow</string>
     <string name="map_style_selection">Вибір стилю</string>
     <string name="map_download_region">Завантажити регіон</string>
     <string name="name">Ім`я</string>
+    <string name="description">Опис</string>
+    <string name="locked">Блоковано</string>
     <string name="save">Зберегти</string>
     <string name="preferences_language">Мова</string>
     <string name="preferences_system_default">Системні налаштунки за умовчанням</string>
@@ -156,4 +162,7 @@
     <string name="map_download_errors">Завантаження завершено з %s помилками</string>
     <string name="map_cache_tiles">%s плиток</string>
     <string name="map_subDescription">прийом: %1$s° відстань: %2$s</string>
+    <string name="waypoint_edit">Редагувати точку</string>
+    <string name="waypoint_delete">Видалити мітку?</string>
+    <string name="waypoint_new">Новий мітка</string>
 </resources>
