@@ -189,6 +189,16 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         item { Divider() }
 
         item {
+            EditTextPreference(title = "NodeInfo broadcast interval",
+                value = deviceInput.nodeInfoBroadcastSecs,
+                enabled = connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    deviceInput = deviceInput.copy { nodeInfoBroadcastSecs = it }
+                })
+        }
+
+        item {
             PreferenceFooter(
                 enabled = deviceInput != localConfig.device,
                 onCancelClicked = {
