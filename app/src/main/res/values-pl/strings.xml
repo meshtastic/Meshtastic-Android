@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?> <!-- Contributed by @wkawecki & @aloisy -->
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="channel_name">Nazwa Kanału</string>
     <string name="channel_options">Opcje kanału</string>
@@ -7,8 +7,10 @@
     <string name="connection_status">Status połączenia</string>
     <string name="application_icon">ikona aplikacji</string>
     <string name="unknown_username">Nieznana nazwa</string>
+    <string name="send">Wyślij</string>
     <string name="send_text">Wyślij wiadomość</string>
     <string name="warning_not_paired">Nie sparowałeś jeszcze radia kompatybilnego z Meshtastic z tym telefonem. Proszę sparować urządzenie i ustawić swoją nazwę użytkownika.\n\nTa aplikacja open-source jest w fazie rozwoju, jeśli znajdziesz problemy, napisz na naszym forum: meshtastic.discourse.group.\n\nWięcej informacji znajdziesz na naszej stronie internetowej -www.meshtastic.org.</string>
+    <string name="you">Ty</string>
     <string name="your_name">Twoja Nazwa</string>
     <string name="analytics_okay">Anonimowe statystyki użycia i raporty o błędach.</string>
     <string name="looking_for_meshtastic_devices">Szukanie urządzeń Meshtastic…</string>
@@ -100,11 +102,15 @@
         <item quantity="other">Usunąć %s wiadomości?</item>
     </plurals>
     <string name="delete">Usuń</string>
+    <string name="delete_for_everyone">Usuń dla wszystkich</string>
+    <string name="delete_for_me">Usuń dla mnie</string>
     <string name="select_all">Zaznacz wszystko</string>
     <string name="modem_config_slow_long">Daleki zasięg (wolny)</string>
     <string name="map_style_selection">Wybór stylu</string>
     <string name="map_download_region">Pobierz region</string>
     <string name="name">Nazwa</string>
+    <string name="description">Opis</string>
+    <string name="locked">Zablokowany</string>
     <string name="save">Zapisz</string>
     <string name="preferences_language">Język</string>
     <string name="preferences_system_default">Domyślny systemu</string>
@@ -156,4 +162,7 @@
     <string name="map_download_errors">Pobieranie zakończone z %s błędami</string>
     <string name="map_cache_tiles">%s mapy</string>
     <string name="map_subDescription">kierunek: %1$s° odległość: %2$s</string>
+    <string name="waypoint_edit">Edytuj punkt nawigacji</string>
+    <string name="waypoint_delete">Usuń punkt nawigacji?</string>
+    <string name="waypoint_new">Nowy punkt nawigacyjny</string>
 </resources>
