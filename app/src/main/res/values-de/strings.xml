@@ -3,23 +3,25 @@
     <string name="channel_name">Kanalname</string>
     <string name="channel_options">Kanaloptionen</string>
     <string name="qr_code">QR-Code</string>
-    <string name="unset">Nicht festgelegt.</string>
+    <string name="unset">Nicht konfiguriert</string>
     <string name="connection_status">Verbindungsstatus</string>
     <string name="application_icon">Anwendungssymbol</string>
-    <string name="unknown_username">unbekannter Nutzername</string>
+    <string name="unknown_username">Unbekannter Nutzername</string>
+    <string name="send">Senden</string>
     <string name="send_text">Text senden</string>
-    <string name="warning_not_paired">Sie haben noch kein Meshtastic-kompatibles Funkgerät mit diesem Telefon gekoppelt. Bitte koppeln Sie ein Gerät und legen Sie Ihren Benutzernamen fest.\n\nDiese Open-Source-Anwendung befindet sich im Alpha-Test. Wenn Sie Probleme finden, veröffentlichen Sie diese bitte auf unserer Website im Chat.\n\nWeitere Informationen finden Sie auf unserer Webseite - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Sie haben noch kein Meshtastic-kompatibles Funkgerät mit diesem Telefon gekoppelt. Bitte koppeln Sie ein Gerät und legen Sie Ihren Benutzernamen fest.\n\nDiese quelloffene App befindet sich im Alpha-Test. Wenn Sie Probleme finden, veröffentlichen Sie diese bitte auf unserer Website im Chat.\n\nWeitere Informationen finden Sie auf unserer Webseite - www.meshtastic.org.</string>
+    <string name="you">Du</string>
     <string name="your_name">Dein Name</string>
-    <string name="analytics_okay">Anonyme Nutzungsstatistiken und Absturzberichte.</string>
-    <string name="looking_for_meshtastic_devices">Suche nach Meshtastic-Geräten …</string>
+    <string name="analytics_okay">Anonyme Nutzungsstatistiken und Absturzberichte senden.</string>
+    <string name="looking_for_meshtastic_devices">Suche nach Meshtastic Geräten…</string>
     <string name="starting_pairing">Koppelung beginnen</string>
-    <string name="url_for_join">Ein Link zum Beitritt zu einem meshtastischen Netzwerk</string>
+    <string name="url_for_join">Eine URL zum Beitritt zu einem meshtastischen Netzwerk</string>
     <string name="accept">Akzeptieren</string>
     <string name="cancel">Abbrechen</string>
     <string name="change_channel">Kanal wechseln</string>
     <string name="are_you_sure_channel">Möchten Sie wirklich den Kanal wechseln? Die gesamte Kommunikation mit anderen Knoten wird unterbrochen, bis Sie die neuen Kanaleinstellungen freigeben.</string>
     <string name="new_channel_rcvd">Neuen Kanal-Link empfangen</string>
-    <string name="do_you_want_switch">Möchten Sie zum Kanal wechseln? \'%s\' </string>
+    <string name="do_you_want_switch">Möchten Sie zum Kanal \'%s\' wechseln?</string>
     <string name="permission_missing">Meshtastic benötigt Standortberechtigung und Standort muss eingeschaltet werden, um neue Geräte über Bluetooth zu finden. Sie können es später wieder deaktivieren.</string>
     <string name="radio_sleeping">Das Funkgerät war schlafend, der Kanal konnte nicht geändert werden</string>
     <string name="report_bug">Fehler melden</string>
@@ -43,12 +45,12 @@
     <string name="connected_sleeping">Mit Funkgerät verbunden, aber es ist schlafend</string>
     <string name="update_to">Auf %s aktualisieren</string>
     <string name="app_too_old">Anwendungsaktualisierung erforderlich</string>
-    <string name="must_update">Sie müssen diese App über den App Store (oder Github) aktualisieren. Es ist zu alt, um mit dieser Funkgerät-Firmware zu kommunizieren. Bitte lesen Sie unsere  <a href="https://meshtastic.org/docs/software/android/android-installation">Dokumentation</a> zu diesem Thema.</string>
+    <string name="must_update">Sie müssen diese App über den App Store (oder Github) aktualisieren. Sie ist zu alt, um mit dieser Funkgerät-Firmware zu kommunizieren. Bitte lesen Sie unsere  <a href="https://meshtastic.org/docs/software/android/android-installation">Dokumentation</a> zu diesem Thema.</string>
     <string name="none">Nichts (deaktiviert)</string>
     <string name="modem_config_short">Kurze Reichweite / Schnell</string>
     <string name="modem_config_medium">Mittlere Reichweite / Schnell</string>
-    <string name="modem_config_long">Weite Reichweite / Schnell</string>
-    <string name="modem_config_very_long">Sehr weite Reichweite / Langsam</string>
+    <string name="modem_config_long">Hohe Reichweite / Schnell</string>
+    <string name="modem_config_very_long">Sehr hohe Reichweite / Langsam</string>
     <string name="modem_config_unrecognized">UNERKANNT</string>
     <string name="meshtastic_service_notifications">Dienst-Benachrichtigungen</string>
     <string name="location_disabled_warning">Standort muss eingeschaltet werden (hohe Genauigkeit), um neue Geräte über Bluetooth zu finden. Sie können es später wieder ausschalten.</string>
@@ -56,7 +58,7 @@
     <string name="a_list_of_nodes_in_the_mesh">Eine Liste der Knoten im Mesh</string>
     <string name="text_messages">Textnachrichten</string>
     <string name="channel_invalid">Diese Kanal-URL ist ungültig und kann nicht verwendet werden</string>
-    <string name="debug_panel">Fehlermeldungs-Leiste</string>
+    <string name="debug_panel">Debug Anzeige</string>
     <string name="debug_last_messages">500 letzte Nachrichten</string>
     <string name="clear">Leeren</string>
     <string name="updating_firmware">Firmware aktualisieren, bitte bis zu acht Minuten warten …</string>
@@ -91,18 +93,22 @@
     <string name="provide_location_to_mesh">Standort zum Mesh angeben</string>
     <string name="camera_required">Kamera-Berechtigungen</string>
     <string name="why_camera_required">Wir müssen Zugriff auf die Kamera haben, um QR-Codes lesen zu können. Es werden keine Bilder oder Videos gespeichert.</string>
-    <string name="modem_config_slow_short">Kurze Reichweite / Schnell</string>
-    <string name="modem_config_slow_medium">Mittlere Reichweite / Schnell</string>
+    <string name="modem_config_slow_short">Kurze Reichweite / Langsam</string>
+    <string name="modem_config_slow_medium">Mittlere Reichweite / Langsam</string>
     <plurals name="delete_messages">
         <item quantity="one">Nachricht löschen?</item>
         <item quantity="other">%s Nachrichten löschen?</item>
     </plurals>
     <string name="delete">Löschen</string>
+    <string name="delete_for_everyone">Für jeden löschen</string>
+    <string name="delete_for_me">Für mich löschen</string>
     <string name="select_all">Alle auswählen</string>
     <string name="modem_config_slow_long">Weite Reichweite / Langsam</string>
     <string name="map_style_selection">Stil-Auswahl</string>
     <string name="map_download_region">Region herunterladen</string>
     <string name="name">Name</string>
+    <string name="description">Beschreibung</string>
+    <string name="locked">Gesperrt</string>
     <string name="save">Speichern</string>
     <string name="preferences_language">Sprache</string>
     <string name="preferences_system_default">System</string>
@@ -154,4 +160,7 @@
     <string name="map_download_errors">Herunterladen abgeschlossen mit %s Fehlern</string>
     <string name="map_cache_tiles">%s Kacheln</string>
     <string name="map_subDescription">Richtung: %1$s° Entfernung: %2$s</string>
+    <string name="waypoint_edit">Wegpunkt bearbeiten</string>
+    <string name="waypoint_delete">Wegpunkt löschen?</string>
+    <string name="waypoint_new">Wegpunkt hinzufügen</string>
 </resources>
