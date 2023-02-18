@@ -191,8 +191,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
     // kotlin serialization
-    // implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1" FIXME
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1"
 
     // rate this app
     googleImplementation 'com.suddenh4x.ratingdialog:awesome-app-rating:2.4.0'
