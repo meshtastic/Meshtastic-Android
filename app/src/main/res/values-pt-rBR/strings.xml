@@ -7,8 +7,10 @@
     <string name="connection_status">Status da conexão</string>
     <string name="application_icon">icone da aplicação</string>
     <string name="unknown_username">Nome desconhecido</string>
+    <string name="send">Enviar</string>
     <string name="send_text">Enviar Texto</string>
     <string name="warning_not_paired">Você ainda não pareou um rádio compatível ao Meshtastic com este smartphone. Por favor pareie um dispositivo e configure seu nome de usuário.\n\nEste aplicativo open source está em desenvolvimento, caso encontre algum problema por favor publique em nosso fórum: meshtastic.discourse.group.\n\nPara mais informações acesse nossa página: www.meshtastic.org.</string>
+    <string name="you">Você</string>
     <string name="your_name">Seu Nome</string>
     <string name="analytics_okay">Estatísticas anônimas de uso e relatórios de erros.</string>
     <string name="looking_for_meshtastic_devices">Procurando por dispositivos Meshtastic…</string>
@@ -98,11 +100,15 @@
         <item quantity="other">Excluir %s mensagens?</item>
     </plurals>
     <string name="delete">Excluir</string>
+    <string name="delete_for_everyone">Apagar para todos</string>
+    <string name="delete_for_me">Apagar para mim</string>
     <string name="select_all">Selecionar tudo</string>
     <string name="modem_config_slow_long">Longo alcance / lento</string>
     <string name="map_style_selection">Seleção de estilo</string>
     <string name="map_download_region">Baixar região</string>
     <string name="name">Nome</string>
+    <string name="description">Descrição</string>
+    <string name="locked">Bloqueado</string>
     <string name="save">Salvar</string>
     <string name="preferences_language">Idioma</string>
     <string name="preferences_system_default">Padrão do sistema</string>
@@ -154,4 +160,7 @@
     <string name="map_download_errors">Download concluído com %s erros</string>
     <string name="map_cache_tiles">%s blocos</string>
     <string name="map_subDescription">direção: %1$s° distância: %2$s</string>
+    <string name="waypoint_edit">Editar ponto de referência</string>
+    <string name="waypoint_delete">Excluir ponto de referência?</string>
+    <string name="waypoint_new">Novo ponto de referência</string>
 </resources>
