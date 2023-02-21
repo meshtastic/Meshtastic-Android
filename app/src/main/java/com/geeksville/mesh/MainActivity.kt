@@ -666,7 +666,8 @@ class MainActivity : AppCompatActivity(), Logging {
                         }
                         .setPositiveButton(R.string.accept) { _, _ ->
                             info("requesting permissions")
-                            requestPermissionsLauncher.launch(getBluetoothPermissions())                    }
+                            requestPermissionsLauncher.launch(getBluetoothPermissions())
+                        }
                         .show()
                 }
             }
