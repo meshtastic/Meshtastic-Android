@@ -170,7 +170,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (connected == MeshService.ConnectionState.DISCONNECTED)
             model.setOwner("")
 
-        if (requireContext().hasGps() && model.config.position.gpsEnabled) {
+        if (requireContext().hasGps()) {
             binding.provideLocationCheckbox.isEnabled = true
         } else {
             binding.provideLocationCheckbox.isChecked = false
