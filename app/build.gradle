@@ -221,7 +221,7 @@ dependencies {
     //noinspection GradleDependency
     implementation 'com.google.zxing:core:3.3.0' // <-- don't update
 
-    def work_version = '2.7.1'
+    def work_version = '2.8.0'
     // Work Request - used to delay boot event handling
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
