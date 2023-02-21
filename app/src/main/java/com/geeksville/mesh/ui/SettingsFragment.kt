@@ -324,7 +324,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         model.channels.asLiveData().observe(viewLifecycleOwner) {
             if (!model.isConnected()) it.protobuf.let { ch ->
-                val maxChannels = model.myNodeInfo.value?.maxChannels
+                val maxChannels = model.myNodeInfo.value?.maxChannels ?: "8"
                 if (!ch.hasLoraConfig() && ch.settingsCount > 0)
                     binding.scanStatusText.text = "Channels (${ch.settingsCount} / $maxChannels)"
             }
