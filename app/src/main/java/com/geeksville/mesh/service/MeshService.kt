@@ -252,6 +252,8 @@ class MeshService : Service(), Logging {
             .launchIn(serviceScope)
         localConfigRepository.localConfigFlow.onEach { localConfig = it }
             .launchIn(serviceScope)
+        channelSetRepository.channelSetFlow.onEach { channelSet = it }
+            .launchIn(serviceScope)
 
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
@@ -364,6 +366,7 @@ class MeshService : Service(), Logging {
     var myNodeInfo: MyNodeInfo? = null
 
     private var localConfig: LocalConfig = LocalConfig.getDefaultInstance()
+    private var channelSet: AppOnlyProtos.ChannelSet = AppOnlyProtos.ChannelSet.getDefaultInstance()
 
     /// True after we've done our initial node db init
     @Volatile
@@ -1719,6 +1722,10 @@ class MeshService : Service(), Logging {
             sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
                 commitEditSettings = true
             })
+        }
+
+        override fun getChannelSet(): ByteArray = toRemoteExceptions {
+            this@MeshService.channelSet.toByteArray()
         }
 
         override fun getNodes(): MutableList<NodeInfo> = toRemoteExceptions {

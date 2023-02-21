@@ -116,6 +116,9 @@ interface IMeshService {
     /// Send NodedbReset admin packet to nodeNum
     void requestNodedbReset(in int idNum);
 
+    /// Returns a ChannelSet protobuf
+    byte []getChannelSet();
+
     /**
     Is the packet radio currently connected to the phone?  Returns a ConnectionState string.
     */
