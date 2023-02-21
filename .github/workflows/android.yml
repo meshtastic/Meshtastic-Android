@@ -19,6 +19,9 @@ jobs:
       with:
         submodules: 'recursive'
 
+    - name: Validate Gradle wrapper
+      uses: gradle/wrapper-validation-action@v1
+
     - name: Mock files for CI
       run: |
         rm ./app/google-services.json
@@ -32,18 +35,31 @@ jobs:
       uses: actions/setup-java@v3
       with:
         java-version: '11'
-        distribution: 'temurin'
-        cache: gradle
+        distribution: 'zulu'
 
-    - name: Validate Gradle wrapper
-      uses: gradle/wrapper-validation-action@v1
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2
 
-    - name: Gradle build
-      run: ./gradlew build
+    - name: Check lint
+      run: ./gradlew lintFdroidDebug lintGoogleDebug
 
-    - name: Upload debug APK
+    - name: Build debug artifacts
+      run: ./gradlew assembleDebug
+
+    - name: Run local tests
+      run: ./gradlew testFdroidDebug testGoogleDebug
+
+    - name: Upload debug artifact
       uses: actions/upload-artifact@v3
       with:
         name: fdroidDebug
         path: app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
+        retention-days: 30
+
+    - name: Upload build reports
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-reports
+        path: app/build/reports
         retention-days: 30
