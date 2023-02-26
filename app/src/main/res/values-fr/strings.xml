@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="channel_name">Nom du canal</string>
-    <string name="channel_options">options Canal</string>
+    <string name="channel_options">Options du canal</string>
     <string name="qr_code">code QR</string>
     <string name="unset">Non défini</string>
     <string name="connection_status">État de la connexion</string>
@@ -14,23 +14,23 @@
     <string name="your_name">Votre Nom</string>
     <string name="analytics_okay">Statistiques et rapports d\'erreur anonymes.</string>
     <string name="looking_for_meshtastic_devices">Recherche d\'appareils Meshtastic…</string>
-    <string name="starting_pairing">Démarre jumelage</string>
+    <string name="starting_pairing">Démarrage du jumelage</string>
     <string name="url_for_join">Un URL pour rejoindre une toile Meshtastic</string>
     <string name="accept">Accepter</string>
     <string name="cancel">Annuler</string>
     <string name="change_channel">Changer de canal</string>
-    <string name="are_you_sure_channel">Vous êtes sur de vouloir changer de canal? Toute communication aux autres nœuds va s\'arrêter jusqu\'à ce que vous partagez les nouveaux réglages.</string>
+    <string name="are_you_sure_channel">Êtes-vous sûr de vouloir modifier le canal ? Toutes les communications avec les autres nœuds s\'arrêteront jusqu\'à ce que vous partagiez les nouveaux paramètres du canal.</string>
     <string name="new_channel_rcvd">Nouveau URL canal reçu</string>
-    <string name="do_you_want_switch">Voulez-vous changer vers canal \'%s\' ?</string>
+    <string name="do_you_want_switch">Voulez-vous basculer sur le canal \'%s\' ?</string>
     <string name="permission_missing">Une permission indispensable manque, Meshtastic ne peut pas fonctionner. Veuillez modifier dans Réglages.</string>
-    <string name="radio_sleeping">Radio en veille, change de Canal impossible</string>
+    <string name="radio_sleeping">La radio était en veille, impossible de changer de canal</string>
     <string name="report_bug">Rapporter Bogue</string>
     <string name="report_a_bug">Rapporter un Bogue</string>
     <string name="report_bug_text">Vous êtes certain de vouloir rapporter un bogue? Après l\'envoi, veuillez poster dans meshtastic.discourse.group afin que nous puissions examiner ce que vous avez trouvé.</string>
     <string name="report">Rapport</string>
     <string name="not_paired_yet">Vous n\'avez pas encore jumelé une radio.</string>
     <string name="change_radio">Changer radio</string>
-    <string name="pairing_completed">Jumelage  terminé, démarrage du service</string>
+    <string name="pairing_completed">Jumelage terminé, démarrage du service</string>
     <string name="pairing_failed_try_again">Le jumelage a échoué, veuillez sélectionner à nouveau</string>
     <string name="location_disabled">L\'accès à la position est désactivé, ne peut pas fournir de position au mesh.</string>
     <string name="share">Partager</string>
@@ -57,7 +57,7 @@
     <string name="about">Infos</string>
     <string name="a_list_of_nodes_in_the_mesh">Une liste des nœuds dans le réseau</string>
     <string name="text_messages">Messages tèxte</string>
-    <string name="channel_invalid">Cet URL Canal n\'est pas valide et ne peut être utilisé</string>
+    <string name="channel_invalid">Cette URL de canal est invalide et ne peut pas être utilisée</string>
     <string name="debug_panel">Panneau de débogage</string>
     <string name="debug_last_messages">500 derniers messages</string>
     <string name="clear">Effacer</string>
@@ -121,7 +121,7 @@
     <string name="intro_started">Commençons !</string>
     <string name="intro_started_text">Connectez votre appareil Meshtastic en utilisant soit Bluetooth, soit une connexion série ou soit la WiFi. \n\nVous pouvez voir quels appareils sont compatibles sur www.meshtastic.org/docs/hardware</string>
     <string name="intro_encryption">"Configuration du cryptage"</string>
-    <string name="intro_encryption_text">En base, une clé de chiffrement par défaut est définie. Pour activer votre propre canal et un chiffrement amélioré, allez dans l\'onglet canal et changez le nom du canal : cela définira une clé aléatoire pour le chiffrement AES256. \n\nPour communiquer avec d\'autres appareils, ils devront scanner votre code QR ou suivre le lien partagé pour configurer les paramètres du canal.</string>
+    <string name="intro_encryption_text">De base, une clé de chiffrement par défaut est définie. Pour activer votre propre canal et un chiffrement amélioré, allez dans l\'onglet canal et changez le nom du canal : cela définira une clé aléatoire pour le chiffrement AES256. \n\nPour communiquer avec d\'autres appareils, ils devront scanner votre code QR ou suivre le lien partagé pour configurer les paramètres du canal.</string>
     <string name="message">Message</string>
     <string name="quick_chat">Options du clavardage</string>
     <string name="quick_chat_new">Nouveau clavardage</string>
@@ -140,7 +140,7 @@
     <string name="map_5_miles">8 kilomètres</string>
     <string name="map_10_miles">16 kilomètres</string>
     <string name="map_15_miles">24 kilomètres</string>
-    <string name="map_tile_download_estimate">Tile download estimate:</string>
+    <string name="map_tile_download_estimate">Estimation du téléchargement de tuiles :</string>
     <string name="map_start_download">Commencer le téléchargement</string>
     <string name="request_position">Demander la position</string>
     <string name="close">Fermer</string>
