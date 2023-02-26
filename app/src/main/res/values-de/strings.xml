@@ -103,7 +103,7 @@
     <string name="delete_for_everyone">Für jeden löschen</string>
     <string name="delete_for_me">Für mich löschen</string>
     <string name="select_all">Alle auswählen</string>
-    <string name="modem_config_slow_long">Weite Reichweite / Langsam</string>
+    <string name="modem_config_slow_long">Hohe Reichweite / Langsam</string>
     <string name="map_style_selection">Stil-Auswahl</string>
     <string name="map_download_region">Region herunterladen</string>
     <string name="name">Name</string>
