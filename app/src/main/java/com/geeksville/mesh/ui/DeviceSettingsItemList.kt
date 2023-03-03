@@ -682,39 +682,41 @@ fun DeviceSettingsItemList(viewModel: UIViewModel) {
         }
         item { Divider() }
 
-        item {
-            DropDownPreference(title = "Modem preset",
-                enabled = connected && loraInput.usePreset,
-                items = ConfigProtos.Config.LoRaConfig.ModemPreset.values()
-                    .filter { it != ConfigProtos.Config.LoRaConfig.ModemPreset.UNRECOGNIZED }
-                    .map { it to it.name },
-                selectedItem = loraInput.modemPreset,
-                onItemSelected = { loraInput = loraInput.copy { modemPreset = it } })
-        }
-        item { Divider() }
+        if (loraInput.usePreset) {
+            item {
+                DropDownPreference(title = "Modem preset",
+                    enabled = connected && loraInput.usePreset,
+                    items = ConfigProtos.Config.LoRaConfig.ModemPreset.values()
+                        .filter { it != ConfigProtos.Config.LoRaConfig.ModemPreset.UNRECOGNIZED }
+                        .map { it to it.name },
+                    selectedItem = loraInput.modemPreset,
+                    onItemSelected = { loraInput = loraInput.copy { modemPreset = it } })
+            }
+            item { Divider() }
+        } else {
+            item {
+                EditTextPreference(title = "Bandwidth",
+                    value = loraInput.bandwidth,
+                    enabled = connected && !loraInput.usePreset,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { loraInput = loraInput.copy { bandwidth = it } })
+            }
 
-        item {
-            EditTextPreference(title = "Bandwidth",
-                value = loraInput.bandwidth,
-                enabled = connected && !loraInput.usePreset,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { loraInput = loraInput.copy { bandwidth = it } })
-        }
+            item {
+                EditTextPreference(title = "Spread factor",
+                    value = loraInput.spreadFactor,
+                    enabled = connected && !loraInput.usePreset,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { loraInput = loraInput.copy { spreadFactor = it } })
+            }
 
-        item {
-            EditTextPreference(title = "Spread factor",
-                value = loraInput.spreadFactor,
-                enabled = connected && !loraInput.usePreset,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { loraInput = loraInput.copy { spreadFactor = it } })
-        }
-
-        item {
-            EditTextPreference(title = "Coding rate",
-                value = loraInput.codingRate,
-                enabled = connected && !loraInput.usePreset,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { loraInput = loraInput.copy { codingRate = it } })
+            item {
+                EditTextPreference(title = "Coding rate",
+                    value = loraInput.codingRate,
+                    enabled = connected && !loraInput.usePreset,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { loraInput = loraInput.copy { codingRate = it } })
+            }
         }
 
         item {
