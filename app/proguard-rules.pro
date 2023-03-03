@@ -30,19 +30,7 @@
 -keep class com.geeksville.mesh.**{*;}
 -keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite { <fields>; }
 
-
-# for kotlinx.serialization
--keepattributes *Annotation*, InnerClasses
--dontnote kotlinx.serialization.SerializationKt
--keep,includedescriptorclasses class com.geeksville.mesh.**$$serializer { *; }
--keepclassmembers class com.geeksville.mesh.** {
-    *** Companion;
-}
--keepclasseswithmembers class com.geeksville.mesh.** {
-    kotlinx.serialization.KSerializer serializer(...);
-}
-
--keep public class com.google.android.gms.* { public *; }
+# mil.nga.mgrs
 -dontwarn com.google.android.gms.**
 
 # ormlite
@@ -56,8 +44,9 @@
 -dontwarn org.bouncycastle.**
 -dontwarn org.openjsse.**
 
-#-dontwarn java.awt.image.**
-#-dontwarn com.google.errorprone.annotations.**
+# ?
+-dontwarn java.awt.image.**
+-dontwarn com.google.errorprone.annotations.**
 
 # Our app is opensource no need to obsfucate
 -dontobfuscate
