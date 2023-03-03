@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
+import javax.inject.Singleton
 
 
 /**
@@ -33,6 +34,7 @@ import javax.inject.Inject
  * Note - this class intentionally dumb.  It doesn't understand protobuf framing etc...
  * It is designed to be simple so it can be stubbed out with a simulated version as needed.
  */
+@Singleton
 class RadioInterfaceService @Inject constructor(
     private val context: Application,
     private val dispatchers: CoroutineDispatchers,
@@ -72,8 +74,8 @@ class RadioInterfaceService @Inject constructor(
     init {
         processLifecycle.coroutineScope.launch {
             bluetoothRepository.state.collect { state ->
-                if (state.enabled) {
-                    // startInterface() FIXME no longer safe to call here, crashing SafeBluetooth.asyncConnect
+                if (state.enabled && !isStarted) {
+                    startInterface()
                 } else if (radioIf is BluetoothInterface) {
                     stopInterface()
                 }
