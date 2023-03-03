@@ -32,6 +32,7 @@ import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.util.onEditorAction
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.protobuf.ByteString
@@ -234,7 +235,7 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
                 .show()
         }
 
-        binding.channelNameEdit.on(EditorInfo.IME_ACTION_DONE) {
+        binding.channelNameEdit.onEditorAction(EditorInfo.IME_ACTION_DONE) {
             requireActivity().hideKeyboard()
         }
 

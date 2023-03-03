@@ -43,6 +43,7 @@ import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.SoftwareUpdateService
 import com.geeksville.mesh.util.exceptionToSnackbar
+import com.geeksville.mesh.util.onEditorAction
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -369,11 +370,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 .show()
         }
 
-        binding.usernameEditText.on(EditorInfo.IME_ACTION_DONE) {
-            debug("did IME action")
+        binding.usernameEditText.onEditorAction(EditorInfo.IME_ACTION_DONE) {
+            debug("received IME_ACTION_DONE")
             val n = binding.usernameEditText.text.toString().trim()
-            if (n.isNotEmpty())
-                model.setOwner(n)
+            if (n.isNotEmpty()) model.setOwner(n)
             requireActivity().hideKeyboard()
         }
 

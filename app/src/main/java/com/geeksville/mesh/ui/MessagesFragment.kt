@@ -26,22 +26,12 @@ import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.databinding.AdapterMessageLayoutBinding
 import com.geeksville.mesh.databinding.MessagesFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.util.onEditorAction
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.DateFormat
 import java.util.*
-
-// Allows usage like email.on(EditorInfo.IME_ACTION_NEXT, { confirm() })
-fun EditText.on(actionId: Int, func: () -> Unit) {
-    setOnEditorActionListener { _, receivedActionId, _ ->
-
-        if (actionId == receivedActionId) {
-            func()
-        }
-        true
-    }
-}
 
 @AndroidEntryPoint
 class MessagesFragment : Fragment(), Logging {
@@ -58,17 +48,6 @@ class MessagesFragment : Fragment(), Logging {
     private val model: UIViewModel by activityViewModels()
 
     private var isConnected = false
-
-    // Allows textMultiline with IME_ACTION_SEND
-    private fun EditText.onActionSend(func: () -> Unit) {
-        setOnEditorActionListener { _, actionId, _ ->
-
-            if (actionId == EditorInfo.IME_ACTION_SEND) {
-                func()
-            }
-            true
-        }
-    }
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
@@ -276,8 +255,8 @@ class MessagesFragment : Fragment(), Logging {
             // requireActivity().hideKeyboard()
         }
 
-        binding.messageInputText.onActionSend {
-            debug("did IME action")
+        binding.messageInputText.onEditorAction(EditorInfo.IME_ACTION_SEND) {
+            debug("received IME_ACTION_SEND")
 
             val str = binding.messageInputText.text.toString().trim()
             if (str.isNotEmpty()) model.sendMessage(str, contactKey)
