@@ -799,8 +799,6 @@ class MeshService : Service(), Logging {
             sendToRadio(ToRadio.newBuilder().apply {
                 this.packet = packet
             })
-            // FIXME remove when MeshPacketQueue is fixed
-            if (!packet.wantAck) future.complete(true)
         } catch (ex: Exception) {
             errormsg("sendToRadio error:", ex)
             future.complete(false)
@@ -1202,8 +1200,7 @@ class MeshService : Service(), Logging {
     private fun handleQueueStatus(queueStatus: MeshProtos.QueueStatus) {
         debug("queueStatus ${queueStatus.toOneLineString()}")
         val (success, isFull, requestId) = with(queueStatus) {
-            // FIXME use "free == 0" when MeshPacketQueue is fixed
-            Triple(res == 0, free <= 16, meshPacketId)
+            Triple(res == 0, free == 0, meshPacketId)
         }
         if (success && isFull) return // Queue is full, wait for free != 0
         if (requestId != 0) queueResponse.remove(requestId)?.complete(success)
