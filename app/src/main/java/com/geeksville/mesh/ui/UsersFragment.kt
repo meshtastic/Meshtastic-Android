@@ -286,11 +286,11 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     ) {
 
         val (image, text) = when (battery) {
-            in 1..100 -> Pair(
+            in 0..100 -> Pair(
                 R.drawable.ic_battery_full_24,
                 String.format("%d%% %.2fV", battery, voltage ?: 0)
             )
-            0 -> Pair(R.drawable.ic_power_plug_24, "")
+            111 -> Pair(R.drawable.ic_power_plug_24, "")
             else -> Pair(R.drawable.ic_battery_full_24, "?")
         }
 
