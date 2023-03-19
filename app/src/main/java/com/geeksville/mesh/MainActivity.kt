@@ -131,48 +131,21 @@ class MainActivity : AppCompatActivity(), Logging {
             bluetoothViewModel.permissionsUpdated()
         }
 
-    data class TabInfo(val text: String, val icon: Int, val content: Fragment)
+    enum class TabInfo(val icon: Int, val content: Fragment) {
+        Messages(R.drawable.ic_twotone_message_24, ContactsFragment()),
+        Users(R.drawable.ic_twotone_people_24, UsersFragment()),
+        Map(R.drawable.ic_twotone_map_24, MapFragment()),
+        Channels(R.drawable.ic_twotone_contactless_24, ChannelFragment()),
+        Settings(R.drawable.ic_twotone_settings_applications_24, SettingsFragment())
+    }
 
-    // private val tabIndexes = generateSequence(0) { it + 1 } FIXME, instead do withIndex or zip? to get the ids below, also stop duplicating strings
-    private val tabInfos = arrayOf(
-        TabInfo(
-            "Messages",
-            R.drawable.ic_twotone_message_24,
-            ContactsFragment()
-        ),
-        TabInfo(
-            "Users",
-            R.drawable.ic_twotone_people_24,
-            UsersFragment()
-        ),
-        TabInfo(
-            "Map",
-            R.drawable.ic_twotone_map_24,
-            MapFragment()
-        ),
-        TabInfo(
-            "Channel",
-            R.drawable.ic_twotone_contactless_24,
-            ChannelFragment()
-        ),
-        TabInfo(
-            "Settings",
-            R.drawable.ic_twotone_settings_applications_24,
-            SettingsFragment()
-        )
-    )
+    private val tabInfos = TabInfo.values()
 
-    private val tabsAdapter = object : FragmentStateAdapter(this) {
+    private val tabsAdapter = object : FragmentStateAdapter(supportFragmentManager, lifecycle) {
 
         override fun getItemCount(): Int = tabInfos.size
 
         override fun createFragment(position: Int): Fragment {
-            // Return a NEW fragment instance in createFragment(int)
-            /*
-            fragment.arguments = Bundle().apply {
-                // Our object is just an integer :-P
-                putInt(ARG_OBJECT, position + 1)
-            } */
             return tabInfos[position].content
         }
     }
