@@ -15,7 +15,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.notificationManager
@@ -102,7 +101,7 @@ class MeshServiceNotifications(
     fun updateMessageNotification(name: String, message: String) =
         notificationManager.notify(
             messageNotifyId,
-            createMessageNotifcation(name, message)
+            createMessageNotification(name, message)
         )
 
     private val openAppIntent: PendingIntent by lazy {
@@ -117,11 +116,8 @@ class MeshServiceNotifications(
      * Generate a bitmap from a vector drawable (even on old builds)
      * https://stackoverflow.com/questions/33696488/getting-bitmap-from-vector-drawable
      */
-    fun getBitmapFromVectorDrawable(drawableId: Int): Bitmap {
-        var drawable = ContextCompat.getDrawable(context, drawableId)!!
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            drawable = DrawableCompat.wrap(drawable).mutate()
-        }
+    private fun getBitmapFromVectorDrawable(drawableId: Int): Bitmap {
+        val drawable = ContextCompat.getDrawable(context, drawableId)!!
         val bitmap = Bitmap.createBitmap(
             drawable.intrinsicWidth,
             drawable.intrinsicHeight, Bitmap.Config.ARGB_8888
@@ -132,7 +128,7 @@ class MeshServiceNotifications(
         return bitmap
     }
 
-    fun commonBuilder(channel: String): NotificationCompat.Builder {
+    private fun commonBuilder(channel: String): NotificationCompat.Builder {
         val builder = NotificationCompat.Builder(context, channel)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(openAppIntent)
@@ -166,7 +162,7 @@ class MeshServiceNotifications(
         return builder.build()
     }
 
-    fun createMessageNotifcation(name: String, message: String): Notification {
+    private fun createMessageNotification(name: String, message: String): Notification {
         val builder = commonBuilder(messageChannelId)
         with(builder) {
             priority = NotificationCompat.PRIORITY_DEFAULT
