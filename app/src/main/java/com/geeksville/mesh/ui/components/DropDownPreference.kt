@@ -52,7 +52,7 @@ fun <T> DropDownPreference(
                         dropDownExpanded = false
                         onItemSelected(item.first)
                     },
-                    modifier = Modifier
+                    modifier = modifier
                         .background(
                             color = if (selectedItem == item.first)
                                 MaterialTheme.colors.primary.copy(alpha = 0.3f)
