@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.UIViewModel
@@ -27,7 +28,7 @@ import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.SwitchPreference
 
 @Composable
-fun ModuleSettingsItemList(viewModel: UIViewModel) {
+fun ModuleSettingsItemList(viewModel: UIViewModel = viewModel()) {
     val focusManager = LocalFocusManager.current
 
     val connectionState by viewModel.connectionState.observeAsState()
