@@ -131,15 +131,35 @@ class MainActivity : AppCompatActivity(), Logging {
             bluetoothViewModel.permissionsUpdated()
         }
 
-    enum class TabInfo(val icon: Int, val content: Fragment) {
-        Messages(R.drawable.ic_twotone_message_24, ContactsFragment()),
-        Users(R.drawable.ic_twotone_people_24, UsersFragment()),
-        Map(R.drawable.ic_twotone_map_24, MapFragment()),
-        Channels(R.drawable.ic_twotone_contactless_24, ChannelFragment()),
-        Settings(R.drawable.ic_twotone_settings_applications_24, SettingsFragment())
-    }
+    data class TabInfo(val text: String, val icon: Int, val content: Fragment)
 
-    private val tabInfos = TabInfo.values()
+    private val tabInfos = arrayOf(
+        TabInfo(
+            "Messages",
+            R.drawable.ic_twotone_message_24,
+            ContactsFragment()
+        ),
+        TabInfo(
+            "Users",
+            R.drawable.ic_twotone_people_24,
+            UsersFragment()
+        ),
+        TabInfo(
+            "Map",
+            R.drawable.ic_twotone_map_24,
+            MapFragment()
+        ),
+        TabInfo(
+            "Channel",
+            R.drawable.ic_twotone_contactless_24,
+            ChannelFragment()
+        ),
+        TabInfo(
+            "Settings",
+            R.drawable.ic_twotone_settings_applications_24,
+            SettingsFragment()
+        )
+    )
 
     private val tabsAdapter = object : FragmentStateAdapter(supportFragmentManager, lifecycle) {
 
