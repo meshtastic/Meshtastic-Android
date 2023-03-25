@@ -661,6 +661,14 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
         item { Divider() }
 
         item {
+            SwitchPreference(title = "Wake screen on tap or motion",
+                checked = displayInput.wakeOnTapOrMotion,
+                enabled = connected,
+                onCheckedChange = { displayInput = displayInput.copy { wakeOnTapOrMotion = it } })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = displayInput != localConfig.display,
                 onCancelClicked = {
