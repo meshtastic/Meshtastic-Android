@@ -5,6 +5,7 @@ package com.geeksville.mesh;
 parcelable DataPacket;
 parcelable NodeInfo;
 parcelable MeshUser;
+parcelable Position;
 parcelable MyNodeInfo;
 
 /**
@@ -101,7 +102,7 @@ interface IMeshService {
     void commitEditSettings();
 
     /// Send position packet with wantResponse to nodeNum
-    void requestPosition(in int idNum, in double lat, in double lon, in int alt);
+    void requestPosition(in int idNum, in Position position);
 
     /// Send Shutdown admin packet to nodeNum
     void requestShutdown(in int idNum);

@@ -336,9 +336,8 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
                 },
                 onSaveClicked = {
                     focusManager.clearFocus()
-                    if (positionInfo != ourNodeInfo?.position && positionInput.fixedPosition) positionInfo?.let {
-                        viewModel.requestPosition(0, it.latitude, it.longitude, it.altitude)
-                    }
+                    if (positionInfo != ourNodeInfo?.position && positionInput.fixedPosition)
+                        positionInfo?.let { viewModel.requestPosition(0, it) }
                     if (positionInput != localConfig.position) viewModel.updatePositionConfig { positionInput }
                 })
         }

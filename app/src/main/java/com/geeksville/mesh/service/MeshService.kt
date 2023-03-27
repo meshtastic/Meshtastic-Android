@@ -1741,8 +1741,9 @@ class MeshService : Service(), Logging {
             stopLocationRequests()
         }
 
-        override fun requestPosition(idNum: Int, lat: Double, lon: Double, alt: Int) =
+        override fun requestPosition(idNum: Int, position: Position) =
             toRemoteExceptions {
+                val (lat, lon, alt) = with(position) { Triple(latitude, longitude, altitude) }
                 // request position
                 if (idNum != 0) sendPosition(time = 1, destNum = idNum, wantResponse = true)
                 // set local node's fixed position
