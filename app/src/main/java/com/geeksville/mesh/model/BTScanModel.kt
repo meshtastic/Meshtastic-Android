@@ -93,6 +93,10 @@ class BTScanModel @Inject constructor(
     private val context: Context get() = application.applicationContext
 
     init {
+        bluetoothRepository.state.value.bondedDevices.onEach {
+            setupScan() // TODO clean up device list updates
+        }.launchIn(viewModelScope)
+
         debug("BTScanModel created")
     }
 

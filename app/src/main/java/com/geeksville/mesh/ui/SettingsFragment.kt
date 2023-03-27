@@ -290,10 +290,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = regionAdapter
 
-        bluetoothViewModel.enabled.observe(viewLifecycleOwner) { enabled ->
-            if (enabled) scanModel.setupScan()
-        }
-
         model.ownerName.observe(viewLifecycleOwner) { name ->
             binding.usernameEditText.isEnabled = !name.isNullOrEmpty()
             binding.usernameEditText.setText(name)
