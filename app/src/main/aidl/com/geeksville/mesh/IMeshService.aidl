@@ -4,6 +4,7 @@ package com.geeksville.mesh;
 // Declare any non-default types here with import statements
 parcelable DataPacket;
 parcelable NodeInfo;
+parcelable MeshUser;
 parcelable MyNodeInfo;
 
 /**
@@ -52,11 +53,9 @@ interface IMeshService {
     void subscribeReceiver(String packageName, String receiverName);
 
     /**
-    * Set the ID info for this node
-
-    If myId is null, then the existing unique node ID is preserved, only the human visible longName/shortName is changed
+    * Set the user info for this node
     */
-    void setOwner(String myId, String longName, String shortName, boolean isLicensed);
+    void setOwner(in MeshUser user);
 
     /// Return my unique user ID string
     String getMyId();

@@ -125,7 +125,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
                     userInput = ourNodeInfo?.user
                 }, onSaveClicked = {
                     focusManager.clearFocus()
-                    userInput?.let { viewModel.setOwner(it.longName, it.shortName, it.isLicensed) }
+                    userInput?.let { viewModel.setOwner(it) }
                 })
         }
 

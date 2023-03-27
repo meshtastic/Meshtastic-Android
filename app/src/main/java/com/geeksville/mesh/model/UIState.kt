@@ -460,10 +460,9 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    // clean up all this nasty owner state management FIXME
-    fun setOwner(longName: String? = null, shortName: String? = null, isLicensed: Boolean? = null) {
+    fun setOwner(user: MeshUser) = with(user) {
 
-        longName?.trim()?.let { ownerName ->
+        longName.trim().let { ownerName ->
             // note: we allow an empty user string to be written to prefs
             _ownerName.value = ownerName
             preferences.edit { putString("owner", ownerName) }
@@ -472,12 +471,8 @@ class UIViewModel @Inject constructor(
         // Note: we are careful to not set a new unique ID
         if (_ownerName.value!!.isNotEmpty())
             try {
-                meshService?.setOwner(
-                    null,
-                    _ownerName.value,
-                    shortName?.trim() ?: getInitials(_ownerName.value!!),
-                    isLicensed ?: false
-                ) // Note: we use ?. here because we might be running in the emulator
+                // Note: we use ?. here because we might be running in the emulator
+                meshService?.setOwner(user)
             } catch (ex: RemoteException) {
                 errormsg("Can't set username on device, is device offline? ${ex.message}")
             }

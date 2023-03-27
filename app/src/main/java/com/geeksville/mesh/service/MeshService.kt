@@ -1513,32 +1513,28 @@ class MeshService : Service(), Logging {
     }
 
     /**
-     * Set our owner with either the new or old API
+     * Send setOwner admin packet with [MeshProtos.User] protobuf
      */
-    fun setOwner(myId: String?, longName: String, shortName: String, isLicensed: Boolean) {
-        val myNode = myNodeInfo
-        if (myNode != null) {
-            val my = localNodeInfo?.user
-            if (longName == my?.longName && shortName == my.shortName && isLicensed == my.isLicensed)
+    fun setOwner(meshUser: MeshUser) = with(meshUser) {
+        val dest = nodeDBbyID[id]
+        if (dest != null) {
+            val old = dest.user
+            if (longName == old?.longName && shortName == old.shortName && isLicensed == old.isLicensed)
                 debug("Ignoring nop owner change")
             else {
-                debug("SetOwner Id: $myId longName: ${longName.anonymize} shortName: $shortName isLicensed: $isLicensed")
+                debug("SetOwner Id: $id longName: ${longName.anonymize} shortName: $shortName isLicensed: $isLicensed")
 
                 val user = MeshProtos.User.newBuilder().also {
-                    if (myId != null)  // Only set the id if it was provided
-                        it.id = myId
                     it.longName = longName
                     it.shortName = shortName
-                    it.hwModel = my?.hwModel
                     it.isLicensed = isLicensed
                 }.build()
 
                 // Also update our own map for our nodenum, by handling the packet just like packets from other users
-
-                handleReceivedUser(myNode.myNodeNum, user)
+                handleReceivedUser(dest.num, user)
 
                 // encapsulate our payload in the proper protobufs and fire it off
-                val packet = newMeshPacketTo(myNodeNum).buildAdminPacket {
+                val packet = newMeshPacketTo(dest.num).buildAdminPacket {
                     setOwner = user
                 }
 
@@ -1648,10 +1644,9 @@ class MeshService : Service(), Logging {
 
         override fun getPacketId() = toRemoteExceptions { generatePacketId() }
 
-        override fun setOwner(myId: String?, longName: String, shortName: String, isLicensed: Boolean) =
-            toRemoteExceptions {
-                this@MeshService.setOwner(myId, longName, shortName, isLicensed)
-            }
+        override fun setOwner(user: MeshUser) = toRemoteExceptions {
+            this@MeshService.setOwner(user)
+        }
 
         override fun send(p: DataPacket) {
             toRemoteExceptions {
