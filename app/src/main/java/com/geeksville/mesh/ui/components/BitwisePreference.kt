@@ -1,17 +1,11 @@
 package com.geeksville.mesh.ui.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Checkbox
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.KeyboardArrowDown
@@ -23,11 +17,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 
 @Composable
@@ -58,14 +49,14 @@ fun BitwisePreference(
             items.forEach { item ->
                 DropdownMenuItem(
                     onClick = { onItemSelected(value xor item.first) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = modifier.fillMaxWidth(),
                     content = {
                         Text(
                             text = item.second,
                             overflow = TextOverflow.Ellipsis,
                         )
                         Checkbox(
-                            modifier = Modifier
+                            modifier = modifier
                                 .fillMaxWidth()
                                 .wrapContentWidth(Alignment.End),
                             checked = value and item.first != 0,
@@ -75,42 +66,13 @@ fun BitwisePreference(
                     }
                 )
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
-            ) {
-                Button(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    enabled = enabled,
-                    onClick = { onItemSelected(0) },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red)
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.clear),
-                        style = MaterialTheme.typography.body1,
-                        color = Color.Unspecified,
-                    )
-                }
-                Button(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    enabled = enabled,
-                    onClick = { dropDownExpanded = false },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green)
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.close),
-                        style = MaterialTheme.typography.body1,
-                        color = Color.DarkGray,
-                    )
-                }
-            }
+            PreferenceFooter(
+                enabled = enabled,
+                negativeText = R.string.clear,
+                onNegativeClicked = { onItemSelected(0) },
+                positiveText = R.string.close,
+                onPositiveClicked = { dropDownExpanded = false },
+            )
         }
     }
 }

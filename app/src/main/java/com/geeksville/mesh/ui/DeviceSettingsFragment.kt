@@ -11,7 +11,7 @@ import androidx.fragment.app.activityViewModels
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.UIViewModel
-import com.google.accompanist.themeadapter.material.MdcTheme
+import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -28,7 +28,7 @@ class DeviceSettingsFragment : ScreenFragment("Device Settings"), Logging {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setBackgroundColor(ContextCompat.getColor(context, R.color.colorAdvancedBackground))
             setContent {
-                MdcTheme {
+                AppCompatTheme {
                     DeviceSettingsItemList(model)
                 }
             }

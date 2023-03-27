@@ -111,7 +111,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
         Configuration.getInstance().userAgentValue =
             BuildConfig.APPLICATION_ID // Required to get online tiles
         map = viewIn.findViewById(R.id.map)
-        mPrefs = context!!.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+        mPrefs = requireContext().getSharedPreferences(prefsName, Context.MODE_PRIVATE)
 
         setupMapProperties()
         map.setTileSource(loadOnlineTileSourceBase())
@@ -241,7 +241,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
                     resources.getString(R.string.cancel)
                 )
             ) { dialog, _ -> dialog.dismiss() }
-            activity!!.runOnUiThread { // show it
+            requireActivity().runOnUiThread { // show it
                 // create alert dialog
                 val alertDialog = alertDialogBuilder.create()
                 alertDialog.show()
@@ -537,38 +537,23 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
     private fun onNodesChanged(nodes: Collection<NodeInfo>) {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
         val ic = ContextCompat.getDrawable(requireActivity(), R.drawable.ic_baseline_location_on_24)
-
-        /**
-         * Using the latest nodedb, generate GeoPoint
-         */
-        // Find all nodes with valid locations
-        fun getCurrentNodes(): List<MarkerWithLabel> {
-            debug("Showing on map: ${nodesWithPosition.size} nodes")
-            val mrkr = nodesWithPosition.map { node ->
-                val p = node.position!!
-                lateinit var marker: MarkerWithLabel
-                node.user?.let {
-                    val label = it.longName + " " + formatAgo(p.time)
-                    marker = MarkerWithLabel(map, label)
-                    marker.title = "${it.longName} ${node.batteryStr}"
-                    marker.snippet = model.gpsString(p)
-                    model.ourNodeInfo.value?.let { our ->
-                        our.distanceStr(node)?.let { dist ->
-                            marker.subDescription = getString(R.string.map_subDescription).format(
-                                our.bearing(node),
-                                dist
-                            )
-                        }
-                    }
-                    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                    marker.position = GeoPoint(p.latitude, p.longitude)
-                    marker.icon = ic
+        debug("Showing on map: ${nodesWithPosition.size} nodes")
+        nodePositions = nodesWithPosition.map { node ->
+            val (p, u) = Pair(node.position!!, node.user!!)
+            val marker = MarkerWithLabel(map, "${u.longName} ${formatAgo(p.time)}")
+            marker.title = "${u.longName} ${node.batteryStr}"
+            marker.snippet = model.gpsString(p)
+            model.ourNodeInfo.value?.let { our ->
+                our.distanceStr(node)?.let { dist ->
+                    marker.subDescription = getString(R.string.map_subDescription)
+                        .format(our.bearing(node), dist)
                 }
-                marker
             }
-            return mrkr
+            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+            marker.position = GeoPoint(p.latitude, p.longitude)
+            marker.icon = ic
+            marker
         }
-        nodePositions = getCurrentNodes()
     }
 
 

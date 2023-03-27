@@ -500,7 +500,7 @@ class BTScanModel @Inject constructor(
         }
     }
     companion object {
-        const val BLE_NAME_PATTERN = "^\\S+\$"
+        const val BLE_NAME_PATTERN = "^.*_([0-9a-fA-F]{4})$"
         const val ACTION_USB_PERMISSION = "com.geeksville.mesh.USB_PERMISSION"
     }
 }

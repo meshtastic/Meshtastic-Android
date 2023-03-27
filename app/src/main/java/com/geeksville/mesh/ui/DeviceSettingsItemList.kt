@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.ConfigProtos.Config.NetworkConfig
 import com.geeksville.mesh.R
@@ -34,7 +35,7 @@ import com.geeksville.mesh.ui.components.RegularPreference
 import com.geeksville.mesh.ui.components.SwitchPreference
 
 @Composable
-fun DeviceSettingsItemList(viewModel: UIViewModel) {
+fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
     val focusManager = LocalFocusManager.current
 
     val hasWifi = viewModel.hasWifi()
