@@ -273,8 +273,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
         return DialogBuilder(builder, nameInput, descInput, lockedSwitch)
     }
 
-    private fun showDeleteMarkerDialog(id: Int) {
-        val waypoint = waypoints[id]
+    private fun showDeleteMarkerDialog(waypoint: Waypoint) {
         val builder = MaterialAlertDialogBuilder(requireContext())
         builder.setTitle(R.string.waypoint_delete)
         builder.setNeutralButton(R.string.cancel) { _, _ ->
@@ -282,13 +281,13 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
         }
         builder.setNegativeButton(R.string.delete_for_me) { _, _ ->
             debug("User deleted waypoint $id for me")
-            model.deleteWaypoint(id)
+            model.deleteWaypoint(waypoint.id)
         }
-        if (waypoint != null && waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0))
+        if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected())
             builder.setPositiveButton(R.string.delete_for_everyone) { _, _ ->
                 debug("User deleted waypoint $id for everyone")
                 model.sendWaypoint(waypoint.copy { expire = 1 })
-                model.deleteWaypoint(id)
+                model.deleteWaypoint(waypoint.id)
             }
         val dialog = builder.show()
         for (button in setOf(
@@ -309,7 +308,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
         }
         dialog.builder.setNegativeButton(R.string.delete) { _, _ ->
             debug("User clicked delete waypoint ${waypoint.id}")
-            showDeleteMarkerDialog(waypoint.id)
+            showDeleteMarkerDialog(waypoint)
         }
         dialog.builder.setPositiveButton(getString(R.string.send)) { _, _ ->
             debug("User edited waypoint ${waypoint.id}")
@@ -325,12 +324,12 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
 
     fun showMarkerLongPressDialog(id: Int) {
         debug("marker long pressed id=${id}")
-        val waypoint = waypoints[id]
+        val waypoint = waypoints[id] ?: return
         // edit only when unlocked or lockedTo myNodeNum
-        if (waypoint != null && waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0))
+        if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected())
             showEditMarkerDialog(waypoint)
         else
-            showDeleteMarkerDialog(id)
+            showDeleteMarkerDialog(waypoint)
     }
 
     private fun downloadJobAlert() {
