@@ -1527,6 +1527,7 @@ class MeshService : Service(), Logging {
                 val user = MeshProtos.User.newBuilder().also {
                     it.longName = longName
                     it.shortName = shortName
+                    it.hwModel = hwModel
                     it.isLicensed = isLicensed
                 }.build()
 
