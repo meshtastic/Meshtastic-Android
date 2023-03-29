@@ -234,6 +234,28 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
         }
         item { Divider() }
 
+        if (positionInput.positionBroadcastSmartEnabled) {
+            item {
+                EditTextPreference(title = "Smart broadcast minimum distance",
+                    value = positionInput.broadcastSmartMinimumDistance,
+                    enabled = connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = {
+                        positionInput = positionInput.copy { broadcastSmartMinimumDistance = it }
+                    })
+            }
+
+            item {
+                EditTextPreference(title = "Smart broadcast minimum interval",
+                    value = positionInput.broadcastSmartMinimumIntervalSecs,
+                    enabled = connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = {
+                        positionInput = positionInput.copy { broadcastSmartMinimumDistance = it }
+                    })
+            }
+        }
+
         item {
             SwitchPreference(title = "Use fixed position",
                 checked = positionInput.fixedPosition,
