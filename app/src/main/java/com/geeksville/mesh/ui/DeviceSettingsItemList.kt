@@ -71,6 +71,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
         item {
             EditTextPreference(title = "Long name",
                 value = userInput?.longName ?: stringResource(id = R.string.unknown_username),
+                maxSize = 39, // long_name max_size:40
                 enabled = connected && userInput?.longName != null,
                 isError = userInput?.longName.isNullOrEmpty(),
                 keyboardOptions = KeyboardOptions.Default.copy(
@@ -78,8 +79,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { value ->
-                    if (value.toByteArray().size <= 39) // long_name max_size:40
-                        userInput?.let { userInput = it.copy(longName = value) }
+                    userInput?.let { userInput = it.copy(longName = value) }
                     if (getInitials(value).toByteArray().size <= 4) // short_name max_size:5
                         userInput?.let { userInput = it.copy(shortName = getInitials(value)) }
                 })
@@ -88,6 +88,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
         item {
             EditTextPreference(title = "Short name",
                 value = userInput?.shortName ?: stringResource(id = R.string.unknown),
+                maxSize = 4, // short_name max_size:5
                 enabled = connected && userInput?.shortName != null,
                 isError = userInput?.shortName.isNullOrEmpty(),
                 keyboardOptions = KeyboardOptions.Default.copy(
@@ -95,8 +96,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { value ->
-                    if (value.toByteArray().size <= 4) // short_name max_size:5
-                        userInput?.let { userInput = it.copy(shortName = value) }
+                    userInput?.let { userInput = it.copy(shortName = value) }
                 })
         }
 
@@ -436,60 +436,60 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
         item {
             EditTextPreference(title = "SSID",
                 value = networkInput.wifiSsid,
+                maxSize = 32, // wifi_ssid max_size:33
                 enabled = connected && hasWifi,
                 isError = false,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { value ->
-                    if (value.toByteArray().size <= 32) // wifi_ssid max_size:33
-                        networkInput = networkInput.copy { wifiSsid = value }
+                onValueChanged = {
+                    networkInput = networkInput.copy { wifiSsid = it }
                 })
         }
 
         item {
             EditTextPreference(title = "PSK",
                 value = networkInput.wifiPsk,
+                maxSize = 63, // wifi_psk max_size:64
                 enabled = connected && hasWifi,
                 isError = false,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Password, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { value ->
-                    if (value.toByteArray().size <= 63) // wifi_psk max_size:64
-                        networkInput = networkInput.copy { wifiPsk = value }
+                onValueChanged = {
+                    networkInput = networkInput.copy { wifiPsk = it }
                 })
         }
 
         item {
             EditTextPreference(title = "NTP server",
                 value = networkInput.ntpServer,
+                maxSize = 32, // ntp_server max_size:33
                 enabled = connected && hasWifi,
                 isError = networkInput.ntpServer.isEmpty(),
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { value ->
-                    if (value.toByteArray().size <= 32) // ntp_server max_size:33
-                        networkInput = networkInput.copy { ntpServer = value }
+                onValueChanged = {
+                    networkInput = networkInput.copy { ntpServer = it }
                 })
         }
 
         item {
             EditTextPreference(title = "rsyslog server",
                 value = networkInput.rsyslogServer,
+                maxSize = 32, // rsyslog_server max_size:33
                 enabled = connected && hasWifi,
                 isError = false,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { value ->
-                    if (value.toByteArray().size <= 32) // rsyslog_server max_size:33
-                        networkInput = networkInput.copy { rsyslogServer = value }
+                onValueChanged = {
+                    networkInput = networkInput.copy { rsyslogServer = it }
                 })
         }
 
