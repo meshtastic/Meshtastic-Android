@@ -1,12 +1,12 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'kotlin-kapt'
     id 'kotlin-parcelize'
     id 'kotlinx-serialization'
     id 'com.google.dagger.hilt.android'
     id 'de.mobilej.unmock'
     id 'com.google.protobuf'
+    id 'kotlin-kapt'
 }
 
 unMock {
