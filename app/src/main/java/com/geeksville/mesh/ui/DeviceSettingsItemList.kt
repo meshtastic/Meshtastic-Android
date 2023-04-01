@@ -201,6 +201,16 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
         }
 
         item {
+            SwitchPreference(title = "Double tap as button press",
+                checked = deviceInput.doubleTapAsButtonPress,
+                enabled = connected,
+                onCheckedChange = {
+                    deviceInput = deviceInput.copy { doubleTapAsButtonPress = it }
+                })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = deviceInput != localConfig.device,
                 onCancelClicked = {
