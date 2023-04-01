@@ -290,7 +290,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 R.drawable.ic_battery_full_24,
                 String.format("%d%% %.2fV", battery, voltage ?: 0)
             )
-            111 -> Pair(R.drawable.ic_power_plug_24, "")
+            101 -> Pair(R.drawable.ic_power_plug_24, "")
             else -> Pair(R.drawable.ic_battery_full_24, "?")
         }
 
