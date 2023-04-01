@@ -309,6 +309,7 @@ class MeshService : Service(), Logging {
     /// Save information about our mesh to disk, so we will have it when we next start the service (even before we hear from our device)
     private fun saveSettings() {
         myNodeInfo?.let { myInfo ->
+            val nodeDBbyNodeNum = nodeDBbyNodeNum.toMap()
             val settings = MeshServiceSettingsData(
                 myInfo = myInfo,
                 nodeDB = nodeDBbyNodeNum.values.toTypedArray(),
@@ -391,17 +392,6 @@ class MeshService : Service(), Logging {
 
     /// Map a nodenum to a node, or throw an exception if not found
     private fun toNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: throw NodeNumNotFoundException(n)
-
-    /**
-     * Return the nodeinfo for the local node, or null if not found
-     */
-    private val localNodeInfo
-        get(): NodeInfo? =
-            try {
-                toNodeInfo(myNodeNum)
-            } catch (ex: Exception) {
-                null
-            }
 
     /** Map a nodeNum to the nodeId string
     If we have a NodeInfo for this ID we prefer to return the string ID inside the user record.
