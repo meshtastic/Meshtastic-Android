@@ -131,7 +131,6 @@ class BTScanModel @Inject constructor(
         debug("BTScanModel cleared")
     }
 
-    private val deviceManager get() = context.deviceManager
     val hasCompanionDeviceApi get() = application.hasCompanionDeviceApi()
     val hasBluetoothPermission get() = application.hasBluetoothPermission()
     private val usbManager get() = context.usbManager
@@ -373,7 +372,7 @@ class BTScanModel @Inject constructor(
     @SuppressLint("NewApi")
     private fun startCompanionScan() {
         debug("starting companion scan")
-        deviceManager?.associate(
+        context.companionDeviceManager?.associate(
             associationRequest(),
             @SuppressLint("NewApi")
             object : CompanionDeviceManager.Callback() {
