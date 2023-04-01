@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -159,6 +160,36 @@ fun EditIPv4Preference(
         },
         modifier = modifier
     )
+}
+
+@Composable
+fun EditListPreference(
+    title: String,
+    list: List<Int>,
+    maxCount: Int,
+    enabled: Boolean,
+    keyboardActions: KeyboardActions,
+    onValuesChanged: (List<Int>) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val listState = remember(list) { mutableStateListOf<Int>().apply { addAll(list) } }
+
+    Column(modifier = modifier) {
+        for (i in 0..list.size.coerceAtMost(maxCount - 1)) {
+            val value = listState.getOrNull(i)
+            EditTextPreference(
+                title = "$title ${i + 1}/$maxCount",
+                value = value ?: 0,
+                enabled = enabled,
+                keyboardActions = keyboardActions,
+                onValueChanged = {
+                    if (value == null) listState.add(it) else listState[i] = it
+                    onValuesChanged(listState)
+                },
+                modifier = modifier.fillMaxWidth()
+            )
+        }
+    }
 }
 
 @Composable

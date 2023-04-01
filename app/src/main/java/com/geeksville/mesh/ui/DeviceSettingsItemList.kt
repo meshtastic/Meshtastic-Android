@@ -28,6 +28,7 @@ import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.BitwisePreference
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditIPv4Preference
+import com.geeksville.mesh.ui.components.EditListPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
@@ -809,14 +810,15 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
         item { Divider() }
 
         item {
-            EditTextPreference(title = "Ignore incoming", // FIXME use proper Composable component
-                value = loraInput.ignoreIncomingList.getOrNull(0) ?: 0,
+            EditListPreference(title = "Ignore incoming",
+                list = loraInput.ignoreIncomingList,
+                maxCount = 3, // ignore_incoming max_count:3
                 enabled = connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = {
+                onValuesChanged = { list ->
                     loraInput = loraInput.copy {
-                        if (loraInput.ignoreIncomingCount == 0) ignoreIncoming.add(it)
-                        else if (it == 0) ignoreIncoming.clear() else ignoreIncoming[0] = it
+                        ignoreIncoming.clear()
+                        ignoreIncoming.addAll(list.filter { it != 0 })
                     }
                 })
         }
