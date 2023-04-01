@@ -252,11 +252,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 ?.let { device ->
                     scanModel.onSelected(
                         myActivity,
-                        BTScanModel.DeviceListEntry(
-                            device.name,
-                            "x${device.address}",
-                            device.bondState == BluetoothDevice.BOND_BONDED
-                        )
+                        BTScanModel.BLEDeviceListEntry(device)
                     )
                 }
         }

@@ -114,6 +114,13 @@ class BTScanModel @Inject constructor(
         val isTCP: Boolean get() = prefix == 't'
     }
 
+    @SuppressLint("MissingPermission")
+    class BLEDeviceListEntry(device: BluetoothDevice) : DeviceListEntry(
+        device.name,
+        "x${device.address}",
+        device.bondState == BluetoothDevice.BOND_BONDED
+    )
+
     class USBDeviceListEntry(usbManager: UsbManager, val usb: UsbSerialDriver) : DeviceListEntry(
         usb.device.deviceName,
         SerialInterface.toInterfaceName(usb.device.deviceName),
@@ -332,7 +339,7 @@ class BTScanModel @Inject constructor(
         bluetoothRepository.getBondedDevices()
             ?.filter { it.name != null && it.name.matches(Regex(BLE_NAME_PATTERN)) }
             ?.forEach {
-                addDevice(DeviceListEntry(it.name, "x${it.address}", true))
+                addDevice(BLEDeviceListEntry(it))
             }
     }
 
