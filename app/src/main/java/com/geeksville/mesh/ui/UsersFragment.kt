@@ -211,9 +211,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
             val pos = n.validPosition
             if (pos != null) {
-                val html = "<a href='geo:0,0?z=17&q=${pos.latitude},${pos.longitude}(${
+                val html = "<a href='geo:${pos.latitude},${pos.longitude}?z=17&label=${
                     URLEncoder.encode(name, "utf-8")
-                })'>${model.gpsString(pos)}</a>"
+                }'>${model.gpsString(pos)}</a>"
                 holder.coordsView.text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
                 holder.coordsView.movementMethod = LinkMovementMethod.getInstance()
                 holder.coordsView.visibility = View.VISIBLE
