@@ -262,7 +262,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
                     enabled = connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = {
-                        positionInput = positionInput.copy { broadcastSmartMinimumDistance = it }
+                        positionInput = positionInput.copy { broadcastSmartMinimumIntervalSecs = it }
                     })
             }
         }
