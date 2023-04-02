@@ -37,6 +37,7 @@ import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.model.getInitials
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.radio.MockInterface
 import com.geeksville.mesh.repository.usb.UsbRepository
@@ -169,7 +170,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         binding.provideLocationCheckbox.visibility = if (model.isConnected()) View.VISIBLE else View.GONE
 
         if (connected == MeshService.ConnectionState.DISCONNECTED)
-            model.setOwner("")
+            binding.usernameEditText.setText("")
 
         if (requireContext().hasGps()) {
             binding.provideLocationCheckbox.isEnabled = true
@@ -251,11 +252,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 ?.let { device ->
                     scanModel.onSelected(
                         myActivity,
-                        BTScanModel.DeviceListEntry(
-                            device.name,
-                            "x${device.address}",
-                            device.bondState == BluetoothDevice.BOND_BONDED
-                        )
+                        BTScanModel.BLEDeviceListEntry(device)
                     )
                 }
         }
@@ -289,10 +286,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, regions)
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = regionAdapter
-
-        bluetoothViewModel.enabled.observe(viewLifecycleOwner) { enabled ->
-            if (enabled) scanModel.setupScan()
-        }
 
         model.ownerName.observe(viewLifecycleOwner) { name ->
             binding.usernameEditText.isEnabled = !name.isNullOrEmpty()
@@ -373,7 +366,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         binding.usernameEditText.onEditorAction(EditorInfo.IME_ACTION_DONE) {
             debug("received IME_ACTION_DONE")
             val n = binding.usernameEditText.text.toString().trim()
-            if (n.isNotEmpty()) model.setOwner(n)
+            model.ourNodeInfo.value?.user?.let {
+                val user = it.copy(longName = n, shortName = getInitials(n))
+                if (n.isNotEmpty()) model.setOwner(user)
+            }
             requireActivity().hideKeyboard()
         }
 

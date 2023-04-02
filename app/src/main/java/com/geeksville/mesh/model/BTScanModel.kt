@@ -93,6 +93,10 @@ class BTScanModel @Inject constructor(
     private val context: Context get() = application.applicationContext
 
     init {
+        bluetoothRepository.state.value.bondedDevices.onEach {
+            setupScan() // TODO clean up device list updates
+        }.launchIn(viewModelScope)
+
         debug("BTScanModel created")
     }
 
@@ -109,6 +113,13 @@ class BTScanModel @Inject constructor(
         val isUSB: Boolean get() = prefix == 's'
         val isTCP: Boolean get() = prefix == 't'
     }
+
+    @SuppressLint("MissingPermission")
+    class BLEDeviceListEntry(device: BluetoothDevice) : DeviceListEntry(
+        device.name,
+        "x${device.address}",
+        device.bondState == BluetoothDevice.BOND_BONDED
+    )
 
     class USBDeviceListEntry(usbManager: UsbManager, val usb: UsbSerialDriver) : DeviceListEntry(
         usb.device.deviceName,
@@ -127,7 +138,6 @@ class BTScanModel @Inject constructor(
         debug("BTScanModel cleared")
     }
 
-    private val deviceManager get() = context.deviceManager
     val hasCompanionDeviceApi get() = application.hasCompanionDeviceApi()
     val hasBluetoothPermission get() = application.hasBluetoothPermission()
     private val usbManager get() = context.usbManager
@@ -329,7 +339,7 @@ class BTScanModel @Inject constructor(
         bluetoothRepository.getBondedDevices()
             ?.filter { it.name != null && it.name.matches(Regex(BLE_NAME_PATTERN)) }
             ?.forEach {
-                addDevice(DeviceListEntry(it.name, "x${it.address}", true))
+                addDevice(BLEDeviceListEntry(it))
             }
     }
 
@@ -369,7 +379,7 @@ class BTScanModel @Inject constructor(
     @SuppressLint("NewApi")
     private fun startCompanionScan() {
         debug("starting companion scan")
-        deviceManager?.associate(
+        context.companionDeviceManager?.associate(
             associationRequest(),
             @SuppressLint("NewApi")
             object : CompanionDeviceManager.Callback() {

@@ -1,6 +1,7 @@
 package com.geeksville.mesh.android
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.bluetooth.BluetoothManager
 import android.location.LocationManager
@@ -9,7 +10,6 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
 import androidx.core.content.ContextCompat
-import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 
 /**
@@ -18,14 +18,9 @@ import com.geeksville.mesh.R
 val Context.bluetoothManager: BluetoothManager?
     get() = getSystemService(Context.BLUETOOTH_SERVICE).takeIf { hasBluetoothPermission() } as? BluetoothManager?
 
-val Context.deviceManager: CompanionDeviceManager?
-    get() {
-        if (GeeksvilleApplication.currentActivity is MainActivity) {
-            val activity = GeeksvilleApplication.currentActivity
-            if (hasCompanionDeviceApi()) return activity?.getSystemService(Context.COMPANION_DEVICE_SERVICE) as? CompanionDeviceManager?
-        }
-        return null
-    }
+val Context.companionDeviceManager: CompanionDeviceManager?
+    @SuppressLint("NewApi")
+    get() = getSystemService(Context.COMPANION_DEVICE_SERVICE).takeIf { hasCompanionDeviceApi() } as? CompanionDeviceManager?
 
 val Context.usbManager: UsbManager get() = requireNotNull(getSystemService(Context.USB_SERVICE) as? UsbManager?) { "USB_SERVICE is not available"}
 

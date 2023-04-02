@@ -309,6 +309,7 @@ class MeshService : Service(), Logging {
     /// Save information about our mesh to disk, so we will have it when we next start the service (even before we hear from our device)
     private fun saveSettings() {
         myNodeInfo?.let { myInfo ->
+            val nodeDBbyNodeNum = nodeDBbyNodeNum.toMap()
             val settings = MeshServiceSettingsData(
                 myInfo = myInfo,
                 nodeDB = nodeDBbyNodeNum.values.toTypedArray(),
@@ -391,17 +392,6 @@ class MeshService : Service(), Logging {
 
     /// Map a nodenum to a node, or throw an exception if not found
     private fun toNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: throw NodeNumNotFoundException(n)
-
-    /**
-     * Return the nodeinfo for the local node, or null if not found
-     */
-    private val localNodeInfo
-        get(): NodeInfo? =
-            try {
-                toNodeInfo(myNodeNum)
-            } catch (ex: Exception) {
-                null
-            }
 
     /** Map a nodeNum to the nodeId string
     If we have a NodeInfo for this ID we prefer to return the string ID inside the user record.
@@ -1513,32 +1503,29 @@ class MeshService : Service(), Logging {
     }
 
     /**
-     * Set our owner with either the new or old API
+     * Send setOwner admin packet with [MeshProtos.User] protobuf
      */
-    fun setOwner(myId: String?, longName: String, shortName: String, isLicensed: Boolean) {
-        val myNode = myNodeInfo
-        if (myNode != null) {
-            val my = localNodeInfo?.user
-            if (longName == my?.longName && shortName == my.shortName && isLicensed == my.isLicensed)
+    fun setOwner(meshUser: MeshUser) = with(meshUser) {
+        val dest = nodeDBbyID[id]
+        if (dest != null) {
+            val old = dest.user
+            if (longName == old?.longName && shortName == old.shortName && isLicensed == old.isLicensed)
                 debug("Ignoring nop owner change")
             else {
-                debug("SetOwner Id: $myId longName: ${longName.anonymize} shortName: $shortName isLicensed: $isLicensed")
+                debug("SetOwner Id: $id longName: ${longName.anonymize} shortName: $shortName isLicensed: $isLicensed")
 
                 val user = MeshProtos.User.newBuilder().also {
-                    if (myId != null)  // Only set the id if it was provided
-                        it.id = myId
                     it.longName = longName
                     it.shortName = shortName
-                    it.hwModel = my?.hwModel
+                    it.hwModel = hwModel
                     it.isLicensed = isLicensed
                 }.build()
 
                 // Also update our own map for our nodenum, by handling the packet just like packets from other users
-
-                handleReceivedUser(myNode.myNodeNum, user)
+                handleReceivedUser(dest.num, user)
 
                 // encapsulate our payload in the proper protobufs and fire it off
-                val packet = newMeshPacketTo(myNodeNum).buildAdminPacket {
+                val packet = newMeshPacketTo(dest.num).buildAdminPacket {
                     setOwner = user
                 }
 
@@ -1648,10 +1635,9 @@ class MeshService : Service(), Logging {
 
         override fun getPacketId() = toRemoteExceptions { generatePacketId() }
 
-        override fun setOwner(myId: String?, longName: String, shortName: String, isLicensed: Boolean) =
-            toRemoteExceptions {
-                this@MeshService.setOwner(myId, longName, shortName, isLicensed)
-            }
+        override fun setOwner(user: MeshUser) = toRemoteExceptions {
+            this@MeshService.setOwner(user)
+        }
 
         override fun send(p: DataPacket) {
             toRemoteExceptions {
@@ -1746,8 +1732,9 @@ class MeshService : Service(), Logging {
             stopLocationRequests()
         }
 
-        override fun requestPosition(idNum: Int, lat: Double, lon: Double, alt: Int) =
+        override fun requestPosition(idNum: Int, position: Position) =
             toRemoteExceptions {
+                val (lat, lon, alt) = with(position) { Triple(latitude, longitude, altitude) }
                 // request position
                 if (idNum != 0) sendPosition(time = 1, destNum = idNum, wantResponse = true)
                 // set local node's fixed position

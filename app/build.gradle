@@ -1,12 +1,12 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
-    id 'kotlin-kapt'
     id 'kotlin-parcelize'
     id 'kotlinx-serialization'
     id 'com.google.dagger.hilt.android'
     id 'de.mobilej.unmock'
     id 'com.google.protobuf'
+    id 'kotlin-kapt'
 }
 
 unMock {
@@ -34,8 +34,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 31
-        versionCode 30103 // format is Mmmss (where M is 1+the numeric major number
-        versionName "2.1.3"
+        versionCode 30105 // format is Mmmss (where M is 1+the numeric major number
+        versionName "2.1.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
@@ -71,7 +71,7 @@ android {
     defaultConfig {
         // We have to list all translated languages here, because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
-        resConfigs "cs", "de", "el", "en", "es", "fi", "fr", "fr-rHT", "ga", "hu", "it", "ja", "ko", "nl", "nb", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sq", "sv", "tr", "zh", "uk"
+        resConfigs "cs", "de", "el", "en", "es", "fi", "fr", "fr-rHT", "ga", "hu", "is", "it", "ja", "ko", "nl", "nb", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sq", "sv", "tr", "zh", "uk"
 
         ndk {
             // abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
@@ -212,8 +212,8 @@ dependencies {
     googleImplementation 'com.google.android.gms:play-services-location:19.0.1'
 
     // For Firebase Crashlytics & Analytics
-    googleImplementation 'com.google.firebase:firebase-crashlytics:18.2.6'
-    googleImplementation 'com.google.firebase:firebase-analytics:20.1.0'
+    googleImplementation 'com.google.firebase:firebase-crashlytics:18.3.6'
+    googleImplementation 'com.google.firebase:firebase-analytics:21.2.1'
 
     // barcode support
     // per https://github.com/journeyapps/zxing-android-embedded#older-sdk-versions for minSdkVersion 21
@@ -225,7 +225,7 @@ dependencies {
     // Work Request - used to delay boot event handling
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
-    implementation "androidx.core:core-splashscreen:1.0.0-beta02"
+    implementation "androidx.core:core-splashscreen:1.0.0"
 
     // CompletableFuture backport for API 14+
     implementation 'net.sourceforge.streamsupport:streamsupport-minifuture:1.7.4'

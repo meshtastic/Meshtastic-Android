@@ -13,7 +13,6 @@ import com.geeksville.mesh.android.hasBluetoothPermission
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -95,19 +94,13 @@ class BluetoothRepository @Inject constructor(
      * Creates a cold Flow used to obtain the set of bonded devices.
      */
     @SuppressLint("MissingPermission") // Already checked prior to calling
-    private suspend fun createBondedDevicesFlow(adapter: BluetoothAdapter): Flow<Set<BluetoothDevice>>? {
-        return if (adapter.isEnabled) {
-            flow<Set<BluetoothDevice>> {
-                withContext(dispatchers.default) {
-                    while (true) {
-                        emit(adapter.bondedDevices)
-                        delay(REFRESH_DELAY_MS)
-                    }
-                }
-            }.flowOn(dispatchers.default)
-        } else {
-            null
-        }
+    private suspend fun createBondedDevicesFlow(adapter: BluetoothAdapter): Flow<Set<BluetoothDevice>> {
+        return flow<Set<BluetoothDevice>> {
+            while (true) {
+                emit(adapter.bondedDevices ?: emptySet())
+                delay(REFRESH_DELAY_MS)
+            }
+        }.flowOn(dispatchers.default).distinctUntilChanged()
     }
 
     companion object {

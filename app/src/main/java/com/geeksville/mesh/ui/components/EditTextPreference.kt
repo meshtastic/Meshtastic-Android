@@ -1,7 +1,9 @@
 package com.geeksville.mesh.ui.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
@@ -12,13 +14,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun EditTextPreference(
@@ -157,6 +163,36 @@ fun EditIPv4Preference(
 }
 
 @Composable
+fun EditListPreference(
+    title: String,
+    list: List<Int>,
+    maxCount: Int,
+    enabled: Boolean,
+    keyboardActions: KeyboardActions,
+    onValuesChanged: (List<Int>) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val listState = remember(list) { mutableStateListOf<Int>().apply { addAll(list) } }
+
+    Column(modifier = modifier) {
+        for (i in 0..list.size.coerceAtMost(maxCount - 1)) {
+            val value = listState.getOrNull(i)
+            EditTextPreference(
+                title = "$title ${i + 1}/$maxCount",
+                value = value ?: 0,
+                enabled = enabled,
+                keyboardActions = keyboardActions,
+                onValueChanged = {
+                    if (value == null) listState.add(it) else listState[i] = it
+                    onValuesChanged(listState)
+                },
+                modifier = modifier.fillMaxWidth()
+            )
+        }
+    }
+}
+
+@Composable
 fun EditTextPreference(
     title: String,
     value: String,
@@ -166,14 +202,25 @@ fun EditTextPreference(
     keyboardActions: KeyboardActions,
     onValueChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
+    maxSize: Int = 0, // max_size - 1 (in bytes)
 ) {
+    var isFocused by remember { mutableStateOf(false) }
+
     TextField(
         value = value,
         singleLine = true,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .onFocusEvent { isFocused = it.isFocused },
         enabled = enabled,
         isError = isError,
-        onValueChange = onValueChanged,
+        onValueChange = {
+            if (maxSize > 0) {
+                if (it.toByteArray().size <= maxSize) {
+                    onValueChanged(it)
+                }
+            } else onValueChanged(it)
+        },
         label = { Text(title) },
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
@@ -181,12 +228,36 @@ fun EditTextPreference(
             if (isError) Icon(Icons.TwoTone.Info, "Error", tint = MaterialTheme.colors.error)
         }
     )
+
+    if (maxSize > 0 && isFocused) {
+        Box(
+            contentAlignment = Alignment.BottomEnd,
+            modifier = modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "${value.toByteArray().size}/$maxSize",
+                style = MaterialTheme.typography.caption,
+                color = if (isError) MaterialTheme.colors.error else MaterialTheme.colors.onBackground,
+                modifier = Modifier.padding(end = 8.dp, bottom = 4.dp)
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun EditTextPreferencePreview() {
     Column {
+        EditTextPreference(
+            title = "String",
+            value = "Meshtastic",
+            maxSize = 39,
+            enabled = true,
+            isError = false,
+            keyboardOptions = KeyboardOptions.Default,
+            keyboardActions = KeyboardActions {},
+            onValueChanged = {},
+        )
         EditTextPreference(
             title = "Advanced Settings",
             value = UInt.MAX_VALUE.toInt(),

@@ -28,6 +28,7 @@ import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.BitwisePreference
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditIPv4Preference
+import com.geeksville.mesh.ui.components.EditListPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
@@ -71,6 +72,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
         item {
             EditTextPreference(title = "Long name",
                 value = userInput?.longName ?: stringResource(id = R.string.unknown_username),
+                maxSize = 39, // long_name max_size:40
                 enabled = connected && userInput?.longName != null,
                 isError = userInput?.longName.isNullOrEmpty(),
                 keyboardOptions = KeyboardOptions.Default.copy(
@@ -78,8 +80,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { value ->
-                    if (value.toByteArray().size <= 39) // long_name max_size:40
-                        userInput?.let { userInput = it.copy(longName = value) }
+                    userInput?.let { userInput = it.copy(longName = value) }
                     if (getInitials(value).toByteArray().size <= 4) // short_name max_size:5
                         userInput?.let { userInput = it.copy(shortName = getInitials(value)) }
                 })
@@ -88,6 +89,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
         item {
             EditTextPreference(title = "Short name",
                 value = userInput?.shortName ?: stringResource(id = R.string.unknown),
+                maxSize = 4, // short_name max_size:5
                 enabled = connected && userInput?.shortName != null,
                 isError = userInput?.shortName.isNullOrEmpty(),
                 keyboardOptions = KeyboardOptions.Default.copy(
@@ -95,8 +97,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { value ->
-                    if (value.toByteArray().size <= 4) // short_name max_size:5
-                        userInput?.let { userInput = it.copy(shortName = value) }
+                    userInput?.let { userInput = it.copy(shortName = value) }
                 })
         }
 
@@ -125,7 +126,7 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
                     userInput = ourNodeInfo?.user
                 }, onSaveClicked = {
                     focusManager.clearFocus()
-                    userInput?.let { viewModel.setOwner(it.longName, it.shortName, it.isLicensed) }
+                    userInput?.let { viewModel.setOwner(it) }
                 })
         }
 
@@ -200,6 +201,16 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
         }
 
         item {
+            SwitchPreference(title = "Double tap as button press",
+                checked = deviceInput.doubleTapAsButtonPress,
+                enabled = connected,
+                onCheckedChange = {
+                    deviceInput = deviceInput.copy { doubleTapAsButtonPress = it }
+                })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = deviceInput != localConfig.device,
                 onCancelClicked = {
@@ -233,6 +244,28 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
                 })
         }
         item { Divider() }
+
+        if (positionInput.positionBroadcastSmartEnabled) {
+            item {
+                EditTextPreference(title = "Smart broadcast minimum distance",
+                    value = positionInput.broadcastSmartMinimumDistance,
+                    enabled = connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = {
+                        positionInput = positionInput.copy { broadcastSmartMinimumDistance = it }
+                    })
+            }
+
+            item {
+                EditTextPreference(title = "Smart broadcast minimum interval",
+                    value = positionInput.broadcastSmartMinimumIntervalSecs,
+                    enabled = connected,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = {
+                        positionInput = positionInput.copy { broadcastSmartMinimumIntervalSecs = it }
+                    })
+            }
+        }
 
         item {
             SwitchPreference(title = "Use fixed position",
@@ -336,9 +369,8 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
                 },
                 onSaveClicked = {
                     focusManager.clearFocus()
-                    if (positionInfo != ourNodeInfo?.position && positionInput.fixedPosition) positionInfo?.let {
-                        viewModel.requestPosition(0, it.latitude, it.longitude, it.altitude)
-                    }
+                    if (positionInfo != ourNodeInfo?.position && positionInput.fixedPosition)
+                        positionInfo?.let { viewModel.requestPosition(0, it) }
                     if (positionInput != localConfig.position) viewModel.updatePositionConfig { positionInput }
                 })
         }
@@ -437,60 +469,60 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
         item {
             EditTextPreference(title = "SSID",
                 value = networkInput.wifiSsid,
+                maxSize = 32, // wifi_ssid max_size:33
                 enabled = connected && hasWifi,
                 isError = false,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { value ->
-                    if (value.toByteArray().size <= 32) // wifi_ssid max_size:33
-                        networkInput = networkInput.copy { wifiSsid = value }
+                onValueChanged = {
+                    networkInput = networkInput.copy { wifiSsid = it }
                 })
         }
 
         item {
             EditTextPreference(title = "PSK",
                 value = networkInput.wifiPsk,
+                maxSize = 63, // wifi_psk max_size:64
                 enabled = connected && hasWifi,
                 isError = false,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Password, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { value ->
-                    if (value.toByteArray().size <= 63) // wifi_psk max_size:64
-                        networkInput = networkInput.copy { wifiPsk = value }
+                onValueChanged = {
+                    networkInput = networkInput.copy { wifiPsk = it }
                 })
         }
 
         item {
             EditTextPreference(title = "NTP server",
                 value = networkInput.ntpServer,
+                maxSize = 32, // ntp_server max_size:33
                 enabled = connected && hasWifi,
                 isError = networkInput.ntpServer.isEmpty(),
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { value ->
-                    if (value.toByteArray().size <= 32) // ntp_server max_size:33
-                        networkInput = networkInput.copy { ntpServer = value }
+                onValueChanged = {
+                    networkInput = networkInput.copy { ntpServer = it }
                 })
         }
 
         item {
             EditTextPreference(title = "rsyslog server",
                 value = networkInput.rsyslogServer,
+                maxSize = 32, // rsyslog_server max_size:33
                 enabled = connected && hasWifi,
                 isError = false,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { value ->
-                    if (value.toByteArray().size <= 32) // rsyslog_server max_size:33
-                        networkInput = networkInput.copy { rsyslogServer = value }
+                onValueChanged = {
+                    networkInput = networkInput.copy { rsyslogServer = it }
                 })
         }
 
@@ -661,6 +693,14 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
         item { Divider() }
 
         item {
+            SwitchPreference(title = "Wake screen on tap or motion",
+                checked = displayInput.wakeOnTapOrMotion,
+                enabled = connected,
+                onCheckedChange = { displayInput = displayInput.copy { wakeOnTapOrMotion = it } })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = displayInput != localConfig.display,
                 onCancelClicked = {
@@ -780,14 +820,15 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
         item { Divider() }
 
         item {
-            EditTextPreference(title = "Ignore incoming", // FIXME use proper Composable component
-                value = loraInput.ignoreIncomingList.getOrNull(0) ?: 0,
+            EditListPreference(title = "Ignore incoming",
+                list = loraInput.ignoreIncomingList,
+                maxCount = 3, // ignore_incoming max_count:3
                 enabled = connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = {
+                onValuesChanged = { list ->
                     loraInput = loraInput.copy {
-                        if (loraInput.ignoreIncomingCount == 0) ignoreIncoming.add(it)
-                        else if (it == 0) ignoreIncoming.clear() else ignoreIncoming[0] = it
+                        ignoreIncoming.clear()
+                        ignoreIncoming.addAll(list.filter { it != 0 })
                     }
                 })
         }
