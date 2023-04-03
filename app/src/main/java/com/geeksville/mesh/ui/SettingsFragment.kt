@@ -1,11 +1,15 @@
 package com.geeksville.mesh.ui
 
+import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.bluetooth.BluetoothDevice
 import android.companion.CompanionDeviceManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.hardware.usb.UsbDevice
+import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -43,6 +47,8 @@ import com.geeksville.mesh.repository.radio.MockInterface
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.SoftwareUpdateService
+import com.geeksville.mesh.util.anonymize
+import com.geeksville.mesh.util.exceptionReporter
 import com.geeksville.mesh.util.exceptionToSnackbar
 import com.geeksville.mesh.util.onEditorAction
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -52,16 +58,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
-
-object SLogging : Logging
-
-/// Change to a new macaddr selection, updating GUI and radio
-fun changeDeviceSelection(context: MainActivity, newAddr: String?) {
-    // FIXME, this is a kinda yucky way to find the service
-    context.model.meshService?.let { service ->
-        MeshService.changeDeviceAddress(context, service, newAddr)
-    }
-}
 
 @AndroidEntryPoint
 class SettingsFragment : ScreenFragment("Settings"), Logging {
@@ -250,10 +246,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             it.data
                 ?.getParcelableExtra<BluetoothDevice>(CompanionDeviceManager.EXTRA_DEVICE)
                 ?.let { device ->
-                    scanModel.onSelected(
-                        myActivity,
-                        BTScanModel.BLEDeviceListEntry(device)
-                    )
+                    onSelected(BTScanModel.BLEDeviceListEntry(device))
                 }
         }
 
@@ -455,8 +448,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             if (!device.bonded) // If user just clicked on us, try to bond
                 binding.scanStatusText.setText(R.string.starting_pairing)
 
-            b.isChecked =
-                scanModel.onSelected(myActivity, device)
+            b.isChecked = onSelected(device)
         }
     }
 
@@ -493,7 +485,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (curRadio != null && !MockInterface.addressValid(requireContext(), usbRepository, "")) {
             binding.warningNotPaired.visibility = View.GONE
             // binding.scanStatusText.text = getString(R.string.current_pair).format(curRadio)
-        } else if (bluetoothViewModel.enabled.value == true){
+        } else if (bluetoothViewModel.enabled.value == true) {
             binding.warningNotPaired.visibility = View.VISIBLE
             binding.scanStatusText.text = getString(R.string.not_paired_yet)
         }
@@ -513,6 +505,117 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         } else {
             scanning = false
             scanModel.stopScan()
+        }
+    }
+
+    /// Called by the GUI when a new device has been selected by the user
+    /// Returns true if we were able to change to that item
+    private fun onSelected(it: BTScanModel.DeviceListEntry): Boolean {
+        // If the device is paired, let user select it, otherwise start the pairing flow
+        if (it.bonded) {
+            scanModel.changeDeviceAddress(it.fullAddress)
+            return true
+        } else {
+            // Handle requesting USB or bluetooth permissions for the device
+            debug("Requesting permissions for the device")
+
+            exceptionReporter {
+                if (it.isBLE) {
+                    // Request bonding for bluetooth
+                    // We ignore missing BT adapters, because it lets us run on the emulator
+                    scanModel.getRemoteDevice(it.address)?.let { device ->
+                        requestBonding(device) { state ->
+                            if (state == BluetoothDevice.BOND_BONDED) {
+                                binding.scanStatusText.text =
+                                    getString(R.string.pairing_completed)
+                                scanModel.changeDeviceAddress(it.fullAddress)
+                            } else {
+                                binding.scanStatusText.text =
+                                    getString(R.string.pairing_failed_try_again)
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (it.isUSB) {
+                it as BTScanModel.USBDeviceListEntry
+
+                val usbReceiver = object : BroadcastReceiver() {
+
+                    override fun onReceive(context: Context, intent: Intent) {
+                        if (BTScanModel.ACTION_USB_PERMISSION == intent.action) {
+
+                            val device: UsbDevice =
+                                intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
+
+                            if (intent.getBooleanExtra(
+                                    UsbManager.EXTRA_PERMISSION_GRANTED,
+                                    false
+                                )
+                            ) {
+                                info("User approved USB access")
+                                scanModel.changeDeviceAddress(it.fullAddress)
+                            } else {
+                                errormsg("USB permission denied for device $device")
+                            }
+                        }
+                        // We don't need to stay registered
+                        requireActivity().unregisterReceiver(this)
+                    }
+                }
+
+                val permissionIntent =
+                    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
+                        PendingIntent.getBroadcast(activity, 0, Intent(BTScanModel.ACTION_USB_PERMISSION), 0)
+                    } else {
+                        PendingIntent.getBroadcast(activity, 0, Intent(BTScanModel.ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE)
+                    }
+                val filter = IntentFilter(BTScanModel.ACTION_USB_PERMISSION)
+                requireActivity().registerReceiver(usbReceiver, filter)
+                requireContext().usbManager.requestPermission(it.usb.device, permissionIntent)
+            }
+
+            return false
+        }
+    }
+
+    /// Show the UI asking the user to bond with a device, call changeSelection() if/when bonding completes
+    @SuppressLint("MissingPermission")
+    private fun requestBonding(
+        device: BluetoothDevice,
+        onComplete: (Int) -> Unit
+    ) {
+        info("Starting bonding for ${device.anonymize}")
+
+        // We need this receiver to get informed when the bond attempt finished
+        val bondChangedReceiver = object : BroadcastReceiver() {
+
+            override fun onReceive(
+                context: Context,
+                intent: Intent
+            ) = exceptionReporter {
+                val state =
+                    intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
+                debug("Received bond state changed $state")
+
+                if (state != BluetoothDevice.BOND_BONDING) {
+                    context.unregisterReceiver(this) // we stay registered until bonding completes (either with BONDED or NONE)
+                    debug("Bonding completed, state=$state")
+                    onComplete(state)
+                }
+            }
+        }
+
+        val filter = IntentFilter()
+        filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+        requireActivity().registerReceiver(bondChangedReceiver, filter)
+
+        // We ignore missing BT adapters, because it lets us run on the emulator
+        try {
+            device.createBond()
+        } catch (ex: Throwable) {
+            warn("Failed creating Bluetooth bond: ${ex.message}")
         }
     }
 

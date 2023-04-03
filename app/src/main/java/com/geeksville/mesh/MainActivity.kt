@@ -644,6 +644,20 @@ class MainActivity : AppCompatActivity(), Logging {
     override fun onStart() {
         super.onStart()
 
+        scanModel.changeDeviceAddress.observe(this) { newAddr ->
+            newAddr?.let {
+                try {
+                    model.meshService?.let { service ->
+                        MeshService.changeDeviceAddress(this, service, newAddr)
+                    }
+                    scanModel.changeSelectedAddress(newAddr) // if it throws the change will be discarded
+                } catch (ex: RemoteException) {
+                    errormsg("changeDeviceSelection failed, probably it is shutting down $ex.message")
+                    // ignore the failure and the GUI won't be updating anyways
+                }
+            }
+        }
+
         bluetoothViewModel.enabled.observe(this) { enabled ->
             if (!enabled && !requestedEnable && scanModel.selectedBluetooth) {
                 requestedEnable = true
