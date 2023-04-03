@@ -363,6 +363,11 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     private fun getModemPreset(selectedChannelOptionString: String): ConfigProtos.Config.LoRaConfig.ModemPreset {
         for (item in ChannelOption.values()) {
             if (getString(item.configRes) == selectedChannelOptionString)

@@ -51,4 +51,9 @@ class DebugFragment : Fragment() {
             logs?.let { adapter.setLogs(it) }
         }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

@@ -618,6 +618,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (binding.provideLocationCheckbox.isChecked)
             checkLocationEnabled(getString(R.string.location_disabled))
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     companion object {
         const val SCAN_PERIOD: Long = 10000 // Stops scanning after 10 seconds
     }

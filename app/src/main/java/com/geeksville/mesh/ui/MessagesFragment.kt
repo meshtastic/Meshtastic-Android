@@ -320,6 +320,13 @@ class MessagesFragment : Fragment(), Logging {
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        actionMode?.finish()
+        actionMode = null
+        _binding = null
+    }
+
     private inner class ActionModeCallback : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             mode.menuInflater.inflate(R.menu.menu_messages, menu)

@@ -109,6 +109,11 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat Settings"), Logging
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     data class DialogBuilder(
         val builder: MaterialAlertDialogBuilder,
         val nameInput: EditText,

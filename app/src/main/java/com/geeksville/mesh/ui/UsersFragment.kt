@@ -318,4 +318,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             nodesAdapter.onNodesChanged(it.values.toTypedArray())
         }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }
