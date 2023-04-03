@@ -210,10 +210,6 @@ class MainActivity : AppCompatActivity(), Logging {
             tab.icon = ContextCompat.getDrawable(this, tabInfos[position].icon)
         }.attach()
 
-        model.connectionState.observe(this) { connected ->
-            updateConnectionStatusImage(connected)
-        }
-
         // Handle any intent
         handleIntent(intent)
     }
@@ -638,6 +634,11 @@ class MainActivity : AppCompatActivity(), Logging {
         unregisterMeshReceiver() // No point in receiving updates while the GUI is gone, we'll get them when the user launches the activity
         unbindMeshService()
 
+        scanModel.changeDeviceAddress.removeObservers(this)
+        model.connectionState.removeObservers(this)
+        bluetoothViewModel.enabled.removeObservers(this)
+        model.requestChannelUrl.removeObservers(this)
+
         super.onStop()
     }
 
@@ -656,6 +657,10 @@ class MainActivity : AppCompatActivity(), Logging {
                     // ignore the failure and the GUI won't be updating anyways
                 }
             }
+        }
+
+        model.connectionState.observe(this) { connected ->
+            updateConnectionStatusImage(connected)
         }
 
         bluetoothViewModel.enabled.observe(this) { enabled ->
