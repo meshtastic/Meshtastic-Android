@@ -307,9 +307,8 @@ class MeshService : Service(), Logging {
     private fun getPrefs() = getSharedPreferences("service-prefs", Context.MODE_PRIVATE)
 
     /// Save information about our mesh to disk, so we will have it when we next start the service (even before we hear from our device)
-    private fun saveSettings() {
+    private fun saveSettings() = synchronized(nodeDBbyNodeNum) {
         myNodeInfo?.let { myInfo ->
-            val nodeDBbyNodeNum = nodeDBbyNodeNum.toMap()
             val settings = MeshServiceSettingsData(
                 myInfo = myInfo,
                 nodeDB = nodeDBbyNodeNum.values.toTypedArray(),
@@ -356,7 +355,7 @@ class MeshService : Service(), Logging {
     /**
      * discard entire node db & message state - used when downloading a new db from the device
      */
-    private fun discardNodeDB() {
+    private fun discardNodeDB() = synchronized(nodeDBbyNodeNum) {
         debug("Discarding NodeDB")
         myNodeInfo = null
         nodeDBbyNodeNum.clear()
