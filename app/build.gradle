@@ -167,6 +167,7 @@ dependencies {
     androidTestImplementation composeBom
 
     implementation 'androidx.compose.material:material'
+    implementation 'androidx.activity:activity-compose'
     implementation 'androidx.compose.runtime:runtime-livedata'
     implementation "com.google.accompanist:accompanist-themeadapter-appcompat:0.29.2-rc"
 
