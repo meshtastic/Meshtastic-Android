@@ -60,16 +60,16 @@ fun RegularPreference(
         Column {
             Text(
                 text = title,
-                style = MaterialTheme.typography.body1,
-                color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
-            )
-
-            Text(
-                text = subtitle,
                 style = MaterialTheme.typography.body2,
                 color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else MaterialTheme.colors.onSurface.copy(
                     alpha = ContentAlpha.medium
                 ),
+            )
+
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.body1,
+                color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
             )
         }
         if (trailingIcon != null) Icon(
