@@ -122,6 +122,14 @@ fun ModuleSettingsItemList(viewModel: UIViewModel = viewModel()) {
         item { Divider() }
 
         item {
+            SwitchPreference(title = "TLS enabled",
+                checked = mqttInput.tlsEnabled,
+                enabled = connected,
+                onCheckedChange = { mqttInput = mqttInput.copy { tlsEnabled = it } })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = mqttInput != moduleConfig.mqtt,
                 onCancelClicked = {
