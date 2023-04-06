@@ -43,6 +43,7 @@ class BTScanModel @Inject constructor(
 ) : ViewModel(), Logging {
 
     private val context: Context get() = application.applicationContext
+    val devices = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
 
     init {
         bluetoothRepository.state.value.bondedDevices.onEach {
@@ -340,8 +341,6 @@ class BTScanModel @Inject constructor(
             }, null
         )
     }
-
-    val devices = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
 
     private val _changeDeviceAddress = MutableLiveData<String?>(null)
     val changeDeviceAddress: LiveData<String?> get() = _changeDeviceAddress
