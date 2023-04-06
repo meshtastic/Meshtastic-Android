@@ -61,7 +61,9 @@ class BluetoothRepository @Inject constructor(
     }
 
     fun getBluetoothLeScanner(): BluetoothLeScanner? {
-        return bluetoothAdapterLazy.get()?.bluetoothLeScanner
+        return bluetoothAdapterLazy.get()
+            ?.takeIf { application.hasBluetoothPermission() }
+            ?.bluetoothLeScanner
     }
 
     @SuppressLint("MissingPermission")

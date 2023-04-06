@@ -1,6 +1,7 @@
 package com.geeksville.mesh.model
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.*
@@ -90,10 +91,6 @@ class BTScanModel @Inject constructor(
         super.onCleared()
         debug("BTScanModel cleared")
     }
-
-    val hasCompanionDeviceApi get() = application.hasCompanionDeviceApi()
-    val hasBluetoothPermission get() = application.hasBluetoothPermission()
-    private val usbManager get() = context.usbManager
 
     var selectedAddress: String? = null
     val errorText = object : MutableLiveData<String?>(null) {}
@@ -211,7 +208,7 @@ class BTScanModel @Inject constructor(
 
                 val serialDevices by lazy { usbRepository.serialDevicesWithDrivers.value }
                 serialDevices.forEach { (_, d) ->
-                    addDevice(USBDeviceListEntry(usbManager, d))
+                    addDevice(USBDeviceListEntry(context.usbManager, d))
                 }
             } else {
                 debug("scan already running")
@@ -221,7 +218,7 @@ class BTScanModel @Inject constructor(
     }
 
     private var networkDiscovery: Job? = null
-    fun startScan() {
+    fun startScan(activity: Activity?) {
         _spinner.value = true
 
         // Start Network Service Discovery (find TCP devices)
@@ -229,10 +226,7 @@ class BTScanModel @Inject constructor(
             .onEach { addDevice(TCPDeviceListEntry(it)) }
             .launchIn(viewModelScope)
 
-        if (hasBluetoothPermission) {
-            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S && hasCompanionDeviceApi)
-                startCompanionScan() else startClassicScan()
-        }
+        if (activity != null) startCompanionScan(activity) else startClassicScan()
     }
 
     @SuppressLint("MissingPermission")
@@ -320,9 +314,9 @@ class BTScanModel @Inject constructor(
     }
 
     @SuppressLint("NewApi")
-    private fun startCompanionScan() {
+    private fun startCompanionScan(activity: Activity) {
         debug("starting companion scan")
-        context.companionDeviceManager?.associate(
+        activity.companionDeviceManager?.associate(
             associationRequest(),
             @SuppressLint("NewApi")
             object : CompanionDeviceManager.Callback() {

@@ -79,6 +79,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private val myActivity get() = requireActivity() as MainActivity
 
+    private val hasCompanionDeviceApi by lazy { requireContext().hasCompanionDeviceApi() }
+    private val useCompanionDeviceApi by lazy {
+        android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S && hasCompanionDeviceApi
+    }
+
     private fun doFirmwareUpdate() {
         model.meshService?.let { service ->
 
@@ -264,9 +269,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 if (permissions.entries.all { it.value }) {
                     // Older versions of android only need Location permission
-                    if (myActivity.hasBackgroundPermission()) {
+                    if (requireContext().hasBackgroundPermission()) {
                         binding.provideLocationCheckbox.isChecked = true
-                    } else requestBackgroundAndCheckLauncher.launch(myActivity.getBackgroundPermissions())
+                    } else requestBackgroundAndCheckLauncher.launch(requireContext().getBackgroundPermissions())
                 } else {
                     debug("User denied location permission")
                     showSnackbar(getString(R.string.why_background_required))
@@ -375,7 +380,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
             // Don't check the box until the system setting changes
-            view.isChecked = isChecked && myActivity.hasBackgroundPermission()
+            view.isChecked = isChecked && requireContext().hasBackgroundPermission()
 
             if (view.isPressed) { // We want to ignore changes caused by code (as opposed to the user)
                 debug("User changed location tracking to $isChecked")
@@ -389,10 +394,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                         }
                         .setPositiveButton(getString(R.string.accept)) { _, _ ->
                             // Make sure we have location permission (prerequisite)
-                            if (!myActivity.hasLocationPermission()) {
-                                requestLocationAndBackgroundLauncher.launch(myActivity.getLocationPermissions())
+                            if (!requireContext().hasLocationPermission()) {
+                                requestLocationAndBackgroundLauncher.launch(requireContext().getLocationPermissions())
                             } else {
-                                requestBackgroundAndCheckLauncher.launch(myActivity.getBackgroundPermissions())
+                                requestBackgroundAndCheckLauncher.launch(requireContext().getBackgroundPermissions())
                             }
                         }
                         .show()
@@ -501,7 +506,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 scanModel.stopScan()
             }, SCAN_PERIOD)
             scanning = true
-            scanModel.startScan()
+            scanModel.startScan(requireActivity().takeIf { useCompanionDeviceApi })
         } else {
             scanning = false
             scanModel.stopScan()
@@ -628,7 +633,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 if (permissions.entries.all { it.value }) {
                     checkBTEnabled()
-                    if (!scanModel.hasCompanionDeviceApi) checkLocationEnabled()
+                    if (!hasCompanionDeviceApi) checkLocationEnabled()
                     scanLeDevice()
                 } else {
                     errormsg("User denied scan permissions")
@@ -640,9 +645,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         binding.changeRadioButton.setOnClickListener {
             debug("User clicked changeRadioButton")
             scanLeDevice()
-            if (scanModel.hasBluetoothPermission) {
+            if (requireContext().hasBluetoothPermission()) {
                 checkBTEnabled()
-                if (!scanModel.hasCompanionDeviceApi) checkLocationEnabled()
+                if (!hasCompanionDeviceApi) checkLocationEnabled()
             } else {
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(getString(R.string.required_permissions))
@@ -652,7 +657,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     }
                     .setPositiveButton(R.string.accept) { _, _ ->
                         info("requesting scan permissions")
-                        requestPermissionAndScanLauncher.launch(myActivity.getBluetoothPermissions())
+                        requestPermissionAndScanLauncher.launch(requireContext().getBluetoothPermissions())
                     }
                     .show()
             }
@@ -710,7 +715,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         scanModel.setupScan()
 
         // system permissions might have changed while we were away
-        binding.provideLocationCheckbox.isChecked = myActivity.hasBackgroundPermission() && (model.provideLocation.value ?: false)
+        binding.provideLocationCheckbox.isChecked = requireContext().hasBackgroundPermission() && (model.provideLocation.value ?: false)
 
         myActivity.registerReceiver(updateProgressReceiver, updateProgressFilter)
 
