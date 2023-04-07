@@ -427,7 +427,8 @@ class MeshService : Service(), Logging {
     /**
      * How many nodes are currently online (including our local node)
      */
-    private val numOnlineNodes get() = nodeDBbyNodeNum.values.count { it.isOnline }
+    private val numOnlineNodes
+        get() = synchronized(nodeDBbyNodeNum) { nodeDBbyNodeNum.values.count { it.isOnline } }
 
     private fun toNodeNum(id: String): Int = when (id) {
         DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
