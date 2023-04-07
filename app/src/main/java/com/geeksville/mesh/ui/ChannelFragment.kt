@@ -27,7 +27,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
-import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,7 +36,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -68,10 +66,12 @@ import com.geeksville.mesh.android.hasCameraPermission
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.DropDownPreference
+import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -122,7 +122,6 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
     val channelUrl = ChannelSet(channelSet).getChannelUrl()
 
     var isEditing by remember(channelSet) { mutableStateOf(channelSet != channels.protobuf) }
-    val enabled = connected && isEditing
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
@@ -217,7 +216,7 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
 
             // Generate a new AES256 key if the user changes channel name or the name is non-default and the settings changed
             val shouldUseRandomKey =
-                (newName.isNotEmpty() && newModemPreset != oldPrimary.loraConfig.modemPreset)
+                newName != oldPrimary.name || (newName.isNotEmpty() && newModemPreset != oldPrimary.loraConfig.modemPreset)
             if (shouldUseRandomKey) {
 
                 // Install a new customized channel
@@ -271,35 +270,24 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
             .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
         item {
-            OutlinedTextField(
-                value = if (isEditing) primaryChannel?.name ?: "" else primaryChannel?.humanName ?: "",
-                onValueChange = {
-                    if (it.toByteArray().size <= 11) { // name max_size:12
-                        val newSettings = channelSet.getSettings(0).copy { name = it }
-                        channelSet = channelSet.copy { settings[0] = newSettings }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onFocusChanged { isEditing = it.isFocused }
-                    .padding(bottom = 8.dp),
+            val isFocused = remember { mutableStateOf(false) }
+            EditTextPreference(
+                title = stringResource(R.string.channel_name),
+                value = if (isFocused.value) primaryChannel?.name ?: ""
+                else primaryChannel?.humanName ?: "",
+                maxSize = 11, // name max_size:12
                 enabled = connected,
-                label = { Text(stringResource(R.string.channel_name)) },
-                trailingIcon = {
-                    IconButton(
-                        onClick = { isEditing = !isEditing },
-                        enabled = connected // TODO connected only
-                    ) {
-                        Icon(Icons.TwoTone.Edit, contentDescription = "Edit")
-                    }
-                },
-                maxLines = 1,
-                singleLine = true,
+                isError = false,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                )
+                onValueChanged = {
+                    val newSettings = channelSet.getSettings(0).copy { name = it }
+                    channelSet = channelSet.copy { settings[0] = newSettings }
+                },
+                onFocusChanged = { isFocused.value = it.isFocused }
+            )
         }
 
         if (!isEditing) item {
