@@ -63,46 +63,40 @@ fun ModuleSettingsItemList(viewModel: UIViewModel = viewModel()) {
         item {
             EditTextPreference(title = "Address",
                 value = mqttInput.address,
+                maxSize = 63, // address max_size:64
                 enabled = connected,
                 isError = false,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { value ->
-                    if (value.toByteArray().size <= 63) // address max_size:64
-                        mqttInput = mqttInput.copy { address = value }
-                })
+                onValueChanged = { mqttInput = mqttInput.copy { address = it } })
         }
 
         item {
             EditTextPreference(title = "Username",
                 value = mqttInput.username,
+                maxSize = 63, // username max_size:64
                 enabled = connected,
                 isError = false,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { value ->
-                    if (value.toByteArray().size <= 63) // username max_size:64
-                        mqttInput = mqttInput.copy { username = value }
-                })
+                onValueChanged = { mqttInput = mqttInput.copy { username = it } })
         }
 
         item {
             EditTextPreference(title = "Password",
                 value = mqttInput.password,
+                maxSize = 63, // password max_size:64
                 enabled = connected,
                 isError = false,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { value ->
-                    if (value.toByteArray().size <= 63) // password max_size:64
-                        mqttInput = mqttInput.copy { password = value }
-                })
+                onValueChanged = { mqttInput = mqttInput.copy { password = it } })
         }
 
         item {
@@ -645,15 +639,15 @@ fun ModuleSettingsItemList(viewModel: UIViewModel = viewModel()) {
         item {
             EditTextPreference(title = "Allow input source",
                 value = cannedMessageInput.allowInputSource,
+                maxSize = 63, // allow_input_source max_size:16
                 enabled = connected,
                 isError = false,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { value ->
-                    if (value.toByteArray().size <= 15) // allow_input_source max_size:16
-                        cannedMessageInput = cannedMessageInput.copy { allowInputSource = value }
+                onValueChanged = {
+                    cannedMessageInput = cannedMessageInput.copy { allowInputSource = it }
                 })
         }
 
