@@ -379,9 +379,8 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
         item {
             DropDownPreference(title = stringResource(id = R.string.channel_options),
                 enabled = connected,
-                items = ConfigProtos.Config.LoRaConfig.ModemPreset.values()
-                    .filter { it != ConfigProtos.Config.LoRaConfig.ModemPreset.UNRECOGNIZED }
-                    .map { it to it.name },
+                items = ChannelOption.values()
+                    .map { it.modemPreset to stringResource(it.configRes) },
                 selectedItem = channelSet.loraConfig.modemPreset,
                 onItemSelected = {
                     val lora = channelSet.loraConfig.copy { modemPreset = it }

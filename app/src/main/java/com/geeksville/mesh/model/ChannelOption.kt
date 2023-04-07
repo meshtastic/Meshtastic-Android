@@ -12,6 +12,7 @@ enum class ChannelOption(
     MEDIUM_FAST(ModemPreset.MEDIUM_FAST, R.string.modem_config_medium),
     MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, R.string.modem_config_slow_medium),
     LONG_FAST(ModemPreset.LONG_FAST, R.string.modem_config_long),
+    LONG_MODERATE(ModemPreset.LONG_MODERATE, R.string.modem_config_mod_long),
     LONG_SLOW(ModemPreset.LONG_SLOW, R.string.modem_config_slow_long),
     VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, R.string.modem_config_very_long);
 
