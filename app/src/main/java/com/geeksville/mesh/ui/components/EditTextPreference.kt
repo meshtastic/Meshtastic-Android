@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -53,6 +54,7 @@ fun EditTextPreference(
                 onValueChanged(int)
             }
         },
+        onFocusChanged = {},
         modifier = modifier
     )
 }
@@ -84,6 +86,7 @@ fun EditTextPreference(
                 onValueChanged(float)
             }
         },
+        onFocusChanged = {},
         modifier = modifier
     )
 }
@@ -115,6 +118,7 @@ fun EditTextPreference(
                 onValueChanged(double)
             }
         },
+        onFocusChanged = {},
         modifier = modifier
     )
 }
@@ -158,6 +162,7 @@ fun EditIPv4Preference(
                 onValueChanged(int)
             }
         },
+        onFocusChanged = {},
         modifier = modifier
     )
 }
@@ -202,6 +207,33 @@ fun EditTextPreference(
     keyboardActions: KeyboardActions,
     onValueChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
+    maxSize: Int // max_size - 1 (in bytes)
+) {
+    EditTextPreference(
+        title = title,
+        value = value,
+        maxSize = maxSize,
+        enabled = enabled,
+        isError = isError,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        onValueChanged = onValueChanged,
+        onFocusChanged = {},
+        modifier = modifier,
+    )
+}
+
+@Composable
+fun EditTextPreference(
+    title: String,
+    value: String,
+    enabled: Boolean,
+    isError: Boolean,
+    keyboardOptions: KeyboardOptions,
+    keyboardActions: KeyboardActions,
+    onValueChanged: (String) -> Unit,
+    onFocusChanged: (FocusState) -> Unit,
+    modifier: Modifier = Modifier,
     maxSize: Int = 0, // max_size - 1 (in bytes)
 ) {
     var isFocused by remember { mutableStateOf(false) }
@@ -211,7 +243,7 @@ fun EditTextPreference(
         singleLine = true,
         modifier = modifier
             .fillMaxWidth()
-            .onFocusEvent { isFocused = it.isFocused },
+            .onFocusEvent { isFocused = it.isFocused; onFocusChanged(it) },
         enabled = enabled,
         isError = isError,
         onValueChange = {
