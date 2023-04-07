@@ -1,177 +1,164 @@
 package com.geeksville.mesh.ui
 
-import android.content.ActivityNotFoundException
-import android.content.Intent
-import android.graphics.ColorMatrix
-import android.graphics.ColorMatrixColorFilter
 import android.net.Uri
 import android.os.Bundle
 import android.os.RemoteException
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.widget.ArrayAdapter
-import android.widget.ImageView
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.twotone.Check
+import androidx.compose.material.icons.twotone.Close
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.hideKeyboard
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.BuildUtils.debug
+import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.android.hasCameraPermission
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.databinding.ChannelFragmentBinding
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.util.onEditorAction
+import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.ui.components.DropDownPreference
+import com.geeksville.mesh.ui.components.EditTextPreference
+import com.geeksville.mesh.ui.components.PreferenceFooter
+import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.google.protobuf.ByteString
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import java.security.SecureRandom
-
-
-// Make an image view dim
-fun ImageView.setDim() {
-    val matrix = ColorMatrix()
-    matrix.setSaturation(0f) //0 means grayscale
-    val cf = ColorMatrixColorFilter(matrix)
-    colorFilter = cf
-    imageAlpha = 64 // 128 = 0.5
-}
-
-/// Return image view to normal
-fun ImageView.setOpaque() {
-    colorFilter = null
-    imageAlpha = 255
-}
 
 @AndroidEntryPoint
 class ChannelFragment : ScreenFragment("Channel"), Logging {
 
-    private var _binding: ChannelFragmentBinding? = null
-
-    // This property is only valid between onCreateView and onDestroyView.
-    private val binding get() = _binding!!
-
     private val model: UIViewModel by activityViewModels()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = ChannelFragmentBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    /// Called when the lock/unlock icon has changed
-    private fun onEditingChanged() {
-        val isEditing = binding.editableCheckbox.isChecked
-
-        binding.channelOptions.isEnabled = isEditing
-        binding.shareButton.isEnabled = !isEditing
-        binding.resetButton.isEnabled = isEditing
-        binding.scanButton.isEnabled = isEditing
-        binding.channelNameView.isEnabled = isEditing
-        if (isEditing) // Dim the (stale) QR code while editing...
-            binding.qrView.setDim()
-        else
-            binding.qrView.setOpaque()
-    }
-
-    /// Pull the latest data from the model (discarding any user edits)
-    private fun setGUIfromModel() {
-        val channels = model.channels.value
-        val channel = channels.primaryChannel
-        val connected = model.isConnected()
-
-        // Only let buttons work if we are connected to the radio
-        binding.editableCheckbox.isChecked = false // start locked
-        onEditingChanged() // we just locked the gui
-        binding.shareButton.isEnabled = connected
-
-        if (channel != null) {
-            binding.qrView.visibility = View.VISIBLE
-            binding.channelNameEdit.visibility = View.VISIBLE
-            binding.channelNameEdit.setText(channel.humanName)
-
-            // For now, we only let the user edit/save channels while the radio is awake - because the service
-            // doesn't cache DeviceConfig writes.
-            binding.editableCheckbox.isEnabled = connected
-
-            val bitmap = channels.qrCode
-            if (bitmap != null)
-                binding.qrView.setImageBitmap(bitmap)
-
-            val modemPreset = channel.loraConfig.modemPreset
-            val channelOption = ChannelOption.fromConfig(modemPreset)
-            binding.filledExposedDropdown.setText(
-                getString(
-                    channelOption?.configRes ?: R.string.modem_config_unrecognized
-                ), false
-            )
-
-        } else {
-            binding.qrView.visibility = View.INVISIBLE
-            binding.channelNameEdit.visibility = View.INVISIBLE
-            binding.editableCheckbox.isEnabled = false
-        }
-
-        val modemPresets = ChannelOption.values()
-        val modemPresetList = modemPresets.map { getString(it.configRes) }
-        val adapter = ArrayAdapter(
-            requireContext(),
-            R.layout.dropdown_menu_popup_item,
-            modemPresetList
-        )
-
-        binding.filledExposedDropdown.setAdapter(adapter)
-    }
-
-    private fun shareChannel() {
-        model.channels.value.let { channels ->
-
-            GeeksvilleApplication.analytics.track(
-                "share",
-                DataPair("content_type", "channel")
-            ) // track how many times users share channels
-
-            val sendIntent: Intent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, channels.getChannelUrl().toString())
-                putExtra(
-                    Intent.EXTRA_TITLE,
-                    getString(R.string.url_for_join)
-                )
-                type = "text/plain"
-            }
-
-            try {
-                val shareIntent = Intent.createChooser(sendIntent, null)
-                requireActivity().startActivity(shareIntent)
-            } catch (ex: ActivityNotFoundException) {
-                Snackbar.make(
-                    requireView(),
-                    R.string.no_app_found,
-                    Snackbar.LENGTH_SHORT
-                ).show()
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                AppCompatTheme {
+                    ChannelScreen(model)
+                }
             }
         }
+    }
+}
+
+@Composable
+fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
+    val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val clipboardManager = LocalClipboardManager.current
+
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val connectionState by viewModel.connectionState.observeAsState()
+    val connected = connectionState == MeshService.ConnectionState.CONNECTED
+
+    val channels by viewModel.channels.collectAsState()
+    var channelSet by remember(channels.protobuf) { mutableStateOf(channels.protobuf) }
+
+    val primaryChannel = ChannelSet(channelSet).primaryChannel
+    val channelUrl = ChannelSet(channelSet).getChannelUrl()
+
+    var isEditing by remember(channelSet) { mutableStateOf(channelSet != channels.protobuf) }
+
+    val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
+        if (result.contents != null) {
+            viewModel.setRequestChannelUrl(Uri.parse(result.contents))
+        }
+    }
+
+    fun zxingScan() {
+        debug("Starting zxing QR code scanner")
+        val zxingScan = ScanOptions()
+        zxingScan.setCameraId(0)
+        zxingScan.setPrompt("")
+        zxingScan.setBeepEnabled(false)
+        zxingScan.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+        barcodeLauncher.launch(zxingScan)
+    }
+
+    val requestPermissionAndScanLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (permissions.entries.all { it.value }) zxingScan()
+        }
+
+    fun requestPermissionAndScan() {
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.camera_required)
+            .setMessage(R.string.why_camera_required)
+            .setNeutralButton(R.string.cancel) { _, _ ->
+                debug("Camera permission denied")
+            }
+            .setPositiveButton(R.string.accept) { _, _ ->
+                requestPermissionAndScanLauncher.launch(context.getCameraPermissions())
+            }
+            .show()
     }
 
     /// Send new channel settings to the device
-    private fun installSettings(
+    fun installSettings(
         newChannel: ChannelProtos.ChannelSettings,
         newLoRaConfig: ConfigProtos.Config.LoRaConfig
     ) {
@@ -182,197 +169,249 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
             })
         // Try to change the radio, if it fails, tell the user why and throw away their edits
         try {
-            model.setChannels(newSet)
+            viewModel.setChannels(newSet)
             // Since we are writing to DeviceConfig, that will trigger the rest of the GUI update (QR code etc)
         } catch (ex: RemoteException) {
             errormsg("ignoring channel problem", ex)
 
-            setGUIfromModel() // Throw away user edits
+            channelSet = channels.protobuf // Throw away user edits
 
             // Tell the user to try again
-            Snackbar.make(
-                requireView(),
-                R.string.radio_sleeping,
-                Snackbar.LENGTH_SHORT
-            ).show()
+            scope.launch {
+                snackbarHostState.showSnackbar(context.getString(R.string.radio_sleeping))
+            }
         }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        val barcodeLauncher = registerForActivityResult(ScanContract()) { result ->
-            if (result.contents != null) {
-                model.setRequestChannelUrl(Uri.parse(result.contents))
+    fun resetButton() {
+        // User just locked it, we should warn and then apply changes to radio
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.reset_to_defaults)
+            .setMessage(R.string.are_you_sure_change_default)
+            .setNeutralButton(R.string.cancel) { _, _ ->
+                channelSet = channels.protobuf // throw away any edits
             }
-        }
-
-        fun zxingScan() {
-            debug("Starting zxing QR code scanner")
-            val zxingScan = ScanOptions()
-            zxingScan.setCameraId(0)
-            zxingScan.setPrompt("")
-            zxingScan.setBeepEnabled(false)
-            zxingScan.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-            barcodeLauncher.launch(zxingScan)
-        }
-
-        val requestPermissionAndScanLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-                if (permissions.entries.all { it.value }) zxingScan()
+            .setPositiveButton(R.string.apply) { _, _ ->
+                debug("Switching back to default channel")
+                installSettings(
+                    Channel.default.settings,
+                    Channel.default.loraConfig.copy {
+                        region = viewModel.region
+                        txEnabled = viewModel.txEnabled
+                    }
+                )
             }
+            .show()
+    }
 
-        fun requestPermissionAndScan() {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.camera_required)
-                .setMessage(R.string.why_camera_required)
-                .setNeutralButton(R.string.cancel) { _, _ ->
-                    debug("Camera permission denied")
-                }
-                .setPositiveButton(getString(R.string.accept)) { _, _ ->
-                    requestPermissionAndScanLauncher.launch(requireContext().getCameraPermissions())
-                }
-                .show()
-        }
+    fun sendButton() {
+        channels.primaryChannel?.let { oldPrimary ->
+            var newSettings = oldPrimary.settings
+            val newName = primaryChannel!!.name.trim()
 
-        binding.channelNameEdit.onEditorAction(EditorInfo.IME_ACTION_DONE) {
-            requireActivity().hideKeyboard()
-        }
+            // Find the new modem config
+            var newModemPreset = channelSet.loraConfig.modemPreset
+            if (newModemPreset == ConfigProtos.Config.LoRaConfig.ModemPreset.UNRECOGNIZED) // Huh? didn't find it - keep same
+                newModemPreset = oldPrimary.loraConfig.modemPreset
 
-        binding.resetButton.setOnClickListener {
-            // User just locked it, we should warn and then apply changes to radio
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.reset_to_defaults)
-                .setMessage(R.string.are_you_sure_change_default)
-                .setNeutralButton(R.string.cancel) { _, _ ->
-                    setGUIfromModel() // throw away any edits
-                }
-                .setPositiveButton(R.string.apply) { _, _ ->
-                    debug("Switching back to default channel")
-                    installSettings(
-                        Channel.default.settings,
-                        Channel.default.loraConfig.copy {
-                            region = model.region
-                            txEnabled = model.txEnabled
-                        }
-                    )
-                }
-                .show()
-        }
+            // Generate a new AES256 key if the user changes channel name or the name is non-default and the settings changed
+            val shouldUseRandomKey =
+                newName != oldPrimary.name || (newName.isNotEmpty() && newModemPreset != oldPrimary.loraConfig.modemPreset)
+            if (shouldUseRandomKey) {
 
-        binding.scanButton.setOnClickListener {
-            if (requireContext().hasCameraPermission()) zxingScan()
-            else requestPermissionAndScan()
-        }
-
-        // Note: Do not use setOnCheckedChanged here because we don't want to be called when we programmatically disable editing
-        binding.editableCheckbox.setOnClickListener {
-
-            /// We use this to determine if the user tried to install a custom name
-            var originalName = ""
-
-            val checked = binding.editableCheckbox.isChecked
-            if (checked) {
-                // User just unlocked for editing - remove the # goo around the channel name
-                model.channels.value.primaryChannel?.let { ch ->
-                    // Note: We are careful to show the empty string here if the user was on a default channel, so the user knows they should it for any changes
-                    originalName = ch.settings.name
-                    binding.channelNameEdit.setText(originalName)
+                // Install a new customized channel
+                debug("ASSIGNING NEW AES256 KEY")
+                val random = SecureRandom()
+                val bytes = ByteArray(32)
+                random.nextBytes(bytes)
+                newSettings = newSettings.copy {
+                    name = newName
+                    psk = ByteString.copyFrom(bytes)
                 }
             } else {
-                // User just locked it, we should warn and then apply changes to radio
-
-                model.channels.value.primaryChannel?.let { oldPrimary ->
-                    var newSettings = oldPrimary.settings
-                    val newName = binding.channelNameEdit.text.toString().trim()
-
-                    // Find the new modem config
-                    val selectedModemPresetString =
-                        binding.filledExposedDropdown.editableText.toString()
-                    var newModemPreset = getModemPreset(selectedModemPresetString)
-                    if (newModemPreset == ConfigProtos.Config.LoRaConfig.ModemPreset.UNRECOGNIZED) // Huh? didn't find it - keep same
-                        newModemPreset = oldPrimary.loraConfig.modemPreset
-
-                    // Generate a new AES256 key if the user changes channel name or the name is non-default and the settings changed
-                    val shouldUseRandomKey =
-                        newName != originalName || (newName.isNotEmpty() && newModemPreset != oldPrimary.loraConfig.modemPreset)
-                    if (shouldUseRandomKey) {
-
-                        // Install a new customized channel
-                        debug("ASSIGNING NEW AES256 KEY")
-                        val random = SecureRandom()
-                        val bytes = ByteArray(32)
-                        random.nextBytes(bytes)
-                        newSettings = newSettings.copy {
-                            name = newName.take(11) // proto max_size:12
-                            psk = ByteString.copyFrom(bytes)
-                        }
-                    } else {
-                        debug("Switching back to default channel")
-                        newSettings = Channel.default.settings
-                    }
-
-                    // No matter what apply the speed selection from the user
-                    val newLoRaConfig = model.config.lora.copy {
-                        usePreset = true
-                        modemPreset = newModemPreset
-                        bandwidth = 0
-                        spreadFactor = 0
-                        codingRate = 0
-                    }
-
-                    val humanName = Channel(newSettings, newLoRaConfig).humanName
-                    binding.channelNameEdit.setText(humanName)
-
-                    val message = buildString {
-                        append(getString(R.string.are_you_sure_channel))
-                        if (!shouldUseRandomKey)
-                            append("\n\n" + getString(R.string.warning_default_psk).format(humanName))
-                    }
-
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setTitle(R.string.change_channel)
-                        .setMessage(message)
-                        .setNeutralButton(R.string.cancel) { _, _ ->
-                            setGUIfromModel()
-                        }
-                        .setPositiveButton(getString(R.string.accept)) { _, _ ->
-                            // Generate a new channel with only the changes the user can change in the GUI
-
-                            installSettings(newSettings, newLoRaConfig)
-                        }
-                        .show()
-                }
+                debug("Switching back to default channel")
+                newSettings = Channel.default.settings
             }
 
-            onEditingChanged() // update GUI on what user is allowed to edit/share
-        }
+            // No matter what apply the speed selection from the user
+            val newLoRaConfig = viewModel.config.lora.copy {
+                usePreset = true
+                modemPreset = newModemPreset
+                bandwidth = 0
+                spreadFactor = 0
+                codingRate = 0
+            }
 
-        // Share this particular channel if someone clicks share
-        binding.shareButton.setOnClickListener {
-            shareChannel()
-        }
+            val humanName = Channel(newSettings, newLoRaConfig).humanName
 
-        model.channels.asLiveData().observe(viewLifecycleOwner) {
-            setGUIfromModel()
-        }
+            val message = buildString {
+                append(context.getString(R.string.are_you_sure_channel))
+                if (!shouldUseRandomKey)
+                    append("\n\n" + context.getString(R.string.warning_default_psk).format(humanName))
+            }
 
-        // If connection state changes, we might need to enable/disable buttons
-        model.connectionState.observe(viewLifecycleOwner) {
-            setGUIfromModel()
+            MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.change_channel)
+                .setMessage(message)
+                .setNeutralButton(R.string.cancel) { _, _ ->
+                    channelSet = channels.protobuf
+                }
+                .setPositiveButton(context.getString(R.string.accept)) { _, _ ->
+                    // Generate a new channel with only the changes the user can change in the GUI
+                    installSettings(newSettings, newLoRaConfig)
+                }
+                .show()
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    private fun getModemPreset(selectedChannelOptionString: String): ConfigProtos.Config.LoRaConfig.ModemPreset {
-        for (item in ChannelOption.values()) {
-            if (getString(item.configRes) == selectedChannelOptionString)
-                return item.modemPreset
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp, vertical = 16.dp),
+    ) {
+        item {
+            val isFocused = remember { mutableStateOf(false) }
+            EditTextPreference(
+                title = stringResource(R.string.channel_name),
+                value = if (isFocused.value) primaryChannel?.name ?: ""
+                else primaryChannel?.humanName ?: "",
+                maxSize = 11, // name max_size:12
+                enabled = connected,
+                isError = false,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    val newSettings = channelSet.getSettings(0).copy { name = it }
+                    channelSet = channelSet.copy { settings[0] = newSettings }
+                },
+                onFocusChanged = { isFocused.value = it.isFocused }
+            )
         }
-        return ConfigProtos.Config.LoRaConfig.ModemPreset.UNRECOGNIZED
+
+        if (!isEditing) item {
+            Image(
+                painter = ChannelSet(channelSet).qrCode?.let { BitmapPainter(it.asImageBitmap()) }
+                    ?: painterResource(id = R.drawable.qrcode),
+                contentDescription = stringResource(R.string.qr_code),
+                contentScale = ContentScale.FillWidth,
+                alpha = if (connected) 1f else 0.25f,
+                // colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, bottom = 16.dp)
+            )
+        }
+
+        item {
+            var valueState by remember(channelUrl) { mutableStateOf(channelUrl) }
+            val isError = valueState != channelUrl
+
+            OutlinedTextField(
+                value = valueState.toString(),
+                onValueChange = {
+                    try {
+                        valueState = Uri.parse(it)
+                        channelSet = ChannelSet(valueState).protobuf
+                    } catch (ex: Throwable) {
+                        // channelSet failed to update, isError true
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth(),
+                enabled = connected,
+                label = { Text("URL") },
+                isError = isError,
+                trailingIcon = {
+                    val isUrlEqual = channelUrl == channels.getChannelUrl()
+                    IconButton(onClick = {
+                        when {
+                            isError -> valueState = channelUrl
+                            !isUrlEqual -> viewModel.setRequestChannelUrl(channelUrl)
+                            else -> {
+                                // track how many times users share channels
+                                GeeksvilleApplication.analytics.track(
+                                    "share",
+                                    DataPair("content_type", "channel")
+                                )
+                                clipboardManager.setText(AnnotatedString(channelUrl.toString()))
+                            }
+                        }
+                    }) {
+                        Icon(
+                            painter = when {
+                                isError -> rememberVectorPainter(Icons.TwoTone.Close)
+                                !isUrlEqual -> rememberVectorPainter(Icons.TwoTone.Check)
+                                else -> painterResource(R.drawable.ic_twotone_content_copy_24)
+                            },
+                            contentDescription = when {
+                                isError -> "Error"
+                                !isUrlEqual -> stringResource(R.string.send)
+                                else -> "Copy"
+                            },
+                            tint = if (isError) MaterialTheme.colors.error
+                            else LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+                        )
+                    }
+                },
+                maxLines = 1,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+            )
+        }
+
+        item {
+            DropDownPreference(title = stringResource(id = R.string.channel_options),
+                enabled = connected,
+                items = ChannelOption.values()
+                    .map { it.modemPreset to stringResource(it.configRes) },
+                selectedItem = channelSet.loraConfig.modemPreset,
+                onItemSelected = {
+                    val lora = channelSet.loraConfig.copy { modemPreset = it }
+                    channelSet = channelSet.copy { loraConfig = lora }
+                })
+        }
+
+        if (isEditing) item {
+            PreferenceFooter(
+                enabled = connected,
+                onCancelClicked = {
+                    focusManager.clearFocus()
+                    channelSet = channels.protobuf
+                    isEditing = false
+                },
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    // viewModel.setRequestChannelUrl(channelUrl)
+                    sendButton()
+                })
+        } else {
+            item {
+                PreferenceFooter(
+                    enabled = connected,
+                    negativeText = R.string.reset,
+                    onNegativeClicked = {
+                        focusManager.clearFocus()
+                        resetButton()
+                    },
+                    positiveText = R.string.scan,
+                    onPositiveClicked = {
+                        focusManager.clearFocus()
+                        // viewModel.setRequestChannelUrl(channelUrl)
+                        if (context.hasCameraPermission()) zxingScan() else requestPermissionAndScan()
+                    })
+            }
+        }
     }
+    SnackbarHost(hostState = snackbarHostState)
 }
+
+//@Preview(showBackground = true)
+//@Composable
+//private fun ChannelScreenPreview() {
+//    ChannelScreen()
+//}
