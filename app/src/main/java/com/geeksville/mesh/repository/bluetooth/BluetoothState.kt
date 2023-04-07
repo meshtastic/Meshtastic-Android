@@ -13,5 +13,5 @@ data class BluetoothState(
     /** If we have adequate permissions and bluetooth is enabled */
     val enabled: Boolean = false,
     /** If enabled, a cold flow of the currently bonded devices */
-    val bondedDevices: Flow<Set<BluetoothDevice>> = flowOf(emptySet())
+    val bondedDevices: Flow<List<BluetoothDevice>> = flowOf(emptyList())
 )

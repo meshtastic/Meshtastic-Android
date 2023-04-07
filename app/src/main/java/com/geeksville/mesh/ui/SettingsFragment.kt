@@ -712,8 +712,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     override fun onResume() {
         super.onResume()
 
-        scanModel.setupScan()
-
         // system permissions might have changed while we were away
         binding.provideLocationCheckbox.isChecked = requireContext().hasBackgroundPermission() && (model.provideLocation.value ?: false)
 

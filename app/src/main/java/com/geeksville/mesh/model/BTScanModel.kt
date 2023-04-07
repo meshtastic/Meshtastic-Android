@@ -29,6 +29,7 @@ import com.geeksville.mesh.util.anonymize
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import java.util.regex.Pattern
@@ -45,11 +46,17 @@ class BTScanModel @Inject constructor(
 
     private val context: Context get() = application.applicationContext
     val devices = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
+    private val bleDevices = MutableLiveData<List<BluetoothDevice>>(listOf())
+    private val usbDevices = MutableLiveData<Map<String, UsbSerialDriver>>(mapOf())
 
     init {
-        bluetoothRepository.state.value.bondedDevices.onEach {
-            setupScan() // TODO clean up device list updates
-        }.launchIn(viewModelScope)
+        combine(
+            bluetoothRepository.state.value.bondedDevices,
+            usbRepository.serialDevicesWithDrivers
+        ) { ble, usb ->
+            bleDevices.value = ble
+            usbDevices.value = usb
+        }.onEach { setupScan() }.launchIn(viewModelScope)
 
         debug("BTScanModel created")
     }
@@ -166,7 +173,7 @@ class BTScanModel @Inject constructor(
     /**
      * returns true if we could start scanning, false otherwise
      */
-    fun setupScan(): Boolean {
+    private fun setupScan(): Boolean {
         selectedAddress = radioInterfaceService.getDeviceAddress()
 
         return if (MockInterface.addressValid(context, usbRepository, "")) {
@@ -192,24 +199,30 @@ class BTScanModel @Inject constructor(
             true
         } else {
             if (scanner == null) {
-                // Clear the old device list
-                devices.value?.clear()
+                val newDevs = mutableMapOf<String, DeviceListEntry>()
+
+                fun addDevice(entry: DeviceListEntry) {
+                    newDevs[entry.fullAddress] = entry
+                }
 
                 // Include a placeholder for "None"
                 addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
 
                 // Include paired Bluetooth devices
-                addBluetoothDevices()
+                bleDevices.value?.forEach {
+                    addDevice(BLEDeviceListEntry(it))
+                }
 
                 // Include Network Service Discovery
                 nsdRepository.resolvedList?.forEach { service ->
                     addDevice(TCPDeviceListEntry(service))
                 }
 
-                val serialDevices by lazy { usbRepository.serialDevicesWithDrivers.value }
-                serialDevices.forEach { (_, d) ->
+                usbDevices.value?.forEach { (_, d) ->
                     addDevice(USBDeviceListEntry(context.usbManager, d))
                 }
+
+                devices.value = newDevs
             } else {
                 debug("scan already running")
             }
@@ -269,15 +282,6 @@ class BTScanModel @Inject constructor(
         } else {
             DeviceListEntry(address, fullAddress, bonded)
         }
-    }
-
-    @SuppressLint("MissingPermission")
-    private fun addBluetoothDevices() {
-        bluetoothRepository.getBondedDevices()
-            ?.filter { it.name != null && it.name.matches(Regex(BLE_NAME_PATTERN)) }
-            ?.forEach {
-                addDevice(BLEDeviceListEntry(it))
-            }
     }
 
     private val _spinner = MutableLiveData(false)
@@ -355,7 +359,7 @@ class BTScanModel @Inject constructor(
     }
 
     companion object {
-        const val BLE_NAME_PATTERN = "^.*_([0-9a-fA-F]{4})$"
+        const val BLE_NAME_PATTERN = BluetoothRepository.BLE_NAME_PATTERN
         const val ACTION_USB_PERMISSION = "com.geeksville.mesh.USB_PERMISSION"
     }
 }

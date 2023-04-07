@@ -67,13 +67,6 @@ class BluetoothRepository @Inject constructor(
     }
 
     @SuppressLint("MissingPermission")
-    fun getBondedDevices(): Set<BluetoothDevice>? {
-        return bluetoothAdapterLazy.get()
-            ?.takeIf { application.hasBluetoothPermission() }
-            ?.bondedDevices
-    }
-
-    @SuppressLint("MissingPermission")
     internal suspend fun updateBluetoothState() {
         val newState: BluetoothState = bluetoothAdapterLazy.get()?.takeIf {
             application.hasBluetoothPermission().also { hasPerms ->
@@ -96,16 +89,18 @@ class BluetoothRepository @Inject constructor(
      * Creates a cold Flow used to obtain the set of bonded devices.
      */
     @SuppressLint("MissingPermission") // Already checked prior to calling
-    private suspend fun createBondedDevicesFlow(adapter: BluetoothAdapter): Flow<Set<BluetoothDevice>> {
-        return flow<Set<BluetoothDevice>> {
+    private suspend fun createBondedDevicesFlow(adapter: BluetoothAdapter): Flow<List<BluetoothDevice>> {
+        return flow<List<BluetoothDevice>> {
+            val devices = adapter.bondedDevices ?: emptySet()
             while (true) {
-                emit(adapter.bondedDevices ?: emptySet())
+                emit(devices.filter { it.name != null && it.name.matches(Regex(BLE_NAME_PATTERN)) })
                 delay(REFRESH_DELAY_MS)
             }
         }.flowOn(dispatchers.default).distinctUntilChanged()
     }
 
     companion object {
+        const val BLE_NAME_PATTERN = "^.*_([0-9a-fA-F]{4})$"
         const val REFRESH_DELAY_MS = 1000L
     }
 }

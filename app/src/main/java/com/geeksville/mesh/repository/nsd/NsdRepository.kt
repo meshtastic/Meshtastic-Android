@@ -12,7 +12,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.collections.ArrayList
 
 @Singleton
 class NsdRepository @Inject constructor(
@@ -21,7 +20,7 @@ class NsdRepository @Inject constructor(
 ) : Logging {
 
     private val resolveQueue = Semaphore(1)
-    private var hostsList: ArrayList<NsdServiceInfo>? = ArrayList()
+    private var hostsList: ArrayList<NsdServiceInfo>? = null
 
     val resolvedList: List<NsdServiceInfo>? get() = hostsList
 
@@ -91,7 +90,7 @@ class NsdRepository @Inject constructor(
 
     companion object {
         //To find all the available networks SERVICE_TYPE = "_services._dns-sd._udp"
-        const val SERVICE_TYPE = "_http._tcp."
+        const val SERVICE_TYPE = "_https._tcp."
         const val serviceName = "Meshtastic"
     }
 }
