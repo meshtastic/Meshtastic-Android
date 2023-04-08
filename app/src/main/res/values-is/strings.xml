@@ -54,7 +54,7 @@
     <string name="modem_config_unrecognized">ÓÞEKKT</string>
     <string name="meshtastic_service_notifications">Tilkynningar um þjónustu</string>
     <string name="location_disabled_warning">Kveikt verður að vera á staðsetningu (Mikil nákvæmni) til að finna nýjan búnað yfir Blátönn. Þú getur slökkt á því eftir á.</string>
-    <string name="about">Um</string>
+    <string name="about">Um smáforrit</string>
     <string name="a_list_of_nodes_in_the_mesh">Listi yfir nóður á möskva</string>
     <string name="text_messages">Textaskilaboð</string>
     <string name="channel_invalid">Þetta rásar URL er ógilt og ónothæft</string>
