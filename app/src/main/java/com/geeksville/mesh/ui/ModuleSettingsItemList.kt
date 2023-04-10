@@ -6,7 +6,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -16,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.copy
@@ -34,7 +34,7 @@ fun ModuleSettingsItemList(viewModel: UIViewModel = viewModel()) {
     val connectionState by viewModel.connectionState.observeAsState()
     val connected = connectionState == MeshService.ConnectionState.CONNECTED
 
-    val moduleConfig by viewModel.moduleConfig.collectAsState()
+    val moduleConfig by viewModel.moduleConfig.collectAsStateWithLifecycle()
 
     // Temporary [ModuleConfigProtos.ModuleConfig] state holders
     var mqttInput by remember(moduleConfig.mqtt) { mutableStateOf(moduleConfig.mqtt) }

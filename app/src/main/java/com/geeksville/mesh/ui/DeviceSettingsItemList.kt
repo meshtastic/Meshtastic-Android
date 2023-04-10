@@ -6,7 +6,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -17,6 +16,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.ConfigProtos.Config.NetworkConfig
@@ -43,8 +43,8 @@ fun DeviceSettingsItemList(viewModel: UIViewModel = viewModel()) {
     val connectionState by viewModel.connectionState.observeAsState()
     val connected = connectionState == MeshService.ConnectionState.CONNECTED
 
-    val localConfig by viewModel.localConfig.collectAsState()
-    val ourNodeInfo by viewModel.ourNodeInfo.collectAsState()
+    val localConfig by viewModel.localConfig.collectAsStateWithLifecycle()
+    val ourNodeInfo by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     var userInput by remember(ourNodeInfo?.user) { mutableStateOf(ourNodeInfo?.user) }
     var positionInfo by remember(ourNodeInfo?.position) { mutableStateOf(ourNodeInfo?.position) }
 
