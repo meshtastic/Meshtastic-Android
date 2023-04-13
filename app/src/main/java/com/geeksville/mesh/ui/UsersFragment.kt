@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
@@ -205,8 +206,13 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val n = nodes[position]
             val user = n.user
-            holder.chipNode.text = user?.shortName ?: "UNK"
-            val name = user?.longName ?: "Unknown node"
+            val (textColor, nodeColor) = n.colors
+            with(holder.chipNode) {
+                text = user?.shortName ?: "UNK"
+                chipBackgroundColor = ColorStateList.valueOf(nodeColor)
+                setTextColor(textColor)
+            }
+            val name = user?.longName ?: getString(R.string.unknown_username)
             holder.nodeNameView.text = name
 
             val pos = n.validPosition

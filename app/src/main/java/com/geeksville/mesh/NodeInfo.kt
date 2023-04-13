@@ -1,5 +1,6 @@
 package com.geeksville.mesh
 
+import android.graphics.Color
 import android.os.Parcelable
 import com.geeksville.mesh.util.bearing
 import com.geeksville.mesh.util.latLongToMeter
@@ -152,6 +153,15 @@ data class NodeInfo(
     var deviceMetrics: DeviceMetrics? = null,
     var environmentMetrics: EnvironmentMetrics? = null,
 ) : Parcelable {
+
+    val colors: Pair<Int, Int>
+        get() { // returns foreground and background @ColorInt for each 'num'
+            val r = (num and 0xFF0000) shr 16
+            val g = (num and 0x00FF00) shr 8
+            val b = num and 0x0000FF
+            val brightness = ((r * 0.299) + (g * 0.587) + (b * 0.114)) / 255
+            return Pair(if (brightness > 0.5) Color.BLACK else Color.WHITE, Color.rgb(r, g, b))
+        }
 
     val batteryLevel get() = deviceMetrics?.batteryLevel
     val voltage get() = deviceMetrics?.voltage
