@@ -93,7 +93,7 @@ class BluetoothRepository @Inject constructor(
         return flow<List<BluetoothDevice>> {
             val devices = adapter.bondedDevices ?: emptySet()
             while (true) {
-                emit(devices.filter { it.name != null && it.name.matches(Regex(BLE_NAME_PATTERN)) })
+                emit(devices.filter { it.name?.matches(Regex(BLE_NAME_PATTERN)) == true })
                 delay(REFRESH_DELAY_MS)
             }
         }.flowOn(dispatchers.default).distinctUntilChanged()
