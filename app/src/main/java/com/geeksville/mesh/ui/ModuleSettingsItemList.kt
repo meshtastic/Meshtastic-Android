@@ -124,6 +124,19 @@ fun ModuleSettingsItemList(viewModel: UIViewModel = viewModel()) {
         item { Divider() }
 
         item {
+            EditTextPreference(title = "Root topic",
+                value = mqttInput.root,
+                maxSize = 15, // root max_size:16
+                enabled = connected,
+                isError = false,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { mqttInput = mqttInput.copy { root = it } })
+        }
+
+        item {
             PreferenceFooter(
                 enabled = mqttInput != moduleConfig.mqtt,
                 onCancelClicked = {
