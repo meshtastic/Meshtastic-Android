@@ -40,11 +40,9 @@ data class ChannelSet(
      * Return the primary channel info
      */
     val primaryChannel: Channel?
-        get() =
-            if (protobuf.settingsCount > 0)
-                Channel(protobuf.getSettings(0), protobuf.loraConfig)
-            else
-                null
+        get() = with(protobuf) {
+            Channel(getSettings(0), loraConfig).takeIf { settingsCount > 0 }
+        }
 
     /// Return an URL that represents the current channel values
     /// @param upperCasePrefix - portions of the URL can be upper case to make for more efficient QR codes

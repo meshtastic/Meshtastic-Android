@@ -116,7 +116,7 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
     val connected = connectionState == MeshService.ConnectionState.CONNECTED
 
     val channels by viewModel.channels.collectAsStateWithLifecycle()
-    var channelSet by remember(channels.protobuf) { mutableStateOf(channels.protobuf) }
+    var channelSet by remember(channels) { mutableStateOf(channels.protobuf) }
 
     val primaryChannel = ChannelSet(channelSet).primaryChannel
     val channelUrl = ChannelSet(channelSet).getChannelUrl()
@@ -207,16 +207,15 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
     fun sendButton() {
         channels.primaryChannel?.let { oldPrimary ->
             var newSettings = oldPrimary.settings
-            val newName = primaryChannel!!.name.trim()
+            val newName = channelSet.getSettings(0).name.trim()
 
             // Find the new modem config
             var newModemPreset = channelSet.loraConfig.modemPreset
             if (newModemPreset == ConfigProtos.Config.LoRaConfig.ModemPreset.UNRECOGNIZED) // Huh? didn't find it - keep same
                 newModemPreset = oldPrimary.loraConfig.modemPreset
 
-            // Generate a new AES256 key if the user changes channel name or the name is non-default and the settings changed
-            val shouldUseRandomKey =
-                newName != oldPrimary.name || (newName.isNotEmpty() && newModemPreset != oldPrimary.loraConfig.modemPreset)
+            // Generate a new AES256 key if the channel name is non-default (empty)
+            val shouldUseRandomKey = newName.isNotEmpty()
             if (shouldUseRandomKey) {
 
                 // Install a new customized channel
@@ -270,11 +269,10 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
             .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
         item {
-            val isFocused = remember { mutableStateOf(false) }
+            var isFocused by remember { mutableStateOf(false) }
             EditTextPreference(
                 title = stringResource(R.string.channel_name),
-                value = if (isFocused.value) primaryChannel?.name ?: ""
-                else primaryChannel?.humanName ?: "",
+                value = if (isFocused) channelSet.getSettings(0).name else primaryChannel?.humanName.orEmpty(),
                 maxSize = 11, // name max_size:12
                 enabled = connected,
                 isError = false,
@@ -286,7 +284,7 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
                     val newSettings = channelSet.getSettings(0).copy { name = it }
                     channelSet = channelSet.copy { settings[0] = newSettings }
                 },
-                onFocusChanged = { isFocused.value = it.isFocused }
+                onFocusChanged = { isFocused = it.isFocused }
             )
         }
 
