@@ -100,7 +100,11 @@ class BTScanModel @Inject constructor(
     }
 
     var selectedAddress: String? = null
-    val errorText = object : MutableLiveData<String?>(null) {}
+    val errorText = MutableLiveData<String?>(null)
+
+    fun setErrorText(text: String) {
+        errorText.value = text
+    }
 
     private var scanner: BluetoothLeScanner? = null
 

@@ -301,7 +301,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 val configCount = it.allFields.size
                 val configTotal = ConfigProtos.Config.getDescriptor().fields.size
                 if (configCount > 0)
-                    binding.scanStatusText.text = "Device config ($configCount / $configTotal)"
+                    scanModel.setErrorText("Device config ($configCount / $configTotal)")
             } else updateNodeInfo()
         }
 
@@ -310,7 +310,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 val moduleCount = it.allFields.size
                 val moduleTotal = ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size
                 if (moduleCount > 0)
-                    binding.scanStatusText.text = "Module config ($moduleCount / $moduleTotal)"
+                    scanModel.setErrorText("Module config ($moduleCount / $moduleTotal)")
             } else updateNodeInfo()
         }
 
@@ -318,7 +318,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             if (!model.isConnected()) it.protobuf.let { ch ->
                 val maxChannels = model.myNodeInfo.value?.maxChannels ?: "8"
                 if (!ch.hasLoraConfig() && ch.settingsCount > 0)
-                    binding.scanStatusText.text = "Channels (${ch.settingsCount} / $maxChannels)"
+                    scanModel.setErrorText("Channels (${ch.settingsCount} / $maxChannels)")
             }
         }
 
@@ -489,10 +489,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         if (curRadio != null && !MockInterface.addressValid(requireContext(), usbRepository, "")) {
             binding.warningNotPaired.visibility = View.GONE
-            // binding.scanStatusText.text = getString(R.string.current_pair).format(curRadio)
         } else if (bluetoothViewModel.enabled.value == true) {
             binding.warningNotPaired.visibility = View.VISIBLE
-            binding.scanStatusText.text = getString(R.string.not_paired_yet)
+            scanModel.setErrorText(getString(R.string.not_paired_yet))
         }
     }
 
@@ -531,12 +530,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     scanModel.getRemoteDevice(it.address)?.let { device ->
                         requestBonding(device) { state ->
                             if (state == BluetoothDevice.BOND_BONDED) {
-                                binding.scanStatusText.text =
-                                    getString(R.string.pairing_completed)
+                                scanModel.setErrorText(getString(R.string.pairing_completed))
                                 scanModel.changeDeviceAddress(it.fullAddress)
                             } else {
-                                binding.scanStatusText.text =
-                                    getString(R.string.pairing_failed_try_again)
+                                scanModel.setErrorText(getString(R.string.pairing_failed_try_again))
                             }
                         }
                     }
