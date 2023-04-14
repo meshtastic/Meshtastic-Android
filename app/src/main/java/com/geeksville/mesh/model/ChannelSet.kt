@@ -41,7 +41,7 @@ data class ChannelSet(
      */
     val primaryChannel: Channel?
         get() = with(protobuf) {
-            Channel(getSettings(0), loraConfig).takeIf { settingsCount > 0 }
+            if (settingsCount > 0) Channel(getSettings(0), loraConfig) else null
         }
 
     /// Return an URL that represents the current channel values
