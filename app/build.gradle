@@ -186,7 +186,7 @@ dependencies {
     implementation "org.osmdroid:osmdroid-wms:$osmdroid_version"
     implementation "org.osmdroid:osmdroid-geopackage:$osmdroid_version"
     implementation 'com.github.MKergall:osmbonuspack:6.9.0'
-    implementation('mil.nga.mgrs:mgrs-android:2.2.1') { exclude group: 'com.google.android.gms' }
+    implementation('mil.nga.mgrs:mgrs-android:2.2.2') { exclude group: 'com.google.android.gms' }
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
