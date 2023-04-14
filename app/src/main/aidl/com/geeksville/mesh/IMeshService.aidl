@@ -104,6 +104,9 @@ interface IMeshService {
     /// Send position packet with wantResponse to nodeNum
     void requestPosition(in int idNum, in Position position);
 
+    /// Send traceroute packet with wantResponse to nodeNum
+    void requestTraceroute(in int requestId, in int destNum);
+
     /// Send Shutdown admin packet to nodeNum
     void requestShutdown(in int idNum);
 

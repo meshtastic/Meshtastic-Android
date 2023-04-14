@@ -1734,12 +1734,20 @@ class MeshService : Service(), Logging {
 
         override fun requestPosition(idNum: Int, position: Position) =
             toRemoteExceptions {
-                val (lat, lon, alt) = with(position) { Triple(latitude, longitude, altitude) }
+                val (lat, lon, alt) = position
                 // request position
                 if (idNum != 0) sendPosition(time = 1, destNum = idNum, wantResponse = true)
                 // set local node's fixed position
                 else sendPosition(time = 0, destNum = null, lat = lat, lon = lon, alt = alt)
             }
+
+        override fun requestTraceroute(requestId: Int, destNum: Int) = toRemoteExceptions {
+            sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(id = requestId) {
+                portnumValue = Portnums.PortNum.TRACEROUTE_APP_VALUE
+                payload = routeDiscovery {}.toByteString()
+                wantResponse = true
+            })
+        }
 
         override fun requestShutdown(idNum: Int) = toRemoteExceptions {
             sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {

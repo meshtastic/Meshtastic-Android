@@ -51,4 +51,14 @@ data class MeshLog(@PrimaryKey val uuid: String,
                 return null
             } ?: nodeInfo?.position
         }
+
+    val routeDiscovery: MeshProtos.RouteDiscovery?
+        get() {
+            return meshPacket?.run {
+                if (hasDecoded() && decoded.portnumValue == Portnums.PortNum.TRACEROUTE_APP_VALUE) {
+                    return MeshProtos.RouteDiscovery.parseFrom(decoded.payload)
+                }
+                return null
+            }
+        }
 }

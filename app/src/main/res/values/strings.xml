@@ -127,6 +127,7 @@
     <string name="resend">Resend</string>
     <string name="shutdown">Shutdown</string>
     <string name="reboot">Reboot</string>
+    <string name="traceroute">Traceroute</string>
     <string name="intro_show">Show Introduction</string>
     <string name="intro_welcome">Welcome to Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic is an open-source, off-grid, encrypted communication platform. The Meshtastic radios form a mesh network and communicate using the LoRa protocol to send text messages.</string>
