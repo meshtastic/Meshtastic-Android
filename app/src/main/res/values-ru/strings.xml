@@ -50,6 +50,7 @@
     <string name="modem_config_short">Малое расстояние / Быстро</string>
     <string name="modem_config_medium">Среднее расстояние / Быстро</string>
     <string name="modem_config_long">Большое расстояние / Быстро</string>
+    <string name="modem_config_mod_long">Большая дальность / Умеренная (Middle Range, instead Moderate. Moderate -> unwanted association with moderator)</string>
     <string name="modem_config_very_long">Очень большое расстояние / Медленный</string>
     <string name="modem_config_unrecognized">НЕРАСПОЗНАНО</string>
     <string name="meshtastic_service_notifications">Служебные уведомления</string>
@@ -117,6 +118,7 @@
     <string name="resend">Отправить</string>
     <string name="shutdown">Выключение</string>
     <string name="reboot">Перезагрузить</string>
+    <string name="traceroute">Трассировка маршрута</string>
     <string name="intro_show">Показать Введение</string>
     <string name="intro_welcome">Добро пожаловать в Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic - это открытая, автономная, зашифрованная коммуникационная платформа. Радиостанции Meshtastic образуют ячеистую сеть и общаются с использованием протокола LoRa для отправки текстовых сообщений.</string>
