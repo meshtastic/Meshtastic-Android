@@ -13,6 +13,7 @@ import androidx.core.os.bundleOf
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
+import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.NodeInfo
@@ -84,6 +85,12 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                         if (position > 0 && user != null) {
                             debug("requesting position for ${user.longName}")
                             model.requestPosition(node.num)
+                        }
+                    }
+                    R.id.traceroute -> {
+                        if (position > 0 && user != null) {
+                            debug("requesting traceroute for ${user.longName}")
+                            model.requestTraceroute(node.num)
                         }
                     }
                     R.id.reboot -> {
@@ -322,6 +329,25 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
         model.nodeDB.nodes.observe(viewLifecycleOwner) {
             nodesAdapter.onNodesChanged(it.values.toTypedArray())
+        }
+
+        model.packetResponse.asLiveData().observe(viewLifecycleOwner) { meshLog ->
+            meshLog?.meshPacket?.let { meshPacket ->
+                val routeList = meshLog.routeDiscovery?.routeList
+                fun nodeName(num: Int) = model.nodeDB.nodesByNum?.get(num)?.user?.longName
+
+                var routeStr = "${nodeName(meshPacket.from)} --> "
+                routeList?.forEach { num -> routeStr += "${nodeName(num)} --> " }
+                routeStr += "${nodeName(meshPacket.to)}"
+
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.traceroute)
+                    .setMessage(routeStr)
+                    .setPositiveButton(R.string.okay) { _, _ -> }
+                    .show()
+
+                model.clearPacketResponse()
+            }
         }
     }
 

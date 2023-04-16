@@ -34,6 +34,7 @@ import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -44,6 +45,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.osmdroid.bonuspack.kml.KmlDocument
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.FolderOverlay
@@ -171,6 +173,44 @@ class UIViewModel @Inject constructor(
             .associateBy { packet -> packet.data.waypoint!!.id }
             .filterValues { it.data.waypoint!!.expire > System.currentTimeMillis() / 1000 }
     }.asLiveData()
+
+    private val _packetResponse = MutableStateFlow<MeshLog?>(null)
+    val packetResponse: StateFlow<MeshLog?> = _packetResponse
+
+    /**
+     * Called immediately after activity observes packetResponse
+     */
+    fun clearPacketResponse() {
+        _packetResponse.tryEmit(null)
+    }
+
+    /**
+     * Returns the packet response to a given [packetId] or null after [timeout] milliseconds
+     */
+    private suspend fun getResponseBy(packetId: Int, timeout: Long) = withContext(Dispatchers.IO) {
+        withTimeoutOrNull(timeout) {
+            var packet: MeshLog? = null
+            while (packet == null) {
+                packet = _meshLog.value.lastOrNull { it.meshPacket?.decoded?.requestId == packetId }
+                if (packet == null) delay(1000)
+            }
+            packet
+        }
+    }
+
+    fun requestTraceroute(destNum: Int) = viewModelScope.launch {
+        meshService?.let { service ->
+            try {
+                val packetId = service.packetId
+                val waitFactor = (service.nodes.count { it.isOnline } - 1)
+                    .coerceAtMost(config.lora.hopLimit)
+                service.requestTraceroute(packetId, destNum)
+                _packetResponse.emit(getResponseBy(packetId, 20000L * waitFactor))
+            } catch (ex: RemoteException) {
+                errormsg("Request traceroute error: ${ex.message}")
+            }
+        }
+    }
 
     fun generatePacketId(): Int? {
         return try {

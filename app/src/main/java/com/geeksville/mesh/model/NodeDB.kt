@@ -56,6 +56,7 @@ class NodeDB(private val ui: UIViewModel) {
     private val _nodes = MutableLiveData<Map<String, NodeInfo>>(mapOf(*(if (seedWithTestNodes) testNodes else listOf()).map { it.user!!.id to it }
                 .toTypedArray()))
     val nodes: LiveData<Map<String, NodeInfo>> get() = _nodes
+    val nodesByNum get() = nodes.value?.values?.associateBy { it.num }
 
     fun setNodes(nodes: Map<String, NodeInfo>) {
         _nodes.value = nodes
