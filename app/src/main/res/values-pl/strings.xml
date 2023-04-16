@@ -50,6 +50,7 @@
     <string name="modem_config_short">Krótki zasięg / Szybko</string>
     <string name="modem_config_medium">Średni zasięg / Szybko</string>
     <string name="modem_config_long">Daleki zasięg / Szybko</string>
+    <string name="modem_config_mod_long">Długi zasięg / Średnio</string>
     <string name="modem_config_very_long">Bardzo daleki zasięg / Wolno</string>
     <string name="modem_config_unrecognized">NIE ROZPOZNANO</string>
     <string name="meshtastic_service_notifications">Powiadomienia o usługach</string>
@@ -117,6 +118,7 @@
     <string name="resend">Ponów</string>
     <string name="shutdown">Wyłącz</string>
     <string name="reboot">Restart</string>
+    <string name="traceroute">Śledzenie trasy</string>
     <string name="intro_show">Wprowadzenie</string>
     <string name="intro_welcome">Witaj w Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic jest szyfrowaną platformą komunikacji typu open-source bez dostępu do sieci. Radiostacja Meshtastic tworzy sieć mesh i komunikuje się za pomocą protokołu LoRa do wysyłania i odbierania wiadomości tekstowych.</string>
