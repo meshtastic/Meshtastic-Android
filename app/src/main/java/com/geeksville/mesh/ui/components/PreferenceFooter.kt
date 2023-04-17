@@ -41,35 +41,41 @@ fun PreferenceFooter(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .size(48.dp),
+            .height(64.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Button(
             modifier = modifier
                 .fillMaxWidth()
+                .height(48.dp)
                 .weight(1f),
             enabled = enabled,
             onClick = onNegativeClicked,
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Red)
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Red.copy(alpha = 0.6f),
+                disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+            )
         ) {
             Text(
                 text = stringResource(id = negativeText),
                 style = MaterialTheme.typography.body1,
-                color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
             )
         }
         Button(
             modifier = modifier
                 .fillMaxWidth()
+                .height(48.dp)
                 .weight(1f),
             enabled = enabled,
             onClick = onPositiveClicked,
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Green)
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color.Green.copy(alpha = 0.6f),
+                disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+            )
         ) {
             Text(
                 text = stringResource(id = positiveText),
                 style = MaterialTheme.typography.body1,
-                color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.DarkGray,
             )
         }
     }
