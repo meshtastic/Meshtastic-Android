@@ -201,17 +201,15 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         // Update the status string (highest priority messages first)
         val info = model.myNodeInfo.value
-        val statusText = binding.scanStatusText
         when (connected) {
-            MeshService.ConnectionState.CONNECTED -> {
-                statusText.text = if (region.number == 0) getString(R.string.must_set_region)
-                else getString(R.string.connected_to).format(info?.firmwareString ?: "unknown")
-            }
-            MeshService.ConnectionState.DISCONNECTED ->
-                statusText.text = getString(R.string.not_connected)
-            MeshService.ConnectionState.DEVICE_SLEEP ->
-                statusText.text = getString(R.string.connected_sleeping)
-            else -> {}
+            MeshService.ConnectionState.CONNECTED ->
+                if (region.number == 0) R.string.must_set_region else R.string.connected_to
+            MeshService.ConnectionState.DISCONNECTED -> R.string.not_connected
+            MeshService.ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
+            else -> null
+        }?.let {
+            val firmwareString = info?.firmwareString ?: getString(R.string.unknown)
+            scanModel.setErrorText(getString(it, firmwareString))
         }
     }
 
