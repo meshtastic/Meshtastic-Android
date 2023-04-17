@@ -768,16 +768,9 @@ class MainActivity : AppCompatActivity(), Logging {
                     handler.removeCallbacksAndMessages(null)
                 return true
             }
-            R.id.device_settings -> {
+            R.id.radio_config -> {
                 supportFragmentManager.beginTransaction()
                     .add(R.id.mainActivityLayout, DeviceSettingsFragment())
-                    .addToBackStack(null)
-                    .commit()
-                return true
-            }
-            R.id.module_settings -> {
-                supportFragmentManager.beginTransaction()
-                    .add(R.id.mainActivityLayout, ModuleSettingsFragment())
                     .addToBackStack(null)
                     .commit()
                 return true
