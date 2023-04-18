@@ -32,7 +32,7 @@ android {
     compileSdkVersion 33
     defaultConfig {
         applicationId "com.geeksville.mesh"
-        minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
+        minSdkVersion 23 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 31
         versionCode 30109 // format is Mmmss (where M is 1+the numeric major number
         versionName "2.1.9"
@@ -187,10 +187,13 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 
     // Osmdroid & Maps
-    def osmdroid_version = '6.1.14'
+    def osmdroid_version = '6.1.16'
     implementation "org.osmdroid:osmdroid-android:$osmdroid_version"
     implementation "org.osmdroid:osmdroid-wms:$osmdroid_version"
-    implementation "org.osmdroid:osmdroid-geopackage:$osmdroid_version"
+    implementation ("org.osmdroid:osmdroid-geopackage:$osmdroid_version") {
+        exclude module: 'ormlite-core'
+        exclude group: 'com.j256.ormlite'
+    }
     implementation 'com.github.MKergall:osmbonuspack:6.9.0'
     implementation('mil.nga.mgrs:mgrs-android:2.2.2') { exclude group: 'com.google.android.gms' }
 
