@@ -26,11 +26,13 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 
 @Composable
 fun CannedMessageConfigItemList(
+    messages: String,
     cannedMessageConfig: CannedMessageConfig,
     enabled: Boolean,
     focusManager: FocusManager,
-    onSaveClicked: (CannedMessageConfig) -> Unit,
+    onSaveClicked: (Pair<String, CannedMessageConfig>) -> Unit,
 ) {
+    var messagesInput by remember(messages) { mutableStateOf(messages) }
     var cannedMessageInput by remember(cannedMessageConfig) { mutableStateOf(cannedMessageConfig) }
 
     LazyColumn(
@@ -163,13 +165,28 @@ fun CannedMessageConfigItemList(
         item { Divider() }
 
         item {
+            EditTextPreference(title = "Messages",
+                value = messagesInput,
+                maxSize = 200, // messages max_size:201
+                enabled = enabled,
+                isError = false,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { messagesInput = it }
+            )
+        }
+
+        item {
             PreferenceFooter(
-                enabled = cannedMessageInput != cannedMessageConfig,
+                enabled = cannedMessageInput != cannedMessageConfig || messagesInput != messages,
                 onCancelClicked = {
                     focusManager.clearFocus()
+                    messagesInput = messages
                     cannedMessageInput = cannedMessageConfig
                 },
-                onSaveClicked = { onSaveClicked(cannedMessageInput) }
+                onSaveClicked = { onSaveClicked(Pair(messagesInput,cannedMessageInput)) }
             )
         }
     }
@@ -179,6 +196,7 @@ fun CannedMessageConfigItemList(
 @Composable
 fun CannedMessageConfigPreview(){
     CannedMessageConfigItemList(
+        messages = "",
         cannedMessageConfig = CannedMessageConfig.getDefaultInstance(),
         enabled = true,
         focusManager = LocalFocusManager.current,

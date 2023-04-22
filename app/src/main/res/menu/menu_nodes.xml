@@ -17,6 +17,10 @@
     </group>
     <group android:id="@+id/group_admin">
         <item
+            android:id="@+id/remote_admin"
+            android:title="@string/device_settings"
+            app:showAsAction="withText" />
+        <item
             android:id="@+id/reboot"
             android:title="@string/reboot"
             app:showAsAction="withText" />

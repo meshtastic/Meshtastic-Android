@@ -481,8 +481,7 @@ class MeshService : Service(), Logging {
      *
      * If id is null we assume a broadcast message
      */
-    private fun newMeshPacketTo(id: String) =
-        newMeshPacketTo(toNodeNum(id))
+    private fun newMeshPacketTo(id: String) = newMeshPacketTo(toNodeNum(id))
 
     /**
      * Helper to make it easy to build a subpacket in the proper protobufs
@@ -512,9 +511,11 @@ class MeshService : Service(), Logging {
      * Helper to make it easy to build a subpacket in the proper protobufs
      */
     private fun MeshPacket.Builder.buildAdminPacket(
+        id: Int = generatePacketId(), // always assign a packet ID if we didn't already have one
         wantResponse: Boolean = false,
         initFn: AdminProtos.AdminMessage.Builder.() -> Unit
     ): MeshPacket = buildMeshPacket(
+        id = id,
         wantAck = true,
         channel = adminChannelIndex,
         priority = MeshPacket.Priority.RELIABLE
@@ -1480,28 +1481,6 @@ class MeshService : Service(), Logging {
         }
     }
 
-    /** Send our current radio config to the device
-     */
-    private fun setConfig(config: ConfigProtos.Config) {
-        if (deviceVersion < minDeviceVersion) return
-        debug("Setting new radio config!")
-        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
-            setConfig = config
-        })
-        setLocalConfig(config) // Update our local copy
-    }
-
-    /** Send our current module config to the device
-     */
-    private fun setModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
-        if (deviceVersion < minDeviceVersion) return
-        debug("Setting new module config!")
-        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
-            setModuleConfig = config
-        })
-        setLocalModuleConfig(config) // Update our local copy
-    }
-
     /**
      * Send setOwner admin packet with [MeshProtos.User] protobuf
      */
@@ -1639,6 +1618,19 @@ class MeshService : Service(), Logging {
             this@MeshService.setOwner(user)
         }
 
+        override fun setRemoteOwner(destNum: Int, payload: ByteArray) = toRemoteExceptions {
+            val parsed = MeshProtos.User.parseFrom(payload)
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket {
+                setOwner = parsed
+            })
+        }
+
+        override fun getRemoteOwner(id: Int, destNum: Int) = toRemoteExceptions {
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
+                getOwnerRequest = true
+            })
+        }
+
         override fun send(p: DataPacket) {
             toRemoteExceptions {
                 if (p.id == 0) p.id = generatePacketId()
@@ -1680,14 +1672,62 @@ class MeshService : Service(), Logging {
             this@MeshService.localConfig.toByteArray() ?: throw NoDeviceConfigException()
         }
 
+        /** Send our current radio config to the device
+         */
         override fun setConfig(payload: ByteArray) = toRemoteExceptions {
-            val parsed = ConfigProtos.Config.parseFrom(payload)
-            setConfig(parsed)
+            setRemoteConfig(myNodeNum, payload)
         }
 
-        override fun setModuleConfig(payload: ByteArray) = toRemoteExceptions {
-            val parsed = ModuleConfigProtos.ModuleConfig.parseFrom(payload)
-            setModuleConfig(parsed)
+        override fun setRemoteConfig(destNum: Int, payload: ByteArray) = toRemoteExceptions {
+            debug("Setting new radio config!")
+            val config = ConfigProtos.Config.parseFrom(payload)
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket { setConfig = config })
+            if (destNum == myNodeNum) setLocalConfig(config) // Update our local copy
+        }
+
+        override fun getRemoteConfig(id: Int, destNum: Int, config: Int) = toRemoteExceptions {
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
+                getConfigRequestValue = config
+            })
+        }
+
+        /** Send our current module config to the device
+         */
+        override fun setModuleConfig(destNum: Int, payload: ByteArray) = toRemoteExceptions {
+            debug("Setting new module config!")
+            val config = ModuleConfigProtos.ModuleConfig.parseFrom(payload)
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket { setModuleConfig = config })
+            if (destNum == myNodeNum) setLocalModuleConfig(config) // Update our local copy
+        }
+
+        override fun getModuleConfig(id: Int, destNum: Int, config: Int) = toRemoteExceptions {
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
+                getModuleConfigRequestValue = config
+            })
+        }
+
+        override fun setRingtone(destNum: Int, ringtone: String) = toRemoteExceptions {
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket {
+                setRingtoneMessage = ringtone
+            })
+        }
+
+        override fun getRingtone(id: Int, destNum: Int) = toRemoteExceptions {
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
+                getRingtoneRequest = true
+            })
+        }
+
+        override fun setCannedMessages(destNum: Int, messages: String) = toRemoteExceptions {
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket {
+                setCannedMessageModuleMessages = messages
+            })
+        }
+
+        override fun getCannedMessages(id: Int, destNum: Int) = toRemoteExceptions {
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
+                getCannedMessageModuleMessagesRequest = true
+            })
         }
 
         override fun setChannel(payload: ByteArray?) = toRemoteExceptions {
@@ -1732,14 +1772,16 @@ class MeshService : Service(), Logging {
             stopLocationRequests()
         }
 
-        override fun requestPosition(idNum: Int, position: Position) =
-            toRemoteExceptions {
-                val (lat, lon, alt) = position
+        override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
+            if (position == Position(0.0, 0.0, 0)) {
                 // request position
-                if (idNum != 0) sendPosition(time = 1, destNum = idNum, wantResponse = true)
-                // set local node's fixed position
-                else sendPosition(time = 0, destNum = null, lat = lat, lon = lon, alt = alt)
+                sendPosition(time = 1, destNum = destNum, wantResponse = true)
+            } else {
+                // send fixed position
+                val (lat, lon, alt) = position
+                sendPosition(time = 0, destNum = null, lat = lat, lon = lon, alt = alt)
             }
+        }
 
         override fun requestTraceroute(requestId: Int, destNum: Int) = toRemoteExceptions {
             sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(id = requestId) {
