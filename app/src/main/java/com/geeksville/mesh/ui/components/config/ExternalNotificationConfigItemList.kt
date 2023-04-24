@@ -3,6 +3,7 @@ package com.geeksville.mesh.ui.components.config
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -12,6 +13,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.ExternalNotificationConfig
 import com.geeksville.mesh.copy
@@ -23,13 +26,15 @@ import com.geeksville.mesh.ui.components.TextDividerPreference
 
 @Composable
 fun ExternalNotificationConfigItemList(
-    externalNotificationConfig: ExternalNotificationConfig,
+    ringtone: String,
+    extNotificationConfig: ExternalNotificationConfig,
     enabled: Boolean,
     focusManager: FocusManager,
-    onSaveClicked: (ExternalNotificationConfig) -> Unit,
+    onSaveClicked: (Pair<String, ExternalNotificationConfig>) -> Unit,
 ) {
-    var externalNotificationInput by remember(externalNotificationConfig) {
-        mutableStateOf(externalNotificationConfig)
+    var ringtoneInput by remember(ringtone) { mutableStateOf(ringtone) }
+    var externalNotificationInput by remember(extNotificationConfig) {
+        mutableStateOf(extNotificationConfig)
     }
 
     LazyColumn(
@@ -184,13 +189,28 @@ fun ExternalNotificationConfigItemList(
         }
 
         item {
+            EditTextPreference(title = "Ringtone",
+                value = ringtoneInput,
+                maxSize = 230, // ringtone max_size:231
+                enabled = enabled,
+                isError = false,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { ringtoneInput = it }
+            )
+        }
+
+        item {
             PreferenceFooter(
-                enabled = externalNotificationInput != externalNotificationConfig,
+                enabled = externalNotificationInput != extNotificationConfig || ringtoneInput != ringtone,
                 onCancelClicked = {
                     focusManager.clearFocus()
-                    externalNotificationInput = externalNotificationConfig
+                    ringtoneInput = ringtone
+                    externalNotificationInput = extNotificationConfig
                 },
-                onSaveClicked = { onSaveClicked(externalNotificationInput) }
+                onSaveClicked = { onSaveClicked(Pair(ringtoneInput, externalNotificationInput)) }
             )
         }
     }
@@ -200,7 +220,8 @@ fun ExternalNotificationConfigItemList(
 @Composable
 fun ExternalNotificationConfigPreview(){
     ExternalNotificationConfigItemList(
-        externalNotificationConfig = ExternalNotificationConfig.getDefaultInstance(),
+        ringtone = "",
+        extNotificationConfig = ExternalNotificationConfig.getDefaultInstance(),
         enabled = true,
         focusManager = LocalFocusManager.current,
         onSaveClicked = { },

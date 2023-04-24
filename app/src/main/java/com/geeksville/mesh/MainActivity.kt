@@ -769,8 +769,9 @@ class MainActivity : AppCompatActivity(), Logging {
                 return true
             }
             R.id.radio_config -> {
+                val node = model.ourNodeInfo.value ?: return true
                 supportFragmentManager.beginTransaction()
-                    .add(R.id.mainActivityLayout, DeviceSettingsFragment())
+                    .add(R.id.mainActivityLayout, DeviceSettingsFragment(node))
                     .addToBackStack(null)
                     .commit()
                 return true

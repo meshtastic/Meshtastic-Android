@@ -58,6 +58,9 @@ interface IMeshService {
     */
     void setOwner(in MeshUser user);
 
+    void setRemoteOwner(in int destNum, in byte []payload);
+    void getRemoteOwner(in int requestId, in int destNum);
+
     /// Return my unique user ID string
     String getMyId();
 
@@ -87,9 +90,21 @@ interface IMeshService {
     /// It sets a Config protobuf via admin packet
     void setConfig(in byte []payload);
 
-    /// This method is only intended for use in our GUI, so the user can set radio options
-    /// It sets a ModuleConfig protobuf via admin packet
-    void setModuleConfig(in byte []payload);
+    /// Set and get a Config protobuf via admin packet
+    void setRemoteConfig(in int destNum, in byte []payload);
+    void getRemoteConfig(in int requestId, in int destNum, in int configTypeValue);
+
+    /// Set and get a ModuleConfig protobuf via admin packet
+    void setModuleConfig(in int destNum, in byte []payload);
+    void getModuleConfig(in int requestId, in int destNum, in int moduleConfigTypeValue);
+
+    /// Set and get the Ext Notification Ringtone string via admin packet
+    void setRingtone(in int destNum, in String ringtone);
+    void getRingtone(in int requestId, in int destNum);
+
+    /// Set and get the Canned Message Messages string via admin packet
+    void setCannedMessages(in int destNum, in String messages);
+    void getCannedMessages(in int requestId, in int destNum);
 
     /// This method is only intended for use in our GUI, so the user can set radio options
     /// It sets a Channel protobuf via admin packet
@@ -102,22 +117,22 @@ interface IMeshService {
     void commitEditSettings();
 
     /// Send position packet with wantResponse to nodeNum
-    void requestPosition(in int idNum, in Position position);
+    void requestPosition(in int destNum, in Position position);
 
     /// Send traceroute packet with wantResponse to nodeNum
     void requestTraceroute(in int requestId, in int destNum);
 
     /// Send Shutdown admin packet to nodeNum
-    void requestShutdown(in int idNum);
+    void requestShutdown(in int destNum);
 
     /// Send Reboot admin packet to nodeNum
-    void requestReboot(in int idNum);
+    void requestReboot(in int destNum);
 
     /// Send FactoryReset admin packet to nodeNum
-    void requestFactoryReset(in int idNum);
+    void requestFactoryReset(in int destNum);
 
     /// Send NodedbReset admin packet to nodeNum
-    void requestNodedbReset(in int idNum);
+    void requestNodedbReset(in int destNum);
 
     /// Returns a ChannelSet protobuf
     byte []getChannelSet();
