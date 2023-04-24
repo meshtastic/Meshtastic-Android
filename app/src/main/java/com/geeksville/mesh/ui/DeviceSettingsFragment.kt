@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,18 +13,23 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Card
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.KeyboardArrowRight
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
@@ -33,15 +39,25 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.geeksville.mesh.AdminProtos
+import com.geeksville.mesh.AdminProtos.AdminMessage.ConfigType
+import com.geeksville.mesh.AdminProtos.AdminMessage.ModuleConfigType
+import com.geeksville.mesh.ConfigProtos.Config
+import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
+import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.config
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.PreferenceCategory
+import com.geeksville.mesh.ui.components.TextDividerPreference
 import com.geeksville.mesh.ui.components.config.AudioConfigItemList
 import com.geeksville.mesh.ui.components.config.BluetoothConfigItemList
 import com.geeksville.mesh.ui.components.config.CannedMessageConfigItemList
@@ -63,7 +79,7 @@ import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class DeviceSettingsFragment : ScreenFragment("Device Settings"), Logging {
+class DeviceSettingsFragment(val node: NodeInfo) : ScreenFragment("Device Settings"), Logging {
 
     private val model: UIViewModel by activityViewModels()
 
@@ -77,139 +93,240 @@ class DeviceSettingsFragment : ScreenFragment("Device Settings"), Logging {
             setBackgroundColor(ContextCompat.getColor(context, R.color.colorAdvancedBackground))
             setContent {
                 AppCompatTheme {
-                    RadioConfigNavHost(model)
+                    RadioConfigNavHost(node, model)
                 }
             }
         }
     }
 }
 
-enum class ConfigDest(val title: String, val route: String) {
-    USER("User", "user"),
-    DEVICE("Device", "device"),
-    POSITION("Position", "position"),
-    POWER("Power", "power"),
-    NETWORK("Network", "network"),
-    DISPLAY("Display", "display"),
-    LORA("LoRa", "lora"),
-    BLUETOOTH("Bluetooth", "bluetooth")
+enum class ConfigDest(val title: String, val route: String, val config: ConfigType) {
+    USER("User", "user", ConfigType.UNRECOGNIZED),
+    DEVICE("Device", "device", ConfigType.DEVICE_CONFIG),
+    POSITION("Position", "position", ConfigType.POSITION_CONFIG),
+    POWER("Power", "power", ConfigType.POWER_CONFIG),
+    NETWORK("Network", "network", ConfigType.NETWORK_CONFIG),
+    DISPLAY("Display", "display", ConfigType.DISPLAY_CONFIG),
+    LORA("LoRa", "lora", ConfigType.LORA_CONFIG),
+    BLUETOOTH("Bluetooth", "bluetooth", ConfigType.BLUETOOTH_CONFIG);
 }
 
-enum class ModuleDest(val title: String, val route: String) {
-    MQTT("MQTT", "mqtt"),
-    SERIAL("Serial", "serial"),
-    EXT_NOTIFICATION("External Notification", "ext_notification"),
-    STORE_FORWARD("Store & Forward", "store_forward"),
-    RANGE_TEST("Range Test", "range_test"),
-    TELEMETRY("Telemetry", "telemetry"),
-    CANNED_MESSAGE("Canned Message", "canned_message"),
-    AUDIO("Audio", "audio"),
-    REMOTE_HARDWARE("Remote Hardware", "remote_hardware")
+enum class ModuleDest(val title: String, val route: String, val config: ModuleConfigType) {
+    MQTT("MQTT", "mqtt", ModuleConfigType.MQTT_CONFIG),
+    SERIAL("Serial", "serial", ModuleConfigType.SERIAL_CONFIG),
+    EXTERNAL_NOTIFICATION("External Notification", "ext_not", ModuleConfigType.EXTNOTIF_CONFIG),
+    STORE_FORWARD("Store & Forward", "store_forward", ModuleConfigType.STOREFORWARD_CONFIG),
+    RANGE_TEST("Range Test", "range_test", ModuleConfigType.RANGETEST_CONFIG),
+    TELEMETRY("Telemetry", "telemetry", ModuleConfigType.TELEMETRY_CONFIG),
+    CANNED_MESSAGE("Canned Message", "canned_message", ModuleConfigType.CANNEDMSG_CONFIG),
+    AUDIO("Audio", "audio", ModuleConfigType.AUDIO_CONFIG),
+    REMOTE_HARDWARE("Remote Hardware", "remote_hardware", ModuleConfigType.REMOTEHARDWARE_CONFIG);
 }
 
 @Composable
-fun RadioConfigNavHost(viewModel: UIViewModel = viewModel()) {
+fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
     val navController = rememberNavController()
     val focusManager = LocalFocusManager.current
 
     val connectionState by viewModel.connectionState.observeAsState()
     val connected = connectionState == MeshService.ConnectionState.CONNECTED
 
-    val ourNodeInfo by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val localConfig by viewModel.localConfig.collectAsStateWithLifecycle()
-    val moduleConfig by viewModel.moduleConfig.collectAsStateWithLifecycle()
+    val destNum = node.num
+
+    var userConfig by remember { mutableStateOf(MeshProtos.User.getDefaultInstance()) }
+    var radioConfig by remember { mutableStateOf(Config.getDefaultInstance()) }
+    var moduleConfig by remember { mutableStateOf(ModuleConfig.getDefaultInstance()) }
+
+    var location by remember(node) { mutableStateOf(node.position) }
+    var ringtone by remember { mutableStateOf("") }
+    var cannedMessageMessages by remember { mutableStateOf("") }
+
+    val configResponse by viewModel.packetResponse.collectAsStateWithLifecycle()
+    var isWaiting by remember { mutableStateOf(false) }
+
+    LaunchedEffect(configResponse) {
+        val data = configResponse?.meshPacket?.decoded
+        if (isWaiting && data?.portnumValue == Portnums.PortNum.ADMIN_APP_VALUE) {
+            val parsed = AdminProtos.AdminMessage.parseFrom(data.payload)
+            when (parsed.payloadVariantCase) {
+                AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
+                    val response = parsed.getChannelResponse // TODO
+                }
+
+                AdminProtos.AdminMessage.PayloadVariantCase.GET_OWNER_RESPONSE -> {
+                    isWaiting = false
+                    userConfig = parsed.getOwnerResponse
+                    navController.navigate("user")
+                }
+
+                AdminProtos.AdminMessage.PayloadVariantCase.GET_CONFIG_RESPONSE -> {
+                    isWaiting = false
+                    val response = parsed.getConfigResponse
+                    radioConfig = response
+                    enumValues<ConfigDest>().find { it.name == "${response.payloadVariantCase}" }?.let {
+                        navController.navigate(it.route)
+                    }
+                }
+
+                AdminProtos.AdminMessage.PayloadVariantCase.GET_MODULE_CONFIG_RESPONSE -> {
+                    isWaiting = false
+                    val response = parsed.getModuleConfigResponse
+                    moduleConfig = response
+                    enumValues<ModuleDest>().find { it.name == "${response.payloadVariantCase}" }?.let {
+                        navController.navigate(it.route)
+                    }
+                }
+
+                AdminProtos.AdminMessage.PayloadVariantCase.GET_CANNED_MESSAGE_MODULE_MESSAGES_RESPONSE -> {
+                    cannedMessageMessages = parsed.getCannedMessageModuleMessagesResponse
+                    viewModel.getModuleConfig(destNum, ModuleConfigType.CANNEDMSG_CONFIG_VALUE)
+                }
+
+                AdminProtos.AdminMessage.PayloadVariantCase.GET_RINGTONE_RESPONSE -> {
+                    ringtone = parsed.getRingtoneResponse
+                    viewModel.getModuleConfig(destNum, ModuleConfigType.EXTNOTIF_CONFIG_VALUE)
+                }
+                else -> TODO()
+            }
+        }
+    }
 
     NavHost(navController = navController, startDestination = "home") {
-        composable("home") { RadioSettingsScreen(navController) }
+        composable("home") {
+            RadioSettingsScreen(
+                enabled = connected && !isWaiting,
+                headerText = node.user?.longName ?: stringResource(R.string.unknown_username),
+                onRouteClick = { configType ->
+                    isWaiting = true
+                    // clearAllConfigs() ?
+                    when (configType) {
+                        ConfigType.UNRECOGNIZED -> {
+                            viewModel.getOwner(destNum)
+                        }
+                        is ConfigType -> {
+                            viewModel.getConfig(destNum, configType.number)
+                        }
+                        ModuleConfigType.CANNEDMSG_CONFIG -> {
+                            viewModel.getCannedMessages(destNum)
+                        }
+                        ModuleConfigType.EXTNOTIF_CONFIG -> {
+                            viewModel.getRingtone(destNum)
+                        }
+                        is ModuleConfigType -> {
+                            viewModel.getModuleConfig(destNum, configType.number)
+                        }
+                    }
+                },
+            )
+        }
         composable("user") {
             UserConfigItemList(
-                userConfig = ourNodeInfo?.user!!,
+                userConfig = userConfig,
                 enabled = connected,
                 focusManager = focusManager,
                 onSaveClicked = { userInput ->
                     focusManager.clearFocus()
-                    viewModel.setOwner(userInput)
+                    viewModel.setRemoteOwner(destNum, userInput)
+                    userConfig = userInput
                 }
             )
         }
         composable("device") {
             DeviceConfigItemList(
-                deviceConfig = localConfig.device,
+                deviceConfig = radioConfig.device,
                 enabled = connected,
                 focusManager = focusManager,
                 onSaveClicked = { deviceInput ->
                     focusManager.clearFocus()
-                    viewModel.updateDeviceConfig { deviceInput }
+                    val config = config { device = deviceInput }
+                    viewModel.setRemoteConfig(destNum, config)
+                    radioConfig = config
                 }
             )
         }
         composable("position") {
             PositionConfigItemList(
-                positionInfo = ourNodeInfo?.position,
-                positionConfig = localConfig.position,
+                locationInfo = location,
+                positionConfig = radioConfig.position,
                 enabled = connected,
                 focusManager = focusManager,
                 onSaveClicked = { positionPair ->
                     focusManager.clearFocus()
                     val (locationInput, positionInput) = positionPair
-                    if (locationInput != ourNodeInfo?.position && positionInput.fixedPosition)
-                        locationInput?.let { viewModel.requestPosition(0, it) }
-                    if (positionInput != localConfig.position) viewModel.updatePositionConfig { positionInput }
+                    if (locationInput != node.position && positionInput.fixedPosition) {
+                        locationInput?.let { viewModel.requestPosition(destNum, it) }
+                        location = locationInput
+                    }
+                    if (positionInput != radioConfig.position) {
+                        val config = config { position = positionInput }
+                        viewModel.setRemoteConfig(destNum, config)
+                        radioConfig = config
+                    }
                 }
             )
         }
         composable("power") {
             PowerConfigItemList(
-                powerConfig = localConfig.power,
+                powerConfig = radioConfig.power,
                 enabled = connected,
                 focusManager = focusManager,
                 onSaveClicked = { powerInput ->
                     focusManager.clearFocus()
-                    viewModel.updatePowerConfig { powerInput }
+                    val config = config { power = powerInput }
+                    viewModel.setRemoteConfig(destNum, config)
+                    radioConfig = config
                 }
             )
         }
         composable("network") {
             NetworkConfigItemList(
-                networkConfig = localConfig.network,
+                networkConfig = radioConfig.network,
                 enabled = connected,
                 focusManager = focusManager,
                 onSaveClicked = { networkInput ->
                     focusManager.clearFocus()
-                    viewModel.updateNetworkConfig { networkInput }
+                    val config = config { network = networkInput }
+                    viewModel.setRemoteConfig(destNum, config)
+                    radioConfig = config
                 }
             )
         }
         composable("display") {
             DisplayConfigItemList(
-                displayConfig = localConfig.display,
+                displayConfig = radioConfig.display,
                 enabled = connected,
                 focusManager = focusManager,
                 onSaveClicked = { displayInput ->
                     focusManager.clearFocus()
-                    viewModel.updateDisplayConfig { displayInput }
+                    val config = config { display = displayInput }
+                    viewModel.setRemoteConfig(destNum, config)
+                    radioConfig = config
                 }
             )
         }
         composable("lora") {
             LoRaConfigItemList(
-                loraConfig = localConfig.lora,
+                loraConfig = radioConfig.lora,
                 enabled = connected,
                 focusManager = focusManager,
                 onSaveClicked = { loraInput ->
                     focusManager.clearFocus()
-                    viewModel.updateLoraConfig { loraInput }
+                    val config = config { lora = loraInput }
+                    viewModel.setRemoteConfig(destNum, config)
+                    radioConfig = config
                 }
             )
         }
         composable("bluetooth") {
             BluetoothConfigItemList(
-                bluetoothConfig = localConfig.bluetooth,
+                bluetoothConfig = radioConfig.bluetooth,
                 enabled = connected,
                 focusManager = focusManager,
                 onSaveClicked = { bluetoothInput ->
                     focusManager.clearFocus()
-                    viewModel.updateBluetoothConfig { bluetoothInput }
+                    val config = config { bluetooth = bluetoothInput }
+                    viewModel.setRemoteConfig(destNum, config)
+                    radioConfig = config
                 }
             )
         }
@@ -220,7 +337,9 @@ fun RadioConfigNavHost(viewModel: UIViewModel = viewModel()) {
                 focusManager = focusManager,
                 onSaveClicked = { mqttInput ->
                     focusManager.clearFocus()
-                    viewModel.updateMQTTConfig { mqttInput }
+                    val config = moduleConfig { mqtt = mqttInput }
+                    viewModel.setModuleConfig(destNum, config)
+                    moduleConfig = config
                 }
             )
         }
@@ -231,18 +350,30 @@ fun RadioConfigNavHost(viewModel: UIViewModel = viewModel()) {
                 focusManager = focusManager,
                 onSaveClicked = { serialInput ->
                     focusManager.clearFocus()
-                    viewModel.updateSerialConfig { serialInput }
+                    val config = moduleConfig { serial = serialInput }
+                    viewModel.setModuleConfig(destNum, config)
+                    moduleConfig = config
                 }
             )
         }
-        composable("ext_notification") {
+        composable("ext_not") {
             ExternalNotificationConfigItemList(
-                externalNotificationConfig = moduleConfig.externalNotification,
+                ringtone = ringtone,
+                extNotificationConfig = moduleConfig.externalNotification,
                 enabled = connected,
                 focusManager = focusManager,
-                onSaveClicked = { externalNotificationInput ->
+                onSaveClicked = { extNotificationPair ->
                     focusManager.clearFocus()
-                    viewModel.updateExternalNotificationConfig { externalNotificationInput }
+                    val (ringtoneInput, extNotificationInput) = extNotificationPair
+                    if (ringtoneInput != ringtone) {
+                        viewModel.setRingtone(destNum, ringtoneInput)
+                        ringtone = ringtoneInput
+                    }
+                    if (extNotificationInput != moduleConfig.externalNotification) {
+                        val config = moduleConfig { externalNotification = extNotificationInput }
+                        viewModel.setModuleConfig(destNum, config)
+                        moduleConfig = config
+                    }
                 }
             )
         }
@@ -253,7 +384,9 @@ fun RadioConfigNavHost(viewModel: UIViewModel = viewModel()) {
                 focusManager = focusManager,
                 onSaveClicked = { storeForwardInput ->
                     focusManager.clearFocus()
-                    viewModel.updateStoreForwardConfig { storeForwardInput }
+                    val config = moduleConfig { storeForward = storeForwardInput }
+                    viewModel.setModuleConfig(destNum, config)
+                    moduleConfig = config
                 }
             )
         }
@@ -264,7 +397,9 @@ fun RadioConfigNavHost(viewModel: UIViewModel = viewModel()) {
                 focusManager = focusManager,
                 onSaveClicked = { rangeTestInput ->
                     focusManager.clearFocus()
-                    viewModel.updateRangeTestConfig { rangeTestInput }
+                    val config = moduleConfig { rangeTest = rangeTestInput }
+                    viewModel.setModuleConfig(destNum, config)
+                    moduleConfig = config
                 }
             )
         }
@@ -275,18 +410,30 @@ fun RadioConfigNavHost(viewModel: UIViewModel = viewModel()) {
                 focusManager = focusManager,
                 onSaveClicked = { telemetryInput ->
                     focusManager.clearFocus()
-                    viewModel.updateTelemetryConfig { telemetryInput }
+                    val config = moduleConfig { telemetry = telemetryInput }
+                    viewModel.setModuleConfig(destNum, config)
+                    moduleConfig = config
                 }
             )
         }
         composable("canned_message") {
             CannedMessageConfigItemList(
+                messages = cannedMessageMessages,
                 cannedMessageConfig = moduleConfig.cannedMessage,
                 enabled = connected,
                 focusManager = focusManager,
-                onSaveClicked = { cannedMessageInput ->
+                onSaveClicked = { cannedMessagePair ->
                     focusManager.clearFocus()
-                    viewModel.updateCannedMessageConfig { cannedMessageInput }
+                    val (messagesInput, cannedMessageInput) = cannedMessagePair
+                    if (messagesInput != cannedMessageMessages) {
+                        viewModel.setCannedMessages(destNum, messagesInput)
+                        cannedMessageMessages = messagesInput
+                    }
+                    if (cannedMessageInput != moduleConfig.cannedMessage) {
+                        val config = moduleConfig { cannedMessage = cannedMessageInput }
+                        viewModel.setModuleConfig(destNum, config)
+                        moduleConfig = config
+                    }
                 }
             )
         }
@@ -297,7 +444,9 @@ fun RadioConfigNavHost(viewModel: UIViewModel = viewModel()) {
                 focusManager = focusManager,
                 onSaveClicked = { audioInput ->
                     focusManager.clearFocus()
-                    viewModel.updateAudioConfig { audioInput }
+                    val config = moduleConfig { audio = audioInput }
+                    viewModel.setModuleConfig(destNum, config)
+                    moduleConfig = config
                 }
             )
         }
@@ -308,7 +457,9 @@ fun RadioConfigNavHost(viewModel: UIViewModel = viewModel()) {
                 focusManager = focusManager,
                 onSaveClicked = { remoteHardwareInput ->
                     focusManager.clearFocus()
-                    viewModel.updateRemoteHardwareConfig { remoteHardwareInput }
+                    val config = moduleConfig { remoteHardware = remoteHardwareInput }
+                    viewModel.setModuleConfig(destNum, config)
+                    moduleConfig = config
                 }
             )
         }
@@ -316,12 +467,16 @@ fun RadioConfigNavHost(viewModel: UIViewModel = viewModel()) {
 }
 
 @Composable
-fun NavCard(title: String, onClick: () -> Unit) {
+fun NavCard(
+    title: String,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 2.dp, horizontal = 16.dp)
-            .clickable { onClick() },
+            .padding(vertical = 2.dp)
+            .clickable(enabled = enabled) { onClick() },
         elevation = 4.dp
     ) {
         Row(
@@ -331,6 +486,7 @@ fun NavCard(title: String, onClick: () -> Unit) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.body1,
+                color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
                 modifier = Modifier.weight(1f)
             )
             Icon(
@@ -341,32 +497,43 @@ fun NavCard(title: String, onClick: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RadioSettingsScreen(navController: NavHostController) {
-    LazyColumn {
-        item {
-            PreferenceCategory(
-                stringResource(id = R.string.device_settings), Modifier.padding(horizontal = 16.dp)
-            )
-        }
-        items(ConfigDest.values()) { configs ->
-            NavCard(configs.title) { navController.navigate(configs.route) }
+fun RadioSettingsScreen(
+    enabled: Boolean = true,
+    headerText: String = "longName",
+    onRouteClick: (Any) -> Unit = {},
+) {
+    LazyColumn(
+        modifier = Modifier.padding(horizontal = 16.dp)
+    ) {
+        stickyHeader {
+            TextDividerPreference(headerText)
         }
 
         item {
             PreferenceCategory(
-                stringResource(id = R.string.module_settings), Modifier.padding(horizontal = 16.dp)
+                stringResource(id = R.string.device_settings)
+            )
+        }
+        items(ConfigDest.values()) { configs ->
+            NavCard(configs.title, enabled = enabled) { onRouteClick(configs.config) }
+        }
+
+        item {
+            PreferenceCategory(
+                stringResource(id = R.string.module_settings)
             )
         }
 
         items(ModuleDest.values()) { modules ->
-            NavCard(modules.title) { navController.navigate(modules.route) }
+            NavCard(modules.title, enabled = enabled) { onRouteClick(modules.config) }
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun RadioSettingsScreenPreview(){
-    RadioSettingsScreen(NavHostController(LocalContext.current))
+fun RadioSettingsScreenPreview() {
+    RadioSettingsScreen()
 }

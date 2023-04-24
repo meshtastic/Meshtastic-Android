@@ -17,6 +17,7 @@ import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
@@ -56,6 +57,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         private var nodes = arrayOf<NodeInfo>()
 
         private fun popup(view: View, position: Int) {
+            if (!model.isConnected()) return
             val node = nodes[position]
             val user = node.user
             val showAdmin = position == 0 || model.adminChannelIndex > 0
@@ -92,6 +94,13 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                             debug("requesting traceroute for ${user.longName}")
                             model.requestTraceroute(node.num)
                         }
+                    }
+                    R.id.remote_admin -> {
+                        debug("calling remote admin --> destNum: ${node.num}")
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.mainActivityLayout, DeviceSettingsFragment(node))
+                            .addToBackStack(null)
+                            .commit()
                     }
                     R.id.reboot -> {
                         MaterialAlertDialogBuilder(requireContext())
@@ -333,6 +342,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
         model.packetResponse.asLiveData().observe(viewLifecycleOwner) { meshLog ->
             meshLog?.meshPacket?.let { meshPacket ->
+                if (meshPacket.decoded.portnum != Portnums.PortNum.TRACEROUTE_APP) return@let
                 val routeList = meshLog.routeDiscovery?.routeList
                 fun nodeName(num: Int) = model.nodeDB.nodesByNum?.get(num)?.user?.longName
 
