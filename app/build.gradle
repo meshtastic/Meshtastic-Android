@@ -192,7 +192,6 @@ dependencies {
     implementation "org.osmdroid:osmdroid-wms:$osmdroid_version"
     implementation ("org.osmdroid:osmdroid-geopackage:$osmdroid_version") {
         exclude module: 'ormlite-core'
-        exclude group: 'com.j256.ormlite'
     }
     implementation 'com.github.MKergall:osmbonuspack:6.9.0'
     implementation('mil.nga.mgrs:mgrs-android:2.2.2') { exclude group: 'com.google.android.gms' }
