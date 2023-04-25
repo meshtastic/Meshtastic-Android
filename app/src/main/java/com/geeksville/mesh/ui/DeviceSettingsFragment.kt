@@ -144,9 +144,9 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
     val configResponse by viewModel.packetResponse.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
 
-    LaunchedEffect(configResponse) {
+    if (isWaiting) LaunchedEffect(configResponse) {
         val data = configResponse?.meshPacket?.decoded
-        if (isWaiting && data?.portnumValue == Portnums.PortNum.ADMIN_APP_VALUE) {
+        if (data?.portnumValue == Portnums.PortNum.ADMIN_APP_VALUE) {
             val parsed = AdminProtos.AdminMessage.parseFrom(data.payload)
             when (parsed.payloadVariantCase) {
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
