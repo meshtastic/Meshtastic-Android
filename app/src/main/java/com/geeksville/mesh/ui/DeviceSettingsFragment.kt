@@ -246,13 +246,12 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
         }
         composable("position") {
             PositionConfigItemList(
-                locationInfo = location,
+                location = location,
                 positionConfig = radioConfig.position,
                 enabled = connected,
                 focusManager = focusManager,
-                onSaveClicked = { positionPair ->
+                onSaveClicked = { locationInput, positionInput ->
                     focusManager.clearFocus()
-                    val (locationInput, positionInput) = positionPair
                     if (locationInput != node.position && positionInput.fixedPosition) {
                         locationInput?.let { viewModel.requestPosition(destNum, it) }
                         location = locationInput
@@ -362,9 +361,8 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 extNotificationConfig = moduleConfig.externalNotification,
                 enabled = connected,
                 focusManager = focusManager,
-                onSaveClicked = { extNotificationPair ->
+                onSaveClicked = { ringtoneInput, extNotificationInput ->
                     focusManager.clearFocus()
-                    val (ringtoneInput, extNotificationInput) = extNotificationPair
                     if (ringtoneInput != ringtone) {
                         viewModel.setRingtone(destNum, ringtoneInput)
                         ringtone = ringtoneInput
@@ -422,9 +420,8 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 cannedMessageConfig = moduleConfig.cannedMessage,
                 enabled = connected,
                 focusManager = focusManager,
-                onSaveClicked = { cannedMessagePair ->
+                onSaveClicked = { messagesInput, cannedMessageInput ->
                     focusManager.clearFocus()
-                    val (messagesInput, cannedMessageInput) = cannedMessagePair
                     if (messagesInput != cannedMessageMessages) {
                         viewModel.setCannedMessages(destNum, messagesInput)
                         cannedMessageMessages = messagesInput

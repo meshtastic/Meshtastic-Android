@@ -30,10 +30,10 @@ fun CannedMessageConfigItemList(
     cannedMessageConfig: CannedMessageConfig,
     enabled: Boolean,
     focusManager: FocusManager,
-    onSaveClicked: (Pair<String, CannedMessageConfig>) -> Unit,
+    onSaveClicked: (messages: String, config: CannedMessageConfig) -> Unit,
 ) {
-    var messagesInput by remember(messages) { mutableStateOf(messages) }
-    var cannedMessageInput by remember(cannedMessageConfig) { mutableStateOf(cannedMessageConfig) }
+    var messagesInput by remember { mutableStateOf(messages) }
+    var cannedMessageInput by remember { mutableStateOf(cannedMessageConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -186,7 +186,7 @@ fun CannedMessageConfigItemList(
                     messagesInput = messages
                     cannedMessageInput = cannedMessageConfig
                 },
-                onSaveClicked = { onSaveClicked(Pair(messagesInput,cannedMessageInput)) }
+                onSaveClicked = { onSaveClicked(messagesInput,cannedMessageInput) }
             )
         }
     }
@@ -200,6 +200,6 @@ fun CannedMessageConfigPreview(){
         cannedMessageConfig = CannedMessageConfig.getDefaultInstance(),
         enabled = true,
         focusManager = LocalFocusManager.current,
-        onSaveClicked = { },
+        onSaveClicked = { _, _ -> },
     )
 }
