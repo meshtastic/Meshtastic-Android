@@ -79,7 +79,7 @@ import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class DeviceSettingsFragment(val node: NodeInfo) : ScreenFragment("Device Settings"), Logging {
+class DeviceSettingsFragment(val node: NodeInfo) : ScreenFragment("Radio Configuration"), Logging {
 
     private val model: UIViewModel by activityViewModels()
 
@@ -163,18 +163,16 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                     isWaiting = false
                     val response = parsed.getConfigResponse
                     radioConfig = response
-                    enumValues<ConfigDest>().find { it.name == "${response.payloadVariantCase}" }?.let {
-                        navController.navigate(it.route)
-                    }
+                    enumValues<ConfigDest>().find { it.name == "${response.payloadVariantCase}" }
+                        ?.let { navController.navigate(it.route) }
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_MODULE_CONFIG_RESPONSE -> {
                     isWaiting = false
                     val response = parsed.getModuleConfigResponse
                     moduleConfig = response
-                    enumValues<ModuleDest>().find { it.name == "${response.payloadVariantCase}" }?.let {
-                        navController.navigate(it.route)
-                    }
+                    enumValues<ModuleDest>().find { it.name == "${response.payloadVariantCase}" }
+                        ?.let { navController.navigate(it.route) }
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CANNED_MESSAGE_MODULE_MESSAGES_RESPONSE -> {
@@ -186,6 +184,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                     ringtone = parsed.getRingtoneResponse
                     viewModel.getModuleConfig(destNum, ModuleConfigType.EXTNOTIF_CONFIG_VALUE)
                 }
+
                 else -> TODO()
             }
         }
