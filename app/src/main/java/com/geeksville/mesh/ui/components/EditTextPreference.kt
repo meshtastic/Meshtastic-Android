@@ -132,16 +132,18 @@ fun EditIPv4Preference(
     onValueChanged: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val pattern = """\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b""".toRegex()
+
     fun convertIntToIpAddress(int: Int): String {
-        return "${int shr 24 and 0xff}.${int shr 16 and 0xff}.${int shr 8 and 0xff}.${int and 0xff}"
+        return "${int and 0xff}.${int shr 8 and 0xff}.${int shr 16 and 0xff}.${int shr 24 and 0xff}"
     }
-    fun convertIpAddressToInt(ipAddress: String): Int? {
-        return ipAddress.split(".")
-            .map { it.toIntOrNull() }
-            .fold(0) { total, next ->
-                if (next == null) return null else total shl 8 or next
-            }
-    }
+
+    fun convertIpAddressToInt(ipAddress: String): Int? = ipAddress.split(".")
+        .map { it.toIntOrNull() }.reversed() // little-endian byte order
+        .fold(0) { total, next ->
+            if (next == null) return null else total shl 8 or next
+        }
+
     var valueState by remember(value) { mutableStateOf(convertIntToIpAddress(value)) }
 
     EditTextPreference(
@@ -154,13 +156,8 @@ fun EditIPv4Preference(
         ),
         keyboardActions = keyboardActions,
         onValueChanged = {
-            val pattern = """\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b""".toRegex()
-            val isValid = pattern.matches(it)
-            if (it.isEmpty() || !isValid) valueState = it
-            else convertIpAddressToInt(it)?.let { int ->
-                valueState = it
-                onValueChanged(int)
-            }
+            valueState = it
+            if (pattern.matches(it)) convertIpAddressToInt(it)?.let { int -> onValueChanged(int) }
         },
         onFocusChanged = {},
         modifier = modifier
@@ -299,7 +296,7 @@ private fun EditTextPreferencePreview() {
         )
         EditIPv4Preference(
             title = "IP Address",
-            value = 3232235521.toInt(),
+            value = 16820416,
             enabled = true,
             keyboardActions = KeyboardActions {},
             onValueChanged = {}
