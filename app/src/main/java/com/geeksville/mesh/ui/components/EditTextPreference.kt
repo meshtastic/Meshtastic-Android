@@ -101,6 +101,7 @@ fun EditTextPreference(
     modifier: Modifier = Modifier,
 ) {
     var valueState by remember(value) { mutableStateOf(value.toString()) }
+    val decimalSeparators = setOf('.', ',', '٫', '、', '·') // set of possible decimal separators
 
     EditTextPreference(
         title = title,
@@ -112,7 +113,7 @@ fun EditTextPreference(
         ),
         keyboardActions = keyboardActions,
         onValueChanged = {
-            if (it.isEmpty()) valueState = it
+            if (it.length <= 1 || it.first() in decimalSeparators) valueState = it
             else it.toDoubleOrNull()?.let { double ->
                 valueState = it
                 onValueChanged(double)
