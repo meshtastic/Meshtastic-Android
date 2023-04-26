@@ -17,7 +17,6 @@ import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.NodeInfo
-import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
@@ -342,12 +341,11 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
         model.packetResponse.asLiveData().observe(viewLifecycleOwner) { meshLog ->
             meshLog?.meshPacket?.let { meshPacket ->
-                if (meshPacket.decoded.portnum != Portnums.PortNum.TRACEROUTE_APP) return@let
-                val routeList = meshLog.routeDiscovery?.routeList
+                val routeList = meshLog.routeDiscovery?.routeList ?: return@let
                 fun nodeName(num: Int) = model.nodeDB.nodesByNum?.get(num)?.user?.longName
 
                 var routeStr = "${nodeName(meshPacket.from)} --> "
-                routeList?.forEach { num -> routeStr += "${nodeName(num)} --> " }
+                routeList.forEach { num -> routeStr += "${nodeName(num)} --> " }
                 routeStr += "${nodeName(meshPacket.to)}"
 
                 MaterialAlertDialogBuilder(requireContext())
