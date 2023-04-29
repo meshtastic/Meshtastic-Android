@@ -250,6 +250,12 @@ class UIViewModel @Inject constructor(
         "Request getOwner error"
     )
 
+    fun getChannel(destNum: Int, index: Int) = request(
+        destNum,
+        { service, packetId, dest -> service.getRemoteChannel(packetId, dest, index) },
+        "Request getChannel error"
+    )
+
     fun getConfig(destNum: Int, configType: Int) = request(
         destNum,
         { service, packetId, dest -> service.getRemoteConfig(packetId, dest, configType) },
@@ -450,6 +456,10 @@ class UIViewModel @Inject constructor(
     fun setChannels(channelSet: ChannelSet) {
         debug("Setting new channels!")
         this._channelSet = channelSet.protobuf
+    }
+
+    fun setRemoteChannel(destNum: Int, channel: ChannelProtos.Channel) {
+        meshService?.setRemoteChannel(destNum, channel.toByteArray())
     }
 
     /// our name in hte radio

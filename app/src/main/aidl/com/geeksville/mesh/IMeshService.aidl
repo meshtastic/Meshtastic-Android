@@ -110,6 +110,10 @@ interface IMeshService {
     /// It sets a Channel protobuf via admin packet
     void setChannel(in byte []payload);
 
+    /// Set and get a Channel protobuf via admin packet
+    void setRemoteChannel(in int destNum, in byte []payload);
+    void getRemoteChannel(in int requestId, in int destNum, in int channelIndex);
+
     /// Send beginEditSettings admin packet to nodeNum
     void beginEditSettings();
 

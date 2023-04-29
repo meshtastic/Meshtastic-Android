@@ -1407,12 +1407,6 @@ class MeshService : Service(), Logging {
         }.forEach(::requestConfig)
     }
 
-    private fun requestChannel(channelIndex: Int) {
-        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
-            getChannelRequest = channelIndex + 1
-        })
-    }
-
     private fun setChannel(ch: ChannelProtos.Channel) {
         if (ch.index == 0 || ch.settings.name.lowercase() == "admin") adminChannelIndex = ch.index
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
@@ -1731,8 +1725,23 @@ class MeshService : Service(), Logging {
         }
 
         override fun setChannel(payload: ByteArray?) = toRemoteExceptions {
-            val parsed = ChannelProtos.Channel.parseFrom(payload)
-            setChannel(parsed)
+            with(ChannelProtos.Channel.parseFrom(payload)) {
+                if (index == 0 || settings.name.lowercase() == "admin") adminChannelIndex = index
+            }
+            setRemoteChannel(myNodeNum, payload)
+        }
+
+        override fun setRemoteChannel(destNum: Int, payload: ByteArray?) = toRemoteExceptions {
+            val channel = ChannelProtos.Channel.parseFrom(payload)
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(wantResponse = true) {
+                setChannel = channel
+            })
+        }
+
+        override fun getRemoteChannel(id: Int, destNum: Int, index: Int) = toRemoteExceptions {
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
+                getChannelRequest = index + 1
+            })
         }
 
         override fun beginEditSettings() = toRemoteExceptions {
