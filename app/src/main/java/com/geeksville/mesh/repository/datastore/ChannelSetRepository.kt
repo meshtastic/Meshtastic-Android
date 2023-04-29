@@ -42,7 +42,11 @@ class ChannelSetRepository @Inject constructor(
 
     suspend fun addSettings(channel: ChannelProtos.Channel) {
         channelSetStore.updateData { preference ->
-            preference.toBuilder().addSettings(channel.settings).build()
+            if (preference.settingsCount > channel.index) {
+                preference.toBuilder().setSettings(channel.index, channel.settings).build()
+            } else {
+                preference.toBuilder().addSettings(channel.settings).build()
+            }
         }
     }
 
