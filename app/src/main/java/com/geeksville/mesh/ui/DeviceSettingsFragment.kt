@@ -1,9 +1,14 @@
 package com.geeksville.mesh.ui
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -57,6 +62,7 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.channel
 import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.config
+import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.service.MeshService
@@ -68,6 +74,7 @@ import com.geeksville.mesh.ui.components.config.CannedMessageConfigItemList
 import com.geeksville.mesh.ui.components.config.ChannelSettingsItemList
 import com.geeksville.mesh.ui.components.config.DeviceConfigItemList
 import com.geeksville.mesh.ui.components.config.DisplayConfigItemList
+import com.geeksville.mesh.ui.components.config.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.components.config.ExternalNotificationConfigItemList
 import com.geeksville.mesh.ui.components.config.LoRaConfigItemList
 import com.geeksville.mesh.ui.components.config.MQTTConfigItemList
@@ -148,7 +155,71 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
     var cannedMessageMessages by remember { mutableStateOf("") }
 
     val configResponse by viewModel.packetResponse.collectAsStateWithLifecycle()
+    val deviceProfile by viewModel.deviceProfile.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
+
+    val importConfigLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            it.data?.data?.let { file_uri -> viewModel.importProfile(file_uri) }
+        }
+    }
+
+    val exportConfigLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            it.data?.data?.let { file_uri -> viewModel.exportProfile(file_uri) }
+        }
+    }
+
+    var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
+    if (showEditDeviceProfileDialog) EditDeviceProfileDialog(
+        title = "Export configuration",
+        deviceProfile = with(viewModel) {
+            deviceProfile {
+                ourNodeInfo.value?.user?.let {
+                    longName = it.longName
+                    shortName = it.shortName
+                }
+                channelUrl = channels.value.getChannelUrl().toString()
+                config = localConfig.value
+                this.moduleConfig = module
+            }
+        },
+        onAddClick = {
+            isWaiting = false
+            viewModel.setDeviceProfile(it)
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "application/*"
+                putExtra(Intent.EXTRA_TITLE, "$destNum.cfg")
+            }
+            exportConfigLauncher.launch(intent)
+            showEditDeviceProfileDialog = false
+        },
+        onDismissRequest = {
+            isWaiting = false
+            showEditDeviceProfileDialog = false
+            viewModel.setDeviceProfile(null)
+        }
+    )
+
+    if (isWaiting && deviceProfile != null) {
+        EditDeviceProfileDialog(
+            title = "Import configuration",
+            deviceProfile = deviceProfile ?: return,
+            onAddClick = {
+                isWaiting = false
+                viewModel.installProfile(it)
+            },
+            onDismissRequest = {
+                isWaiting = false
+                viewModel.setDeviceProfile(null)
+            }
+        )
+    }
 
     if (isWaiting) LaunchedEffect(configResponse) {
         val data = configResponse?.meshPacket?.decoded
@@ -216,6 +287,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
         composable("home") {
             RadioSettingsScreen(
                 enabled = connected && !isWaiting,
+                isLocal = destNum == viewModel.myNodeNum,
                 headerText = node.user?.longName ?: stringResource(R.string.unknown_username),
                 onRouteClick = { configType ->
                     isWaiting = true
@@ -226,6 +298,14 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                             channelList.clear()
                             viewModel.getChannel(destNum, 0)
                         }
+                        "IMPORT" -> {
+                            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                type = "application/*"
+                            }
+                            importConfigLauncher.launch(intent)
+                        }
+                        "EXPORT" -> { showEditDeviceProfileDialog = true }
                         is ConfigType -> {
                             viewModel.getConfig(destNum, configType.number)
                         }
@@ -544,10 +624,16 @@ fun NavCard(
     }
 }
 
+@Composable
+fun NavCard(@StringRes title: Int, enabled: Boolean, onClick: () -> Unit) {
+    NavCard(title = stringResource(title), enabled = enabled, onClick = onClick)
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RadioSettingsScreen(
     enabled: Boolean = true,
+    isLocal: Boolean = true,
     headerText: String = "longName",
     onRouteClick: (Any) -> Unit = {},
 ) {
@@ -566,6 +652,12 @@ fun RadioSettingsScreen(
         item { PreferenceCategory(stringResource(R.string.module_settings)) }
         items(ModuleDest.values()) { modules ->
             NavCard(modules.title, enabled = enabled) { onRouteClick(modules.config) }
+        }
+
+        if (isLocal) {
+            item { PreferenceCategory("Import / Export") }
+            item { NavCard("Import configuration", enabled = enabled) { onRouteClick("IMPORT") } }
+            item { NavCard("Export configuration", enabled = enabled) { onRouteClick("EXPORT") } }
         }
     }
 }
