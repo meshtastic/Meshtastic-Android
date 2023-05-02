@@ -130,7 +130,9 @@ fun ChannelSettingsItemList(
     }
 
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(onClick = { }, enabled = false)
     ) {
         if (maxChannels > settingsListInput.size) FloatingActionButton(
             onClick = {
