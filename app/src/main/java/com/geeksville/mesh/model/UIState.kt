@@ -15,6 +15,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.*
+import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.database.MeshLogRepository
@@ -32,6 +33,7 @@ import com.geeksville.mesh.repository.datastore.ModuleConfigRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.positionToMeter
+import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -50,7 +52,9 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.FolderOverlay
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
+import java.io.FileOutputStream
 import java.io.FileWriter
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
@@ -424,6 +428,10 @@ class UIViewModel @Inject constructor(
         meshService?.setModuleConfig(destNum, config.toByteArray())
     }
 
+    fun setModuleConfig(config: ModuleConfig) {
+        setModuleConfig(myNodeNum ?: return, config)
+    }
+
     /// Convert the channels array to and from [AppOnlyProtos.ChannelSet]
     private var _channelSet: AppOnlyProtos.ChannelSet
         get() = channels.value.protobuf
@@ -651,6 +659,82 @@ class UIViewModel @Inject constructor(
         }
     }
 
+    private val _deviceProfile = MutableStateFlow<DeviceProfile?>(null)
+    val deviceProfile: StateFlow<DeviceProfile?> = _deviceProfile
+
+    fun setDeviceProfile(deviceProfile: DeviceProfile?) {
+        _deviceProfile.value = deviceProfile
+    }
+
+    fun importProfile(file_uri: Uri) = viewModelScope.launch(Dispatchers.Main) {
+        withContext(Dispatchers.IO) {
+            var inputStream: InputStream? = null
+            try {
+                inputStream = app.contentResolver.openInputStream(file_uri)
+                val bytes = inputStream?.readBytes()
+                val protobuf = DeviceProfile.parseFrom(bytes)
+                _deviceProfile.value = protobuf
+            } catch (ex: Exception) {
+                errormsg("Failed to import radio configs: ${ex.message}")
+            } finally {
+                inputStream?.close()
+            }
+        }
+    }
+
+    fun exportProfile(file_uri: Uri) = viewModelScope.launch {
+        val profile = deviceProfile.value ?: return@launch
+        writeToUri(file_uri, profile)
+        _deviceProfile.value = null
+    }
+
+    private suspend fun writeToUri(uri: Uri, message: MessageLite) = withContext(Dispatchers.IO) {
+        try {
+            app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
+                FileOutputStream(parcelFileDescriptor.fileDescriptor).use { outputStream ->
+                    message.writeTo(outputStream)
+                }
+            }
+        } catch (ex: FileNotFoundException) {
+            errormsg("Can't write file error: ${ex.message}")
+        }
+    }
+
+    fun installProfile(protobuf: DeviceProfile) = with(protobuf) {
+        _deviceProfile.value = null
+        // meshService?.beginEditSettings()
+        if (hasLongName() || hasShortName()) ourNodeInfo.value?.user?.let {
+            val user = it.copy(
+                longName = if (hasLongName()) longName else it.longName,
+                shortName = if (hasShortName()) shortName else it.shortName
+            )
+            setOwner(user)
+        }
+        if (hasChannelUrl()) {
+            setChannels(ChannelSet(Uri.parse(channelUrl)))
+        }
+        if (hasConfig()) {
+            setConfig(config { device = config.device })
+            setConfig(config { position = config.position })
+            setConfig(config { power = config.power })
+            setConfig(config { network = config.network })
+            setConfig(config { display = config.display })
+            setConfig(config { lora = config.lora })
+            setConfig(config { bluetooth = config.bluetooth })
+        }
+        if (hasModuleConfig()) moduleConfig.let {
+            setModuleConfig(moduleConfig { mqtt = it.mqtt })
+            setModuleConfig(moduleConfig { serial = it.serial })
+            setModuleConfig(moduleConfig { externalNotification = it.externalNotification })
+            setModuleConfig(moduleConfig { storeForward = it.storeForward })
+            setModuleConfig(moduleConfig { rangeTest = it.rangeTest })
+            setModuleConfig(moduleConfig { telemetry = it.telemetry })
+            setModuleConfig(moduleConfig { cannedMessage = it.cannedMessage })
+            setModuleConfig(moduleConfig { audio = it.audio })
+            setModuleConfig(moduleConfig { remoteHardware = it.remoteHardware })
+        }
+        // meshService?.commitEditSettings()
+    }
 
     fun parseUrl(url: String, map: MapView) {
         viewModelScope.launch(Dispatchers.IO) {
