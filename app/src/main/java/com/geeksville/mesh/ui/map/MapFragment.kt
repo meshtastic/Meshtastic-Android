@@ -53,6 +53,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.tileprovider.modules.SqliteArchiveTileWriter
 import org.osmdroid.tileprovider.tilesource.ITileSource
@@ -259,18 +262,17 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
         map.maxZoomLevel = defaultMaxZoom
         map.setMultiTouchControls(true) // Sets gesture controls to true.
         map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
-//        map.addMapListener(object : MapListener {
-//            override fun onScroll(event: ScrollEvent): Boolean {
-//                if (binding.cacheLayout.visibility == View.VISIBLE) {
-//                    generateBoxOverlay(zoomLevelMax)
-//                }
-//                return true
-//            }
-//
-//            override fun onZoom(event: ZoomEvent): Boolean {
-//                return false
-//            }
-//        })
+        map.addMapListener(object : MapListener {
+            override fun onScroll(event: ScrollEvent): Boolean {
+                if (binding.cacheLayout.visibility == View.VISIBLE) {
+                    generateBoxOverlay(zoomLevelMax)
+                }
+                return true
+            }
+            override fun onZoom(event: ZoomEvent): Boolean {
+                return false
+            }
+        })
     }
 
     private fun drawOverlays() {
