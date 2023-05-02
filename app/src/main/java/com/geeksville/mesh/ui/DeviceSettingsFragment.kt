@@ -194,7 +194,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "application/*"
-                putExtra(Intent.EXTRA_TITLE, "$destNum.cfg")
+                putExtra(Intent.EXTRA_TITLE, "${destNum.toUInt()}.cfg")
             }
             exportConfigLauncher.launch(intent)
             showEditDeviceProfileDialog = false
