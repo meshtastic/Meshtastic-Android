@@ -31,11 +31,11 @@ fun EditDeviceProfileDialog(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var longNameInput by remember { mutableStateOf(true) }
-    var shortNameInput by remember { mutableStateOf(true) }
-    var channelUrlInput by remember { mutableStateOf(true) }
-    var configInput by remember { mutableStateOf(true) }
-    var moduleConfigInput by remember { mutableStateOf(true) }
+    var longNameInput by remember { mutableStateOf(deviceProfile.hasLongName()) }
+    var shortNameInput by remember { mutableStateOf(deviceProfile.hasShortName()) }
+    var channelUrlInput by remember { mutableStateOf(deviceProfile.hasChannelUrl()) }
+    var configInput by remember { mutableStateOf(deviceProfile.hasConfig()) }
+    var moduleConfigInput by remember { mutableStateOf(deviceProfile.hasModuleConfig()) }
 
     AlertDialog(
         title = { Text(title) },
