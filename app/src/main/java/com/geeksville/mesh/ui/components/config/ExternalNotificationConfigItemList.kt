@@ -30,12 +30,10 @@ fun ExternalNotificationConfigItemList(
     extNotificationConfig: ExternalNotificationConfig,
     enabled: Boolean,
     focusManager: FocusManager,
-    onSaveClicked: (Pair<String, ExternalNotificationConfig>) -> Unit,
+    onSaveClicked: (ringtone: String, config: ExternalNotificationConfig) -> Unit,
 ) {
-    var ringtoneInput by remember(ringtone) { mutableStateOf(ringtone) }
-    var externalNotificationInput by remember(extNotificationConfig) {
-        mutableStateOf(extNotificationConfig)
-    }
+    var ringtoneInput by remember { mutableStateOf(ringtone) }
+    var externalNotificationInput by remember { mutableStateOf(extNotificationConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -210,7 +208,7 @@ fun ExternalNotificationConfigItemList(
                     ringtoneInput = ringtone
                     externalNotificationInput = extNotificationConfig
                 },
-                onSaveClicked = { onSaveClicked(Pair(ringtoneInput, externalNotificationInput)) }
+                onSaveClicked = { onSaveClicked(ringtoneInput, externalNotificationInput) }
             )
         }
     }
@@ -224,6 +222,6 @@ fun ExternalNotificationConfigPreview(){
         extNotificationConfig = ExternalNotificationConfig.getDefaultInstance(),
         enabled = true,
         focusManager = LocalFocusManager.current,
-        onSaveClicked = { },
+        onSaveClicked = { _, _ -> },
     )
 }

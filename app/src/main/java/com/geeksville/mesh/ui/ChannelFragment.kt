@@ -27,6 +27,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
+import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -49,10 +50,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
@@ -64,6 +67,7 @@ import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.android.hasCameraPermission
 import com.geeksville.mesh.channelSet
+import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
@@ -71,16 +75,16 @@ import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.DropDownPreference
-import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceFooter
+import com.geeksville.mesh.ui.components.RegularPreference
+import com.geeksville.mesh.ui.components.config.ChannelSettingsItemList
+import com.geeksville.mesh.ui.components.config.EditChannelDialog
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.protobuf.ByteString
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.security.SecureRandom
 
 @AndroidEntryPoint
 class ChannelFragment : ScreenFragment("Channel"), Logging {
@@ -121,7 +125,7 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
     val primaryChannel = ChannelSet(channelSet).primaryChannel
     val channelUrl = ChannelSet(channelSet).getChannelUrl()
 
-    var isEditing by remember(channelSet) { mutableStateOf(channelSet != channels.protobuf) }
+    val isEditing by remember(channelSet) { mutableStateOf(channelSet != channels.protobuf) }
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
@@ -159,14 +163,9 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
 
     /// Send new channel settings to the device
     fun installSettings(
-        newChannel: ChannelProtos.ChannelSettings,
-        newLoRaConfig: ConfigProtos.Config.LoRaConfig
+        newChannelSet: AppOnlyProtos.ChannelSet
     ) {
-        val newSet = ChannelSet(
-            channelSet {
-                settings.add(newChannel)
-                loraConfig = newLoRaConfig
-            })
+        val newSet = ChannelSet(newChannelSet)
         // Try to change the radio, if it fails, tell the user why and throw away their edits
         try {
             viewModel.setChannels(newSet)
@@ -181,6 +180,17 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
                 snackbarHostState.showSnackbar(context.getString(R.string.radio_sleeping))
             }
         }
+    }
+
+    fun installSettings(
+        newChannel: ChannelProtos.ChannelSettings,
+        newLoRaConfig: ConfigProtos.Config.LoRaConfig
+    ) {
+        val newSet = channelSet {
+            settings.add(newChannel)
+            loraConfig = newLoRaConfig
+        }
+        installSettings(newSet)
     }
 
     fun resetButton() {
@@ -205,48 +215,12 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
     }
 
     fun sendButton() {
-        channels.primaryChannel?.let { oldPrimary ->
-            var newSettings = oldPrimary.settings
-            val newName = channelSet.getSettings(0).name.trim()
-
-            // Find the new modem config
-            var newModemPreset = channelSet.loraConfig.modemPreset
-            if (newModemPreset == ConfigProtos.Config.LoRaConfig.ModemPreset.UNRECOGNIZED) // Huh? didn't find it - keep same
-                newModemPreset = oldPrimary.loraConfig.modemPreset
-
-            // Generate a new AES256 key if the channel name is non-default (empty)
-            val shouldUseRandomKey = newName.isNotEmpty()
-            if (shouldUseRandomKey) {
-
-                // Install a new customized channel
-                debug("ASSIGNING NEW AES256 KEY")
-                val random = SecureRandom()
-                val bytes = ByteArray(32)
-                random.nextBytes(bytes)
-                newSettings = newSettings.copy {
-                    name = newName
-                    psk = ByteString.copyFrom(bytes)
-                }
-            } else {
-                debug("Switching back to default channel")
-                newSettings = Channel.default.settings
-            }
-
-            // No matter what apply the speed selection from the user
-            val newLoRaConfig = viewModel.config.lora.copy {
-                usePreset = true
-                modemPreset = newModemPreset
-                bandwidth = 0
-                spreadFactor = 0
-                codingRate = 0
-            }
-
-            val humanName = Channel(newSettings, newLoRaConfig).humanName
-
+        primaryChannel?.let { primaryChannel ->
+            val humanName = primaryChannel.humanName
             val message = buildString {
                 append(context.getString(R.string.are_you_sure_channel))
-                if (!shouldUseRandomKey)
-                    append("\n\n" + context.getString(R.string.warning_default_psk).format(humanName))
+                if (primaryChannel.settings == Channel.default.settings)
+                    append("\n\n" + context.getString(R.string.warning_default_psk, humanName))
             }
 
             MaterialAlertDialogBuilder(context)
@@ -255,36 +229,61 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
                 .setNeutralButton(R.string.cancel) { _, _ ->
                     channelSet = channels.protobuf
                 }
-                .setPositiveButton(context.getString(R.string.accept)) { _, _ ->
-                    // Generate a new channel with only the changes the user can change in the GUI
-                    installSettings(newSettings, newLoRaConfig)
+                .setPositiveButton(R.string.accept) { _, _ ->
+                    installSettings(channelSet)
                 }
                 .show()
         }
     }
 
-    LazyColumn(
+    var showEditChannelDialog: Int? by remember { mutableStateOf(null) }
+
+    if (showEditChannelDialog != null) {
+        val index = showEditChannelDialog ?: return
+        EditChannelDialog(
+            channelSettings = with(channelSet) {
+                if (settingsCount > index) getSettings(index) else channelSettings { }
+            },
+            onAddClick = {
+                with(channelSet) {
+                    if (settingsCount > index) channelSet = copy { settings[index] = it }
+                    else channelSet = copy { settings.add(it) }
+                }
+                showEditChannelDialog = null
+            },
+            onDismissRequest = { showEditChannelDialog = null }
+        )
+    }
+
+    var showChannelEditor by remember { mutableStateOf(false) }
+    if (showChannelEditor) ChannelSettingsItemList(
+        settingsList = channelSet.settingsList,
+        enabled = connected,
+        focusManager = focusManager,
+        onNegativeClicked = {
+            focusManager.clearFocus()
+            showChannelEditor = false
+        },
+        positiveText = R.string.save,
+        onPositiveClicked = {
+            focusManager.clearFocus()
+            showChannelEditor = false
+            channelSet = channelSet.toBuilder().clearSettings().addAllSettings(it).build()
+        }
+    )
+
+    if (!showChannelEditor) LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
         item {
-            var isFocused by remember { mutableStateOf(false) }
-            EditTextPreference(
+            RegularPreference(
                 title = stringResource(R.string.channel_name),
-                value = if (isFocused) channelSet.getSettings(0).name else primaryChannel?.humanName.orEmpty(),
-                maxSize = 11, // name max_size:12
+                subtitle = primaryChannel?.humanName.orEmpty(),
+                onClick = { showChannelEditor = true },
                 enabled = connected,
-                isError = false,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = {
-                    val newSettings = channelSet.getSettings(0).copy { name = it }
-                    channelSet = channelSet.copy { settings[0] = newSettings }
-                },
-                onFocusChanged = { isFocused = it.isFocused }
+                trailingIcon = Icons.TwoTone.Edit
             )
         }
 
@@ -316,8 +315,7 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
                         // channelSet failed to update, isError true
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth(),
                 enabled = connected,
                 label = { Text("URL") },
                 isError = isError,
@@ -380,7 +378,6 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
                 onCancelClicked = {
                     focusManager.clearFocus()
                     channelSet = channels.protobuf
-                    isEditing = false
                 },
                 onSaveClicked = {
                     focusManager.clearFocus()
@@ -408,8 +405,8 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
     SnackbarHost(hostState = snackbarHostState)
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//private fun ChannelScreenPreview() {
-//    ChannelScreen()
-//}
+@Preview(showBackground = true)
+@Composable
+fun ChannelScreenPreview() {
+    // ChannelScreen()
+}

@@ -25,14 +25,14 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 
 @Composable
 fun PositionConfigItemList(
-    locationInfo: Position?,
+    location: Position?,
     positionConfig: PositionConfig,
     enabled: Boolean,
     focusManager: FocusManager,
-    onSaveClicked: (Pair<Position?, PositionConfig>) -> Unit,
+    onSaveClicked: (position: Position?, config: PositionConfig) -> Unit,
 ) {
-    var locationInput by remember(locationInfo) { mutableStateOf(locationInfo) }
-    var positionInput by remember(positionConfig) { mutableStateOf(positionConfig) }
+    var locationInput by remember { mutableStateOf(location) }
+    var positionInput by remember { mutableStateOf(positionConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -175,13 +175,13 @@ fun PositionConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = positionInput != positionConfig || locationInput != locationInfo,
+                enabled = positionInput != positionConfig || locationInput != location,
                 onCancelClicked = {
                     focusManager.clearFocus()
-                    locationInput = locationInfo
+                    locationInput = location
                     positionInput = positionConfig
                 },
-                onSaveClicked = { onSaveClicked(Pair(locationInput, positionInput)) }
+                onSaveClicked = { onSaveClicked(locationInput, positionInput) }
             )
         }
     }
@@ -191,10 +191,10 @@ fun PositionConfigItemList(
 @Composable
 fun PositionConfigPreview(){
     PositionConfigItemList(
-        locationInfo = null,
+        location = null,
         positionConfig = PositionConfig.getDefaultInstance(),
         enabled = true,
         focusManager = LocalFocusManager.current,
-        onSaveClicked = { },
+        onSaveClicked = { _, _ -> },
     )
 }

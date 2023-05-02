@@ -37,8 +37,8 @@ fun BitwisePreference(
         subtitle = value.toString(),
         onClick = { dropDownExpanded = !dropDownExpanded },
         enabled = enabled,
-        trailingIcon = if (dropDownExpanded) Icons.TwoTone.KeyboardArrowDown
-        else Icons.TwoTone.KeyboardArrowUp,
+        trailingIcon = if (dropDownExpanded) Icons.TwoTone.KeyboardArrowUp
+        else Icons.TwoTone.KeyboardArrowDown,
     )
 
     Box {

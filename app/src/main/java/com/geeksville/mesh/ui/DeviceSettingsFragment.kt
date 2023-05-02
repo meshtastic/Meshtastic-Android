@@ -1,9 +1,14 @@
 package com.geeksville.mesh.ui
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -23,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -45,6 +51,7 @@ import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.AdminProtos.AdminMessage.ConfigType
 import com.geeksville.mesh.AdminProtos.AdminMessage.ModuleConfigType
+import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.MeshProtos
@@ -52,7 +59,10 @@ import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.channel
+import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.config
+import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.service.MeshService
@@ -61,8 +71,10 @@ import com.geeksville.mesh.ui.components.TextDividerPreference
 import com.geeksville.mesh.ui.components.config.AudioConfigItemList
 import com.geeksville.mesh.ui.components.config.BluetoothConfigItemList
 import com.geeksville.mesh.ui.components.config.CannedMessageConfigItemList
+import com.geeksville.mesh.ui.components.config.ChannelSettingsItemList
 import com.geeksville.mesh.ui.components.config.DeviceConfigItemList
 import com.geeksville.mesh.ui.components.config.DisplayConfigItemList
+import com.geeksville.mesh.ui.components.config.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.components.config.ExternalNotificationConfigItemList
 import com.geeksville.mesh.ui.components.config.LoRaConfigItemList
 import com.geeksville.mesh.ui.components.config.MQTTConfigItemList
@@ -79,7 +91,7 @@ import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class DeviceSettingsFragment(val node: NodeInfo) : ScreenFragment("Device Settings"), Logging {
+class DeviceSettingsFragment(val node: NodeInfo) : ScreenFragment("Radio Configuration"), Logging {
 
     private val model: UIViewModel by activityViewModels()
 
@@ -101,7 +113,6 @@ class DeviceSettingsFragment(val node: NodeInfo) : ScreenFragment("Device Settin
 }
 
 enum class ConfigDest(val title: String, val route: String, val config: ConfigType) {
-    USER("User", "user", ConfigType.UNRECOGNIZED),
     DEVICE("Device", "device", ConfigType.DEVICE_CONFIG),
     POSITION("Position", "position", ConfigType.POSITION_CONFIG),
     POWER("Power", "power", ConfigType.POWER_CONFIG),
@@ -132,8 +143,10 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
     val connected = connectionState == MeshService.ConnectionState.CONNECTED
 
     val destNum = node.num
+    val maxChannels = viewModel.myNodeInfo.value?.maxChannels ?: 8
 
     var userConfig by remember { mutableStateOf(MeshProtos.User.getDefaultInstance()) }
+    val channelList = remember { mutableStateListOf<ChannelProtos.ChannelSettings>() }
     var radioConfig by remember { mutableStateOf(Config.getDefaultInstance()) }
     var moduleConfig by remember { mutableStateOf(ModuleConfig.getDefaultInstance()) }
 
@@ -142,15 +155,96 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
     var cannedMessageMessages by remember { mutableStateOf("") }
 
     val configResponse by viewModel.packetResponse.collectAsStateWithLifecycle()
+    val deviceProfile by viewModel.deviceProfile.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
 
-    LaunchedEffect(configResponse) {
+    val importConfigLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            it.data?.data?.let { file_uri -> viewModel.importProfile(file_uri) }
+        }
+    }
+
+    val exportConfigLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            it.data?.data?.let { file_uri -> viewModel.exportProfile(file_uri) }
+        }
+    }
+
+    var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
+    if (showEditDeviceProfileDialog) EditDeviceProfileDialog(
+        title = "Export configuration",
+        deviceProfile = with(viewModel) {
+            deviceProfile {
+                ourNodeInfo.value?.user?.let {
+                    longName = it.longName
+                    shortName = it.shortName
+                }
+                channelUrl = channels.value.getChannelUrl().toString()
+                config = localConfig.value
+                this.moduleConfig = module
+            }
+        },
+        onAddClick = {
+            isWaiting = false
+            viewModel.setDeviceProfile(it)
+            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "application/*"
+                putExtra(Intent.EXTRA_TITLE, "${destNum.toUInt()}.cfg")
+            }
+            exportConfigLauncher.launch(intent)
+            showEditDeviceProfileDialog = false
+        },
+        onDismissRequest = {
+            isWaiting = false
+            showEditDeviceProfileDialog = false
+            viewModel.setDeviceProfile(null)
+        }
+    )
+
+    if (isWaiting && deviceProfile != null) {
+        EditDeviceProfileDialog(
+            title = "Import configuration",
+            deviceProfile = deviceProfile ?: return,
+            onAddClick = {
+                isWaiting = false
+                viewModel.installProfile(it)
+            },
+            onDismissRequest = {
+                isWaiting = false
+                viewModel.setDeviceProfile(null)
+            }
+        )
+    }
+
+    if (isWaiting) LaunchedEffect(configResponse) {
         val data = configResponse?.meshPacket?.decoded
-        if (isWaiting && data?.portnumValue == Portnums.PortNum.ADMIN_APP_VALUE) {
+        if (data?.portnumValue == Portnums.PortNum.ADMIN_APP_VALUE) {
+            viewModel.clearPacketResponse()
             val parsed = AdminProtos.AdminMessage.parseFrom(data.payload)
             when (parsed.payloadVariantCase) {
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
-                    val response = parsed.getChannelResponse // TODO
+                    val response = parsed.getChannelResponse
+                    if (response.index + 1 < maxChannels) {
+                        // Stop once we get to the first disabled entry
+                        if (response.role != ChannelProtos.Channel.Role.DISABLED) {
+                            // Not done yet, request next channel
+                            channelList.add(response.index, response.settings)
+                            viewModel.getChannel(destNum, response.index + 1)
+                        } else {
+                            // Received the last channel, start channel editor
+                            isWaiting = false
+                            navController.navigate("channels")
+                        }
+                    } else {
+                        // Received max channels, start channel editor
+                        isWaiting = false
+                        navController.navigate("channels")
+                    }
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_OWNER_RESPONSE -> {
@@ -163,18 +257,16 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                     isWaiting = false
                     val response = parsed.getConfigResponse
                     radioConfig = response
-                    enumValues<ConfigDest>().find { it.name == "${response.payloadVariantCase}" }?.let {
-                        navController.navigate(it.route)
-                    }
+                    enumValues<ConfigDest>().find { it.name == "${response.payloadVariantCase}" }
+                        ?.let { navController.navigate(it.route) }
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_MODULE_CONFIG_RESPONSE -> {
                     isWaiting = false
                     val response = parsed.getModuleConfigResponse
                     moduleConfig = response
-                    enumValues<ModuleDest>().find { it.name == "${response.payloadVariantCase}" }?.let {
-                        navController.navigate(it.route)
-                    }
+                    enumValues<ModuleDest>().find { it.name == "${response.payloadVariantCase}" }
+                        ?.let { navController.navigate(it.route) }
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CANNED_MESSAGE_MODULE_MESSAGES_RESPONSE -> {
@@ -186,6 +278,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                     ringtone = parsed.getRingtoneResponse
                     viewModel.getModuleConfig(destNum, ModuleConfigType.EXTNOTIF_CONFIG_VALUE)
                 }
+
                 else -> TODO()
             }
         }
@@ -195,14 +288,26 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
         composable("home") {
             RadioSettingsScreen(
                 enabled = connected && !isWaiting,
+                isLocal = destNum == viewModel.myNodeNum,
                 headerText = node.user?.longName ?: stringResource(R.string.unknown_username),
                 onRouteClick = { configType ->
                     isWaiting = true
                     // clearAllConfigs() ?
                     when (configType) {
-                        ConfigType.UNRECOGNIZED -> {
-                            viewModel.getOwner(destNum)
+                        "USER" -> { viewModel.getOwner(destNum) }
+                        "CHANNELS" -> {
+                            channelList.clear()
+                            viewModel.getChannel(destNum, 0)
                         }
+                        "IMPORT" -> {
+                            viewModel.setDeviceProfile(null)
+                            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                type = "application/*"
+                            }
+                            importConfigLauncher.launch(intent)
+                        }
+                        "EXPORT" -> { showEditDeviceProfileDialog = true }
                         is ConfigType -> {
                             viewModel.getConfig(destNum, configType.number)
                         }
@@ -217,6 +322,33 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                         }
                     }
                 },
+            )
+        }
+        composable("channels") {
+            ChannelSettingsItemList(
+                settingsList = channelList,
+                enabled = connected,
+                maxChannels = maxChannels,
+                focusManager = focusManager,
+                onSaveClicked = { channelListInput ->
+                    focusManager.clearFocus()
+                    (0 until channelList.size.coerceAtLeast(channelListInput.size)).map { i ->
+                        channel {
+                            role = when (i) {
+                                0 -> ChannelProtos.Channel.Role.PRIMARY
+                                in 1 until channelListInput.size -> ChannelProtos.Channel.Role.SECONDARY
+                                else -> ChannelProtos.Channel.Role.DISABLED
+                            }
+                            index = i
+                            settings = channelListInput.getOrNull(i) ?: channelSettings { }
+                        }
+                    }.forEach { newChannel ->
+                        if (newChannel.settings != channelList.getOrNull(newChannel.index))
+                            viewModel.setRemoteChannel(destNum, newChannel)
+                    }
+                    channelList.clear()
+                    channelList.addAll(channelListInput)
+                }
             )
         }
         composable("user") {
@@ -246,13 +378,12 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
         }
         composable("position") {
             PositionConfigItemList(
-                locationInfo = location,
+                location = location,
                 positionConfig = radioConfig.position,
                 enabled = connected,
                 focusManager = focusManager,
-                onSaveClicked = { positionPair ->
+                onSaveClicked = { locationInput, positionInput ->
                     focusManager.clearFocus()
-                    val (locationInput, positionInput) = positionPair
                     if (locationInput != node.position && positionInput.fixedPosition) {
                         locationInput?.let { viewModel.requestPosition(destNum, it) }
                         location = locationInput
@@ -362,9 +493,8 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 extNotificationConfig = moduleConfig.externalNotification,
                 enabled = connected,
                 focusManager = focusManager,
-                onSaveClicked = { extNotificationPair ->
+                onSaveClicked = { ringtoneInput, extNotificationInput ->
                     focusManager.clearFocus()
-                    val (ringtoneInput, extNotificationInput) = extNotificationPair
                     if (ringtoneInput != ringtone) {
                         viewModel.setRingtone(destNum, ringtoneInput)
                         ringtone = ringtoneInput
@@ -422,9 +552,8 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 cannedMessageConfig = moduleConfig.cannedMessage,
                 enabled = connected,
                 focusManager = focusManager,
-                onSaveClicked = { cannedMessagePair ->
+                onSaveClicked = { messagesInput, cannedMessageInput ->
                     focusManager.clearFocus()
-                    val (messagesInput, cannedMessageInput) = cannedMessagePair
                     if (messagesInput != cannedMessageMessages) {
                         viewModel.setCannedMessages(destNum, messagesInput)
                         cannedMessageMessages = messagesInput
@@ -497,37 +626,40 @@ fun NavCard(
     }
 }
 
+@Composable
+fun NavCard(@StringRes title: Int, enabled: Boolean, onClick: () -> Unit) {
+    NavCard(title = stringResource(title), enabled = enabled, onClick = onClick)
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RadioSettingsScreen(
     enabled: Boolean = true,
+    isLocal: Boolean = true,
     headerText: String = "longName",
     onRouteClick: (Any) -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
-        stickyHeader {
-            TextDividerPreference(headerText)
-        }
+        stickyHeader { TextDividerPreference(headerText) }
 
-        item {
-            PreferenceCategory(
-                stringResource(id = R.string.device_settings)
-            )
-        }
+        item { PreferenceCategory(stringResource(R.string.device_settings)) }
+        item { NavCard("User", enabled = enabled) { onRouteClick("USER") } }
+        item { NavCard("Channels", enabled = enabled) { onRouteClick("CHANNELS") } }
         items(ConfigDest.values()) { configs ->
             NavCard(configs.title, enabled = enabled) { onRouteClick(configs.config) }
         }
 
-        item {
-            PreferenceCategory(
-                stringResource(id = R.string.module_settings)
-            )
-        }
-
+        item { PreferenceCategory(stringResource(R.string.module_settings)) }
         items(ModuleDest.values()) { modules ->
             NavCard(modules.title, enabled = enabled) { onRouteClick(modules.config) }
+        }
+
+        if (isLocal) {
+            item { PreferenceCategory("Import / Export") }
+            item { NavCard("Import configuration", enabled = enabled) { onRouteClick("IMPORT") } }
+            item { NavCard("Export configuration", enabled = enabled) { onRouteClick("EXPORT") } }
         }
     }
 }
