@@ -224,6 +224,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
     if (isWaiting) LaunchedEffect(configResponse) {
         val data = configResponse?.meshPacket?.decoded
         if (data?.portnumValue == Portnums.PortNum.ADMIN_APP_VALUE) {
+            viewModel.clearPacketResponse()
             val parsed = AdminProtos.AdminMessage.parseFrom(data.payload)
             when (parsed.payloadVariantCase) {
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
@@ -299,6 +300,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                             viewModel.getChannel(destNum, 0)
                         }
                         "IMPORT" -> {
+                            viewModel.setDeviceProfile(null)
                             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                                 addCategory(Intent.CATEGORY_OPENABLE)
                                 type = "application/*"
