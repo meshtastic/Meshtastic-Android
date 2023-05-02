@@ -702,7 +702,7 @@ class UIViewModel @Inject constructor(
 
     fun installProfile(protobuf: DeviceProfile) = with(protobuf) {
         _deviceProfile.value = null
-        meshService?.beginEditSettings()
+        // meshService?.beginEditSettings()
         if (hasLongName() || hasShortName()) ourNodeInfo.value?.user?.let {
             val user = it.copy(
                 longName = if (hasLongName()) longName else it.longName,
@@ -733,7 +733,7 @@ class UIViewModel @Inject constructor(
             setModuleConfig(moduleConfig { audio = it.audio })
             setModuleConfig(moduleConfig { remoteHardware = it.remoteHardware })
         }
-        meshService?.commitEditSettings()
+        // meshService?.commitEditSettings()
     }
 
     fun parseUrl(url: String, map: MapView) {
