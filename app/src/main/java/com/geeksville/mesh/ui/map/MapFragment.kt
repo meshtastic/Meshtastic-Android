@@ -43,6 +43,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomOverlayManager
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.ui.ScreenFragment
+import com.geeksville.mesh.ui.map.components.DownloadButton
 import com.geeksville.mesh.ui.map.components.MapStyleButton
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.formatAgo
@@ -124,6 +125,9 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
             setContent {
                 AppCompatTheme {
                     MapView()
+                    DownloadButton {
+                        showCacheManagerDialog()
+                    }
                     MapStyleButton {
                         chooseMapStyle()
                     }
@@ -174,7 +178,6 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
                 zoomToNodes(mapController)
 
             }
-            binding.downloadButton.setOnClickListener { showCacheManagerDialog() }
         }
     }
 
