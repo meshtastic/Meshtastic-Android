@@ -43,6 +43,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomOverlayManager
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.ui.ScreenFragment
+import com.geeksville.mesh.ui.map.components.MapStyleButton
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.waypoint
@@ -80,7 +81,7 @@ import kotlin.math.log2
 class MapFragment : ScreenFragment("Map Fragment"), Logging {
 
     // UI Elements
-    private lateinit var binding: MapViewBinding
+    private lateinit var binding: MapViewBinding;
     private lateinit var map: MapView
     private lateinit var cacheEstimate: TextView
     private var cache: SqlTileWriterExt? = null
@@ -123,6 +124,9 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
             setContent {
                 AppCompatTheme {
                     MapView()
+                    MapStyleButton {
+                        chooseMapStyle()
+                    }
                 }
             }
         }
@@ -149,9 +153,6 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
                 setupMapProperties(map)
                 mPrefs = requireContext().getSharedPreferences(prefsName, Context.MODE_PRIVATE)
                 map.setTileSource(loadOnlineTileSourceBase())
-                binding.mapStyleButton.setOnClickListener {
-                    chooseMapStyle()
-                }
                 if (binding.cacheLayout.visibility == View.GONE) {
                     model.nodeDB.nodes.value?.let { nodes ->
                         onNodesChanged(nodes.values)
