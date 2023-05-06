@@ -963,11 +963,8 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private fun addChannelSettings(ch: ChannelProtos.Channel) {
-        if (ch.index == 0 || ch.settings.name.lowercase() == "admin") adminChannelIndex = ch.index
-        serviceScope.handledLaunch {
-            channelSetRepository.addSettings(ch)
-        }
+    private fun updateChannelSettings(ch: ChannelProtos.Channel) = serviceScope.handledLaunch {
+        adminChannelIndex = channelSetRepository.updateChannelSettings(ch)
     }
 
     private fun currentSecond() = (System.currentTimeMillis() / 1000).toInt()
@@ -1207,7 +1204,7 @@ class MeshService : Service(), Logging {
             ch.toString()
         )
         insertMeshLog(packetToSave)
-        if (ch.role != ChannelProtos.Channel.Role.DISABLED) addChannelSettings(ch)
+        if (ch.role != ChannelProtos.Channel.Role.DISABLED) updateChannelSettings(ch)
     }
 
     /**
@@ -1405,13 +1402,6 @@ class MeshService : Service(), Logging {
         AdminProtos.AdminMessage.ConfigType.values().filter {
             it != AdminProtos.AdminMessage.ConfigType.UNRECOGNIZED
         }.forEach(::requestConfig)
-    }
-
-    private fun setChannel(ch: ChannelProtos.Channel) {
-        if (ch.index == 0 || ch.settings.name.lowercase() == "admin") adminChannelIndex = ch.index
-        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
-            setChannel = ch
-        })
     }
 
     /**
@@ -1725,17 +1715,13 @@ class MeshService : Service(), Logging {
         }
 
         override fun setChannel(payload: ByteArray?) = toRemoteExceptions {
-            with(ChannelProtos.Channel.parseFrom(payload)) {
-                if (index == 0 || settings.name.lowercase() == "admin") adminChannelIndex = index
-            }
             setRemoteChannel(myNodeNum, payload)
         }
 
         override fun setRemoteChannel(destNum: Int, payload: ByteArray?) = toRemoteExceptions {
             val channel = ChannelProtos.Channel.parseFrom(payload)
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(wantResponse = true) {
-                setChannel = channel
-            })
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket { setChannel = channel })
+            if (destNum == myNodeNum) updateChannelSettings(channel) // Update our local copy
         }
 
         override fun getRemoteChannel(id: Int, destNum: Int, index: Int) = toRemoteExceptions {
