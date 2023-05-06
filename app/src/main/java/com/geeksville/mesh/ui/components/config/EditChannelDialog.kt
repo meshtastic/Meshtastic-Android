@@ -90,9 +90,9 @@ fun EditChannelDialog(
                         value = pskString,
                         onValueChange = {
                             try {
-                                pskString = it
+                                pskString = it // empty (no crypto), 128 or 256 bit only
                                 val decoded = Base64.decode(it, base64Flags).toByteString()
-                                if (decoded.size() == 32) pskInput = decoded // 256 bit only
+                                if (decoded.size() in setOf(0, 16, 32)) pskInput = decoded
                             } catch (ex: Throwable) {
                                 // Base64 decode failed, pskError true
                             }
