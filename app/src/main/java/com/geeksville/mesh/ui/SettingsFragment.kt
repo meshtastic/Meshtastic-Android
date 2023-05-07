@@ -26,8 +26,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asLiveData
-import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
@@ -54,9 +54,7 @@ import com.geeksville.mesh.util.onEditorAction
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -75,7 +73,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     @Inject
     internal lateinit var locationRepository: LocationRepository
-    private var receivingLocationUpdates: Job? = null
 
     private val myActivity get() = requireActivity() as MainActivity
 
@@ -370,11 +367,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         // Observe receivingLocationUpdates state and update provideLocationCheckbox
-        if (receivingLocationUpdates?.isActive == true) return
-        else receivingLocationUpdates = locationRepository.receivingLocationUpdates
-            .flowWithLifecycle(lifecycle, Lifecycle.State.STARTED)
-            .onEach { binding.provideLocationCheckbox.isChecked = it }
-            .launchIn(lifecycleScope)
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                locationRepository.receivingLocationUpdates.collect {
+                    binding.provideLocationCheckbox.isChecked = it
+                }
+            }
+        }
 
         binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
             // Don't check the box until the system setting changes
