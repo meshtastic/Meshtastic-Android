@@ -140,8 +140,7 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat Settings"), Logging
         val builder = MaterialAlertDialogBuilder(context)
         builder.setTitle(title)
 
-        val layout =
-            LayoutInflater.from(requireContext()).inflate(R.layout.dialog_add_quick_chat, null)
+        val layout = LayoutInflater.from(context).inflate(R.layout.dialog_add_quick_chat, null)
 
         val nameInput: EditText = layout.findViewById(R.id.addQuickChatName)
         val messageInput: EditText = layout.findViewById(R.id.addQuickChatMessage)
@@ -149,7 +148,8 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat Settings"), Logging
         val instantImage: ImageView = layout.findViewById(R.id.addQuickChatInsant)
         instantImage.visibility = if (modeSwitch.isChecked) View.VISIBLE else View.INVISIBLE
 
-        var nameHasChanged = false
+        // don't change action name on edits
+        var nameHasChanged = title == getString(R.string.quick_chat_edit)
 
         modeSwitch.setOnCheckedChangeListener { _, _ ->
             if (modeSwitch.isChecked) {
