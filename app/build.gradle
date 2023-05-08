@@ -233,7 +233,7 @@ dependencies {
     // Work Request - used to delay boot event handling
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
-    implementation "androidx.core:core-splashscreen:1.0.0"
+    implementation "androidx.core:core-splashscreen:1.0.1"
 
     // CompletableFuture backport for API 14+
     implementation 'net.sourceforge.streamsupport:streamsupport-minifuture:1.7.4'
