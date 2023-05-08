@@ -79,6 +79,7 @@ import com.geeksville.mesh.ui.components.config.ExternalNotificationConfigItemLi
 import com.geeksville.mesh.ui.components.config.LoRaConfigItemList
 import com.geeksville.mesh.ui.components.config.MQTTConfigItemList
 import com.geeksville.mesh.ui.components.config.NetworkConfigItemList
+import com.geeksville.mesh.ui.components.config.PacketResponseStateDialog
 import com.geeksville.mesh.ui.components.config.PositionConfigItemList
 import com.geeksville.mesh.ui.components.config.PowerConfigItemList
 import com.geeksville.mesh.ui.components.config.RangeTestConfigItemList
@@ -134,6 +135,20 @@ enum class ModuleDest(val title: String, val route: String, val config: ModuleCo
     REMOTE_HARDWARE("Remote Hardware", "remote_hardware", ModuleConfigType.REMOTEHARDWARE_CONFIG);
 }
 
+/**
+ * This sealed class defines each possible state of a packet response.
+ */
+sealed class PacketResponseState {
+    object Loading : PacketResponseState() {
+        var total: Int = 0
+        var completed: Int = 0
+    }
+
+    data class Success(val packets: List<String>) : PacketResponseState()
+    object Empty : PacketResponseState()
+    data class Error(val error: String) : PacketResponseState()
+}
+
 @Composable
 fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
     val navController = rememberNavController()
@@ -156,12 +171,15 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
 
     val configResponse by viewModel.packetResponse.collectAsStateWithLifecycle()
     val deviceProfile by viewModel.deviceProfile.collectAsStateWithLifecycle()
-    var isWaiting by remember { mutableStateOf(false) }
+    var packetResponseState by remember { mutableStateOf<PacketResponseState>(PacketResponseState.Empty) }
+    val isWaiting = packetResponseState is PacketResponseState.Loading
+    var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
 
     val importConfigLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
         if (it.resultCode == Activity.RESULT_OK) {
+            showEditDeviceProfileDialog = true
             it.data?.data?.let { file_uri -> viewModel.importProfile(file_uri) }
         }
     }
@@ -174,10 +192,9 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
         }
     }
 
-    var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
     if (showEditDeviceProfileDialog) EditDeviceProfileDialog(
-        title = "Export configuration",
-        deviceProfile = with(viewModel) {
+        title = if (deviceProfile != null) "Import configuration" else "Export configuration",
+        deviceProfile = deviceProfile ?: with(viewModel) {
             deviceProfile {
                 ourNodeInfo.value?.user?.let {
                     longName = it.longName
@@ -189,37 +206,32 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             }
         },
         onAddClick = {
-            isWaiting = false
-            viewModel.setDeviceProfile(it)
-            val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                addCategory(Intent.CATEGORY_OPENABLE)
-                type = "application/*"
-                putExtra(Intent.EXTRA_TITLE, "${destNum.toUInt()}.cfg")
-            }
-            exportConfigLauncher.launch(intent)
             showEditDeviceProfileDialog = false
+            if (deviceProfile != null) {
+                viewModel.installProfile(it)
+            } else {
+                viewModel.setDeviceProfile(it)
+                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "application/*"
+                    putExtra(Intent.EXTRA_TITLE, "${destNum.toUInt()}.cfg")
+                }
+                exportConfigLauncher.launch(intent)
+            }
         },
         onDismissRequest = {
-            isWaiting = false
             showEditDeviceProfileDialog = false
             viewModel.setDeviceProfile(null)
         }
     )
 
-    if (isWaiting && deviceProfile != null) {
-        EditDeviceProfileDialog(
-            title = "Import configuration",
-            deviceProfile = deviceProfile ?: return,
-            onAddClick = {
-                isWaiting = false
-                viewModel.installProfile(it)
-            },
-            onDismissRequest = {
-                isWaiting = false
-                viewModel.setDeviceProfile(null)
-            }
-        )
-    }
+    if (isWaiting) PacketResponseStateDialog(
+        packetResponseState as PacketResponseState.Loading,
+        onDismiss = {
+            packetResponseState = PacketResponseState.Empty
+            viewModel.clearPacketResponse()
+        }
+    )
 
     if (isWaiting) LaunchedEffect(configResponse) {
         val data = configResponse?.meshPacket?.decoded
@@ -233,28 +245,29 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                         // Stop once we get to the first disabled entry
                         if (response.role != ChannelProtos.Channel.Role.DISABLED) {
                             // Not done yet, request next channel
+                            (packetResponseState as PacketResponseState.Loading).completed++
                             channelList.add(response.index, response.settings)
                             viewModel.getChannel(destNum, response.index + 1)
                         } else {
                             // Received the last channel, start channel editor
-                            isWaiting = false
+                            packetResponseState = PacketResponseState.Success(emptyList())
                             navController.navigate("channels")
                         }
                     } else {
                         // Received max channels, start channel editor
-                        isWaiting = false
+                        packetResponseState = PacketResponseState.Success(emptyList())
                         navController.navigate("channels")
                     }
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_OWNER_RESPONSE -> {
-                    isWaiting = false
+                    packetResponseState = PacketResponseState.Success(emptyList())
                     userConfig = parsed.getOwnerResponse
                     navController.navigate("user")
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CONFIG_RESPONSE -> {
-                    isWaiting = false
+                    packetResponseState = PacketResponseState.Success(emptyList())
                     val response = parsed.getConfigResponse
                     radioConfig = response
                     enumValues<ConfigDest>().find { it.name == "${response.payloadVariantCase}" }
@@ -262,7 +275,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_MODULE_CONFIG_RESPONSE -> {
-                    isWaiting = false
+                    packetResponseState = PacketResponseState.Success(emptyList())
                     val response = parsed.getModuleConfigResponse
                     moduleConfig = response
                     enumValues<ModuleDest>().find { it.name == "${response.payloadVariantCase}" }
@@ -271,11 +284,13 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CANNED_MESSAGE_MODULE_MESSAGES_RESPONSE -> {
                     cannedMessageMessages = parsed.getCannedMessageModuleMessagesResponse
+                    (packetResponseState as PacketResponseState.Loading).completed++
                     viewModel.getModuleConfig(destNum, ModuleConfigType.CANNEDMSG_CONFIG_VALUE)
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_RINGTONE_RESPONSE -> {
                     ringtone = parsed.getRingtoneResponse
+                    (packetResponseState as PacketResponseState.Loading).completed++
                     viewModel.getModuleConfig(destNum, ModuleConfigType.EXTNOTIF_CONFIG_VALUE)
                 }
 
@@ -291,15 +306,20 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 isLocal = destNum == viewModel.myNodeNum,
                 headerText = node.user?.longName ?: stringResource(R.string.unknown_username),
                 onRouteClick = { configType ->
-                    isWaiting = true
+                    packetResponseState = PacketResponseState.Loading.apply {
+                        total = 1
+                        completed = 0
+                    }
                     // clearAllConfigs() ?
                     when (configType) {
                         "USER" -> { viewModel.getOwner(destNum) }
                         "CHANNELS" -> {
+                            (packetResponseState as PacketResponseState.Loading).total = maxChannels
                             channelList.clear()
                             viewModel.getChannel(destNum, 0)
                         }
                         "IMPORT" -> {
+                            packetResponseState = PacketResponseState.Empty
                             viewModel.setDeviceProfile(null)
                             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                                 addCategory(Intent.CATEGORY_OPENABLE)
@@ -307,14 +327,19 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                             }
                             importConfigLauncher.launch(intent)
                         }
-                        "EXPORT" -> { showEditDeviceProfileDialog = true }
+                        "EXPORT" -> {
+                            packetResponseState = PacketResponseState.Empty
+                            showEditDeviceProfileDialog = true
+                        }
                         is ConfigType -> {
                             viewModel.getConfig(destNum, configType.number)
                         }
                         ModuleConfigType.CANNEDMSG_CONFIG -> {
+                            (packetResponseState as PacketResponseState.Loading).total = 2
                             viewModel.getCannedMessages(destNum)
                         }
                         ModuleConfigType.EXTNOTIF_CONFIG -> {
+                            (packetResponseState as PacketResponseState.Loading).total = 2
                             viewModel.getRingtone(destNum)
                         }
                         is ModuleConfigType -> {
