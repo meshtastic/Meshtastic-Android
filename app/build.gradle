@@ -220,7 +220,7 @@ dependencies {
     googleImplementation 'com.google.android.gms:play-services-location:19.0.1'
 
     // For Firebase Crashlytics & Analytics
-    googleImplementation 'com.google.firebase:firebase-crashlytics:18.3.6'
+    googleImplementation 'com.google.firebase:firebase-crashlytics:18.3.7'
     googleImplementation 'com.google.firebase:firebase-analytics:21.2.2'
 
     // barcode support
