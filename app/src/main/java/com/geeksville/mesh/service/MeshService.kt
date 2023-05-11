@@ -626,6 +626,7 @@ class MeshService : Service(), Logging {
 
                     // Handle new style position info
                     Portnums.PortNum.POSITION_APP_VALUE -> {
+                        if (data.wantResponse) return // ignore data from position requests
                         var u = MeshProtos.Position.parseFrom(data.payload)
                         // position updates from mesh usually don't include times.  So promote rx time
                         if (u.time == 0 && packet.rxTime != 0)
@@ -738,10 +739,11 @@ class MeshService : Service(), Logging {
         p: MeshProtos.Position,
         defaultTime: Long = System.currentTimeMillis()
     ) {
-        // Nodes periodically send out position updates, but those updates might not contain valid data so
+        // Nodes periodically send out position updates, but those updates might not contain a lat & lon (because no GPS lock)
+        // We like to look at the local node to see if it has been sending out valid lat/lon, so for the LOCAL node (only)
         // we don't record these nop position updates
-        if (!Position(p).isValid() && currentSecond() - p.time > 2592000) // 30 days in seconds
-            debug("Ignoring nop position update for node $fromNum")
+        if (myNodeNum == fromNum && p.latitudeI == 0 && p.longitudeI == 0)
+            debug("Ignoring nop position update for the local node")
         else
             updateNodeInfo(fromNum) {
                 debug("update position: ${it.user?.longName?.toPIIString()} with ${p.toPIIString()}")
@@ -1770,11 +1772,11 @@ class MeshService : Service(), Logging {
         override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
             if (position == Position(0.0, 0.0, 0)) {
                 // request position
-                sendPosition(time = 1, destNum = destNum, wantResponse = true)
+                sendPosition(destNum = destNum, wantResponse = true)
             } else {
                 // send fixed position
                 val (lat, lon, alt) = position
-                sendPosition(time = 0, destNum = null, lat = lat, lon = lon, alt = alt)
+                sendPosition(destNum = destNum, lat = lat, lon = lon, alt = alt)
             }
         }
 
