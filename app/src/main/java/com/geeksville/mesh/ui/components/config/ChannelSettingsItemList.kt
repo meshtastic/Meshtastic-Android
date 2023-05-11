@@ -1,6 +1,11 @@
 package com.geeksville.mesh.ui.components.config
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -134,18 +139,6 @@ fun ChannelSettingsItemList(
             .fillMaxSize()
             .clickable(onClick = { }, enabled = false)
     ) {
-        if (maxChannels > settingsListInput.size) FloatingActionButton(
-            onClick = {
-                settingsListInput.add(channelSettings {
-                    psk = Channel.default.settings.psk
-                })
-                showEditChannelDialog = settingsListInput.size - 1
-            },
-            modifier = Modifier
-                .padding(16.dp)
-                .align(Alignment.BottomEnd),
-        ) { Icon(Icons.TwoTone.Add, stringResource(R.string.add)) }
-
         LazyColumn(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
@@ -178,6 +171,29 @@ fun ChannelSettingsItemList(
                     onPositiveClicked = { onPositiveClicked(settingsListInput) }
                 )
             }
+        }
+
+        AnimatedVisibility(
+            visible = maxChannels > settingsListInput.size,
+            modifier = Modifier.align(Alignment.BottomEnd),
+            enter = slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing)
+            ),
+            exit = slideOutHorizontally(
+                targetOffsetX = { it },
+                animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing)
+            )
+        ) {
+            FloatingActionButton(
+                onClick = {
+                    settingsListInput.add(channelSettings {
+                        psk = Channel.default.settings.psk
+                    })
+                    showEditChannelDialog = settingsListInput.lastIndex
+                },
+                modifier = Modifier.padding(16.dp)
+            ) { Icon(Icons.TwoTone.Add, stringResource(R.string.add)) }
         }
     }
 }
