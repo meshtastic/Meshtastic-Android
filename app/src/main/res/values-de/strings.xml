@@ -50,6 +50,7 @@
     <string name="modem_config_short">Kurze Reichweite / Schnell</string>
     <string name="modem_config_medium">Mittlere Reichweite / Schnell</string>
     <string name="modem_config_long">Hohe Reichweite / Schnell</string>
+    <string name="modem_config_mod_long">Lange Reichweite / Medium</string>
     <string name="modem_config_very_long">Sehr hohe Reichweite / Langsam</string>
     <string name="modem_config_unrecognized">UNERKANNT</string>
     <string name="meshtastic_service_notifications">Dienst-Benachrichtigungen</string>
@@ -115,6 +116,7 @@
     <string name="resend">Erneut senden</string>
     <string name="shutdown">Herunterfahren</string>
     <string name="reboot">Neustarten</string>
+    <string name="traceroute">Traceroute</string>
     <string name="intro_show">Einführung zeigen</string>
     <string name="intro_welcome">Willkommen bei Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic ist eine quelloffene, netzunabhängige und verschlüsselte Kommunikationsplattform. Die Meshtastic-Funkgeräte bilden ein Mesh-Netzwerk und kommunizieren mithilfe des LoRa Protokolls, um Textnachrichten zu senden.</string>
