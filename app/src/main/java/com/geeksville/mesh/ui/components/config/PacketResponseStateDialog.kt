@@ -21,10 +21,9 @@ import com.geeksville.mesh.ui.PacketResponseState
 
 @Composable
 fun PacketResponseStateDialog(
-    state: PacketResponseState.Loading,
+    state: PacketResponseState,
     onDismiss: () -> Unit
 ) {
-    val progress = state.completed.toFloat() / state.total.toFloat()
     AlertDialog(
         onDismissRequest = { },
         text = {
@@ -32,14 +31,20 @@ fun PacketResponseStateDialog(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("%.0f%%".format(progress * 100))
-                LinearProgressIndicator(
-                    progress = progress,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    color = MaterialTheme.colors.onSurface,
-                )
+                if (state is PacketResponseState.Loading) {
+                    val progress = state.completed.toFloat() / state.total.toFloat()
+                    Text("%.0f%%".format(progress * 100))
+                    LinearProgressIndicator(
+                        progress = progress,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        color = MaterialTheme.colors.onSurface,
+                    )
+                }
+                if (state is PacketResponseState.Error) {
+                    Text("Error: ${state.error}")
+                }
             }
         },
         buttons = {
@@ -50,7 +55,13 @@ fun PacketResponseStateDialog(
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier.padding(bottom = 16.dp)
-                ) { Text(stringResource(R.string.cancel)) }
+                ) {
+                    if (state is PacketResponseState.Loading) {
+                        Text(stringResource(R.string.cancel))
+                    } else {
+                        Text(stringResource(R.string.close))
+                    }
+                }
             }
         }
     )
