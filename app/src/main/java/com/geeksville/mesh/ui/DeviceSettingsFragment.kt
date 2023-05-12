@@ -225,8 +225,8 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
         }
     )
 
-    if (isWaiting) PacketResponseStateDialog(
-        packetResponseState as PacketResponseState.Loading,
+    if (isWaiting || packetResponseState is PacketResponseState.Error) PacketResponseStateDialog(
+        packetResponseState,
         onDismiss = {
             packetResponseState = PacketResponseState.Empty
             viewModel.clearPacketResponse()
@@ -235,6 +235,11 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
 
     if (isWaiting) LaunchedEffect(configResponse) {
         val data = configResponse?.meshPacket?.decoded
+        if (data?.portnumValue == Portnums.PortNum.ROUTING_APP_VALUE) {
+            val parsed = MeshProtos.Routing.parseFrom(data.payload)
+            if (parsed.errorReason != MeshProtos.Routing.Error.NONE)
+                packetResponseState = PacketResponseState.Error(parsed.errorReason.toString())
+        }
         if (data?.portnumValue == Portnums.PortNum.ADMIN_APP_VALUE) {
             viewModel.clearPacketResponse()
             val parsed = AdminProtos.AdminMessage.parseFrom(data.payload)
