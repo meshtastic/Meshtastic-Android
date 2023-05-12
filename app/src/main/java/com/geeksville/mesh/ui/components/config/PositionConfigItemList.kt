@@ -25,6 +25,7 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 
 @Composable
 fun PositionConfigItemList(
+    isLocal: Boolean = false,
     location: Position?,
     positionConfig: PositionConfig,
     enabled: Boolean,
@@ -93,7 +94,7 @@ fun PositionConfigItemList(
             item {
                 EditTextPreference(title = "Latitude",
                     value = locationInput?.latitude ?: 0.0,
-                    enabled = enabled,
+                    enabled = enabled && isLocal,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { value ->
                         if (value >= -90 && value <= 90.0)
@@ -103,7 +104,7 @@ fun PositionConfigItemList(
             item {
                 EditTextPreference(title = "Longitude",
                     value = locationInput?.longitude ?: 0.0,
-                    enabled = enabled,
+                    enabled = enabled && isLocal,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { value ->
                         if (value >= -180 && value <= 180.0)
@@ -113,7 +114,7 @@ fun PositionConfigItemList(
             item {
                 EditTextPreference(title = "Altitude (meters)",
                     value = locationInput?.altitude ?: 0,
-                    enabled = enabled,
+                    enabled = enabled && isLocal,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { value ->
                         locationInput?.let { locationInput = it.copy(altitude = value) }

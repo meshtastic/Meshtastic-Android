@@ -1774,9 +1774,9 @@ class MeshService : Service(), Logging {
                 // request position
                 sendPosition(destNum = destNum, wantResponse = true)
             } else {
-                // send fixed position
+                // send fixed position (local only/no remote method, so we force destNum to null)
                 val (lat, lon, alt) = position
-                sendPosition(destNum = destNum, lat = lat, lon = lon, alt = alt)
+                sendPosition(destNum = null, lat = lat, lon = lon, alt = alt)
             }
         }
 

@@ -158,6 +158,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
     val connected = connectionState == MeshService.ConnectionState.CONNECTED
 
     val destNum = node.num
+    val isLocal = destNum == viewModel.myNodeNum
     val maxChannels = viewModel.myNodeInfo.value?.maxChannels ?: 8
 
     var userConfig by remember { mutableStateOf(MeshProtos.User.getDefaultInstance()) }
@@ -308,7 +309,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
         composable("home") {
             RadioSettingsScreen(
                 enabled = connected && !isWaiting,
-                isLocal = destNum == viewModel.myNodeNum,
+                isLocal = isLocal,
                 headerText = node.user?.longName ?: stringResource(R.string.unknown_username),
                 onRouteClick = { configType ->
                     packetResponseState = PacketResponseState.Loading.apply {
@@ -408,6 +409,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
         }
         composable("position") {
             PositionConfigItemList(
+                isLocal = isLocal,
                 location = location,
                 positionConfig = radioConfig.position,
                 enabled = connected,
