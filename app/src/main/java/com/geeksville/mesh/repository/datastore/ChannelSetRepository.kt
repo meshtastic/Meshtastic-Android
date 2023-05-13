@@ -53,7 +53,7 @@ class ChannelSetRepository @Inject constructor(
                     preference.toBuilder().setSettings(channel.index, channel.settings).build()
                 }
             } else {
-                preference.toBuilder().addSettings(channel.index, channel.settings).build()
+                preference.toBuilder().addSettings(channel.settings).build()
             }
         }
         return getAdminChannel()
