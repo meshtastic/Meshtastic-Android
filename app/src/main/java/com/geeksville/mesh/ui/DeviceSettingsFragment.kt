@@ -70,6 +70,8 @@ import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.channel
+import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.config
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.UIViewModel
@@ -393,7 +395,20 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 focusManager = focusManager,
                 onSaveClicked = { channelListInput ->
                     focusManager.clearFocus()
-                    viewModel.updateChannels(destNum, channelList, channelListInput)
+                    (0 until channelList.size.coerceAtLeast(channelListInput.size)).map { i ->
+                        channel {
+                            role = when (i) {
+                                0 -> ChannelProtos.Channel.Role.PRIMARY
+                                in 1 until channelListInput.size -> ChannelProtos.Channel.Role.SECONDARY
+                                else -> ChannelProtos.Channel.Role.DISABLED
+                            }
+                            index = i
+                            settings = channelListInput.getOrNull(i) ?: channelSettings { }
+                        }
+                    }.forEach { newChannel ->
+                        if (newChannel.settings != channelList.getOrNull(newChannel.index))
+                            viewModel.setRemoteChannel(destNum, newChannel)
+                    }
                     channelList.clear()
                     channelList.addAll(channelListInput)
                 }
