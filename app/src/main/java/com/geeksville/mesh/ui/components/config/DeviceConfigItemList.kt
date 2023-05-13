@@ -114,6 +114,16 @@ fun DeviceConfigItemList(
         item { Divider() }
 
         item {
+            SwitchPreference(title = "Managed mode",
+                checked = deviceInput.isManaged,
+                enabled = enabled,
+                onCheckedChange = {
+                    deviceInput = deviceInput.copy { isManaged = it }
+                })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = deviceInput != deviceConfig,
                 onCancelClicked = {

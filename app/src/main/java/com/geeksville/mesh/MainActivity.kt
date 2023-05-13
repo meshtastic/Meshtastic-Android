@@ -727,6 +727,7 @@ class MainActivity : AppCompatActivity(), Logging {
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         menu.findItem(R.id.stress_test).isVisible =
             BuildConfig.DEBUG // only show stress test for debug builds (for now)
+        menu.findItem(R.id.radio_config).isEnabled = !model.isManaged
         return super.onPrepareOptionsMenu(menu)
     }
 

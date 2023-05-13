@@ -191,7 +191,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // We don't want to be notified of our own changes, so turn off listener while making them
         spinner.setSelection(regionIndex, false)
         spinner.onItemSelectedListener = regionSpinnerListener
-        spinner.isEnabled = true
+        spinner.isEnabled = !model.isManaged
 
         // If actively connected possibly let the user update firmware
         refreshUpdateButton(model.isConnected())
@@ -281,7 +281,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         spinner.adapter = regionAdapter
 
         model.ownerName.observe(viewLifecycleOwner) { name ->
-            binding.usernameEditText.isEnabled = !name.isNullOrEmpty()
+            binding.usernameEditText.isEnabled = !name.isNullOrEmpty() && !model.isManaged
             binding.usernameEditText.setText(name)
         }
 

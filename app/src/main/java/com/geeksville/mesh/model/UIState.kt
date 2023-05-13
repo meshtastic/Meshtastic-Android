@@ -374,8 +374,8 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    @Suppress("MemberVisibilityCanBePrivate")
-    val isRouter: Boolean = config.device.role == Config.DeviceConfig.Role.ROUTER
+    // managed mode disables all access to configuration
+    val isManaged: Boolean get() = config.device.isManaged
 
     /// hardware info about our local device (can be null)
     private val _myNodeInfo = MutableLiveData<MyNodeInfo?>()
