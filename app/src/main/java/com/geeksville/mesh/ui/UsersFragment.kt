@@ -64,6 +64,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             popup.inflate(R.menu.menu_nodes)
             popup.menu.setGroupVisible(R.id.group_remote, position > 0)
             popup.menu.setGroupVisible(R.id.group_admin, showAdmin)
+            popup.menu.setGroupEnabled(R.id.group_admin, !model.isManaged)
             popup.setOnMenuItemClickListener { item: MenuItem ->
                 when (item.itemId) {
                     R.id.direct_message -> {
@@ -100,56 +101,6 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                             .replace(R.id.mainActivityLayout, DeviceSettingsFragment(node))
                             .addToBackStack(null)
                             .commit()
-                    }
-                    R.id.reboot -> {
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setTitle("${getString(R.string.reboot)}\n${user?.longName}?")
-                            .setIcon(R.drawable.ic_twotone_warning_24)
-                            .setNeutralButton(R.string.cancel) { _, _ ->
-                            }
-                            .setPositiveButton(getString(R.string.okay)) { _, _ ->
-                                debug("User clicked requestReboot")
-                                model.requestReboot(node.num)
-                            }
-                            .show()
-                    }
-                    R.id.shutdown -> {
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setTitle("${getString(R.string.shutdown)}\n${user?.longName}?")
-                            .setIcon(R.drawable.ic_twotone_warning_24)
-                            .setNeutralButton(R.string.cancel) { _, _ ->
-                            }
-                            .setPositiveButton(getString(R.string.okay)) { _, _ ->
-                                debug("User clicked requestShutdown")
-                                model.requestShutdown(node.num)
-                            }
-                            .show()
-                    }
-                    R.id.factory_reset -> {
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setTitle("${getString(R.string.factory_reset)}\n${user?.longName}?")
-                            .setIcon(R.drawable.ic_twotone_warning_24)
-                            .setMessage(R.string.factory_reset_description)
-                            .setNeutralButton(R.string.cancel) { _, _ ->
-                            }
-                            .setPositiveButton(R.string.okay) { _, _ ->
-                                debug("User clicked requestFactoryReset")
-                                model.requestFactoryReset(node.num)
-                            }
-                            .show()
-                    }
-                    R.id.nodedb_reset -> {
-                        MaterialAlertDialogBuilder(requireContext())
-                            .setTitle("${getString(R.string.nodedb_reset)}\n${user?.longName}?")
-                            .setIcon(R.drawable.ic_twotone_warning_24)
-                            .setMessage(R.string.nodedb_reset_description)
-                            .setNeutralButton(R.string.cancel) { _, _ ->
-                            }
-                            .setPositiveButton(getString(R.string.okay)) { _, _ ->
-                                debug("User clicked requestNodedbReset")
-                                model.requestNodedbReset(node.num)
-                            }
-                            .show()
                     }
                 }
                 true

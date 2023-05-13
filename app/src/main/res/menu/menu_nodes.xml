@@ -20,21 +20,5 @@
             android:id="@+id/remote_admin"
             android:title="@string/device_settings"
             app:showAsAction="withText" />
-        <item
-            android:id="@+id/reboot"
-            android:title="@string/reboot"
-            app:showAsAction="withText" />
-        <item
-            android:id="@+id/shutdown"
-            android:title="@string/shutdown"
-            app:showAsAction="withText" />
-        <item
-            android:id="@+id/factory_reset"
-            android:title="@string/factory_reset"
-            app:showAsAction="withText" />
-        <item
-            android:id="@+id/nodedb_reset"
-            android:title="@string/nodedb_reset"
-            app:showAsAction="withText" />
     </group>
 </menu>

@@ -9,14 +9,24 @@ import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
@@ -38,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -59,8 +70,6 @@ import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.channel
-import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.config
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.UIViewModel
@@ -337,6 +346,27 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                             packetResponseState = PacketResponseState.Empty
                             showEditDeviceProfileDialog = true
                         }
+
+                        "REBOOT" -> {
+                            packetResponseState = PacketResponseState.Empty
+                            viewModel.requestReboot(destNum)
+                        }
+
+                        "SHUTDOWN" -> {
+                            packetResponseState = PacketResponseState.Empty
+                            viewModel.requestShutdown(destNum)
+                        }
+
+                        "FACTORY_RESET" -> {
+                            packetResponseState = PacketResponseState.Empty
+                            viewModel.requestFactoryReset(destNum)
+                        }
+
+                        "NODEDB_RESET" -> {
+                            packetResponseState = PacketResponseState.Empty
+                            viewModel.requestNodedbReset(destNum)
+                        }
+
                         is ConfigType -> {
                             viewModel.getConfig(destNum, configType.number)
                         }
@@ -363,20 +393,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 focusManager = focusManager,
                 onSaveClicked = { channelListInput ->
                     focusManager.clearFocus()
-                    (0 until channelList.size.coerceAtLeast(channelListInput.size)).map { i ->
-                        channel {
-                            role = when (i) {
-                                0 -> ChannelProtos.Channel.Role.PRIMARY
-                                in 1 until channelListInput.size -> ChannelProtos.Channel.Role.SECONDARY
-                                else -> ChannelProtos.Channel.Role.DISABLED
-                            }
-                            index = i
-                            settings = channelListInput.getOrNull(i) ?: channelSettings { }
-                        }
-                    }.forEach { newChannel ->
-                        if (newChannel.settings != channelList.getOrNull(newChannel.index))
-                            viewModel.setRemoteChannel(destNum, newChannel)
-                    }
+                    viewModel.updateChannels(destNum, channelList, channelListInput)
                     channelList.clear()
                     channelList.addAll(channelListInput)
                 }
@@ -633,6 +650,9 @@ fun NavCard(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
+    val color = if (enabled) MaterialTheme.colors.onSurface
+    else MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -642,17 +662,18 @@ fun NavCard(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp)
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 12.dp)
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.body1,
-                color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
+                color = color,
                 modifier = Modifier.weight(1f)
             )
             Icon(
                 Icons.TwoTone.KeyboardArrowRight, "trailingIcon",
                 modifier = Modifier.wrapContentSize(),
+                tint = color,
             )
         }
     }
@@ -661,6 +682,67 @@ fun NavCard(
 @Composable
 fun NavCard(@StringRes title: Int, enabled: Boolean, onClick: () -> Unit) {
     NavCard(title = stringResource(title), enabled = enabled, onClick = onClick)
+}
+
+@Composable
+fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Unit) {
+    var showDialog by remember { mutableStateOf(false) }
+    if (showDialog) AlertDialog(
+        onDismissRequest = { },
+        title = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Icon(
+                    painterResource(R.drawable.ic_twotone_warning_24),
+                    "warning",
+                    modifier = Modifier.padding(end = 8.dp)
+                )
+                Text(
+                    text = "${stringResource(title)}?\n")
+                Icon(
+                    painterResource(R.drawable.ic_twotone_warning_24),
+                    "warning",
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+        },
+        buttons = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = { showDialog = false }
+                ) { Text(stringResource(R.string.cancel)) }
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        showDialog = false
+                        onClick()
+                    },
+                ) { Text(stringResource(R.string.send)) }
+            }
+        }
+    )
+
+    Column {
+        val borderColor = if (isSystemInDarkTheme()) Color.DarkGray else Color.Unspecified
+        Spacer(modifier = Modifier.height(4.dp))
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(BorderStroke(1.dp, borderColor), shape = MaterialTheme.shapes.medium)
+                .height(48.dp),
+            enabled = enabled,
+            onClick = { showDialog = true },
+            colors = ButtonDefaults.buttonColors(
+                disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+            )
+        ) { Text(text = stringResource(title)) }
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -693,6 +775,11 @@ fun RadioSettingsScreen(
             item { NavCard("Import configuration", enabled = enabled) { onRouteClick("IMPORT") } }
             item { NavCard("Export configuration", enabled = enabled) { onRouteClick("EXPORT") } }
         }
+
+        item { NavButton(R.string.reboot, enabled) { onRouteClick("REBOOT") } }
+        item { NavButton(R.string.shutdown, enabled) { onRouteClick("SHUTDOWN") } }
+        item { NavButton(R.string.factory_reset, enabled) { onRouteClick("FACTORY_RESET") } }
+        item { NavButton(R.string.nodedb_reset, enabled) { onRouteClick("NODEDB_RESET") } }
     }
 }
 
