@@ -26,7 +26,7 @@ fun PacketResponseStateDialog(
 ) {
     AlertDialog(
         onDismissRequest = { },
-        text = {
+        title = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -42,6 +42,9 @@ fun PacketResponseStateDialog(
                         color = MaterialTheme.colors.onSurface,
                     )
                 }
+                if (state is PacketResponseState.Success) {
+                    Text("Success!")
+                }
                 if (state is PacketResponseState.Error) {
                     Text("Error: ${state.error}")
                 }
@@ -54,7 +57,7 @@ fun PacketResponseStateDialog(
             ) {
                 Button(
                     onClick = onDismiss,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(top = 16.dp)
                 ) {
                     if (state is PacketResponseState.Loading) {
                         Text(stringResource(R.string.cancel))

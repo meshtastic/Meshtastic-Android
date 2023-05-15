@@ -299,6 +299,30 @@ class UIViewModel @Inject constructor(
         "Request traceroute error"
     )
 
+    fun requestShutdown(destNum: Int) = request(
+        destNum,
+        { service, packetId, dest -> service.requestShutdown(packetId, dest) },
+        "Request shutdown error"
+    )
+
+    fun requestReboot(destNum: Int) = request(
+        destNum,
+        { service, packetId, dest -> service.requestReboot(packetId, dest) },
+        "Request reboot error"
+    )
+
+    fun requestFactoryReset(destNum: Int) = request(
+        destNum,
+        { service, packetId, dest -> service.requestFactoryReset(packetId, dest) },
+        "Request factory reset error"
+    )
+
+    fun requestNodedbReset(destNum: Int) = request(
+        destNum,
+        { service, packetId, dest -> service.requestNodedbReset(packetId, dest) },
+        "Request NodeDB reset error"
+    )
+
     fun requestPosition(destNum: Int, position: Position = Position(0.0, 0.0, 0)) {
         try {
             meshService?.requestPosition(destNum, position)
@@ -514,38 +538,6 @@ class UIViewModel @Inject constructor(
 
     val adminChannelIndex: Int
         get() = channelSet.settingsList.map { it.name.lowercase() }.indexOf("admin")
-
-    fun requestShutdown(idNum: Int) {
-        try {
-            meshService?.requestShutdown(idNum)
-        } catch (ex: RemoteException) {
-            errormsg("RemoteException: ${ex.message}")
-        }
-    }
-
-    fun requestReboot(idNum: Int) {
-        try {
-            meshService?.requestReboot(idNum)
-        } catch (ex: RemoteException) {
-            errormsg("RemoteException: ${ex.message}")
-        }
-    }
-
-    fun requestFactoryReset(idNum: Int) {
-        try {
-            meshService?.requestFactoryReset(idNum)
-        } catch (ex: RemoteException) {
-            errormsg("RemoteException: ${ex.message}")
-        }
-    }
-
-    fun requestNodedbReset(idNum: Int) {
-        try {
-            meshService?.requestNodedbReset(idNum)
-        } catch (ex: RemoteException) {
-            errormsg("RemoteException: ${ex.message}")
-        }
-    }
 
     /**
      * Write the persisted packet data out to a CSV file in the specified location.

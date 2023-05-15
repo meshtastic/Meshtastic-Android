@@ -127,16 +127,16 @@ interface IMeshService {
     void requestTraceroute(in int requestId, in int destNum);
 
     /// Send Shutdown admin packet to nodeNum
-    void requestShutdown(in int destNum);
+    void requestShutdown(in int requestId, in int destNum);
 
     /// Send Reboot admin packet to nodeNum
-    void requestReboot(in int destNum);
+    void requestReboot(in int requestId, in int destNum);
 
     /// Send FactoryReset admin packet to nodeNum
-    void requestFactoryReset(in int destNum);
+    void requestFactoryReset(in int requestId, in int destNum);
 
     /// Send NodedbReset admin packet to nodeNum
-    void requestNodedbReset(in int destNum);
+    void requestNodedbReset(in int requestId, in int destNum);
 
     /// Returns a ChannelSet protobuf
     byte []getChannelSet();
