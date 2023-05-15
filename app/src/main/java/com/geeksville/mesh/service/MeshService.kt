@@ -1788,26 +1788,26 @@ class MeshService : Service(), Logging {
             })
         }
 
-        override fun requestShutdown(idNum: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
+        override fun requestShutdown(requestId: Int, destNum: Int) = toRemoteExceptions {
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
                 shutdownSeconds = 5
             })
         }
 
-        override fun requestReboot(idNum: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
+        override fun requestReboot(requestId: Int, destNum: Int) = toRemoteExceptions {
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
                 rebootSeconds = 5
             })
         }
 
-        override fun requestFactoryReset(idNum: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
+        override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
                 factoryReset = 1
             })
         }
 
-        override fun requestNodedbReset(idNum: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(idNum).buildAdminPacket {
+        override fun requestNodedbReset(requestId: Int, destNum: Int) = toRemoteExceptions {
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
                 nodedbReset = 1
             })
         }

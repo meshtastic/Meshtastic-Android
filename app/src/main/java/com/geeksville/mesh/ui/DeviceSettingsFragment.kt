@@ -184,7 +184,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
     val configResponse by viewModel.packetResponse.collectAsStateWithLifecycle()
     val deviceProfile by viewModel.deviceProfile.collectAsStateWithLifecycle()
     var packetResponseState by remember { mutableStateOf<PacketResponseState>(PacketResponseState.Empty) }
-    val isWaiting = packetResponseState is PacketResponseState.Loading
+    val isWaiting = packetResponseState !is PacketResponseState.Empty
     var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
 
     val importConfigLauncher = rememberLauncherForActivityResult(
@@ -237,7 +237,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
         }
     )
 
-    if (isWaiting || packetResponseState is PacketResponseState.Error) PacketResponseStateDialog(
+    if (isWaiting) PacketResponseStateDialog(
         packetResponseState,
         onDismiss = {
             packetResponseState = PacketResponseState.Empty
@@ -249,8 +249,11 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
         val data = configResponse?.meshPacket?.decoded
         if (data?.portnumValue == Portnums.PortNum.ROUTING_APP_VALUE) {
             val parsed = MeshProtos.Routing.parseFrom(data.payload)
-            if (parsed.errorReason != MeshProtos.Routing.Error.NONE)
-                packetResponseState = PacketResponseState.Error(parsed.errorReason.toString())
+            packetResponseState = if (parsed.errorReason == MeshProtos.Routing.Error.NONE) {
+                PacketResponseState.Success(emptyList())
+            } else {
+                PacketResponseState.Error(parsed.errorReason.toString())
+            }
         }
         if (data?.portnumValue == Portnums.PortNum.ADMIN_APP_VALUE) {
             viewModel.clearPacketResponse()
@@ -267,24 +270,24 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                             viewModel.getChannel(destNum, response.index + 1)
                         } else {
                             // Received the last channel, start channel editor
-                            packetResponseState = PacketResponseState.Success(emptyList())
+                            packetResponseState = PacketResponseState.Empty
                             navController.navigate("channels")
                         }
                     } else {
                         // Received max channels, start channel editor
-                        packetResponseState = PacketResponseState.Success(emptyList())
+                        packetResponseState = PacketResponseState.Empty
                         navController.navigate("channels")
                     }
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_OWNER_RESPONSE -> {
-                    packetResponseState = PacketResponseState.Success(emptyList())
+                    packetResponseState = PacketResponseState.Empty
                     userConfig = parsed.getOwnerResponse
                     navController.navigate("user")
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CONFIG_RESPONSE -> {
-                    packetResponseState = PacketResponseState.Success(emptyList())
+                    packetResponseState = PacketResponseState.Empty
                     val response = parsed.getConfigResponse
                     radioConfig = response
                     enumValues<ConfigDest>().find { it.name == "${response.payloadVariantCase}" }
@@ -292,7 +295,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_MODULE_CONFIG_RESPONSE -> {
-                    packetResponseState = PacketResponseState.Success(emptyList())
+                    packetResponseState = PacketResponseState.Empty
                     val response = parsed.getModuleConfigResponse
                     moduleConfig = response
                     enumValues<ModuleDest>().find { it.name == "${response.payloadVariantCase}" }
@@ -350,22 +353,18 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                         }
 
                         "REBOOT" -> {
-                            packetResponseState = PacketResponseState.Empty
                             viewModel.requestReboot(destNum)
                         }
 
                         "SHUTDOWN" -> {
-                            packetResponseState = PacketResponseState.Empty
                             viewModel.requestShutdown(destNum)
                         }
 
                         "FACTORY_RESET" -> {
-                            packetResponseState = PacketResponseState.Empty
                             viewModel.requestFactoryReset(destNum)
                         }
 
                         "NODEDB_RESET" -> {
-                            packetResponseState = PacketResponseState.Empty
                             viewModel.requestNodedbReset(destNum)
                         }
 
