@@ -14,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,6 +34,7 @@ fun EditTextPreference(
     keyboardActions: KeyboardActions,
     onValueChanged: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    trailingIcon: (@Composable () -> Unit)? = null,
 ) {
     var valueState by remember(value) { mutableStateOf(value.toUInt().toString()) }
 
@@ -55,7 +55,8 @@ fun EditTextPreference(
             }
         },
         onFocusChanged = {},
-        modifier = modifier
+        modifier = modifier,
+        trailingIcon = trailingIcon
     )
 }
 
@@ -166,36 +167,6 @@ fun EditIPv4Preference(
 }
 
 @Composable
-fun EditListPreference(
-    title: String,
-    list: List<Int>,
-    maxCount: Int,
-    enabled: Boolean,
-    keyboardActions: KeyboardActions,
-    onValuesChanged: (List<Int>) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val listState = remember(list) { mutableStateListOf<Int>().apply { addAll(list) } }
-
-    Column(modifier = modifier) {
-        for (i in 0..list.size.coerceAtMost(maxCount - 1)) {
-            val value = listState.getOrNull(i)
-            EditTextPreference(
-                title = "$title ${i + 1}/$maxCount",
-                value = value ?: 0,
-                enabled = enabled,
-                keyboardActions = keyboardActions,
-                onValueChanged = {
-                    if (value == null) listState.add(it) else listState[i] = it
-                    onValuesChanged(listState)
-                },
-                modifier = modifier.fillMaxWidth()
-            )
-        }
-    }
-}
-
-@Composable
 fun EditTextPreference(
     title: String,
     value: String,
@@ -204,35 +175,10 @@ fun EditTextPreference(
     keyboardOptions: KeyboardOptions,
     keyboardActions: KeyboardActions,
     onValueChanged: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    maxSize: Int // max_size - 1 (in bytes)
-) {
-    EditTextPreference(
-        title = title,
-        value = value,
-        maxSize = maxSize,
-        enabled = enabled,
-        isError = isError,
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        onValueChanged = onValueChanged,
-        onFocusChanged = {},
-        modifier = modifier,
-    )
-}
-
-@Composable
-fun EditTextPreference(
-    title: String,
-    value: String,
-    enabled: Boolean,
-    isError: Boolean,
-    keyboardOptions: KeyboardOptions,
-    keyboardActions: KeyboardActions,
-    onValueChanged: (String) -> Unit,
-    onFocusChanged: (FocusState) -> Unit,
     modifier: Modifier = Modifier,
     maxSize: Int = 0, // max_size - 1 (in bytes)
+    onFocusChanged: (FocusState) -> Unit = {},
+    trailingIcon: (@Composable () -> Unit)? = null,
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
@@ -255,7 +201,11 @@ fun EditTextPreference(
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         trailingIcon = {
-            if (isError) Icon(Icons.TwoTone.Info, "Error", tint = MaterialTheme.colors.error)
+            if (trailingIcon != null) {
+                trailingIcon()
+            } else {
+                if (isError) Icon(Icons.TwoTone.Info, "Error", tint = MaterialTheme.colors.error)
+            }
         }
     )
 
