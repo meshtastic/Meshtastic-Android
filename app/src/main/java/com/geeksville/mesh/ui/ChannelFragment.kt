@@ -122,11 +122,10 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
 
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     var channelSet by remember(channels) { mutableStateOf(channels.protobuf) }
+    val isEditing = channelSet != channels.protobuf
 
     val primaryChannel = ChannelSet(channelSet).primaryChannel
     val channelUrl = ChannelSet(channelSet).getChannelUrl()
-
-    val isEditing by remember(channelSet) { mutableStateOf(channelSet != channels.protobuf) }
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
