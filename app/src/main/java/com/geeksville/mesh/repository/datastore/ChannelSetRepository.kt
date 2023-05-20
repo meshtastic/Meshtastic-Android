@@ -3,7 +3,8 @@ package com.geeksville.mesh.repository.datastore
 import androidx.datastore.core.DataStore
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
-import com.geeksville.mesh.ChannelProtos
+import com.geeksville.mesh.ChannelProtos.Channel
+import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -12,7 +13,7 @@ import java.io.IOException
 import javax.inject.Inject
 
 /**
- * Class that handles saving and retrieving channel settings
+ * Class that handles saving and retrieving [ChannelSet] data.
  */
 class ChannelSetRepository @Inject constructor(
     private val channelSetStore: DataStore<ChannelSet>
@@ -34,20 +35,14 @@ class ChannelSetRepository @Inject constructor(
         }
     }
 
-    suspend fun clearSettings() {
-        channelSetStore.updateData { preference ->
-            preference.toBuilder().clearSettings().build()
-        }
-    }
-
     /**
-     * Updates the ChannelSettings list with the provided channel and returns the index of the
+     * Updates the [ChannelSettings] list with the provided channel and returns the index of the
      * admin channel after the update (if not found, returns 0).
      */
-    suspend fun updateChannelSettings(channel: ChannelProtos.Channel): Int {
+    suspend fun updateChannelSettings(channel: Channel): Int {
         channelSetStore.updateData { preference ->
             if (preference.settingsCount > channel.index) {
-                if (channel.role == ChannelProtos.Channel.Role.DISABLED) {
+                if (channel.role == Channel.Role.DISABLED) {
                     preference.toBuilder().removeSettings(channel.index).build()
                 } else {
                     preference.toBuilder().setSettings(channel.index, channel.settings).build()
@@ -57,12 +52,6 @@ class ChannelSetRepository @Inject constructor(
             }
         }
         return getAdminChannel()
-    }
-
-    suspend fun addAllSettings(channelSet: ChannelSet) {
-        channelSetStore.updateData { preference ->
-            preference.toBuilder().addAllSettings(channelSet.settingsList).build()
-        }
     }
 
     suspend fun setLoraConfig(config: ConfigProtos.Config.LoRaConfig) {

@@ -27,9 +27,7 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos.User
 import com.geeksville.mesh.database.PacketRepository
-import com.geeksville.mesh.repository.datastore.ChannelSetRepository
-import com.geeksville.mesh.repository.datastore.LocalConfigRepository
-import com.geeksville.mesh.repository.datastore.ModuleConfigRepository
+import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.positionToMeter
@@ -87,11 +85,9 @@ fun getInitials(nameIn: String): String {
 @HiltViewModel
 class UIViewModel @Inject constructor(
     private val app: Application,
+    radioConfigRepository: RadioConfigRepository,
     private val meshLogRepository: MeshLogRepository,
-    private val channelSetRepository: ChannelSetRepository,
     private val packetRepository: PacketRepository,
-    private val localConfigRepository: LocalConfigRepository,
-    private val moduleConfigRepository: ModuleConfigRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
     private val preferences: SharedPreferences
 ) : ViewModel(), Logging {
@@ -138,10 +134,10 @@ class UIViewModel @Inject constructor(
                 _packets.value = packets
             }
         }
-        localConfigRepository.localConfigFlow.onEach { config ->
+        radioConfigRepository.localConfigFlow.onEach { config ->
             _localConfig.value = config
         }.launchIn(viewModelScope)
-        moduleConfigRepository.moduleConfigFlow.onEach { config ->
+        radioConfigRepository.moduleConfigFlow.onEach { config ->
             _moduleConfig.value = config
         }.launchIn(viewModelScope)
         viewModelScope.launch {
@@ -149,7 +145,7 @@ class UIViewModel @Inject constructor(
                 _quickChatActions.value = actions
             }
         }
-        channelSetRepository.channelSetFlow.onEach { channelSet ->
+        radioConfigRepository.channelSetFlow.onEach { channelSet ->
             _channels.value = ChannelSet(channelSet)
         }.launchIn(viewModelScope)
         combine(nodeDB.nodes.asFlow(), nodeDB.myId.asFlow()) { nodes, id -> nodes[id] }.onEach {
@@ -471,11 +467,6 @@ class UIViewModel @Inject constructor(
                 }
             }.forEach {
                 meshService?.setChannel(it.toByteArray())
-            }
-
-            viewModelScope.launch {
-                channelSetRepository.clearSettings()
-                channelSetRepository.addAllSettings(value)
             }
 
             val newConfig = config { lora = value.loraConfig }

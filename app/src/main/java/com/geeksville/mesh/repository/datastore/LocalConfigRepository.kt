@@ -5,19 +5,16 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import java.io.IOException
 import javax.inject.Inject
 
 /**
- * Class that handles saving and retrieving config settings
+ * Class that handles saving and retrieving [LocalConfig] data.
  */
 class LocalConfigRepository @Inject constructor(
     private val localConfigStore: DataStore<LocalConfig>,
-    private val channelSetRepository: ChannelSetRepository,
 ) : Logging {
     val localConfigFlow: Flow<LocalConfig> = localConfigStore.data
         .catch { exception ->
@@ -30,17 +27,6 @@ class LocalConfigRepository @Inject constructor(
             }
         }
 
-    private val _setConfigFlow = MutableSharedFlow<Config>()
-    val setConfigFlow: SharedFlow<Config> = _setConfigFlow
-
-    /**
-     * Update LocalConfig and send ConfigProtos.Config Oneof to the radio
-     */
-    suspend fun setConfig(config: Config) {
-        setLocalConfig(config)
-        _setConfigFlow.emit(config)
-    }
-
     suspend fun clearLocalConfig() {
         localConfigStore.updateData { preference ->
             preference.toBuilder().clear().build()
@@ -48,7 +34,7 @@ class LocalConfigRepository @Inject constructor(
     }
 
     /**
-     * Update LocalConfig from each ConfigProtos.Config Oneof
+     * Updates [LocalConfig] from each [Config] oneOf.
      */
     suspend fun setLocalConfig(config: Config) {
         if (config.hasDevice()) setDeviceConfig(config.device)
@@ -94,7 +80,6 @@ class LocalConfigRepository @Inject constructor(
         localConfigStore.updateData { preference ->
             preference.toBuilder().setLora(config).build()
         }
-        channelSetRepository.setLoraConfig(config)
     }
 
     private suspend fun setBluetoothConfig(config: Config.BluetoothConfig) {
