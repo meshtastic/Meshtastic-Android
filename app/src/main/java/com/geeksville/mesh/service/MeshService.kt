@@ -21,9 +21,7 @@ import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.DeviceVersion
-import com.geeksville.mesh.repository.datastore.ChannelSetRepository
-import com.geeksville.mesh.repository.datastore.LocalConfigRepository
-import com.geeksville.mesh.repository.datastore.ModuleConfigRepository
+import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
@@ -75,13 +73,7 @@ class MeshService : Service(), Logging {
     lateinit var locationRepository: LocationRepository
 
     @Inject
-    lateinit var localConfigRepository: LocalConfigRepository
-
-    @Inject
-    lateinit var moduleConfigRepository: ModuleConfigRepository
-
-    @Inject
-    lateinit var channelSetRepository: ChannelSetRepository
+    lateinit var radioConfigRepository: RadioConfigRepository
 
     companion object : Logging {
 
@@ -250,9 +242,9 @@ class MeshService : Service(), Logging {
             .launchIn(serviceScope)
         radioInterfaceService.receivedData.onEach(::onReceiveFromRadio)
             .launchIn(serviceScope)
-        localConfigRepository.localConfigFlow.onEach { localConfig = it }
+        radioConfigRepository.localConfigFlow.onEach { localConfig = it }
             .launchIn(serviceScope)
-        channelSetRepository.channelSetFlow.onEach { channelSet = it }
+        radioConfigRepository.channelSetFlow.onEach { channelSet = it }
             .launchIn(serviceScope)
 
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
@@ -948,25 +940,25 @@ class MeshService : Service(), Logging {
 
     private fun setLocalConfig(config: ConfigProtos.Config) {
         serviceScope.handledLaunch {
-            localConfigRepository.setLocalConfig(config)
+            radioConfigRepository.setLocalConfig(config)
         }
     }
 
     private fun setLocalModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
         serviceScope.handledLaunch {
-            moduleConfigRepository.setLocalModuleConfig(config)
+            radioConfigRepository.setLocalModuleConfig(config)
         }
     }
 
     private fun clearLocalConfig() {
         serviceScope.handledLaunch {
-            localConfigRepository.clearLocalConfig()
-            moduleConfigRepository.clearLocalModuleConfig()
+            radioConfigRepository.clearLocalConfig()
+            radioConfigRepository.clearLocalModuleConfig()
         }
     }
 
     private fun updateChannelSettings(ch: ChannelProtos.Channel) = serviceScope.handledLaunch {
-        adminChannelIndex = channelSetRepository.updateChannelSettings(ch)
+        adminChannelIndex = radioConfigRepository.updateChannelSettings(ch)
     }
 
     private fun currentSecond() = (System.currentTimeMillis() / 1000).toInt()
@@ -1338,9 +1330,9 @@ class MeshService : Service(), Logging {
 
         // We'll need to get a new set of channels and settings now
         serviceScope.handledLaunch {
-            channelSetRepository.clearChannelSet()
-            localConfigRepository.clearLocalConfig()
-            moduleConfigRepository.clearLocalModuleConfig()
+            radioConfigRepository.clearChannelSet()
+            radioConfigRepository.clearLocalConfig()
+            radioConfigRepository.clearLocalModuleConfig()
         }
     }
 

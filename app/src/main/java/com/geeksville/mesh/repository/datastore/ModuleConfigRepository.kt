@@ -11,7 +11,7 @@ import java.io.IOException
 import javax.inject.Inject
 
 /**
- * Class that handles saving and retrieving config settings
+ * Class that handles saving and retrieving [LocalModuleConfig] data.
  */
 class ModuleConfigRepository @Inject constructor(
     private val moduleConfigStore: DataStore<LocalModuleConfig>,
@@ -34,7 +34,7 @@ class ModuleConfigRepository @Inject constructor(
     }
 
     /**
-     * Update LocalModuleConfig from each ModuleConfigProtos.ModuleConfig Oneof
+     * Updates [LocalModuleConfig] from each [ModuleConfig] oneOf.
      */
     suspend fun setLocalModuleConfig(config: ModuleConfig) {
         if (config.hasMqtt()) setMQTTConfig(config.mqtt)
