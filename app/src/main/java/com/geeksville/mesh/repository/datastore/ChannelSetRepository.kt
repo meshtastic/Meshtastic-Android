@@ -35,6 +35,18 @@ class ChannelSetRepository @Inject constructor(
         }
     }
 
+    suspend fun clearSettings() {
+        channelSetStore.updateData { preference ->
+            preference.toBuilder().clearSettings().build()
+        }
+    }
+
+    suspend fun addAllSettings(settingsList: List<ChannelSettings>) {
+        channelSetStore.updateData { preference ->
+            preference.toBuilder().addAllSettings(settingsList).build()
+        }
+    }
+
     /**
      * Updates the [ChannelSettings] list with the provided channel and returns the index of the
      * admin channel after the update (if not found, returns 0).
@@ -42,11 +54,7 @@ class ChannelSetRepository @Inject constructor(
     suspend fun updateChannelSettings(channel: Channel): Int {
         channelSetStore.updateData { preference ->
             if (preference.settingsCount > channel.index) {
-                if (channel.role == Channel.Role.DISABLED) {
-                    preference.toBuilder().removeSettings(channel.index).build()
-                } else {
-                    preference.toBuilder().setSettings(channel.index, channel.settings).build()
-                }
+                preference.toBuilder().setSettings(channel.index, channel.settings).build()
             } else {
                 preference.toBuilder().addSettings(channel.settings).build()
             }

@@ -1715,7 +1715,6 @@ class MeshService : Service(), Logging {
         override fun setRemoteChannel(destNum: Int, payload: ByteArray?) = toRemoteExceptions {
             val channel = ChannelProtos.Channel.parseFrom(payload)
             sendToRadio(newMeshPacketTo(destNum).buildAdminPacket { setChannel = channel })
-            if (destNum == myNodeNum) updateChannelSettings(channel) // Update our local copy
         }
 
         override fun getRemoteChannel(id: Int, destNum: Int, index: Int) = toRemoteExceptions {

@@ -32,6 +32,14 @@ class RadioConfigRepository @Inject constructor(
     }
 
     /**
+     * Replaces the [ChannelSettings] list with a new [settingsList].
+     */
+    suspend fun replaceAllSettings(settingsList: List<ChannelSettings>) {
+        channelSetRepository.clearSettings()
+        channelSetRepository.addAllSettings(settingsList)
+    }
+
+    /**
      * Updates the [ChannelSettings] list with the provided channel and returns the index of the
      * admin channel after the update (if not found, returns 0).
      * @param channel The [Channel] provided.

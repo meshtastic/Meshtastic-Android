@@ -15,6 +15,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.*
+import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
@@ -56,7 +57,6 @@ import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
-import kotlin.math.max
 import kotlin.math.roundToInt
 
 /// Given a human name, strip out the first letter of the first three words and return that as the initials for
@@ -85,7 +85,7 @@ fun getInitials(nameIn: String): String {
 @HiltViewModel
 class UIViewModel @Inject constructor(
     private val app: Application,
-    radioConfigRepository: RadioConfigRepository,
+    private val radioConfigRepository: RadioConfigRepository,
     private val meshLogRepository: MeshLogRepository,
     private val packetRepository: PacketRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
@@ -451,23 +451,51 @@ class UIViewModel @Inject constructor(
         setModuleConfig(myNodeNum ?: return, config)
     }
 
-    /// Convert the channels array to and from [AppOnlyProtos.ChannelSet]
-    private var _channelSet: AppOnlyProtos.ChannelSet
-        get() = channels.value.protobuf
-        set(value) {
-            (0 until max(_channelSet.settingsCount, value.settingsCount)).map { i ->
-                channel {
+    /**
+     * Updates channels to match the [new] list. Only channels with changes are updated.
+     *
+     * @param destNum Destination node number.
+     * @param old The current [ChannelSettings] list.
+     * @param new The updated [ChannelSettings] list.
+     */
+    fun updateChannels(
+        destNum: Int,
+        old: List<ChannelSettings>,
+        new: List<ChannelSettings>,
+    ) {
+        buildList {
+            for (i in 0..maxOf(old.lastIndex, new.lastIndex)) {
+                if (old.getOrNull(i) != new.getOrNull(i)) add(channel {
                     role = when (i) {
                         0 -> ChannelProtos.Channel.Role.PRIMARY
-                        in 1 until value.settingsCount -> ChannelProtos.Channel.Role.SECONDARY
+                        in 1..new.lastIndex -> ChannelProtos.Channel.Role.SECONDARY
                         else -> ChannelProtos.Channel.Role.DISABLED
                     }
                     index = i
-                    settings = value.settingsList.getOrNull(i) ?: channelSettings { }
-                }
-            }.forEach {
-                meshService?.setChannel(it.toByteArray())
+                    settings = new.getOrNull(i) ?: channelSettings { }
+                })
             }
+        }.forEach { setRemoteChannel(destNum, it) }
+
+        if (destNum == myNodeNum) viewModelScope.launch {
+            radioConfigRepository.replaceAllSettings(new)
+        }
+    }
+
+    private fun updateChannels(
+        old: List<ChannelSettings>,
+        new: List<ChannelSettings>
+    ) {
+        updateChannels(myNodeNum ?: return, old, new)
+    }
+
+    /**
+     * Convert the [channels] array to and from [ChannelSet]
+     */
+    private var _channelSet: AppOnlyProtos.ChannelSet
+        get() = channels.value.protobuf
+        set(value) {
+            updateChannels(channelSet.settingsList, value.settingsList)
 
             val newConfig = config { lora = value.loraConfig }
             if (config.lora != newConfig.lora) setConfig(newConfig)
@@ -476,12 +504,16 @@ class UIViewModel @Inject constructor(
 
     /// Set the radio config (also updates our saved copy in preferences)
     fun setChannels(channelSet: ChannelSet) {
-        debug("Setting new channels!")
         this._channelSet = channelSet.protobuf
     }
 
-    fun setRemoteChannel(destNum: Int, channel: ChannelProtos.Channel) {
-        meshService?.setRemoteChannel(destNum, channel.toByteArray())
+    private fun setRemoteChannel(destNum: Int, channel: ChannelProtos.Channel) {
+        try {
+            debug("Sending channel ${channel.index} to $destNum")
+            meshService?.setRemoteChannel(destNum, channel.toByteArray())
+        } catch (ex: RemoteException) {
+            errormsg("Can't set channel on radio ${ex.message}")
+        }
     }
 
     /// our name in hte radio
