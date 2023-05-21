@@ -286,8 +286,16 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         binding.nodeListView.adapter = nodesAdapter
         binding.nodeListView.layoutManager = LinearLayoutManager(requireContext())
 
+        // ensure our local node is first (index 0)
+        fun Map<String, NodeInfo>.perhapsReindexBy(nodeNum: Int?): Array<NodeInfo> =
+            if (size > 1 && nodeNum != null && values.firstOrNull()?.num != nodeNum) {
+                values.partition { node -> node.num == nodeNum }.let { it.first + it.second }
+            } else {
+                values
+            }.toTypedArray()
+
         model.nodeDB.nodes.observe(viewLifecycleOwner) {
-            nodesAdapter.onNodesChanged(it.values.toTypedArray())
+            nodesAdapter.onNodesChanged(it.perhapsReindexBy(model.myNodeNum))
         }
 
         model.packetResponse.asLiveData().observe(viewLifecycleOwner) { meshLog ->
