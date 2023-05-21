@@ -107,6 +107,7 @@ fun ChannelSettingsItemList(
 @Composable
 fun ChannelSettingsItemList(
     settingsList: List<ChannelSettings>,
+    modemPresetName: String = "Default",
     maxChannels: Int = 8,
     enabled: Boolean,
     focusManager: FocusManager,
@@ -125,6 +126,7 @@ fun ChannelSettingsItemList(
             channelSettings = with(settingsListInput) {
                 if (size > index) get(index) else channelSettings { }
             },
+            modemPresetName = modemPresetName,
             onAddClick = {
                 if (settingsListInput.size > index) settingsListInput[index] = it
                 else settingsListInput.add(it)
@@ -147,7 +149,7 @@ fun ChannelSettingsItemList(
             itemsIndexed(settingsListInput) { index, channel ->
                 ChannelCard(
                     index = index,
-                    title = channel.name,
+                    title = channel.name.ifEmpty { modemPresetName },
                     enabled = enabled,
                     onEditClick = { showEditChannelDialog = index },
                     onDeleteClick = { settingsListInput.removeAt(index) }

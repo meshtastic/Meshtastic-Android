@@ -126,6 +126,7 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
 
     val primaryChannel = ChannelSet(channelSet).primaryChannel
     val channelUrl = ChannelSet(channelSet).getChannelUrl()
+    val modemPresetName = Channel(Channel.default.settings, channelSet.loraConfig).name
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
@@ -244,6 +245,7 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
             channelSettings = with(channelSet) {
                 if (settingsCount > index) getSettings(index) else channelSettings { }
             },
+            modemPresetName = modemPresetName,
             onAddClick = {
                 with(channelSet) {
                     if (settingsCount > index) channelSet = copy { settings[index] = it }
@@ -258,6 +260,7 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
     var showChannelEditor by remember { mutableStateOf(false) }
     if (showChannelEditor) ChannelSettingsItemList(
         settingsList = channelSet.settingsList,
+        modemPresetName = modemPresetName,
         enabled = enabled,
         focusManager = focusManager,
         onNegativeClicked = {

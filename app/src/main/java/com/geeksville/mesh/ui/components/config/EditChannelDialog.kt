@@ -48,6 +48,7 @@ fun EditChannelDialog(
     onAddClick: (ChannelProtos.ChannelSettings) -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
+    modemPresetName: String = "Default",
 ) {
     val base64Flags = Base64.URL_SAFE + Base64.NO_WRAP
     fun encodeToString(input: ByteString) =
@@ -73,9 +74,10 @@ fun EditChannelDialog(
         text = {
             AppCompatTheme {
                 Column(modifier.fillMaxWidth()) {
+                    var isFocused by remember { mutableStateOf(false) }
                     EditTextPreference(
                         title = stringResource(R.string.channel_name),
-                        value = nameInput,
+                        value = if (isFocused) nameInput else nameInput.ifEmpty { modemPresetName },
                         maxSize = 11, // name max_size:12
                         enabled = true,
                         isError = false,
@@ -84,6 +86,7 @@ fun EditChannelDialog(
                         ),
                         keyboardActions = KeyboardActions(onDone = { }),
                         onValueChanged = { nameInput = it },
+                        onFocusChanged = { isFocused = it.isFocused },
                     )
 
                     OutlinedTextField(
