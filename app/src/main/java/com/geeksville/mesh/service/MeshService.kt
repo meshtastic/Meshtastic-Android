@@ -456,7 +456,8 @@ class MeshService : Service(), Logging {
     private val myNodeID get() = toNodeID(myNodeNum)
 
     /// Admin channel index
-    private var adminChannelIndex: Int = 0
+    private val adminChannelIndex: Int
+        get() = channelSet.settingsList.map { it.name.lowercase() }.indexOf("admin")
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
     private fun newMeshPacketTo(idNum: Int) = MeshPacket.newBuilder().apply {
@@ -958,7 +959,7 @@ class MeshService : Service(), Logging {
     }
 
     private fun updateChannelSettings(ch: ChannelProtos.Channel) = serviceScope.handledLaunch {
-        adminChannelIndex = radioConfigRepository.updateChannelSettings(ch)
+        radioConfigRepository.updateChannelSettings(ch)
     }
 
     private fun currentSecond() = (System.currentTimeMillis() / 1000).toInt()

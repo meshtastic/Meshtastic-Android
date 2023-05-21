@@ -48,10 +48,9 @@ class ChannelSetRepository @Inject constructor(
     }
 
     /**
-     * Updates the [ChannelSettings] list with the provided channel and returns the index of the
-     * admin channel after the update (if not found, returns 0).
+     * Updates the [ChannelSettings] list with the provided channel.
      */
-    suspend fun updateChannelSettings(channel: Channel): Int {
+    suspend fun updateChannelSettings(channel: Channel) {
         channelSetStore.updateData { preference ->
             if (preference.settingsCount > channel.index) {
                 preference.toBuilder().setSettings(channel.index, channel.settings).build()
@@ -59,7 +58,6 @@ class ChannelSetRepository @Inject constructor(
                 preference.toBuilder().addSettings(channel.settings).build()
             }
         }
-        return getAdminChannel()
     }
 
     suspend fun setLoraConfig(config: ConfigProtos.Config.LoRaConfig) {
@@ -67,13 +65,6 @@ class ChannelSetRepository @Inject constructor(
             preference.toBuilder().setLoraConfig(config).build()
         }
     }
-
-    /**
-     * Returns the index of the admin channel (or 0 if not found).
-     */
-    private suspend fun getAdminChannel(): Int = fetchInitialChannelSet()?.settingsList
-        ?.indexOfFirst { it.name.lowercase() == "admin" }
-        ?.coerceAtLeast(0) ?: 0
 
     suspend fun fetchInitialChannelSet() = channelSetStore.data.firstOrNull()
 

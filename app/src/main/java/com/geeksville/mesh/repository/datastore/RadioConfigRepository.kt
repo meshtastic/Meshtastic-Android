@@ -45,7 +45,7 @@ class RadioConfigRepository @Inject constructor(
      * @param channel The [Channel] provided.
      * @return the index of the admin channel after the update (if not found, returns 0).
      */
-    suspend fun updateChannelSettings(channel: Channel): Int {
+    suspend fun updateChannelSettings(channel: Channel) {
         return channelSetRepository.updateChannelSettings(channel)
     }
 
