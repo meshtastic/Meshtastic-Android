@@ -257,19 +257,19 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             when (parsed.payloadVariantCase) {
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
                     val response = parsed.getChannelResponse
-                    channelList.add(response.index, response.settings)
                     (packetResponseState as PacketResponseState.Loading).completed++
-                    if (response.index + 1 < maxChannels) {
-                        // Stop once we get to the first disabled entry
-                        if (response.role != ChannelProtos.Channel.Role.DISABLED) {
+                    // Stop once we get to the first disabled entry
+                    if (response.role != ChannelProtos.Channel.Role.DISABLED) {
+                        channelList.add(response.index, response.settings)
+                        if (response.index + 1 < maxChannels) {
                             // Not done yet, request next channel
                             viewModel.getChannel(destNum, response.index + 1)
                         } else {
-                            // Received last channel, get lora config (for default channel names)
+                            // Received max channels, get lora config (for default channel names)
                             viewModel.getConfig(destNum, ConfigType.LORA_CONFIG_VALUE)
                         }
                     } else {
-                        // Received max channels, get lora config (for default channel names)
+                        // Received last channel, get lora config (for default channel names)
                         viewModel.getConfig(destNum, ConfigType.LORA_CONFIG_VALUE)
                     }
                 }
