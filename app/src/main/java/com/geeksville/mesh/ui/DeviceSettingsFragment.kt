@@ -69,6 +69,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
 import com.geeksville.mesh.deviceProfile
+import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.service.MeshService
@@ -256,22 +257,20 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             when (parsed.payloadVariantCase) {
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
                     val response = parsed.getChannelResponse
+                    channelList.add(response.index, response.settings)
+                    (packetResponseState as PacketResponseState.Loading).completed++
                     if (response.index + 1 < maxChannels) {
                         // Stop once we get to the first disabled entry
                         if (response.role != ChannelProtos.Channel.Role.DISABLED) {
                             // Not done yet, request next channel
-                            (packetResponseState as PacketResponseState.Loading).completed++
-                            channelList.add(response.index, response.settings)
                             viewModel.getChannel(destNum, response.index + 1)
                         } else {
-                            // Received the last channel, start channel editor
-                            packetResponseState = PacketResponseState.Empty
-                            navController.navigate("channels")
+                            // Received last channel, get lora config (for default channel names)
+                            viewModel.getConfig(destNum, ConfigType.LORA_CONFIG_VALUE)
                         }
                     } else {
-                        // Received max channels, start channel editor
-                        packetResponseState = PacketResponseState.Empty
-                        navController.navigate("channels")
+                        // Received max channels, get lora config (for default channel names)
+                        viewModel.getConfig(destNum, ConfigType.LORA_CONFIG_VALUE)
                     }
                 }
 
@@ -282,10 +281,13 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CONFIG_RESPONSE -> {
+                    // check destination: lora config or channel editor
+                    val goChannels = (packetResponseState as PacketResponseState.Loading).total > 1
                     packetResponseState = PacketResponseState.Empty
                     val response = parsed.getConfigResponse
                     radioConfig = response
-                    enumValues<ConfigDest>().find { it.name == "${response.payloadVariantCase}" }
+                    if (goChannels) navController.navigate("channels")
+                    else enumValues<ConfigDest>().find { it.name == "${response.payloadVariantCase}" }
                         ?.let { navController.navigate(it.route) }
                 }
 
@@ -329,7 +331,8 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                     when (configType) {
                         "USER" -> { viewModel.getOwner(destNum) }
                         "CHANNELS" -> {
-                            (packetResponseState as PacketResponseState.Loading).total = maxChannels
+                            val maxPackets = maxChannels + 1 // for lora config
+                            (packetResponseState as PacketResponseState.Loading).total = maxPackets
                             channelList.clear()
                             viewModel.getChannel(destNum, 0)
                         }
@@ -384,15 +387,16 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
         composable("channels") {
             ChannelSettingsItemList(
                 settingsList = channelList,
+                modemPresetName = Channel(Channel.default.settings, radioConfig.lora).name,
                 enabled = connected,
                 maxChannels = maxChannels,
                 focusManager = focusManager,
-                onSaveClicked = { channelListInput ->
+                onPositiveClicked = { channelListInput ->
                     focusManager.clearFocus()
                     viewModel.updateChannels(destNum, channelList, channelListInput)
                     channelList.clear()
                     channelList.addAll(channelListInput)
-                }
+                },
             )
         }
         composable("user") {

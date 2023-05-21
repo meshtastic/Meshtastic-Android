@@ -509,7 +509,6 @@ class UIViewModel @Inject constructor(
 
     private fun setRemoteChannel(destNum: Int, channel: ChannelProtos.Channel) {
         try {
-            debug("Sending channel ${channel.index} to $destNum")
             meshService?.setRemoteChannel(destNum, channel.toByteArray())
         } catch (ex: RemoteException) {
             errormsg("Can't set channel on radio ${ex.message}")

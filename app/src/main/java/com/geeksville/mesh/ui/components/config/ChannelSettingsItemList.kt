@@ -89,29 +89,11 @@ fun ChannelCard(
 @Composable
 fun ChannelSettingsItemList(
     settingsList: List<ChannelSettings>,
-    maxChannels: Int = 8,
-    enabled: Boolean,
-    focusManager: FocusManager,
-    onSaveClicked: (List<ChannelSettings>) -> Unit,
-) {
-    ChannelSettingsItemList(
-        settingsList = settingsList,
-        maxChannels = maxChannels,
-        enabled = enabled,
-        focusManager = focusManager,
-        onPositiveClicked = onSaveClicked,
-        onNegativeClicked = { }
-    )
-}
-
-@Composable
-fun ChannelSettingsItemList(
-    settingsList: List<ChannelSettings>,
     modemPresetName: String = "Default",
     maxChannels: Int = 8,
     enabled: Boolean,
     focusManager: FocusManager,
-    onNegativeClicked: () -> Unit,
+    onNegativeClicked: () -> Unit = { },
     @StringRes positiveText: Int = R.string.send,
     onPositiveClicked: (List<ChannelSettings>) -> Unit,
     ) {
@@ -215,6 +197,6 @@ fun ChannelSettingsPreview() {
         ),
         enabled = true,
         focusManager = LocalFocusManager.current,
-        onSaveClicked = { },
+        onPositiveClicked = { },
     )
 }
