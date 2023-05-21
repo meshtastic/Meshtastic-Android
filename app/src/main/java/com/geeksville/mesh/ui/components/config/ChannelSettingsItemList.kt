@@ -96,10 +96,14 @@ fun ChannelSettingsItemList(
     onNegativeClicked: () -> Unit = { },
     @StringRes positiveText: Int = R.string.send,
     onPositiveClicked: (List<ChannelSettings>) -> Unit,
-    ) {
+) {
     val settingsListInput = remember {
         mutableStateListOf<ChannelSettings>().apply { addAll(settingsList) }
     }
+
+    val isEditing: Boolean = settingsList.size != settingsListInput.size
+            || settingsList.zip(settingsListInput).any { (item1, item2) -> item1 != item2 }
+
     var showEditChannelDialog: Int? by remember { mutableStateOf(null) }
 
     if (showEditChannelDialog != null) {
@@ -141,9 +145,7 @@ fun ChannelSettingsItemList(
             item {
                 PreferenceFooter(
                     // FIXME workaround until we use navigation in ChannelFragment
-                    enabled = positiveText != R.string.send
-                            || !settingsListInput.containsAll(settingsList)
-                            || !settingsList.containsAll(settingsListInput),
+                    enabled = isEditing || positiveText != R.string.send,
                     negativeText = R.string.cancel,
                     onNegativeClicked = {
                         focusManager.clearFocus()
