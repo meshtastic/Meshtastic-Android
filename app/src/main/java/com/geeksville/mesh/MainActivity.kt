@@ -38,7 +38,6 @@ import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.repository.radio.BluetoothInterface
-import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.SerialInterface
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
@@ -55,7 +54,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import java.text.DateFormat
 import java.util.Date
-import javax.inject.Inject
 
 /*
 UI design
@@ -117,9 +115,6 @@ class MainActivity : AppCompatActivity(), Logging {
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
     private val scanModel: BTScanModel by viewModels()
     val model: UIViewModel by viewModels()
-
-    @Inject
-    internal lateinit var radioInterfaceService: RadioInterfaceService
 
     private val requestPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -664,7 +659,7 @@ class MainActivity : AppCompatActivity(), Logging {
         }
 
         bluetoothViewModel.enabled.observe(this) { enabled ->
-            if (!enabled && !requestedEnable && scanModel.selectedBluetooth) {
+            if (!enabled && !requestedEnable && model.selectedBluetooth) {
                 requestedEnable = true
                 if (hasBluetoothPermission()) {
                     val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
@@ -701,7 +696,7 @@ class MainActivity : AppCompatActivity(), Logging {
             errormsg("Bind of MeshService failed")
         }
 
-        val bonded = radioInterfaceService.getBondedDeviceAddress() != null
+        val bonded = model.bondedAddress != null
         if (!bonded && usbDevice == null) // we will handle USB later
             showSettingsPage()
     }

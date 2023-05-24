@@ -29,6 +29,7 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos.User
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.positionToMeter
@@ -86,6 +87,7 @@ fun getInitials(nameIn: String): String {
 class UIViewModel @Inject constructor(
     private val app: Application,
     private val radioConfigRepository: RadioConfigRepository,
+    private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: MeshLogRepository,
     private val packetRepository: PacketRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
@@ -95,6 +97,9 @@ class UIViewModel @Inject constructor(
     var actionBarMenu: Menu? = null
     var meshService: IMeshService? = null
     val nodeDB = NodeDB(this)
+
+    val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()
+    val selectedBluetooth: Boolean get() = bondedAddress?.getOrNull(0) == 'x'
 
     private val _meshLog = MutableStateFlow<List<MeshLog>>(emptyList())
     val meshLog: StateFlow<List<MeshLog>> = _meshLog
