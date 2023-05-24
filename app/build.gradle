@@ -84,7 +84,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.4"
+        kotlinCompilerExtensionVersion = "1.4.7"
     }
     // Set both the Java and Kotlin compilers to target Java 8.
     compileOptions {
@@ -169,7 +169,7 @@ dependencies {
     androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
 
     // Compose
-    def composeBom = platform('androidx.compose:compose-bom:2023.03.00')
+    def composeBom = platform('androidx.compose:compose-bom:2023.05.01')
     implementation composeBom
     androidTestImplementation composeBom
 
