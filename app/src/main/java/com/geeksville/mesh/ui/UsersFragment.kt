@@ -213,20 +213,15 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             }
 
             if (n.num == ourNodeInfo?.num) {
-                val info = model.myNodeInfo.value
-                if (info != null) {
-                    val text =
-                        String.format(
-                            "ChUtil %.1f%% AirUtilTX %.1f%%",
-                            n.deviceMetrics?.channelUtilization ?: info.channelUtilization,
-                            n.deviceMetrics?.airUtilTx ?: info.airUtilTx
-                        )
-                    holder.signalView.text = text
-                    holder.signalView.visibility = View.VISIBLE
-                }
+                val text = "ChUtil %.1f%% AirUtilTX %.1f%%".format(
+                    n.deviceMetrics?.channelUtilization,
+                    n.deviceMetrics?.airUtilTx
+                )
+                holder.signalView.text = text
+                holder.signalView.visibility = View.VISIBLE
             } else {
                 if ((n.snr < 100f) && (n.rssi < 0)) {
-                    val text = String.format("rssi:%d snr:%.1f", n.rssi, n.snr)
+                    val text = "rssi:%d snr:%.1f".format(n.rssi, n.snr)
                     holder.signalView.text = text
                     holder.signalView.visibility = View.VISIBLE
                 } else {
@@ -260,7 +255,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         val (image, text) = when (battery) {
             in 0..100 -> Pair(
                 R.drawable.ic_battery_full_24,
-                String.format("%d%% %.2fV", battery, voltage ?: 0)
+                "%d%% %.2fV".format(battery, voltage ?: 0)
             )
             101 -> Pair(R.drawable.ic_power_plug_24, "")
             else -> Pair(R.drawable.ic_battery_full_24, "?")
