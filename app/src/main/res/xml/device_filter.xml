@@ -82,4 +82,5 @@
     <usb-device
         vendor-id="9114"
         product-id="17413" /> <!-- 0x239A / 0x4405: Adafruit (T-Echo) -->
+    <usb-device vendor-id="11914" /> <!-- 0x2E8A / ……: Raspberry Pi -->
 </resources>
