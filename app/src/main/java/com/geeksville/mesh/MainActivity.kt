@@ -32,7 +32,6 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.geeksville.mesh.android.*
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.databinding.ActivityMainBinding
-import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.DeviceVersion
@@ -113,8 +112,7 @@ class MainActivity : AppCompatActivity(), Logging {
     private val mainScope = CoroutineScope(Dispatchers.Main + Job())
 
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
-    private val scanModel: BTScanModel by viewModels()
-    val model: UIViewModel by viewModels()
+    private val model: UIViewModel by viewModels()
 
     private val requestPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -629,7 +627,6 @@ class MainActivity : AppCompatActivity(), Logging {
         unregisterMeshReceiver() // No point in receiving updates while the GUI is gone, we'll get them when the user launches the activity
         unbindMeshService()
 
-        scanModel.changeDeviceAddress.removeObservers(this)
         model.connectionState.removeObservers(this)
         bluetoothViewModel.enabled.removeObservers(this)
         model.requestChannelUrl.removeObservers(this)
@@ -639,20 +636,6 @@ class MainActivity : AppCompatActivity(), Logging {
 
     override fun onStart() {
         super.onStart()
-
-        scanModel.changeDeviceAddress.observe(this) { newAddr ->
-            newAddr?.let {
-                try {
-                    model.meshService?.let { service ->
-                        MeshService.changeDeviceAddress(this, service, newAddr)
-                    }
-                    scanModel.changeSelectedAddress(newAddr) // if it throws the change will be discarded
-                } catch (ex: RemoteException) {
-                    errormsg("changeDeviceSelection failed, probably it is shutting down $ex.message")
-                    // ignore the failure and the GUI won't be updating anyways
-                }
-            }
-        }
 
         model.connectionState.observe(this) { connected ->
             updateConnectionStatusImage(connected)

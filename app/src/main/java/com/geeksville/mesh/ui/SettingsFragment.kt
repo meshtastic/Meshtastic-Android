@@ -13,6 +13,7 @@ import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.RemoteException
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -286,10 +287,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             binding.usernameEditText.setText(name)
         }
 
+        scanModel.devices.observe(viewLifecycleOwner) { devices ->
+            updateDevicesButtons(devices)
+        }
+
         // Only let user edit their name or set software update while connected to a radio
         model.connectionState.observe(viewLifecycleOwner) {
             updateNodeInfo()
-            updateDevicesButtons(scanModel.devices.value)
         }
 
         model.localConfig.asLiveData().observe(viewLifecycleOwner) {
@@ -321,10 +325,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // Also watch myNodeInfo because it might change later
         model.myNodeInfo.observe(viewLifecycleOwner) {
             updateNodeInfo()
-        }
-
-        scanModel.devices.observe(viewLifecycleOwner) { devices ->
-            updateDevicesButtons(devices)
         }
 
         scanModel.errorText.observe(viewLifecycleOwner) { errMsg ->
@@ -510,12 +510,24 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
+    private fun changeDeviceAddress(address: String) {
+        try {
+            model.meshService?.let { service ->
+                MeshService.changeDeviceAddress(requireActivity(), service, address)
+            }
+            scanModel.changeSelectedAddress(address) // if it throws the change will be discarded
+        } catch (ex: RemoteException) {
+            errormsg("changeDeviceSelection failed, probably it is shutting down $ex.message")
+            // ignore the failure and the GUI won't be updating anyways
+        }
+    }
+
     /// Called by the GUI when a new device has been selected by the user
     /// Returns true if we were able to change to that item
     private fun onSelected(it: BTScanModel.DeviceListEntry): Boolean {
         // If the device is paired, let user select it, otherwise start the pairing flow
         if (it.bonded) {
-            scanModel.changeDeviceAddress(it.fullAddress)
+            changeDeviceAddress(it.fullAddress)
             return true
         } else {
             // Handle requesting USB or bluetooth permissions for the device
@@ -529,7 +541,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                         requestBonding(device) { state ->
                             if (state == BluetoothDevice.BOND_BONDED) {
                                 scanModel.setErrorText(getString(R.string.pairing_completed))
-                                scanModel.changeDeviceAddress(it.fullAddress)
+                                changeDeviceAddress(it.fullAddress)
                             } else {
                                 scanModel.setErrorText(getString(R.string.pairing_failed_try_again))
                             }
@@ -555,7 +567,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                                 )
                             ) {
                                 info("User approved USB access")
-                                scanModel.changeDeviceAddress(it.fullAddress)
+                                changeDeviceAddress(it.fullAddress)
                             } else {
                                 errormsg("USB permission denied for device $device")
                             }

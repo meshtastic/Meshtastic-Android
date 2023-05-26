@@ -108,7 +108,7 @@ class BTScanModel @Inject constructor(
 
     private var scanner: BluetoothLeScanner? = null
 
-    val selectedBluetooth: Boolean get() = selectedAddress?.get(0) == 'x'
+    val selectedBluetooth: Boolean get() = selectedAddress?.getOrNull(0) == 'x'
 
     /// Use the string for the NopInterface
     val selectedNotNull: String get() = selectedAddress ?: "n"
@@ -141,9 +141,6 @@ class BTScanModel @Inject constructor(
                         fullAddr,
                         isBonded
                     )
-                    // If nothing was selected, by default select the first valid thing we see
-                    if (selectedAddress == null && entry.bonded)
-                        changeDeviceAddress(fullAddr)
                     addDevice(entry) // Add/replace entry
                 }
             }
@@ -195,11 +192,6 @@ class BTScanModel @Inject constructor(
             )
 
             devices.value = (testnodes.map { it.fullAddress to it }).toMap().toMutableMap()
-
-            // If nothing was selected, by default select the first thing we see
-            if (selectedAddress == null)
-                changeDeviceAddress(testnodes.first().fullAddress)
-
             true
         } else {
             if (scanner == null) {
@@ -344,20 +336,10 @@ class BTScanModel @Inject constructor(
         )
     }
 
-    private val _changeDeviceAddress = MutableLiveData<String?>(null)
-    val changeDeviceAddress: LiveData<String?> get() = _changeDeviceAddress
-
-    /// Change to a new macaddr selection, updating GUI and radio
-    fun changeDeviceAddress(newAddr: String) {
-        info("Changing device to ${newAddr.anonymize}")
-        _changeDeviceAddress.value = newAddr
-    }
-
     /**
-     * Called immediately after activity observes changeDeviceAddress
+     * Called immediately after activity calls MeshService.changeDeviceAddress
      */
     fun changeSelectedAddress(newAddress: String) {
-        _changeDeviceAddress.value = null
         selectedAddress = newAddress
         devices.value = devices.value // Force a GUI update
     }
