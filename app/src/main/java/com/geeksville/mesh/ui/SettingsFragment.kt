@@ -280,7 +280,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = regionAdapter
 
-        model.ownerName.observe(viewLifecycleOwner) { name ->
+        model.ourNodeInfo.asLiveData().observe(viewLifecycleOwner) { node ->
+            val name = node?.user?.longName
             binding.usernameEditText.isEnabled = !name.isNullOrEmpty() && !model.isManaged
             binding.usernameEditText.setText(name)
         }
@@ -361,7 +362,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             val n = binding.usernameEditText.text.toString().trim()
             model.ourNodeInfo.value?.user?.let {
                 val user = it.copy(longName = n, shortName = getInitials(n))
-                if (n.isNotEmpty()) model.setOwner(user)
+                if (n.isNotEmpty()) model.setOwner(user.toProto())
             }
             requireActivity().hideKeyboard()
         }

@@ -2,6 +2,7 @@ package com.geeksville.mesh
 
 import android.graphics.Color
 import android.os.Parcelable
+import com.geeksville.mesh.MeshProtos.User
 import com.geeksville.mesh.util.bearing
 import com.geeksville.mesh.util.latLongToMeter
 import com.geeksville.mesh.util.anonymize
@@ -26,6 +27,9 @@ data class MeshUser(
     override fun toString(): String {
         return "MeshUser(id=${id.anonymize}, longName=${longName.anonymize}, shortName=${shortName.anonymize}, hwModel=${hwModelString}, isLicensed=${isLicensed})"
     }
+
+    fun toProto(): User = User.newBuilder().setId(id).setLongName(longName).setShortName(shortName)
+        .setHwModel(hwModel).setIsLicensed(isLicensed).build()
 
     /** a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot
      * or null if unset
