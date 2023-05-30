@@ -3,7 +3,6 @@ package com.geeksville.mesh.ui
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.bluetooth.BluetoothDevice
-import android.companion.CompanionDeviceManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -48,9 +47,12 @@ import com.geeksville.mesh.repository.radio.MockInterface
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.SoftwareUpdateService
+import com.geeksville.mesh.util.CompanionDeviceManagerCompat
+import com.geeksville.mesh.util.PendingIntentCompat
 import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.exceptionReporter
 import com.geeksville.mesh.util.exceptionToSnackbar
+import com.geeksville.mesh.util.getParcelableExtraCompat
 import com.geeksville.mesh.util.onEditorAction
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -245,10 +247,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             ActivityResultContracts.StartIntentSenderForResult()
         ) {
             it.data
-                ?.getParcelableExtra<BluetoothDevice>(CompanionDeviceManager.EXTRA_DEVICE)
-                ?.let { device ->
-                    onSelected(BTScanModel.BLEDeviceListEntry(device))
-                }
+                ?.getParcelableExtraCompat<BluetoothDevice>(CompanionDeviceManagerCompat.EXTRA_DEVICE)
+                ?.let { device -> onSelected(BTScanModel.BLEDeviceListEntry(device)) }
         }
 
         val requestBackgroundAndCheckLauncher =
@@ -558,8 +558,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     override fun onReceive(context: Context, intent: Intent) {
                         if (BTScanModel.ACTION_USB_PERMISSION == intent.action) {
 
-                            val device: UsbDevice =
-                                intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
+                            val device: UsbDevice? =
+                                intent.getParcelableExtraCompat(UsbManager.EXTRA_DEVICE)
+                            val deviceName: String = device?.deviceName ?: "unknown"
 
                             if (intent.getBooleanExtra(
                                     UsbManager.EXTRA_PERMISSION_GRANTED,
@@ -569,7 +570,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                                 info("User approved USB access")
                                 changeDeviceAddress(it.fullAddress)
                             } else {
-                                errormsg("USB permission denied for device $device")
+                                errormsg("USB permission denied for device $deviceName")
                             }
                         }
                         // We don't need to stay registered
@@ -577,12 +578,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     }
                 }
 
-                val permissionIntent =
-                    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
-                        PendingIntent.getBroadcast(activity, 0, Intent(BTScanModel.ACTION_USB_PERMISSION), 0)
-                    } else {
-                        PendingIntent.getBroadcast(activity, 0, Intent(BTScanModel.ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE)
-                    }
+                val permissionIntent = PendingIntent.getBroadcast(
+                    activity,
+                    0,
+                    Intent(BTScanModel.ACTION_USB_PERMISSION),
+                    PendingIntentCompat.FLAG_IMMUTABLE
+                )
                 val filter = IntentFilter(BTScanModel.ACTION_USB_PERMISSION)
                 requireActivity().registerReceiver(usbReceiver, filter)
                 requireContext().usbManager.requestPermission(it.usb.device, permissionIntent)

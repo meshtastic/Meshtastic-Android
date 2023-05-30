@@ -8,6 +8,7 @@ import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.util.exceptionReporter
+import com.geeksville.mesh.util.getParcelableExtraCompat
 import javax.inject.Inject
 
 /**
@@ -24,7 +25,9 @@ class UsbBroadcastReceiver @Inject constructor(
     }
 
     override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
-        val deviceName: String = intent.getParcelableExtra<UsbDevice?>(UsbManager.EXTRA_DEVICE)?.deviceName ?: "unknown"
+        val device: UsbDevice? = intent.getParcelableExtraCompat(UsbManager.EXTRA_DEVICE)
+        val deviceName: String = device?.deviceName ?: "unknown"
+
         when (intent.action) {
             UsbManager.ACTION_USB_DEVICE_DETACHED -> {
                 debug("USB device '$deviceName' was detached")
