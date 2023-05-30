@@ -101,6 +101,14 @@ fun PowerConfigItemList(
         }
 
         item {
+            EditTextPreference(title = "Battery INA_2XX I2C address",
+                value = powerInput.deviceBatteryInaAddress,
+                enabled = enabled,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { powerInput = powerInput.copy { deviceBatteryInaAddress = it } })
+        }
+
+        item {
             PreferenceFooter(
                 enabled = powerInput != powerConfig,
                 onCancelClicked = {

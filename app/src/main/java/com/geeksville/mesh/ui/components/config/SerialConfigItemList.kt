@@ -98,6 +98,16 @@ fun SerialConfigItemList(
         item { Divider() }
 
         item {
+            SwitchPreference(title = "Override console serial port",
+                checked = serialInput.overrideConsoleSerialPort,
+                enabled = enabled,
+                onCheckedChange = {
+                    serialInput = serialInput.copy { overrideConsoleSerialPort = it }
+                })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = serialInput != serialConfig,
                 onCancelClicked = {
