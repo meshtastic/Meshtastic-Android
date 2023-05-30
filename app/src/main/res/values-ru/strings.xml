@@ -50,7 +50,7 @@
     <string name="modem_config_short">Малое расстояние / Быстро</string>
     <string name="modem_config_medium">Среднее расстояние / Быстро</string>
     <string name="modem_config_long">Большое расстояние / Быстро</string>
-    <string name="modem_config_mod_long">Большая дальность / Умеренная (Middle Range, instead Moderate. Moderate -> unwanted association with moderator)</string>
+    <string name="modem_config_mod_long">Большая дальность / Умеренная</string>
     <string name="modem_config_very_long">Очень большое расстояние / Медленный</string>
     <string name="modem_config_unrecognized">НЕРАСПОЗНАНО</string>
     <string name="meshtastic_service_notifications">Служебные уведомления</string>
@@ -91,7 +91,7 @@
     <string name="background_required">Фоновое расположение</string>
     <string name="why_background_required">Для этой функции вы должны предоставить опцию разрешения location «Разрешить все время».\nЭто позволяет Meshtastic считывать местоположение вашего смартфона и отправлять его другим членам вашей сети, даже если приложение закрыто или не используется.</string>
     <string name="required_permissions">Необходимые разрешения</string>
-    <string name="provide_location_to_mesh">Предоставление местоположения для сетки</string>
+    <string name="provide_location_to_mesh">Предоставление местоположения для сети</string>
     <string name="camera_required">Разрешение камеры</string>
     <string name="why_camera_required">Нам должен быть предоставлен доступ к камере для считывания QR-кодов. Фотографии или видео не будут сохранены.</string>
     <string name="modem_config_slow_short">Ближний радиус действия / Медленный</string>
