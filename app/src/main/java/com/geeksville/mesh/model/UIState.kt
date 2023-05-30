@@ -99,7 +99,7 @@ class UIViewModel @Inject constructor(
     val nodeDB = NodeDB(this)
 
     val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()
-    val selectedBluetooth: Boolean get() = bondedAddress?.getOrNull(0) == 'x'
+    val selectedBluetooth get() = radioInterfaceService.getDeviceAddress()?.getOrNull(0) == 'x'
 
     private val _meshLog = MutableStateFlow<List<MeshLog>>(emptyList())
     val meshLog: StateFlow<List<MeshLog>> = _meshLog
