@@ -320,7 +320,12 @@ class BTScanModel @Inject constructor(
             associationRequest(),
             @SuppressLint("NewApi")
             object : CompanionDeviceManager.Callback() {
-                override fun onDeviceFound(chooserLauncher: IntentSender) {
+                @Deprecated("Deprecated in Java", ReplaceWith("onAssociationPending(intentSender)"))
+                override fun onDeviceFound(intentSender: IntentSender) {
+                    onAssociationPending(intentSender)
+                }
+
+                override fun onAssociationPending(chooserLauncher: IntentSender) {
                     debug("CompanionDeviceManager - device found")
                     _spinner.value = false
                     chooserLauncher.let {

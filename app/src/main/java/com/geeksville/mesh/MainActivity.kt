@@ -41,8 +41,10 @@ import com.geeksville.mesh.repository.radio.SerialInterface
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
 import com.geeksville.mesh.util.Exceptions
+import com.geeksville.mesh.util.getParcelableExtraCompat
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.exceptionReporter
+import com.geeksville.mesh.util.getPackageInfoCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
@@ -264,7 +266,7 @@ class MainActivity : AppCompatActivity(), Logging {
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
-                val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+                val device: UsbDevice? = intent.getParcelableExtraCompat(UsbManager.EXTRA_DEVICE)
                 if (device != null) {
                     debug("Handle USB device attached! $device")
                     usbDevice = device
@@ -475,12 +477,11 @@ class MainActivity : AppCompatActivity(), Logging {
 
                 when (intent.action) {
                     MeshService.ACTION_NODE_CHANGE -> {
-                        val info: NodeInfo =
-                            intent.getParcelableExtra(EXTRA_NODEINFO)!!
+                        val info: NodeInfo? = intent.getParcelableExtraCompat(EXTRA_NODEINFO)
                         debug("UI nodechange $info")
 
                         // We only care about nodes that have user info
-                        info.user?.id?.let {
+                        info?.user?.id?.let {
                             val nodes = model.nodeDB.nodes.value!! + Pair(it, info)
                             model.nodeDB.setNodes(nodes)
                         }
@@ -698,7 +699,7 @@ class MainActivity : AppCompatActivity(), Logging {
         return true
     }
 
-    val handler: Handler by lazy {
+    private val handler: Handler by lazy {
         Handler(Looper.getMainLooper())
     }
 
@@ -791,7 +792,7 @@ class MainActivity : AppCompatActivity(), Logging {
 
     private fun getVersionInfo() {
         try {
-            val packageInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
+            val packageInfo: PackageInfo = packageManager.getPackageInfoCompat(packageName, 0)
             val versionName = packageInfo.versionName
             Toast.makeText(this, versionName, Toast.LENGTH_LONG).show()
         } catch (e: PackageManager.NameNotFoundException) {
