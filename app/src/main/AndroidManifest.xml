@@ -129,7 +129,7 @@
         <activity
             android:name="com.geeksville.mesh.MainActivity"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait"
+            android:screenOrientation="sensorPortrait"
             android:windowSoftInputMode="stateAlwaysHidden"
             android:theme="@style/Theme.App.Starting"
             android:exported="true">
