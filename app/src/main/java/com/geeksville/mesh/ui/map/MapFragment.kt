@@ -135,24 +135,6 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
             setContent {
                 AppCompatTheme {
                     MapView()
-
-                    MapStyleButton {
-                        chooseMapStyle()
-                    }
-                    DownloadButton(
-                        cacheMenu = {
-                            CacheLayout(onExecuteJob = {
-                                updateEstimate()
-                            },
-                                onCancelDownload = {
-                                    cacheEstimate.text = ""
-                                    defaultMapSettings()
-                                }
-                            )
-                        }
-                    ) {
-                        showCacheManagerDialog()
-                    }
                 }
             }
         }
@@ -166,7 +148,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
                 clipToOutline = true
             }
         }
-
+        var canDownload: Boolean by remember { mutableStateOf(false) }
         Scaffold() { innerPadding ->
             AndroidView({ map }, modifier = Modifier
                 .padding(innerPadding)
@@ -178,6 +160,9 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
                     BuildConfig.APPLICATION_ID // Required to get online tiles
                 this.map = map
                 setupMapProperties(map)
+
+                canDownload =
+                    (map.tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()
                 mPrefs = requireContext().getSharedPreferences(prefsName, Context.MODE_PRIVATE)
                 map.setTileSource(loadOnlineTileSourceBase())
 //                if (binding.cacheLayout.visibility == View.GONE) {
@@ -199,14 +184,52 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
 //                    }
 //                }
                 zoomToNodes(mapController)
-
             }
+        }
+        DownloadButton(
+            cacheMenu = {
+                CacheLayout(onExecuteJob = {
+                    updateEstimate()
+                },
+                    onCancelDownload = {
+                        cacheEstimate.text = ""
+                        defaultMapSettings()
+                    }
+                )
+            }, canDownload
+        ) {
+            showCacheManagerDialog()
+        }
+        MapStyleButton {
+            val builder = MaterialAlertDialogBuilder(requireContext())
+            val mapStyles = arrayOf<CharSequence>(
+                "OpenStreetMap",
+                "USGS TOPO",
+                "Open TOPO",
+                "ESRI World TOPO",
+                "USGS Satellite",
+                "ESRI World Overview",
+            )
+
+            /// Load preferences and its value
+            val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
+            builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
+                debug("Set mapStyleId pref to $which")
+                val editor: SharedPreferences.Editor = mPrefs.edit()
+                editor.putInt(mapStyleId, which)
+                editor.apply()
+                dialog.dismiss()
+                map.setTileSource(loadOnlineTileSourceBase())
+                drawOverlays()
+                canDownload =
+                    (map.tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()
+            }
+            val dialog = builder.create()
+            dialog.show()
+
         }
     }
 
-    private fun renderDownloadButton(): Boolean {
-        return !(map.tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload();1
-    }
 
     private fun zoomToNodes(controller: IMapController) {
         val points: MutableList<GeoPoint> = mutableListOf()
@@ -619,29 +642,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
 
     private fun chooseMapStyle() {
         /// Prepare dialog and its items
-        val builder = MaterialAlertDialogBuilder(requireContext())
-        val mapStyles = arrayOf<CharSequence>(
-            "OpenStreetMap",
-            "USGS TOPO",
-            "Open TOPO",
-            "ESRI World TOPO",
-            "USGS Satellite",
-            "ESRI World Overview",
-        )
 
-        /// Load preferences and its value
-        val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
-        builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
-            debug("Set mapStyleId pref to $which")
-            val editor: SharedPreferences.Editor = mPrefs.edit()
-            editor.putInt(mapStyleId, which)
-            editor.apply()
-            dialog.dismiss()
-            map.setTileSource(loadOnlineTileSourceBase())
-            drawOverlays()
-        }
-        val dialog = builder.create()
-        dialog.show()
     }
 
     private fun onNodesChanged(nodes: Collection<NodeInfo>) {
