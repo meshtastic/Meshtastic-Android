@@ -16,17 +16,26 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
@@ -43,8 +52,10 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomOverlayManager
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.ui.ScreenFragment
+import com.geeksville.mesh.ui.map.components.CacheLayout
 import com.geeksville.mesh.ui.map.components.DownloadButton
 import com.geeksville.mesh.ui.map.components.MapStyleButton
+import com.geeksville.mesh.ui.map.components.ToggleButton
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.waypoint
@@ -114,7 +125,6 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
     private val model: UIViewModel by activityViewModels()
     private lateinit var cacheManager: CacheManager
     private lateinit var downloadRegionBoundingBox: BoundingBox
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -125,11 +135,23 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
             setContent {
                 AppCompatTheme {
                     MapView()
-                    DownloadButton {
-                        showCacheManagerDialog()
-                    }
+
                     MapStyleButton {
                         chooseMapStyle()
+                    }
+                    DownloadButton(
+                        cacheMenu = {
+                            CacheLayout(onExecuteJob = {
+                                updateEstimate()
+                            },
+                                onCancelDownload = {
+                                    cacheEstimate.text = ""
+                                    defaultMapSettings()
+                                }
+                            )
+                        }
+                    ) {
+                        showCacheManagerDialog()
                     }
                 }
             }
@@ -154,31 +176,36 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
             ) { map ->
                 Configuration.getInstance().userAgentValue =
                     BuildConfig.APPLICATION_ID // Required to get online tiles
+                this.map = map
                 setupMapProperties(map)
                 mPrefs = requireContext().getSharedPreferences(prefsName, Context.MODE_PRIVATE)
                 map.setTileSource(loadOnlineTileSourceBase())
-                if (binding.cacheLayout.visibility == View.GONE) {
-                    model.nodeDB.nodes.value?.let { nodes ->
-                        onNodesChanged(nodes.values)
-                        drawOverlays()
-                    }
-                }
-                if (binding.cacheLayout.visibility == View.GONE) {
-                    model.nodeDB.nodes.observe(viewLifecycleOwner) { nodes ->
-                        onNodesChanged(nodes.values)
-                        drawOverlays()
-                    }
-                    model.waypoints.observe(viewLifecycleOwner) {
-                        debug("New waypoints received: ${it.size}")
-                        waypoints = it.mapValues { p -> p.value.data.waypoint }
-                        onWaypointChanged(it.values)
-                        drawOverlays()
-                    }
-                }
+//                if (binding.cacheLayout.visibility == View.GONE) {
+//                    model.nodeDB.nodes.value?.let { nodes ->
+//                        onNodesChanged(nodes.values)
+//                        drawOverlays()
+//                    }
+//                }
+//                if (binding.cacheLayout.visibility == View.GONE) {
+//                    model.nodeDB.nodes.observe(viewLifecycleOwner) { nodes ->
+//                        onNodesChanged(nodes.values)
+//                        drawOverlays()
+//                    }
+//                    model.waypoints.observe(viewLifecycleOwner) {
+//                        debug("New waypoints received: ${it.size}")
+//                        waypoints = it.mapValues { p -> p.value.data.waypoint }
+//                        onWaypointChanged(it.values)
+//                        drawOverlays()
+//                    }
+//                }
                 zoomToNodes(mapController)
 
             }
         }
+    }
+
+    private fun renderDownloadButton(): Boolean {
+        return !(map.tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload();1
     }
 
     private fun zoomToNodes(controller: IMapController) {
@@ -229,14 +256,6 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
         return CustomTileSource.mTileSources.getOrNull(id) ?: CustomTileSource.DEFAULT_TILE_SOURCE
     }
 
-    private fun renderDownloadButton() {
-        if (!(map.tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()) {
-            binding.downloadButton.hide()
-        } else {
-            binding.downloadButton.show()
-        }
-    }
-
     /**
      * Reset map to default settings & visible buttons
      */
@@ -250,8 +269,8 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
 
 
     private fun setupMapProperties(map: MapView) {
-
         map.setDestroyMode(false) // keeps map instance alive when in the background.
+        mapController = map.controller
         map.isVerticalMapRepetitionEnabled = false // disables map repetition
         map.overlayManager = CustomOverlayManager.create(map, context)
         map.setScrollableAreaLimitLatitude(
@@ -266,17 +285,18 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
         map.maxZoomLevel = defaultMaxZoom
         map.setMultiTouchControls(true) // Sets gesture controls to true.
         map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
-        map.addMapListener(object : MapListener {
-            override fun onScroll(event: ScrollEvent): Boolean {
-                if (binding.cacheLayout.visibility == View.VISIBLE) {
-                    generateBoxOverlay(zoomLevelMax)
-                }
-                return true
-            }
-            override fun onZoom(event: ZoomEvent): Boolean {
-                return false
-            }
-        })
+//        map.addMapListener(object : MapListener {
+//            override fun onScroll(event: ScrollEvent): Boolean {
+//                if (binding.cacheLayout.visibility == View.VISIBLE) {
+//                    generateBoxOverlay(zoomLevelMax)
+//                }
+//                return true
+//            }
+//
+//            override fun onZoom(event: ZoomEvent): Boolean {
+//                return false
+//            }
+//        })
     }
 
     private fun drawOverlays() {
@@ -618,7 +638,6 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
             editor.apply()
             dialog.dismiss()
             map.setTileSource(loadOnlineTileSourceBase())
-            renderDownloadButton()
             drawOverlays()
         }
         val dialog = builder.create()
@@ -683,21 +702,15 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
 
     private fun downloadJobAlert() {
         //prompt for input params .
-        binding.downloadButton.hide()
-        binding.mapStyleButton.visibility = View.GONE
-        binding.cacheLayout.visibility = View.VISIBLE
+        // binding.downloadButton.hide()
+        // binding.mapStyleButton.visibility = View.GONE
+        // binding.cacheLayout.visibility = View.VISIBLE
         val builder = MaterialAlertDialogBuilder(requireContext())
-        binding.box5miles.setOnClickListener { generateBoxOverlay(zoomLevelLowest) }
-        binding.box10miles.setOnClickListener { generateBoxOverlay(zoomLevelMiddle) }
-        binding.box15miles.setOnClickListener { generateBoxOverlay(zoomLevelHighest) }
-        cacheEstimate = binding.cacheEstimate
+        // binding.box5miles.setOnClickListener { generateBoxOverlay(zoomLevelLowest) }
+        // binding.box10miles.setOnClickListener { generateBoxOverlay(zoomLevelMiddle) }
+        // binding.box15miles.setOnClickListener { generateBoxOverlay(zoomLevelHighest) }
+        // cacheEstimate = binding.cacheEstimate
         generateBoxOverlay(zoomLevelLowest)
-        binding.executeJob.setOnClickListener { updateEstimate() }
-        binding.cancelDownload.setOnClickListener {
-            cacheEstimate.text = ""
-            defaultMapSettings()
-
-        }
         builder.setCancelable(true)
     }
 
