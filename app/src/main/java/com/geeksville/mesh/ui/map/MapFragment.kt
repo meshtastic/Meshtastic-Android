@@ -597,18 +597,18 @@ fun MapView(model: UIViewModel = viewModel()) {
                 map.maxZoomLevel = defaultMaxZoom
                 map.setMultiTouchControls(true) // Sets gesture controls to true.
                 map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
-//                map.addMapListener(object : MapListener {
-//                    override fun onScroll(event: ScrollEvent): Boolean {
-//                        if (binding.cacheLayout.visibility == View.VISIBLE) {
-//                            generateBoxOverlay(zoomLevelMax)
-//                        }
-//                        return true
-//                    }
-//
-//                    override fun onZoom(event: ZoomEvent): Boolean {
-//                        return false
-//                    }
-//                })
+                map.addMapListener(object : MapListener {
+                    override fun onScroll(event: ScrollEvent): Boolean {
+                        if (showDownloadRegionBoundingBox) { // TODO double check if this boolean works here
+                            generateBoxOverlay(zoomLevelMax)
+                        }
+                        return true
+                    }
+
+                    override fun onZoom(event: ZoomEvent): Boolean {
+                        return false
+                    }
+                })
             }
 
             /**
