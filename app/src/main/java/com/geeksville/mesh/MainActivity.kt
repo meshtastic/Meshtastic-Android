@@ -40,6 +40,7 @@ import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.SerialInterface
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
+import com.geeksville.mesh.ui.map.MapFragment
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.getParcelableExtraCompat
 import com.geeksville.mesh.util.LanguageUtils
