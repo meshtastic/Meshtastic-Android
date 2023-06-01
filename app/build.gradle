@@ -32,7 +32,7 @@ android {
     compileSdkVersion 33
     defaultConfig {
         applicationId "com.geeksville.mesh"
-        minSdkVersion 23 // The oldest emulator image I have tried is 22 (though 21 probably works)
+        minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdkVersion 31
         versionCode 30114 // format is Mmmss (where M is 1+the numeric major number
         versionName "2.1.14"
