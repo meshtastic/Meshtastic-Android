@@ -185,7 +185,7 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 
     // Osmdroid & Maps
-    def osmdroid_version = '6.1.16'
+    def osmdroid_version = '6.1.14'
     implementation "org.osmdroid:osmdroid-android:$osmdroid_version"
     implementation "org.osmdroid:osmdroid-wms:$osmdroid_version"
     implementation ("org.osmdroid:osmdroid-geopackage:$osmdroid_version") {
