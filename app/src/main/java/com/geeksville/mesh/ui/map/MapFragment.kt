@@ -3,14 +3,11 @@ package com.geeksville.mesh.ui.map
 import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Rect
 import android.os.Bundle
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
@@ -56,6 +53,7 @@ import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomOverlayManager
 import com.geeksville.mesh.model.map.CustomTileSource
+import com.geeksville.mesh.model.map.MarkerWithLabel
 import com.geeksville.mesh.ui.ScreenFragment
 import com.geeksville.mesh.ui.map.components.CacheLayout
 import com.geeksville.mesh.ui.map.components.DownloadButton
@@ -158,55 +156,6 @@ fun MapView(model: UIViewModel = viewModel()) {
     var showMarkerLongPressDialog: Int? by remember { mutableStateOf(null) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
     var showDownloadRegionBoundingBox by remember { mutableStateOf(false) } // FIXME
-
-    class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
-        Marker(mapView) {
-        private val mLabel = label
-        private val mEmoji = emoji
-        private val textPaint = Paint().apply {
-            textSize = 40f
-            color = Color.DKGRAY
-            isAntiAlias = true
-            isFakeBoldText = true
-            textAlign = Paint.Align.CENTER
-        }
-        private val emojiPaint = Paint().apply {
-            textSize = 80f
-            isAntiAlias = true
-            textAlign = Paint.Align.CENTER
-        }
-
-        private val bgPaint = Paint().apply { color = Color.WHITE }
-
-        private fun getTextBackgroundSize(text: String, x: Float, y: Float): Rect {
-            val fontMetrics = textPaint.fontMetrics
-            val halfTextLength = textPaint.measureText(text) / 2 + 3
-            return Rect(
-                (x - halfTextLength).toInt(),
-                (y + fontMetrics.top).toInt(),
-                (x + halfTextLength).toInt(),
-                (y + fontMetrics.bottom).toInt()
-            )
-        }
-
-        override fun onLongPress(event: MotionEvent?, mapView: MapView?): Boolean {
-            val touched = hitTest(event, mapView)
-            if (touched && this.id != null) {
-                performHapticFeedback()
-                showMarkerLongPressDialog = this.id.toIntOrNull()
-            }
-            return super.onLongPress(event, mapView)
-        }
-
-        override fun draw(c: Canvas, osmv: MapView?, shadow: Boolean) {
-            super.draw(c, osmv, false)
-            val p = mPositionPixels
-            val bgRect = getTextBackgroundSize(mLabel, (p.x - 0f), (p.y - 110f))
-            c.drawRect(bgRect, bgPaint)
-            c.drawText(mLabel, (p.x - 0f), (p.y - 110f), textPaint)
-            mEmoji?.let { c.drawText(it, (p.x - 0f), (p.y - 30f), emojiPaint) }
-        }
-    }
 
     var nodePositions = listOf<MarkerWithLabel>()
     var waypointMarkers = listOf<MarkerWithLabel>()
@@ -427,6 +376,10 @@ fun MapView(model: UIViewModel = viewModel()) {
                     marker.snippet = "[$time] " + it.description
                     marker.position = GeoPoint(it.latitudeI * 1e-7, it.longitudeI * 1e-7)
                     marker.setVisible(false)
+                    marker.setOnLongClickListener {
+                        showMarkerLongPressDialog(it.id)
+                        true
+                    }
                 }
                 marker
             }
