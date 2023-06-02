@@ -61,7 +61,9 @@ class BTScanModel @Inject constructor(
         debug("BTScanModel created")
     }
 
-    /** *fullAddress* = interface prefix + address (example: "x7C:9E:BD:F0:BE:BE") */
+    /**
+     * @param fullAddress Interface [prefix] + [address] (example: "x7C:9E:BD:F0:BE:BE")
+     */
     open class DeviceListEntry(val name: String, val fullAddress: String, val bonded: Boolean) {
         val prefix get() = fullAddress[0]
         val address get() = fullAddress.substring(1)
@@ -77,7 +79,7 @@ class BTScanModel @Inject constructor(
 
     @SuppressLint("MissingPermission")
     class BLEDeviceListEntry(device: BluetoothDevice) : DeviceListEntry(
-        device.name,
+        device.name ?: "unnamed-${device.address}", // some devices might not have a name
         "x${device.address}",
         device.bondState == BluetoothDevice.BOND_BONDED
     )
@@ -136,8 +138,7 @@ class BTScanModel @Inject constructor(
                 val oldEntry = oldDevs[fullAddr]
                 if (oldEntry == null || oldEntry.bonded != isBonded) { // Don't spam the GUI with endless updates for non changing nodes
                     val entry = DeviceListEntry(
-                        result.device.name
-                            ?: "unnamed-$addr", // autobug: some devices might not have a name, if someone is running really old device code?
+                        result.device.name,
                         fullAddr,
                         isBonded
                     )
