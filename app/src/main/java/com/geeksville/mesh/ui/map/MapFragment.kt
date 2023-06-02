@@ -60,6 +60,7 @@ import com.geeksville.mesh.ui.map.components.DownloadButton
 import com.geeksville.mesh.ui.map.components.MapStyleButton
 import com.geeksville.mesh.ui.map.components.ToggleButton
 import com.geeksville.mesh.util.SqlTileWriterExt
+import com.geeksville.mesh.util.requiredZoomLevel
 import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.waypoint
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
@@ -89,7 +90,6 @@ import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import java.io.File
 import java.text.DateFormat
-import kotlin.math.log2
 
 
 @AndroidEntryPoint
@@ -157,7 +157,7 @@ fun MapView(model: UIViewModel = viewModel()) {
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
     var showDownloadRegionBoundingBox by remember { mutableStateOf(false) } // FIXME
 
-    var nodePositions = listOf<MarkerWithLabel>()
+    var nodeMarkers = listOf<MarkerWithLabel>()
     var waypointMarkers = listOf<MarkerWithLabel>()
 
     fun purgeTileSource() {
@@ -392,7 +392,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
         val ic = ContextCompat.getDrawable(context, R.drawable.ic_baseline_location_on_24)
         debug("Showing on map: ${nodesWithPosition.size} nodes")
-        nodePositions = nodesWithPosition.map { node ->
+        nodeMarkers = nodesWithPosition.map { node ->
             val (p, u) = Pair(node.position!!, node.user!!)
             val marker = MarkerWithLabel(map, "${u.longName} ${formatAgo(p.time)}")
             marker.title = "${u.longName} ${node.batteryStr}"
@@ -449,7 +449,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         map.overlayManager.overlays().clear()
         addCopyright()  // Copyright is required for certain map sources
         createLatLongGrid(false)
-        map.overlayManager.addAll(nodeLayer, nodePositions)
+        map.overlayManager.addAll(nodeLayer, nodeMarkers)
         map.overlayManager.addAll(nodeLayer, waypointMarkers)
         map.overlayManager.add(nodeLayer, MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
@@ -502,37 +502,13 @@ fun MapView(model: UIViewModel = viewModel()) {
 //    }
 
     fun zoomToNodes(controller: IMapController) {
-        val points: MutableList<GeoPoint> = mutableListOf()
-        val nodesWithPosition =
-            model.nodeDB.nodes.value?.values?.filter { it.validPosition != null }
-        if (!nodesWithPosition.isNullOrEmpty()) {
+        if (nodeMarkers.isNotEmpty()) {
+            val points = nodeMarkers.map { it.position }
+            val box = BoundingBox.fromGeoPoints(points)
+            val center = GeoPoint(box.centerLatitude, box.centerLongitude)
             val maximumZoomLevel = map.tileProvider.tileSource.maximumZoomLevel.toDouble()
-            if (nodesWithPosition.size >= 2) {
-                // Multiple nodes, make them all fit on the map view
-                nodesWithPosition.forEach {
-                    points.add(
-                        GeoPoint(
-                            it.position!!.latitude, it.position!!.longitude
-                        )
-                    )
-                }
-                val box = BoundingBox.fromGeoPoints(points)
-                val point = GeoPoint(box.centerLatitude, box.centerLongitude)
-                val topLeft = GeoPoint(box.latNorth, box.lonWest)
-                val bottomRight = GeoPoint(box.latSouth, box.lonEast)
-                val latLonWidth = topLeft.distanceToAsDouble(GeoPoint(topLeft.latitude, bottomRight.longitude))
-                val latLonHeight = topLeft.distanceToAsDouble(GeoPoint(bottomRight.latitude, topLeft.longitude))
-                val requiredLatZoom = log2(360.0 / (latLonHeight / 111320))
-                val requiredLonZoom = log2(360.0 / (latLonWidth / 111320))
-                val requiredZoom = requiredLatZoom.coerceAtLeast(requiredLonZoom)
-                val finalZoomLevel = (requiredZoom * 0.8).coerceAtMost(maximumZoomLevel)
-                controller.animateTo(point, finalZoomLevel, defaultZoomSpeed)
-            } else {
-                // Only one node, just zoom in on it
-                val it = nodesWithPosition[0].position!!
-                points.add(GeoPoint(it.latitude, it.longitude))
-                controller.animateTo(points[0], maximumZoomLevel, defaultZoomSpeed)
-            }
+            val finalZoomLevel = minOf(box.requiredZoomLevel() * 0.8, maximumZoomLevel)
+            controller.animateTo(center, finalZoomLevel, defaultZoomSpeed)
         }
     }
 
