@@ -45,7 +45,7 @@ import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.BuildUtils
+import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.entity.Packet
@@ -276,15 +276,15 @@ fun MapView(model: UIViewModel = viewModel()) {
         val builder = MaterialAlertDialogBuilder(context)
         builder.setTitle(R.string.waypoint_delete)
         builder.setNeutralButton(R.string.cancel) { _, _ ->
-            BuildUtils.debug("User canceled marker delete dialog")
+            debug("User canceled marker delete dialog")
         }
         builder.setNegativeButton(R.string.delete_for_me) { _, _ ->
-            BuildUtils.debug("User deleted waypoint ${waypoint.id} for me")
+            debug("User deleted waypoint ${waypoint.id} for me")
             model.deleteWaypoint(waypoint.id)
         }
         if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected())
             builder.setPositiveButton(R.string.delete_for_everyone) { _, _ ->
-                BuildUtils.debug("User deleted waypoint ${waypoint.id} for everyone")
+                debug("User deleted waypoint ${waypoint.id} for everyone")
                 model.sendWaypoint(waypoint.copy { expire = 1 })
                 model.deleteWaypoint(waypoint.id)
             }
@@ -303,14 +303,14 @@ fun MapView(model: UIViewModel = viewModel()) {
         dialog.lockedSwitch.isEnabled = false
         dialog.lockedSwitch.isChecked = waypoint.lockedTo != 0
         dialog.builder.setNeutralButton(R.string.cancel) { _, _ ->
-            BuildUtils.debug("User canceled marker edit dialog")
+            debug("User canceled marker edit dialog")
         }
         dialog.builder.setNegativeButton(R.string.delete) { _, _ ->
-            BuildUtils.debug("User clicked delete waypoint ${waypoint.id}")
+            debug("User clicked delete waypoint ${waypoint.id}")
             showDeleteMarkerDialog(waypoint)
         }
         dialog.builder.setPositiveButton(R.string.send) { _, _ ->
-            BuildUtils.debug("User edited waypoint ${waypoint.id}")
+            debug("User edited waypoint ${waypoint.id}")
             model.sendWaypoint(waypoint.copy {
                 name = dialog.name.ifEmpty { return@setPositiveButton }
                 description = dialog.description
@@ -322,8 +322,8 @@ fun MapView(model: UIViewModel = viewModel()) {
     }
 
     fun showMarkerLongPressDialog(id: Int) {
-        BuildUtils.debug("marker long pressed id=${id}")
-        val waypoint = waypoints[id] ?: return
+        debug("marker long pressed id=${id}")
+        val waypoint = model.waypoints.value?.get(id)?.data?.waypoint ?: return
         // edit only when unlocked or lockedTo myNodeNum
         if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected())
             showEditMarkerDialog(waypoint)
@@ -361,7 +361,7 @@ fun MapView(model: UIViewModel = viewModel()) {
          */
         // Find all waypoints
         fun getCurrentWayPoints(): List<MarkerWithLabel> {
-            BuildUtils.debug("Showing on map: ${wayPt.size} waypoints")
+            debug("Showing on map: ${wayPt.size} waypoints")
             val wayPoint = wayPt.map { pt ->
                 lateinit var marker: MarkerWithLabel
                 pt.data.waypoint?.let {
@@ -391,7 +391,7 @@ fun MapView(model: UIViewModel = viewModel()) {
     fun onNodesChanged(nodes: Collection<NodeInfo>) {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
         val ic = ContextCompat.getDrawable(context, R.drawable.ic_baseline_location_on_24)
-        BuildUtils.debug("Showing on map: ${nodesWithPosition.size} nodes")
+        debug("Showing on map: ${nodesWithPosition.size} nodes")
         nodePositions = nodesWithPosition.map { node ->
             val (p, u) = Pair(node.position!!, node.user!!)
             val marker = MarkerWithLabel(map, "${u.longName} ${formatAgo(p.time)}")
@@ -463,10 +463,10 @@ fun MapView(model: UIViewModel = viewModel()) {
 
                 val dialog = createEditDialog(context, context.getString(R.string.waypoint_new))
                 dialog.builder.setNeutralButton(R.string.cancel) { _, _ ->
-                    BuildUtils.debug("User canceled marker create dialog")
+                    debug("User canceled marker create dialog")
                 }
                 dialog.builder.setPositiveButton(R.string.send) { _, _ ->
-                    BuildUtils.debug("User created waypoint")
+                    debug("User created waypoint")
                     model.sendWaypoint(waypoint {
                         name = dialog.name.ifEmpty { return@setPositiveButton }
                         description = dialog.description
@@ -538,7 +538,7 @@ fun MapView(model: UIViewModel = viewModel()) {
 
     fun loadOnlineTileSourceBase(): ITileSource {
         val id = mPrefs.getInt(mapStyleId, 1)
-        BuildUtils.debug("mapStyleId from prefs: $id")
+        debug("mapStyleId from prefs: $id")
         return CustomTileSource.mTileSources.getOrNull(id) ?: CustomTileSource.DEFAULT_TILE_SOURCE
     }
 
@@ -676,7 +676,7 @@ fun MapView(model: UIViewModel = viewModel()) {
                         try {
                             val cacheManager = CacheManager(map, writer) // Make sure cacheManager has latest from map
                         } catch (ex: TileSourcePolicyException) {
-                            BuildUtils.debug("Tile source does not allow archiving: ${ex.message}")
+                            debug("Tile source does not allow archiving: ${ex.message}")
                             return
                         }
                         //this triggers the download
@@ -745,7 +745,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         /// Load preferences and its value
         val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
         builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
-            BuildUtils.debug("Set mapStyleId pref to $which")
+            debug("Set mapStyleId pref to $which")
             val editor: SharedPreferences.Editor = mPrefs.edit()
             editor.putInt(mapStyleId, which)
             editor.apply()
