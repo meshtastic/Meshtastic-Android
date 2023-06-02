@@ -354,38 +354,27 @@ fun MapView(model: UIViewModel = viewModel()) {
     fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) context.getString(R.string.you)
     else model.nodeDB.nodes.value?.get(id)?.user?.longName ?: context.getString(R.string.unknown_username)
 
-    fun onWaypointChanged(wayPt: Collection<Packet>) {
-
-        /**
-         * Using the latest waypoint, generate GeoPoint
-         */
-        // Find all waypoints
-        fun getCurrentWayPoints(): List<MarkerWithLabel> {
-            debug("Showing on map: ${wayPt.size} waypoints")
-            val wayPoint = wayPt.map { pt ->
-                lateinit var marker: MarkerWithLabel
-                pt.data.waypoint?.let {
-                    val lock = if (it.lockedTo != 0) "\uD83D\uDD12" else ""
-                    val time = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-                        .format(pt.received_time)
-                    val label = it.name + " " + formatAgo((pt.received_time / 1000).toInt())
-                    val emoji = String(Character.toChars(if (it.icon == 0) 128205 else it.icon))
-                    marker = MarkerWithLabel(map, label, emoji)
-                    marker.id = "${it.id}"
-                    marker.title = "${it.name} (${getUsername(pt.data.from)}$lock)"
-                    marker.snippet = "[$time] " + it.description
-                    marker.position = GeoPoint(it.latitudeI * 1e-7, it.longitudeI * 1e-7)
-                    marker.setVisible(false)
-                    marker.setOnLongClickListener {
-                        showMarkerLongPressDialog(it.id)
-                        true
-                    }
-                }
-                marker
+    fun onWaypointChanged(waypoints: Collection<Packet>) {
+        debug("Showing on map: ${waypoints.size} waypoints")
+        waypointMarkers = waypoints.mapNotNull { waypoint ->
+            val pt = waypoint.data.waypoint ?: return@mapNotNull null
+            val lock = if (pt.lockedTo != 0) "\uD83D\uDD12" else ""
+            val time = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+                .format(waypoint.received_time)
+            val label = pt.name + " " + formatAgo((waypoint.received_time / 1000).toInt())
+            val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
+            val marker = MarkerWithLabel(map, label, emoji)
+            marker.id = "${pt.id}"
+            marker.title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
+            marker.snippet = "[$time] " + pt.description
+            marker.position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
+            marker.setVisible(false)
+            marker.setOnLongClickListener {
+                showMarkerLongPressDialog(pt.id)
+                true
             }
-            return wayPoint
+            marker
         }
-        waypointMarkers = getCurrentWayPoints()
     }
 
     fun onNodesChanged(nodes: Collection<NodeInfo>) {
