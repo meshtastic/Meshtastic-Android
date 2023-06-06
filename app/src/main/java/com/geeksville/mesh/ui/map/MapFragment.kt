@@ -1,23 +1,17 @@
 package com.geeksville.mesh.ui.map
 
-import android.app.AlertDialog
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
-import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.TextView
 import android.widget.Toast
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.ComposeView
@@ -34,8 +27,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
@@ -153,6 +144,8 @@ fun MapView(model: UIViewModel = viewModel()) {
         }
     }
     var canDownload: Boolean by remember { mutableStateOf(false) }
+    var mapStyleButtonVisibility by remember { mutableStateOf(false) }
+    var cacheLayoutVisibility by remember { mutableStateOf(false) }
     var showMarkerLongPressDialog: Int? by remember { mutableStateOf(null) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
     var showDownloadRegionBoundingBox by remember { mutableStateOf(false) } // FIXME
@@ -223,6 +216,25 @@ fun MapView(model: UIViewModel = viewModel()) {
             }
             .show()
     }
+    fun downloadJobAlert() {
+        //prompt for input params .
+        canDownload = false
+        mapStyleButtonVisibility = false
+        cacheLayoutVisibility = false
+        val builder = MaterialAlertDialogBuilder(context)
+//        box5miles.setOnClickListener { generateBoxOverlay(zoomLevelLowest) }
+//        box10miles.setOnClickListener { generateBoxOverlay(zoomLevelMiddle) }
+//        box15miles.setOnClickListener { generateBoxOverlay(zoomLevelHighest) }
+//        cacheEstimate = binding.cacheEstimate
+//        generateBoxOverlay(zoomLevelLowest)
+//        binding.executeJob.setOnClickListener { updateEstimate() }
+//        binding.cancelDownload.setOnClickListener {
+//            cacheEstimate.text = ""
+//            defaultMapSettings()
+//
+//        }
+        builder.setCancelable(true)
+    }
 
     fun showCacheManagerDialog() {
         MaterialAlertDialogBuilder(context)
@@ -248,6 +260,59 @@ fun MapView(model: UIViewModel = viewModel()) {
             }.show()
     }
 
+    fun downloadRegion(
+        cacheManager: CacheManager,
+        writer: SqliteArchiveTileWriter,
+        bb: BoundingBox,
+        zoomMin: Int,
+        zoommax: Int
+    ) {
+        cacheManager.downloadAreaAsync(
+            context,
+            bb,
+            zoomMin,
+            zoommax,
+            object : CacheManager.CacheManagerCallback {
+                override fun onTaskComplete() {
+                    Toast.makeText(
+                        context,
+                        R.string.map_download_complete,
+                        Toast.LENGTH_LONG
+                    )
+                        .show()
+                    writer.onDetach()
+                    //defaultMapSettings()
+                }
+
+                override fun onTaskFailed(errors: Int) {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.map_download_errors).format(errors),
+                        Toast.LENGTH_LONG
+                    ).show()
+                    writer.onDetach()
+                    // defaultMapSettings()
+                }
+
+                override fun updateProgress(
+                    progress: Int,
+                    currentZoomLevel: Int,
+                    zoomMin: Int,
+                    zoomMax: Int
+                ) {
+                    //NOOP since we are using the build in UI
+                }
+
+                override fun downloadStarted() {
+                    //NOOP since we are using the build in UI
+                }
+
+                override fun setPossibleTilesInArea(total: Int) {
+                    //NOOP since we are using the build in UI
+                }
+            })
+    }
+
     data class DialogBuilder(
         val builder: MaterialAlertDialogBuilder,
         val nameInput: EditText,
@@ -263,7 +328,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         val layout = LayoutInflater.from(context).inflate(R.layout.dialog_add_waypoint, null)
 
         val nameInput: EditText = layout.findViewById(R.id.waypointName)
-        val descInput: EditText= layout.findViewById(R.id.waypointDescription)
+        val descInput: EditText = layout.findViewById(R.id.waypointDescription)
         val lockedSwitch: SwitchMaterial = layout.findViewById(R.id.waypointLocked)
 
         builder.setTitle(title)
@@ -331,28 +396,9 @@ fun MapView(model: UIViewModel = viewModel()) {
             showDeleteMarkerDialog(waypoint)
     }
 
-//    fun downloadJobAlert() {
-//        //prompt for input params .
-//        binding.downloadButton.hide()
-//        binding.mapStyleButton.visibility = View.GONE
-//        binding.cacheLayout.visibility = View.VISIBLE
-//        val builder = MaterialAlertDialogBuilder(context)
-//        binding.box5miles.setOnClickListener{ generateBoxOverlay(zoomLevelLowest) }
-//        binding.box10miles.setOnClickListener { generateBoxOverlay(zoomLevelMiddle) }
-//        binding.box15miles.setOnClickListener { generateBoxOverlay(zoomLevelHighest) }
-//        cacheEstimate = binding.cacheEstimate
-//        generateBoxOverlay(zoomLevelLowest)
-//        binding.executeJob.setOnClickListener { updateEstimate() }
-//        binding.cancelDownload.setOnClickListener {
-//            cacheEstimate.text = ""
-//            defaultMapSettings()
-//
-//        }
-//        builder.setCancelable(true)
-//    }
-
     fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) context.getString(R.string.you)
-    else model.nodeDB.nodes.value?.get(id)?.user?.longName ?: context.getString(R.string.unknown_username)
+    else model.nodeDB.nodes.value?.get(id)?.user?.longName
+        ?: context.getString(R.string.unknown_username)
 
     fun onWaypointChanged(waypoints: Collection<Packet>) {
         debug("Showing on map: ${waypoints.size} waypoints")
@@ -584,76 +630,12 @@ fun MapView(model: UIViewModel = viewModel()) {
                 drawOverlays()
             }
 
-            fun downloadRegion(bb: BoundingBox, zoommin: Int, zoommax: Int) {
-                cacheManager.downloadAreaAsync(
-                    context,
-                    bb,
-                    zoommin,
-                    zoommax,
-                    object : CacheManager.CacheManagerCallback {
-                        override fun onTaskComplete() {
-                            Toast.makeText(context, R.string.map_download_complete, Toast.LENGTH_LONG)
-                                .show()
-                            writer.onDetach()
-                            defaultMapSettings()
-                        }
-
-                        override fun onTaskFailed(errors: Int) {
-                            Toast.makeText(
-                                context,
-                                context.getString(R.string.map_download_errors).format(errors),
-                                Toast.LENGTH_LONG
-                            ).show()
-                            writer.onDetach()
-                            defaultMapSettings()
-                        }
-
-                        override fun updateProgress(
-                            progress: Int,
-                            currentZoomLevel: Int,
-                            zoomMin: Int,
-                            zoomMax: Int
-                        ) {
-                            //NOOP since we are using the build in UI
-                        }
-
-                        override fun downloadStarted() {
-                            //NOOP since we are using the build in UI
-                        }
-
-                        override fun setPossibleTilesInArea(total: Int) {
-                            //NOOP since we are using the build in UI
-                        }
-                    })
-            }
-
             /**
              * if true, start the job
              * if false, just update the dialog box
              */
             fun updateEstimate() {
-                try {
-                    if (showDownloadRegionBoundingBox) {
-                        val outputName =
-                            Configuration.getInstance().osmdroidBasePath.absolutePath + File.separator + "mainFile.sqlite" // TODO: Accept filename input param from user
-                        writer = SqliteArchiveTileWriter(outputName)
-                        //nesw
-                        try {
-                            val cacheManager = CacheManager(map, writer) // Make sure cacheManager has latest from map
-                        } catch (ex: TileSourcePolicyException) {
-                            debug("Tile source does not allow archiving: ${ex.message}")
-                            return
-                        }
-                        //this triggers the download
-                        downloadRegion(
-                            downloadRegionBoundingBox,
-                            zoomLevelMax.toInt(),
-                            zoomLevelMin.toInt(),
-                        )
-                    }
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                }
+
             }
 
             setupMapProperties()
@@ -685,11 +667,37 @@ fun MapView(model: UIViewModel = viewModel()) {
     DownloadButton(
         cacheMenu = {
             CacheLayout(onExecuteJob = {
-                updateEstimate()
+                try {
+                    if (showDownloadRegionBoundingBox) {
+                        val outputName =
+                            Configuration.getInstance().osmdroidBasePath.absolutePath + File.separator + "mainFile.sqlite" // TODO: Accept filename input param from user
+                        writer = SqliteArchiveTileWriter(outputName)
+                        downloadRegionBoundingBox = map.boundingBox // FIXME
+                        //nesw
+                        try {
+                            val cacheManager = CacheManager(
+                                map,
+                                writer
+                            ) // Make sure cacheManager has latest from map
+                            //this triggers the download
+                            downloadRegion(
+                                cacheManager,
+                                writer,
+                                downloadRegionBoundingBox,
+                                zoomLevelMax.toInt(),
+                                zoomLevelMin.toInt(),
+                            )
+                        } catch (ex: TileSourcePolicyException) {
+                            debug("Tile source does not allow archiving: ${ex.message}")
+                        }
+                    }
+                } catch (ex: Exception) {
+                    ex.printStackTrace()
+                }
             },
                 onCancelDownload = {
                     cacheEstimate = ""
-                    defaultMapSettings()
+                    //     defaultMapSettings()
                 }
             )
         }, canDownload
