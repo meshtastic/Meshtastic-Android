@@ -16,6 +16,8 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -25,22 +27,19 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.DataPacket
-import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.entity.Packet
-import com.geeksville.mesh.databinding.MapViewBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomOverlayManager
 import com.geeksville.mesh.model.map.CustomTileSource
@@ -49,7 +48,6 @@ import com.geeksville.mesh.ui.ScreenFragment
 import com.geeksville.mesh.ui.map.components.CacheLayout
 import com.geeksville.mesh.ui.map.components.DownloadButton
 import com.geeksville.mesh.ui.map.components.MapStyleButton
-import com.geeksville.mesh.ui.map.components.ToggleButton
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.requiredZoomLevel
 import com.geeksville.mesh.util.formatAgo
@@ -117,7 +115,6 @@ fun MapView(model: UIViewModel = viewModel()) {
     val defaultZoomSpeed = 3000L
     val prefsName = "org.geeksville.osm.prefs"
     val mapStyleId = "map_style_id"
-    var waypoints = mapOf<Int, MeshProtos.Waypoint?>()
     val nodeLayer = 1
 
     // Distance of bottom corner to top corner of bounding box
@@ -150,8 +147,150 @@ fun MapView(model: UIViewModel = viewModel()) {
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
     var showDownloadRegionBoundingBox by remember { mutableStateOf(false) } // FIXME
 
-    var nodeMarkers = listOf<MarkerWithLabel>()
-    var waypointMarkers = listOf<MarkerWithLabel>()
+    fun onNodesChanged(nodes: Collection<NodeInfo>): List<MarkerWithLabel> {
+        val nodesWithPosition = nodes.filter { it.validPosition != null }
+        val ic = ContextCompat.getDrawable(context, R.drawable.ic_baseline_location_on_24)
+        val ourNode = model.ourNodeInfo.value
+        debug("Showing on map: ${nodesWithPosition.size} nodes")
+        return nodesWithPosition.map { node ->
+            val (p, u) = Pair(node.position!!, node.user!!)
+            MarkerWithLabel(map, "${u.longName} ${formatAgo(p.time)}").apply {
+                title = "${u.longName} ${node.batteryStr}"
+                snippet = model.gpsString(p)
+                ourNode?.distanceStr(node)?.let { dist ->
+                    val string = context.getString(R.string.map_subDescription)
+                    subDescription = string.format(ourNode.bearing(node), dist)
+                }
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                position = GeoPoint(p.latitude, p.longitude)
+                icon = ic
+            }
+        }
+    }
+
+    val nodes by model.nodeDB.nodes.observeAsState()
+    val nodeMarkers = remember(nodes) {
+        mutableStateListOf<MarkerWithLabel>().apply {
+            nodes?.values?.let { addAll(onNodesChanged(it)) }
+        }
+    }
+
+    data class DialogBuilder(
+        val builder: MaterialAlertDialogBuilder,
+        val nameInput: EditText,
+        val descInput: EditText,
+        val lockedSwitch: SwitchMaterial,
+    ) {
+        val name get() = nameInput.text.toString().trim()
+        val description get() = descInput.text.toString().trim()
+    }
+
+    fun showDeleteMarkerDialog(waypoint: Waypoint) {
+        val builder = MaterialAlertDialogBuilder(context)
+        builder.setTitle(R.string.waypoint_delete)
+        builder.setNeutralButton(R.string.cancel) { _, _ ->
+            debug("User canceled marker delete dialog")
+        }
+        builder.setNegativeButton(R.string.delete_for_me) { _, _ ->
+            debug("User deleted waypoint ${waypoint.id} for me")
+            model.deleteWaypoint(waypoint.id)
+        }
+        if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected())
+            builder.setPositiveButton(R.string.delete_for_everyone) { _, _ ->
+                debug("User deleted waypoint ${waypoint.id} for everyone")
+                model.sendWaypoint(waypoint.copy { expire = 1 })
+                model.deleteWaypoint(waypoint.id)
+            }
+        val dialog = builder.show()
+        for (button in setOf(
+            androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL,
+            androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE,
+            androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE
+        )) with(dialog.getButton(button)) { textSize = 12F; isAllCaps = false }
+    }
+
+    fun createEditDialog(context: Context, title: String): DialogBuilder {
+        val builder = MaterialAlertDialogBuilder(context)
+        val layout = LayoutInflater.from(context).inflate(R.layout.dialog_add_waypoint, null)
+
+        val nameInput: EditText = layout.findViewById(R.id.waypointName)
+        val descInput: EditText = layout.findViewById(R.id.waypointDescription)
+        val lockedSwitch: SwitchMaterial = layout.findViewById(R.id.waypointLocked)
+
+        builder.setTitle(title)
+        builder.setView(layout)
+
+        return DialogBuilder(builder, nameInput, descInput, lockedSwitch)
+    }
+
+    fun showEditMarkerDialog(waypoint: Waypoint) {
+        val dialog = createEditDialog(context, context.getString(R.string.waypoint_edit))
+        dialog.nameInput.setText(waypoint.name)
+        dialog.descInput.setText(waypoint.description)
+        dialog.lockedSwitch.isEnabled = false
+        dialog.lockedSwitch.isChecked = waypoint.lockedTo != 0
+        dialog.builder.setNeutralButton(R.string.cancel) { _, _ ->
+            debug("User canceled marker edit dialog")
+        }
+        dialog.builder.setNegativeButton(R.string.delete) { _, _ ->
+            debug("User clicked delete waypoint ${waypoint.id}")
+            showDeleteMarkerDialog(waypoint)
+        }
+        dialog.builder.setPositiveButton(R.string.send) { _, _ ->
+            debug("User edited waypoint ${waypoint.id}")
+            model.sendWaypoint(waypoint.copy {
+                name = dialog.name.ifEmpty { return@setPositiveButton }
+                description = dialog.description
+                expire = Int.MAX_VALUE // TODO add expire picker
+                icon = 0 // TODO add emoji picker
+            })
+        }
+        dialog.builder.show()
+    }
+
+    fun showMarkerLongPressDialog(id: Int) {
+        debug("marker long pressed id=${id}")
+        val waypoint = model.waypoints.value?.get(id)?.data?.waypoint ?: return
+        // edit only when unlocked or lockedTo myNodeNum
+        if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected())
+            showEditMarkerDialog(waypoint)
+        else
+            showDeleteMarkerDialog(waypoint)
+    }
+
+    fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) context.getString(R.string.you)
+    else model.nodeDB.nodes.value?.get(id)?.user?.longName
+        ?: context.getString(R.string.unknown_username)
+
+    fun onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
+        debug("Showing on map: ${waypoints.size} waypoints")
+        return waypoints.mapNotNull { waypoint ->
+            val pt = waypoint.data.waypoint ?: return@mapNotNull null
+            val lock = if (pt.lockedTo != 0) "\uD83D\uDD12" else ""
+            val time = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+                .format(waypoint.received_time)
+            val label = pt.name + " " + formatAgo((waypoint.received_time / 1000).toInt())
+            val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
+            MarkerWithLabel(map, label, emoji).apply {
+                id = "${pt.id}"
+                title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
+                snippet = "[$time] " + pt.description
+                position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
+                setVisible(false)
+                setOnLongClickListener {
+                    showMarkerLongPressDialog(pt.id)
+                    true
+                }
+            }
+        }
+    }
+
+    val waypoints by model.waypoints.observeAsState()
+    val waypointMarkers = remember(waypoints) {
+        mutableStateListOf<MarkerWithLabel>().apply {
+            waypoints?.values?.let { addAll(onWaypointChanged(it)) }
+        }
+    }
 
     fun purgeTileSource() {
         cache = SqlTileWriterExt()
@@ -196,6 +335,7 @@ fun MapView(model: UIViewModel = viewModel()) {
     }
 
     LaunchedEffect(showCurrentCacheInfo) {
+        if (!showCurrentCacheInfo) return@LaunchedEffect
         Toast.makeText(context, R.string.calculating, Toast.LENGTH_SHORT).show()
         val cacheManager = CacheManager(map) // Make sure CacheManager has latest from map
         val cacheCapacity = cacheManager.cacheCapacity()
@@ -313,139 +453,6 @@ fun MapView(model: UIViewModel = viewModel()) {
             })
     }
 
-    data class DialogBuilder(
-        val builder: MaterialAlertDialogBuilder,
-        val nameInput: EditText,
-        val descInput: EditText,
-        val lockedSwitch: SwitchMaterial,
-    ) {
-        val name get() = nameInput.text.toString().trim()
-        val description get() = descInput.text.toString().trim()
-    }
-
-    fun createEditDialog(context: Context, title: String): DialogBuilder {
-        val builder = MaterialAlertDialogBuilder(context)
-        val layout = LayoutInflater.from(context).inflate(R.layout.dialog_add_waypoint, null)
-
-        val nameInput: EditText = layout.findViewById(R.id.waypointName)
-        val descInput: EditText = layout.findViewById(R.id.waypointDescription)
-        val lockedSwitch: SwitchMaterial = layout.findViewById(R.id.waypointLocked)
-
-        builder.setTitle(title)
-        builder.setView(layout)
-
-        return DialogBuilder(builder, nameInput, descInput, lockedSwitch)
-    }
-
-    fun showDeleteMarkerDialog(waypoint: MeshProtos.Waypoint) {
-        val builder = MaterialAlertDialogBuilder(context)
-        builder.setTitle(R.string.waypoint_delete)
-        builder.setNeutralButton(R.string.cancel) { _, _ ->
-            debug("User canceled marker delete dialog")
-        }
-        builder.setNegativeButton(R.string.delete_for_me) { _, _ ->
-            debug("User deleted waypoint ${waypoint.id} for me")
-            model.deleteWaypoint(waypoint.id)
-        }
-        if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected())
-            builder.setPositiveButton(R.string.delete_for_everyone) { _, _ ->
-                debug("User deleted waypoint ${waypoint.id} for everyone")
-                model.sendWaypoint(waypoint.copy { expire = 1 })
-                model.deleteWaypoint(waypoint.id)
-            }
-        val dialog = builder.show()
-        for (button in setOf(
-            androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL,
-            androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE,
-            androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE
-        )) with(dialog.getButton(button)) { textSize = 12F; isAllCaps = false }
-    }
-
-    fun showEditMarkerDialog(waypoint: MeshProtos.Waypoint) {
-        val dialog = createEditDialog(context, context.getString(R.string.waypoint_edit))
-        dialog.nameInput.setText(waypoint.name)
-        dialog.descInput.setText(waypoint.description)
-        dialog.lockedSwitch.isEnabled = false
-        dialog.lockedSwitch.isChecked = waypoint.lockedTo != 0
-        dialog.builder.setNeutralButton(R.string.cancel) { _, _ ->
-            debug("User canceled marker edit dialog")
-        }
-        dialog.builder.setNegativeButton(R.string.delete) { _, _ ->
-            debug("User clicked delete waypoint ${waypoint.id}")
-            showDeleteMarkerDialog(waypoint)
-        }
-        dialog.builder.setPositiveButton(R.string.send) { _, _ ->
-            debug("User edited waypoint ${waypoint.id}")
-            model.sendWaypoint(waypoint.copy {
-                name = dialog.name.ifEmpty { return@setPositiveButton }
-                description = dialog.description
-                expire = Int.MAX_VALUE // TODO add expire picker
-                icon = 0 // TODO add emoji picker
-            })
-        }
-        dialog.builder.show()
-    }
-
-    fun showMarkerLongPressDialog(id: Int) {
-        debug("marker long pressed id=${id}")
-        val waypoint = model.waypoints.value?.get(id)?.data?.waypoint ?: return
-        // edit only when unlocked or lockedTo myNodeNum
-        if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected())
-            showEditMarkerDialog(waypoint)
-        else
-            showDeleteMarkerDialog(waypoint)
-    }
-
-    fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) context.getString(R.string.you)
-    else model.nodeDB.nodes.value?.get(id)?.user?.longName
-        ?: context.getString(R.string.unknown_username)
-
-    fun onWaypointChanged(waypoints: Collection<Packet>) {
-        debug("Showing on map: ${waypoints.size} waypoints")
-        waypointMarkers = waypoints.mapNotNull { waypoint ->
-            val pt = waypoint.data.waypoint ?: return@mapNotNull null
-            val lock = if (pt.lockedTo != 0) "\uD83D\uDD12" else ""
-            val time = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-                .format(waypoint.received_time)
-            val label = pt.name + " " + formatAgo((waypoint.received_time / 1000).toInt())
-            val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
-            val marker = MarkerWithLabel(map, label, emoji)
-            marker.id = "${pt.id}"
-            marker.title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
-            marker.snippet = "[$time] " + pt.description
-            marker.position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
-            marker.setVisible(false)
-            marker.setOnLongClickListener {
-                showMarkerLongPressDialog(pt.id)
-                true
-            }
-            marker
-        }
-    }
-
-    fun onNodesChanged(nodes: Collection<NodeInfo>) {
-        val nodesWithPosition = nodes.filter { it.validPosition != null }
-        val ic = ContextCompat.getDrawable(context, R.drawable.ic_baseline_location_on_24)
-        debug("Showing on map: ${nodesWithPosition.size} nodes")
-        nodeMarkers = nodesWithPosition.map { node ->
-            val (p, u) = Pair(node.position!!, node.user!!)
-            val marker = MarkerWithLabel(map, "${u.longName} ${formatAgo(p.time)}")
-            marker.title = "${u.longName} ${node.batteryStr}"
-            marker.snippet = model.gpsString(p)
-            model.ourNodeInfo.value?.let { our ->
-                our.distanceStr(node)?.let { dist ->
-                    marker.subDescription = context.getString(R.string.map_subDescription)
-                        .format(our.bearing(node), dist)
-                }
-            }
-            marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-            marker.position = GeoPoint(p.latitude, p.longitude)
-            marker.icon = ic
-            marker
-        }
-    }
-
-
     /**
      * Create LatLong Grid line overlay
      * @param enabled: turn on/off gridlines
@@ -480,13 +487,13 @@ fun MapView(model: UIViewModel = viewModel()) {
         }
     }
 
-    fun drawOverlays() {
-        map.overlayManager.overlays().clear()
+    fun drawOverlays() = map.apply {
+        overlayManager.overlays().clear()
         addCopyright()  // Copyright is required for certain map sources
         createLatLongGrid(false)
-        map.overlayManager.addAll(nodeLayer, nodeMarkers)
-        map.overlayManager.addAll(nodeLayer, waypointMarkers)
-        map.overlayManager.add(nodeLayer, MapEventsOverlay(object : MapEventsReceiver {
+        overlayManager.addAll(nodeLayer, nodeMarkers)
+        overlayManager.addAll(nodeLayer, waypointMarkers)
+        overlayManager.add(nodeLayer, MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
                 InfoWindow.closeAllInfoWindowsOn(map)
                 return true
@@ -517,7 +524,7 @@ fun MapView(model: UIViewModel = viewModel()) {
                 return true
             }
         }))
-        map.invalidate()
+        invalidate()
     }
 
 //    private fun addWeatherLayer() {
@@ -553,116 +560,92 @@ fun MapView(model: UIViewModel = viewModel()) {
         return CustomTileSource.mTileSources.getOrNull(id) ?: CustomTileSource.DEFAULT_TILE_SOURCE
     }
 
-    Scaffold() { innerPadding ->
-        AndroidView({ map }, modifier = Modifier
-            .padding(innerPadding)
-            .fillMaxHeight()
-            .testTag("Meshtastic Map")
-            .semantics { }
-        ) { map ->
-            val mapController = map.controller
-            // Required to get online tiles
-            Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
-
-            /**
-             * Creates Box overlay showing what area can be downloaded
-             */
-            fun generateBoxOverlay(zoomLevel: Double) {
-                drawOverlays()
-                map.setMultiTouchControls(false)
-                // furthest back
-                zoomLevelMax = zoomLevel
-                // furthest in min should be > than max
-                zoomLevelMin = map.tileProvider.tileSource.maximumZoomLevel.toDouble()
-                mapController.setZoom(zoomLevel)
-                downloadRegionBoundingBox = map.boundingBox
-                val polygon = Polygon().apply {
-                    points = Polygon.pointsAsRect(downloadRegionBoundingBox)
-                        .map { GeoPoint(it.latitude, it.longitude) }
-                }
-                map.overlayManager.add(polygon)
-                mapController.setZoom(zoomLevel - 1.0)
-                val cacheManager = CacheManager(map)
-                val tileCount: Int =
-                    cacheManager.possibleTilesInArea(
-                        downloadRegionBoundingBox,
-                        zoomLevelMax.toInt(),
-                        zoomLevelMin.toInt()
-                    )
-                cacheEstimate = context.getString(R.string.map_cache_tiles).format(tileCount)
+    /**
+     * Creates Box overlay showing what area can be downloaded
+     */
+    fun generateBoxOverlay(zoomLevel: Double) = map.apply {
+        overlayManager = CustomOverlayManager.disableDoubleTap(map, context) // disable double tap
+        setMultiTouchControls(false)
+        // furthest back
+        zoomLevelMax = zoomLevel
+        // furthest in min should be > than max
+        zoomLevelMin = map.tileProvider.tileSource.maximumZoomLevel.toDouble()
+        controller.setZoom(zoomLevel)
+        downloadRegionBoundingBox = map.boundingBox
+        val polygon = Polygon().apply {
+            points = Polygon.pointsAsRect(downloadRegionBoundingBox).map {
+                GeoPoint(it.latitude, it.longitude)
             }
-
-            fun setupMapProperties() {
-                map.setDestroyMode(false) // keeps map instance alive when in the background.
-                map.isVerticalMapRepetitionEnabled = false // disables map repetition
-                map.overlayManager = CustomOverlayManager.create(map, context)
-                map.setScrollableAreaLimitLatitude(
-                    map.overlayManager.tilesOverlay.bounds.actualNorth,
-                    map.overlayManager.tilesOverlay.bounds.actualSouth,
-                    0
-                ) // bounds scrollable map
-                map.isTilesScaledToDpi =
-                    true // scales the map tiles to the display density of the screen
-                map.minZoomLevel =
-                    defaultMinZoom // sets the minimum zoom level (the furthest out you can zoom)
-                map.maxZoomLevel = defaultMaxZoom
-                map.setMultiTouchControls(true) // Sets gesture controls to true.
-                map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
-                map.addMapListener(object : MapListener {
-                    override fun onScroll(event: ScrollEvent): Boolean {
-                        if (showDownloadRegionBoundingBox) { // TODO double check if this boolean works here
-                            generateBoxOverlay(zoomLevelMax)
-                        }
-                        return true
-                    }
-
-                    override fun onZoom(event: ZoomEvent): Boolean {
-                        return false
-                    }
-                })
-            }
-
-            /**
-             * Reset map to default settings & visible buttons
-             */
-            fun defaultMapSettings() {
-                setupMapProperties()
-                drawOverlays()
-            }
-
-            /**
-             * if true, start the job
-             * if false, just update the dialog box
-             */
-            fun updateEstimate() {
-
-            }
-
-            setupMapProperties()
-
-            canDownload =
-                (map.tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()
-            map.setTileSource(loadOnlineTileSourceBase())
-//                if (binding.cacheLayout.visibility == View.GONE) {
-//                    model.nodeDB.nodes.value?.let { nodes ->
-//                        onNodesChanged(nodes.values)
-//                        drawOverlays()
-//                    }
-//                }
-//                if (binding.cacheLayout.visibility == View.GONE) {
-//                    model.nodeDB.nodes.observe(viewLifecycleOwner) { nodes ->
-//                        onNodesChanged(nodes.values)
-//                        drawOverlays()
-//                    }
-//                    model.waypoints.observe(viewLifecycleOwner) {
-//                        debug("New waypoints received: ${it.size}")
-//                        waypoints = it.mapValues { p -> p.value.data.waypoint }
-//                        onWaypointChanged(it.values)
-//                        drawOverlays()
-//                    }
-//                }
-            zoomToNodes(mapController)
         }
+        overlayManager.add(polygon)
+        controller.setZoom(zoomLevel - 1.0)
+        val tileCount: Int = CacheManager(map).possibleTilesInArea(
+            downloadRegionBoundingBox,
+            zoomLevelMax.toInt(),
+            zoomLevelMin.toInt()
+        )
+        cacheEstimate = context.getString(R.string.map_cache_tiles).format(tileCount)
+    }
+
+    /**
+     * Reset map to default settings & visible buttons
+     */
+    fun defaultMapSettings() = map.apply {
+        setTileSource(loadOnlineTileSourceBase())
+        setDestroyMode(false) // keeps map instance alive when in the background.
+        isVerticalMapRepetitionEnabled = false // disables map repetition
+        overlayManager = CustomOverlayManager.default(map, context)
+        setScrollableAreaLimitLatitude( // bounds scrollable map
+            overlayManager.tilesOverlay.bounds.actualNorth,
+            overlayManager.tilesOverlay.bounds.actualSouth,
+            0
+        )
+        isTilesScaledToDpi = true // scales the map tiles to the display density of the screen
+        minZoomLevel = defaultMinZoom // sets the minimum zoom level (the furthest out you can zoom)
+        maxZoomLevel = defaultMaxZoom
+        setMultiTouchControls(true) // Sets gesture controls to true.
+        zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
+        addMapListener(object : MapListener {
+            override fun onScroll(event: ScrollEvent): Boolean {
+                if (showDownloadRegionBoundingBox) { // TODO double check if this boolean works here
+                    generateBoxOverlay(zoomLevelMax)
+                }
+                return true
+            }
+
+            override fun onZoom(event: ZoomEvent): Boolean {
+                return false
+            }
+        })
+        canDownload =
+            (tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()
+    }
+
+    /**
+     * if true, start the job
+     * if false, just update the dialog box
+     */
+    fun updateEstimate() {
+
+    }
+
+    Scaffold(
+        // floatingActionButton = ,
+    ) { innerPadding ->
+        AndroidView(
+            factory = {
+                map.apply {
+                    // Required to get online tiles
+                    Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
+                    defaultMapSettings()
+                    zoomToNodes(controller)
+                }
+            },
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxHeight(),
+            update = { drawOverlays() },
+        )
     }
     DownloadButton(
         cacheMenu = {
@@ -697,7 +680,7 @@ fun MapView(model: UIViewModel = viewModel()) {
             },
                 onCancelDownload = {
                     cacheEstimate = ""
-                    //     defaultMapSettings()
+                    defaultMapSettings()
                 }
             )
         }, canDownload
