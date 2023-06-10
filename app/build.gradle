@@ -126,6 +126,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$appcompat_version"
     // For loading and tinting drawables on older versions of the platform
     implementation "androidx.appcompat:appcompat-resources:$appcompat_version"
+    implementation "androidx.emoji2:emoji2-emojipicker:1.4.0-beta05"
 
     implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.fragment:fragment-ktx:1.5.7'
@@ -207,8 +208,8 @@ dependencies {
 
     // Coroutines
     def coroutines_version = '1.7.1'
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-guava:$coroutines_version"
 
     // For now I'm not using javalite, because I want JSON printing
     implementation "com.google.protobuf:protobuf-kotlin:$protobuf_version"

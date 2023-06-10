@@ -1,14 +1,12 @@
 package com.geeksville.mesh.ui.map
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
@@ -47,6 +45,7 @@ import com.geeksville.mesh.model.map.MarkerWithLabel
 import com.geeksville.mesh.ui.ScreenFragment
 import com.geeksville.mesh.ui.map.components.CacheLayout
 import com.geeksville.mesh.ui.map.components.DownloadButton
+import com.geeksville.mesh.ui.map.components.EditWaypointDialog
 import com.geeksville.mesh.ui.map.components.MapStyleButton
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.requiredZoomLevel
@@ -54,7 +53,6 @@ import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.waypoint
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.switchmaterial.SwitchMaterial
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
@@ -143,7 +141,7 @@ fun MapView(model: UIViewModel = viewModel()) {
     var canDownload: Boolean by remember { mutableStateOf(false) }
     var mapStyleButtonVisibility by remember { mutableStateOf(false) }
     var cacheLayoutVisibility by remember { mutableStateOf(false) }
-    var showMarkerLongPressDialog: Int? by remember { mutableStateOf(null) }
+    var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
     var showDownloadRegionBoundingBox by remember { mutableStateOf(false) } // FIXME
 
@@ -175,16 +173,6 @@ fun MapView(model: UIViewModel = viewModel()) {
         }
     }
 
-    data class DialogBuilder(
-        val builder: MaterialAlertDialogBuilder,
-        val nameInput: EditText,
-        val descInput: EditText,
-        val lockedSwitch: SwitchMaterial,
-    ) {
-        val name get() = nameInput.text.toString().trim()
-        val description get() = descInput.text.toString().trim()
-    }
-
     fun showDeleteMarkerDialog(waypoint: Waypoint) {
         val builder = MaterialAlertDialogBuilder(context)
         builder.setTitle(R.string.waypoint_delete)
@@ -209,51 +197,12 @@ fun MapView(model: UIViewModel = viewModel()) {
         )) with(dialog.getButton(button)) { textSize = 12F; isAllCaps = false }
     }
 
-    fun createEditDialog(context: Context, title: String): DialogBuilder {
-        val builder = MaterialAlertDialogBuilder(context)
-        val layout = LayoutInflater.from(context).inflate(R.layout.dialog_add_waypoint, null)
-
-        val nameInput: EditText = layout.findViewById(R.id.waypointName)
-        val descInput: EditText = layout.findViewById(R.id.waypointDescription)
-        val lockedSwitch: SwitchMaterial = layout.findViewById(R.id.waypointLocked)
-
-        builder.setTitle(title)
-        builder.setView(layout)
-
-        return DialogBuilder(builder, nameInput, descInput, lockedSwitch)
-    }
-
-    fun showEditMarkerDialog(waypoint: Waypoint) {
-        val dialog = createEditDialog(context, context.getString(R.string.waypoint_edit))
-        dialog.nameInput.setText(waypoint.name)
-        dialog.descInput.setText(waypoint.description)
-        dialog.lockedSwitch.isEnabled = false
-        dialog.lockedSwitch.isChecked = waypoint.lockedTo != 0
-        dialog.builder.setNeutralButton(R.string.cancel) { _, _ ->
-            debug("User canceled marker edit dialog")
-        }
-        dialog.builder.setNegativeButton(R.string.delete) { _, _ ->
-            debug("User clicked delete waypoint ${waypoint.id}")
-            showDeleteMarkerDialog(waypoint)
-        }
-        dialog.builder.setPositiveButton(R.string.send) { _, _ ->
-            debug("User edited waypoint ${waypoint.id}")
-            model.sendWaypoint(waypoint.copy {
-                name = dialog.name.ifEmpty { return@setPositiveButton }
-                description = dialog.description
-                expire = Int.MAX_VALUE // TODO add expire picker
-                icon = 0 // TODO add emoji picker
-            })
-        }
-        dialog.builder.show()
-    }
-
     fun showMarkerLongPressDialog(id: Int) {
         debug("marker long pressed id=${id}")
         val waypoint = model.waypoints.value?.get(id)?.data?.waypoint ?: return
         // edit only when unlocked or lockedTo myNodeNum
         if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected())
-            showEditMarkerDialog(waypoint)
+            showEditWaypointDialog = waypoint
         else
             showDeleteMarkerDialog(waypoint)
     }
@@ -503,24 +452,10 @@ fun MapView(model: UIViewModel = viewModel()) {
                 performHapticFeedback()
                 if (!model.isConnected()) return true
 
-                val dialog = createEditDialog(context, context.getString(R.string.waypoint_new))
-                dialog.builder.setNeutralButton(R.string.cancel) { _, _ ->
-                    debug("User canceled marker create dialog")
+                showEditWaypointDialog = waypoint {
+                    latitudeI = (p.latitude * 1e7).toInt()
+                    longitudeI = (p.longitude * 1e7).toInt()
                 }
-                dialog.builder.setPositiveButton(R.string.send) { _, _ ->
-                    debug("User created waypoint")
-                    model.sendWaypoint(waypoint {
-                        name = dialog.name.ifEmpty { return@setPositiveButton }
-                        description = dialog.description
-                        id = model.generatePacketId() ?: return@setPositiveButton
-                        latitudeI = (p.latitude * 1e7).toInt()
-                        longitudeI = (p.longitude * 1e7).toInt()
-                        expire = Int.MAX_VALUE // TODO add expire picker
-                        icon = 0 // TODO add emoji picker
-                        lockedTo = if (!dialog.lockedSwitch.isChecked) 0 else model.myNodeNum ?: 0
-                    })
-                }
-                dialog.builder.show()
                 return true
             }
         }))
@@ -647,6 +582,30 @@ fun MapView(model: UIViewModel = viewModel()) {
             update = { drawOverlays() },
         )
     }
+    if (showEditWaypointDialog != null) {
+        EditWaypointDialog(
+            waypoint = showEditWaypointDialog ?: return,
+            onSendClicked = { waypoint ->
+                debug("User clicked send waypoint ${waypoint.id}")
+                showEditWaypointDialog = null
+                model.sendWaypoint(waypoint.copy {
+                    if (id == 0) id = model.generatePacketId() ?: return@EditWaypointDialog // TODO check if needed
+                    expire = Int.MAX_VALUE // TODO add expire picker
+                    lockedTo = if (waypoint.lockedTo != 0) model.myNodeNum ?: 0 else 0
+                })
+
+            },
+            onDeleteClicked = { waypoint ->
+                debug("User clicked delete waypoint ${waypoint.id}")
+                showEditWaypointDialog = null
+                showDeleteMarkerDialog(waypoint)
+            },
+            onDismissRequest = {
+                debug("User clicked cancel marker edit dialog")
+                showEditWaypointDialog = null
+            },
+        )
+    }
     DownloadButton(
         cacheMenu = {
             CacheLayout(onExecuteJob = {
@@ -702,9 +661,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
         builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
             debug("Set mapStyleId pref to $which")
-            val editor: SharedPreferences.Editor = mPrefs.edit()
-            editor.putInt(mapStyleId, which)
-            editor.apply()
+            mPrefs.edit().putInt(mapStyleId, which).apply()
             dialog.dismiss()
             map.setTileSource(loadOnlineTileSourceBase())
             drawOverlays()
