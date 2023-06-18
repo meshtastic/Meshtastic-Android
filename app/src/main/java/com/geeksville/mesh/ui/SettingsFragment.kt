@@ -3,6 +3,7 @@ package com.geeksville.mesh.ui
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.bluetooth.BluetoothDevice
+import android.companion.CompanionDeviceManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -47,7 +48,6 @@ import com.geeksville.mesh.repository.radio.MockInterface
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.SoftwareUpdateService
-import com.geeksville.mesh.util.CompanionDeviceManagerCompat
 import com.geeksville.mesh.util.PendingIntentCompat
 import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.exceptionReporter
@@ -247,7 +247,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             ActivityResultContracts.StartIntentSenderForResult()
         ) {
             it.data
-                ?.getParcelableExtraCompat<BluetoothDevice>(CompanionDeviceManagerCompat.EXTRA_DEVICE)
+                ?.getParcelableExtraCompat<BluetoothDevice>(CompanionDeviceManager.EXTRA_DEVICE)
                 ?.let { device -> onSelected(BTScanModel.BLEDeviceListEntry(device)) }
         }
 

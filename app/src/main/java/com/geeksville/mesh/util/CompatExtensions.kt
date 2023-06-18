@@ -25,15 +25,6 @@ object PendingIntentCompat {
     }
 }
 
-object CompanionDeviceManagerCompat {
-    @SuppressLint("InlinedApi")
-    val EXTRA_DEVICE = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-        CompanionDeviceManager.EXTRA_ASSOCIATION
-    } else {
-        @Suppress("DEPRECATION") CompanionDeviceManager.EXTRA_DEVICE
-    }
-}
-
 inline fun <reified T : Parcelable> Parcel.readParcelableCompat(loader: ClassLoader?): T? =
     ParcelCompat.readParcelable(this, loader, T::class.java)
 
