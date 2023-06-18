@@ -3,6 +3,7 @@ package com.geeksville.mesh.service
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.app.ServiceCompat
@@ -270,7 +271,15 @@ class MeshService : Service(), Logging {
         // but if we don't really need foreground we immediately stop it.
         val notification = serviceNotifications.createServiceStateNotification(notificationSummary)
 
-        startForeground(serviceNotifications.notifyId, notification)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            startForeground(
+                serviceNotifications.notifyId,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
+            )
+        } else {
+            startForeground(serviceNotifications.notifyId, notification)
+        }
         return if (!wantForeground) {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
             START_NOT_STICKY
