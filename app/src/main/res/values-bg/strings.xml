@@ -1,16 +1,4 @@
 <resources>
-    // Language tags native names (not available via .getDisplayLanguage)
-    <string name="fr_HT" translatable="false">Kreyòl ayisyen</string>
-    <string name="pt_BR" translatable="false">Português do Brasil</string>
-
-    <string name="app_name" translatable="false">Meshtastic</string>
-    <string name="sample_distance" translatable="false">2.13 km</string>
-    <string name="some_username" translatable="false">SKH</string>
-    <string name="test_devname1" translatable="false">Meshtastic_ac23</string>
-    <string name="test_devname2" translatable="false">Meshtastic_1267</string>
-    <string name="sample_coords" translatable="false">55.332244 34.442211</string>
-    <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
-
     <string name="channel_name">Име на канал</string>
     <string name="channel_options">Настройки на канал</string>
     <string name="qr_code">QR код</string>
