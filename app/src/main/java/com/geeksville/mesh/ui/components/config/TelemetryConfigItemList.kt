@@ -85,6 +85,26 @@ fun TelemetryConfigItemList(
         item { Divider() }
 
         item {
+            SwitchPreference(title = "Air quality metrics module enabled",
+                checked = telemetryInput.airQualityEnabled,
+                enabled = enabled,
+                onCheckedChange = {
+                    telemetryInput = telemetryInput.copy { airQualityEnabled = it }
+                })
+        }
+        item { Divider() }
+
+        item {
+            EditTextPreference(title = "Air quality metrics update interval (seconds)",
+                value = telemetryInput.airQualityInterval,
+                enabled = enabled,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    telemetryInput = telemetryInput.copy { airQualityInterval = it }
+                })
+        }
+
+        item {
             PreferenceFooter(
                 enabled = telemetryInput != telemetryConfig,
                 onCancelClicked = {
