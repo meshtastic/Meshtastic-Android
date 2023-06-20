@@ -466,7 +466,7 @@ class MeshService : Service(), Logging {
 
     /// Admin channel index
     private val adminChannelIndex: Int
-        get() = channelSet.settingsList.indexOfFirst { it.name.lowercase() == "admin" }
+        get() = channelSet.settingsList.indexOfFirst { it.name.equals("admin", ignoreCase = true) }
             .coerceAtLeast(0)
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
