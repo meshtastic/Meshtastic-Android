@@ -34,6 +34,10 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
         packetDao.updateMessageStatus(d, m)
     }
 
+    suspend fun updateMessageId(d: DataPacket, id: Int) = withContext(Dispatchers.IO) {
+        packetDao.updateMessageId(d, id)
+    }
+
     suspend fun getDataPacketById(requestId: Int) = withContext(Dispatchers.IO) {
         packetDao.getDataPacketById(requestId)
     }
