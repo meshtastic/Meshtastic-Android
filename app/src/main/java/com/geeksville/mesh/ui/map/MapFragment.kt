@@ -561,11 +561,37 @@ fun MapView(model: UIViewModel = viewModel()) {
      * if false, just update the dialog box
      */
     fun updateEstimate() {
-
+        if (showDownloadRegionBoundingBox) try {
+            val outputName =
+                Configuration.getInstance().osmdroidBasePath.absolutePath + File.separator + "mainFile.sqlite" // TODO: Accept filename input param from user
+            writer = SqliteArchiveTileWriter(outputName)
+            downloadRegionBoundingBox = map.boundingBox // FIXME
+            //nesw
+            try {
+                val cacheManager = CacheManager(
+                    map,
+                    writer
+                ) // Make sure cacheManager has latest from map
+                //this triggers the download
+                downloadRegion(
+                    cacheManager,
+                    writer,
+                    downloadRegionBoundingBox,
+                    zoomLevelMax.toInt(),
+                    zoomLevelMin.toInt(),
+                )
+            } catch (ex: TileSourcePolicyException) {
+                debug("Tile source does not allow archiving: ${ex.message}")
+            }
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
     }
 
     Scaffold(
-        // floatingActionButton = ,
+        floatingActionButton = {
+            DownloadButton(canDownload) { showCacheManagerDialog() }
+        },
     ) { innerPadding ->
         AndroidView(
             factory = {
@@ -605,46 +631,6 @@ fun MapView(model: UIViewModel = viewModel()) {
                 showEditWaypointDialog = null
             },
         )
-    }
-    DownloadButton(
-        cacheMenu = {
-            CacheLayout(onExecuteJob = {
-                try {
-                    if (showDownloadRegionBoundingBox) {
-                        val outputName =
-                            Configuration.getInstance().osmdroidBasePath.absolutePath + File.separator + "mainFile.sqlite" // TODO: Accept filename input param from user
-                        writer = SqliteArchiveTileWriter(outputName)
-                        downloadRegionBoundingBox = map.boundingBox // FIXME
-                        //nesw
-                        try {
-                            val cacheManager = CacheManager(
-                                map,
-                                writer
-                            ) // Make sure cacheManager has latest from map
-                            //this triggers the download
-                            downloadRegion(
-                                cacheManager,
-                                writer,
-                                downloadRegionBoundingBox,
-                                zoomLevelMax.toInt(),
-                                zoomLevelMin.toInt(),
-                            )
-                        } catch (ex: TileSourcePolicyException) {
-                            debug("Tile source does not allow archiving: ${ex.message}")
-                        }
-                    }
-                } catch (ex: Exception) {
-                    ex.printStackTrace()
-                }
-            },
-                onCancelDownload = {
-                    cacheEstimate = ""
-                    defaultMapSettings()
-                }
-            )
-        }, canDownload
-    ) {
-        showCacheManagerDialog()
     }
     MapStyleButton {
         val builder = MaterialAlertDialogBuilder(context)
