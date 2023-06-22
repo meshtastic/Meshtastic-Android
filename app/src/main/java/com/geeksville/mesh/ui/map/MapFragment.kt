@@ -150,7 +150,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         val ourNode = model.ourNodeInfo.value
         debug("Showing on map: ${nodesWithPosition.size} nodes")
         return nodesWithPosition.map { node ->
-            val (p, u) = Pair(node.position!!, node.user!!)
+            val (p, u) = node.position!! to node.user!!
             MarkerWithLabel(map, "${u.longName} ${formatAgo(p.time)}").apply {
                 title = "${u.longName} ${node.batteryStr}"
                 snippet = model.gpsString(p)
