@@ -126,7 +126,7 @@ fun MapView(model: UIViewModel = viewModel()) {
 
     // Map Elements
     var writer: SqliteArchiveTileWriter
-    var downloadRegionBoundingBox: BoundingBox
+    var downloadRegionBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
 
     val context = LocalContext.current
     val mPrefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
