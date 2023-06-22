@@ -1,6 +1,6 @@
 package com.geeksville.mesh.ui.map.components
 
-import android.view.View
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,21 +31,19 @@ import com.geeksville.mesh.R
 
 @Composable
 fun CacheLayout(
+    cacheEstimate: String,
     onExecuteJob: () -> Unit,
-    onCancelDownload: () -> Unit
+    onCancelDownload: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var selectedDistance by remember { mutableStateOf(5) }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(16.dp)
-//            .visibility(visibility = if (selectedDistance != -1) {
-//                View.VISIBLE
-//            } else {
-//                View.GONE
-//            })
+            .background(colorResource(R.color.colorAdvancedBackground))
+            .padding(16.dp),
     ) {
         Text(
             text = stringResource(id = R.string.map_select_download_region),
@@ -59,16 +58,16 @@ fun CacheLayout(
         val distances = listOf(5, 10, 15)
         val selectedDistanceIndex = distances.indexOf(selectedDistance)
 
-        ToggleButton(
-            options = distances.map { it.toString() },
-            selectedOptionIndex = selectedDistanceIndex,
-            onOptionSelected = { selectedDistance = distances[it].toInt() }
-        )
+//        ToggleButton(
+//            options = distances.map { it.toString() },
+//            selectedOptionIndex = selectedDistanceIndex,
+//            onOptionSelected = { selectedDistance = distances[it] },
+//        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+//        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = stringResource(id = R.string.map_tile_download_estimate),
+            text = stringResource(R.string.map_tile_download_estimate) + " " + cacheEstimate,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.body1,
@@ -146,12 +145,13 @@ fun ToggleButton(
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun CacheLayoutPreview() {
     CacheLayout(
+        cacheEstimate = "100 tiles",
         onExecuteJob = { },
         onCancelDownload = { }
     )
 }
-

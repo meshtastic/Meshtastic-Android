@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.ComposeView
@@ -105,7 +106,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
 fun MapView(model: UIViewModel = viewModel()) {
 
     // UI Elements
-    var cacheEstimate: String
+    var cacheEstimate by remember { mutableStateOf("") }
     var cache: SqlTileWriterExt?
 
     // constants
@@ -610,6 +611,18 @@ fun MapView(model: UIViewModel = viewModel()) {
                 },
                 modifier = Modifier.fillMaxSize(),
                 update = { if (!showDownloadRegionBoundingBox) drawOverlays() },
+            )
+            if (showDownloadRegionBoundingBox) CacheLayout(
+                cacheEstimate = cacheEstimate,
+                onExecuteJob = {
+                    updateEstimate()
+                },
+                onCancelDownload = {
+                    cacheEstimate = ""
+                    showDownloadRegionBoundingBox = false
+                    defaultMapSettings()
+                },
+                modifier = Modifier.align(Alignment.BottomCenter)
             )
         }
     }
