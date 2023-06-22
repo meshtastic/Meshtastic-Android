@@ -459,7 +459,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         overlayManager = CustomOverlayManager.disableDoubleTap(map, context) // disable double tap
         setMultiTouchControls(false)
         // furthest back
-        zoomLevelMax = zoomLevel
+        zoomLevelMax = zoomLevelHighest // FIXME zoomLevel
         // furthest in min should be > than max
         zoomLevelMin = map.tileProvider.tileSource.maximumZoomLevel.toDouble()
         controller.setZoom(zoomLevel)
