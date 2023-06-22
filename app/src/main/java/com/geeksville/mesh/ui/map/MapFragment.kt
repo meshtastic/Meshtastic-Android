@@ -305,29 +305,6 @@ fun MapView(model: UIViewModel = viewModel()) {
             }
             .show()
     }
-    fun showCacheManagerDialog() {
-        MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.map_offline_manager)
-            .setItems(
-                arrayOf<CharSequence>(
-                    context.getString(R.string.map_cache_size),
-                    context.getString(R.string.map_download_region),
-                    context.getString(R.string.map_clear_tiles),
-                    context.getString(R.string.cancel)
-                )
-            ) { dialog, which ->
-                when (which) {
-                    0 -> showCurrentCacheInfo = true
-                    1 -> {
-                        downloadJobAlert()
-                        dialog.dismiss()
-                    }
-
-                    2 -> purgeTileSource()
-                    else -> dialog.dismiss()
-                }
-            }.show()
-    }
 
     fun downloadRegion(
         cacheManager: CacheManager,
@@ -590,6 +567,32 @@ fun MapView(model: UIViewModel = viewModel()) {
         }
         val dialog = builder.create()
         dialog.show()
+    }
+
+    fun showCacheManagerDialog() {
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.map_offline_manager)
+            .setItems(
+                arrayOf<CharSequence>(
+                    context.getString(R.string.map_cache_size),
+                    context.getString(R.string.map_download_region),
+                    context.getString(R.string.map_clear_tiles),
+                    context.getString(R.string.cancel)
+                )
+            ) { dialog, which ->
+                when (which) {
+                    0 -> showCurrentCacheInfo = true
+                    1 -> {
+                        generateBoxOverlay(zoomLevelHighest)
+                        showDownloadRegionBoundingBox = true
+                        canDownload = false
+                        dialog.dismiss()
+                    }
+
+                    2 -> purgeTileSource()
+                    else -> dialog.dismiss()
+                }
+            }.show()
     }
 
     Scaffold(
