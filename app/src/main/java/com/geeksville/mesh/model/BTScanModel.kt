@@ -1,7 +1,6 @@
 package com.geeksville.mesh.model
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.*
@@ -228,7 +227,7 @@ class BTScanModel @Inject constructor(
     }
 
     private var networkDiscovery: Job? = null
-    fun startScan(activity: Activity?) {
+    fun startScan(context: Context?) {
         _spinner.value = true
 
         // Start Network Service Discovery (find TCP devices)
@@ -236,7 +235,7 @@ class BTScanModel @Inject constructor(
             .onEach { addDevice(TCPDeviceListEntry(it)) }
             .launchIn(viewModelScope)
 
-        if (activity != null) startCompanionScan(activity) else startClassicScan()
+        if (context != null) startCompanionScan(context) else startClassicScan()
     }
 
     @SuppressLint("MissingPermission")
@@ -315,9 +314,9 @@ class BTScanModel @Inject constructor(
     }
 
     @SuppressLint("NewApi")
-    private fun startCompanionScan(activity: Activity) {
+    private fun startCompanionScan(context: Context) {
         debug("starting companion scan")
-        activity.companionDeviceManager?.associate(
+        context.companionDeviceManager?.associate(
             associationRequest(),
             @SuppressLint("NewApi")
             object : CompanionDeviceManager.Callback() {
