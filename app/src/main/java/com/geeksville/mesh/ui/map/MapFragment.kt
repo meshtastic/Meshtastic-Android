@@ -356,13 +356,13 @@ fun MapView(model: UIViewModel = viewModel()) {
         writer: SqliteArchiveTileWriter,
         bb: BoundingBox,
         zoomMin: Int,
-        zoommax: Int
+        zoomMax: Int
     ) {
         cacheManager.downloadAreaAsync(
             context,
             bb,
             zoomMin,
-            zoommax,
+            zoomMax,
             object : CacheManager.CacheManagerCallback {
                 override fun onTaskComplete() {
                     Toast.makeText(
