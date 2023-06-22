@@ -544,7 +544,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
         addMapListener(object : MapListener {
             override fun onScroll(event: ScrollEvent): Boolean {
-                if (showDownloadRegionBoundingBox) { // TODO double check if this boolean works here
+                if (showDownloadRegionBoundingBox) {
                     generateBoxOverlay(zoomLevelMax)
                 }
                 return true
@@ -660,7 +660,7 @@ fun MapView(model: UIViewModel = viewModel()) {
                 debug("User clicked send waypoint ${waypoint.id}")
                 showEditWaypointDialog = null
                 model.sendWaypoint(waypoint.copy {
-                    if (id == 0) id = model.generatePacketId() ?: return@EditWaypointDialog // TODO check if needed
+                    if (id == 0) id = model.generatePacketId() ?: return@EditWaypointDialog
                     expire = Int.MAX_VALUE // TODO add expire picker
                     lockedTo = if (waypoint.lockedTo != 0) model.myNodeNum ?: 0 else 0
                 })
