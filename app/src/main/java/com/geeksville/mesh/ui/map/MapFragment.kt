@@ -107,7 +107,6 @@ fun MapView(model: UIViewModel = viewModel()) {
 
     // UI Elements
     var cacheEstimate by remember { mutableStateOf("") }
-    var cache: SqlTileWriterExt?
 
     // constants
     val defaultMinZoom = 1.5
@@ -242,10 +241,10 @@ fun MapView(model: UIViewModel = viewModel()) {
     }
 
     fun purgeTileSource() {
-        cache = SqlTileWriterExt()
+        val cache = SqlTileWriterExt()
         val builder = MaterialAlertDialogBuilder(context)
         builder.setTitle(R.string.map_tile_source)
-        val sources = cache!!.sources
+        val sources = cache.sources
         val sourceList = mutableListOf<String>()
         for (i in sources.indices) {
             sourceList.add(sources[i].source as String)
@@ -266,13 +265,12 @@ fun MapView(model: UIViewModel = viewModel()) {
         builder.setPositiveButton(R.string.clear) { _, _ ->
             for (x in selectedList) {
                 val item = sources[x]
-                val b = cache!!.purgeCache(item.source)
+                val b = cache.purgeCache(item.source)
                 if (b) Toast.makeText(
                     context,
                     context.getString(R.string.map_purge_success).format(item.source),
                     Toast.LENGTH_SHORT
-                )
-                    .show() else Toast.makeText(
+                ).show() else Toast.makeText(
                     context,
                     R.string.map_purge_fail,
                     Toast.LENGTH_LONG
