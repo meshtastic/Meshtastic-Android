@@ -590,6 +590,30 @@ fun MapView(model: UIViewModel = viewModel()) {
         }
     }
 
+    fun showMapStyleDialog() {
+        val builder = MaterialAlertDialogBuilder(context)
+        val mapStyles = arrayOf<CharSequence>(
+            "OpenStreetMap",
+            "USGS TOPO",
+            "Open TOPO",
+            "ESRI World TOPO",
+            "USGS Satellite",
+            "ESRI World Overview",
+        )
+
+        val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
+        builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
+            debug("Set mapStyleId pref to $which")
+            mPrefs.edit().putInt(mapStyleId, which).apply()
+            dialog.dismiss()
+            map.setTileSource(loadOnlineTileSourceBase())
+            canDownload = (map.tileProvider.tileSource as OnlineTileSourceBase)
+                .tileSourcePolicy.acceptsBulkDownload()
+        }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
     Scaffold(
         floatingActionButton = {
             DownloadButton(canDownload) { showCacheManagerDialog() }
@@ -623,6 +647,9 @@ fun MapView(model: UIViewModel = viewModel()) {
                     defaultMapSettings()
                 },
                 modifier = Modifier.align(Alignment.BottomCenter)
+            ) else MapStyleButton(
+                onClick = { showMapStyleDialog() },
+                modifier = Modifier.align(Alignment.TopEnd),
             )
         }
     }
@@ -649,30 +676,5 @@ fun MapView(model: UIViewModel = viewModel()) {
                 showEditWaypointDialog = null
             },
         )
-    }
-    MapStyleButton {
-        val builder = MaterialAlertDialogBuilder(context)
-        val mapStyles = arrayOf<CharSequence>(
-            "OpenStreetMap",
-            "USGS TOPO",
-            "Open TOPO",
-            "ESRI World TOPO",
-            "USGS Satellite",
-            "ESRI World Overview",
-        )
-
-        /// Load preferences and its value
-        val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
-        builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
-            debug("Set mapStyleId pref to $which")
-            mPrefs.edit().putInt(mapStyleId, which).apply()
-            dialog.dismiss()
-            map.setTileSource(loadOnlineTileSourceBase())
-            drawOverlays()
-            canDownload = (map.tileProvider.tileSource as OnlineTileSourceBase)
-                .tileSourcePolicy.acceptsBulkDownload()
-        }
-        val dialog = builder.create()
-        dialog.show()
     }
 }
