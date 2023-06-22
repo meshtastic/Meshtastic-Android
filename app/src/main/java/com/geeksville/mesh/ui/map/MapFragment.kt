@@ -8,7 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
@@ -593,20 +594,24 @@ fun MapView(model: UIViewModel = viewModel()) {
             DownloadButton(canDownload) { showCacheManagerDialog() }
         },
     ) { innerPadding ->
-        AndroidView(
-            factory = {
-                map.apply {
-                    // Required to get online tiles
-                    Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
-                    defaultMapSettings()
-                    zoomToNodes(controller)
-                }
-            },
+        Box(
             modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxHeight(),
-            update = { drawOverlays() },
-        )
+                .fillMaxSize()
+                .padding(innerPadding),
+        ) {
+            AndroidView(
+                factory = {
+                    map.apply {
+                        // Required to get online tiles
+                        Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
+                        defaultMapSettings()
+                        zoomToNodes(controller)
+                    }
+                },
+                modifier = Modifier.fillMaxSize(),
+                update = { if (!showDownloadRegionBoundingBox) drawOverlays() },
+            )
+        }
     }
     if (showEditWaypointDialog != null) {
         EditWaypointDialog(
