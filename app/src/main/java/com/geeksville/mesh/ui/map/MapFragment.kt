@@ -511,35 +511,25 @@ fun MapView(model: UIViewModel = viewModel()) {
             (tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()
     }
 
-    /**
-     * if true, start the job
-     * if false, just update the dialog box
-     */
-    fun updateEstimate() {
-        if (showDownloadRegionBoundingBox) try {
+    fun downloadRegion() {
+        val boundingBox = downloadRegionBoundingBox ?: return
+        try {
             val outputName =
                 Configuration.getInstance().osmdroidBasePath.absolutePath + File.separator + "mainFile.sqlite" // TODO: Accept filename input param from user
             writer = SqliteArchiveTileWriter(outputName)
-            downloadRegionBoundingBox = map.boundingBox // FIXME
-            //nesw
-            try {
-                val cacheManager = CacheManager(
-                    map,
-                    writer
-                ) // Make sure cacheManager has latest from map
-                //this triggers the download
-                downloadRegion(
-                    cacheManager,
-                    writer,
-                    downloadRegionBoundingBox,
-                    zoomLevelMax.toInt(),
-                    zoomLevelMin.toInt(),
-                )
-            } catch (ex: TileSourcePolicyException) {
-                debug("Tile source does not allow archiving: ${ex.message}")
-            }
+            val cacheManager = CacheManager(map, writer) // Make sure cacheManager has latest from map
+            //this triggers the download
+            downloadRegion(
+                cacheManager,
+                writer,
+                boundingBox,
+                zoomLevelMax.toInt(),
+                zoomLevelMin.toInt(),
+            )
+        } catch (ex: TileSourcePolicyException) {
+            debug("Tile source does not allow archiving: ${ex.message}")
         } catch (ex: Exception) {
-            ex.printStackTrace()
+            debug("Tile source exception: ${ex.message}")
         }
     }
 
@@ -618,7 +608,7 @@ fun MapView(model: UIViewModel = viewModel()) {
             if (showDownloadRegionBoundingBox) CacheLayout(
                 cacheEstimate = cacheEstimate,
                 onExecuteJob = {
-                    updateEstimate()
+                    downloadRegion()
                 },
                 onCancelDownload = {
                     cacheEstimate = ""
