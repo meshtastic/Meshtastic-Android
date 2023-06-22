@@ -297,7 +297,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         MaterialAlertDialogBuilder(context)
             .setTitle(R.string.map_cache_manager)
             .setMessage(mapCacheInfoText)
-            .setNeutralButton(R.string.cancel) { dialog, _ ->
+            .setPositiveButton(R.string.close) { dialog, _ ->
                 showCurrentCacheInfo = false
                 dialog.dismiss()
             }
