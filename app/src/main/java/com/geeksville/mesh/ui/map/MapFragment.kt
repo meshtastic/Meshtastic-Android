@@ -141,8 +141,6 @@ fun MapView(model: UIViewModel = viewModel()) {
         }
     }
     var canDownload: Boolean by remember { mutableStateOf(false) }
-    var mapStyleButtonVisibility by remember { mutableStateOf(false) }
-    var cacheLayoutVisibility by remember { mutableStateOf(false) }
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
     var showDownloadRegionBoundingBox by remember { mutableStateOf(false) } // FIXME
@@ -307,26 +305,6 @@ fun MapView(model: UIViewModel = viewModel()) {
             }
             .show()
     }
-    fun downloadJobAlert() {
-        //prompt for input params .
-        canDownload = false
-        mapStyleButtonVisibility = false
-        cacheLayoutVisibility = false
-        val builder = MaterialAlertDialogBuilder(context)
-//        box5miles.setOnClickListener { generateBoxOverlay(zoomLevelLowest) }
-//        box10miles.setOnClickListener { generateBoxOverlay(zoomLevelMiddle) }
-//        box15miles.setOnClickListener { generateBoxOverlay(zoomLevelHighest) }
-//        cacheEstimate = binding.cacheEstimate
-//        generateBoxOverlay(zoomLevelLowest)
-//        binding.executeJob.setOnClickListener { updateEstimate() }
-//        binding.cancelDownload.setOnClickListener {
-//            cacheEstimate.text = ""
-//            defaultMapSettings()
-//
-//        }
-        builder.setCancelable(true)
-    }
-
     fun showCacheManagerDialog() {
         MaterialAlertDialogBuilder(context)
             .setTitle(R.string.map_offline_manager)
