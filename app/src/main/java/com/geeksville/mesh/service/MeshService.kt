@@ -3,6 +3,7 @@ package com.geeksville.mesh.service
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.app.ServiceCompat
@@ -270,7 +271,15 @@ class MeshService : Service(), Logging {
         // but if we don't really need foreground we immediately stop it.
         val notification = serviceNotifications.createServiceStateNotification(notificationSummary)
 
-        startForeground(serviceNotifications.notifyId, notification)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            startForeground(
+                serviceNotifications.notifyId,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
+            )
+        } else {
+            startForeground(serviceNotifications.notifyId, notification)
+        }
         return if (!wantForeground) {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
             START_NOT_STICKY
@@ -457,7 +466,7 @@ class MeshService : Service(), Logging {
 
     /// Admin channel index
     private val adminChannelIndex: Int
-        get() = channelSet.settingsList.indexOfFirst { it.name.lowercase() == "admin" }
+        get() = channelSet.settingsList.indexOfFirst { it.name.equals("admin", ignoreCase = true) }
             .coerceAtLeast(0)
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
@@ -841,6 +850,13 @@ class MeshService : Service(), Logging {
 
     private fun processQueuedPackets() = serviceScope.handledLaunch {
         packetRepository.get().getQueuedPackets()?.forEach { p ->
+            // check for duplicate packet IDs before sending (so ACK/NAK updates can work)
+            if (getDataPacketById(p.id)?.time != p.time) {
+                val newId = generatePacketId()
+                debug("Replaced duplicate packet ID in queue: ${p.id}, with: $newId")
+                packetRepository.get().updateMessageId(p, newId)
+                p.id = newId
+            }
             try {
                 sendNow(p)
             } catch (ex: Exception) {

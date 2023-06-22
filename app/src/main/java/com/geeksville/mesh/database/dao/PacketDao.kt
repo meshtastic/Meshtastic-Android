@@ -48,6 +48,12 @@ interface PacketDao {
         findDataPacket(data)?.let { update(it.copy(data = new)) }
     }
 
+    @Transaction
+    fun updateMessageId(data: DataPacket, id: Int) {
+        val new = data.copy(id = id)
+        findDataPacket(data)?.let { update(it.copy(data = new)) }
+    }
+
     @Query("Select data from packet order by received_time asc")
     fun getDataPackets(): List<DataPacket>
 

@@ -7,7 +7,7 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 
 /**
- * Implement our analytics API using firebase analtics
+ * Implement our analytics API using Firebase Analytics
  */
 class GoogleAnalytics(context: Context) : AnalyticsProvider, Logging {
 
@@ -61,7 +61,7 @@ class GoogleAnalytics(context: Context) : AnalyticsProvider, Logging {
     }
 
     /**
-     * Send a google analyics screen view event
+     * Send a google analytics screen view event
      */
     override fun sendScreenView(name: String) {
         debug("Analytics: start screen $name")

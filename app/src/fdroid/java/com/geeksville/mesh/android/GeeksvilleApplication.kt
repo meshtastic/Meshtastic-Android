@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import com.geeksville.mesh.analytics.AnalyticsProvider
 
+@Suppress("UNUSED_PARAMETER")
 fun isGooglePlayAvailable(context: Context): Boolean = false
 
 open class GeeksvilleApplication : Application(), Logging {
@@ -72,6 +73,7 @@ open class GeeksvilleApplication : Application(), Logging {
             analytics.setEnabled(value && !isInTestLab) // Never do analytics in the test lab
         }
 
+    @Suppress("UNUSED_PARAMETER")
     fun askToRate(activity: AppCompatActivity) {
         // do nothing
     }

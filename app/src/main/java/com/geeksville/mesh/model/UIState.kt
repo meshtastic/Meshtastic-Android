@@ -541,8 +541,9 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    val adminChannelIndex: Int
-        get() = channelSet.settingsList.map { it.name.lowercase() }.indexOf("admin")
+    val adminChannelIndex: Int /** matches [MeshService.adminChannelIndex] **/
+        get() = channelSet.settingsList.indexOfFirst { it.name.equals("admin", ignoreCase = true) }
+            .coerceAtLeast(0)
 
     /**
      * Write the persisted packet data out to a CSV file in the specified location.

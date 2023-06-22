@@ -66,6 +66,7 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
 import com.geeksville.mesh.deviceProfile
@@ -177,7 +178,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
     var ringtone by remember { mutableStateOf("") }
     var cannedMessageMessages by remember { mutableStateOf("") }
 
-    val configResponse by viewModel.packetResponse.collectAsStateWithLifecycle()
+    val packetResponse by viewModel.packetResponse.collectAsStateWithLifecycle()
     val deviceProfile by viewModel.deviceProfile.collectAsStateWithLifecycle()
     var packetResponseState by remember { mutableStateOf<PacketResponseState>(PacketResponseState.Empty) }
     val isWaiting = packetResponseState !is PacketResponseState.Empty
@@ -241,19 +242,22 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
         }
     )
 
-    if (isWaiting) LaunchedEffect(configResponse) {
-        val data = configResponse?.meshPacket?.decoded
+    if (isWaiting) LaunchedEffect(packetResponse) {
+        val data = packetResponse?.meshPacket?.decoded
+        val from = packetResponse?.meshPacket?.from?.toUInt()
         if (data?.portnumValue == Portnums.PortNum.ROUTING_APP_VALUE) {
             val parsed = MeshProtos.Routing.parseFrom(data.payload)
-            packetResponseState = if (parsed.errorReason == MeshProtos.Routing.Error.NONE) {
-                PacketResponseState.Success(emptyList())
-            } else {
-                PacketResponseState.Error(parsed.errorReason.toString())
+            debug("packet for destNum ${destNum.toUInt()} received ${parsed.errorReason} from $from")
+            if (parsed.errorReason != MeshProtos.Routing.Error.NONE) {
+                packetResponseState = PacketResponseState.Error(parsed.errorReason.toString())
+            } else if (packetResponse?.meshPacket?.from == destNum) {
+                packetResponseState = PacketResponseState.Success(emptyList())
             }
         }
         if (data?.portnumValue == Portnums.PortNum.ADMIN_APP_VALUE) {
             viewModel.clearPacketResponse()
             val parsed = AdminProtos.AdminMessage.parseFrom(data.payload)
+            debug("packet for destNum ${destNum.toUInt()} received ${parsed.payloadVariantCase} from $from")
             when (parsed.payloadVariantCase) {
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
                     val response = parsed.getChannelResponse
