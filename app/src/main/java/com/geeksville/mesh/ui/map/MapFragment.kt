@@ -510,7 +510,7 @@ fun MapView(model: UIViewModel = viewModel()) {
             (tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()
     }
 
-    fun downloadRegion() {
+    fun startDownload() {
         val boundingBox = downloadRegionBoundingBox ?: return
         try {
             val outputName =
@@ -605,9 +605,7 @@ fun MapView(model: UIViewModel = viewModel()) {
             )
             if (downloadRegionBoundingBox != null) CacheLayout(
                 cacheEstimate = cacheEstimate,
-                onExecuteJob = {
-                    downloadRegion()
-                },
+                onExecuteJob = { startDownload() },
                 onCancelDownload = {
                     cacheEstimate = ""
                     downloadRegionBoundingBox = null
