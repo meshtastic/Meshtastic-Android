@@ -142,7 +142,6 @@ fun MapView(model: UIViewModel = viewModel()) {
     var canDownload: Boolean by remember { mutableStateOf(false) }
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
-    var showDownloadRegionBoundingBox by remember { mutableStateOf(false) } // FIXME
 
     fun onNodesChanged(nodes: Collection<NodeInfo>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
@@ -497,7 +496,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
         addMapListener(object : MapListener {
             override fun onScroll(event: ScrollEvent): Boolean {
-                if (showDownloadRegionBoundingBox) {
+                if (downloadRegionBoundingBox != null) {
                     generateBoxOverlay(zoomLevelMax)
                 }
                 return true
@@ -572,7 +571,6 @@ fun MapView(model: UIViewModel = viewModel()) {
                     0 -> showCurrentCacheInfo = true
                     1 -> {
                         generateBoxOverlay(zoomLevelHighest)
-                        showDownloadRegionBoundingBox = true
                         canDownload = false
                         dialog.dismiss()
                     }
@@ -603,16 +601,16 @@ fun MapView(model: UIViewModel = viewModel()) {
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
-                update = { if (!showDownloadRegionBoundingBox) drawOverlays() },
+                update = { if (downloadRegionBoundingBox == null) drawOverlays() },
             )
-            if (showDownloadRegionBoundingBox) CacheLayout(
+            if (downloadRegionBoundingBox != null) CacheLayout(
                 cacheEstimate = cacheEstimate,
                 onExecuteJob = {
                     downloadRegion()
                 },
                 onCancelDownload = {
                     cacheEstimate = ""
-                    showDownloadRegionBoundingBox = false
+                    downloadRegionBoundingBox = null
                     defaultMapSettings()
                 },
                 modifier = Modifier.align(Alignment.BottomCenter)
