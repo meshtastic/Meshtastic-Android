@@ -448,7 +448,7 @@ fun MapView(model: UIViewModel = viewModel()) {
     fun loadOnlineTileSourceBase(): ITileSource {
         val id = mPrefs.getInt(mapStyleId, 1)
         debug("mapStyleId from prefs: $id")
-        return CustomTileSource.mTileSources.getOrNull(id) ?: CustomTileSource.DEFAULT_TILE_SOURCE
+        return CustomTileSource.getTileSource(id)
     }
 
     /**
@@ -536,14 +536,7 @@ fun MapView(model: UIViewModel = viewModel()) {
 
     fun showMapStyleDialog() {
         val builder = MaterialAlertDialogBuilder(context)
-        val mapStyles = arrayOf<CharSequence>(
-            "OpenStreetMap",
-            "USGS TOPO",
-            "Open TOPO",
-            "ESRI World TOPO",
-            "USGS Satellite",
-            "ESRI World Overview",
-        )
+        val mapStyles: Array<CharSequence> = CustomTileSource.mTileSources.values.toTypedArray()
 
         val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
         builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->

@@ -167,23 +167,25 @@ class CustomTileSource {
         val DEFAULT_TILE_SOURCE: OnlineTileSourceBase = TileSourceFactory.DEFAULT_TILE_SOURCE
 
         /**
-         * The order in this list must match that in the arrays.xml under map_styles
+         * Source for each available [ITileSource] and their display names.
          */
-        val mTileSources: List<ITileSource> =
-            listOf(
-                MAPNIK,
-                USGS_TOPO,
-                OPEN_TOPO,
-                ESRI_WORLD_TOPO,
-                USGS_SAT,
-                ESRI_IMAGERY,
-            )
+        val mTileSources: Map<ITileSource, String> = mapOf(
+            MAPNIK to "OpenStreetMap",
+            USGS_TOPO to "USGS TOPO",
+            OPEN_TOPO to "Open TOPO",
+            ESRI_WORLD_TOPO to "ESRI World TOPO",
+            USGS_SAT to "USGS Satellite",
+            ESRI_IMAGERY to "ESRI World Overview",
+        )
 
+        fun getTileSource(index: Int): ITileSource {
+            return mTileSources.keys.elementAtOrNull(index) ?: DEFAULT_TILE_SOURCE
+        }
 
         fun getTileSource(aName: String): ITileSource {
-            for (tileSource: ITileSource in mTileSources) {
+            for (tileSource: ITileSource in mTileSources.keys) {
                 if (tileSource.name().equals(aName)) {
-                    return tileSource;
+                    return tileSource
                 }
             }
             throw IllegalArgumentException("No such tile source: $aName")
