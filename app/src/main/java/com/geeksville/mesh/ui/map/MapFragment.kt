@@ -72,9 +72,11 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.CopyrightOverlay
+import org.osmdroid.views.overlay.DefaultOverlayManager
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
+import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import java.io.File
@@ -453,7 +455,7 @@ fun MapView(model: UIViewModel = viewModel()) {
      * Creates Box overlay showing what area can be downloaded
      */
     fun generateBoxOverlay(zoomLevel: Double) = map.apply {
-        overlayManager = CustomOverlayManager.disableDoubleTap(map, context) // disable double tap
+        overlayManager = CustomOverlayManager(TilesOverlay(tileProvider, context))
         setMultiTouchControls(false)
         // furthest back
         zoomLevelMax = zoomLevelHighest // FIXME zoomLevel
@@ -483,7 +485,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         setTileSource(loadOnlineTileSourceBase())
         setDestroyMode(false) // keeps map instance alive when in the background.
         isVerticalMapRepetitionEnabled = false // disables map repetition
-        overlayManager = CustomOverlayManager.default(map, context)
+        overlayManager = DefaultOverlayManager(TilesOverlay(tileProvider, context))
         setScrollableAreaLimitLatitude( // bounds scrollable map
             overlayManager.tilesOverlay.bounds.actualNorth,
             overlayManager.tilesOverlay.bounds.actualSouth,
