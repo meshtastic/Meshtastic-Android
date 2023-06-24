@@ -138,7 +138,7 @@ fun MapView(model: UIViewModel = viewModel()) {
             clipToOutline = true
         }
     }
-    var canDownload: Boolean by remember { mutableStateOf(false) }
+    var showDownloadButton: Boolean by remember { mutableStateOf(false) }
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
 
@@ -495,7 +495,7 @@ fun MapView(model: UIViewModel = viewModel()) {
                 return false
             }
         })
-        canDownload =
+        showDownloadButton =
             (tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()
     }
 
@@ -531,8 +531,8 @@ fun MapView(model: UIViewModel = viewModel()) {
             mPrefs.edit().putInt(mapStyleId, which).apply()
             dialog.dismiss()
             map.setTileSource(loadOnlineTileSourceBase())
-            canDownload = (map.tileProvider.tileSource as OnlineTileSourceBase)
-                .tileSourcePolicy.acceptsBulkDownload()
+            showDownloadButton =
+                (map.tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()
         }
         val dialog = builder.create()
         dialog.show()
@@ -553,7 +553,7 @@ fun MapView(model: UIViewModel = viewModel()) {
                     0 -> showCurrentCacheInfo = true
                     1 -> {
                         generateBoxOverlay(zoomLevelHighest)
-                        canDownload = false
+                        showDownloadButton = false
                         dialog.dismiss()
                     }
 
@@ -565,7 +565,7 @@ fun MapView(model: UIViewModel = viewModel()) {
 
     Scaffold(
         floatingActionButton = {
-            DownloadButton(canDownload) { showCacheManagerDialog() }
+            DownloadButton(showDownloadButton) { showCacheManagerDialog() }
         },
     ) { innerPadding ->
         Box(
