@@ -443,7 +443,7 @@ fun MapView(model: UIViewModel = viewModel()) {
             val maximumZoomLevel = map.tileProvider.tileSource.maximumZoomLevel.toDouble()
             val finalZoomLevel = minOf(box.requiredZoomLevel() * 0.8, maximumZoomLevel)
             controller.animateTo(center, finalZoomLevel, defaultZoomSpeed)
-        } else map.controller.zoomIn()
+        } else controller.zoomIn()
     }
 
     fun loadOnlineTileSourceBase(): ITileSource {
