@@ -5,13 +5,10 @@ import com.geeksville.mesh.Position
 import mil.nga.grid.features.Point
 import mil.nga.mgrs.MGRS
 import mil.nga.mgrs.utm.UTM
-import org.osmdroid.util.BoundingBox
-import org.osmdroid.util.GeoPoint
 import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.atan2
 import kotlin.math.cos
-import kotlin.math.log2
 import kotlin.math.sin
 
 /*******************************************************************************
@@ -236,18 +233,3 @@ fun bearing(
 fun radToBearing(rad: Double): Double {
     return (Math.toDegrees(rad) + 360) % 360
 }
-
-/**
- * Calculates the zoom level required to fit the entire [BoundingBox] inside the map view.
- * @return The zoom level as a Double value.
- */
-fun BoundingBox.requiredZoomLevel(): Double {
-    val topLeft = GeoPoint(this.latNorth, this.lonWest)
-    val bottomRight = GeoPoint(this.latSouth, this.lonEast)
-    val latLonWidth = topLeft.distanceToAsDouble(GeoPoint(topLeft.latitude, bottomRight.longitude))
-    val latLonHeight = topLeft.distanceToAsDouble(GeoPoint(bottomRight.latitude, topLeft.longitude))
-    val requiredLatZoom = log2(360.0 / (latLonHeight / 111320))
-    val requiredLonZoom = log2(360.0 / (latLonWidth / 111320))
-    return maxOf(requiredLatZoom, requiredLonZoom)
-}
-
