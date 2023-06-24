@@ -126,6 +126,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$appcompat_version"
     // For loading and tinting drawables on older versions of the platform
     implementation "androidx.appcompat:appcompat-resources:$appcompat_version"
+    implementation "androidx.emoji2:emoji2-emojipicker:1.4.0-beta05"
 
     implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.fragment:fragment-ktx:1.6.0'
@@ -188,7 +189,10 @@ dependencies {
     def osmdroid_version = '6.1.14'
     implementation "org.osmdroid:osmdroid-android:$osmdroid_version"
     implementation "org.osmdroid:osmdroid-wms:$osmdroid_version"
-    implementation "org.osmdroid:osmdroid-geopackage:$osmdroid_version"
+    implementation ("org.osmdroid:osmdroid-geopackage:$osmdroid_version") {
+        exclude module: 'ormlite-core'
+        exclude group: 'com.j256.ormlite'
+    }
     implementation 'com.github.MKergall:osmbonuspack:6.9.0'
     implementation('mil.nga.mgrs:mgrs-android:2.2.2') { exclude group: 'com.google.android.gms' }
 
@@ -204,8 +208,8 @@ dependencies {
 
     // Coroutines
     def coroutines_version = '1.7.1'
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-guava:$coroutines_version"
 
     // For now I'm not using javalite, because I want JSON printing
     implementation "com.google.protobuf:protobuf-kotlin:$protobuf_version"
