@@ -198,6 +198,7 @@ fun MapView(model: UIViewModel = viewModel()) {
     }
 
     fun showMarkerLongPressDialog(id: Int) {
+        performHapticFeedback()
         debug("marker long pressed id=${id}")
         val waypoint = model.waypoints.value?.get(id)?.data?.waypoint ?: return
         // edit only when unlocked or lockedTo myNodeNum
