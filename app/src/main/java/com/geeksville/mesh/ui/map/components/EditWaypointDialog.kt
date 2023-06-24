@@ -56,9 +56,9 @@ fun EditWaypointDialog(
 
     if (!showEmojiPickerView) AlertDialog(
         onDismissRequest = onDismissRequest,
+        title = { Text(stringResource(title)) },
         text = {
             Column(modifier = modifier.fillMaxWidth()) {
-                Text(stringResource(title))
                 EditTextPreference(title = stringResource(R.string.name),
                     value = waypointInput.name,
                     maxSize = 29, // name max_size:30
