@@ -472,7 +472,8 @@ fun MapView(model: UIViewModel = viewModel()) {
      * Reset map to default settings & visible buttons
      */
     fun defaultMapSettings() = map.apply {
-        setTileSource(loadOnlineTileSourceBase())
+        // Required to get online tiles
+        Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
         setDestroyMode(false) // keeps map instance alive when in the background.
         isVerticalMapRepetitionEnabled = false // disables map repetition
         overlayManager = DefaultOverlayManager(TilesOverlay(tileProvider, context))
@@ -574,8 +575,7 @@ fun MapView(model: UIViewModel = viewModel()) {
             AndroidView(
                 factory = {
                     map.apply {
-                        // Required to get online tiles
-                        Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
+                        setTileSource(loadOnlineTileSourceBase())
                         defaultMapSettings()
                         if (nodeMarkers.isNotEmpty()) zoomToBoundingBox(
                             BoundingBox.fromGeoPoints(nodeMarkers.map { it.position }),
