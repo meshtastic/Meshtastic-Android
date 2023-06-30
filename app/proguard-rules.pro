@@ -34,9 +34,7 @@
 -dontwarn com.google.android.gms.**
 
 # ormlite
--dontwarn com.j256.ormlite.android.**
--dontwarn com.j256.ormlite.logger.**
--dontwarn com.j256.ormlite.misc.**
+-dontwarn com.j256.ormlite.**
 
 # OkHttp
 -dontwarn okhttp3.internal.platform.**
@@ -46,6 +44,7 @@
 
 # ?
 -dontwarn java.awt.image.**
+-dontwarn java.lang.reflect.**
 -dontwarn com.google.errorprone.annotations.**
 
 # Our app is opensource no need to obsfucate
