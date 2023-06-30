@@ -435,7 +435,10 @@ fun MapView(model: UIViewModel = viewModel()) {
     fun loadOnlineTileSourceBase(): ITileSource {
         val id = mPrefs.getInt(mapStyleId, 1)
         debug("mapStyleId from prefs: $id")
-        return CustomTileSource.getTileSource(id)
+        return CustomTileSource.getTileSource(id).also {
+            showDownloadButton =
+                if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
+        }
     }
 
     /**
@@ -495,8 +498,6 @@ fun MapView(model: UIViewModel = viewModel()) {
                 return false
             }
         })
-        showDownloadButton =
-            (tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()
     }
 
     fun startDownload() {
@@ -531,8 +532,6 @@ fun MapView(model: UIViewModel = viewModel()) {
             mPrefs.edit().putInt(mapStyleId, which).apply()
             dialog.dismiss()
             map.setTileSource(loadOnlineTileSourceBase())
-            showDownloadButton =
-                (map.tileProvider.tileSource as OnlineTileSourceBase).tileSourcePolicy.acceptsBulkDownload()
         }
         val dialog = builder.create()
         dialog.show()
@@ -553,7 +552,6 @@ fun MapView(model: UIViewModel = viewModel()) {
                     0 -> showCurrentCacheInfo = true
                     1 -> {
                         generateBoxOverlay(zoomLevelHighest)
-                        showDownloadButton = false
                         dialog.dismiss()
                     }
 
@@ -565,7 +563,7 @@ fun MapView(model: UIViewModel = viewModel()) {
 
     Scaffold(
         floatingActionButton = {
-            DownloadButton(showDownloadButton) { showCacheManagerDialog() }
+            DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) { showCacheManagerDialog() }
         },
     ) { innerPadding ->
         Box(
@@ -592,7 +590,6 @@ fun MapView(model: UIViewModel = viewModel()) {
                 cacheEstimate = cacheEstimate,
                 onExecuteJob = { startDownload() },
                 onCancelDownload = {
-                    cacheEstimate = ""
                     downloadRegionBoundingBox = null
                     defaultMapSettings()
                 },
