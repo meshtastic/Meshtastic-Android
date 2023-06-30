@@ -54,7 +54,6 @@ import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.FileWriter
-import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
@@ -665,16 +664,10 @@ class UIViewModel @Inject constructor(
 
     fun importProfile(file_uri: Uri) = viewModelScope.launch(Dispatchers.Main) {
         withContext(Dispatchers.IO) {
-            var inputStream: InputStream? = null
-            try {
-                inputStream = app.contentResolver.openInputStream(file_uri)
+            app.contentResolver.openInputStream(file_uri).use { inputStream ->
                 val bytes = inputStream?.readBytes()
                 val protobuf = DeviceProfile.parseFrom(bytes)
                 _deviceProfile.value = protobuf
-            } catch (ex: Exception) {
-                errormsg("Failed to import radio configs: ${ex.message}")
-            } finally {
-                inputStream?.close()
             }
         }
     }
