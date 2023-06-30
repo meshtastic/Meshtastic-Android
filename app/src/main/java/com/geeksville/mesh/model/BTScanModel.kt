@@ -50,10 +50,10 @@ class BTScanModel @Inject constructor(
 
     init {
         combine(
-            bluetoothRepository.state.value.bondedDevices,
+            bluetoothRepository.state,
             usbRepository.serialDevicesWithDrivers
         ) { ble, usb ->
-            bleDevices.value = ble
+            bleDevices.value = ble.bondedDevices
             usbDevices.value = usb
         }.onEach { setupScan() }.launchIn(viewModelScope)
 

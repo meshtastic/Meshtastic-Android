@@ -10,7 +10,6 @@ import androidx.lifecycle.coroutineScope
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.android.hasBluetoothPermission
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -74,10 +73,14 @@ class BluetoothRepository @Inject constructor(
             }
         }?.let { adapter ->
             /// ask the adapter if we have access
+            val enabled = adapter.isEnabled
+            val bondedDevices = adapter.bondedDevices ?: emptySet()
+
             BluetoothState(
                 hasPermissions = true,
-                enabled = adapter.isEnabled,
-                bondedDevices = createBondedDevicesFlow(adapter),
+                enabled = enabled,
+                bondedDevices = if (!enabled) emptyList()
+                else bondedDevices.filter { it.name?.matches(Regex(BLE_NAME_PATTERN)) == true },
             )
         } ?: BluetoothState()
 
@@ -85,22 +88,7 @@ class BluetoothRepository @Inject constructor(
         debug("Detected our bluetooth access=$newState")
     }
 
-    /**
-     * Creates a cold Flow used to obtain the set of bonded devices.
-     */
-    @SuppressLint("MissingPermission") // Already checked prior to calling
-    private suspend fun createBondedDevicesFlow(adapter: BluetoothAdapter): Flow<List<BluetoothDevice>> {
-        return flow<List<BluetoothDevice>> {
-            val devices = adapter.bondedDevices ?: emptySet()
-            while (true) {
-                emit(devices.filter { it.name?.matches(Regex(BLE_NAME_PATTERN)) == true })
-                delay(REFRESH_DELAY_MS)
-            }
-        }.flowOn(dispatchers.default).distinctUntilChanged()
-    }
-
     companion object {
         const val BLE_NAME_PATTERN = "^.*_([0-9a-fA-F]{4})$"
-        const val REFRESH_DELAY_MS = 1000L
     }
 }

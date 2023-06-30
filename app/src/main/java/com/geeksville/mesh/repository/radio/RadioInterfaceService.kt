@@ -74,7 +74,7 @@ class RadioInterfaceService @Inject constructor(
     init {
         processLifecycle.coroutineScope.launch {
             bluetoothRepository.state.collect { state ->
-                if (state.enabled && !isStarted) {
+                if (state.enabled) {
                     startInterface()
                 } else if (radioIf is BluetoothInterface) {
                     stopInterface()
