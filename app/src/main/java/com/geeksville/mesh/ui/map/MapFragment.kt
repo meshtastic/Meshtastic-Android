@@ -152,7 +152,7 @@ fun MapView(model: UIViewModel = viewModel()) {
             MarkerWithLabel(map, "${u.longName} ${formatAgo(p.time)}").apply {
                 title = "${u.longName} ${node.batteryStr}"
                 snippet = model.gpsString(p)
-                ourNode?.distanceStr(node)?.let { dist ->
+                ourNode?.distanceStr(node, model.config.display.units.number)?.let { dist ->
                     val string = context.getString(R.string.map_subDescription)
                     subDescription = string.format(ourNode.bearing(node), dist)
                 }
