@@ -34,7 +34,7 @@ class NodeInfoTest {
 
     @Test
     fun distanceStrGood() {
-        Assert.assertEquals(ni1.distanceStr(ni2), "1.1 km")
-        Assert.assertEquals(ni1.distanceStr(ni3), "111 m")
+        Assert.assertEquals(ni1.distanceStr(ni2, ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE), "1.1 km")
+        Assert.assertEquals(ni1.distanceStr(ni3, ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE), "111 m")
     }
 }
