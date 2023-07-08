@@ -25,6 +25,10 @@ If you encounter any problems or have questions, [post in the forum](https://mes
 
 However, if you must use 'raw' APKs you can get them from our [github releases](https://github.com/meshtastic/Meshtastic-Android/releases). This is not recommended because if you manually install an APK it will not automatically update.
 
+## Translations
+
+You can help translate the app into your native language using [Crowdin](https://crowdin.meshtastic.org/android).
+
 ## Build instructions
 
 If you would like to develop this application we'd love your help! These build instructions are brief and should be improved, please send a PR if you can.
@@ -62,4 +66,4 @@ for verbose logging:
 adb shell setprop log.tag.FA VERBOSE
 ```
 
-Copyright 2023, Meshtastic LLC. GPL V3 license
+Copyright 2023, Meshtastic LLC. GPL-3.0 license
