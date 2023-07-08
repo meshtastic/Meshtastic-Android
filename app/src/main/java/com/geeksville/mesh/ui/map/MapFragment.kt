@@ -50,11 +50,13 @@ import com.geeksville.mesh.ui.map.components.DownloadButton
 import com.geeksville.mesh.ui.map.components.EditWaypointDialog
 import com.geeksville.mesh.ui.map.components.MapStyleButton
 import com.geeksville.mesh.util.SqlTileWriterExt
+import com.geeksville.mesh.util.requiredZoomLevel
 import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.waypoint
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
@@ -111,6 +113,7 @@ fun MapView(model: UIViewModel = viewModel()) {
     // constants
     val defaultMinZoom = 1.5
     val defaultMaxZoom = 18.0
+    val defaultZoomSpeed = 3000L
     val prefsName = "org.geeksville.osm.prefs"
     val mapStyleId = "map_style_id"
     val nodeLayer = 1
@@ -432,6 +435,16 @@ fun MapView(model: UIViewModel = viewModel()) {
 //        }
 //    }
 
+    fun zoomToNodes(controller: IMapController) {
+        if (nodeMarkers.isNotEmpty()) {
+            val box = BoundingBox.fromGeoPoints(nodeMarkers.map { it.position })
+            val center = GeoPoint(box.centerLatitude, box.centerLongitude)
+            val maximumZoomLevel = map.tileProvider.tileSource.maximumZoomLevel.toDouble()
+            val finalZoomLevel = minOf(box.requiredZoomLevel() * 0.8, maximumZoomLevel)
+            controller.animateTo(center, finalZoomLevel, defaultZoomSpeed)
+        } else controller.zoomIn()
+    }
+
     fun loadOnlineTileSourceBase(): ITileSource {
         val id = mPrefs.getInt(mapStyleId, 1)
         debug("mapStyleId from prefs: $id")
@@ -577,10 +590,7 @@ fun MapView(model: UIViewModel = viewModel()) {
                     map.apply {
                         setTileSource(loadOnlineTileSourceBase())
                         defaultMapSettings()
-                        if (nodeMarkers.isNotEmpty()) zoomToBoundingBox(
-                            BoundingBox.fromGeoPoints(nodeMarkers.map { it.position }),
-                            false
-                        ) else controller.zoomIn()
+                        zoomToNodes(controller)
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
