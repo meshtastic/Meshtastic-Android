@@ -7,17 +7,19 @@
     <string name="connection_status">Kapcsolat állapota</string>
     <string name="application_icon">alkalmazás ikonja</string>
     <string name="unknown_username">Ismeretlen felhasználónév</string>
+    <string name="send">Küldeni</string>
     <string name="send_text">Szöveg elküldése</string>
     <string name="warning_not_paired">Még nem párosított egyetlen Meshtastic rádiót sem ehhez a telefonhoz. Kérem pároztasson egyet és állítsa be a felhasználónevet.\n\nEz a szabad forráskódú alkalmazás fejlesztés alatt áll, ha hibát talál kérem írjon a projekt fórumába: meshtastic.discourse.group.\n\nBővebb információért látogasson el a projekt veboldalára - www.meshtastic.org.</string>
+    <string name="you">Te</string>
     <string name="your_name">A neve</string>
     <string name="analytics_okay">Névtelen felhasználási statisztikák és hibajelentések.</string>
     <string name="looking_for_meshtastic_devices">Meshtastic eszközök keresése…</string>
     <string name="starting_pairing">Pároztatás megkezdése</string>
     <string name="url_for_join">Meshtastic mesh hálózat URL</string>
-    <string name="accept">Elfogad</string>
-    <string name="cancel">Mégsem</string>
+    <string name="accept">Elfogadni</string>
+    <string name="cancel">Megszakítani</string>
     <string name="change_channel">Csatorna váltás</string>
-    <string name="are_you_sure_channel">Biztosan csatornát akar váltani? Minden kommunikáció a többi állomással megszakad amíg nem osztja meg velük az új csatorna beállításokat.</string>
+    <string name="are_you_sure_channel">Biztosan csatornát akarsz váltani? Összes kommunikáció a többi állomással megszakad, amíg nem osztja meg velük az új csatorna beállításokat.</string>
     <string name="new_channel_rcvd">Új csatorna URL érkezett</string>
     <string name="do_you_want_switch">Átkapcsol a(z) \'%s\' csatornára?</string>
     <string name="permission_missing">Egy szükséges engedély hiányzik, ezért a Meshtastic nem fog tudni rendesen működni. Kérem engedélyezze az Android alkalmazások beállításai között.</string>
@@ -48,6 +50,7 @@
     <string name="modem_config_short">Rövid hatótáv (gyors)</string>
     <string name="modem_config_medium">Közepes hatótáv (gyors)</string>
     <string name="modem_config_long">Távoli hatótáv (gyors)</string>
+    <string name="modem_config_mod_long">Hosszú táv</string>
     <string name="modem_config_very_long">Nagyon távoli hatótáv (lassú)</string>
     <string name="modem_config_unrecognized">FELISMERHETETLEN</string>
     <string name="meshtastic_service_notifications">Szolgáltatás értesítések</string>
@@ -98,17 +101,22 @@
         <item quantity="other">Töröljek %s üzenetet?</item>
     </plurals>
     <string name="delete">Törlés</string>
+    <string name="delete_for_everyone">Törlés mindenki számára</string>
+    <string name="delete_for_me">Törlés nekem</string>
     <string name="select_all">Összes kijelölése</string>
     <string name="modem_config_slow_long">Távoli hatótáv (lassú)</string>
     <string name="map_style_selection">Stílus választás</string>
     <string name="map_download_region">Letöltési régió</string>
     <string name="name">Név</string>
+    <string name="description">Leírás</string>
+    <string name="locked">Zárolt</string>
     <string name="save">Mentés</string>
     <string name="preferences_language">Nyelv</string>
     <string name="preferences_system_default">Alapbeállítás</string>
     <string name="resend">Újraküldés</string>
     <string name="shutdown">Leállítás</string>
     <string name="reboot">Újraindítás</string>
+    <string name="traceroute">Traceroute</string>
     <string name="intro_show">Bemutatkozás megjelenítése</string>
     <string name="intro_welcome">Üdvözöl a Meshtastic</string>
     <string name="intro_welcome_text">A Meshtastic egy nyílt forráskódú, hálózatot nem igénylő, titkosított kommunikációs platform. A Meshtastic rádiók mesh hálózatot alakítanak ki, és a LoRa protokollt használják szöveges üzenetek küldésére.</string>
@@ -154,4 +162,7 @@
     <string name="map_download_errors">A letöltés %s hibával fejeződött be</string>
     <string name="map_cache_tiles">%s csempe</string>
     <string name="map_subDescription">irányszög: %1$s° távolság: %2$s</string>
+    <string name="waypoint_edit">Útpont szerkesztés</string>
+    <string name="waypoint_delete">Útpont törlés?</string>
+    <string name="waypoint_new">Új útpont</string>
 </resources>
