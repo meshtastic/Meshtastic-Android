@@ -49,9 +49,9 @@
     <string name="none">Nichts (deaktiviert)</string>
     <string name="modem_config_short">Kurze Reichweite / Schnell</string>
     <string name="modem_config_medium">Mittlere Reichweite / Schnell</string>
-    <string name="modem_config_long">Lange Reichweite / Schnell</string>
-    <string name="modem_config_mod_long">Lange Reichweite / Medium</string>
-    <string name="modem_config_very_long">Sehr lange Reichweite / Langsam</string>
+    <string name="modem_config_long">Hohe Reichweite / Schnell</string>
+    <string name="modem_config_mod_long">Hohe Reichweite / Medium</string>
+    <string name="modem_config_very_long">Sehr hohe Reichweite / Langsam</string>
     <string name="modem_config_unrecognized">UNERKANNT</string>
     <string name="meshtastic_service_notifications">Dienst-Benachrichtigungen</string>
     <string name="location_disabled_warning">Standort muss eingeschaltet werden (hohe Genauigkeit), um neue Geräte über Bluetooth zu finden. Sie können es später wieder ausschalten.</string>
