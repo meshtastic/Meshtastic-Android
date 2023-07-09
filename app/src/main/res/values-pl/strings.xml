@@ -6,7 +6,7 @@
     <string name="unset">Odznacz</string>
     <string name="connection_status">Status połączenia</string>
     <string name="application_icon">ikona aplikacji</string>
-    <string name="unknown_username">Nieznana nazwa</string>
+    <string name="unknown_username">Nieznana nazwa użytkownika</string>
     <string name="send">Wyślij</string>
     <string name="send_text">Wyślij wiadomość</string>
     <string name="warning_not_paired">Nie sparowałeś jeszcze radia kompatybilnego z Meshtastic z tym telefonem. Proszę sparować urządzenie i ustawić swoją nazwę użytkownika.\n\nTa aplikacja open-source jest w fazie rozwoju, jeśli znajdziesz problemy, napisz na naszym forum: meshtastic.discourse.group.\n\nWięcej informacji znajdziesz na naszej stronie internetowej -www.meshtastic.org.</string>
@@ -19,10 +19,10 @@
     <string name="accept">Akceptuj</string>
     <string name="cancel">Anuluj</string>
     <string name="change_channel">Zmień kanał</string>
-    <string name="are_you_sure_channel">Czy na pewno chcesz zmienić kanał? Komunikacja z innymi węzłami zostanie przerwana do czasu udostępnienia nowych ustawień kanału.</string>
+    <string name="are_you_sure_channel">Czy na pewno chcesz zmienić kanał? Komunikacja z innymi węzłami komunikacyjnymi zostanie przerwana do czasu udostępnienia nowych ustawień kanału.</string>
     <string name="new_channel_rcvd">Odebrano nowy URL kanału</string>
     <string name="do_you_want_switch">Chcesz przełączyć na \'%s\' kanał?</string>
-    <string name="permission_missing">Meshtastic potrzebuje lokalizacja zezwolenie i lokalizacja muszą być włączone, aby można było znaleźć nowe urządzenia przez Bluetooth. Możesz go później wyłączyć.</string>
+    <string name="permission_missing">Meshtastic potrzebuje zezwolenia na lokalizacje. Lokalizacja musi być włączona, aby można było znaleźć nowe urządzenia przez Bluetooth. Możesz go później wyłączyć.</string>
     <string name="radio_sleeping">Radio było w trybie uśpienia, nie mogło zmienić kanału</string>
     <string name="report_bug">Zgłoś błąd</string>
     <string name="report_a_bug">Zgłoś błąd</string>
@@ -37,15 +37,15 @@
     <string name="disconnected">Rozłączono</string>
     <string name="device_sleeping">Urządzenie uśpione</string>
     <string name="connected_count">Połączono: %1$s z %2$s online</string>
-    <string name="list_of_nodes">Lista węzłów w sieci</string>
+    <string name="list_of_nodes">Lista węzłów komunikacyjnych w sieci</string>
     <string name="update_firmware">Aktualizacja oprogramowania</string>
     <string name="connected">Połączono z radiem</string>
     <string name="connected_to">Połączono z radiem (%s)</string>
     <string name="not_connected">Nie połączono</string>
-    <string name="connected_sleeping">Połączono z radiem w stanie uśpienia</string>
+    <string name="connected_sleeping">Połączono z radiem, ale jest w stanie uśpienia</string>
     <string name="update_to">Aktualizuj do %s</string>
     <string name="app_too_old">Konieczna aktualizacja aplikacji</string>
-    <string name="must_update">Należy zaktualizować aplikację za pomocą Sklepu Play lub Githuba, bo jest zbyt stara aby dogadać się z oprogramowaniem zainstalowanym na tym tadiu. <a href="https://meshtastic.org/docs/software/android/android-installation">Więcej informacji (ang.)</a></string>
+    <string name="must_update">Należy zaktualizować aplikację za pomocą Sklepu Play lub Githuba, bo aplikacja jest zbyt stara aby dogadać się z oprogramowaniem zainstalowanym na tym radiu. <a href="https://meshtastic.org/docs/software/android/android-installation">Więcej informacji (ang.)</a></string>
     <string name="none">Brak (wyłącz)</string>
     <string name="modem_config_short">Krótki zasięg / Szybko</string>
     <string name="modem_config_medium">Średni zasięg / Szybko</string>
