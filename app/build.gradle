@@ -189,8 +189,7 @@ dependencies {
     def osmdroid_version = '6.1.14'
     implementation "org.osmdroid:osmdroid-android:$osmdroid_version"
     implementation "org.osmdroid:osmdroid-wms:$osmdroid_version"
-    implementation ("org.osmdroid:osmdroid-geopackage:$osmdroid_version") {
-        exclude module: 'ormlite-core'
+    implementation("org.osmdroid:osmdroid-geopackage:$osmdroid_version") {
         exclude group: 'com.j256.ormlite'
     }
     implementation 'com.github.MKergall:osmbonuspack:6.9.0'
