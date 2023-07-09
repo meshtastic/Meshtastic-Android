@@ -5,9 +5,11 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.util.Exceptions
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.IOException
-import java.io.InputStream
 import java.io.OutputStream
 import java.net.InetAddress
 import java.net.Socket
@@ -29,9 +31,7 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
         }
     }
 
-    var socket: Socket? = null
-    lateinit var outStream: OutputStream
-    lateinit var inStream: InputStream
+    private lateinit var outStream: OutputStream
 
     init {
         connect()
@@ -45,42 +45,37 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
         outStream.flush()
     }
 
-    override fun onDeviceDisconnect(waitForStopped: Boolean) {
-        val s = socket
-        if (s != null) {
-            debug("Closing TCP socket")
-            outStream.close()
-            inStream.close()
-            s.close()
-            socket = null
-        }
-        super.onDeviceDisconnect(waitForStopped)
-    }
-
     override fun connect() {
         service.serviceScope.handledLaunch {
             try {
-                val a = InetAddress.getByName(address)
-                debug("TCP connecting to $address")
+                startConnect()
+            } catch (ex: IOException) {
+                errormsg("IOException in TCP reader: $ex")
+                onDeviceDisconnect(false)
+            } catch (ex: Throwable) {
+                Exceptions.report(ex, "Exception in TCP reader")
+                onDeviceDisconnect(false)
+            }
+        }
+    }
 
-                //create a socket to make the connection with the server
-                val port = 4403
-                val s = Socket(a, port)
-                s.tcpNoDelay = true
-                s.soTimeout = 500
-                socket = s
-                outStream = BufferedOutputStream(s.getOutputStream())
-                inStream = s.getInputStream()
+    // Create a socket to make the connection with the server
+    private suspend fun startConnect() = withContext(Dispatchers.IO) {
+        debug("TCP connecting to $address")
+        Socket(InetAddress.getByName(address), 4403).use { socket ->
+            socket.tcpNoDelay = true
+            socket.soTimeout = 500
 
-                // Note: we call the super method FROM OUR NEW THREAD
-                super.connect()
+            BufferedOutputStream(socket.getOutputStream()).use { outputStream ->
+                outStream = outputStream
 
-                while (true) {
-                    try {
-                        val c = inStream.read()
+                BufferedInputStream(socket.getInputStream()).use { inputStream ->
+                    super.connect()
+
+                    while (true) try {
+                        val c = inputStream.read()
                         if (c == -1) {
                             warn("Got EOF on TCP stream")
-                            onDeviceDisconnect(false)
                             break
                         } else
                             readChar(c.toByte())
@@ -88,14 +83,9 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
                         // Ignore and start another read
                     }
                 }
-            } catch (ex: IOException) {
-                errormsg("IOException in TCP reader: $ex") // FIXME, show message to user
-                onDeviceDisconnect(false)
-            } catch (ex: Throwable) {
-                Exceptions.report(ex, "Exception in TCP reader")
-                onDeviceDisconnect(false)
             }
-            debug("Exiting TCP reader")
+            debug("Closing TCP socket")
+            onDeviceDisconnect(false)
         }
     }
 }
