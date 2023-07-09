@@ -2,6 +2,7 @@ package com.geeksville.mesh.repository.radio
 
 import android.content.Context
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.util.Exceptions
 import java.io.BufferedOutputStream
@@ -11,8 +12,6 @@ import java.io.OutputStream
 import java.net.InetAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
-import kotlin.concurrent.thread
-
 
 class TCPInterface(service: RadioInterfaceService, private val address: String) :
     StreamInterface(service) {
@@ -59,8 +58,7 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
     }
 
     override fun connect() {
-        // No need to keep a reference to this thread - it will exit when we close inStream
-        thread(start = true, isDaemon = true, name = "TCP reader") {
+        service.serviceScope.handledLaunch {
             try {
                 val a = InetAddress.getByName(address)
                 debug("TCP connecting to $address")
