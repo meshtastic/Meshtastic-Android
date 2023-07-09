@@ -15,7 +15,7 @@ import javax.inject.Inject
 class BluetoothBroadcastReceiver @Inject constructor(
     private val bluetoothRepository: BluetoothRepository
 ) : BroadcastReceiver() {
-    internal val intentFilter = IntentFilter().apply {
+    internal val intentFilter get() = IntentFilter().apply {
         addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
         addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
     }
