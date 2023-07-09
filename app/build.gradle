@@ -82,7 +82,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.7"
+        kotlinCompilerExtensionVersion = "1.4.8"
     }
     // Set both the Java and Kotlin compilers to target Java 8.
     compileOptions {
