@@ -12,6 +12,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -39,20 +40,21 @@ class SharedLocationManager constructor(
 
     // Set up the Fused Location Provider and LocationRequest
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-    private val locationRequest = LocationRequest.create().apply {
-        interval = desiredInterval
-        fastestInterval = 30 * 1000L
-        maxWaitTime = 5 * 60 * 1000L
-        // smallestDisplacement = 30F // 30 meters
-        priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
-    }
+    private val locationRequest = LocationRequest.Builder(desiredInterval)
+        .setMinUpdateIntervalMillis(30 * 1000L)
+        .setMaxUpdateDelayMillis(5 * 60 * 1000L)
+        // .setMinUpdateDistanceMeters(30f) // 30 meters
+        .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
+        .build()
 
     @SuppressLint("MissingPermission")
     private val _locationUpdates = callbackFlow {
         val callback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
                 // info("New location: ${result.lastLocation}")
-                trySend(result.lastLocation)
+                result.lastLocation?.let { lastLocation ->
+                    trySend(lastLocation)
+                }
             }
         }
         if (!context.hasBackgroundPermission() || !isGooglePlayAvailable(context)) close()
