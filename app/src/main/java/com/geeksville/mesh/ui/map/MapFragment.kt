@@ -49,6 +49,7 @@ import com.geeksville.mesh.ui.map.components.CacheLayout
 import com.geeksville.mesh.ui.map.components.DownloadButton
 import com.geeksville.mesh.ui.map.components.EditWaypointDialog
 import com.geeksville.mesh.ui.map.components.MapStyleButton
+import com.geeksville.mesh.util.EnableWakeLock
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.requiredZoomLevel
 import com.geeksville.mesh.util.formatAgo
@@ -135,6 +136,8 @@ fun MapView(model: UIViewModel = viewModel()) {
 
     val haptic = LocalHapticFeedback.current
     fun performHapticFeedback() = haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+
+    EnableWakeLock(context)
 
     val map = remember {
         MapView(context).apply {
