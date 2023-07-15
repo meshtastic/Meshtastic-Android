@@ -33,7 +33,7 @@ class SharedLocationManager constructor(
 
     // Defaults from device positionBroadcastSmart
     private val timeTravelMinimum = 30 * 1000L // 30 seconds
-    private val distanceTravelMinimum = 30F // 30 meters
+    private val distanceTravelMinimum = 0f
 
     @SuppressLint("MissingPermission")
     private val _locationUpdates = callbackFlow {
@@ -45,18 +45,30 @@ class SharedLocationManager constructor(
 
         if (!context.hasBackgroundPermission()) close()
 
-        info("Starting location updates with minTimeMs=${timeTravelMinimum}ms and minDistanceM=${distanceTravelMinimum}m")
+        val providerList = buildList {
+            val providers = locationManager.allProviders
+            if (android.os.Build.VERSION.SDK_INT >= 31 && LocationManager.FUSED_PROVIDER in providers) {
+                add(LocationManager.FUSED_PROVIDER)
+            } else {
+                if (LocationManager.NETWORK_PROVIDER in providers) add(LocationManager.NETWORK_PROVIDER)
+                if (LocationManager.GPS_PROVIDER in providers) add(LocationManager.GPS_PROVIDER)
+            }
+        }
+
+        info("Starting location updates with $providerList minTimeMs=${timeTravelMinimum}ms and minDistanceM=${distanceTravelMinimum}m")
         _receivingLocationUpdates.value = true
         GeeksvilleApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
 
         try {
-            locationManager.requestLocationUpdates(
-                LocationManager.GPS_PROVIDER,
-                timeTravelMinimum,
-                distanceTravelMinimum,
-                callback,
-                context.mainLooper
-            )
+            providerList.forEach { provider ->
+                locationManager.requestLocationUpdates(
+                    provider,
+                    timeTravelMinimum,
+                    distanceTravelMinimum,
+                    callback,
+                    context.mainLooper
+                )
+            }
         } catch (e: Exception) {
             close(e) // in case of exception, close the Flow
         }
