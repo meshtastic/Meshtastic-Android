@@ -31,6 +31,7 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
         }
     }
 
+    private var socket: Socket? = null
     private lateinit var outStream: OutputStream
 
     init {
@@ -45,6 +46,16 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
         outStream.flush()
     }
 
+    override fun onDeviceDisconnect(waitForStopped: Boolean) {
+        val s = socket
+        if (s != null) {
+            debug("Closing TCP socket")
+            s.close()
+            socket = null
+        }
+        super.onDeviceDisconnect(waitForStopped)
+    }
+
     override fun connect() {
         service.serviceScope.handledLaunch {
             try {
@@ -56,6 +67,7 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
                 Exceptions.report(ex, "Exception in TCP reader")
                 onDeviceDisconnect(false)
             }
+            debug("Exiting TCP reader")
         }
     }
 
@@ -65,6 +77,7 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
         Socket(InetAddress.getByName(address), 4403).use { socket ->
             socket.tcpNoDelay = true
             socket.soTimeout = 500
+            this@TCPInterface.socket = socket
 
             BufferedOutputStream(socket.getOutputStream()).use { outputStream ->
                 outStream = outputStream
@@ -84,7 +97,6 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
                     }
                 }
             }
-            debug("Closing TCP socket")
             onDeviceDisconnect(false)
         }
     }
