@@ -205,8 +205,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
             holder.lastTime.text = formatAgo(n.lastHeard)
 
-            if (n.envMetricStr.isNotEmpty()) {
-                holder.envMetrics.text = n.envMetricStr
+            val envMetrics = n.envMetricStr(model.module.telemetry.environmentDisplayFahrenheit)
+            if (envMetrics.isNotEmpty()) {
+                holder.envMetrics.text = envMetrics
                 holder.envMetrics.visibility = View.VISIBLE
             } else {
                 holder.envMetrics.visibility = View.GONE
