@@ -50,6 +50,7 @@
     <string name="connected_count">Connected: %1$s of %2$s online</string>
     <string name="list_of_nodes">A list of nodes in the network</string>
     <string name="update_firmware">Update Firmware</string>
+    <string name="ip_address">IP Address:</string>
     <string name="connected">Connected to radio</string>
     <string name="connected_to">Connected to radio (%s)</string>
     <string name="not_connected">Not connected</string>

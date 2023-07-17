@@ -14,6 +14,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.RemoteException
+import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,6 +25,7 @@ import android.widget.RadioButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asLiveData
@@ -455,6 +457,27 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
+    private fun addManualDeviceButton() {
+        val b = binding.radioButtonManual
+        val e = binding.editManualAddress
+
+        b.isEnabled = false
+
+        binding.deviceRadioGroup.addView(b)
+
+
+        b.setOnClickListener {
+
+
+            b.isChecked = onSelected(BTScanModel.DeviceListEntry("", "t" + e.text, true))
+
+        }
+        binding.deviceRadioGroup.addView(e)
+        e.doAfterTextChanged {
+            b.isEnabled = Patterns.IP_ADDRESS.matcher(e.text).matches()
+        }
+    }
+
     private fun updateDevicesButtons(devices: MutableMap<String, BTScanModel.DeviceListEntry>?) {
         // Remove the old radio buttons and repopulate
         binding.deviceRadioGroup.removeAllViews()
@@ -480,6 +503,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 addDeviceButton(curDevice, model.isConnected())
             }
         }
+
+        addManualDeviceButton()
 
         // get rid of the warning text once at least one device is paired.
         // If we are running on an emulator, always leave this message showing so we can test the worst case layout

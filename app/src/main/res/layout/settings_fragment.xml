@@ -109,6 +109,22 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/test_devname2" />
+
+            <RadioButton
+                android:id="@+id/radioButtonManual"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/ip_address" />
+
+            <EditText
+                android:id="@+id/editManualAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/ip_address"
+                android:inputType="number|text"
+                android:visibility="visible" />
+
         </RadioGroup>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
