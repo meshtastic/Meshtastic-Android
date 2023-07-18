@@ -179,7 +179,7 @@ data class NodeInfo(
         else envFormat("%.1f", "°F ", environmentMetrics?.temperature?.times(1.8f)?.plus(32)) +
                 envFormat("%.0f", "%% ", environmentMetrics?.relativeHumidity) +
                 envFormat("%.1f", "hPa ", environmentMetrics?.barometricPressure) +
-                envFormat("%.0f", "mΩ ", environmentMetrics?.gasResistance) +
+                envFormat("%.0f", "MΩ ", environmentMetrics?.gasResistance) +
                 envFormat("%.2f", "V ", environmentMetrics?.voltage) +
                 envFormat("%.1f", "mA", environmentMetrics?.current)
 
