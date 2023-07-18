@@ -122,6 +122,14 @@ fun MQTTConfigItemList(
         }
 
         item {
+            SwitchPreference(title = "Proxy to client enabled",
+                checked = mqttInput.proxyToClientEnabled,
+                enabled = enabled,
+                onCheckedChange = { mqttInput = mqttInput.copy { proxyToClientEnabled = it } })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = mqttInput != mqttConfig,
                 onCancelClicked = {
@@ -136,7 +144,7 @@ fun MQTTConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun MQTTConfigPreview(){
+fun MQTTConfigPreview() {
     MQTTConfigItemList(
         mqttConfig = MQTTConfig.getDefaultInstance(),
         enabled = true,
