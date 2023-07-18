@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,7 +56,6 @@ import com.geeksville.mesh.waypoint
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import org.osmdroid.api.IMapController
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
@@ -114,7 +112,6 @@ fun MapView(model: UIViewModel = viewModel()) {
     // constants
     val defaultMinZoom = 1.5
     val defaultMaxZoom = 18.0
-    val defaultZoomSpeed = 3000L
     val prefsName = "org.geeksville.osm.prefs"
     val mapStyleId = "map_style_id"
     val nodeLayer = 1
@@ -144,6 +141,9 @@ fun MapView(model: UIViewModel = viewModel()) {
             clipToOutline = true
         }
     }
+    val nodes by model.nodeDB.nodes.observeAsState(emptyMap())
+    val waypoints by model.waypoints.observeAsState(emptyMap())
+
     var showDownloadButton: Boolean by remember { mutableStateOf(false) }
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
@@ -166,13 +166,6 @@ fun MapView(model: UIViewModel = viewModel()) {
                 position = GeoPoint(p.latitude, p.longitude)
                 icon = ic
             }
-        }
-    }
-
-    val nodes by model.nodeDB.nodes.observeAsState()
-    val nodeMarkers = remember(nodes) {
-        mutableStateListOf<MarkerWithLabel>().apply {
-            nodes?.values?.let { addAll(onNodesChanged(it)) }
         }
     }
 
@@ -235,13 +228,6 @@ fun MapView(model: UIViewModel = viewModel()) {
                     true
                 }
             }
-        }
-    }
-
-    val waypoints by model.waypoints.observeAsState()
-    val waypointMarkers = remember(waypoints) {
-        mutableStateListOf<MarkerWithLabel>().apply {
-            waypoints?.values?.let { addAll(onWaypointChanged(it)) }
         }
     }
 
@@ -397,11 +383,12 @@ fun MapView(model: UIViewModel = viewModel()) {
     }
 
     fun drawOverlays() = map.apply {
-        overlayManager.overlays().clear()
+        overlays.clear()
         addCopyright()  // Copyright is required for certain map sources
         createLatLongGrid(false)
-        overlayManager.addAll(nodeLayer, nodeMarkers)
-        overlayManager.addAll(nodeLayer, waypointMarkers)
+
+        overlayManager.addAll(nodeLayer, onNodesChanged(nodes.values))
+        overlayManager.addAll(nodeLayer, onWaypointChanged(waypoints.values))
         overlayManager.add(nodeLayer, MapEventsOverlay(object : MapEventsReceiver {
             override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
                 InfoWindow.closeAllInfoWindowsOn(map)
@@ -438,13 +425,15 @@ fun MapView(model: UIViewModel = viewModel()) {
 //        }
 //    }
 
-    fun zoomToNodes(controller: IMapController) {
+    fun zoomToNodes(map: MapView) = map.apply {
+        val nodeMarkers = onNodesChanged(nodes.values)
         if (nodeMarkers.isNotEmpty()) {
             val box = BoundingBox.fromGeoPoints(nodeMarkers.map { it.position })
             val center = GeoPoint(box.centerLatitude, box.centerLongitude)
             val maximumZoomLevel = map.tileProvider.tileSource.maximumZoomLevel.toDouble()
             val finalZoomLevel = minOf(box.requiredZoomLevel() * 0.8, maximumZoomLevel)
-            controller.animateTo(center, finalZoomLevel, defaultZoomSpeed)
+            controller.setCenter(center)
+            controller.setZoom(finalZoomLevel)
         } else controller.zoomIn()
     }
 
@@ -482,39 +471,6 @@ fun MapView(model: UIViewModel = viewModel()) {
             zoomLevelMin.toInt()
         )
         cacheEstimate = context.getString(R.string.map_cache_tiles).format(tileCount)
-    }
-
-    /**
-     * Reset map to default settings & visible buttons
-     */
-    fun defaultMapSettings() = map.apply {
-        // Required to get online tiles
-        Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
-        setDestroyMode(false) // keeps map instance alive when in the background.
-        isVerticalMapRepetitionEnabled = false // disables map repetition
-        overlayManager = DefaultOverlayManager(TilesOverlay(tileProvider, context))
-        setScrollableAreaLimitLatitude( // bounds scrollable map
-            overlayManager.tilesOverlay.bounds.actualNorth,
-            overlayManager.tilesOverlay.bounds.actualSouth,
-            0
-        )
-        isTilesScaledToDpi = true // scales the map tiles to the display density of the screen
-        minZoomLevel = defaultMinZoom // sets the minimum zoom level (the furthest out you can zoom)
-        maxZoomLevel = defaultMaxZoom
-        setMultiTouchControls(true) // Sets gesture controls to true.
-        zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER) // Disables default +/- button for zooming
-        addMapListener(object : MapListener {
-            override fun onScroll(event: ScrollEvent): Boolean {
-                if (downloadRegionBoundingBox != null) {
-                    generateBoxOverlay(zoomLevelMax)
-                }
-                return true
-            }
-
-            override fun onZoom(event: ZoomEvent): Boolean {
-                return false
-            }
-        })
     }
 
     fun startDownload() {
@@ -591,9 +547,38 @@ fun MapView(model: UIViewModel = viewModel()) {
             AndroidView(
                 factory = {
                     map.apply {
+                        // Required to get online tiles
+                        Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
                         setTileSource(loadOnlineTileSourceBase())
-                        defaultMapSettings()
-                        zoomToNodes(controller)
+                        setDestroyMode(false) // keeps map instance alive when in the background
+                        isVerticalMapRepetitionEnabled = false // disables map repetition
+                        overlayManager = DefaultOverlayManager(TilesOverlay(tileProvider, context))
+                        setMultiTouchControls(true)
+                        setScrollableAreaLimitLatitude( // bounds scrollable map
+                            overlayManager.tilesOverlay.bounds.actualNorth,
+                            overlayManager.tilesOverlay.bounds.actualSouth,
+                            0
+                        )
+                        // scales the map tiles to the display density of the screen
+                        isTilesScaledToDpi = true
+                        // sets the minimum zoom level (the furthest out you can zoom)
+                        minZoomLevel = defaultMinZoom
+                        maxZoomLevel = defaultMaxZoom
+                        // Disables default +/- button for zooming
+                        zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
+                        addMapListener(object : MapListener {
+                            override fun onScroll(event: ScrollEvent): Boolean {
+                                if (downloadRegionBoundingBox != null) {
+                                    generateBoxOverlay(zoomLevelMax)
+                                }
+                                return true
+                            }
+
+                            override fun onZoom(event: ZoomEvent): Boolean {
+                                return false
+                            }
+                        })
+                        zoomToNodes(map)
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
@@ -604,7 +589,10 @@ fun MapView(model: UIViewModel = viewModel()) {
                 onExecuteJob = { startDownload() },
                 onCancelDownload = {
                     downloadRegionBoundingBox = null
-                    defaultMapSettings()
+                    map.apply {
+                        overlayManager = DefaultOverlayManager(TilesOverlay(tileProvider, context))
+                        setMultiTouchControls(true)
+                    }
                 },
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) else MapStyleButton(
