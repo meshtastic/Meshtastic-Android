@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,6 +22,7 @@ import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
@@ -99,8 +101,23 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
+                val scope = rememberCoroutineScope()
+                val snackbarHostState = remember { SnackbarHostState() }
+
                 AppCompatTheme {
-                    ChannelScreen(model)
+                    Scaffold(
+                        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+                    ) { paddingValues ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues),
+                        ) {
+                            ChannelScreen(model) { text ->
+                                scope.launch { snackbarHostState.showSnackbar(text) }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -108,13 +125,13 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
 }
 
 @Composable
-fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
+fun ChannelScreen(
+    viewModel: UIViewModel = viewModel(),
+    showSnackbar: (String) -> Unit = {},
+) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val clipboardManager = LocalClipboardManager.current
-
-    val scope = rememberCoroutineScope()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     val connectionState by viewModel.connectionState.observeAsState()
     val connected = connectionState == MeshService.ConnectionState.CONNECTED
@@ -177,9 +194,7 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
             channelSet = channels.protobuf // Throw away user edits
 
             // Tell the user to try again
-            scope.launch {
-                snackbarHostState.showSnackbar(context.getString(R.string.radio_sleeping))
-            }
+            showSnackbar(context.getString(R.string.radio_sleeping))
         }
     }
 
@@ -405,7 +420,6 @@ fun ChannelScreen(viewModel: UIViewModel = viewModel()) {
             }
         }
     }
-    SnackbarHost(hostState = snackbarHostState)
 }
 
 @Preview(showBackground = true)
