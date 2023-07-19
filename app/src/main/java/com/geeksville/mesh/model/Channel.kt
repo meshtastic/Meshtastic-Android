@@ -43,9 +43,7 @@ data class Channel(
     val name: String
         get() = settings.name.ifEmpty {
             // We have a new style 'empty' channel name.  Use the same logic from the device to convert that to a human readable name
-            if (loraConfig.bandwidth != 0)
-                "Unset"
-            else when (loraConfig.modemPreset) {
+            if (loraConfig.usePreset) when (loraConfig.modemPreset) {
                 ModemPreset.SHORT_FAST -> "ShortFast"
                 ModemPreset.SHORT_SLOW -> "ShortSlow"
                 ModemPreset.MEDIUM_FAST -> "MediumFast"
@@ -55,7 +53,7 @@ data class Channel(
                 ModemPreset.LONG_MODERATE -> "LongMod"
                 ModemPreset.VERY_LONG_SLOW -> "VLongSlow"
                 else -> "Invalid"
-            }
+            } else "Custom"
         }
 
     val psk: ByteString
@@ -89,6 +87,26 @@ data class Channel(
 
             return "#${name}-${suffix}"
         }
+
+    /**
+     * hash a string into an integer using the djb2 algorithm by Dan Bernstein
+     * http://www.cse.yorku.ca/~oz/hash.html
+     */
+    val hash: UInt // using UInt instead of Long to match RadioInterface.cpp results
+        get() {
+            var hash: UInt = 5381u
+            for (c in name) {
+                hash += (hash shl 5) + c.code.toUInt()
+                print("$c ${c.code} $hash ")
+            }
+            return hash
+        }
+
+    val channelNum: Int
+        get() = if (loraConfig.channelNum != 0) loraConfig.channelNum
+        else (hash % RegionInfo.numChannels(loraConfig).toUInt()).toInt() + 1
+
+    val radioFreq: Float get() = RegionInfo.radioFreq(loraConfig, channelNum)
 
     override fun equals(other: Any?): Boolean = (other is Channel)
             && psk.toByteArray() contentEquals other.psk.toByteArray()

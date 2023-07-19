@@ -34,6 +34,7 @@ fun EditTextPreference(
     keyboardActions: KeyboardActions,
     onValueChanged: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    onFocusChanged: (FocusState) -> Unit = {},
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
     var valueState by remember(value) { mutableStateOf(value.toUInt().toString()) }
@@ -54,7 +55,7 @@ fun EditTextPreference(
                 onValueChanged(int)
             }
         },
-        onFocusChanged = {},
+        onFocusChanged = onFocusChanged,
         modifier = modifier,
         trailingIcon = trailingIcon
     )
@@ -68,7 +69,8 @@ fun EditTextPreference(
     keyboardActions: KeyboardActions,
     onValueChanged: (Float) -> Unit,
     modifier: Modifier = Modifier,
-) {
+    onFocusChanged: (FocusState) -> Unit = {},
+    ) {
     var valueState by remember(value) { mutableStateOf(value.toString()) }
 
     EditTextPreference(
@@ -87,7 +89,7 @@ fun EditTextPreference(
                 onValueChanged(float)
             }
         },
-        onFocusChanged = {},
+        onFocusChanged = onFocusChanged,
         modifier = modifier
     )
 }
