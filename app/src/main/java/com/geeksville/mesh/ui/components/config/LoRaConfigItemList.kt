@@ -13,8 +13,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
+import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.RegionInfo
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditListPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
@@ -25,11 +28,13 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 @Composable
 fun LoRaConfigItemList(
     loraConfig: LoRaConfig,
+    primarySettings: ChannelSettings,
     enabled: Boolean,
     focusManager: FocusManager,
     onSaveClicked: (LoRaConfig) -> Unit,
 ) {
     var loraInput by remember(loraConfig) { mutableStateOf(loraConfig) }
+    val primaryChannel = Channel(primarySettings, loraInput)
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -125,11 +130,16 @@ fun LoRaConfigItemList(
         }
 
         item {
+            var isFocused by remember { mutableStateOf(false) }
             EditTextPreference(title = "Channel number",
-                value = loraInput.channelNum,
+                value = if (isFocused || loraInput.channelNum != 0) loraInput.channelNum else primaryChannel.channelNum,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { loraInput = loraInput.copy { channelNum = it } })
+                onFocusChanged = { isFocused = it.isFocused },
+                onValueChanged = {
+                    if (it <= RegionInfo.numChannels(loraInput)) // max numChannels
+                        loraInput = loraInput.copy { channelNum = it }
+                })
         }
 
         item {
@@ -163,10 +173,12 @@ fun LoRaConfigItemList(
         item { Divider() }
 
         item {
+            var isFocused by remember { mutableStateOf(false) }
             EditTextPreference(title = "Override frequency (MHz)",
-                value = loraInput.overrideFrequency,
+                value = if (isFocused || loraInput.overrideFrequency != 0f) loraInput.overrideFrequency else primaryChannel.radioFreq,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onFocusChanged = { isFocused = it.isFocused },
                 onValueChanged = { loraInput = loraInput.copy { overrideFrequency = it } })
         }
 
@@ -185,9 +197,10 @@ fun LoRaConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun LoRaConfigPreview(){
+fun LoRaConfigPreview() {
     LoRaConfigItemList(
-        loraConfig = LoRaConfig.getDefaultInstance(),
+        loraConfig = Channel.default.loraConfig,
+        primarySettings = Channel.default.settings,
         enabled = true,
         focusManager = LocalFocusManager.current,
         onSaveClicked = { },

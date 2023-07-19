@@ -258,6 +258,8 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             viewModel.clearPacketResponse()
             val parsed = AdminProtos.AdminMessage.parseFrom(data.payload)
             debug("packet for destNum ${destNum.toUInt()} received ${parsed.payloadVariantCase} from $from")
+            // check destination: lora config or channel editor
+            val goChannels = (packetResponseState as PacketResponseState.Loading).total > 2
             when (parsed.payloadVariantCase) {
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
                     val response = parsed.getChannelResponse
@@ -265,7 +267,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                     // Stop once we get to the first disabled entry
                     if (response.role != ChannelProtos.Channel.Role.DISABLED) {
                         channelList.add(response.index, response.settings)
-                        if (response.index + 1 < maxChannels) {
+                        if (response.index + 1 < maxChannels && goChannels) {
                             // Not done yet, request next channel
                             viewModel.getChannel(destNum, response.index + 1)
                         } else {
@@ -285,8 +287,6 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CONFIG_RESPONSE -> {
-                    // check destination: lora config or channel editor
-                    val goChannels = (packetResponseState as PacketResponseState.Loading).total > 1
                     packetResponseState = PacketResponseState.Empty
                     val response = parsed.getConfigResponse
                     radioConfig = response
@@ -370,6 +370,11 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                             viewModel.requestNodedbReset(destNum)
                         }
 
+                        ConfigType.LORA_CONFIG -> {
+                            (packetResponseState as PacketResponseState.Loading).total = 2
+                            channelList.clear()
+                            viewModel.getChannel(destNum, 0)
+                        }
                         is ConfigType -> {
                             viewModel.getConfig(destNum, configType.number)
                         }
@@ -491,6 +496,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
         composable("lora") {
             LoRaConfigItemList(
                 loraConfig = radioConfig.lora,
+                primarySettings = channelList.getOrNull(0) ?: return@composable,
                 enabled = connected,
                 focusManager = focusManager,
                 onSaveClicked = { loraInput ->
