@@ -210,7 +210,7 @@ class BTScanModel @Inject constructor(
                 }
 
                 // Include Network Service Discovery
-                nsdRepository.resolvedList?.forEach { service ->
+                nsdRepository.resolvedList.value.forEach { service ->
                     addDevice(TCPDeviceListEntry(service))
                 }
 
