@@ -36,13 +36,13 @@ class SharedLocationManager constructor(
     private val _receivingLocationUpdates: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val receivingLocationUpdates: StateFlow<Boolean> get() = _receivingLocationUpdates
 
-    private val desiredInterval = 1 * 60 * 1000L
+    private val desiredInterval = 30 * 1000L // 30 seconds
 
     // Set up the Fused Location Provider and LocationRequest
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     private val locationRequest = LocationRequest.Builder(desiredInterval)
-        .setMinUpdateIntervalMillis(30 * 1000L)
-        .setMaxUpdateDelayMillis(5 * 60 * 1000L)
+        // .setMinUpdateIntervalMillis(10 * 1000L)
+        // .setMaxUpdateDelayMillis(5 * 60 * 1000L)
         // .setMinUpdateDistanceMeters(30f) // 30 meters
         .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
         .build()
