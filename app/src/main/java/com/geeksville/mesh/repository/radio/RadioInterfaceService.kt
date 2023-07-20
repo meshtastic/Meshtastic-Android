@@ -12,6 +12,7 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
+import com.geeksville.mesh.repository.nsd.NsdRepository
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.ignoreException
@@ -21,6 +22,9 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -38,7 +42,8 @@ import javax.inject.Singleton
 class RadioInterfaceService @Inject constructor(
     private val context: Application,
     private val dispatchers: CoroutineDispatchers,
-    private val bluetoothRepository: BluetoothRepository,
+    bluetoothRepository: BluetoothRepository,
+    nsdRepository: NsdRepository,
     private val processLifecycle: Lifecycle,
     private val usbRepository: UsbRepository,
     @RadioRepositoryQualifier private val prefs: SharedPreferences
@@ -72,15 +77,15 @@ class RadioInterfaceService @Inject constructor(
     private var isConnected = false
 
     init {
-        processLifecycle.coroutineScope.launch {
-            bluetoothRepository.state.collect { state ->
-                if (state.enabled) {
-                    startInterface()
-                } else if (radioIf is BluetoothInterface) {
-                    stopInterface()
-                }
-            }
-        }
+        bluetoothRepository.state.onEach { state ->
+            if (state.enabled) startInterface()
+            else if (radioIf is BluetoothInterface) stopInterface()
+        }.launchIn(processLifecycle.coroutineScope)
+
+        nsdRepository.networkAvailable.onEach { state ->
+            if (state) startInterface()
+            else if (radioIf is TCPInterface) stopInterface()
+        }.launchIn(processLifecycle.coroutineScope)
     }
 
     companion object : Logging {
@@ -174,14 +179,14 @@ class RadioInterfaceService @Inject constructor(
     fun onConnect() {
         if (!isConnected) {
             isConnected = true
-            broadcastConnectionChanged(true, false)
+            broadcastConnectionChanged(isConnected = true, isPermanent = false)
         }
     }
 
     fun onDisconnect(isPermanent: Boolean) {
         if (isConnected) {
             isConnected = false
-            broadcastConnectionChanged(false, isPermanent)
+            broadcastConnectionChanged(isConnected = false, isPermanent = isPermanent)
         }
     }
 

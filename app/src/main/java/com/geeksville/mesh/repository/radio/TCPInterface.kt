@@ -85,14 +85,18 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
                 BufferedInputStream(socket.getInputStream()).use { inputStream ->
                     super.connect()
 
-                    while (true) try {
+                    var timeoutCount = 0
+                    while (timeoutCount < 180) try { // close after 90s of inactivity
                         val c = inputStream.read()
                         if (c == -1) {
                             warn("Got EOF on TCP stream")
                             break
-                        } else
+                        } else {
+                            timeoutCount = 0
                             readChar(c.toByte())
+                        }
                     } catch (ex: SocketTimeoutException) {
+                        timeoutCount++
                         // Ignore and start another read
                     }
                 }
