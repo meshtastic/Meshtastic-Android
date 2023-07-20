@@ -153,10 +153,11 @@ class UIViewModel @Inject constructor(
             _ourNodeInfo.value = it
         }.launchIn(viewModelScope)
 
-        combine(meshLog, requestId) { packet, requestId ->
-            if (requestId != null) _packetResponse.value =
-                packet.firstOrNull { it.meshPacket?.decoded?.requestId == requestId }
-        }.launchIn(viewModelScope)
+        viewModelScope.launch {
+            combine(meshLogRepository.getAllLogs(9), requestId) { list, id ->
+                list.takeIf { id != null }?.firstOrNull { it.meshPacket?.decoded?.requestId == id }
+            }.collect { response -> _packetResponse.value = response }
+        }
 
         debug("ViewModel created")
     }

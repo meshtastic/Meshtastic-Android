@@ -12,8 +12,8 @@ class MeshLogRepository @Inject constructor(private val meshLogDaoLazy: dagger.L
         meshLogDaoLazy.get()
     }
 
-    suspend fun getAllLogs(): Flow<List<MeshLog>> = withContext(Dispatchers.IO) {
-        meshLogDao.getAllLogs(MAX_ITEMS)
+    suspend fun getAllLogs(maxItems: Int = MAX_ITEMS): Flow<List<MeshLog>> = withContext(Dispatchers.IO) {
+        meshLogDao.getAllLogs(maxItems)
     }
 
     suspend fun getAllLogsInReceiveOrder(maxItems: Int = MAX_ITEMS): Flow<List<MeshLog>> = withContext(Dispatchers.IO) {
