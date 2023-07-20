@@ -56,6 +56,7 @@ import com.geeksville.mesh.waypoint
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
@@ -156,6 +157,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         return nodesWithPosition.map { node ->
             val (p, u) = node.position!! to node.user!!
             MarkerWithLabel(map, "${u.longName} ${formatAgo(p.time)}").apply {
+                id = u.id
                 title = "${u.longName} ${node.batteryStr}"
                 snippet = model.gpsString(p)
                 ourNode?.distanceStr(node, model.config.display.units.number)?.let { dist ->
@@ -407,6 +409,15 @@ fun MapView(model: UIViewModel = viewModel()) {
             }
         }))
         invalidate()
+    }
+
+    // FIXME workaround to 'nodes.observeAsState' going stale after MapFragment enters onPause state
+    if (downloadRegionBoundingBox == null) LaunchedEffect(Unit) {
+        while (true) {
+            debug("update position LaunchedEffect() ${nodes.size}")
+            drawOverlays()
+            delay(30000L)
+        }
     }
 
 //    private fun addWeatherLayer() {
