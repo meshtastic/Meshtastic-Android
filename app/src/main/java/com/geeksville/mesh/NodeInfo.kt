@@ -171,17 +171,21 @@ data class NodeInfo(
     val voltage get() = deviceMetrics?.voltage
     val batteryStr get() = if (batteryLevel in 1..100) String.format("%d%%", batteryLevel) else ""
 
-    private fun envFormat(f: String, unit: String, env: Float?): String =
-        if (env != null && env != 0f) String.format(f + unit, env) else ""
+    private fun Float.envFormat(unit: String, decimalPlaces: Int = 1): String =
+        if (this != 0f) String.format("%.${decimalPlaces}f$unit", this) else ""
 
-    fun envMetricStr(isFahrenheit: Boolean = false): String =
-        (if (!isFahrenheit) envFormat("%.1f", "°C ", environmentMetrics?.temperature)
-        else envFormat("%.1f", "°F ", environmentMetrics?.temperature?.times(1.8f)?.plus(32))) +
-                envFormat("%.0f", "%% ", environmentMetrics?.relativeHumidity) +
-                envFormat("%.1f", "hPa ", environmentMetrics?.barometricPressure) +
-                envFormat("%.0f", "MΩ ", environmentMetrics?.gasResistance) +
-                envFormat("%.2f", "V ", environmentMetrics?.voltage) +
-                envFormat("%.1f", "mA", environmentMetrics?.current)
+    fun envMetricStr(isFahrenheit: Boolean = false): String = buildString {
+        val env = environmentMetrics ?: return ""
+        if (env.temperature != 0f) append(
+            if (!isFahrenheit) env.temperature.envFormat("°C ")
+            else (env.temperature * 1.8f + 32).envFormat("°F ")
+        )
+        append(env.relativeHumidity.envFormat("%% ", 0))
+        append(env.barometricPressure.envFormat("hPa "))
+        append(env.gasResistance.envFormat("MΩ ", 0))
+        append(env.voltage.envFormat("V ", 2))
+        append(env.current.envFormat("mA"))
+    }
 
     /**
      * true if the device was heard from recently
