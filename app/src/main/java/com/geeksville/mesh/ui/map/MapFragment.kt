@@ -412,9 +412,9 @@ fun MapView(model: UIViewModel = viewModel()) {
     }
 
     // FIXME workaround to 'nodes.observeAsState' going stale after MapFragment enters onPause state
-    if (downloadRegionBoundingBox == null) LaunchedEffect(Unit) {
+    LaunchedEffect(Unit) {
         while (true) {
-            drawOverlays()
+            if (downloadRegionBoundingBox == null) drawOverlays()
             delay(30000L)
         }
     }
