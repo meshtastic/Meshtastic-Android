@@ -22,8 +22,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.RadioButton
-import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.activityViewModels
@@ -57,7 +55,6 @@ import com.geeksville.mesh.util.exceptionToSnackbar
 import com.geeksville.mesh.util.getParcelableExtraCompat
 import com.geeksville.mesh.util.onEditorAction
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -259,7 +256,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     binding.provideLocationCheckbox.isChecked = true
                 } else {
                     debug("User denied background permission")
-                    showSnackbar(getString(R.string.why_background_required))
+                    model.showSnackbar(getString(R.string.why_background_required))
                 }
             }
 
@@ -272,7 +269,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     } else requestBackgroundAndCheckLauncher.launch(requireContext().getBackgroundPermissions())
                 } else {
                     debug("User denied location permission")
-                    showSnackbar(getString(R.string.why_background_required))
+                    model.showSnackbar(getString(R.string.why_background_required))
                 }
             }
 
@@ -435,7 +432,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 }
                 .setPositiveButton(getString(R.string.report)) { _, _ ->
                     reportError("Clicked Report A Bug")
-                    Toast.makeText(requireContext(), "Bug report sent!", Toast.LENGTH_LONG).show()
+                    model.showSnackbar("Bug report sent!")
                 }
                 .show()
         }
@@ -670,7 +667,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     scanLeDevice()
                 } else {
                     errormsg("User denied scan permissions")
-                    showSnackbar(requireContext().permissionMissing)
+                    model.showSnackbar(requireContext().permissionMissing)
                 }
                 bluetoothViewModel.permissionsUpdated()
             }
@@ -703,17 +700,15 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         warningReason: String = getString(R.string.location_disabled_warning)
     ) {
         if (requireContext().gpsDisabled()) {
-            warn("Telling user we need need location access")
-            showSnackbar(warningReason)
+            warn("Telling user we need location access")
+            model.showSnackbar(warningReason)
         }
     }
 
-    private fun checkBTEnabled(
-        warningReason: String = getString(R.string.bluetooth_disabled)
-    ) {
+    private fun checkBTEnabled() {
         if (bluetoothViewModel.enabled.value == false) {
             warn("Telling user bluetooth is disabled")
-            Toast.makeText(requireContext(), warningReason, Toast.LENGTH_LONG).show()
+            model.showSnackbar(R.string.bluetooth_disabled)
         }
     }
 
@@ -722,17 +717,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private val updateProgressReceiver: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             refreshUpdateButton(true)
-        }
-    }
-
-    private fun showSnackbar(msg: String) {
-        if (isAdded) {
-            Snackbar.make(binding.root, msg, Snackbar.LENGTH_INDEFINITE)
-                .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
-                .setAction(R.string.okay) {
-                    // dismiss
-                }
-                .show()
         }
     }
 

@@ -371,6 +371,20 @@ class UIViewModel @Inject constructor(
         _requestChannelUrl.value = null
     }
 
+    private val _snackbarText = MutableLiveData<Any?>(null)
+    val snackbarText: LiveData<Any?> get() = _snackbarText
+
+    fun showSnackbar(resString: Any) {
+        _snackbarText.value = resString
+    }
+
+    /**
+     * Called immediately after activity observes [snackbarText]
+     */
+    fun clearSnackbarText() {
+        _snackbarText.value = null
+    }
+
     var txEnabled: Boolean
         get() = config.lora.txEnabled
         set(value) {

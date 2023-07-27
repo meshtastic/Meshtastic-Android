@@ -632,6 +632,7 @@ class MainActivity : AppCompatActivity(), Logging {
         model.connectionState.removeObservers(this)
         bluetoothViewModel.enabled.removeObservers(this)
         model.requestChannelUrl.removeObservers(this)
+        model.snackbarText.removeObservers(this)
 
         super.onStop()
     }
@@ -665,13 +666,20 @@ class MainActivity : AppCompatActivity(), Logging {
             }
         }
 
-        // Call perhapsChangeChannel() whenever [changeChannelUrl] updates with a non-null value
+        // Call perhapsChangeChannel() whenever [requestChannelUrl] updates with a non-null value
         model.requestChannelUrl.observe(this) { url ->
             url?.let {
                 requestedChannelUrl = url
                 model.clearRequestChannelUrl()
                 perhapsChangeChannel()
             }
+        }
+
+        // Call showSnackbar() whenever [snackbarText] updates with a non-null value
+        model.snackbarText.observe(this) { text ->
+            if (text is Int) showSnackbar(text)
+            if (text is String) showSnackbar(text)
+            if (text != null) model.clearSnackbarText()
         }
 
         try {
