@@ -80,17 +80,19 @@ android {
     buildFeatures {
         viewBinding true
         compose true
+        aidl true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.8"
     }
-    // Set both the Java and Kotlin compilers to target Java 8.
+    // Configure the build-logic plugins to target JDK 17
+    // This matches the JDK used to build the project, and is not related to what is running on device.
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_17.toString()
         freeCompilerArgs += ['-opt-in=kotlin.RequiresOptIn']
     }
     lint {
