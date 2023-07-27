@@ -12,6 +12,7 @@ import kotlin.math.acos
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.log2
+import kotlin.math.pow
 import kotlin.math.sin
 
 /*******************************************************************************
@@ -251,3 +252,30 @@ fun BoundingBox.requiredZoomLevel(): Double {
     return maxOf(requiredLatZoom, requiredLonZoom)
 }
 
+/**
+ * Creates a new bounding box with adjusted dimensions based on the provided [zoomFactor].
+ * @return A new [BoundingBox] with added [zoomFactor]. Example:
+ * ```
+ * // Setting the zoom level directly using setZoom()
+ * map.setZoom(14.0)
+ * val boundingBoxZoom14 = map.boundingBox
+ *
+ * // Using zoomIn() results the equivalent BoundingBox with setZoom(15.0)
+ * val boundingBoxZoom15 = boundingBoxZoom14.zoomIn(1.0)
+ * ```
+ */
+fun BoundingBox.zoomIn(zoomFactor: Double): BoundingBox {
+    val center = GeoPoint((latNorth + latSouth) / 2, (lonWest + lonEast) / 2)
+    val latDiff = latNorth - latSouth
+    val lonDiff = lonEast - lonWest
+
+    val newLatDiff = latDiff / (2.0.pow(zoomFactor))
+    val newLonDiff = lonDiff / (2.0.pow(zoomFactor))
+
+    return BoundingBox(
+        center.latitude + newLatDiff / 2,
+        center.longitude + newLonDiff / 2,
+        center.latitude - newLatDiff / 2,
+        center.longitude - newLonDiff / 2
+    )
+}

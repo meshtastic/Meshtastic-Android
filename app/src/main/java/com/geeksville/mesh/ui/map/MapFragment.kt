@@ -52,6 +52,7 @@ import com.geeksville.mesh.util.EnableWakeLock
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.requiredZoomLevel
 import com.geeksville.mesh.util.formatAgo
+import com.geeksville.mesh.util.zoomIn
 import com.geeksville.mesh.waypoint
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -461,21 +462,21 @@ fun MapView(model: UIViewModel = viewModel()) {
      */
     fun generateBoxOverlay(zoomLevel: Double) = map.apply {
         overlayManager = CustomOverlayManager(TilesOverlay(tileProvider, context))
+        val zoomFactor = 1.3 // zoom difference between view and download area polygon
+        controller.setZoom(zoomLevel - zoomFactor)
         setMultiTouchControls(false)
         // furthest back
         zoomLevelMax = zoomLevelHighest // FIXME zoomLevel
         // furthest in min should be > than max
-        zoomLevelMin = map.tileProvider.tileSource.maximumZoomLevel.toDouble()
-        controller.setZoom(zoomLevel)
-        downloadRegionBoundingBox = map.boundingBox
+        zoomLevelMin = tileProvider.tileSource.maximumZoomLevel.toDouble()
+        downloadRegionBoundingBox = boundingBox.zoomIn(zoomFactor)
         val polygon = Polygon().apply {
             points = Polygon.pointsAsRect(downloadRegionBoundingBox).map {
                 GeoPoint(it.latitude, it.longitude)
             }
         }
         overlayManager.add(polygon)
-        controller.setZoom(zoomLevel - 1.0)
-        val tileCount: Int = CacheManager(map).possibleTilesInArea(
+        val tileCount: Int = CacheManager(this).possibleTilesInArea(
             downloadRegionBoundingBox,
             zoomLevelMax.toInt(),
             zoomLevelMin.toInt()
