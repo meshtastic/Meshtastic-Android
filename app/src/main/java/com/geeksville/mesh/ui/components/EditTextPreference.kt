@@ -23,6 +23,7 @@ import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -128,47 +129,6 @@ fun EditTextPreference(
 }
 
 @Composable
-fun EditIPv4Preference(
-    title: String,
-    value: Int,
-    enabled: Boolean,
-    keyboardActions: KeyboardActions,
-    onValueChanged: (Int) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val pattern = """\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b""".toRegex()
-
-    fun convertIntToIpAddress(int: Int): String {
-        return "${int and 0xff}.${int shr 8 and 0xff}.${int shr 16 and 0xff}.${int shr 24 and 0xff}"
-    }
-
-    fun convertIpAddressToInt(ipAddress: String): Int? = ipAddress.split(".")
-        .map { it.toIntOrNull() }.reversed() // little-endian byte order
-        .fold(0) { total, next ->
-            if (next == null) return null else total shl 8 or next
-        }
-
-    var valueState by remember(value) { mutableStateOf(convertIntToIpAddress(value)) }
-
-    EditTextPreference(
-        title = title,
-        value = valueState,
-        enabled = enabled,
-        isError = convertIntToIpAddress(value) != valueState,
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
-        ),
-        keyboardActions = keyboardActions,
-        onValueChanged = {
-            valueState = it
-            if (pattern.matches(it)) convertIpAddressToInt(it)?.let { int -> onValueChanged(int) }
-        },
-        onFocusChanged = {},
-        modifier = modifier
-    )
-}
-
-@Composable
 fun EditTextPreference(
     title: String,
     value: String,
@@ -181,6 +141,7 @@ fun EditTextPreference(
     maxSize: Int = 0, // max_size - 1 (in bytes)
     onFocusChanged: (FocusState) -> Unit = {},
     trailingIcon: (@Composable () -> Unit)? = null,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
@@ -202,13 +163,14 @@ fun EditTextPreference(
         label = { Text(title) },
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
+        visualTransformation = visualTransformation,
         trailingIcon = {
             if (trailingIcon != null) {
                 trailingIcon()
             } else {
                 if (isError) Icon(Icons.TwoTone.Info, "Error", tint = MaterialTheme.colors.error)
             }
-        }
+        },
     )
 
     if (maxSize > 0 && isFocused) {
@@ -243,13 +205,6 @@ private fun EditTextPreferencePreview() {
         EditTextPreference(
             title = "Advanced Settings",
             value = UInt.MAX_VALUE.toInt(),
-            enabled = true,
-            keyboardActions = KeyboardActions {},
-            onValueChanged = {}
-        )
-        EditIPv4Preference(
-            title = "IP Address",
-            value = 16820416,
             enabled = true,
             keyboardActions = KeyboardActions {},
             onValueChanged = {}

@@ -18,6 +18,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.MQTTConfig
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.ui.components.EditPasswordPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
@@ -72,14 +73,10 @@ fun MQTTConfigItemList(
         }
 
         item {
-            EditTextPreference(title = "Password",
+            EditPasswordPreference(title = "Password",
                 value = mqttInput.password,
                 maxSize = 63, // password max_size:64
                 enabled = enabled,
-                isError = false,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
-                ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { mqttInput = mqttInput.copy { password = it } })
         }

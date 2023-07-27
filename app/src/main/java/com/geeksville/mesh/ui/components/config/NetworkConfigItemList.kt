@@ -20,6 +20,7 @@ import com.geeksville.mesh.ConfigProtos.Config.NetworkConfig
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditIPv4Preference
+import com.geeksville.mesh.ui.components.EditPasswordPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
@@ -63,18 +64,12 @@ fun NetworkConfigItemList(
         }
 
         item {
-            EditTextPreference(title = "PSK",
+            EditPasswordPreference(title = "PSK",
                 value = networkInput.wifiPsk,
                 maxSize = 63, // wifi_psk max_size:64
                 enabled = enabled,
-                isError = false,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Password, imeAction = ImeAction.Done
-                ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = {
-                    networkInput = networkInput.copy { wifiPsk = it }
-                })
+                onValueChanged = { networkInput = networkInput.copy { wifiPsk = it } })
         }
 
         item {
