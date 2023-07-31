@@ -126,7 +126,6 @@ fun MapView(model: UIViewModel = viewModel()) {
     var zoomLevelMax = 0.0
 
     // Map Elements
-    var writer: SqliteArchiveTileWriter
     var downloadRegionBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
 
     val context = LocalContext.current
@@ -313,10 +312,8 @@ fun MapView(model: UIViewModel = viewModel()) {
                         context,
                         R.string.map_download_complete,
                         Toast.LENGTH_LONG
-                    )
-                        .show()
+                    ).show()
                     writer.onDetach()
-                    //defaultMapSettings()
                 }
 
                 override fun onTaskFailed(errors: Int) {
@@ -326,7 +323,6 @@ fun MapView(model: UIViewModel = viewModel()) {
                         Toast.LENGTH_LONG
                     ).show()
                     writer.onDetach()
-                    // defaultMapSettings()
                 }
 
                 override fun updateProgress(
@@ -496,9 +492,12 @@ fun MapView(model: UIViewModel = viewModel()) {
     fun startDownload() {
         val boundingBox = downloadRegionBoundingBox ?: return
         try {
-            val outputName =
-                Configuration.getInstance().osmdroidBasePath.absolutePath + File.separator + "mainFile.sqlite" // TODO: Accept filename input param from user
-            writer = SqliteArchiveTileWriter(outputName)
+            val outputName = buildString {
+                append(Configuration.getInstance().osmdroidBasePath.absolutePath)
+                append(File.separator)
+                append("mainFile.sqlite") // TODO: Accept filename input param from user
+            }
+            val writer = SqliteArchiveTileWriter(outputName)
             val cacheManager = CacheManager(map, writer) // Make sure cacheManager has latest from map
             //this triggers the download
             downloadRegion(
