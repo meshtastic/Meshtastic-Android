@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -256,15 +255,11 @@ fun MapView(model: UIViewModel = viewModel()) {
             for (x in selectedList) {
                 val item = sources[x]
                 val b = cache.purgeCache(item.source)
-                if (b) Toast.makeText(
-                    context,
-                    context.getString(R.string.map_purge_success).format(item.source),
-                    Toast.LENGTH_SHORT
-                ).show() else Toast.makeText(
-                    context,
-                    R.string.map_purge_fail,
-                    Toast.LENGTH_LONG
-                ).show()
+                if (b) model.showSnackbar(
+                    context.getString(R.string.map_purge_success, item.source)
+                ) else model.showSnackbar(
+                    context.getString(R.string.map_purge_fail)
+                )
             }
         }
         builder.setNegativeButton(R.string.cancel) { dialog, _ -> dialog.cancel() }
@@ -273,7 +268,7 @@ fun MapView(model: UIViewModel = viewModel()) {
 
     LaunchedEffect(showCurrentCacheInfo) {
         if (!showCurrentCacheInfo) return@LaunchedEffect
-        Toast.makeText(context, R.string.calculating, Toast.LENGTH_SHORT).show()
+        model.showSnackbar(R.string.calculating)
         val cacheManager = CacheManager(map) // Make sure CacheManager has latest from map
         val cacheCapacity = cacheManager.cacheCapacity()
         val currentCacheUsage = cacheManager.currentCacheUsage()
@@ -308,20 +303,12 @@ fun MapView(model: UIViewModel = viewModel()) {
             zoomMax,
             object : CacheManager.CacheManagerCallback {
                 override fun onTaskComplete() {
-                    Toast.makeText(
-                        context,
-                        R.string.map_download_complete,
-                        Toast.LENGTH_LONG
-                    ).show()
+                    model.showSnackbar(R.string.map_download_complete)
                     writer.onDetach()
                 }
 
                 override fun onTaskFailed(errors: Int) {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.map_download_errors).format(errors),
-                        Toast.LENGTH_LONG
-                    ).show()
+                    model.showSnackbar(context.getString(R.string.map_download_errors, errors))
                     writer.onDetach()
                 }
 
