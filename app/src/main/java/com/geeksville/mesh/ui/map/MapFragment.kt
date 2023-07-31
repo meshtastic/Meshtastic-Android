@@ -461,14 +461,16 @@ fun MapView(model: UIViewModel = viewModel()) {
      * Creates Box overlay showing what area can be downloaded
      */
     fun generateBoxOverlay(zoomLevel: Double) = map.apply {
-        overlayManager = CustomOverlayManager(TilesOverlay(tileProvider, context))
+        if (overlayManager !is CustomOverlayManager) {
+            overlayManager = CustomOverlayManager(TilesOverlay(tileProvider, context))
+            setMultiTouchControls(false)
+            zoomLevelMax = tileProvider.tileSource.maximumZoomLevel.toDouble()
+        } else overlays.filterIsInstance<Polygon>().forEach { overlay ->
+            overlayManager.remove(overlay)
+        }
         val zoomFactor = 1.3 // zoom difference between view and download area polygon
         controller.setZoom(zoomLevel - zoomFactor)
-        setMultiTouchControls(false)
-        // furthest back
-        zoomLevelMax = zoomLevelHighest // FIXME zoomLevel
-        // furthest in min should be > than max
-        zoomLevelMin = tileProvider.tileSource.maximumZoomLevel.toDouble()
+        zoomLevelMin = zoomLevel
         downloadRegionBoundingBox = boundingBox.zoomIn(zoomFactor)
         val polygon = Polygon().apply {
             points = Polygon.pointsAsRect(downloadRegionBoundingBox).map {
@@ -478,8 +480,8 @@ fun MapView(model: UIViewModel = viewModel()) {
         overlayManager.add(polygon)
         val tileCount: Int = CacheManager(this).possibleTilesInArea(
             downloadRegionBoundingBox,
-            zoomLevelMax.toInt(),
-            zoomLevelMin.toInt()
+            zoomLevelMin.toInt(),
+            zoomLevelMax.toInt()
         )
         cacheEstimate = context.getString(R.string.map_cache_tiles).format(tileCount)
     }
@@ -496,8 +498,8 @@ fun MapView(model: UIViewModel = viewModel()) {
                 cacheManager,
                 writer,
                 boundingBox,
-                zoomLevelMax.toInt(),
                 zoomLevelMin.toInt(),
+                zoomLevelMax.toInt(),
             )
         } catch (ex: TileSourcePolicyException) {
             debug("Tile source does not allow archiving: ${ex.message}")
@@ -580,7 +582,7 @@ fun MapView(model: UIViewModel = viewModel()) {
                         addMapListener(object : MapListener {
                             override fun onScroll(event: ScrollEvent): Boolean {
                                 if (downloadRegionBoundingBox != null) {
-                                    generateBoxOverlay(zoomLevelMax)
+                                    generateBoxOverlay(zoomLevelMin)
                                 }
                                 return true
                             }
