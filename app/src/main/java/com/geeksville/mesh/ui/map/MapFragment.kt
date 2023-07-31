@@ -116,7 +116,6 @@ fun MapView(model: UIViewModel = viewModel()) {
     val defaultMaxZoom = 18.0
     val prefsName = "org.geeksville.osm.prefs"
     val mapStyleId = "map_style_id"
-    val nodeLayer = 1
 
     // Distance of bottom corner to top corner of bounding box
     val zoomLevelLowest = 13.0 // approx 5 miles long
@@ -154,7 +153,6 @@ fun MapView(model: UIViewModel = viewModel()) {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
         val ic = ContextCompat.getDrawable(context, R.drawable.ic_baseline_location_on_24)
         val ourNode = model.ourNodeInfo.value
-        debug("Showing on map: ${nodesWithPosition.size} nodes")
         return nodesWithPosition.map { node ->
             val (p, u) = node.position!! to node.user!!
             MarkerWithLabel(map, "${u.longName} ${formatAgo(p.time)}").apply {
@@ -212,7 +210,6 @@ fun MapView(model: UIViewModel = viewModel()) {
         ?: context.getString(R.string.unknown_username)
 
     fun onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
-        debug("Showing on map: ${waypoints.size} waypoints")
         return waypoints.mapNotNull { waypoint ->
             val pt = waypoint.data.waypoint ?: return@mapNotNull null
             val lock = if (pt.lockedTo != 0) "\uD83D\uDD12" else ""
@@ -377,38 +374,48 @@ fun MapView(model: UIViewModel = viewModel()) {
      * Adds copyright to map depending on what source is showing
      */
     fun addCopyright() {
-        if (map.tileProvider.tileSource.copyrightNotice != null) {
-            val copyrightNotice: String = map.tileProvider.tileSource.copyrightNotice
+        if (map.overlays.none { it is CopyrightOverlay }) {
+            val copyrightNotice: String = map.tileProvider.tileSource.copyrightNotice ?: return
             val copyrightOverlay = CopyrightOverlay(context)
             copyrightOverlay.setCopyrightNotice(copyrightNotice)
             map.overlays.add(copyrightOverlay)
         }
     }
 
+    val mapEventsReceiver = object : MapEventsReceiver {
+        override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
+            InfoWindow.closeAllInfoWindowsOn(map)
+            return true
+        }
+
+        override fun longPressHelper(p: GeoPoint): Boolean {
+            performHapticFeedback()
+            if (!model.isConnected()) return true
+
+            showEditWaypointDialog = waypoint {
+                latitudeI = (p.latitude * 1e7).toInt()
+                longitudeI = (p.longitude * 1e7).toInt()
+            }
+            return true
+        }
+    }
+
     fun drawOverlays() = map.apply {
         overlays.clear()
+        if (overlays.none { it is MapEventsOverlay }) {
+            overlays.add(0, MapEventsOverlay(mapEventsReceiver))
+        }
         addCopyright()  // Copyright is required for certain map sources
         createLatLongGrid(false)
 
-        overlayManager.addAll(nodeLayer, onNodesChanged(nodes.values))
-        overlayManager.addAll(nodeLayer, onWaypointChanged(waypoints.values))
-        overlayManager.add(nodeLayer, MapEventsOverlay(object : MapEventsReceiver {
-            override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
-                InfoWindow.closeAllInfoWindowsOn(map)
-                return true
-            }
+//        overlays.filterIsInstance<MarkerWithLabel>().forEach { overlay ->
+//            overlayManager.remove(overlay)
+//        }
+        val nodeMarkers = onNodesChanged(nodes.values)
+        val waypointMarkers = onWaypointChanged(waypoints.values)
+        debug("Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints")
 
-            override fun longPressHelper(p: GeoPoint): Boolean {
-                performHapticFeedback()
-                if (!model.isConnected()) return true
-
-                showEditWaypointDialog = waypoint {
-                    latitudeI = (p.latitude * 1e7).toInt()
-                    longitudeI = (p.longitude * 1e7).toInt()
-                }
-                return true
-            }
-        }))
+        overlays.addAll(nodeMarkers + waypointMarkers)
         invalidate()
     }
 
