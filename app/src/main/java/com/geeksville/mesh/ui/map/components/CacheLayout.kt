@@ -43,7 +43,7 @@ fun CacheLayout(
             .fillMaxWidth()
             .wrapContentHeight()
             .background(colorResource(R.color.colorAdvancedBackground))
-            .padding(16.dp),
+            .padding(8.dp),
     ) {
         Text(
             text = stringResource(id = R.string.map_select_download_region),
@@ -53,7 +53,7 @@ fun CacheLayout(
             color = MaterialTheme.colors.onBackground.copy(alpha = ContentAlpha.medium)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         val distances = listOf(5, 10, 15)
         val selectedDistanceIndex = distances.indexOf(selectedDistance)
@@ -73,8 +73,6 @@ fun CacheLayout(
             style = MaterialTheme.typography.body1,
             color = MaterialTheme.colors.onBackground.copy(alpha = ContentAlpha.medium)
         )
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
