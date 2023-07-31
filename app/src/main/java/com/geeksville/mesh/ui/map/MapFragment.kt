@@ -159,8 +159,8 @@ fun MapView(model: UIViewModel = viewModel()) {
                 title = "${u.longName} ${node.batteryStr}"
                 snippet = model.gpsString(p)
                 ourNode?.distanceStr(node, model.config.display.units.number)?.let { dist ->
-                    val string = context.getString(R.string.map_subDescription)
-                    subDescription = string.format(ourNode.bearing(node), dist)
+                    subDescription =
+                        context.getString(R.string.map_subDescription, ourNode.bearing(node), dist)
                 }
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 position = GeoPoint(p.latitude, p.longitude)
@@ -486,7 +486,7 @@ fun MapView(model: UIViewModel = viewModel()) {
             zoomLevelMin.toInt(),
             zoomLevelMax.toInt()
         )
-        cacheEstimate = context.getString(R.string.map_cache_tiles).format(tileCount)
+        cacheEstimate = context.getString(R.string.map_cache_tiles, tileCount)
     }
 
     fun startDownload() {

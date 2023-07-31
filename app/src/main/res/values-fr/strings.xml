@@ -157,9 +157,9 @@
     <string name="map_purge_fail">La purge du cache SQL a échoué, consultez « logcat » pour plus de détails</string>
     <string name="map_cache_manager">Gestionnaire du cache</string>
     <string name="map_download_complete">Téléchargement terminé !</string>
-    <string name="map_download_errors">Téléchargement terminé avec %s erreurs</string>
-    <string name="map_cache_tiles">Vignettes de %s</string>
-    <string name="map_subDescription">échelle : %1$s° distance : %2$s</string>
+    <string name="map_download_errors">Téléchargement terminé avec %d erreurs</string>
+    <string name="map_cache_tiles">Vignettes de %d</string>
+    <string name="map_subDescription">échelle : %1$d° distance : %2$s</string>
     <string name="waypoint_edit">Modifier le repère</string>
     <string name="waypoint_delete">Supprimer le repère ?</string>
     <string name="waypoint_new">Nouveau point de repère</string>

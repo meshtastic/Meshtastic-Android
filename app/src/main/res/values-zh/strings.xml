@@ -156,9 +156,9 @@
     <string name="map_purge_fail">清除 SQL 快取失败，请查看 logcat 纪录</string>
     <string name="map_cache_manager">缓存管理员</string>
     <string name="map_download_complete">下载已完成！</string>
-    <string name="map_download_errors">下载完成，但有 %s 个错误</string>
-    <string name="map_cache_tiles">%s 图砖</string>
-    <string name="map_subDescription">方位：%1$s° 距离：%2$s</string>
+    <string name="map_download_errors">下载完成，但有 %d 个错误</string>
+    <string name="map_cache_tiles">%d 图砖</string>
+    <string name="map_subDescription">方位：%1$d° 距离：%2$s</string>
     <string name="waypoint_edit">编辑航点</string>
     <string name="waypoint_delete">删除航点?</string>
     <string name="waypoint_new">新建航点</string>

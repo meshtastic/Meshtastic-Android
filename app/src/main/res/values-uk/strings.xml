@@ -159,9 +159,9 @@
     <string name="map_purge_fail">Помилка очищення кешу SQL, перегляньте logcat для деталей</string>
     <string name="map_cache_manager">Керування кешем</string>
     <string name="map_download_complete">Звантаження завершено!</string>
-    <string name="map_download_errors">Завантаження завершено з %s помилками</string>
-    <string name="map_cache_tiles">%s плиток</string>
-    <string name="map_subDescription">прийом: %1$s° відстань: %2$s</string>
+    <string name="map_download_errors">Завантаження завершено з %d помилками</string>
+    <string name="map_cache_tiles">%d плиток</string>
+    <string name="map_subDescription">прийом: %1$d° відстань: %2$s</string>
     <string name="waypoint_edit">Редагувати точку</string>
     <string name="waypoint_delete">Видалити мітку?</string>
     <string name="waypoint_new">Новий мітка</string>

@@ -150,7 +150,7 @@
     <string name="map_purge_fail">SQL 캐시 제거 실패, 자세한 내용은 logcat 참조</string>
     <string name="map_cache_manager">캐시 관리자</string>
     <string name="map_download_complete">다운로드 완료!</string>
-    <string name="map_download_errors">%s 에러로 다운로드 완료되지 않았습니다.</string>
-    <string name="map_cache_tiles">%s 타일</string>
-    <string name="map_subDescription">방위: %1$s° 거리: %2$s</string>
+    <string name="map_download_errors">%d 에러로 다운로드 완료되지 않았습니다.</string>
+    <string name="map_cache_tiles">%d 타일</string>
+    <string name="map_subDescription">방위: %1$d° 거리: %2$s</string>
 </resources>

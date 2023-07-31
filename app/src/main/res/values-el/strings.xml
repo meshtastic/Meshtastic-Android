@@ -160,9 +160,9 @@
     <string name="map_purge_fail">SQL Cache purge failed, see logcat for details</string>
     <string name="map_cache_manager">Διαχείριση Προσωρινής Αποθήκευσης</string>
     <string name="map_download_complete">Η λήψη ολοκληρώθηκε!</string>
-    <string name="map_download_errors">Λήψη ολοκληρώθηκε με %s σφάλματα</string>
-    <string name="map_cache_tiles">%s tiles</string>
-    <string name="map_subDescription">bearing: %1$s° distance: %2$s</string>
+    <string name="map_download_errors">Λήψη ολοκληρώθηκε με %d σφάλματα</string>
+    <string name="map_cache_tiles">%d tiles</string>
+    <string name="map_subDescription">bearing: %1$d° distance: %2$s</string>
     <string name="waypoint_edit">Επεξεργασία σημείου διαδρομής</string>
     <string name="waypoint_delete">Διαγραφή σημείου πορείας;</string>
     <string name="waypoint_new">Νέο σημείο πορείας</string>

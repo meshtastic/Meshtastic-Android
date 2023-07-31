@@ -158,9 +158,9 @@
     <string name="map_purge_fail">Неуспешно изчистване на свалените SQL данни, вижте регистъра на приложението за повече информация</string>
     <string name="map_cache_manager">Управление на свалените данни</string>
     <string name="map_download_complete">Свалянето приключи!</string>
-    <string name="map_download_errors">Свалянето приключи с %s грешки</string>
-    <string name="map_cache_tiles">%s картинки</string>
-    <string name="map_subDescription">посока: %1$s° разстояние: %2$s</string>
+    <string name="map_download_errors">Свалянето приключи с %d грешки</string>
+    <string name="map_cache_tiles">%d картинки</string>
+    <string name="map_subDescription">посока: %1$d° разстояние: %2$s</string>
     <string name="waypoint_edit">Редакция на точка</string>
     <string name="waypoint_delete">Изтриване на точка?</string>
     <string name="waypoint_new">Нова точка</string>

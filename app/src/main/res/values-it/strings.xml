@@ -157,9 +157,9 @@
     <string name="map_purge_fail">Eliminazione della cache SQL non riuscita, vedere logcat per i dettagli</string>
     <string name="map_cache_manager">Gestione della cache</string>
     <string name="map_download_complete">Scaricamento completato!</string>
-    <string name="map_download_errors">Download completo con %s errori</string>
-    <string name="map_cache_tiles">%s tiles</string>
-    <string name="map_subDescription">bearing: %1$s° distance: %2$s</string>
+    <string name="map_download_errors">Download completo con %d errori</string>
+    <string name="map_cache_tiles">%d tiles</string>
+    <string name="map_subDescription">bearing: %1$d° distance: %2$s</string>
     <string name="waypoint_edit">Modifica waypoint</string>
     <string name="waypoint_delete">Elimina waypoint?</string>
     <string name="waypoint_new">Nuovo waypoint</string>

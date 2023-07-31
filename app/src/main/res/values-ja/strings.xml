@@ -156,9 +156,9 @@
     <string name="map_purge_fail">SQL キャッシュの削除が失敗しました。詳細は logcat を参照してください。</string>
     <string name="map_cache_manager">キャッシュ管理</string>
     <string name="map_download_complete">ダウンロード完了！</string>
-    <string name="map_download_errors">ダウンロード完了、%sのエラーがあります。</string>
-    <string name="map_cache_tiles">%s タイル</string>
-    <string name="map_subDescription">方位: %1$s°距離: %2$s</string>
+    <string name="map_download_errors">ダウンロード完了、%dのエラーがあります。</string>
+    <string name="map_cache_tiles">%d タイル</string>
+    <string name="map_subDescription">方位: %1$d°距離: %2$s</string>
     <string name="waypoint_edit">ウェイポイントを編集</string>
     <string name="waypoint_delete">ウェイポイントを削除しますか？</string>
     <string name="waypoint_new">新規ウェイポイント</string>

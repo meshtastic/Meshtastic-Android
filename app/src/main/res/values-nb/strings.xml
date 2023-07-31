@@ -151,7 +151,7 @@
     <string name="map_purge_fail">SQL Cache purge failed, see logcat for details</string>
     <string name="map_cache_manager">Cache Manager</string>
     <string name="map_download_complete">Download complete!</string>
-    <string name="map_download_errors">Download complete with %s errors</string>
-    <string name="map_cache_tiles">%s tiles</string>
-    <string name="map_subDescription">bearing: %1$s° distance: %2$s</string>
+    <string name="map_download_errors">Download complete with %d errors</string>
+    <string name="map_cache_tiles">%d tiles</string>
+    <string name="map_subDescription">bearing: %1$d° distance: %2$s</string>
 </resources>

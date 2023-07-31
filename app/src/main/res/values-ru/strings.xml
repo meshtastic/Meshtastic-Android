@@ -161,9 +161,9 @@
     <string name="map_purge_fail">Ошибка очистки кэша SQL, подробности в logcat</string>
     <string name="map_cache_manager">Менеджер кэша</string>
     <string name="map_download_complete">Загрузка завершена!</string>
-    <string name="map_download_errors">Скачивание завершено с %s ошибок</string>
-    <string name="map_cache_tiles">%s файла</string>
-    <string name="map_subDescription">курс: %1$s° расстояние: %2$s</string>
+    <string name="map_download_errors">Скачивание завершено с %d ошибок</string>
+    <string name="map_cache_tiles">%d файла</string>
+    <string name="map_subDescription">курс: %1$d° расстояние: %2$s</string>
     <string name="waypoint_edit">Редактировать путевую точку</string>
     <string name="waypoint_delete">Удалить путевую точку?</string>
     <string name="waypoint_new">Установить путевую точку</string>

@@ -159,9 +159,9 @@
     <string name="map_purge_fail">Das Säubern des SQL-Zwischenspeichers ist fehlgeschlagen, siehe Logcat für Details</string>
     <string name="map_cache_manager">Zwischenspeicher-Verwaltung</string>
     <string name="map_download_complete">Herunterladen abgeschlossen!</string>
-    <string name="map_download_errors">Herunterladen abgeschlossen mit %s Fehlern</string>
-    <string name="map_cache_tiles">%s Kacheln</string>
-    <string name="map_subDescription">Richtung: %1$s° Entfernung: %2$s</string>
+    <string name="map_download_errors">Herunterladen abgeschlossen mit %d Fehlern</string>
+    <string name="map_cache_tiles">%d Kacheln</string>
+    <string name="map_subDescription">Richtung: %1$d° Entfernung: %2$s</string>
     <string name="waypoint_edit">Wegpunkt bearbeiten</string>
     <string name="waypoint_delete">Wegpunkt löschen?</string>
     <string name="waypoint_new">Wegpunkt hinzufügen</string>

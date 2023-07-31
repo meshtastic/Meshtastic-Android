@@ -161,9 +161,9 @@
     <string name="map_purge_fail">SQL Cache purge failed, see logcat for details</string>
     <string name="map_cache_manager">Cache Manager</string>
     <string name="map_download_complete">Stahování dokončeno!</string>
-    <string name="map_download_errors">Stahování dokončeno s %s chybami</string>
-    <string name="map_cache_tiles">%s dlaždic</string>
-    <string name="map_subDescription">rychlost %1$s° vzdálenost: %2$s</string>
+    <string name="map_download_errors">Stahování dokončeno s %d chybami</string>
+    <string name="map_cache_tiles">%d dlaždic</string>
+    <string name="map_subDescription">rychlost %1$d° vzdálenost: %2$s</string>
     <string name="waypoint_edit">Edit waypoint</string>
     <string name="waypoint_delete">Delete waypoint?</string>
     <string name="waypoint_new">New waypoint</string>
