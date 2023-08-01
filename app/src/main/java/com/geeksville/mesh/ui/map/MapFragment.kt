@@ -7,7 +7,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
@@ -25,8 +29,10 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.BuildConfig
@@ -36,6 +42,10 @@ import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.getLocationPermissions
+import com.geeksville.mesh.android.gpsDisabled
+import com.geeksville.mesh.android.hasGps
+import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.UIViewModel
@@ -46,7 +56,7 @@ import com.geeksville.mesh.ui.ScreenFragment
 import com.geeksville.mesh.ui.map.components.CacheLayout
 import com.geeksville.mesh.ui.map.components.DownloadButton
 import com.geeksville.mesh.ui.map.components.EditWaypointDialog
-import com.geeksville.mesh.ui.map.components.MapStyleButton
+import com.geeksville.mesh.ui.components.IconButton
 import com.geeksville.mesh.util.EnableWakeLock
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.requiredZoomLevel
@@ -79,6 +89,7 @@ import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.infowindow.InfoWindow
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
 import java.text.DateFormat
 
@@ -126,12 +137,15 @@ fun MapView(model: UIViewModel = viewModel()) {
 
     // Map Elements
     var downloadRegionBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
+    var myLocationOverlay: MyLocationNewOverlay? by remember { mutableStateOf(null) }
 
     val context = LocalContext.current
     val mPrefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
 
     val haptic = LocalHapticFeedback.current
     fun performHapticFeedback() = haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+
+    val hasGps = context.hasGps()
 
     EnableWakeLock(context)
 
@@ -140,6 +154,43 @@ fun MapView(model: UIViewModel = viewModel()) {
             clipToOutline = true
         }
     }
+
+    fun toggleMyLocation() {
+        if (context.gpsDisabled()) {
+            debug("Telling user we need location turned on for MyLocationNewOverlay")
+            model.showSnackbar(R.string.location_disabled)
+            return
+        }
+        debug("user clicked MyLocationNewOverlay ${myLocationOverlay == null}")
+        if (myLocationOverlay == null) {
+            myLocationOverlay = MyLocationNewOverlay(map).apply {
+                enableMyLocation()
+                enableFollowLocation()
+                AppCompatResources.getDrawable(context, R.drawable.ic_location_dot_24)?.let {
+                    setPersonIcon(it.toBitmap())
+                    setPersonAnchor(0.5f, 0.5f)
+                }
+            }
+            map.overlays.add(myLocationOverlay)
+        } else {
+            myLocationOverlay?.apply {
+                disableMyLocation()
+                disableFollowLocation()
+            }
+            map.overlays.remove(myLocationOverlay)
+            myLocationOverlay = null
+        }
+    }
+
+    val requestPermissionAndToggleLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (permissions.entries.all { it.value }) toggleMyLocation()
+        }
+
+    fun requestPermissionAndToggle() {
+        requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+    }
+
     val nodes by model.nodeDB.nodes.observeAsState(emptyMap())
     val waypoints by model.waypoints.observeAsState(emptyMap())
 
@@ -388,6 +439,9 @@ fun MapView(model: UIViewModel = viewModel()) {
         if (overlays.none { it is MapEventsOverlay }) {
             overlays.add(0, MapEventsOverlay(mapEventsReceiver))
         }
+        if (myLocationOverlay != null && overlays.none { it is MyLocationNewOverlay }) {
+            overlays.add(myLocationOverlay)
+        }
         addCopyright()  // Copyright is required for certain map sources
         createLatLongGrid(false)
 
@@ -601,10 +655,28 @@ fun MapView(model: UIViewModel = viewModel()) {
                     }
                 },
                 modifier = Modifier.align(Alignment.BottomCenter)
-            ) else MapStyleButton(
-                onClick = { showMapStyleDialog() },
-                modifier = Modifier.align(Alignment.TopEnd),
-            )
+            ) else Column(
+                modifier = Modifier
+                    .padding(top = 16.dp, end = 16.dp)
+                    .align(Alignment.TopEnd),
+            ) {
+                IconButton(
+                    onClick = { showMapStyleDialog() },
+                    drawableRes = R.drawable.ic_twotone_layers_24,
+                    contentDescription = R.string.map_style_selection,
+                )
+                IconButton(
+                    onClick = {
+                        if (context.hasLocationPermission()) toggleMyLocation()
+                        else requestPermissionAndToggle()
+                    },
+                    enabled = hasGps,
+                    drawableRes = if (myLocationOverlay == null) R.drawable.ic_twotone_my_location_24
+                    else R.drawable.ic_twotone_location_disabled_24,
+                    contentDescription = null,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
         }
     }
     if (showEditWaypointDialog != null) {
