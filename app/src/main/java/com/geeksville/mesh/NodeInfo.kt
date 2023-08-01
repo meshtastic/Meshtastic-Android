@@ -164,7 +164,7 @@ data class NodeInfo(
             val g = (num and 0x00FF00) shr 8
             val b = num and 0x0000FF
             val brightness = ((r * 0.299) + (g * 0.587) + (b * 0.114)) / 255
-            return Pair(if (brightness > 0.5) Color.BLACK else Color.WHITE, Color.rgb(r, g, b))
+            return (if (brightness > 0.5) Color.BLACK else Color.WHITE) to Color.rgb(r, g, b)
         }
 
     val batteryLevel get() = deviceMetrics?.batteryLevel

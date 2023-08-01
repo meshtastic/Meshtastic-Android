@@ -330,11 +330,10 @@ class MeshService : Service(), Logging {
         myNodeInfo = ni
 
         // put our node array into our two different map representations
-        nodeDBbyNodeNum.putAll(nodes.map { Pair(it.num, it) })
+        nodeDBbyNodeNum.putAll(nodes.map { it.num to it })
         nodeDBbyID.putAll(nodes.mapNotNull {
-            it.user?.let { user -> // ignore records that don't have a valid user
-                Pair(user.id, it)
-            }
+            // ignore records that don't have a valid user
+            it.user?.let { user -> user.id to it }
         })
     }
 

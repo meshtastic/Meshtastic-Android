@@ -160,10 +160,7 @@ class MainActivity : AppCompatActivity(), Logging {
     private val tabsAdapter = object : FragmentStateAdapter(supportFragmentManager, lifecycle) {
 
         override fun getItemCount(): Int = tabInfos.size
-
-        override fun createFragment(position: Int): Fragment {
-            return tabInfos[position].content
-        }
+        override fun createFragment(position: Int): Fragment = tabInfos[position].content
     }
 
     private val isInTestLab: Boolean by lazy {
@@ -217,20 +214,12 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     private fun updateConnectionStatusImage(connected: MeshService.ConnectionState) {
-
-        if (model.actionBarMenu == null)
-            return
+        if (model.actionBarMenu == null) return
 
         val (image, tooltip) = when (connected) {
-            MeshService.ConnectionState.CONNECTED -> Pair(R.drawable.cloud_on, R.string.connected)
-            MeshService.ConnectionState.DEVICE_SLEEP -> Pair(
-                R.drawable.ic_twotone_cloud_upload_24,
-                R.string.device_sleeping
-            )
-            MeshService.ConnectionState.DISCONNECTED -> Pair(
-                R.drawable.cloud_off,
-                R.string.disconnected
-            )
+            MeshService.ConnectionState.CONNECTED -> R.drawable.cloud_on to R.string.connected
+            MeshService.ConnectionState.DEVICE_SLEEP -> R.drawable.ic_twotone_cloud_upload_24 to R.string.device_sleeping
+            MeshService.ConnectionState.DISCONNECTED -> R.drawable.cloud_off to R.string.disconnected
         }
 
         val item = model.actionBarMenu?.findItem(R.id.connectStatusImage)
