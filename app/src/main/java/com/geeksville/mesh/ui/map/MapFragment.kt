@@ -435,7 +435,6 @@ fun MapView(model: UIViewModel = viewModel()) {
     }
 
     fun drawOverlays() = map.apply {
-        overlays.clear()
         if (overlays.none { it is MapEventsOverlay }) {
             overlays.add(0, MapEventsOverlay(mapEventsReceiver))
         }
@@ -445,9 +444,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         addCopyright()  // Copyright is required for certain map sources
         createLatLongGrid(false)
 
-//        overlays.filterIsInstance<MarkerWithLabel>().forEach { overlay ->
-//            overlayManager.remove(overlay)
-//        }
+        overlays.removeAll(overlays.filterIsInstance<MarkerWithLabel>())
         val nodeMarkers = onNodesChanged(nodes.values)
         val waypointMarkers = onWaypointChanged(waypoints.values)
         debug("Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints")
@@ -509,8 +506,9 @@ fun MapView(model: UIViewModel = viewModel()) {
             overlayManager = CustomOverlayManager(TilesOverlay(tileProvider, context))
             setMultiTouchControls(false)
             zoomLevelMax = tileProvider.tileSource.maximumZoomLevel.toDouble()
-        } else overlays.filterIsInstance<Polygon>().forEach { overlay ->
-            overlayManager.remove(overlay)
+            drawOverlays()
+        } else {
+            overlays.removeAll(overlays.filterIsInstance<Polygon>())
         }
         val zoomFactor = 1.3 // zoom difference between view and download area polygon
         controller.setZoom(zoomLevel - zoomFactor)
@@ -521,7 +519,7 @@ fun MapView(model: UIViewModel = viewModel()) {
                 GeoPoint(it.latitude, it.longitude)
             }
         }
-        overlayManager.add(polygon)
+        overlays.add(polygon)
         val tileCount: Int = CacheManager(this).possibleTilesInArea(
             downloadRegionBoundingBox,
             zoomLevelMin.toInt(),
