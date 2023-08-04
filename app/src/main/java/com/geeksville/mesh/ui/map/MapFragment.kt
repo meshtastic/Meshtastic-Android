@@ -57,7 +57,7 @@ import com.geeksville.mesh.ui.map.components.CacheLayout
 import com.geeksville.mesh.ui.map.components.DownloadButton
 import com.geeksville.mesh.ui.map.components.EditWaypointDialog
 import com.geeksville.mesh.ui.components.IconButton
-import com.geeksville.mesh.util.EnableWakeLock
+import com.geeksville.mesh.ui.map.components.rememberMapViewWithLifecycle
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.requiredZoomLevel
 import com.geeksville.mesh.util.formatAgo
@@ -147,13 +147,7 @@ fun MapView(model: UIViewModel = viewModel()) {
 
     val hasGps = context.hasGps()
 
-    EnableWakeLock(context)
-
-    val map = remember {
-        MapView(context).apply {
-            clipToOutline = true
-        }
-    }
+    val map = rememberMapViewWithLifecycle(context)
 
     fun toggleMyLocation() {
         if (context.gpsDisabled()) {
