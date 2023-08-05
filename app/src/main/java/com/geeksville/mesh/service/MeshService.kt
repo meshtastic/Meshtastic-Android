@@ -123,9 +123,10 @@ class MeshService : Service(), Logging {
             "com.geeksville.mesh.service.MeshService"
         )
 
-        /** The minimmum firmware version we know how to talk to. We'll still be able to talk to 1.0 firmwares but only well enough to ask them to firmware update
+        /** The minimum firmware version we know how to talk to. We'll still be able
+         * to talk to 2.0 firmwares but only well enough to ask them to firmware update.
          */
-        val minDeviceVersion = DeviceVersion("1.3.43")
+        val minDeviceVersion = DeviceVersion("2.0.21")
     }
 
     enum class ConnectionState {
@@ -1156,6 +1157,7 @@ class MeshService : Service(), Logging {
                 MeshProtos.FromRadio.CONFIG_FIELD_NUMBER -> handleDeviceConfig(proto.config)
                 MeshProtos.FromRadio.MODULECONFIG_FIELD_NUMBER -> handleModuleConfig(proto.moduleConfig)
                 MeshProtos.FromRadio.QUEUESTATUS_FIELD_NUMBER -> handleQueueStatus(proto.queueStatus)
+                MeshProtos.FromRadio.METADATA_FIELD_NUMBER -> handleMetadata(proto.metadata)
                 else -> errormsg("Unexpected FromRadio variant")
             }
         } catch (ex: InvalidProtocolBufferException) {
@@ -1265,6 +1267,7 @@ class MeshService : Service(), Logging {
 
 
     private var rawMyNodeInfo: MeshProtos.MyNodeInfo? = null
+    private var rawDeviceMetadata: MeshProtos.DeviceMetadata? = null
 
     /** Regenerate the myNodeInfo model.  We call this twice.  Once after we receive myNodeInfo from the device
      * and again after we have the node DB (which might allow us a better notion of our HwModel.
@@ -1274,6 +1277,7 @@ class MeshService : Service(), Logging {
         if (myInfo != null) {
             val a = radioInterfaceService.getBondedDeviceAddress()
             val isBluetoothInterface = a != null && a.startsWith("x")
+            val firmwareVersion = rawDeviceMetadata?.firmwareVersion.orEmpty()
 
             val nodeNum =
                 myInfo.myNodeNum // Note: can't use the normal property because myNodeInfo not yet setup
@@ -1283,7 +1287,7 @@ class MeshService : Service(), Logging {
             val mi = with(myInfo) {
                 MyNodeInfo(
                     myNodeNum,
-                    hasGps,
+                    false,
                     hwModelStr,
                     firmwareVersion,
                     firmwareUpdateFilename?.appLoad != null && firmwareUpdateFilename?.littlefs != null,
@@ -1292,12 +1296,12 @@ class MeshService : Service(), Logging {
                         DeviceVersion(firmwareVersion)
                     ),
                     currentPacketId and 0xffffffffL,
-                    if (messageTimeoutMsec == 0) 5 * 60 * 1000 else messageTimeoutMsec, // constants from current device code
+                    5 * 60 * 1000, // constants from current device code
                     minAppVersion,
-                    maxChannels,
-                    hasWifi,
-                    channelUtilization,
-                    airUtilTx
+                    8,
+                    false,
+                    0f,
+                    0f,
                 )
             }
             newMyNodeInfo = mi
@@ -1311,27 +1315,13 @@ class MeshService : Service(), Logging {
             /// Track types of devices and firmware versions in use
             GeeksvilleApplication.analytics.setUserInfo(
                 DataPair("firmware", mi.firmwareVersion),
-                DataPair("has_gps", mi.hasGPS),
                 DataPair("hw_model", mi.model),
-                DataPair("dev_error_count", myInfo.errorCount)
             )
-
-            if (myInfo.errorCode != MeshProtos.CriticalErrorCode.UNSPECIFIED && myInfo.errorCode != MeshProtos.CriticalErrorCode.NONE) {
-                GeeksvilleApplication.analytics.track(
-                    "dev_error",
-                    DataPair("code", myInfo.errorCode.number),
-                    DataPair("address", myInfo.errorAddress),
-
-                    // We also include this info, because it is required to correctly decode address from the map file
-                    DataPair("firmware", mi.firmwareVersion),
-                    DataPair("hw_model", mi.model)
-                )
-            }
         }
     }
 
     /**
-     * Update the nodeinfo (called from either new API version or the old one)
+     * Update MyNodeInfo (called from either new API version or the old one)
      */
     private fun handleMyInfo(myInfo: MeshProtos.MyNodeInfo) {
         val packetToSave = MeshLog(
@@ -1351,6 +1341,21 @@ class MeshService : Service(), Logging {
             radioConfigRepository.clearLocalConfig()
             radioConfigRepository.clearLocalModuleConfig()
         }
+    }
+
+    /**
+     * Update our DeviceMetadata
+     */
+    private fun handleMetadata(metadata: MeshProtos.DeviceMetadata) {
+        val packetToSave = MeshLog(
+            UUID.randomUUID().toString(),
+            "DeviceMetadata",
+            System.currentTimeMillis(),
+            metadata.toString()
+        )
+        insertMeshLog(packetToSave)
+
+        rawDeviceMetadata = metadata
     }
 
     /// If we've received our initial config, our radio settings and all of our channels, send any queued packets and broadcast connected to clients

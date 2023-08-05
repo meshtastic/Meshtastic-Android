@@ -86,6 +86,7 @@ import com.geeksville.mesh.ui.components.config.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.components.config.ExternalNotificationConfigItemList
 import com.geeksville.mesh.ui.components.config.LoRaConfigItemList
 import com.geeksville.mesh.ui.components.config.MQTTConfigItemList
+import com.geeksville.mesh.ui.components.config.NeighborInfoConfigItemList
 import com.geeksville.mesh.ui.components.config.NetworkConfigItemList
 import com.geeksville.mesh.ui.components.config.PacketResponseStateDialog
 import com.geeksville.mesh.ui.components.config.PositionConfigItemList
@@ -121,26 +122,27 @@ class DeviceSettingsFragment(val node: NodeInfo) : ScreenFragment("Radio Configu
     }
 }
 
-enum class ConfigDest(val title: String, val route: String, val config: ConfigType) {
-    DEVICE("Device", "device", ConfigType.DEVICE_CONFIG),
-    POSITION("Position", "position", ConfigType.POSITION_CONFIG),
-    POWER("Power", "power", ConfigType.POWER_CONFIG),
-    NETWORK("Network", "network", ConfigType.NETWORK_CONFIG),
-    DISPLAY("Display", "display", ConfigType.DISPLAY_CONFIG),
-    LORA("LoRa", "lora", ConfigType.LORA_CONFIG),
-    BLUETOOTH("Bluetooth", "bluetooth", ConfigType.BLUETOOTH_CONFIG);
+enum class ConfigDest(val title: String, val route: String) {
+    DEVICE("Device", "device"),
+    POSITION("Position", "position"),
+    POWER("Power", "power"),
+    NETWORK("Network", "network"),
+    DISPLAY("Display", "display"),
+    LORA("LoRa", "lora"),
+    BLUETOOTH("Bluetooth", "bluetooth");
 }
 
-enum class ModuleDest(val title: String, val route: String, val config: ModuleConfigType) {
-    MQTT("MQTT", "mqtt", ModuleConfigType.MQTT_CONFIG),
-    SERIAL("Serial", "serial", ModuleConfigType.SERIAL_CONFIG),
-    EXTERNAL_NOTIFICATION("External Notification", "ext_not", ModuleConfigType.EXTNOTIF_CONFIG),
-    STORE_FORWARD("Store & Forward", "store_forward", ModuleConfigType.STOREFORWARD_CONFIG),
-    RANGE_TEST("Range Test", "range_test", ModuleConfigType.RANGETEST_CONFIG),
-    TELEMETRY("Telemetry", "telemetry", ModuleConfigType.TELEMETRY_CONFIG),
-    CANNED_MESSAGE("Canned Message", "canned_message", ModuleConfigType.CANNEDMSG_CONFIG),
-    AUDIO("Audio", "audio", ModuleConfigType.AUDIO_CONFIG),
-    REMOTE_HARDWARE("Remote Hardware", "remote_hardware", ModuleConfigType.REMOTEHARDWARE_CONFIG);
+enum class ModuleDest(val title: String, val route: String) {
+    MQTT("MQTT", "mqtt"),
+    SERIAL("Serial", "serial"),
+    EXTERNAL_NOTIFICATION("External Notification", "ext_not"),
+    STORE_FORWARD("Store & Forward", "store_forward"),
+    RANGE_TEST("Range Test", "range_test"),
+    TELEMETRY("Telemetry", "telemetry"),
+    CANNED_MESSAGE("Canned Message", "canned_message"),
+    AUDIO("Audio", "audio"),
+    REMOTE_HARDWARE("Remote Hardware", "remote_hardware"),
+    NEIGHBOR_INFO("Neighbor Info", "neighbor_info");
 }
 
 /**
@@ -375,19 +377,19 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                             channelList.clear()
                             viewModel.getChannel(destNum, 0)
                         }
-                        is ConfigType -> {
-                            viewModel.getConfig(destNum, configType.number)
+                        is ConfigDest -> {
+                            viewModel.getConfig(destNum, configType.ordinal)
                         }
-                        ModuleConfigType.CANNEDMSG_CONFIG -> {
+                        ModuleDest.CANNED_MESSAGE -> {
                             (packetResponseState as PacketResponseState.Loading).total = 2
                             viewModel.getCannedMessages(destNum)
                         }
-                        ModuleConfigType.EXTNOTIF_CONFIG -> {
+                        ModuleDest.EXTERNAL_NOTIFICATION -> {
                             (packetResponseState as PacketResponseState.Loading).total = 2
                             viewModel.getRingtone(destNum)
                         }
-                        is ModuleConfigType -> {
-                            viewModel.getModuleConfig(destNum, configType.number)
+                        is ModuleDest -> {
+                            viewModel.getModuleConfig(destNum, configType.ordinal)
                         }
                     }
                 },
@@ -651,6 +653,19 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 }
             )
         }
+        composable("neighbor_info") {
+            NeighborInfoConfigItemList(
+                neighborInfoConfig = moduleConfig.neighborInfo,
+                enabled = connected,
+                focusManager = focusManager,
+                onSaveClicked = { neighborInfoInput ->
+                    focusManager.clearFocus()
+                    val config = moduleConfig { neighborInfo = neighborInfoInput }
+                    viewModel.setModuleConfig(destNum, config)
+                    moduleConfig = config
+                }
+            )
+        }
     }
 }
 
@@ -769,13 +784,13 @@ fun RadioSettingsScreen(
         item { PreferenceCategory(stringResource(R.string.device_settings)) }
         item { NavCard("User", enabled = enabled) { onRouteClick("USER") } }
         item { NavCard("Channels", enabled = enabled) { onRouteClick("CHANNELS") } }
-        items(ConfigDest.values()) { configs ->
-            NavCard(configs.title, enabled = enabled) { onRouteClick(configs.config) }
+        items(ConfigDest.values()) { config ->
+            NavCard(config.title, enabled = enabled) { onRouteClick(config) }
         }
 
         item { PreferenceCategory(stringResource(R.string.module_settings)) }
-        items(ModuleDest.values()) { modules ->
-            NavCard(modules.title, enabled = enabled) { onRouteClick(modules.config) }
+        items(ModuleDest.values()) { module ->
+            NavCard(module.title, enabled = enabled) { onRouteClick(module) }
         }
 
         if (isLocal) {

@@ -69,14 +69,6 @@ fun PowerConfigItemList(
         }
 
         item {
-            EditTextPreference(title = "Mesh SDS timeout (seconds)",
-                value = powerInput.meshSdsTimeoutSecs,
-                enabled = enabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { powerInput = powerInput.copy { meshSdsTimeoutSecs = it } })
-        }
-
-        item {
             EditTextPreference(title = "Super deep sleep duration (seconds)",
                 value = powerInput.sdsSecs,
                 enabled = enabled,
