@@ -69,9 +69,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
-import org.osmdroid.events.MapListener
-import org.osmdroid.events.ScrollEvent
-import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.tileprovider.modules.SqliteArchiveTileWriter
 import org.osmdroid.tileprovider.tilesource.ITileSource
@@ -149,7 +146,7 @@ fun MapView(model: UIViewModel = viewModel()) {
 
     val map = rememberMapViewWithLifecycle(context)
 
-    fun toggleMyLocation() {
+    fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
             debug("Telling user we need location turned on for MyLocationNewOverlay")
             model.showSnackbar(R.string.location_disabled)
@@ -157,7 +154,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         }
         debug("user clicked MyLocationNewOverlay ${myLocationOverlay == null}")
         if (myLocationOverlay == null) {
-            myLocationOverlay = MyLocationNewOverlay(map).apply {
+            myLocationOverlay = MyLocationNewOverlay(this).apply {
                 enableMyLocation()
                 enableFollowLocation()
                 AppCompatResources.getDrawable(context, R.drawable.ic_location_dot_24)?.let {
@@ -165,20 +162,20 @@ fun MapView(model: UIViewModel = viewModel()) {
                     setPersonAnchor(0.5f, 0.5f)
                 }
             }
-            map.overlays.add(myLocationOverlay)
+            overlays.add(myLocationOverlay)
         } else {
             myLocationOverlay?.apply {
                 disableMyLocation()
                 disableFollowLocation()
             }
-            map.overlays.remove(myLocationOverlay)
+            overlays.remove(myLocationOverlay)
             myLocationOverlay = null
         }
     }
 
     val requestPermissionAndToggleLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions.entries.all { it.value }) toggleMyLocation()
+            if (permissions.entries.all { it.value }) map.toggleMyLocation()
         }
 
     fun requestPermissionAndToggle() {
@@ -192,13 +189,13 @@ fun MapView(model: UIViewModel = viewModel()) {
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
 
-    fun onNodesChanged(nodes: Collection<NodeInfo>): List<MarkerWithLabel> {
+    fun MapView.onNodesChanged(nodes: Collection<NodeInfo>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
         val ic = ContextCompat.getDrawable(context, R.drawable.ic_baseline_location_on_24)
         val ourNode = model.ourNodeInfo.value
         return nodesWithPosition.map { node ->
             val (p, u) = node.position!! to node.user!!
-            MarkerWithLabel(map, "${u.longName} ${formatAgo(p.time)}").apply {
+            MarkerWithLabel(this, "${u.longName} ${formatAgo(p.time)}").apply {
                 id = u.id
                 title = "${u.longName} ${node.batteryStr}"
                 snippet = model.gpsString(p)
@@ -252,7 +249,7 @@ fun MapView(model: UIViewModel = viewModel()) {
     else model.nodeDB.nodes.value?.get(id)?.user?.longName
         ?: context.getString(R.string.unknown_username)
 
-    fun onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
+    fun MapView.onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
         return waypoints.mapNotNull { waypoint ->
             val pt = waypoint.data.waypoint ?: return@mapNotNull null
             val lock = if (pt.lockedTo != 0) "\uD83D\uDD12" else ""
@@ -260,7 +257,7 @@ fun MapView(model: UIViewModel = viewModel()) {
                 .format(waypoint.received_time)
             val label = pt.name + " " + formatAgo((waypoint.received_time / 1000).toInt())
             val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
-            MarkerWithLabel(map, label, emoji).apply {
+            MarkerWithLabel(this, label, emoji).apply {
                 id = "${pt.id}"
                 title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
                 snippet = "[$time] " + pt.description
@@ -380,7 +377,7 @@ fun MapView(model: UIViewModel = viewModel()) {
      * Create LatLong Grid line overlay
      * @param enabled: turn on/off gridlines
      */
-    fun createLatLongGrid(enabled: Boolean) {
+    fun MapView.createLatLongGrid(enabled: Boolean) {
         val latLongGridOverlay = LatLonGridlineOverlay2()
         latLongGridOverlay.isEnabled = enabled
         if (latLongGridOverlay.isEnabled) {
@@ -394,19 +391,19 @@ fun MapView(model: UIViewModel = viewModel()) {
             latLongGridOverlay.setBackgroundColor(Color.TRANSPARENT)
             latLongGridOverlay.setLineWidth(3.0f)
             latLongGridOverlay.setLineColor(Color.GRAY)
-            map.overlayManager.add(latLongGridOverlay)
+            overlays.add(latLongGridOverlay)
         }
     }
 
     /**
      * Adds copyright to map depending on what source is showing
      */
-    fun addCopyright() {
-        if (map.overlays.none { it is CopyrightOverlay }) {
-            val copyrightNotice: String = map.tileProvider.tileSource.copyrightNotice ?: return
+    fun MapView.addCopyright() {
+        if (overlays.none { it is CopyrightOverlay }) {
+            val copyrightNotice: String = tileProvider.tileSource.copyrightNotice ?: return
             val copyrightOverlay = CopyrightOverlay(context)
             copyrightOverlay.setCopyrightNotice(copyrightNotice)
-            map.overlays.add(copyrightOverlay)
+            overlays.add(copyrightOverlay)
         }
     }
 
@@ -418,9 +415,9 @@ fun MapView(model: UIViewModel = viewModel()) {
 
         override fun longPressHelper(p: GeoPoint): Boolean {
             performHapticFeedback()
-            if (!model.isConnected()) return true
+            val enabled = model.isConnected() && downloadRegionBoundingBox == null
 
-            showEditWaypointDialog = waypoint {
+            if (enabled) showEditWaypointDialog = waypoint {
                 latitudeI = (p.latitude * 1e7).toInt()
                 longitudeI = (p.longitude * 1e7).toInt()
             }
@@ -428,7 +425,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         }
     }
 
-    fun drawOverlays() = map.apply {
+    fun MapView.drawOverlays() {
         if (overlays.none { it is MapEventsOverlay }) {
             overlays.add(0, MapEventsOverlay(mapEventsReceiver))
         }
@@ -450,7 +447,7 @@ fun MapView(model: UIViewModel = viewModel()) {
     // FIXME workaround to 'nodes.observeAsState' going stale after MapFragment enters onPause state
     LaunchedEffect(Unit) {
         while (true) {
-            if (downloadRegionBoundingBox == null) drawOverlays()
+            if (downloadRegionBoundingBox == null) map.drawOverlays()
             delay(30000L)
         }
     }
@@ -471,12 +468,12 @@ fun MapView(model: UIViewModel = viewModel()) {
 //        }
 //    }
 
-    fun zoomToNodes(map: MapView) = map.apply {
+    fun MapView.zoomToNodes() {
         val nodeMarkers = onNodesChanged(nodes.values)
         if (nodeMarkers.isNotEmpty()) {
             val box = BoundingBox.fromGeoPoints(nodeMarkers.map { it.position })
             val center = GeoPoint(box.centerLatitude, box.centerLongitude)
-            val maximumZoomLevel = map.tileProvider.tileSource.maximumZoomLevel.toDouble()
+            val maximumZoomLevel = tileProvider.tileSource.maximumZoomLevel.toDouble()
             val finalZoomLevel = minOf(box.requiredZoomLevel() * 0.8, maximumZoomLevel)
             controller.setCenter(center)
             controller.setZoom(finalZoomLevel)
@@ -495,7 +492,7 @@ fun MapView(model: UIViewModel = viewModel()) {
     /**
      * Creates Box overlay showing what area can be downloaded
      */
-    fun generateBoxOverlay(zoomLevel: Double) = map.apply {
+    fun MapView.generateBoxOverlay(zoomLevel: Double) {
         if (overlayManager !is CustomOverlayManager) {
             overlayManager = CustomOverlayManager(TilesOverlay(tileProvider, context))
             setMultiTouchControls(false)
@@ -576,7 +573,7 @@ fun MapView(model: UIViewModel = viewModel()) {
                 when (which) {
                     0 -> showCurrentCacheInfo = true
                     1 -> {
-                        generateBoxOverlay(zoomLevelHighest)
+                        map.generateBoxOverlay(zoomLevelHighest)
                         dialog.dismiss()
                     }
 
@@ -618,23 +615,14 @@ fun MapView(model: UIViewModel = viewModel()) {
                         maxZoomLevel = defaultMaxZoom
                         // Disables default +/- button for zooming
                         zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-                        addMapListener(object : MapListener {
-                            override fun onScroll(event: ScrollEvent): Boolean {
-                                if (downloadRegionBoundingBox != null) {
-                                    generateBoxOverlay(zoomLevelMin)
-                                }
-                                return true
-                            }
-
-                            override fun onZoom(event: ZoomEvent): Boolean {
-                                return false
-                            }
-                        })
-                        zoomToNodes(map)
+                        zoomToNodes()
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
-                update = { if (downloadRegionBoundingBox == null) drawOverlays() },
+                update = { map ->
+                    if (downloadRegionBoundingBox == null) map.drawOverlays()
+                    else map.generateBoxOverlay(zoomLevelMin)
+                },
             )
             if (downloadRegionBoundingBox != null) CacheLayout(
                 cacheEstimate = cacheEstimate,
@@ -659,7 +647,7 @@ fun MapView(model: UIViewModel = viewModel()) {
                 )
                 IconButton(
                     onClick = {
-                        if (context.hasLocationPermission()) toggleMyLocation()
+                        if (context.hasLocationPermission()) map.toggleMyLocation()
                         else requestPermissionAndToggle()
                     },
                     enabled = hasGps,
