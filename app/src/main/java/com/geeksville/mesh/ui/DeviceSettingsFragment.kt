@@ -372,7 +372,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                             viewModel.requestNodedbReset(destNum)
                         }
 
-                        ConfigType.LORA_CONFIG -> {
+                        ConfigDest.LORA -> {
                             (packetResponseState as PacketResponseState.Loading).total = 2
                             channelList.clear()
                             viewModel.getChannel(destNum, 0)
