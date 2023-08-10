@@ -103,7 +103,7 @@
     <string name="background_required">Background location</string>
     <string name="why_background_required">For this feature, you must grant Location permission option \"Allow all the time\".\nThis allows Meshtastic to read your smartphone location and send it to other members of your mesh, even when the app is closed or not in use.</string>
     <string name="required_permissions">Required permissions</string>
-    <string name="provide_location_to_mesh">Provide location to mesh</string>
+    <string name="provide_location_to_mesh">Provide phone location to mesh</string>
     <string name="camera_required">Camera permission</string>
     <string name="why_camera_required">We must be granted access to the camera to read QR codes. No pictures or videos will be saved.</string>
     <string name="modem_config_slow_short">Short Range / Slow</string>
