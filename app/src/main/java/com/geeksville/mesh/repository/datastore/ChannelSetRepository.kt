@@ -51,12 +51,15 @@ class ChannelSetRepository @Inject constructor(
      * Updates the [ChannelSettings] list with the provided channel.
      */
     suspend fun updateChannelSettings(channel: Channel) {
+        if (channel.role == Channel.Role.DISABLED) return
         channelSetStore.updateData { preference ->
-            if (preference.settingsCount > channel.index) {
-                preference.toBuilder().setSettings(channel.index, channel.settings).build()
-            } else {
-                preference.toBuilder().addSettings(channel.settings).build()
+            val builder = preference.toBuilder()
+            // Resize to fit channel
+            while (builder.settingsCount <= channel.index) {
+                builder.addSettings(ChannelSettings.getDefaultInstance())
             }
+            // use setSettings() to ensure settingsList and channel indexes match
+            builder.setSettings(channel.index, channel.settings).build()
         }
     }
 
