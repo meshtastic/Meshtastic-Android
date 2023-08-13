@@ -6,6 +6,7 @@ import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.util.Exceptions
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -29,7 +30,14 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
         init {
             registerFactory()
         }
+
+        const val MAX_RETRIES_ALLOWED = Int.MAX_VALUE
+        const val MIN_BACKOFF_MILLIS = 1 * 1000L // 1 second
+        const val MAX_BACKOFF_MILLIS = 5 * 60 * 1000L // 5 minutes
     }
+
+    private var retryCount = 1
+    private var backoffDelay = MIN_BACKOFF_MILLIS
 
     private var socket: Socket? = null
     private lateinit var outStream: OutputStream
@@ -58,14 +66,24 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
 
     override fun connect() {
         service.serviceScope.handledLaunch {
-            try {
-                startConnect()
-            } catch (ex: IOException) {
-                errormsg("IOException in TCP reader: $ex")
-                onDeviceDisconnect(false)
-            } catch (ex: Throwable) {
-                Exceptions.report(ex, "Exception in TCP reader")
-                onDeviceDisconnect(false)
+            while (true) {
+                try {
+                    startConnect()
+                } catch (ex: IOException) {
+                    errormsg("IOException in TCP reader: $ex")
+                    onDeviceDisconnect(false)
+                } catch (ex: Throwable) {
+                    Exceptions.report(ex, "Exception in TCP reader")
+                    onDeviceDisconnect(false)
+                }
+
+                if (retryCount > MAX_RETRIES_ALLOWED) break
+
+                debug("Reconnect attempt $retryCount in ${backoffDelay / 1000}s")
+                delay(backoffDelay)
+
+                retryCount++
+                backoffDelay = minOf(backoffDelay * 2, MAX_BACKOFF_MILLIS)
             }
             debug("Exiting TCP reader")
         }
@@ -84,6 +102,9 @@ class TCPInterface(service: RadioInterfaceService, private val address: String) 
 
                 BufferedInputStream(socket.getInputStream()).use { inputStream ->
                     super.connect()
+
+                    retryCount = 1
+                    backoffDelay = MIN_BACKOFF_MILLIS
 
                     var timeoutCount = 0
                     while (timeoutCount < 180) try { // close after 90s of inactivity
