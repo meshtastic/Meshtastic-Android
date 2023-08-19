@@ -76,10 +76,12 @@ import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.TextDividerPreference
+import com.geeksville.mesh.ui.components.config.AmbientLightingConfigItemList
 import com.geeksville.mesh.ui.components.config.AudioConfigItemList
 import com.geeksville.mesh.ui.components.config.BluetoothConfigItemList
 import com.geeksville.mesh.ui.components.config.CannedMessageConfigItemList
 import com.geeksville.mesh.ui.components.config.ChannelSettingsItemList
+import com.geeksville.mesh.ui.components.config.DetectionSensorConfigItemList
 import com.geeksville.mesh.ui.components.config.DeviceConfigItemList
 import com.geeksville.mesh.ui.components.config.DisplayConfigItemList
 import com.geeksville.mesh.ui.components.config.EditDeviceProfileDialog
@@ -142,7 +144,9 @@ enum class ModuleDest(val title: String, val route: String) {
     CANNED_MESSAGE("Canned Message", "canned_message"),
     AUDIO("Audio", "audio"),
     REMOTE_HARDWARE("Remote Hardware", "remote_hardware"),
-    NEIGHBOR_INFO("Neighbor Info", "neighbor_info");
+    NEIGHBOR_INFO("Neighbor Info", "neighbor_info"),
+    AMBIENT_LIGHTING("Ambient Lighting", "ambient_lighting"),
+    DETECTION_SENSOR("Detection Sensor", "detection_sensor");
 }
 
 /**
@@ -661,6 +665,32 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 onSaveClicked = { neighborInfoInput ->
                     focusManager.clearFocus()
                     val config = moduleConfig { neighborInfo = neighborInfoInput }
+                    viewModel.setModuleConfig(destNum, config)
+                    moduleConfig = config
+                }
+            )
+        }
+        composable("ambient_lighting") {
+            AmbientLightingConfigItemList(
+                ambientLightingConfig = moduleConfig.ambientLighting,
+                enabled = connected,
+                focusManager = focusManager,
+                onSaveClicked = { ambientLightingInput ->
+                    focusManager.clearFocus()
+                    val config = moduleConfig { ambientLighting = ambientLightingInput }
+                    viewModel.setModuleConfig(destNum, config)
+                    moduleConfig = config
+                }
+            )
+        }
+        composable("detection_sensor") {
+            DetectionSensorConfigItemList(
+                detectionSensorConfig = moduleConfig.detectionSensor,
+                enabled = connected,
+                focusManager = focusManager,
+                onSaveClicked = { detectionSensorInput ->
+                    focusManager.clearFocus()
+                    val config = moduleConfig { detectionSensor = detectionSensorInput }
                     viewModel.setModuleConfig(destNum, config)
                     moduleConfig = config
                 }

@@ -46,6 +46,9 @@ class ModuleConfigRepository @Inject constructor(
         if (config.hasCannedMessage()) setCannedMessageConfig(config.cannedMessage)
         if (config.hasAudio()) setAudioConfig(config.audio)
         if (config.hasRemoteHardware()) setRemoteHardwareConfig(config.remoteHardware)
+        if (config.hasNeighborInfo()) setNeighborInfoConfig(config.neighborInfo)
+        if (config.hasAmbientLighting()) setAmbientLightingConfig(config.ambientLighting)
+        if (config.hasDetectionSensor()) setDetectionSensorConfig(config.detectionSensor)
     }
 
     private suspend fun setMQTTConfig(config: ModuleConfig.MQTTConfig) {
@@ -99,6 +102,24 @@ class ModuleConfigRepository @Inject constructor(
     private suspend fun setRemoteHardwareConfig(config: ModuleConfig.RemoteHardwareConfig) {
         moduleConfigStore.updateData { preference ->
             preference.toBuilder().setRemoteHardware(config).build()
+        }
+    }
+
+    private suspend fun setNeighborInfoConfig(config: ModuleConfig.NeighborInfoConfig) {
+        moduleConfigStore.updateData { preference ->
+            preference.toBuilder().setNeighborInfo(config).build()
+        }
+    }
+
+    private suspend fun setAmbientLightingConfig(config: ModuleConfig.AmbientLightingConfig) {
+        moduleConfigStore.updateData { preference ->
+            preference.toBuilder().setAmbientLighting(config).build()
+        }
+    }
+
+    private suspend fun setDetectionSensorConfig(config: ModuleConfig.DetectionSensorConfig) {
+        moduleConfigStore.updateData { preference ->
+            preference.toBuilder().setDetectionSensor(config).build()
         }
     }
 
