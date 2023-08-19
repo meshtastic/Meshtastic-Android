@@ -808,6 +808,6 @@ fun RadioSettingsScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun RadioSettingsScreenPreview() {
+private fun RadioSettingsScreenPreview() {
     RadioSettingsScreen()
 }

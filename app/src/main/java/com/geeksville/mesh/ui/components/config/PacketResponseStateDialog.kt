@@ -72,7 +72,7 @@ fun PacketResponseStateDialog(
 
 @Preview(showBackground = true)
 @Composable
-fun PacketResponseStateDialogPreview() {
+private fun PacketResponseStateDialogPreview() {
     PacketResponseStateDialog(
         state = PacketResponseState.Loading.apply {
             total = 17

@@ -83,7 +83,7 @@ fun RemoteHardwareConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun RemoteHardwareConfigPreview(){
+private fun RemoteHardwareConfigPreview() {
     RemoteHardwareConfigItemList(
         remoteHardwareConfig = RemoteHardwareConfig.getDefaultInstance(),
         enabled = true,

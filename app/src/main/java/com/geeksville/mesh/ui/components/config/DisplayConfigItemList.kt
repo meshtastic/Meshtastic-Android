@@ -145,7 +145,7 @@ fun DisplayConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun DisplayConfigPreview(){
+private fun DisplayConfigPreview() {
     DisplayConfigItemList(
         displayConfig = DisplayConfig.getDefaultInstance(),
         enabled = true,

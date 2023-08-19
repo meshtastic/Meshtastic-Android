@@ -115,7 +115,7 @@ fun PowerConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun PowerConfigPreview(){
+private fun PowerConfigPreview() {
     PowerConfigItemList(
         powerConfig = PowerConfig.getDefaultInstance(),
         enabled = true,

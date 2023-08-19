@@ -73,7 +73,7 @@ fun RangeTestConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun RangeTestConfig(){
+private fun RangeTestConfig() {
     RangeTestConfigItemList(
         rangeTestConfig = RangeTestConfig.getDefaultInstance(),
         enabled = true,

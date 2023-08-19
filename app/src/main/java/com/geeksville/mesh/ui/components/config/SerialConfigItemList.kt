@@ -122,7 +122,7 @@ fun SerialConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun SerialConfigPreview(){
+private fun SerialConfigPreview() {
     SerialConfigItemList(
         serialConfig = SerialConfig.getDefaultInstance(),
         enabled = true,

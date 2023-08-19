@@ -190,7 +190,7 @@ fun PositionConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun PositionConfigPreview(){
+private fun PositionConfigPreview() {
     PositionConfigItemList(
         location = null,
         positionConfig = PositionConfig.getDefaultInstance(),

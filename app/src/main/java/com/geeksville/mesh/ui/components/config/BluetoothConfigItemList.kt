@@ -80,7 +80,7 @@ fun BluetoothConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun BluetoothConfigPreview(){
+private fun BluetoothConfigPreview() {
     BluetoothConfigItemList(
         bluetoothConfig = BluetoothConfig.getDefaultInstance(),
         enabled = true,

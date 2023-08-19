@@ -119,7 +119,7 @@ fun TelemetryConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun TelemetryConfigPreview(){
+private fun TelemetryConfigPreview() {
     TelemetryConfigItemList(
         telemetryConfig = TelemetryConfig.getDefaultInstance(),
         enabled = true,

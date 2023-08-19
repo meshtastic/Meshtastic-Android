@@ -424,6 +424,6 @@ fun ChannelScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun ChannelScreenPreview() {
+private fun ChannelScreenPreview() {
     // ChannelScreen()
 }

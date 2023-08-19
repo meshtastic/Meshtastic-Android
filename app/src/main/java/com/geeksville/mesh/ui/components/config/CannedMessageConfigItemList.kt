@@ -194,7 +194,7 @@ fun CannedMessageConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun CannedMessageConfigPreview(){
+private fun CannedMessageConfigPreview() {
     CannedMessageConfigItemList(
         messages = "",
         cannedMessageConfig = CannedMessageConfig.getDefaultInstance(),

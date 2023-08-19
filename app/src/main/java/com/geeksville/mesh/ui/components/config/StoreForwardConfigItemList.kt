@@ -95,7 +95,7 @@ fun StoreForwardConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun StoreForwardConfigPreview(){
+private fun StoreForwardConfigPreview() {
     StoreForwardConfigItemList(
         storeForwardConfig = StoreForwardConfig.getDefaultInstance(),
         enabled = true,

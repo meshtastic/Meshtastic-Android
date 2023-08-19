@@ -106,7 +106,7 @@ fun UserConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun UserConfigPreview(){
+private fun UserConfigPreview() {
     UserConfigItemList(
         userConfig = user {
             id = "!a280d9c8"

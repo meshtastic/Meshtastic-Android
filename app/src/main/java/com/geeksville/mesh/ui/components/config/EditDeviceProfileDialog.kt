@@ -105,7 +105,7 @@ fun EditDeviceProfileDialog(
 
 @Preview(showBackground = true)
 @Composable
-fun EditDeviceProfileDialogPreview() {
+private fun EditDeviceProfileDialogPreview() {
     EditDeviceProfileDialog(
         title = "Export configuration",
         deviceProfile = deviceProfile { },

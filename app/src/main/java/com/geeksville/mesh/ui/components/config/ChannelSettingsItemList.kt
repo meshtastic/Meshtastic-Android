@@ -186,7 +186,7 @@ fun ChannelSettingsItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun ChannelSettingsPreview() {
+private fun ChannelSettingsPreview() {
     ChannelSettingsItemList(
         settingsList = listOf(
             channelSettings {

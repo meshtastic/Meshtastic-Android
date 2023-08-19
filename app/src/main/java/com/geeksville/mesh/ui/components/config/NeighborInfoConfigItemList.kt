@@ -69,7 +69,7 @@ fun NeighborInfoConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun NeighborInfoConfigPreview(){
+private fun NeighborInfoConfigPreview() {
     NeighborInfoConfigItemList(
         neighborInfoConfig = ModuleConfigProtos.ModuleConfig.NeighborInfoConfig.getDefaultInstance(),
         enabled = true,

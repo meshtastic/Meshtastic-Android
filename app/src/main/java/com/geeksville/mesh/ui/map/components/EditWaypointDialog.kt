@@ -159,7 +159,7 @@ fun EditWaypointDialog(
 
 @Preview(showBackground = true)
 @Composable
-fun EditWaypointFormPreview() {
+private fun EditWaypointFormPreview() {
     AppTheme {
         EditWaypointDialog(
             waypoint = waypoint {

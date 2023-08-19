@@ -197,7 +197,7 @@ fun LoRaConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun LoRaConfigPreview() {
+private fun LoRaConfigPreview() {
     LoRaConfigItemList(
         loraConfig = Channel.default.loraConfig,
         primarySettings = Channel.default.settings,

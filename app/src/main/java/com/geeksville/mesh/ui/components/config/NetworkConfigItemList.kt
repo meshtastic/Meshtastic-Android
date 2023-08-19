@@ -180,7 +180,7 @@ fun NetworkConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun NetworkConfigPreview(){
+private fun NetworkConfigPreview() {
     NetworkConfigItemList(
         networkConfig = NetworkConfig.getDefaultInstance(),
         enabled = true,

@@ -109,7 +109,7 @@ fun AudioConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun AudioConfigPreview(){
+private fun AudioConfigPreview() {
     AudioConfigItemList(
         audioConfig = AudioConfig.getDefaultInstance(),
         enabled = true,

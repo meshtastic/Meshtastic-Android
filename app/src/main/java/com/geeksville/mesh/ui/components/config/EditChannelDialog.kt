@@ -182,7 +182,7 @@ fun EditChannelDialog(
 
 @Preview(showBackground = true)
 @Composable
-fun EditChannelDialogPreview() {
+private fun EditChannelDialogPreview() {
     EditChannelDialog(
         channelSettings = channelSettings {
             psk = Channel.default.settings.psk

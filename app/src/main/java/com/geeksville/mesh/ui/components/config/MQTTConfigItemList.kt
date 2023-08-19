@@ -141,7 +141,7 @@ fun MQTTConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun MQTTConfigPreview() {
+private fun MQTTConfigPreview() {
     MQTTConfigItemList(
         mqttConfig = MQTTConfig.getDefaultInstance(),
         enabled = true,

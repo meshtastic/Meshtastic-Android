@@ -216,7 +216,7 @@ fun ExternalNotificationConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun ExternalNotificationConfigPreview(){
+private fun ExternalNotificationConfigPreview() {
     ExternalNotificationConfigItemList(
         ringtone = "",
         extNotificationConfig = ExternalNotificationConfig.getDefaultInstance(),

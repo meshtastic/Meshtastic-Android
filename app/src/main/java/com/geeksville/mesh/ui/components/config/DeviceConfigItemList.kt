@@ -138,7 +138,7 @@ fun DeviceConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-fun DeviceConfigPreview(){
+private fun DeviceConfigPreview() {
     DeviceConfigItemList(
         deviceConfig = DeviceConfig.getDefaultInstance(),
         enabled = true,
