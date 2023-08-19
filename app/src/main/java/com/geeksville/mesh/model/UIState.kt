@@ -149,9 +149,6 @@ class UIViewModel @Inject constructor(
         radioConfigRepository.channelSetFlow.onEach { channelSet ->
             _channels.value = ChannelSet(channelSet)
         }.launchIn(viewModelScope)
-        combine(nodeDB.nodes.asFlow(), nodeDB.myId.asFlow()) { nodes, id -> nodes[id] }.onEach {
-            _ourNodeInfo.value = it
-        }.launchIn(viewModelScope)
 
         viewModelScope.launch {
             combine(meshLogRepository.getAllLogs(9), requestId) { list, id ->
@@ -433,7 +430,9 @@ class UIViewModel @Inject constructor(
 
             try {
                 // Pull down our real node ID - This must be done AFTER reading the nodedb because we need the DB to find our nodeinof object
-                nodeDB.setMyId(service.myId)
+                val myId = service.myId
+                nodeDB.setMyId(myId)
+                _ourNodeInfo.value = nodes[myId]
             } catch (ex: Exception) {
                 warn("Ignoring failure to get myId, service is probably just uninited... ${ex.message}")
             }
