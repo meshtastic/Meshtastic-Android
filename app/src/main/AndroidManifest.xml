@@ -196,6 +196,16 @@
 
         <activity
             android:name=".AppIntroduction"/>
+
+        <!-- allow for plugin discovery -->
+        <activity
+            android:name="com.atakmap.app.component"
+            android:exported="true"
+            tools:ignore="MissingClass">
+            <intent-filter android:label="@string/app_name">
+                <action android:name="com.atakmap.app.component" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
