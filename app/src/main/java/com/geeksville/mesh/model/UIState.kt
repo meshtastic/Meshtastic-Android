@@ -171,7 +171,7 @@ class UIViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val contacts: LiveData<Map<String, Packet>> = _packets.mapLatest { list ->
-        list.filter { it.port_num == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE }
+        list.filter { it.port_num == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE || it.port_num == Portnums.PortNum.DETECTION_SENSOR_APP_VALUE }
             .associateBy { packet -> packet.contact_key }
     }.asLiveData()
 
