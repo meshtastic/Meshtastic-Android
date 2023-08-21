@@ -620,6 +620,13 @@ class MeshService : Service(), Logging {
                             updateMessageNotification(dataPacket)
                         }
 
+                    Portnums.PortNum.DETECTION_SENSOR_APP_VALUE ->
+                        if (!fromUs) {
+                            debug("Received DETECTION_SENSOR alert text from $fromId")
+                            rememberDataPacket(dataPacket)
+                            updateMessageNotification(dataPacket)
+                        }
+
                     Portnums.PortNum.WAYPOINT_APP_VALUE -> {
                         val u = MeshProtos.Waypoint.parseFrom(data.payload)
                         // Validate locked Waypoints from the original sender

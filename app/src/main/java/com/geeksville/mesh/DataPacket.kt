@@ -48,10 +48,10 @@ data class DataPacket(
     )
 
     /**
-     * If this is a text message, return the string, otherwise null
+     * If this is a text or detection sensor message, return the string, otherwise null
      */
     val text: String?
-        get() = if (dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
+        get() = if (dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE || dataType == Portnums.PortNum.DETECTION_SENSOR_APP_VALUE)
             bytes?.decodeToString()
         else
             null
