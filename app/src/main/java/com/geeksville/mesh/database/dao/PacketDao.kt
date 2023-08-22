@@ -19,13 +19,13 @@ interface PacketDao {
     @Insert
     fun insert(packet: Packet)
 
-    @Query("Select * from packet where port_num = 1 and contact_key = :contact order by received_time asc")
+    @Query("Select * from packet where port_num in (1, 10) and contact_key = :contact order by received_time asc")
     fun getMessagesFrom(contact: String): Flow<List<Packet>>
 
     @Query("Select * from packet where data = :data")
     fun findDataPacket(data: DataPacket): Packet?
 
-    @Query("Delete from packet where port_num = 1")
+    @Query("Delete from packet where port_num in (1, 10)")
     fun deleteAllMessages()
 
     @Query("Delete from packet where uuid in (:uuidList)")
