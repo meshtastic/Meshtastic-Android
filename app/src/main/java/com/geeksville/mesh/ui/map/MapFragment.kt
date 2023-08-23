@@ -157,9 +157,13 @@ fun MapView(model: UIViewModel = viewModel()) {
             myLocationOverlay = MyLocationNewOverlay(this).apply {
                 enableMyLocation()
                 enableFollowLocation()
-                AppCompatResources.getDrawable(context, R.drawable.ic_location_dot_24)?.let {
+                AppCompatResources.getDrawable(context, R.drawable.ic_map_location_dot_24)?.let {
                     setPersonIcon(it.toBitmap())
                     setPersonAnchor(0.5f, 0.5f)
+                }
+                AppCompatResources.getDrawable(context, R.drawable.ic_map_navigation_24)?.let {
+                    setDirectionIcon(it.toBitmap())
+                    setDirectionAnchor(0.5f, 0.5f)
                 }
             }
             overlays.add(myLocationOverlay)
