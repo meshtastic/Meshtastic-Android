@@ -552,7 +552,7 @@ class MeshService : Service(), Logging {
                 to = toId,
                 time = rxTime * 1000L,
                 id = packet.id,
-                dataType = data.portnumValue,
+                dataType = if (data.portnumValue == Portnums.PortNum.DETECTION_SENSOR_APP_VALUE) Portnums.PortNum.TEXT_MESSAGE_APP_VALUE else data.portnumValue,
                 bytes = bytes,
                 hopLimit = hopLimit,
                 channel = packet.channel,
