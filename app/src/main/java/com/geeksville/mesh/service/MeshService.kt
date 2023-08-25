@@ -223,10 +223,17 @@ class MeshService : Service(), Logging {
         startPacketQueue()
     }
 
-    private fun updateMessageNotification(message: DataPacket) =
-        serviceNotifications.updateMessageNotification(
-            getSenderName(message), message.bytes!!.decodeToString()
-        )
+    private fun updateMessageNotification(dataPacket: DataPacket) {
+        val message: String = when (dataPacket.dataType) {
+            Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> dataPacket.text!!
+            Portnums.PortNum.WAYPOINT_APP_VALUE -> {
+                getString(R.string.waypoint_received, dataPacket.waypoint!!.name)
+            }
+
+            else -> return
+        }
+        serviceNotifications.updateMessageNotification(getSenderName(dataPacket), message)
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -625,6 +632,7 @@ class MeshService : Service(), Logging {
                         // Validate locked Waypoints from the original sender
                         if (u.lockedTo != 0 && u.lockedTo != packet.from) return
                         rememberDataPacket(dataPacket)
+                        if (u.expire > currentSecond()) updateMessageNotification(dataPacket)
                     }
 
                     // Handle new style position info

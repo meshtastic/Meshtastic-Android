@@ -177,4 +177,5 @@
     <string name="waypoint_edit">Edit waypoint</string>
     <string name="waypoint_delete">Delete waypoint?</string>
     <string name="waypoint_new">New waypoint</string>
+    <string name="waypoint_received">Received waypoint: %s</string>
 </resources>
