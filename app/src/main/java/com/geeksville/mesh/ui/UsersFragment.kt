@@ -58,7 +58,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         private fun popup(view: View, position: Int) {
             if (!model.isConnected()) return
             val node = nodes[position]
-            val user = node.user
+            val user = node.user ?: return
             val showAdmin = position == 0 || model.adminChannelIndex > 0
             val popup = PopupMenu(requireContext(), view)
             popup.inflate(R.menu.menu_nodes)
@@ -68,32 +68,26 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             popup.setOnMenuItemClickListener { item: MenuItem ->
                 when (item.itemId) {
                     R.id.direct_message -> {
-                        if (position > 0 && user != null) {
-                            debug("calling MessagesFragment filter: 0${user.id}")
-                            setFragmentResult(
-                                "requestKey",
-                                bundleOf(
-                                    "contactKey" to "0${user.id}",
-                                    "contactName" to user.longName
-                                )
+                        debug("calling MessagesFragment filter: 0${user.id}")
+                        setFragmentResult(
+                            "requestKey",
+                            bundleOf(
+                                "contactKey" to "0${user.id}",
+                                "contactName" to user.longName
                             )
-                            parentFragmentManager.beginTransaction()
-                                .replace(R.id.mainActivityLayout, MessagesFragment())
-                                .addToBackStack(null)
-                                .commit()
-                        }
+                        )
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.mainActivityLayout, MessagesFragment())
+                            .addToBackStack(null)
+                            .commit()
                     }
                     R.id.request_position -> {
-                        if (position > 0 && user != null) {
-                            debug("requesting position for ${user.longName}")
-                            model.requestPosition(node.num)
-                        }
+                        debug("requesting position for '${user.longName}'")
+                        model.requestPosition(node.num)
                     }
                     R.id.traceroute -> {
-                        if (position > 0 && user != null) {
-                            debug("requesting traceroute for ${user.longName}")
-                            model.requestTraceroute(node.num)
-                        }
+                        debug("requesting traceroute for '${user.longName}'")
+                        model.requestTraceroute(node.num)
                     }
                     R.id.remote_admin -> {
                         debug("calling remote admin --> destNum: ${node.num.toUInt()}")
