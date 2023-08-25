@@ -289,10 +289,11 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             meshLog?.meshPacket?.let { meshPacket ->
                 val routeList = meshLog.routeDiscovery?.routeList ?: return@let
                 fun nodeName(num: Int) = model.nodeDB.nodesByNum?.get(num)?.user?.longName
+                    ?: getString(R.string.unknown_username)
 
                 var routeStr = "${nodeName(meshPacket.to)} --> "
                 routeList.forEach { num -> routeStr += "${nodeName(num)} --> " }
-                routeStr += "${nodeName(meshPacket.from)}"
+                routeStr += nodeName(meshPacket.from)
 
                 MaterialAlertDialogBuilder(requireContext())
                     .setTitle(R.string.traceroute)
