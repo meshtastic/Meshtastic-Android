@@ -2,7 +2,9 @@ package com.geeksville.mesh.ui
 
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.text.SpannableString
 import android.text.method.LinkMovementMethod
+import android.text.style.StrikethroughSpan
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -54,17 +56,29 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     private val nodesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
 
         private var nodes = arrayOf<NodeInfo>()
+        val ignoreIncomingList: MutableList<Int> = mutableListOf()
+
+        private fun CharSequence.strike() = SpannableString(this).apply {
+            setSpan(StrikethroughSpan(), 0, this.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+
+        private fun CharSequence.strikeIf(isIgnored: Boolean) = if (isIgnored) strike() else this
 
         private fun popup(view: View, position: Int) {
             if (!model.isConnected()) return
             val node = nodes[position]
             val user = node.user ?: return
             val showAdmin = position == 0 || model.adminChannelIndex > 0
+            val isIgnored = ignoreIncomingList.contains(node.num)
             val popup = PopupMenu(requireContext(), view)
             popup.inflate(R.menu.menu_nodes)
             popup.menu.setGroupVisible(R.id.group_remote, position > 0)
             popup.menu.setGroupVisible(R.id.group_admin, showAdmin)
             popup.menu.setGroupEnabled(R.id.group_admin, !model.isManaged)
+            popup.menu.findItem(R.id.ignore).apply {
+                isEnabled = ignoreIncomingList.size < 3
+                isChecked = isIgnored
+            }
             popup.setOnMenuItemClickListener { item: MenuItem ->
                 when (item.itemId) {
                     R.id.direct_message -> {
@@ -88,6 +102,27 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                     R.id.traceroute -> {
                         debug("requesting traceroute for '${user.longName}'")
                         model.requestTraceroute(node.num)
+                    }
+                    R.id.ignore -> {
+                        val message = if (isIgnored) R.string.ignore_remove else R.string.ignore_add
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(R.string.ignore)
+                            .setMessage(getString(message, user.longName))
+                            .setNeutralButton(R.string.cancel) { _, _ -> }
+                            .setPositiveButton(R.string.send) { _, _ ->
+                                model.ignoreIncomingList = ignoreIncomingList.apply {
+                                    if (isIgnored) {
+                                        debug("removed '${user.longName}' from ignore list")
+                                        remove(node.num)
+                                    } else {
+                                        debug("added '${user.longName}' to ignore list")
+                                        add(node.num)
+                                    }
+                                }
+                                item.isChecked = !item.isChecked
+                                notifyItemChanged(position)
+                            }
+                            .show()
                     }
                     R.id.remote_admin -> {
                         debug("calling remote admin --> destNum: ${node.num.toUInt()}")
@@ -167,8 +202,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             val n = nodes[position]
             val user = n.user
             val (textColor, nodeColor) = n.colors
+            val isIgnored: Boolean = ignoreIncomingList.contains(n.num)
             with(holder.chipNode) {
-                text = user?.shortName ?: "UNK"
+                text = (user?.shortName ?: "UNK").strikeIf(isIgnored)
                 chipBackgroundColor = ColorStateList.valueOf(nodeColor)
                 setTextColor(textColor)
             }
@@ -283,6 +319,13 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
         model.nodeDB.nodes.observe(viewLifecycleOwner) {
             nodesAdapter.onNodesChanged(it.perhapsReindexBy(model.myNodeNum))
+        }
+
+        model.localConfig.asLiveData().observe(viewLifecycleOwner) { config ->
+            nodesAdapter.ignoreIncomingList.apply {
+                clear()
+                addAll(config.lora.ignoreIncomingList)
+            }
         }
 
         model.packetResponse.asLiveData().observe(viewLifecycleOwner) { meshLog ->

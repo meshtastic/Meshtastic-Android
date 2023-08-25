@@ -394,6 +394,15 @@ class UIViewModel @Inject constructor(
             updateLoraConfig { it.copy { region = value } }
         }
 
+    var ignoreIncomingList: MutableList<Int>
+        get() = config.lora.ignoreIncomingList
+        set(value) = updateLoraConfig {
+            it.copy {
+                ignoreIncoming.clear()
+                ignoreIncoming.addAll(value)
+            }
+        }
+
     fun gpsString(p: Position): String {
         return when (config.display.gpsFormat) {
             Config.DisplayConfig.GpsCoordinateFormat.DEC -> GPSFormat.DEC(p)
