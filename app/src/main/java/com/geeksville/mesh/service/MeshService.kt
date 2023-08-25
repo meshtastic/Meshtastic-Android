@@ -1347,6 +1347,7 @@ class MeshService : Service(), Logging {
      * Update our DeviceMetadata
      */
     private fun handleMetadata(metadata: MeshProtos.DeviceMetadata) {
+        debug("Received deviceMetadata ${metadata.toOneLineString()}")
         val packetToSave = MeshLog(
             UUID.randomUUID().toString(),
             "DeviceMetadata",
