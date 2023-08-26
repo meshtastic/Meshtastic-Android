@@ -4,5 +4,5 @@
     "config:base",
     ":semanticCommitTypeAll(chore)"
   ],
-  "commitMessageTopic": "{{depName}}",
+  "commitMessageTopic": "{{depName}}"
 }
