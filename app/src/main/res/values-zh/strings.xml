@@ -136,9 +136,6 @@
     <string name="nodedb_reset">节点数据库重置</string>
     <string name="nodedb_reset_description">这将从该列表中清除所有节点。</string>
     <string name="map_select_download_region">选择下载地区</string>
-    <string name="map_5_miles">5英里</string>
-    <string name="map_10_miles">10英里</string>
-    <string name="map_15_miles">15英里</string>
     <string name="map_tile_download_estimate">瓷砖下载估计:</string>
     <string name="map_start_download">开始下载</string>
     <string name="request_position">要求位置</string>

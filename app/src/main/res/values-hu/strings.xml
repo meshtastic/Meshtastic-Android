@@ -139,9 +139,6 @@
     <string name="nodedb_reset">NodeDB törlése</string>
     <string name="nodedb_reset_description">Ezzel minden állomást törölni fogsz erről listáról.</string>
     <string name="map_select_download_region">Válassz letöltési régiót</string>
-    <string name="map_5_miles">5 mérföld</string>
-    <string name="map_10_miles">10 mérföld</string>
-    <string name="map_15_miles">15 mérföld</string>
     <string name="map_tile_download_estimate">Csempe letöltés számítása:</string>
     <string name="map_start_download">Letöltés indítása</string>
     <string name="request_position">Pozíció kérése</string>

@@ -154,9 +154,6 @@
     <string name="ignore_add">Add \'%s\' to ignore list? Your radio will reboot after making this change.</string>
     <string name="ignore_remove">Remove \'%s\' from ignore list? Your radio will reboot after making this change.</string>
     <string name="map_select_download_region">Select download region</string>
-    <string name="map_5_miles">5 Miles</string>
-    <string name="map_10_miles">10 miles</string>
-    <string name="map_15_miles">15 miles</string>
     <string name="map_tile_download_estimate">Tile download estimate:</string>
     <string name="map_start_download">Start Download</string>
     <string name="request_position">Request position</string>

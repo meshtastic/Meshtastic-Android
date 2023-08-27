@@ -130,9 +130,6 @@
     <string name="nodedb_reset">NodeDB 리셋</string>
     <string name="nodedb_reset_description">이 목록의 모든 노드가 지워집니다.</string>
     <string name="map_select_download_region">다운로드 지역 선택</string>
-    <string name="map_5_miles">8 Km</string>
-    <string name="map_10_miles">16 Km</string>
-    <string name="map_15_miles">24 Km</string>
     <string name="map_tile_download_estimate">타일 다운로드 예상:</string>
     <string name="map_start_download">다운로드 시작</string>
     <string name="request_position">위치 요청</string>

@@ -140,9 +140,6 @@
     <string name="nodedb_reset">NodeDB reset</string>
     <string name="nodedb_reset_description">Αυτό θα καθαρίσει όλους τους κόμβους από αυτήν τη λίστα.</string>
     <string name="map_select_download_region">Επιλογή περιοχής λήψης</string>
-    <string name="map_5_miles">5 Μίλια</string>
-    <string name="map_10_miles">10 μίλια</string>
-    <string name="map_15_miles">15 μίλια</string>
     <string name="map_tile_download_estimate">Tile download estimate:</string>
     <string name="map_start_download">Εκκίνηση Λήψης</string>
     <string name="request_position">Αίτηση θέσης</string>

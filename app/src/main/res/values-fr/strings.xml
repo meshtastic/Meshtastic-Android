@@ -137,9 +137,6 @@
     <string name="nodedb_reset">Reconfiguration de NodeDB</string>
     <string name="nodedb_reset_description">Ceci effacera tous les nœuds de cette liste.</string>
     <string name="map_select_download_region">Sélectionnez la région de téléchargement</string>
-    <string name="map_5_miles">8 kilomètres</string>
-    <string name="map_10_miles">16 kilomètres</string>
-    <string name="map_15_miles">24 kilomètres</string>
     <string name="map_tile_download_estimate">Estimation du téléchargement de tuiles :</string>
     <string name="map_start_download">Commencer le téléchargement</string>
     <string name="request_position">Demander la position</string>

@@ -137,9 +137,6 @@
     <string name="nodedb_reset">Endurræsa NodeDB</string>
     <string name="nodedb_reset_description">Þetta mun hreinsa út allar nóður af listanum.</string>
     <string name="map_select_download_region">Veldu svæði til að niðurhala</string>
-    <string name="map_5_miles">8 kílómetrar</string>
-    <string name="map_10_miles">16 kílómetrar</string>
-    <string name="map_15_miles">24 kílómetrar</string>
     <string name="map_tile_download_estimate">Áætlaður niðurhalstími reits:</string>
     <string name="map_start_download">Hefja niðurhal</string>
     <string name="request_position">Óska eftir staðsetningu</string>

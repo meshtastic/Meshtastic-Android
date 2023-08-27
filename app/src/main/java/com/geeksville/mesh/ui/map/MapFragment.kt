@@ -49,7 +49,6 @@ import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.model.map.CustomOverlayManager
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.model.map.MarkerWithLabel
 import com.geeksville.mesh.ui.ScreenFragment
@@ -69,6 +68,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
+import org.osmdroid.events.MapListener
+import org.osmdroid.events.ScrollEvent
+import org.osmdroid.events.ZoomEvent
 import org.osmdroid.tileprovider.cachemanager.CacheManager
 import org.osmdroid.tileprovider.modules.SqliteArchiveTileWriter
 import org.osmdroid.tileprovider.tilesource.ITileSource
@@ -119,15 +121,8 @@ fun MapView(model: UIViewModel = viewModel()) {
     var cacheEstimate by remember { mutableStateOf("") }
 
     // constants
-    val defaultMinZoom = 1.5
-    val defaultMaxZoom = 18.0
     val prefsName = "org.geeksville.osm.prefs"
     val mapStyleId = "map_style_id"
-
-    // Distance of bottom corner to top corner of bounding box
-    val zoomLevelLowest = 13.0 // approx 5 miles long
-    val zoomLevelMiddle = 12.25 // approx 10 miles long
-    val zoomLevelHighest = 11.5 // approx 15 miles long
 
     var zoomLevelMin = 0.0
     var zoomLevelMax = 0.0
@@ -488,6 +483,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         val id = mPrefs.getInt(mapStyleId, 1)
         debug("mapStyleId from prefs: $id")
         return CustomTileSource.getTileSource(id).also {
+            map.maxZoomLevel = it.maximumZoomLevel.toDouble()
             showDownloadButton =
                 if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
         }
@@ -496,18 +492,11 @@ fun MapView(model: UIViewModel = viewModel()) {
     /**
      * Creates Box overlay showing what area can be downloaded
      */
-    fun MapView.generateBoxOverlay(zoomLevel: Double) {
-        if (overlayManager !is CustomOverlayManager) {
-            overlayManager = CustomOverlayManager(TilesOverlay(tileProvider, context))
-            setMultiTouchControls(false)
-            zoomLevelMax = tileProvider.tileSource.maximumZoomLevel.toDouble()
-            drawOverlays()
-        } else {
-            overlays.removeAll(overlays.filterIsInstance<Polygon>())
-        }
+    fun MapView.generateBoxOverlay() {
+        overlays.removeAll(overlays.filterIsInstance<Polygon>())
         val zoomFactor = 1.3 // zoom difference between view and download area polygon
-        controller.setZoom(zoomLevel - zoomFactor)
-        zoomLevelMin = zoomLevel
+        zoomLevelMax = maxZoomLevel
+        zoomLevelMin = maxOf(zoomLevelDouble, maxZoomLevel)
         downloadRegionBoundingBox = boundingBox.zoomIn(zoomFactor)
         val polygon = Polygon().apply {
             points = Polygon.pointsAsRect(downloadRegionBoundingBox).map {
@@ -518,7 +507,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         val tileCount: Int = CacheManager(this).possibleTilesInArea(
             downloadRegionBoundingBox,
             zoomLevelMin.toInt(),
-            zoomLevelMax.toInt()
+            zoomLevelMax.toInt(),
         )
         cacheEstimate = context.getString(R.string.map_cache_tiles, tileCount)
     }
@@ -577,7 +566,7 @@ fun MapView(model: UIViewModel = viewModel()) {
                 when (which) {
                     0 -> showCurrentCacheInfo = true
                     1 -> {
-                        map.generateBoxOverlay(zoomLevelHighest)
+                        map.generateBoxOverlay()
                         dialog.dismiss()
                     }
 
@@ -615,10 +604,19 @@ fun MapView(model: UIViewModel = viewModel()) {
                         // scales the map tiles to the display density of the screen
                         isTilesScaledToDpi = true
                         // sets the minimum zoom level (the furthest out you can zoom)
-                        minZoomLevel = defaultMinZoom
-                        maxZoomLevel = defaultMaxZoom
+                        minZoomLevel = 1.5
                         // Disables default +/- button for zooming
                         zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
+                        addMapListener(object : MapListener {
+                            override fun onScroll(event: ScrollEvent): Boolean {
+                                if (downloadRegionBoundingBox != null) generateBoxOverlay()
+                                return true
+                            }
+
+                            override fun onZoom(event: ZoomEvent): Boolean {
+                                return false
+                            }
+                        })
                         zoomToNodes()
                     }
                 },
@@ -633,10 +631,7 @@ fun MapView(model: UIViewModel = viewModel()) {
                 onExecuteJob = { startDownload() },
                 onCancelDownload = {
                     downloadRegionBoundingBox = null
-                    map.apply {
-                        overlayManager = DefaultOverlayManager(TilesOverlay(tileProvider, context))
-                        setMultiTouchControls(true)
-                    }
+                    map.overlays.removeAll(map.overlays.filterIsInstance<Polygon>())
                 },
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) else Column(
