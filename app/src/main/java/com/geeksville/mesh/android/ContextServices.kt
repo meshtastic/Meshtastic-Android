@@ -2,15 +2,19 @@ package com.geeksville.mesh.android
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.NotificationManager
 import android.bluetooth.BluetoothManager
-import android.location.LocationManager
 import android.companion.CompanionDeviceManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
+import android.location.LocationManager
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import com.geeksville.mesh.R
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 /**
  * @return null on platforms without a BlueTooth driver (i.e. the emulator)
@@ -48,7 +52,7 @@ fun Context.gpsDisabled(): Boolean =
     if (hasGps()) !locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) else false
 
 /**
- * return the text string of the permissions missing
+ * @return the text string of the permissions missing
  */
 val Context.permissionMissing: String
     get() = if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
@@ -56,6 +60,55 @@ val Context.permissionMissing: String
     } else {
         getString(R.string.permission_missing_31)
     }
+
+/**
+ * Checks if any given permissions need to show rationale.
+ *
+ * @return true if should show UI with rationale before requesting a permission.
+ */
+fun Activity.shouldShowRequestPermissionRationale(permissions: Array<String>): Boolean {
+    for (permission in permissions) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Checks if any given permissions need to show rationale.
+ *
+ * @return true if should show UI with rationale before requesting a permission.
+ */
+fun Fragment.shouldShowRequestPermissionRationale(permissions: Array<String>): Boolean {
+    for (permission in permissions) {
+        if (shouldShowRequestPermissionRationale(permission)) {
+            return true
+        }
+    }
+    return false
+}
+
+/**
+ * Handles whether a rationale dialog should be shown before performing an action.
+ */
+fun Context.rationaleDialog(
+    shouldShowRequestPermissionRationale: Boolean = true,
+    title: Int = R.string.required_permissions,
+    rationale: CharSequence = permissionMissing,
+    invokeFun: () -> Unit,
+) {
+    if (!shouldShowRequestPermissionRationale) invokeFun()
+    else MaterialAlertDialogBuilder(this)
+        .setTitle(title)
+        .setMessage(rationale)
+        .setNeutralButton(R.string.cancel) { _, _ ->
+        }
+        .setPositiveButton(R.string.accept) { _, _ ->
+            invokeFun()
+        }
+        .show()
+}
 
 /**
  * return a list of the permissions we don't have
@@ -123,3 +176,17 @@ fun Context.getBackgroundPermissions(): Array<String> {
 
 /** @return true if the user already has background location permission */
 fun Context.hasBackgroundPermission() = getBackgroundPermissions().isEmpty()
+
+/**
+ * Notification permission (or empty if we already have what we need)
+ */
+fun Context.getNotificationPermissions(): Array<String> {
+    val perms = mutableListOf<String>()
+    if (android.os.Build.VERSION.SDK_INT >= 33)
+        perms.add(Manifest.permission.POST_NOTIFICATIONS)
+
+    return getMissingPermissions(perms)
+}
+
+/** @return true if the user already has notification permission */
+fun Context.hasNotificationPermission() = getNotificationPermissions().isEmpty()

@@ -662,11 +662,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val requestPermissionAndScanLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 if (permissions.entries.all { it.value }) {
+                    info("Bluetooth permissions granted")
                     checkBTEnabled()
                     if (!hasCompanionDeviceApi) checkLocationEnabled()
                     scanLeDevice()
                 } else {
-                    errormsg("User denied scan permissions")
+                    warn("Bluetooth permissions denied")
                     model.showSnackbar(requireContext().permissionMissing)
                 }
                 bluetoothViewModel.permissionsUpdated()
@@ -675,21 +676,16 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         binding.changeRadioButton.setOnClickListener {
             debug("User clicked changeRadioButton")
             scanLeDevice()
-            if (requireContext().hasBluetoothPermission()) {
+            val bluetoothPermissions = requireContext().getBluetoothPermissions()
+            if (bluetoothPermissions.isEmpty()) {
                 checkBTEnabled()
                 if (!hasCompanionDeviceApi) checkLocationEnabled()
             } else {
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(getString(R.string.required_permissions))
-                    .setMessage(requireContext().permissionMissing)
-                    .setNeutralButton(R.string.cancel) { _, _ ->
-                        warn("User bailed due to permissions")
-                    }
-                    .setPositiveButton(R.string.accept) { _, _ ->
-                        info("requesting scan permissions")
-                        requestPermissionAndScanLauncher.launch(requireContext().getBluetoothPermissions())
-                    }
-                    .show()
+                requireContext().rationaleDialog(
+                    shouldShowRequestPermissionRationale(bluetoothPermissions)
+                ) {
+                    requestPermissionAndScanLauncher.launch(bluetoothPermissions)
+                }
             }
         }
     }

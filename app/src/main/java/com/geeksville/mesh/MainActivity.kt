@@ -117,14 +117,26 @@ class MainActivity : AppCompatActivity(), Logging {
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
     private val model: UIViewModel by viewModels()
 
-    private val requestPermissionsLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (!permissions.entries.all { it.value }) {
-                errormsg("User denied permissions")
+    private val bluetoothPermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            if (result.entries.all { it.value }) {
+                info("Bluetooth permissions granted")
+            } else {
+                warn("Bluetooth permissions denied")
                 showSnackbar(permissionMissing)
             }
             requestedEnable = false
             bluetoothViewModel.permissionsUpdated()
+        }
+
+    private val notificationPermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            if (result.entries.all { it.value }) {
+                info("Notification permissions granted")
+            } else {
+                warn("Notification permissions denied")
+                showSnackbar(getString(R.string.notification_denied))
+            }
         }
 
     data class TabInfo(val text: String, val icon: Int, val content: Fragment)
@@ -385,6 +397,17 @@ class MainActivity : AppCompatActivity(), Logging {
                 if (model.provideLocation.value == true)
                     service.startProvideLocation()
             }
+
+            if (!hasNotificationPermission()) {
+                val notificationPermissions = getNotificationPermissions()
+                rationaleDialog(
+                    shouldShowRequestPermissionRationale(notificationPermissions),
+                    R.string.notification_required,
+                    getString(R.string.why_notification_required),
+                ) {
+                    notificationPermissionsLauncher.launch(notificationPermissions)
+                }
+            }
         } else {
             // For other connection states, just slam them in
             model.setConnectionState(newConnection)
@@ -640,17 +663,10 @@ class MainActivity : AppCompatActivity(), Logging {
                     val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                     bleRequestEnable.launch(enableBtIntent)
                 } else {
-                    MaterialAlertDialogBuilder(this)
-                        .setTitle(getString(R.string.required_permissions))
-                        .setMessage(permissionMissing)
-                        .setNeutralButton(R.string.cancel) { _, _ ->
-                            warn("User bailed due to permissions")
-                        }
-                        .setPositiveButton(R.string.accept) { _, _ ->
-                            info("requesting permissions")
-                            requestPermissionsLauncher.launch(getBluetoothPermissions())
-                        }
-                        .show()
+                    val bluetoothPermissions = getBluetoothPermissions()
+                    rationaleDialog(shouldShowRequestPermissionRationale(bluetoothPermissions)) {
+                        bluetoothPermissionsLauncher.launch(bluetoothPermissions)
+                    }
                 }
             }
         }

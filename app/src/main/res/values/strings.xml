@@ -106,6 +106,9 @@
     <string name="provide_location_to_mesh">Provide phone location to mesh</string>
     <string name="camera_required">Camera permission</string>
     <string name="why_camera_required">We must be granted access to the camera to read QR codes. No pictures or videos will be saved.</string>
+    <string name="notification_required">Notification permission</string>
+    <string name="why_notification_required">Meshtastic needs permission for service and message notifications.</string>
+    <string name="notification_denied">Notification permission denied. To turn on notifications, access: Android Settings > Apps > Meshtastic > Notifications.</string>
     <string name="modem_config_slow_short">Short Range / Slow</string>
     <string name="modem_config_slow_medium">Medium Range / Slow</string>
     <plurals name="delete_messages">
