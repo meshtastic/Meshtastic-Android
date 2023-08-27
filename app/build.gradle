@@ -21,6 +21,8 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
+    namespace 'com.geeksville.mesh'
+
     signingConfigs {
         release {
             keyAlias keystoreProperties['keyAlias']
@@ -29,11 +31,11 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
-    compileSdkVersion 33
+    compileSdk 33
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
-        targetSdkVersion 31
+        targetSdk 33
         versionCode 30202 // format is Mmmss (where M is 1+the numeric major number
         versionName "2.2.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -41,7 +43,7 @@ android {
         // per https://developer.android.com/studio/write/vector-asset-studio
         vectorDrawables.useSupportLibrary = true
     }
-    flavorDimensions 'default'
+    flavorDimensions = ['default']
     productFlavors {
         fdroid {
             dimension = 'default'
@@ -98,7 +100,6 @@ android {
     lint {
         abortOnError false
     }
-    namespace 'com.geeksville.mesh'
 }
 
 // per protobuf-gradle-plugin docs, this is recommended for android
