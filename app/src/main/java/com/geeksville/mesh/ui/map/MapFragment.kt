@@ -623,7 +623,6 @@ fun MapView(model: UIViewModel = viewModel()) {
                 modifier = Modifier.fillMaxSize(),
                 update = { map ->
                     if (downloadRegionBoundingBox == null) map.drawOverlays()
-                    else map.generateBoxOverlay(zoomLevelMin)
                 },
             )
             if (downloadRegionBoundingBox != null) CacheLayout(
