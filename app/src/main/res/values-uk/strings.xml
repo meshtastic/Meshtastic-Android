@@ -141,9 +141,6 @@
     <string name="nodedb_reset">Очищення бази вузлів</string>
     <string name="nodedb_reset_description">Це очистить усі вузли зі списку.</string>
     <string name="map_select_download_region">Оберіть регіон завантаження</string>
-    <string name="map_5_miles">5 миль</string>
-    <string name="map_10_miles">10 миль</string>
-    <string name="map_15_miles">15 миль</string>
     <string name="map_tile_download_estimate">Час завантаження фрагментів:</string>
     <string name="map_start_download">Почати завантаження</string>
     <string name="request_position">Запит місцезнаходження</string>

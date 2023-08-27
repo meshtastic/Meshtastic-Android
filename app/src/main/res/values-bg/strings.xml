@@ -138,9 +138,6 @@
     <string name="nodedb_reset">Нулиране на базата данни с възли</string>
     <string name="nodedb_reset_description">Това ще изчисти всички възли от този списък.</string>
     <string name="map_select_download_region">Избор на регион за сваляне</string>
-    <string name="map_5_miles">5 мили</string>
-    <string name="map_10_miles">10 мили</string>
-    <string name="map_15_miles">15 мили</string>
     <string name="map_tile_download_estimate">Прогноза за изтегляне на картинки:</string>
     <string name="map_start_download">Започни свалянето</string>
     <string name="request_position">Поискване на позиция</string>

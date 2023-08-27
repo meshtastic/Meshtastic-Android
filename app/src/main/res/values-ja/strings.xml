@@ -136,9 +136,6 @@
     <string name="nodedb_reset">NodeDBをリセット</string>
     <string name="nodedb_reset_description">このノードリストをクリアします。</string>
     <string name="map_select_download_region">ダウンロードリージョンを選択する</string>
-    <string name="map_5_miles">5 マイル</string>
-    <string name="map_10_miles">10 マイル</string>
-    <string name="map_15_miles">15 マイル</string>
     <string name="map_tile_download_estimate">タイルダウンロードの見積もり:</string>
     <string name="map_start_download">ダウンロード開始</string>
     <string name="request_position">位置を求める</string>

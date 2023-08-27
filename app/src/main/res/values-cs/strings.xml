@@ -141,9 +141,6 @@
     <string name="nodedb_reset">Reset NodeDB</string>
     <string name="nodedb_reset_description">Tímto vymažete všechny uzly z tohoto seznamu.</string>
     <string name="map_select_download_region">Vyberte oblast stahování</string>
-    <string name="map_5_miles">5 mil</string>
-    <string name="map_10_miles">10 mil</string>
-    <string name="map_15_miles">15 mil</string>
     <string name="map_tile_download_estimate">Odhad stažení dlaždic:</string>
     <string name="map_start_download">Zahájit stahování</string>
     <string name="request_position">Vyžádat pozici</string>

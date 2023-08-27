@@ -141,9 +141,6 @@
     <string name="nodedb_reset">Очистка списка узлов сети</string>
     <string name="nodedb_reset_description">Это очистит все узлы из этого списка.</string>
     <string name="map_select_download_region">Выберите регион загрузки</string>
-    <string name="map_5_miles">5 Миль</string>
-    <string name="map_10_miles">10 миль</string>
-    <string name="map_15_miles">15 миль</string>
     <string name="map_tile_download_estimate">Предполагаемое время загрузки файла:</string>
     <string name="map_start_download">Начать скачивание</string>
     <string name="request_position">Запросить позицию</string>

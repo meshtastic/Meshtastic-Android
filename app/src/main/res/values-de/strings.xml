@@ -139,9 +139,6 @@
     <string name="nodedb_reset">Node-Datenbank zurücksetzen</string>
     <string name="nodedb_reset_description">Dies löscht alle Knoten von dieser Liste.</string>
     <string name="map_select_download_region">Herunterlade-Region auswählen</string>
-    <string name="map_5_miles">5 Meilen/8 km</string>
-    <string name="map_10_miles">10 Meilen/15 km</string>
-    <string name="map_15_miles">15 Meilen/24 km</string>
     <string name="map_tile_download_estimate">Kachel-Herunterladen-Schätzung:</string>
     <string name="map_start_download">Herunterladen starten</string>
     <string name="request_position">Position anfordern</string>

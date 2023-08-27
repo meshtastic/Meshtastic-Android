@@ -137,9 +137,6 @@
     <string name="nodedb_reset">Redefinir NodeDB</string>
     <string name="nodedb_reset_description">Isto limpará todos os dispositivos desta lista.</string>
     <string name="map_select_download_region">Selecione a região para download</string>
-    <string name="map_5_miles">5 milhas</string>
-    <string name="map_10_miles">10 milhas</string>
-    <string name="map_15_miles">15 milhas</string>
     <string name="map_tile_download_estimate">Estimativa de download do bloco:</string>
     <string name="map_start_download">Iniciar download</string>
     <string name="request_position">Solicitar posição</string>

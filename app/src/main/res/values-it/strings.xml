@@ -137,9 +137,6 @@
     <string name="nodedb_reset">NodeDB reset</string>
     <string name="nodedb_reset_description">Questo cancellerà tutti i nodi da questo elenco.</string>
     <string name="map_select_download_region">Seleziona regione di download</string>
-    <string name="map_5_miles">5 Miles</string>
-    <string name="map_10_miles">10 miles</string>
-    <string name="map_15_miles">15 miles</string>
     <string name="map_tile_download_estimate">Tile stima download:</string>
     <string name="map_start_download">Inizia download</string>
     <string name="request_position">Richiedi posizione</string>
