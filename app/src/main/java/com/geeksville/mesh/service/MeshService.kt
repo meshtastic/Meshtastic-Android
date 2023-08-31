@@ -1410,6 +1410,7 @@ class MeshService : Service(), Logging {
                 if (deviceVersion < minDeviceVersion || appVersion < minAppVersion) {
                     info("Device firmware or app is too old, faking config so firmware update can occur")
                     clearLocalConfig()
+                    setLocalConfig(config { device = device.copy { isManaged = true } })
                 }
                 onHasSettings()
             }

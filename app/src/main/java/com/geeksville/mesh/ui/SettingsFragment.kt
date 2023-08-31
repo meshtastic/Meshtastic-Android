@@ -78,6 +78,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private val myActivity get() = requireActivity() as MainActivity
 
+    private val hasGps by lazy { requireContext().hasGps() }
     private val hasCompanionDeviceApi by lazy { requireContext().hasCompanionDeviceApi() }
     private val useCompanionDeviceApi by lazy {
         android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S && hasCompanionDeviceApi
@@ -164,15 +165,15 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
      * Pull the latest device info from the model and into the GUI
      */
     private fun updateNodeInfo() {
-        val connected = model.connectionState.value
+        val connectionState = model.connectionState.value
+        val isConnected = connectionState == MeshService.ConnectionState.CONNECTED
 
-        binding.nodeSettings.visibility = if (model.isConnected()) View.VISIBLE else View.GONE
-        binding.provideLocationCheckbox.visibility = if (model.isConnected()) View.VISIBLE else View.GONE
+        binding.nodeSettings.visibility = if (isConnected) View.VISIBLE else View.GONE
+        binding.provideLocationCheckbox.visibility = if (isConnected) View.VISIBLE else View.GONE
 
-        if (connected == MeshService.ConnectionState.DISCONNECTED)
-            binding.usernameEditText.setText("")
+        binding.usernameEditText.isEnabled = isConnected && !model.isManaged
 
-        if (requireContext().hasGps()) {
+        if (hasGps) {
             binding.provideLocationCheckbox.isEnabled = true
         } else {
             binding.provideLocationCheckbox.isChecked = false
@@ -196,11 +197,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         spinner.isEnabled = !model.isManaged
 
         // If actively connected possibly let the user update firmware
-        refreshUpdateButton(model.isConnected())
+        refreshUpdateButton(isConnected)
 
         // Update the status string (highest priority messages first)
         val info = model.myNodeInfo.value
-        when (connected) {
+        when (connectionState) {
             MeshService.ConnectionState.CONNECTED ->
                 if (region.number == 0) R.string.must_set_region else R.string.connected_to
             MeshService.ConnectionState.DISCONNECTED -> R.string.not_connected
@@ -281,9 +282,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         spinner.adapter = regionAdapter
 
         model.ourNodeInfo.asLiveData().observe(viewLifecycleOwner) { node ->
-            val name = node?.user?.longName
-            binding.usernameEditText.isEnabled = !name.isNullOrEmpty() && !model.isManaged
-            binding.usernameEditText.setText(name)
+            binding.usernameEditText.setText(node?.user?.longName.orEmpty())
         }
 
         scanModel.devices.observe(viewLifecycleOwner) { devices ->
