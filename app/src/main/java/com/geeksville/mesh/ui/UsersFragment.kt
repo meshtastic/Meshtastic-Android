@@ -76,7 +76,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             popup.menu.setGroupVisible(R.id.group_admin, showAdmin)
             popup.menu.setGroupEnabled(R.id.group_admin, !model.isManaged)
             popup.menu.findItem(R.id.ignore).apply {
-                isEnabled = ignoreIncomingList.size < 3
+                isEnabled = isIgnored || ignoreIncomingList.size < 3
                 isChecked = isIgnored
             }
             popup.setOnMenuItemClickListener { item: MenuItem ->
