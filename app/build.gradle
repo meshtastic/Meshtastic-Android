@@ -231,7 +231,7 @@ dependencies {
     // per https://github.com/journeyapps/zxing-android-embedded#older-sdk-versions for minSdkVersion 21
     implementation('com.journeyapps:zxing-android-embedded:4.3.0') { transitive = false }
     //noinspection GradleDependency
-    implementation 'com.google.zxing:core:3.3.0' // <-- don't update
+    implementation 'com.google.zxing:core:3.5.2' // <-- don't update
 
     def work_version = '2.8.1'
     // Work Request - used to delay boot event handling
