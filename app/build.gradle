@@ -178,7 +178,7 @@ dependencies {
     implementation 'androidx.compose.material:material'
     implementation 'androidx.activity:activity-compose'
     implementation 'androidx.compose.runtime:runtime-livedata'
-    implementation "com.google.accompanist:accompanist-themeadapter-appcompat:0.30.1"
+    implementation "com.google.accompanist:accompanist-themeadapter-appcompat:0.32.0"
 
     // Android Studio Preview support
     implementation 'androidx.compose.ui:ui-tooling-preview'
