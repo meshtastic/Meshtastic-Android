@@ -32,7 +32,6 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.BuildConfig
@@ -66,6 +65,7 @@ import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
+import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
@@ -152,12 +152,12 @@ fun MapView(model: UIViewModel = viewModel()) {
             myLocationOverlay = MyLocationNewOverlay(this).apply {
                 enableMyLocation()
                 enableFollowLocation()
-                AppCompatResources.getDrawable(context, R.drawable.ic_map_location_dot_24)?.let {
-                    setPersonIcon(it.toBitmap())
+                getBitmapFromVectorDrawable(context, R.drawable.ic_map_location_dot_24)?.let {
+                    setPersonIcon(it)
                     setPersonAnchor(0.5f, 0.5f)
                 }
-                AppCompatResources.getDrawable(context, R.drawable.ic_map_navigation_24)?.let {
-                    setDirectionIcon(it.toBitmap())
+                getBitmapFromVectorDrawable(context, R.drawable.ic_map_navigation_24)?.let {
+                    setDirectionIcon(it)
                     setDirectionAnchor(0.5f, 0.5f)
                 }
             }
