@@ -3,7 +3,7 @@
 buildscript {
     ext {
         useCrashlytics = false
-        kotlin_version = '1.8.22'
+        kotlin_version = '1.9.10'
         hilt_version = '2.47'
         protobuf_version = '3.24.2'
     }
