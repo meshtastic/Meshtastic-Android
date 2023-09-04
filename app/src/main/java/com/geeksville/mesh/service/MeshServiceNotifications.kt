@@ -14,7 +14,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.NotificationCompat
-import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.drawable.toBitmapOrNull
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.notificationManager
@@ -116,10 +116,10 @@ class MeshServiceNotifications(
 
     /**
      * Generate a bitmap from a vector drawable (even on old builds)
-     * https://stackoverflow.com/questions/33696488/getting-bitmap-from-vector-drawable
+     * https://stackoverflow.com/questions/33696488/getting-bitmap-from-vector-drawable/#51742167
      */
     private fun getBitmapFromVectorDrawable(drawableId: Int): Bitmap? =
-        AppCompatResources.getDrawable(context, drawableId)?.toBitmap()
+        AppCompatResources.getDrawable(context, drawableId)?.toBitmapOrNull()
 
     private fun commonBuilder(channel: String): NotificationCompat.Builder {
         val builder = NotificationCompat.Builder(context, channel)

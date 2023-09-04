@@ -81,11 +81,9 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.CopyrightOverlay
-import org.osmdroid.views.overlay.DefaultOverlayManager
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
-import org.osmdroid.views.overlay.TilesOverlay
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
@@ -188,23 +186,28 @@ fun MapView(model: UIViewModel = viewModel()) {
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
 
+    val markerIcon by lazy {
+        AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24)
+    }
+
     fun MapView.onNodesChanged(nodes: Collection<NodeInfo>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
-        val ic = ContextCompat.getDrawable(context, R.drawable.ic_baseline_location_on_24)
         val ourNode = model.ourNodeInfo.value
+        val gpsFormat = model.config.display.gpsFormat.number
+        val displayUnits = model.config.display.units.number
         return nodesWithPosition.map { node ->
             val (p, u) = node.position!! to node.user!!
-            MarkerWithLabel(this, "${u.longName} ${formatAgo(p.time)}").apply {
+            MarkerWithLabel(this, "${u.shortName} ${formatAgo(p.time)}").apply {
                 id = u.id
                 title = "${u.longName} ${node.batteryStr}"
-                snippet = model.gpsString(p)
-                ourNode?.distanceStr(node, model.config.display.units.number)?.let { dist ->
+                snippet = p.gpsString(gpsFormat)
+                ourNode?.distanceStr(node, displayUnits)?.let { dist ->
                     subDescription =
                         context.getString(R.string.map_subDescription, ourNode.bearing(node), dist)
                 }
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 position = GeoPoint(p.latitude, p.longitude)
-                icon = ic
+                icon = markerIcon
             }
         }
     }
@@ -594,7 +597,6 @@ fun MapView(model: UIViewModel = viewModel()) {
                         setTileSource(loadOnlineTileSourceBase())
                         setDestroyMode(false) // keeps map instance alive when in the background
                         isVerticalMapRepetitionEnabled = false // disables map repetition
-                        overlayManager = DefaultOverlayManager(TilesOverlay(tileProvider, context))
                         setMultiTouchControls(true)
                         setScrollableAreaLimitLatitude( // bounds scrollable map
                             overlayManager.tilesOverlay.bounds.actualNorth,

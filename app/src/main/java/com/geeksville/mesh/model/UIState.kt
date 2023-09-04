@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.RemoteException
 import android.view.Menu
 import androidx.core.content.edit
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -31,7 +30,6 @@ import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.positionToMeter
 import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -402,16 +400,6 @@ class UIViewModel @Inject constructor(
                 ignoreIncoming.addAll(value)
             }
         }
-
-    fun gpsString(p: Position): String {
-        return when (config.display.gpsFormat) {
-            Config.DisplayConfig.GpsCoordinateFormat.DEC -> GPSFormat.DEC(p)
-            Config.DisplayConfig.GpsCoordinateFormat.DMS -> GPSFormat.DMS(p)
-            Config.DisplayConfig.GpsCoordinateFormat.UTM -> GPSFormat.UTM(p)
-            Config.DisplayConfig.GpsCoordinateFormat.MGRS -> GPSFormat.MGRS(p)
-            else -> GPSFormat.DEC(p)
-        }
-    }
 
     // managed mode disables all access to configuration
     val isManaged: Boolean get() = config.device.isManaged

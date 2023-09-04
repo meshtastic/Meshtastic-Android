@@ -58,6 +58,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         private var nodes = arrayOf<NodeInfo>()
         val ignoreIncomingList: MutableList<Int> = mutableListOf()
 
+        private val gpsFormat by lazy { model.config.display.gpsFormat.number }
+        private val displayUnits by lazy { model.config.display.units.number }
+
         private fun CharSequence.strike() = SpannableString(this).apply {
             setSpan(StrikethroughSpan(), 0, this.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
@@ -215,7 +218,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             if (pos != null) {
                 val html = "<a href='geo:${pos.latitude},${pos.longitude}?z=17&label=${
                     URLEncoder.encode(name, "utf-8")
-                }'>${model.gpsString(pos)}</a>"
+                }'>${pos.gpsString(gpsFormat)}</a>"
                 holder.coordsView.text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
                 holder.coordsView.movementMethod = LinkMovementMethod.getInstance()
                 holder.coordsView.visibility = View.VISIBLE
@@ -224,7 +227,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             }
 
             val ourNodeInfo = model.ourNodeInfo.value
-            val distance = ourNodeInfo?.distanceStr(n, model.config.display.units.number)
+            val distance = ourNodeInfo?.distanceStr(n, displayUnits)
             if (distance != null) {
                 holder.distanceView.text = distance
                 holder.distanceView.visibility = View.VISIBLE
