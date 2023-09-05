@@ -203,7 +203,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
     // kotlin serialization
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0"
 
     // rate this app
     googleImplementation 'com.suddenh4x.ratingdialog:awesome-app-rating:2.7.0'
