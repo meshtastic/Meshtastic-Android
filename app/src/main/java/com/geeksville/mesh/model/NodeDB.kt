@@ -2,11 +2,12 @@ package com.geeksville.mesh.model
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshUser
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.Position
-
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /// NodeDB lives inside the UIViewModel, but it needs a backpointer to reach the service
 class NodeDB(private val ui: UIViewModel) {
@@ -40,11 +41,11 @@ class NodeDB(private val ui: UIViewModel) {
             ),
             it
         )
-    }
+    }.associateBy { it.user?.id!! }
 
     private val seedWithTestNodes = false
 
-    /// The unique ID of our node
+    // The unique userId of our node
     private val _myId = MutableLiveData<String?>(if (seedWithTestNodes) "+16508765309" else null)
     val myId: LiveData<String?> get() = _myId
 
@@ -52,13 +53,16 @@ class NodeDB(private val ui: UIViewModel) {
         _myId.value = myId
     }
 
-    /// A map from nodeid to to nodeinfo
-    private val _nodes = MutableLiveData<Map<String, NodeInfo>>(mapOf(*(if (seedWithTestNodes) testNodes else listOf()).map { it.user!!.id to it }
-                .toTypedArray()))
-    val nodes: LiveData<Map<String, NodeInfo>> get() = _nodes
+    // A map from userId to NodeInfo
+    private val _nodes = MutableStateFlow(if (seedWithTestNodes) testNodes else mapOf())
+    val nodes: LiveData<Map<String, NodeInfo>> = _nodes.asLiveData()
     val nodesByNum get() = nodes.value?.values?.associateBy { it.num }
 
     fun setNodes(nodes: Map<String, NodeInfo>) {
         _nodes.value = nodes
+    }
+
+    fun setNodes(list: List<NodeInfo>) {
+        setNodes(list.associateBy { it.user?.id!! })
     }
 }

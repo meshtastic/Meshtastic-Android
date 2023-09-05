@@ -123,6 +123,9 @@ class UIViewModel @Inject constructor(
     val packetResponse: StateFlow<MeshLog?> = _packetResponse
 
     init {
+        radioConfigRepository.nodeInfoFlow().onEach(nodeDB::setNodes)
+            .launchIn(viewModelScope)
+
         viewModelScope.launch {
             meshLogRepository.getAllLogs().collect { logs ->
                 _meshLog.value = logs

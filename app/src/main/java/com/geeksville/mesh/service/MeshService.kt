@@ -7,7 +7,6 @@ import android.content.pm.ServiceInfo
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.app.ServiceCompat
-import androidx.core.content.edit
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
@@ -41,7 +40,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.json.Json
 import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
@@ -242,9 +240,6 @@ class MeshService : Service(), Logging {
 
         // Switch to the IO thread
         serviceScope.handledLaunch {
-            loadSettings() // Load our last known node DB
-
-            // We in turn need to use the radiointerface service
             radioInterfaceService.connect()
         }
         radioInterfaceService.connectionState.onEach(::onRadioConnectionState)
@@ -255,6 +250,8 @@ class MeshService : Service(), Logging {
             .launchIn(serviceScope)
         radioConfigRepository.channelSetFlow.onEach { channelSet = it }
             .launchIn(serviceScope)
+
+        loadSettings() // Load our last known node DB
 
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
@@ -299,8 +296,6 @@ class MeshService : Service(), Logging {
     override fun onDestroy() {
         info("Destroying mesh service")
 
-        saveSettings()
-
         // Make sure we aren't using the notification first
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
         serviceNotifications.close()
@@ -313,26 +308,8 @@ class MeshService : Service(), Logging {
     /// BEGINNING OF MODEL - FIXME, move elsewhere
     ///
 
-    private fun getPrefs() = getSharedPreferences("service-prefs", Context.MODE_PRIVATE)
+    private fun installNewNodeDB(ni: MyNodeInfo, nodes: List<NodeInfo>) {
 
-    /// Save information about our mesh to disk, so we will have it when we next start the service (even before we hear from our device)
-    private fun saveSettings() = synchronized(nodeDBbyNodeNum) {
-        myNodeInfo?.let { myInfo ->
-            val settings = MeshServiceSettingsData(
-                myInfo = myInfo,
-                nodeDB = nodeDBbyNodeNum.values.toTypedArray(),
-            )
-            val json = Json { isLenient = true; allowSpecialFloatingPointValues = true }
-            val asString = json.encodeToString(MeshServiceSettingsData.serializer(), settings)
-            debug("Saving settings")
-            getPrefs().edit {
-                // FIXME, not really ideal to store this bigish blob in preferences
-                putString("json", asString)
-            }
-        }
-    }
-
-    private fun installNewNodeDB(ni: MyNodeInfo, nodes: Array<NodeInfo>) {
         discardNodeDB() // Get rid of any old state
 
         myNodeInfo = ni
@@ -347,11 +324,11 @@ class MeshService : Service(), Logging {
 
     private fun loadSettings() {
         try {
-            getPrefs().getString("json", null)?.let { asString ->
+            serviceScope.handledLaunch {
 
-                val json = Json { isLenient = true; allowSpecialFloatingPointValues = true }
-                val settings = json.decodeFromString(MeshServiceSettingsData.serializer(), asString)
-                installNewNodeDB(settings.myInfo, settings.nodeDB)
+                val myInfo = radioConfigRepository.getMyNodeInfo()
+                val nodeDB = radioConfigRepository.getNodes()
+                if (myInfo != null && nodeDB != null) installNewNodeDB(myInfo, nodeDB)
 
                 // Note: we do not haveNodeDB = true because that means we've got a valid db from a real device (rather than this possibly stale hint)
             }
@@ -455,8 +432,12 @@ class MeshService : Service(), Logging {
 
         // This might have been the first time we know an ID for this node, so also update the by ID map
         val userId = info.user?.id.orEmpty()
-        if (userId.isNotEmpty())
+        if (userId.isNotEmpty()) {
             nodeDBbyID[userId] = info
+            if (haveNodeDB) serviceScope.handledLaunch {
+                radioConfigRepository.upsert(info)
+            }
+        }
 
         // parcelable is busted
         if (withBroadcast)
@@ -1027,9 +1008,6 @@ class MeshService : Service(), Logging {
 
         /// Perform all the steps needed once we start waiting for device sleep to complete
         fun startDeviceSleep() {
-            // Just in case the user uncleanly reboots the phone, save now (we normally save in onDestroy)
-            saveSettings()
-
             stopPacketQueue()
             stopLocationRequests()
 
@@ -1063,9 +1041,6 @@ class MeshService : Service(), Logging {
         }
 
         fun startDisconnect() {
-            // Just in case the user uncleanly reboots the phone, save now (we normally save in onDestroy)
-            saveSettings()
-
             stopPacketQueue()
             stopLocationRequests()
 
@@ -1404,6 +1379,10 @@ class MeshService : Service(), Logging {
 
                 regenMyNodeInfo() // we have a node db now, so can possibly find a better hwmodel
                 myNodeInfo = newMyNodeInfo // we might have just updated myNodeInfo
+
+                serviceScope.handledLaunch {
+                    radioConfigRepository.installNodeDB(newMyNodeInfo, nodeDBbyID.values.toList())
+                }
 
                 sendAnalytics()
 

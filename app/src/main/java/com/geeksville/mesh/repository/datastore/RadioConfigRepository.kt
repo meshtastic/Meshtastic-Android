@@ -7,18 +7,63 @@ import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
+import com.geeksville.mesh.MyNodeInfo
+import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.database.dao.MyNodeInfoDao
+import com.geeksville.mesh.database.dao.NodeInfoDao
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
  * Class responsible for radio configuration data.
- * Combines access to [ChannelSet], [LocalConfig] & [LocalModuleConfig] data stores.
+ * Combines access to [MyNodeInfo] & [NodeInfo] Room databases
+ * and [ChannelSet], [LocalConfig] & [LocalModuleConfig] data stores.
  */
 class RadioConfigRepository @Inject constructor(
+    private val myNodeInfoDao: MyNodeInfoDao,
+    private val nodeInfoDao: NodeInfoDao,
     private val channelSetRepository: ChannelSetRepository,
     private val localConfigRepository: LocalConfigRepository,
     private val moduleConfigRepository: ModuleConfigRepository,
 ) {
+    suspend fun clearNodeDB() = withContext(Dispatchers.IO) {
+        myNodeInfoDao.clearMyNodeInfo()
+        nodeInfoDao.clearNodeInfo()
+    }
+
+    /**
+     * Flow representing the [MyNodeInfo] database.
+     */
+    fun myNodeInfoFlow(): Flow<MyNodeInfo?> = myNodeInfoDao.getMyNodeInfo()
+    suspend fun getMyNodeInfo(): MyNodeInfo? = myNodeInfoFlow().firstOrNull()
+
+    suspend fun setMyNodeInfo(myInfo: MyNodeInfo?) = withContext(Dispatchers.IO) {
+        myNodeInfoDao.setMyNodeInfo(myInfo)
+    }
+
+    /**
+     * Flow representing the [NodeInfo] database.
+     */
+    fun nodeInfoFlow(): Flow<List<NodeInfo>> = nodeInfoDao.getNodes()
+    suspend fun getNodes(): List<NodeInfo>? = nodeInfoFlow().firstOrNull()
+
+    suspend fun upsert(node: NodeInfo) = withContext(Dispatchers.IO) {
+        nodeInfoDao.upsert(node)
+    }
+
+    suspend fun putAll(nodes: List<NodeInfo>) = withContext(Dispatchers.IO) {
+        nodeInfoDao.putAll(nodes)
+    }
+
+    suspend fun installNodeDB(mi: MyNodeInfo?, nodes: List<NodeInfo>) {
+        clearNodeDB()
+        putAll(nodes)
+        setMyNodeInfo(mi) // set MyNodeInfo last
+    }
+
     /**
      * Flow representing the [ChannelSet] data store.
      */

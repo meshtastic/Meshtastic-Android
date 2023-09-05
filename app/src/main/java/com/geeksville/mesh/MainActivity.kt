@@ -311,7 +311,6 @@ class MainActivity : AppCompatActivity(), Logging {
         unregisterMeshReceiver()
         val filter = IntentFilter()
         filter.addAction(MeshService.ACTION_MESH_CONNECTED)
-        filter.addAction(MeshService.ACTION_NODE_CHANGE)
         registerReceiver(meshServiceReceiver, filter)
         receiverRegistered = true
     }
@@ -489,17 +488,6 @@ class MainActivity : AppCompatActivity(), Logging {
                 debug("Received from mesh service $intent")
 
                 when (intent.action) {
-                    MeshService.ACTION_NODE_CHANGE -> {
-                        val info: NodeInfo? = intent.getParcelableExtraCompat(EXTRA_NODEINFO)
-                        debug("UI nodechange $info")
-
-                        // We only care about nodes that have user info
-                        info?.user?.id?.let {
-                            val nodes = model.nodeDB.nodes.value!! + Pair(it, info)
-                            model.nodeDB.setNodes(nodes)
-                        }
-                    }
-
                     MeshService.ACTION_MESH_CONNECTED -> {
                         val extra = intent.getStringExtra(EXTRA_CONNECTED)
                         if (extra != null) {
