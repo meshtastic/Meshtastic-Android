@@ -31,7 +31,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.BuildConfig
@@ -64,7 +63,6 @@ import com.geeksville.mesh.waypoint
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
@@ -110,6 +108,16 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
             }
         }
     }
+}
+
+@Composable
+private fun MapView.UpdateMarkers(
+    nodeMarkers: List<MarkerWithLabel>,
+    waypointMarkers: List<MarkerWithLabel>,
+) {
+    debug("Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints")
+    overlays.removeAll(overlays.filterIsInstance<MarkerWithLabel>())
+    overlays.addAll(nodeMarkers + waypointMarkers)
 }
 
 @Composable
@@ -437,21 +445,11 @@ fun MapView(model: UIViewModel = viewModel()) {
         addCopyright()  // Copyright is required for certain map sources
         createLatLongGrid(false)
 
-        overlays.removeAll(overlays.filterIsInstance<MarkerWithLabel>())
-        val nodeMarkers = onNodesChanged(nodes.values)
-        val waypointMarkers = onWaypointChanged(waypoints.values)
-        debug("Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints")
-
-        overlays.addAll(nodeMarkers + waypointMarkers)
         invalidate()
     }
 
-    // FIXME workaround to 'nodes.observeAsState' going stale after MapFragment enters onPause state
-    LaunchedEffect(Unit) {
-        while (true) {
-            if (model.isConnected() && downloadRegionBoundingBox == null) map.drawOverlays()
-            delay(30000L)
-        }
+    with(map) {
+        UpdateMarkers(onNodesChanged(nodes.values), onWaypointChanged(waypoints.values))
     }
 
 //    private fun addWeatherLayer() {
@@ -623,9 +621,7 @@ fun MapView(model: UIViewModel = viewModel()) {
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
-                update = { map ->
-                    if (downloadRegionBoundingBox == null) map.drawOverlays()
-                },
+                update = { map -> map.drawOverlays() },
             )
             if (downloadRegionBoundingBox != null) CacheLayout(
                 cacheEstimate = cacheEstimate,
