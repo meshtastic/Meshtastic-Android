@@ -166,7 +166,7 @@ dependencies {
     ksp "com.google.dagger:hilt-compiler:$hilt_version"
 
     // Navigation
-    def nav_version = "2.7.1"
+    def nav_version = "2.7.2"
     implementation "androidx.navigation:navigation-compose:$nav_version"
     androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
 
