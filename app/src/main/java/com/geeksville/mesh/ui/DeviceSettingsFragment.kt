@@ -43,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -166,7 +165,6 @@ sealed class PacketResponseState {
 @Composable
 fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
     val navController = rememberNavController()
-    val focusManager = LocalFocusManager.current
 
     val connectionState by viewModel.connectionState.observeAsState()
     val connected = connectionState == MeshService.ConnectionState.CONNECTED
@@ -405,9 +403,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 modemPresetName = Channel(Channel.default.settings, radioConfig.lora).name,
                 enabled = connected,
                 maxChannels = maxChannels,
-                focusManager = focusManager,
                 onPositiveClicked = { channelListInput ->
-                    focusManager.clearFocus()
                     viewModel.updateChannels(destNum, channelList, channelListInput)
                     channelList.clear()
                     channelList.addAll(channelListInput)
@@ -418,9 +414,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             UserConfigItemList(
                 userConfig = userConfig,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { userInput ->
-                    focusManager.clearFocus()
                     viewModel.setRemoteOwner(destNum, userInput)
                     userConfig = userInput
                 }
@@ -430,9 +424,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             DeviceConfigItemList(
                 deviceConfig = radioConfig.device,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { deviceInput ->
-                    focusManager.clearFocus()
                     val config = config { device = deviceInput }
                     viewModel.setRemoteConfig(destNum, config)
                     radioConfig = config
@@ -445,9 +437,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 location = location,
                 positionConfig = radioConfig.position,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { locationInput, positionInput ->
-                    focusManager.clearFocus()
                     if (locationInput != node.position && positionInput.fixedPosition) {
                         locationInput?.let { viewModel.requestPosition(destNum, it) }
                         location = locationInput
@@ -464,9 +454,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             PowerConfigItemList(
                 powerConfig = radioConfig.power,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { powerInput ->
-                    focusManager.clearFocus()
                     val config = config { power = powerInput }
                     viewModel.setRemoteConfig(destNum, config)
                     radioConfig = config
@@ -477,9 +465,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             NetworkConfigItemList(
                 networkConfig = radioConfig.network,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { networkInput ->
-                    focusManager.clearFocus()
                     val config = config { network = networkInput }
                     viewModel.setRemoteConfig(destNum, config)
                     radioConfig = config
@@ -490,9 +476,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             DisplayConfigItemList(
                 displayConfig = radioConfig.display,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { displayInput ->
-                    focusManager.clearFocus()
                     val config = config { display = displayInput }
                     viewModel.setRemoteConfig(destNum, config)
                     radioConfig = config
@@ -504,9 +488,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 loraConfig = radioConfig.lora,
                 primarySettings = channelList.getOrNull(0) ?: return@composable,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { loraInput ->
-                    focusManager.clearFocus()
                     val config = config { lora = loraInput }
                     viewModel.setRemoteConfig(destNum, config)
                     radioConfig = config
@@ -517,9 +499,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             BluetoothConfigItemList(
                 bluetoothConfig = radioConfig.bluetooth,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { bluetoothInput ->
-                    focusManager.clearFocus()
                     val config = config { bluetooth = bluetoothInput }
                     viewModel.setRemoteConfig(destNum, config)
                     radioConfig = config
@@ -530,9 +510,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             MQTTConfigItemList(
                 mqttConfig = moduleConfig.mqtt,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { mqttInput ->
-                    focusManager.clearFocus()
                     val config = moduleConfig { mqtt = mqttInput }
                     viewModel.setModuleConfig(destNum, config)
                     moduleConfig = config
@@ -543,9 +521,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             SerialConfigItemList(
                 serialConfig = moduleConfig.serial,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { serialInput ->
-                    focusManager.clearFocus()
                     val config = moduleConfig { serial = serialInput }
                     viewModel.setModuleConfig(destNum, config)
                     moduleConfig = config
@@ -557,9 +533,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 ringtone = ringtone,
                 extNotificationConfig = moduleConfig.externalNotification,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { ringtoneInput, extNotificationInput ->
-                    focusManager.clearFocus()
                     if (ringtoneInput != ringtone) {
                         viewModel.setRingtone(destNum, ringtoneInput)
                         ringtone = ringtoneInput
@@ -576,9 +550,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             StoreForwardConfigItemList(
                 storeForwardConfig = moduleConfig.storeForward,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { storeForwardInput ->
-                    focusManager.clearFocus()
                     val config = moduleConfig { storeForward = storeForwardInput }
                     viewModel.setModuleConfig(destNum, config)
                     moduleConfig = config
@@ -589,9 +561,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             RangeTestConfigItemList(
                 rangeTestConfig = moduleConfig.rangeTest,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { rangeTestInput ->
-                    focusManager.clearFocus()
                     val config = moduleConfig { rangeTest = rangeTestInput }
                     viewModel.setModuleConfig(destNum, config)
                     moduleConfig = config
@@ -602,9 +572,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             TelemetryConfigItemList(
                 telemetryConfig = moduleConfig.telemetry,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { telemetryInput ->
-                    focusManager.clearFocus()
                     val config = moduleConfig { telemetry = telemetryInput }
                     viewModel.setModuleConfig(destNum, config)
                     moduleConfig = config
@@ -616,9 +584,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
                 messages = cannedMessageMessages,
                 cannedMessageConfig = moduleConfig.cannedMessage,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { messagesInput, cannedMessageInput ->
-                    focusManager.clearFocus()
                     if (messagesInput != cannedMessageMessages) {
                         viewModel.setCannedMessages(destNum, messagesInput)
                         cannedMessageMessages = messagesInput
@@ -635,9 +601,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             AudioConfigItemList(
                 audioConfig = moduleConfig.audio,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { audioInput ->
-                    focusManager.clearFocus()
                     val config = moduleConfig { audio = audioInput }
                     viewModel.setModuleConfig(destNum, config)
                     moduleConfig = config
@@ -648,9 +612,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             RemoteHardwareConfigItemList(
                 remoteHardwareConfig = moduleConfig.remoteHardware,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { remoteHardwareInput ->
-                    focusManager.clearFocus()
                     val config = moduleConfig { remoteHardware = remoteHardwareInput }
                     viewModel.setModuleConfig(destNum, config)
                     moduleConfig = config
@@ -661,9 +623,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             NeighborInfoConfigItemList(
                 neighborInfoConfig = moduleConfig.neighborInfo,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { neighborInfoInput ->
-                    focusManager.clearFocus()
                     val config = moduleConfig { neighborInfo = neighborInfoInput }
                     viewModel.setModuleConfig(destNum, config)
                     moduleConfig = config
@@ -674,9 +634,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             AmbientLightingConfigItemList(
                 ambientLightingConfig = moduleConfig.ambientLighting,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { ambientLightingInput ->
-                    focusManager.clearFocus()
                     val config = moduleConfig { ambientLighting = ambientLightingInput }
                     viewModel.setModuleConfig(destNum, config)
                     moduleConfig = config
@@ -687,9 +645,7 @@ fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
             DetectionSensorConfigItemList(
                 detectionSensorConfig = moduleConfig.detectionSensor,
                 enabled = connected,
-                focusManager = focusManager,
                 onSaveClicked = { detectionSensorInput ->
-                    focusManager.clearFocus()
                     val config = moduleConfig { detectionSensor = detectionSensorInput }
                     viewModel.setModuleConfig(destNum, config)
                     moduleConfig = config

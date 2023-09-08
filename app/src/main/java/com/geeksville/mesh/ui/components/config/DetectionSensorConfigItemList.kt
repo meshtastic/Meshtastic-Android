@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -27,9 +26,9 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 fun DetectionSensorConfigItemList(
     detectionSensorConfig: ModuleConfigProtos.ModuleConfig.DetectionSensorConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (ModuleConfigProtos.ModuleConfig.DetectionSensorConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var detectionSensorInput by remember(detectionSensorConfig) {
         mutableStateOf(detectionSensorConfig)
     }
@@ -131,7 +130,10 @@ fun DetectionSensorConfigItemList(
                     focusManager.clearFocus()
                     detectionSensorInput = detectionSensorConfig
                 },
-                onSaveClicked = { onSaveClicked(detectionSensorInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(detectionSensorInput)
+                }
             )
         }
     }
@@ -143,7 +145,6 @@ private fun DetectionSensorConfigPreview() {
     DetectionSensorConfigItemList(
         detectionSensorConfig = ModuleConfigProtos.ModuleConfig.DetectionSensorConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { },
     )
 }

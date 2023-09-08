@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -29,9 +28,9 @@ fun ExternalNotificationConfigItemList(
     ringtone: String,
     extNotificationConfig: ExternalNotificationConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (ringtone: String, config: ExternalNotificationConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var ringtoneInput by remember { mutableStateOf(ringtone) }
     var externalNotificationInput by remember { mutableStateOf(extNotificationConfig) }
 
@@ -208,7 +207,10 @@ fun ExternalNotificationConfigItemList(
                     ringtoneInput = ringtone
                     externalNotificationInput = extNotificationConfig
                 },
-                onSaveClicked = { onSaveClicked(ringtoneInput, externalNotificationInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(ringtoneInput, externalNotificationInput)
+                }
             )
         }
     }
@@ -221,7 +223,6 @@ private fun ExternalNotificationConfigPreview() {
         ringtone = "",
         extNotificationConfig = ExternalNotificationConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { _, _ -> },
     )
 }

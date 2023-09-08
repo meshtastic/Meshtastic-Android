@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -28,9 +27,9 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 fun MQTTConfigItemList(
     mqttConfig: MQTTConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (MQTTConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var mqttInput by remember(mqttConfig) { mutableStateOf(mqttConfig) }
 
     LazyColumn(
@@ -133,7 +132,10 @@ fun MQTTConfigItemList(
                     focusManager.clearFocus()
                     mqttInput = mqttConfig
                 },
-                onSaveClicked = { onSaveClicked(mqttInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(mqttInput)
+                }
             )
         }
     }
@@ -145,7 +147,6 @@ private fun MQTTConfigPreview() {
     MQTTConfigItemList(
         mqttConfig = MQTTConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { },
     )
 }

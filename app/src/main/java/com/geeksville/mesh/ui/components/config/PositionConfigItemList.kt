@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ConfigProtos
@@ -29,9 +28,9 @@ fun PositionConfigItemList(
     location: Position?,
     positionConfig: PositionConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (position: Position?, config: PositionConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var locationInput by remember { mutableStateOf(location) }
     var positionInput by remember { mutableStateOf(positionConfig) }
 
@@ -182,7 +181,10 @@ fun PositionConfigItemList(
                     locationInput = location
                     positionInput = positionConfig
                 },
-                onSaveClicked = { onSaveClicked(locationInput, positionInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(locationInput, positionInput)
+                }
             )
         }
     }
@@ -195,7 +197,6 @@ private fun PositionConfigPreview() {
         location = null,
         positionConfig = PositionConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { _, _ -> },
     )
 }

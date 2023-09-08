@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.TelemetryConfig
@@ -24,9 +23,9 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 fun TelemetryConfigItemList(
     telemetryConfig: TelemetryConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (TelemetryConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var telemetryInput by remember(telemetryConfig) { mutableStateOf(telemetryConfig) }
 
     LazyColumn(
@@ -111,7 +110,10 @@ fun TelemetryConfigItemList(
                     focusManager.clearFocus()
                     telemetryInput = telemetryConfig
                 },
-                onSaveClicked = { onSaveClicked(telemetryInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(telemetryInput)
+                }
             )
         }
     }
@@ -123,7 +125,6 @@ private fun TelemetryConfigPreview() {
     TelemetryConfigItemList(
         telemetryConfig = TelemetryConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { },
     )
 }

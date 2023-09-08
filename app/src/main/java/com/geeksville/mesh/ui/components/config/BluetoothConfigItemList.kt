@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ConfigProtos.Config.BluetoothConfig
@@ -25,9 +24,9 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 fun BluetoothConfigItemList(
     bluetoothConfig: BluetoothConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (BluetoothConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var bluetoothInput by remember(bluetoothConfig) { mutableStateOf(bluetoothConfig) }
 
     LazyColumn(
@@ -72,7 +71,10 @@ fun BluetoothConfigItemList(
                     focusManager.clearFocus()
                     bluetoothInput = bluetoothConfig
                 },
-                onSaveClicked = { onSaveClicked(bluetoothInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(bluetoothInput)
+                }
             )
         }
     }
@@ -84,7 +86,6 @@ private fun BluetoothConfigPreview() {
     BluetoothConfigItemList(
         bluetoothConfig = BluetoothConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { },
     )
 }

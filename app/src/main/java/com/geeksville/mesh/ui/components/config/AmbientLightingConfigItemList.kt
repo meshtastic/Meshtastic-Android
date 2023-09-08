@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ModuleConfigProtos
@@ -24,9 +23,9 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 fun AmbientLightingConfigItemList(
     ambientLightingConfig: ModuleConfigProtos.ModuleConfig.AmbientLightingConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (ModuleConfigProtos.ModuleConfig.AmbientLightingConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var ambientLightingInput by remember(ambientLightingConfig) {
         mutableStateOf(ambientLightingConfig)
     }
@@ -87,7 +86,10 @@ fun AmbientLightingConfigItemList(
                     focusManager.clearFocus()
                     ambientLightingInput = ambientLightingConfig
                 },
-                onSaveClicked = { onSaveClicked(ambientLightingInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(ambientLightingInput)
+                }
             )
         }
     }
@@ -99,7 +101,6 @@ private fun AmbientLightingConfigPreview() {
     AmbientLightingConfigItemList(
         ambientLightingConfig = ModuleConfigProtos.ModuleConfig.AmbientLightingConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { },
     )
 }

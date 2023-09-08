@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
@@ -30,9 +29,9 @@ fun LoRaConfigItemList(
     loraConfig: LoRaConfig,
     primarySettings: ChannelSettings,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (LoRaConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var loraInput by remember(loraConfig) { mutableStateOf(loraConfig) }
     val primaryChannel = Channel(primarySettings, loraInput)
 
@@ -189,7 +188,10 @@ fun LoRaConfigItemList(
                     focusManager.clearFocus()
                     loraInput = loraConfig
                 },
-                onSaveClicked = { onSaveClicked(loraInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(loraInput)
+                }
             )
         }
     }
@@ -202,7 +204,6 @@ private fun LoRaConfigPreview() {
         loraConfig = Channel.default.loraConfig,
         primarySettings = Channel.default.settings,
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { },
     )
 }

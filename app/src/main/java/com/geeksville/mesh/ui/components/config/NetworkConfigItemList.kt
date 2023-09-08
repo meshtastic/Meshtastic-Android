@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -30,9 +29,9 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 fun NetworkConfigItemList(
     networkConfig: NetworkConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (NetworkConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var networkInput by remember(networkConfig) { mutableStateOf(networkConfig) }
 
     LazyColumn(
@@ -172,7 +171,10 @@ fun NetworkConfigItemList(
                     focusManager.clearFocus()
                     networkInput = networkConfig
                 },
-                onSaveClicked = { onSaveClicked(networkInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(networkInput)
+                }
             )
         }
     }
@@ -184,7 +186,6 @@ private fun NetworkConfigPreview() {
     NetworkConfigItemList(
         networkConfig = NetworkConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { },
     )
 }

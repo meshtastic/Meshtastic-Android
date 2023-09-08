@@ -11,7 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -29,9 +28,9 @@ fun CannedMessageConfigItemList(
     messages: String,
     cannedMessageConfig: CannedMessageConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (messages: String, config: CannedMessageConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var messagesInput by remember { mutableStateOf(messages) }
     var cannedMessageInput by remember { mutableStateOf(cannedMessageConfig) }
 
@@ -186,7 +185,10 @@ fun CannedMessageConfigItemList(
                     messagesInput = messages
                     cannedMessageInput = cannedMessageConfig
                 },
-                onSaveClicked = { onSaveClicked(messagesInput,cannedMessageInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(messagesInput,cannedMessageInput)
+                }
             )
         }
     }
@@ -199,7 +201,6 @@ private fun CannedMessageConfigPreview() {
         messages = "",
         cannedMessageConfig = CannedMessageConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { _, _ -> },
     )
 }

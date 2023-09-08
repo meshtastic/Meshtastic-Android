@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
@@ -25,9 +24,9 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 fun DeviceConfigItemList(
     deviceConfig: DeviceConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (DeviceConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var deviceInput by remember(deviceConfig) { mutableStateOf(deviceConfig) }
 
     LazyColumn(
@@ -130,7 +129,10 @@ fun DeviceConfigItemList(
                     focusManager.clearFocus()
                     deviceInput = deviceConfig
                 },
-                onSaveClicked = { onSaveClicked(deviceInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(deviceInput)
+                }
             )
         }
     }
@@ -142,7 +144,6 @@ private fun DeviceConfigPreview() {
     DeviceConfigItemList(
         deviceConfig = DeviceConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { },
     )
 }

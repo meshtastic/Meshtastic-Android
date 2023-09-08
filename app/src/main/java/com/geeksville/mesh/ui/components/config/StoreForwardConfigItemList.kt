@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.StoreForwardConfig
@@ -24,9 +23,9 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 fun StoreForwardConfigItemList(
     storeForwardConfig: StoreForwardConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (StoreForwardConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var storeForwardInput by remember(storeForwardConfig) { mutableStateOf(storeForwardConfig) }
 
     LazyColumn(
@@ -87,7 +86,10 @@ fun StoreForwardConfigItemList(
                     focusManager.clearFocus()
                     storeForwardInput = storeForwardConfig
                 },
-                onSaveClicked = { onSaveClicked(storeForwardInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(storeForwardInput)
+                }
             )
         }
     }
@@ -99,7 +101,6 @@ private fun StoreForwardConfigPreview() {
     StoreForwardConfigItemList(
         storeForwardConfig = StoreForwardConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { },
     )
 }

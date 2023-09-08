@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
@@ -25,9 +24,9 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 fun DisplayConfigItemList(
     displayConfig: DisplayConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (DisplayConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var displayInput by remember(displayConfig) { mutableStateOf(displayConfig) }
 
     LazyColumn(
@@ -136,7 +135,10 @@ fun DisplayConfigItemList(
                     focusManager.clearFocus()
                     displayInput = displayConfig
                 },
-                onSaveClicked = { onSaveClicked(displayInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(displayInput)
+                }
             )
         }
     }
@@ -149,7 +151,6 @@ private fun DisplayConfigPreview() {
     DisplayConfigItemList(
         displayConfig = DisplayConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { },
     )
 }

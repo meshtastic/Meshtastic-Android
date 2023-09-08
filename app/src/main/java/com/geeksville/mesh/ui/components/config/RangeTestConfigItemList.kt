@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.RangeTestConfig
@@ -24,9 +23,9 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 fun RangeTestConfigItemList(
     rangeTestConfig: RangeTestConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (RangeTestConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var rangeTestInput by remember(rangeTestConfig) { mutableStateOf(rangeTestConfig) }
 
     LazyColumn(
@@ -65,7 +64,10 @@ fun RangeTestConfigItemList(
                     focusManager.clearFocus()
                     rangeTestInput = rangeTestConfig
                 },
-                onSaveClicked = { onSaveClicked(rangeTestInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(rangeTestInput)
+                }
             )
         }
     }
@@ -77,7 +79,6 @@ private fun RangeTestConfig() {
     RangeTestConfigItemList(
         rangeTestConfig = RangeTestConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { },
     )
 }

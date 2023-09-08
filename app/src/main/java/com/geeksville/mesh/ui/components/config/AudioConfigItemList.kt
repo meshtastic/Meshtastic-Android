@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.AudioConfig
@@ -25,9 +24,9 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 fun AudioConfigItemList(
     audioConfig: AudioConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (AudioConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var audioInput by remember(audioConfig) { mutableStateOf(audioConfig) }
 
     LazyColumn(
@@ -101,7 +100,10 @@ fun AudioConfigItemList(
                     focusManager.clearFocus()
                     audioInput = audioConfig
                 },
-                onSaveClicked = { onSaveClicked(audioInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(audioInput)
+                }
             )
         }
     }
@@ -113,7 +115,6 @@ private fun AudioConfigPreview() {
     AudioConfigItemList(
         audioConfig = AudioConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { },
     )
 }

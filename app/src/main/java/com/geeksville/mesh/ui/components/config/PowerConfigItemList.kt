@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ConfigProtos.Config.PowerConfig
@@ -24,9 +23,9 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 fun PowerConfigItemList(
     powerConfig: PowerConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (PowerConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var powerInput by remember(powerConfig) { mutableStateOf(powerConfig) }
 
     LazyColumn(
@@ -107,7 +106,10 @@ fun PowerConfigItemList(
                     focusManager.clearFocus()
                     powerInput = powerConfig
                 },
-                onSaveClicked = { onSaveClicked(powerInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(powerInput)
+                }
             )
         }
     }
@@ -119,7 +121,6 @@ private fun PowerConfigPreview() {
     PowerConfigItemList(
         powerConfig = PowerConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { },
     )
 }

@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ModuleConfigProtos
@@ -24,9 +23,9 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 fun NeighborInfoConfigItemList(
     neighborInfoConfig: ModuleConfigProtos.ModuleConfig.NeighborInfoConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (ModuleConfigProtos.ModuleConfig.NeighborInfoConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var neighborInfoInput by remember(neighborInfoConfig) { mutableStateOf(neighborInfoConfig) }
 
     LazyColumn(
@@ -61,7 +60,10 @@ fun NeighborInfoConfigItemList(
                     focusManager.clearFocus()
                     neighborInfoInput = neighborInfoConfig
                 },
-                onSaveClicked = { onSaveClicked(neighborInfoInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(neighborInfoInput)
+                }
             )
         }
     }
@@ -73,7 +75,6 @@ private fun NeighborInfoConfigPreview() {
     NeighborInfoConfigItemList(
         neighborInfoConfig = ModuleConfigProtos.ModuleConfig.NeighborInfoConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { },
     )
 }

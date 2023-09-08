@@ -35,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -92,11 +91,11 @@ fun ChannelSettingsItemList(
     modemPresetName: String = "Default",
     maxChannels: Int = 8,
     enabled: Boolean,
-    focusManager: FocusManager,
     onNegativeClicked: () -> Unit = { },
     @StringRes positiveText: Int = R.string.send,
     onPositiveClicked: (List<ChannelSettings>) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     val settingsListInput = remember {
         mutableStateListOf<ChannelSettings>().apply { addAll(settingsList) }
     }
@@ -154,7 +153,10 @@ fun ChannelSettingsItemList(
                         onNegativeClicked()
                     },
                     positiveText = positiveText,
-                    onPositiveClicked = { onPositiveClicked(settingsListInput) }
+                    onPositiveClicked = {
+                        focusManager.clearFocus()
+                        onPositiveClicked(settingsListInput)
+                    }
                 )
             }
         }
@@ -198,7 +200,6 @@ private fun ChannelSettingsPreview() {
             },
         ),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onPositiveClicked = { },
     )
 }

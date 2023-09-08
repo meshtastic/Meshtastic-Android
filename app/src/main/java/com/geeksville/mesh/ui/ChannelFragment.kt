@@ -277,14 +277,11 @@ fun ChannelScreen(
         settingsList = channelSet.settingsList,
         modemPresetName = modemPresetName,
         enabled = enabled,
-        focusManager = focusManager,
         onNegativeClicked = {
-            focusManager.clearFocus()
             showChannelEditor = false
         },
         positiveText = R.string.save,
         onPositiveClicked = {
-            focusManager.clearFocus()
             showChannelEditor = false
             channelSet = channelSet.toBuilder().clearSettings().addAllSettings(it).build()
         }

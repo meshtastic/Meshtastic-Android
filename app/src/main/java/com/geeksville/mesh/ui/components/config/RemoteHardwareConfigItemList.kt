@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.RemoteHardwareConfig
@@ -24,9 +23,9 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 fun RemoteHardwareConfigItemList(
     remoteHardwareConfig: RemoteHardwareConfig,
     enabled: Boolean,
-    focusManager: FocusManager,
     onSaveClicked: (RemoteHardwareConfig) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     var remoteHardwareInput by remember(remoteHardwareConfig) { mutableStateOf(remoteHardwareConfig) }
 
     LazyColumn(
@@ -75,7 +74,10 @@ fun RemoteHardwareConfigItemList(
                     focusManager.clearFocus()
                     remoteHardwareInput = remoteHardwareConfig
                 },
-                onSaveClicked = { onSaveClicked(remoteHardwareInput) }
+                onSaveClicked = {
+                    focusManager.clearFocus()
+                    onSaveClicked(remoteHardwareInput)
+                }
             )
         }
     }
@@ -87,7 +89,6 @@ private fun RemoteHardwareConfigPreview() {
     RemoteHardwareConfigItemList(
         remoteHardwareConfig = RemoteHardwareConfig.getDefaultInstance(),
         enabled = true,
-        focusManager = LocalFocusManager.current,
         onSaveClicked = { },
     )
 }
