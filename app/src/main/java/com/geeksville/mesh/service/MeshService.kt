@@ -13,6 +13,7 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.*
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
+import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.mesh.android.hasBackgroundPermission
@@ -248,6 +249,8 @@ class MeshService : Service(), Logging {
             .launchIn(serviceScope)
         radioConfigRepository.localConfigFlow.onEach { localConfig = it }
             .launchIn(serviceScope)
+        radioConfigRepository.moduleConfigFlow.onEach { moduleConfig = it }
+            .launchIn(serviceScope)
         radioConfigRepository.channelSetFlow.onEach { channelSet = it }
             .launchIn(serviceScope)
 
@@ -351,6 +354,7 @@ class MeshService : Service(), Logging {
     var myNodeInfo: MyNodeInfo? = null
 
     private var localConfig: LocalConfig = LocalConfig.getDefaultInstance()
+    private var moduleConfig: LocalModuleConfig = LocalModuleConfig.getDefaultInstance()
     private var channelSet: AppOnlyProtos.ChannelSet = AppOnlyProtos.ChannelSet.getDefaultInstance()
 
     /// True after we've done our initial node db init
@@ -540,7 +544,7 @@ class MeshService : Service(), Logging {
                 to = toId,
                 time = rxTime * 1000L,
                 id = packet.id,
-                dataType = if (data.portnumValue == Portnums.PortNum.DETECTION_SENSOR_APP_VALUE) Portnums.PortNum.TEXT_MESSAGE_APP_VALUE else data.portnumValue,
+                dataType = data.portnumValue,
                 bytes = bytes,
                 hopLimit = hopLimit,
                 channel = packet.channel,
@@ -659,8 +663,20 @@ class MeshService : Service(), Logging {
                         shouldBroadcast = false
                     }
 
-                    else ->
-                        debug("No custom processing needed for ${data.portnumValue}")
+                    Portnums.PortNum.RANGE_TEST_APP_VALUE -> {
+                        if (!moduleConfig.rangeTest.enabled) return
+                        val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
+                        rememberDataPacket(u)
+                        updateMessageNotification(u)
+                    }
+
+                    Portnums.PortNum.DETECTION_SENSOR_APP_VALUE -> {
+                        val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
+                        rememberDataPacket(u)
+                        updateMessageNotification(u)
+                    }
+
+                    else -> debug("No custom processing needed for ${data.portnumValue}")
                 }
 
                 // We always tell other apps when new data packets arrive
