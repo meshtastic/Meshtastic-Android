@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,10 +26,14 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.twotone.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,6 +55,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -74,7 +78,6 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.PreferenceCategory
-import com.geeksville.mesh.ui.components.TextDividerPreference
 import com.geeksville.mesh.ui.components.config.AmbientLightingConfigItemList
 import com.geeksville.mesh.ui.components.config.AudioConfigItemList
 import com.geeksville.mesh.ui.components.config.BluetoothConfigItemList
@@ -118,39 +121,70 @@ class DeviceSettingsFragment : ScreenFragment("Radio Configuration"), Logging {
                 val node by model.destNode.collectAsStateWithLifecycle()
 
                 AppCompatTheme {
-                    RadioConfigNavHost(
-                        node!!,
-                        model,
-                    )
+                    val navController: NavHostController = rememberNavController()
+                    // Get current back stack entry
+                    // val backStackEntry by navController.currentBackStackEntryAsState()
+                    // Get the name of the current screen
+                    // val currentScreen = backStackEntry?.destination?.route?.let { route ->
+                    //     enumValues<ConfigDest>().find { it.name == route }?.title ?: "home"
+                    // }
+
+                    Scaffold(
+                        topBar = {
+                            MeshAppBar(
+                                currentScreen = node?.user?.longName
+                                    ?: stringResource(R.string.unknown_username),
+                                // canNavigateBack = navController.previousBackStackEntry != null,
+                                // navigateUp = { navController.navigateUp() },
+                                canNavigateBack = true,
+                                navigateUp = {
+                                    if (navController.previousBackStackEntry != null) {
+                                        navController.navigateUp()
+                                    } else {
+                                        parentFragmentManager.popBackStack()
+                                    }
+                                },
+                            )
+                        }
+                    ) { innerPadding ->
+                        RadioConfigNavHost(
+                            node!!,
+                            model,
+                            navController,
+                            modifier = Modifier.padding(innerPadding),
+                        )
+                    }
                 }
             }
         }
     }
 }
 
-enum class ConfigDest(val title: String, val route: String) {
-    DEVICE("Device", "device"),
-    POSITION("Position", "position"),
-    POWER("Power", "power"),
-    NETWORK("Network", "network"),
-    DISPLAY("Display", "display"),
-    LORA("LoRa", "lora"),
-    BLUETOOTH("Bluetooth", "bluetooth");
+enum class ConfigDest(val title: String) {
+    DEVICE("Device"),
+    POSITION("Position"),
+    POWER("Power"),
+    NETWORK("Network"),
+    DISPLAY("Display"),
+    LORA("LoRa"),
+    BLUETOOTH("Bluetooth"),
+    ;
 }
 
-enum class ModuleDest(val title: String, val route: String) {
-    MQTT("MQTT", "mqtt"),
-    SERIAL("Serial", "serial"),
-    EXTERNAL_NOTIFICATION("External Notification", "ext_not"),
-    STORE_FORWARD("Store & Forward", "store_forward"),
-    RANGE_TEST("Range Test", "range_test"),
-    TELEMETRY("Telemetry", "telemetry"),
-    CANNED_MESSAGE("Canned Message", "canned_message"),
-    AUDIO("Audio", "audio"),
-    REMOTE_HARDWARE("Remote Hardware", "remote_hardware"),
-    NEIGHBOR_INFO("Neighbor Info", "neighbor_info"),
-    AMBIENT_LIGHTING("Ambient Lighting", "ambient_lighting"),
-    DETECTION_SENSOR("Detection Sensor", "detection_sensor");
+enum class ModuleDest(val title: String) {
+    MQTT("MQTT"),
+    SERIAL("Serial"),
+    EXTERNAL_NOTIFICATION("External Notification"),
+    STORE_FORWARD("Store & Forward"),
+    RANGE_TEST("Range Test"),
+    TELEMETRY("Telemetry"),
+    CANNED_MESSAGE("Canned Message"),
+    AUDIO("Audio"),
+    REMOTE_HARDWARE("Remote Hardware"),
+    NEIGHBOR_INFO("Neighbor Info"),
+    AMBIENT_LIGHTING("Ambient Lighting"),
+    DETECTION_SENSOR("Detection Sensor"),
+    ;
 }
 
 /**
@@ -168,12 +202,35 @@ sealed class PacketResponseState {
 }
 
 @Composable
+private fun MeshAppBar(
+    currentScreen: String,
+    canNavigateBack: Boolean,
+    navigateUp: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    TopAppBar(
+        title = { Text(currentScreen) },
+        modifier = modifier,
+        navigationIcon = {
+            if (canNavigateBack) {
+                IconButton(onClick = navigateUp) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        null,
+                    )
+                }
+            }
+        }
+    )
+}
+
+@Composable
 fun RadioConfigNavHost(
     node: NodeInfo,
     viewModel: UIViewModel = viewModel(),
+    navController: NavHostController = rememberNavController(),
+    modifier: Modifier,
 ) {
-    val navController = rememberNavController()
-
     val connectionState by viewModel.connectionState.observeAsState()
     val connected = connectionState == MeshService.ConnectionState.CONNECTED
 
@@ -304,7 +361,7 @@ fun RadioConfigNavHost(
                     radioConfig = response
                     if (goChannels) navController.navigate("channels")
                     else enumValues<ConfigDest>().find { it.name == "${response.payloadVariantCase}" }
-                        ?.let { navController.navigate(it.route) }
+                        ?.let { navController.navigate(it.name) }
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_MODULE_CONFIG_RESPONSE -> {
@@ -312,7 +369,7 @@ fun RadioConfigNavHost(
                     val response = parsed.getModuleConfigResponse
                     moduleConfig = response
                     enumValues<ModuleDest>().find { it.name == "${response.payloadVariantCase}" }
-                        ?.let { navController.navigate(it.route) }
+                        ?.let { navController.navigate(it.name) }
                 }
 
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CANNED_MESSAGE_MODULE_MESSAGES_RESPONSE -> {
@@ -332,12 +389,15 @@ fun RadioConfigNavHost(
         }
     }
 
-    NavHost(navController = navController, startDestination = "home") {
+    NavHost(
+        navController = navController,
+        startDestination = "home",
+        modifier = modifier,
+    ) {
         composable("home") {
             RadioSettingsScreen(
                 enabled = connected && !isWaiting,
                 isLocal = isLocal,
-                headerText = node.user?.longName ?: stringResource(R.string.unknown_username),
                 onRouteClick = { configType ->
                     packetResponseState = PacketResponseState.Loading.apply {
                         total = 1
@@ -428,7 +488,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("device") {
+        composable(ConfigDest.DEVICE.name) {
             DeviceConfigItemList(
                 deviceConfig = radioConfig.device,
                 enabled = connected,
@@ -439,7 +499,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("position") {
+        composable(ConfigDest.POSITION.name) {
             PositionConfigItemList(
                 isLocal = isLocal,
                 location = location,
@@ -458,7 +518,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("power") {
+        composable(ConfigDest.POWER.name) {
             PowerConfigItemList(
                 powerConfig = radioConfig.power,
                 enabled = connected,
@@ -469,7 +529,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("network") {
+        composable(ConfigDest.NETWORK.name) {
             NetworkConfigItemList(
                 networkConfig = radioConfig.network,
                 enabled = connected,
@@ -480,7 +540,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("display") {
+        composable(ConfigDest.DISPLAY.name) {
             DisplayConfigItemList(
                 displayConfig = radioConfig.display,
                 enabled = connected,
@@ -491,7 +551,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("lora") {
+        composable(ConfigDest.LORA.name) {
             LoRaConfigItemList(
                 loraConfig = radioConfig.lora,
                 primarySettings = channelList.getOrNull(0) ?: return@composable,
@@ -503,7 +563,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("bluetooth") {
+        composable(ConfigDest.BLUETOOTH.name) {
             BluetoothConfigItemList(
                 bluetoothConfig = radioConfig.bluetooth,
                 enabled = connected,
@@ -514,7 +574,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("mqtt") {
+        composable(ModuleDest.MQTT.name) {
             MQTTConfigItemList(
                 mqttConfig = moduleConfig.mqtt,
                 enabled = connected,
@@ -525,7 +585,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("serial") {
+        composable(ModuleDest.SERIAL.name) {
             SerialConfigItemList(
                 serialConfig = moduleConfig.serial,
                 enabled = connected,
@@ -536,7 +596,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("ext_not") {
+        composable(ModuleDest.EXTERNAL_NOTIFICATION.name) {
             ExternalNotificationConfigItemList(
                 ringtone = ringtone,
                 extNotificationConfig = moduleConfig.externalNotification,
@@ -554,7 +614,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("store_forward") {
+        composable(ModuleDest.STORE_FORWARD.name) {
             StoreForwardConfigItemList(
                 storeForwardConfig = moduleConfig.storeForward,
                 enabled = connected,
@@ -565,7 +625,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("range_test") {
+        composable(ModuleDest.RANGE_TEST.name) {
             RangeTestConfigItemList(
                 rangeTestConfig = moduleConfig.rangeTest,
                 enabled = connected,
@@ -576,7 +636,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("telemetry") {
+        composable(ModuleDest.TELEMETRY.name) {
             TelemetryConfigItemList(
                 telemetryConfig = moduleConfig.telemetry,
                 enabled = connected,
@@ -587,7 +647,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("canned_message") {
+        composable(ModuleDest.CANNED_MESSAGE.name) {
             CannedMessageConfigItemList(
                 messages = cannedMessageMessages,
                 cannedMessageConfig = moduleConfig.cannedMessage,
@@ -605,7 +665,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("audio") {
+        composable(ModuleDest.AUDIO.name) {
             AudioConfigItemList(
                 audioConfig = moduleConfig.audio,
                 enabled = connected,
@@ -616,7 +676,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("remote_hardware") {
+        composable(ModuleDest.REMOTE_HARDWARE.name) {
             RemoteHardwareConfigItemList(
                 remoteHardwareConfig = moduleConfig.remoteHardware,
                 enabled = connected,
@@ -627,7 +687,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("neighbor_info") {
+        composable(ModuleDest.NEIGHBOR_INFO.name) {
             NeighborInfoConfigItemList(
                 neighborInfoConfig = moduleConfig.neighborInfo,
                 enabled = connected,
@@ -638,7 +698,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("ambient_lighting") {
+        composable(ModuleDest.AMBIENT_LIGHTING.name) {
             AmbientLightingConfigItemList(
                 ambientLightingConfig = moduleConfig.ambientLighting,
                 enabled = connected,
@@ -649,7 +709,7 @@ fun RadioConfigNavHost(
                 }
             )
         }
-        composable("detection_sensor") {
+        composable(ModuleDest.DETECTION_SENSOR.name) {
             DetectionSensorConfigItemList(
                 detectionSensorConfig = moduleConfig.detectionSensor,
                 enabled = connected,
@@ -664,7 +724,7 @@ fun RadioConfigNavHost(
 }
 
 @Composable
-fun NavCard(
+private fun NavCard(
     title: String,
     enabled: Boolean,
     onClick: () -> Unit
@@ -699,12 +759,12 @@ fun NavCard(
 }
 
 @Composable
-fun NavCard(@StringRes title: Int, enabled: Boolean, onClick: () -> Unit) {
+private fun NavCard(@StringRes title: Int, enabled: Boolean, onClick: () -> Unit) {
     NavCard(title = stringResource(title), enabled = enabled, onClick = onClick)
 }
 
 @Composable
-fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Unit) {
+private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Unit) {
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) AlertDialog(
         onDismissRequest = { },
@@ -762,19 +822,15 @@ fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RadioSettingsScreen(
+private fun RadioSettingsScreen(
     enabled: Boolean = true,
     isLocal: Boolean = true,
-    headerText: String = "longName",
     onRouteClick: (Any) -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
-        stickyHeader { TextDividerPreference(headerText) }
-
         item { PreferenceCategory(stringResource(R.string.device_settings)) }
         item { NavCard("User", enabled = enabled) { onRouteClick("USER") } }
         item { NavCard("Channels", enabled = enabled) { onRouteClick("CHANNELS") } }
