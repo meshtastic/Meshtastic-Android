@@ -129,8 +129,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                     }
                     R.id.remote_admin -> {
                         debug("calling remote admin --> destNum: ${node.num.toUInt()}")
+                        model.setDestNode(node)
                         parentFragmentManager.beginTransaction()
-                            .replace(R.id.mainActivityLayout, DeviceSettingsFragment(node))
+                            .replace(R.id.mainActivityLayout, DeviceSettingsFragment())
                             .addToBackStack(null)
                             .commit()
                     }

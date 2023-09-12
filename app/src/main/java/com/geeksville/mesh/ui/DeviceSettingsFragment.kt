@@ -102,7 +102,7 @@ import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class DeviceSettingsFragment(val node: NodeInfo) : ScreenFragment("Radio Configuration"), Logging {
+class DeviceSettingsFragment : ScreenFragment("Radio Configuration"), Logging {
 
     private val model: UIViewModel by activityViewModels()
 
@@ -115,8 +115,13 @@ class DeviceSettingsFragment(val node: NodeInfo) : ScreenFragment("Radio Configu
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setBackgroundColor(ContextCompat.getColor(context, R.color.colorAdvancedBackground))
             setContent {
+                val node by model.destNode.collectAsStateWithLifecycle()
+
                 AppCompatTheme {
-                    RadioConfigNavHost(node, model)
+                    RadioConfigNavHost(
+                        node!!,
+                        model,
+                    )
                 }
             }
         }
@@ -163,7 +168,10 @@ sealed class PacketResponseState {
 }
 
 @Composable
-fun RadioConfigNavHost(node: NodeInfo, viewModel: UIViewModel = viewModel()) {
+fun RadioConfigNavHost(
+    node: NodeInfo,
+    viewModel: UIViewModel = viewModel(),
+) {
     val navController = rememberNavController()
 
     val connectionState by viewModel.connectionState.observeAsState()
