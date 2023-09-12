@@ -481,7 +481,7 @@ fun MapView(model: UIViewModel = viewModel()) {
     }
 
     fun loadOnlineTileSourceBase(): ITileSource {
-        val id = mPrefs.getInt(mapStyleId, 1)
+        val id = mPrefs.getInt(mapStyleId, 0)
         debug("mapStyleId from prefs: $id")
         return CustomTileSource.getTileSource(id).also {
             map.maxZoomLevel = it.maximumZoomLevel.toDouble()
@@ -542,7 +542,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         val builder = MaterialAlertDialogBuilder(context)
         val mapStyles: Array<CharSequence> = CustomTileSource.mTileSources.values.toTypedArray()
 
-        val mapStyleInt = mPrefs.getInt(mapStyleId, 1)
+        val mapStyleInt = mPrefs.getInt(mapStyleId, 0)
         builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
             debug("Set mapStyleId pref to $which")
             mPrefs.edit().putInt(mapStyleId, which).apply()
