@@ -92,7 +92,7 @@ fun CannedMessageConfigItemList(
         item {
             DropDownPreference(title = "Generate input event on Press",
                 enabled = enabled,
-                items = CannedMessageConfig.InputEventChar.values()
+                items = CannedMessageConfig.InputEventChar.entries
                     .filter { it != CannedMessageConfig.InputEventChar.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = cannedMessageInput.inputbrokerEventPress,
@@ -105,7 +105,7 @@ fun CannedMessageConfigItemList(
         item {
             DropDownPreference(title = "Generate input event on CW",
                 enabled = enabled,
-                items = CannedMessageConfig.InputEventChar.values()
+                items = CannedMessageConfig.InputEventChar.entries
                     .filter { it != CannedMessageConfig.InputEventChar.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = cannedMessageInput.inputbrokerEventCw,
@@ -118,7 +118,7 @@ fun CannedMessageConfigItemList(
         item {
             DropDownPreference(title = "Generate input event on CCW",
                 enabled = enabled,
-                items = CannedMessageConfig.InputEventChar.values()
+                items = CannedMessageConfig.InputEventChar.entries
                     .filter { it != CannedMessageConfig.InputEventChar.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = cannedMessageInput.inputbrokerEventCcw,

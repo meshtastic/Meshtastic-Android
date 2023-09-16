@@ -124,7 +124,7 @@ inline fun <reified T> EditListPreference(
                 DropDownPreference(
                     title = "Type",
                     enabled = enabled,
-                    items = RemoteHardwarePinType.values()
+                    items = RemoteHardwarePinType.entries
                         .filter { it != RemoteHardwarePinType.UNRECOGNIZED }
                         .map { it to it.name },
                     selectedItem = value.type,

@@ -45,7 +45,7 @@ fun BluetoothConfigItemList(
         item {
             DropDownPreference(title = "Pairing mode",
                 enabled = enabled,
-                items = BluetoothConfig.PairingMode.values()
+                items = BluetoothConfig.PairingMode.entries
                     .filter { it != BluetoothConfig.PairingMode.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = bluetoothInput.mode,

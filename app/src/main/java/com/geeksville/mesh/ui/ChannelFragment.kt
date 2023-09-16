@@ -379,7 +379,7 @@ fun ChannelScreen(
         item {
             DropDownPreference(title = stringResource(id = R.string.channel_options),
                 enabled = enabled,
-                items = ChannelOption.values()
+                items = ChannelOption.entries
                     .map { it.modemPreset to stringResource(it.configRes) },
                 selectedItem = channelSet.loraConfig.modemPreset,
                 onItemSelected = {

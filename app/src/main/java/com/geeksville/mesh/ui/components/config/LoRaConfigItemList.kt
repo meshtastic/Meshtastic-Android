@@ -52,7 +52,7 @@ fun LoRaConfigItemList(
             item {
                 DropDownPreference(title = "Modem preset",
                     enabled = enabled && loraInput.usePreset,
-                    items = LoRaConfig.ModemPreset.values()
+                    items = LoRaConfig.ModemPreset.entries
                         .filter { it != LoRaConfig.ModemPreset.UNRECOGNIZED }
                         .map { it to it.name },
                     selectedItem = loraInput.modemPreset,
@@ -96,7 +96,7 @@ fun LoRaConfigItemList(
         item {
             DropDownPreference(title = "Region (frequency plan)",
                 enabled = enabled,
-                items = LoRaConfig.RegionCode.values()
+                items = LoRaConfig.RegionCode.entries
                     .filter { it != LoRaConfig.RegionCode.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = loraInput.region,

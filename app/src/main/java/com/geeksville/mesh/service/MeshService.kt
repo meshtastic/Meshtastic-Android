@@ -1420,7 +1420,7 @@ class MeshService : Service(), Logging {
     }
 
     private fun requestAllConfig() {
-        AdminProtos.AdminMessage.ConfigType.values().filter {
+        AdminProtos.AdminMessage.ConfigType.entries.filter {
             it != AdminProtos.AdminMessage.ConfigType.UNRECOGNIZED
         }.forEach(::requestConfig)
     }

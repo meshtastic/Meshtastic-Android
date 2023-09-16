@@ -53,7 +53,7 @@ fun AudioConfigItemList(
         item {
             DropDownPreference(title = "CODEC2 sample rate",
                 enabled = enabled,
-                items = AudioConfig.Audio_Baud.values()
+                items = AudioConfig.Audio_Baud.entries
                     .filter { it != AudioConfig.Audio_Baud.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = audioInput.bitrate,

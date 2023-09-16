@@ -149,7 +149,7 @@ fun PositionConfigItemList(
             BitwisePreference(title = "Position flags",
                 value = positionInput.positionFlags,
                 enabled = enabled,
-                items = ConfigProtos.Config.PositionConfig.PositionFlags.values()
+                items = ConfigProtos.Config.PositionConfig.PositionFlags.entries
                     .filter { it != PositionConfig.PositionFlags.UNSET && it != PositionConfig.PositionFlags.UNRECOGNIZED }
                     .map { it.number to it.name },
                 onItemSelected = { positionInput = positionInput.copy { positionFlags = it } }

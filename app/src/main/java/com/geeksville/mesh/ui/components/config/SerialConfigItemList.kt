@@ -69,7 +69,7 @@ fun SerialConfigItemList(
         item {
             DropDownPreference(title = "Serial baud rate",
                 enabled = enabled,
-                items = SerialConfig.Serial_Baud.values()
+                items = SerialConfig.Serial_Baud.entries
                     .filter { it != SerialConfig.Serial_Baud.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = serialInput.baud,
@@ -88,7 +88,7 @@ fun SerialConfigItemList(
         item {
             DropDownPreference(title = "Serial mode",
                 enabled = enabled,
-                items = SerialConfig.Serial_Mode.values()
+                items = SerialConfig.Serial_Mode.entries
                     .filter { it != SerialConfig.Serial_Mode.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = serialInput.mode,

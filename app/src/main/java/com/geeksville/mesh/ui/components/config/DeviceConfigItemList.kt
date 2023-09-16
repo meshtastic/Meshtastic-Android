@@ -37,7 +37,7 @@ fun DeviceConfigItemList(
         item {
             DropDownPreference(title = "Role",
                 enabled = enabled,
-                items = DeviceConfig.Role.values()
+                items = DeviceConfig.Role.entries
                     .filter { it != DeviceConfig.Role.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = deviceInput.role,
@@ -84,7 +84,7 @@ fun DeviceConfigItemList(
         item {
             DropDownPreference(title = "Rebroadcast mode",
                 enabled = enabled,
-                items = DeviceConfig.RebroadcastMode.values()
+                items = DeviceConfig.RebroadcastMode.entries
                     .filter { it != DeviceConfig.RebroadcastMode.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = deviceInput.rebroadcastMode,

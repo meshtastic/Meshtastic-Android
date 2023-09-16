@@ -45,7 +45,7 @@ fun DisplayConfigItemList(
         item {
             DropDownPreference(title = "GPS coordinates format",
                 enabled = enabled,
-                items = DisplayConfig.GpsCoordinateFormat.values()
+                items = DisplayConfig.GpsCoordinateFormat.entries
                     .filter { it != DisplayConfig.GpsCoordinateFormat.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = displayInput.gpsFormat,
@@ -82,7 +82,7 @@ fun DisplayConfigItemList(
         item {
             DropDownPreference(title = "Display units",
                 enabled = enabled,
-                items = DisplayConfig.DisplayUnits.values()
+                items = DisplayConfig.DisplayUnits.entries
                     .filter { it != DisplayConfig.DisplayUnits.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = displayInput.units,
@@ -93,7 +93,7 @@ fun DisplayConfigItemList(
         item {
             DropDownPreference(title = "Override OLED auto-detect",
                 enabled = enabled,
-                items = DisplayConfig.OledType.values()
+                items = DisplayConfig.OledType.entries
                     .filter { it != DisplayConfig.OledType.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = displayInput.oled,
@@ -104,7 +104,7 @@ fun DisplayConfigItemList(
         item {
             DropDownPreference(title = "Display mode",
                 enabled = enabled,
-                items = DisplayConfig.DisplayMode.values()
+                items = DisplayConfig.DisplayMode.entries
                     .filter { it != DisplayConfig.DisplayMode.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = displayInput.displaymode,

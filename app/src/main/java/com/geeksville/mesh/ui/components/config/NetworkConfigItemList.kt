@@ -112,7 +112,7 @@ fun NetworkConfigItemList(
         item {
             DropDownPreference(title = "IPv4 mode",
                 enabled = enabled,
-                items = NetworkConfig.AddressMode.values()
+                items = NetworkConfig.AddressMode.entries
                     .filter { it != NetworkConfig.AddressMode.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = networkInput.addressMode,

@@ -235,7 +235,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     }
 
     /// the sorted list of region names like arrayOf("US", "CN", "EU488")
-    private val regions = ConfigProtos.Config.LoRaConfig.RegionCode.values().filter {
+    private val regions = ConfigProtos.Config.LoRaConfig.RegionCode.entries.filter {
         it != ConfigProtos.Config.LoRaConfig.RegionCode.UNRECOGNIZED
     }.map {
         it.name
