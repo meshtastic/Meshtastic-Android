@@ -41,11 +41,11 @@ fun PreferenceFooter(
         modifier = modifier
             .fillMaxWidth()
             .height(64.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Button(
+        OutlinedButton(
             modifier = modifier
-                .fillMaxWidth()
                 .height(48.dp)
                 .weight(1f),
             enabled = enabled,
@@ -59,9 +59,8 @@ fun PreferenceFooter(
                 style = MaterialTheme.typography.body1,
             )
         }
-        Button(
+        OutlinedButton(
             modifier = modifier
-                .fillMaxWidth()
                 .height(48.dp)
                 .weight(1f),
             enabled = enabled,
