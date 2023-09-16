@@ -76,9 +76,9 @@ import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.ui.components.ClickableTextField
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.PreferenceFooter
-import com.geeksville.mesh.ui.components.RegularPreference
 import com.geeksville.mesh.ui.components.config.ChannelSettingsItemList
 import com.geeksville.mesh.ui.components.config.EditChannelDialog
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
@@ -293,12 +293,13 @@ fun ChannelScreen(
             .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
         item {
-            RegularPreference(
-                title = stringResource(R.string.channel_name),
-                subtitle = primaryChannel?.humanName.orEmpty(),
+            ClickableTextField(
+                label = R.string.channel_name,
+                value = primaryChannel?.humanName.orEmpty(),
                 onClick = { showChannelEditor = true },
                 enabled = enabled,
-                trailingIcon = Icons.TwoTone.Edit
+                trailingIcon = Icons.TwoTone.Edit,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
 
