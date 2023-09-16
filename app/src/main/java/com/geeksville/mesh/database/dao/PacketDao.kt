@@ -64,7 +64,7 @@ interface PacketDao {
 
     @Transaction
     fun getQueuedPackets(): List<DataPacket>? =
-        getDataPackets().filter { it.status in setOf(MessageStatus.ENROUTE, MessageStatus.QUEUED) }
+        getDataPackets().filter { it.status == MessageStatus.QUEUED }
 
     @Query("Select * from packet where port_num = 8 order by received_time asc")
     fun getAllWaypoints(): List<Packet>
