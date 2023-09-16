@@ -12,8 +12,8 @@ fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].
 fun xorHash(b: ByteArray) = b.fold(0) { acc, x -> acc xor (x.toInt() and 0xff) }
 
 data class Channel(
-    val settings: ChannelProtos.ChannelSettings,
-    val loraConfig: ConfigProtos.Config.LoRaConfig
+    val settings: ChannelProtos.ChannelSettings = default.settings,
+    val loraConfig: ConfigProtos.Config.LoRaConfig = default.loraConfig,
 ) {
     companion object {
         // These bytes must match the well known and not secret bytes used the default channel AES128 key device code

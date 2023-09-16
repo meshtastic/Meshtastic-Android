@@ -143,7 +143,7 @@ fun ChannelScreen(
 
     val primaryChannel = ChannelSet(channelSet).primaryChannel
     val channelUrl = ChannelSet(channelSet).getChannelUrl()
-    val modemPresetName = Channel(Channel.default.settings, channelSet.loraConfig).name
+    val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {

@@ -332,24 +332,14 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             }
         }
 
-        model.packetResponse.asLiveData().observe(viewLifecycleOwner) { meshLog ->
-            meshLog?.meshPacket?.let { meshPacket ->
-                val routeList = meshLog.routeDiscovery?.routeList ?: return@let
-                fun nodeName(num: Int) = model.nodeDB.nodesByNum?.get(num)?.user?.longName
-                    ?: getString(R.string.unknown_username)
+        model.tracerouteResponse.observe(viewLifecycleOwner) { response ->
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.traceroute)
+                .setMessage(response ?: return@observe)
+                .setPositiveButton(R.string.okay) { _, _ -> }
+                .show()
 
-                var routeStr = "${nodeName(meshPacket.to)} --> "
-                routeList.forEach { num -> routeStr += "${nodeName(num)} --> " }
-                routeStr += nodeName(meshPacket.from)
-
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle(R.string.traceroute)
-                    .setMessage(routeStr)
-                    .setPositiveButton(R.string.okay) { _, _ -> }
-                    .show()
-
-                model.clearPacketResponse()
-            }
+            model.clearTracerouteResponse()
         }
     }
 
