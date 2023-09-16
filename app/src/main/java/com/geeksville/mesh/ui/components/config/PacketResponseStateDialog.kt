@@ -14,24 +14,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
-import com.geeksville.mesh.ui.PacketResponseState
+import com.geeksville.mesh.ui.ResponseState
 
 @Composable
-fun PacketResponseStateDialog(
-    state: PacketResponseState,
-    onDismiss: () -> Unit
+fun <T> PacketResponseStateDialog(
+    state: ResponseState<T>,
+    onDismiss: () -> Unit = {},
+    onComplete: () -> Unit = {},
 ) {
     AlertDialog(
-        onDismissRequest = { },
+        onDismissRequest = {},
         title = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (state is PacketResponseState.Loading) {
+                if (state is ResponseState.Loading) {
                     val progress = state.completed.toFloat() / state.total.toFloat()
                     Text("%.0f%%".format(progress * 100))
                     LinearProgressIndicator(
@@ -41,12 +43,14 @@ fun PacketResponseStateDialog(
                             .padding(top = 8.dp),
                         color = MaterialTheme.colors.onSurface,
                     )
+                    if (state.total == state.completed) onComplete()
                 }
-                if (state is PacketResponseState.Success) {
+                if (state is ResponseState.Success) {
                     Text("Success!")
                 }
-                if (state is PacketResponseState.Error) {
-                    Text("Error: ${state.error}")
+                if (state is ResponseState.Error) {
+                    Text(text = "Error\n", textAlign = TextAlign.Center)
+                    Text(state.error)
                 }
             }
         },
@@ -59,7 +63,7 @@ fun PacketResponseStateDialog(
                     onClick = onDismiss,
                     modifier = Modifier.padding(top = 16.dp)
                 ) {
-                    if (state is PacketResponseState.Loading) {
+                    if (state is ResponseState.Loading) {
                         Text(stringResource(R.string.cancel))
                     } else {
                         Text(stringResource(R.string.close))
@@ -74,10 +78,9 @@ fun PacketResponseStateDialog(
 @Composable
 private fun PacketResponseStateDialogPreview() {
     PacketResponseStateDialog(
-        state = PacketResponseState.Loading.apply {
-            total = 17
-            completed = 5
-        },
-        onDismiss = { }
+        state = ResponseState.Loading(
+            total = 17,
+            completed = 5,
+        ),
     )
 }

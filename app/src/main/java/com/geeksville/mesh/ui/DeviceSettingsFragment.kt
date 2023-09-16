@@ -36,10 +36,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.twotone.KeyboardArrowRight
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -59,17 +57,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.geeksville.mesh.AdminProtos
-import com.geeksville.mesh.AdminProtos.AdminMessage.ConfigType
-import com.geeksville.mesh.AdminProtos.AdminMessage.ModuleConfigType
-import com.geeksville.mesh.ChannelProtos
-import com.geeksville.mesh.ConfigProtos.Config
-import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.NodeInfo
-import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
 import com.geeksville.mesh.deviceProfile
@@ -126,7 +115,7 @@ class DeviceSettingsFragment : ScreenFragment("Radio Configuration"), Logging {
                     // val backStackEntry by navController.currentBackStackEntryAsState()
                     // Get the name of the current screen
                     // val currentScreen = backStackEntry?.destination?.route?.let { route ->
-                    //     enumValues<ConfigDest>().find { it.name == route }?.title ?: "home"
+                    //     NavRoute.entries.find { it.name == route }?.title
                     // }
 
                     Scaffold(
@@ -160,45 +149,51 @@ class DeviceSettingsFragment : ScreenFragment("Radio Configuration"), Logging {
     }
 }
 
-enum class ConfigDest(val title: String) {
-    DEVICE("Device"),
-    POSITION("Position"),
-    POWER("Power"),
-    NETWORK("Network"),
-    DISPLAY("Display"),
-    LORA("LoRa"),
-    BLUETOOTH("Bluetooth"),
+// Config (configType = AdminProtos.AdminMessage.ConfigType)
+enum class ConfigRoute(val title: String, val configType: Int = 0) {
+    USER("User"),
+    CHANNELS("Channels"),
+    DEVICE("Device", 0),
+    POSITION("Position", 1),
+    POWER("Power", 2),
+    NETWORK("Network", 3),
+    DISPLAY("Display", 4),
+    LORA("LoRa", 5),
+    BLUETOOTH("Bluetooth", 6),
     ;
 }
 
-enum class ModuleDest(val title: String) {
-    MQTT("MQTT"),
-    SERIAL("Serial"),
-    EXTERNAL_NOTIFICATION("External Notification"),
-    STORE_FORWARD("Store & Forward"),
-    RANGE_TEST("Range Test"),
-    TELEMETRY("Telemetry"),
-    CANNED_MESSAGE("Canned Message"),
-    AUDIO("Audio"),
-    REMOTE_HARDWARE("Remote Hardware"),
-    NEIGHBOR_INFO("Neighbor Info"),
-    AMBIENT_LIGHTING("Ambient Lighting"),
-    DETECTION_SENSOR("Detection Sensor"),
+// ModuleConfig (configType = AdminProtos.AdminMessage.ModuleConfigType)
+enum class ModuleRoute(val title: String, val configType: Int = 0) {
+    MQTT("MQTT", 0),
+    SERIAL("Serial", 1),
+    EXTERNAL_NOTIFICATION("External Notification", 2),
+    STORE_FORWARD("Store & Forward", 3),
+    RANGE_TEST("Range Test", 4),
+    TELEMETRY("Telemetry", 5),
+    CANNED_MESSAGE("Canned Message", 6),
+    AUDIO("Audio", 7),
+    REMOTE_HARDWARE("Remote Hardware", 8),
+    NEIGHBOR_INFO("Neighbor Info", 9),
+    AMBIENT_LIGHTING("Ambient Lighting", 10),
+    DETECTION_SENSOR("Detection Sensor", 11),
     ;
+}
+
+private fun getName(route: Any): String = when (route) {
+    is ConfigRoute -> route.name
+    is ModuleRoute -> route.name
+    else -> ""
 }
 
 /**
- * This sealed class defines each possible state of a packet response.
+ * Generic sealed class defines each possible state of a response.
  */
-sealed class PacketResponseState {
-    object Loading : PacketResponseState() {
-        var total: Int = 0
-        var completed: Int = 0
-    }
-
-    data class Success(val packets: List<String>) : PacketResponseState()
-    object Empty : PacketResponseState()
-    data class Error(val error: String) : PacketResponseState()
+sealed class ResponseState<out T> {
+    data object Empty : ResponseState<Nothing>()
+    data class Loading(var total: Int = 0, var completed: Int = 0) : ResponseState<Nothing>()
+    data class Success<T>(val result: T) : ResponseState<T>()
+    data class Error(val error: String) : ResponseState<Nothing>()
 }
 
 @Composable
@@ -236,21 +231,13 @@ fun RadioConfigNavHost(
 
     val destNum = node.num
     val isLocal = destNum == viewModel.myNodeNum
-    val maxChannels = viewModel.myNodeInfo.value?.maxChannels ?: 8
+    val maxChannels = viewModel.maxChannels
 
-    var userConfig by remember { mutableStateOf(MeshProtos.User.getDefaultInstance()) }
-    val channelList = remember { mutableStateListOf<ChannelProtos.ChannelSettings>() }
-    var radioConfig by remember { mutableStateOf(Config.getDefaultInstance()) }
-    var moduleConfig by remember { mutableStateOf(ModuleConfig.getDefaultInstance()) }
+    val radioConfigState by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    var location by remember(node) { mutableStateOf(node.position) } // FIXME
 
-    var location by remember(node) { mutableStateOf(node.position) }
-    var ringtone by remember { mutableStateOf("") }
-    var cannedMessageMessages by remember { mutableStateOf("") }
-
-    val packetResponse by viewModel.packetResponse.collectAsStateWithLifecycle()
     val deviceProfile by viewModel.deviceProfile.collectAsStateWithLifecycle()
-    var packetResponseState by remember { mutableStateOf<PacketResponseState>(PacketResponseState.Empty) }
-    val isWaiting = packetResponseState !is PacketResponseState.Empty
+    val isWaiting = radioConfigState.responseState !is ResponseState.Empty
     var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
 
     val importConfigLauncher = rememberLauncherForActivityResult(
@@ -258,7 +245,7 @@ fun RadioConfigNavHost(
     ) {
         if (it.resultCode == Activity.RESULT_OK) {
             showEditDeviceProfileDialog = true
-            it.data?.data?.let { file_uri -> viewModel.importProfile(file_uri) }
+            it.data?.data?.let { uri -> viewModel.importProfile(uri) }
         }
     }
 
@@ -266,7 +253,7 @@ fun RadioConfigNavHost(
         ActivityResultContracts.StartActivityForResult()
     ) {
         if (it.resultCode == Activity.RESULT_OK) {
-            it.data?.data?.let { file_uri -> viewModel.exportProfile(file_uri) }
+            it.data?.data?.let { uri -> viewModel.exportProfile(uri) }
         }
     }
 
@@ -304,90 +291,16 @@ fun RadioConfigNavHost(
     )
 
     if (isWaiting) PacketResponseStateDialog(
-        packetResponseState,
+        radioConfigState.responseState,
         onDismiss = {
-            packetResponseState = PacketResponseState.Empty
+            showEditDeviceProfileDialog = false
+            viewModel.clearPacketResponse()
+        },
+        onComplete = {
+            navController.navigate(radioConfigState.route)
             viewModel.clearPacketResponse()
         }
     )
-
-    if (isWaiting) LaunchedEffect(packetResponse) {
-        val data = packetResponse?.meshPacket?.decoded
-        val from = packetResponse?.meshPacket?.from?.toUInt()
-        if (data?.portnumValue == Portnums.PortNum.ROUTING_APP_VALUE) {
-            val parsed = MeshProtos.Routing.parseFrom(data.payload)
-            debug("packet for destNum ${destNum.toUInt()} received ${parsed.errorReason} from $from")
-            if (parsed.errorReason != MeshProtos.Routing.Error.NONE) {
-                packetResponseState = PacketResponseState.Error(parsed.errorReason.toString())
-            } else if (packetResponse?.meshPacket?.from == destNum) {
-                packetResponseState = PacketResponseState.Success(emptyList())
-            }
-        }
-        if (data?.portnumValue == Portnums.PortNum.ADMIN_APP_VALUE) {
-            viewModel.clearPacketResponse()
-            val parsed = AdminProtos.AdminMessage.parseFrom(data.payload)
-            debug("packet for destNum ${destNum.toUInt()} received ${parsed.payloadVariantCase} from $from")
-            // check destination: lora config or channel editor
-            val goChannels = (packetResponseState as PacketResponseState.Loading).total > 2
-            when (parsed.payloadVariantCase) {
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
-                    val response = parsed.getChannelResponse
-                    (packetResponseState as PacketResponseState.Loading).completed++
-                    // Stop once we get to the first disabled entry
-                    if (response.role != ChannelProtos.Channel.Role.DISABLED) {
-                        channelList.add(response.index, response.settings)
-                        if (response.index + 1 < maxChannels && goChannels) {
-                            // Not done yet, request next channel
-                            viewModel.getChannel(destNum, response.index + 1)
-                        } else {
-                            // Received max channels, get lora config (for default channel names)
-                            viewModel.getConfig(destNum, ConfigType.LORA_CONFIG_VALUE)
-                        }
-                    } else {
-                        // Received last channel, get lora config (for default channel names)
-                        viewModel.getConfig(destNum, ConfigType.LORA_CONFIG_VALUE)
-                    }
-                }
-
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_OWNER_RESPONSE -> {
-                    packetResponseState = PacketResponseState.Empty
-                    userConfig = parsed.getOwnerResponse
-                    navController.navigate("user")
-                }
-
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_CONFIG_RESPONSE -> {
-                    packetResponseState = PacketResponseState.Empty
-                    val response = parsed.getConfigResponse
-                    radioConfig = response
-                    if (goChannels) navController.navigate("channels")
-                    else enumValues<ConfigDest>().find { it.name == "${response.payloadVariantCase}" }
-                        ?.let { navController.navigate(it.name) }
-                }
-
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_MODULE_CONFIG_RESPONSE -> {
-                    packetResponseState = PacketResponseState.Empty
-                    val response = parsed.getModuleConfigResponse
-                    moduleConfig = response
-                    enumValues<ModuleDest>().find { it.name == "${response.payloadVariantCase}" }
-                        ?.let { navController.navigate(it.name) }
-                }
-
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_CANNED_MESSAGE_MODULE_MESSAGES_RESPONSE -> {
-                    cannedMessageMessages = parsed.getCannedMessageModuleMessagesResponse
-                    (packetResponseState as PacketResponseState.Loading).completed++
-                    viewModel.getModuleConfig(destNum, ModuleConfigType.CANNEDMSG_CONFIG_VALUE)
-                }
-
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_RINGTONE_RESPONSE -> {
-                    ringtone = parsed.getRingtoneResponse
-                    (packetResponseState as PacketResponseState.Loading).completed++
-                    viewModel.getModuleConfig(destNum, ModuleConfigType.EXTNOTIF_CONFIG_VALUE)
-                }
-
-                else -> TODO()
-            }
-        }
-    }
 
     NavHost(
         navController = navController,
@@ -398,22 +311,17 @@ fun RadioConfigNavHost(
             RadioSettingsScreen(
                 enabled = connected && !isWaiting,
                 isLocal = isLocal,
-                onRouteClick = { configType ->
-                    packetResponseState = PacketResponseState.Loading.apply {
-                        total = 1
-                        completed = 0
-                    }
-                    // clearAllConfigs() ?
-                    when (configType) {
-                        "USER" -> { viewModel.getOwner(destNum) }
-                        "CHANNELS" -> {
-                            val maxPackets = maxChannels + 1 // for lora config
-                            (packetResponseState as PacketResponseState.Loading).total = maxPackets
-                            channelList.clear()
+                onRouteClick = { route ->
+                    viewModel.setResponseStateLoading(getName(route))
+                    when (route) {
+                        ConfigRoute.USER -> { viewModel.getOwner(destNum) }
+                        ConfigRoute.CHANNELS -> {
+                            viewModel.setResponseStateTotal(maxChannels + 1) // for lora config
+                            viewModel.clearRemoteChannelList()
                             viewModel.getChannel(destNum, 0)
                         }
                         "IMPORT" -> {
-                            packetResponseState = PacketResponseState.Empty
+                            viewModel.clearPacketResponse()
                             viewModel.setDeviceProfile(null)
                             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                                 addCategory(Intent.CATEGORY_OPENABLE)
@@ -422,7 +330,7 @@ fun RadioConfigNavHost(
                             importConfigLauncher.launch(intent)
                         }
                         "EXPORT" -> {
-                            packetResponseState = PacketResponseState.Empty
+                            viewModel.clearPacketResponse()
                             showEditDeviceProfileDialog = true
                         }
 
@@ -442,281 +350,258 @@ fun RadioConfigNavHost(
                             viewModel.requestNodedbReset(destNum)
                         }
 
-                        ConfigDest.LORA -> {
-                            (packetResponseState as PacketResponseState.Loading).total = 2
-                            channelList.clear()
+                        ConfigRoute.LORA -> {
+                            viewModel.setResponseStateTotal(2)
+                            viewModel.clearRemoteChannelList()
                             viewModel.getChannel(destNum, 0)
                         }
-                        is ConfigDest -> {
-                            viewModel.getConfig(destNum, configType.ordinal)
+                        is ConfigRoute -> {
+                            viewModel.getConfig(destNum, route.configType)
                         }
-                        ModuleDest.CANNED_MESSAGE -> {
-                            (packetResponseState as PacketResponseState.Loading).total = 2
+                        ModuleRoute.CANNED_MESSAGE -> {
+                            viewModel.setResponseStateTotal(2)
                             viewModel.getCannedMessages(destNum)
                         }
-                        ModuleDest.EXTERNAL_NOTIFICATION -> {
-                            (packetResponseState as PacketResponseState.Loading).total = 2
+                        ModuleRoute.EXTERNAL_NOTIFICATION -> {
+                            viewModel.setResponseStateTotal(2)
                             viewModel.getRingtone(destNum)
                         }
-                        is ModuleDest -> {
-                            viewModel.getModuleConfig(destNum, configType.ordinal)
+                        is ModuleRoute -> {
+                            viewModel.getModuleConfig(destNum, route.configType)
                         }
                     }
                 },
             )
         }
-        composable("channels") {
-            ChannelSettingsItemList(
-                settingsList = channelList,
-                modemPresetName = Channel(Channel.default.settings, radioConfig.lora).name,
-                enabled = connected,
-                maxChannels = maxChannels,
-                onPositiveClicked = { channelListInput ->
-                    viewModel.updateChannels(destNum, channelList, channelListInput)
-                    channelList.clear()
-                    channelList.addAll(channelListInput)
-                },
-            )
-        }
-        composable("user") {
+        composable(ConfigRoute.USER.name) {
             UserConfigItemList(
-                userConfig = userConfig,
+                userConfig = radioConfigState.userConfig,
                 enabled = connected,
                 onSaveClicked = { userInput ->
                     viewModel.setRemoteOwner(destNum, userInput)
-                    userConfig = userInput
                 }
             )
         }
-        composable(ConfigDest.DEVICE.name) {
+        composable(ConfigRoute.CHANNELS.name) {
+            ChannelSettingsItemList(
+                settingsList = radioConfigState.channelList,
+                modemPresetName = Channel(loraConfig = radioConfigState.radioConfig.lora).name,
+                enabled = connected,
+                maxChannels = maxChannels,
+                onPositiveClicked = { channelListInput ->
+                    viewModel.updateChannels(destNum, radioConfigState.channelList, channelListInput)
+                    viewModel.setRemoteChannelList(channelListInput)
+                },
+            )
+        }
+        composable(ConfigRoute.DEVICE.name) {
             DeviceConfigItemList(
-                deviceConfig = radioConfig.device,
+                deviceConfig = radioConfigState.radioConfig.device,
                 enabled = connected,
                 onSaveClicked = { deviceInput ->
                     val config = config { device = deviceInput }
                     viewModel.setRemoteConfig(destNum, config)
-                    radioConfig = config
                 }
             )
         }
-        composable(ConfigDest.POSITION.name) {
+        composable(ConfigRoute.POSITION.name) {
             PositionConfigItemList(
                 isLocal = isLocal,
                 location = location,
-                positionConfig = radioConfig.position,
+                positionConfig = radioConfigState.radioConfig.position,
                 enabled = connected,
                 onSaveClicked = { locationInput, positionInput ->
                     if (locationInput != node.position && positionInput.fixedPosition) {
                         locationInput?.let { viewModel.requestPosition(destNum, it) }
                         location = locationInput
                     }
-                    if (positionInput != radioConfig.position) {
+                    if (positionInput != radioConfigState.radioConfig.position) {
                         val config = config { position = positionInput }
                         viewModel.setRemoteConfig(destNum, config)
-                        radioConfig = config
                     }
                 }
             )
         }
-        composable(ConfigDest.POWER.name) {
+        composable(ConfigRoute.POWER.name) {
             PowerConfigItemList(
-                powerConfig = radioConfig.power,
+                powerConfig = radioConfigState.radioConfig.power,
                 enabled = connected,
                 onSaveClicked = { powerInput ->
                     val config = config { power = powerInput }
                     viewModel.setRemoteConfig(destNum, config)
-                    radioConfig = config
                 }
             )
         }
-        composable(ConfigDest.NETWORK.name) {
+        composable(ConfigRoute.NETWORK.name) {
             NetworkConfigItemList(
-                networkConfig = radioConfig.network,
+                networkConfig = radioConfigState.radioConfig.network,
                 enabled = connected,
                 onSaveClicked = { networkInput ->
                     val config = config { network = networkInput }
                     viewModel.setRemoteConfig(destNum, config)
-                    radioConfig = config
                 }
             )
         }
-        composable(ConfigDest.DISPLAY.name) {
+        composable(ConfigRoute.DISPLAY.name) {
             DisplayConfigItemList(
-                displayConfig = radioConfig.display,
+                displayConfig = radioConfigState.radioConfig.display,
                 enabled = connected,
                 onSaveClicked = { displayInput ->
                     val config = config { display = displayInput }
                     viewModel.setRemoteConfig(destNum, config)
-                    radioConfig = config
                 }
             )
         }
-        composable(ConfigDest.LORA.name) {
+        composable(ConfigRoute.LORA.name) {
             LoRaConfigItemList(
-                loraConfig = radioConfig.lora,
-                primarySettings = channelList.getOrNull(0) ?: return@composable,
+                loraConfig = radioConfigState.radioConfig.lora,
+                primarySettings = radioConfigState.channelList.getOrNull(0) ?: return@composable,
                 enabled = connected,
                 onSaveClicked = { loraInput ->
                     val config = config { lora = loraInput }
                     viewModel.setRemoteConfig(destNum, config)
-                    radioConfig = config
                 }
             )
         }
-        composable(ConfigDest.BLUETOOTH.name) {
+        composable(ConfigRoute.BLUETOOTH.name) {
             BluetoothConfigItemList(
-                bluetoothConfig = radioConfig.bluetooth,
+                bluetoothConfig = radioConfigState.radioConfig.bluetooth,
                 enabled = connected,
                 onSaveClicked = { bluetoothInput ->
                     val config = config { bluetooth = bluetoothInput }
                     viewModel.setRemoteConfig(destNum, config)
-                    radioConfig = config
                 }
             )
         }
-        composable(ModuleDest.MQTT.name) {
+        composable(ModuleRoute.MQTT.name) {
             MQTTConfigItemList(
-                mqttConfig = moduleConfig.mqtt,
+                mqttConfig = radioConfigState.moduleConfig.mqtt,
                 enabled = connected,
                 onSaveClicked = { mqttInput ->
                     val config = moduleConfig { mqtt = mqttInput }
                     viewModel.setModuleConfig(destNum, config)
-                    moduleConfig = config
                 }
             )
         }
-        composable(ModuleDest.SERIAL.name) {
+        composable(ModuleRoute.SERIAL.name) {
             SerialConfigItemList(
-                serialConfig = moduleConfig.serial,
+                serialConfig = radioConfigState.moduleConfig.serial,
                 enabled = connected,
                 onSaveClicked = { serialInput ->
                     val config = moduleConfig { serial = serialInput }
                     viewModel.setModuleConfig(destNum, config)
-                    moduleConfig = config
                 }
             )
         }
-        composable(ModuleDest.EXTERNAL_NOTIFICATION.name) {
+        composable(ModuleRoute.EXTERNAL_NOTIFICATION.name) {
             ExternalNotificationConfigItemList(
-                ringtone = ringtone,
-                extNotificationConfig = moduleConfig.externalNotification,
+                ringtone = radioConfigState.ringtone,
+                extNotificationConfig = radioConfigState.moduleConfig.externalNotification,
                 enabled = connected,
                 onSaveClicked = { ringtoneInput, extNotificationInput ->
-                    if (ringtoneInput != ringtone) {
+                    if (ringtoneInput != radioConfigState.ringtone) {
                         viewModel.setRingtone(destNum, ringtoneInput)
-                        ringtone = ringtoneInput
                     }
-                    if (extNotificationInput != moduleConfig.externalNotification) {
+                    if (extNotificationInput != radioConfigState.moduleConfig.externalNotification) {
                         val config = moduleConfig { externalNotification = extNotificationInput }
                         viewModel.setModuleConfig(destNum, config)
-                        moduleConfig = config
                     }
                 }
             )
         }
-        composable(ModuleDest.STORE_FORWARD.name) {
+        composable(ModuleRoute.STORE_FORWARD.name) {
             StoreForwardConfigItemList(
-                storeForwardConfig = moduleConfig.storeForward,
+                storeForwardConfig = radioConfigState.moduleConfig.storeForward,
                 enabled = connected,
                 onSaveClicked = { storeForwardInput ->
                     val config = moduleConfig { storeForward = storeForwardInput }
                     viewModel.setModuleConfig(destNum, config)
-                    moduleConfig = config
                 }
             )
         }
-        composable(ModuleDest.RANGE_TEST.name) {
+        composable(ModuleRoute.RANGE_TEST.name) {
             RangeTestConfigItemList(
-                rangeTestConfig = moduleConfig.rangeTest,
+                rangeTestConfig = radioConfigState.moduleConfig.rangeTest,
                 enabled = connected,
                 onSaveClicked = { rangeTestInput ->
                     val config = moduleConfig { rangeTest = rangeTestInput }
                     viewModel.setModuleConfig(destNum, config)
-                    moduleConfig = config
                 }
             )
         }
-        composable(ModuleDest.TELEMETRY.name) {
+        composable(ModuleRoute.TELEMETRY.name) {
             TelemetryConfigItemList(
-                telemetryConfig = moduleConfig.telemetry,
+                telemetryConfig = radioConfigState.moduleConfig.telemetry,
                 enabled = connected,
                 onSaveClicked = { telemetryInput ->
                     val config = moduleConfig { telemetry = telemetryInput }
                     viewModel.setModuleConfig(destNum, config)
-                    moduleConfig = config
                 }
             )
         }
-        composable(ModuleDest.CANNED_MESSAGE.name) {
+        composable(ModuleRoute.CANNED_MESSAGE.name) {
             CannedMessageConfigItemList(
-                messages = cannedMessageMessages,
-                cannedMessageConfig = moduleConfig.cannedMessage,
+                messages = radioConfigState.cannedMessageMessages,
+                cannedMessageConfig = radioConfigState.moduleConfig.cannedMessage,
                 enabled = connected,
                 onSaveClicked = { messagesInput, cannedMessageInput ->
-                    if (messagesInput != cannedMessageMessages) {
+                    if (messagesInput != radioConfigState.cannedMessageMessages) {
                         viewModel.setCannedMessages(destNum, messagesInput)
-                        cannedMessageMessages = messagesInput
                     }
-                    if (cannedMessageInput != moduleConfig.cannedMessage) {
+                    if (cannedMessageInput != radioConfigState.moduleConfig.cannedMessage) {
                         val config = moduleConfig { cannedMessage = cannedMessageInput }
                         viewModel.setModuleConfig(destNum, config)
-                        moduleConfig = config
                     }
                 }
             )
         }
-        composable(ModuleDest.AUDIO.name) {
+        composable(ModuleRoute.AUDIO.name) {
             AudioConfigItemList(
-                audioConfig = moduleConfig.audio,
+                audioConfig = radioConfigState.moduleConfig.audio,
                 enabled = connected,
                 onSaveClicked = { audioInput ->
                     val config = moduleConfig { audio = audioInput }
                     viewModel.setModuleConfig(destNum, config)
-                    moduleConfig = config
                 }
             )
         }
-        composable(ModuleDest.REMOTE_HARDWARE.name) {
+        composable(ModuleRoute.REMOTE_HARDWARE.name) {
             RemoteHardwareConfigItemList(
-                remoteHardwareConfig = moduleConfig.remoteHardware,
+                remoteHardwareConfig = radioConfigState.moduleConfig.remoteHardware,
                 enabled = connected,
                 onSaveClicked = { remoteHardwareInput ->
                     val config = moduleConfig { remoteHardware = remoteHardwareInput }
                     viewModel.setModuleConfig(destNum, config)
-                    moduleConfig = config
                 }
             )
         }
-        composable(ModuleDest.NEIGHBOR_INFO.name) {
+        composable(ModuleRoute.NEIGHBOR_INFO.name) {
             NeighborInfoConfigItemList(
-                neighborInfoConfig = moduleConfig.neighborInfo,
+                neighborInfoConfig = radioConfigState.moduleConfig.neighborInfo,
                 enabled = connected,
                 onSaveClicked = { neighborInfoInput ->
                     val config = moduleConfig { neighborInfo = neighborInfoInput }
                     viewModel.setModuleConfig(destNum, config)
-                    moduleConfig = config
                 }
             )
         }
-        composable(ModuleDest.AMBIENT_LIGHTING.name) {
+        composable(ModuleRoute.AMBIENT_LIGHTING.name) {
             AmbientLightingConfigItemList(
-                ambientLightingConfig = moduleConfig.ambientLighting,
+                ambientLightingConfig = radioConfigState.moduleConfig.ambientLighting,
                 enabled = connected,
                 onSaveClicked = { ambientLightingInput ->
                     val config = moduleConfig { ambientLighting = ambientLightingInput }
                     viewModel.setModuleConfig(destNum, config)
-                    moduleConfig = config
                 }
             )
         }
-        composable(ModuleDest.DETECTION_SENSOR.name) {
+        composable(ModuleRoute.DETECTION_SENSOR.name) {
             DetectionSensorConfigItemList(
-                detectionSensorConfig = moduleConfig.detectionSensor,
+                detectionSensorConfig = radioConfigState.moduleConfig.detectionSensor,
                 enabled = connected,
                 onSaveClicked = { detectionSensorInput ->
                     val config = moduleConfig { detectionSensor = detectionSensorInput }
                     viewModel.setModuleConfig(destNum, config)
-                    moduleConfig = config
                 }
             )
         }
@@ -756,11 +641,6 @@ private fun NavCard(
             )
         }
     }
-}
-
-@Composable
-private fun NavCard(@StringRes title: Int, enabled: Boolean, onClick: () -> Unit) {
-    NavCard(title = stringResource(title), enabled = enabled, onClick = onClick)
 }
 
 @Composable
@@ -832,16 +712,10 @@ private fun RadioSettingsScreen(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
         item { PreferenceCategory(stringResource(R.string.device_settings)) }
-        item { NavCard("User", enabled = enabled) { onRouteClick("USER") } }
-        item { NavCard("Channels", enabled = enabled) { onRouteClick("CHANNELS") } }
-        items(ConfigDest.values()) { config ->
-            NavCard(config.title, enabled = enabled) { onRouteClick(config) }
-        }
+        items(ConfigRoute.entries) { NavCard(it.title, enabled = enabled) { onRouteClick(it) } }
 
         item { PreferenceCategory(stringResource(R.string.module_settings)) }
-        items(ModuleDest.values()) { module ->
-            NavCard(module.title, enabled = enabled) { onRouteClick(module) }
-        }
+        items(ModuleRoute.entries) { NavCard(it.title, enabled = enabled) { onRouteClick(it) } }
 
         if (isLocal) {
             item { PreferenceCategory("Import / Export") }
