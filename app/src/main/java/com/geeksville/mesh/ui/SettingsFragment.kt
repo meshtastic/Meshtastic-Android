@@ -208,7 +208,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             MeshService.ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
             else -> null
         }?.let {
-            val firmwareString = info?.firmwareString ?: getString(R.string.unknown)
+            val firmwareString = info?.firmwareString ?: getString(org.osmdroid.library.R.string.unknown)
             scanModel.setErrorText(getString(it, firmwareString))
         }
     }
