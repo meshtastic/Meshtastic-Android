@@ -39,6 +39,7 @@
     <string name="connected_count">Подключено: %1$s из %2$s онлайн</string>
     <string name="list_of_nodes">Список узлов в сети</string>
     <string name="update_firmware">Обновите прошивку</string>
+    <string name="ip_address">ИП адрес:</string>
     <string name="connected">Подключен к радио</string>
     <string name="connected_to">Подключен к радио (%s)</string>
     <string name="not_connected">Нет соединения</string>
@@ -94,6 +95,9 @@
     <string name="provide_location_to_mesh">Предоставление местоположения для сети</string>
     <string name="camera_required">Разрешение камеры</string>
     <string name="why_camera_required">Нам должен быть предоставлен доступ к камере для считывания QR-кодов. Фотографии или видео не будут сохранены.</string>
+    <string name="notification_required">Разрешение на уведомления</string>
+    <string name="why_notification_required">Meshtastic требуется разрешение для уведомлений об сообщениях и работе в фоне.</string>
+    <string name="notification_denied">Разрешение на уведомления отклонено. Чтобы включить уведомления, откройте: Настройки Android > Приложения > Meshtastic > Уведомления.</string>
     <string name="modem_config_slow_short">Ближний радиус действия / Медленный</string>
     <string name="modem_config_slow_medium">Средний диапазон / Медленный</string>
     <plurals name="delete_messages">
@@ -140,6 +144,9 @@
     <string name="direct_message">Прямое сообщение</string>
     <string name="nodedb_reset">Очистка списка узлов сети</string>
     <string name="nodedb_reset_description">Это очистит все узлы из этого списка.</string>
+    <string name="ignore">Игнорировать</string>
+    <string name="ignore_add">Добавить \'%s\' в игнор лист? Устройство будет перезагружено после этого действия.</string>
+    <string name="ignore_remove">Удалить \'%s\' из игнор листа? Устройство будет перезагружено после этого действия.</string>
     <string name="map_select_download_region">Выберите регион загрузки</string>
     <string name="map_tile_download_estimate">Предполагаемое время загрузки файла:</string>
     <string name="map_start_download">Начать скачивание</string>
@@ -164,4 +171,5 @@
     <string name="waypoint_edit">Редактировать путевую точку</string>
     <string name="waypoint_delete">Удалить путевую точку?</string>
     <string name="waypoint_new">Установить путевую точку</string>
+    <string name="waypoint_received">Приняты путевые точки: %s</string>
 </resources>
