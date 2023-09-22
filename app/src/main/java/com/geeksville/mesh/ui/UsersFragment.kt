@@ -256,7 +256,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 holder.signalView.visibility = View.VISIBLE
             } else {
                 if ((n.snr < 100f) && (n.rssi < 0)) {
-                    val text = "rssi:%d snr:%.1f".format(n.rssi, n.snr)
+                    val text = "rssi:%d snr:%.1f hops:%d".format(n.rssi, n.snr, n.hopLimit)
                     holder.signalView.text = text
                     holder.signalView.visibility = View.VISIBLE
                 } else {
@@ -337,6 +337,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 .setTitle(R.string.traceroute)
                 .setMessage(response ?: return@observe)
                 .setPositiveButton(R.string.okay) { _, _ -> }
+                .setCancelable(false)
                 .show()
 
             model.clearTracerouteResponse()

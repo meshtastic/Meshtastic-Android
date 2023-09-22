@@ -167,6 +167,7 @@ data class NodeInfo(
     var position: Position? = null,
     var snr: Float = Float.MAX_VALUE,
     var rssi: Int = Int.MAX_VALUE,
+    var hopLimit: Int = 0, // 0 as simple zero when not filled
     var lastHeard: Int = 0, // the last time we've seen this node in secs since 1970
     @Embedded(prefix = "devMetrics_")
     var deviceMetrics: DeviceMetrics? = null,

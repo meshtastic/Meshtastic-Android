@@ -941,6 +941,7 @@ class MeshService : Service(), Logging {
                 updateNodeInfoTime(it, rxTime)
                 it.snr = packet.rxSnr
                 it.rssi = packet.rxRssi
+                it.hopLimit = packet.hopLimit
             }
 
             handleReceivedData(packet)
