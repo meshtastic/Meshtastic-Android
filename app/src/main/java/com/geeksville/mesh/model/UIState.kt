@@ -723,8 +723,10 @@ class UIViewModel @Inject constructor(
                     message.writeTo(outputStream)
                 }
             }
-        } catch (ex: FileNotFoundException) {
+        } catch (ex: Exception) {
+            val error = "${ex.javaClass.simpleName}: ${ex.message}"
             errormsg("Can't write file error: ${ex.message}")
+            setResponseStateError(error)
         }
     }
 
