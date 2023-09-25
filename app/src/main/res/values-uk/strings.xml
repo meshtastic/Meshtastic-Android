@@ -39,6 +39,7 @@
     <string name="connected_count">Підключено: %1$s із %2$s доступні</string>
     <string name="list_of_nodes">Список вузлів мережі</string>
     <string name="update_firmware">Оновлення прошивки</string>
+    <string name="ip_address">IP Адреса:</string>
     <string name="connected">Підключено до радіомодуля</string>
     <string name="connected_to">Підключено до радіомодуля (%s)</string>
     <string name="not_connected">Не підключено</string>
@@ -94,6 +95,9 @@
     <string name="provide_location_to_mesh">Укажіть розташування для мережі</string>
     <string name="camera_required">Дозвіл доступу до камери</string>
     <string name="why_camera_required">Потрібно надати доступ до камери, щоб розпізнати QR-код. Зображення чи відео не будуть збережені.</string>
+    <string name="notification_required">Дозвіл на сповіщення</string>
+    <string name="why_notification_required">Meshtastic потрібен дозвіл для відображення повідомлень і сервісних сповіщень.</string>
+    <string name="notification_denied">У доступі до сповіщень відмовлено. Щоб увімкнути сповіщення, відкрийте: Налаштування Android &gt; Додатки &gt; Meshtastic &gt; Сповіщення.</string>
     <string name="modem_config_slow_short">Short Range / Slow</string>
     <string name="modem_config_slow_medium">Medium Range / Slow</string>
     <plurals name="delete_messages">
@@ -140,6 +144,9 @@
     <string name="direct_message">Пряме повідомлення</string>
     <string name="nodedb_reset">Очищення бази вузлів</string>
     <string name="nodedb_reset_description">Це очистить усі вузли зі списку.</string>
+    <string name="ignore">Ігнорувати</string>
+    <string name="ignore_add">Додати \'%s\' до чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>
+    <string name="ignore_remove">Видалити \'%s\' з чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>
     <string name="map_select_download_region">Оберіть регіон завантаження</string>
     <string name="map_tile_download_estimate">Час завантаження фрагментів:</string>
     <string name="map_start_download">Почати завантаження</string>
@@ -164,4 +171,5 @@
     <string name="waypoint_edit">Редагувати точку</string>
     <string name="waypoint_delete">Видалити мітку?</string>
     <string name="waypoint_new">Новий мітка</string>
+    <string name="waypoint_received">Отримано точку маршруту: %s</string>
 </resources>
