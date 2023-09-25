@@ -44,7 +44,7 @@
     <string name="connected_sleeping">Свързан е с радио, но рядиото е в режим на заспиване</string>
     <string name="update_to">Актуализиране до %s</string>
     <string name="app_too_old">Изисква се актуализация на приложението</string>
-    <string name="must_update">Трябва да актуализирате това приложение в магазина за приложения (или GitHub). Приложението е твърде старо, за да говори с този фърмуер на радиото. Моля, прочетете нашите <a href="https://meshtastic.org/docs/software/android/android-installation">документи</a> по тази тема.</string>
+    <string name="must_update">Трябва да актуализирате това приложение в магазина за приложения (или GitHub). Приложението е твърде старо, за да говори с този фърмуер на радиото. Моля, прочетете нашите <a href="https://meshtastic.org/docs/software/android/installation">документи</a> по тази тема.</string>
     <string name="none">Няма (деактивиране)</string>
     <string name="modem_config_short">Къс обхват / Бърз</string>
     <string name="modem_config_medium">Среден обхват / Бърз</string>
@@ -70,7 +70,7 @@
     <string name="meshtastic_messages_notifications">Известия за съобщения</string>
     <string name="protocol_stress_test">Протоколен стрес тест</string>
     <string name="firmware_too_old">Изисква се актуализация на фърмуера</string>
-    <string name="firmware_old">Фърмуерът на радиото е твърде стар, за да общува с това приложение, моля, отидете в панела с настройки и изберете „Актуализиране на фърмуера“. За повече информация относно това вижте <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">нашето ръководство за инсталиране на фърмуер</a> в GitHub.</string>
+    <string name="firmware_old">Фърмуерът на радиото е твърде стар, за да общува с това приложение, моля, отидете в панела с настройки и изберете „Актуализиране на фърмуера“. За повече информация относно това вижте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">нашето ръководство за инсталиране на фърмуер</a> в GitHub.</string>
     <string name="okay">Добре</string>
     <string name="must_set_region">Трябва да зададете регион!</string>
     <string name="region">Регион</string>

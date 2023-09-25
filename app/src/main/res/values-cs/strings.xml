@@ -71,7 +71,7 @@
     <string name="meshtastic_messages_notifications">Upozornění na zprávy</string>
     <string name="protocol_stress_test">Protokol zátěžového testu</string>
     <string name="firmware_too_old">Vyžadována aktualizace firmwaru</string>
-    <string name="firmware_old">Firmware rádia je příliš starý na to, aby mohl komunikovat s touto aplikací, přejděte do nastavení a zvolte \"Aktualizovat firmware\". Více informací o tomto naleznete v <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">naší firmware instalační příručce</a> na Githubu.</string>
+    <string name="firmware_old">Firmware rádia je příliš starý na to, aby mohl komunikovat s touto aplikací, přejděte do nastavení a zvolte \"Aktualizovat firmware\". Více informací o tomto naleznete v <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naší firmware instalační příručce</a> na Githubu.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Musíte specifikovat region!</string>
     <string name="region">Region</string>

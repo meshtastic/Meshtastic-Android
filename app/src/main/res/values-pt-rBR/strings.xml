@@ -45,7 +45,7 @@
     <string name="connected_sleeping">Conectado ao rádio, mas ele está em suspensão (sleep)</string>
     <string name="update_to">Atualização para %s</string>
     <string name="app_too_old">Atualização do aplicativo necessária</string>
-    <string name="must_update">Será necessário atualizar este aplicativo no Google Play (ou Github). Versão muito antiga para comunicar com o firmware do rádio.  Favor consultar <a href="https://meshtastic.org/docs/software/android/android-installation">docs</a>.</string>
+    <string name="must_update">Será necessário atualizar este aplicativo no Google Play (ou Github). Versão muito antiga para comunicar com o firmware do rádio.  Favor consultar <a href="https://meshtastic.org/docs/software/android/installation">docs</a>.</string>
     <string name="none">Nenhum (desabilitado)</string>
     <string name="modem_config_short">Curto alcance / rápido</string>
     <string name="modem_config_medium">Médio alcance / rápido</string>
@@ -70,7 +70,7 @@
     <string name="meshtastic_messages_notifications">Notificações de mensagens</string>
     <string name="protocol_stress_test">Stress test do protocolo</string>
     <string name="firmware_too_old">Atualização do firmware necessária</string>
-    <string name="firmware_old">Versão de firmware do rádio muito antiga para comunicar com este aplicativo, favor acessar opção \"Atualizar firmware\" nas Configurações.  Para mais informações consultar <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">Nosso guia de instalação de firmware</a> no Github.</string>
+    <string name="firmware_old">Versão de firmware do rádio muito antiga para comunicar com este aplicativo, favor acessar opção \"Atualizar firmware\" nas Configurações.  Para mais informações consultar <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Nosso guia de instalação de firmware</a> no Github.</string>
     <string name="okay">Okay</string>
     <string name="must_set_region">Você deve informar uma região!</string>
     <string name="region">Região</string>

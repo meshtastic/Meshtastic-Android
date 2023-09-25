@@ -45,7 +45,7 @@
     <string name="connected_sleeping">Connesso alla radio, ma sta dormendo</string>
     <string name="update_to">Aggiornare a %s</string>
     <string name="app_too_old">Aggiornamento dell\'applicazione necessario</string>
-    <string name="must_update">È necessario aggiornare questa applicazione nell\'app store (o Github). È troppo vecchio per parlare con questo firmware radio. Per favore leggi i nostri <a href="https://meshtastic.org/docs/software/android/android-installation">documenti</a> su questo argomento.</string>
+    <string name="must_update">È necessario aggiornare questa applicazione nell\'app store (o Github). È troppo vecchio per parlare con questo firmware radio. Per favore leggi i nostri <a href="https://meshtastic.org/docs/software/android/installation">documenti</a> su questo argomento.</string>
     <string name="none">None (disable)</string>
     <string name="modem_config_short">Distanza Breve / Veloce</string>
     <string name="modem_config_medium">Distanza Media / Veloce</string>
@@ -70,7 +70,7 @@
     <string name="meshtastic_messages_notifications">Notifiche messaggio</string>
     <string name="protocol_stress_test">Protocol stress test</string>
     <string name="firmware_too_old">Aggiornamento del firmware necessario</string>
-    <string name="firmware_old">Il firmware radio è troppo vecchio per parlare con questa applicazione, vai al riquadro delle impostazioni e scegli \"Aggiorna firmware\". Per ulteriori informazioni su questo vedi <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">la nostra guida all\'installazione del firmware</a> su Github.</string>
+    <string name="firmware_old">Il firmware radio è troppo vecchio per parlare con questa applicazione, vai al riquadro delle impostazioni e scegli \"Aggiorna firmware\". Per ulteriori informazioni su questo vedi <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">la nostra guida all\'installazione del firmware</a> su Github.</string>
     <string name="okay">Ok</string>
     <string name="must_set_region">Devi impostare una regione!</string>
     <string name="region">Regione</string>

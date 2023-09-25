@@ -45,7 +45,7 @@
     <string name="connected_sleeping">Підключено до радіомодуля, але він в режимі сну</string>
     <string name="update_to">Оновити до %s</string>
     <string name="app_too_old">Потрібне оновлення програми</string>
-    <string name="must_update">Ви повинні оновити цю програму в App Store (або Github). Він занадто старий, щоб спілкуватися з цією прошивкою радіо. Будь ласка, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/android-installation">документацію</a> у вказаній темі.</string>
+    <string name="must_update">Ви повинні оновити цю програму в App Store (або Github). Він занадто старий, щоб спілкуватися з цією прошивкою радіо. Будь ласка, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацію</a> у вказаній темі.</string>
     <string name="none">Відсутнє (вимкнуте)</string>
     <string name="modem_config_short">Short Range / Fast</string>
     <string name="modem_config_medium">Medium Range / Fast</string>
@@ -71,7 +71,7 @@
     <string name="meshtastic_messages_notifications">Сповіщення повідомлення</string>
     <string name="protocol_stress_test">Стрес-тест протоколу</string>
     <string name="firmware_too_old">Потрібне оновлення прошивки</string>
-    <string name="firmware_old">Прошивка радіо застаріла для зв’язку з цією програмою. Перейдіть на панель налаштувань і виберіть «Оновити мікропрограму». Для отримання додаткової інформації дивіться <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">наш посібник із встановлення мікропрограми</a> на Github.</string>
+    <string name="firmware_old">Прошивка радіо застаріла для зв’язку з цією програмою. Перейдіть на панель налаштувань і виберіть «Оновити мікропрограму». Для отримання додаткової інформації дивіться <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наш посібник із встановлення мікропрограми</a> на Github.</string>
     <string name="okay">Гаразд</string>
     <string name="must_set_region">Ви повинні встановити регіон!</string>
     <string name="region">Регіон</string>

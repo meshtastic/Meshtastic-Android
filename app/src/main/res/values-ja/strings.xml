@@ -45,7 +45,7 @@
     <string name="connected_sleeping">接続しましたが、Meshtasticデバイスはスリープ状態です。</string>
     <string name="update_to">%s更新</string>
     <string name="app_too_old">アプリケーション更新が必要です。</string>
-    <string name="must_update">アプリは旧バージョンのため、ラジオと通信ができません。アプリストアまたはGithubでアプリを更新してください。詳細はGithub<a href="https://meshtastic.org/docs/software/android/android-installation">docs</a> に記載されております。</string>
+    <string name="must_update">アプリは旧バージョンのため、ラジオと通信ができません。アプリストアまたはGithubでアプリを更新してください。詳細はGithub<a href="https://meshtastic.org/docs/software/android/installation">docs</a> に記載されております。</string>
     <string name="none">なし (無効化)</string>
     <string name="modem_config_short">短距離/高速</string>
     <string name="modem_config_medium">中距離/高速</string>
@@ -70,7 +70,7 @@
     <string name="meshtastic_messages_notifications">メッセージ通知</string>
     <string name="protocol_stress_test">プロトコルストレステスト</string>
     <string name="firmware_too_old">ファームウェア更新が必要です。</string>
-    <string name="firmware_old">ラジオファームウェアは旧バージョンのため、アプリと通信ができません。設定パネルからファームウェアを更新してください。詳細はGithub<a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation"> Firmware Installation guide</a> に記載されております。</string>
+    <string name="firmware_old">ラジオファームウェアは旧バージョンのため、アプリと通信ができません。設定パネルからファームウェアを更新してください。詳細はGithub<a href="https://meshtastic.org/docs/getting-started/flashing-firmware"> Firmware Installation guide</a> に記載されております。</string>
     <string name="okay">OK</string>
     <string name="must_set_region">リージョンを指定する必要があります。</string>
     <string name="region">リージョン</string>

@@ -68,7 +68,7 @@
     <string name="meshtastic_messages_notifications">Meldingsvarsler</string>
     <string name="protocol_stress_test">Protokoll stresstest</string>
     <string name="firmware_too_old">Firmwareoppdatering kreves</string>
-    <string name="firmware_old">Radiofirmwaren er for gammel til å snakke med denne applikasjonen, gå til innstillingsruten og velg \"Oppdater Firmware\". For mer informasjon om dette se <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">vår Firmware installasjonsveiledning</a> på Github.</string>
+    <string name="firmware_old">Radiofirmwaren er for gammel til å snakke med denne applikasjonen, gå til innstillingsruten og velg \"Oppdater Firmware\". For mer informasjon om dette se <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">vår Firmware installasjonsveiledning</a> på Github.</string>
     <string name="okay">Ok</string>
     <string name="must_set_region">Du må angi en region!</string>
     <string name="region">Region</string>

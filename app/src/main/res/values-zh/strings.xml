@@ -45,7 +45,7 @@
     <string name="connected_sleeping">已连接至设备，但设备正在休眠中</string>
     <string name="update_to">更新到%s</string>
     <string name="app_too_old">需要更新应用程序</string>
-    <string name="must_update">您必须在应用商店（或 Github）上更新此应用程序。程序太旧了以至于无法与此装置进行通讯。 请阅读有关此主题的 <a href="https://meshtastic.org/docs/software/android/android-installation">文件</a>。</string>
+    <string name="must_update">您必须在应用商店（或 Github）上更新此应用程序。程序太旧了以至于无法与此装置进行通讯。 请阅读有关此主题的 <a href="https://meshtastic.org/docs/software/android/installation">文件</a>。</string>
     <string name="none">无 （停用）</string>
     <string name="modem_config_short">短距離（速度快）</string>
     <string name="modem_config_medium">中等距离（速度快）</string>
@@ -70,7 +70,7 @@
     <string name="meshtastic_messages_notifications">消息通知</string>
     <string name="protocol_stress_test">協定壓力測試</string>
     <string name="firmware_too_old">需要韧体更新</string>
-    <string name="firmware_old">版本过旧，无法与此应用程序通讯。请前往设定面板并选择「更新韧体」。欲了解更多信息，请参阅 Github 上的<a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">韧体安装指南</a>。</string>
+    <string name="firmware_old">版本过旧，无法与此应用程序通讯。请前往设定面板并选择「更新韧体」。欲了解更多信息，请参阅 Github 上的<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">韧体安装指南</a>。</string>
     <string name="okay">好的</string>
     <string name="must_set_region">您必须先选择一个地区</string>
     <string name="region">地區</string>

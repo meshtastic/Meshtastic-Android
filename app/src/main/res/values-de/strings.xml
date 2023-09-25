@@ -45,7 +45,7 @@
     <string name="connected_sleeping">Mit Funkgerät verbunden, aber es ist im Schlafmodus</string>
     <string name="update_to">Auf %s aktualisieren</string>
     <string name="app_too_old">Anwendungsaktualisierung erforderlich</string>
-    <string name="must_update">Sie müssen diese App über den App Store (oder Github) aktualisieren. Sie ist zu alt, um mit dieser Funkgerät-Firmware zu kommunizieren. Bitte lesen Sie unsere  <a href="https://meshtastic.org/docs/software/android/android-installation">Dokumentation</a> zu diesem Thema.</string>
+    <string name="must_update">Sie müssen diese App über den App Store (oder Github) aktualisieren. Sie ist zu alt, um mit dieser Funkgerät-Firmware zu kommunizieren. Bitte lesen Sie unsere  <a href="https://meshtastic.org/docs/software/android/installation">Dokumentation</a> zu diesem Thema.</string>
     <string name="none">Nichts (deaktiviert)</string>
     <string name="modem_config_short">Kurze Reichweite / Schnell</string>
     <string name="modem_config_medium">Mittlere Reichweite / Schnell</string>
@@ -71,7 +71,7 @@
     <string name="meshtastic_messages_notifications">Nachrichten-Benachrichtigungen</string>
     <string name="protocol_stress_test">Protokollstress-Test</string>
     <string name="firmware_too_old">Firmware-Aktualisierung erforderlich</string>
-    <string name="firmware_old">Die Funkgerät-Firmware ist zu alt, um mit dieser App kommunizieren zu können. Bitte gehen Sie in die Einstellung-Leiste und wählen Sie „Firmware aktualisieren“. Für mehr Informationen darüber besuchen Sie <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">unsere Firmware-Installationsanleitung</a> auf Github.</string>
+    <string name="firmware_old">Die Funkgerät-Firmware ist zu alt, um mit dieser App kommunizieren zu können. Bitte gehen Sie in die Einstellung-Leiste und wählen Sie „Firmware aktualisieren“. Für mehr Informationen darüber besuchen Sie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">unsere Firmware-Installationsanleitung</a> auf Github.</string>
     <string name="okay">Okay</string>
     <string name="must_set_region">Sie müssen eine Region festlegen!</string>
     <string name="region">Region</string>

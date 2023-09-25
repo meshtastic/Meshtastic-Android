@@ -43,7 +43,7 @@
     <string name="connected_sleeping">Pripojené k uspatému vysielaču.</string>
     <string name="update_to">Aktualizovať na %s</string>
     <string name="app_too_old">Aplikácia je príliš stará</string>
-    <string name="must_update">Musíte aktualizovať aplikáciu na Google Play store (alebo z Github). Je príliš stará pre komunikáciu s touto verziou firmvéru vysielača. Viac informácií k tejto téme nájdete na <a href="https://meshtastic.org/docs/software/android/android-installation">Meshtastic docs</a>.</string>
+    <string name="must_update">Musíte aktualizovať aplikáciu na Google Play store (alebo z Github). Je príliš stará pre komunikáciu s touto verziou firmvéru vysielača. Viac informácií k tejto téme nájdete na <a href="https://meshtastic.org/docs/software/android/installation">Meshtastic docs</a>.</string>
     <string name="none">Žiaden (zakázať)</string>
     <string name="modem_config_short">Krátky dosah / Rýchle</string>
     <string name="modem_config_medium">Stredný dosah / Rýchle</string>
@@ -77,7 +77,7 @@
     <string name="apply">Použiť</string>
     <string name="are_you_sure_change_default">Ste si istý, že chcete preladiť na základný (default) kanál?</string>
     <string name="cant_change_no_radio">Nie je možné zmeniť kanál, pretože vysielač ešte nie je pripojený. Skúste to neskôr.</string>
-    <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Prosím choďte na panel nastavení a zvoľte možnosť \"Aktualizácia firmvéru\". Viac informácií nájdete na <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">našom sprievodcovi inštaláciou firmvéru</a> na Github-e.</string>
+    <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Prosím choďte na panel nastavení a zvoľte možnosť \"Aktualizácia firmvéru\". Viac informácií nájdete na <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">našom sprievodcovi inštaláciou firmvéru</a> na Github-e.</string>
     <string name="no_app_found">Aplikácia pre odoslanie URL nebola nájdená</string>
     <string name="theme">Téma</string>
     <string name="theme_light">Svetlá</string>

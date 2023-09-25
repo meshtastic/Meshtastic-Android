@@ -45,7 +45,7 @@
     <string name="connected_sleeping">Tengdur við radíó, en það er í svefnham</string>
     <string name="update_to">Uppfæra í %s</string>
     <string name="app_too_old">Uppfærsla á smáforriti nauðsynleg</string>
-    <string name="must_update">Þú verður að uppfæra þetta smáforrit í app store (eða Github). Það er of gamalt til að geta talað við fastbúnað þessa radíó. Vinsamlegast lestu <a href="https://meshtastic.org/docs/software/android/android-installation">leiðbeiningar </a> okkar um þetta mál.</string>
+    <string name="must_update">Þú verður að uppfæra þetta smáforrit í app store (eða Github). Það er of gamalt til að geta talað við fastbúnað þessa radíó. Vinsamlegast lestu <a href="https://meshtastic.org/docs/software/android/installation">leiðbeiningar </a> okkar um þetta mál.</string>
     <string name="none">Ekkert (Afvirkjað)</string>
     <string name="modem_config_short">Skammdrægni / Hratt</string>
     <string name="modem_config_medium">Miðlungsdrægni / Hratt</string>
@@ -70,7 +70,7 @@
     <string name="meshtastic_messages_notifications">Tilkynningar um skilaboð</string>
     <string name="protocol_stress_test">Álagsprófun staðals</string>
     <string name="firmware_too_old">Uppfærsla fastbúnaðar nauðsynleg</string>
-    <string name="firmware_old">Fastbúnaður radíósins er of gamall til að tala við þetta smáforrit, vinsamlegast farðu í stillingar og veldur „Uppfæra fastbúnað.“ Fyrir ítarlegri upplýsingar sjá  <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">Leiðbeiningar um uppfærslu fastbúnaðar</a> á Github.</string>
+    <string name="firmware_old">Fastbúnaður radíósins er of gamall til að tala við þetta smáforrit, vinsamlegast farðu í stillingar og veldur „Uppfæra fastbúnað.“ Fyrir ítarlegri upplýsingar sjá  <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Leiðbeiningar um uppfærslu fastbúnaðar</a> á Github.</string>
     <string name="okay">Í lagi</string>
     <string name="must_set_region">Þú verður að velja svæði!</string>
     <string name="region">Svæði</string>

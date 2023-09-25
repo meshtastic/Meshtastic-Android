@@ -45,7 +45,7 @@
     <string name="connected_sleeping">Kapcsolódva a rádióhoz, de az alvó üzemmódban van</string>
     <string name="update_to">Frissítés %s verzióra</string>
     <string name="app_too_old">Az alkalmazás frissítése szükséges</string>
-    <string name="must_update">Frissítenie kell ezt az alkalmazást a Google Play áruházban (vagy a GitHub-ról), mert túl régi, hogy kommunikálni tudjob ezzel a rádió firmware-rel. Kérem olvassa el a tudnivalókat ebből a <a href="https://meshtastic.org/docs/software/android/android-installation">docs</a>-ből.</string>
+    <string name="must_update">Frissítenie kell ezt az alkalmazást a Google Play áruházban (vagy a GitHub-ról), mert túl régi, hogy kommunikálni tudjob ezzel a rádió firmware-rel. Kérem olvassa el a tudnivalókat ebből a <a href="https://meshtastic.org/docs/software/android/installation">docs</a>-ből.</string>
     <string name="none">Egyik sem (letiltás)</string>
     <string name="modem_config_short">Rövid hatótáv (gyors)</string>
     <string name="modem_config_medium">Közepes hatótáv (gyors)</string>
@@ -71,7 +71,7 @@
     <string name="meshtastic_messages_notifications">Üzenet értesítések</string>
     <string name="protocol_stress_test">Protokoll stressz teszt</string>
     <string name="firmware_too_old">Firmware frissítés szükséges</string>
-    <string name="firmware_old">A rádió firmware túl régi ahhoz, hogy a programmal kommunikálni tudjon, kérem menjen a beállítások oldalra és válassza a \"firmware frissítés\" gombot. További tudnivalókat a <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">firmware frissítés leírásában</a> talál, a Github-on.</string>
+    <string name="firmware_old">A rádió firmware túl régi ahhoz, hogy a programmal kommunikálni tudjon, kérem menjen a beállítások oldalra és válassza a \"firmware frissítés\" gombot. További tudnivalókat a <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">firmware frissítés leírásában</a> talál, a Github-on.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Be kell állítania egy régiót</string>
     <string name="region">Régió</string>

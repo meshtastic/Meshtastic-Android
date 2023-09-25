@@ -45,7 +45,7 @@
     <string name="connected_sleeping">Подключено к радио, но оно спит</string>
     <string name="update_to">Обновите до %s</string>
     <string name="app_too_old">Требуется обновление приложения</string>
-    <string name="must_update">Вы должны обновить это приложение в магазине приложений app store (или Github). Приложение слишком старо, чтобы работать с этой прошивкой в радио. Пожалуйста, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/android-installation">документацию</a> по этой теме.</string>
+    <string name="must_update">Вы должны обновить это приложение в магазине приложений app store (или Github). Приложение слишком старо, чтобы работать с этой прошивкой в радио. Пожалуйста, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацию</a> по этой теме.</string>
     <string name="none">Нет (выключить)</string>
     <string name="modem_config_short">Малое расстояние / Быстро</string>
     <string name="modem_config_medium">Среднее расстояние / Быстро</string>
@@ -71,7 +71,7 @@
     <string name="meshtastic_messages_notifications">Уведомления о сообщениях</string>
     <string name="protocol_stress_test">Испытание протокола на нагрузку</string>
     <string name="firmware_too_old">Требуется обновление прошивки</string>
-    <string name="firmware_old">Слишком старая микропрограмма в радио для общения с этим приложением. Перейдите в настройки и выберите \"Обновить прошивку\". Более подробную информацию об этом можно найти в <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">нашем руководстве по установке прошивки</a> на Github.</string>
+    <string name="firmware_old">Слишком старая микропрограмма в радио для общения с этим приложением. Перейдите в настройки и выберите \"Обновить прошивку\". Более подробную информацию об этом можно найти в <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">нашем руководстве по установке прошивки</a> на Github.</string>
     <string name="okay">Лады</string>
     <string name="must_set_region">Вы должны задать регион!</string>
     <string name="region">Регион / Страна</string>

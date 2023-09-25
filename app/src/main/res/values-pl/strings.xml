@@ -45,7 +45,7 @@
     <string name="connected_sleeping">Połączono z radiem, ale jest w stanie uśpienia</string>
     <string name="update_to">Aktualizuj do %s</string>
     <string name="app_too_old">Konieczna aktualizacja aplikacji</string>
-    <string name="must_update">Należy zaktualizować aplikację za pomocą Sklepu Play lub Githuba, bo aplikacja jest zbyt stara aby dogadać się z oprogramowaniem zainstalowanym na tym radiu. <a href="https://meshtastic.org/docs/software/android/android-installation">Więcej informacji (ang.)</a></string>
+    <string name="must_update">Należy zaktualizować aplikację za pomocą Sklepu Play lub Githuba, bo aplikacja jest zbyt stara aby dogadać się z oprogramowaniem zainstalowanym na tym radiu. <a href="https://meshtastic.org/docs/software/android/installation">Więcej informacji (ang.)</a>.</string>
     <string name="none">Brak (wyłącz)</string>
     <string name="modem_config_short">Krótki zasięg / Szybko</string>
     <string name="modem_config_medium">Średni zasięg / Szybko</string>
@@ -71,7 +71,7 @@
     <string name="meshtastic_messages_notifications">Powiadomienia wiadomości</string>
     <string name="protocol_stress_test">Protokół testu warunków skrajnych</string>
     <string name="firmware_too_old">Wymagana aktualizacja oprogramowania układowego</string>
-    <string name="firmware_old">Oprogramowanie układowe radia jest zbyt stare, aby komunikować się z tą aplikacją, przejdź do panelu ustawień i wybierz „Aktualizuj oprogramowanie układowe”. Aby uzyskać więcej informacji na ten temat, zobacz <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation">nasz przewodnik instalacji oprogramowania układowego</a> na Github.</string>
+    <string name="firmware_old">Oprogramowanie układowe radia jest zbyt stare, aby komunikować się z tą aplikacją, przejdź do panelu ustawień i wybierz „Aktualizuj oprogramowanie układowe”. Aby uzyskać więcej informacji na ten temat, zobacz <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">nasz przewodnik instalacji oprogramowania układowego</a> na Github.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Musisz ustawić region!</string>
     <string name="region">Region</string>

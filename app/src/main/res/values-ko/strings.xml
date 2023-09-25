@@ -43,7 +43,7 @@
     <string name="connected_sleeping">연결되었지만, 해당 기기는 절전모드입니다.</string>
     <string name="update_to">%s로 업데이트</string>
     <string name="app_too_old">앱 업데이트가 필요합니다.</string>
-    <string name="must_update">구글 플레이 스토어 또는 깃허브를 통해서 앱을 업데이트 해야합니다. 앱이 너무 구버전입니다. 이 주제의  <a href="https://meshtastic.org/docs/software/android/android-installation">docs</a> 를 읽어주세요</string>
+    <string name="must_update">구글 플레이 스토어 또는 깃허브를 통해서 앱을 업데이트 해야합니다. 앱이 너무 구버전입니다. 이 주제의  <a href="https://meshtastic.org/docs/software/android/installation">docs</a> 를 읽어주세요</string>
     <string name="none">없음 (비활성화)</string>
     <string name="modem_config_short">단거리 (고속)</string>
     <string name="modem_config_medium">중거리 (고속)</string>
@@ -68,7 +68,7 @@
     <string name="meshtastic_messages_notifications">메시지 알림</string>
     <string name="protocol_stress_test">프로토콜 스트레스 테스트</string>
     <string name="firmware_too_old">펌웨어 업데이트 필요</string>
-    <string name="firmware_old">이 기기의 펌웨어가 매우 오래되어 이 앱과 호환되지않습니다, 설정에서 \"펌웨어 업데이트\"를 선택하여주세요. 더 자세한 정보는 깃허브의 <a href="https://github.com/meshtastic/Meshtastic-device#firmware-installation"> </a> 에서 펌웨어 업데이트 가이드를 참고해주세요.</string>
+    <string name="firmware_old">이 기기의 펌웨어가 매우 오래되어 이 앱과 호환되지않습니다, 설정에서 \"펌웨어 업데이트\"를 선택하여주세요. 더 자세한 정보는 깃허브의 <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">에서 펌웨어 업데이트 가이드를 참고해주세요</a>.</string>
     <string name="okay">확인</string>
     <string name="must_set_region">지역을 설정해 주세요!</string>
     <string name="region">지역</string>
