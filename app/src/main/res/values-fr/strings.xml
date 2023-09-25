@@ -39,6 +39,7 @@
     <string name="connected_count">Connecté: %1$s sur %2$s en ligne</string>
     <string name="list_of_nodes">Une liste de nœuds dans le réseau</string>
     <string name="update_firmware">Mise à jour du Firmware</string>
+    <string name="ip_address">Adresse IP :</string>
     <string name="connected">Connecté à une radio</string>
     <string name="connected_to">Connecté à la radio (%s)</string>
     <string name="not_connected">Non connecté</string>
@@ -50,6 +51,7 @@
     <string name="modem_config_short">Courte distance (rapide)</string>
     <string name="modem_config_medium">Moyenne distance (rapide)</string>
     <string name="modem_config_long">Longue distance (rapide)</string>
+    <string name="modem_config_mod_long">Longue portée / Modérée</string>
     <string name="modem_config_very_long">Très longue distance (lent)</string>
     <string name="modem_config_unrecognized">NON RECONNU</string>
     <string name="meshtastic_service_notifications">Notifications de service</string>
@@ -93,6 +95,9 @@
     <string name="provide_location_to_mesh">Fournir l\'emplacement au maillage</string>
     <string name="camera_required">Autorisation de la caméra</string>
     <string name="why_camera_required">Nous devons avoir accès à la caméra pour lire les codes QR. Aucune photo ou vidéo ne sera enregistrée.</string>
+    <string name="notification_required">Autorisation de notifier</string>
+    <string name="why_notification_required">Meshtastic a besoin d\'une autorisation pour les notifications de services et de messages.</string>
+    <string name="notification_denied">L\'autorisation de notification est refusée. Pour activer les notifications, accédez à : Paramètres Android &amp;gt ; Apps &amp;gt ; Meshtastic &amp;gt ; Notifications.</string>
     <string name="modem_config_slow_short">Courte distance (lent)</string>
     <string name="modem_config_slow_medium">Moyenne distance (lent)</string>
     <plurals name="delete_messages">
@@ -115,6 +120,7 @@
     <string name="resend">Renvoyer</string>
     <string name="shutdown">Éteindre</string>
     <string name="reboot">Redémarrer</string>
+    <string name="traceroute">Traceroute</string>
     <string name="intro_show">Afficher l\'introduction</string>
     <string name="intro_welcome">Bienvenue sur Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic est une plate-forme de communication libre, sans connexion et cryptée. Les radios Meshtastic forment un réseau de maillage et communiquent à l\'aide du protocole LoRa pour envoyer des messages texte.</string>
@@ -136,6 +142,9 @@
     <string name="direct_message">Message direct</string>
     <string name="nodedb_reset">Reconfiguration de NodeDB</string>
     <string name="nodedb_reset_description">Ceci effacera tous les nœuds de cette liste.</string>
+    <string name="ignore">Ignorer</string>
+    <string name="ignore_add">Ajouter \'%s\' à la liste des ignorés ? Votre radio va redémarrer après avoir effectué ce changement.</string>
+    <string name="ignore_remove">Supprimer \'%s\' de la liste des ignorés ? Votre radio va redémarrer après avoir effectué ce changement.</string>
     <string name="map_select_download_region">Sélectionnez la région de téléchargement</string>
     <string name="map_tile_download_estimate">Estimation du téléchargement de tuiles :</string>
     <string name="map_start_download">Commencer le téléchargement</string>
@@ -160,4 +169,5 @@
     <string name="waypoint_edit">Modifier le repère</string>
     <string name="waypoint_delete">Supprimer le repère ?</string>
     <string name="waypoint_new">Nouveau point de repère</string>
+    <string name="waypoint_received">Point de passage reçu : %s</string>
 </resources>
