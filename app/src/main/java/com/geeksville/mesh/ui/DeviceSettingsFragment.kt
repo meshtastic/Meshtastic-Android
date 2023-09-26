@@ -107,6 +107,7 @@ class DeviceSettingsFragment : ScreenFragment("Radio Configuration"), Logging {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setBackgroundColor(ContextCompat.getColor(context, R.color.colorAdvancedBackground))
             setContent {
+                // TODO change destNode to destNum and pass as navigation argument
                 val node by model.destNode.collectAsStateWithLifecycle()
 
                 AppCompatTheme {
@@ -137,7 +138,7 @@ class DeviceSettingsFragment : ScreenFragment("Radio Configuration"), Logging {
                         }
                     ) { innerPadding ->
                         RadioConfigNavHost(
-                            node!!,
+                            node,
                             model,
                             navController,
                             modifier = Modifier.padding(innerPadding),
@@ -221,20 +222,20 @@ private fun MeshAppBar(
 
 @Composable
 fun RadioConfigNavHost(
-    node: NodeInfo,
+    node: NodeInfo?,
     viewModel: UIViewModel = viewModel(),
     navController: NavHostController = rememberNavController(),
     modifier: Modifier,
 ) {
     val connectionState by viewModel.connectionState.observeAsState()
-    val connected = connectionState == MeshService.ConnectionState.CONNECTED
+    val connected = connectionState == MeshService.ConnectionState.CONNECTED && node != null
 
-    val destNum = node.num
+    val destNum = node?.num ?: 0
     val isLocal = destNum == viewModel.myNodeNum
     val maxChannels = viewModel.maxChannels
 
     val radioConfigState by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    var location by remember(node) { mutableStateOf(node.position) } // FIXME
+    var location by remember(node) { mutableStateOf(node?.position) } // FIXME
 
     val deviceProfile by viewModel.deviceProfile.collectAsStateWithLifecycle()
     val isWaiting = radioConfigState.responseState !is ResponseState.Empty
@@ -411,7 +412,7 @@ fun RadioConfigNavHost(
                 positionConfig = radioConfigState.radioConfig.position,
                 enabled = connected,
                 onSaveClicked = { locationInput, positionInput ->
-                    if (locationInput != node.position && positionInput.fixedPosition) {
+                    if (locationInput != location && positionInput.fixedPosition) {
                         locationInput?.let { viewModel.requestPosition(destNum, it) }
                         location = locationInput
                     }
