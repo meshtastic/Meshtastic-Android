@@ -242,6 +242,10 @@ class MessagesFragment : Fragment(), Logging {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.toolbar.setNavigationOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
         setFragmentResultListener("requestKey") { _, bundle->
             // get the result from bundle
             contactKey = bundle.getString("contactKey").toString()
