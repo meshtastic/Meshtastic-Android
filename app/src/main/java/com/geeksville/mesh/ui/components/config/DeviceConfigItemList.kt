@@ -123,6 +123,16 @@ fun DeviceConfigItemList(
         item { Divider() }
 
         item {
+            SwitchPreference(title = "Disable triple-click",
+                checked = deviceInput.disableTripleClick,
+                enabled = enabled,
+                onCheckedChange = {
+                    deviceInput = deviceInput.copy { disableTripleClick = it }
+                })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = deviceInput != deviceConfig,
                 onCancelClicked = {

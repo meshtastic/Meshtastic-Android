@@ -174,6 +174,14 @@ fun PositionConfigItemList(
         }
 
         item {
+            EditTextPreference(title = "Redefine PIN_GPS_EN",
+                value = positionInput.gpsEnGpio,
+                enabled = enabled,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { positionInput = positionInput.copy { gpsEnGpio = it } })
+        }
+
+        item {
             PreferenceFooter(
                 enabled = positionInput != positionConfig || locationInput != location,
                 onCancelClicked = {
