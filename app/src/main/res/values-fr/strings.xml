@@ -26,7 +26,7 @@
     <string name="radio_sleeping">La radio était en veille, impossible de changer de canal</string>
     <string name="report_bug">Rapporter Bogue</string>
     <string name="report_a_bug">Rapporter un Bogue</string>
-    <string name="report_bug_text">Vous êtes certain de vouloir rapporter un bogue? Après l\'envoi, veuillez poster dans meshtastic.discourse.group afin que nous puissions examiner ce que vous avez trouvé.</string>
+    <string name="report_bug_text">Êtes-vous certain de vouloir rapporter un bogue ? Après l\'envoi, veuillez poster dans meshtastic.discourse.group afin que nous puissions examiner ce que vous avez trouvé.</string>
     <string name="report">Rapport</string>
     <string name="not_paired_yet">Vous n\'avez pas encore jumelé une radio.</string>
     <string name="change_radio">Changer radio</string>
@@ -46,7 +46,7 @@
     <string name="connected_sleeping">Connecté à la radio, mais en mode veille</string>
     <string name="update_to">Mise à jour vers %s</string>
     <string name="app_too_old">Application désuète</string>
-    <string name="must_update">Vous devez mettre à jour l\'application sur le Google Play Store (ou Github). Cette version n\'est plus compatible avec la radio.</string>
+    <string name="must_update">Vous devez mettre à jour cette application sur le Google Play Store (ou Github). Cette version n\'est plus compatible avec la radio. Merci de lire la <a href="https://meshtastic.org/docs/software/android/installation">documentation</a> sur ce sujet.</string>
     <string name="none">Aucun (désactivé)</string>
     <string name="modem_config_short">Courte distance (rapide)</string>
     <string name="modem_config_medium">Moyenne distance (rapide)</string>
@@ -123,10 +123,10 @@
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Afficher l\'introduction</string>
     <string name="intro_welcome">Bienvenue sur Meshtastic</string>
-    <string name="intro_welcome_text">Meshtastic est une plate-forme de communication libre, sans connexion et cryptée. Les radios Meshtastic forment un réseau de maillage et communiquent à l\'aide du protocole LoRa pour envoyer des messages texte.</string>
+    <string name="intro_welcome_text">Meshtastic est une plate-forme de communication libre, autonome et chiffrée. Les radios Meshtastic forment un réseau maillé et communiquent à l\'aide du protocole LoRa pour envoyer des messages texte.</string>
     <string name="intro_started">Commençons !</string>
-    <string name="intro_started_text">Connectez votre appareil Meshtastic en utilisant soit Bluetooth, soit une connexion série ou soit la WiFi. \n\nVous pouvez voir quels appareils sont compatibles sur www.meshtastic.org/docs/hardware</string>
-    <string name="intro_encryption">"Configuration du cryptage"</string>
+    <string name="intro_started_text">Connectez votre appareil Meshtastic en utilisant Bluetooth, WiFi, ou un lien série. \n\nVous pouvez voir quels appareils sont compatibles sur www.meshtastic.org/docs/hardware</string>
+    <string name="intro_encryption">"Configuration du chiffrement"</string>
     <string name="intro_encryption_text">De base, une clé de chiffrement par défaut est définie. Pour activer votre propre canal et un chiffrement amélioré, allez dans l\'onglet canal et changez le nom du canal : cela définira une clé aléatoire pour le chiffrement AES256. \n\nPour communiquer avec d\'autres appareils, ils devront scanner votre code QR ou suivre le lien partagé pour configurer les paramètres du canal.</string>
     <string name="message">Message</string>
     <string name="quick_chat">Options du clavardage</string>
