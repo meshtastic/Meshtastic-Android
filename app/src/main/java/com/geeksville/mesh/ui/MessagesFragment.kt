@@ -233,6 +233,12 @@ class MessagesFragment : Fragment(), Logging {
         return binding.root
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("contactKey", contactKey)
+        outState.putString("contactName", contactName)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -241,6 +247,11 @@ class MessagesFragment : Fragment(), Logging {
             contactKey = bundle.getString("contactKey").toString()
             contactName = bundle.getString("contactName").toString()
             model.setContactKey(contactKey)
+            binding.messageTitle.text = contactName
+        }
+        if (savedInstanceState != null) {
+            contactKey = savedInstanceState.getString("contactKey").toString()
+            contactName = savedInstanceState.getString("contactName").toString()
             binding.messageTitle.text = contactName
         }
 
