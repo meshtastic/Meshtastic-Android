@@ -87,7 +87,7 @@ fun EditChannelDialog(
                         keyboardActions = KeyboardActions(onDone = { }),
                         onValueChanged = {
                             nameInput = it
-                            getRandomKey()
+                            if (pskInput == Channel.default.settings.psk) getRandomKey()
                         },
                         onFocusChanged = { isFocused = it.isFocused },
                     )
