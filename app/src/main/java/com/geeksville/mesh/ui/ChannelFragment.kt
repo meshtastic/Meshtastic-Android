@@ -14,13 +14,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
@@ -79,7 +83,7 @@ import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.ClickableTextField
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.PreferenceFooter
-import com.geeksville.mesh.ui.components.config.ChannelSettingsItemList
+import com.geeksville.mesh.ui.components.config.ChannelCard
 import com.geeksville.mesh.ui.components.config.EditChannelDialog
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -134,12 +138,12 @@ fun ChannelScreen(
     val clipboardManager = LocalClipboardManager.current
 
     val connectionState by viewModel.connectionState.observeAsState()
-    val connected = connectionState == MeshService.ConnectionState.CONNECTED
-    val enabled = connected && !viewModel.isManaged
+    val enabled = connectionState == MeshService.ConnectionState.CONNECTED && !viewModel.isManaged
 
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     var channelSet by remember(channels) { mutableStateOf(channels.protobuf) }
-    val isEditing = channelSet != channels.protobuf
+    var showChannelEditor by remember { mutableStateOf(false) }
+    val isEditing = channelSet != channels.protobuf || showChannelEditor
 
     val primaryChannel = ChannelSet(channelSet).primaryChannel
     val channelUrl = ChannelSet(channelSet).getChannelUrl()
@@ -195,6 +199,8 @@ fun ChannelScreen(
 
             // Tell the user to try again
             showSnackbar(context.getString(R.string.radio_sleeping))
+        } finally {
+            showChannelEditor = false
         }
     }
 
@@ -243,6 +249,7 @@ fun ChannelScreen(
                 .setTitle(R.string.change_channel)
                 .setMessage(message)
                 .setNeutralButton(R.string.cancel) { _, _ ->
+                    showChannelEditor = false
                     channelSet = channels.protobuf
                 }
                 .setPositiveButton(R.string.accept) { _, _ ->
@@ -272,27 +279,12 @@ fun ChannelScreen(
         )
     }
 
-    var showChannelEditor by remember { mutableStateOf(false) }
-    if (showChannelEditor) ChannelSettingsItemList(
-        settingsList = channelSet.settingsList,
-        modemPresetName = modemPresetName,
-        enabled = enabled,
-        onNegativeClicked = {
-            showChannelEditor = false
-        },
-        positiveText = R.string.save,
-        onPositiveClicked = {
-            showChannelEditor = false
-            channelSet = channelSet.toBuilder().clearSettings().addAllSettings(it).build()
-        }
-    )
-
-    if (!showChannelEditor) LazyColumn(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
-        item {
+        if (!showChannelEditor) item {
             ClickableTextField(
                 label = R.string.channel_name,
                 value = primaryChannel?.humanName.orEmpty(),
@@ -301,6 +293,36 @@ fun ChannelScreen(
                 trailingIcon = Icons.TwoTone.Edit,
                 modifier = Modifier.fillMaxWidth(),
             )
+        } else {
+            itemsIndexed(channelSet.settingsList) { index, channel ->
+                ChannelCard(
+                    index = index,
+                    title = channel.name.ifEmpty { modemPresetName },
+                    enabled = enabled,
+                    onEditClick = { showEditChannelDialog = index },
+                    onDeleteClick = {
+                        channelSet = channelSet.copy {
+                            settings.clear()
+                            settings.addAll(channelSet.settingsList.filterIndexed { i, _ -> i != index })
+                        }
+                    }
+                )
+            }
+            item {
+                OutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        channelSet = channelSet.copy {
+                            settings.add(channelSettings { psk = Channel.default.settings.psk })
+                        }
+                        showEditChannelDialog = channelSet.settingsList.lastIndex
+                    },
+                    enabled = viewModel.maxChannels > channelSet.settingsCount,
+                    colors = ButtonDefaults.buttonColors(
+                        disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+                    )
+                ) { Text(text = stringResource(R.string.add)) }
+            }
         }
 
         if (!isEditing) item {
@@ -393,6 +415,7 @@ fun ChannelScreen(
                 enabled = enabled,
                 onCancelClicked = {
                     focusManager.clearFocus()
+                    showChannelEditor = false
                     channelSet = channels.protobuf
                 },
                 onSaveClicked = {

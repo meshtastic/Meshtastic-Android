@@ -1,6 +1,5 @@
 package com.geeksville.mesh.ui.components.config
 
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -92,7 +91,6 @@ fun ChannelSettingsItemList(
     maxChannels: Int = 8,
     enabled: Boolean,
     onNegativeClicked: () -> Unit = { },
-    @StringRes positiveText: Int = R.string.send,
     onPositiveClicked: (List<ChannelSettings>) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
@@ -143,8 +141,7 @@ fun ChannelSettingsItemList(
 
             item {
                 PreferenceFooter(
-                    // FIXME workaround until we use navigation in ChannelFragment
-                    enabled = isEditing || positiveText != R.string.send,
+                    enabled = isEditing,
                     negativeText = R.string.cancel,
                     onNegativeClicked = {
                         focusManager.clearFocus()
@@ -152,7 +149,7 @@ fun ChannelSettingsItemList(
                         settingsListInput.addAll(settingsList)
                         onNegativeClicked()
                     },
-                    positiveText = positiveText,
+                    positiveText = R.string.send,
                     onPositiveClicked = {
                         focusManager.clearFocus()
                         onPositiveClicked(settingsListInput)
