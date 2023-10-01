@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui.components.config
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +12,7 @@ import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -34,7 +36,10 @@ fun <T> PacketResponseStateDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (state is ResponseState.Loading) {
-                    val progress = state.completed.toFloat() / state.total.toFloat()
+                    val progress by animateFloatAsState(
+                        targetValue = state.completed.toFloat() / state.total.toFloat(),
+                        label = "progress",
+                    )
                     Text("%.0f%%".format(progress * 100))
                     LinearProgressIndicator(
                         progress = progress,
