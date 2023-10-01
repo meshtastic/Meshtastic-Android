@@ -85,7 +85,10 @@ fun EditChannelDialog(
                             keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                         ),
                         keyboardActions = KeyboardActions(onDone = { }),
-                        onValueChanged = { nameInput = it },
+                        onValueChanged = {
+                            nameInput = it
+                            getRandomKey()
+                        },
                         onFocusChanged = { isFocused = it.isFocused },
                     )
 
