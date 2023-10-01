@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
@@ -673,16 +672,18 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
             ) {
-                Button(
+                OutlinedButton(
                     modifier = Modifier.weight(1f),
-                    onClick = { showDialog = false }
+                    onClick = { showDialog = false },
+                    colors = ButtonDefaults.buttonColors(),
                 ) { Text(stringResource(R.string.cancel)) }
-                Button(
+                OutlinedButton(
                     modifier = Modifier.weight(1f),
                     onClick = {
                         showDialog = false
                         onClick()
                     },
+                    colors = ButtonDefaults.buttonColors(),
                 ) { Text(stringResource(R.string.send)) }
             }
         }
