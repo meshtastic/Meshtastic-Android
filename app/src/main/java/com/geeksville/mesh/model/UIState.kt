@@ -857,10 +857,8 @@ class UIViewModel @Inject constructor(
     }
 
     private fun processPacketResponse(log: MeshLog?) {
-        val destNum = destNode.value?.num ?: return
         val packet = log?.meshPacket ?: return
         val data = packet.decoded
-        val destStr = destNum.toUInt()
         val fromStr = packet.from.toUInt()
         requestId.value = null
 
@@ -875,11 +873,14 @@ class UIViewModel @Inject constructor(
                 append(nodeName(packet.from))
             }
         }
+        val destNum = destNode.value?.num ?: return
+        val destStr = destNum.toUInt()
+
         if (data?.portnumValue == Portnums.PortNum.ROUTING_APP_VALUE) {
             val parsed = MeshProtos.Routing.parseFrom(data.payload)
             debug("packet for destNum $destStr received ${parsed.errorReason} from $fromStr")
             if (parsed.errorReason != MeshProtos.Routing.Error.NONE) {
-                setResponseStateError(parsed.errorReason.toString())
+                setResponseStateError(parsed.errorReason.name)
             } else if (packet.from == destNum) {
                 _radioConfigState.update { it.copy(responseState = ResponseState.Success(true)) }
             }
@@ -896,7 +897,6 @@ class UIViewModel @Inject constructor(
             when (parsed.payloadVariantCase) {
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
                     val response = parsed.getChannelResponse
-                    incrementCompleted()
                     // Stop once we get to the first disabled entry
                     if (response.role != ChannelProtos.Channel.Role.DISABLED) {
                         _radioConfigState.update { state ->
@@ -905,6 +905,7 @@ class UIViewModel @Inject constructor(
                             }
                             state.copy(channelList = updatedList)
                         }
+                        incrementCompleted()
                         if (response.index + 1 < maxChannels && goChannels) {
                             // Not done yet, request next channel
                             getChannel(destNum, response.index + 1)
@@ -914,7 +915,7 @@ class UIViewModel @Inject constructor(
                         }
                     } else {
                         // Received last channel, get lora config (for default channel names)
-                        setResponseStateTotal(radioConfigState.value.channelList.size + 1)
+                        setResponseStateTotal(response.index + 1)
                         getConfig(destNum, AdminProtos.AdminMessage.ConfigType.LORA_CONFIG_VALUE)
                     }
                 }
