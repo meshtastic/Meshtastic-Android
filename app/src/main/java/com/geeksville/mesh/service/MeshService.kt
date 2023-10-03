@@ -1483,35 +1483,23 @@ class MeshService : Service(), Logging {
     /**
      * Send setOwner admin packet with [MeshProtos.User] protobuf
      */
-    fun setOwner(meshUser: MeshUser) = with(meshUser) {
+    private fun setOwner(packetId: Int, user: MeshProtos.User) = with(user) {
         val dest = nodeDBbyID[id]
-        if (dest != null) {
-            val old = dest.user
-            if (longName == old?.longName && shortName == old.shortName && isLicensed == old.isLicensed)
-                debug("Ignoring nop owner change")
-            else {
-                debug("SetOwner Id: $id longName: ${longName.anonymize} shortName: $shortName isLicensed: $isLicensed")
+            ?: throw Exception("Can't set user without a NodeInfo") // this shouldn't happen
+        val old = dest.user!!
+        if (longName == old.longName && shortName == old.shortName && isLicensed == old.isLicensed) {
+            debug("Ignoring nop owner change")
+        } else {
+            debug("setOwner Id: $id longName: ${longName.anonymize} shortName: $shortName isLicensed: $isLicensed")
 
-                val user = MeshProtos.User.newBuilder().also {
-                    it.longName = longName
-                    it.shortName = shortName
-                    it.hwModel = hwModel
-                    it.isLicensed = isLicensed
-                }.build()
+            // Also update our own map for our nodeNum, by handling the packet just like packets from other users
+            handleReceivedUser(dest.num, user)
 
-                // Also update our own map for our nodenum, by handling the packet just like packets from other users
-                handleReceivedUser(dest.num, user)
-
-                // encapsulate our payload in the proper protobufs and fire it off
-                val packet = newMeshPacketTo(dest.num).buildAdminPacket {
-                    setOwner = user
-                }
-
-                // send the packet into the mesh
-                sendToRadio(packet)
-            }
-        } else
-            throw Exception("Can't set user without a node info") // this shouldn't happen
+            // encapsulate our payload in the proper protobuf and fire it off
+            sendToRadio(newMeshPacketTo(dest.num).buildAdminPacket(id = packetId) {
+                setOwner = user
+            })
+        }
     }
 
 
@@ -1614,14 +1602,12 @@ class MeshService : Service(), Logging {
         override fun getPacketId() = toRemoteExceptions { generatePacketId() }
 
         override fun setOwner(user: MeshUser) = toRemoteExceptions {
-            this@MeshService.setOwner(user)
+            setOwner(generatePacketId(), user.toProto())
         }
 
-        override fun setRemoteOwner(destNum: Int, payload: ByteArray) = toRemoteExceptions {
+        override fun setRemoteOwner(id: Int, payload: ByteArray) = toRemoteExceptions {
             val parsed = MeshProtos.User.parseFrom(payload)
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket {
-                setOwner = parsed
-            })
+            setOwner(id, parsed)
         }
 
         override fun getRemoteOwner(id: Int, destNum: Int) = toRemoteExceptions {
@@ -1674,14 +1660,14 @@ class MeshService : Service(), Logging {
         /** Send our current radio config to the device
          */
         override fun setConfig(payload: ByteArray) = toRemoteExceptions {
-            setRemoteConfig(myNodeNum, payload)
+            setRemoteConfig(generatePacketId(), myNodeNum, payload)
         }
 
-        override fun setRemoteConfig(destNum: Int, payload: ByteArray) = toRemoteExceptions {
+        override fun setRemoteConfig(id: Int, num: Int, payload: ByteArray) = toRemoteExceptions {
             debug("Setting new radio config!")
             val config = ConfigProtos.Config.parseFrom(payload)
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket { setConfig = config })
-            if (destNum == myNodeNum) setLocalConfig(config) // Update our local copy
+            sendToRadio(newMeshPacketTo(num).buildAdminPacket(id = id) { setConfig = config })
+            if (num == myNodeNum) setLocalConfig(config) // Update our local copy
         }
 
         override fun getRemoteConfig(id: Int, destNum: Int, config: Int) = toRemoteExceptions {
@@ -1692,11 +1678,11 @@ class MeshService : Service(), Logging {
 
         /** Send our current module config to the device
          */
-        override fun setModuleConfig(destNum: Int, payload: ByteArray) = toRemoteExceptions {
+        override fun setModuleConfig(id: Int, num: Int, payload: ByteArray) = toRemoteExceptions {
             debug("Setting new module config!")
             val config = ModuleConfigProtos.ModuleConfig.parseFrom(payload)
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket { setModuleConfig = config })
-            if (destNum == myNodeNum) setLocalModuleConfig(config) // Update our local copy
+            sendToRadio(newMeshPacketTo(num).buildAdminPacket(id = id) { setModuleConfig = config })
+            if (num == myNodeNum) setLocalModuleConfig(config) // Update our local copy
         }
 
         override fun getModuleConfig(id: Int, destNum: Int, config: Int) = toRemoteExceptions {
@@ -1730,12 +1716,12 @@ class MeshService : Service(), Logging {
         }
 
         override fun setChannel(payload: ByteArray?) = toRemoteExceptions {
-            setRemoteChannel(myNodeNum, payload)
+            setRemoteChannel(generatePacketId(), myNodeNum, payload)
         }
 
-        override fun setRemoteChannel(destNum: Int, payload: ByteArray?) = toRemoteExceptions {
+        override fun setRemoteChannel(id: Int, num: Int, payload: ByteArray?) = toRemoteExceptions {
             val channel = ChannelProtos.Channel.parseFrom(payload)
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket { setChannel = channel })
+            sendToRadio(newMeshPacketTo(num).buildAdminPacket(id = id) { setChannel = channel })
         }
 
         override fun getRemoteChannel(id: Int, destNum: Int, index: Int) = toRemoteExceptions {
