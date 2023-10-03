@@ -51,7 +51,7 @@ fun <T> PacketResponseStateDialog(
                     if (state.total == state.completed) onComplete()
                 }
                 if (state is ResponseState.Success) {
-                    Text("Success!")
+                    Text("Delivery confirmed.")
                 }
                 if (state is ResponseState.Error) {
                     Text(text = "Error\n", textAlign = TextAlign.Center)
@@ -67,13 +67,7 @@ fun <T> PacketResponseStateDialog(
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier.padding(top = 16.dp)
-                ) {
-                    if (state is ResponseState.Loading) {
-                        Text(stringResource(R.string.cancel))
-                    } else {
-                        Text(stringResource(R.string.close))
-                    }
-                }
+                ) { Text(stringResource(R.string.close)) }
             }
         }
     )

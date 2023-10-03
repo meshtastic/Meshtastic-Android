@@ -58,7 +58,7 @@ interface IMeshService {
     */
     void setOwner(in MeshUser user);
 
-    void setRemoteOwner(in int destNum, in byte []payload);
+    void setRemoteOwner(in int requestId, in byte []payload);
     void getRemoteOwner(in int requestId, in int destNum);
 
     /// Return my unique user ID string
@@ -91,11 +91,11 @@ interface IMeshService {
     void setConfig(in byte []payload);
 
     /// Set and get a Config protobuf via admin packet
-    void setRemoteConfig(in int destNum, in byte []payload);
+    void setRemoteConfig(in int requestId, in int destNum, in byte []payload);
     void getRemoteConfig(in int requestId, in int destNum, in int configTypeValue);
 
     /// Set and get a ModuleConfig protobuf via admin packet
-    void setModuleConfig(in int destNum, in byte []payload);
+    void setModuleConfig(in int requestId, in int destNum, in byte []payload);
     void getModuleConfig(in int requestId, in int destNum, in int moduleConfigTypeValue);
 
     /// Set and get the Ext Notification Ringtone string via admin packet
@@ -111,7 +111,7 @@ interface IMeshService {
     void setChannel(in byte []payload);
 
     /// Set and get a Channel protobuf via admin packet
-    void setRemoteChannel(in int destNum, in byte []payload);
+    void setRemoteChannel(in int requestId, in int destNum, in byte []payload);
     void getRemoteChannel(in int requestId, in int destNum, in int channelIndex);
 
     /// Send beginEditSettings admin packet to nodeNum

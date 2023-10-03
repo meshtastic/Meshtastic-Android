@@ -191,7 +191,7 @@ private fun getName(route: Any): String = when (route) {
  */
 sealed class ResponseState<out T> {
     data object Empty : ResponseState<Nothing>()
-    data class Loading(var total: Int = 0, var completed: Int = 0) : ResponseState<Nothing>()
+    data class Loading(var total: Int = 1, var completed: Int = 0) : ResponseState<Nothing>()
     data class Success<T>(val result: T) : ResponseState<T>()
     data class Error(val error: String) : ResponseState<Nothing>()
 }
@@ -231,7 +231,6 @@ fun RadioConfigNavHost(
 
     val destNum = node?.num ?: 0
     val isLocal = destNum == viewModel.myNodeNum
-    val maxChannels = viewModel.maxChannels
 
     val radioConfigState by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var location by remember(node) { mutableStateOf(node?.position) } // FIXME
@@ -314,12 +313,15 @@ fun RadioConfigNavHost(
                 onRouteClick = { route ->
                     viewModel.setResponseStateLoading(getName(route))
                     when (route) {
-                        ConfigRoute.USER -> { viewModel.getOwner(destNum) }
-                        ConfigRoute.CHANNELS -> {
-                            viewModel.setResponseStateTotal(maxChannels + 1) // for lora config
-                            viewModel.clearRemoteChannelList()
-                            viewModel.getChannel(destNum, 0)
+                        ConfigRoute.USER -> {
+                            viewModel.getOwner(destNum)
                         }
+
+                        ConfigRoute.CHANNELS -> {
+                            viewModel.getChannel(destNum, 0)
+                            viewModel.getConfig(destNum, ConfigRoute.LORA.configType)
+                        }
+
                         "IMPORT" -> {
                             viewModel.clearPacketResponse()
                             viewModel.setDeviceProfile(null)
@@ -329,6 +331,7 @@ fun RadioConfigNavHost(
                             }
                             importConfigLauncher.launch(intent)
                         }
+
                         "EXPORT" -> {
                             viewModel.clearPacketResponse()
                             showEditDeviceProfileDialog = true
@@ -350,23 +353,20 @@ fun RadioConfigNavHost(
                             viewModel.requestNodedbReset(destNum)
                         }
 
-                        ConfigRoute.LORA -> {
-                            viewModel.setResponseStateTotal(2)
-                            viewModel.clearRemoteChannelList()
-                            viewModel.getChannel(destNum, 0)
-                        }
                         is ConfigRoute -> {
+                            if (route == ConfigRoute.LORA) {
+                                viewModel.getChannel(destNum, 0)
+                            }
                             viewModel.getConfig(destNum, route.configType)
                         }
-                        ModuleRoute.CANNED_MESSAGE -> {
-                            viewModel.setResponseStateTotal(2)
-                            viewModel.getCannedMessages(destNum)
-                        }
-                        ModuleRoute.EXTERNAL_NOTIFICATION -> {
-                            viewModel.setResponseStateTotal(2)
-                            viewModel.getRingtone(destNum)
-                        }
+
                         is ModuleRoute -> {
+                            if (route == ModuleRoute.CANNED_MESSAGE) {
+                                viewModel.getCannedMessages(destNum)
+                            }
+                            if (route == ModuleRoute.EXTERNAL_NOTIFICATION) {
+                                viewModel.getRingtone(destNum)
+                            }
                             viewModel.getModuleConfig(destNum, route.configType)
                         }
                     }
@@ -387,10 +387,9 @@ fun RadioConfigNavHost(
                 settingsList = radioConfigState.channelList,
                 modemPresetName = Channel(loraConfig = radioConfigState.radioConfig.lora).name,
                 enabled = connected,
-                maxChannels = maxChannels,
+                maxChannels = viewModel.maxChannels,
                 onPositiveClicked = { channelListInput ->
                     viewModel.updateChannels(destNum, radioConfigState.channelList, channelListInput)
-                    viewModel.setRemoteChannelList(channelListInput)
                 },
             )
         }

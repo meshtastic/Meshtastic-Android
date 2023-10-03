@@ -28,10 +28,10 @@ import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -94,9 +94,7 @@ fun ChannelSettingsItemList(
     onPositiveClicked: (List<ChannelSettings>) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    val settingsListInput = remember {
-        mutableStateListOf<ChannelSettings>().apply { addAll(settingsList) }
-    }
+    val settingsListInput = remember(settingsList) { settingsList.toMutableStateList() }
 
     val isEditing: Boolean = settingsList.size != settingsListInput.size
             || settingsList.zip(settingsListInput).any { (item1, item2) -> item1 != item2 }
@@ -172,10 +170,12 @@ fun ChannelSettingsItemList(
         ) {
             FloatingActionButton(
                 onClick = {
-                    settingsListInput.add(channelSettings {
-                        psk = Channel.default.settings.psk
-                    })
-                    showEditChannelDialog = settingsListInput.lastIndex
+                    if (maxChannels > settingsListInput.size) {
+                        settingsListInput.add(channelSettings {
+                            psk = Channel.default.settings.psk
+                        })
+                        showEditChannelDialog = settingsListInput.lastIndex
+                    }
                 },
                 modifier = Modifier.padding(16.dp)
             ) { Icon(Icons.TwoTone.Add, stringResource(R.string.add)) }
