@@ -40,6 +40,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -142,7 +143,7 @@ fun ChannelScreen(
 
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     var channelSet by remember(channels) { mutableStateOf(channels.protobuf) }
-    var showChannelEditor by remember { mutableStateOf(false) }
+    var showChannelEditor by rememberSaveable { mutableStateOf(false) }
     val isEditing = channelSet != channels.protobuf || showChannelEditor
 
     val primaryChannel = ChannelSet(channelSet).primaryChannel
