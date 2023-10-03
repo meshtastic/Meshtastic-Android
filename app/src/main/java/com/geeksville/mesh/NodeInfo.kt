@@ -5,7 +5,6 @@ import android.os.Parcelable
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.geeksville.mesh.MeshProtos.User
 import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.bearing
 import com.geeksville.mesh.util.latLongToMeter
@@ -13,8 +12,9 @@ import com.geeksville.mesh.util.anonymize
 import kotlinx.parcelize.Parcelize
 
 /**
- * Room [Embedded], [Entity] and [PrimaryKey] annotations and imports can be removed when only using the API.
- *  For details check the AIDL interface in [com.geeksville.mesh.IMeshService]
+ * Room [Embedded], [Entity] and [PrimaryKey] annotations and imports, as well as any protobuf
+ * reference [MeshProtos], [TelemetryProtos], [ConfigProtos] can be removed when only using the API.
+ * For details check the AIDL interface in [com.geeksville.mesh.IMeshService]
  */
 
 //
@@ -34,8 +34,24 @@ data class MeshUser(
         return "MeshUser(id=${id.anonymize}, longName=${longName.anonymize}, shortName=${shortName.anonymize}, hwModel=${hwModelString}, isLicensed=${isLicensed})"
     }
 
-    fun toProto(): User = User.newBuilder().setId(id).setLongName(longName).setShortName(shortName)
-        .setHwModel(hwModel).setIsLicensed(isLicensed).build()
+    /** Create our model object from a protobuf.
+     */
+    constructor(p: MeshProtos.User) : this(
+        p.id,
+        p.longName,
+        p.shortName,
+        p.hwModel,
+        p.isLicensed,
+    )
+
+    fun toProto(): MeshProtos.User =
+        MeshProtos.User.newBuilder()
+            .setId(id)
+            .setLongName(longName)
+            .setShortName(shortName)
+            .setHwModel(hwModel)
+            .setIsLicensed(isLicensed)
+            .build()
 
     /** a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot
      * or null if unset

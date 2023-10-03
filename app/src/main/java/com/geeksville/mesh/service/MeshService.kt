@@ -1225,15 +1225,9 @@ class MeshService : Service(), Logging {
     private fun installNodeInfo(info: MeshProtos.NodeInfo) {
         // Just replace/add any entry
         updateNodeInfo(info.num) {
-            if (info.hasUser())
-                it.user =
-                    MeshUser(
-                        info.user.id,
-                        info.user.longName,
-                        info.user.shortName,
-                        info.user.hwModel,
-                        info.user.isLicensed
-                    )
+            if (info.hasUser()) {
+                it.user = MeshUser(info.user)
+            }
 
             if (info.hasPosition()) {
                 // For the local node, it might not be able to update its times because it doesn't have a valid GPS reading yet

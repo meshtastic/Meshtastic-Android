@@ -2,9 +2,20 @@ package com.geeksville.mesh
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.geeksville.mesh.util.readParcelableCompat
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
+
+/**
+ * Generic [Parcel.readParcelable] Android 13 compatibility extension.
+ */
+private inline fun <reified T : Parcelable> Parcel.readParcelableCompat(loader: ClassLoader?): T? {
+    return if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+        @Suppress("DEPRECATION")
+        readParcelable(loader)
+    } else {
+        readParcelable(loader, T::class.java)
+    }
+}
 
 @Parcelize
 enum class MessageStatus : Parcelable {
