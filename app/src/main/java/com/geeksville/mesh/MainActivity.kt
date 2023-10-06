@@ -56,6 +56,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import java.text.DateFormat
 import java.util.Date
+import javax.inject.Inject
 
 /*
 UI design
@@ -116,6 +117,9 @@ class MainActivity : AppCompatActivity(), Logging {
 
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
     private val model: UIViewModel by viewModels()
+
+    @Inject
+    internal lateinit var serviceRepository: ServiceRepository
 
     private val bluetoothPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
@@ -351,7 +355,7 @@ class MainActivity : AppCompatActivity(), Logging {
         debug("connchange $oldConnection -> $newConnection")
 
         if (newConnection == MeshService.ConnectionState.CONNECTED) {
-            model.meshService?.let { service ->
+            serviceRepository.meshService?.let { service ->
 
                 model.setConnectionState(newConnection)
 
@@ -506,44 +510,8 @@ class MainActivity : AppCompatActivity(), Logging {
             IMeshService.Stub.asInterface(it)
         }) {
         override fun onConnected(service: IMeshService) {
-
-            /*
-                Note: we must call this callback in a coroutine.  Because apparently there is only a single activity looper thread.  and if that onConnected override
-                also tries to do a service operation we can deadlock.
-
-                Old buggy stack trace:
-
-                 at sun.misc.Unsafe.park (Unsafe.java)
-                - waiting on an unknown object
-                  at java.util.concurrent.locks.LockSupport.park (LockSupport.java:190)
-                  at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await (AbstractQueuedSynchronizer.java:2067)
-                  at com.geeksville.mesh.android.ServiceClient.waitConnect (ServiceClient.java:46)
-                  at com.geeksville.mesh.android.ServiceClient.getService (ServiceClient.java:27)
-                  at com.geeksville.mesh.service.MeshService$binder$1$setDeviceAddress$1.invoke (MeshService.java:1519)
-                  at com.geeksville.mesh.service.MeshService$binder$1$setDeviceAddress$1.invoke (MeshService.java:1514)
-                  at com.geeksville.mesh.util.ExceptionsKt.toRemoteExceptions (ExceptionsKt.java:56)
-                  at com.geeksville.mesh.service.MeshService$binder$1.setDeviceAddress (MeshService.java:1516)
-                  at com.geeksville.mesh.MainActivity$mesh$1$onConnected$1.invoke (MainActivity.java:743)
-                  at com.geeksville.mesh.MainActivity$mesh$1$onConnected$1.invoke (MainActivity.java:734)
-                  at com.geeksville.mesh.util.ExceptionsKt.exceptionReporter (ExceptionsKt.java:34)
-                  at com.geeksville.mesh.MainActivity$mesh$1.onConnected (MainActivity.java:738)
-                  at com.geeksville.mesh.MainActivity$mesh$1.onConnected (MainActivity.java:734)
-                  at com.geeksville.mesh.android.ServiceClient$connection$1$onServiceConnected$1.invoke (ServiceClient.java:89)
-                  at com.geeksville.mesh.android.ServiceClient$connection$1$onServiceConnected$1.invoke (ServiceClient.java:84)
-                  at com.geeksville.mesh.util.ExceptionsKt.exceptionReporter (ExceptionsKt.java:34)
-                  at com.geeksville.mesh.android.ServiceClient$connection$1.onServiceConnected (ServiceClient.java:85)
-                  at android.app.LoadedApk$ServiceDispatcher.doConnected (LoadedApk.java:2067)
-                  at android.app.LoadedApk$ServiceDispatcher$RunConnection.run (LoadedApk.java:2099)
-                  at android.os.Handler.handleCallback (Handler.java:883)
-                  at android.os.Handler.dispatchMessage (Handler.java:100)
-                  at android.os.Looper.loop (Looper.java:237)
-                  at android.app.ActivityThread.main (ActivityThread.java:8016)
-                  at java.lang.reflect.Method.invoke (Method.java)
-                  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run (RuntimeInit.java:493)
-                  at com.android.internal.os.ZygoteInit.main (ZygoteInit.java:1076)
-                 */
             connectionJob = mainScope.handledLaunch {
-                model.meshService = service
+                serviceRepository.setMeshService(service)
 
                 try {
                     usbDevice?.let { usb ->
@@ -582,14 +550,14 @@ class MainActivity : AppCompatActivity(), Logging {
 
         override fun onDisconnected() {
             unregisterMeshReceiver()
-            model.meshService = null
+            serviceRepository.setMeshService(null)
         }
     }
 
     private fun bindMeshService() {
         debug("Binding to mesh service!")
         // we bind using the well known name, to make sure 3rd party apps could also
-        if (model.meshService != null) {
+        if (serviceRepository.meshService != null) {
             /* This problem can occur if we unbind, but there is already an onConnected job waiting to run.  That job runs and then makes meshService != null again
             I think I've fixed this by cancelling connectionJob.  We'll see!
              */
@@ -622,7 +590,7 @@ class MainActivity : AppCompatActivity(), Logging {
             job.cancel("unbinding")
         }
         mesh.close()
-        model.meshService = null
+        serviceRepository.setMeshService(null)
     }
 
     override fun onStop() {

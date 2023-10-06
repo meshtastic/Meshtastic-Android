@@ -106,7 +106,7 @@ class UIViewModel @Inject constructor(
 ) : ViewModel(), Logging {
 
     var actionBarMenu: Menu? = null
-    var meshService: IMeshService? = null
+    val meshService: IMeshService? get() = radioConfigRepository.meshService
     val nodeDB = NodeDB(this)
 
     val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()

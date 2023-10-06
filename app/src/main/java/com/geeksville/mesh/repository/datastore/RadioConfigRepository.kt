@@ -4,6 +4,7 @@ import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.ChannelProtos.Channel
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config
+import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
@@ -11,6 +12,7 @@ import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.database.dao.MyNodeInfoDao
 import com.geeksville.mesh.database.dao.NodeInfoDao
+import com.geeksville.mesh.service.ServiceRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -23,12 +25,15 @@ import javax.inject.Inject
  * and [ChannelSet], [LocalConfig] & [LocalModuleConfig] data stores.
  */
 class RadioConfigRepository @Inject constructor(
+    private val serviceRepository: ServiceRepository,
     private val myNodeInfoDao: MyNodeInfoDao,
     private val nodeInfoDao: NodeInfoDao,
     private val channelSetRepository: ChannelSetRepository,
     private val localConfigRepository: LocalConfigRepository,
     private val moduleConfigRepository: ModuleConfigRepository,
 ) {
+    val meshService: IMeshService? get() = serviceRepository.meshService
+
     suspend fun clearNodeDB() = withContext(Dispatchers.IO) {
         myNodeInfoDao.clearMyNodeInfo()
         nodeInfoDao.clearNodeInfo()
