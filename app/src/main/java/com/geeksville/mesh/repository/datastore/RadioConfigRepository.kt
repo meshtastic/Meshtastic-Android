@@ -3,6 +3,7 @@ package com.geeksville.mesh.repository.datastore
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.ChannelProtos.Channel
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
+import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
@@ -12,9 +13,11 @@ import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.database.dao.MyNodeInfoDao
 import com.geeksville.mesh.database.dao.NodeInfoDao
+import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.service.ServiceRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -138,5 +141,26 @@ class RadioConfigRepository @Inject constructor(
      */
     suspend fun setLocalModuleConfig(config: ModuleConfig) {
         moduleConfigRepository.setLocalModuleConfig(config)
+    }
+
+    /**
+     * Flow representing the combined [DeviceProfile] protobuf.
+     */
+    val deviceProfileFlow: Flow<DeviceProfile> = combine(
+        myNodeInfoFlow(),
+        nodeInfoFlow(),
+        channelSetFlow,
+        localConfigFlow,
+        moduleConfigFlow,
+    ) { myInfo, nodes, channels, localConfig, localModuleConfig ->
+        deviceProfile {
+            nodes.firstOrNull { it.num == myInfo?.myNodeNum }?.user?.let {
+                longName = it.longName
+                shortName = it.shortName
+            }
+            channelUrl = com.geeksville.mesh.model.ChannelSet(channels).getChannelUrl().toString()
+            config = localConfig
+            moduleConfig = localModuleConfig
+        }
     }
 }

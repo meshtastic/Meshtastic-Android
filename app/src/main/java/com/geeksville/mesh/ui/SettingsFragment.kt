@@ -360,7 +360,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             val n = binding.usernameEditText.text.toString().trim()
             model.ourNodeInfo.value?.user?.let {
                 val user = it.copy(longName = n, shortName = getInitials(n))
-                if (n.isNotEmpty()) model.setOwner(user.toProto())
+                if (n.isNotEmpty()) model.setOwner(user)
             }
             requireActivity().hideKeyboard()
         }

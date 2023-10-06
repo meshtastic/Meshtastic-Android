@@ -36,7 +36,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.twotone.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -50,8 +49,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -60,11 +59,11 @@ import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
-import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.moduleConfig
-import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.config.AmbientLightingConfigItemList
 import com.geeksville.mesh.ui.components.config.AudioConfigItemList
@@ -137,9 +136,8 @@ class DeviceSettingsFragment : ScreenFragment("Radio Configuration"), Logging {
                         }
                     ) { innerPadding ->
                         RadioConfigNavHost(
-                            node,
-                            model,
-                            navController,
+                            node = node,
+                            navController = navController,
                             modifier = Modifier.padding(innerPadding),
                         )
                     }
@@ -222,20 +220,20 @@ private fun MeshAppBar(
 @Composable
 fun RadioConfigNavHost(
     node: NodeInfo?,
-    viewModel: UIViewModel = viewModel(),
+    viewModel: RadioConfigViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
     modifier: Modifier,
 ) {
-    val connectionState by viewModel.connectionState.observeAsState()
-    val connected = connectionState == MeshService.ConnectionState.CONNECTED && node != null
+    val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
+    val connected = connectionState == ConnectionState.CONNECTED && node != null
 
+    val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle() // FIXME
     val destNum = node?.num ?: 0
-    val isLocal = destNum == viewModel.myNodeNum
+    val isLocal = destNum == myNodeInfo?.myNodeNum
 
     val radioConfigState by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var location by remember(node) { mutableStateOf(node?.position) } // FIXME
 
-    val deviceProfile by viewModel.deviceProfile.collectAsStateWithLifecycle()
     val isWaiting = radioConfigState.responseState !is ResponseState.Empty
     var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
 
@@ -256,19 +254,10 @@ fun RadioConfigNavHost(
         }
     }
 
+    val deviceProfile = viewModel.deviceProfile
     if (showEditDeviceProfileDialog) EditDeviceProfileDialog(
         title = if (deviceProfile != null) "Import configuration" else "Export configuration",
-        deviceProfile = deviceProfile ?: with(viewModel) {
-            deviceProfile {
-                ourNodeInfo.value?.user?.let {
-                    longName = it.longName
-                    shortName = it.shortName
-                }
-                channelUrl = channels.value.getChannelUrl().toString()
-                config = localConfig.value
-                this.moduleConfig = module
-            }
-        },
+        deviceProfile = deviceProfile ?: viewModel.currentDeviceProfile,
         onAddClick = {
             showEditDeviceProfileDialog = false
             if (deviceProfile != null) {
@@ -389,7 +378,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 maxChannels = viewModel.maxChannels,
                 onPositiveClicked = { channelListInput ->
-                    viewModel.updateChannels(destNum, radioConfigState.channelList, channelListInput)
+                    viewModel.updateChannels(destNum, channelListInput, radioConfigState.channelList)
                 },
             )
         }
