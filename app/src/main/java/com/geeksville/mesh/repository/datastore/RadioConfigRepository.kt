@@ -14,6 +14,7 @@ import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.database.dao.MyNodeInfoDao
 import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.deviceProfile
+import com.geeksville.mesh.model.getChannelUrl
 import com.geeksville.mesh.service.ServiceRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -158,7 +159,7 @@ class RadioConfigRepository @Inject constructor(
                 longName = it.longName
                 shortName = it.shortName
             }
-            channelUrl = com.geeksville.mesh.model.ChannelSet(channels).getChannelUrl().toString()
+            channelUrl = channels.getChannelUrl().toString()
             config = localConfig
             moduleConfig = localModuleConfig
         }

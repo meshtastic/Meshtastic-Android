@@ -313,10 +313,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         model.channels.asLiveData().observe(viewLifecycleOwner) {
-            if (!model.isConnected()) it.protobuf.let { ch ->
+            if (!model.isConnected()) {
                 val maxChannels = model.maxChannels
-                if (!ch.hasLoraConfig() && ch.settingsCount > 0)
-                    scanModel.setErrorText("Channels (${ch.settingsCount} / $maxChannels)")
+                if (!it.hasLoraConfig() && it.settingsCount > 0)
+                    scanModel.setErrorText("Channels (${it.settingsCount} / $maxChannels)")
             }
         }
 
