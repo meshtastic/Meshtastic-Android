@@ -181,7 +181,7 @@ class RadioConfigViewModel @Inject constructor(
     }
 
     private fun setChannels(channelUrl: String) = viewModelScope.launch {
-        val new = ChannelSet(Uri.parse(channelUrl)).protobuf
+        val new = Uri.parse(channelUrl).toChannelSet()
         val old = radioConfigRepository.channelSetFlow.firstOrNull() ?: return@launch
         updateChannels(myNodeNum ?: return@launch, new.settingsList, old.settingsList)
     }
@@ -308,9 +308,8 @@ class RadioConfigViewModel @Inject constructor(
                 _deviceProfile.value = protobuf
             }
         } catch (ex: Exception) {
-            val error = "${ex.javaClass.simpleName}: ${ex.message}"
             errormsg("Import DeviceProfile error: ${ex.message}")
-            setResponseStateError(error)
+            setResponseStateError(ex.customMessage)
         }
     }
 
@@ -329,9 +328,8 @@ class RadioConfigViewModel @Inject constructor(
             }
             setResponseStateSuccess()
         } catch (ex: Exception) {
-            val error = "${ex.javaClass.simpleName}: ${ex.message}"
             errormsg("Can't write file error: ${ex.message}")
-            setResponseStateError(error)
+            setResponseStateError(ex.customMessage)
         }
     }
 
@@ -345,8 +343,11 @@ class RadioConfigViewModel @Inject constructor(
             )
             setOwner(user.toProto())
         }
-        if (hasChannelUrl()) {
+        if (hasChannelUrl()) try {
             setChannels(channelUrl)
+        } catch (ex: Exception) {
+            errormsg("DeviceProfile channel import error", ex)
+            setResponseStateError(ex.customMessage)
         }
         if (hasConfig()) {
             setConfig(config { device = config.device })
@@ -406,6 +407,7 @@ class RadioConfigViewModel @Inject constructor(
         }
     }
 
+    private val Exception.customMessage: String get() = "${javaClass.simpleName}: $message"
     private fun setResponseStateError(error: String) {
         _radioConfigState.update { it.copy(responseState = ResponseState.Error(error)) }
     }

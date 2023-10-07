@@ -33,9 +33,10 @@ import com.geeksville.mesh.android.*
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.BluetoothViewModel
-import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.model.primaryChannel
+import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.SerialInterface
 import com.geeksville.mesh.service.*
@@ -443,7 +444,7 @@ class MainActivity : AppCompatActivity(), Logging {
         if (url != null && model.isConnected()) {
             requestedChannelUrl = null
             try {
-                val channels = ChannelSet(url)
+                val channels = url.toChannelSet()
                 val primary = channels.primaryChannel
                 if (primary == null)
                     showSnackbar(R.string.channel_invalid)

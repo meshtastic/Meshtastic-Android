@@ -78,8 +78,11 @@ import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
-import com.geeksville.mesh.model.ChannelSet
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.model.getChannelUrl
+import com.geeksville.mesh.model.primaryChannel
+import com.geeksville.mesh.model.qrCode
+import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.ClickableTextField
 import com.geeksville.mesh.ui.components.DropDownPreference
@@ -142,12 +145,12 @@ fun ChannelScreen(
     val enabled = connectionState == MeshService.ConnectionState.CONNECTED && !viewModel.isManaged
 
     val channels by viewModel.channels.collectAsStateWithLifecycle()
-    var channelSet by remember(channels) { mutableStateOf(channels.protobuf) }
+    var channelSet by remember(channels) { mutableStateOf(channels) }
     var showChannelEditor by rememberSaveable { mutableStateOf(false) }
-    val isEditing = channelSet != channels.protobuf || showChannelEditor
+    val isEditing = channelSet != channels || showChannelEditor
 
-    val primaryChannel = ChannelSet(channelSet).primaryChannel
-    val channelUrl = ChannelSet(channelSet).getChannelUrl()
+    val primaryChannel = channelSet.primaryChannel
+    val channelUrl = channelSet.getChannelUrl()
     val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
@@ -188,15 +191,14 @@ fun ChannelScreen(
     fun installSettings(
         newChannelSet: AppOnlyProtos.ChannelSet
     ) {
-        val newSet = ChannelSet(newChannelSet)
         // Try to change the radio, if it fails, tell the user why and throw away their edits
         try {
-            viewModel.setChannels(newSet)
+            viewModel.setChannels(newChannelSet)
             // Since we are writing to DeviceConfig, that will trigger the rest of the GUI update (QR code etc)
         } catch (ex: RemoteException) {
             errormsg("ignoring channel problem", ex)
 
-            channelSet = channels.protobuf // Throw away user edits
+            channelSet = channels // Throw away user edits
 
             // Tell the user to try again
             showSnackbar(context.getString(R.string.radio_sleeping))
@@ -222,7 +224,7 @@ fun ChannelScreen(
             .setTitle(R.string.reset_to_defaults)
             .setMessage(R.string.are_you_sure_change_default)
             .setNeutralButton(R.string.cancel) { _, _ ->
-                channelSet = channels.protobuf // throw away any edits
+                channelSet = channels // throw away any edits
             }
             .setPositiveButton(R.string.apply) { _, _ ->
                 debug("Switching back to default channel")
@@ -251,7 +253,7 @@ fun ChannelScreen(
                 .setMessage(message)
                 .setNeutralButton(R.string.cancel) { _, _ ->
                     showChannelEditor = false
-                    channelSet = channels.protobuf
+                    channelSet = channels
                 }
                 .setPositiveButton(R.string.accept) { _, _ ->
                     installSettings(channelSet)
@@ -328,7 +330,7 @@ fun ChannelScreen(
 
         if (!isEditing) item {
             Image(
-                painter = ChannelSet(channelSet).qrCode?.let { BitmapPainter(it.asImageBitmap()) }
+                painter = channelSet.qrCode?.let { BitmapPainter(it.asImageBitmap()) }
                     ?: painterResource(id = R.drawable.qrcode),
                 contentDescription = stringResource(R.string.qr_code),
                 contentScale = ContentScale.FillWidth,
@@ -349,7 +351,7 @@ fun ChannelScreen(
                 onValueChange = {
                     try {
                         valueState = Uri.parse(it)
-                        channelSet = ChannelSet(valueState).protobuf
+                        channelSet = valueState.toChannelSet()
                     } catch (ex: Throwable) {
                         // channelSet failed to update, isError true
                     }
@@ -417,7 +419,7 @@ fun ChannelScreen(
                 onCancelClicked = {
                     focusManager.clearFocus()
                     showChannelEditor = false
-                    channelSet = channels.protobuf
+                    channelSet = channels
                 },
                 onSaveClicked = {
                     focusManager.clearFocus()

@@ -130,8 +130,9 @@ class UIViewModel @Inject constructor(
     val moduleConfig: StateFlow<LocalModuleConfig> = _moduleConfig
     val module get() = _moduleConfig.value
 
-    private val _channels = MutableStateFlow(ChannelSet())
-    val channels: StateFlow<ChannelSet> = _channels
+    private val _channels = MutableStateFlow(channelSet {})
+    val channels: StateFlow<AppOnlyProtos.ChannelSet> get() = _channels
+    val channelSet get() = channels.value
 
     private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
     val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
@@ -167,7 +168,7 @@ class UIViewModel @Inject constructor(
             }
         }
         radioConfigRepository.channelSetFlow.onEach { channelSet ->
-            _channels.value = ChannelSet(channelSet)
+            _channels.value = channelSet
         }.launchIn(viewModelScope)
 
         viewModelScope.launch {
@@ -396,27 +397,13 @@ class UIViewModel @Inject constructor(
         meshService?.setChannel(channel.toByteArray())
     }
 
-    /**
-     * Convert the [channels] array to and from [ChannelSet]
-     */
-    private var _channelSet: AppOnlyProtos.ChannelSet
-        get() = channels.value.protobuf
-        set(value) {
-            val new = value.settingsList
-            val old = channelSet.settingsList
-            viewModelScope.launch {
-                getChannelList(new, old).forEach(::setChannel)
-                radioConfigRepository.replaceAllSettings(new)
+    // Set the radio config (also updates our saved copy in preferences)
+    fun setChannels(channelSet: AppOnlyProtos.ChannelSet) = viewModelScope.launch {
+        getChannelList(channelSet.settingsList, channels.value.settingsList).forEach(::setChannel)
+        radioConfigRepository.replaceAllSettings(channelSet.settingsList)
 
-                val newConfig = config { lora = value.loraConfig }
-                if (config.lora != newConfig.lora) setConfig(newConfig)
-            }
-        }
-    val channelSet get() = _channelSet
-
-    /// Set the radio config (also updates our saved copy in preferences)
-    fun setChannels(channelSet: ChannelSet) {
-        this._channelSet = channelSet.protobuf
+        val newConfig = config { lora = channelSet.loraConfig }
+        if (config.lora != newConfig.lora) setConfig(newConfig)
     }
 
     val provideLocation = object : MutableLiveData<Boolean>(preferences.getBoolean("provide-location", false)) {
