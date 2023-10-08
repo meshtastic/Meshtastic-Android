@@ -564,7 +564,13 @@ class MeshService : Service(), Logging {
         }
     }
 
+    private val rememberDataType = setOf(
+        Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+        Portnums.PortNum.WAYPOINT_APP_VALUE,
+    )
+
     private fun rememberDataPacket(dataPacket: DataPacket) {
+        if (dataPacket.dataType !in rememberDataType) return
         val fromLocal = dataPacket.from == DataPacket.ID_LOCAL
         val toBroadcast = dataPacket.to == DataPacket.ID_BROADCAST
         val contactId = if (fromLocal || toBroadcast) dataPacket.to else dataPacket.from
