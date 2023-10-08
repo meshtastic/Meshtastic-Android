@@ -508,7 +508,10 @@ class UIViewModel @Inject constructor(
                             val hopLimit = proto.hopLimit
 
                             val payload = when {
-                                proto.decoded.portnumValue != Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> "<${proto.decoded.portnum}>"
+                                proto.decoded.portnumValue !in setOf(
+                                    Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                                    Portnums.PortNum.RANGE_TEST_APP_VALUE,
+                                ) -> "<${proto.decoded.portnum}>"
                                 proto.hasDecoded() -> "\"" + proto.decoded.payload.toStringUtf8()
                                     .replace("\"", "\\\"") + "\""
                                 proto.hasEncrypted() -> "${proto.encrypted.size()} encrypted bytes"
