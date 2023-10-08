@@ -469,7 +469,7 @@ class UIViewModel @Inject constructor(
                         // If the packet contains position data then use it to update, if valid
                         packet.position?.let { position ->
                             positionToPos.invoke(position)?.let {
-                                nodePositions[proto.from] = position
+                                nodePositions[proto.from.takeIf { it != 0 } ?: myNodeNum] = position
                             }
                         }
 
