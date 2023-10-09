@@ -394,6 +394,7 @@ class MeshService : Service(), Logging {
         nodeDBbyNodeNum.getOrPut(n) { NodeInfo(n) }
 
     private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
+    private val rangeTestRegex = Regex("seq (\\d{1,10})")
 
     /// Map a userid to a node/ node num, or throw an exception if not found
     /// We prefer to find nodes based on their assigned IDs, but if no ID has been assigned to a node, we can also find it based on node number
@@ -611,12 +612,17 @@ class MeshService : Service(), Logging {
                 var shouldBroadcast = !fromUs
 
                 when (data.portnumValue) {
-                    Portnums.PortNum.TEXT_MESSAGE_APP_VALUE ->
-                        if (!fromUs) {
-                            debug("Received CLEAR_TEXT from $fromId")
-                            rememberDataPacket(dataPacket)
-                            updateMessageNotification(dataPacket)
-                        }
+                    Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
+                        if (fromUs) return
+
+                        // TODO temporary solution to Range Test spam, may be removed in the future
+                        val isRangeTest = rangeTestRegex.matches(data.payload.toStringUtf8())
+                        if (!moduleConfig.rangeTest.enabled && isRangeTest) return
+
+                        debug("Received CLEAR_TEXT from $fromId")
+                        rememberDataPacket(dataPacket)
+                        updateMessageNotification(dataPacket)
+                    }
 
                     Portnums.PortNum.WAYPOINT_APP_VALUE -> {
                         val u = MeshProtos.Waypoint.parseFrom(data.payload)
