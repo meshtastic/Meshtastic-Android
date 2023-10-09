@@ -41,10 +41,10 @@ class SharedLocationManager constructor(
     // Set up the Fused Location Provider and LocationRequest
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
     private val locationRequest = LocationRequest.Builder(desiredInterval)
-        // .setMinUpdateIntervalMillis(10 * 1000L)
-        // .setMaxUpdateDelayMillis(5 * 60 * 1000L)
+        .setMinUpdateIntervalMillis(desiredInterval / 2)
+        .setMaxUpdateDelayMillis(desiredInterval)
         // .setMinUpdateDistanceMeters(30f) // 30 meters
-        .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
+        .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
         .build()
 
     @SuppressLint("MissingPermission")
