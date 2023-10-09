@@ -39,6 +39,11 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
     private val model: UIViewModel by activityViewModels()
 
+    private val ignoreIncomingList: MutableList<Int> = mutableListOf()
+    private var gpsFormat = 0
+    private var displayUnits = 0
+    private var displayFahrenheit = false
+
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
     class ViewHolder(itemView: AdapterNodeLayoutBinding) : RecyclerView.ViewHolder(itemView.root) {
@@ -56,10 +61,6 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     private val nodesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
 
         private var nodes = arrayOf<NodeInfo>()
-        val ignoreIncomingList: MutableList<Int> = mutableListOf()
-
-        private val gpsFormat by lazy { model.config.display.gpsFormat.number }
-        private val displayUnits by lazy { model.config.display.units.number }
 
         private fun CharSequence.strike() = SpannableString(this).apply {
             setSpan(StrikethroughSpan(), 0, this.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -239,7 +240,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
             holder.lastTime.text = formatAgo(n.lastHeard)
 
-            val envMetrics = n.envMetricStr(model.module.telemetry.environmentDisplayFahrenheit)
+            val envMetrics = n.envMetricStr(displayFahrenheit)
             if (envMetrics.isNotEmpty()) {
                 holder.envMetrics.text = envMetrics
                 holder.envMetrics.visibility = View.VISIBLE
@@ -326,10 +327,16 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         }
 
         model.localConfig.asLiveData().observe(viewLifecycleOwner) { config ->
-            nodesAdapter.ignoreIncomingList.apply {
+            ignoreIncomingList.apply {
                 clear()
                 addAll(config.lora.ignoreIncomingList)
             }
+            gpsFormat = config.display.gpsFormat.number
+            displayUnits = config.display.units.number
+        }
+
+        model.moduleConfig.asLiveData().observe(viewLifecycleOwner) { module ->
+            displayFahrenheit = module.telemetry.environmentDisplayFahrenheit
         }
 
         model.tracerouteResponse.observe(viewLifecycleOwner) { response ->
