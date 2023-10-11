@@ -51,7 +51,7 @@ fun <T> PacketResponseStateDialog(
                     if (state.total == state.completed) onComplete()
                 }
                 if (state is ResponseState.Success) {
-                    Text("Delivery confirmed.")
+                    Text("Delivery confirmed")
                 }
                 if (state is ResponseState.Error) {
                     Text(text = "Error\n", textAlign = TextAlign.Center)

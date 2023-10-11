@@ -294,7 +294,7 @@ class RadioConfigViewModel @Inject constructor(
     }
 
     private val _deviceProfile = MutableStateFlow<DeviceProfile?>(null)
-    val deviceProfile get() = _deviceProfile.value
+    val deviceProfile: StateFlow<DeviceProfile?> get() = _deviceProfile
 
     fun setDeviceProfile(deviceProfile: DeviceProfile?) {
         _deviceProfile.value = deviceProfile
@@ -314,7 +314,7 @@ class RadioConfigViewModel @Inject constructor(
     }
 
     fun exportProfile(uri: Uri) = viewModelScope.launch {
-        val profile = deviceProfile ?: return@launch
+        val profile = deviceProfile.value ?: return@launch
         writeToUri(uri, profile)
         _deviceProfile.value = null
     }

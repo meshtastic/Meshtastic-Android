@@ -234,6 +234,7 @@ fun RadioConfigNavHost(
     val radioConfigState by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var location by remember(node) { mutableStateOf(node?.position) } // FIXME
 
+    val deviceProfile by viewModel.deviceProfile.collectAsStateWithLifecycle()
     val isWaiting = radioConfigState.responseState !is ResponseState.Empty
     var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
 
@@ -254,7 +255,6 @@ fun RadioConfigNavHost(
         }
     }
 
-    val deviceProfile = viewModel.deviceProfile
     if (showEditDeviceProfileDialog) EditDeviceProfileDialog(
         title = if (deviceProfile != null) "Import configuration" else "Export configuration",
         deviceProfile = deviceProfile ?: viewModel.currentDeviceProfile,
