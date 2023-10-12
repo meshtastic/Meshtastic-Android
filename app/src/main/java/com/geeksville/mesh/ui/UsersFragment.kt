@@ -341,6 +341,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
         model.tracerouteResponse.observe(viewLifecycleOwner) { response ->
             MaterialAlertDialogBuilder(requireContext())
+                .setCancelable(false)
                 .setTitle(R.string.traceroute)
                 .setMessage(response ?: return@observe)
                 .setPositiveButton(R.string.okay) { _, _ -> }
