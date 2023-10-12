@@ -249,6 +249,9 @@ dependencies {
 
     // App intro
     implementation 'com.github.AppIntro:AppIntro:6.3.1'
+
+    // MQTT
+    implementation "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5"
 }
 
 ksp {
