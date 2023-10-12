@@ -24,6 +24,7 @@ import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
+import com.geeksville.mesh.repository.network.MQTTRepository
 import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
@@ -38,6 +39,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeoutOrNull
@@ -74,6 +76,9 @@ class MeshService : Service(), Logging {
 
     @Inject
     lateinit var radioConfigRepository: RadioConfigRepository
+
+    @Inject
+    lateinit var mqttRepository: MQTTRepository
 
     companion object : Logging {
 
@@ -145,6 +150,7 @@ class MeshService : Service(), Logging {
     private var connectionState = ConnectionState.DISCONNECTED
 
     private var locationFlow: Job? = null
+    private var mqttMessageFlow: Job? = null
 
     private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
@@ -184,7 +190,7 @@ class MeshService : Service(), Logging {
 
     private fun stopLocationRequests() {
         if (locationFlow?.isActive == true) {
-            debug("Stopping location requests")
+            info("Stopping location requests")
             locationFlow?.cancel()
             locationFlow = null
         }
@@ -515,8 +521,7 @@ class MeshService : Service(), Logging {
         wantAck = true,
         channel = adminChannelIndex,
         priority = MeshPacket.Priority.RELIABLE
-    )
-    {
+    ) {
         this.wantResponse = wantResponse
         portnumValue = Portnums.PortNum.ADMIN_APP_VALUE
         payload = AdminProtos.AdminMessage.newBuilder().also {
@@ -849,7 +854,7 @@ class MeshService : Service(), Logging {
 
     private fun stopPacketQueue() {
         if (queueJob?.isActive == true) {
-            debug("Stopping packet queueJob")
+            info("Stopping packet queueJob")
             queueJob?.cancel()
             queueJob = null
             queuedPackets.clear()
@@ -1038,6 +1043,7 @@ class MeshService : Service(), Logging {
         fun startDeviceSleep() {
             stopPacketQueue()
             stopLocationRequests()
+            stopMqttClientProxy()
 
             if (connectTimeMsec != 0L) {
                 val now = System.currentTimeMillis()
@@ -1071,6 +1077,7 @@ class MeshService : Service(), Logging {
         fun startDisconnect() {
             stopPacketQueue()
             stopLocationRequests()
+            stopMqttClientProxy()
 
             GeeksvilleApplication.analytics.track(
                 "mesh_disconnect",
@@ -1120,12 +1127,9 @@ class MeshService : Service(), Logging {
 
         connectionState = c
         when (c) {
-            ConnectionState.CONNECTED ->
-                startConnect()
-            ConnectionState.DEVICE_SLEEP ->
-                startDeviceSleep()
-            ConnectionState.DISCONNECTED ->
-                startDisconnect()
+            ConnectionState.CONNECTED -> startConnect()
+            ConnectionState.DEVICE_SLEEP -> startDeviceSleep()
+            ConnectionState.DISCONNECTED -> startDisconnect()
         }
 
         // Update the android notification in the status bar
@@ -1169,6 +1173,7 @@ class MeshService : Service(), Logging {
                 MeshProtos.FromRadio.MODULECONFIG_FIELD_NUMBER -> handleModuleConfig(proto.moduleConfig)
                 MeshProtos.FromRadio.QUEUESTATUS_FIELD_NUMBER -> handleQueueStatus(proto.queueStatus)
                 MeshProtos.FromRadio.METADATA_FIELD_NUMBER -> handleMetadata(proto.metadata)
+                MeshProtos.FromRadio.MQTTCLIENTPROXYMESSAGE_FIELD_NUMBER -> handleMqttProxyMessage(proto.mqttClientProxyMessage)
                 else -> errormsg("Unexpected FromRadio variant")
             }
         } catch (ex: InvalidProtocolBufferException) {
@@ -1364,10 +1369,52 @@ class MeshService : Service(), Logging {
         rawDeviceMetadata = metadata
     }
 
+    /**
+     * Publish MqttClientProxyMessage (fromRadio)
+     */
+    private fun handleMqttProxyMessage(message: MeshProtos.MqttClientProxyMessage) {
+        with(message) {
+            when (payloadVariantCase) {
+                MeshProtos.MqttClientProxyMessage.PayloadVariantCase.TEXT -> {
+                    mqttRepository.publish(topic, text, retained)
+                }
+
+                MeshProtos.MqttClientProxyMessage.PayloadVariantCase.DATA -> {
+                    mqttRepository.publish(topic, data.toByteArray(), retained)
+                }
+
+                else -> {}
+            }
+        }
+    }
+
+    /**
+     * Connect, subscribe and receive Flow of MqttClientProxyMessage (toRadio)
+     */
+    private fun startMqttClientProxy() {
+        if (mqttMessageFlow?.isActive == true) return
+        if (moduleConfig.mqtt.enabled && moduleConfig.mqtt.proxyToClientEnabled) {
+            mqttMessageFlow = mqttRepository.proxyMessageFlow.onEach { message ->
+                sendToRadio(ToRadio.newBuilder().apply { mqttClientProxyMessage = message })
+            }.catch { throwable ->
+                errormsg("MqttClientProxy failed: $throwable")
+            }.launchIn(serviceScope)
+        }
+    }
+
+    private fun stopMqttClientProxy() {
+        if (mqttMessageFlow?.isActive == true) {
+            info("Stopping MqttClientProxy")
+            mqttMessageFlow?.cancel()
+            mqttMessageFlow = null
+        }
+    }
+
     /// If we've received our initial config, our radio settings and all of our channels, send any queued packets and broadcast connected to clients
     private fun onHasSettings() {
 
         processQueuedPackets() // send any packets that were queued up
+        startMqttClientProxy()
 
         // broadcast an intent with our new connection state
         serviceBroadcasts.broadcastConnection()
