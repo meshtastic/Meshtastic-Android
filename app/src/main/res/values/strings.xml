@@ -181,4 +181,5 @@
     <string name="waypoint_delete">Delete waypoint?</string>
     <string name="waypoint_new">New waypoint</string>
     <string name="waypoint_received">Received waypoint: %s</string>
+    <string name="error_duty_cycle">Duty Cycle limit reached. Cannot send messages right now, please try again later.</string>
 </resources>

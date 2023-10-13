@@ -664,12 +664,16 @@ class MeshService : Service(), Logging {
                         handleReceivedTelemetry(packet.from, u, dataPacket.time)
                     }
 
-                    // Handle new style routing info
                     Portnums.PortNum.ROUTING_APP_VALUE -> {
-                        shouldBroadcast =
-                            true // We always send acks to other apps, because they might care about the messages they sent
+                        // We always send ACKs to other apps, because they might care about the messages they sent
+                        shouldBroadcast = true
                         val u = MeshProtos.Routing.parseFrom(data.payload)
                         val isAck = u.errorReasonValue == MeshProtos.Routing.Error.NONE_VALUE
+
+                        if (u.errorReason == MeshProtos.Routing.Error.DUTY_CYCLE_LIMIT) {
+                            radioInterfaceService.setErrorMessage(getString(R.string.error_duty_cycle))
+                        }
+
                         handleAckNak(isAck, fromId, data.requestId)
                         queueResponse.remove(data.requestId)?.complete(true)
                     }

@@ -334,6 +334,7 @@ class MainActivity : AppCompatActivity(), Logging {
         // val messageStr = getText(messageText)
 
         val builder = MaterialAlertDialogBuilder(this)
+            .setCancelable(false)
             .setTitle(titleText)
             .setMessage(messageText)
             .setPositiveButton(R.string.okay) { _, _ ->

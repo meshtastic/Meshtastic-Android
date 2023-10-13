@@ -34,6 +34,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
@@ -143,6 +144,11 @@ class UIViewModel @Inject constructor(
     private val requestIds = MutableStateFlow<HashMap<Int, Boolean>>(hashMapOf())
 
     init {
+        radioInterfaceService.errorMessage.filterNotNull().onEach {
+            _snackbarText.value = it
+            radioInterfaceService.clearErrorMessage()
+        }.launchIn(viewModelScope)
+
         radioConfigRepository.nodeInfoFlow().onEach(nodeDB::setNodes)
             .launchIn(viewModelScope)
 
