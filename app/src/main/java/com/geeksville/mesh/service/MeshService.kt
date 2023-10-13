@@ -1401,7 +1401,7 @@ class MeshService : Service(), Logging {
             mqttMessageFlow = mqttRepository.proxyMessageFlow.onEach { message ->
                 sendToRadio(ToRadio.newBuilder().apply { mqttClientProxyMessage = message })
             }.catch { throwable ->
-                errormsg("MqttClientProxy failed: $throwable")
+                radioInterfaceService.setErrorMessage("MqttClientProxy failed: $throwable")
             }.launchIn(serviceScope)
         }
     }
