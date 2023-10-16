@@ -31,6 +31,12 @@ fun Uri.toChannelSet(): ChannelSet {
 }
 
 /**
+ * @return A list of globally unique channel IDs usable with MQTT subscribe()
+ */
+val ChannelSet.subscribeList: List<String>
+    get() = settingsList.filter { it.downlinkEnabled }.map { Channel(it, loraConfig).name }
+
+/**
  * Return the primary channel info
  */
 val ChannelSet.primaryChannel: Channel?
