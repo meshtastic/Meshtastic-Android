@@ -228,7 +228,7 @@ dependencies {
     googleImplementation 'com.google.android.gms:play-services-location:21.0.1'
 
     // For Firebase Crashlytics & Analytics
-    googleImplementation platform('com.google.firebase:firebase-bom:32.3.1')
+    googleImplementation platform('com.google.firebase:firebase-bom:32.4.0')
     googleImplementation 'com.google.firebase:firebase-crashlytics-ktx'
     googleImplementation 'com.google.firebase:firebase-analytics-ktx'
 
