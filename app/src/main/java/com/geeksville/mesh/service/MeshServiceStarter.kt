@@ -1,9 +1,13 @@
 package com.geeksville.mesh.service
 
-import android.content.ComponentName
+import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
 import android.os.Build
-import androidx.work.*
+import androidx.work.BackoffPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.Worker
+import androidx.work.WorkerParameters
 import com.geeksville.mesh.BuildConfig
 import java.util.concurrent.TimeUnit
 
@@ -23,15 +27,6 @@ class ServiceStarter(
     } catch (ex: Exception) {
         MeshService.errormsg("failure starting service, will retry", ex)
         Result.retry()
-    }
-}
-
-private fun Context.startMeshService(): ComponentName? {
-    val intent = MeshService.createIntent()
-    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        startForegroundService(intent)
-    } else {
-        startService(intent)
     }
 }
 
@@ -63,5 +58,19 @@ fun MeshService.Companion.startService(context: Context) {
     // listening for the bluetooth packets arriving from the radio. And when they arrive forward them
     // to Signal or whatever.
     info("Trying to start service debug=${BuildConfig.DEBUG}")
-    requireNotNull(context.startMeshService()) { "Failed to start service" }
+
+    val intent = createIntent()
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            try {
+                context.startForegroundService(intent)
+            } catch (ex: ForegroundServiceStartNotAllowedException) {
+                errormsg("Unable to start service: ${ex.message}")
+            }
+        } else {
+            context.startForegroundService(intent)
+        }
+    } else {
+        context.startService(intent)
+    }
 }
