@@ -403,10 +403,8 @@ fun RadioConfigNavHost(
                         locationInput?.let { viewModel.requestPosition(destNum, it) }
                         location = locationInput
                     }
-                    if (positionInput != radioConfigState.radioConfig.position) {
-                        val config = config { position = positionInput }
-                        viewModel.setRemoteConfig(destNum, config)
-                    }
+                    val config = config { position = positionInput }
+                    viewModel.setRemoteConfig(destNum, config)
                 }
             )
         }
