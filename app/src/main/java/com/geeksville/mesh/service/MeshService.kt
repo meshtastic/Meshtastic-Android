@@ -833,23 +833,17 @@ class MeshService : Service(), Logging {
         queueJob = serviceScope.handledLaunch {
             debug("packet queueJob started")
             while (connectionState == ConnectionState.CONNECTED) {
-                var retryCount = 0
                 // take the first packet from the queue head
                 val packet = queuedPackets.poll() ?: break
-                while (retryCount < 3) try {
+                try {
                     // send packet to the radio and wait for response
                     val response = sendPacket(packet)
-                    debug("queueJob packet id=${packet.id.toUInt()} waiting (retry $retryCount)")
-                    @Suppress("BlockingMethodInNonBlockingContext")
-                    val success = response.get(45, TimeUnit.SECONDS)
+                    debug("queueJob packet id=${packet.id.toUInt()} waiting")
+                    val success = response.get(2, TimeUnit.MINUTES)
                     debug("queueJob packet id=${packet.id.toUInt()} success $success")
-                    if (success) break
-                    retryCount++ // if send operation fails, retry
                 } catch (e: TimeoutException) {
-                    debug("queueJob timeout waiting packet id=${packet.id.toUInt()}")
-                    retryCount++ // if send operation fails, retry
-                }
-                if (retryCount >= 3) {
+                    debug("queueJob packet id=${packet.id.toUInt()} timeout")
+                } catch (e: Exception) {
                     debug("queueJob packet id=${packet.id.toUInt()} failed")
                 }
             }
