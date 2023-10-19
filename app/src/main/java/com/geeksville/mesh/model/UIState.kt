@@ -143,6 +143,9 @@ class UIViewModel @Inject constructor(
 
     private val requestIds = MutableStateFlow<HashMap<Int, Boolean>>(hashMapOf())
 
+    private val _snackbarText = MutableLiveData<Any?>(null)
+    val snackbarText: LiveData<Any?> get() = _snackbarText
+
     init {
         radioInterfaceService.errorMessage.filterNotNull().onEach {
             _snackbarText.value = it
@@ -317,9 +320,6 @@ class UIViewModel @Inject constructor(
     fun clearRequestChannelUrl() {
         _requestChannelUrl.value = null
     }
-
-    private val _snackbarText = MutableLiveData<Any?>(null)
-    val snackbarText: LiveData<Any?> get() = _snackbarText
 
     fun showSnackbar(resString: Any) {
         _snackbarText.value = resString
