@@ -321,7 +321,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         // Also watch myNodeInfo because it might change later
-        model.myNodeInfo.observe(viewLifecycleOwner) {
+        model.myNodeInfo.asLiveData().observe(viewLifecycleOwner) {
             updateNodeInfo()
         }
 

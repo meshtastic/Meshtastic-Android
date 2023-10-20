@@ -112,7 +112,7 @@ class UIViewModel @Inject constructor(
 
     var actionBarMenu: Menu? = null
     val meshService: IMeshService? get() = radioConfigRepository.meshService
-    val nodeDB = NodeDB(this)
+    val nodeDB = radioConfigRepository.nodeDB
 
     val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()
     val selectedBluetooth get() = radioInterfaceService.getDeviceAddress()?.getOrNull(0) == 'x'
@@ -138,6 +138,10 @@ class UIViewModel @Inject constructor(
     private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
     val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
 
+    // hardware info about our local device (can be null)
+    private val _myNodeInfo = MutableStateFlow<MyNodeInfo?>(null)
+    val myNodeInfo: StateFlow<MyNodeInfo?> get() = _myNodeInfo
+
     private val _ourNodeInfo = MutableStateFlow<NodeInfo?>(null)
     val ourNodeInfo: StateFlow<NodeInfo?> = _ourNodeInfo
 
@@ -150,6 +154,10 @@ class UIViewModel @Inject constructor(
         radioInterfaceService.errorMessage.filterNotNull().onEach {
             _snackbarText.value = it
             radioInterfaceService.clearErrorMessage()
+        }.launchIn(viewModelScope)
+
+        radioConfigRepository.myNodeInfoFlow().onEach {
+            _myNodeInfo.value = it
         }.launchIn(viewModelScope)
 
         radioConfigRepository.nodeInfoFlow().onEach(nodeDB::setNodes)
@@ -356,15 +364,8 @@ class UIViewModel @Inject constructor(
     // managed mode disables all access to configuration
     val isManaged: Boolean get() = config.device.isManaged
 
-    /// hardware info about our local device (can be null)
-    private val _myNodeInfo = MutableLiveData<MyNodeInfo?>()
-    val myNodeInfo: LiveData<MyNodeInfo?> get() = _myNodeInfo
-    val myNodeNum get() = _myNodeInfo.value?.myNodeNum
-    val maxChannels = myNodeInfo.value?.maxChannels ?: 8
-
-    fun setMyNodeInfo(info: MyNodeInfo?) {
-        _myNodeInfo.value = info
-    }
+    val myNodeNum get() = myNodeInfo.value?.myNodeNum
+    val maxChannels get() = myNodeInfo.value?.maxChannels ?: 8
 
     override fun onCleared() {
         super.onCleared()
@@ -445,7 +446,7 @@ class UIViewModel @Inject constructor(
             val myNodeNum = myNodeNum ?: return@launch
 
             // Capture the current node value while we're still on main thread
-            val nodes = nodeDB.nodes.value ?: emptyMap()
+            val nodes = nodeDB.nodes.value
 
             val positionToPos: (MeshProtos.Position?) -> Position? = { meshPosition ->
                 meshPosition?.let { Position(it) }.takeIf {
@@ -602,7 +603,7 @@ class UIViewModel @Inject constructor(
 
         if (data?.portnumValue == Portnums.PortNum.TRACEROUTE_APP_VALUE) {
             val parsed = MeshProtos.RouteDiscovery.parseFrom(data.payload)
-            fun nodeName(num: Int) = nodeDB.nodesByNum?.get(num)?.user?.longName
+            fun nodeName(num: Int) = nodeDB.nodesByNum[num]?.user?.longName
                 ?: app.getString(R.string.unknown_username)
 
             _tracerouteResponse.value = buildString {

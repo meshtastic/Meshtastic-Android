@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.DataPacket
@@ -187,7 +188,7 @@ fun MapView(model: UIViewModel = viewModel()) {
         requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
     }
 
-    val nodes by model.nodeDB.nodes.observeAsState(emptyMap())
+    val nodes by model.nodeDB.nodes.collectAsStateWithLifecycle()
     val waypoints by model.waypoints.observeAsState(emptyMap())
 
     var showDownloadButton: Boolean by remember { mutableStateOf(false) }
@@ -256,8 +257,7 @@ fun MapView(model: UIViewModel = viewModel()) {
     }
 
     fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) context.getString(R.string.you)
-    else model.nodeDB.nodes.value?.get(id)?.user?.longName
-        ?: context.getString(R.string.unknown_username)
+    else model.nodeDB.nodes.value[id]?.user?.longName ?: context.getString(R.string.unknown_username)
 
     fun MapView.onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
         return waypoints.mapNotNull { waypoint ->

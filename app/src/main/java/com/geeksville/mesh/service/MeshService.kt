@@ -144,7 +144,9 @@ class MeshService : Service(), Logging {
     /// A mapping of receiver class name to package name - used for explicit broadcasts
     private val clientPackages = mutableMapOf<String, String>()
     private val serviceNotifications = MeshServiceNotifications(this)
-    private val serviceBroadcasts = MeshServiceBroadcasts(this, clientPackages) { connectionState }
+    private val serviceBroadcasts = MeshServiceBroadcasts(this, clientPackages) {
+        connectionState.also { radioConfigRepository.setConnectionState(it) }
+    }
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
     private var connectionState = ConnectionState.DISCONNECTED
@@ -1053,7 +1055,7 @@ class MeshService : Service(), Logging {
                 )
             }
 
-            // Have our timeout fire in the approprate number of seconds
+            // Have our timeout fire in the appropriate number of seconds
             sleepTimeout = serviceScope.handledLaunch {
                 try {
                     // If we have a valid timeout, wait that long (+30 seconds) otherwise, just wait 30 seconds
@@ -1432,9 +1434,9 @@ class MeshService : Service(), Logging {
             insertMeshLog(packetToSave)
 
             // This was our config request
-            if (newMyNodeInfo == null || newNodes.isEmpty())
+            if (newMyNodeInfo == null || newNodes.isEmpty()) {
                 errormsg("Did not receive a valid config")
-            else {
+            } else {
                 discardNodeDB()
                 debug("Installing new node DB")
                 myNodeInfo = newMyNodeInfo // Install myNodeInfo as current
@@ -1448,7 +1450,7 @@ class MeshService : Service(), Logging {
                 myNodeInfo = newMyNodeInfo // we might have just updated myNodeInfo
 
                 serviceScope.handledLaunch {
-                    radioConfigRepository.installNodeDB(newMyNodeInfo, nodeDBbyID.values.toList())
+                    radioConfigRepository.installNodeDB(newMyNodeInfo!!, nodeDBbyID.values.toList())
                 }
 
                 sendAnalytics()
@@ -1460,8 +1462,9 @@ class MeshService : Service(), Logging {
                 }
                 onHasSettings()
             }
-        } else
+        } else {
             warn("Ignoring stale config complete")
+        }
     }
 
     private fun requestConfig(config: AdminProtos.AdminMessage.ConfigType) {

@@ -23,8 +23,6 @@ import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
-import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.ui.ConfigRoute
 import com.geeksville.mesh.ui.ResponseState
 import com.google.protobuf.MessageLite
@@ -59,7 +57,6 @@ data class RadioConfigState(
 @HiltViewModel
 class RadioConfigViewModel @Inject constructor(
     private val app: Application,
-    radioInterfaceService: RadioInterfaceService,
     private val radioConfigRepository: RadioConfigRepository,
     meshLogRepository: MeshLogRepository,
 ) : ViewModel(), Logging {
@@ -68,12 +65,10 @@ class RadioConfigViewModel @Inject constructor(
     private val meshService: IMeshService? get() = radioConfigRepository.meshService
 
     // Connection state to our radio device
-    private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
-    val connectionState: StateFlow<ConnectionState> get() = _connectionState
+    val connectionState get() = radioConfigRepository.connectionState
 
     // A map from nodeNum to NodeInfo
-    private val _nodes = MutableStateFlow<Map<Int, NodeInfo>>(mapOf())
-    val nodes: StateFlow<Map<Int, NodeInfo>> = _nodes
+    val nodes: StateFlow<Map<Int, NodeInfo>> get() = radioConfigRepository.nodeDBbyNum
 
     private val _myNodeInfo = MutableStateFlow<MyNodeInfo?>(null)
     val myNodeInfo get() = _myNodeInfo
@@ -86,19 +81,8 @@ class RadioConfigViewModel @Inject constructor(
     val currentDeviceProfile get() = _currentDeviceProfile.value
 
     init {
-        radioInterfaceService.connectionState.onEach { state ->
-            _connectionState.value = when {
-                state.isConnected -> ConnectionState.CONNECTED
-                else -> ConnectionState.DISCONNECTED
-            }
-        }.launchIn(viewModelScope)
-
         radioConfigRepository.myNodeInfoFlow().onEach {
             _myNodeInfo.value = it
-        }.launchIn(viewModelScope)
-
-        radioConfigRepository.nodeInfoFlow().onEach { list ->
-            _nodes.value = list.associateBy { it.num }
         }.launchIn(viewModelScope)
 
         radioConfigRepository.deviceProfileFlow.onEach {
@@ -114,8 +98,8 @@ class RadioConfigViewModel @Inject constructor(
         debug("RadioConfigViewModel created")
     }
 
-    val myNodeNum get() = _myNodeInfo.value?.myNodeNum
-    val maxChannels get() = _myNodeInfo.value?.maxChannels ?: 8
+    val myNodeNum get() = myNodeInfo.value?.myNodeNum
+    val maxChannels get() = myNodeInfo.value?.maxChannels ?: 8
     private val ourNodeInfo: NodeInfo? get() = nodes.value[myNodeNum]
 
     override fun onCleared() {

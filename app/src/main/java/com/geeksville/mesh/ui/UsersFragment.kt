@@ -322,7 +322,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 values
             }.toTypedArray()
 
-        model.nodeDB.nodes.observe(viewLifecycleOwner) {
+        model.nodeDB.nodes.asLiveData().observe(viewLifecycleOwner) {
             nodesAdapter.onNodesChanged(it.perhapsReindexBy(model.myNodeNum))
         }
 

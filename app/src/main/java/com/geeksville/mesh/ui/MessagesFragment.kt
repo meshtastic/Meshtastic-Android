@@ -93,7 +93,7 @@ class MessagesFragment : Fragment(), Logging {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val packet = messages[position]
             val msg = packet.data
-            val nodes = model.nodeDB.nodes.value!!
+            val nodes = model.nodeDB.nodes.value
             val node = nodes[msg.from]
             // Determine if this is my message (originated on this device)
             val isLocal = msg.from == DataPacket.ID_LOCAL
