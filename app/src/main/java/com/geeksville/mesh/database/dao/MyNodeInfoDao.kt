@@ -14,7 +14,7 @@ interface MyNodeInfoDao {
     fun getMyNodeInfo(): Flow<MyNodeInfo?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun setMyNodeInfo(myInfo: MyNodeInfo?)
+    fun setMyNodeInfo(myInfo: MyNodeInfo)
 
     @Query("DELETE FROM MyNodeInfo")
     fun clearMyNodeInfo()

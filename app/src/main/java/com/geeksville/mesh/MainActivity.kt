@@ -180,10 +180,6 @@ class MainActivity : AppCompatActivity(), Logging {
         override fun createFragment(position: Int): Fragment = tabInfos[position].content
     }
 
-    private val isInTestLab: Boolean by lazy {
-        (application as GeeksvilleApplication).isInTestLab
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -364,7 +360,6 @@ class MainActivity : AppCompatActivity(), Logging {
                 debug("Getting latest DeviceConfig from service")
                 try {
                     val info: MyNodeInfo? = service.myNodeInfo // this can be null
-                    model.setMyNodeInfo(info)
 
                     if (info != null) {
                         val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
@@ -380,9 +375,6 @@ class MainActivity : AppCompatActivity(), Logging {
                                     showAlert(R.string.firmware_too_old, R.string.firmware_old)
                                 else {
                                     // If our app is too old/new, we probably don't understand the new DeviceConfig messages, so we don't read them until here
-
-                                    // model.setLocalConfig(LocalOnlyProtos.LocalConfig.parseFrom(service.deviceConfig))
-                                    // model.setChannels(ChannelSet(AppOnlyProtos.ChannelSet.parseFrom(service.channels)))
 
                                     model.updateNodesFromDevice()
 
@@ -525,8 +517,6 @@ class MainActivity : AppCompatActivity(), Logging {
 
                     // We don't start listening for packets until after we are connected to the service
                     registerMeshReceiver()
-
-                    model.setMyNodeInfo(service.myNodeInfo) // Note: this could be NULL!
 
                     val connectionState =
                         MeshService.ConnectionState.valueOf(service.connectionState())

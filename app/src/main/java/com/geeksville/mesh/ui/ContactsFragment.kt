@@ -87,7 +87,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             val toBroadcast = contact.to == DataPacket.ID_BROADCAST
 
             // grab usernames from NodeInfo
-            val nodes = model.nodeDB.nodes.value!!
+            val nodes = model.nodeDB.nodes.value
             val node = nodes[if (fromLocal) contact.to else contact.from]
 
             //grab channel names from DeviceConfig
@@ -212,7 +212,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             contactsAdapter.onChannelsChanged()
         }
 
-        model.nodeDB.nodes.observe(viewLifecycleOwner) {
+        model.nodeDB.nodes.asLiveData().observe(viewLifecycleOwner) {
             contactsAdapter.notifyDataSetChanged()
         }
 

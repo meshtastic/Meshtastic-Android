@@ -11,66 +11,52 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
-import com.geeksville.mesh.database.dao.MyNodeInfoDao
-import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.deviceProfile
+import com.geeksville.mesh.model.NodeDB
 import com.geeksville.mesh.model.getChannelUrl
+import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.service.ServiceRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 /**
  * Class responsible for radio configuration data.
- * Combines access to [MyNodeInfo] & [NodeInfo] Room databases
- * and [ChannelSet], [LocalConfig] & [LocalModuleConfig] data stores.
+ * Combines access to [nodeDB], [ChannelSet], [LocalConfig] & [LocalModuleConfig].
  */
 class RadioConfigRepository @Inject constructor(
     private val serviceRepository: ServiceRepository,
-    private val myNodeInfoDao: MyNodeInfoDao,
-    private val nodeInfoDao: NodeInfoDao,
+    val nodeDB: NodeDB,
     private val channelSetRepository: ChannelSetRepository,
     private val localConfigRepository: LocalConfigRepository,
     private val moduleConfigRepository: ModuleConfigRepository,
 ) {
     val meshService: IMeshService? get() = serviceRepository.meshService
 
-    suspend fun clearNodeDB() = withContext(Dispatchers.IO) {
-        myNodeInfoDao.clearMyNodeInfo()
-        nodeInfoDao.clearNodeInfo()
-    }
+    // Connection state to our radio device
+    val connectionState get() = serviceRepository.connectionState
+    fun setConnectionState(state: ConnectionState) = serviceRepository.setConnectionState(state)
 
     /**
      * Flow representing the [MyNodeInfo] database.
      */
-    fun myNodeInfoFlow(): Flow<MyNodeInfo?> = myNodeInfoDao.getMyNodeInfo()
+    fun myNodeInfoFlow(): Flow<MyNodeInfo?> = nodeDB.myNodeInfoFlow()
     suspend fun getMyNodeInfo(): MyNodeInfo? = myNodeInfoFlow().firstOrNull()
 
-    suspend fun setMyNodeInfo(myInfo: MyNodeInfo?) = withContext(Dispatchers.IO) {
-        myNodeInfoDao.setMyNodeInfo(myInfo)
-    }
+    val nodeDBbyNum: StateFlow<Map<Int, NodeInfo>> get() = nodeDB.nodeDBbyNum
+    val nodeDBbyID: StateFlow<Map<String, NodeInfo>> get() = nodeDB.nodes
 
     /**
      * Flow representing the [NodeInfo] database.
      */
-    fun nodeInfoFlow(): Flow<List<NodeInfo>> = nodeInfoDao.getNodes()
+    fun nodeInfoFlow(): Flow<List<NodeInfo>> = nodeDB.nodeInfoFlow()
     suspend fun getNodes(): List<NodeInfo>? = nodeInfoFlow().firstOrNull()
 
-    suspend fun upsert(node: NodeInfo) = withContext(Dispatchers.IO) {
-        nodeInfoDao.upsert(node)
-    }
-
-    suspend fun putAll(nodes: List<NodeInfo>) = withContext(Dispatchers.IO) {
-        nodeInfoDao.putAll(nodes)
-    }
-
-    suspend fun installNodeDB(mi: MyNodeInfo?, nodes: List<NodeInfo>) {
-        clearNodeDB()
-        putAll(nodes)
-        setMyNodeInfo(mi) // set MyNodeInfo last
+    suspend fun upsert(node: NodeInfo) = nodeDB.upsert(node)
+    suspend fun installNodeDB(mi: MyNodeInfo, nodes: List<NodeInfo>) {
+        nodeDB.installNodeDB(mi, nodes)
     }
 
     /**
@@ -149,13 +135,13 @@ class RadioConfigRepository @Inject constructor(
      */
     val deviceProfileFlow: Flow<DeviceProfile> = combine(
         myNodeInfoFlow(),
-        nodeInfoFlow(),
+        nodeDBbyNum,
         channelSetFlow,
         localConfigFlow,
         moduleConfigFlow,
     ) { myInfo, nodes, channels, localConfig, localModuleConfig ->
         deviceProfile {
-            nodes.firstOrNull { it.num == myInfo?.myNodeNum }?.user?.let {
+            nodes[myInfo?.myNodeNum]?.user?.let {
                 longName = it.longName
                 shortName = it.shortName
             }
