@@ -305,15 +305,9 @@ class UIViewModel @Inject constructor(
             context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
     }
 
-    /// Connection state to our radio device
-    private val _connectionState = MutableLiveData(MeshService.ConnectionState.DISCONNECTED)
-    val connectionState: LiveData<MeshService.ConnectionState> get() = _connectionState
-
-    fun isConnected() = _connectionState.value != MeshService.ConnectionState.DISCONNECTED
-
-    fun setConnectionState(connectionState: MeshService.ConnectionState) {
-        _connectionState.value = connectionState
-    }
+    // Connection state to our radio device
+    val connectionState get() = radioConfigRepository.connectionState.asLiveData()
+    fun isConnected() = connectionState.value != MeshService.ConnectionState.DISCONNECTED
 
     private val _requestChannelUrl = MutableLiveData<Uri?>(null)
     val requestChannelUrl: LiveData<Uri?> get() = _requestChannelUrl

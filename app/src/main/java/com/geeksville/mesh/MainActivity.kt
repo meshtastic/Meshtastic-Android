@@ -45,7 +45,6 @@ import com.geeksville.mesh.ui.map.MapFragment
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.getParcelableExtraCompat
 import com.geeksville.mesh.util.LanguageUtils
-import com.geeksville.mesh.util.exceptionReporter
 import com.geeksville.mesh.util.getPackageInfoCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -301,26 +300,8 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     override fun onDestroy() {
-        unregisterMeshReceiver()
         mainScope.cancel("Activity going away")
         super.onDestroy()
-    }
-
-    private var receiverRegistered = false
-
-    private fun registerMeshReceiver() {
-        unregisterMeshReceiver()
-        val filter = IntentFilter()
-        filter.addAction(MeshService.ACTION_MESH_CONNECTED)
-        registerReceiver(meshServiceReceiver, filter)
-        receiverRegistered = true
-    }
-
-    private fun unregisterMeshReceiver() {
-        if (receiverRegistered) {
-            receiverRegistered = false
-            unregisterReceiver(meshServiceReceiver)
-        }
     }
 
     /** Show an alert that may contain HTML */
@@ -349,15 +330,8 @@ class MainActivity : AppCompatActivity(), Logging {
 
     /// Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(newConnection: MeshService.ConnectionState) {
-        val oldConnection = model.connectionState.value!!
-        debug("connchange $oldConnection -> $newConnection")
-
         if (newConnection == MeshService.ConnectionState.CONNECTED) {
             serviceRepository.meshService?.let { service ->
-
-                model.setConnectionState(newConnection)
-
-                debug("Getting latest DeviceConfig from service")
                 try {
                     val info: MyNodeInfo? = service.myNodeInfo // this can be null
 
@@ -388,7 +362,6 @@ class MainActivity : AppCompatActivity(), Logging {
                     }
                 } catch (ex: RemoteException) {
                     warn("Abandoning connect $ex, because we probably just lost device connection")
-                    model.setConnectionState(oldConnection)
                 }
                 // if provideLocation enabled: Start providing location (from phone GPS) to mesh
                 if (model.provideLocation.value == true)
@@ -405,9 +378,6 @@ class MainActivity : AppCompatActivity(), Logging {
                     notificationPermissionsLauncher.launch(notificationPermissions)
                 }
             }
-        } else {
-            // For other connection states, just slam them in
-            model.setConnectionState(newConnection)
         }
     }
 
@@ -479,24 +449,6 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    private val meshServiceReceiver = object : BroadcastReceiver() {
-
-        override fun onReceive(context: Context, intent: Intent) =
-            exceptionReporter {
-                debug("Received from mesh service $intent")
-
-                when (intent.action) {
-                    MeshService.ACTION_MESH_CONNECTED -> {
-                        val extra = intent.getStringExtra(EXTRA_CONNECTED)
-                        if (extra != null) {
-                            onMeshConnectionChanged(MeshService.ConnectionState.valueOf(extra))
-                        }
-                    }
-                    else -> TODO()
-                }
-            }
-    }
-
     private var connectionJob: Job? = null
 
     private val mesh = object :
@@ -515,9 +467,6 @@ class MainActivity : AppCompatActivity(), Logging {
                             null // Only switch once - thereafter it should be stored in settings
                     }
 
-                    // We don't start listening for packets until after we are connected to the service
-                    registerMeshReceiver()
-
                     val connectionState =
                         MeshService.ConnectionState.valueOf(service.connectionState())
 
@@ -529,9 +478,7 @@ class MainActivity : AppCompatActivity(), Logging {
                     // We won't receive a notify for the initial state of connection, so we force an update here
                     onMeshConnectionChanged(connectionState)
                 } catch (ex: RemoteException) {
-                    // If we get an exception while reading our service config, the device might have gone away, double check to see if we are really connected
                     errormsg("Device error during init ${ex.message}")
-                    model.setConnectionState(MeshService.ConnectionState.valueOf(service.connectionState()))
                 } finally {
                     connectionJob = null
                 }
@@ -541,7 +488,6 @@ class MainActivity : AppCompatActivity(), Logging {
         }
 
         override fun onDisconnected() {
-            unregisterMeshReceiver()
             serviceRepository.setMeshService(null)
         }
     }
@@ -586,7 +532,6 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     override fun onStop() {
-        unregisterMeshReceiver() // No point in receiving updates while the GUI is gone, we'll get them when the user launches the activity
         unbindMeshService()
 
         model.connectionState.removeObservers(this)
@@ -600,8 +545,9 @@ class MainActivity : AppCompatActivity(), Logging {
     override fun onStart() {
         super.onStart()
 
-        model.connectionState.observe(this) { connected ->
-            updateConnectionStatusImage(connected)
+        model.connectionState.observe(this) { state ->
+            onMeshConnectionChanged(state)
+            updateConnectionStatusImage(state)
         }
 
         bluetoothViewModel.enabled.observe(this) { enabled ->

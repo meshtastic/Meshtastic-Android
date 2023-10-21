@@ -1037,7 +1037,7 @@ class MeshService : Service(), Logging {
 
     /// Called when we gain/lose connection to our radio
     private fun onConnectionChanged(c: ConnectionState) {
-        debug("onConnectionChanged=$c")
+        debug("onConnectionChanged: $connectionState -> $c")
 
         /// Perform all the steps needed once we start waiting for device sleep to complete
         fun startDeviceSleep() {
