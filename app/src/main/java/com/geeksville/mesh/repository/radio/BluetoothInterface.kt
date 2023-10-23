@@ -81,10 +81,10 @@ class BluetoothInterface @AssistedInject constructor(
     context: Application,
     bluetoothAdapter: dagger.Lazy<BluetoothAdapter?>,
     private val service: RadioInterfaceService,
-    @Assisted val address: String) : IRadioInterface,
-    Logging {
+    @Assisted val address: String,
+) : IRadioInterface, Logging {
 
-    companion object : Logging {
+    companion object {
         /// this service UUID is publicly visible for scanning
         val BTM_SERVICE_UUID: UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
 

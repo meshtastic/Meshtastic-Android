@@ -75,6 +75,13 @@ class BTScanModel @Inject constructor(
         val isTCP: Boolean get() = prefix == 't'
     }
 
+    @SuppressLint("MissingPermission")
+    class BLEDeviceListEntry(device: BluetoothDevice) : DeviceListEntry(
+        device.name ?: "unnamed-${device.address}", // some devices might not have a name
+        "x${device.address}",
+        device.bondState == BluetoothDevice.BOND_BONDED
+    )
+
     class USBDeviceListEntry(
         radioInterfaceService: RadioInterfaceService,
         usbManager: UsbManager,

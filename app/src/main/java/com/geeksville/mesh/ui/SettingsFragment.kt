@@ -67,9 +67,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private val model: UIViewModel by activityViewModels()
 
     @Inject
-    internal lateinit var usbRepository: UsbRepository
-
-    @Inject
     internal lateinit var radioInterfaceServiceLazy: dagger.Lazy<RadioInterfaceService>
 
     @Inject
