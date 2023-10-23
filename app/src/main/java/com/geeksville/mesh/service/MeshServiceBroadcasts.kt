@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.NodeInfo
 
 class MeshServiceBroadcasts(
@@ -38,15 +39,17 @@ class MeshServiceBroadcasts(
         explicitBroadcast(intent)
     }
 
-    fun broadcastMessageStatus(p: DataPacket) {
-        if (p.id == 0) {
+    fun broadcastMessageStatus(p: DataPacket) = broadcastMessageStatus(p.id, p.status)
+
+    fun broadcastMessageStatus(id: Int, status: MessageStatus?) {
+        if (id == 0) {
             MeshService.debug("Ignoring anonymous packet status")
         } else {
             // Do not log, contains PII possibly
             // MeshService.debug("Broadcasting message status $p")
             val intent = Intent(MeshService.ACTION_MESSAGE_STATUS).apply {
-                putExtra(EXTRA_PACKET_ID, p.id)
-                putExtra(EXTRA_STATUS, p.status as Parcelable)
+                putExtra(EXTRA_PACKET_ID, id)
+                putExtra(EXTRA_STATUS, status as Parcelable)
             }
             explicitBroadcast(intent)
         }

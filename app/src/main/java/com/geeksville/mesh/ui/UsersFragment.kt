@@ -1,24 +1,31 @@
 package com.geeksville.mesh.ui
 
+import android.content.res.ColorStateList
 import android.os.Bundle
+import android.text.SpannableString
 import android.text.method.LinkMovementMethod
+import android.text.style.StrikethroughSpan
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
+import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
 import com.geeksville.mesh.databinding.NodelistFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.util.formatAgo
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import java.net.URLEncoder
 
@@ -32,9 +39,15 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
     private val model: UIViewModel by activityViewModels()
 
+    private val ignoreIncomingList: MutableList<Int> = mutableListOf()
+    private var gpsFormat = 0
+    private var displayUnits = 0
+    private var displayFahrenheit = false
+
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
     class ViewHolder(itemView: AdapterNodeLayoutBinding) : RecyclerView.ViewHolder(itemView.root) {
+        val chipNode = itemView.chipNode
         val nodeNameView = itemView.nodeNameView
         val distanceView = itemView.distanceView
         val coordsView = itemView.coordsView
@@ -42,9 +55,92 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         val lastTime = itemView.lastConnectionView
         val powerIcon = itemView.batteryIcon
         val signalView = itemView.signalView
+        val envMetrics = itemView.envMetrics
     }
 
     private val nodesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
+
+        private var nodes = arrayOf<NodeInfo>()
+
+        private fun CharSequence.strike() = SpannableString(this).apply {
+            setSpan(StrikethroughSpan(), 0, this.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+
+        private fun CharSequence.strikeIf(isIgnored: Boolean) = if (isIgnored) strike() else this
+
+        private fun popup(view: View, position: Int) {
+            if (!model.isConnected()) return
+            val node = nodes[position]
+            val user = node.user ?: return
+            val showAdmin = position == 0 || model.adminChannelIndex > 0
+            val isIgnored = ignoreIncomingList.contains(node.num)
+            val popup = PopupMenu(requireContext(), view)
+            popup.inflate(R.menu.menu_nodes)
+            popup.menu.setGroupVisible(R.id.group_remote, position > 0)
+            popup.menu.setGroupVisible(R.id.group_admin, showAdmin)
+            popup.menu.setGroupEnabled(R.id.group_admin, !model.isManaged)
+            popup.menu.findItem(R.id.ignore).apply {
+                isEnabled = isIgnored || ignoreIncomingList.size < 3
+                isChecked = isIgnored
+            }
+            popup.setOnMenuItemClickListener { item: MenuItem ->
+                when (item.itemId) {
+                    R.id.direct_message -> {
+                        debug("calling MessagesFragment filter: 0${user.id}")
+                        setFragmentResult(
+                            "requestKey",
+                            bundleOf(
+                                "contactKey" to "0${user.id}",
+                                "contactName" to user.longName
+                            )
+                        )
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.mainActivityLayout, MessagesFragment())
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                    R.id.request_position -> {
+                        debug("requesting position for '${user.longName}'")
+                        model.requestPosition(node.num)
+                    }
+                    R.id.traceroute -> {
+                        debug("requesting traceroute for '${user.longName}'")
+                        model.requestTraceroute(node.num)
+                    }
+                    R.id.ignore -> {
+                        val message = if (isIgnored) R.string.ignore_remove else R.string.ignore_add
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(R.string.ignore)
+                            .setMessage(getString(message, user.longName))
+                            .setNeutralButton(R.string.cancel) { _, _ -> }
+                            .setPositiveButton(R.string.send) { _, _ ->
+                                model.ignoreIncomingList = ignoreIncomingList.apply {
+                                    if (isIgnored) {
+                                        debug("removed '${user.longName}' from ignore list")
+                                        remove(node.num)
+                                    } else {
+                                        debug("added '${user.longName}' to ignore list")
+                                        add(node.num)
+                                    }
+                                }
+                                item.isChecked = !item.isChecked
+                                notifyItemChanged(position)
+                            }
+                            .show()
+                    }
+                    R.id.remote_admin -> {
+                        debug("calling remote admin --> destNum: ${node.num.toUInt()}")
+                        model.setDestNode(node)
+                        parentFragmentManager.beginTransaction()
+                            .replace(R.id.mainActivityLayout, DeviceSettingsFragment())
+                            .addToBackStack(null)
+                            .commit()
+                    }
+                }
+                true
+            }
+            popup.show()
+        }
 
         /**
          * Called when RecyclerView needs a new [ViewHolder] of the given type to represent
@@ -109,14 +205,22 @@ class UsersFragment : ScreenFragment("Users"), Logging {
          */
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val n = nodes[position]
-            val name = n.user?.longName ?: n.user?.id ?: "Unknown node"
+            val user = n.user
+            val (textColor, nodeColor) = n.colors
+            val isIgnored: Boolean = ignoreIncomingList.contains(n.num)
+            with(holder.chipNode) {
+                text = (user?.shortName ?: "UNK").strikeIf(isIgnored)
+                chipBackgroundColor = ColorStateList.valueOf(nodeColor)
+                setTextColor(textColor)
+            }
+            val name = user?.longName ?: getString(R.string.unknown_username)
             holder.nodeNameView.text = name
 
             val pos = n.validPosition
             if (pos != null) {
                 val html = "<a href='geo:${pos.latitude},${pos.longitude}?z=17&label=${
                     URLEncoder.encode(name, "utf-8")
-                }'>${model.gpsString(pos)}</a>"
+                }'>${pos.gpsString(gpsFormat)}</a>"
                 holder.coordsView.text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
                 holder.coordsView.movementMethod = LinkMovementMethod.getInstance()
                 holder.coordsView.visibility = View.VISIBLE
@@ -124,8 +228,8 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 holder.coordsView.visibility = View.INVISIBLE
             }
 
-            val ourNodeInfo = model.nodeDB.ourNodeInfo
-            val distance = ourNodeInfo?.distanceStr(n)
+            val ourNodeInfo = model.ourNodeInfo.value
+            val distance = ourNodeInfo?.distanceStr(n, displayUnits)
             if (distance != null) {
                 holder.distanceView.text = distance
                 holder.distanceView.visibility = View.VISIBLE
@@ -136,44 +240,38 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
             holder.lastTime.text = formatAgo(n.lastHeard)
 
+            val envMetrics = n.envMetricStr(displayFahrenheit)
+            if (envMetrics.isNotEmpty()) {
+                holder.envMetrics.text = envMetrics
+                holder.envMetrics.visibility = View.VISIBLE
+            } else {
+                holder.envMetrics.visibility = View.GONE
+            }
+
             if (n.num == ourNodeInfo?.num) {
-                val info = model.myNodeInfo.value
-                if (info != null) {
-                    val text =
-                        String.format(
-                            "ChUtil %.1f%% AirUtilTX %.1f%%",
-                            n.deviceMetrics?.channelUtilization ?: info.channelUtilization,
-                            n.deviceMetrics?.airUtilTx ?: info.airUtilTx
-                        )
-                    holder.signalView.text = text
-                    holder.signalView.visibility = View.VISIBLE
-                }
+                val text = "ChUtil %.1f%% AirUtilTX %.1f%%".format(
+                    n.deviceMetrics?.channelUtilization,
+                    n.deviceMetrics?.airUtilTx
+                )
+                holder.signalView.text = text
+                holder.signalView.visibility = View.VISIBLE
             } else {
                 if ((n.snr < 100f) && (n.rssi < 0)) {
-                    val text = String.format("rssi:%d snr:%.1f", n.rssi, n.snr)
+                    val text = "rssi:%d snr:%.1f".format(n.rssi, n.snr)
                     holder.signalView.text = text
                     holder.signalView.visibility = View.VISIBLE
                 } else {
                     holder.signalView.visibility = View.INVISIBLE
                 }
             }
+            holder.chipNode.setOnClickListener {
+                popup(it, position)
+            }
             holder.itemView.setOnLongClickListener {
-                if (position > 0) {
-                    debug("calling MessagesFragment filter:${n.user?.id}")
-                    setFragmentResult(
-                        "requestKey",
-                        bundleOf("contactId" to n.user?.id, "contactName" to name)
-                    )
-                    parentFragmentManager.beginTransaction()
-                        .replace(R.id.mainActivityLayout, MessagesFragment())
-                        .addToBackStack(null)
-                        .commit()
-                }
+                popup(it, position)
                 true
             }
         }
-
-        private var nodes = arrayOf<NodeInfo>()
 
         /// Called when our node DB changes
         fun onNodesChanged(nodesIn: Array<NodeInfo>) {
@@ -191,20 +289,14 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     ) {
 
         val (image, text) = when (battery) {
-            in 1..100 -> Pair(
-                R.drawable.ic_battery_full_24,
-                String.format("%d%% %.2fV", battery, voltage ?: 0)
-            )
-            0 -> Pair(R.drawable.ic_power_plug_24, "")
-            else -> Pair(R.drawable.ic_battery_full_24, "?")
+            in 0..100 -> R.drawable.ic_battery_full_24 to "%d%% %.2fV".format(battery, voltage)
+            101 -> R.drawable.ic_power_plug_24 to ""
+            else -> R.drawable.ic_battery_full_24 to "?"
         }
 
         holder.batteryPctView.text = text
         holder.powerIcon.setImageDrawable(context?.let {
-            ContextCompat.getDrawable(
-                it,
-                image
-            )
+            ContextCompat.getDrawable(it, image)
         })
     }
 
@@ -222,8 +314,45 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         binding.nodeListView.adapter = nodesAdapter
         binding.nodeListView.layoutManager = LinearLayoutManager(requireContext())
 
-        model.nodeDB.nodes.observe(viewLifecycleOwner) {
-            nodesAdapter.onNodesChanged(it.values.toTypedArray())
+        // ensure our local node is first (index 0)
+        fun Map<String, NodeInfo>.perhapsReindexBy(nodeNum: Int?): Array<NodeInfo> =
+            if (size > 1 && nodeNum != null && values.firstOrNull()?.num != nodeNum) {
+                values.partition { node -> node.num == nodeNum }.let { it.first + it.second }
+            } else {
+                values
+            }.toTypedArray()
+
+        model.nodeDB.nodes.asLiveData().observe(viewLifecycleOwner) {
+            nodesAdapter.onNodesChanged(it.perhapsReindexBy(model.myNodeNum))
         }
+
+        model.localConfig.asLiveData().observe(viewLifecycleOwner) { config ->
+            ignoreIncomingList.apply {
+                clear()
+                addAll(config.lora.ignoreIncomingList)
+            }
+            gpsFormat = config.display.gpsFormat.number
+            displayUnits = config.display.units.number
+        }
+
+        model.moduleConfig.asLiveData().observe(viewLifecycleOwner) { module ->
+            displayFahrenheit = module.telemetry.environmentDisplayFahrenheit
+        }
+
+        model.tracerouteResponse.observe(viewLifecycleOwner) { response ->
+            MaterialAlertDialogBuilder(requireContext())
+                .setCancelable(false)
+                .setTitle(R.string.traceroute)
+                .setMessage(response ?: return@observe)
+                .setPositiveButton(R.string.okay) { _, _ -> }
+                .show()
+
+            model.clearTracerouteResponse()
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

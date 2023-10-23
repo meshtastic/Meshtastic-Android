@@ -159,9 +159,6 @@ class MockInterface @AssistedInject constructor(
             MeshProtos.FromRadio.newBuilder().apply {
                 myInfo = MeshProtos.MyNodeInfo.newBuilder().apply {
                     myNodeNum = MY_NODE
-                    messageTimeoutMsec = 5 * 60 * 1000
-                    firmwareVersion = "1.3.8" // Pretend to be running an older 1.3 version
-                    maxChannels = 8
                 }.build()
             },
 

@@ -58,7 +58,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="16dp"
-            android:entries="@array/regions"
             android:theme="@style/AppTheme.Spinner"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/regionLabel"
@@ -103,13 +102,29 @@
                 android:id="@+id/radioButton2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/test__devname1" />
+                android:text="@string/test_devname1" />
 
             <RadioButton
                 android:id="@+id/radioButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/test_devname2" />
+
+            <RadioButton
+                android:id="@+id/radioButtonManual"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/ip_address" />
+
+            <EditText
+                android:id="@+id/editManualAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:hint="@string/ip_address"
+                android:inputType="number|text"
+                android:visibility="visible" />
+
         </RadioGroup>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton

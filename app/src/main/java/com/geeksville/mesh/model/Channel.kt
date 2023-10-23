@@ -1,7 +1,10 @@
 package com.geeksville.mesh.model
 
 import com.geeksville.mesh.ChannelProtos
+import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.ModemPreset
+import com.geeksville.mesh.ConfigKt.loRaConfig
 import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.channelSettings
 import com.google.protobuf.ByteString
 
 /** Utility function to make it easy to declare byte arrays - FIXME move someplace better */
@@ -9,8 +12,8 @@ fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].
 fun xorHash(b: ByteArray) = b.fold(0) { acc, x -> acc xor (x.toInt() and 0xff) }
 
 data class Channel(
-    val settings: ChannelProtos.ChannelSettings,
-    val loraConfig: ConfigProtos.Config.LoRaConfig
+    val settings: ChannelProtos.ChannelSettings = default.settings,
+    val loraConfig: ConfigProtos.Config.LoRaConfig = default.loraConfig,
 ) {
     companion object {
         // These bytes must match the well known and not secret bytes used the default channel AES128 key device code
@@ -25,12 +28,14 @@ data class Channel(
 
         // The default channel that devices ship with
         val default = Channel(
-            ChannelProtos.ChannelSettings.newBuilder()
-                .setPsk(ByteString.copyFrom(defaultPSK))
-                .build(),
-            ConfigProtos.Config.LoRaConfig.newBuilder()
-                .setModemPreset(ConfigProtos.Config.LoRaConfig.ModemPreset.LongFast)
-                .build()
+            channelSettings { psk = ByteString.copyFrom(defaultPSK) },
+            // references: NodeDB::installDefaultConfig / Channels::initDefaultChannel
+            loRaConfig {
+                usePreset = true
+                modemPreset = ModemPreset.LONG_FAST
+                hopLimit = 3
+                txEnabled = true
+            }
         )
     }
 
@@ -38,18 +43,17 @@ data class Channel(
     val name: String
         get() = settings.name.ifEmpty {
             // We have a new style 'empty' channel name.  Use the same logic from the device to convert that to a human readable name
-            if (loraConfig.bandwidth != 0)
-                "Unset"
-            else when (loraConfig.modemPreset) {
-                ConfigProtos.Config.LoRaConfig.ModemPreset.ShortFast -> "ShortFast"
-                ConfigProtos.Config.LoRaConfig.ModemPreset.ShortSlow -> "ShortSlow"
-                ConfigProtos.Config.LoRaConfig.ModemPreset.MedFast -> "MidFast"
-                ConfigProtos.Config.LoRaConfig.ModemPreset.MedSlow -> "MidSlow"
-                ConfigProtos.Config.LoRaConfig.ModemPreset.LongFast -> "LongFast"
-                ConfigProtos.Config.LoRaConfig.ModemPreset.LongSlow -> "LongSlow"
-                ConfigProtos.Config.LoRaConfig.ModemPreset.VLongSlow -> "VLongSlow"
+            if (loraConfig.usePreset) when (loraConfig.modemPreset) {
+                ModemPreset.SHORT_FAST -> "ShortFast"
+                ModemPreset.SHORT_SLOW -> "ShortSlow"
+                ModemPreset.MEDIUM_FAST -> "MediumFast"
+                ModemPreset.MEDIUM_SLOW -> "MediumSlow"
+                ModemPreset.LONG_FAST -> "LongFast"
+                ModemPreset.LONG_SLOW -> "LongSlow"
+                ModemPreset.LONG_MODERATE -> "LongMod"
+                ModemPreset.VERY_LONG_SLOW -> "VLongSlow"
                 else -> "Invalid"
-            }
+            } else "Custom"
         }
 
     val psk: ByteString
@@ -83,6 +87,26 @@ data class Channel(
 
             return "#${name}-${suffix}"
         }
+
+    /**
+     * hash a string into an integer using the djb2 algorithm by Dan Bernstein
+     * http://www.cse.yorku.ca/~oz/hash.html
+     */
+    val hash: UInt // using UInt instead of Long to match RadioInterface.cpp results
+        get() {
+            var hash: UInt = 5381u
+            for (c in name) {
+                hash += (hash shl 5) + c.code.toUInt()
+                print("$c ${c.code} $hash ")
+            }
+            return hash
+        }
+
+    val channelNum: Int
+        get() = if (loraConfig.channelNum != 0) loraConfig.channelNum
+        else (hash % RegionInfo.numChannels(loraConfig).toUInt()).toInt() + 1
+
+    val radioFreq: Float get() = RegionInfo.radioFreq(loraConfig, channelNum)
 
     override fun equals(other: Any?): Boolean = (other is Channel)
             && psk.toByteArray() contentEquals other.psk.toByteArray()

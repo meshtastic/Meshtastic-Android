@@ -2,22 +2,20 @@ package com.geeksville.mesh.model
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.app.PendingIntent
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.*
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
 import android.content.*
-import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.net.nsd.NsdServiceInfo
-import android.os.RemoteException
 import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.geeksville.mesh.MainActivity
+import androidx.lifecycle.viewModelScope
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.*
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
@@ -25,59 +23,15 @@ import com.geeksville.mesh.repository.nsd.NsdRepository
 import com.geeksville.mesh.repository.radio.InterfaceId
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.usb.UsbRepository
-import com.geeksville.mesh.ui.SLogging
-import com.geeksville.mesh.ui.changeDeviceSelection
 import com.geeksville.mesh.util.anonymize
-import com.geeksville.mesh.util.exceptionReporter
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import java.util.regex.Pattern
 import javax.inject.Inject
-
-/// Show the UI asking the user to bond with a device, call changeSelection() if/when bonding completes
-@SuppressLint("MissingPermission")
-private fun requestBonding(
-    activity: MainActivity,
-    device: BluetoothDevice,
-    onComplete: (Int) -> Unit
-) {
-    SLogging.info("Starting bonding for ${device.anonymize}")
-
-    // We need this receiver to get informed when the bond attempt finished
-    val bondChangedReceiver = object : BroadcastReceiver() {
-
-        override fun onReceive(
-            context: Context,
-            intent: Intent
-        ) = exceptionReporter {
-            val state =
-                intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
-            SLogging.debug("Received bond state changed $state")
-
-            if (state != BluetoothDevice.BOND_BONDING) {
-                context.unregisterReceiver(this) // we stay registered until bonding completes (either with BONDED or NONE)
-                SLogging.debug("Bonding completed, state=$state")
-                onComplete(state)
-            }
-        }
-    }
-
-    val filter = IntentFilter()
-    filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-    activity.registerReceiver(bondChangedReceiver, filter)
-
-    // We ignore missing BT adapters, because it lets us run on the emulator
-    try {
-        device.createBond()
-    } catch (ex: Throwable) {
-        SLogging.warn("Failed creating Bluetooth bond: ${ex.message}")
-    }
-}
 
 @HiltViewModel
 class BTScanModel @Inject constructor(
@@ -89,12 +43,25 @@ class BTScanModel @Inject constructor(
 ) : ViewModel(), Logging {
 
     private val context: Context get() = application.applicationContext
+    val devices = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
+    private val bleDevices = MutableLiveData<List<BluetoothDevice>>(listOf())
+    private val usbDevices = MutableLiveData<Map<String, UsbSerialDriver>>(mapOf())
 
     init {
+        combine(
+            bluetoothRepository.state,
+            usbRepository.serialDevicesWithDrivers
+        ) { ble, usb ->
+            bleDevices.value = ble.bondedDevices
+            usbDevices.value = usb
+        }.onEach { setupScan() }.launchIn(viewModelScope)
+
         debug("BTScanModel created")
     }
 
-    /** *fullAddress* = interface prefix + address (example: "x7C:9E:BD:F0:BE:BE") */
+    /**
+     * @param fullAddress Interface [prefix] + [address] (example: "x7C:9E:BD:F0:BE:BE")
+     */
     open class DeviceListEntry(val name: String, val fullAddress: String, val bonded: Boolean) {
         val prefix get() = fullAddress[0]
         val address get() = fullAddress.substring(1)
@@ -108,10 +75,14 @@ class BTScanModel @Inject constructor(
         val isTCP: Boolean get() = prefix == 't'
     }
 
-    class USBDeviceListEntry(radioInterfaceService: RadioInterfaceService, usbManager: UsbManager, val usb: UsbSerialDriver) : DeviceListEntry(
+    class USBDeviceListEntry(
+        radioInterfaceService: RadioInterfaceService,
+        usbManager: UsbManager,
+        val usb: UsbSerialDriver,
+    ) : DeviceListEntry(
         usb.device.deviceName,
         radioInterfaceService.toInterfaceAddress(InterfaceId.SERIAL, usb.device.deviceName),
-        usbManager.hasPermission(usb.device)
+        usbManager.hasPermission(usb.device),
     )
 
     class TCPDeviceListEntry(val service: NsdServiceInfo) : DeviceListEntry(
@@ -125,18 +96,16 @@ class BTScanModel @Inject constructor(
         debug("BTScanModel cleared")
     }
 
-    private val bluetoothAdapter = context.bluetoothManager?.adapter
-    private val deviceManager get() = context.deviceManager
-    val hasCompanionDeviceApi get() = context.hasCompanionDeviceApi()
-    private val hasBluetoothPermission get() = application.hasBluetoothPermission()
-    private val usbManager get() = context.usbManager
-
     var selectedAddress: String? = null
-    val errorText = object : MutableLiveData<String?>(null) {}
+    val errorText = MutableLiveData<String?>(null)
+
+    fun setErrorText(text: String) {
+        errorText.value = text
+    }
 
     private var scanner: BluetoothLeScanner? = null
 
-    val selectedBluetooth: Boolean get() = selectedAddress?.get(0) == 'x'
+    val selectedBluetooth: Boolean get() = selectedAddress?.getOrNull(0) == 'x'
 
     /// Use the string for the NopInterface
     val selectedNotNull: String get() = selectedAddress ?: "n"
@@ -155,7 +124,7 @@ class BTScanModel @Inject constructor(
         @SuppressLint("MissingPermission")
         override fun onScanResult(callbackType: Int, result: ScanResult) {
 
-            if (result.device.name != null) {
+            if (result.device.name.let { it != null && it.matches(Regex(BLE_NAME_PATTERN)) }) {
                 val addr = result.device.address
                 val fullAddr = "x$addr" // full address with the bluetooth prefix added
                 // prevent log spam because we'll get lots of redundant scan results
@@ -164,22 +133,10 @@ class BTScanModel @Inject constructor(
                 val oldEntry = oldDevs[fullAddr]
                 if (oldEntry == null || oldEntry.bonded != isBonded) { // Don't spam the GUI with endless updates for non changing nodes
                     val entry = DeviceListEntry(
-                        result.device.name
-                            ?: "unnamed-$addr", // autobug: some devices might not have a name, if someone is running really old device code?
+                        result.device.name,
                         fullAddr,
                         isBonded
                     )
-                    // If nothing was selected, by default select the first valid thing we see
-                    val activity: MainActivity? = try {
-                        GeeksvilleApplication.currentActivity as MainActivity? // Can be null if app is shutting down
-                    } catch (_: ClassCastException) {
-                        // Buggy "Z812" phones apparently have the wrong class type for this
-                        errormsg("Unexpected class for main activity")
-                        null
-                    }
-
-                    if (selectedAddress == null && entry.bonded && activity != null)
-                        changeScanSelection(activity, fullAddr)
                     addDevice(entry) // Add/replace entry
                 }
             }
@@ -213,11 +170,11 @@ class BTScanModel @Inject constructor(
     /**
      * returns true if we could start scanning, false otherwise
      */
-    fun setupScan(): Boolean {
+    private fun setupScan(): Boolean {
         selectedAddress = radioInterfaceService.getDeviceAddress()
 
-        return if (bluetoothAdapter == null || radioInterfaceService.isAddressValid(radioInterfaceService.mockInterfaceAddress)) {
-            warn("No bluetooth adapter.  Running under emulation?")
+        return if (radioInterfaceService.isAddressValid(radioInterfaceService.mockInterfaceAddress)) {
+            warn("Running under emulator/test lab")
 
             val testnodes = listOf(
                 DeviceListEntry("Included simulator", "m", true),
@@ -231,35 +188,33 @@ class BTScanModel @Inject constructor(
             )
 
             devices.value = (testnodes.map { it.fullAddress to it }).toMap().toMutableMap()
-
-            // If nothing was selected, by default select the first thing we see
-            if (selectedAddress == null)
-                changeScanSelection(
-                    GeeksvilleApplication.currentActivity as MainActivity,
-                    testnodes.first().fullAddress
-                )
-
             true
         } else {
             if (scanner == null) {
-                // Clear the old device list
-                devices.value?.clear()
+                val newDevs = mutableMapOf<String, DeviceListEntry>()
+
+                fun addDevice(entry: DeviceListEntry) {
+                    newDevs[entry.fullAddress] = entry
+                }
 
                 // Include a placeholder for "None"
                 addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
 
-                // Include CompanionDeviceManager valid associations
-                addDeviceAssociations()
+                // Include paired Bluetooth devices
+                bleDevices.value?.forEach {
+                    addDevice(BLEDeviceListEntry(it))
+                }
 
                 // Include Network Service Discovery
-                nsdRepository.resolvedList?.forEach { service ->
+                nsdRepository.resolvedList.value.forEach { service ->
                     addDevice(TCPDeviceListEntry(service))
                 }
 
-                val serialDevices by lazy { usbRepository.serialDevicesWithDrivers.value }
-                serialDevices.forEach { (_, d) ->
-                    addDevice(USBDeviceListEntry(radioInterfaceService, usbManager, d))
+                usbDevices.value?.forEach { (_, d) ->
+                    addDevice(USBDeviceListEntry(radioInterfaceService, context.usbManager, d))
                 }
+
+                devices.value = newDevs
             } else {
                 debug("scan already running")
             }
@@ -268,15 +223,15 @@ class BTScanModel @Inject constructor(
     }
 
     private var networkDiscovery: Job? = null
-    fun startScan() {
+    fun startScan(context: Context?) {
+        _spinner.value = true
+
         // Start Network Service Discovery (find TCP devices)
         networkDiscovery = nsdRepository.networkDiscoveryFlow()
             .onEach { addDevice(TCPDeviceListEntry(it)) }
-            .launchIn(CoroutineScope(Dispatchers.Main))
+            .launchIn(viewModelScope)
 
-        if (hasCompanionDeviceApi) {
-            startCompanionScan()
-        } else startClassicScan()
+        if (context != null) startCompanionScan(context) else startClassicScan()
     }
 
     @SuppressLint("MissingPermission")
@@ -286,7 +241,6 @@ class BTScanModel @Inject constructor(
 
         if (bluetoothLeScanner != null) { // could be null if bluetooth is disabled
             debug("starting classic scan")
-            _spinner.value = true
 
             // filter and only accept devices that have our service
             val filter =
@@ -305,6 +259,8 @@ class BTScanModel @Inject constructor(
         }
     }
 
+    fun getRemoteDevice(address: String) = bluetoothRepository.getRemoteDevice(address)
+
     /**
      * @return DeviceListEntry from full Address (prefix + address).
      * If Bluetooth is enabled and BLE Address is valid, get remote device information.
@@ -312,24 +268,11 @@ class BTScanModel @Inject constructor(
     @SuppressLint("MissingPermission")
     fun getDeviceListEntry(fullAddress: String, bonded: Boolean = false): DeviceListEntry {
         val address = fullAddress.substring(1)
-        val device = bluetoothRepository.getRemoteDevice(address)
+        val device = getRemoteDevice(address)
         return if (device != null && device.name != null) {
-            DeviceListEntry(device.name, fullAddress, device.bondState != BluetoothDevice.BOND_NONE)
+            BLEDeviceListEntry(device)
         } else {
             DeviceListEntry(address, fullAddress, bonded)
-        }
-    }
-
-    @SuppressLint("NewApi")
-    fun addDeviceAssociations() {
-        if (hasCompanionDeviceApi) deviceManager?.associations?.forEach { bleAddress ->
-            val bleDevice = getDeviceListEntry("x$bleAddress", true)
-            // Disassociate after pairing is removed (if BLE is disabled, assume bonded)
-            if (!bleDevice.bonded) {
-                debug("Forgetting old BLE association ${bleAddress.anonymize}")
-                deviceManager?.disassociate(bleAddress)
-            }
-            addDevice(bleDevice)
         }
     }
 
@@ -353,7 +296,7 @@ class BTScanModel @Inject constructor(
         // respectively. This example uses Bluetooth.
         // We only look for Mesh (rather than the full name) because NRF52 uses a very short name
         val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
-            .setNamePattern(Pattern.compile("^\\S+\$"))
+            .setNamePattern(Pattern.compile(BLE_NAME_PATTERN))
             // .addServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID), null)
             .build()
 
@@ -367,14 +310,18 @@ class BTScanModel @Inject constructor(
     }
 
     @SuppressLint("NewApi")
-    private fun startCompanionScan() {
+    private fun startCompanionScan(context: Context) {
         debug("starting companion scan")
-        _spinner.value = true
-        deviceManager?.associate(
+        context.companionDeviceManager?.associate(
             associationRequest(),
             @SuppressLint("NewApi")
             object : CompanionDeviceManager.Callback() {
-                override fun onDeviceFound(chooserLauncher: IntentSender) {
+                @Deprecated("Deprecated in Java", ReplaceWith("onAssociationPending(intentSender)"))
+                override fun onDeviceFound(intentSender: IntentSender) {
+                    onAssociationPending(intentSender)
+                }
+
+                override fun onAssociationPending(chooserLauncher: IntentSender) {
                     debug("CompanionDeviceManager - device found")
                     _spinner.value = false
                     chooserLauncher.let {
@@ -390,112 +337,16 @@ class BTScanModel @Inject constructor(
         )
     }
 
-    val devices = object : MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf()) {
-
-        /**
-         * Called when the number of active observers change from 1 to 0.
-         *
-         *
-         * This does not mean that there are no observers left, there may still be observers but their
-         * lifecycle states aren't [Lifecycle.State.STARTED] or [Lifecycle.State.RESUMED]
-         * (like an Activity in the back stack).
-         *
-         *
-         * You can check if there are observers via [.hasObservers].
-         */
-        override fun onInactive() {
-            super.onInactive()
-            stopScan()
-        }
+    /**
+     * Called immediately after activity calls MeshService.changeDeviceAddress
+     */
+    fun changeSelectedAddress(newAddress: String) {
+        selectedAddress = newAddress
+        devices.value = devices.value // Force a GUI update
     }
 
-    /// Called by the GUI when a new device has been selected by the user
-    /// Returns true if we were able to change to that item
-    fun onSelected(activity: MainActivity, it: DeviceListEntry): Boolean {
-        // If the device is paired, let user select it, otherwise start the pairing flow
-        if (it.bonded) {
-            changeScanSelection(activity, it.fullAddress)
-            return true
-        } else {
-            // Handle requesting USB or bluetooth permissions for the device
-            debug("Requesting permissions for the device")
-
-            exceptionReporter {
-                if (it.isBLE) {
-                    // Request bonding for bluetooth
-                    // We ignore missing BT adapters, because it lets us run on the emulator
-                    bluetoothRepository
-                        .getRemoteDevice(it.address)?.let { device ->
-                            requestBonding(activity, device) { state ->
-                                if (state == BluetoothDevice.BOND_BONDED) {
-                                    errorText.value = activity.getString(R.string.pairing_completed)
-                                    changeScanSelection(activity, it.fullAddress)
-                                } else {
-                                    errorText.value =
-                                        activity.getString(R.string.pairing_failed_try_again)
-                                }
-
-                                // Force the GUI to redraw
-                                devices.value = devices.value
-                            }
-                        }
-                }
-            }
-
-            if (it.isUSB) {
-                it as USBDeviceListEntry
-
-                val ACTION_USB_PERMISSION = "com.geeksville.mesh.USB_PERMISSION"
-
-                val usbReceiver = object : BroadcastReceiver() {
-
-                    override fun onReceive(context: Context, intent: Intent) {
-                        if (ACTION_USB_PERMISSION == intent.action) {
-
-                            val device: UsbDevice =
-                                intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)!!
-
-                            if (intent.getBooleanExtra(
-                                    UsbManager.EXTRA_PERMISSION_GRANTED,
-                                    false
-                                )
-                            ) {
-                                info("User approved USB access")
-                                changeScanSelection(activity, it.fullAddress)
-
-                                // Force the GUI to redraw
-                                devices.value = devices.value
-                            } else {
-                                errormsg("USB permission denied for device $device")
-                            }
-                        }
-                        // We don't need to stay registered
-                        activity.unregisterReceiver(this)
-                    }
-                }
-
-                val permissionIntent =
-                    PendingIntent.getBroadcast(activity, 0, Intent(ACTION_USB_PERMISSION), 0)
-                val filter = IntentFilter(ACTION_USB_PERMISSION)
-                activity.registerReceiver(usbReceiver, filter)
-                usbManager.requestPermission(it.usb.device, permissionIntent)
-            }
-
-            return false
-        }
-    }
-
-    /// Change to a new macaddr selection, updating GUI and radio
-    fun changeScanSelection(context: MainActivity, newAddr: String) {
-        try {
-            info("Changing device to ${newAddr.anonymize}")
-            changeDeviceSelection(context, newAddr)
-            selectedAddress =
-                newAddr // do this after changeDeviceSelection, so if it throws the change will be discarded
-            devices.value = devices.value // Force a GUI update
-        } catch (ex: RemoteException) {
-            errormsg("Failed talking to service, probably it is shutting down $ex.message")
-            // ignore the failure and the GUI won't be updating anyways
-        }
+    companion object {
+        const val BLE_NAME_PATTERN = BluetoothRepository.BLE_NAME_PATTERN
+        const val ACTION_USB_PERMISSION = "com.geeksville.mesh.USB_PERMISSION"
     }
 }

@@ -2,6 +2,9 @@ name: Android CI
 
 on:
   push:
+    branches: [ master ]
+    paths-ignore:
+      - "**.md"
   pull_request:
     branches: [ master ]
 
@@ -12,9 +15,12 @@ jobs:
     steps:
 
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         submodules: 'recursive'
+
+    - name: Validate Gradle wrapper
+      uses: gradle/wrapper-validation-action@v1
 
     - name: Mock files for CI
       run: |
@@ -22,26 +28,38 @@ jobs:
         cp ./app/google-services-example.json ./app/google-services.json
         rm ./app/src/main/res/values/curfirmwareversion.xml
         cp ./app/special/curfirmwareversion.xml ./app/src/main/res/values/
+        rm -rf ./app/src/main/assets/firmware
+        mkdir -p ./app/src/main/assets/firmware
 
-    - name: Set up JDK 11
-      uses: actions/setup-java@v2
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
       with:
-        java-version: 11
-        distribution: 'adopt'
-        cache: gradle
-        
-    - name: Validate Gradle wrapper
-      uses: gradle/wrapper-validation-action@v1
-      
-    - name: Integration test
-      run: ./gradlew test --stacktrace
+        java-version: '17'
+        distribution: 'zulu'
 
-    - name: Build debug APK
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2
+
+    - name: Check lint
+      run: ./gradlew lintFdroidDebug lintGoogleDebug
+
+    - name: Build debug artifacts
       run: ./gradlew assembleDebug
 
-    - name: Upload APK
-      uses: actions/upload-artifact@v2
+    - name: Run local tests
+      run: ./gradlew testFdroidDebug testGoogleDebug
+
+    - name: Upload debug artifact
+      uses: actions/upload-artifact@v3
       with:
-        name: app-debug
-        path: app/build/outputs/apk/debug/app-debug.apk
+        name: fdroidDebug
+        path: app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
+        retention-days: 30
+
+    - name: Upload build reports
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-reports
+        path: app/build/reports
         retention-days: 30

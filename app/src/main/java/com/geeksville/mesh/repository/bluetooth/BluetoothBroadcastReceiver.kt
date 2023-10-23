@@ -1,6 +1,7 @@
 package com.geeksville.mesh.repository.bluetooth
 
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -14,7 +15,10 @@ import javax.inject.Inject
 class BluetoothBroadcastReceiver @Inject constructor(
     private val bluetoothRepository: BluetoothRepository
 ) : BroadcastReceiver() {
-    internal val intentFilter get() = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED) // Can be used for registering
+    internal val intentFilter get() = IntentFilter().apply {
+        addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
+        addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+    }
 
     override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
         if (intent.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
@@ -24,8 +28,11 @@ class BluetoothBroadcastReceiver @Inject constructor(
                 BluetoothAdapter.STATE_ON -> bluetoothRepository.refreshState()
             }
         }
+        if (intent.action == BluetoothDevice.ACTION_BOND_STATE_CHANGED) {
+            bluetoothRepository.refreshState()
+        }
     }
 
     private val Intent.bluetoothAdapterState: Int
-        get() = getIntExtra(BluetoothAdapter.EXTRA_STATE,-1)
+        get() = getIntExtra(BluetoothAdapter.EXTRA_STATE, -1)
 }

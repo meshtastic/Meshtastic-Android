@@ -23,7 +23,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.util.*
 
 @AndroidEntryPoint
-class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging {
+class QuickChatSettingsFragment : ScreenFragment("Quick Chat Settings"), Logging {
     private var _binding: QuickChatSettingsFragmentBinding? = null
 
     private val binding get() = _binding!!
@@ -44,9 +44,9 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
         super.onViewCreated(view, savedInstanceState)
 
         binding.quickChatSettingsCreateButton.setOnClickListener {
-            val builder = createEditDialog(requireContext(), "New quick chat")
+            val builder = createEditDialog(requireContext(), getString(R.string.quick_chat_new))
 
-            builder.builder.setPositiveButton("Add") { view, x ->
+            builder.builder.setPositiveButton(R.string.add) { _, _ ->
 
                 val name = builder.nameInput.text.toString().trim()
                 val message = builder.messageInput.text.toString()
@@ -63,7 +63,7 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
 
         val quickChatActionAdapter =
             QuickChatActionAdapter(requireContext(), { action: QuickChatAction ->
-                val builder = createEditDialog(requireContext(), "Edit quick chat")
+                val builder = createEditDialog(requireContext(), getString(R.string.quick_chat_edit))
                 builder.nameInput.setText(action.name)
                 builder.messageInput.setText(action.message)
                 val isInstant = action.mode == QuickChatAction.Mode.Instant
@@ -73,7 +73,7 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
                 builder.builder.setNegativeButton(R.string.delete) { _, _ ->
                     model.deleteQuickChatAction(action)
                 }
-                builder.builder.setPositiveButton(R.string.save_btn) { _, _ ->
+                builder.builder.setPositiveButton(R.string.save) { _, _ ->
                     if (builder.isNotEmpty()) {
                         model.updateQuickChatAction(
                             action,
@@ -109,6 +109,11 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
         }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     data class DialogBuilder(
         val builder: MaterialAlertDialogBuilder,
         val nameInput: EditText,
@@ -135,8 +140,7 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
         val builder = MaterialAlertDialogBuilder(context)
         builder.setTitle(title)
 
-        val layout =
-            LayoutInflater.from(requireContext()).inflate(R.layout.dialog_add_quick_chat, null)
+        val layout = LayoutInflater.from(context).inflate(R.layout.dialog_add_quick_chat, null)
 
         val nameInput: EditText = layout.findViewById(R.id.addQuickChatName)
         val messageInput: EditText = layout.findViewById(R.id.addQuickChatMessage)
@@ -144,14 +148,15 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat settings"), Logging
         val instantImage: ImageView = layout.findViewById(R.id.addQuickChatInsant)
         instantImage.visibility = if (modeSwitch.isChecked) View.VISIBLE else View.INVISIBLE
 
-        var nameHasChanged = false
+        // don't change action name on edits
+        var nameHasChanged = title == getString(R.string.quick_chat_edit)
 
         modeSwitch.setOnCheckedChangeListener { _, _ ->
             if (modeSwitch.isChecked) {
-                modeSwitch.setText(R.string.mode_instant)
+                modeSwitch.setText(R.string.quick_chat_instant)
                 instantImage.visibility = View.VISIBLE
             } else {
-                modeSwitch.setText(R.string.mode_append)
+                modeSwitch.setText(R.string.quick_chat_append)
                 instantImage.visibility = View.INVISIBLE
             }
         }

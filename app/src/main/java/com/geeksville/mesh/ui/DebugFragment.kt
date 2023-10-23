@@ -10,14 +10,14 @@ import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.R
-import com.geeksville.mesh.databinding.DebugFragmentBinding
+import com.geeksville.mesh.databinding.FragmentDebugBinding
 import com.geeksville.mesh.model.UIViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class DebugFragment : Fragment() {
 
-    private var _binding: DebugFragmentBinding? = null
+    private var _binding: FragmentDebugBinding? = null
 
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
@@ -28,27 +28,32 @@ class DebugFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = DebugFragmentBinding.inflate(inflater, container, false)
+        _binding = FragmentDebugBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val recyclerView = view.findViewById<RecyclerView>(R.id.packets_recyclerview)
-        val adapter = PacketListAdapter(requireContext())
+        val recyclerView = view.findViewById<RecyclerView>(R.id.debug_recyclerview)
+        val adapter = DebugAdapter(requireContext())
 
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         binding.clearButton.setOnClickListener {
-            model.deleteAllPacket()
+            model.deleteAllLogs()
         }
 
         binding.closeButton.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
-        model.allPackets.asLiveData().observe(viewLifecycleOwner) { packets ->
-            packets?.let { adapter.setPackets(it) }
+        model.meshLog.asLiveData().observe(viewLifecycleOwner) { logs ->
+            logs?.let { adapter.setLogs(it) }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

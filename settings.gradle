@@ -1,5 +1,2 @@
 include ':app'
 rootProject.name='Mesh Util'
-
-include ':geeksville-androidlib'
-project(':geeksville-androidlib').projectDir = new File('geeksville-androidlib')

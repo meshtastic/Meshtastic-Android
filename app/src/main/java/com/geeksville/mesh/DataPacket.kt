@@ -4,8 +4,18 @@ import android.os.Parcel
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
-import java.nio.charset.Charset
 
+/**
+ * Generic [Parcel.readParcelable] Android 13 compatibility extension.
+ */
+private inline fun <reified T : Parcelable> Parcel.readParcelableCompat(loader: ClassLoader?): T? {
+    return if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+        @Suppress("DEPRECATION")
+        readParcelable(loader)
+    } else {
+        readParcelable(loader, T::class.java)
+    }
+}
 
 @Parcelize
 enum class MessageStatus : Parcelable {
@@ -41,9 +51,11 @@ data class DataPacket(
     /**
      * Syntactic sugar to make it easy to create text messages
      */
-    constructor(to: String? = ID_BROADCAST, text: String) : this(
-        to, text.toByteArray(utf8),
-        Portnums.PortNum.TEXT_MESSAGE_APP_VALUE
+    constructor(to: String?, channel: Int, text: String) : this(
+        to = to,
+        bytes = text.encodeToByteArray(),
+        dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+        channel = channel
     )
 
     /**
@@ -51,7 +63,20 @@ data class DataPacket(
      */
     val text: String?
         get() = if (dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
-            bytes?.toString(utf8)
+            bytes?.decodeToString()
+        else
+            null
+
+    constructor(to: String?, channel: Int, waypoint: MeshProtos.Waypoint) : this(
+        to = to,
+        bytes = waypoint.toByteArray(),
+        dataType = Portnums.PortNum.WAYPOINT_APP_VALUE,
+        channel = channel
+    )
+
+    val waypoint: MeshProtos.Waypoint?
+        get() = if (dataType == Portnums.PortNum.WAYPOINT_APP_VALUE)
+            MeshProtos.Waypoint.parseFrom(bytes)
         else
             null
 
@@ -64,7 +89,7 @@ data class DataPacket(
         parcel.readString(),
         parcel.readLong(),
         parcel.readInt(),
-        parcel.readParcelable(MessageStatus::class.java.classLoader),
+        parcel.readParcelableCompat(MessageStatus::class.java.classLoader),
         parcel.readInt(),
         parcel.readInt(),
     )
@@ -125,7 +150,7 @@ data class DataPacket(
         from = parcel.readString()
         time = parcel.readLong()
         id = parcel.readInt()
-        status = parcel.readParcelable(MessageStatus::class.java.classLoader)
+        status = parcel.readParcelableCompat(MessageStatus::class.java.classLoader)
         hopLimit = parcel.readInt()
         channel = parcel.readInt()
     }
@@ -143,6 +168,7 @@ data class DataPacket(
         const val NODENUM_BROADCAST = (0xffffffff).toInt()
 
         fun nodeNumToDefaultId(n: Int): String = "!%08x".format(n)
+        fun idToDefaultNodeNum(id: String?): Int? = id?.toLong(16)?.toInt()
 
         override fun createFromParcel(parcel: Parcel): DataPacket {
             return DataPacket(parcel)
@@ -151,7 +177,5 @@ data class DataPacket(
         override fun newArray(size: Int): Array<DataPacket?> {
             return arrayOfNulls(size)
         }
-
-        val utf8: Charset = Charset.forName("UTF-8")
     }
 }

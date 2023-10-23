@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.geeksville.mesh"
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="GoogleAppIndexingWarning">
 
@@ -12,23 +11,24 @@
         android:name="android.hardware.location.gps"
         android:required="false" />
 
-<!-- TODO - wait for targetSdkVersion 31
-    &lt;!&ndash; Request legacy Bluetooth permissions on older devices &ndash;&gt;
+    <!-- Request legacy Bluetooth permissions on older devices -->
     <uses-permission android:name="android.permission.BLUETOOTH"
         android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
         android:maxSdkVersion="30" />
 
-    &lt;!&ndash; API 31+ Bluetooth permissions &ndash;&gt;
+    <!-- API 31+ Bluetooth permissions -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
-        android:usesPermissionFlags="neverForLocation" />
--->
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="s" />
+
+    <!-- API 33+ Notification runtime permissions -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Permissions required for providing location (from phone GPS) to mesh -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <!-- This permission is required for analytics - and soon the MQTT gateway -->
@@ -61,6 +61,10 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
+    <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="false" />
 
@@ -76,19 +80,17 @@
 
     <!-- hardware acceleration is required for zxing barcode lib -->
     <application
-        tools:replace="android:icon"
         android:name="com.geeksville.mesh.MeshUtilApplication"
         android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher2"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher2_round"
         android:supportsRtl="true"
         android:hardwareAccelerated="true"
-        android:theme="@style/AppTheme">
-
-        <meta-data
-            android:name="com.mixpanel.android.MPConfig.DisableViewCrawler"
-            android:value="true" />
+        android:theme="@style/AppTheme"
+        android:localeConfig="@xml/locales_config">
 
         <!-- Default crash collection and analytics off until we (possibly) turn it on in application.onCreate -->
         <meta-data
@@ -109,10 +111,20 @@
         <service
             android:name="com.geeksville.mesh.service.MeshService"
             android:enabled="true"
+            android:foregroundServiceType="connectedDevice"
             android:exported="true" tools:ignore="ExportedActivity">
             <intent-filter>
                 <action android:name="com.geeksville.mesh.Service" />
             </intent-filter>
+        </service>
+
+        <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data
+                android:name="autoStoreLocales"
+                android:value="true" />
         </service>
 
         <!-- zxing for QR Code scanning: lock portrait orientation -->
@@ -124,7 +136,7 @@
         <activity
             android:name="com.geeksville.mesh.MainActivity"
             android:launchMode="singleInstance"
-            android:screenOrientation="portrait"
+            android:screenOrientation="sensorPortrait"
             android:windowSoftInputMode="stateAlwaysHidden"
             android:theme="@style/Theme.App.Starting"
             android:exported="true">
@@ -137,7 +149,7 @@
                 <!-- The QR codes to share channel settings are shared as meshtastic URLS
 
                 an approximate example:
-                http://www.meshtastic.org/e/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
+                http://meshtastic.org/e/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
                 -->
                 <action android:name="android.intent.action.VIEW" />
 
@@ -146,11 +158,11 @@
 
                 <data
                     android:scheme="https"
-                    android:host="www.meshtastic.org"
+                    android:host="meshtastic.org"
                     android:pathPrefix="/e/" />
                 <data
                     android:scheme="https"
-                    android:host="www.meshtastic.org"
+                    android:host="meshtastic.org"
                     android:pathPrefix="/E/" />
             </intent-filter>
 
@@ -191,6 +203,16 @@
 
         <activity
             android:name=".AppIntroduction"/>
+
+        <!-- allow for plugin discovery -->
+        <activity
+            android:name="com.atakmap.app.component"
+            android:exported="true"
+            tools:ignore="MissingClass">
+            <intent-filter android:label="@string/app_name">
+                <action android:name="com.atakmap.app.component" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

@@ -5,6 +5,7 @@
         <!-- Customize your theme here. -->
         <item name="actionBarTheme">@style/MyActionBar</item>
         <item name="materialButtonStyle">@style/Widget.App.Button</item>
+        <item name="materialAlertDialogTheme">@style/CustomMaterialDialog</item>
 
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
@@ -57,6 +58,15 @@
 
     <style name="Widget.App.Button" parent="Widget.MaterialComponents.Button">
         <item name="backgroundTint">@color/buttonColor</item>
+    </style>
+
+    <style name="CustomMaterialDialog" parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <!-- Background Color
+        <item name="android:background">#006db3</item> -->
+        <!-- Text Color for title and message
+        <item name="colorOnSurface">@color/unselectedColor</item> -->
+        <!-- Text Color for buttons -->
+        <item name="colorPrimary">@color/unselectedColor</item>
     </style>
 
     <style name="MyThemeOverlay_Toolbar" parent="">

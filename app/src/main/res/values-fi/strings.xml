@@ -1,24 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?><!-- Translations contributed initially by @CycloMies -->
 <resources>
-    <string name="action_settings">Asetukset</string>
     <string name="channel_name">Kanavan nimi</string>
     <string name="channel_options">Kanavan ominaisuudet</string>
-    <string name="share_button">Jaa painike</string>
     <string name="qr_code">QR koodi</string>
     <string name="unset">Yhdistämättä</string>
     <string name="connection_status">Verkon tila</string>
     <string name="application_icon">Ohjelman kuvake</string>
     <string name="unknown_username">Tuntematon käyttäjänimi</string>
-    <string name="user_avatar">Käyttäjän kuvake</string>
-    <string name="sample_message">Hei! Löysin kätkön. Se on täällä suuren tiikerin luona! Hieman jo hirvittää.</string>
     <string name="send_text">Lähetä teksti</string>
     <string name="warning_not_paired">Et ole vielä yhdistänyt Meshtastic -yhteensopivaa radiota tähän puhelimeen. Parita laitteesi tämän puhelimen kanssa ja aseta käyttäjänimesi.\n\nTämä avoimen lähdekoodin (open source) ohjelma on alpha-testausvaiheessa. Mikäli huomaat ongelmia, lähetäthän viestin verkkosivumme keskustelupalstalle.\n\nLisätietoja verkkosivuiltamme - www.meshtastic.org.</string>
-    <string name="username_unset">Käyttäjänimi asettamatta</string>
     <string name="your_name">Nimesi</string>
     <string name="analytics_okay">Nimettömät käyttötilastot ja kaatumisraportit.</string>
     <string name="looking_for_meshtastic_devices">Etsii Meshtastic laiteita…</string>
     <string name="starting_pairing">Yhdistää laitteeseen</string>
-    <string name="pairing_failed">Yhdistäminen epäonnistui</string>
     <string name="url_for_join">Hyperlinkki liittymiseksi Meshtastic verkkoon</string>
     <string name="accept">Hyväksy</string>
     <string name="cancel">Peruuta</string>

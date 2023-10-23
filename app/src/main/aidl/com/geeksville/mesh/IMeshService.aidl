@@ -4,6 +4,8 @@ package com.geeksville.mesh;
 // Declare any non-default types here with import statements
 parcelable DataPacket;
 parcelable NodeInfo;
+parcelable MeshUser;
+parcelable Position;
 parcelable MyNodeInfo;
 
 /**
@@ -19,6 +21,13 @@ The intent you use to reach the service should look like this:
                 "com.geeksville.mesh.service.MeshService"
             )
         }
+
+In Android 11+ you *may* need to add the following to the client app's manifest to allow binding of the mesh service:
+<queries>
+    <package android:name="com.geeksville.mesh" />
+</queries>
+For additional information, see https://developer.android.com/guide/topics/manifest/queries-element
+
 
 Once you have bound to the service you should register your broadcast receivers per https://developer.android.com/guide/components/broadcasts#context-registered-receivers
 
@@ -45,14 +54,18 @@ interface IMeshService {
     void subscribeReceiver(String packageName, String receiverName);
 
     /**
-    * Set the ID info for this node
-
-    If myId is null, then the existing unique node ID is preserved, only the human visible longName/shortName is changed
+    * Set the user info for this node
     */
-    void setOwner(String myId, String longName, String shortName);
+    void setOwner(in MeshUser user);
+
+    void setRemoteOwner(in int requestId, in byte []payload);
+    void getRemoteOwner(in int requestId, in int destNum);
 
     /// Return my unique user ID string
     String getMyId();
+
+    /// Return a unique packet ID
+    int getPacketId();
 
     /*
     Send a packet to a specified node name
@@ -66,40 +79,67 @@ interface IMeshService {
     */
     void send(inout DataPacket packet);
 
-    void deleteMessages(in List<DataPacket> deleteList);
-
-    void deleteAllMessages();
-
     /**
     Get the IDs of everyone on the mesh.  You should also subscribe for NODE_CHANGE broadcasts.
     */
     List<NodeInfo> getNodes();
 
-    /// Return an list of MeshPacket protobuf (byte arrays) which were received while your client app was offline (recent messages only).
-    /// Also includes any messages we have sent recently (useful for finding current message status)
-    List<DataPacket> getOldMessages();
-
     /// This method is only intended for use in our GUI, so the user can set radio options
     /// It returns a DeviceConfig protobuf.
-    byte []getDeviceConfig();
+    byte []getConfig();
+    /// It sets a Config protobuf via admin packet
+    void setConfig(in byte []payload);
+
+    /// Set and get a Config protobuf via admin packet
+    void setRemoteConfig(in int requestId, in int destNum, in byte []payload);
+    void getRemoteConfig(in int requestId, in int destNum, in int configTypeValue);
+
+    /// Set and get a ModuleConfig protobuf via admin packet
+    void setModuleConfig(in int requestId, in int destNum, in byte []payload);
+    void getModuleConfig(in int requestId, in int destNum, in int moduleConfigTypeValue);
+
+    /// Set and get the Ext Notification Ringtone string via admin packet
+    void setRingtone(in int destNum, in String ringtone);
+    void getRingtone(in int requestId, in int destNum);
+
+    /// Set and get the Canned Message Messages string via admin packet
+    void setCannedMessages(in int destNum, in String messages);
+    void getCannedMessages(in int requestId, in int destNum);
 
     /// This method is only intended for use in our GUI, so the user can set radio options
-    /// It sets a DeviceConfig protobuf
-    void setDeviceConfig(in byte []payload);
+    /// It sets a Channel protobuf via admin packet
+    void setChannel(in byte []payload);
 
-    /// This method is only intended for use in our GUI, so the user can set radio options
-    /// It returns a ChannelSet protobuf.
-    byte []getChannels();
+    /// Set and get a Channel protobuf via admin packet
+    void setRemoteChannel(in int requestId, in int destNum, in byte []payload);
+    void getRemoteChannel(in int requestId, in int destNum, in int channelIndex);
 
-    /// This method is only intended for use in our GUI, so the user can set radio options
-    /// It sets a ChannelSet protobuf
-    void setChannels(in byte []payload);
+    /// Send beginEditSettings admin packet to nodeNum
+    void beginEditSettings();
+
+    /// Send commitEditSettings admin packet to nodeNum
+    void commitEditSettings();
+
+    /// Send position packet with wantResponse to nodeNum
+    void requestPosition(in int destNum, in Position position);
+
+    /// Send traceroute packet with wantResponse to nodeNum
+    void requestTraceroute(in int requestId, in int destNum);
 
     /// Send Shutdown admin packet to nodeNum
-    void requestShutdown(in String nodeId);
+    void requestShutdown(in int requestId, in int destNum);
 
     /// Send Reboot admin packet to nodeNum
-    void requestReboot(in String nodeId);
+    void requestReboot(in int requestId, in int destNum);
+
+    /// Send FactoryReset admin packet to nodeNum
+    void requestFactoryReset(in int requestId, in int destNum);
+
+    /// Send NodedbReset admin packet to nodeNum
+    void requestNodedbReset(in int requestId, in int destNum);
+
+    /// Returns a ChannelSet protobuf
+    byte []getChannelSet();
 
     /**
     Is the packet radio currently connected to the phone?  Returns a ConnectionState string.

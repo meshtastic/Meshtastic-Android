@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <group android:id="@+id/group_remote">
+        <item
+            android:id="@+id/direct_message"
+            android:title="@string/direct_message"
+            app:showAsAction="withText" />
+        <item
+            android:id="@+id/request_position"
+            android:title="@string/request_position"
+            app:showAsAction="withText" />
+        <item
+            android:id="@+id/traceroute"
+            android:title="@string/traceroute"
+            app:showAsAction="withText" />
+        <item
+            android:id="@+id/ignore"
+            android:checkable="true"
+            android:checked="false"
+            android:title="@string/ignore" />
+    </group>
+    <group android:id="@+id/group_admin">
+        <item
+            android:id="@+id/remote_admin"
+            android:title="@string/device_settings"
+            app:showAsAction="withText" />
+    </group>
+</menu>

@@ -88,8 +88,12 @@ class BluetoothInterface @AssistedInject constructor(
         /// this service UUID is publicly visible for scanning
         val BTM_SERVICE_UUID: UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
 
-        val BTM_FROMRADIO_CHARACTER: UUID =
+        var invalidVersion = false
+        val EOL_FROMRADIO_CHARACTER: UUID =
             UUID.fromString("8ba2bcc2-ee02-4a55-a531-c525c5e454d5")
+
+        val BTM_FROMRADIO_CHARACTER: UUID =
+            UUID.fromString("2c55e69e-4993-11ed-b878-0242ac120002")
         val BTM_TORADIO_CHARACTER: UUID =
             UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
         val BTM_FROMNUM_CHARACTER: UUID =
@@ -115,6 +119,7 @@ class BluetoothInterface @AssistedInject constructor(
             ?: throw RadioNotConnectedException("BLE service not found")
 
     private lateinit var fromNum: BluetoothGattCharacteristic
+    private lateinit var fromRadio: BluetoothGattCharacteristic
 
     /**
      * With the new rev2 api, our first send is to start the configure readbacks.  In that case,
@@ -194,7 +199,6 @@ class BluetoothInterface @AssistedInject constructor(
     /// Attempt to read from the fromRadio mailbox, if data is found broadcast it to android apps
     private fun doReadFromRadio(firstRead: Boolean) {
         safe?.let { s ->
-            val fromRadio = getCharacteristic(BTM_FROMRADIO_CHARACTER)
             s.asyncReadCharacteristic(fromRadio) {
                 try {
                     val b = it.getOrThrow()
@@ -243,7 +247,6 @@ class BluetoothInterface @AssistedInject constructor(
         safe?.setNotify(fromNum, true) {
             // We might get multiple notifies before we get around to reading from the radio - so just set one flag
             fromNumChanged = true
-            debug("fromNum changed")
             service.serviceScope.handledLaunch {
                 try {
                     if (fromNumChanged) {
@@ -322,6 +325,16 @@ class BluetoothInterface @AssistedInject constructor(
                             } */
 
                             fromNum = getCharacteristic(BTM_FROMNUM_CHARACTER)
+
+                            // We changed UUIDs to be able to identify old firmware (<1.3.43)
+                            fromRadio = if (bservice.characteristics.map { it.uuid }
+                                    .contains(EOL_FROMRADIO_CHARACTER)) {
+                                invalidVersion = true
+                                getCharacteristic(EOL_FROMRADIO_CHARACTER)
+                            } else {
+                                invalidVersion = false
+                                getCharacteristic(BTM_FROMRADIO_CHARACTER)
+                            }
 
                             // We treat the first send by a client as special
                             isFirstSend = true

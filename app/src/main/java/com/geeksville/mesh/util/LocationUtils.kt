@@ -5,10 +5,14 @@ import com.geeksville.mesh.Position
 import mil.nga.grid.features.Point
 import mil.nga.mgrs.MGRS
 import mil.nga.mgrs.utm.UTM
+import org.osmdroid.util.BoundingBox
+import org.osmdroid.util.GeoPoint
 import kotlin.math.abs
 import kotlin.math.acos
 import kotlin.math.atan2
 import kotlin.math.cos
+import kotlin.math.log2
+import kotlin.math.pow
 import kotlin.math.sin
 
 /*******************************************************************************
@@ -20,18 +24,18 @@ import kotlin.math.sin
  ******************************************************************************/
 
 object GPSFormat {
-    fun dec(p: Position): String {
+    fun DEC(p: Position): String {
         return String.format("%.5f %.5f", p.latitude, p.longitude).replace(",", ".")
     }
 
-    fun toDMS(p: Position): String {
+    fun DMS(p: Position): String {
         val lat = degreesToDMS(p.latitude, true)
         val lon = degreesToDMS(p.longitude, false)
         fun string(a: Array<String>) = String.format("%s°%s'%.5s\"%s", a[0], a[1], a[2], a[3])
         return string(lat) + " " + string(lon)
     }
 
-    fun toUTM(p: Position): String {
+    fun UTM(p: Position): String {
         val UTM = UTM.from(Point.point(p.longitude, p.latitude))
         return String.format(
             "%s%s %.6s %.7s",
@@ -42,7 +46,7 @@ object GPSFormat {
         )
     }
 
-    fun toMGRS(p: Position): String {
+    fun MGRS(p: Position): String {
         val MGRS = MGRS.from(Point.point(p.longitude, p.latitude))
         return String.format(
             "%s%s %s%s %05d %05d",
@@ -232,4 +236,46 @@ fun bearing(
  */
 fun radToBearing(rad: Double): Double {
     return (Math.toDegrees(rad) + 360) % 360
+}
+
+/**
+ * Calculates the zoom level required to fit the entire [BoundingBox] inside the map view.
+ * @return The zoom level as a Double value.
+ */
+fun BoundingBox.requiredZoomLevel(): Double {
+    val topLeft = GeoPoint(this.latNorth, this.lonWest)
+    val bottomRight = GeoPoint(this.latSouth, this.lonEast)
+    val latLonWidth = topLeft.distanceToAsDouble(GeoPoint(topLeft.latitude, bottomRight.longitude))
+    val latLonHeight = topLeft.distanceToAsDouble(GeoPoint(bottomRight.latitude, topLeft.longitude))
+    val requiredLatZoom = log2(360.0 / (latLonHeight / 111320))
+    val requiredLonZoom = log2(360.0 / (latLonWidth / 111320))
+    return maxOf(requiredLatZoom, requiredLonZoom)
+}
+
+/**
+ * Creates a new bounding box with adjusted dimensions based on the provided [zoomFactor].
+ * @return A new [BoundingBox] with added [zoomFactor]. Example:
+ * ```
+ * // Setting the zoom level directly using setZoom()
+ * map.setZoom(14.0)
+ * val boundingBoxZoom14 = map.boundingBox
+ *
+ * // Using zoomIn() results the equivalent BoundingBox with setZoom(15.0)
+ * val boundingBoxZoom15 = boundingBoxZoom14.zoomIn(1.0)
+ * ```
+ */
+fun BoundingBox.zoomIn(zoomFactor: Double): BoundingBox {
+    val center = GeoPoint((latNorth + latSouth) / 2, (lonWest + lonEast) / 2)
+    val latDiff = latNorth - latSouth
+    val lonDiff = lonEast - lonWest
+
+    val newLatDiff = latDiff / (2.0.pow(zoomFactor))
+    val newLonDiff = lonDiff / (2.0.pow(zoomFactor))
+
+    return BoundingBox(
+        center.latitude + newLatDiff / 2,
+        center.longitude + newLonDiff / 2,
+        center.latitude - newLatDiff / 2,
+        center.longitude - newLonDiff / 2
+    )
 }

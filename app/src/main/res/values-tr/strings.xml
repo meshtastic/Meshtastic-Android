@@ -1,24 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="action_settings">Ayarla</string>
     <string name="channel_name">Kanal Adı</string>
     <string name="channel_options">Kanal Seçenekleri</string>
-    <string name="share_button">Paylaş Düğmesi</string>
     <string name="qr_code">QR kodu</string>
     <string name="unset">Kaldır</string>
     <string name="connection_status">Bağlantı durumu</string>
     <string name="application_icon">uygulama ikonu</string>
     <string name="unknown_username">Bilinmeyen kullanıcı adı</string>
-    <string name="user_avatar">Avatar</string>
-    <string name="sample_message">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
     <string name="send_text">Metni Gönder</string>
     <string name="warning_not_paired">Telefonu, henüz Meshtastic uyumlu bir telsiz ile eşleştirmediniz. Bir cihazla eşleştirin ve kullanıcı adınızı belirleyin lütfen.\n\nAçık kaynaklı bu uygulama şu an alfa-test\'i aşamasında, problemler görürseniz forum\'da lütfen paylaşınız: meshtastic.discourse.group.\n\nDaha fazla bilgi için internet sitemizi ziyaret ediniz - www.meshtastic.org.</string>
-    <string name="username_unset">Kullanıcı adını kaldır</string>
     <string name="your_name">Adınız</string>
     <string name="analytics_okay">Anonim kullanim istatistikleri ve hata raporları.</string>
     <string name="looking_for_meshtastic_devices">Meshtastic cihazları aranıyor…</string>
     <string name="starting_pairing">Eşleşme başlatılıyor</string>
-    <string name="pairing_failed">Eşleşme başarız</string>
     <string name="url_for_join">Meshtastic mesh ağına bağlanmak için adres</string>
     <string name="accept">Kabul et</string>
     <string name="cancel">İptal</string>
@@ -32,11 +26,8 @@
     <string name="report_a_bug">Hata Bildir</string>
     <string name="report_bug_text">Hata bildirmek istediğinizden emin misiniz? Hata bildirdikten sonra, lütfen meshtastic.discourse.group sayfasında paylaşınız ki raporu bulgularınızla eşleştirebilelim.</string>
     <string name="report">Bildir</string>
-    <string name="select_radio">Telsiz seçiniz</string>
-    <string name="current_pair">Şu anda %s telsizi ile eşleşmiş durumdasınız.</string>
     <string name="not_paired_yet">Henüz bir telsiz ile eşleşmediniz.</string>
     <string name="change_radio">Telsizi değiştir</string>
-    <string name="please_pair">Cihazı Android ayarlarında eşleştiriniz lütfen.</string>
     <string name="pairing_completed">Eşleşme tamamlandı, servis başlatılıyor</string>
     <string name="pairing_failed_try_again">Eşleşme başarısız, lütfen tekrar seçiniz</string>
     <string name="location_disabled">Konum erişimi kapalı, konum mesh ağına paylaşılamıyor.</string>
@@ -59,7 +50,7 @@
     <string name="modem_config_long">Uzun menzilli (hızlı)</string>
     <string name="modem_config_very_long">Çok uzun menzilli (yavaş)</string>
     <string name="modem_config_unrecognized">TANIMLANAMADI</string>
-    <string name="meshtastic_service_notifications">Meshtastic Servis Bildirimleri</string>
+    <string name="meshtastic_service_notifications">Servis bildirimleri</string>
     <string name="location_disabled_warning">Android ayarlarında konum servislerine izin vermelisiniz</string>
     <string name="about">Hakkında</string>
     <string name="modem_config_slow_short">Kısa menzilli (yavaş)</string>

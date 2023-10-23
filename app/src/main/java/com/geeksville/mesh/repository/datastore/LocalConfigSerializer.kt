@@ -10,6 +10,7 @@ import java.io.OutputStream
 /**
  * Serializer for the [LocalConfig] object defined in localonly.proto.
  */
+@Suppress("BlockingMethodInNonBlockingContext")
 object LocalConfigSerializer : Serializer<LocalConfig> {
     override val defaultValue: LocalConfig = LocalConfig.getDefaultInstance()
 

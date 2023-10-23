@@ -1,24 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?><!-- Contributed by @eriktheV-king -->
 <resources>
-    <string name="action_settings">Instellingen</string>
     <string name="channel_name">Kanaal Naam</string>
     <string name="channel_options">Kanaal opties</string>
-    <string name="share_button">Deel knop</string>
     <string name="qr_code">QR code</string>
     <string name="unset">Terugzetten</string>
     <string name="connection_status">Verbindingsstatusstatus</string>
     <string name="application_icon">Applicatie icoon</string>
     <string name="unknown_username">Onbekende Gebruikersnaam</string>
-    <string name="user_avatar">Gebruikers avatar</string>
-    <string name="sample_message">hallo ik heb de schuilplaats gevonden, hier naast de tijger. Ik ben een beetje bang.</string>
     <string name="send_text">Zend Tekst</string>
     <string name="warning_not_paired">Je hebt nog geen Meshtastic compatibele radio met deze telefoon gekoppeld. Paar alstublieft een apparaat en voer je gebruikersnaam in.\n\nDeze open-source applicatie is in alpha-test, indien je een probleem vaststelt, kan je het posten op onze website chat.\n\nVoor meer informatie bezoek onze web pagina - www.meshtastic.org.</string>
-    <string name="username_unset">Gebruikersnaam terugzetten</string>
     <string name="your_name">Je Naam</string>
     <string name="analytics_okay">Anonieme gebruikersnaam en foutrapporten.</string>
     <string name="looking_for_meshtastic_devices">Zoekt Meshtastic apparaten…</string>
     <string name="starting_pairing">Start koppeling</string>
-    <string name="pairing_failed">Koppeling mislukt</string>
     <string name="url_for_join">Een URL om te verbinden met een Meshtastic net</string>
     <string name="accept">Bevestig</string>
     <string name="cancel">Annuleer</string>
@@ -32,11 +26,8 @@
     <string name="report_a_bug">Rapporteer een Bug</string>
     <string name="report_bug_text">Ben je zeker dat je een bug wil rapporteren? Na het doorsturen, graag een post in meshtastic.discourse.group zodat we het rapport kunnen toetsen aan hetgeen je ondervond.</string>
     <string name="report">Rapport</string>
-    <string name="select_radio">Selecteer radio</string>
-    <string name="current_pair">Je bent momenteel gekoppeld met radio %s</string>
     <string name="not_paired_yet">Je hebt nog geen radio gekoppeld.</string>
-    <string name="change_radio">Wijzig radio</string>	
-	<string name="please_pair">Koppel een radio in Android Instellingen.</string>
+    <string name="change_radio">Wijzig radio</string>
     <string name="pairing_completed">Koppeling geslaagd, start service</string>
     <string name="pairing_failed_try_again">Koppeling mislukt, selecteer opnieuw</string>
     <string name="location_disabled">Vrijgave positie niet actief, onmogelijk de positie aan het netwerk te geven.</string>
@@ -59,7 +50,7 @@
     <string name="modem_config_long">Groot bereik (snel)</string>
     <string name="modem_config_very_long">Zeer groot bereik (traag)</string>
     <string name="modem_config_unrecognized">ONBEKEND</string>
-    <string name="meshtastic_service_notifications">Meshtastic Service Berichten</string>
+    <string name="meshtastic_service_notifications">Service berichten</string>
     <string name="location_disabled_warning">Noodzakelijk de positioneringsservice te activeren in Android Instellingen</string>
     <string name="about">Over</string>
     <string name="a_list_of_nodes_in_the_mesh">Een lijst van de aansluitpunten in het netwerk</string>

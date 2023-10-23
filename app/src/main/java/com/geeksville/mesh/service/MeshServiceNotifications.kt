@@ -7,18 +7,18 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.graphics.drawable.toBitmapOrNull
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.notificationManager
+import com.geeksville.mesh.util.PendingIntentCompat
 import java.io.Closeable
 
 
@@ -102,33 +102,26 @@ class MeshServiceNotifications(
     fun updateMessageNotification(name: String, message: String) =
         notificationManager.notify(
             messageNotifyId,
-            createMessageNotifcation(name, message)
+            createMessageNotification(name, message)
         )
 
     private val openAppIntent: PendingIntent by lazy {
-        PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), 0)
+        PendingIntent.getActivity(
+            context,
+            0,
+            Intent(context, MainActivity::class.java),
+            PendingIntentCompat.FLAG_IMMUTABLE
+        )
     }
 
     /**
      * Generate a bitmap from a vector drawable (even on old builds)
-     * https://stackoverflow.com/questions/33696488/getting-bitmap-from-vector-drawable
+     * https://stackoverflow.com/questions/33696488/getting-bitmap-from-vector-drawable/#51742167
      */
-    fun getBitmapFromVectorDrawable(drawableId: Int): Bitmap {
-        var drawable = ContextCompat.getDrawable(context, drawableId)!!
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-            drawable = DrawableCompat.wrap(drawable).mutate()
-        }
-        val bitmap = Bitmap.createBitmap(
-            drawable.intrinsicWidth,
-            drawable.intrinsicHeight, Bitmap.Config.ARGB_8888
-        )
-        val canvas = Canvas(bitmap)
-        drawable.setBounds(0, 0, canvas.width, canvas.height)
-        drawable.draw(canvas)
-        return bitmap
-    }
+    private fun getBitmapFromVectorDrawable(drawableId: Int): Bitmap? =
+        AppCompatResources.getDrawable(context, drawableId)?.toBitmapOrNull()
 
-    fun commonBuilder(channel: String): NotificationCompat.Builder {
+    private fun commonBuilder(channel: String): NotificationCompat.Builder {
         val builder = NotificationCompat.Builder(context, channel)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(openAppIntent)
@@ -142,10 +135,13 @@ class MeshServiceNotifications(
             // Newer androids also support a 'large' icon
 
             // We delay making this bitmap until we know we need it
-            if (largeIcon == null)
-                largeIcon = getBitmapFromVectorDrawable(R.mipmap.ic_launcher2)
+            largeIcon = largeIcon ?: getBitmapFromVectorDrawable(R.mipmap.ic_launcher2)
 
-            builder.setSmallIcon(if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) R.drawable.app_icon_novect else R.drawable.app_icon) // vector form icons don't work reliably on  older androids
+            builder.setSmallIcon(
+                // vector form icons don't work reliably on older androids
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) R.drawable.app_icon_novect
+                else R.drawable.app_icon
+            )
                 .setLargeIcon(largeIcon)
         }
         return builder
@@ -162,7 +158,7 @@ class MeshServiceNotifications(
         return builder.build()
     }
 
-    fun createMessageNotifcation(name: String, message: String): Notification {
+    private fun createMessageNotification(name: String, message: String): Notification {
         val builder = commonBuilder(messageChannelId)
         with(builder) {
             priority = NotificationCompat.PRIORITY_DEFAULT

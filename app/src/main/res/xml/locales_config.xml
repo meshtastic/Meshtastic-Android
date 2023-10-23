@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+   <locale android:name="en"/> <!-- English (ultimate fallback locale) -->
+   <locale android:name="bg"/> <!-- Bulgarian -->
+   <locale android:name="cs"/> <!-- Czech -->
+   <locale android:name="zh"/> <!-- Chinese -->
+   <locale android:name="de"/> <!-- German -->
+   <locale android:name="es"/> <!-- Spanish (Spain) -->
+   <locale android:name="fr"/> <!-- French (France) -->
+   <locale android:name="ga"/> <!-- Irish -->
+   <locale android:name="el"/> <!-- Greek -->
+   <locale android:name="fr-HT"/> <!-- Haitian Creole -->
+   <locale android:name="it"/> <!-- Italian -->
+   <locale android:name="is"/> <!-- Icelandic -->
+   <locale android:name="ja"/> <!-- Japanese -->
+   <locale android:name="ko"/> <!-- Korean -->
+   <locale android:name="hu"/> <!-- Hungarian -->
+   <locale android:name="nl"/> <!-- Dutch -->
+   <locale android:name="nb"/> <!-- Norwegian -->
+   <locale android:name="pl"/> <!-- Polish -->
+   <locale android:name="pt"/> <!-- Portuguese -->
+   <locale android:name="pt-BR"/> <!-- Portuguese (Brazil) -->
+   <locale android:name="ro"/> <!-- Romanian -->
+   <locale android:name="ru"/> <!-- Russian -->
+   <locale android:name="sq"/> <!-- Albanian -->
+   <locale android:name="sk"/> <!-- Slovak -->
+   <locale android:name="sl"/> <!-- Slovenian -->
+   <locale android:name="fi"/> <!-- Finnish -->
+   <locale android:name="sv"/> <!-- Swedish -->
+   <locale android:name="tr"/> <!-- Turkish -->
+   <locale android:name="uk"/> <!-- Ukrainian -->
+</locale-config>

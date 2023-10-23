@@ -21,27 +21,17 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
+import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.databinding.AdapterMessageLayoutBinding
 import com.geeksville.mesh.databinding.MessagesFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.util.onEditorAction
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.DateFormat
 import java.util.*
-
-// Allows usage like email.on(EditorInfo.IME_ACTION_NEXT, { confirm() })
-fun EditText.on(actionId: Int, func: () -> Unit) {
-    setOnEditorActionListener { _, receivedActionId, _ ->
-
-        if (actionId == receivedActionId) {
-            func()
-        }
-        true
-    }
-}
 
 @AndroidEntryPoint
 class MessagesFragment : Fragment(), Logging {
@@ -52,23 +42,12 @@ class MessagesFragment : Fragment(), Logging {
 
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
-    private var contactId: String = DataPacket.ID_BROADCAST
+    private var contactKey: String = DataPacket.ID_BROADCAST
     private var contactName: String = DataPacket.ID_BROADCAST
 
     private val model: UIViewModel by activityViewModels()
 
     private var isConnected = false
-
-    // Allows textMultiline with IME_ACTION_SEND
-    private fun EditText.onActionSend(func: () -> Unit) {
-        setOnEditorActionListener { _, actionId, _ ->
-
-            if (actionId == EditorInfo.IME_ACTION_SEND) {
-                func()
-            }
-            true
-        }
-    }
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
@@ -106,14 +85,15 @@ class MessagesFragment : Fragment(), Logging {
             return ViewHolder(contactViewBinding)
         }
 
-        var messages = arrayOf<DataPacket>()
-        var selectedList = ArrayList<DataPacket>()
+        var messages = listOf<Packet>()
+        var selectedList = ArrayList<Packet>()
 
         override fun getItemCount(): Int = messages.size
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val msg = messages[position]
-            val nodes = model.nodeDB.nodes.value!!
+            val packet = messages[position]
+            val msg = packet.data
+            val nodes = model.nodeDB.nodes.value
             val node = nodes[msg.from]
             // Determine if this is my message (originated on this device)
             val isLocal = msg.from == DataPacket.ID_LOCAL
@@ -165,6 +145,7 @@ class MessagesFragment : Fragment(), Logging {
             holder.messageTime.text = getShortDateTime(Date(msg.time))
 
             val icon = when (msg.status) {
+                MessageStatus.RECEIVED -> R.drawable.ic_twotone_how_to_reg_24
                 MessageStatus.QUEUED -> R.drawable.ic_twotone_cloud_upload_24
                 MessageStatus.DELIVERED -> R.drawable.cloud_on
                 MessageStatus.ENROUTE -> R.drawable.ic_twotone_cloud_24
@@ -172,11 +153,17 @@ class MessagesFragment : Fragment(), Logging {
                 else -> null
             }
 
-            if (icon != null) {
+            if (icon != null && isLocal) {
                 holder.messageStatusIcon.setImageResource(icon)
                 holder.messageStatusIcon.visibility = View.VISIBLE
             } else
                 holder.messageStatusIcon.visibility = View.GONE
+
+            holder.messageStatusIcon.setOnClickListener {
+                if (isAdded) {
+                    Toast.makeText(context, "${msg.status}", Toast.LENGTH_SHORT).show()
+                }
+            }
 
             holder.itemView.setOnLongClickListener {
                 clickItem(holder)
@@ -190,7 +177,7 @@ class MessagesFragment : Fragment(), Logging {
                 if (actionMode != null) clickItem(holder)
             }
 
-            if (selectedList.contains(msg)) {
+            if (selectedList.contains(packet)) {
                 holder.itemView.background = GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
                     cornerRadius = 32f
@@ -223,11 +210,8 @@ class MessagesFragment : Fragment(), Logging {
         }
 
         /// Called when our node DB changes
-        fun onMessagesChanged(msgIn: Collection<DataPacket>) {
-            messages = msgIn.filter {
-                if (contactId == DataPacket.ID_BROADCAST) it.to == DataPacket.ID_BROADCAST
-                else it.from == contactId && it.to != DataPacket.ID_BROADCAST || it.from == DataPacket.ID_LOCAL && it.to == contactId
-            }.toTypedArray()
+        fun onMessagesChanged(messages: List<Packet>) {
+            this.messages = messages
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all messages
 
             // scroll to the last line
@@ -249,13 +233,29 @@ class MessagesFragment : Fragment(), Logging {
         return binding.root
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("contactKey", contactKey)
+        outState.putString("contactName", contactName)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.toolbar.setNavigationOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
         setFragmentResultListener("requestKey") { _, bundle->
             // get the result from bundle
-            contactId = bundle.getString("contactId").toString()
+            contactKey = bundle.getString("contactKey").toString()
             contactName = bundle.getString("contactName").toString()
+            model.setContactKey(contactKey)
+            binding.messageTitle.text = contactName
+        }
+        if (savedInstanceState != null) {
+            contactKey = savedInstanceState.getString("contactKey").toString()
+            contactName = savedInstanceState.getString("contactName").toString()
             binding.messageTitle.text = contactName
         }
 
@@ -264,18 +264,17 @@ class MessagesFragment : Fragment(), Logging {
 
             val str = binding.messageInputText.text.toString().trim()
             if (str.isNotEmpty())
-                model.messagesState.sendMessage(str, contactId)
+                model.sendMessage(str, contactKey)
             binding.messageInputText.setText("") // blow away the string the user just entered
 
             // requireActivity().hideKeyboard()
         }
 
-        binding.messageInputText.onActionSend {
-            debug("did IME action")
+        binding.messageInputText.onEditorAction(EditorInfo.IME_ACTION_SEND) {
+            debug("received IME_ACTION_SEND")
 
             val str = binding.messageInputText.text.toString().trim()
-            if (str.isNotEmpty())
-                model.messagesState.sendMessage(str)
+            if (str.isNotEmpty()) model.sendMessage(str, contactKey)
             binding.messageInputText.setText("") // blow away the string the user just entered
 
             // requireActivity().hideKeyboard()
@@ -286,15 +285,15 @@ class MessagesFragment : Fragment(), Logging {
         layoutManager.stackFromEnd = true // We want the last rows to always be shown
         binding.messageListView.layoutManager = layoutManager
 
-        model.messagesState.messages.observe(viewLifecycleOwner) {
+        model.messages.observe(viewLifecycleOwner) {
             debug("New messages received: ${it.size}")
             messagesAdapter.onMessagesChanged(it)
         }
 
         // If connection state _OR_ myID changes we have to fix our ability to edit outgoing messages
-        model.connectionState.observe(viewLifecycleOwner) { connectionState ->
+        model.connectionState.observe(viewLifecycleOwner) {
             // If we don't know our node ID and we are offline don't let user try to send
-            isConnected = connectionState == MeshService.ConnectionState.CONNECTED
+            isConnected = model.isConnected()
             binding.textInputLayout.isEnabled = isConnected
             binding.sendButton.isEnabled = isConnected
             for (subView: View in binding.quickChatLayout.allViews) {
@@ -310,7 +309,7 @@ class MessagesFragment : Fragment(), Logging {
                 binding.quickChatLayout.removeAllViews()
                 for (action in actions) {
                     val button = Button(context)
-                    button.setText(action.name)
+                    button.text = action.name
                     button.isEnabled = isConnected
                     if (action.mode == QuickChatAction.Mode.Instant) {
                         button.backgroundTintList = ContextCompat.getColorStateList(requireActivity(), R.color.colorMyMsg)
@@ -327,13 +326,20 @@ class MessagesFragment : Fragment(), Logging {
                             binding.messageInputText.setText(newText)
                             binding.messageInputText.setSelection(newText.length)
                         } else {
-                            model.messagesState.sendMessage(action.message, contactId)
+                            model.sendMessage(action.message, contactKey)
                         }
                     }
                     binding.quickChatLayout.addView(button)
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        actionMode?.finish()
+        actionMode = null
+        _binding = null
     }
 
     private inner class ActionModeCallback : ActionMode.Callback {
@@ -361,11 +367,11 @@ class MessagesFragment : Fragment(), Logging {
                         .setPositiveButton(getString(R.string.delete)) { _, _ ->
                             debug("User clicked deleteButton")
                             // all items selected --> deleteAllMessages()
-                            val messagesTotal = model.messagesState.messages.value
-                            if (messagesTotal != null && selectedList.size == messagesTotal.size) {
-                                model.messagesState.deleteAllMessages()
+                            val messagesTotal = model.packets.value.filter { it.port_num == 1 }
+                            if (selectedList.size == messagesTotal.size) {
+                                model.deleteAllMessages()
                             } else {
-                                model.messagesState.deleteMessages(selectedList)
+                                model.deleteMessages(selectedList.map { it.uuid })
                             }
                             mode.finish()
                         }
@@ -391,7 +397,7 @@ class MessagesFragment : Fragment(), Logging {
                     val selectedList = messagesAdapter.selectedList
                     var resendText = ""
                     selectedList.forEach {
-                        resendText = resendText + it.text + System.lineSeparator()
+                        resendText = resendText + it.data.text + System.lineSeparator()
                     }
                     if (resendText!="")
                         resendText = resendText.substring(0, resendText.length - 1)

@@ -1,24 +1,37 @@
 package com.geeksville.mesh.repository.radio
 
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.util.Exceptions
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.IOException
-import java.io.InputStream
 import java.io.OutputStream
 import java.net.InetAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
-import kotlin.concurrent.thread
 
 class TCPInterface @AssistedInject constructor(
     service: RadioInterfaceService,
-    @Assisted private val address: String
-) : StreamInterface(service) {
-    var socket: Socket? = null
-    lateinit var outStream: OutputStream
-    lateinit var inStream: InputStream
+    @Assisted private val address: String,
+) : StreamInterface(service), Logging {
+
+    companion object {
+        const val MAX_RETRIES_ALLOWED = Int.MAX_VALUE
+        const val MIN_BACKOFF_MILLIS = 1 * 1000L // 1 second
+        const val MAX_BACKOFF_MILLIS = 5 * 60 * 1000L // 5 minutes
+    }
+
+    private var retryCount = 1
+    private var backoffDelay = MIN_BACKOFF_MILLIS
+
+    private var socket: Socket? = null
+    private lateinit var outStream: OutputStream
 
     init {
         connect()
@@ -36,54 +49,71 @@ class TCPInterface @AssistedInject constructor(
         val s = socket
         if (s != null) {
             debug("Closing TCP socket")
-            socket = null
-            outStream.close()
-            inStream.close()
             s.close()
+            socket = null
         }
         super.onDeviceDisconnect(waitForStopped)
     }
 
     override fun connect() {
-        // No need to keep a reference to this thread - it will exit when we close inStream
-        thread(start = true, isDaemon = true, name = "TCP reader") {
-            try {
-                val a = InetAddress.getByName(address)
-                debug("TCP connecting to $address")
+        service.serviceScope.handledLaunch {
+            while (true) {
+                try {
+                    startConnect()
+                } catch (ex: IOException) {
+                    errormsg("IOException in TCP reader: $ex")
+                    onDeviceDisconnect(false)
+                } catch (ex: Throwable) {
+                    Exceptions.report(ex, "Exception in TCP reader")
+                    onDeviceDisconnect(false)
+                }
 
-                //create a socket to make the connection with the server
-                val port = 4403
-                val s = Socket(a, port)
-                s.tcpNoDelay = true
-                s.soTimeout = 500
-                socket = s
-                outStream = BufferedOutputStream(s.getOutputStream())
-                inStream = s.getInputStream()
+                if (retryCount > MAX_RETRIES_ALLOWED) break
 
-                // Note: we call the super method FROM OUR NEW THREAD
-                super.connect()
+                debug("Reconnect attempt $retryCount in ${backoffDelay / 1000}s")
+                delay(backoffDelay)
 
-                while (true) {
-                    try {
-                        val c = inStream.read()
+                retryCount++
+                backoffDelay = minOf(backoffDelay * 2, MAX_BACKOFF_MILLIS)
+            }
+            debug("Exiting TCP reader")
+        }
+    }
+
+    // Create a socket to make the connection with the server
+    private suspend fun startConnect() = withContext(Dispatchers.IO) {
+        debug("TCP connecting to $address")
+        Socket(InetAddress.getByName(address), 4403).use { socket ->
+            socket.tcpNoDelay = true
+            socket.soTimeout = 500
+            this@TCPInterface.socket = socket
+
+            BufferedOutputStream(socket.getOutputStream()).use { outputStream ->
+                outStream = outputStream
+
+                BufferedInputStream(socket.getInputStream()).use { inputStream ->
+                    super.connect()
+
+                    retryCount = 1
+                    backoffDelay = MIN_BACKOFF_MILLIS
+
+                    var timeoutCount = 0
+                    while (timeoutCount < 180) try { // close after 90s of inactivity
+                        val c = inputStream.read()
                         if (c == -1) {
                             warn("Got EOF on TCP stream")
-                            onDeviceDisconnect(false)
                             break
-                        } else
+                        } else {
+                            timeoutCount = 0
                             readChar(c.toByte())
+                        }
                     } catch (ex: SocketTimeoutException) {
+                        timeoutCount++
                         // Ignore and start another read
                     }
                 }
-            } catch (ex: IOException) {
-                errormsg("IOException in TCP reader: $ex") // FIXME, show message to user
-                onDeviceDisconnect(false)
-            } catch (ex: Throwable) {
-                Exceptions.report(ex, "Exception in TCP reader")
-                onDeviceDisconnect(false)
             }
-            debug("Exiting TCP reader")
+            onDeviceDisconnect(false)
         }
     }
 }

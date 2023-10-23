@@ -16,14 +16,13 @@ import android.text.method.LinkMovementMethod
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
-import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.Fragment
@@ -33,25 +32,30 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.geeksville.mesh.android.*
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.databinding.ActivityMainBinding
-import com.geeksville.mesh.model.*
+import com.geeksville.mesh.model.BluetoothViewModel
+import com.geeksville.mesh.model.DeviceVersion
+import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.model.primaryChannel
+import com.geeksville.mesh.model.toChannelSet
+import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.InterfaceId
-import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
+import com.geeksville.mesh.ui.map.MapFragment
 import com.geeksville.mesh.util.Exceptions
-import com.geeksville.mesh.util.exceptionReporter
+import com.geeksville.mesh.util.getParcelableExtraCompat
+import com.geeksville.mesh.util.LanguageUtils
+import com.geeksville.mesh.util.getPackageInfoCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
-import com.suddenh4x.ratingdialog.AppRating
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
-import java.nio.charset.Charset
 import java.text.DateFormat
-import java.util.*
+import java.util.Date
 import javax.inject.Inject
 
 /*
@@ -103,10 +107,8 @@ eventually:
   make a custom theme: https://github.com/material-components/material-components-android/tree/master/material-theme-builder
 */
 
-val utf8: Charset = Charset.forName("UTF-8")
-
 @AndroidEntryPoint
-class MainActivity : BaseActivity(), Logging {
+class MainActivity : AppCompatActivity(), Logging {
 
     private lateinit var binding: ActivityMainBinding
 
@@ -114,24 +116,35 @@ class MainActivity : BaseActivity(), Logging {
     private val mainScope = CoroutineScope(Dispatchers.Main + Job())
 
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
-    private val scanModel: BTScanModel by viewModels()
-    val model: UIViewModel by viewModels()
+    private val model: UIViewModel by viewModels()
 
     @Inject
-    internal lateinit var radioInterfaceService: RadioInterfaceService
+    internal lateinit var serviceRepository: ServiceRepository
 
-    private val requestPermissionsLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (!permissions.entries.all { it.value }) {
-                errormsg("User denied permissions")
-                showSnackbar(getString(R.string.permission_missing_31))
+    private val bluetoothPermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            if (result.entries.all { it.value }) {
+                info("Bluetooth permissions granted")
+            } else {
+                warn("Bluetooth permissions denied")
+                showSnackbar(permissionMissing)
             }
+            requestedEnable = false
             bluetoothViewModel.permissionsUpdated()
+        }
+
+    private val notificationPermissionsLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
+            if (result.entries.all { it.value }) {
+                info("Notification permissions granted")
+            } else {
+                warn("Notification permissions denied")
+                showSnackbar(getString(R.string.notification_denied))
+            }
         }
 
     data class TabInfo(val text: String, val icon: Int, val content: Fragment)
 
-    // private val tabIndexes = generateSequence(0) { it + 1 } FIXME, instead do withIndex or zip? to get the ids below, also stop duplicating strings
     private val tabInfos = arrayOf(
         TabInfo(
             "Messages",
@@ -160,119 +173,35 @@ class MainActivity : BaseActivity(), Logging {
         )
     )
 
-    private val tabsAdapter = object : FragmentStateAdapter(this) {
+    private val tabsAdapter = object : FragmentStateAdapter(supportFragmentManager, lifecycle) {
 
         override fun getItemCount(): Int = tabInfos.size
-
-        override fun createFragment(position: Int): Fragment {
-            // Return a NEW fragment instance in createFragment(int)
-            /*
-            fragment.arguments = Bundle().apply {
-                // Our object is just an integer :-P
-                putInt(ARG_OBJECT, position + 1)
-            } */
-            return tabInfos[position].content
-        }
-    }
-
-    /** Get the minimum permissions our app needs to run correctly
-     */
-    private fun getMinimumPermissions(): Array<String> {
-        val perms = mutableListOf<String>()
-
-        // We only need this for logging to capture files for the simulator - turn off for production
-        // perms.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-
-/*      TODO - wait for targetSdkVersion 31
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            perms.add(Manifest.permission.BLUETOOTH_SCAN)
-            perms.add(Manifest.permission.BLUETOOTH_CONNECT)
-        }
-*/
-        return getMissingPermissions(perms)
-    }
-
-    /** Possibly prompt user to grant permissions
-     * @param shouldShowDialog usually true, but in cases where we've already shown a dialog elsewhere we skip it.
-     *
-     * @return true if we already have the needed permissions
-     */
-    private fun requestPermission(
-        missingPerms: Array<String> = getMinimumPermissions(),
-        shouldShowDialog: Boolean = true
-    ): Boolean =
-        if (missingPerms.isNotEmpty()) {
-            val shouldShow = missingPerms.filter {
-                ActivityCompat.shouldShowRequestPermissionRationale(this, it)
-            }
-
-            fun doRequest() {
-                info("requesting permissions")
-                // Ask for all the missing perms
-                requestPermissionsLauncher.launch(missingPerms)
-            }
-
-            if (shouldShow.isNotEmpty() && shouldShowDialog) {
-                // DID_REQUEST_PERM is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-                warn("Permissions $shouldShow missing, we should show dialog")
-
-                MaterialAlertDialogBuilder(this)
-                    .setTitle(getString(R.string.required_permissions))
-                    .setMessage(getString(R.string.permission_missing_31))
-                    .setNeutralButton(R.string.cancel) { _, _ ->
-                        warn("User bailed due to permissions")
-                    }
-                    .setPositiveButton(R.string.accept) { _, _ ->
-                        doRequest()
-                    }
-                    .show()
-            } else {
-                info("Permissions $missingPerms missing, no need to show dialog, just asking OS")
-                doRequest()
-            }
-
-            false
-        } else {
-            // Permission has already been granted
-            debug("We have our required permissions")
-            true
-        }
-
-    /// Ask user to rate in play store
-    private fun askToRate() {
-        exceptionReporter { // we don't want to crash our app because of bugs in this optional feature
-            AppRating.Builder(this)
-                .setMinimumLaunchTimes(10) // default is 5, 3 means app is launched 3 or more times
-                .setMinimumDays(10) // default is 5, 0 means install day, 10 means app is launched 10 or more days later than installation
-                .setMinimumLaunchTimesToShowAgain(5) // default is 5, 1 means app is launched 1 or more times after neutral button clicked
-                .setMinimumDaysToShowAgain(14) // default is 14, 1 means app is launched 1 or more days after neutral button clicked
-                .showIfMeetsConditions()
-        }
-    }
-
-    private val isInTestLab: Boolean by lazy {
-        (application as GeeksvilleApplication).isInTestLab
+        override fun createFragment(position: Int): Fragment = tabInfos[position].content
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val preferences = getSharedPreferences("PREFERENCES", Context.MODE_PRIVATE)
-
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        if (!preferences.getBoolean("app_intro_completed", false)) {
-            startActivity(Intent(this, AppIntroduction::class.java))
+        if (savedInstanceState == null) {
+            val prefs = UIViewModel.getPreferences(this)
+            // First run: show AppIntroduction
+            if (!prefs.getBoolean("app_intro_completed", false)) {
+                startActivity(Intent(this, AppIntroduction::class.java))
+            }
+            // First run: migrate in-app language prefs to appcompat
+            val lang = prefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT)
+            if (lang != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(prefs)
+            info("in-app language is ${LanguageUtils.getLocale()}")
+            // Set theme
+            AppCompatDelegate.setDefaultNightMode(
+                prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+            )
+            // Ask user to rate in play store
+            (application as GeeksvilleApplication).askToRate(this)
         }
 
         binding = ActivityMainBinding.inflate(layoutInflater)
-
-        val prefs = UIViewModel.getPreferences(this)
-        model.setOwner(prefs.getString("owner", ""))
-
-        /// Set theme
-        setUITheme(prefs)
         setContentView(binding.root)
 
         initToolbar()
@@ -286,41 +215,23 @@ class MainActivity : BaseActivity(), Logging {
             tab.icon = ContextCompat.getDrawable(this, tabInfos[position].icon)
         }.attach()
 
-        model.connectionState.observe(this) { connected ->
-            updateConnectionStatusImage(connected)
-        }
-
         // Handle any intent
         handleIntent(intent)
-
-        if (isGooglePlayAvailable(this)) askToRate()
-
-        // if (!isInTestLab) - very important - even in test lab we must request permissions because we need location perms for some of our tests to pass
-        requestPermission()
     }
 
     private fun initToolbar() {
-        val toolbar =
-            findViewById<View>(R.id.toolbar) as Toolbar
+        val toolbar = binding.toolbar as Toolbar
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
     }
 
     private fun updateConnectionStatusImage(connected: MeshService.ConnectionState) {
-
-        if (model.actionBarMenu == null)
-            return
+        if (model.actionBarMenu == null) return
 
         val (image, tooltip) = when (connected) {
-            MeshService.ConnectionState.CONNECTED -> Pair(R.drawable.cloud_on, R.string.connected)
-            MeshService.ConnectionState.DEVICE_SLEEP -> Pair(
-                R.drawable.ic_twotone_cloud_upload_24,
-                R.string.device_sleeping
-            )
-            MeshService.ConnectionState.DISCONNECTED -> Pair(
-                R.drawable.cloud_off,
-                R.string.disconnected
-            )
+            MeshService.ConnectionState.CONNECTED -> R.drawable.cloud_on to R.string.connected
+            MeshService.ConnectionState.DEVICE_SLEEP -> R.drawable.ic_twotone_cloud_upload_24 to R.string.device_sleeping
+            MeshService.ConnectionState.DISCONNECTED -> R.drawable.cloud_off to R.string.disconnected
         }
 
         val item = model.actionBarMenu?.findItem(R.id.connectStatusImage)
@@ -357,7 +268,7 @@ class MainActivity : BaseActivity(), Logging {
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
-                val device: UsbDevice? = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE)
+                val device: UsbDevice? = intent.getParcelableExtraCompat(UsbManager.EXTRA_DEVICE)
                 if (device != null) {
                     debug("Handle USB device attached! $device")
                     usbDevice = device
@@ -389,37 +300,18 @@ class MainActivity : BaseActivity(), Logging {
     }
 
     override fun onDestroy() {
-        unregisterMeshReceiver()
         mainScope.cancel("Activity going away")
         super.onDestroy()
     }
 
-    private var receiverRegistered = false
-
-    private fun registerMeshReceiver() {
-        unregisterMeshReceiver()
-        val filter = IntentFilter()
-        filter.addAction(MeshService.ACTION_MESH_CONNECTED)
-        filter.addAction(MeshService.ACTION_NODE_CHANGE)
-        filter.addAction(MeshService.actionReceived(Portnums.PortNum.TEXT_MESSAGE_APP_VALUE))
-        filter.addAction((MeshService.ACTION_MESSAGE_STATUS))
-        registerReceiver(meshServiceReceiver, filter)
-        receiverRegistered = true
-    }
-
-    private fun unregisterMeshReceiver() {
-        if (receiverRegistered) {
-            receiverRegistered = false
-            unregisterReceiver(meshServiceReceiver)
-        }
-    }
-
     /** Show an alert that may contain HTML */
     private fun showAlert(titleText: Int, messageText: Int) {
+
         // make links clickable per https://stackoverflow.com/a/62642807
         // val messageStr = getText(messageText)
 
         val builder = MaterialAlertDialogBuilder(this)
+            .setCancelable(false)
             .setTitle(titleText)
             .setMessage(messageText)
             .setPositiveButton(R.string.okay) { _, _ ->
@@ -438,18 +330,10 @@ class MainActivity : BaseActivity(), Logging {
 
     /// Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(newConnection: MeshService.ConnectionState) {
-        val oldConnection = model.connectionState.value!!
-        debug("connchange $oldConnection -> $newConnection")
-
         if (newConnection == MeshService.ConnectionState.CONNECTED) {
-            model.meshService?.let { service ->
-
-                model.setConnectionState(newConnection)
-
-                debug("Getting latest DeviceConfig from service")
+            serviceRepository.meshService?.let { service ->
                 try {
                     val info: MyNodeInfo? = service.myNodeInfo // this can be null
-                    model.setMyNodeInfo(info)
 
                     if (info != null) {
                         val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
@@ -466,16 +350,6 @@ class MainActivity : BaseActivity(), Logging {
                                 else {
                                     // If our app is too old/new, we probably don't understand the new DeviceConfig messages, so we don't read them until here
 
-                                    // model.setLocalConfig(LocalOnlyProtos.LocalConfig.parseFrom(service.deviceConfig))
-
-                                    model.setChannels(
-                                        ChannelSet(
-                                            AppOnlyProtos.ChannelSet.parseFrom(
-                                                service.channels
-                                            )
-                                        )
-                                    )
-
                                     model.updateNodesFromDevice()
 
                                     // we have a connection to our device now, do the channel change
@@ -483,28 +357,33 @@ class MainActivity : BaseActivity(), Logging {
                                 }
                             }
                         }
+                    } else if (BluetoothInterface.invalidVersion) {
+                        showAlert(R.string.firmware_too_old, R.string.firmware_old)
                     }
                 } catch (ex: RemoteException) {
                     warn("Abandoning connect $ex, because we probably just lost device connection")
-                    model.setConnectionState(oldConnection)
                 }
                 // if provideLocation enabled: Start providing location (from phone GPS) to mesh
                 if (model.provideLocation.value == true)
                     service.startProvideLocation()
             }
-        } else {
-            // For other connection states, just slam them in
-            model.setConnectionState(newConnection)
+
+            if (!hasNotificationPermission()) {
+                val notificationPermissions = getNotificationPermissions()
+                rationaleDialog(
+                    shouldShowRequestPermissionRationale(notificationPermissions),
+                    R.string.notification_required,
+                    getString(R.string.why_notification_required),
+                ) {
+                    notificationPermissionsLauncher.launch(notificationPermissions)
+                }
+            }
         }
     }
 
     private fun showSnackbar(msgId: Int) {
         try {
-            Snackbar.make(
-                findViewById(android.R.id.content),
-                msgId,
-                Snackbar.LENGTH_LONG
-            ).show()
+            Snackbar.make(binding.root, msgId, Snackbar.LENGTH_LONG).show()
         } catch (ex: IllegalStateException) {
             errormsg("Snackbar couldn't find view for msgId $msgId")
         }
@@ -512,11 +391,7 @@ class MainActivity : BaseActivity(), Logging {
 
     private fun showSnackbar(msg: String) {
         try {
-            Snackbar.make(
-                findViewById(android.R.id.content),
-                msg,
-                Snackbar.LENGTH_INDEFINITE
-            )
+            Snackbar.make(binding.root, msg, Snackbar.LENGTH_INDEFINITE)
                 .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
                 .setAction(R.string.okay) {
                     // dismiss
@@ -532,7 +407,7 @@ class MainActivity : BaseActivity(), Logging {
         if (url != null && model.isConnected()) {
             requestedChannelUrl = null
             try {
-                val channels = ChannelSet(url)
+                val channels = url.toChannelSet()
                 val primary = channels.primaryChannel
                 if (primary == null)
                     showSnackbar(R.string.channel_invalid)
@@ -574,52 +449,6 @@ class MainActivity : BaseActivity(), Logging {
         }
     }
 
-    private val meshServiceReceiver = object : BroadcastReceiver() {
-
-        override fun onReceive(context: Context, intent: Intent) =
-            exceptionReporter {
-                debug("Received from mesh service $intent")
-
-                when (intent.action) {
-                    MeshService.ACTION_NODE_CHANGE -> {
-                        val info: NodeInfo =
-                            intent.getParcelableExtra(EXTRA_NODEINFO)!!
-                        debug("UI nodechange $info")
-
-                        // We only care about nodes that have user info
-                        info.user?.id?.let {
-                            val nodes = model.nodeDB.nodes.value!! + Pair(it, info)
-                            model.nodeDB.setNodes(nodes)
-                        }
-                    }
-
-                    MeshService.actionReceived(Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) -> {
-                        debug("received new message from service")
-                        val payload =
-                            intent.getParcelableExtra<DataPacket>(EXTRA_PAYLOAD)!!
-
-                        model.messagesState.addMessage(payload)
-                    }
-
-                    MeshService.ACTION_MESSAGE_STATUS -> {
-                        debug("received message status from service")
-                        val id = intent.getIntExtra(EXTRA_PACKET_ID, 0)
-                        val status = intent.getParcelableExtra<MessageStatus>(EXTRA_STATUS)!!
-
-                        model.messagesState.updateStatus(id, status)
-                    }
-
-                    MeshService.ACTION_MESH_CONNECTED -> {
-                        val extra = intent.getStringExtra(EXTRA_CONNECTED)
-                        if (extra != null) {
-                            onMeshConnectionChanged(MeshService.ConnectionState.valueOf(extra))
-                        }
-                    }
-                    else -> TODO()
-                }
-            }
-    }
-
     private var connectionJob: Job? = null
 
     private val mesh = object :
@@ -627,44 +456,8 @@ class MainActivity : BaseActivity(), Logging {
             IMeshService.Stub.asInterface(it)
         }) {
         override fun onConnected(service: IMeshService) {
-
-            /*
-                Note: we must call this callback in a coroutine.  Because apparently there is only a single activity looper thread.  and if that onConnected override
-                also tries to do a service operation we can deadlock.
-
-                Old buggy stack trace:
-
-                 at sun.misc.Unsafe.park (Unsafe.java)
-                - waiting on an unknown object
-                  at java.util.concurrent.locks.LockSupport.park (LockSupport.java:190)
-                  at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await (AbstractQueuedSynchronizer.java:2067)
-                  at com.geeksville.mesh.android.ServiceClient.waitConnect (ServiceClient.java:46)
-                  at com.geeksville.mesh.android.ServiceClient.getService (ServiceClient.java:27)
-                  at com.geeksville.mesh.service.MeshService$binder$1$setDeviceAddress$1.invoke (MeshService.java:1519)
-                  at com.geeksville.mesh.service.MeshService$binder$1$setDeviceAddress$1.invoke (MeshService.java:1514)
-                  at com.geeksville.mesh.util.ExceptionsKt.toRemoteExceptions (ExceptionsKt.java:56)
-                  at com.geeksville.mesh.service.MeshService$binder$1.setDeviceAddress (MeshService.java:1516)
-                  at com.geeksville.mesh.MainActivity$mesh$1$onConnected$1.invoke (MainActivity.java:743)
-                  at com.geeksville.mesh.MainActivity$mesh$1$onConnected$1.invoke (MainActivity.java:734)
-                  at com.geeksville.mesh.util.ExceptionsKt.exceptionReporter (ExceptionsKt.java:34)
-                  at com.geeksville.mesh.MainActivity$mesh$1.onConnected (MainActivity.java:738)
-                  at com.geeksville.mesh.MainActivity$mesh$1.onConnected (MainActivity.java:734)
-                  at com.geeksville.mesh.android.ServiceClient$connection$1$onServiceConnected$1.invoke (ServiceClient.java:89)
-                  at com.geeksville.mesh.android.ServiceClient$connection$1$onServiceConnected$1.invoke (ServiceClient.java:84)
-                  at com.geeksville.mesh.util.ExceptionsKt.exceptionReporter (ExceptionsKt.java:34)
-                  at com.geeksville.mesh.android.ServiceClient$connection$1.onServiceConnected (ServiceClient.java:85)
-                  at android.app.LoadedApk$ServiceDispatcher.doConnected (LoadedApk.java:2067)
-                  at android.app.LoadedApk$ServiceDispatcher$RunConnection.run (LoadedApk.java:2099)
-                  at android.os.Handler.handleCallback (Handler.java:883)
-                  at android.os.Handler.dispatchMessage (Handler.java:100)
-                  at android.os.Looper.loop (Looper.java:237)
-                  at android.app.ActivityThread.main (ActivityThread.java:8016)
-                  at java.lang.reflect.Method.invoke (Method.java)
-                  at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run (RuntimeInit.java:493)
-                  at com.android.internal.os.ZygoteInit.main (ZygoteInit.java:1076)
-                 */
             connectionJob = mainScope.handledLaunch {
-                model.meshService = service
+                serviceRepository.setMeshService(service)
 
                 try {
                     usbDevice?.let { usb ->
@@ -675,18 +468,6 @@ class MainActivity : BaseActivity(), Logging {
                             null // Only switch once - thereafter it should be stored in settings
                     }
 
-                    // We don't start listening for packets until after we are connected to the service
-                    registerMeshReceiver()
-
-                    // Init our messages table with the service's record of past text messages (ignore all other message types)
-                    val allMsgs = service.oldMessages
-                    val msgs =
-                        allMsgs.filter { p -> p.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE }
-
-                    model.setMyNodeInfo(service.myNodeInfo) // Note: this could be NULL!
-                    debug("Service provided ${msgs.size} messages and myNodeNum ${model.myNodeInfo.value?.myNodeNum}")
-
-                    model.messagesState.setMessages(msgs)
                     val connectionState =
                         MeshService.ConnectionState.valueOf(service.connectionState())
 
@@ -698,9 +479,7 @@ class MainActivity : BaseActivity(), Logging {
                     // We won't receive a notify for the initial state of connection, so we force an update here
                     onMeshConnectionChanged(connectionState)
                 } catch (ex: RemoteException) {
-                    // If we get an exception while reading our service config, the device might have gone away, double check to see if we are really connected
                     errormsg("Device error during init ${ex.message}")
-                    model.setConnectionState(MeshService.ConnectionState.valueOf(service.connectionState()))
                 } finally {
                     connectionJob = null
                 }
@@ -710,15 +489,14 @@ class MainActivity : BaseActivity(), Logging {
         }
 
         override fun onDisconnected() {
-            unregisterMeshReceiver()
-            model.meshService = null
+            serviceRepository.setMeshService(null)
         }
     }
 
     private fun bindMeshService() {
         debug("Binding to mesh service!")
         // we bind using the well known name, to make sure 3rd party apps could also
-        if (model.meshService != null) {
+        if (serviceRepository.meshService != null) {
             /* This problem can occur if we unbind, but there is already an onConnected job waiting to run.  That job runs and then makes meshService != null again
             I think I've fixed this by cancelling connectionJob.  We'll see!
              */
@@ -751,12 +529,16 @@ class MainActivity : BaseActivity(), Logging {
             job.cancel("unbinding")
         }
         mesh.close()
-        model.meshService = null
+        serviceRepository.setMeshService(null)
     }
 
     override fun onStop() {
-        unregisterMeshReceiver() // No point in receiving updates while the GUI is gone, we'll get them when the user launches the activity
         unbindMeshService()
+
+        model.connectionState.removeObservers(this)
+        bluetoothViewModel.enabled.removeObservers(this)
+        model.requestChannelUrl.removeObservers(this)
+        model.snackbarText.removeObservers(this)
 
         super.onStop()
     }
@@ -764,23 +546,40 @@ class MainActivity : BaseActivity(), Logging {
     override fun onStart() {
         super.onStart()
 
+        model.connectionState.observe(this) { state ->
+            onMeshConnectionChanged(state)
+            updateConnectionStatusImage(state)
+        }
+
         bluetoothViewModel.enabled.observe(this) { enabled ->
-            if (!enabled && !requestedEnable) {
-                if (!isInTestLab && scanModel.selectedBluetooth) {
-                    requestedEnable = true
+            if (!enabled && !requestedEnable && model.selectedBluetooth) {
+                requestedEnable = true
+                if (hasBluetoothPermission()) {
                     val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                     bleRequestEnable.launch(enableBtIntent)
+                } else {
+                    val bluetoothPermissions = getBluetoothPermissions()
+                    rationaleDialog(shouldShowRequestPermissionRationale(bluetoothPermissions)) {
+                        bluetoothPermissionsLauncher.launch(bluetoothPermissions)
+                    }
                 }
             }
         }
 
-        // Call perhapsChangeChannel() whenever [changeChannelUrl] updates with a non-null value
+        // Call perhapsChangeChannel() whenever [requestChannelUrl] updates with a non-null value
         model.requestChannelUrl.observe(this) { url ->
             url?.let {
                 requestedChannelUrl = url
                 model.clearRequestChannelUrl()
                 perhapsChangeChannel()
             }
+        }
+
+        // Call showSnackbar() whenever [snackbarText] updates with a non-null value
+        model.snackbarText.observe(this) { text ->
+            if (text is Int) showSnackbar(text)
+            if (text is String) showSnackbar(text)
+            if (text != null) model.clearSnackbarText()
         }
 
         try {
@@ -790,7 +589,7 @@ class MainActivity : BaseActivity(), Logging {
             errormsg("Bind of MeshService failed")
         }
 
-        val bonded = radioInterfaceService.getBondedDeviceAddress() != null
+        val bonded = model.bondedAddress != null
         if (!bonded && usbDevice == null) // we will handle USB later
             showSettingsPage()
     }
@@ -809,13 +608,14 @@ class MainActivity : BaseActivity(), Logging {
         return true
     }
 
-    val handler: Handler by lazy {
+    private val handler: Handler by lazy {
         Handler(Looper.getMainLooper())
     }
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         menu.findItem(R.id.stress_test).isVisible =
             BuildConfig.DEBUG // only show stress test for debug builds (for now)
+        menu.findItem(R.id.radio_config).isEnabled = !model.isManaged
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -847,7 +647,7 @@ class MainActivity : BaseActivity(), Logging {
                     debug("Sending ping")
                     val str = "Ping " + DateFormat.getTimeInstance(DateFormat.MEDIUM)
                         .format(Date(System.currentTimeMillis()))
-                    model.messagesState.sendMessage(str)
+                    model.sendMessage(str)
                     handler.postDelayed({ postPing() }, 30000)
                 }
                 item.isChecked = !item.isChecked // toggle ping test
@@ -857,13 +657,12 @@ class MainActivity : BaseActivity(), Logging {
                     handler.removeCallbacksAndMessages(null)
                 return true
             }
-            R.id.advanced_settings -> {
-                val fragmentManager: FragmentManager = supportFragmentManager
-                val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-                val nameFragment = AdvancedSettingsFragment()
-                fragmentTransaction.add(R.id.mainActivityLayout, nameFragment)
-                fragmentTransaction.addToBackStack(null)
-                fragmentTransaction.commit()
+            R.id.radio_config -> {
+                model.setDestNode(null)
+                supportFragmentManager.beginTransaction()
+                    .add(R.id.mainActivityLayout, DeviceSettingsFragment())
+                    .addToBackStack(null)
+                    .commit()
                 return true
             }
             R.id.save_messages_csv -> {
@@ -902,7 +701,7 @@ class MainActivity : BaseActivity(), Logging {
 
     private fun getVersionInfo() {
         try {
-            val packageInfo: PackageInfo = packageManager.getPackageInfo(packageName, 0)
+            val packageInfo: PackageInfo = packageManager.getPackageInfoCompat(packageName, 0)
             val versionName = packageInfo.versionName
             Toast.makeText(this, versionName, Toast.LENGTH_LONG).show()
         } catch (e: PackageManager.NameNotFoundException) {
@@ -916,97 +715,52 @@ class MainActivity : BaseActivity(), Logging {
 
         /// Prepare dialog and its items
         val builder = MaterialAlertDialogBuilder(this)
-        builder.setTitle(getString(R.string.choose_theme_title))
+        builder.setTitle(getString(R.string.choose_theme))
 
-        val styles = arrayOf(
-            getString(R.string.theme_light),
-            getString(R.string.theme_dark),
-            getString(R.string.theme_system)
+        val styles = mapOf(
+            getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
+            getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
+            getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         )
 
         /// Load preferences and its value
         val prefs = UIViewModel.getPreferences(this)
-        val editor: SharedPreferences.Editor = prefs.edit()
-        val checkedItem = prefs.getInt("theme", 2)
+        val theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        debug("Theme from prefs: $theme")
 
-        builder.setSingleChoiceItems(styles, checkedItem) { dialog, which ->
-
-            when (which) {
-                0 -> {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                    editor.putInt("theme", 0)
-                    editor.apply()
-
-                    delegate.applyDayNight()
-                    dialog.dismiss()
-                }
-                1 -> {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                    editor.putInt("theme", 1)
-                    editor.apply()
-
-                    delegate.applyDayNight()
-                    dialog.dismiss()
-                }
-                2 -> {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                    editor.putInt("theme", 2)
-                    editor.apply()
-
-                    delegate.applyDayNight()
-                    dialog.dismiss()
-                }
-
-            }
+        builder.setSingleChoiceItems(
+            styles.keys.toTypedArray(),
+            styles.values.indexOf(theme)
+        ) { dialog, position ->
+            val selectedTheme = styles.values.elementAt(position)
+            debug("Set theme pref to $selectedTheme")
+            prefs.edit().putInt("theme", selectedTheme).apply()
+            AppCompatDelegate.setDefaultNightMode(selectedTheme)
+            dialog.dismiss()
         }
 
         val dialog = builder.create()
         dialog.show()
     }
 
-    private fun setUITheme(prefs: SharedPreferences) {
-        /// Read theme settings from preferences and set it
-        /// If nothing is found set FOLLOW SYSTEM option
-
-        when (prefs.getInt("theme", 2)) {
-            0 -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                delegate.applyDayNight()
-            }
-            1 -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                delegate.applyDayNight()
-            }
-            2 -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-                delegate.applyDayNight()
-            }
-        }
-    }
-
     private fun chooseLangDialog() {
-
         /// Prepare dialog and its items
         val builder = MaterialAlertDialogBuilder(this)
         builder.setTitle(getString(R.string.preferences_language))
 
-        val languageLabels by lazy { resources.getStringArray(R.array.language_entries) }
-        val languageValues by lazy { resources.getStringArray(R.array.language_values) }
+        val languageTags = LanguageUtils.getLanguageTags(this)
 
         /// Load preferences and its value
-        val prefs = UIViewModel.getPreferences(this)
-        val editor: SharedPreferences.Editor = prefs.edit()
-        val lang = prefs.getString("lang", "zz")
+        val lang = LanguageUtils.getLocale()
         debug("Lang from prefs: $lang")
 
         builder.setSingleChoiceItems(
-            languageLabels,
-            languageValues.indexOf(lang)
-        ) { dialog, which ->
-            val selectedLang = languageValues[which]
+            languageTags.keys.toTypedArray(),
+            languageTags.values.indexOf(lang)
+        ) { dialog, position ->
+            val selectedLang = languageTags.values.elementAt(position)
             debug("Set lang pref to $selectedLang")
-            editor.putString("lang", selectedLang)
-            editor.apply()
+            LanguageUtils.setLocale(selectedLang)
             dialog.dismiss()
         }
         val dialog = builder.create()

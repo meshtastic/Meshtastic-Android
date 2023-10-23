@@ -3,78 +3,70 @@ package com.geeksville.mesh.model
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Base64
-import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.AppOnlyProtos
+import com.geeksville.mesh.AppOnlyProtos.ChannelSet
+import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import java.net.MalformedURLException
+import kotlin.jvm.Throws
 
-data class ChannelSet(
-    val protobuf: AppOnlyProtos.ChannelSet = AppOnlyProtos.ChannelSet.getDefaultInstance()
-) : Logging {
-    companion object {
+internal const val URL_PREFIX = "https://meshtastic.org/e/#"
+private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
 
-        const val prefix = "https://www.meshtastic.org/e/#"
+/**
+ * Return a [ChannelSet] that represents the URL
+ * @throws MalformedURLException when not recognized as a valid Meshtastic URL
+ */
+@Throws(MalformedURLException::class)
+fun Uri.toChannelSet(): ChannelSet {
+    val urlStr = this.toString()
 
-        private const val base64Flags = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
+    val pathRegex = Regex("$URL_PREFIX(.*)", RegexOption.IGNORE_CASE)
+    val (base64) = pathRegex.find(urlStr)?.destructured
+        ?: throw MalformedURLException("Not a Meshtastic URL: ${urlStr.take(40)}")
+    val bytes = Base64.decode(base64, BASE64FLAGS)
 
-        private fun urlToChannels(url: Uri): AppOnlyProtos.ChannelSet {
-            val urlStr = url.toString()
-
-            val pathRegex = Regex("$prefix(.*)", RegexOption.IGNORE_CASE)
-            val (base64) = pathRegex.find(urlStr)?.destructured
-                ?: throw MalformedURLException("Not a meshtastic URL: ${urlStr.take(40)}")
-            val bytes = Base64.decode(base64, base64Flags)
-
-            return AppOnlyProtos.ChannelSet.parseFrom(bytes)
-        }
-    }
-
-    constructor(url: Uri) : this(urlToChannels(url))
-
-    /// Can this channel be changed right now?
-    var editable = false
-
-    /**
-     * Return the primary channel info
-     */
-    val primaryChannel: Channel?
-        get() =
-            if (protobuf.settingsCount > 0)
-                Channel(protobuf.getSettings(0), protobuf.loraConfig)
-            else
-                null
-
-    /// Return an URL that represents the current channel values
-    /// @param upperCasePrefix - portions of the URL can be upper case to make for more efficient QR codes
-    fun getChannelUrl(upperCasePrefix: Boolean = false): Uri {
-        // If we have a valid radio config use it, otherwise use whatever we have saved in the prefs
-
-        val channelBytes = protobuf.toByteArray() ?: ByteArray(0) // if unset just use empty
-        val enc = Base64.encodeToString(channelBytes, base64Flags)
-
-        val p = if (upperCasePrefix) prefix.uppercase() else prefix
-        return Uri.parse("$p$enc")
-    }
-
-    val qrCode
-        get(): Bitmap? = try {
-            val multiFormatWriter = MultiFormatWriter()
-
-            // We encode as UPPER case for the QR code URL because QR codes are more efficient for that special case
-            val bitMatrix =
-                multiFormatWriter.encode(
-                    getChannelUrl(true).toString(),
-                    BarcodeFormat.QR_CODE,
-                    192,
-                    192
-                )
-            val barcodeEncoder = BarcodeEncoder()
-            barcodeEncoder.createBitmap(bitMatrix)
-        } catch (ex: Throwable) {
-            errormsg("URL was too complex to render as barcode")
-            null
-        }
+    return ChannelSet.parseFrom(bytes)
 }
 
+/**
+ * @return A list of globally unique channel IDs usable with MQTT subscribe()
+ */
+val ChannelSet.subscribeList: List<String>
+    get() = settingsList.filter { it.downlinkEnabled }.map { Channel(it, loraConfig).name }
+
+/**
+ * Return the primary channel info
+ */
+val ChannelSet.primaryChannel: Channel?
+    get() = if (settingsCount > 0) Channel(getSettings(0), loraConfig) else null
+
+/**
+ * Return a URL that represents the [ChannelSet]
+ * @param upperCasePrefix portions of the URL can be upper case to make for more efficient QR codes
+ */
+fun ChannelSet.getChannelUrl(upperCasePrefix: Boolean = false): Uri {
+    val channelBytes = this.toByteArray() ?: ByteArray(0) // if unset just use empty
+    val enc = Base64.encodeToString(channelBytes, BASE64FLAGS)
+    val p = if (upperCasePrefix) URL_PREFIX.uppercase() else URL_PREFIX
+    return Uri.parse("$p$enc")
+}
+
+val ChannelSet.qrCode: Bitmap?
+    get() = try {
+        val multiFormatWriter = MultiFormatWriter()
+
+        val bitMatrix =
+            multiFormatWriter.encode(
+                getChannelUrl(false).toString(),
+                BarcodeFormat.QR_CODE,
+                960,
+                960
+            )
+        val barcodeEncoder = BarcodeEncoder()
+        barcodeEncoder.createBitmap(bitMatrix)
+    } catch (ex: Throwable) {
+        errormsg("URL was too complex to render as barcode")
+        null
+    }

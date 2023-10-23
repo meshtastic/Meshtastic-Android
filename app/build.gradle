@@ -1,20 +1,13 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-parcelize'
-apply plugin: 'kotlinx-serialization'
-apply plugin: 'dagger.hilt.android.plugin'
-apply plugin: 'com.github.triplet.play'
-apply plugin: 'de.mobilej.unmock'
-// apply plugin: "app.brant.amazonappstorepublisher"
-
-// Firebase Crashlytics
-apply plugin: 'com.google.gms.google-services'
-apply plugin: 'com.google.firebase.crashlytics'
-
-// protobuf
-apply plugin: 'com.google.protobuf'
-
-apply plugin: 'kotlin-kapt'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-parcelize'
+    id 'kotlinx-serialization'
+    id 'com.google.dagger.hilt.android'
+    id 'de.mobilej.unmock'
+    id 'com.google.protobuf'
+    id "com.google.devtools.ksp"
+}
 
 unMock {
     keep "android.net.Uri"
@@ -28,6 +21,8 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
+    namespace 'com.geeksville.mesh'
+
     signingConfigs {
         release {
             keyAlias keystoreProperties['keyAlias']
@@ -36,18 +31,31 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
-    compileSdkVersion 32
-    // leave undefined to use version plugin wants
+    compileSdk 34
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
-        targetSdkVersion 30
-        versionCode 20340 // format is Mmmss (where M is 1+the numeric major number
-        versionName "1.3.40"
+        targetSdk 33
+        versionCode 30212 // format is Mmmss (where M is 1+the numeric major number
+        versionName "2.2.12"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
         vectorDrawables.useSupportLibrary = true
+    }
+    flavorDimensions = ['default']
+    productFlavors {
+        fdroid {
+            dimension = 'default'
+        }
+        google {
+            dimension = 'default'
+            if (project.findProperty("useCrashlytics") == true) {
+                println("useCrashlytics plugins $useCrashlytics")
+                apply plugin: 'com.google.gms.google-services'
+                apply plugin: 'com.google.firebase.crashlytics'
+            }
+        }
     }
     buildTypes {
         release {
@@ -62,49 +70,47 @@ android {
             pseudoLocalesEnabled true
         }
     }
-
     defaultConfig {
         // We have to list all translated languages here, because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
-        resConfigs "cs", "de", "el", "en", "es", "fi", "fr", "ga", "ht", "it", "ja", "ko-rKR", "nl", "no", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sq", "sv", "tr", "zh"
+        resConfigs "bg", "cs", "de", "el", "en", "es", "fi", "fr", "fr-rHT", "ga", "hu", "is", "it", "ja", "ko", "nl", "nb", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sq", "sv", "tr", "zh", "uk"
 
         ndk {
             // abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
         }
     }
-
+    bundle {
+        language {
+            enableSplit false
+        }
+    }
     buildFeatures {
         viewBinding true
+        compose true
+        aidl true
     }
-
-    // Set both the Java and Kotlin compilers to target Java 8.
-
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.3"
+    }
+    // Configure the build-logic plugins to target JDK 17
+    // This matches the JDK used to build the project, and is not related to what is running on device.
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
-
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = JavaVersion.VERSION_17.toString()
         freeCompilerArgs += ['-opt-in=kotlin.RequiresOptIn']
     }
     lint {
         abortOnError false
     }
-
-}
-
-play {
-    // configure per https://github.com/Triple-T/gradle-play-publisher#authenticating-gradle-play-publisher
-    track = 'internal'
-    defaultToAppBundles = true
-    serviceAccountCredentials = file("../../play-credentials.json")
 }
 
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
     protoc {
-        artifact = 'com.google.protobuf:protoc:3.21.1'
+        artifact = "com.google.protobuf:protoc:$protobuf_version"
     }
     generateProtoTasks {
         all().each { task ->
@@ -114,6 +120,8 @@ protobuf {
                     // use the smaller android version of the library
                     //option "lite"
                 }
+                kotlin {
+                }
             }
         }
     }
@@ -122,55 +130,107 @@ protobuf {
 dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.5.0'
-    implementation 'androidx.core:core-ktx:1.8.0'
-    implementation 'androidx.fragment:fragment-ktx:1.5.2'
+    def appcompat_version = '1.6.1'
+    implementation "androidx.appcompat:appcompat:$appcompat_version"
+    // For loading and tinting drawables on older versions of the platform
+    implementation "androidx.appcompat:appcompat-resources:$appcompat_version"
+    implementation "androidx.emoji2:emoji2-emojipicker:1.4.0"
+
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.fragment:fragment-ktx:1.6.1'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.recyclerview:recyclerview:1.3.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'com.google.android.material:material:1.10.0'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
-    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
+    implementation 'androidx.datastore:datastore:1.0.0'
+
+    // Lifecycle
+    def lifecycle_version = '2.6.2'
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-process:$lifecycle_version"
+
+    // Room
+    def room_version = '2.6.0'
     implementation "androidx.room:room-runtime:$room_version"
-    implementation "com.google.dagger:hilt-android:$hilt_version"
-    implementation "androidx.datastore:datastore:$datastore_version"
-    kapt "androidx.room:room-compiler:$room_version"
-    kapt "com.google.dagger:hilt-compiler:$hilt_version"
-
-    //OSMAND
-    implementation 'org.osmdroid:osmdroid-android:6.1.14'
-    implementation 'mil.nga:mgrs:2.0.0'
-
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    ksp "androidx.room:room-compiler:$room_version"
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:$room_version"
-
     // optional - Test helpers
     testImplementation "androidx.room:room-testing:$room_version"
+
+    // Hilt
+    implementation "com.google.dagger:hilt-android:$hilt_version"
+    implementation "androidx.hilt:hilt-navigation-compose:1.0.0"
+    ksp "com.google.dagger:hilt-compiler:$hilt_version"
+
+    // Navigation
+    def nav_version = "2.7.4"
+    implementation "androidx.navigation:navigation-compose:$nav_version"
+    androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
+
+    // Compose
+    def composeBom = platform('androidx.compose:compose-bom:2023.10.01')
+    implementation composeBom
+    androidTestImplementation composeBom
+
+    implementation 'androidx.compose.material:material'
+    implementation 'androidx.activity:activity-compose'
+    implementation 'androidx.compose.runtime:runtime-livedata'
+    implementation "com.google.accompanist:accompanist-themeadapter-appcompat:0.32.0"
+
+    // Android Studio Preview support
+    implementation 'androidx.compose.ui:ui-tooling-preview'
+    debugImplementation 'androidx.compose.ui:ui-tooling'
+
+    // UI Tests
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
+    debugImplementation 'androidx.compose.ui:ui-test-manifest'
+
+    // Osmdroid & Maps
+    def osmdroid_version = '6.1.14'
+    implementation "org.osmdroid:osmdroid-android:$osmdroid_version"
+    implementation "org.osmdroid:osmdroid-wms:$osmdroid_version"
+    implementation("org.osmdroid:osmdroid-geopackage:$osmdroid_version") {
+        exclude group: 'com.j256.ormlite'
+    }
+    implementation 'com.github.MKergall:osmbonuspack:6.9.0'
+    implementation('mil.nga.mgrs:mgrs-android:2.2.2') { exclude group: 'com.google.android.gms' }
+
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
     // kotlin serialization
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:1.0-M1-1.4.0-rc"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0"
 
     // rate this app
-    implementation 'com.suddenh4x.ratingdialog:awesome-app-rating:2.4.0'
+    googleImplementation 'com.suddenh4x.ratingdialog:awesome-app-rating:2.7.0'
 
     // Coroutines
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
+    def coroutines_version = '1.7.3'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-guava:$coroutines_version"
 
     // For now I'm not using javalite, because I want JSON printing
-    implementation 'com.google.protobuf:protobuf-java:3.21.1'
+    implementation "com.google.protobuf:protobuf-kotlin:$protobuf_version"
 
     // For UART access
-    // implementation 'com.google.android.things:androidthings:1.0'
-    implementation 'com.github.mik3y:usb-serial-for-android:3.4.6'
+    implementation 'com.github.mik3y:usb-serial-for-android:3.7.0'
 
-    // Add the Firebase SDK for Crashlytics.
-    implementation 'com.google.firebase:firebase-crashlytics:18.2.6'
-    implementation 'com.google.firebase:firebase-analytics:20.1.0'
+    // location services
+    googleImplementation 'com.google.android.gms:play-services-location:21.0.1'
+
+    // For Firebase Crashlytics & Analytics
+    googleImplementation platform('com.google.firebase:firebase-bom:32.4.0')
+    googleImplementation 'com.google.firebase:firebase-crashlytics-ktx'
+    googleImplementation 'com.google.firebase:firebase-analytics-ktx'
 
     // barcode support
     // per https://github.com/journeyapps/zxing-android-embedded#older-sdk-versions for minSdkVersion 21
@@ -178,18 +238,25 @@ dependencies {
     //noinspection GradleDependency
     implementation 'com.google.zxing:core:3.3.0' // <-- don't update
 
-    def work_version = '2.7.1'
+    def work_version = '2.8.1'
     // Work Request - used to delay boot event handling
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
-    implementation "androidx.core:core-splashscreen:1.0.0-beta02"
+    implementation "androidx.core:core-splashscreen:1.0.1"
+
+    // CompletableFuture backport for API 14+
+    implementation 'net.sourceforge.streamsupport:streamsupport-minifuture:1.7.4'
 
     // App intro
-    implementation 'com.github.AppIntro:AppIntro:6.2.0'
+    implementation 'com.github.AppIntro:AppIntro:6.3.1'
+
+    // MQTT
+    implementation "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5"
 }
 
-kapt {
-    correctErrorTypes true
+ksp {
+//    arg("room.generateKotlin", "true")
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 repositories {

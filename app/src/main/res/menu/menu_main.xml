@@ -17,9 +17,9 @@
         android:checked="false"
         android:title="@string/protocol_stress_test" />
     <item
-        android:id="@+id/advanced_settings"
+        android:id="@+id/radio_config"
         app:showAsAction="withText"
-        android:title="@string/advanced_settings" />
+        android:title="@string/device_settings" />
     <item
         android:id="@+id/save_messages_csv"
         app:showAsAction="withText"
@@ -34,11 +34,11 @@
         app:showAsAction="withText" />
     <item
         android:id="@+id/show_intro"
-        android:title="@string/show_intro"
+        android:title="@string/intro_show"
         app:showAsAction="withText" />
     <item
         android:id="@+id/preferences_quick_chat"
-        android:title="Quick chat options"
+        android:title="@string/quick_chat"
         app:showAsAction="withText" />
     <item
         android:id="@+id/about"
