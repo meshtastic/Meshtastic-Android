@@ -1839,7 +1839,7 @@ class MeshService : Service(), Logging {
         }
 
         override fun requestTraceroute(requestId: Int, destNum: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(id = requestId) {
+            sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(wantAck = true, id = requestId) {
                 portnumValue = Portnums.PortNum.TRACEROUTE_APP_VALUE
                 payload = routeDiscovery {}.toByteString()
                 wantResponse = true
