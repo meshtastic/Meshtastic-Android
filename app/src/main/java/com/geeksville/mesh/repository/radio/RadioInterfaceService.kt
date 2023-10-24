@@ -6,14 +6,13 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
+import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.android.BinaryLogFile
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.nsd.NsdRepository
-import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.ignoreException
 import com.geeksville.mesh.util.toRemoteExceptions
@@ -45,8 +44,9 @@ class RadioInterfaceService @Inject constructor(
     bluetoothRepository: BluetoothRepository,
     nsdRepository: NsdRepository,
     private val processLifecycle: Lifecycle,
-    private val usbRepository: UsbRepository,
-    @RadioRepositoryQualifier private val prefs: SharedPreferences
+    @RadioRepositoryQualifier private val prefs: SharedPreferences,
+    private val interfaceFactory: InterfaceFactory,
+    private val mockInterfaceSpec: MockInterfaceSpec
 ) : Logging {
 
     private val _connectionState = MutableStateFlow(RadioServiceConnectionState())
@@ -72,12 +72,16 @@ class RadioInterfaceService @Inject constructor(
     private lateinit var sentPacketsLog: BinaryLogFile // inited in onCreate
     private lateinit var receivedPacketsLog: BinaryLogFile
 
+    val mockInterfaceAddress: String by lazy {
+        toInterfaceAddress(InterfaceId.MOCK, "")
+    }
+
     /**
      * We recreate this scope each time we stop an interface
      */
     var serviceScope = CoroutineScope(Dispatchers.IO + Job())
 
-    private var radioIf: IRadioInterface = NopInterface()
+    private var radioIf: IRadioInterface = NopInterface("")
 
     /** true if we have started our interface
      *
@@ -102,18 +106,17 @@ class RadioInterfaceService @Inject constructor(
 
     companion object : Logging {
         const val DEVADDR_KEY = "devAddr2" // the new name for devaddr
+    }
 
-        init {
-            /// We keep this var alive so that the following factory objects get created and not stripped during the android build
-            val factories = arrayOf<InterfaceFactory>(
-                BluetoothInterface,
-                SerialInterface,
-                TCPInterface,
-                MockInterface,
-                NopInterface
-            )
-            info("Using ${factories.size} interface factories")
-        }
+    /**
+     * Constructs a full radio address for the specific interface type.
+     */
+    fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String {
+        return interfaceFactory.toInterfaceAddress(interfaceId, rest)
+    }
+
+    fun isAddressValid(address: String?): Boolean {
+        return interfaceFactory.addressValid(address)
     }
 
     /** Return the device we are configured to use, or null for none
@@ -129,8 +132,8 @@ class RadioInterfaceService @Inject constructor(
         var address = prefs.getString(DEVADDR_KEY, null)
 
         // If we are running on the emulator we default to the mock interface, so we can have some data to show to the user
-        if (address == null && MockInterface.addressValid(context, usbRepository, ""))
-            address = MockInterface.prefix.toString()
+        if (address == null && mockInterfaceSpec.addressValid(""))
+            address = "${InterfaceId.MOCK.id}"
 
         return address
     }
@@ -146,17 +149,11 @@ class RadioInterfaceService @Inject constructor(
     fun getBondedDeviceAddress(): String? {
         // If the user has unpaired our device, treat things as if we don't have one
         val address = getDeviceAddress()
-
-        /// Interfaces can filter addresses to indicate that address is no longer acceptable
-        if (address != null) {
-            val c = address[0]
-            val rest = address.substring(1)
-            val isValid = InterfaceFactory.getFactory(c)
-                ?.addressValid(context, usbRepository, rest) ?: false
-            if (!isValid)
-                return null
+        return if (interfaceFactory.addressValid(address)) {
+            address
+        } else {
+            null
         }
-        return address
     }
 
     private fun broadcastConnectionChanged(isConnected: Boolean, isPermanent: Boolean) {
@@ -219,10 +216,7 @@ class RadioInterfaceService @Inject constructor(
                 if (logReceives)
                     receivedPacketsLog = BinaryLogFile(context, "receive_log.pb")
 
-                val c = address[0]
-                val rest = address.substring(1)
-                radioIf =
-                    InterfaceFactory.getFactory(c)?.createInterface(context, this, usbRepository, rest) ?: NopInterface()
+                radioIf = interfaceFactory.createInterface(address)
             }
         }
     }
@@ -231,7 +225,7 @@ class RadioInterfaceService @Inject constructor(
         val r = radioIf
         info("stopping interface $r")
         isStarted = false
-        radioIf = NopInterface()
+        radioIf = interfaceFactory.nopInterface
         r.close()
 
         // cancel any old jobs and get ready for the new ones

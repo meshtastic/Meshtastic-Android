@@ -1,10 +1,10 @@
 package com.geeksville.mesh.repository.radio
 
-import android.content.Context
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.util.Exceptions
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -16,21 +16,12 @@ import java.net.InetAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
 
-class TCPInterface(service: RadioInterfaceService, private val address: String) :
-    StreamInterface(service) {
+class TCPInterface @AssistedInject constructor(
+    service: RadioInterfaceService,
+    @Assisted private val address: String,
+) : StreamInterface(service), Logging {
 
-    companion object : Logging, InterfaceFactory('t') {
-        override fun createInterface(
-            context: Context,
-            service: RadioInterfaceService,
-            usbRepository: UsbRepository, // Temporary until dependency injection transition is completed
-            rest: String
-        ): IRadioInterface = TCPInterface(service, rest)
-
-        init {
-            registerFactory()
-        }
-
+    companion object {
         const val MAX_RETRIES_ALLOWED = Int.MAX_VALUE
         const val MIN_BACKOFF_MILLIS = 1 * 1000L // 1 second
         const val MAX_BACKOFF_MILLIS = 5 * 60 * 1000L // 5 minutes

@@ -1,23 +1,9 @@
 package com.geeksville.mesh.repository.radio
 
-import android.content.Context
-import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.repository.usb.UsbRepository
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 
-class NopInterface : IRadioInterface {
-    companion object : Logging, InterfaceFactory('n') {
-        override fun createInterface(
-            context: Context,
-            service: RadioInterfaceService,
-            usbRepository: UsbRepository, // Temporary until dependency injection transition is completed
-            rest: String
-        ): IRadioInterface = NopInterface()
-
-        init {
-            registerFactory()
-        }
-    }
-
+class NopInterface @AssistedInject constructor(@Assisted val address: String) : IRadioInterface {
     override fun handleSendToRadio(p: ByteArray) {
     }
 

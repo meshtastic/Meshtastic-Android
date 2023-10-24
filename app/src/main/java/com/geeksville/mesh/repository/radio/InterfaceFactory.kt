@@ -1,24 +1,41 @@
 package com.geeksville.mesh.repository.radio
 
-import android.content.Context
-import com.geeksville.mesh.repository.usb.UsbRepository
+import javax.inject.Inject
+import javax.inject.Provider
 
 /**
- * A base class for the singleton factories that make interfaces.  One instance per interface type
+ * Entry point for create radio backend instances given a specific address.
+ *
+ * This class is responsible for building and dissecting radio addresses based upon
+ * their interface type and the "rest" of the address (which varies per implementation).
  */
-abstract class InterfaceFactory(val prefix: Char) {
-    companion object {
-        private val factories = mutableMapOf<Char, InterfaceFactory>()
-
-        fun getFactory(l: Char) = factories.get(l)
+class InterfaceFactory @Inject constructor(
+    private val nopInterfaceFactory: NopInterfaceFactory,
+    private val specMap: Map<InterfaceId, @JvmSuppressWildcards Provider<InterfaceSpec<*>>>
+)  {
+    internal val nopInterface by lazy {
+        nopInterfaceFactory.create("")
     }
 
-    protected fun registerFactory() {
-        factories[prefix] = this
+    fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String {
+        return "${interfaceId.id}$rest"
     }
 
-    abstract fun createInterface(context: Context, service: RadioInterfaceService, usbRepository: UsbRepository, rest: String): IRadioInterface
+    fun createInterface(address: String): IRadioInterface {
+        val (spec, rest) = splitAddress(address)
+        return spec?.createInterface(rest) ?: nopInterface
+    }
 
-    /** Return true if this address is still acceptable. For BLE that means, still bonded */
-    open fun addressValid(context: Context, usbRepository: UsbRepository, rest: String): Boolean = true
+    fun addressValid(address: String?): Boolean {
+        return address?.let {
+            val (spec, rest) = splitAddress(it)
+            spec?.addressValid(rest)
+        } ?: false
+    }
+
+    private fun splitAddress(address: String): Pair<InterfaceSpec<*>?, String> {
+        val c = address[0].let { InterfaceId.forIdChar(it) }?.let { specMap[it]?.get() }
+        val rest = address.substring(1)
+        return Pair(c, rest)
+    }
 }

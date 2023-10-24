@@ -38,7 +38,8 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.primaryChannel
 import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.repository.radio.BluetoothInterface
-import com.geeksville.mesh.repository.radio.SerialInterface
+import com.geeksville.mesh.repository.radio.InterfaceId
+import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
 import com.geeksville.mesh.ui.map.MapFragment
@@ -120,6 +121,9 @@ class MainActivity : AppCompatActivity(), Logging {
 
     @Inject
     internal lateinit var serviceRepository: ServiceRepository
+
+    @Inject
+    internal lateinit var radioInterfaceService: RadioInterfaceService
 
     private val bluetoothPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
@@ -462,9 +466,9 @@ class MainActivity : AppCompatActivity(), Logging {
                 try {
                     usbDevice?.let { usb ->
                         debug("Switching to USB radio ${usb.deviceName}")
-                        service.setDeviceAddress(SerialInterface.toInterfaceName(usb.deviceName))
-                        usbDevice =
-                            null // Only switch once - thereafter it should be stored in settings
+                        val address = radioInterfaceService.toInterfaceAddress(InterfaceId.SERIAL, usb.deviceName)
+                        service.setDeviceAddress(address)
+                        usbDevice = null // Only switch once - thereafter it should be stored in settings
                     }
 
                     val connectionState =

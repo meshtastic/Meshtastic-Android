@@ -20,9 +20,8 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.android.*
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.nsd.NsdRepository
-import com.geeksville.mesh.repository.radio.MockInterface
+import com.geeksville.mesh.repository.radio.InterfaceId
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.geeksville.mesh.repository.radio.SerialInterface
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.util.anonymize
 import com.hoho.android.usbserial.driver.UsbSerialDriver
@@ -83,10 +82,14 @@ class BTScanModel @Inject constructor(
         device.bondState == BluetoothDevice.BOND_BONDED
     )
 
-    class USBDeviceListEntry(usbManager: UsbManager, val usb: UsbSerialDriver) : DeviceListEntry(
+    class USBDeviceListEntry(
+        radioInterfaceService: RadioInterfaceService,
+        usbManager: UsbManager,
+        val usb: UsbSerialDriver,
+    ) : DeviceListEntry(
         usb.device.deviceName,
-        SerialInterface.toInterfaceName(usb.device.deviceName),
-        SerialInterface.assumePermission || usbManager.hasPermission(usb.device)
+        radioInterfaceService.toInterfaceAddress(InterfaceId.SERIAL, usb.device.deviceName),
+        usbManager.hasPermission(usb.device),
     )
 
     class TCPDeviceListEntry(val service: NsdServiceInfo) : DeviceListEntry(
@@ -177,7 +180,7 @@ class BTScanModel @Inject constructor(
     private fun setupScan(): Boolean {
         selectedAddress = radioInterfaceService.getDeviceAddress()
 
-        return if (MockInterface.addressValid(context, usbRepository, "")) {
+        return if (radioInterfaceService.isAddressValid(radioInterfaceService.mockInterfaceAddress)) {
             warn("Running under emulator/test lab")
 
             val testnodes = listOf(
@@ -215,7 +218,7 @@ class BTScanModel @Inject constructor(
                 }
 
                 usbDevices.value?.forEach { (_, d) ->
-                    addDevice(USBDeviceListEntry(context.usbManager, d))
+                    addDevice(USBDeviceListEntry(radioInterfaceService, context.usbManager, d))
                 }
 
                 devices.value = newDevs
