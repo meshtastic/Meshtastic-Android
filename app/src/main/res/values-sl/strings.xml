@@ -21,7 +21,7 @@
     <string name="new_channel_rcvd">Prejet je bil novi URL kanala</string>
     <string name="do_you_want_switch">Ali želite preklopiti na kanal \'%s\' ?</string>
     <string name="permission_missing">Manjka zahtevano dovoljenje: Meshtastic ne bo mogel pravilno delovati. Omogočite v nastavitvah aplikacije za Android.</string>
-    <string name="radio_sleeping">Radio je "spal", sprememba kanala ni bila izvedena.</string>
+    <string name="radio_sleeping">Radio je \"spal\", sprememba kanala ni bila izvedena.</string>
     <string name="report_bug">Prijavi napako</string>
     <string name="report_a_bug">Prijavite napako</string>
     <string name="report_bug_text">Ali ste prepričani, da želite prijaviti napako? Po poročanju objavite v meshtastic.discourse.group, da bomo lahko primerjali poročilo s tistim, kar ste našli.</string>
@@ -33,14 +33,14 @@
     <string name="location_disabled">Dostop do lokacije je onemogočen, mreža ne more prikazati položaja.</string>
     <string name="share">Deliti</string>
     <string name="disconnected">Prekinjeno</string>
-    <string name="device_sleeping">Naprava je v "spanju"</string>
+    <string name="device_sleeping">Naprava je v \"spanju\"</string>
     <string name="connected_count">Povezano: %1$s od %2$s je na mreži</string>
     <string name="list_of_nodes">Seznam vozlišč v omrežju</string>
     <string name="update_firmware">Posodobite vdelano programsko opremo</string>
     <string name="connected">Povezana z radiem</string>
     <string name="connected_to">Povezana z radiem (%s)</string>
     <string name="not_connected">Ni povezano</string>
-    <string name="connected_sleeping">Povezan z radiem, vendar radio "spi"</string>
+    <string name="connected_sleeping">Povezan z radiem, vendar radio \"spi\"</string>
     <string name="update_to">Posodobi v %s</string>
     <string name="app_too_old">Aplikacija je prestara</string>
     <string name="must_update">To aplikacijo morate posodobiti v trgovini Google Play (ali Github). Žal se ne more povezati s tem radiem.</string>

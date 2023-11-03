@@ -8,7 +8,7 @@
     <string name="application_icon">Ikona aplikácie</string>
     <string name="unknown_username">Neznáme užívateľské meno</string>
     <string name="send_text">Odoslať text</string>
-    <string name="warning_not_paired">"K tomuto telefónu ste ešte nenapárovalii žiadne zariadenie kompatibilné s Meshtastic. Prosím napárujte zariadenie a nastavte svoje užívateľské meno. Táto open-source aplikácia je v alpha testovacej fáze, ak nájdete chybu, prosím popíšte ju na fóre: meshtastic.discourse.group.\n\n Pre viac informácií navštívte web stránku - www.meshtastic.org."</string>
+    <string name="warning_not_paired">K tomuto telefónu ste ešte nenapárovalii žiadne zariadenie kompatibilné s Meshtastic. Prosím napárujte zariadenie a nastavte svoje užívateľské meno. Táto open-source aplikácia je v alpha testovacej fáze, ak nájdete chybu, prosím popíšte ju na fóre: meshtastic.discourse.group.\n\n Pre viac informácií navštívte web stránku - www.meshtastic.org.</string>
     <string name="your_name">Vaše meno</string>
     <string name="analytics_okay">Anonymné hlásenia o používaní aplikácie a jej chybách.</string>
     <string name="looking_for_meshtastic_devices">Vyhľadávam Meshtastic zariadenia…</string>
@@ -48,11 +48,12 @@
     <string name="modem_config_short">Krátky dosah / Rýchle</string>
     <string name="modem_config_medium">Stredný dosah / Rýchle</string>
     <string name="modem_config_long">Dlhý dosah / Rýchle</string>
+    <string name="modem_config_mod_long">Long Range / Moderate</string>
     <string name="modem_config_very_long">Veľmi dlhý dosah / Pomalé</string>
-    <string name="meshtastic_service_notifications">Notifikácie zo služby</string>
-    <string name="about">O aplikácii (verzia)</string>
-    <string name="location_disabled_warning">Musíte zapnúť služby o polohe zariadenia (GPS) v nastaveniach systému Android.</string>
     <string name="modem_config_unrecognized">UNRECOGNIZED</string>
+    <string name="meshtastic_service_notifications">Notifikácie zo služby</string>
+    <string name="location_disabled_warning">Musíte zapnúť služby o polohe zariadenia (GPS) v nastaveniach systému Android.</string>
+    <string name="about">O aplikácii (verzia)</string>
     <string name="a_list_of_nodes_in_the_mesh">Zoznam zariadení v mesh sieti</string>
     <string name="text_messages">Textové správy</string>
     <string name="channel_invalid">URL tohoto kanála nie je platá a nemôže byť použitá</string>
@@ -68,16 +69,17 @@
     <string name="meshtastic_messages_notifications">Notifikácie správy</string>
     <string name="protocol_stress_test">Stres test protokolu</string>
     <string name="firmware_too_old">Nutná aktualizácia firmvéru vysielača</string>
+    <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Prosím choďte na panel nastavení a zvoľte možnosť \"Aktualizácia firmvéru\". Viac informácií nájdete na <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">našom sprievodcovi inštaláciou firmvéru</a> na Github-e.</string>
     <string name="okay">Ok</string>
     <string name="must_set_region">Musíte nastaviť región!</string>
     <string name="region">Región</string>
-    <string name="sample_coords">48.14816 17.10674</string>
+    <string name="cant_change_no_radio">Nie je možné zmeniť kanál, pretože vysielač ešte nie je pripojený. Skúste to neskôr.</string>
+    <string name="save_messages">Export rangetest.csv</string>
     <string name="reset">Resetovať</string>
+    <string name="scan">Scan</string>
+    <string name="are_you_sure_change_default">Ste si istý, že chcete preladiť na základný (default) kanál?</string>
     <string name="reset_to_defaults">Resetovať na základné (default) nastavenia</string>
     <string name="apply">Použiť</string>
-    <string name="are_you_sure_change_default">Ste si istý, že chcete preladiť na základný (default) kanál?</string>
-    <string name="cant_change_no_radio">Nie je možné zmeniť kanál, pretože vysielač ešte nie je pripojený. Skúste to neskôr.</string>
-    <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Prosím choďte na panel nastavení a zvoľte možnosť \"Aktualizácia firmvéru\". Viac informácií nájdete na <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">našom sprievodcovi inštaláciou firmvéru</a> na Github-e.</string>
     <string name="no_app_found">Aplikácia pre odoslanie URL nebola nájdená</string>
     <string name="theme">Téma</string>
     <string name="theme_light">Svetlá</string>

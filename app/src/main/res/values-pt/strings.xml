@@ -116,7 +116,7 @@
     <string name="shutdown">Desligar</string>
     <string name="reboot">Reiniciar</string>
     <string name="intro_show">Mostrar Introdução</string>
-    <string name="intro_welcome">Bem-vindo à Meshtastic</string>
+    <string name="intro_welcome">Bem-vindo a Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic é uma plataforma de comunicação criptografada fora de rede de código aberto. Os rádios formam uma rede mesh e se comunicam usando o protocolo LoRa para enviar mensagens de texto.</string>
     <string name="intro_started">Vamos começar!</string>
     <string name="intro_started_text">Conecte seu dispositivo Meshtastic usando Bluetooth, Serial ou WiFi. \n\nVocê pode ver quais dispositivos são compatíveis em www.meshtastic.org/docs/hardware</string>

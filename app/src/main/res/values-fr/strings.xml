@@ -2,7 +2,7 @@
 <resources>
     <string name="channel_name">Nom du canal</string>
     <string name="channel_options">Options du canal</string>
-    <string name="qr_code">code QR</string>
+    <string name="qr_code">Code QR</string>
     <string name="unset">Non défini</string>
     <string name="connection_status">État de la connexion</string>
     <string name="application_icon">icône de l\'application</string>
@@ -15,12 +15,12 @@
     <string name="analytics_okay">Statistiques et rapports d\'erreur anonymes.</string>
     <string name="looking_for_meshtastic_devices">Recherche d\'appareils Meshtastic…</string>
     <string name="starting_pairing">Démarrage du jumelage</string>
-    <string name="url_for_join">Un URL pour rejoindre une toile Meshtastic</string>
+    <string name="url_for_join">Une URL pour rejoindre une toile Meshtastic</string>
     <string name="accept">Accepter</string>
     <string name="cancel">Annuler</string>
     <string name="change_channel">Changer de canal</string>
     <string name="are_you_sure_channel">Êtes-vous sûr de vouloir modifier le canal ? Toutes les communications avec les autres nœuds s\'arrêteront jusqu\'à ce que vous partagiez les nouveaux paramètres du canal.</string>
-    <string name="new_channel_rcvd">Nouveau URL canal reçu</string>
+    <string name="new_channel_rcvd">Nouvel URL canal reçu</string>
     <string name="do_you_want_switch">Voulez-vous basculer sur le canal \'%s\' ?</string>
     <string name="permission_missing">Une permission indispensable manque, Meshtastic ne peut pas fonctionner. Veuillez modifier dans Réglages.</string>
     <string name="radio_sleeping">La radio était en veille, impossible de changer de canal</string>
@@ -32,7 +32,7 @@
     <string name="change_radio">Changer radio</string>
     <string name="pairing_completed">Jumelage terminé, démarrage du service</string>
     <string name="pairing_failed_try_again">Le jumelage a échoué, veuillez sélectionner à nouveau</string>
-    <string name="location_disabled">L\'accès à la position est désactivé, ne peut pas fournir de position au mesh.</string>
+    <string name="location_disabled">L\'accès à la localisation est désactivé, impossible de fournir la position au maillage.</string>
     <string name="share">Partager</string>
     <string name="disconnected">Déconnecté</string>
     <string name="device_sleeping">Appareil en veille</string>
@@ -45,7 +45,7 @@
     <string name="not_connected">Non connecté</string>
     <string name="connected_sleeping">Connecté à la radio, mais en mode veille</string>
     <string name="update_to">Mise à jour vers %s</string>
-    <string name="app_too_old">Application désuète</string>
+    <string name="app_too_old">Application obsolète. Mise à jour requise</string>
     <string name="must_update">Vous devez mettre à jour cette application sur le Google Play Store (ou Github). Cette version n\'est plus compatible avec la radio. Merci de lire la <a href="https://meshtastic.org/docs/software/android/installation">documentation</a> sur ce sujet.</string>
     <string name="none">Aucun (désactivé)</string>
     <string name="modem_config_short">Courte distance (rapide)</string>
@@ -56,9 +56,9 @@
     <string name="modem_config_unrecognized">NON RECONNU</string>
     <string name="meshtastic_service_notifications">Notifications de service</string>
     <string name="location_disabled_warning">Besoin d\'activer l\'accès à la position dans les Paramètres Android</string>
-    <string name="about">Infos</string>
-    <string name="a_list_of_nodes_in_the_mesh">Une liste des nœuds dans le réseau</string>
-    <string name="text_messages">Messages tèxte</string>
+    <string name="about">A propos</string>
+    <string name="a_list_of_nodes_in_the_mesh">Une liste de nœuds dans le réseau</string>
+    <string name="text_messages">Messages texte</string>
     <string name="channel_invalid">Cette URL de canal est invalide et ne peut pas être utilisée</string>
     <string name="debug_panel">Panneau de débogage</string>
     <string name="debug_last_messages">500 derniers messages</string>
@@ -85,7 +85,7 @@
     <string name="apply">Appliquer</string>
     <string name="no_app_found">Aucune application trouvée pour envoyer des URLs</string>
     <string name="theme">Thème</string>
-    <string name="theme_light">Lumière</string>
+    <string name="theme_light">Clair</string>
     <string name="theme_dark">Sombre</string>
     <string name="theme_system">Valeur par défaut du système</string>
     <string name="choose_theme">Choisir un thème</string>
@@ -125,8 +125,8 @@
     <string name="intro_welcome">Bienvenue sur Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic est une plate-forme de communication libre, autonome et chiffrée. Les radios Meshtastic forment un réseau maillé et communiquent à l\'aide du protocole LoRa pour envoyer des messages texte.</string>
     <string name="intro_started">Commençons !</string>
-    <string name="intro_started_text">Connectez votre appareil Meshtastic en utilisant Bluetooth, WiFi, ou un lien série. \n\nVous pouvez voir quels appareils sont compatibles sur www.meshtastic.org/docs/hardware</string>
-    <string name="intro_encryption">"Configuration du chiffrement"</string>
+    <string name="intro_started_text">Connectez votre appareil Meshtastic en utilisant soit Bluetooth, soit une connexion série ou soit la WiFi. \n\nVous pouvez voir quels appareils sont compatibles sur www.meshtastic.org/docs/hardware</string>
+    <string name="intro_encryption">"Configuration du cryptage"</string>
     <string name="intro_encryption_text">De base, une clé de chiffrement par défaut est définie. Pour activer votre propre canal et un chiffrement amélioré, allez dans l\'onglet canal et changez le nom du canal : cela définira une clé aléatoire pour le chiffrement AES256. \n\nPour communiquer avec d\'autres appareils, ils devront scanner votre code QR ou suivre le lien partagé pour configurer les paramètres du canal.</string>
     <string name="message">Message</string>
     <string name="quick_chat">Options du clavardage</string>
