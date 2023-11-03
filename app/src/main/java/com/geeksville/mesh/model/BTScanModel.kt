@@ -187,18 +187,15 @@ class BTScanModel @Inject constructor(
         return if (isMockInterfaceAddressValid) {
             warn("Running under emulator/test lab")
 
-            val testnodes = listOf(
+            listOf(
+                DeviceListEntry(context.getString(R.string.none), "n", true),
                 DeviceListEntry("Included simulator", "m", true),
-                DeviceListEntry("Complete simulator", "t10.0.2.2", true),
-                DeviceListEntry(context.getString(R.string.none), "n", true)
                 /* Don't populate fake bluetooth devices, because we don't want testlab inside of google
                 to try and use them.
 
                 DeviceListEntry("Meshtastic_ab12", "xaa", false),
                 DeviceListEntry("Meshtastic_32ac", "xbb", true) */
-            )
-
-            devices.value = (testnodes.map { it.fullAddress to it }).toMap().toMutableMap()
+            ).forEach(::addDevice)
             true
         } else {
             if (scanner == null) {

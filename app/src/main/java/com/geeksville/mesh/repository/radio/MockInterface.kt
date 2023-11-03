@@ -1,21 +1,41 @@
 package com.geeksville.mesh.repository.radio
 
+import android.app.Application
 import com.geeksville.mesh.*
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.concurrent.handledLaunch
+import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.getInitials
 import com.google.protobuf.ByteString
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.delay
+
+private val defaultLoRaConfig = ConfigKt.loRaConfig {
+    usePreset = true
+    region = ConfigProtos.Config.LoRaConfig.RegionCode.TW
+}
+
+private val defaultChannel = channel {
+    settings = Channel.default.settings
+    role = ChannelProtos.Channel.Role.PRIMARY
+}
 
 /** A simulated interface that is used for testing in the simulator */
 class MockInterface @AssistedInject constructor(
+    private val context: Application,
     private val service: RadioInterfaceService,
-    @Assisted val address: String
-) : Logging, IRadioInterface {
-    private var messageCount = 50
+    @Assisted val address: String,
+) : IRadioInterface, Logging {
+
+    companion object {
+        private const val MY_NODE = 0x42424242
+    }
+
+    private var currentPacketId = 50
 
     // an infinite sequence of ints
-    private val messageNumSequence = generateSequence { messageCount++ }.iterator()
+    private val packetIdSequence = generateSequence { currentPacketId++ }.iterator()
 
     init {
         info("Starting the mock interface")
@@ -24,6 +44,7 @@ class MockInterface @AssistedInject constructor(
 
     override fun handleSendToRadio(p: ByteArray) {
         val pr = MeshProtos.ToRadio.parseFrom(p)
+        sendQueueStatus(pr.packet.id)
 
         val data = if (pr.hasPacket()) pr.packet.decoded else null
 
@@ -42,27 +63,21 @@ class MockInterface @AssistedInject constructor(
         when {
             d.getConfigRequest == AdminProtos.AdminMessage.ConfigType.LORA_CONFIG ->
                 sendAdmin(pr.packet.to, pr.packet.from, pr.packet.id) {
-                    getConfigResponse = ConfigProtos.Config.newBuilder().apply {
-
-                        lora =
-                            ConfigProtos.Config.LoRaConfig.newBuilder().apply {
-                                region = ConfigProtos.Config.LoRaConfig.RegionCode.TW
-                                // FIXME set critical times?
-                            }.build()
-                    }.build()
+                    getConfigResponse = config { lora = defaultLoRaConfig }
                 }
 
             d.getChannelRequest != 0 ->
                 sendAdmin(pr.packet.to, pr.packet.from, pr.packet.id) {
-                    getChannelResponse = ChannelProtos.Channel.newBuilder().apply {
+                    getChannelResponse = channel {
                         index = d.getChannelRequest - 1 // 0 based on the response
-                        role =
-                            if (d.getChannelRequest == 1) ChannelProtos.Channel.Role.PRIMARY else ChannelProtos.Channel.Role.DISABLED
-                    }.build()
+                        if (d.getChannelRequest == 1) {
+                            settings = Channel.default.settings
+                            role = ChannelProtos.Channel.Role.PRIMARY
+                        }
+                    }
                 }
 
-            else ->
-                info("Ignoring admin sent to mock interface $d")
+            else -> info("Ignoring admin sent to mock interface $d")
         }
     }
 
@@ -74,7 +89,7 @@ class MockInterface @AssistedInject constructor(
     private fun makeTextMessage(numIn: Int) =
         MeshProtos.FromRadio.newBuilder().apply {
             packet = MeshProtos.MeshPacket.newBuilder().apply {
-                id = messageNumSequence.next()
+                id = packetIdSequence.next()
                 from = numIn
                 to = 0xffffffff.toInt() // ugly way of saying broadcast
                 rxTime = (System.currentTimeMillis() / 1000).toInt()
@@ -89,7 +104,7 @@ class MockInterface @AssistedInject constructor(
     private fun makeDataPacket(fromIn: Int, toIn: Int, data: MeshProtos.Data.Builder) =
         MeshProtos.FromRadio.newBuilder().apply {
             packet = MeshProtos.MeshPacket.newBuilder().apply {
-                id = messageNumSequence.next()
+                id = packetIdSequence.next()
                 from = fromIn
                 to = toIn
                 rxTime = (System.currentTimeMillis() / 1000).toInt()
@@ -105,6 +120,16 @@ class MockInterface @AssistedInject constructor(
             }.build().toByteString()
             requestId = msgId
         })
+
+    private fun sendQueueStatus(msgId: Int) = service.handleFromRadio(
+        fromRadio {
+            queueStatus = queueStatus {
+                res = 0
+                free = 16
+                meshPacketId = msgId
+            }
+        }.toByteArray()
+    )
 
     private fun sendAdmin(
         fromIn: Int,
@@ -123,9 +148,10 @@ class MockInterface @AssistedInject constructor(
     }
 
     /// Send a fake ack packet back if the sender asked for want_ack
-    private fun sendFakeAck(pr: MeshProtos.ToRadio) {
+    private fun sendFakeAck(pr: MeshProtos.ToRadio) = service.serviceScope.handledLaunch {
+        delay(2000)
         service.handleFromRadio(
-            makeAck(pr.packet.to, pr.packet.from, pr.packet.id).build().toByteArray()
+            makeAck(MY_NODE + 1, pr.packet.from, pr.packet.id).build().toByteArray()
         )
     }
 
@@ -153,7 +179,6 @@ class MockInterface @AssistedInject constructor(
             }
 
         // Simulated network data to feed to our app
-        val MY_NODE = 0x42424242
         val packets = arrayOf(
             // MyNodeInfo
             MeshProtos.FromRadio.newBuilder().apply {
@@ -162,9 +187,23 @@ class MockInterface @AssistedInject constructor(
                 }.build()
             },
 
+            MeshProtos.FromRadio.newBuilder().apply {
+                metadata = deviceMetadata {
+                    firmwareVersion = context.getString(R.string.cur_firmware_version)
+                }
+            },
+
             // Fake NodeDB
             makeNodeInfo(MY_NODE, 32.776665, -96.796989), // dallas
             makeNodeInfo(MY_NODE + 1, 32.960758, -96.733521), // richardson
+
+            MeshProtos.FromRadio.newBuilder().apply {
+                config = config { lora = defaultLoRaConfig }
+            },
+
+            MeshProtos.FromRadio.newBuilder().apply {
+                channel = defaultChannel
+            },
 
             MeshProtos.FromRadio.newBuilder().apply {
                 configCompleteId = configId

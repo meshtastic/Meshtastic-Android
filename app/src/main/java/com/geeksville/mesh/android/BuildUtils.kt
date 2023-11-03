@@ -19,6 +19,15 @@ object BuildUtils : Logging {
         return Build.DEVICE == "osprey_u2" // Moto G
     }
 
-    /// Are we running on the emulator?
-    val isEmulator get() = Build.MODEL == "Android SDK built for x86" || Build.MODEL == "sdk_gphone_x86" || Build.MODEL == "sdk_gphone64_arm64" || Build.MODEL == "Android SDK built for x86_64"
+    // Are we running on the emulator?
+    val isEmulator
+        get() = Build.FINGERPRINT.startsWith("generic") ||
+                Build.FINGERPRINT.startsWith("unknown") ||
+                Build.FINGERPRINT.contains("emulator") ||
+                setOf(Build.MODEL, Build.PRODUCT).contains("google_sdk") ||
+                Build.MODEL.contains("sdk_gphone64") ||
+                Build.MODEL.contains("Emulator") ||
+                Build.MODEL.contains("Android SDK built for") ||
+                Build.MANUFACTURER.contains("Genymotion") ||
+                Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic")
 }
