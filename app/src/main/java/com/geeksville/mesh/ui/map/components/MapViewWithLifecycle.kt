@@ -43,8 +43,8 @@ fun rememberMapViewWithLifecycle(context: Context): MapView {
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
 
         @Suppress("DEPRECATION")
-        @SuppressLint("InvalidWakeLockTag")
-        val wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "ScreenLock")
+        val wakeLock =
+            powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "Meshtastic:MapViewLock")
 
         wakeLock.safeAcquire()
 
