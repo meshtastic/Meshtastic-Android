@@ -5,7 +5,6 @@ import android.bluetooth.BluetoothAdapter
 import android.content.*
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Bundle
@@ -38,13 +37,10 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.primaryChannel
 import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.repository.radio.BluetoothInterface
-import com.geeksville.mesh.repository.radio.InterfaceId
-import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
 import com.geeksville.mesh.ui.map.MapFragment
 import com.geeksville.mesh.util.Exceptions
-import com.geeksville.mesh.util.getParcelableExtraCompat
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -121,9 +117,6 @@ class MainActivity : AppCompatActivity(), Logging {
 
     @Inject
     internal lateinit var serviceRepository: ServiceRepository
-
-    @Inject
-    internal lateinit var radioInterfaceService: RadioInterfaceService
 
     private val bluetoothPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
@@ -252,9 +245,6 @@ class MainActivity : AppCompatActivity(), Logging {
 
     private var requestedChannelUrl: Uri? = null
 
-    /** We keep the usb device here, so later we can give it to our service */
-    private var usbDevice: UsbDevice? = null
-
     /// Handle any itents that were passed into us
     private fun handleIntent(intent: Intent) {
         val appLinkAction = intent.action
@@ -272,11 +262,7 @@ class MainActivity : AppCompatActivity(), Logging {
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
-                val device: UsbDevice? = intent.getParcelableExtraCompat(UsbManager.EXTRA_DEVICE)
-                if (device != null) {
-                    debug("Handle USB device attached! $device")
-                    usbDevice = device
-                }
+                showSettingsPage()
             }
 
             Intent.ACTION_MAIN -> {
@@ -464,13 +450,6 @@ class MainActivity : AppCompatActivity(), Logging {
                 serviceRepository.setMeshService(service)
 
                 try {
-                    usbDevice?.let { usb ->
-                        debug("Switching to USB radio ${usb.deviceName}")
-                        val address = radioInterfaceService.toInterfaceAddress(InterfaceId.SERIAL, usb.deviceName)
-                        service.setDeviceAddress(address)
-                        usbDevice = null // Only switch once - thereafter it should be stored in settings
-                    }
-
                     val connectionState =
                         MeshService.ConnectionState.valueOf(service.connectionState())
 
@@ -593,8 +572,7 @@ class MainActivity : AppCompatActivity(), Logging {
         }
 
         val bonded = model.bondedAddress != null
-        if (!bonded && usbDevice == null) // we will handle USB later
-            showSettingsPage()
+        if (!bonded) showSettingsPage()
     }
 
     private fun showSettingsPage() {

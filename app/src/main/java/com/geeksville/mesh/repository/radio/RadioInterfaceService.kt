@@ -1,6 +1,5 @@
 package com.geeksville.mesh.repository.radio
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.content.SharedPreferences
 import androidx.core.content.edit
@@ -16,7 +15,10 @@ import com.geeksville.mesh.repository.nsd.NsdRepository
 import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.ignoreException
 import com.geeksville.mesh.util.toRemoteExceptions
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -46,7 +48,6 @@ class RadioInterfaceService @Inject constructor(
     private val processLifecycle: Lifecycle,
     @RadioRepositoryQualifier private val prefs: SharedPreferences,
     private val interfaceFactory: InterfaceFactory,
-    private val mockInterfaceSpec: MockInterfaceSpec
 ) : Logging {
 
     private val _connectionState = MutableStateFlow(RadioServiceConnectionState())
@@ -132,8 +133,9 @@ class RadioInterfaceService @Inject constructor(
         var address = prefs.getString(DEVADDR_KEY, null)
 
         // If we are running on the emulator we default to the mock interface, so we can have some data to show to the user
-        if (address == null && mockInterfaceSpec.addressValid(""))
-            address = "${InterfaceId.MOCK.id}"
+        if (address == null && isAddressValid(mockInterfaceAddress)) {
+            address = mockInterfaceAddress
+        }
 
         return address
     }
@@ -145,7 +147,6 @@ class RadioInterfaceService @Inject constructor(
      * where a is either x for bluetooth or s for serial
      * and t is an interface specific address (macaddr or a device path)
      */
-    @SuppressLint("NewApi")
     fun getBondedDeviceAddress(): String? {
         // If the user has unpaired our device, treat things as if we don't have one
         val address = getDeviceAddress()
@@ -248,7 +249,6 @@ class RadioInterfaceService @Inject constructor(
      *
      * @return true if the device changed, false if no change
      */
-    @SuppressLint("NewApi")
     private fun setBondedDeviceAddress(address: String?): Boolean {
         return if (getBondedDeviceAddress() == address && isStarted) {
             warn("Ignoring setBondedDevice ${address.anonymize}, because we are already using that device")

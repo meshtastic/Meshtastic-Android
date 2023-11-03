@@ -34,7 +34,7 @@ class SerialInterface @AssistedInject constructor(
             errormsg("Can't find device")
         } else {
             info("Opening $device")
-            val onConnect: () -> Unit = {  super.connect() }
+            val onConnect: () -> Unit = { super.connect() }
             usbRepository.createSerialConnection(device, object : SerialConnectionListener {
                 override fun onMissingPermission() {
                     errormsg("Need permissions for port")

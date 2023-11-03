@@ -8,11 +8,12 @@ enum class InterfaceId(val id: Char) {
     MOCK('m'),
     NOP('n'),
     SERIAL('s'),
-    TCP('t');
+    TCP('t'),
+    ;
 
     companion object {
         fun forIdChar(id: Char): InterfaceId? {
-            return values().firstOrNull { it.id == id }
+            return entries.firstOrNull { it.id == id }
         }
     }
 }

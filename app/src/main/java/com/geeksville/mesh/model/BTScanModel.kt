@@ -47,6 +47,10 @@ class BTScanModel @Inject constructor(
     private val bleDevices = MutableLiveData<List<BluetoothDevice>>(listOf())
     private val usbDevices = MutableLiveData<Map<String, UsbSerialDriver>>(mapOf())
 
+    val isMockInterfaceAddressValid: Boolean by lazy {
+        radioInterfaceService.isAddressValid(radioInterfaceService.mockInterfaceAddress)
+    }
+
     init {
         combine(
             bluetoothRepository.state,
@@ -180,7 +184,7 @@ class BTScanModel @Inject constructor(
     private fun setupScan(): Boolean {
         selectedAddress = radioInterfaceService.getDeviceAddress()
 
-        return if (radioInterfaceService.isAddressValid(radioInterfaceService.mockInterfaceAddress)) {
+        return if (isMockInterfaceAddressValid) {
             warn("Running under emulator/test lab")
 
             val testnodes = listOf(

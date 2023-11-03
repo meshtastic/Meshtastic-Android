@@ -8,7 +8,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.Bundle
 import android.os.Handler
@@ -41,7 +40,6 @@ import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getInitials
 import com.geeksville.mesh.repository.location.LocationRepository
-import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.SoftwareUpdateService
 import com.geeksville.mesh.util.PendingIntentCompat
@@ -65,9 +63,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private val scanModel: BTScanModel by activityViewModels()
     private val bluetoothViewModel: BluetoothViewModel by activityViewModels()
     private val model: UIViewModel by activityViewModels()
-
-    @Inject
-    internal lateinit var radioInterfaceServiceLazy: dagger.Lazy<RadioInterfaceService>
 
     @Inject
     internal lateinit var locationRepository: LocationRepository
@@ -502,8 +497,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // If we are running on an emulator, always leave this message showing so we can test the worst case layout
         val curRadio = scanModel.selectedAddress
 
-        val radioInterfaceService = radioInterfaceServiceLazy.get()
-        if (curRadio != null && !radioInterfaceService.isAddressValid(radioInterfaceService.mockInterfaceAddress)) {
+        if (curRadio != null && !scanModel.isMockInterfaceAddressValid) {
             binding.warningNotPaired.visibility = View.GONE
         } else if (bluetoothViewModel.enabled.value == true) {
             binding.warningNotPaired.visibility = View.VISIBLE
@@ -574,22 +568,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 val usbReceiver = object : BroadcastReceiver() {
 
                     override fun onReceive(context: Context, intent: Intent) {
-                        if (BTScanModel.ACTION_USB_PERMISSION == intent.action) {
+                        if (BTScanModel.ACTION_USB_PERMISSION != intent.action) return
 
-                            val device: UsbDevice? =
-                                intent.getParcelableExtraCompat(UsbManager.EXTRA_DEVICE)
-                            val deviceName: String = device?.deviceName ?: "unknown"
-
-                            if (intent.getBooleanExtra(
-                                    UsbManager.EXTRA_PERMISSION_GRANTED,
-                                    false
-                                )
-                            ) {
-                                info("User approved USB access")
-                                changeDeviceAddress(it.fullAddress)
-                            } else {
-                                errormsg("USB permission denied for device $deviceName")
-                            }
+                        if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                            info("User approved USB access")
+                            changeDeviceAddress(it.fullAddress)
+                        } else {
+                            errormsg("USB permission denied for device ${it.address}")
                         }
                         // We don't need to stay registered
                         requireActivity().unregisterReceiver(this)
@@ -600,7 +585,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     activity,
                     0,
                     Intent(BTScanModel.ACTION_USB_PERMISSION),
-                    PendingIntentCompat.FLAG_IMMUTABLE
+                    PendingIntentCompat.FLAG_MUTABLE
                 )
                 val filter = IntentFilter(BTScanModel.ACTION_USB_PERMISSION)
                 requireActivity().registerReceiver(usbReceiver, filter)
@@ -622,12 +607,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // We need this receiver to get informed when the bond attempt finished
         val bondChangedReceiver = object : BroadcastReceiver() {
 
-            override fun onReceive(
-                context: Context,
-                intent: Intent
-            ) = exceptionReporter {
-                val state =
-                    intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
+            override fun onReceive(context: Context, intent: Intent) = exceptionReporter {
+                val state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
                 debug("Received bond state changed $state")
 
                 if (state != BluetoothDevice.BOND_BONDING) {
