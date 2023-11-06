@@ -104,6 +104,36 @@ fun TelemetryConfigItemList(
         }
 
         item {
+            SwitchPreference(title = "Power metrics module enabled",
+                checked = telemetryInput.powerMeasurementEnabled,
+                enabled = enabled,
+                onCheckedChange = {
+                    telemetryInput = telemetryInput.copy { powerMeasurementEnabled = it }
+                })
+        }
+        item { Divider() }
+
+        item {
+            EditTextPreference(title = "Power metrics update interval (seconds)",
+                value = telemetryInput.powerUpdateInterval,
+                enabled = enabled,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    telemetryInput = telemetryInput.copy { powerUpdateInterval = it }
+                })
+        }
+
+        item {
+            SwitchPreference(title = "Power metrics on-screen enabled",
+                checked = telemetryInput.powerScreenEnabled,
+                enabled = enabled,
+                onCheckedChange = {
+                    telemetryInput = telemetryInput.copy { powerScreenEnabled = it }
+                })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = telemetryInput != telemetryConfig,
                 onCancelClicked = {

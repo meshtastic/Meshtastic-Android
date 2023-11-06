@@ -200,6 +200,16 @@ fun ExternalNotificationConfigItemList(
         }
 
         item {
+            SwitchPreference(title = "Use I2S as buzzer",
+                checked = externalNotificationInput.useI2SAsBuzzer,
+                enabled = enabled,
+                onCheckedChange = {
+                    externalNotificationInput = externalNotificationInput.copy { useI2SAsBuzzer = it }
+                })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = externalNotificationInput != extNotificationConfig || ringtoneInput != ringtone,
                 onCancelClicked = {
