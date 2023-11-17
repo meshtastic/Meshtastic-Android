@@ -333,7 +333,7 @@ fun ChannelScreen(
                 painter = channelSet.qrCode?.let { BitmapPainter(it.asImageBitmap()) }
                     ?: painterResource(id = R.drawable.qrcode),
                 contentDescription = stringResource(R.string.qr_code),
-                contentScale = ContentScale.FillWidth,
+                contentScale = ContentScale.Inside,
                 alpha = if (enabled) 1f else 0.25f,
                 // colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
                 modifier = Modifier
