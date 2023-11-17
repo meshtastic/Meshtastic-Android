@@ -75,6 +75,9 @@ class UsbRepository @Inject constructor(
         return SerialConnectionImpl(usbManagerLazy, device, listener)
     }
 
+    fun requestPermission(device: UsbDevice): Flow<Boolean> =
+        usbManagerLazy.get()?.requestPermission(application, device) ?: emptyFlow()
+
     fun refreshState() {
         processLifecycle.coroutineScope.launch(dispatchers.default) {
             refreshStateInternal()

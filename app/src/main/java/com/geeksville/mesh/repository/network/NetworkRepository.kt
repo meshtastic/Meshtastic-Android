@@ -1,4 +1,4 @@
-package com.geeksville.mesh.repository.nsd
+package com.geeksville.mesh.repository.network
 
 import android.net.ConnectivityManager
 import android.net.Network
@@ -6,21 +6,18 @@ import android.net.NetworkRequest
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.CoroutineDispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class NsdRepository @Inject constructor(
-    private val dispatchers: CoroutineDispatchers,
+class NetworkRepository @Inject constructor(
     private val nsdManagerLazy: dagger.Lazy<NsdManager?>,
     private val connectivityManager: dagger.Lazy<ConnectivityManager>,
 ) : Logging {
@@ -43,24 +40,20 @@ class NsdRepository @Inject constructor(
         awaitClose { connectivityManager.get().unregisterNetworkCallback(callback) }
     }
 
-    private val resolveQueue = Semaphore(1)
-    private val hostsList = mutableListOf<NsdServiceInfo>()
-
     private val _resolvedList = MutableStateFlow<List<NsdServiceInfo>>(emptyList())
     val resolvedList: StateFlow<List<NsdServiceInfo>> get() = _resolvedList
 
     private val _networkDiscovery: Flow<NsdServiceInfo> = callbackFlow {
+        val resolveQueue = Semaphore(1)
+        val hostsList = mutableListOf<NsdServiceInfo>()
         val discoveryListener = object : NsdManager.DiscoveryListener {
-            override fun onDiscoveryStarted(regType: String) {
-                debug("Service discovery started: $regType")
-                hostsList.clear()
+            override fun onDiscoveryStarted(serviceType: String) {
+                debug("Service discovery started: $serviceType")
             }
 
             override fun onServiceFound(service: NsdServiceInfo) {
                 debug("Service discovery success: $service")
-                if (service.serviceType == SERVICE_TYPE &&
-                    service.serviceName.contains(serviceName)
-                ) {
+                if (service.serviceName.contains(SERVICE_NAME)) {
                     val resolveListener = object : NsdManager.ResolveListener {
                         override fun onServiceResolved(service: NsdServiceInfo) {
                             debug("Resolve Succeeded: $service")
@@ -97,26 +90,24 @@ class NsdRepository @Inject constructor(
 
             override fun onStartDiscoveryFailed(serviceType: String, errorCode: Int) {
                 debug("Start Discovery failed: Error code: $errorCode")
-                nsdManagerLazy.get()?.stopServiceDiscovery(this)
             }
 
             override fun onStopDiscoveryFailed(serviceType: String, errorCode: Int) {
                 debug("Stop Discovery failed: Error code: $errorCode")
-                nsdManagerLazy.get()?.stopServiceDiscovery(this)
             }
         }
         nsdManagerLazy.get()
             ?.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, discoveryListener)
         awaitClose { nsdManagerLazy.get()?.stopServiceDiscovery(discoveryListener) }
-    }.flowOn(dispatchers.default)
+    }
 
     fun networkDiscoveryFlow(): Flow<NsdServiceInfo> {
         return _networkDiscovery
     }
 
     companion object {
-        //To find all the available networks SERVICE_TYPE = "_services._dns-sd._udp"
-        const val SERVICE_TYPE = "_https._tcp."
-        const val serviceName = "Meshtastic"
+        // To find all available services use SERVICE_TYPE = "_services._dns-sd._udp"
+        internal const val SERVICE_NAME = "Meshtastic"
+        internal const val SERVICE_TYPE = "_https._tcp."
     }
 }

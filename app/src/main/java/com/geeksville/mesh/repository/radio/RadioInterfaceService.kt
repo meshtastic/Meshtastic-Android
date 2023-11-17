@@ -11,7 +11,7 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
-import com.geeksville.mesh.repository.nsd.NsdRepository
+import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.ignoreException
 import com.geeksville.mesh.util.toRemoteExceptions
@@ -44,7 +44,7 @@ class RadioInterfaceService @Inject constructor(
     private val context: Application,
     private val dispatchers: CoroutineDispatchers,
     bluetoothRepository: BluetoothRepository,
-    nsdRepository: NsdRepository,
+    networkRepository: NetworkRepository,
     private val processLifecycle: Lifecycle,
     @RadioRepositoryQualifier private val prefs: SharedPreferences,
     private val interfaceFactory: InterfaceFactory,
@@ -99,7 +99,7 @@ class RadioInterfaceService @Inject constructor(
             else if (radioIf is BluetoothInterface) stopInterface()
         }.launchIn(processLifecycle.coroutineScope)
 
-        nsdRepository.networkAvailable.onEach { state ->
+        networkRepository.networkAvailable.onEach { state ->
             if (state) startInterface()
             else if (radioIf is TCPInterface) stopInterface()
         }.launchIn(processLifecycle.coroutineScope)

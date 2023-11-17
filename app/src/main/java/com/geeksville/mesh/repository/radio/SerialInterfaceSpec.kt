@@ -1,7 +1,6 @@
 package com.geeksville.mesh.repository.radio
 
-import android.app.Application
-import com.geeksville.mesh.android.usbManager
+import android.hardware.usb.UsbManager
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import javax.inject.Inject
@@ -11,7 +10,7 @@ import javax.inject.Inject
  */
 class SerialInterfaceSpec @Inject constructor(
     private val factory: SerialInterfaceFactory,
-    private val context: Application,
+    private val usbManager: dagger.Lazy<UsbManager>,
     private val usbRepository: UsbRepository,
 ): InterfaceSpec<SerialInterface> {
     override fun createInterface(rest: String): SerialInterface {
@@ -22,10 +21,10 @@ class SerialInterfaceSpec @Inject constructor(
         rest: String
     ): Boolean {
         usbRepository.serialDevicesWithDrivers.value.filterValues {
-            context.usbManager.hasPermission(it.device)
+            usbManager.get().hasPermission(it.device)
         }
         findSerial(rest)?.let { d ->
-            return context.usbManager.hasPermission(d.device)
+            return usbManager.get().hasPermission(d.device)
         }
         return false
     }

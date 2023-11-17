@@ -1,4 +1,4 @@
-package com.geeksville.mesh.repository.nsd
+package com.geeksville.mesh.repository.network
 
 import android.app.Application
 import android.content.Context
@@ -11,7 +11,7 @@ import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(SingletonComponent::class)
-class NsdRepositoryModule {
+class NetworkRepositoryModule {
     companion object {
         @Provides
         fun provideConnectivityManager(application: Application): ConnectivityManager {

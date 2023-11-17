@@ -1,8 +1,6 @@
 package com.geeksville.mesh.util
 
-import android.annotation.SuppressLint
 import android.app.PendingIntent
-import android.companion.CompanionDeviceManager
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
