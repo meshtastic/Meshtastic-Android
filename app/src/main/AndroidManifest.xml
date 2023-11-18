@@ -135,7 +135,7 @@
         <activity
             android:name="com.geeksville.mesh.MainActivity"
             android:launchMode="singleInstance"
-            android:screenOrientation="sensorPortrait"
+            android:screenOrientation="unspecified"
             android:windowSoftInputMode="stateAlwaysHidden"
             android:theme="@style/Theme.App.Starting"
             android:exported="true">
