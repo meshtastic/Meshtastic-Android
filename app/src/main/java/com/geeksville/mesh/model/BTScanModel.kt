@@ -154,9 +154,6 @@ class BTScanModel @Inject constructor(
     }
 
     fun stopScan() {
-        // Stop Network Service Discovery (for TCP)
-        networkDiscovery?.cancel()
-
         if (scanJob != null) {
             debug("stopping scan")
             try {
@@ -170,13 +167,8 @@ class BTScanModel @Inject constructor(
         } else _spinner.value = false
     }
 
-    private var networkDiscovery: Job? = null
     fun startScan(context: Context?) {
         _spinner.value = true
-
-        // Start Network Service Discovery (find TCP devices)
-        networkDiscovery = networkRepository.networkDiscoveryFlow()
-            .launchIn(viewModelScope)
 
         if (context != null) startCompanionScan(context) else startClassicScan()
     }
