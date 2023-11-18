@@ -127,10 +127,9 @@
                 android:value="true" />
         </service>
 
-        <!-- zxing for QR Code scanning: lock portrait orientation -->
         <activity
             android:name="com.journeyapps.barcodescanner.CaptureActivity"
-            android:screenOrientation="portrait"
+            android:screenOrientation="unspecified"
             tools:replace="screenOrientation" />
 
         <activity
