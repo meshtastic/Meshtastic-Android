@@ -65,7 +65,7 @@ fun NetworkConfigItemList(
         item {
             EditPasswordPreference(title = "PSK",
                 value = networkInput.wifiPsk,
-                maxSize = 63, // wifi_psk max_size:64
+                maxSize = 64, // wifi_psk max_size:65
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { networkInput = networkInput.copy { wifiPsk = it } })
