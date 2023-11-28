@@ -160,7 +160,7 @@
     <string name="map_download_complete">Stahování dokončeno!</string>
     <string name="map_download_errors">Stahování dokončeno s %d chybami</string>
     <string name="map_cache_tiles">%d dlaždic</string>
-    <string name="map_subDescription">rychlost %1$d° vzdálenost: %2$s</string>
+    <string name="map_subDescription">směr: %1$d° vzdálenost: %2$s</string>
     <string name="waypoint_edit">Edit waypoint</string>
     <string name="waypoint_delete">Delete waypoint?</string>
     <string name="waypoint_new">New waypoint</string>

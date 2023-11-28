@@ -172,4 +172,5 @@
     <string name="waypoint_delete">Удалить путевую точку?</string>
     <string name="waypoint_new">Установить путевую точку</string>
     <string name="waypoint_received">Принята путевая точка: %s</string>
+    <string name="error_duty_cycle">Достигнут лимит отправки сообщений в единицу времени. Не удается отправить сообщения прямо сейчас, пожалуйста, повторите попытку позже.</string>
 </resources>

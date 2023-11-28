@@ -160,4 +160,5 @@
     <string name="waypoint_edit">Breyta leiðarpunkti</string>
     <string name="waypoint_delete">Eyða leiðarpunkti?</string>
     <string name="waypoint_new">Nýr leiðarpunktur</string>
+    <string name="error_duty_cycle">Hámarsksendingartíma náð. Ekki hægt að senda skilaboð, vinsamlegast reynið aftur síðar.</string>
 </resources>

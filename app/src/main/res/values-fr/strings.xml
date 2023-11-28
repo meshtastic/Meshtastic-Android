@@ -170,4 +170,5 @@
     <string name="waypoint_delete">Supprimer le repère ?</string>
     <string name="waypoint_new">Nouveau point de repère</string>
     <string name="waypoint_received">Point de passage reçu : %s</string>
+    <string name="error_duty_cycle">Limite du cycle d\'usage atteinte. Impossible d\'émettre maintenant, essayez plus tard.</string>
 </resources>
