@@ -43,8 +43,8 @@ import javax.inject.Singleton
 class RadioInterfaceService @Inject constructor(
     private val context: Application,
     private val dispatchers: CoroutineDispatchers,
-    bluetoothRepository: BluetoothRepository,
-    networkRepository: NetworkRepository,
+    private val bluetoothRepository: BluetoothRepository,
+    private val networkRepository: NetworkRepository,
     private val processLifecycle: Lifecycle,
     @RadioRepositoryQualifier private val prefs: SharedPreferences,
     private val interfaceFactory: InterfaceFactory,
@@ -93,7 +93,7 @@ class RadioInterfaceService @Inject constructor(
     /// true if our interface is currently connected to a device
     private var isConnected = false
 
-    init {
+    private fun initStateListeners() {
         bluetoothRepository.state.onEach { state ->
             if (state.enabled) startInterface()
             else if (radioIf is BluetoothInterface) stopInterface()
@@ -291,6 +291,7 @@ class RadioInterfaceService @Inject constructor(
         // We don't start actually talking to our device until MeshService binds to us - this prevents
         // broadcasting connection events before MeshService is ready to receive them
         startInterface()
+        initStateListeners()
     }
 
     fun sendToRadio(a: ByteArray) {
