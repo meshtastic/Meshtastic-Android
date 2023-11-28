@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -51,9 +52,11 @@ class NetworkRepository @Inject constructor(
         processLifecycle.coroutineScope.launch(dispatchers.default) {
             nsdManagerLazy.get()?.let { manager ->
                 manager.discoverServices(SERVICE_TYPE).collect { serviceList ->
-                    _resolvedList.value = serviceList
-                        .filter { it.serviceName == SERVICE_NAME }
-                        .mapNotNull { manager.resolveService(it) }
+                    _resolvedList.update {
+                        serviceList
+                            .filter { it.serviceName == SERVICE_NAME }
+                            .mapNotNull { manager.resolveService(it) }
+                    }
                 }
             }
         }
