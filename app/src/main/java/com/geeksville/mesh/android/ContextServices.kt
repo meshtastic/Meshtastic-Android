@@ -8,7 +8,6 @@ import android.bluetooth.BluetoothManager
 import android.companion.CompanionDeviceManager
 import android.content.Context
 import android.content.pm.PackageManager
-import android.hardware.usb.UsbManager
 import android.location.LocationManager
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -25,8 +24,6 @@ val Context.bluetoothManager: BluetoothManager?
 val Context.companionDeviceManager: CompanionDeviceManager?
     @SuppressLint("NewApi")
     get() = getSystemService(Context.COMPANION_DEVICE_SERVICE).takeIf { hasCompanionDeviceApi() } as? CompanionDeviceManager?
-
-val Context.usbManager: UsbManager get() = requireNotNull(getSystemService(Context.USB_SERVICE) as? UsbManager?) { "USB_SERVICE is not available"}
 
 val Context.notificationManager: NotificationManager get() = requireNotNull(getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager?)
 

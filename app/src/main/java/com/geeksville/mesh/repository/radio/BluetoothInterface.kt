@@ -1,11 +1,11 @@
 package com.geeksville.mesh.repository.radio
 
 import android.app.Application
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
+import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.exceptionReporter
@@ -79,7 +79,7 @@ A variable keepAllPackets, if set to true will suppress this behavior and instea
  */
 class BluetoothInterface @AssistedInject constructor(
     context: Application,
-    bluetoothAdapter: dagger.Lazy<BluetoothAdapter?>,
+    bluetoothRepository: BluetoothRepository,
     private val service: RadioInterfaceService,
     @Assisted val address: String,
 ) : IRadioInterface, Logging {
@@ -136,7 +136,7 @@ class BluetoothInterface @AssistedInject constructor(
     init {
         // Note: this call does no comms, it just creates the device object (even if the
         // device is off/not connected)
-        val device = bluetoothAdapter.get()?.getRemoteDevice(address)
+        val device = bluetoothRepository.getRemoteDevice(address)
         if (device != null) {
             info("Creating radio interface service.  device=${address.anonymize}")
 
