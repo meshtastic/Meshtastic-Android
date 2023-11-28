@@ -1,6 +1,5 @@
 package com.geeksville.mesh.repository.radio
 
-import android.app.Application
 import com.geeksville.mesh.*
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
@@ -23,7 +22,6 @@ private val defaultChannel = channel {
 
 /** A simulated interface that is used for testing in the simulator */
 class MockInterface @AssistedInject constructor(
-    private val context: Application,
     private val service: RadioInterfaceService,
     @Assisted val address: String,
 ) : IRadioInterface, Logging {
@@ -189,7 +187,7 @@ class MockInterface @AssistedInject constructor(
 
             MeshProtos.FromRadio.newBuilder().apply {
                 metadata = deviceMetadata {
-                    firmwareVersion = context.getString(R.string.cur_firmware_version)
+                    firmwareVersion = "${BuildConfig.VERSION_NAME}.abcdefg"
                 }
             },
 

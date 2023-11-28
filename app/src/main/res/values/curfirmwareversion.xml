@@ -1,1 +1,10 @@
-../../../../../../meshtastic-esp32/release/latest/curfirmwareversion.xml
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- This file is used by the android app for software updates.
+It reflects the firmware version included in: ./app/src/main/assets/firmware/
+Matches output from Meshtastic-device/bin/buildinfo.py 'long' & 'short' -->
+
+<resources>
+    <string name="cur_firmware_version" translatable="false">0.2.0.abcdefg</string>
+    <string name="short_firmware_version" translatable="false">0.2.0</string>
+</resources>

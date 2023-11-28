@@ -50,8 +50,7 @@ android {
         }
         google {
             dimension = 'default'
-            if (project.findProperty("useCrashlytics") == true) {
-                println("useCrashlytics plugins $useCrashlytics")
+            if (useCrashlytics) {
                 apply plugin: 'com.google.gms.google-services'
                 apply plugin: 'com.google.firebase.crashlytics'
             }

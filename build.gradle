@@ -21,8 +21,7 @@ buildscript {
         // in the individual module build.gradle files
 
         // Firebase Crashlytics
-        if (project.findProperty("useCrashlytics") == true) {
-            println("useCrashlytics classpath $useCrashlytics")
+        if (useCrashlytics) {
             classpath 'com.google.gms:google-services:4.4.0'
             classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
         }
