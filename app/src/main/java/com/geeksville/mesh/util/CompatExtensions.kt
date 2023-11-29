@@ -1,6 +1,9 @@
 package com.geeksville.mesh.util
 
 import android.app.PendingIntent
+import android.bluetooth.BluetoothDevice
+import android.companion.AssociationInfo
+import android.companion.CompanionDeviceManager
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -35,3 +38,16 @@ fun PackageManager.getPackageInfoCompat(packageName: String, flags: Int = 0): Pa
     } else {
         @Suppress("DEPRECATION") getPackageInfo(packageName, flags)
     }
+
+fun Intent.getAssociationResult(): String? = when {
+    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU ->
+        getParcelableExtraCompat<AssociationInfo>(CompanionDeviceManager.EXTRA_ASSOCIATION)
+            ?.deviceMacAddress?.toString()?.uppercase()
+
+    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O ->
+        @Suppress("DEPRECATION")
+        getParcelableExtra<BluetoothDevice>(CompanionDeviceManager.EXTRA_DEVICE)
+            ?.address
+
+    else -> null
+}

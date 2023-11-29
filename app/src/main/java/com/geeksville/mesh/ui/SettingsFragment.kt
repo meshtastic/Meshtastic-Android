@@ -1,7 +1,5 @@
 package com.geeksville.mesh.ui
 
-import android.bluetooth.BluetoothDevice
-import android.companion.CompanionDeviceManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -35,7 +33,7 @@ import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.SoftwareUpdateService
 import com.geeksville.mesh.util.exceptionToSnackbar
-import com.geeksville.mesh.util.getParcelableExtraCompat
+import com.geeksville.mesh.util.getAssociationResult
 import com.geeksville.mesh.util.onEditorAction
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -57,9 +55,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private val hasGps by lazy { requireContext().hasGps() }
     private val hasCompanionDeviceApi by lazy { requireContext().hasCompanionDeviceApi() }
-    private val useCompanionDeviceApi by lazy {
-        android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S && hasCompanionDeviceApi
-    }
 
     private fun doFirmwareUpdate() {
         model.meshService?.let { service ->
@@ -224,8 +219,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             ActivityResultContracts.StartIntentSenderForResult()
         ) {
             it.data
-                ?.getParcelableExtraCompat<BluetoothDevice>(CompanionDeviceManager.EXTRA_DEVICE)
-                ?.let { device -> scanModel.onSelected(BTScanModel.BLEDeviceListEntry(device)) }
+                ?.getAssociationResult()
+                ?.let { address -> scanModel.onSelectedBle(address) }
         }
 
         val requestBackgroundAndCheckLauncher =
@@ -489,7 +484,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 scanModel.stopScan()
             }, SCAN_PERIOD)
             scanning = true
-            scanModel.startScan(requireActivity().takeIf { useCompanionDeviceApi })
+            scanModel.startScan(requireActivity().takeIf { hasCompanionDeviceApi })
         } else {
             scanning = false
             scanModel.stopScan()

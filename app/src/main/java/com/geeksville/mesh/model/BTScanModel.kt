@@ -5,6 +5,7 @@ import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
+import android.companion.BluetoothLeDeviceFilter
 import android.companion.CompanionDeviceManager
 import android.content.*
 import android.hardware.usb.UsbManager
@@ -267,6 +268,11 @@ class BTScanModel @Inject constructor(
         }
     }
 
+    fun onSelectedBle(address: String): Boolean {
+        val device = bluetoothRepository.getRemoteDevice(address) ?: return false
+        return onSelected(BLEDeviceListEntry(device))
+    }
+
     private val _spinner = MutableLiveData(false)
     val spinner: LiveData<Boolean> get() = _spinner
 
@@ -281,24 +287,24 @@ class BTScanModel @Inject constructor(
     }
 
     @SuppressLint("NewApi")
-    private fun associationRequest(): AssociationRequest {
-        // To skip filtering based on name and supported feature flags (UUIDs),
-        // don't include calls to setNamePattern() and addServiceUuid(),
-        // respectively. This example uses Bluetooth.
-        // We only look for Mesh (rather than the full name) because NRF52 uses a very short name
-        val deviceFilter: BluetoothDeviceFilter = BluetoothDeviceFilter.Builder()
-            .setNamePattern(Pattern.compile(BLE_NAME_PATTERN))
-            // .addServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID), null)
-            .build()
-
-        // The argument provided in setSingleDevice() determines whether a single
-        // device name or a list of device names is presented to the user as
-        // pairing options.
-        return AssociationRequest.Builder()
-            .addDeviceFilter(deviceFilter)
-            .setSingleDevice(false)
-            .build()
-    }
+    private fun associationRequest(): AssociationRequest = AssociationRequest.Builder()
+        .addDeviceFilter(
+            BluetoothDeviceFilter.Builder()
+                .setNamePattern(Pattern.compile(BLE_NAME_PATTERN))
+                .build()
+        )
+        .addDeviceFilter(
+            BluetoothLeDeviceFilter.Builder()
+                .setNamePattern(Pattern.compile(BLE_NAME_PATTERN))
+                // .setScanFilter(
+                //     ScanFilter.Builder()
+                //         .setServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID))
+                //         .build()
+                // )
+                .build()
+        )
+        .setSingleDevice(false)
+        .build()
 
     @SuppressLint("NewApi")
     private fun startCompanionScan(context: Context) {
