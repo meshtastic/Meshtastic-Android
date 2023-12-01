@@ -14,7 +14,8 @@
         android:layout_margin="8dp"
         android:ems="10"
         android:hint="@string/message"
-        android:inputType="textShortMessage"
+        android:inputType="textMultiLine|textCapSentences"
+        android:maxLength="228"
         android:minHeight="48dp" />
 
     <EditText
