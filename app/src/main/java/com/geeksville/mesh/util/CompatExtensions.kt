@@ -2,6 +2,7 @@ package com.geeksville.mesh.util
 
 import android.app.PendingIntent
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.le.ScanResult
 import android.companion.AssociationInfo
 import android.companion.CompanionDeviceManager
 import android.content.Intent
@@ -46,8 +47,11 @@ fun Intent.getAssociationResult(): String? = when {
 
     android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O ->
         @Suppress("DEPRECATION")
-        getParcelableExtra<BluetoothDevice>(CompanionDeviceManager.EXTRA_DEVICE)
-            ?.address
+        when (val it = getParcelableExtra<Parcelable>(CompanionDeviceManager.EXTRA_DEVICE)) {
+            is BluetoothDevice -> it.address
+            is ScanResult -> it.device.address
+            else -> null
+        }
 
     else -> null
 }
