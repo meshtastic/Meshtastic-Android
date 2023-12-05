@@ -172,4 +172,5 @@
     <string name="waypoint_delete">Видалити мітку?</string>
     <string name="waypoint_new">Новий мітка</string>
     <string name="waypoint_received">Отримано точку маршруту: %s</string>
+    <string name="error_duty_cycle">Досягнуто обмеження заповнення каналу. Неможливо надіслати повідомлення зараз, будь ласка, спробуйте ще раз пізніше.</string>
 </resources>
