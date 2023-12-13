@@ -1,8 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base",
-    ":semanticCommitTypeAll(chore)"
+    ":dependencyDashboard",
+    ":semanticCommitTypeAll(chore)",
+    ":ignoreModulesAndTests",
+    "group:recommended",
+    "replacements:all",
+    "workarounds:all"
   ],
   "commitMessageTopic": "{{depName}}"
 }
