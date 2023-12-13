@@ -593,7 +593,6 @@ class UIViewModel @Inject constructor(
     private fun processPacketResponse(log: MeshLog?) {
         val packet = log?.meshPacket ?: return
         val data = packet.decoded
-        requestIds.update { it.apply { put(data.requestId, true) } }
 
         if (data?.portnumValue == Portnums.PortNum.TRACEROUTE_APP_VALUE) {
             val parsed = MeshProtos.RouteDiscovery.parseFrom(data.payload)
@@ -605,6 +604,7 @@ class UIViewModel @Inject constructor(
                 parsed.routeList.forEach { num -> append("${nodeName(num)} --> ") }
                 append(nodeName(packet.from))
             }
+            requestIds.update { it.apply { put(data.requestId, true) } }
         }
     }
 }

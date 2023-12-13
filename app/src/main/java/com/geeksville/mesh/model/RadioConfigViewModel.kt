@@ -123,7 +123,10 @@ class RadioConfigViewModel @Inject constructor(
                         val total = maxOf(requestIds.value.size, state.responseState.total)
                         state.copy(responseState = state.responseState.copy(total = total))
                     } else {
-                        state.copy(responseState = ResponseState.Loading())
+                        state.copy(
+                            route = "", // setter (response is PortNum.ROUTING_APP)
+                            responseState = ResponseState.Loading(),
+                        )
                     }
                 }
             } catch (ex: RemoteException) {
@@ -410,7 +413,7 @@ class RadioConfigViewModel @Inject constructor(
     private fun processPacketResponse(log: MeshLog?) {
         val packet = log?.meshPacket ?: return
         val data = packet.decoded
-        requestIds.update { it.apply { put(data.requestId, true) } }
+        val route = radioConfigState.value.route
 
         // val destNum = destNode.value?.num ?: return
         val debugMsg =
@@ -421,7 +424,8 @@ class RadioConfigViewModel @Inject constructor(
             debug(debugMsg.format(parsed.errorReason.name))
             if (parsed.errorReason != MeshProtos.Routing.Error.NONE) {
                 setResponseStateError(parsed.errorReason.name)
-            } else if (packet.from == destNum) {
+            } else if (packet.from == destNum && route.isEmpty()) {
+                requestIds.update { it.apply { put(data.requestId, true) } }
                 if (requestIds.value.filterValues { !it }.isEmpty()) setResponseStateSuccess()
                 else incrementCompleted()
             }
@@ -434,7 +438,7 @@ class RadioConfigViewModel @Inject constructor(
                 return
             }
             // check if destination is channel editor
-            val goChannels = radioConfigState.value.route == ConfigRoute.CHANNELS.name
+            val goChannels = route == ConfigRoute.CHANNELS.name
             when (parsed.payloadVariantCase) {
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
                     val response = parsed.getChannelResponse
@@ -493,6 +497,7 @@ class RadioConfigViewModel @Inject constructor(
 
                 else -> TODO()
             }
+            requestIds.update { it.apply { put(data.requestId, true) } }
         }
     }
 }
