@@ -222,17 +222,12 @@ data class NodeInfo(
 
     /**
      * true if the device was heard from recently
-     *
-     * Note: if a node has never had its time set, it will have a time of zero.  In that
-     * case assume it is online - so that we will start sending GPS updates
      */
     val isOnline: Boolean
         get() {
             val now = System.currentTimeMillis() / 1000
-            // FIXME - use correct timeout from the device settings
-            val timeout =
-                15 * 60 // Don't set this timeout too tight, or otherwise we will stop sending GPS helper positions to our device
-            return (now - lastHeard <= timeout) || lastHeard == 0
+            val timeout = 15 * 60
+            return (now - lastHeard <= timeout)
         }
 
     /// return the position if it is valid, else null
