@@ -46,7 +46,7 @@ jobs:
       run: ./gradlew testFdroidDebug testGoogleDebug
 
     - name: Upload debug artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: fdroidDebug
         path: app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
@@ -54,7 +54,7 @@ jobs:
 
     - name: Upload build reports
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: build-reports
         path: app/build/reports
