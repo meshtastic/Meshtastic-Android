@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -32,12 +32,12 @@ class NetworkRepository @Inject constructor(
         val callback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 availableNetworks.add(network)
-                trySend(availableNetworks.isNotEmpty()).isSuccess
+                trySend(availableNetworks.isNotEmpty())
             }
 
             override fun onLost(network: Network) {
                 availableNetworks.remove(network)
-                trySend(availableNetworks.isNotEmpty()).isSuccess
+                trySend(availableNetworks.isNotEmpty())
             }
         }
         val networkRequest = NetworkRequest.Builder().build()
@@ -51,12 +51,10 @@ class NetworkRepository @Inject constructor(
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) {
             nsdManagerLazy.get()?.let { manager ->
-                manager.discoverServices(SERVICE_TYPE).collect { serviceList ->
-                    _resolvedList.update {
-                        serviceList
-                            .filter { it.serviceName == SERVICE_NAME }
-                            .mapNotNull { manager.resolveService(it) }
-                    }
+                manager.discoverServices(SERVICE_TYPE).collectLatest { serviceList ->
+                    _resolvedList.value = serviceList
+                        .filter { it.serviceName.contains(SERVICE_NAME) }
+                        .mapNotNull { manager.resolveService(it) }
                 }
             }
         }

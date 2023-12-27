@@ -36,7 +36,7 @@ internal fun NsdManager.discoverServices(
         }
 
         override fun onServiceLost(serviceInfo: NsdServiceInfo) {
-            serviceList -= serviceInfo
+            serviceList.removeAll { it.serviceName == serviceInfo.serviceName }
             trySend(serviceList)
         }
     }
