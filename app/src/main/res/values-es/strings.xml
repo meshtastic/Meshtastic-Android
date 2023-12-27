@@ -170,4 +170,5 @@
     <string name="waypoint_delete">¿Eliminar punto de referencia?</string>
     <string name="waypoint_new">Nuevo punto de referencia</string>
     <string name="waypoint_received">Punto de referencia recibido: %s</string>
+    <string name="error_duty_cycle">Límite de Ciclo de Trabajo alcanzado. No se pueden enviar mensajes en este momento, por favor inténtalo de nuevo más tarde.</string>
 </resources>
