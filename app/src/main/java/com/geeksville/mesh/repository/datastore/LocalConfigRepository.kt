@@ -6,7 +6,6 @@ import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import java.io.IOException
 import javax.inject.Inject
 
@@ -87,7 +86,4 @@ class LocalConfigRepository @Inject constructor(
             preference.toBuilder().setBluetooth(config).build()
         }
     }
-
-    suspend fun fetchInitialLocalConfig() = localConfigStore.data.first()
-
 }

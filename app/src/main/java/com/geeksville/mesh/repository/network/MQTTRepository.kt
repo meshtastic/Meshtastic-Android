@@ -4,13 +4,13 @@ import com.geeksville.mesh.MeshProtos.MqttClientProxyMessage
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.subscribeList
 import com.geeksville.mesh.mqttClientProxyMessage
-import com.geeksville.mesh.repository.datastore.ChannelSetRepository
-import com.geeksville.mesh.repository.datastore.ModuleConfigRepository
+import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.util.ignoreException
 import com.google.protobuf.ByteString
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.first
 import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient
@@ -28,8 +28,7 @@ import javax.net.ssl.TrustManager
 
 @Singleton
 class MQTTRepository @Inject constructor(
-    private val channelSetRepository: ChannelSetRepository,
-    private val moduleConfigRepository: ModuleConfigRepository,
+    private val radioConfigRepository: RadioConfigRepository,
 ) : Logging {
 
     companion object {
@@ -50,14 +49,15 @@ class MQTTRepository @Inject constructor(
     private var mqttClient: MqttAsyncClient? = null
 
     suspend fun connect(callback: MqttCallbackExtended) {
-        val channelSet = channelSetRepository.fetchInitialChannelSet() ?: return
-        val mqttConfig = moduleConfigRepository.fetchInitialModuleConfig().mqtt
+        val ownerId = radioConfigRepository.nodeDB.myId.value ?: generateClientId()
+        val channelSet = radioConfigRepository.channelSetFlow.first()
+        val mqttConfig = radioConfigRepository.moduleConfigFlow.first().mqtt
 
         val sslContext = SSLContext.getInstance("TLS")
         // Create a custom SSLContext that trusts all certificates
         sslContext.init(null, arrayOf<TrustManager>(TrustAllX509TrustManager()), SecureRandom())
 
-        // val stat = mqttConfig.root.ifEmpty { DEFAULT_TOPIC_ROOT } + STAT_TOPIC_LEVEL + ownerId
+        val stat = mqttConfig.root.ifEmpty { DEFAULT_TOPIC_ROOT } + STAT_TOPIC_LEVEL + ownerId
         val connectOptions = MqttConnectOptions().apply {
             userName = mqttConfig.username
             password = mqttConfig.password.toCharArray()
@@ -66,7 +66,7 @@ class MQTTRepository @Inject constructor(
             if (mqttConfig.tlsEnabled) {
                 socketFactory = sslContext.socketFactory
             }
-            // setWill(stat, "offline".encodeToByteArray(), DEFAULT_QOS, true)
+            setWill(stat, "offline".encodeToByteArray(), DEFAULT_QOS, true)
         }
 
         val bufferOptions = DisconnectedBufferOptions().apply {
@@ -87,7 +87,7 @@ class MQTTRepository @Inject constructor(
 
         mqttClient = MqttAsyncClient(
             serverURI,
-            generateClientId(),
+            ownerId,
             MemoryPersistence(),
         )
         mqttClient?.apply {
@@ -135,17 +135,9 @@ class MQTTRepository @Inject constructor(
                 info("MQTT deliveryComplete messageId: ${token?.messageId}")
             }
         }
+        connect(callback)
 
-        try {
-            connect(callback)
-        } catch (ex: Exception) {
-            errormsg("MQTT Connect error: ${ex.message}")
-            close(ex)
-        }
-
-        awaitClose {
-            disconnect()
-        }
+        awaitClose { disconnect() }
     }
 
     fun publish(topic: String, data: ByteArray, retained: Boolean) {
@@ -155,9 +147,5 @@ class MQTTRepository @Inject constructor(
         } catch (ex: Exception) {
             errormsg("MQTT Publish error: ${ex.message}")
         }
-    }
-
-    fun publish(topic: String, message: String, retained: Boolean) {
-        publish(topic, message.encodeToByteArray(), retained)
     }
 }

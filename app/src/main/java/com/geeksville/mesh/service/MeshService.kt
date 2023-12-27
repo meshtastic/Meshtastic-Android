@@ -1376,7 +1376,7 @@ class MeshService : Service(), Logging {
         with(message) {
             when (payloadVariantCase) {
                 MeshProtos.MqttClientProxyMessage.PayloadVariantCase.TEXT -> {
-                    mqttRepository.publish(topic, text, retained)
+                    mqttRepository.publish(topic, text.encodeToByteArray(), retained)
                 }
 
                 MeshProtos.MqttClientProxyMessage.PayloadVariantCase.DATA -> {

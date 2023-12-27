@@ -8,7 +8,6 @@ import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.firstOrNull
 import java.io.IOException
 import javax.inject.Inject
 
@@ -68,7 +67,4 @@ class ChannelSetRepository @Inject constructor(
             preference.toBuilder().setLoraConfig(config).build()
         }
     }
-
-    suspend fun fetchInitialChannelSet() = channelSetStore.data.firstOrNull()
-
 }

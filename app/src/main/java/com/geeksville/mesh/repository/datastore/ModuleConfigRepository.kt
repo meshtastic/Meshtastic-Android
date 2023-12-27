@@ -6,7 +6,6 @@ import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import java.io.IOException
 import javax.inject.Inject
 
@@ -122,7 +121,4 @@ class ModuleConfigRepository @Inject constructor(
             preference.toBuilder().setDetectionSensor(config).build()
         }
     }
-
-    suspend fun fetchInitialModuleConfig() = moduleConfigStore.data.first()
-
 }
