@@ -96,17 +96,13 @@ class BluetoothRepository @Inject constructor(
 
     @SuppressLint("MissingPermission")
     internal suspend fun updateBluetoothState() {
-        val newState: BluetoothState = bluetoothAdapterLazy.get()?.takeIf {
-            application.hasBluetoothPermission().also { hasPerms ->
-                if (!hasPerms) errormsg("Still missing needed bluetooth permissions")
-            }
-        }?.let { adapter ->
-            /// ask the adapter if we have access
+        val hasPerms = application.hasBluetoothPermission()
+        val newState: BluetoothState = bluetoothAdapterLazy.get()?.let { adapter ->
             val enabled = adapter.isEnabled
-            val bondedDevices = adapter.bondedDevices ?: emptySet()
+            val bondedDevices = adapter.takeIf { hasPerms }?.bondedDevices ?: emptySet()
 
             BluetoothState(
-                hasPermissions = true,
+                hasPermissions = hasPerms,
                 enabled = enabled,
                 bondedDevices = if (!enabled) emptyList()
                 else bondedDevices.filter { it.name?.matches(Regex(BLE_NAME_PATTERN)) == true },
