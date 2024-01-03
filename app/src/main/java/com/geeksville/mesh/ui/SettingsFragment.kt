@@ -475,8 +475,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     }
 
     // per https://developer.android.com/guide/topics/connectivity/bluetooth/find-ble-devices
+    private var scanning = false
     private fun scanLeDevice() {
-        var scanning = false
+        if (!checkBTEnabled()) return
+        if (!hasCompanionDeviceApi) checkLocationEnabled()
 
         if (!scanning) { // Stops scanning after a pre-defined scan period.
             Handler(Looper.getMainLooper()).postDelayed({
@@ -500,8 +502,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 if (permissions.entries.all { it.value }) {
                     info("Bluetooth permissions granted")
-                    checkBTEnabled()
-                    if (!hasCompanionDeviceApi) checkLocationEnabled()
                     scanLeDevice()
                 } else {
                     warn("Bluetooth permissions denied")
@@ -512,11 +512,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         binding.changeRadioButton.setOnClickListener {
             debug("User clicked changeRadioButton")
-            scanLeDevice()
             val bluetoothPermissions = requireContext().getBluetoothPermissions()
             if (bluetoothPermissions.isEmpty()) {
-                checkBTEnabled()
-                if (!hasCompanionDeviceApi) checkLocationEnabled()
+                scanLeDevice()
             } else {
                 requireContext().rationaleDialog(
                     shouldShowRequestPermissionRationale(bluetoothPermissions)
@@ -538,8 +536,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
-    private fun checkBTEnabled() {
-        if (bluetoothViewModel.enabled.value == false) {
+    private fun checkBTEnabled(): Boolean = (bluetoothViewModel.enabled.value == true).also { enabled ->
+        if (!enabled) {
             warn("Telling user bluetooth is disabled")
             model.showSnackbar(R.string.bluetooth_disabled)
         }
