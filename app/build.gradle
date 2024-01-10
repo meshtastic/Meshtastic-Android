@@ -126,6 +126,18 @@ protobuf {
     }
 }
 
+// workaround for https://github.com/google/ksp/issues/1590
+androidComponents {
+    onVariants(selector().all(), { variant ->
+        afterEvaluate {
+            def capName = variant.name.capitalize()
+            tasks.getByName("ksp${capName}Kotlin") {
+                setSource(tasks.getByName("generate${capName}Proto").outputs)
+            }
+        }
+    })
+}
+
 dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
