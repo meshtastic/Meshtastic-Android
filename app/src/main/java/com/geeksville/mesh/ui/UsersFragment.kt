@@ -256,8 +256,14 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 holder.signalView.text = text
                 holder.signalView.visibility = View.VISIBLE
             } else {
-                if ((n.snr < 100f) && (n.rssi < 0)) {
-                    val text = "rssi:%d snr:%.1f".format(n.rssi, n.snr)
+                val text = buildString {
+                    if (n.channel > 0) append("ch:${n.channel}")
+                    if (n.snr < 100f && n.rssi < 0) {
+                        if (isNotEmpty()) append(" ")
+                        append("rssi:%d snr:%.1f".format(n.rssi, n.snr))
+                    }
+                }
+                if (text.isNotEmpty()) {
                     holder.signalView.text = text
                     holder.signalView.visibility = View.VISIBLE
                 } else {
