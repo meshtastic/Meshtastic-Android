@@ -89,24 +89,13 @@ data class Channel(
         }
 
     /**
-     * hash a string into an integer using the djb2 algorithm by Dan Bernstein
-     * http://www.cse.yorku.ca/~oz/hash.html
+     * Given a channel name and psk, return the (0 to 255) hash for that channel
      */
-    val hash: UInt // using UInt instead of Long to match RadioInterface.cpp results
-        get() {
-            var hash: UInt = 5381u
-            for (c in name) {
-                hash += (hash shl 5) + c.code.toUInt()
-                print("$c ${c.code} $hash ")
-            }
-            return hash
-        }
+    val hash: Int get() = xorHash(name.toByteArray()) xor xorHash(psk.toByteArray())
 
-    val channelNum: Int
-        get() = if (loraConfig.channelNum != 0) loraConfig.channelNum
-        else (hash % RegionInfo.numChannels(loraConfig).toUInt()).toInt() + 1
+    val channelNum: Int get() = loraConfig.channelNum(name)
 
-    val radioFreq: Float get() = RegionInfo.radioFreq(loraConfig, channelNum)
+    val radioFreq: Float get() = loraConfig.radioFreq(channelNum)
 
     override fun equals(other: Any?): Boolean = (other is Channel)
             && psk.toByteArray() contentEquals other.psk.toByteArray()

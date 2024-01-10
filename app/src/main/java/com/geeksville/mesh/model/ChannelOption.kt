@@ -5,9 +5,29 @@ import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.ModemPreset
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.RegionCode
 import com.geeksville.mesh.R
 
-fun LoRaConfig.bandwidth() = if (usePreset) {
+/**
+ * hash a string into an integer using the djb2 algorithm by Dan Bernstein
+ * http://www.cse.yorku.ca/~oz/hash.html
+ */
+private fun hash(name: String): UInt { // using UInt instead of Long to match RadioInterface.cpp results
+    var hash: UInt = 5381u
+    for (c in name) {
+        hash += (hash shl 5) + c.code.toUInt()
+    }
+    return hash
+}
+
+private val ModemPreset.bandwidth: Float
+    get() {
+        for (option in ChannelOption.entries) {
+            if (option.modemPreset == this) return option.bandwidth
+        }
+        return 0f
+    }
+
+private fun LoRaConfig.bandwidth() = if (usePreset) {
     val wideLora = region == RegionCode.LORA_24
-    ChannelOption.bandwidth(modemPreset) * if (wideLora) 3.25f else 1f
+    modemPreset.bandwidth * if (wideLora) 3.25f else 1f
 } else when (bandwidth) {
     31 -> .03125f
     62 -> .0625f
@@ -16,6 +36,28 @@ fun LoRaConfig.bandwidth() = if (usePreset) {
     800 -> .8125f
     1600 -> 1.6250f
     else -> bandwidth / 1000f
+}
+
+val LoRaConfig.numChannels: Int get() {
+    for (option in RegionInfo.entries) {
+        if (option.regionCode == region)
+            return ((option.freqEnd - option.freqStart) / bandwidth()).toInt()
+    }
+    return 0
+}
+
+internal fun LoRaConfig.channelNum(primaryName: String): Int {
+    return if (channelNum != 0) channelNum
+    else (hash(primaryName) % numChannels.toUInt()).toInt() + 1
+}
+
+internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
+    if (overrideFrequency != 0f) return overrideFrequency + frequencyOffset
+    for (option in RegionInfo.entries) {
+        if (option.regionCode == region)
+            return (option.freqStart + bandwidth() / 2) + (channelNum - 1) * bandwidth()
+    }
+    return 0f
 }
 
 enum class RegionInfo(
@@ -38,26 +80,8 @@ enum class RegionInfo(
     UA_433(RegionCode.UA_433, 433.0f, 434.7f),
     UA_868(RegionCode.UA_868, 868.0f, 868.6f),
     LORA_24(RegionCode.LORA_24, 2400.0f, 2483.5f),
-    UNSET(RegionCode.UNSET, 902.0f, 928.0f);
-
-    companion object {
-        fun numChannels(loraConfig: LoRaConfig): Int {
-            for (option in values()) {
-                if (option.regionCode == loraConfig.region)
-                    return ((option.freqEnd - option.freqStart) / loraConfig.bandwidth()).toInt()
-            }
-            return 0
-        }
-
-        fun radioFreq(loraConfig: LoRaConfig, channelNum: Int): Float = with(loraConfig) {
-            if (overrideFrequency != 0f) return overrideFrequency + frequencyOffset
-            for (option in values()) {
-                if (option.regionCode == region)
-                    return (option.freqStart + bandwidth() / 2) + (channelNum - 1) * bandwidth()
-            }
-            return 0f
-        }
-    }
+    UNSET(RegionCode.UNSET, 902.0f, 928.0f),
+    ;
 }
 
 enum class ChannelOption(
@@ -74,13 +98,4 @@ enum class ChannelOption(
     LONG_SLOW(ModemPreset.LONG_SLOW, R.string.modem_config_slow_long, .125f),
     VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, R.string.modem_config_very_long, .0625f),
     ;
-
-    companion object {
-        fun bandwidth(modemPreset: ModemPreset?): Float {
-            for (option in values()) {
-                if (option.modemPreset == modemPreset) return option.bandwidth
-            }
-            return 0f
-        }
-    }
 }

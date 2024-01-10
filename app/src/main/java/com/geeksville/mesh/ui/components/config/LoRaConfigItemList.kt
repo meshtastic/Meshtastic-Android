@@ -16,7 +16,7 @@ import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
-import com.geeksville.mesh.model.RegionInfo
+import com.geeksville.mesh.model.numChannels
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditListPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
@@ -136,7 +136,7 @@ fun LoRaConfigItemList(
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onFocusChanged = { isFocused = it.isFocused },
                 onValueChanged = {
-                    if (it <= RegionInfo.numChannels(loraInput)) // max numChannels
+                    if (it <= loraInput.numChannels) // total num of LoRa channels
                         loraInput = loraInput.copy { channelNum = it }
                 })
         }

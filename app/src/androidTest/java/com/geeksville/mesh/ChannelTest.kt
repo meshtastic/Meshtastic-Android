@@ -4,6 +4,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.URL_PREFIX
 import com.geeksville.mesh.model.getChannelUrl
+import com.geeksville.mesh.model.numChannels
 import com.geeksville.mesh.model.toChannelSet
 import org.junit.Assert
 import org.junit.Test
@@ -21,6 +22,20 @@ class ChannelTest {
 
         Assert.assertTrue(channelUrl.toString().startsWith(URL_PREFIX))
         Assert.assertEquals(channelUrl.toChannelSet(), ch)
+    }
+
+    @Test
+    fun channelHashGood() {
+        val ch = Channel.default
+
+        Assert.assertEquals(8, ch.hash)
+    }
+
+    @Test
+    fun numChannelsGood() {
+        val ch = Channel.default
+
+        Assert.assertEquals(104, ch.loraConfig.numChannels)
     }
 
     @Test
