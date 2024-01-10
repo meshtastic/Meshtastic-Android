@@ -538,23 +538,18 @@ class MeshService : Service(), Logging {
             null
         } else {
             val data = packet.decoded
-            val bytes = data.payload.toByteArray()
-            val fromId = toNodeID(packet.from)
-            val delayedBroadcast = packet.delayed == MeshPacket.Delayed.DELAYED_BROADCAST
-            val toId = if (delayedBroadcast) DataPacket.ID_BROADCAST else toNodeID(packet.to)
-            val hopLimit = packet.hopLimit
 
             // If the rxTime was not set by the device (because device software was old), guess at a time
             val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
 
             DataPacket(
-                from = fromId,
-                to = toId,
+                from = toNodeID(packet.from),
+                to = toNodeID(packet.to),
                 time = rxTime * 1000L,
                 id = packet.id,
                 dataType = data.portnumValue,
-                bytes = bytes,
-                hopLimit = hopLimit,
+                bytes = data.payload.toByteArray(),
+                hopLimit = packet.hopLimit,
                 channel = packet.channel,
             )
         }
