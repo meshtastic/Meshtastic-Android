@@ -17,6 +17,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.Refresh
@@ -128,7 +129,11 @@ fun EditChannelDialog(
                                     else LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
                                 )
                             }
-                        })
+                        },
+                        colors = TextFieldDefaults.outlinedTextFieldColors(
+                            cursorColor = MaterialTheme.colors.onPrimary,
+                        ),
+                    )
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Uplink enabled", // TODO move to resource strings
