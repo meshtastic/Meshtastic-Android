@@ -44,6 +44,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -351,7 +352,7 @@ class MeshService : Service(), Logging {
     /**
      * discard entire node db & message state - used when downloading a new db from the device
      */
-    private fun discardNodeDB() = synchronized(nodeDBbyNodeNum) {
+    private fun discardNodeDB() {
         debug("Discarding NodeDB")
         myNodeInfo = null
         nodeDBbyNodeNum.clear()
@@ -370,7 +371,7 @@ class MeshService : Service(), Logging {
     private var haveNodeDB = false
 
     // The database of active nodes, index is the node number
-    private val nodeDBbyNodeNum = mutableMapOf<Int, NodeInfo>()
+    private val nodeDBbyNodeNum = ConcurrentHashMap<Int, NodeInfo>()
 
     /// The database of active nodes, index is the node user ID string
     /// NOTE: some NodeInfos might be in only nodeDBbyNodeNum (because we don't yet know
@@ -425,8 +426,7 @@ class MeshService : Service(), Logging {
     /**
      * How many nodes are currently online (including our local node)
      */
-    private val numOnlineNodes
-        get() = synchronized(nodeDBbyNodeNum) { nodeDBbyNodeNum.values.count { it.isOnline } }
+    private val numOnlineNodes get() = nodeDBbyNodeNum.values.count { it.isOnline }
 
     private fun toNodeNum(id: String): Int = when (id) {
         DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
