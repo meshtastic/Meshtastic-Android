@@ -24,13 +24,6 @@ class MeshServiceBroadcasts(
                 payload
             )
         )
-
-        /*
-        // For the time being we ALSO broadcast using old ACTION_RECEIVED_DATA field for any oldschool opaque packets
-        // newer packets (that have a non zero portnum) are only broadcast using the standard mechanism.
-        if(payload.dataType == Portnums.PortNum.UNKNOWN_APP_VALUE)
-            explicitBroadcast(Intent(MeshService.ACTION_RECEIVED_DATA).putExtra(EXTRA_PAYLOAD, payload))
-         */
     }
 
     fun broadcastNodeChange(info: NodeInfo) {

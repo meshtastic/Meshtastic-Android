@@ -85,9 +85,6 @@ class MeshService : Service(), Logging {
 
         /// Intents broadcast by MeshService
 
-        /* @Deprecated(message = "Does not filter by port number.  For legacy reasons only broadcast for UNKNOWN_APP, switch to ACTION_RECEIVED")
-        const val ACTION_RECEIVED_DATA = "$prefix.RECEIVED_DATA" */
-
         private fun actionReceived(portNum: String) = "$prefix.RECEIVED.$portNum"
 
         /// generate a RECEIVED action filter string that includes either the portnumber as an int, or preferably a symbolic name from portnums.proto
