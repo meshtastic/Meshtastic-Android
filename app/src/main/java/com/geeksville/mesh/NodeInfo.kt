@@ -186,7 +186,7 @@ data class NodeInfo(
     var lastHeard: Int = 0, // the last time we've seen this node in secs since 1970
     @Embedded(prefix = "devMetrics_")
     var deviceMetrics: DeviceMetrics? = null,
-    val channel: Int = 0,
+    var channel: Int = 0,
     @Embedded(prefix = "envMetrics_")
     var environmentMetrics: EnvironmentMetrics? = null,
 ) : Parcelable {

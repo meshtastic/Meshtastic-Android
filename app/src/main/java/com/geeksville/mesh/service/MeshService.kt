@@ -432,10 +432,10 @@ class MeshService : Service(), Logging {
     }
 
     /// A helper function that makes it easy to update node info objects
-    private fun updateNodeInfo(
+    private inline fun updateNodeInfo(
         nodeNum: Int,
         withBroadcast: Boolean = true,
-        updateFn: (NodeInfo) -> Unit
+        crossinline updateFn: (NodeInfo) -> Unit,
     ) {
         val info = getOrCreateNodeInfo(nodeNum)
         updateFn(info)
@@ -647,7 +647,7 @@ class MeshService : Service(), Logging {
                     Portnums.PortNum.NODEINFO_APP_VALUE ->
                         if (!fromUs) {
                             val u = MeshProtos.User.parseFrom(data.payload)
-                            handleReceivedUser(packet.from, u)
+                            handleReceivedUser(packet.from, u, packet.channel)
                         }
 
                     // Handle new telemetry info
@@ -741,7 +741,7 @@ class MeshService : Service(), Logging {
     }
 
     /// Update our DB of users based on someone sending out a User subpacket
-    private fun handleReceivedUser(fromNum: Int, p: MeshProtos.User) {
+    private fun handleReceivedUser(fromNum: Int, p: MeshProtos.User, channel: Int = 0) {
         updateNodeInfo(fromNum) {
             val oldId = it.user?.id.orEmpty()
             it.user = MeshUser(
@@ -751,6 +751,7 @@ class MeshService : Service(), Logging {
                 p.hwModel,
                 p.isLicensed
             )
+            it.channel = channel
         }
     }
 
@@ -1244,11 +1245,13 @@ class MeshService : Service(), Logging {
                 it.position = Position(info.position)
             }
 
+            it.lastHeard = info.lastHeard
+
             if (info.hasDeviceMetrics()) {
                 it.deviceMetrics = DeviceMetrics(info.deviceMetrics)
             }
 
-            it.lastHeard = info.lastHeard
+            it.channel = info.channel
         }
     }
 
@@ -1513,16 +1516,17 @@ class MeshService : Service(), Logging {
                     it.time = time
                 }.build()
 
-                // Also update our own map for our nodenum, by handling the packet just like packets from other users
+                // Also update our own map for our nodeNum, by handling the packet just like packets from other users
                 handleReceivedPosition(mi.myNodeNum, position)
 
-                val fullPacket =
-                    newMeshPacketTo(idNum).buildMeshPacket(priority = MeshPacket.Priority.BACKGROUND) {
-                        // Use the new position as data format
-                        portnumValue = Portnums.PortNum.POSITION_APP_VALUE
-                        payload = position.toByteString()
-                        this.wantResponse = wantResponse
-                    }
+                val fullPacket = newMeshPacketTo(idNum).buildMeshPacket(
+                    channel = if (destNum == null) 0 else nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                    priority = MeshPacket.Priority.BACKGROUND,
+                ) {
+                    portnumValue = Portnums.PortNum.POSITION_APP_VALUE
+                    payload = position.toByteString()
+                    this.wantResponse = wantResponse
+                }
 
                 // send the packet into the mesh
                 sendToRadio(fullPacket)
@@ -1831,7 +1835,11 @@ class MeshService : Service(), Logging {
         }
 
         override fun requestTraceroute(requestId: Int, destNum: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(wantAck = true, id = requestId) {
+            sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
+                wantAck = true,
+                id = requestId,
+                channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
+            ) {
                 portnumValue = Portnums.PortNum.TRACEROUTE_APP_VALUE
                 payload = routeDiscovery {}.toByteString()
                 wantResponse = true

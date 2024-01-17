@@ -86,11 +86,11 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             popup.setOnMenuItemClickListener { item: MenuItem ->
                 when (item.itemId) {
                     R.id.direct_message -> {
-                        debug("calling MessagesFragment filter: 0${user.id}")
+                        debug("calling MessagesFragment filter: ${node.channel}${user.id}")
                         setFragmentResult(
                             "requestKey",
                             bundleOf(
-                                "contactKey" to "0${user.id}",
+                                "contactKey" to "${node.channel}${user.id}",
                                 "contactName" to user.longName
                             )
                         )
