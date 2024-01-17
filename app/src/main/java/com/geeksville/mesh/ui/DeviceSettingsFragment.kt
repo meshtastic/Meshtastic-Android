@@ -80,6 +80,7 @@ import com.geeksville.mesh.ui.components.config.MQTTConfigItemList
 import com.geeksville.mesh.ui.components.config.NeighborInfoConfigItemList
 import com.geeksville.mesh.ui.components.config.NetworkConfigItemList
 import com.geeksville.mesh.ui.components.config.PacketResponseStateDialog
+import com.geeksville.mesh.ui.components.config.PaxcounterConfigItemList
 import com.geeksville.mesh.ui.components.config.PositionConfigItemList
 import com.geeksville.mesh.ui.components.config.PowerConfigItemList
 import com.geeksville.mesh.ui.components.config.RangeTestConfigItemList
@@ -175,6 +176,7 @@ enum class ModuleRoute(val title: String, val configType: Int = 0) {
     NEIGHBOR_INFO("Neighbor Info", 9),
     AMBIENT_LIGHTING("Ambient Lighting", 10),
     DETECTION_SENSOR("Detection Sensor", 11),
+    PAXCOUNTER("Paxcounter", 12),
     ;
 }
 
@@ -587,6 +589,16 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { detectionSensorInput ->
                     val config = moduleConfig { detectionSensor = detectionSensorInput }
+                    viewModel.setModuleConfig(destNum, config)
+                }
+            )
+        }
+        composable(ModuleRoute.PAXCOUNTER.name) {
+            PaxcounterConfigItemList(
+                paxcounterConfig = radioConfigState.moduleConfig.paxcounter,
+                enabled = connected,
+                onSaveClicked = { paxcounterConfigInput ->
+                    val config = moduleConfig { paxcounter = paxcounterConfigInput }
                     viewModel.setModuleConfig(destNum, config)
                 }
             )
