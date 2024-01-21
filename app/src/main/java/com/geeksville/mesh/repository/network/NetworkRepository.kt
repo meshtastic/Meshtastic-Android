@@ -10,6 +10,7 @@ import com.geeksville.mesh.CoroutineDispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,9 +30,10 @@ class NetworkRepository @Inject constructor(
 
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) {
-            nsdManagerLazy.get()?.let { manager ->
-                manager.discoverServices(SERVICE_TYPE).collectLatest { serviceList ->
-                    _resolvedList.value = serviceList
+            val manager = nsdManagerLazy.get() ?: return@launch
+            manager.discoverServices(SERVICE_TYPE).collectLatest { serviceList ->
+                _resolvedList.update {
+                    serviceList
                         .filter { it.serviceName.contains(SERVICE_NAME) }
                         .mapNotNull { manager.resolveService(it) }
                 }
