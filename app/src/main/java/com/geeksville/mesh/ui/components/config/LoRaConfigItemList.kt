@@ -182,6 +182,14 @@ fun LoRaConfigItemList(
         }
 
         item {
+            SwitchPreference(title = "Ignore MQTT",
+                checked = loraInput.ignoreMqtt,
+                enabled = enabled,
+                onCheckedChange = { loraInput = loraInput.copy { ignoreMqtt = it } })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = loraInput != loraConfig,
                 onCancelClicked = {
