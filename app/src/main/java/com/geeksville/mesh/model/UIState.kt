@@ -453,11 +453,11 @@ class UIViewModel @Inject constructor(
                 val nodesById = nodes.values.associateBy { it.num }.toMutableMap()
                 val nodePositions = mutableMapOf<Int, MeshProtos.Position?>()
 
-                writer.appendLine("date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload")
+                writer.appendLine("date;time;from;sender name;sender lat;sender long;rx lat;rx long;rx elevation;rx snr;distance;hop limit;payload")
 
                 // Packets are ordered by time, we keep most recent position of
                 // our device in localNodePosition.
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd,HH:mm:ss", Locale.getDefault())
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd;HH:mm:ss", Locale.getDefault())
                 meshLogRepository.getAllLogsInReceiveOrder(Int.MAX_VALUE).first().forEach { packet ->
                     // If we get a NodeInfo packet, use it to update our position data (if valid)
                     packet.nodeInfo?.let { nodeInfo ->
@@ -520,7 +520,7 @@ class UIViewModel @Inject constructor(
                             }
 
                             //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload
-                            writer.appendLine("$rxDateTime,$rxFrom,$senderName,$senderLat,$senderLong,$rxLat,$rxLong,$rxAlt,$rxSnr,$dist,$hopLimit,$payload")
+                            writer.appendLine("$rxDateTime;$rxFrom;$senderName;$senderLat;$senderLong;$rxLat;$rxLong;$rxAlt;$rxSnr;$dist;$hopLimit;$payload")
                         }
                     }
                 }
