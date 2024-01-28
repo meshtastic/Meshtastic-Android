@@ -2,14 +2,26 @@ package com.geeksville.mesh.repository.network
 
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
-internal fun NsdManager.discoverServices(
+@OptIn(ExperimentalCoroutinesApi::class)
+internal fun NsdManager.serviceList(
+    serviceType: String,
+    serviceName: String,
+): Flow<List<NsdServiceInfo>> = discoverServices(serviceType).mapLatest { serviceList ->
+    serviceList
+        .filter { it.serviceName.contains(serviceName) }
+        .mapNotNull { resolveService(it) }
+}
+
+private fun NsdManager.discoverServices(
     serviceType: String,
     protocolType: Int = NsdManager.PROTOCOL_DNS_SD,
 ): Flow<List<NsdServiceInfo>> = callbackFlow {
@@ -40,11 +52,13 @@ internal fun NsdManager.discoverServices(
             trySend(serviceList)
         }
     }
+    trySend(emptyList()) // Emit an initial empty list
     discoverServices(serviceType, protocolType, discoveryListener)
+
     awaitClose { stopServiceDiscovery(discoveryListener) }
 }
 
-internal suspend fun NsdManager.resolveService(
+private suspend fun NsdManager.resolveService(
     serviceInfo: NsdServiceInfo,
 ): NsdServiceInfo? = suspendCancellableCoroutine { continuation ->
     val listener = object : NsdManager.ResolveListener {
