@@ -7,16 +7,37 @@ import android.content.pm.ServiceInfo
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.app.ServiceCompat
+import com.geeksville.mesh.AdminProtos
+import com.geeksville.mesh.AppOnlyProtos
+import com.geeksville.mesh.BuildConfig
+import com.geeksville.mesh.ChannelProtos
+import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.CoroutineDispatchers
+import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.DeviceMetrics
+import com.geeksville.mesh.EnvironmentMetrics
+import com.geeksville.mesh.IMeshService
+import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
+import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.MeshProtos.MeshPacket
+import com.geeksville.mesh.MeshProtos.ToRadio
+import com.geeksville.mesh.MeshUser
+import com.geeksville.mesh.MessageStatus
+import com.geeksville.mesh.ModuleConfigProtos
+import com.geeksville.mesh.MyNodeInfo
+import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.Portnums
+import com.geeksville.mesh.Position
+import com.geeksville.mesh.R
+import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.*
-import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
-import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
-import com.geeksville.mesh.MeshProtos.MeshPacket
-import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.mesh.android.hasBackgroundPermission
+import com.geeksville.mesh.concurrent.handledLaunch
+import com.geeksville.mesh.config
+import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.MeshLog
@@ -28,7 +49,13 @@ import com.geeksville.mesh.repository.network.MQTTRepository
 import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
-import com.geeksville.mesh.util.*
+import com.geeksville.mesh.routeDiscovery
+import com.geeksville.mesh.util.anonymize
+import com.geeksville.mesh.util.exceptionReporter
+import com.geeksville.mesh.util.toAnnotatedString
+import com.geeksville.mesh.util.toOneLineString
+import com.geeksville.mesh.util.toPIIString
+import com.geeksville.mesh.util.toRemoteExceptions
 import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
 import dagger.Lazy
@@ -43,7 +70,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeoutOrNull
-import java.util.*
+import java.util.Random
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
@@ -214,7 +242,7 @@ class MeshService : Service(), Logging {
                 UUID.randomUUID().toString(),
                 "Packet",
                 System.currentTimeMillis(),
-                p.packet.toString()
+                p.packet.toAnnotatedString()
             )
             insertMeshLog(packetToSave)
         }
@@ -929,7 +957,7 @@ class MeshService : Service(), Logging {
                 UUID.randomUUID().toString(),
                 "Packet",
                 System.currentTimeMillis(),
-                packet.toString()
+                packet.toAnnotatedString()
             )
             insertMeshLog(packetToSave)
 
@@ -1262,7 +1290,7 @@ class MeshService : Service(), Logging {
             UUID.randomUUID().toString(),
             "NodeInfo",
             System.currentTimeMillis(),
-            info.toString()
+            info.toAnnotatedString()
         )
         insertMeshLog(packetToSave)
 
@@ -1333,7 +1361,7 @@ class MeshService : Service(), Logging {
             UUID.randomUUID().toString(),
             "MyNodeInfo",
             System.currentTimeMillis(),
-            myInfo.toString()
+            myInfo.toAnnotatedString()
         )
         insertMeshLog(packetToSave)
 

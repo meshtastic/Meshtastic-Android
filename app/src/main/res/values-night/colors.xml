@@ -10,4 +10,5 @@
     <color name="colorMenuItem">#FFFFFF</color>
     <color name="selectedColor">#67EA94</color>
     <color name="unselectedColor">#AAAAAA</color>
+    <color name="colorAnnotation">#039BE5</color>
 </resources>
