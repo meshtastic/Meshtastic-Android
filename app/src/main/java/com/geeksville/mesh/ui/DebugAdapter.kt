@@ -48,7 +48,7 @@ class DebugAdapter internal constructor(
      * Enhance the raw message by visually distinguishing the annotations prior to when
      * the data was added to the database.
      *
-     * @see com.geeksville.mesh.util.MeshProtosExtensionsKt.annotateRawMessage
+     * @see com.geeksville.mesh.ui.DebugFragment.annotateMeshLogs
      */
     private fun annotateMessage(current: MeshLog): CharSequence {
         val spannable = current.raw_message.toSpannable()

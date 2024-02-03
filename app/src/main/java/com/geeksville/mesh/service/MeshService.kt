@@ -52,7 +52,6 @@ import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
 import com.geeksville.mesh.routeDiscovery
 import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.exceptionReporter
-import com.geeksville.mesh.util.toAnnotatedString
 import com.geeksville.mesh.util.toOneLineString
 import com.geeksville.mesh.util.toPIIString
 import com.geeksville.mesh.util.toRemoteExceptions
@@ -242,7 +241,7 @@ class MeshService : Service(), Logging {
                 UUID.randomUUID().toString(),
                 "Packet",
                 System.currentTimeMillis(),
-                p.packet.toAnnotatedString()
+                p.packet.toString()
             )
             insertMeshLog(packetToSave)
         }
@@ -957,7 +956,7 @@ class MeshService : Service(), Logging {
                 UUID.randomUUID().toString(),
                 "Packet",
                 System.currentTimeMillis(),
-                packet.toAnnotatedString()
+                packet.toString()
             )
             insertMeshLog(packetToSave)
 
@@ -1290,7 +1289,7 @@ class MeshService : Service(), Logging {
             UUID.randomUUID().toString(),
             "NodeInfo",
             System.currentTimeMillis(),
-            info.toAnnotatedString()
+            info.toString()
         )
         insertMeshLog(packetToSave)
 
@@ -1361,7 +1360,7 @@ class MeshService : Service(), Logging {
             UUID.randomUUID().toString(),
             "MyNodeInfo",
             System.currentTimeMillis(),
-            myInfo.toAnnotatedString()
+            myInfo.toString()
         )
         insertMeshLog(packetToSave)
 
