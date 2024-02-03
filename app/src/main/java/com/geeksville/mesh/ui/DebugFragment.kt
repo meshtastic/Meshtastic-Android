@@ -9,10 +9,16 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.R
+import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.databinding.FragmentDebugBinding
 import com.geeksville.mesh.model.UIViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import java.util.Locale
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class DebugFragment : Fragment() {
@@ -23,6 +29,9 @@ class DebugFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val model: UIViewModel by activityViewModels()
+
+    @Inject
+    lateinit var dispatchers: CoroutineDispatchers
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,7 +56,11 @@ class DebugFragment : Fragment() {
         binding.closeButton.setOnClickListener {
             parentFragmentManager.popBackStack()
         }
-        model.meshLog.asLiveData().observe(viewLifecycleOwner) { logs ->
+        model.meshLog
+            .map(this::annotateMeshLogs)
+            .flowOn(dispatchers.default)
+            .asLiveData()
+            .observe(viewLifecycleOwner) { logs ->
             logs?.let { adapter.setLogs(it) }
         }
     }
@@ -55,5 +68,69 @@ class DebugFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    /**
+     * Transform the input list by enhancing the raw message with annotations.
+     */
+    private fun annotateMeshLogs(logs: List<MeshLog>): List<MeshLog> {
+        return logs.map { meshLog ->
+            val annotated = when (meshLog.message_type) {
+                "Packet" -> {
+                    meshLog.meshPacket?.let { packet ->
+                        annotateRawMessage(meshLog.raw_message, packet.from, packet.to)
+                    }
+                }
+                "NodeInfo" -> {
+                    meshLog.nodeInfo?.let { nodeInfo ->
+                        annotateRawMessage(meshLog.raw_message, nodeInfo.num)
+                    }
+                }
+                "MyNodeInfo" -> {
+                    meshLog.myNodeInfo?.let { nodeInfo ->
+                        annotateRawMessage(meshLog.raw_message, nodeInfo.myNodeNum)
+                    }
+                }
+                else -> null
+            }
+            if (annotated == null) {
+                meshLog
+            } else {
+                meshLog.copy(raw_message = annotated)
+            }
+        }
+    }
+
+    /**
+     * Annotate the raw message string with the node IDs provided, in hex, if they are present.
+     */
+    private fun annotateRawMessage(rawMessage: String, vararg nodeIds: Int): String {
+        val msg = StringBuilder(rawMessage)
+        var mutated = false
+        nodeIds.forEach { nodeId ->
+            mutated = mutated or msg.annotateNodeId(nodeId)
+        }
+        return if (mutated) {
+            return msg.toString()
+        } else {
+            rawMessage
+        }
+    }
+
+    /**
+     * Look for a single node ID integer in the string and annotate it with the hex equivalent
+     * if found.
+     */
+    private fun StringBuilder.annotateNodeId(nodeId: Int): Boolean {
+        val nodeIdStr = nodeId.toUInt().toString()
+        indexOf(nodeIdStr).takeIf { it >= 0 }?.let { idx ->
+            insert(idx + nodeIdStr.length, " (${nodeId.asNodeId()})")
+            return true
+        }
+        return false
+    }
+
+    private fun Int.asNodeId(): String {
+        return "!%08x".format(Locale.getDefault(), this)
     }
 }

@@ -42,6 +42,19 @@ data class MeshLog(@PrimaryKey val uuid: String,
             return null
         }
 
+    val myNodeInfo: MeshProtos.MyNodeInfo?
+        get() {
+            if (message_type == "MyNodeInfo") {
+                val builder = MeshProtos.MyNodeInfo.newBuilder()
+                try {
+                    TextFormat.getParser().merge(raw_message, builder)
+                    return builder.build()
+                } catch (e: IOException) {
+                }
+            }
+            return null
+        }
+
     val position: MeshProtos.Position?
         get() {
             return meshPacket?.run {
