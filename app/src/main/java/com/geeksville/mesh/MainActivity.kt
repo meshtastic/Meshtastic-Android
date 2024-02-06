@@ -340,8 +340,6 @@ class MainActivity : AppCompatActivity(), Logging {
                                 else {
                                     // If our app is too old/new, we probably don't understand the new DeviceConfig messages, so we don't read them until here
 
-                                    model.updateNodesFromDevice()
-
                                     // we have a connection to our device now, do the channel change
                                     perhapsChangeChannel()
                                 }
@@ -452,11 +450,6 @@ class MainActivity : AppCompatActivity(), Logging {
                 try {
                     val connectionState =
                         MeshService.ConnectionState.valueOf(service.connectionState())
-
-                    // if we are not connected, onMeshConnectionChange won't fetch nodes from the service
-                    // in that case, we do it here - because the service certainly has a better idea of node db that we have
-                    if (connectionState != MeshService.ConnectionState.CONNECTED)
-                        model.updateNodesFromDevice()
 
                     // We won't receive a notify for the initial state of connection, so we force an update here
                     onMeshConnectionChanged(connectionState)

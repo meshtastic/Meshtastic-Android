@@ -102,6 +102,7 @@ internal fun getChannelList(
 @HiltViewModel
 class UIViewModel @Inject constructor(
     private val app: Application,
+    val nodeDB: NodeDB,
     private val radioConfigRepository: RadioConfigRepository,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: MeshLogRepository,
@@ -112,7 +113,6 @@ class UIViewModel @Inject constructor(
 
     var actionBarMenu: Menu? = null
     val meshService: IMeshService? get() = radioConfigRepository.meshService
-    val nodeDB = radioConfigRepository.nodeDB
 
     val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()
     val selectedBluetooth get() = radioInterfaceService.getDeviceAddress()?.getOrNull(0) == 'x'
@@ -139,11 +139,8 @@ class UIViewModel @Inject constructor(
     val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
 
     // hardware info about our local device (can be null)
-    private val _myNodeInfo = MutableStateFlow<MyNodeInfo?>(null)
-    val myNodeInfo: StateFlow<MyNodeInfo?> get() = _myNodeInfo
-
-    private val _ourNodeInfo = MutableStateFlow<NodeInfo?>(null)
-    val ourNodeInfo: StateFlow<NodeInfo?> = _ourNodeInfo
+    val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
+    val ourNodeInfo: StateFlow<NodeInfo?> get() = nodeDB.ourNodeInfo
 
     private val requestIds = MutableStateFlow<HashMap<Int, Boolean>>(hashMapOf())
 
@@ -155,13 +152,6 @@ class UIViewModel @Inject constructor(
             _snackbarText.value = it
             radioInterfaceService.clearErrorMessage()
         }.launchIn(viewModelScope)
-
-        radioConfigRepository.myNodeInfoFlow().onEach {
-            _myNodeInfo.value = it
-        }.launchIn(viewModelScope)
-
-        radioConfigRepository.nodeInfoFlow().onEach(nodeDB::setNodes)
-            .launchIn(viewModelScope)
 
         viewModelScope.launch {
             meshLogRepository.getAllLogs().collect { logs ->
@@ -221,7 +211,7 @@ class UIViewModel @Inject constructor(
     }.asLiveData()
 
     private val _destNode = MutableStateFlow<NodeInfo?>(null)
-    val destNode: StateFlow<NodeInfo?> get() = if (_destNode.value != null) _destNode else _ourNodeInfo
+    val destNode: StateFlow<NodeInfo?> get() = if (_destNode.value != null) _destNode else ourNodeInfo
 
     /**
      * Sets the destination [NodeInfo] used in Radio Configuration.
@@ -364,24 +354,6 @@ class UIViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         debug("ViewModel cleared")
-    }
-
-    /// Pull our latest node db from the device
-    fun updateNodesFromDevice() {
-        meshService?.let { service ->
-            // Update our nodeinfos based on data from the device
-            val nodes = service.nodes.associateBy { it.user?.id!! }
-            nodeDB.setNodes(nodes)
-
-            try {
-                // Pull down our real node ID - This must be done AFTER reading the nodedb because we need the DB to find our nodeinof object
-                val myId = service.myId
-                nodeDB.setMyId(myId)
-                _ourNodeInfo.value = nodes[myId]
-            } catch (ex: Exception) {
-                warn("Ignoring failure to get myId, service is probably just uninited... ${ex.message}")
-            }
-        }
     }
 
     private inline fun updateLoraConfig(crossinline body: (Config.LoRaConfig) -> Config.LoRaConfig) {
