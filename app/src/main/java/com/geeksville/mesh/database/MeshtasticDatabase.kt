@@ -10,7 +10,6 @@ import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.database.dao.PacketDao
 import com.geeksville.mesh.database.dao.MeshLogDao
-import com.geeksville.mesh.database.dao.MyNodeInfoDao
 import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.database.dao.QuickChatActionDao
 import com.geeksville.mesh.database.entity.MeshLog
@@ -33,7 +32,6 @@ import com.geeksville.mesh.database.entity.QuickChatAction
 )
 @TypeConverters(Converters::class)
 abstract class MeshtasticDatabase : RoomDatabase() {
-    abstract fun myNodeInfoDao(): MyNodeInfoDao
     abstract fun nodeInfoDao(): NodeInfoDao
     abstract fun packetDao(): PacketDao
     abstract fun meshLogDao(): MeshLogDao
