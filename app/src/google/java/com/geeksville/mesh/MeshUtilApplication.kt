@@ -6,7 +6,8 @@ import com.geeksville.mesh.android.BuildUtils.isEmulator
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.util.Exceptions
-import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.crashlytics.crashlytics
+import com.google.firebase.Firebase
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
@@ -20,7 +21,7 @@ class MeshUtilApplication : GeeksvilleApplication() {
         // We default to off in the manifest - we turn on here if the user approves
         // leave off when running in the debugger
         if (!isEmulator && (!BuildConfig.DEBUG || !Debug.isDebuggerConnected())) {
-            val crashlytics = FirebaseCrashlytics.getInstance()
+            val crashlytics = Firebase.crashlytics
             crashlytics.setCrashlyticsCollectionEnabled(isAnalyticsAllowed)
             crashlytics.setCustomKey("debug_build", BuildConfig.DEBUG)
 

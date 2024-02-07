@@ -3,15 +3,26 @@ package com.geeksville.mesh.analytics
 import android.content.Context
 import android.os.Bundle
 import com.geeksville.mesh.android.AppPrefs
-import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.analytics
+import com.google.firebase.analytics.logEvent
+import com.google.firebase.Firebase
+
+class DataPair(val name: String, valueIn: Any?) {
+    val value = valueIn ?: "null"
+
+    /// An accumulating firebase event - only one allowed per event
+    constructor(d: Double) : this(FirebaseAnalytics.Param.VALUE, d)
+    constructor(d: Int) : this(FirebaseAnalytics.Param.VALUE, d)
+}
 
 /**
  * Implement our analytics API using Firebase Analytics
  */
-class GoogleAnalytics(context: Context) : AnalyticsProvider, Logging {
+class FirebaseAnalytics(context: Context) : AnalyticsProvider, Logging {
 
-    val t = com.google.firebase.analytics.FirebaseAnalytics.getInstance(context)
+    val t = Firebase.analytics
 
     init {
         val pref = AppPrefs(context)
@@ -65,10 +76,9 @@ class GoogleAnalytics(context: Context) : AnalyticsProvider, Logging {
      */
     override fun sendScreenView(name: String) {
         debug("Analytics: start screen $name")
-        GeeksvilleApplication.currentActivity?.let {
-            t.setCurrentScreen(
-                it, name, null
-            )
+        t.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {
+            param(FirebaseAnalytics.Param.SCREEN_NAME, name)
+            param(FirebaseAnalytics.Param.SCREEN_CLASS, "MainActivity")
         }
     }
 
