@@ -93,7 +93,7 @@ android {
         buildConfig true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
+        kotlinCompilerExtensionVersion = "1.5.9"
     }
     // Configure the build-logic plugins to target JDK 17
     // This matches the JDK used to build the project, and is not related to what is running on device.
