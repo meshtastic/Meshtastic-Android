@@ -31,7 +31,9 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.BuildConfig
@@ -50,6 +52,7 @@ import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.model.map.MarkerWithLabel
+import com.geeksville.mesh.ui.MessagesFragment
 import com.geeksville.mesh.ui.ScreenFragment
 import com.geeksville.mesh.ui.map.components.CacheLayout
 import com.geeksville.mesh.ui.map.components.DownloadButton
@@ -104,11 +107,27 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 AppCompatTheme {
-                    MapView(model)
+                    MapView(model, ::openDirectMessage)
                 }
             }
         }
     }
+
+    private fun openDirectMessage(node: NodeInfo) {
+        val user = node.user ?: return
+        setFragmentResult(
+            "requestKey",
+            bundleOf(
+                "contactKey" to "${node.channel}${user.id}",
+                "contactName" to user.longName
+            )
+        )
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.mainActivityLayout, MessagesFragment())
+            .addToBackStack(null)
+            .commit()
+    }
+
 }
 
 @Composable
@@ -122,7 +141,10 @@ private fun MapView.UpdateMarkers(
 }
 
 @Composable
-fun MapView(model: UIViewModel = viewModel()) {
+fun MapView(
+    model: UIViewModel = viewModel(),
+    openDirectMessage: (NodeInfo) -> Unit = { },
+) {
 
     // UI Elements
     var cacheEstimate by remember { mutableStateOf("") }
@@ -206,7 +228,10 @@ fun MapView(model: UIViewModel = viewModel()) {
         val displayUnits = model.config.display.units.number
         return nodesWithPosition.map { node ->
             val (p, u) = node.position!! to node.user!!
-            MarkerWithLabel(this, "${u.shortName} ${formatAgo(p.time)}").apply {
+            MarkerWithLabel(
+                mapView = this,
+                label = "${u.shortName} ${formatAgo(p.time)}"
+            ).apply {
                 id = u.id
                 title = "${u.longName} ${node.batteryStr}"
                 snippet = p.gpsString(gpsFormat)
@@ -217,6 +242,11 @@ fun MapView(model: UIViewModel = viewModel()) {
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 position = GeoPoint(p.latitude, p.longitude)
                 icon = markerIcon
+
+                setOnLongClickListener {
+                    openDirectMessage(node)
+                    true
+                }
             }
         }
     }
@@ -655,6 +685,7 @@ fun MapView(model: UIViewModel = viewModel()) {
             }
         }
     }
+
     if (showEditWaypointDialog != null) {
         EditWaypointDialog(
             waypoint = showEditWaypointDialog ?: return,
