@@ -138,6 +138,9 @@ class UIViewModel @Inject constructor(
     private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
     val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
 
+    private val _focusedNode = MutableStateFlow<NodeInfo?>(null)
+    val focusedNode: StateFlow<NodeInfo?> = _focusedNode
+
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
     val ourNodeInfo: StateFlow<NodeInfo?> get() = nodeDB.ourNodeInfo
@@ -578,5 +581,13 @@ class UIViewModel @Inject constructor(
             }
             requestIds.update { it.apply { put(data.requestId, true) } }
         }
+    }
+
+    private val _currentTab = MutableLiveData(0)
+    val currentTab: LiveData<Int> get() = _currentTab
+
+    fun focusUserNode(node: NodeInfo?) {
+        _currentTab.value = 1 // TODO not a magic number
+        _focusedNode.value = node
     }
 }

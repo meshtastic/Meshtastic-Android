@@ -514,6 +514,7 @@ class MainActivity : AppCompatActivity(), Logging {
         bluetoothViewModel.enabled.removeObservers(this)
         model.requestChannelUrl.removeObservers(this)
         model.snackbarText.removeObservers(this)
+        model.currentTab.removeObservers(this)
 
         super.onStop()
     }
@@ -555,6 +556,10 @@ class MainActivity : AppCompatActivity(), Logging {
             if (text is Int) showSnackbar(text)
             if (text is String) showSnackbar(text)
             if (text != null) model.clearSnackbarText()
+        }
+
+        model.currentTab.observe(this) {
+            binding.tabLayout.getTabAt(it)?.select()
         }
 
         try {

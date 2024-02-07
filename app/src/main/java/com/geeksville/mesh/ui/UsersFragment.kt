@@ -1,6 +1,8 @@
 package com.geeksville.mesh.ui
 
+import android.animation.ValueAnimator
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.method.LinkMovementMethod
@@ -9,14 +11,18 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.LinearInterpolator
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
@@ -27,6 +33,9 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.util.formatAgo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.URLEncoder
 
 @AndroidEntryPoint
@@ -56,6 +65,28 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         val powerIcon = itemView.batteryIcon
         val signalView = itemView.signalView
         val envMetrics = itemView.envMetrics
+        val background = itemView.nodeCard
+
+        fun blink() {
+            val bg = background.backgroundTintList
+            ValueAnimator.ofArgb(
+                Color.parseColor("#00FFFFFF"),
+                Color.parseColor("#33FFFFFF")
+            ).apply {
+                interpolator = LinearInterpolator()
+                startDelay = 500
+                duration = 250
+                repeatCount = 3
+                repeatMode = ValueAnimator.REVERSE
+                addUpdateListener {
+                    background.backgroundTintList = ColorStateList.valueOf(it.animatedValue as Int)
+                }
+                start()
+                doOnEnd {
+                    background.backgroundTintList = bg
+                }
+            }
+        }
     }
 
     private val nodesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
@@ -347,10 +378,47 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
             model.clearTracerouteResponse()
         }
+
+        model.focusedNode.asLiveData().observe(viewLifecycleOwner) { node ->
+            var idx = model.nodeDB.nodeDBbyNum.value.values.indexOfFirst {
+                it.user?.id == node?.user?.id
+            }
+
+            idx += 1
+            if (idx == 0) return@observe
+
+            lifecycleScope.launch {
+                binding.nodeListView.layoutManager?.smoothScrollToTop(idx)
+                val vh = binding.nodeListView.findViewHolderForLayoutPosition(idx)
+                (vh as? ViewHolder)?.blink()
+                model.focusUserNode(null)
+            }
+        }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    /**
+     * Scrolls the recycler view until the item at [position] is at the top of the view, then waits
+     * until the scrolling is finished.
+     */
+    private suspend fun RecyclerView.LayoutManager.smoothScrollToTop(position: Int) {
+        this.startSmoothScroll(
+            object : LinearSmoothScroller(requireContext()) {
+                override fun getVerticalSnapPreference(): Int {
+                    return SNAP_TO_START
+                }
+            }.apply {
+                targetPosition = position
+            }
+        )
+        withContext(Dispatchers.Default) {
+            while (this@smoothScrollToTop.isSmoothScrolling) {
+                // noop
+            }
+        }
     }
 }
