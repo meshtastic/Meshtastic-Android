@@ -91,7 +91,8 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
     private val nodesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
 
-        private var nodes = arrayOf<NodeInfo>()
+        var nodes = arrayOf<NodeInfo>()
+            private set
 
         private fun CharSequence.strike() = SpannableString(this).apply {
             setSpan(StrikethroughSpan(), 0, this.length, SpannableString.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -380,12 +381,11 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         }
 
         model.focusedNode.asLiveData().observe(viewLifecycleOwner) { node ->
-            var idx = model.nodeDB.nodeDBbyNum.value.values.indexOfFirst {
+            val idx = nodesAdapter.nodes.indexOfFirst {
                 it.user?.id == node?.user?.id
             }
 
-            idx += 1
-            if (idx == 0) return@observe
+            if (idx < 1) return@observe
 
             lifecycleScope.launch {
                 binding.nodeListView.layoutManager?.smoothScrollToTop(idx)
