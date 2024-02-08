@@ -1,14 +1,9 @@
 package com.geeksville.mesh.analytics
 
-class DataPair(val name: String, valueIn: Any?) {
-    val value = valueIn ?: "null"
-
-    /// An accumulating firebase event - only one allowed per event
-    constructor(d: Double) : this("BOGUS", d)
-    constructor(d: Int) : this("BOGUS", d)
-}
-
-public interface AnalyticsProvider {
+/**
+ * Created by kevinh on 12/24/14.
+ */
+interface AnalyticsProvider {
 
     // Turn analytics logging on/off
     fun setEnabled(on: Boolean)
@@ -32,11 +27,10 @@ public interface AnalyticsProvider {
     fun setUserInfo(vararg p: DataPair)
 
     /**
-     * Increment some sort of anyalytics counter
+     * Increment some sort of analytics counter
      */
     fun increment(name: String, amount: Double = 1.0)
 
     fun sendScreenView(name: String)
     fun endScreenView()
-
 }

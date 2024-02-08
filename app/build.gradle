@@ -241,8 +241,8 @@ dependencies {
 
     // For Firebase Crashlytics & Analytics
     googleImplementation platform('com.google.firebase:firebase-bom:32.7.1')
-    googleImplementation 'com.google.firebase:firebase-crashlytics-ktx'
-    googleImplementation 'com.google.firebase:firebase-analytics-ktx'
+    googleImplementation 'com.google.firebase:firebase-crashlytics'
+    googleImplementation 'com.google.firebase:firebase-analytics'
 
     // barcode support
     // per https://github.com/journeyapps/zxing-android-embedded#older-sdk-versions for minSdkVersion 21
