@@ -72,7 +72,7 @@ android {
     defaultConfig {
         // We have to list all translated languages here, because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
-        resConfigs "bg", "cs", "de", "el", "en", "es", "fi", "fr", "fr-rHT", "ga", "hu", "is", "it", "ja", "ko", "nl", "nb", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sq", "sv", "tr", "zh", "uk"
+        resConfigs "bg", "cs", "de", "el", "en", "es", "fi", "fr", "fr-rHT", "ga", "hu", "is", "it", "iw", "ja", "ko", "nl", "nb", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sq", "sv", "tr", "zh", "uk"
 
         ndk {
             // abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
