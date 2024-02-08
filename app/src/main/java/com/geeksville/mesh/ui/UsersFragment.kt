@@ -228,8 +228,8 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 holder.coordsView.visibility = View.INVISIBLE
             }
 
-            val ourNodeInfo = model.ourNodeInfo.value
-            val distance = ourNodeInfo?.distanceStr(n, displayUnits)
+            val ourNodeInfo = nodes[0]
+            val distance = ourNodeInfo.distanceStr(n, displayUnits)
             if (distance != null) {
                 holder.distanceView.text = distance
                 holder.distanceView.visibility = View.VISIBLE
@@ -248,7 +248,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 holder.envMetrics.visibility = View.GONE
             }
 
-            if (n.num == ourNodeInfo?.num) {
+            if (n.num == ourNodeInfo.num) {
                 val text = "ChUtil %.1f%% AirUtilTX %.1f%%".format(
                     n.deviceMetrics?.channelUtilization,
                     n.deviceMetrics?.airUtilTx
