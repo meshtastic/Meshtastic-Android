@@ -587,6 +587,10 @@ class UIViewModel @Inject constructor(
     private val _currentTab = MutableLiveData(MainTab.MESSAGES)
     val currentTab: LiveData<MainTab> get() = _currentTab
 
+    fun setCurrentTab(tab: MainTab) {
+        _currentTab.value = tab
+    }
+
     fun focusUserNode(node: NodeInfo?) {
         _currentTab.value = MainTab.USERS
         _focusedNode.value = node

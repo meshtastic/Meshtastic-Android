@@ -44,6 +44,7 @@ import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -179,6 +180,15 @@ class MainActivity : AppCompatActivity(), Logging {
             // tab.text = tabInfos[position].text // I think it looks better with icons only
             tab.icon = ContextCompat.getDrawable(this, MainTab.entries[position].icon)
         }.attach()
+
+        binding.tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                val mainTab = MainTab.entries[tab?.position ?: 0]
+                model.setCurrentTab(mainTab)
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab?) { }
+            override fun onTabReselected(tab: TabLayout.Tab?) { }
+        })
 
         // Handle any intent
         handleIntent(intent)
