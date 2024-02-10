@@ -41,8 +41,6 @@ If you would like to develop this application we'd love your help! These build i
 ```bash
 rm ./app/google-services.json
 cp ./app/google-services-example.json ./app/google-services.json
-rm ./app/src/main/res/values/curfirmwareversion.xml
-cp ./app/special/curfirmwareversion.xml ./app/src/main/res/values/
 ```
 
 - Now you should be able to select "Run / Run" in the IDE and it will happily start running on your

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.coroutines.resume
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -25,7 +26,7 @@ private fun NsdManager.discoverServices(
     serviceType: String,
     protocolType: Int = NsdManager.PROTOCOL_DNS_SD,
 ): Flow<List<NsdServiceInfo>> = callbackFlow {
-    val serviceList = mutableListOf<NsdServiceInfo>()
+    val serviceList = CopyOnWriteArrayList<NsdServiceInfo>()
     val discoveryListener = object : NsdManager.DiscoveryListener {
         override fun onStartDiscoveryFailed(serviceType: String, errorCode: Int) {
             cancel("Start Discovery failed: Error code: $errorCode")

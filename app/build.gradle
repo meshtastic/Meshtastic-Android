@@ -36,8 +36,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdk 33
-        versionCode 30220 // format is Mmmss (where M is 1+the numeric major number
-        versionName "2.2.20"
+        versionCode 30221 // format is Mmmss (where M is 1+the numeric major number
+        versionName "2.2.21"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
@@ -72,7 +72,7 @@ android {
     defaultConfig {
         // We have to list all translated languages here, because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
-        resConfigs "bg", "cs", "de", "el", "en", "es", "fi", "fr", "fr-rHT", "ga", "hu", "is", "it", "ja", "ko", "nl", "nb", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sq", "sv", "tr", "zh", "uk"
+        resConfigs "bg", "cs", "de", "el", "en", "es", "fi", "fr", "fr-rHT", "ga", "hu", "is", "it", "iw", "ja", "ko", "nl", "nb", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sq", "sv", "tr", "zh", "uk"
 
         ndk {
             // abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
@@ -93,7 +93,7 @@ android {
         buildConfig true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
+        kotlinCompilerExtensionVersion = "1.5.9"
     }
     // Configure the build-logic plugins to target JDK 17
     // This matches the JDK used to build the project, and is not related to what is running on device.
@@ -186,12 +186,12 @@ dependencies {
     ksp "com.google.dagger:hilt-compiler:$hilt_version"
 
     // Navigation
-    def nav_version = "2.7.6"
+    def nav_version = "2.7.7"
     implementation "androidx.navigation:navigation-compose:$nav_version"
     androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
 
     // Compose
-    def composeBom = platform('androidx.compose:compose-bom:2024.01.00')
+    def composeBom = platform('androidx.compose:compose-bom:2024.02.00')
     implementation composeBom
     androidTestImplementation composeBom
 
@@ -241,8 +241,8 @@ dependencies {
 
     // For Firebase Crashlytics & Analytics
     googleImplementation platform('com.google.firebase:firebase-bom:32.7.1')
-    googleImplementation 'com.google.firebase:firebase-crashlytics-ktx'
-    googleImplementation 'com.google.firebase:firebase-analytics-ktx'
+    googleImplementation 'com.google.firebase:firebase-crashlytics'
+    googleImplementation 'com.google.firebase:firebase-analytics'
 
     // barcode support
     // per https://github.com/journeyapps/zxing-android-embedded#older-sdk-versions for minSdkVersion 21
