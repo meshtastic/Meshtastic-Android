@@ -2,6 +2,7 @@ package com.geeksville.mesh.service
 
 import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import androidx.work.BackoffPolicy
 import androidx.work.OneTimeWorkRequestBuilder
@@ -49,6 +50,10 @@ fun MeshService.Companion.startServiceLater(context: Context) {
 
 /// Helper function to start running our service
 fun MeshService.Companion.startService(context: Context) {
+    startService(context, createIntent())
+}
+
+fun MeshService.Companion.startService(context: Context, intent: Intent) {
     // Bind to our service using the same mechanism an external client would use (for testing coverage)
     // The following would work for us, but not external users:
     // val intent = Intent(this, MeshService::class.java)
@@ -59,7 +64,6 @@ fun MeshService.Companion.startService(context: Context) {
     // to Signal or whatever.
     info("Trying to start service debug=${BuildConfig.DEBUG}")
 
-    val intent = createIntent()
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             try {

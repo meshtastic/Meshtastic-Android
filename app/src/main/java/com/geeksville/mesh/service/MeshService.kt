@@ -98,6 +98,7 @@ class MeshService : Service(), Logging {
         const val ACTION_NODE_CHANGE = "$prefix.NODE_CHANGE"
         const val ACTION_MESH_CONNECTED = "$prefix.MESH_CONNECTED"
         const val ACTION_MESSAGE_STATUS = "$prefix.MESSAGE_STATUS"
+        const val ACTION_CHANGE_DEVICE = "$prefix.CHANGE_DEVICE"
 
         open class NodeNotFoundException(reason: String) : Exception(reason)
         class InvalidNodeIdException(id: String) : NodeNotFoundException("Invalid NodeId $id")
@@ -276,6 +277,10 @@ class MeshService : Service(), Logging {
      * If someone starts us (or restarts us) this will be called after onCreate)
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (intent?.action == ACTION_CHANGE_DEVICE) {
+            val address = intent.getStringExtra(EXTRA_ADDRESS) ?: "n"
+            changeDeviceAddress(address)
+        }
         val a = radioInterfaceService.getBondedDeviceAddress()
         val wantForeground = a != null && a != "n"
 
@@ -311,6 +316,10 @@ class MeshService : Service(), Logging {
 
         super.onDestroy()
         serviceJob.cancel()
+    }
+
+    private fun changeDeviceAddress(address: String) {
+        binder.setDeviceAddress(address)
     }
 
     ///

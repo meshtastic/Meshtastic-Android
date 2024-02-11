@@ -200,6 +200,17 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".service.ExternalAutomationReceiver"
+            android:exported="true"
+            android:enabled="true"
+            tools:ignore="ExportedReceiver">
+
+            <intent-filter>
+                <action android:name="com.geeksville.mesh.CHANGE_DEVICE"/>
+            </intent-filter>
+
+        </receiver>
+
         <activity
             android:name=".AppIntroduction"/>
 
