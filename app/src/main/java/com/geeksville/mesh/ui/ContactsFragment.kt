@@ -171,16 +171,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         }
 
         fun onContactsChanged(contacts: Map<String, Packet>) {
-            // Add empty channel placeholders (always show Broadcast contacts, even when empty)
-            val mutableMap = contacts.toMutableMap()
-            for (ch in 0 until model.channelSet.settingsCount) {
-                val contactKey = "$ch${DataPacket.ID_BROADCAST}"
-                if (mutableMap[contactKey] == null) mutableMap[contactKey] = Packet(
-                    0L, 1, contactKey, 0L,
-                    DataPacket(bytes = null, dataType = 1, time = 0L, channel = ch)
-                )
-            }
-            this.contacts = mutableMap.values.sortedByDescending { it.received_time }.toTypedArray()
+            this.contacts = contacts.values.toTypedArray()
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all nodes
         }
 
