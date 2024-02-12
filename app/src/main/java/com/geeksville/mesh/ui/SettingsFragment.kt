@@ -387,19 +387,21 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         // report bug button only enabled if analytics is allowed
         binding.reportBugButton.isEnabled = isAnalyticsAllowed
-        binding.reportBugButton.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.report_a_bug)
-                .setMessage(getString(R.string.report_bug_text))
-                .setNeutralButton(R.string.cancel) { _, _ ->
-                    debug("Decided not to report a bug")
-                }
-                .setPositiveButton(getString(R.string.report)) { _, _ ->
-                    reportError("Clicked Report A Bug")
-                    model.showSnackbar("Bug report sent!")
-                }
-                .show()
-        }
+        binding.reportBugButton.setOnClickListener(::showReportBugDialog)
+    }
+
+    private fun showReportBugDialog(view: View) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.report_a_bug)
+            .setMessage(getString(R.string.report_bug_text))
+            .setNeutralButton(R.string.cancel) { _, _ ->
+                debug("Decided not to report a bug")
+            }
+            .setPositiveButton(getString(R.string.report)) { _, _ ->
+                reportError("Clicked Report A Bug")
+                model.showSnackbar("Bug report sent!")
+            }
+            .show()
     }
 
     private fun addDeviceButton(device: BTScanModel.DeviceListEntry, enabled: Boolean) {
