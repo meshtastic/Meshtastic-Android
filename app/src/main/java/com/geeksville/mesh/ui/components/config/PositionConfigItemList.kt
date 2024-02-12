@@ -17,6 +17,7 @@ import com.geeksville.mesh.ConfigProtos.Config.PositionConfig
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.components.BitwisePreference
+import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
@@ -122,10 +123,13 @@ fun PositionConfigItemList(
         }
 
         item {
-            SwitchPreference(title = "GPS enabled",
-                checked = positionInput.gpsEnabled,
+            DropDownPreference(title = "GPS mode",
                 enabled = enabled,
-                onCheckedChange = { positionInput = positionInput.copy { gpsEnabled = it } })
+                items = ConfigProtos.Config.PositionConfig.GpsMode.entries
+                    .filter { it != ConfigProtos.Config.PositionConfig.GpsMode.UNRECOGNIZED }
+                    .map { it to it.name },
+                selectedItem = positionInput.gpsMode,
+                onItemSelected = { positionInput = positionInput.copy { gpsMode = it } })
         }
         item { Divider() }
 
@@ -135,14 +139,6 @@ fun PositionConfigItemList(
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { positionInput = positionInput.copy { gpsUpdateInterval = it } })
-        }
-
-        item {
-            EditTextPreference(title = "Fix attempt duration (seconds)",
-                value = positionInput.gpsAttemptTime,
-                enabled = enabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { positionInput = positionInput.copy { gpsAttemptTime = it } })
         }
 
         item {
