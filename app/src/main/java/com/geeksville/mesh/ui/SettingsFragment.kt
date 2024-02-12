@@ -372,7 +372,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         val app = (requireContext().applicationContext as GeeksvilleApplication)
-        val isGooglePlayAvailable = isGooglePlayAvailable(requireContext())
+        val isGooglePlayAvailable = requireContext().isGooglePlayAvailable()
         val isAnalyticsAllowed = app.isAnalyticsAllowed && isGooglePlayAvailable
 
         // Set analytics checkbox
