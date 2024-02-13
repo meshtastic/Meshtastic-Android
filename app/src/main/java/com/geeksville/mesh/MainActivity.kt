@@ -39,12 +39,12 @@ import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
-import com.geeksville.mesh.ui.map.MapFragment
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -140,40 +140,9 @@ class MainActivity : AppCompatActivity(), Logging {
             }
         }
 
-    data class TabInfo(val text: String, val icon: Int, val content: Fragment)
-
-    private val tabInfos = arrayOf(
-        TabInfo(
-            "Messages",
-            R.drawable.ic_twotone_message_24,
-            ContactsFragment()
-        ),
-        TabInfo(
-            "Users",
-            R.drawable.ic_twotone_people_24,
-            UsersFragment()
-        ),
-        TabInfo(
-            "Map",
-            R.drawable.ic_twotone_map_24,
-            MapFragment()
-        ),
-        TabInfo(
-            "Channel",
-            R.drawable.ic_twotone_contactless_24,
-            ChannelFragment()
-        ),
-        TabInfo(
-            "Settings",
-            R.drawable.ic_twotone_settings_applications_24,
-            SettingsFragment()
-        )
-    )
-
     private val tabsAdapter = object : FragmentStateAdapter(supportFragmentManager, lifecycle) {
-
-        override fun getItemCount(): Int = tabInfos.size
-        override fun createFragment(position: Int): Fragment = tabInfos[position].content
+        override fun getItemCount(): Int = MainTab.entries.size
+        override fun createFragment(position: Int): Fragment = MainTab.entries[position].content
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -209,8 +178,17 @@ class MainActivity : AppCompatActivity(), Logging {
         // pager.offscreenPageLimit = 0 // Don't keep any offscreen pages around, because we want to make sure our bluetooth scanning stops
         TabLayoutMediator(binding.tabLayout, binding.pager, false, false) { tab, position ->
             // tab.text = tabInfos[position].text // I think it looks better with icons only
-            tab.icon = ContextCompat.getDrawable(this, tabInfos[position].icon)
+            tab.icon = ContextCompat.getDrawable(this, MainTab.entries[position].icon)
         }.attach()
+
+        binding.tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                val mainTab = MainTab.entries[tab?.position ?: 0]
+                model.setCurrentTab(mainTab)
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab?) { }
+            override fun onTabReselected(tab: TabLayout.Tab?) { }
+        })
 
         // Handle any intent
         handleIntent(intent)
@@ -514,6 +492,7 @@ class MainActivity : AppCompatActivity(), Logging {
         bluetoothViewModel.enabled.removeObservers(this)
         model.requestChannelUrl.removeObservers(this)
         model.snackbarText.removeObservers(this)
+        model.currentTab.removeObservers(this)
 
         super.onStop()
     }
@@ -555,6 +534,10 @@ class MainActivity : AppCompatActivity(), Logging {
             if (text is Int) showSnackbar(text)
             if (text is String) showSnackbar(text)
             if (text != null) model.clearSnackbarText()
+        }
+
+        model.currentTab.observe(this) {
+            binding.tabLayout.getTabAt(it.ordinal)?.select()
         }
 
         try {

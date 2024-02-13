@@ -27,6 +27,7 @@ import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.ui.MainTab
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -137,6 +138,9 @@ class UIViewModel @Inject constructor(
 
     private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
     val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
+
+    private val _focusedNode = MutableStateFlow<NodeInfo?>(null)
+    val focusedNode: StateFlow<NodeInfo?> = _focusedNode
 
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
@@ -583,5 +587,17 @@ class UIViewModel @Inject constructor(
             }
             requestIds.update { it.apply { put(data.requestId, true) } }
         }
+    }
+
+    private val _currentTab = MutableLiveData(MainTab.MESSAGES)
+    val currentTab: LiveData<MainTab> get() = _currentTab
+
+    fun setCurrentTab(tab: MainTab) {
+        _currentTab.value = tab
+    }
+
+    fun focusUserNode(node: NodeInfo?) {
+        _currentTab.value = MainTab.USERS
+        _focusedNode.value = node
     }
 }

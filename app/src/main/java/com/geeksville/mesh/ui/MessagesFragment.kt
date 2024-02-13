@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
+import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
@@ -126,6 +127,7 @@ class MessagesFragment : Fragment(), Logging {
                     )
                 }
             }
+
             // Hide the username chip for my messages
             if (isLocal) {
                 holder.username.visibility = View.GONE
@@ -134,7 +136,12 @@ class MessagesFragment : Fragment(), Logging {
                 // If we can't find the sender, just use the ID
                 val user = node?.user
                 holder.username.text = user?.shortName ?: msg.from
+
+                holder.username.setOnClickListener {
+                    node?.let { openNodeInfo(it) }
+                }
             }
+
             if (msg.errorMessage != null) {
                 context?.let { holder.card.setCardBackgroundColor(Color.RED) }
                 holder.messageText.text = msg.errorMessage
@@ -414,4 +421,10 @@ class MessagesFragment : Fragment(), Logging {
             actionMode = null
         }
     }
+
+    private fun openNodeInfo(node: NodeInfo) {
+        parentFragmentManager.popBackStack()
+        model.focusUserNode(node)
+    }
+
 }
