@@ -18,6 +18,8 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
         packetDao.getAllPackets()
     }
 
+    fun getContacts(): Flow<Map<String, Packet>> = packetDao.getContactKeys()
+
     suspend fun getQueuedPackets(): List<DataPacket>? = withContext(Dispatchers.IO) {
         packetDao.getQueuedPackets()
     }
