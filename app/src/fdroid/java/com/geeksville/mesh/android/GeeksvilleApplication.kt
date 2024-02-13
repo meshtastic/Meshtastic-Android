@@ -8,9 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import com.geeksville.mesh.analytics.AnalyticsProvider
 
-@Suppress("UNUSED_PARAMETER")
-fun isGooglePlayAvailable(context: Context): Boolean = false
-
 open class GeeksvilleApplication : Application(), Logging {
 
     companion object {
@@ -55,3 +52,5 @@ open class GeeksvilleApplication : Application(), Logging {
         isAnalyticsAllowed = false
     }
 }
+
+fun Context.isGooglePlayAvailable(): Boolean = false

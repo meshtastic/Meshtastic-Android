@@ -12,12 +12,6 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailabilityLight
 import com.suddenh4x.ratingdialog.AppRating
 
-fun isGooglePlayAvailable(context: Context): Boolean {
-    val a = GoogleApiAvailabilityLight.getInstance()
-    val r = a.isGooglePlayServicesAvailable(context)
-    return r != ConnectionResult.SERVICE_MISSING && r != ConnectionResult.SERVICE_INVALID
-}
-
 /**
  * Created by kevinh on 1/4/15.
  */
@@ -55,7 +49,8 @@ open class GeeksvilleApplication : Application(), Logging {
 
     /** Ask user to rate in play store */
     fun askToRate(activity: AppCompatActivity) {
-        if (!isGooglePlayAvailable(this)) return
+        if (!isGooglePlayAvailable()) return
+
         exceptionReporter { // we don't want to crash our app because of bugs in this optional feature
             AppRating.Builder(activity)
                 .setMinimumLaunchTimes(10) // default is 5, 3 means app is launched 3 or more times
@@ -75,4 +70,13 @@ open class GeeksvilleApplication : Application(), Logging {
         // Set analytics per prefs
         isAnalyticsAllowed = isAnalyticsAllowed
     }
+}
+
+fun Context.isGooglePlayAvailable(): Boolean {
+    return GoogleApiAvailabilityLight.getInstance()
+        .isGooglePlayServicesAvailable(this)
+        .let {
+            it != ConnectionResult.SERVICE_MISSING &&
+            it != ConnectionResult.SERVICE_INVALID
+        }
 }
