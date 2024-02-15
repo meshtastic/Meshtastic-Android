@@ -201,15 +201,14 @@ class UIViewModel @Inject constructor(
         packetRepository.getMessagesFrom(contactKey)
     }.asLiveData()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val contacts: LiveData<Map<String, Packet>> = packetRepository.getContacts().mapLatest {
+    val contacts = combine(packetRepository.getContacts(), channels) { contacts, channelSet ->
         // Add empty channel placeholders (always show Broadcast contacts, even when empty)
         val placeholder = (0 until channelSet.settingsCount).associate { ch ->
             val contactKey = "$ch${DataPacket.ID_BROADCAST}"
             val data = DataPacket(bytes = null, dataType = 1, time = 0L, channel = ch)
             contactKey to Packet(0L, 1, contactKey, 0L, data)
         }
-        it + (placeholder - it.keys)
+        contacts + (placeholder - contacts.keys)
     }.asLiveData()
 
     @OptIn(ExperimentalCoroutinesApi::class)
