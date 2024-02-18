@@ -32,8 +32,8 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.twotone.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.twotone.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -210,7 +210,7 @@ private fun MeshAppBar(
             if (canNavigateBack) {
                 IconButton(onClick = navigateUp) {
                     Icon(
-                        imageVector = Icons.Filled.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         null,
                     )
                 }
@@ -633,7 +633,7 @@ private fun NavCard(
                 modifier = Modifier.weight(1f)
             )
             Icon(
-                Icons.TwoTone.KeyboardArrowRight, "trailingIcon",
+                Icons.AutoMirrored.TwoTone.KeyboardArrowRight, "trailingIcon",
                 modifier = Modifier.wrapContentSize(),
                 tint = color,
             )
