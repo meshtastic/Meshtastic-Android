@@ -678,6 +678,12 @@ class MeshService : Service(), Logging {
                         shouldBroadcast = false
                     }
 
+                    Portnums.PortNum.STORE_FORWARD_APP_VALUE -> {
+                        val u = StoreAndForwardProtos.StoreAndForward.parseFrom(data.payload)
+                        handleReceivedStoreAndForward(dataPacket, u)
+                        shouldBroadcast = false
+                    }
+
                     Portnums.PortNum.RANGE_TEST_APP_VALUE -> {
                         if (!moduleConfig.rangeTest.enabled) return
                         val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
@@ -788,6 +794,46 @@ class MeshService : Service(), Logging {
             if (t.hasEnvironmentMetrics()) it.environmentMetrics = EnvironmentMetrics(
                 t.environmentMetrics, if (t.time != 0) t.time else (defaultTime / 1000L).toInt()
             )
+        }
+    }
+
+    private fun handleReceivedStoreAndForward(
+        dataPacket: DataPacket,
+        s: StoreAndForwardProtos.StoreAndForward,
+    ) {
+        debug("StoreAndForward: ${s.variantCase} ${s.rr} from ${dataPacket.from}")
+        when (s.variantCase) {
+            StoreAndForwardProtos.StoreAndForward.VariantCase.STATS -> {
+                val u = dataPacket.copy(
+                    bytes = s.stats.toString().encodeToByteArray(),
+                    dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE
+                )
+                rememberDataPacket(u)
+            }
+
+            StoreAndForwardProtos.StoreAndForward.VariantCase.HISTORY -> {
+                val text = """
+                    Total messages: ${s.history.historyMessages}
+                    History window: ${s.history.window / 60000} min
+                    Last request: ${s.history.lastRequest}
+                """.trimIndent()
+                val u = dataPacket.copy(
+                    bytes = text.encodeToByteArray(),
+                    dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE
+                )
+                rememberDataPacket(u)
+            }
+
+            StoreAndForwardProtos.StoreAndForward.VariantCase.TEXT -> {
+                if (s.rr == StoreAndForwardProtos.StoreAndForward.RequestResponse.ROUTER_TEXT_BROADCAST) {
+                    dataPacket.to = DataPacket.ID_BROADCAST
+                }
+                val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
+                rememberDataPacket(u)
+                updateMessageNotification(u)
+            }
+
+            else -> {}
         }
     }
 
