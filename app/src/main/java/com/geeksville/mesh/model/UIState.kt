@@ -27,7 +27,6 @@ import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.ui.MainTab
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -588,15 +587,15 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    private val _currentTab = MutableLiveData(MainTab.MESSAGES)
-    val currentTab: LiveData<MainTab> get() = _currentTab
+    private val _currentTab = MutableLiveData(0)
+    val currentTab: LiveData<Int> get() = _currentTab
 
-    fun setCurrentTab(tab: MainTab) {
+    fun setCurrentTab(tab: Int) {
         _currentTab.value = tab
     }
 
     fun focusUserNode(node: NodeInfo?) {
-        _currentTab.value = MainTab.USERS
+        _currentTab.value = 1
         _focusedNode.value = node
     }
 }

@@ -11,13 +11,6 @@
     <string name="sample_coords" translatable="false">55.332244 34.442211</string>
     <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
 
-    <!-- Main Tabs -->
-    <string name="main_tab_lbl_messages" translatable="false">Messages</string>
-    <string name="main_tab_lbl_users" translatable="false">Users</string>
-    <string name="main_tab_lbl_map" translatable="false">Map</string>
-    <string name="main_tab_lbl_channel" translatable="false">Channel</string>
-    <string name="main_tab_lbl_settings" translatable="false">Settings</string>
-
     <string name="channel_name">Channel Name</string>
     <string name="channel_options">Channel options</string>
     <string name="qr_code">QR code</string>
