@@ -74,9 +74,10 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
             android:text="@string/looking_for_meshtastic_devices"
-            app:layout_constraintEnd_toStartOf="@+id/updateFirmwareButton"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/nodeSettings" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/nodeSettings"
+            />
 
         <ProgressBar
             android:id="@+id/scanProgressBar"
@@ -123,7 +124,9 @@
                 android:ems="10"
                 android:hint="@string/ip_address"
                 android:inputType="number|text"
-                android:visibility="visible" />
+                android:visibility="visible"
+                android:importantForAutofill="no"
+                />
 
         </RadioGroup>
 
@@ -136,25 +139,6 @@
             app:srcCompat="@drawable/ic_twotone_add_24"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/reportBugButton" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/updateFirmwareButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:text="@string/update_firmware"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/scanStatusText" />
-
-        <ProgressBar
-            android:id="@+id/updateProgressBar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintEnd_toEndOf="@+id/updateFirmwareButton"
-            app:layout_constraintStart_toStartOf="@+id/updateFirmwareButton"
-            app:layout_constraintTop_toBottomOf="@+id/updateFirmwareButton" />
 
         <CheckBox
             android:id="@+id/provideLocationCheckbox"

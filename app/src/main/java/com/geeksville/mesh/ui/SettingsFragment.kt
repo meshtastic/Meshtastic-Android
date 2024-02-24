@@ -1,12 +1,11 @@
 package com.geeksville.mesh.ui
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.net.InetAddresses
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.text.Editable
 import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
@@ -21,7 +20,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
-import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.ModuleConfigProtos
 import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
@@ -31,7 +29,6 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getInitials
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.service.SoftwareUpdateService
 import com.geeksville.mesh.util.exceptionToSnackbar
 import com.geeksville.mesh.util.getAssociationResult
 import com.geeksville.mesh.util.onEditorAction
@@ -56,81 +53,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private val hasGps by lazy { requireContext().hasGps() }
     private val hasCompanionDeviceApi by lazy { requireContext().hasCompanionDeviceApi() }
 
-    private fun doFirmwareUpdate() {
-        model.meshService?.let { service ->
-
-            debug("User started firmware update")
-            GeeksvilleApplication.analytics.track(
-                "firmware_update",
-                DataPair("content_type", "start")
-            )
-            binding.updateFirmwareButton.isEnabled = false // Disable until things complete
-            binding.updateProgressBar.visibility = View.VISIBLE
-            binding.updateProgressBar.progress = 0 // start from scratch
-
-            exceptionToSnackbar(requireView()) {
-                // We rely on our broadcast receiver to show progress as this progresses
-                service.startFirmwareUpdate()
-            }
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = SettingsFragmentBinding.inflate(inflater, container, false)
         return binding.root
-    }
-
-    /// Set the correct update button configuration based on current progress
-    private fun refreshUpdateButton(enable: Boolean) {
-        debug("Reiniting the update button")
-        val info = model.myNodeInfo.value
-        val service = model.meshService
-        if (model.isConnected() && info != null && info.shouldUpdate && info.couldUpdate && service != null) {
-            binding.updateFirmwareButton.visibility = View.VISIBLE
-            binding.updateFirmwareButton.text =
-                getString(R.string.update_to).format(getString(R.string.short_firmware_version))
-
-            val progress = service.updateStatus
-
-            binding.updateFirmwareButton.isEnabled = enable &&
-                (progress < 0) // if currently doing an upgrade disable button
-
-            if (progress >= 0) {
-                binding.updateProgressBar.progress = progress // update partial progress
-                binding.scanStatusText.setText(R.string.updating_firmware)
-                binding.updateProgressBar.visibility = View.VISIBLE
-            } else
-                when (progress) {
-                    SoftwareUpdateService.ProgressSuccess -> {
-                        GeeksvilleApplication.analytics.track(
-                            "firmware_update",
-                            DataPair("content_type", "success")
-                        )
-                        binding.scanStatusText.setText(R.string.update_successful)
-                        binding.updateProgressBar.visibility = View.GONE
-                    }
-                    SoftwareUpdateService.ProgressNotStarted -> {
-                        // Do nothing - because we don't want to overwrite the status text in this case
-                        binding.updateProgressBar.visibility = View.GONE
-                    }
-                    else -> {
-                        GeeksvilleApplication.analytics.track(
-                            "firmware_update",
-                            DataPair("content_type", "failure")
-                        )
-                        binding.scanStatusText.setText(R.string.update_failed)
-                        binding.updateProgressBar.visibility = View.VISIBLE
-                    }
-                }
-            binding.updateProgressBar.isEnabled = false
-
-        } else {
-            binding.updateFirmwareButton.visibility = View.GONE
-            binding.updateProgressBar.visibility = View.GONE
-        }
     }
 
     /**
@@ -167,9 +95,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         spinner.setSelection(regionIndex, false)
         spinner.onItemSelectedListener = regionSpinnerListener
         spinner.isEnabled = !model.isManaged
-
-        // If actively connected possibly let the user update firmware
-        refreshUpdateButton(isConnected)
 
         // Update the status string (highest priority messages first)
         val info = model.myNodeInfo.value
@@ -313,17 +238,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
         }
 
-        binding.updateFirmwareButton.setOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
-                .setMessage("${getString(R.string.update_firmware)}?")
-                .setNeutralButton(R.string.cancel) { _, _ ->
-                }
-                .setPositiveButton(getString(R.string.okay)) { _, _ ->
-                    doFirmwareUpdate()
-                }
-                .show()
-        }
-
         binding.usernameEditText.onEditorAction(EditorInfo.IME_ACTION_DONE) {
             debug("received IME_ACTION_DONE")
             val n = binding.usernameEditText.text.toString().trim()
@@ -390,6 +304,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         binding.reportBugButton.setOnClickListener(::showReportBugDialog)
     }
 
+    @Suppress("UNUSED_PARAMETER")
     private fun showReportBugDialog(view: View) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.report_a_bug)
@@ -420,19 +335,19 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     }
 
     private fun addManualDeviceButton() {
-        val b = binding.radioButtonManual
-        val e = binding.editManualAddress
+        val deviceSelectIPAddress = binding.radioButtonManual
+        val inputIPAddress = binding.editManualAddress
 
-        b.isEnabled = false
-
-        binding.deviceRadioGroup.addView(b)
-
-        b.setOnClickListener {
-            b.isChecked = scanModel.onSelected(BTScanModel.DeviceListEntry("", "t" + e.text, true))
+        deviceSelectIPAddress.isEnabled = false
+        deviceSelectIPAddress.setOnClickListener {
+            deviceSelectIPAddress.isChecked = scanModel.onSelected(BTScanModel.DeviceListEntry("", "t" + inputIPAddress.text, true))
         }
-        binding.deviceRadioGroup.addView(e)
-        e.doAfterTextChanged {
-            b.isEnabled = Patterns.IP_ADDRESS.matcher(e.text).matches()
+
+        binding.deviceRadioGroup.addView(deviceSelectIPAddress)
+        binding.deviceRadioGroup.addView(inputIPAddress)
+
+        inputIPAddress.doAfterTextChanged {
+            deviceSelectIPAddress.isEnabled = inputIPAddress.text.isIPAddress()
         }
     }
 
@@ -545,24 +460,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
-    private val updateProgressFilter = IntentFilter(SoftwareUpdateService.ACTION_UPDATE_PROGRESS)
-
-    private val updateProgressReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            refreshUpdateButton(true)
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-
-        requireActivity().unregisterReceiver(updateProgressReceiver)
-    }
-
     override fun onResume() {
         super.onResume()
-
-        requireActivity().registerReceiver(updateProgressReceiver, updateProgressFilter)
 
         // Warn user if BLE device is selected but BLE disabled
         if (scanModel.selectedBluetooth) checkBTEnabled()
@@ -580,4 +479,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     companion object {
         const val SCAN_PERIOD: Long = 10000 // Stops scanning after 10 seconds
     }
+
+    private fun Editable.isIPAddress(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            InetAddresses.isNumericAddress(this.toString())
+        } else {
+            @Suppress("DEPRECATION")
+            Patterns.IP_ADDRESS.matcher(this).matches()
+        }
+    }
+
 }
