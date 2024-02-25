@@ -64,8 +64,8 @@ class NodeDB @Inject constructor(
         nodeInfoDao.apply {
             clearNodeInfo()
             clearMyNodeInfo()
+            setMyNodeInfo(mi) // set MyNodeInfo first
             putAll(nodes)
-            setMyNodeInfo(mi) // set MyNodeInfo last
         }
         val ourNodeInfo = nodes.find { it.num == mi.myNodeNum }
         _ourNodeInfo.value = ourNodeInfo
