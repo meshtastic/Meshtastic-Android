@@ -31,9 +31,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.BuildConfig
@@ -115,13 +113,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
 
     private fun openDirectMessage(node: NodeInfo) {
         val user = node.user ?: return
-        setFragmentResult(
-            "requestKey",
-            bundleOf(
-                "contactKey" to "${node.channel}${user.id}",
-                "contactName" to user.longName
-            )
-        )
+        model.setContactKey("${node.channel}${user.id}")
         parentFragmentManager.beginTransaction()
             .replace(R.id.mainActivityLayout, MessagesFragment())
             .addToBackStack(null)

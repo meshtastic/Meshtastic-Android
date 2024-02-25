@@ -7,9 +7,7 @@ import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -122,10 +120,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                 if (actionMode != null) clickItem(holder, packet.contact_key)
                 else {
                     debug("calling MessagesFragment filter:${packet.contact_key}")
-                    setFragmentResult(
-                        "requestKey",
-                        bundleOf("contactKey" to packet.contact_key, "contactName" to longName)
-                    )
+                    model.setContactKey(packet.contact_key)
                     parentFragmentManager.beginTransaction()
                         .replace(R.id.mainActivityLayout, MessagesFragment())
                         .addToBackStack(null)

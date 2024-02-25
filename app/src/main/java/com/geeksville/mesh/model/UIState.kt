@@ -190,9 +190,27 @@ class UIViewModel @Inject constructor(
         debug("ViewModel created")
     }
 
-    private val contactKey: MutableStateFlow<String> = MutableStateFlow(DataPacket.ID_BROADCAST)
+    private val _contactKey = MutableStateFlow("0${DataPacket.ID_BROADCAST}")
+    val contactKey: StateFlow<String> = _contactKey
     fun setContactKey(contact: String) {
-        contactKey.value = contact
+        _contactKey.value = contact
+    }
+
+    fun getContactName(contactKey: String): String {
+        val (channel, dest) = contactKey[0].digitToIntOrNull() to contactKey.substring(1)
+
+        return if (channel == null || dest == DataPacket.ID_BROADCAST) {
+            // grab channel names from ChannelSet
+            val channelName = with(channelSet) {
+                if (channel != null && settingsCount > channel)
+                    Channel(settingsList[channel], loraConfig).name else null
+            }
+            channelName ?: app.getString(R.string.channel_name)
+        } else {
+            // grab usernames from NodeInfo
+            val node = nodeDB.nodes.value[dest]
+            node?.user?.longName ?: app.getString(R.string.unknown_username)
+        }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -237,7 +255,7 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
+    fun sendMessage(str: String, contactKey: String = this.contactKey.value) {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
