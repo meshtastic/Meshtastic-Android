@@ -830,7 +830,10 @@ class MeshService : Service(), Logging {
                 if (s.rr == StoreAndForwardProtos.StoreAndForward.RequestResponse.ROUTER_TEXT_BROADCAST) {
                     dataPacket.to = DataPacket.ID_BROADCAST
                 }
-                val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
+                val u = dataPacket.copy(
+                    bytes = s.text.toByteArray(),
+                    dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                )
                 rememberDataPacket(u)
                 updateMessageNotification(u)
             }
