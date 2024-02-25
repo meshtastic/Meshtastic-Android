@@ -1450,7 +1450,7 @@ class MeshService : Service(), Logging {
     /// If we've received our initial config, our radio settings and all of our channels, send any queued packets and broadcast connected to clients
     private fun onHasSettings() {
 
-        processQueuedPackets() // send any packets that were queued up
+        // processQueuedPackets() // send any packets that were queued up FIXME
         startMqttClientProxy()
 
         // broadcast an intent with our new connection state
