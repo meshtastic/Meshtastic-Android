@@ -830,7 +830,10 @@ class MeshService : Service(), Logging {
                 if (s.rr == StoreAndForwardProtos.StoreAndForward.RequestResponse.ROUTER_TEXT_BROADCAST) {
                     dataPacket.to = DataPacket.ID_BROADCAST
                 }
-                val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
+                val u = dataPacket.copy(
+                    bytes = s.text.toByteArray(),
+                    dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                )
                 rememberDataPacket(u)
                 updateMessageNotification(u)
             }
@@ -1447,7 +1450,7 @@ class MeshService : Service(), Logging {
     /// If we've received our initial config, our radio settings and all of our channels, send any queued packets and broadcast connected to clients
     private fun onHasSettings() {
 
-        processQueuedPackets() // send any packets that were queued up
+        // processQueuedPackets() // send any packets that were queued up FIXME
         startMqttClientProxy()
 
         // broadcast an intent with our new connection state

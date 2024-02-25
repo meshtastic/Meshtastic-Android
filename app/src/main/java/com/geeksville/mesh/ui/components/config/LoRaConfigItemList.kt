@@ -130,7 +130,7 @@ fun LoRaConfigItemList(
 
         item {
             var isFocused by remember { mutableStateOf(false) }
-            EditTextPreference(title = "Channel number",
+            EditTextPreference(title = "Frequency slot",
                 value = if (isFocused || loraInput.channelNum != 0) loraInput.channelNum else primaryChannel.channelNum,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),

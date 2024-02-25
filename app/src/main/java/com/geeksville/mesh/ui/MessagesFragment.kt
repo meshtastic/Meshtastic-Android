@@ -13,7 +13,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.allViews
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -43,12 +42,8 @@ class MessagesFragment : Fragment(), Logging {
 
     // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
-    private var contactKey: String = DataPacket.ID_BROADCAST
-    private var contactName: String = DataPacket.ID_BROADCAST
 
     private val model: UIViewModel by activityViewModels()
-
-    private var isConnected = false
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
@@ -240,12 +235,6 @@ class MessagesFragment : Fragment(), Logging {
         return binding.root
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        outState.putString("contactKey", contactKey)
-        outState.putString("contactName", contactName)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -253,25 +242,12 @@ class MessagesFragment : Fragment(), Logging {
             parentFragmentManager.popBackStack()
         }
 
-        setFragmentResultListener("requestKey") { _, bundle->
-            // get the result from bundle
-            contactKey = bundle.getString("contactKey").toString()
-            contactName = bundle.getString("contactName").toString()
-            model.setContactKey(contactKey)
-            binding.messageTitle.text = contactName
-        }
-        if (savedInstanceState != null) {
-            contactKey = savedInstanceState.getString("contactKey").toString()
-            contactName = savedInstanceState.getString("contactName").toString()
-            binding.messageTitle.text = contactName
-        }
-
         binding.sendButton.setOnClickListener {
             debug("User clicked sendButton")
 
             val str = binding.messageInputText.text.toString().trim()
             if (str.isNotEmpty())
-                model.sendMessage(str, contactKey)
+                model.sendMessage(str)
             binding.messageInputText.setText("") // blow away the string the user just entered
 
             // requireActivity().hideKeyboard()
@@ -281,7 +257,7 @@ class MessagesFragment : Fragment(), Logging {
             debug("received IME_ACTION_SEND")
 
             val str = binding.messageInputText.text.toString().trim()
-            if (str.isNotEmpty()) model.sendMessage(str, contactKey)
+            if (str.isNotEmpty()) model.sendMessage(str)
             binding.messageInputText.setText("") // blow away the string the user just entered
 
             // requireActivity().hideKeyboard()
@@ -300,7 +276,7 @@ class MessagesFragment : Fragment(), Logging {
         // If connection state _OR_ myID changes we have to fix our ability to edit outgoing messages
         model.connectionState.observe(viewLifecycleOwner) {
             // If we don't know our node ID and we are offline don't let user try to send
-            isConnected = model.isConnected()
+            val isConnected = model.isConnected()
             binding.textInputLayout.isEnabled = isConnected
             binding.sendButton.isEnabled = isConnected
             for (subView: View in binding.quickChatLayout.allViews) {
@@ -310,6 +286,10 @@ class MessagesFragment : Fragment(), Logging {
             }
         }
 
+        model.contactKey.asLiveData().observe(viewLifecycleOwner) {
+            binding.messageTitle.text = model.getContactName(it)
+        }
+
         model.quickChatActions.asLiveData().observe(viewLifecycleOwner) { actions ->
             actions?.let {
                 // This seems kinda hacky it might be better to replace with a recycler view
@@ -317,7 +297,7 @@ class MessagesFragment : Fragment(), Logging {
                 for (action in actions) {
                     val button = Button(context)
                     button.text = action.name
-                    button.isEnabled = isConnected
+                    button.isEnabled = model.isConnected()
                     if (action.mode == QuickChatAction.Mode.Instant) {
                         button.backgroundTintList = ContextCompat.getColorStateList(requireActivity(), R.color.colorMyMsg)
                     }
@@ -333,7 +313,7 @@ class MessagesFragment : Fragment(), Logging {
                             binding.messageInputText.setText(newText)
                             binding.messageInputText.setSelection(newText.length)
                         } else {
-                            model.sendMessage(action.message, contactKey)
+                            model.sendMessage(action.message)
                         }
                     }
                     binding.quickChatLayout.addView(button)

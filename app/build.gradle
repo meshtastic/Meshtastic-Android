@@ -93,7 +93,7 @@ android {
         buildConfig true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.9"
+        kotlinCompilerExtensionVersion = "1.5.10"
     }
     // Configure the build-logic plugins to target JDK 17
     // This matches the JDK used to build the project, and is not related to what is running on device.
@@ -182,7 +182,7 @@ dependencies {
 
     // Hilt
     implementation "com.google.dagger:hilt-android:$hilt_version"
-    implementation "androidx.hilt:hilt-navigation-compose:1.1.0"
+    implementation "androidx.hilt:hilt-navigation-compose:1.2.0"
     ksp "com.google.dagger:hilt-compiler:$hilt_version"
 
     // Navigation
@@ -191,7 +191,7 @@ dependencies {
     androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
 
     // Compose
-    def composeBom = platform('androidx.compose:compose-bom:2024.02.00')
+    def composeBom = platform('androidx.compose:compose-bom:2024.02.01')
     implementation composeBom
     androidTestImplementation composeBom
 
@@ -223,7 +223,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
     // kotlin serialization
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
 
     // rate this app
     googleImplementation 'com.suddenh4x.ratingdialog:awesome-app-rating:2.7.0'

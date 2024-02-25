@@ -56,7 +56,13 @@ private fun NsdManager.discoverServices(
     trySend(emptyList()) // Emit an initial empty list
     discoverServices(serviceType, protocolType, discoveryListener)
 
-    awaitClose { stopServiceDiscovery(discoveryListener) }
+    awaitClose {
+        try {
+            stopServiceDiscovery(discoveryListener)
+        } catch (ex: IllegalArgumentException) {
+            // ignore if discovery is already stopped
+        }
+    }
 }
 
 private suspend fun NsdManager.resolveService(

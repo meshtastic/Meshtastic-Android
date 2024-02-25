@@ -15,10 +15,8 @@ import android.view.animation.LinearInterpolator
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
 import androidx.core.text.HtmlCompat
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -119,13 +117,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 when (item.itemId) {
                     R.id.direct_message -> {
                         debug("calling MessagesFragment filter: ${node.channel}${user.id}")
-                        setFragmentResult(
-                            "requestKey",
-                            bundleOf(
-                                "contactKey" to "${node.channel}${user.id}",
-                                "contactName" to user.longName
-                            )
-                        )
+                        model.setContactKey("${node.channel}${user.id}")
                         parentFragmentManager.beginTransaction()
                             .replace(R.id.mainActivityLayout, MessagesFragment())
                             .addToBackStack(null)
