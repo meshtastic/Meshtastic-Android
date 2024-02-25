@@ -204,7 +204,9 @@ class MeshService : Service(), Logging {
         debug("Sending to radio ${built.toPIIString()}")
         val b = built.toByteArray()
 
-        if (SoftwareUpdateService.isUpdating) throw IsUpdatingException()
+        if (false) { // TODO check if radio is updating
+            throw IsUpdatingException()
+        }
 
         radioInterfaceService.sendToRadio(b)
         changeStatus(p.packet.id, MessageStatus.ENROUTE)
@@ -1133,13 +1135,7 @@ class MeshService : Service(), Logging {
             // Do our startup init
             try {
                 connectTimeMsec = System.currentTimeMillis()
-                SoftwareUpdateService.sendProgress(
-                    this,
-                    SoftwareUpdateService.ProgressNotStarted,
-                    true
-                ) // Kinda crufty way of reiniting software update
                 startConfig()
-
             } catch (ex: InvalidProtocolBufferException) {
                 errormsg(
                     "Invalid protocol buffer sent by device - update device software and try again",
@@ -1342,10 +1338,7 @@ class MeshService : Service(), Logging {
                     hwModelStr,
                     firmwareVersion,
                     firmwareUpdateFilename?.appLoad != null && firmwareUpdateFilename?.littlefs != null,
-                    isBluetoothInterface && SoftwareUpdateService.shouldUpdate(
-                        this@MeshService,
-                        DeviceVersion(firmwareVersion)
-                    ),
+                    shouldUpdate = false, // TODO add check after re-implementing firmware updates
                     currentPacketId and 0xffffffffL,
                     5 * 60 * 1000, // constants from current device code
                     minAppVersion,
@@ -1632,10 +1625,8 @@ class MeshService : Service(), Logging {
     private fun setFirmwareUpdateFilename(model: String?) {
         firmwareUpdateFilename = try {
             if (model != null)
-                SoftwareUpdateService.getUpdateFilename(
-                    this,
-                    model
-                )
+                // TODO reimplement this after we have a new firmware update mechanism
+                null
             else
                 null
         } catch (ex: Exception) {
@@ -1664,7 +1655,7 @@ class MeshService : Service(), Logging {
             updateJob = serviceScope.handledLaunch {
                 exceptionReporter {
                     debug("Starting firmware update coroutine")
-                    SoftwareUpdateService.doUpdate(this@MeshService, safe, filename)
+                    // TODO perform update with new firmware update mechanism
                 }
             }
         }
@@ -1691,7 +1682,7 @@ class MeshService : Service(), Logging {
                 clientPackages[receiverName] = packageName
             }
 
-        override fun getUpdateStatus(): Int = SoftwareUpdateService.progress
+        override fun getUpdateStatus(): Int = 0 // TODO reimplement this after we have a new firmware update mechanism
 
         override fun startFirmwareUpdate() = toRemoteExceptions {
             doFirmwareUpdate()
