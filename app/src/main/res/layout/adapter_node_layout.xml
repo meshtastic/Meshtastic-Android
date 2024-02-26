@@ -63,7 +63,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/nodeNameView"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                tools:composableName="com.geeksville.mesh.ui.LinkedCoordinatesKt.LinkedCoordinatesPreview"
+                tools:composableName="com.geeksville.mesh.ui.LinkedCoordinatesKt.LinkedCoordinatesSimplePreview"
                 />
 
             <androidx.compose.ui.platform.ComposeView
@@ -85,11 +85,19 @@
                 tools:composableName="com.geeksville.mesh.ui.LastHeardInfoKt.LastHeardInfoPreview"
                 />
 
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="nodePosition, lastHeardInfo"
+                />
+
             <androidx.compose.ui.platform.ComposeView
                 android:id="@+id/signalInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/lastHeardInfo"
+                app:layout_constraintTop_toBottomOf="@id/barrier"
                 app:layout_constraintBottom_toTopOf="@id/envMetrics"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintVertical_bias="0"
