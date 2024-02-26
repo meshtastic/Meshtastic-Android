@@ -19,4 +19,4 @@ val MeshtasticGreen = Color(0xFF67EA94)
 val AlmostWhite = Color(0xB3FFFFFF)
 val AlmostBlack = Color(0x8A000000)
 
-val HyperlinkBlue = Color(0xFF1B74D1)
+val HyperlinkBlue = Color(0xFF43C3B0)
