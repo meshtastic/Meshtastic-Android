@@ -1,11 +1,8 @@
 package com.geeksville.mesh.ui
 
 import android.content.res.Configuration
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -15,6 +12,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.theme.AppTheme
@@ -52,21 +51,25 @@ fun BatteryInfo(batteryLevel: Int?, voltage: Float?) {
 @Composable
 @Preview(showBackground = true)
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
-fun BatteryInfoPreview() {
+fun BatteryInfoPreview(
+    @PreviewParameter(BatteryInfoPreviewParameterProvider::class)
+    batteryInfo: Pair<Int?, Float?>
+) {
     AppTheme {
-        Column(
-            modifier = Modifier.padding(4.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalAlignment = Alignment.End
-        ) {
-            BatteryInfo(2, 3.7F)
-            BatteryInfo(12, 3.7F)
-            BatteryInfo(28, 3.7F)
-            BatteryInfo(50, 3.7F)
-            BatteryInfo(85, 3.7F)
-            BatteryInfo(101, 3.7F)
-            BatteryInfo(null, null)
-            BatteryInfo(null, 4.2F)
-        }
+        BatteryInfo(batteryInfo.first, batteryInfo.second)
     }
+}
+
+class BatteryInfoPreviewParameterProvider : PreviewParameterProvider<Pair<Int?, Float?>> {
+    override val values: Sequence<Pair<Int?, Float?>>
+        get() = sequenceOf(
+            85 to 3.7F,
+            2 to 3.7F,
+            12 to 3.7F,
+            28 to 3.7F,
+            50 to 3.7F,
+            101 to 4.9F,
+            null to 4.5F,
+            null to null
+        )
 }

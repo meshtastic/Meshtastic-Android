@@ -72,8 +72,7 @@
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                tools:layout_height="40dp"
-                tools:layout_width="120dp"
+                tools:composableName="com.geeksville.mesh.ui.BatteryInfoKt.BatteryInfoPreview"
                 />
 
             <ImageView
