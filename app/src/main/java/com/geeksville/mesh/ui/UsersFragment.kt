@@ -27,7 +27,6 @@ import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
 import com.geeksville.mesh.databinding.NodelistFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.theme.AppTheme
-import com.geeksville.mesh.util.formatAgo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -55,12 +54,12 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         val chipNode = itemView.chipNode
         val nodeNameView = itemView.nodeNameView
         val distanceView = itemView.distanceView
-        val lastTime = itemView.lastConnectionView
         val signalView = itemView.signalView
         val envMetrics = itemView.envMetrics
         val background = itemView.nodeCard
         val nodePosition = itemView.nodePosition
         val batteryInfo = itemView.batteryInfo
+        val lastHeard = itemView.lastHeardInfo
 
         fun blink() {
             val bg = background.backgroundTintList
@@ -88,7 +87,8 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             voltage: Float?,
             position: Position?,
             gpsFormat: Int,
-            nodeName: String?
+            nodeName: String?,
+            lastHeard: Int
         ) {
             batteryInfo.setContent {
                 AppTheme {
@@ -98,6 +98,11 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             nodePosition.setContent {
                 AppTheme {
                     LinkedCoordinates(position, gpsFormat, nodeName)
+                }
+            }
+            this.lastHeard.setContent {
+                AppTheme {
+                    LastHeardInfo(lastHeard)
                 }
             }
         }
@@ -250,14 +255,15 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             val isIgnored: Boolean = ignoreIncomingList.contains(n.num)
             val name = user?.longName
 
-            holder.bind(n.batteryLevel, n.voltage, n.validPosition, gpsFormat, name)
+            holder.bind(n.batteryLevel, n.voltage, n.validPosition, gpsFormat, name, n.lastHeard)
+
+            holder.nodeNameView.text = name
 
             with(holder.chipNode) {
                 text = (user?.shortName ?: "UNK").strikeIf(isIgnored)
                 chipBackgroundColor = ColorStateList.valueOf(nodeColor)
                 setTextColor(textColor)
             }
-            holder.nodeNameView.text = name
 
             val ourNodeInfo = nodes[0]
             val distance = ourNodeInfo.distanceStr(n, displayUnits)
@@ -267,8 +273,6 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             } else {
                 holder.distanceView.visibility = View.INVISIBLE
             }
-
-            holder.lastTime.text = formatAgo(n.lastHeard)
 
             val envMetrics = n.envMetricStr(displayFahrenheit)
             if (envMetrics.isNotEmpty()) {
