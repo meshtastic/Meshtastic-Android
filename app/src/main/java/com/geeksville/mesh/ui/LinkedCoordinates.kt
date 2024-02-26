@@ -1,12 +1,8 @@
 package com.geeksville.mesh.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -14,7 +10,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
@@ -65,19 +62,19 @@ fun LinkedCoordinates(
 @Composable
 @Preview(showBackground = true)
 @Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
-fun LinkedCoordinatesPreview() {
+fun LinkedCoordinatesPreview(
+    @PreviewParameter(GPSFormatPreviewParameterProvider::class) format: Int
+) {
     AppTheme {
-        Column(
-            modifier = Modifier.padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            repeat(3) {
-                LinkedCoordinates(
-                    position = Position(37.7749, -122.4194, 0),
-                    format = it,
-                    nodeName = "Test Node Name"
-                )
-            }
-        }
+        LinkedCoordinates(
+            position = Position(37.7749, -122.4194, 0),
+            format = format,
+            nodeName = "Test Node Name"
+        )
     }
+}
+
+class GPSFormatPreviewParameterProvider: PreviewParameterProvider<Int> {
+    override val values: Sequence<Int>
+        get() = sequenceOf(0, 1, 2)
 }
