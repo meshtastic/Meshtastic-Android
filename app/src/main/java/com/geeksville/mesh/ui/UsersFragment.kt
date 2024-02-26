@@ -28,6 +28,7 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
 import com.geeksville.mesh.databinding.NodelistFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.formatAgo
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -58,12 +59,11 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         val nodeNameView = itemView.nodeNameView
         val distanceView = itemView.distanceView
         val coordsView = itemView.coordsView
-        val batteryPctView = itemView.batteryPercentageView
         val lastTime = itemView.lastConnectionView
-        val powerIcon = itemView.batteryIcon
         val signalView = itemView.signalView
         val envMetrics = itemView.envMetrics
         val background = itemView.nodeCard
+        val batteryInfo = itemView.batteryInfo
 
         fun blink() {
             val bg = background.backgroundTintList
@@ -82,6 +82,14 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 start()
                 doOnEnd {
                     background.backgroundTintList = bg
+                }
+            }
+        }
+
+        fun bind(batteryLevel: Int?, voltage: Float?) {
+            batteryInfo.setContent {
+                AppTheme {
+                    BatteryInfo(batteryLevel, voltage)
                 }
             }
         }
@@ -232,6 +240,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             val user = n.user
             val (textColor, nodeColor) = n.colors
             val isIgnored: Boolean = ignoreIncomingList.contains(n.num)
+
+            holder.bind(n.batteryLevel, n.voltage)
+
             with(holder.chipNode) {
                 text = (user?.shortName ?: "UNK").strikeIf(isIgnored)
                 chipBackgroundColor = ColorStateList.valueOf(nodeColor)
@@ -260,7 +271,6 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             } else {
                 holder.distanceView.visibility = View.INVISIBLE
             }
-            renderBattery(n.batteryLevel, n.voltage, holder)
 
             holder.lastTime.text = formatAgo(n.lastHeard)
 
@@ -310,24 +320,6 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             nodes = nodesIn
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all nodes
         }
-    }
-
-    private fun renderBattery(
-        battery: Int?,
-        voltage: Float?,
-        holder: ViewHolder
-    ) {
-
-        val (image, text) = when (battery) {
-            in 0..100 -> R.drawable.ic_battery_full_24 to "%d%% %.2fV".format(battery, voltage)
-            101 -> R.drawable.ic_power_plug_24 to ""
-            else -> R.drawable.ic_battery_full_24 to "?"
-        }
-
-        holder.batteryPctView.text = text
-        holder.powerIcon.setImageDrawable(context?.let {
-            ContextCompat.getDrawable(it, image)
-        })
     }
 
     override fun onCreateView(
