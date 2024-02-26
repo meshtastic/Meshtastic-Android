@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:clipToPadding="false">
+    android:clipToPadding="false"
+    >
 
     <com.google.android.material.card.MaterialCardView
         style="@style/Widget.App.CardView"
@@ -15,110 +18,107 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            >
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_node"
                 android:layout_width="72dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="@string/some_username"
                 android:textAlignment="center"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="@string/some_username"
+                />
 
             <TextView
                 android:id="@+id/nodeNameView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="@string/unknown_username"
                 app:layout_constraintStart_toEndOf="@+id/chip_node"
-                app:layout_constraintTop_toTopOf="@+id/chip_node" />
+                app:layout_constraintTop_toTopOf="@+id/chip_node"
+                tools:text="@string/unknown_username"
+                />
 
             <TextView
                 android:id="@+id/distance_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="@string/sample_distance"
+                app:layout_constraintTop_toBottomOf="@+id/chip_node"
                 app:layout_constraintEnd_toEndOf="@+id/chip_node"
                 app:layout_constraintStart_toStartOf="@+id/chip_node"
-                app:layout_constraintTop_toBottomOf="@+id/chip_node" />
+                android:layout_marginTop="8dp"
+                tools:text="@string/sample_distance"
+                />
 
             <TextView
                 android:id="@+id/coords_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="@string/sample_coords"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Small"
                 app:layout_constraintStart_toEndOf="@+id/chip_node"
                 app:layout_constraintTop_toBottomOf="@+id/nodeNameView"
-                app:layout_constraintVertical_bias="0.0" />
+                app:layout_constraintVertical_bias="0.0"
+                tools:text="@string/sample_coords"
+                />
 
-            <ImageView
-                android:id="@+id/batteryIcon"
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/batteryInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintEnd_toStartOf="@+id/batteryPercentageView"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_battery_full_24" />
-
-            <TextView
-                android:id="@+id/batteryPercentageView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="100%"
-                app:layout_constraintBottom_toBottomOf="@+id/nodeNameView"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/nodeNameView" />
+                tools:composableName="com.geeksville.mesh.ui.BatteryInfoKt.BatteryInfoPreviewSimple"
+                />
 
             <ImageView
                 android:id="@+id/lastCommIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
+                android:layout_marginEnd="2dp"
                 android:layout_marginBottom="8dp"
                 android:visibility="visible"
                 app:layout_constraintBottom_toTopOf="@id/signalView"
                 app:layout_constraintEnd_toStartOf="@+id/lastConnectionView"
-                app:layout_constraintTop_toBottomOf="@id/batteryIcon"
+                app:layout_constraintTop_toBottomOf="@id/batteryInfo"
                 app:srcCompat="@drawable/ic_antenna_24" />
 
             <TextView
                 android:id="@+id/lastConnectionView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="11h01 PM"
                 android:visibility="visible"
+                app:layout_constraintTop_toTopOf="@+id/lastCommIcon"
                 app:layout_constraintBottom_toBottomOf="@+id/lastCommIcon"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/lastCommIcon" />
+                tools:text="11h01 PM"
+                />
 
             <TextView
                 android:id="@+id/signalView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="rssi:-40 snr:-8"
+                app:layout_constraintTop_toBottomOf="@id/lastConnectionView"
                 app:layout_constraintBottom_toTopOf="@id/envMetrics"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/lastConnectionView" />
+                tools:text="RSSI: -40 SNR: -8"
+                />
 
             <TextView
                 android:id="@+id/envMetrics"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
+                android:layout_marginTop="8dp"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                tools:visibility="visible"
+                />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </com.google.android.material.card.MaterialCardView>
