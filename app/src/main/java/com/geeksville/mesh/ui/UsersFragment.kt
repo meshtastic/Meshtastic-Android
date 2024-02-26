@@ -5,7 +5,6 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.text.SpannableString
-import android.text.method.LinkMovementMethod
 import android.text.style.StrikethroughSpan
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -14,8 +13,6 @@ import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.animation.doOnEnd
-import androidx.core.content.ContextCompat
-import androidx.core.text.HtmlCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
@@ -23,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
@@ -35,7 +33,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.net.URLEncoder
 
 @AndroidEntryPoint
 class UsersFragment : ScreenFragment("Users"), Logging {
@@ -58,11 +55,11 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         val chipNode = itemView.chipNode
         val nodeNameView = itemView.nodeNameView
         val distanceView = itemView.distanceView
-        val coordsView = itemView.coordsView
         val lastTime = itemView.lastConnectionView
         val signalView = itemView.signalView
         val envMetrics = itemView.envMetrics
         val background = itemView.nodeCard
+        val nodePosition = itemView.nodePosition
         val batteryInfo = itemView.batteryInfo
 
         fun blink() {
@@ -86,10 +83,21 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             }
         }
 
-        fun bind(batteryLevel: Int?, voltage: Float?) {
+        fun bind(
+            batteryLevel: Int?,
+            voltage: Float?,
+            position: Position?,
+            gpsFormat: Int,
+            nodeName: String?
+        ) {
             batteryInfo.setContent {
                 AppTheme {
                     BatteryInfo(batteryLevel, voltage)
+                }
+            }
+            nodePosition.setContent {
+                AppTheme {
+                    LinkedCoordinates(position, gpsFormat, nodeName)
                 }
             }
         }
@@ -240,28 +248,16 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             val user = n.user
             val (textColor, nodeColor) = n.colors
             val isIgnored: Boolean = ignoreIncomingList.contains(n.num)
+            val name = user?.longName
 
-            holder.bind(n.batteryLevel, n.voltage)
+            holder.bind(n.batteryLevel, n.voltage, n.validPosition, gpsFormat, name)
 
             with(holder.chipNode) {
                 text = (user?.shortName ?: "UNK").strikeIf(isIgnored)
                 chipBackgroundColor = ColorStateList.valueOf(nodeColor)
                 setTextColor(textColor)
             }
-            val name = user?.longName ?: getString(R.string.unknown_username)
             holder.nodeNameView.text = name
-
-            val pos = n.validPosition
-            if (pos != null) {
-                val html = "<a href='geo:${pos.latitude},${pos.longitude}?z=17&label=${
-                    URLEncoder.encode(name, "utf-8")
-                }'>${pos.gpsString(gpsFormat)}</a>"
-                holder.coordsView.text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
-                holder.coordsView.movementMethod = LinkMovementMethod.getInstance()
-                holder.coordsView.visibility = View.VISIBLE
-            } else {
-                holder.coordsView.visibility = View.INVISIBLE
-            }
 
             val ourNodeInfo = nodes[0]
             val distance = ourNodeInfo.distanceStr(n, displayUnits)
