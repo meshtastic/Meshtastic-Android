@@ -60,6 +60,14 @@ fun BatteryInfoPreview(
     }
 }
 
+@Composable
+@Preview
+fun BatteryInfoPreviewSimple() {
+    AppTheme {
+        BatteryInfo(85, 3.7F)
+    }
+}
+
 class BatteryInfoPreviewParameterProvider : PreviewParameterProvider<Pair<Int?, Float?>> {
     override val values: Sequence<Pair<Int?, Float?>>
         get() = sequenceOf(
