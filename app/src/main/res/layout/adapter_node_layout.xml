@@ -85,8 +85,8 @@
                 tools:composableName="com.geeksville.mesh.ui.LastHeardInfoKt.LastHeardInfoPreview"
                 />
 
-            <TextView
-                android:id="@+id/signalView"
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/signalInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toBottomOf="@id/lastHeardInfo"
@@ -95,7 +95,7 @@
                 app:layout_constraintVertical_bias="0"
                 android:layout_marginTop="4dp"
                 android:layout_marginBottom="8dp"
-                tools:text="RSSI: -40 SNR: -8"
+                tools:composableName="com.geeksville.mesh.ui.SignalInfoKt.SignalInfoSimplePreview"
                 />
 
             <TextView
