@@ -1,9 +1,6 @@
 package com.geeksville.mesh.ui
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,7 +15,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -31,6 +27,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.preview.NodeInfoPreviewParameterProvider
@@ -61,88 +59,131 @@ fun NodeInfo(
             .defaultMinSize(minHeight = 80.dp)
     ) {
         Surface {
-            Row(
-                modifier = Modifier.padding(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.Top
+            ConstraintLayout(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
             ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Box(
-                        // removes the extra spacing above the chip
-                        modifier = Modifier.height(32.dp)
-                    ) {
-                        Chip(
-                            modifier = Modifier.width(72.dp),
-                            onClick = onClicked,
-                            colors = ChipDefaults.chipColors(
-                                backgroundColor = Color(nodeColor),
-                                contentColor = Color(textColor)
-                            ),
-                            content = {
-                                Text(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    text = (thatNodeInfo.user?.shortName ?: unknownShortName).strikeIf(isIgnored),
-                                    fontWeight = FontWeight.Normal,
-                                    fontSize = MaterialTheme.typography.button.fontSize,
-                                    textAlign = TextAlign.Center,
-                                )
-                            },
-                        )
-                    }
+                val (chip, dist, name, pos, batt, heard, sig, env) = createRefs()
+                val nameBarrier = createStartBarrier(batt, heard)
+                val posBarrier = createStartBarrier(sig, env)
 
-                    if (distance != null) {
-                        Text(
-                            text = distance,
-                            fontSize = MaterialTheme.typography.button.fontSize,
-                        )
-                    }
+                Box(
+                    // removes the extra spacing above the chip
+                    modifier = Modifier
+                        .height(32.dp)
+                        .constrainAs(chip) {
+                            top.linkTo(parent.top)
+                            start.linkTo(parent.start)
+                        }
+                ) {
+                    Chip(
+                        modifier = Modifier.width(72.dp),
+                        onClick = onClicked,
+                        colors = ChipDefaults.chipColors(
+                            backgroundColor = Color(nodeColor),
+                            contentColor = Color(textColor)
+                        ),
+                        content = {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = (thatNodeInfo.user?.shortName ?: unknownShortName).strikeIf(isIgnored),
+                                fontWeight = FontWeight.Normal,
+                                fontSize = MaterialTheme.typography.button.fontSize,
+                                textAlign = TextAlign.Center,
+                            )
+                        },
+                    )
                 }
-                Column(
-                    modifier = Modifier.weight(1F),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    val style = if (nodeName == unknownLongName) {
-                        LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)
-                    } else {
-                        LocalTextStyle.current
-                    }
 
+                if (distance != null) {
                     Text(
-                        text = nodeName.strikeIf(isIgnored),
-                        style = style
-                    )
-
-                    LinkedCoordinates(
-                        position = thatNodeInfo.position,
-                        format = gpsFormat,
-                        nodeName = nodeName
+                        modifier = Modifier.constrainAs(dist) {
+                            top.linkTo(chip.bottom, 8.dp)
+                            start.linkTo(chip.start)
+                            end.linkTo(chip.end)
+                        },
+                        text = distance,
+                        fontSize = MaterialTheme.typography.button.fontSize,
                     )
                 }
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    horizontalAlignment = Alignment.End
-                ) {
-                    BatteryInfo(
-                        batteryLevel = thatNodeInfo.batteryLevel,
-                        voltage = thatNodeInfo.voltage
-                    )
-                    LastHeardInfo(lastHeard = thatNodeInfo.lastHeard)
-                    SignalInfo(
-                        nodeInfo = thatNodeInfo,
-                        isThisNode = isThisNode
-                    )
 
-                    val envMetrics = thatNodeInfo.envMetricStr(tempInFahrenheit)
-                    if (envMetrics.isNotBlank()) {
-                        Text(
-                            text = envMetrics,
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = MaterialTheme.typography.button.fontSize
+                val style = if (nodeName == unknownLongName) {
+                    LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)
+                } else {
+                    LocalTextStyle.current
+                }
+                Text(
+                    modifier = Modifier.constrainAs(name) {
+                        top.linkTo(parent.top)
+                        linkTo(
+                            start = chip.end,
+                            end = nameBarrier,
+                            bias = 0F,
+                            startMargin = 8.dp,
+                            endMargin = 8.dp,
+
                         )
-                    }
+                        width = Dimension.preferredWrapContent
+                    },
+                    text = nodeName.strikeIf(isIgnored),
+                    style = style
+                )
+
+                LinkedCoordinates(
+                    modifier = Modifier.constrainAs(pos) {
+                        top.linkTo(name.bottom, 8.dp)
+                        start.linkTo(name.start)
+                        linkTo(
+                            start = name.start,
+                            end = posBarrier,
+                            bias = 0F,
+                            endMargin = 8.dp
+                        )
+                        width = Dimension.preferredWrapContent
+                    },
+                    position = thatNodeInfo.position,
+                    format = gpsFormat,
+                    nodeName = nodeName
+                )
+
+                BatteryInfo(
+                    modifier = Modifier.constrainAs(batt) {
+                        top.linkTo(parent.top)
+                        end.linkTo(parent.end)
+                    },
+                    batteryLevel = thatNodeInfo.batteryLevel,
+                    voltage = thatNodeInfo.voltage
+                )
+
+                LastHeardInfo(
+                    modifier = Modifier.constrainAs(heard) {
+                        top.linkTo(batt.bottom, 4.dp)
+                        end.linkTo(parent.end)
+                    },
+                    lastHeard = thatNodeInfo.lastHeard
+                )
+
+                SignalInfo(
+                    modifier = Modifier.constrainAs(sig) {
+                        top.linkTo(heard.bottom, 4.dp)
+                        end.linkTo(parent.end)
+                    },
+                    nodeInfo = thatNodeInfo,
+                    isThisNode = isThisNode
+                )
+
+                val envMetrics = thatNodeInfo.envMetricStr(tempInFahrenheit)
+                if (envMetrics.isNotBlank()) {
+                    Text(
+                        modifier = Modifier.constrainAs(env) {
+                            top.linkTo(sig.bottom, 4.dp)
+                            end.linkTo(parent.end)
+                        },
+                        text = envMetrics,
+                        color = MaterialTheme.colors.onSurface,
+                        fontSize = MaterialTheme.typography.button.fontSize
+                    )
                 }
             }
         }

@@ -56,7 +56,7 @@ class NodeInfoPreviewParameterProvider: PreviewParameterProvider<NodeInfo> {
             voltage = 3.7F
         ),
         user = MeshUser(
-            longName = "Donald Duck",
+            longName = "Donald Duck, the Grand Duck of the Ducks",
             shortName = "DoDu",
             id = "donaldDuckId",
             hwModel = MeshProtos.HardwareModel.HELTEC_V3,
