@@ -20,7 +20,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.NodeInfo
-import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
@@ -51,18 +50,11 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
     class ViewHolder(itemView: AdapterNodeLayoutBinding) : RecyclerView.ViewHolder(itemView.root) {
-        val chipNode = itemView.chipNode
-        val nodeNameView = itemView.nodeNameView
-        val distanceView = itemView.distanceView
-        val envMetrics = itemView.envMetrics
-        val background = itemView.nodeCard
-        val nodePosition = itemView.nodePosition
-        val batteryInfo = itemView.batteryInfo
-        val lastHeard = itemView.lastHeardInfo
-        val signalInfo = itemView.signalInfo
+        val card = itemView.nodeCard
 
+        // TODO not working with compose changes
         fun blink() {
-            val bg = background.backgroundTintList
+            val bg = card.backgroundTintList
             ValueAnimator.ofArgb(
                 Color.parseColor("#00FFFFFF"),
                 Color.parseColor("#33FFFFFF")
@@ -73,38 +65,33 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 repeatCount = 3
                 repeatMode = ValueAnimator.REVERSE
                 addUpdateListener {
-                    background.backgroundTintList = ColorStateList.valueOf(it.animatedValue as Int)
+                    card.backgroundTintList = ColorStateList.valueOf(it.animatedValue as Int)
                 }
                 start()
                 doOnEnd {
-                    background.backgroundTintList = bg
+                    card.backgroundTintList = bg
                 }
             }
         }
 
         fun bind(
-            nodeInfo: NodeInfo,
-            isThisNode: Boolean,
+            thisNodeInfo: NodeInfo,
+            thatNodeInfo: NodeInfo,
             gpsFormat: Int,
+            distanceUnits: Int,
+            tempInFahrenheit: Boolean,
+            onChipClicked: () -> Unit
         ) {
-            batteryInfo.setContent {
+            card.setContent {
                 AppTheme {
-                    BatteryInfo(nodeInfo.batteryLevel, nodeInfo.voltage)
-                }
-            }
-            nodePosition.setContent {
-                AppTheme {
-                    LinkedCoordinates(nodeInfo.position, gpsFormat, nodeInfo.user?.longName)
-                }
-            }
-            this.lastHeard.setContent {
-                AppTheme {
-                    LastHeardInfo(nodeInfo.lastHeard)
-                }
-            }
-            this.signalInfo.setContent {
-                AppTheme {
-                    SignalInfo(nodeInfo, isThisNode)
+                    NodeInfo(
+                        thisNodeInfo = thisNodeInfo,
+                        thatNodeInfo = thatNodeInfo,
+                        gpsFormat = gpsFormat,
+                        distanceUnits = distanceUnits,
+                        tempInFahrenheit = tempInFahrenheit,
+                        onClicked = onChipClicked
+                    )
                 }
             }
         }
@@ -251,43 +238,17 @@ class UsersFragment : ScreenFragment("Users"), Logging {
          * @param position The position of the item within the adapter's data set.
          */
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val n = nodes[position]
-            val (textColor, nodeColor) = n.colors
-            val isIgnored: Boolean = ignoreIncomingList.contains(n.num)
-            val isThisNode = n.num == nodes[0].num
+            val thisNode = nodes[0]
+            val thatNode = nodes[position]
 
-            holder.bind(n, isThisNode, gpsFormat)
-
-            holder.nodeNameView.text = n.user?.longName
-
-            with(holder.chipNode) {
-                text = (n.user?.shortName ?: "UNK").strikeIf(isIgnored)
-                chipBackgroundColor = ColorStateList.valueOf(nodeColor)
-                setTextColor(textColor)
-            }
-
-            val distance = nodes[0].distanceStr(n, displayUnits)
-            if (distance != null) {
-                holder.distanceView.text = distance
-                holder.distanceView.visibility = View.VISIBLE
-            } else {
-                holder.distanceView.visibility = View.INVISIBLE
-            }
-
-            val envMetrics = n.envMetricStr(displayFahrenheit)
-            if (envMetrics.isNotEmpty()) {
-                holder.envMetrics.text = envMetrics
-                holder.envMetrics.visibility = View.VISIBLE
-            } else {
-                holder.envMetrics.visibility = View.GONE
-            }
-
-            holder.chipNode.setOnClickListener {
-                popup(it, position)
-            }
-            holder.itemView.setOnLongClickListener {
-                popup(it, position)
-                true
+            holder.bind(
+                thisNodeInfo = thisNode,
+                thatNodeInfo = thatNode,
+                gpsFormat = gpsFormat,
+                distanceUnits = displayUnits,
+                tempInFahrenheit = displayFahrenheit
+            ) {
+                popup(holder.card, position)
             }
         }
 

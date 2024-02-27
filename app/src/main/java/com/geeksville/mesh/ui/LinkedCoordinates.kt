@@ -25,7 +25,7 @@ fun LinkedCoordinates(
     format: Int,
     nodeName: String?
 ) {
-    if (position != null) {
+    if (position?.isValid() == true) {
         val uriHandler = LocalUriHandler.current
         val style = SpanStyle(
             color = HyperlinkBlue,
@@ -47,7 +47,6 @@ fun LinkedCoordinates(
         }
         ClickableText(
             text = annotatedString,
-            maxLines = 1,
             onClick = { offset ->
                 debug("Clicked on link")
                 annotatedString.getStringAnnotations(tag = "gps", start = offset, end = offset)
