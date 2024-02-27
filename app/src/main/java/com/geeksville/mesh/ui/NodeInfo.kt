@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Card
 import androidx.compose.material.Chip
 import androidx.compose.material.ChipDefaults
@@ -25,6 +26,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -56,7 +58,7 @@ fun NodeInfo(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = 72.dp)
+            .defaultMinSize(minHeight = 80.dp)
     ) {
         Surface {
             Row(
@@ -73,6 +75,7 @@ fun NodeInfo(
                         modifier = Modifier.height(32.dp)
                     ) {
                         Chip(
+                            modifier = Modifier.width(72.dp),
                             onClick = onClicked,
                             colors = ChipDefaults.chipColors(
                                 backgroundColor = Color(nodeColor),
@@ -80,20 +83,26 @@ fun NodeInfo(
                             ),
                             content = {
                                 Text(
+                                    modifier = Modifier.fillMaxWidth(),
                                     text = (thatNodeInfo.user?.shortName ?: unknownShortName).strikeIf(isIgnored),
-                                    fontWeight = FontWeight.Normal
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = MaterialTheme.typography.button.fontSize,
+                                    textAlign = TextAlign.Center,
                                 )
                             },
                         )
                     }
 
                     if (distance != null) {
-                        Text(text = distance)
+                        Text(
+                            text = distance,
+                            fontSize = MaterialTheme.typography.button.fontSize,
+                        )
                     }
                 }
                 Column(
                     modifier = Modifier.weight(1F),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     val style = if (nodeName == unknownLongName) {
                         LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)

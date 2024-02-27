@@ -14,7 +14,7 @@ import kotlin.random.Random
 class NodeInfoPreviewParameterProvider: PreviewParameterProvider<NodeInfo> {
 
     val mickeyMouse = NodeInfo(
-        num = Random.nextInt(),
+        num = 1955,
         position = Position(
             latitude = 33.812511,
             longitude = -117.918976,
