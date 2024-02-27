@@ -81,6 +81,11 @@ class MessagesFragment : Fragment(), Logging {
 
         var messages = listOf<Packet>()
         var selectedList = ArrayList<Packet>()
+        val layoutManager get() = binding.messageListView.layoutManager as LinearLayoutManager
+
+        fun scrollToBottom() {
+            if (itemCount > 0) layoutManager.scrollToPosition(itemCount - 1)
+        }
 
         override fun getItemCount(): Int = messages.size
 
@@ -166,7 +171,7 @@ class MessagesFragment : Fragment(), Logging {
             }
 
             holder.itemView.setOnLongClickListener {
-                clickItem(holder)
+                clickItem(position)
                 if (actionMode == null) {
                     actionMode =
                         (activity as AppCompatActivity).startSupportActionMode(actionModeCallback)
@@ -174,7 +179,7 @@ class MessagesFragment : Fragment(), Logging {
                 true
             }
             holder.itemView.setOnClickListener {
-                if (actionMode != null) clickItem(holder)
+                if (actionMode != null) clickItem(position)
             }
 
             if (selectedList.contains(packet)) {
@@ -192,12 +197,10 @@ class MessagesFragment : Fragment(), Logging {
             }
         }
 
-        private fun clickItem(holder: ViewHolder) {
-            val position = holder.bindingAdapterPosition
-            if (!selectedList.contains(messages[position])) {
-                selectedList.add(messages[position])
-            } else {
-                selectedList.remove(messages[position])
+        private fun clickItem(position: Int) {
+            val message = messages[position]
+            selectedList.apply {
+                if (contains(message)) remove(message) else add(message)
             }
             if (selectedList.isEmpty()) {
                 // finish action mode when no items selected
@@ -211,12 +214,14 @@ class MessagesFragment : Fragment(), Logging {
 
         /// Called when our node DB changes
         fun onMessagesChanged(messages: List<Packet>) {
+            val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+            val shouldScrollToBottom =
+                lastVisibleItemPosition <= 0 || lastVisibleItemPosition == itemCount - 1
+
             this.messages = messages
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all messages
 
-            // scroll to the last line
-            if (itemCount != 0)
-                binding.messageListView.scrollToPosition(itemCount - 1)
+            if (shouldScrollToBottom) scrollToBottom()
         }
     }
 
@@ -240,25 +245,24 @@ class MessagesFragment : Fragment(), Logging {
             parentFragmentManager.popBackStack()
         }
 
+        fun sendMessageInputText() {
+            val str = binding.messageInputText.text.toString().trim()
+            if (str.isNotEmpty()) {
+                model.sendMessage(str)
+                messagesAdapter.scrollToBottom()
+            }
+            binding.messageInputText.setText("") // blow away the string the user just entered
+            // requireActivity().hideKeyboard()
+        }
+
         binding.sendButton.setOnClickListener {
             debug("User clicked sendButton")
-
-            val str = binding.messageInputText.text.toString().trim()
-            if (str.isNotEmpty())
-                model.sendMessage(str)
-            binding.messageInputText.setText("") // blow away the string the user just entered
-
-            // requireActivity().hideKeyboard()
+            sendMessageInputText()
         }
 
         binding.messageInputText.onEditorAction(EditorInfo.IME_ACTION_SEND) {
             debug("received IME_ACTION_SEND")
-
-            val str = binding.messageInputText.text.toString().trim()
-            if (str.isNotEmpty()) model.sendMessage(str)
-            binding.messageInputText.setText("") // blow away the string the user just entered
-
-            // requireActivity().hideKeyboard()
+            sendMessageInputText()
         }
 
         binding.messageListView.adapter = messagesAdapter
@@ -267,6 +271,7 @@ class MessagesFragment : Fragment(), Logging {
         binding.messageListView.layoutManager = layoutManager
 
         model.messages.observe(viewLifecycleOwner) {
+            if (it.isNotEmpty() && it.first().contact_key != model.contactKey.value) return@observe
             debug("New messages received: ${it.size}")
             messagesAdapter.onMessagesChanged(it)
         }
@@ -312,6 +317,7 @@ class MessagesFragment : Fragment(), Logging {
                             binding.messageInputText.setSelection(newText.length)
                         } else {
                             model.sendMessage(action.message)
+                            messagesAdapter.scrollToBottom()
                         }
                     }
                     binding.quickChatLayout.addView(button)
