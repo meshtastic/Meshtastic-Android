@@ -1,12 +1,17 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
     <item
         android:id="@+id/connectStatusImage"
         android:contentDescription="@string/connection_status"
         android:icon="@drawable/cloud_off"
-        app:iconTint="@color/colorOnPrimary"
+        app:iconTint="@color/toolbarText"
         android:title="@string/disconnected"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"
+        />
+
     <item
         android:id="@+id/debug"
         android:title="@string/debug_panel"

@@ -13,4 +13,6 @@
     <color name="buttonColor">#67EA94</color>
     <color name="colourGrey">#535353</color>
     <color name="colorAnnotation">#0288D1</color>
+    <color name="toolbarBackground">#67EA94</color>
+    <color name="toolbarText">#FFFFFF</color>
 </resources>

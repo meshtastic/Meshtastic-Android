@@ -70,9 +70,8 @@
     </style>
 
     <style name="MyThemeOverlay_Toolbar" parent="">
-        <item name="background">@color/colorPrimary</item>
-        <item name="android:textColorPrimary">@color/colorOnPrimary</item>
-        <item name="tint">@color/colorOnPrimary</item>
+        <item name="android:textColorPrimary">@color/toolbarText</item>
+        <item name="tint">@color/toolbarText</item>
     </style>
 
     <style name="MyActionBar" parent="@style/ThemeOverlay.MaterialComponents.ActionBar">
