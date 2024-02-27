@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -41,6 +42,7 @@ inline fun <reified T> EditListPreference(
     crossinline onValuesChanged: (List<T>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val focusManager = LocalFocusManager.current
     val listState = remember(list) { mutableStateListOf<T>().apply { addAll(list) } }
 
     Column(modifier = modifier) {
@@ -65,6 +67,7 @@ inline fun <reified T> EditListPreference(
                 trailingIcon = {
                     IconButton(
                         onClick = {
+                            focusManager.clearFocus()
                             listState.removeAt(index)
                             onValuesChanged(listState)
                         }
@@ -109,6 +112,7 @@ inline fun <reified T> EditListPreference(
                     trailingIcon = {
                         IconButton(
                             onClick = {
+                                focusManager.clearFocus()
                                 listState.removeAt(index)
                                 onValuesChanged(listState)
                             }
