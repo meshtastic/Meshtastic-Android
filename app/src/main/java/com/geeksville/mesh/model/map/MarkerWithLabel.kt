@@ -3,12 +3,17 @@ package com.geeksville.mesh.model.map
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Rect
+import android.graphics.RectF
 import android.view.MotionEvent
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 
 class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) : Marker(mapView) {
+
+    companion object {
+        private const val LABEL_CORNER_RADIUS = 12F
+        private const val LABEL_Y_OFFSET = 100F
+    }
 
     private var onLongClickListener: (() -> Boolean)? = null
 
@@ -33,14 +38,14 @@ class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
 
     private val bgPaint = Paint().apply { color = Color.WHITE }
 
-    private fun getTextBackgroundSize(text: String, x: Float, y: Float): Rect {
+    private fun getTextBackgroundSize(text: String, x: Float, y: Float): RectF {
         val fontMetrics = textPaint.fontMetrics
         val halfTextLength = textPaint.measureText(text) / 2 + 3
-        return Rect(
-            (x - halfTextLength).toInt(),
-            (y + fontMetrics.top).toInt(),
-            (x + halfTextLength).toInt(),
-            (y + fontMetrics.bottom).toInt()
+        return RectF(
+            (x - halfTextLength),
+            (y + fontMetrics.top),
+            (x + halfTextLength),
+            (y + fontMetrics.bottom)
         )
     }
 
@@ -55,9 +60,12 @@ class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
     override fun draw(c: Canvas, osmv: MapView?, shadow: Boolean) {
         super.draw(c, osmv, false)
         val p = mPositionPixels
-        val bgRect = getTextBackgroundSize(mLabel, (p.x - 0f), (p.y - 110f))
-        c.drawRect(bgRect, bgPaint)
-        c.drawText(mLabel, (p.x - 0f), (p.y - 110f), textPaint)
+        val bgRect = getTextBackgroundSize(mLabel, (p.x - 0F), (p.y - LABEL_Y_OFFSET))
+        bgRect.inset(-8F, -2F)
+
+        c.drawRoundRect(bgRect, LABEL_CORNER_RADIUS, LABEL_CORNER_RADIUS, bgPaint)
+        c.drawText(mLabel, (p.x - 0F), (p.y - LABEL_Y_OFFSET), textPaint)
         mEmoji?.let { c.drawText(it, (p.x - 0f), (p.y - 30f), emojiPaint) }
     }
+
 }

@@ -30,7 +30,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
@@ -399,9 +398,6 @@ fun ChannelScreen(
                     keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    cursorColor = MaterialTheme.colors.onPrimary,
-                ),
             )
         }
 

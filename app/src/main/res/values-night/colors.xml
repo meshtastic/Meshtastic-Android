@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorOnPrimary">#67EA94</color>
-    <color name="colorPrimary">#141414</color>
+    <color name="colorOnPrimary">#141414</color>
+    <color name="colorPrimary">#67EA94</color>
     <color name="colorPrimaryDark">#141414</color>
     <color name="colorMsg">#212121</color>
     <color name="colorMyMsg">#28463C</color>
@@ -11,4 +11,6 @@
     <color name="selectedColor">#67EA94</color>
     <color name="unselectedColor">#AAAAAA</color>
     <color name="colorAnnotation">#039BE5</color>
+    <color name="toolbarBackground">#141414</color>
+    <color name="toolbarText">#67EA94</color>
 </resources>
