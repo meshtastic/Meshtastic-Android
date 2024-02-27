@@ -33,6 +33,17 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.text.DateFormat
 import java.util.*
 
+// return time if within 24 hours, otherwise date/time
+internal fun getShortDateTime(date: Date): String {
+    val isWithin24Hours = System.currentTimeMillis() - date.time <= 24 * 60 * 60 * 1000L
+
+    return if (isWithin24Hours) {
+        DateFormat.getTimeInstance(DateFormat.SHORT).format(date)
+    } else {
+        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(date)
+    }
+}
+
 @AndroidEntryPoint
 class MessagesFragment : Fragment(), Logging {
 
@@ -57,19 +68,6 @@ class MessagesFragment : Fragment(), Logging {
     }
 
     private val messagesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
-
-        private val dateTimeFormat: DateFormat =
-            DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-        private val timeFormat: DateFormat =
-            DateFormat.getTimeInstance(DateFormat.SHORT)
-
-        private fun getShortDateTime(time: Date): String {
-            // return time if within 24 hours, otherwise date/time
-            val oneDayMsec = 60 * 60 * 24 * 1000L
-            return if (System.currentTimeMillis() - time.time > oneDayMsec) {
-                dateTimeFormat.format(time)
-            } else timeFormat.format(time)
-        }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val inflater = LayoutInflater.from(requireContext())
