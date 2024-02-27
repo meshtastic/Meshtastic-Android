@@ -173,7 +173,8 @@ fun NodeInfo(
                     isThisNode = isThisNode
                 )
 
-                val envMetrics = thatNodeInfo.envMetricStr(tempInFahrenheit)
+                val envMetrics = thatNodeInfo.environmentMetrics
+                    ?.getDisplayString(tempInFahrenheit) ?: ""
                 if (envMetrics.isNotBlank()) {
                     Text(
                         modifier = Modifier.constrainAs(env) {

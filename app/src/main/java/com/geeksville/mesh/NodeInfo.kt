@@ -170,6 +170,32 @@ data class EnvironmentMetrics(
     override fun toString(): String {
         return "EnvironmentMetrics(time=${time}, temperature=${temperature}, humidity=${relativeHumidity}, pressure=${barometricPressure}), resistance=${gasResistance}, voltage=${voltage}, current=${current}"
     }
+
+    fun getDisplayString(inFahrenheit: Boolean = false): String {
+        val temp = if (temperature != 0f) {
+            if (inFahrenheit) {
+                val fahrenheit = temperature * 1.8F + 32
+                String.format("%.1f°F", fahrenheit)
+            } else {
+                String.format("%.1f°C", temperature)
+            }
+        } else null
+        val humidity = if (relativeHumidity != 0f) String.format("%.0f%%", relativeHumidity) else null
+        val pressure = if (barometricPressure != 0f) String.format("%.1fhPa", barometricPressure) else null
+        val gas = if (gasResistance != 0f) String.format("%.0fMΩ", gasResistance) else null
+        val voltage = if (voltage != 0f) String.format("%.2fV", voltage) else null
+        val current = if (current != 0f) String.format("%.0fmA", current) else null
+
+        return listOfNotNull(
+            temp,
+            humidity,
+            pressure,
+            gas,
+            voltage,
+            current
+        ).joinToString(" ")
+    }
+
 }
 
 @Parcelize
