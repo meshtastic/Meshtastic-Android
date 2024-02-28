@@ -60,6 +60,18 @@ fun LinkedCoordinates(
 }
 
 @Composable
+@Preview
+fun LinkedCoordinatesSimplePreview() {
+    AppTheme {
+        LinkedCoordinates(
+            position = Position(37.7749, -122.4194, 0),
+            format = 1,
+            nodeName = "Test Node Name"
+        )
+    }
+}
+
+@Composable
 @Preview(showBackground = true)
 @Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 fun LinkedCoordinatesPreview(

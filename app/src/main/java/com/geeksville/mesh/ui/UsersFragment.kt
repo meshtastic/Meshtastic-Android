@@ -54,12 +54,12 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         val chipNode = itemView.chipNode
         val nodeNameView = itemView.nodeNameView
         val distanceView = itemView.distanceView
-        val signalView = itemView.signalView
         val envMetrics = itemView.envMetrics
         val background = itemView.nodeCard
         val nodePosition = itemView.nodePosition
         val batteryInfo = itemView.batteryInfo
         val lastHeard = itemView.lastHeardInfo
+        val signalInfo = itemView.signalInfo
 
         fun blink() {
             val bg = background.backgroundTintList
@@ -83,26 +83,28 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         }
 
         fun bind(
-            batteryLevel: Int?,
-            voltage: Float?,
-            position: Position?,
+            nodeInfo: NodeInfo,
+            isThisNode: Boolean,
             gpsFormat: Int,
-            nodeName: String?,
-            lastHeard: Int
         ) {
             batteryInfo.setContent {
                 AppTheme {
-                    BatteryInfo(batteryLevel, voltage)
+                    BatteryInfo(nodeInfo.batteryLevel, nodeInfo.voltage)
                 }
             }
             nodePosition.setContent {
                 AppTheme {
-                    LinkedCoordinates(position, gpsFormat, nodeName)
+                    LinkedCoordinates(nodeInfo.position, gpsFormat, nodeInfo.user?.longName)
                 }
             }
             this.lastHeard.setContent {
                 AppTheme {
-                    LastHeardInfo(lastHeard)
+                    LastHeardInfo(nodeInfo.lastHeard)
+                }
+            }
+            this.signalInfo.setContent {
+                AppTheme {
+                    SignalInfo(nodeInfo, isThisNode)
                 }
             }
         }
@@ -250,23 +252,21 @@ class UsersFragment : ScreenFragment("Users"), Logging {
          */
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val n = nodes[position]
-            val user = n.user
             val (textColor, nodeColor) = n.colors
             val isIgnored: Boolean = ignoreIncomingList.contains(n.num)
-            val name = user?.longName
+            val isThisNode = n.num == nodes[0].num
 
-            holder.bind(n.batteryLevel, n.voltage, n.validPosition, gpsFormat, name, n.lastHeard)
+            holder.bind(n, isThisNode, gpsFormat)
 
-            holder.nodeNameView.text = name
+            holder.nodeNameView.text = n.user?.longName
 
             with(holder.chipNode) {
-                text = (user?.shortName ?: "UNK").strikeIf(isIgnored)
+                text = (n.user?.shortName ?: "UNK").strikeIf(isIgnored)
                 chipBackgroundColor = ColorStateList.valueOf(nodeColor)
                 setTextColor(textColor)
             }
 
-            val ourNodeInfo = nodes[0]
-            val distance = ourNodeInfo.distanceStr(n, displayUnits)
+            val distance = nodes[0].distanceStr(n, displayUnits)
             if (distance != null) {
                 holder.distanceView.text = distance
                 holder.distanceView.visibility = View.VISIBLE
@@ -282,28 +282,6 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 holder.envMetrics.visibility = View.GONE
             }
 
-            if (n.num == ourNodeInfo.num) {
-                val text = "ChUtil %.1f%% AirUtilTX %.1f%%".format(
-                    n.deviceMetrics?.channelUtilization,
-                    n.deviceMetrics?.airUtilTx
-                )
-                holder.signalView.text = text
-                holder.signalView.visibility = View.VISIBLE
-            } else {
-                val text = buildString {
-                    if (n.channel > 0) append("ch:${n.channel}")
-                    if (n.snr < 100f && n.rssi < 0) {
-                        if (isNotEmpty()) append(" ")
-                        append("rssi:%d snr:%.1f".format(n.rssi, n.snr))
-                    }
-                }
-                if (text.isNotEmpty()) {
-                    holder.signalView.text = text
-                    holder.signalView.visibility = View.VISIBLE
-                } else {
-                    holder.signalView.visibility = View.INVISIBLE
-                }
-            }
             holder.chipNode.setOnClickListener {
                 popup(it, position)
             }
