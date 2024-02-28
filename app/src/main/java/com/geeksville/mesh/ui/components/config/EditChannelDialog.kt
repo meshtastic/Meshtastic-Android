@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -35,12 +36,22 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSettings
+import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.toByteString
 import java.security.SecureRandom
+
+private enum class PositionPrecision(val value: Int) {
+    HIGH_PRECISION(32),
+    MED_PRECISION(16),
+    LOW_PRECISION(11),
+    DISABLED(0),
+    ;
+}
 
 @Composable
 fun EditChannelDialog(
@@ -54,19 +65,17 @@ fun EditChannelDialog(
     fun encodeToString(input: ByteString) =
         Base64.encodeToString(input.toByteArray() ?: ByteArray(0), base64Flags)
 
-    var pskInput by remember { mutableStateOf(channelSettings.psk) }
-    var pskString by remember(pskInput) { mutableStateOf(encodeToString(pskInput)) }
-    val pskError = pskString != encodeToString(pskInput)
-
-    var nameInput by remember { mutableStateOf(channelSettings.name) }
-    var uplinkInput by remember { mutableStateOf(channelSettings.uplinkEnabled) }
-    var downlinkInput by remember { mutableStateOf(channelSettings.downlinkEnabled) }
+    var channelInput by remember(channelSettings) { mutableStateOf(channelSettings) }
+    var pskString by remember(channelInput) { mutableStateOf(encodeToString(channelInput.psk)) }
+    val pskError = pskString != encodeToString(channelInput.psk)
+    val useDropDown = PositionPrecision.entries
+        .any { it.value == channelInput.moduleSettings.positionPrecision }
 
     fun getRandomKey() {
         val random = SecureRandom()
         val bytes = ByteArray(32)
         random.nextBytes(bytes)
-        pskInput = ByteString.copyFrom(bytes)
+        channelInput = channelInput.copy { psk = ByteString.copyFrom(bytes) }
     }
 
     AlertDialog(
@@ -74,20 +83,21 @@ fun EditChannelDialog(
         text = {
             AppCompatTheme {
                 Column(modifier.fillMaxWidth()) {
+                    val focusManager = LocalFocusManager.current
                     var isFocused by remember { mutableStateOf(false) }
                     EditTextPreference(
                         title = stringResource(R.string.channel_name),
-                        value = if (isFocused) nameInput else nameInput.ifEmpty { modemPresetName },
+                        value = if (isFocused) channelInput.name else channelInput.name.ifEmpty { modemPresetName },
                         maxSize = 11, // name max_size:12
                         enabled = true,
                         isError = false,
                         keyboardOptions = KeyboardOptions.Default.copy(
                             keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                         ),
-                        keyboardActions = KeyboardActions(onDone = { }),
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                         onValueChanged = {
-                            nameInput = it
-                            if (pskInput == Channel.default.settings.psk) getRandomKey()
+                            channelInput = channelInput.copy { name = it }
+                            if (channelInput.psk == Channel.default.settings.psk) getRandomKey()
                         },
                         onFocusChanged = { isFocused = it.isFocused },
                     )
@@ -99,7 +109,9 @@ fun EditChannelDialog(
                                 pskString = it // empty (no crypto), 128 or 256 bit only
                                 val decoded = Base64.decode(it, base64Flags).toByteString()
                                 val fullPsk = Channel(channelSettings { psk = decoded }).psk
-                                if (fullPsk.size() in setOf(0, 16, 32)) pskInput = decoded
+                                if (fullPsk.size() in setOf(0, 16, 32)) {
+                                    channelInput = channelInput.copy { psk = decoded }
+                                }
                             } catch (ex: Throwable) {
                                 // Base64 decode failed, pskError true
                             }
@@ -116,8 +128,8 @@ fun EditChannelDialog(
                             IconButton(
                                 onClick = {
                                     if (pskError) {
-                                        pskInput = channelSettings.psk
-                                        pskString = encodeToString(pskInput)
+                                        channelInput = channelInput.copy { psk = channelSettings.psk }
+                                        pskString = encodeToString(channelInput.psk)
                                     } else getRandomKey()
                                 }
                             ) {
@@ -136,8 +148,10 @@ fun EditChannelDialog(
                             modifier = modifier.weight(1f)
                         )
                         Switch(
-                            checked = uplinkInput,
-                            onCheckedChange = { uplinkInput = it },
+                            checked = channelInput.uplinkEnabled,
+                            onCheckedChange = {
+                                channelInput = channelInput.copy { uplinkEnabled = it }
+                            },
                         )
                     }
 
@@ -146,10 +160,32 @@ fun EditChannelDialog(
                             modifier = modifier.weight(1f)
                         )
                         Switch(
-                            checked = downlinkInput,
-                            onCheckedChange = { downlinkInput = it },
+                            checked = channelInput.downlinkEnabled,
+                            onCheckedChange = {
+                                channelInput = channelInput.copy { downlinkEnabled = it }
+                            },
                         )
                     }
+
+                    if (useDropDown) DropDownPreference(
+                        title = "Position",
+                        enabled = true,
+                        items = PositionPrecision.entries.map { it.value to it.name },
+                        selectedItem = channelInput.moduleSettings.positionPrecision,
+                        onItemSelected = {
+                            val module = channelInput.moduleSettings.copy { positionPrecision = it }
+                            channelInput = channelInput.copy { moduleSettings = module }
+                        }
+                    ) else EditTextPreference(
+                        title = "Position precision",
+                        value = channelInput.moduleSettings.positionPrecision,
+                        enabled = true,
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        onValueChanged = {
+                            val module = channelInput.moduleSettings.copy { positionPrecision = it }
+                            channelInput = channelInput.copy { moduleSettings = module }
+                        },
+                    )
                 }
             }
         },
@@ -171,12 +207,7 @@ fun EditChannelDialog(
                         .padding(end = 24.dp)
                         .weight(1f),
                     onClick = {
-                        onAddClick(channelSettings {
-                            psk = pskInput
-                            name = nameInput.trim()
-                            uplinkEnabled = uplinkInput
-                            downlinkEnabled = downlinkInput
-                        })
+                        onAddClick(channelInput.copy { name = channelInput.name.trim() })
                     },
                     enabled = !pskError,
                 ) { Text(stringResource(R.string.save)) }
