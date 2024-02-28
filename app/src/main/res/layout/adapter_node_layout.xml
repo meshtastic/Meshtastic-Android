@@ -47,9 +47,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toBottomOf="@+id/chip_node"
-                app:layout_constraintEnd_toEndOf="@+id/chip_node"
+                app:layout_constraintBottom_toTopOf="@id/envMetrics"
                 app:layout_constraintStart_toStartOf="@+id/chip_node"
-                android:layout_marginTop="8dp"
+                app:layout_constraintEnd_toEndOf="@+id/chip_node"
+                android:layout_marginVertical="8dp"
+                app:layout_constraintVertical_bias="0"
                 tools:text="@string/sample_distance"
                 />
 
@@ -73,36 +75,26 @@
                 tools:composableName="com.geeksville.mesh.ui.BatteryInfoKt.BatteryInfoPreviewSimple"
                 />
 
-            <ImageView
-                android:id="@+id/lastCommIcon"
+            <androidx.compose.ui.platform.ComposeView
+                android:id="@+id/lastHeardInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="2dp"
-                android:layout_marginBottom="8dp"
-                android:visibility="visible"
-                app:layout_constraintBottom_toTopOf="@id/signalView"
-                app:layout_constraintEnd_toStartOf="@+id/lastConnectionView"
-                app:layout_constraintTop_toBottomOf="@id/batteryInfo"
-                app:srcCompat="@drawable/ic_antenna_24" />
-
-            <TextView
-                android:id="@+id/lastConnectionView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:visibility="visible"
-                app:layout_constraintTop_toTopOf="@+id/lastCommIcon"
-                app:layout_constraintBottom_toBottomOf="@+id/lastCommIcon"
+                app:layout_constraintTop_toBottomOf="@+id/batteryInfo"
                 app:layout_constraintEnd_toEndOf="parent"
-                tools:text="11h01 PM"
+                android:layout_marginTop="4dp"
+                tools:composableName="com.geeksville.mesh.ui.LastHeardInfoKt.LastHeardInfoPreview"
                 />
 
             <TextView
                 android:id="@+id/signalView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@id/lastConnectionView"
+                app:layout_constraintTop_toBottomOf="@id/lastHeardInfo"
                 app:layout_constraintBottom_toTopOf="@id/envMetrics"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintVertical_bias="0"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="8dp"
                 tools:text="RSSI: -40 SNR: -8"
                 />
 
@@ -110,12 +102,12 @@
                 android:id="@+id/envMetrics"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:visibility="gone"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 tools:visibility="visible"
+                tools:background="@android:color/holo_red_light"
                 />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
