@@ -21,7 +21,6 @@ import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.UIViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import java.text.DateFormat
 import java.util.*
 
 @AndroidEntryPoint
@@ -47,19 +46,6 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
     }
 
     private val contactsAdapter = object : RecyclerView.Adapter<ViewHolder>() {
-
-        private val dateTimeFormat: DateFormat =
-            DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-        private val timeFormat: DateFormat =
-            DateFormat.getTimeInstance(DateFormat.SHORT)
-
-        private fun getShortDateTime(time: Date): String {
-            // return time if within 24 hours, otherwise date/time
-            val oneDayMsec = 60 * 60 * 24 * 1000L
-            return if (System.currentTimeMillis() - time.time > oneDayMsec) {
-                dateTimeFormat.format(time)
-            } else timeFormat.format(time)
-        }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val inflater = LayoutInflater.from(requireContext())
