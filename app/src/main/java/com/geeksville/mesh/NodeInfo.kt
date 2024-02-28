@@ -67,8 +67,10 @@ data class Position(
     val latitude: Double,
     val longitude: Double,
     val altitude: Int,
-    val time: Int = currentTime() // default to current time in secs (NOT MILLISECONDS!)
+    val time: Int = currentTime(), // default to current time in secs (NOT MILLISECONDS!)
+    val satellitesInView: Int = 0
 ) : Parcelable {
+
     companion object {
         /// Convert to a double representation of degrees
         fun degD(i: Int) = i * 1e-7
@@ -84,7 +86,8 @@ data class Position(
         degD(p.latitudeI),
         degD(p.longitudeI),
         p.altitude,
-        if (p.time != 0) p.time else defaultTime
+        if (p.time != 0) p.time else defaultTime,
+        p.satsInView
     )
 
     /// @return distance in meters to some other node (or null if unknown)
