@@ -94,7 +94,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             }
             nodePosition.setContent {
                 AppTheme {
-                    LinkedCoordinates(nodeInfo.position, gpsFormat, nodeInfo.user?.longName)
+                    LinkedCoordinates(nodeInfo.validPosition, gpsFormat, nodeInfo.user?.longName)
                 }
             }
             this.lastHeard.setContent {
