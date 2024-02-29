@@ -67,8 +67,13 @@ data class Position(
     val latitude: Double,
     val longitude: Double,
     val altitude: Int,
-    val time: Int = currentTime() // default to current time in secs (NOT MILLISECONDS!)
+    val time: Int = currentTime(), // default to current time in secs (NOT MILLISECONDS!)
+    val satellitesInView: Int = 0,
+    val groundSpeed: Int = 0,
+    val groundTrack: Int = 0, // "heading"
+    val precisionBits: Int = 0,
 ) : Parcelable {
+
     companion object {
         /// Convert to a double representation of degrees
         fun degD(i: Int) = i * 1e-7
@@ -79,12 +84,16 @@ data class Position(
 
     /** Create our model object from a protobuf.  If time is unspecified in the protobuf, the provided default time will be used.
      */
-    constructor(p: MeshProtos.Position, defaultTime: Int = currentTime()) : this(
+    constructor(position: MeshProtos.Position, defaultTime: Int = currentTime()) : this(
         // We prefer the int version of lat/lon but if not available use the depreciated legacy version
-        degD(p.latitudeI),
-        degD(p.longitudeI),
-        p.altitude,
-        if (p.time != 0) p.time else defaultTime
+        degD(position.latitudeI),
+        degD(position.longitudeI),
+        position.altitude,
+        if (position.time != 0) position.time else defaultTime,
+        position.satsInView,
+        position.groundSpeed,
+        position.groundTrack,
+        position.precisionBits
     )
 
     /// @return distance in meters to some other node (or null if unknown)

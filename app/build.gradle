@@ -36,8 +36,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdk 33
-        versionCode 30223 // format is Mmmss (where M is 1+the numeric major number
-        versionName "2.2.23"
+        versionCode 30224 // format is Mmmss (where M is 1+the numeric major number
+        versionName "2.2.24"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
@@ -241,7 +241,7 @@ dependencies {
     implementation 'com.github.mik3y:usb-serial-for-android:3.7.0'
 
     // For Firebase Crashlytics & Analytics
-    googleImplementation platform('com.google.firebase:firebase-bom:32.7.2')
+    googleImplementation platform('com.google.firebase:firebase-bom:32.7.3')
     googleImplementation 'com.google.firebase:firebase-crashlytics'
     googleImplementation 'com.google.firebase:firebase-analytics'
 

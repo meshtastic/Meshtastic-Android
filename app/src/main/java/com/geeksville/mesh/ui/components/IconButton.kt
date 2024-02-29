@@ -4,9 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -45,7 +43,6 @@ fun IconButton(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier.size(48.dp),
-        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary),
     ) {
         Icon(
             painterResource(id = drawableRes),

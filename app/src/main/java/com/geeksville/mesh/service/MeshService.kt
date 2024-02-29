@@ -649,6 +649,7 @@ class MeshService : Service(), Logging {
                     Portnums.PortNum.NODEINFO_APP_VALUE ->
                         if (!fromUs) {
                             val u = MeshProtos.User.parseFrom(data.payload)
+                                .copy { if (packet.viaMqtt) longName = "$longName (MQTT)" }
                             handleReceivedUser(packet.from, u, packet.channel)
                         }
 
