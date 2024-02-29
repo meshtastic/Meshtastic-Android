@@ -12,7 +12,6 @@
     <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
 
     <string name="unknown_node_short_name">\???</string>
-    <string name="unknown_node_long_name">Unknown</string>
 
     <string name="channel_name">Channel Name</string>
     <string name="channel_options">Channel options</string>
