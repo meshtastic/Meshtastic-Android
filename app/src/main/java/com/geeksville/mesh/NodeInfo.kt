@@ -193,7 +193,7 @@ data class EnvironmentMetrics(
         val pressure = if (barometricPressure != 0f) String.format("%.1fhPa", barometricPressure) else null
         val gas = if (gasResistance != 0f) String.format("%.0fMΩ", gasResistance) else null
         val voltage = if (voltage != 0f) String.format("%.2fV", voltage) else null
-        val current = if (current != 0f) String.format("%.0fmA", current) else null
+        val current = if (current != 0f) String.format("%.1fmA", current) else null
 
         return listOfNotNull(
             temp,
@@ -238,22 +238,6 @@ data class NodeInfo(
     val batteryLevel get() = deviceMetrics?.batteryLevel
     val voltage get() = deviceMetrics?.voltage
     val batteryStr get() = if (batteryLevel in 1..100) String.format("%d%%", batteryLevel) else ""
-
-    private fun Float.envFormat(unit: String, decimalPlaces: Int = 1): String =
-        if (this != 0f) String.format("%.${decimalPlaces}f$unit", this) else ""
-
-    fun envMetricStr(isFahrenheit: Boolean = false): String = buildString {
-        val env = environmentMetrics ?: return ""
-        if (env.temperature != 0f) append(
-            if (!isFahrenheit) env.temperature.envFormat("°C ")
-            else (env.temperature * 1.8f + 32).envFormat("°F ")
-        )
-        append(env.relativeHumidity.envFormat("%% ", 0))
-        append(env.barometricPressure.envFormat("hPa "))
-        append(env.gasResistance.envFormat("MΩ ", 0))
-        append(env.voltage.envFormat("V ", 2))
-        append(env.current.envFormat("mA"))
-    }
 
     /**
      * true if the device was heard from recently
