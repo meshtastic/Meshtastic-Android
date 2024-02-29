@@ -50,7 +50,7 @@ fun NodeInfo(
     onClicked: () -> Unit = {}
 ) {
     val unknownShortName = stringResource(id = R.string.unknown_node_short_name)
-    val unknownLongName = stringResource(id = R.string.unknown_node_long_name)
+    val unknownLongName = stringResource(id = R.string.unknown_username)
 
     val nodeName = thatNodeInfo.user?.longName ?: unknownLongName
     val isThisNode = thisNodeInfo.num == thatNodeInfo.num
