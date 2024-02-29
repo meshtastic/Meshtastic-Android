@@ -56,6 +56,7 @@ fun NodeInfo(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
             .defaultMinSize(minHeight = 80.dp)
     ) {
         Surface {
@@ -65,8 +66,8 @@ fun NodeInfo(
                     .padding(8.dp)
             ) {
                 val (chip, dist, name, pos, batt, heard, sig, env) = createRefs()
-                val nameBarrier = createStartBarrier(batt, heard)
-                val posBarrier = createStartBarrier(sig, env)
+                val barrierBattHeard = createStartBarrier(batt, heard)
+                val sigBarrier = createBottomBarrier(pos, heard)
 
                 Box(
                     // removes the extra spacing above the chip
@@ -118,7 +119,7 @@ fun NodeInfo(
                         top.linkTo(parent.top)
                         linkTo(
                             start = chip.end,
-                            end = nameBarrier,
+                            end = barrierBattHeard,
                             bias = 0F,
                             startMargin = 8.dp,
                             endMargin = 8.dp,
@@ -132,11 +133,16 @@ fun NodeInfo(
 
                 LinkedCoordinates(
                     modifier = Modifier.constrainAs(pos) {
-                        top.linkTo(name.bottom, 8.dp)
-                        start.linkTo(name.start)
+                        linkTo(
+                            top = name.bottom,
+                            bottom = sig.top,
+                            bias = 0F,
+                            topMargin = 4.dp,
+                            bottomMargin = 4.dp
+                        )
                         linkTo(
                             start = name.start,
-                            end = posBarrier,
+                            end = barrierBattHeard,
                             bias = 0F,
                             endMargin = 8.dp
                         )
@@ -166,7 +172,8 @@ fun NodeInfo(
 
                 SignalInfo(
                     modifier = Modifier.constrainAs(sig) {
-                        top.linkTo(heard.bottom, 4.dp)
+                        top.linkTo(sigBarrier, 4.dp)
+                        bottom.linkTo(env.top, 4.dp)
                         end.linkTo(parent.end)
                     },
                     nodeInfo = thatNodeInfo,
@@ -220,7 +227,10 @@ fun NodeInfoSimplePreview() {
 }
 
 @Composable
-@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@Preview(
+    showBackground = true,
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES,
+)
 fun NodeInfoPreview(
     @PreviewParameter(NodeInfoPreviewParameterProvider::class)
     thatNodeInfo: NodeInfo

@@ -38,6 +38,19 @@ class NodeInfoPreviewParameterProvider: PreviewParameterProvider<NodeInfo> {
         )
     )
 
+    private val minnieMouse = mickeyMouse.copy(
+        num = Random.nextInt(),
+        user = MeshUser(
+            longName = "Minnie Mouse",
+            shortName = "MiMo",
+            id = "minnieMouseId",
+            hwModel = MeshProtos.HardwareModel.HELTEC_V3
+        ),
+        snr = 12.5F,
+        rssi = -42,
+        position = null
+    )
+
     private val donaldDuck = NodeInfo(
         num = Random.nextInt(),
         position = Position(
@@ -85,6 +98,7 @@ class NodeInfoPreviewParameterProvider: PreviewParameterProvider<NodeInfo> {
             mickeyMouse, // "this" node
             unknown,
             almostNothing,
+            minnieMouse,
             donaldDuck
         )
 

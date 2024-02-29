@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import androidx.appcompat.widget.PopupMenu
+import androidx.compose.ui.platform.ComposeView
 import androidx.core.animation.doOnEnd
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
@@ -22,7 +23,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.databinding.AdapterNodeLayoutBinding
 import com.geeksville.mesh.databinding.NodelistFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.theme.AppTheme
@@ -47,14 +47,11 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     private var displayUnits = 0
     private var displayFahrenheit = false
 
-    // Provide a direct reference to each of the views within a data item
-    // Used to cache the views within the item layout for fast access
-    class ViewHolder(itemView: AdapterNodeLayoutBinding) : RecyclerView.ViewHolder(itemView.root) {
-        val card = itemView.nodeCard
+    class ViewHolder(val composeView: ComposeView) : RecyclerView.ViewHolder(composeView) {
 
         // TODO not working with compose changes
         fun blink() {
-            val bg = card.backgroundTintList
+            val bg = composeView.backgroundTintList
             ValueAnimator.ofArgb(
                 Color.parseColor("#00FFFFFF"),
                 Color.parseColor("#33FFFFFF")
@@ -65,11 +62,11 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 repeatCount = 3
                 repeatMode = ValueAnimator.REVERSE
                 addUpdateListener {
-                    card.backgroundTintList = ColorStateList.valueOf(it.animatedValue as Int)
+                    composeView.backgroundTintList = ColorStateList.valueOf(it.animatedValue as Int)
                 }
                 start()
                 doOnEnd {
-                    card.backgroundTintList = bg
+                    composeView.backgroundTintList = bg
                 }
             }
         }
@@ -82,7 +79,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             tempInFahrenheit: Boolean,
             onChipClicked: () -> Unit
         ) {
-            card.setContent {
+            composeView.setContent {
                 AppTheme {
                     NodeInfo(
                         thisNodeInfo = thisNodeInfo,
@@ -200,13 +197,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
          * @see .onBindViewHolder
          */
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val inflater = LayoutInflater.from(requireContext())
-
-            // Inflate the custom layout
-            val contactView = AdapterNodeLayoutBinding.inflate(inflater, parent, false)
-
-            // Return a new holder instance
-            return ViewHolder(contactView)
+            return ViewHolder(ComposeView(parent.context))
         }
 
         /**
@@ -248,17 +239,30 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 distanceUnits = displayUnits,
                 tempInFahrenheit = displayFahrenheit
             ) {
-                popup(holder.card, position)
+                popup(holder.composeView, position)
             }
         }
 
-        /// Called when our node DB changes
+        // Called when our node DB changes
         fun onNodesChanged(nodesIn: Array<NodeInfo>) {
-            if (nodesIn.size > 1)
+            if (nodesIn.size > 1) {
                 nodesIn.sortWith(compareByDescending { it.lastHeard }, 1)
+            }
+
+            val previousNodes = nodes
+            val indexChanged = nodesIn.mapIndexed { index, nodeInfo ->
+                previousNodes.getOrNull(index) != nodeInfo
+            }
+            if (indexChanged.isEmpty()) return
+
             nodes = nodesIn
-            notifyDataSetChanged() // FIXME, this is super expensive and redraws all nodes
+            for (i in indexChanged.indices) {
+                if (indexChanged[i]) {
+                    notifyItemChanged(i)
+                }
+            }
         }
+
     }
 
     override fun onCreateView(
