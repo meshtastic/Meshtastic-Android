@@ -6,8 +6,6 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.database.dao.PacketDao
@@ -28,6 +26,7 @@ import com.geeksville.mesh.database.entity.QuickChatAction
     ],
     autoMigrations = [
         AutoMigration (from = 3, to = 4),
+        AutoMigration (from = 4, to = 5),
     ],
     version = 5,
     exportSchema = true,
@@ -47,13 +46,6 @@ abstract class MeshtasticDatabase : RoomDatabase() {
                 MeshtasticDatabase::class.java,
                 "meshtastic_database"
             )
-                .addMigrations(
-                    object: Migration(4, 5) {
-                        override fun migrate(db: SupportSQLiteDatabase) {
-                            db.execSQL("ALTER TABLE `NodeInfo` ADD COLUMN `position_satellitesInView` INTEGER")
-                        }
-                    }
-                )
                 .fallbackToDestructiveMigration()
                 .build()
         }

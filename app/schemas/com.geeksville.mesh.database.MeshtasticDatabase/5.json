@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 5,
-    "identityHash": "f3aeb06ff807f7157a63ef0a37e44a1c",
+    "identityHash": "ceba9ef029debe5bc3f32a16d56b54c7",
     "entities": [
       {
         "tableName": "MyNodeInfo",
@@ -98,7 +98,7 @@
       },
       {
         "tableName": "NodeInfo",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`num` INTEGER NOT NULL, `snr` REAL NOT NULL, `rssi` INTEGER NOT NULL, `lastHeard` INTEGER NOT NULL, `channel` INTEGER NOT NULL, `user_id` TEXT, `user_longName` TEXT, `user_shortName` TEXT, `user_hwModel` TEXT, `user_isLicensed` INTEGER, `position_latitude` REAL, `position_longitude` REAL, `position_altitude` INTEGER, `position_time` INTEGER, `position_satellitesInView` INTEGER, `devMetrics_time` INTEGER, `devMetrics_batteryLevel` INTEGER, `devMetrics_voltage` REAL, `devMetrics_channelUtilization` REAL, `devMetrics_airUtilTx` REAL, `envMetrics_time` INTEGER, `envMetrics_temperature` REAL, `envMetrics_relativeHumidity` REAL, `envMetrics_barometricPressure` REAL, `envMetrics_gasResistance` REAL, `envMetrics_voltage` REAL, `envMetrics_current` REAL, PRIMARY KEY(`num`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`num` INTEGER NOT NULL, `snr` REAL NOT NULL, `rssi` INTEGER NOT NULL, `lastHeard` INTEGER NOT NULL, `channel` INTEGER NOT NULL, `user_id` TEXT, `user_longName` TEXT, `user_shortName` TEXT, `user_hwModel` TEXT, `user_isLicensed` INTEGER, `position_latitude` REAL, `position_longitude` REAL, `position_altitude` INTEGER, `position_time` INTEGER, `position_satellitesInView` INTEGER, `position_groundSpeed` INTEGER, `position_groundTrack` INTEGER, `position_precisionBits` INTEGER, `devMetrics_time` INTEGER, `devMetrics_batteryLevel` INTEGER, `devMetrics_voltage` REAL, `devMetrics_channelUtilization` REAL, `devMetrics_airUtilTx` REAL, `envMetrics_time` INTEGER, `envMetrics_temperature` REAL, `envMetrics_relativeHumidity` REAL, `envMetrics_barometricPressure` REAL, `envMetrics_gasResistance` REAL, `envMetrics_voltage` REAL, `envMetrics_current` REAL, PRIMARY KEY(`num`))",
         "fields": [
           {
             "fieldPath": "num",
@@ -187,6 +187,24 @@
           {
             "fieldPath": "position.satellitesInView",
             "columnName": "position_satellitesInView",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "position.groundSpeed",
+            "columnName": "position_groundSpeed",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "position.groundTrack",
+            "columnName": "position_groundTrack",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "position.precisionBits",
+            "columnName": "position_precisionBits",
             "affinity": "INTEGER",
             "notNull": false
           },
@@ -402,7 +420,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f3aeb06ff807f7157a63ef0a37e44a1c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ceba9ef029debe5bc3f32a16d56b54c7')"
     ]
   }
 }
