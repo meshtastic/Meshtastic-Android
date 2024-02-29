@@ -29,10 +29,14 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
+import com.geeksville.mesh.ui.compose.ElevationInfo
+import com.geeksville.mesh.ui.compose.SatelliteCountInfo
 import com.geeksville.mesh.ui.preview.NodeInfoPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.util.metersIn
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -65,7 +69,7 @@ fun NodeInfo(
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                val (chip, dist, name, pos, batt, heard, sig, env) = createRefs()
+                val (chip, dist, name, pos, alt, sats, batt, heard, sig, env) = createRefs()
                 val barrierBattHeard = createStartBarrier(batt, heard)
                 val sigBarrier = createBottomBarrier(pos, heard)
 
@@ -131,6 +135,7 @@ fun NodeInfo(
                     style = style
                 )
 
+                val position = thatNodeInfo.position
                 LinkedCoordinates(
                     modifier = Modifier.constrainAs(pos) {
                         linkTo(
@@ -148,10 +153,47 @@ fun NodeInfo(
                         )
                         width = Dimension.preferredWrapContent
                     },
-                    position = thatNodeInfo.position,
+                    position = position,
                     format = gpsFormat,
                     nodeName = nodeName
                 )
+
+                if (position?.isValid() == true) {
+                    val system = ConfigProtos.Config.DisplayConfig.DisplayUnits.forNumber(distanceUnits)
+                    val altitude = position.altitude.metersIn(system)
+                    val elevationSuffix = stringResource(id = R.string.elevation_suffix)
+
+                    ElevationInfo(
+                        modifier = Modifier.constrainAs(alt) {
+                            top.linkTo(pos.bottom, 4.dp)
+                            baseline.linkTo(sig.baseline)
+                            linkTo(
+                                start = pos.start,
+                                end = sig.start,
+                                endMargin = 8.dp,
+                                bias = 0F,
+                            )
+                            width = Dimension.preferredWrapContent
+                        },
+                        altitude = altitude,
+                        system = system,
+                        suffix = elevationSuffix
+                    )
+
+                    SatelliteCountInfo(
+                        modifier = Modifier.constrainAs(sats) {
+                            top.linkTo(alt.bottom, 4.dp)
+                            linkTo(
+                                start = pos.start,
+                                end = env.start,
+                                endMargin = 8.dp,
+                                bias = 0F,
+                            )
+                            width = Dimension.preferredWrapContent
+                        },
+                        satCount = position.satellitesInView
+                    )
+                }
 
                 BatteryInfo(
                     modifier = Modifier.constrainAs(batt) {

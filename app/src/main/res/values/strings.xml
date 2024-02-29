@@ -14,6 +14,8 @@
     <string name="unknown_node_short_name">\???</string>
     <string name="unknown_node_long_name">Unknown</string>
 
+    <string name="elevation_suffix">ASL</string>
+
     <string name="channel_name">Channel Name</string>
     <string name="channel_options">Channel options</string>
     <string name="qr_code">QR code</string>
