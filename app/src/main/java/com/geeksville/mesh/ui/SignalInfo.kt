@@ -11,11 +11,11 @@ import com.geeksville.mesh.ui.preview.NodeInfoPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 
 @Composable
-fun SignalInfo(
+fun signalInfo(
     modifier: Modifier = Modifier,
     nodeInfo: NodeInfo,
     isThisNode: Boolean
-) {
+): Boolean {
     val text = if (isThisNode) {
         "ChUtil %.1f%% AirUtilTX %.1f%%".format(
             nodeInfo.deviceMetrics?.channelUtilization,
@@ -30,13 +30,16 @@ fun SignalInfo(
             }
         }
     }
-    if (text.isNotEmpty()) {
+    return if (text.isNotEmpty()) {
         Text(
             modifier = modifier,
             text = text,
             color = MaterialTheme.colors.onSurface,
             fontSize = MaterialTheme.typography.button.fontSize
         )
+        true
+    } else {
+        false
     }
 }
 
@@ -44,7 +47,7 @@ fun SignalInfo(
 @Preview(showBackground = true)
 fun SignalInfoSimplePreview() {
     AppTheme {
-        SignalInfo(
+        signalInfo(
             nodeInfo = NodeInfo(
                 num = 1,
                 position = null,
@@ -68,7 +71,7 @@ fun SignalInfoPreview(
     nodeInfo: NodeInfo
 ) {
     AppTheme {
-        SignalInfo(
+        signalInfo(
             nodeInfo = nodeInfo,
             isThisNode = false
         )
@@ -83,7 +86,7 @@ fun SignalInfoSelfPreview(
     nodeInfo: NodeInfo
 ) {
     AppTheme {
-        SignalInfo(
+        signalInfo(
             nodeInfo = nodeInfo,
             isThisNode = true
         )

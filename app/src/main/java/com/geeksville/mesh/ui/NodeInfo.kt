@@ -158,6 +158,16 @@ fun NodeInfo(
                     nodeName = nodeName
                 )
 
+                val signalShown = signalInfo(
+                    modifier = Modifier.constrainAs(sig) {
+                        top.linkTo(sigBarrier, 4.dp)
+                        bottom.linkTo(env.top, 4.dp)
+                        end.linkTo(parent.end)
+                    },
+                    nodeInfo = thatNodeInfo,
+                    isThisNode = isThisNode
+                )
+
                 if (position?.isValid() == true) {
                     val system = ConfigProtos.Config.DisplayConfig.DisplayUnits.forNumber(distanceUnits)
                     val altitude = position.altitude.metersIn(system)
@@ -166,7 +176,9 @@ fun NodeInfo(
                     ElevationInfo(
                         modifier = Modifier.constrainAs(alt) {
                             top.linkTo(pos.bottom, 4.dp)
-                            baseline.linkTo(sig.baseline)
+                            if (signalShown) {
+                                baseline.linkTo(sig.baseline)
+                            }
                             linkTo(
                                 start = pos.start,
                                 end = sig.start,
@@ -212,22 +224,16 @@ fun NodeInfo(
                     lastHeard = thatNodeInfo.lastHeard
                 )
 
-                SignalInfo(
-                    modifier = Modifier.constrainAs(sig) {
-                        top.linkTo(sigBarrier, 4.dp)
-                        bottom.linkTo(env.top, 4.dp)
-                        end.linkTo(parent.end)
-                    },
-                    nodeInfo = thatNodeInfo,
-                    isThisNode = isThisNode
-                )
-
                 val envMetrics = thatNodeInfo.environmentMetrics
                     ?.getDisplayString(tempInFahrenheit) ?: ""
                 if (envMetrics.isNotBlank()) {
                     Text(
                         modifier = Modifier.constrainAs(env) {
-                            top.linkTo(sig.bottom, 4.dp)
+                            if (signalShown) {
+                                top.linkTo(sig.bottom, 4.dp)
+                            } else {
+                                top.linkTo(pos.bottom, 4.dp)
+                            }
                             end.linkTo(parent.end)
                         },
                         text = envMetrics,
