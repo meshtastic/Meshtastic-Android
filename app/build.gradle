@@ -216,7 +216,7 @@ dependencies {
         exclude group: 'com.j256.ormlite'
     }
     implementation 'com.github.MKergall:osmbonuspack:6.9.0'
-    implementation('mil.nga.mgrs:mgrs-android:2.2.2') { exclude group: 'com.google.android.gms' }
+    implementation "mil.nga:mgrs:2.1.2"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
