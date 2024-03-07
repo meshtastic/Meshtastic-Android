@@ -15,6 +15,7 @@
    <locale android:name="iw"/> <!-- Hebrew -->
    <locale android:name="ja"/> <!-- Japanese -->
    <locale android:name="ko"/> <!-- Korean -->
+   <locale android:name="lt"/> <!-- Lithuanian -->
    <locale android:name="hu"/> <!-- Hungarian -->
    <locale android:name="nl"/> <!-- Dutch -->
    <locale android:name="nb"/> <!-- Norwegian -->
