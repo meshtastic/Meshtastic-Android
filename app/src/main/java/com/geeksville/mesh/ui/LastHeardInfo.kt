@@ -19,9 +19,11 @@ import com.geeksville.mesh.util.formatAgo
 
 @Composable
 fun LastHeardInfo(
+    modifier: Modifier = Modifier,
     lastHeard: Int
 ) {
     Row(
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
@@ -44,6 +46,6 @@ fun LastHeardInfo(
 @Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 fun LastHeardInfoPreview() {
     AppTheme {
-        LastHeardInfo((System.currentTimeMillis() / 1000).toInt() - 8600)
+        LastHeardInfo(lastHeard = (System.currentTimeMillis() / 1000).toInt() - 8600)
     }
 }

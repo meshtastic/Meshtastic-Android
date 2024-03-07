@@ -3,6 +3,7 @@ package com.geeksville.mesh.ui
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -21,11 +22,12 @@ import java.net.URLEncoder
 
 @Composable
 fun LinkedCoordinates(
+    modifier : Modifier = Modifier,
     position: Position?,
     format: Int,
     nodeName: String?
 ) {
-    if (position != null) {
+    if (position?.isValid() == true) {
         val uriHandler = LocalUriHandler.current
         val style = SpanStyle(
             color = HyperlinkBlue,
@@ -46,8 +48,8 @@ fun LinkedCoordinates(
             pop()
         }
         ClickableText(
+            modifier = modifier,
             text = annotatedString,
-            maxLines = 1,
             onClick = { offset ->
                 debug("Clicked on link")
                 annotatedString.getStringAnnotations(tag = "gps", start = offset, end = offset)
