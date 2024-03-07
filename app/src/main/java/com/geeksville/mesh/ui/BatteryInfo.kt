@@ -19,7 +19,11 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.theme.AppTheme
 
 @Composable
-fun BatteryInfo(batteryLevel: Int?, voltage: Float?) {
+fun BatteryInfo(
+    modifier: Modifier = Modifier,
+    batteryLevel: Int?,
+    voltage: Float?
+) {
     val infoString = "%d%% %.2fV".format(batteryLevel, voltage)
     val (image, level) = when (batteryLevel) {
         in 0 .. 4 -> R.drawable.ic_battery_alert to " $infoString"
@@ -32,6 +36,7 @@ fun BatteryInfo(batteryLevel: Int?, voltage: Float?) {
     }
 
     Row(
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -56,7 +61,10 @@ fun BatteryInfoPreview(
     batteryInfo: Pair<Int?, Float?>
 ) {
     AppTheme {
-        BatteryInfo(batteryInfo.first, batteryInfo.second)
+        BatteryInfo(
+            batteryLevel = batteryInfo.first,
+            voltage = batteryInfo.second
+        )
     }
 }
 
@@ -64,7 +72,10 @@ fun BatteryInfoPreview(
 @Preview
 fun BatteryInfoPreviewSimple() {
     AppTheme {
-        BatteryInfo(85, 3.7F)
+        BatteryInfo(
+            batteryLevel = 85,
+            voltage = 3.7F
+        )
     }
 }
 

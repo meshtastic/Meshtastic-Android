@@ -3,6 +3,7 @@ package com.geeksville.mesh.ui
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.geeksville.mesh.NodeInfo
@@ -11,6 +12,7 @@ import com.geeksville.mesh.ui.theme.AppTheme
 
 @Composable
 fun SignalInfo(
+    modifier: Modifier = Modifier,
     nodeInfo: NodeInfo,
     isThisNode: Boolean
 ) {
@@ -30,6 +32,7 @@ fun SignalInfo(
     }
     if (text.isNotEmpty()) {
         Text(
+            modifier = modifier,
             text = text,
             color = MaterialTheme.colors.onSurface,
             fontSize = MaterialTheme.typography.button.fontSize
@@ -41,16 +44,19 @@ fun SignalInfo(
 @Preview(showBackground = true)
 fun SignalInfoSimplePreview() {
     AppTheme {
-        SignalInfo(NodeInfo(
-            num = 1,
-            position = null,
-            lastHeard = 0,
-            channel = 0,
-            snr = 12.5F,
-            rssi = -42,
-            deviceMetrics = null,
-            user = null
-        ), false)
+        SignalInfo(
+            nodeInfo = NodeInfo(
+                num = 1,
+                position = null,
+                lastHeard = 0,
+                channel = 0,
+                snr = 12.5F,
+                rssi = -42,
+                deviceMetrics = null,
+                user = null
+            ),
+            isThisNode = false
+        )
     }
 }
 
@@ -62,7 +68,10 @@ fun SignalInfoPreview(
     nodeInfo: NodeInfo
 ) {
     AppTheme {
-        SignalInfo(nodeInfo, false)
+        SignalInfo(
+            nodeInfo = nodeInfo,
+            isThisNode = false
+        )
     }
 }
 
@@ -74,6 +83,9 @@ fun SignalInfoSelfPreview(
     nodeInfo: NodeInfo
 ) {
     AppTheme {
-        SignalInfo(nodeInfo, true)
+        SignalInfo(
+            nodeInfo = nodeInfo,
+            isThisNode = true
+        )
     }
 }
