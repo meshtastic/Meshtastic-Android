@@ -41,7 +41,6 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
-                android:autoLink="all"
                 android:maxLines="2"
                 android:text="@string/sample_message"
                 app:layout_constraintBottom_toBottomOf="parent"
