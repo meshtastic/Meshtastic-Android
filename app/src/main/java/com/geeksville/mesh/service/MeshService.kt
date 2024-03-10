@@ -1282,7 +1282,7 @@ class MeshService : Service(), Logging {
         // Just replace/add any entry
         updateNodeInfo(info.num) {
             if (info.hasUser()) {
-                it.user = MeshUser(info.user)
+                it.user = MeshUser(info.user.copy { if (info.viaMqtt) longName = "$longName (MQTT)" })
             }
 
             if (info.hasPosition()) {
