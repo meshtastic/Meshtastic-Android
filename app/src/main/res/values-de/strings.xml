@@ -30,15 +30,16 @@
     <string name="report">Melden</string>
     <string name="not_paired_yet">Sie haben noch kein gekoppeltes Funkgerät.</string>
     <string name="change_radio">Funkgerät wechseln</string>
-    <string name="pairing_completed">Koppelung hergestellt, der Dienst wird gestartet</string>
-    <string name="pairing_failed_try_again">Die Koppelung ist fehlgeschlagen, bitte wähle erneut aus</string>
-    <string name="location_disabled">Standortzugriff ist ausgeschaltet, es kann keine Position zum Mesh bereitgestellt werden.</string>
+    <string name="pairing_completed">Kopplung erfolgreich, der Dienst wird gestartet</string>
+    <string name="pairing_failed_try_again">Kopplung fehlgeschlagen, bitte wähle erneut</string>
+    <string name="location_disabled">Standortzugriff ist deaktiviert, es kann keine Position zum Mesh bereitgestellt werden.</string>
     <string name="share">Teilen</string>
     <string name="disconnected">Verbindung getrennt</string>
     <string name="device_sleeping">Gerät schläft</string>
     <string name="connected_count">Verbunden: %1$s von %2$s online</string>
     <string name="list_of_nodes">Eine Liste der Knoten im Netzwerk</string>
     <string name="update_firmware">Firmware aktualisieren</string>
+    <string name="ip_address">IP-Adresse:</string>
     <string name="connected">Mit Funkgerät verbunden</string>
     <string name="connected_to">Mit Funkgerät verbunden (%s)</string>
     <string name="not_connected">Nicht verbunden</string>
@@ -94,6 +95,9 @@
     <string name="provide_location_to_mesh">Standort zum Mesh angeben</string>
     <string name="camera_required">Kamera-Berechtigungen</string>
     <string name="why_camera_required">Wir müssen Zugriff auf die Kamera haben, um QR-Codes lesen zu können. Es werden keine Bilder oder Videos gespeichert.</string>
+    <string name="notification_required">Benachrichtigungen erlauben</string>
+    <string name="why_notification_required">Meshtastic benötigt Berechtigung für Service- und Nachrichtenbenachrichtigungen.</string>
+    <string name="notification_denied">Berechtigung für Benachrichtigungen verweigert. Um Benachrichtigungen einzuschalten, gehe zu: Android-Einstellungen &gt; Apps &gt; Meshtastic &gt; Benachrichtigungen.</string>
     <string name="modem_config_slow_short">Kurze Reichweite / Langsam</string>
     <string name="modem_config_slow_medium">Mittlere Reichweite / Langsam</string>
     <plurals name="delete_messages">
@@ -138,6 +142,9 @@
     <string name="direct_message">Direktnachricht</string>
     <string name="nodedb_reset">Node-Datenbank zurücksetzen</string>
     <string name="nodedb_reset_description">Dies löscht alle Knoten von dieser Liste.</string>
+    <string name="ignore">Ignorieren</string>
+    <string name="ignore_add">\'%s\' zur Ignorierliste hinzufügen? Deine Funkstation wird nach dieser Änderung neu gestartet.</string>
+    <string name="ignore_remove">\'%s\' von der Ignorieren-Liste entfernen? Deine Funkstation wird nach dieser Änderung neu starten.</string>
     <string name="map_select_download_region">Herunterlade-Region auswählen</string>
     <string name="map_tile_download_estimate">Kachel-Herunterladen-Schätzung:</string>
     <string name="map_start_download">Herunterladen starten</string>
@@ -162,4 +169,6 @@
     <string name="waypoint_edit">Wegpunkt bearbeiten</string>
     <string name="waypoint_delete">Wegpunkt löschen?</string>
     <string name="waypoint_new">Wegpunkt hinzufügen</string>
+    <string name="waypoint_received">Wegpunkt: %s empfangen</string>
+    <string name="error_duty_cycle">Limit für den aktuellen Zyklus erreicht. Nachrichten können momentan nicht gesendet werden, bitte versuchen Sie es später erneut.</string>
 </resources>
