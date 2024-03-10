@@ -4,7 +4,6 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.*
-import android.view.inputmethod.EditorInfo
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
@@ -26,7 +25,7 @@ import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.databinding.AdapterMessageLayoutBinding
 import com.geeksville.mesh.databinding.MessagesFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.util.onEditorAction
+import com.geeksville.mesh.util.Utf8ByteLengthFilter
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -260,10 +259,8 @@ class MessagesFragment : Fragment(), Logging {
             sendMessageInputText()
         }
 
-        binding.messageInputText.onEditorAction(EditorInfo.IME_ACTION_SEND) {
-            debug("received IME_ACTION_SEND")
-            sendMessageInputText()
-        }
+        // max payload length should be 237 bytes but anything over 235 bytes crashes the radio
+        binding.messageInputText.filters += Utf8ByteLengthFilter(234)
 
         binding.messageListView.adapter = messagesAdapter
         val layoutManager = LinearLayoutManager(requireContext())
