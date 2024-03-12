@@ -101,7 +101,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             if (!model.isConnected()) return
             val node = nodes[position]
             val user = node.user ?: return
-            val showAdmin = position == 0 || model.adminChannelIndex > 0
+            val showAdmin = position == 0 || model.hasAdminChannel
             val isIgnored = ignoreIncomingList.contains(node.num)
             val popup = PopupMenu(requireContext(), view)
             popup.inflate(R.menu.menu_nodes)
