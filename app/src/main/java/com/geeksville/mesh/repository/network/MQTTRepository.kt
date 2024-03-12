@@ -41,7 +41,7 @@ class MQTTRepository @Inject constructor(
         private const val DEFAULT_QOS = 1
         private const val DEFAULT_TOPIC_ROOT = "msh"
         private const val STAT_TOPIC_LEVEL = "/2/stat/"
-        private const val DEFAULT_TOPIC_LEVEL = "/2/c/"
+        private const val DEFAULT_TOPIC_LEVEL = "/2/e/"
         private const val JSON_TOPIC_LEVEL = "/2/json/"
         private const val DEFAULT_SERVER_ADDRESS = "mqtt.meshtastic.org"
     }
