@@ -355,6 +355,9 @@ class RadioConfigViewModel @Inject constructor(
             setModuleConfig(moduleConfig { cannedMessage = it.cannedMessage })
             setModuleConfig(moduleConfig { audio = it.audio })
             setModuleConfig(moduleConfig { remoteHardware = it.remoteHardware })
+            setModuleConfig(moduleConfig { neighborInfo = it.neighborInfo })
+            setModuleConfig(moduleConfig { ambientLighting = it.ambientLighting })
+            setModuleConfig(moduleConfig { paxcounter = it.paxcounter })
         }
         setResponseStateSuccess()
         // meshService?.commitEditSettings()
