@@ -31,7 +31,7 @@ fun BatteryInfo(
         in 15..34 -> R.drawable.ic_battery_low to infoString
         in 35..79 -> R.drawable.ic_battery_medium to infoString
         in 80..100 -> R.drawable.ic_battery_high to infoString
-        101 -> R.drawable.ic_power_plug_24 to "%.1fV".format(voltage)
+        101 -> R.drawable.ic_power_plug_24 to "%.2fV".format(voltage)
         else -> R.drawable.ic_battery_unknown to (voltage?.let { "%.2fV".format(it) } ?: "")
     }
 
