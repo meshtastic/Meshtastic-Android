@@ -20,15 +20,9 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# per https://medium.com/@kenkyee/android-kotlin-coroutine-best-practices-bc033fed62e7
--keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
--keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
--keepclassmembernames class kotlinx.** { volatile <fields>; }
-
-# Needed for protobufs
--keepclassmembers class * extends com.google.protobuf.GeneratedMessageV3 { <fields>; }
--keep class com.geeksville.mesh.**{*;}
--keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite { <fields>; }
+# Disable code shrinking and optimization
+-dontshrink
+-dontoptimize
 
 # eclipse.paho.client
 -keep class org.eclipse.paho.client.mqttv3.logging.JSR47Logger { *; }
