@@ -74,21 +74,6 @@ data class Channel(
         }
 
     /**
-     * Return a name that is formatted as #channename-suffix
-     *
-     * Where suffix indicates the hash of the PSK
-     */
-    val humanName: String
-        get() {
-            // start with the PSK then xor in the name
-            val pskCode = xorHash(psk.toByteArray())
-            val nameCode = xorHash(name.toByteArray())
-            val suffix = 'A' + ((pskCode xor nameCode) % 26)
-
-            return "#${name}-${suffix}"
-        }
-
-    /**
      * Given a channel name and psk, return the (0 to 255) hash for that channel
      */
     val hash: Int get() = xorHash(name.toByteArray()) xor xorHash(psk.toByteArray())
