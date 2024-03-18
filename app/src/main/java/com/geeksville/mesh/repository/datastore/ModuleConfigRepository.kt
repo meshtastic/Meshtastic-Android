@@ -48,6 +48,7 @@ class ModuleConfigRepository @Inject constructor(
         if (config.hasNeighborInfo()) setNeighborInfoConfig(config.neighborInfo)
         if (config.hasAmbientLighting()) setAmbientLightingConfig(config.ambientLighting)
         if (config.hasDetectionSensor()) setDetectionSensorConfig(config.detectionSensor)
+        if (config.hasPaxcounter()) setPaxcounterConfig(config.paxcounter)
     }
 
     private suspend fun setMQTTConfig(config: ModuleConfig.MQTTConfig) {
@@ -119,6 +120,12 @@ class ModuleConfigRepository @Inject constructor(
     private suspend fun setDetectionSensorConfig(config: ModuleConfig.DetectionSensorConfig) {
         moduleConfigStore.updateData { preference ->
             preference.toBuilder().setDetectionSensor(config).build()
+        }
+    }
+
+    private suspend fun setPaxcounterConfig(config: ModuleConfig.PaxcounterConfig) {
+        moduleConfigStore.updateData { preference ->
+            preference.toBuilder().setPaxcounter(config).build()
         }
     }
 }
