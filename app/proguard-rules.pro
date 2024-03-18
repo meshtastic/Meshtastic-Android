@@ -30,8 +30,8 @@
 -keep class com.geeksville.mesh.**{*;}
 -keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite { <fields>; }
 
-# mil.nga.mgrs
--dontwarn com.google.android.gms.**
+# eclipse.paho.client
+-keep class org.eclipse.paho.client.mqttv3.logging.JSR47Logger { *; }
 
 # ormlite
 -dontwarn com.j256.ormlite.**
