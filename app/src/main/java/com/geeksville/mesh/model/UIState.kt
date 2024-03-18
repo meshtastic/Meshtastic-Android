@@ -141,6 +141,18 @@ class UIViewModel @Inject constructor(
     private val _focusedNode = MutableStateFlow<NodeInfo?>(null)
     val focusedNode: StateFlow<NodeInfo?> = _focusedNode
 
+    private val _nodeFilterText = MutableStateFlow("")
+    val nodeFilterText: StateFlow<String> = _nodeFilterText
+
+    val filteredNodes = nodeDB.nodeDBbyNum.combine(_nodeFilterText) { nodes, filterText ->
+        if (filterText.isBlank()) return@combine nodes
+
+        nodes.filter { entry ->
+            entry.value.user?.longName?.contains(filterText, ignoreCase = true) == true ||
+            entry.value.user?.shortName?.contains(filterText, ignoreCase = true) == true
+        }
+    }
+
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
     val ourNodeInfo: StateFlow<NodeInfo?> get() = nodeDB.ourNodeInfo
@@ -615,4 +627,9 @@ class UIViewModel @Inject constructor(
         _currentTab.value = 1
         _focusedNode.value = node
     }
+
+    fun setNodeFilterText(text: String) {
+        _nodeFilterText.value = text
+    }
+
 }

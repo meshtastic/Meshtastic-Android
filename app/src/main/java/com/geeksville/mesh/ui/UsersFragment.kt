@@ -2,7 +2,6 @@ package com.geeksville.mesh.ui
 
 import android.animation.ValueAnimator
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -10,7 +9,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import androidx.appcompat.widget.PopupMenu
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
@@ -23,6 +30,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.databinding.NodelistFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.ui.components.NodeFilterTextField
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -51,8 +59,8 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         fun blink() {
             val bg = composeView.backgroundTintList
             ValueAnimator.ofArgb(
-                Color.parseColor("#00FFFFFF"),
-                Color.parseColor("#33FFFFFF")
+                android.graphics.Color.parseColor("#00FFFFFF"),
+                android.graphics.Color.parseColor("#33FFFFFF")
             ).apply {
                 interpolator = LinearInterpolator()
                 startDelay = 500
@@ -192,11 +200,22 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
         // Called when our node DB changes
         fun onNodesChanged(nodesIn: Array<NodeInfo>) {
+            if (nodesIn.isEmpty()) {
+                notifyItemRangeRemoved(0, nodes.size)
+                nodes = emptyArray()
+                return
+            }
+
             if (nodesIn.size > 1) {
                 nodesIn.sortWith(compareByDescending { it.lastHeard }, 1)
             }
 
             val previousNodes = nodes
+
+            if (nodesIn.size < previousNodes.size) {
+                notifyItemRangeRemoved(nodesIn.size, previousNodes.size - nodesIn.size)
+            }
+
             val indexChanged = nodesIn.mapIndexed { index, nodeInfo ->
                 previousNodes.getOrNull(index) != nodeInfo
             }
@@ -226,8 +245,10 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         binding.nodeListView.adapter = nodesAdapter
         binding.nodeListView.layoutManager = LinearLayoutManager(requireContext())
 
-        model.nodeDB.nodeDBbyNum.asLiveData().observe(viewLifecycleOwner) {
-            nodesAdapter.onNodesChanged(it.values.toTypedArray())
+        binding.nodeFilter.initFilter()
+
+        model.filteredNodes.asLiveData().observe(viewLifecycleOwner) { nodeMap ->
+            nodesAdapter.onNodesChanged(nodeMap.values.toTypedArray())
         }
 
         model.localConfig.asLiveData().observe(viewLifecycleOwner) { config ->
@@ -295,4 +316,24 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             }
         }
     }
+
+    private fun ComposeView.initFilter() {
+        this.setContent {
+            val filterText by model.nodeFilterText.collectAsState()
+            AppTheme {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp)
+                        .shadow(8.dp)
+                ) {
+                    NodeFilterTextField(
+                        filterText = filterText,
+                        onTextChanged = { model.setNodeFilterText(it) }
+                    )
+                }
+            }
+        }
+    }
+
 }
