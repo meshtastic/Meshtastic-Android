@@ -2,6 +2,7 @@ package com.geeksville.mesh.repository.network
 
 import com.geeksville.mesh.MeshProtos.MqttClientProxyMessage
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.subscribeList
 import com.geeksville.mesh.mqttClientProxyMessage
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -69,6 +70,11 @@ class MQTTRepository @Inject constructor(
         val rootTopic = mqttConfig.root.ifEmpty { DEFAULT_TOPIC_ROOT }
         val statTopic = "$rootTopic$STAT_TOPIC_LEVEL$ownerId"
 
+        // TODO remove after MeshService.minDeviceVersion >= 2.3.0
+        val myNodeInfo = radioConfigRepository.myNodeInfo.first()
+        val curVer = DeviceVersion(myNodeInfo?.firmwareVersion.orEmpty())
+        val defaultTopic = if (curVer < DeviceVersion("2.3.0")) "/2/c/" else DEFAULT_TOPIC_LEVEL
+
         val connectOptions = MqttConnectOptions().apply {
             userName = mqttConfig.username
             password = mqttConfig.password.toCharArray()
@@ -90,7 +96,8 @@ class MQTTRepository @Inject constructor(
             override fun connectComplete(reconnect: Boolean, serverURI: String) {
                 info("MQTT connectComplete: $serverURI reconnect: $reconnect ")
                 channelSet.subscribeList.forEach { globalId ->
-                    subscribe("$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/#")
+                    subscribe("$rootTopic$defaultTopic$globalId/#")
+                    // subscribe("$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/#")
                     if (mqttConfig.jsonEnabled) subscribe("$rootTopic$JSON_TOPIC_LEVEL$globalId/#")
                 }
                 // publish(statTopic, "online".encodeToByteArray(), DEFAULT_QOS, true)
