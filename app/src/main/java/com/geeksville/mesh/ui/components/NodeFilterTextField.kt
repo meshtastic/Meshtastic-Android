@@ -10,15 +10,18 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.theme.AppTheme
 
 @Composable
@@ -34,12 +37,19 @@ fun NodeFilterTextField(
             .heightIn(max = 48.dp)
             .background(MaterialTheme.colors.background),
         value = filterText,
+        placeholder = {
+            Text(
+                text = stringResource(id = R.string.node_filter_placeholder),
+                style = MaterialTheme.typography.body1,
+                color = MaterialTheme.colors.onBackground.copy(alpha = 0.35F)
+            )
+        },
         onValueChange = onTextChanged,
         trailingIcon = {
             if (filterText.isNotEmpty()) {
                 Icon(
                     Icons.Default.Clear,
-                    contentDescription = "clear node filter",
+                    contentDescription = stringResource(id = R.string.desc_node_filter_clear),
                     modifier = Modifier.clickable { onTextChanged("") }
                 )
             }
