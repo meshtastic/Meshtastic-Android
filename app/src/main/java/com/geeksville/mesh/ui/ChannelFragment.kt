@@ -241,11 +241,12 @@ fun ChannelScreen(
 
     fun sendButton() {
         primaryChannel?.let { primaryChannel ->
-            val humanName = primaryChannel.humanName
             val message = buildString {
                 append(context.getString(R.string.are_you_sure_channel))
-                if (primaryChannel.settings == Channel.default.settings)
-                    append("\n\n" + context.getString(R.string.warning_default_psk, humanName))
+                if (primaryChannel.settings == Channel.default.settings) {
+                    append("\n\n")
+                    append(context.getString(R.string.warning_default_psk, primaryChannel.name))
+                }
             }
 
             MaterialAlertDialogBuilder(context)
@@ -290,7 +291,7 @@ fun ChannelScreen(
         if (!showChannelEditor) item {
             ClickableTextField(
                 label = R.string.channel_name,
-                value = primaryChannel?.humanName.orEmpty(),
+                value = primaryChannel?.name.orEmpty(),
                 onClick = { showChannelEditor = true },
                 enabled = enabled,
                 trailingIcon = Icons.TwoTone.Edit,

@@ -38,20 +38,12 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
-import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
+import com.geeksville.mesh.ui.components.PositionPrecisionPreference
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.toByteString
 import java.security.SecureRandom
-
-private enum class PositionPrecision(val value: Int) {
-    HIGH_PRECISION(32),
-    MED_PRECISION(16),
-    LOW_PRECISION(11),
-    DISABLED(0),
-    ;
-}
 
 @Composable
 fun EditChannelDialog(
@@ -68,8 +60,6 @@ fun EditChannelDialog(
     var channelInput by remember(channelSettings) { mutableStateOf(channelSettings) }
     var pskString by remember(channelInput) { mutableStateOf(encodeToString(channelInput.psk)) }
     val pskError = pskString != encodeToString(channelInput.psk)
-    val useDropDown = PositionPrecision.entries
-        .any { it.value == channelInput.moduleSettings.positionPrecision }
 
     fun getRandomKey() {
         val random = SecureRandom()
@@ -167,20 +157,10 @@ fun EditChannelDialog(
                         )
                     }
 
-                    if (useDropDown) DropDownPreference(
+                    PositionPrecisionPreference(
                         title = "Position",
                         enabled = true,
-                        items = PositionPrecision.entries.map { it.value to it.name },
-                        selectedItem = channelInput.moduleSettings.positionPrecision,
-                        onItemSelected = {
-                            val module = channelInput.moduleSettings.copy { positionPrecision = it }
-                            channelInput = channelInput.copy { moduleSettings = module }
-                        }
-                    ) else EditTextPreference(
-                        title = "Position precision",
                         value = channelInput.moduleSettings.positionPrecision,
-                        enabled = true,
-                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                         onValueChanged = {
                             val module = channelInput.moduleSettings.copy { positionPrecision = it }
                             channelInput = channelInput.copy { moduleSettings = module }

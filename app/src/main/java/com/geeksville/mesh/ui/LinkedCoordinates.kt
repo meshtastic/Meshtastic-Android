@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -58,6 +59,9 @@ fun LinkedCoordinates(
                     }
             }
         )
+    } else {
+        // Placeholder for ConstraintLayoutReference; renders no visible content
+        Box(modifier = modifier)
     }
 }
 

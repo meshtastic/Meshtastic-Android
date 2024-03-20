@@ -357,6 +357,7 @@ class RadioConfigViewModel @Inject constructor(
             setModuleConfig(moduleConfig { remoteHardware = it.remoteHardware })
             setModuleConfig(moduleConfig { neighborInfo = it.neighborInfo })
             setModuleConfig(moduleConfig { ambientLighting = it.ambientLighting })
+            setModuleConfig(moduleConfig { detectionSensor = it.detectionSensor })
             setModuleConfig(moduleConfig { paxcounter = it.paxcounter })
         }
         setResponseStateSuccess()
