@@ -76,10 +76,16 @@ class CustomTileSource {
                 "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/"
             ),
             "Esri, HERE, Garmin, FAO, NOAA, USGS, © OpenStreetMap contributors, and the GIS User Community  ",
+//            TileSourcePolicy(
+//                4,
+//                TileSourcePolicy.FLAG_NO_BULK
+//                        or TileSourcePolicy.FLAG_NO_PREVENTIVE
+//                        or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
+//                        or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
+//            )
             TileSourcePolicy(
-                4,
-                TileSourcePolicy.FLAG_NO_BULK
-                        or TileSourcePolicy.FLAG_NO_PREVENTIVE
+                1,
+                TileSourcePolicy.FLAG_NO_PREVENTIVE
                         or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
                         or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
             )
@@ -159,10 +165,40 @@ class CustomTileSource {
          * ===============================================================================================
          */
 
+        private val USGS_TOPO = object : OnlineTileSourceBase(
+            "USGS National Map Topo",
+            0,
+            20,
+            256,
+            "",
+            arrayOf("https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/"),
+            "USGS"
+        ) {
+            override fun getTileURLString(pMapTileIndex: Long): String {
+                return getBaseUrl() + MapTileIndex.getZoom(pMapTileIndex) + "/" + MapTileIndex.getY(
+                    pMapTileIndex
+                ) + "/" + MapTileIndex.getX(pMapTileIndex)
+            }
+        }
+
+        private val USGS_SAT = object : OnlineTileSourceBase(
+            "USGS National Map Sat",
+            0,
+            20,
+            256,
+            "",
+            arrayOf("https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryTopo/MapServer/tile/"),
+            "USGS"
+        ) {
+            override fun getTileURLString(pMapTileIndex: Long): String {
+                return getBaseUrl() + MapTileIndex.getZoom(pMapTileIndex) + "/" + MapTileIndex.getY(
+                    pMapTileIndex
+                ) + "/" + MapTileIndex.getX(pMapTileIndex)
+            }
+        }
+
         private val MAPNIK: OnlineTileSourceBase = TileSourceFactory.MAPNIK
-        private val USGS_TOPO: OnlineTileSourceBase = TileSourceFactory.USGS_TOPO
         private val OPEN_TOPO: OnlineTileSourceBase = TileSourceFactory.OpenTopo
-        private val USGS_SAT: OnlineTileSourceBase = TileSourceFactory.USGS_SAT
         private val SEAMAP: OnlineTileSourceBase = TileSourceFactory.OPEN_SEAMAP
         val DEFAULT_TILE_SOURCE: OnlineTileSourceBase = TileSourceFactory.DEFAULT_TILE_SOURCE
 
