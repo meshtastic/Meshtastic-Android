@@ -76,16 +76,10 @@ class CustomTileSource {
                 "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/"
             ),
             "Esri, HERE, Garmin, FAO, NOAA, USGS, © OpenStreetMap contributors, and the GIS User Community  ",
-//            TileSourcePolicy(
-//                4,
-//                TileSourcePolicy.FLAG_NO_BULK
-//                        or TileSourcePolicy.FLAG_NO_PREVENTIVE
-//                        or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
-//                        or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
-//            )
             TileSourcePolicy(
-                1,
-                TileSourcePolicy.FLAG_NO_PREVENTIVE
+                4,
+                TileSourcePolicy.FLAG_NO_BULK
+                        or TileSourcePolicy.FLAG_NO_PREVENTIVE
                         or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
                         or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
             )
