@@ -47,8 +47,12 @@ class NodeDB @Inject constructor(
         nodeInfoDao.getMyNodeInfo().onEach { _myNodeInfo.value = it }
             .launchIn(processLifecycle.coroutineScope)
 
-        nodeInfoDao.nodeDBbyNum().onEach { _nodeDBbyNum.value = it }
-            .launchIn(processLifecycle.coroutineScope)
+        nodeInfoDao.nodeDBbyNum().onEach {
+            _nodeDBbyNum.value = it
+            val ourNodeInfo = it.values.firstOrNull()
+            _ourNodeInfo.value = ourNodeInfo
+            _myId.value = ourNodeInfo?.user?.id
+        }.launchIn(processLifecycle.coroutineScope)
 
         nodeInfoDao.nodeDBbyID().onEach { _nodeDBbyID.value = it }
             .launchIn(processLifecycle.coroutineScope)
@@ -67,8 +71,5 @@ class NodeDB @Inject constructor(
             setMyNodeInfo(mi) // set MyNodeInfo first
             putAll(nodes)
         }
-        val ourNodeInfo = nodes.find { it.num == mi.myNodeNum }
-        _ourNodeInfo.value = ourNodeInfo
-        _myId.value = ourNodeInfo?.user?.id
     }
 }
