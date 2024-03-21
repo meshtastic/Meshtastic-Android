@@ -506,7 +506,7 @@ fun MapView(
         val id = mPrefs.getInt(mapStyleId, 0)
         debug("mapStyleId from prefs: $id")
         return CustomTileSource.getTileSource(id).also {
-            map.maxZoomLevel = it.maximumZoomLevel.toDouble()
+            map.maxZoomLevel = it.maximumZoomLevel.coerceAtLeast(20).toDouble();
             showDownloadButton =
                 if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
         }
