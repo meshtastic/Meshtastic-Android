@@ -87,6 +87,7 @@ import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import org.osmdroid.bonuspack.clustering.RadiusMarkerClusterer
 import java.io.File
 import java.text.DateFormat
 
@@ -126,10 +127,14 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
 private fun MapView.UpdateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
     waypointMarkers: List<MarkerWithLabel>,
+    nodeClusterer: RadiusMarkerClusterer,
 ) {
     debug("Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints")
     overlays.removeAll(overlays.filterIsInstance<MarkerWithLabel>())
-    overlays.addAll(nodeMarkers + waypointMarkers)
+    overlays.addAll(waypointMarkers)
+    nodeMarkers.forEach {
+        nodeClusterer.add(it)
+    }
 }
 
 @Composable
@@ -161,6 +166,9 @@ fun MapView(
     val hasGps = context.hasGps()
 
     val map = rememberMapViewWithLifecycle(context)
+
+    val nodeClusterer = RadiusMarkerClusterer(context)
+    map.overlays.add(nodeClusterer)
 
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
@@ -471,7 +479,7 @@ fun MapView(
     }
 
     with(map) {
-        UpdateMarkers(onNodesChanged(nodes.values), onWaypointChanged(waypoints.values))
+        UpdateMarkers(onNodesChanged(nodes.values), onWaypointChanged(waypoints.values), nodeClusterer)
     }
 
 //    private fun addWeatherLayer() {
@@ -506,7 +514,7 @@ fun MapView(
         val id = mPrefs.getInt(mapStyleId, 0)
         debug("mapStyleId from prefs: $id")
         return CustomTileSource.getTileSource(id).also {
-            map.maxZoomLevel = it.maximumZoomLevel.coerceAtLeast(20).toDouble();
+            map.maxZoomLevel = it.maximumZoomLevel.coerceAtLeast(20).toDouble()
             showDownloadButton =
                 if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
         }
