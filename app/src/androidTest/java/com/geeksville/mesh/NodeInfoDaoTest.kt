@@ -95,8 +95,8 @@ class NodeDBTest {
         assertEquals(nodes.values.first(), testNodeNoPosition)
     }
 
-    @Test // getNodeInto()
-    fun testGetNodeInto() = runBlocking {
+    @Test // getNodeInfo()
+    fun testGetNodeInfo() = runBlocking {
         for (node in nodeInfoDao.getNodes().first()) {
             assertEquals(nodeInfoDao.getNodeInfo(node.num), node)
         }
