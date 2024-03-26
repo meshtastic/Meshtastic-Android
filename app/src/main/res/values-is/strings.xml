@@ -128,7 +128,6 @@
     <string name="quick_chat_edit">Breyta flýtiskilaboðum</string>
     <string name="quick_chat_append">Hengja aftan við skilaboð</string>
     <string name="quick_chat_instant">Sent samtímis</string>
-    <string name="warning_default_psk">Tóm rásarheiti notar grunndulkóðun, (öll tæki á %s geta lesið skilaboð frá þér).</string>
     <string name="factory_reset">Grunnstilla</string>
     <string name="factory_reset_description">Þetta mun hreinsa allar stillingar á radíóinu sem þú hefur breytt.</string>
     <string name="bluetooth_disabled">Blátönn afvirkjuð</string>

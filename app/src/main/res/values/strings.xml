@@ -149,7 +149,6 @@
     <string name="quick_chat_edit">Edit quick chat</string>
     <string name="quick_chat_append">Append to message</string>
     <string name="quick_chat_instant">Instantly send</string>
-    <string name="warning_default_psk">Empty channel names use the default encryption key (any device on %s can read your messages).</string>
     <string name="factory_reset">Factory reset</string>
     <string name="factory_reset_description">This will clear all device configuration you have done.</string>
     <string name="bluetooth_disabled">Bluetooth disabled</string>

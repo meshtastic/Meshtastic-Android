@@ -134,7 +134,6 @@
     <string name="quick_chat_edit">Snelle chat bewerken</string>
     <string name="quick_chat_append">Aan einde bericht toevoegen</string>
     <string name="quick_chat_instant">Direct verzenden</string>
-    <string name="warning_default_psk">Lege kanaalnamen gebruiken de standaard encryptiesleutel (elk apparaat op %s kan je berichten lezen).</string>
     <string name="factory_reset">Reset naar fabrieksinstellingen</string>
     <string name="factory_reset_description">Dit verwijdert alle apparaatconfiguratie die je hebt gedaan.</string>
     <string name="bluetooth_disabled">Bluetooth uitgeschakeld</string>

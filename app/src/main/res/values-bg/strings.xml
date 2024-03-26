@@ -129,7 +129,6 @@
     <string name="quick_chat_edit">Редактиране на бърз разговор</string>
     <string name="quick_chat_append">Добавяне към съобщението</string>
     <string name="quick_chat_instant">Незабавно изпращане</string>
-    <string name="warning_default_psk">Празните имена на канали използват ключа за шифроване по подразбиране (всяко устройство на %s може да чете вашите съобщения).</string>
     <string name="factory_reset">Фабрично нулиране</string>
     <string name="factory_reset_description">Това ще изчисти всички настройки на устройството, които сте направили.</string>
     <string name="bluetooth_disabled">Bluetooth изключен</string>

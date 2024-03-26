@@ -121,7 +121,6 @@
     <string name="quick_chat_edit">빠른 대화 편집</string>
     <string name="quick_chat_append">메시지에 추가</string>
     <string name="quick_chat_instant">즉시 보내기</string>
-    <string name="warning_default_psk">빈 채널 이름은 기본 암호화 키를 사용합니다(%s의 모든 장치에서 메시지를 읽을 수 있음).</string>
     <string name="factory_reset">공장초기화</string>
     <string name="factory_reset_description">구성한 모든 장치 설정이 초기화됩니다.</string>
     <string name="bluetooth_disabled">블루투스 비활성화됨</string>

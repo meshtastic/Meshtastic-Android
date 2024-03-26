@@ -127,7 +127,6 @@
     <string name="quick_chat_edit">编辑快速聊天</string>
     <string name="quick_chat_append">附加到讯息</string>
     <string name="quick_chat_instant">实时发送</string>
-    <string name="warning_default_psk">空频道名称使用默认的加密密钥（%s上的任何设备都可以读取你的信息）。</string>
     <string name="factory_reset">恢复出厂设置</string>
     <string name="factory_reset_description">这将清除你已经完成的所有设备设定。</string>
     <string name="bluetooth_disabled">蓝牙已禁用</string>

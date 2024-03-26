@@ -128,7 +128,6 @@
     <string name="quick_chat_edit">Editar chat rápido</string>
     <string name="quick_chat_append">Anexar à mensagem</string>
     <string name="quick_chat_instant">Enviar imediatamente</string>
-    <string name="warning_default_psk">Nomes de canais vazios usam a chave de criptografia padrão (qualquer dispositivo em %s pode ler suas mensagens).</string>
     <string name="factory_reset">Redefinição de fábrica</string>
     <string name="factory_reset_description">Isto limpará todas as configurações do dispositivo que você fez.</string>
     <string name="bluetooth_disabled">Bluetooth desativado</string>
