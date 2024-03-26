@@ -5,8 +5,8 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.Image
 import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -35,7 +35,7 @@ fun DownloadButton(
             onClick = onClick,
             backgroundColor = MaterialTheme.colors.primary,
         ) {
-            Image(
+            Icon(
                 painterResource(R.drawable.ic_twotone_download_24),
                 stringResource(R.string.map_download_region),
                 modifier = Modifier.scale(1.25f),
