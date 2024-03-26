@@ -1,6 +1,7 @@
 package com.geeksville.mesh.ui
 
 import android.animation.ValueAnimator
+import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
@@ -24,11 +25,26 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.databinding.NodelistFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.util.Exceptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+/**
+ * Workaround for RecyclerView bug throwing:
+ * java.lang.IndexOutOfBoundsException - Inconsistency detected. Invalid view holder adapter
+ */
+private class LinearLayoutManagerWrapper(context: Context) : LinearLayoutManager(context) {
+    override fun onLayoutChildren(recycler: RecyclerView.Recycler?, state: RecyclerView.State?) {
+        try {
+            super.onLayoutChildren(recycler, state)
+        } catch (ex: IndexOutOfBoundsException) {
+            Exceptions.report(ex, "onLayoutChildren")
+        }
+    }
+}
 
 @AndroidEntryPoint
 class UsersFragment : ScreenFragment("Users"), Logging {
@@ -224,7 +240,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         super.onViewCreated(view, savedInstanceState)
 
         binding.nodeListView.adapter = nodesAdapter
-        binding.nodeListView.layoutManager = LinearLayoutManager(requireContext())
+        binding.nodeListView.layoutManager = LinearLayoutManagerWrapper(requireContext())
 
         model.nodeDB.nodeDBbyNum.asLiveData().observe(viewLifecycleOwner) {
             nodesAdapter.onNodesChanged(it.values.toTypedArray())
