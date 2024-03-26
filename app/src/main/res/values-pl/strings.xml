@@ -136,7 +136,6 @@
     <string name="quick_chat_edit">Zmień szablon</string>
     <string name="quick_chat_append">Dodaj do wiadomości</string>
     <string name="quick_chat_instant">Wyślij natychmiast</string>
-    <string name="warning_default_psk">Puste nazwy kanałów używają domyślnego klucza szyfrowania (każde urządzenie na %s może odczytywać wiadomości).</string>
     <string name="factory_reset">Ustawienia fabryczne</string>
     <string name="factory_reset_description">Spowoduje to wyczyszczenie całej konfiguracji urządzenia.</string>
     <string name="bluetooth_disabled">Bluetooth wyłączony</string>

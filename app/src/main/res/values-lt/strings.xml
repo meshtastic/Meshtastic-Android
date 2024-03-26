@@ -137,7 +137,6 @@ Suderinamus įrenginius galite pamatyti apsilankę adresu www.meshtastic.org/doc
     <string name="quick_chat_edit">Redaguoti greitą pokalbį</string>
     <string name="quick_chat_append">Pridėti prie žinutės</string>
     <string name="quick_chat_instant">Siųsti nedelsiant</string>
-    <string name="warning_default_psk">Tuščių kanalų pavadinimai naudoja numatytąjį šifravimo raktą (bet kuris įrenginys %s gali skaityti jūsų žinutes).</string>
     <string name="factory_reset">Gamyklinis atstatymas</string>
     <string name="factory_reset_description">Tai išvalys visą įrenginio konfigūraciją, kurią esate atlikę.</string>
     <string name="bluetooth_disabled">Bluetooth išjungtas</string>

@@ -240,27 +240,17 @@ fun ChannelScreen(
     }
 
     fun sendButton() {
-        primaryChannel?.let { primaryChannel ->
-            val message = buildString {
-                append(context.getString(R.string.are_you_sure_channel))
-                if (primaryChannel.settings == Channel.default.settings) {
-                    append("\n\n")
-                    append(context.getString(R.string.warning_default_psk, primaryChannel.name))
-                }
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.change_channel)
+            .setMessage(R.string.are_you_sure_channel)
+            .setNeutralButton(R.string.cancel) { _, _ ->
+                showChannelEditor = false
+                channelSet = channels
             }
-
-            MaterialAlertDialogBuilder(context)
-                .setTitle(R.string.change_channel)
-                .setMessage(message)
-                .setNeutralButton(R.string.cancel) { _, _ ->
-                    showChannelEditor = false
-                    channelSet = channels
-                }
-                .setPositiveButton(R.string.accept) { _, _ ->
-                    installSettings(channelSet)
-                }
-                .show()
-        }
+            .setPositiveButton(R.string.accept) { _, _ ->
+                installSettings(channelSet)
+            }
+            .show()
     }
 
     var showEditChannelDialog: Int? by remember { mutableStateOf(null) }

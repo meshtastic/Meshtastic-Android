@@ -130,7 +130,6 @@
     <string name="quick_chat_edit">Gyors csevegés szerkesztése</string>
     <string name="quick_chat_append">Hozzáfűzés az üzenethez</string>
     <string name="quick_chat_instant">Azonnali küldés</string>
-    <string name="warning_default_psk">Az üres csatorna nevek az alapértelmezett titkosító kulcsot használják. (minden eszköz el tudja olvasni az üzeneteket, amelyik itt van: %s ).</string>
     <string name="factory_reset">Gyári beállítások visszaállítása</string>
     <string name="factory_reset_description">Ez törölni fogja az összes eddig elvégzett beállítást.</string>
     <string name="bluetooth_disabled">Bluetooth kikapcsolva</string>
