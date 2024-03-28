@@ -36,7 +36,7 @@ fun formatAgo(lastSeenUnix: Int): String {
     val diffMin = (currentTime - lastSeenUnix) / 60
     if (diffMin < 1)
         return "now"
-    if (diffMin < 59)
+    if (diffMin < 60)
         return diffMin.toString() + " min"
     if (diffMin < 2880)
         return (diffMin / 60).toString() + " h"
