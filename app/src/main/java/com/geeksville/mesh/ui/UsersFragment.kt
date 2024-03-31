@@ -78,7 +78,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         }
 
         fun bind(
-            thisNodeInfo: NodeInfo,
+            thisNodeInfo: NodeInfo?,
             thatNodeInfo: NodeInfo,
             gpsFormat: Int,
             distanceUnits: Int,
@@ -180,7 +180,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         override fun getItemCount(): Int = nodes.size
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val thisNode = nodes[0]
+            val thisNode = model.ourNodeInfo.value
             val thatNode = nodes[position]
 
             holder.bind(

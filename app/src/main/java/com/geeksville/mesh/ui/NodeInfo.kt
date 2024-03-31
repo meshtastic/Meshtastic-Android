@@ -41,7 +41,7 @@ import com.geeksville.mesh.util.metersIn
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun NodeInfo(
-    thisNodeInfo: NodeInfo,
+    thisNodeInfo: NodeInfo?,
     thatNodeInfo: NodeInfo,
     gpsFormat: Int,
     distanceUnits: Int,
@@ -53,8 +53,8 @@ fun NodeInfo(
     val unknownLongName = stringResource(id = R.string.unknown_username)
 
     val nodeName = thatNodeInfo.user?.longName ?: unknownLongName
-    val isThisNode = thisNodeInfo.num == thatNodeInfo.num
-    val distance = thisNodeInfo.distanceStr(thatNodeInfo, distanceUnits)
+    val isThisNode = thisNodeInfo?.num == thatNodeInfo.num
+    val distance = thisNodeInfo?.distanceStr(thatNodeInfo, distanceUnits)
     val (textColor, nodeColor) = thatNodeInfo.colors
 
     Card(
