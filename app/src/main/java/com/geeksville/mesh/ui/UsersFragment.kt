@@ -222,10 +222,6 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 return
             }
 
-            if (nodesIn.size > 1) {
-                nodesIn.sortWith(compareByDescending { it.lastHeard }, 1)
-            }
-
             val previousNodes = nodes
 
             if (nodesIn.size < previousNodes.size) {
