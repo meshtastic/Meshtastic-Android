@@ -121,15 +121,15 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         var nodes = arrayOf<NodeInfo>()
             private set
 
-        private fun popup(view: View, position: Int) {
+        private fun popup(view: View, node: NodeInfo) {
             if (!model.isConnected()) return
-            val node = nodes[position]
             val user = node.user ?: return
-            val showAdmin = position == 0 || model.hasAdminChannel
+            val isOurNode = node.num == model.myNodeNum
+            val showAdmin = isOurNode || model.hasAdminChannel
             val isIgnored = ignoreIncomingList.contains(node.num)
             val popup = PopupMenu(requireContext(), view)
             popup.inflate(R.menu.menu_nodes)
-            popup.menu.setGroupVisible(R.id.group_remote, position > 0)
+            popup.menu.setGroupVisible(R.id.group_remote, !isOurNode)
             popup.menu.setGroupVisible(R.id.group_admin, showAdmin)
             popup.menu.setGroupEnabled(R.id.group_admin, !model.isManaged)
             popup.menu.findItem(R.id.ignore).apply {
@@ -171,7 +171,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                                     }
                                 }
                                 item.isChecked = !item.isChecked
-                                notifyItemChanged(position)
+                                notifyItemChanged(nodes.indexOfFirst { it.num == node.num })
                             }
                             .show()
                     }
@@ -206,7 +206,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 distanceUnits = displayUnits,
                 tempInFahrenheit = displayFahrenheit
             ) {
-                popup(holder.composeView, position)
+                popup(holder.composeView, thatNode)
             }
         }
 
