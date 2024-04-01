@@ -194,6 +194,8 @@ sealed class ResponseState<out T> {
     data class Loading(var total: Int = 1, var completed: Int = 0) : ResponseState<Nothing>()
     data class Success<T>(val result: T) : ResponseState<T>()
     data class Error(val error: String) : ResponseState<Nothing>()
+
+    fun isWaiting() = this !is Empty
 }
 
 @Composable
@@ -237,7 +239,7 @@ fun RadioConfigNavHost(
     var location by remember(node) { mutableStateOf(node?.position) } // FIXME
 
     val deviceProfile by viewModel.deviceProfile.collectAsStateWithLifecycle()
-    val isWaiting = radioConfigState.responseState !is ResponseState.Empty
+    val isWaiting = radioConfigState.responseState.isWaiting()
     var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
 
     val importConfigLauncher = rememberLauncherForActivityResult(
@@ -401,9 +403,16 @@ fun RadioConfigNavHost(
                 positionConfig = radioConfigState.radioConfig.position,
                 enabled = connected,
                 onSaveClicked = { locationInput, positionInput ->
-                    if (locationInput != location && positionInput.fixedPosition) {
-                        locationInput?.let { viewModel.requestPosition(destNum, it) }
-                        location = locationInput
+                    if (positionInput.fixedPosition) {
+                        if (locationInput != null && locationInput != location) {
+                            viewModel.setFixedPosition(locationInput)
+                            location = locationInput
+                        }
+                    } else {
+                        if (radioConfigState.radioConfig.position.fixedPosition) {
+                            // fixed position changed from enabled to disabled
+                            viewModel.removeFixedPosition()
+                        }
                     }
                     val config = config { position = positionInput }
                     viewModel.setRemoteConfig(destNum, config)

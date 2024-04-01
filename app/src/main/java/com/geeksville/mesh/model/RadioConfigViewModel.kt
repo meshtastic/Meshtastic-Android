@@ -70,8 +70,8 @@ class RadioConfigViewModel @Inject constructor(
     // A map from nodeNum to NodeInfo
     val nodes: StateFlow<Map<Int, NodeInfo>> get() = radioConfigRepository.nodeDBbyNum
 
-    private val _myNodeInfo = MutableStateFlow<MyNodeInfo?>(null)
-    val myNodeInfo get() = _myNodeInfo
+    val myNodeInfo: StateFlow<MyNodeInfo?> get() = radioConfigRepository.myNodeInfo
+    val ourNodeInfo: StateFlow<NodeInfo?> get() = radioConfigRepository.ourNodeInfo
 
     private val requestIds = MutableStateFlow<HashMap<Int, Boolean>>(hashMapOf())
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
@@ -81,10 +81,6 @@ class RadioConfigViewModel @Inject constructor(
     val currentDeviceProfile get() = _currentDeviceProfile.value
 
     init {
-        radioConfigRepository.myNodeInfoFlow().onEach {
-            _myNodeInfo.value = it
-        }.launchIn(viewModelScope)
-
         radioConfigRepository.deviceProfileFlow.onEach {
             _currentDeviceProfile.value = it
         }.launchIn(viewModelScope)
@@ -100,7 +96,6 @@ class RadioConfigViewModel @Inject constructor(
 
     val myNodeNum get() = myNodeInfo.value?.myNodeNum
     val maxChannels get() = myNodeInfo.value?.maxChannels ?: 8
-    private val ourNodeInfo: NodeInfo? get() = nodes.value[myNodeNum]
 
     override fun onCleared() {
         super.onCleared()
@@ -263,13 +258,15 @@ class RadioConfigViewModel @Inject constructor(
         "Request NodeDB reset error"
     )
 
-    fun requestPosition(destNum: Int, position: Position = Position(0.0, 0.0, 0)) {
+    fun setFixedPosition(position: Position) {
         try {
-            meshService?.requestPosition(destNum, position)
+            meshService?.requestPosition(myNodeNum ?: return, position)
         } catch (ex: RemoteException) {
             errormsg("Request position error: ${ex.message}")
         }
     }
+
+    fun removeFixedPosition() = setFixedPosition(Position(0.0, 0.0, 0))
 
     // Set the radio config (also updates our saved copy in preferences)
     fun setConfig(config: ConfigProtos.Config) {
@@ -323,7 +320,7 @@ class RadioConfigViewModel @Inject constructor(
     fun installProfile(protobuf: DeviceProfile) = with(protobuf) {
         _deviceProfile.value = null
         // meshService?.beginEditSettings()
-        if (hasLongName() || hasShortName()) ourNodeInfo?.user?.let {
+        if (hasLongName() || hasShortName()) ourNodeInfo.value?.user?.let {
             val user = it.copy(
                 longName = if (hasLongName()) longName else it.longName,
                 shortName = if (hasShortName()) shortName else it.shortName
