@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui
 
+import android.content.ActivityNotFoundException
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.MaterialTheme
@@ -55,7 +56,11 @@ fun LinkedCoordinates(
                 debug("Clicked on link")
                 annotatedString.getStringAnnotations(tag = "gps", start = offset, end = offset)
                     .firstOrNull()?.let {
-                        uriHandler.openUri(it.item)
+                        try {
+                            uriHandler.openUri(it.item)
+                        } catch (ex: ActivityNotFoundException) {
+                            debug("No application found: $ex")
+                        }
                     }
             }
         )
