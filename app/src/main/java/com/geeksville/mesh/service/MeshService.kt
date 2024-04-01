@@ -1312,7 +1312,6 @@ class MeshService : Service(), Logging {
         )
         insertMeshLog(packetToSave)
 
-        logAssert(newNodes.size <= 256) // Sanity check to make sure a device bug can't fill this list forever
         newNodes.add(info)
     }
 
