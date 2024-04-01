@@ -1864,13 +1864,24 @@ class MeshService : Service(), Logging {
         }
 
         override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
-            if (position == Position(0.0, 0.0, 0)) {
+            if (destNum != myNodeNum) {
                 // request position
                 sendPosition(destNum = destNum, wantResponse = true)
             } else {
                 // send fixed position (local only/no remote method, so we force destNum to null)
                 val (lat, lon, alt) = position
                 sendPosition(destNum = null, lat = lat, lon = lon, alt = alt)
+                sendToRadio(newMeshPacketTo(destNum).buildAdminPacket {
+                    if (position != Position(0.0, 0.0, 0)) {
+                        setFixedPosition = position {
+                            longitudeI = Position.degI(lon)
+                            latitudeI = Position.degI(lat)
+                            altitude = alt
+                        }
+                    } else {
+                        removeFixedPosition = true
+                    }
+                })
             }
         }
 
