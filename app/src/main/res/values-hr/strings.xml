@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="channel_name">Ime kanala</string>
+    <string name="channel_name">Naziv kanala</string>
     <string name="channel_options">Mogućnosti kanala</string>
     <string name="qr_code">QR kod</string>
     <string name="unset">Nepostavljeno</string>
     <string name="connection_status">Stanje veze</string>
     <string name="application_icon">ikona aplikacije</string>
     <string name="unknown_username">Nepoznato korisničko ime</string>
-    <string name="send">Pošalji</string>
+    <string name="send">Primijeni</string>
     <string name="send_text">Pošalji poruku</string>
     <string name="warning_not_paired">Još niste povezali Meshtastic radio uređaj s ovim telefonom. Povežite uređaj i postavite svoje korisničko ime.\n\nOva aplikacija otvorenog koda je u razvoju, ako naiđete na probleme, objavite na našem forumu: meshtastic.discourse.group.\n\nZa više informacija pogledajte našu web stranicu - www.meshtastic.org.</string>
     <string name="you">Vi</string>
@@ -128,7 +128,7 @@
     <string name="intro_started">Započnimo!</string>
     <string name="intro_started_text">Povežite svoj Meshtastic uređaj putem Bluetootha, serijske veze ili WiFi-ja. \n\nKompatibilne uređaje možete provjeriti na www.meshtastic.org/docs/hardware</string>
     <string name="intro_encryption">"Postavi enkripciju"</string>
-    <string name="intro_encryption_text">Standardno je postavljen zadani ključ za šifriranje. Kako biste omogućili vlastiti kanal i poboljšanu enkripciju, idite na karticu kanala i promijenite naziv kanala, time ćete postaviti nasumični ključ za AES256 enkripciju. \n\nZa komunikaciju s drugim uređajima, oni ćeće morati skenirati vaš QR kod ili slijediti dijeljenu poveznicu za konfiguraciju postavki kanala.</string>
+    <string name="intro_encryption_text">Standardno je postavljen zadani ključ za šifriranje. Kako biste omogućili vlastiti kanal i poboljšanu enkripciju, idite na karticu kanala i promijenite naziv kanala, time ćete postaviti nasumični ključ za AES256 enkripciju. \n\nZa komunikaciju s drugim uređajima, oni će morati skenirati vaš QR kod ili slijediti dijeljenu poveznicu za konfiguraciju postavki kanala.</string>
     <string name="message">Poruka</string>
     <string name="quick_chat">Opcije brzog razgovora</string>
     <string name="quick_chat_new">Novi brzi razgovor</string>
@@ -140,7 +140,7 @@
     <string name="bluetooth_disabled">Bluetooth onemogućen</string>
     <string name="permission_missing_31">Meshtastic treba dozvolu za uređaje u blizini za pronalaženje i povezivanje uređaja putem Bluetootha. Opciju možete onemogućiti kada nije u upotrebi.</string>
     <string name="direct_message">Izravna poruka</string>
-    <string name="nodedb_reset">Resetiraj bazu podataka čvorova</string>
+    <string name="nodedb_reset">Resetiraj NodeDB bazu</string>
     <string name="nodedb_reset_description">Ovo će izbrisati sve čvorove s ovog popisa.</string>
     <string name="ignore">Ignoriraj</string>
     <string name="ignore_add">Dodati \'%s\' na popis ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
@@ -150,7 +150,7 @@
     <string name="map_start_download">Pokreni Preuzimanje</string>
     <string name="request_position">Zatraži poziciju</string>
     <string name="close">Zatvori</string>
-    <string name="device_settings">Konfiguracija radio-uređaja</string>
+    <string name="device_settings">Konfiguracija radio uređaja</string>
     <string name="module_settings">Konfiguracija modula</string>
     <string name="add">Dodaj</string>
     <string name="calculating">Izračunavanje…</string>
