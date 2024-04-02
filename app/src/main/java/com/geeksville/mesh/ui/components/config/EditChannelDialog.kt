@@ -53,9 +53,8 @@ fun EditChannelDialog(
     modifier: Modifier = Modifier,
     modemPresetName: String = "Default",
 ) {
-    val base64Flags = Base64.URL_SAFE + Base64.NO_WRAP
     fun encodeToString(input: ByteString) =
-        Base64.encodeToString(input.toByteArray() ?: ByteArray(0), base64Flags)
+        Base64.encodeToString(input.toByteArray() ?: ByteArray(0), Base64.DEFAULT)
 
     var channelInput by remember(channelSettings) { mutableStateOf(channelSettings) }
     var pskString by remember(channelInput) { mutableStateOf(encodeToString(channelInput.psk)) }
@@ -97,7 +96,7 @@ fun EditChannelDialog(
                         onValueChange = {
                             try {
                                 pskString = it // empty (no crypto), 128 or 256 bit only
-                                val decoded = Base64.decode(it, base64Flags).toByteString()
+                                val decoded = Base64.decode(it, Base64.DEFAULT).toByteString()
                                 val fullPsk = Channel(channelSettings { psk = decoded }).psk
                                 if (fullPsk.size() in setOf(0, 16, 32)) {
                                     channelInput = channelInput.copy { psk = decoded }
