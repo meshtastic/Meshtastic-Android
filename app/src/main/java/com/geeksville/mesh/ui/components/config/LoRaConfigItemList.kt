@@ -121,7 +121,7 @@ fun LoRaConfigItemList(
         item { Divider() }
 
         item {
-            EditTextPreference(title = "TX power",
+            EditTextPreference(title = "TX power (dBm)",
                 value = loraInput.txPower,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
