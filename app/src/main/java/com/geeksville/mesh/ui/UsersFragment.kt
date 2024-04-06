@@ -1,25 +1,23 @@
 package com.geeksville.mesh.ui
 
-import android.animation.ValueAnimator
 import android.content.Context
-import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.LinearInterpolator
 import androidx.appcompat.widget.PopupMenu
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
-import androidx.core.animation.doOnEnd
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
@@ -36,9 +34,10 @@ import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.Exceptions
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 /**
  * Workaround for RecyclerView bug throwing:
@@ -71,26 +70,12 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
     class ViewHolder(val composeView: ComposeView) : RecyclerView.ViewHolder(composeView) {
 
-        // TODO not working with compose changes
-        fun blink() {
-            val bg = composeView.backgroundTintList
-            ValueAnimator.ofArgb(
-                android.graphics.Color.parseColor("#00FFFFFF"),
-                android.graphics.Color.parseColor("#33FFFFFF")
-            ).apply {
-                interpolator = LinearInterpolator()
-                startDelay = 500
-                duration = 250
-                repeatCount = 3
-                repeatMode = ValueAnimator.REVERSE
-                addUpdateListener {
-                    composeView.backgroundTintList = ColorStateList.valueOf(it.animatedValue as Int)
-                }
-                start()
-                doOnEnd {
-                    composeView.backgroundTintList = bg
-                }
-            }
+        var shouldBlink by mutableStateOf(false)
+
+        suspend fun blink() {
+            shouldBlink = true
+            delay(500)
+            shouldBlink = false
         }
 
         fun bind(
@@ -109,7 +94,8 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                         gpsFormat = gpsFormat,
                         distanceUnits = distanceUnits,
                         tempInFahrenheit = tempInFahrenheit,
-                        onClicked = onChipClicked
+                        onClicked = onChipClicked,
+                        blinking = shouldBlink,
                     )
                 }
             }
@@ -295,10 +281,18 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             if (idx < 1) return@observe
 
             lifecycleScope.launch {
-                binding.nodeListView.layoutManager?.smoothScrollToTop(idx)
-                val vh = binding.nodeListView.findViewHolderForLayoutPosition(idx)
-                (vh as? ViewHolder)?.blink()
-                model.focusUserNode(null)
+                with (binding.nodeListView.layoutManager as LinearLayoutManager) {
+                    smoothScrollToTop(idx)
+                    binding.nodeListView.awaitScrollStateIdle()
+
+                    if (!isIndexAtTop(idx)) { // settle the scroll position
+                        smoothScrollToTop(idx)
+                    }
+
+                    val vh = binding.nodeListView.findViewHolderForLayoutPosition(idx)
+                    (vh as? ViewHolder)?.blink() ?: warn("viewholder wasn't there. May need to wait for it")
+                    model.focusUserNode(null)
+                }
             }
         }
     }
@@ -311,8 +305,11 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     /**
      * Scrolls the recycler view until the item at [position] is at the top of the view, then waits
      * until the scrolling is finished.
+     * @param precision The time in milliseconds to wait between checks for the scroll state.
      */
-    private suspend fun RecyclerView.LayoutManager.smoothScrollToTop(position: Int) {
+    private suspend fun RecyclerView.LayoutManager.smoothScrollToTop(
+        position: Int, precision: Long = 100
+    ) {
         this.startSmoothScroll(
             object : LinearSmoothScroller(requireContext()) {
                 override fun getVerticalSnapPreference(): Int {
@@ -322,10 +319,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 targetPosition = position
             }
         )
-        withContext(Dispatchers.Default) {
-            while (this@smoothScrollToTop.isSmoothScrolling) {
-                // noop
-            }
+
+        while (isSmoothScrolling) {
+            delay(precision)
         }
     }
 
@@ -346,6 +342,33 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 }
             }
         }
+    }
+
+    private suspend fun RecyclerView.awaitScrollStateIdle() = suspendCancellableCoroutine { continuation ->
+        if (scrollState == RecyclerView.SCROLL_STATE_IDLE) {
+            warn("RecyclerView scrollState is already idle")
+            continuation.resume(Unit)
+            return@suspendCancellableCoroutine
+        }
+
+        val scrollListener = object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    recyclerView.removeOnScrollListener(this)
+                    continuation.resume(Unit)
+                }
+            }
+        }
+        addOnScrollListener(scrollListener)
+        continuation.invokeOnCancellation {
+            removeOnScrollListener(scrollListener)
+        }
+    }
+
+    fun LinearLayoutManager.isIndexAtTop(idx: Int): Boolean {
+        val first = findFirstVisibleItemPosition()
+        val firstVisible = findFirstCompletelyVisibleItemPosition()
+        return first == idx && firstVisible == idx
     }
 
 }
