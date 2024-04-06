@@ -90,7 +90,7 @@
     <string name="theme_system">System</string>
     <string name="choose_theme">Thema auswählen</string>
     <string name="background_required">Standortbestimmung im Hintergrund</string>
-    <string name="why_background_required">Für diese Funktion müssen Sie die Standortberechtigungsoption „Jederzeit erlauben“ aktivieren.\nDies erlaubt Meshtastic deinen Smartphone-Standort zu lesen und an andere Mitglieder deines Netzwerks zu senden, auch wenn die App geschlossen ist oder nicht verwendet wird.</string>
+    <string name="why_background_required">Für diese Funktion müssen Sie die Standortberechtigungsoption „Immer zulassen“ aktivieren.\nDies erlaubt Meshtastic deinen Smartphone-Standort zu lesen und an andere Mitglieder deines Netzwerks zu senden, auch wenn die App geschlossen ist oder nicht verwendet wird.</string>
     <string name="required_permissions">Erforderliche Berechtigungen</string>
     <string name="provide_location_to_mesh">Standort zum Mesh angeben</string>
     <string name="camera_required">Kamera-Berechtigungen</string>
