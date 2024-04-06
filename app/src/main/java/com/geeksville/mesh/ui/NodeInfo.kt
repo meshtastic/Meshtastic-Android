@@ -1,5 +1,11 @@
 package com.geeksville.mesh.ui
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +21,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -47,8 +54,12 @@ fun NodeInfo(
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
     isIgnored: Boolean = false,
-    onClicked: () -> Unit = {}
+    onClicked: () -> Unit = {},
+    blinking: Boolean = false,
 ) {
+
+    val BLINK_DURATION = 250
+
     val unknownShortName = stringResource(id = R.string.unknown_node_short_name)
     val unknownLongName = stringResource(id = R.string.unknown_username)
 
@@ -56,6 +67,18 @@ fun NodeInfo(
     val isThisNode = thisNodeInfo?.num == thatNodeInfo.num
     val distance = thisNodeInfo?.distanceStr(thatNodeInfo, distanceUnits)
     val (textColor, nodeColor) = thatNodeInfo.colors
+
+    val highlight = Color(0x33FFFFFF)
+    val bgColor by animateColorAsState(
+        targetValue = if (blinking) highlight else Color.Transparent,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = BLINK_DURATION,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
 
     Card(
         modifier = Modifier
@@ -67,6 +90,7 @@ fun NodeInfo(
             ConstraintLayout(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(bgColor)
                     .padding(8.dp)
             ) {
                 val (chip, dist, name, pos, alt, sats, batt, heard, sig, env) = createRefs()

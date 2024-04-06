@@ -106,19 +106,10 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 AppCompatTheme {
-                    MapView(model, ::openDirectMessage)
+                    MapView(model)
                 }
             }
         }
-    }
-
-    private fun openDirectMessage(node: NodeInfo) {
-        val user = node.user ?: return
-        model.setContactKey("${node.channel}${user.id}")
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.mainActivityLayout, MessagesFragment())
-            .addToBackStack(null)
-            .commit()
     }
 
 }
@@ -142,7 +133,6 @@ private fun MapView.UpdateMarkers(
 @Composable
 fun MapView(
     model: UIViewModel = viewModel(),
-    openDirectMessage: (NodeInfo) -> Unit = { },
 ) {
 
     // UI Elements
@@ -246,7 +236,8 @@ fun MapView(
                 icon = markerIcon
 
                 setOnLongClickListener {
-                    openDirectMessage(node)
+                    performHapticFeedback()
+                    model.focusUserNode(node)
                     true
                 }
             }
