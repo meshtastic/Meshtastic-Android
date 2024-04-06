@@ -14,8 +14,10 @@ jobs:
       with:
         submodules: 'recursive'
 
-    - name: Get versionName
-      run: echo "versionName=$(grep -oP 'versionName \"\K[^\"]+' ./app/build.gradle)" >> $GITHUB_ENV
+    - name: Get `versionCode` & `versionName`
+      run: |
+        echo "versionCode=$(grep -oP 'versionCode \K\d+' ./app/build.gradle)" >> $GITHUB_ENV
+        echo "versionName=$(grep -oP 'versionName \"\K[^\"]+' ./app/build.gradle)" >> $GITHUB_ENV
 
     - name: Validate Gradle wrapper
       uses: gradle/wrapper-validation-action@v2
@@ -26,6 +28,7 @@ jobs:
         echo $GSERVICES > ./app/google-services.json
         echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
         echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
+        echo -e "versionCode=$versionCode\nversionName=$versionName" > ./version_info.txt
       env:
           GSERVICES: ${{ secrets.GSERVICES }}
           KEYSTORE: ${{ secrets.KEYSTORE }}
@@ -90,3 +93,14 @@ jobs:
         asset_path: app/build/outputs/apk/google/release/app-google-release.apk
         asset_name: googleRelease-${{ env.versionName }}.apk
         asset_content_type: application/zip
+
+    # https://github.com/f-droid/fdroiddata/blob/master/metadata/com.geeksville.mesh.yml#L34
+    - name: Add `version_info.txt` to release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: version_info.txt
+        asset_name: version_info.txt
+        asset_content_type: text/plain
