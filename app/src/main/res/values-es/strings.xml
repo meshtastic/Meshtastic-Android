@@ -9,7 +9,7 @@
     <string name="unknown_username">Nombre de usuario desconocido</string>
     <string name="send">Enviar</string>
     <string name="send_text">Enviar texto</string>
-    <string name="warning_not_paired">Aún no ha emparejado un radio compatible con Meshtastic con este teléfono. Empareje un dispositivo y configure su nombre de usuario. \n\nEsta aplicación de código abierto es una prueba alfa; si encuentra un problema publique en el foro: meshtastic.discourse.group. \n\nPara obtener más información visite nuestra página web - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Aún no ha emparejado una radio compatible con Meshtastic con este teléfono. Empareje un dispositivo y configure su nombre de usuario. \n\nEsta aplicación de código abierto es una prueba alfa; si encuentra un problema publiquelo en el foro: meshtastic.discourse.group. \n\nPara obtener más información visite nuestra página web - www.meshtastic.org.</string>
     <string name="you">Usted</string>
     <string name="your_name">Tu nombre</string>
     <string name="analytics_okay">Estadísticas de uso anónimo e informes de fallos.</string>
@@ -19,20 +19,20 @@
     <string name="accept">Aceptar</string>
     <string name="cancel">Cancelar</string>
     <string name="change_channel">Cambia el canal</string>
-    <string name="are_you_sure_channel">¿Estás seguro de que quieres cambiar el canal? Toda comunicación con otros nodos se detendrá hasta que comparta la nueva configuración del canal.</string>
+    <string name="are_you_sure_channel">¿Estás seguro de que quieres cambiar el canal? Toda comunicación con otros nodos se detendrá hasta que compartas la nueva configuración del canal.</string>
     <string name="new_channel_rcvd">Nueva URL de canal recibida</string>
     <string name="do_you_want_switch">¿Quieres cambiar al canal de \'%s\'?</string>
-    <string name="permission_missing">Falta un permiso necesario Meshtastic no podrá funcionar correctamente. Por favor habilite en la configuración de la aplicación Android.</string>
-    <string name="radio_sleeping">La radio estaba en reposo no podía cambiar de canal</string>
-    <string name="report_bug">informe de fallos</string>
-    <string name="report_a_bug">Informar de un error</string>
-    <string name="report_bug_text">¿Estás seguro de que quieres informar de un error? Después de informar por favor publique en meshtastic.discourse.group para que podamos comparar el informe con lo que encontró.</string>
-    <string name="report">Reportar</string>
+    <string name="permission_missing">Meshtastic necesita permiso de ubicación y la ubicación debe estar encendida para encontrar nuevos dispositivos a través de Bluetooth. Puedes apagarla después.</string>
+    <string name="radio_sleeping">La radio estaba en reposo, no se pudo cambiar de canal</string>
+    <string name="report_bug">Informar de un fallo</string>
+    <string name="report_a_bug">Informar de un fallo</string>
+    <string name="report_bug_text">¿Está seguro de que quiere informar de un error? Después de informar por favor publique en meshtastic.discourse.group para que podamos comparar el informe con lo que encontró.</string>
+    <string name="report">Informar</string>
     <string name="not_paired_yet">Todavía no has emparejado una radio.</string>
     <string name="change_radio">Cambiar la radio</string>
-    <string name="pairing_completed">Emparejamiento completado iniciando el servicio</string>
-    <string name="pairing_failed_try_again">El emparejamiento ha fallado por favor seleccione de nuevo</string>
-    <string name="location_disabled">El acceso a la localización está desactivado no puede proporcionar la posición a la malla.</string>
+    <string name="pairing_completed">Emparejamiento completado, iniciando el servicio</string>
+    <string name="pairing_failed_try_again">El emparejamiento ha fallado, por favor seleccione de nuevo</string>
+    <string name="location_disabled">El acceso a la localización está desactivado, no se puede proporcionar la posición a la malla.</string>
     <string name="share">Compartir</string>
     <string name="disconnected">Desconectado</string>
     <string name="device_sleeping">Dispositivo en reposo</string>
@@ -43,15 +43,15 @@
     <string name="connected">Conectado a la radio</string>
     <string name="connected_to">Conectado a la radio (%s)</string>
     <string name="not_connected">No está conectado</string>
-    <string name="connected_sleeping">Conectado a la radio pero está en reposo</string>
+    <string name="connected_sleeping">Conectado a la radio, pero está en reposo</string>
     <string name="update_to">Actualizar a %s</string>
     <string name="app_too_old">Es necesario actualizar la aplicación</string>
-    <string name="must_update">Debes actualizar esta aplicación en la tienda de aplicaciones (o en Github). Es demasiado viejo para comunicar con este firmware de radio. Por favor, lea nuestra <a href="https://meshtastic.org/docs/software/android/installation">documenta</a> sobre este tema.</string>
+    <string name="must_update">Debe actualizar esta aplicación en la tienda de aplicaciones (o en Github). Es demasiado vieja para comunicarse con este firmware de radio. Por favor, lea nuestra <a href="https://meshtastic.org/docs/software/android/installation">documentación</a> sobre este tema.</string>
     <string name="none">Ninguno (desactivado)</string>
     <string name="modem_config_short">Corto alcance / rápido</string>
     <string name="modem_config_medium">Alcance medio / rápido</string>
     <string name="modem_config_long">Largo alcance / rápido</string>
-    <string name="modem_config_mod_long">Rango Largo / Moderado</string>
+    <string name="modem_config_mod_long">Largo alcance / moderado</string>
     <string name="modem_config_very_long">Muy largo alcance / lento</string>
     <string name="modem_config_unrecognized">SIN RECONOCIMIENTO</string>
     <string name="meshtastic_service_notifications">Notificaciones de servicio</string>
@@ -98,7 +98,7 @@
     <string name="notification_required">Permitir notificaciones</string>
     <string name="why_notification_required">Meshtastic necesita permiso para servicio y notificaciones de mensajes.</string>
     <string name="notification_denied">Permiso de notificación denegado. Para activar las notificaciones, acceda: Ajustes de Android &gt; &gt; Meshtastic &gt; Notificaciones.</string>
-    <string name="modem_config_slow_short">Curto alcance / lento</string>
+    <string name="modem_config_slow_short">Corto alcance / lento</string>
     <string name="modem_config_slow_medium">Médio alcance / lento</string>
     <plurals name="delete_messages">
         <item quantity="one">Deseas eliminar el mensaje?</item>
@@ -108,7 +108,7 @@
     <string name="delete_for_everyone">Eliminar para todos</string>
     <string name="delete_for_me">Eliminar para mí</string>
     <string name="select_all">Seleccionar todo</string>
-    <string name="modem_config_slow_long">Largo alcance / lento)</string>
+    <string name="modem_config_slow_long">Largo alcance / lento</string>
     <string name="map_style_selection">Selección de estilo</string>
     <string name="map_download_region">Descargar región</string>
     <string name="name">Nombre</string>
