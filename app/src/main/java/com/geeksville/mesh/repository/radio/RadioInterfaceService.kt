@@ -56,18 +56,6 @@ class RadioInterfaceService @Inject constructor(
     private val _receivedData = MutableSharedFlow<ByteArray>()
     val receivedData: SharedFlow<ByteArray> = _receivedData
 
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: SharedFlow<String?> = _errorMessage
-
-    fun setErrorMessage(text: String) {
-        errormsg(text)
-        _errorMessage.value = text
-    }
-
-    fun clearErrorMessage() {
-        _errorMessage.value = null
-    }
-
     private val logSends = false
     private val logReceives = false
     private lateinit var sentPacketsLog: BinaryLogFile // inited in onCreate

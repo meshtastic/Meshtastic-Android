@@ -671,7 +671,7 @@ class MeshService : Service(), Logging {
                         val isAck = u.errorReasonValue == MeshProtos.Routing.Error.NONE_VALUE
 
                         if (u.errorReason == MeshProtos.Routing.Error.DUTY_CYCLE_LIMIT) {
-                            radioInterfaceService.setErrorMessage(getString(R.string.error_duty_cycle))
+                            radioConfigRepository.setErrorMessage(getString(R.string.error_duty_cycle))
                         }
 
                         handleAckNak(isAck, fromId, data.requestId)
@@ -1446,7 +1446,7 @@ class MeshService : Service(), Logging {
             mqttMessageFlow = mqttRepository.proxyMessageFlow.onEach { message ->
                 sendToRadio(ToRadio.newBuilder().apply { mqttClientProxyMessage = message })
             }.catch { throwable ->
-                radioInterfaceService.setErrorMessage("MqttClientProxy failed: $throwable")
+                radioConfigRepository.setErrorMessage("MqttClientProxy failed: $throwable")
             }.launchIn(serviceScope)
         }
     }

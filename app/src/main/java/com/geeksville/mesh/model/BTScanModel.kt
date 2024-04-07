@@ -194,7 +194,7 @@ class BTScanModel @Inject constructor(
                 addDevice(entry)
             }
         }.catch { ex ->
-            radioInterfaceService.setErrorMessage("Unexpected Bluetooth scan failure: ${ex.message}")
+            serviceRepository.setErrorMessage("Unexpected Bluetooth scan failure: ${ex.message}")
         }.launchIn(viewModelScope)
     }
 

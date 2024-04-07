@@ -157,6 +157,16 @@ class RadioConfigRepository @Inject constructor(
         }
     }
 
+    val errorMessage: StateFlow<String?> get() = serviceRepository.errorMessage
+
+    fun setErrorMessage(text: String) {
+        serviceRepository.setErrorMessage(text)
+    }
+
+    fun clearErrorMessage() {
+        serviceRepository.clearErrorMessage()
+    }
+
     val tracerouteResponse: StateFlow<String?> get() = serviceRepository.tracerouteResponse
 
     fun setTracerouteResponse(value: String?) {
