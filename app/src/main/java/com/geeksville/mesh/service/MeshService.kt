@@ -997,6 +997,10 @@ class MeshService : Service(), Logging {
             )
             insertMeshLog(packetToSave)
 
+            serviceScope.handledLaunch {
+                radioConfigRepository.emitMeshPacket(packet)
+            }
+
             // Update last seen for the node that sent the packet, but also for _our node_ because anytime a packet passes
             // through our node on the way to the phone that means that local node is also alive in the mesh
 

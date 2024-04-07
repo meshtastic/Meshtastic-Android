@@ -8,6 +8,7 @@ import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
@@ -16,7 +17,9 @@ import com.geeksville.mesh.model.NodeDB
 import com.geeksville.mesh.model.getChannelUrl
 import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.service.ServiceRepository
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
@@ -165,6 +168,12 @@ class RadioConfigRepository @Inject constructor(
 
     fun clearErrorMessage() {
         serviceRepository.clearErrorMessage()
+    }
+
+    val meshPacketFlow: SharedFlow<MeshPacket> get() = serviceRepository.meshPacketFlow
+
+    suspend fun emitMeshPacket(packet: MeshPacket) = coroutineScope {
+        serviceRepository.emitMeshPacket(packet)
     }
 
     val tracerouteResponse: StateFlow<String?> get() = serviceRepository.tracerouteResponse
