@@ -19,7 +19,6 @@ import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
 import com.geeksville.mesh.database.entity.Packet
-import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
@@ -40,7 +39,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedWriter
@@ -157,8 +155,6 @@ class UIViewModel @Inject constructor(
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
     val ourNodeInfo: StateFlow<NodeInfo?> get() = nodeDB.ourNodeInfo
 
-    private val requestIds = MutableStateFlow<HashMap<Int, Boolean>>(hashMapOf())
-
     private val _snackbarText = MutableLiveData<Any?>(null)
     val snackbarText: LiveData<Any?> get() = _snackbarText
 
@@ -193,12 +189,6 @@ class UIViewModel @Inject constructor(
             _channels.value = channelSet
         }.launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            combine(meshLogRepository.getAllLogs(9), requestIds) { list, ids ->
-                val unprocessed = ids.filterValues { !it }.keys.ifEmpty { return@combine emptyList() }
-                list.filter { log -> log.meshPacket?.decoded?.requestId in unprocessed }
-            }.collect { it.forEach(::processPacketResponse) }
-        }
         debug("ViewModel created")
     }
 
@@ -297,7 +287,6 @@ class UIViewModel @Inject constructor(
         try {
             val packetId = meshService?.packetId ?: return
             meshService?.requestTraceroute(packetId, destNum)
-            requestIds.update { it.apply { put(packetId, false) } }
         } catch (ex: RemoteException) {
             errormsg("Request traceroute error: ${ex.message}")
         }
@@ -591,29 +580,11 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    private val _tracerouteResponse = MutableLiveData<String?>(null)
-    val tracerouteResponse: LiveData<String?> get() = _tracerouteResponse
+    val tracerouteResponse: LiveData<String?>
+        get() = radioConfigRepository.tracerouteResponse.asLiveData()
 
     fun clearTracerouteResponse() {
-        _tracerouteResponse.value = null
-    }
-
-    private fun processPacketResponse(log: MeshLog?) {
-        val packet = log?.meshPacket ?: return
-        val data = packet.decoded
-
-        if (data?.portnumValue == Portnums.PortNum.TRACEROUTE_APP_VALUE) {
-            val parsed = MeshProtos.RouteDiscovery.parseFrom(data.payload)
-            fun nodeName(num: Int) = nodeDB.nodesByNum[num]?.user?.longName
-                ?: app.getString(R.string.unknown_username)
-
-            _tracerouteResponse.value = buildString {
-                append("${nodeName(packet.to)} --> ")
-                parsed.routeList.forEach { num -> append("${nodeName(num)} --> ") }
-                append(nodeName(packet.from))
-            }
-            requestIds.update { it.apply { put(data.requestId, true) } }
-        }
+        radioConfigRepository.clearTracerouteResponse()
     }
 
     private val _currentTab = MutableLiveData(0)

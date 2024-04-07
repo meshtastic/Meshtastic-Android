@@ -25,4 +25,15 @@ class ServiceRepository @Inject constructor() {
     fun setConnectionState(connectionState: MeshService.ConnectionState) {
         _connectionState.value = connectionState
     }
+
+    private val _tracerouteResponse = MutableStateFlow<String?>(null)
+    val tracerouteResponse: StateFlow<String?> get() = _tracerouteResponse
+
+    fun setTracerouteResponse(value: String?) {
+        _tracerouteResponse.value = value
+    }
+
+    fun clearTracerouteResponse() {
+        setTracerouteResponse(null)
+    }
 }
