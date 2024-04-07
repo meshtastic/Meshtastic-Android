@@ -115,9 +115,6 @@ class UIViewModel @Inject constructor(
     val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()
     val selectedBluetooth get() = radioInterfaceService.getDeviceAddress()?.getOrNull(0) == 'x'
 
-    private val _meshLog = MutableStateFlow<List<MeshLog>>(emptyList())
-    val meshLog: StateFlow<List<MeshLog>> = _meshLog
-
     private val _packets = MutableStateFlow<List<Packet>>(emptyList())
     val packets: StateFlow<List<Packet>> = _packets
 
@@ -164,11 +161,6 @@ class UIViewModel @Inject constructor(
             radioConfigRepository.clearErrorMessage()
         }.launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            meshLogRepository.getAllLogs().collect { logs ->
-                _meshLog.value = logs
-            }
-        }
         viewModelScope.launch {
             packetRepository.getAllPackets().collect { packets ->
                 _packets.value = packets
@@ -298,10 +290,6 @@ class UIViewModel @Inject constructor(
         } catch (ex: RemoteException) {
             errormsg("Request position error: ${ex.message}")
         }
-    }
-
-    fun deleteAllLogs() = viewModelScope.launch(Dispatchers.IO) {
-        meshLogRepository.deleteAll()
     }
 
     fun deleteAllMessages() = viewModelScope.launch(Dispatchers.IO) {
