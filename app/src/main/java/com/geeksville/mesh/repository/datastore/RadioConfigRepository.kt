@@ -28,7 +28,7 @@ import javax.inject.Inject
  */
 class RadioConfigRepository @Inject constructor(
     private val serviceRepository: ServiceRepository,
-    val nodeDB: NodeDB,
+    private val nodeDB: NodeDB,
     private val channelSetRepository: ChannelSetRepository,
     private val localConfigRepository: LocalConfigRepository,
     private val moduleConfigRepository: ModuleConfigRepository,
@@ -38,6 +38,11 @@ class RadioConfigRepository @Inject constructor(
     // Connection state to our radio device
     val connectionState get() = serviceRepository.connectionState
     fun setConnectionState(state: ConnectionState) = serviceRepository.setConnectionState(state)
+
+    /**
+     * Flow representing the unique userId of our node.
+     */
+    val myId: StateFlow<String?> get() = nodeDB.myId
 
     /**
      * Flow representing the [MyNodeInfo] database.
@@ -150,5 +155,15 @@ class RadioConfigRepository @Inject constructor(
             config = localConfig
             moduleConfig = localModuleConfig
         }
+    }
+
+    val tracerouteResponse: StateFlow<String?> get() = serviceRepository.tracerouteResponse
+
+    fun setTracerouteResponse(value: String?) {
+        serviceRepository.setTracerouteResponse(value)
+    }
+
+    fun clearTracerouteResponse() {
+        setTracerouteResponse(null)
     }
 }

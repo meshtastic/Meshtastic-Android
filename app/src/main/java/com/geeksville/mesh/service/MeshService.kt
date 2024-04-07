@@ -420,6 +420,9 @@ class MeshService : Service(), Logging {
         }
     }
 
+    private fun getLongName(num: Int) =
+        nodeDBbyNodeNum[num]?.user?.longName ?: getString(R.string.unknown_username)
+
     private val numNodes get() = nodeDBbyNodeNum.size
 
     /**
@@ -698,6 +701,15 @@ class MeshService : Service(), Logging {
                         val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
                         rememberDataPacket(u)
                         updateMessageNotification(u)
+                    }
+
+                    Portnums.PortNum.TRACEROUTE_APP_VALUE -> {
+                        val parsed = MeshProtos.RouteDiscovery.parseFrom(data.payload)
+                        radioConfigRepository.setTracerouteResponse(buildString {
+                            append("${getLongName(packet.to)} --> ")
+                            parsed.routeList.forEach { num -> append("${getLongName(num)} --> ") }
+                            append(getLongName(packet.from))
+                        })
                     }
 
                     else -> debug("No custom processing needed for ${data.portnumValue}")
