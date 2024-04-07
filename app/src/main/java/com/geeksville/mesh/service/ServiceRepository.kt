@@ -1,6 +1,7 @@
 package com.geeksville.mesh.service
 
 import com.geeksville.mesh.IMeshService
+import com.geeksville.mesh.android.Logging
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
@@ -10,7 +11,7 @@ import javax.inject.Singleton
  * Repository class for managing the [IMeshService] instance and connection state
  */
 @Singleton
-class ServiceRepository @Inject constructor() {
+class ServiceRepository @Inject constructor() : Logging {
     var meshService: IMeshService? = null
         private set
 
@@ -24,6 +25,18 @@ class ServiceRepository @Inject constructor() {
 
     fun setConnectionState(connectionState: MeshService.ConnectionState) {
         _connectionState.value = connectionState
+    }
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> get() = _errorMessage
+
+    fun setErrorMessage(text: String) {
+        errormsg(text)
+        _errorMessage.value = text
+    }
+
+    fun clearErrorMessage() {
+        _errorMessage.value = null
     }
 
     private val _tracerouteResponse = MutableStateFlow<String?>(null)

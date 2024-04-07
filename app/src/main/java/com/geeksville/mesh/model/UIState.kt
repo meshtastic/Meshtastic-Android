@@ -159,9 +159,9 @@ class UIViewModel @Inject constructor(
     val snackbarText: LiveData<Any?> get() = _snackbarText
 
     init {
-        radioInterfaceService.errorMessage.filterNotNull().onEach {
+        radioConfigRepository.errorMessage.filterNotNull().onEach {
             _snackbarText.value = it
-            radioInterfaceService.clearErrorMessage()
+            radioConfigRepository.clearErrorMessage()
         }.launchIn(viewModelScope)
 
         viewModelScope.launch {
