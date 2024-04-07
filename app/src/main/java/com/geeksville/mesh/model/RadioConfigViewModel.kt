@@ -18,8 +18,6 @@ import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
-import com.geeksville.mesh.database.MeshLogRepository
-import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -30,7 +28,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -58,7 +55,6 @@ data class RadioConfigState(
 class RadioConfigViewModel @Inject constructor(
     private val app: Application,
     private val radioConfigRepository: RadioConfigRepository,
-    meshLogRepository: MeshLogRepository,
 ) : ViewModel(), Logging {
 
     private var destNum: Int = 0
@@ -73,7 +69,7 @@ class RadioConfigViewModel @Inject constructor(
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = radioConfigRepository.myNodeInfo
     val ourNodeInfo: StateFlow<NodeInfo?> get() = radioConfigRepository.ourNodeInfo
 
-    private val requestIds = MutableStateFlow<HashMap<Int, Boolean>>(hashMapOf())
+    private val requestIds = MutableStateFlow(hashSetOf<Int>())
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
     val radioConfigState: StateFlow<RadioConfigState> = _radioConfigState
 
@@ -85,12 +81,9 @@ class RadioConfigViewModel @Inject constructor(
             _currentDeviceProfile.value = it
         }.launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            combine(meshLogRepository.getAllLogs(9), requestIds) { list, ids ->
-                val unprocessed = ids.filterValues { !it }.keys.ifEmpty { return@combine emptyList() }
-                list.filter { log -> log.meshPacket?.decoded?.requestId in unprocessed }
-            }.collect { it.forEach(::processPacketResponse) }
-        }
+        radioConfigRepository.meshPacketFlow.onEach(::processPacketResponse)
+            .launchIn(viewModelScope)
+
         debug("RadioConfigViewModel created")
     }
 
@@ -112,7 +105,7 @@ class RadioConfigViewModel @Inject constructor(
             val packetId = service.packetId
             try {
                 requestAction(service, packetId, destNum)
-                requestIds.update { it.apply { put(packetId, false) } }
+                requestIds.update { it.apply { add(packetId) } }
                 _radioConfigState.update { state ->
                     if (state.responseState is ResponseState.Loading) {
                         val total = maxOf(requestIds.value.size, state.responseState.total)
@@ -362,7 +355,7 @@ class RadioConfigViewModel @Inject constructor(
     }
 
     fun clearPacketResponse() {
-        requestIds.value = hashMapOf()
+        requestIds.value = hashSetOf()
         _radioConfigState.update { it.copy(responseState = ResponseState.Empty) }
     }
 
@@ -411,9 +404,9 @@ class RadioConfigViewModel @Inject constructor(
         }
     }
 
-    private fun processPacketResponse(log: MeshLog?) {
-        val packet = log?.meshPacket ?: return
+    private fun processPacketResponse(packet: MeshProtos.MeshPacket) {
         val data = packet.decoded
+        if (data.requestId !in requestIds.value) return
         val route = radioConfigState.value.route
 
         // val destNum = destNode.value?.num ?: return
@@ -426,8 +419,8 @@ class RadioConfigViewModel @Inject constructor(
             if (parsed.errorReason != MeshProtos.Routing.Error.NONE) {
                 setResponseStateError(parsed.errorReason.name)
             } else if (packet.from == destNum && route.isEmpty()) {
-                requestIds.update { it.apply { put(data.requestId, true) } }
-                if (requestIds.value.filterValues { !it }.isEmpty()) setResponseStateSuccess()
+                requestIds.update { it.apply { remove(data.requestId) } }
+                if (requestIds.value.isEmpty()) setResponseStateSuccess()
                 else incrementCompleted()
             }
         }
@@ -498,7 +491,7 @@ class RadioConfigViewModel @Inject constructor(
 
                 else -> TODO()
             }
-            requestIds.update { it.apply { put(data.requestId, true) } }
+            requestIds.update { it.apply { remove(data.requestId) } }
         }
     }
 }

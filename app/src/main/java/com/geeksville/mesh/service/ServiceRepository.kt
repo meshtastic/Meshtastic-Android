@@ -1,8 +1,11 @@
 package com.geeksville.mesh.service
 
 import com.geeksville.mesh.IMeshService
+import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.android.Logging
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -37,6 +40,13 @@ class ServiceRepository @Inject constructor() : Logging {
 
     fun clearErrorMessage() {
         _errorMessage.value = null
+    }
+
+    private val _meshPacketFlow = MutableSharedFlow<MeshPacket>()
+    val meshPacketFlow: SharedFlow<MeshPacket> get() = _meshPacketFlow
+
+    suspend fun emitMeshPacket(packet: MeshPacket) {
+        _meshPacketFlow.emit(packet)
     }
 
     private val _tracerouteResponse = MutableStateFlow<String?>(null)
