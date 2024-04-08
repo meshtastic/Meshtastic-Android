@@ -87,7 +87,7 @@ import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-import org.osmdroid.bonuspack.clustering.RadiusMarkerClusterer
+import com.geeksville.mesh.model.map.clustering.RadiusMarkerClusterer
 import java.io.File
 import java.text.DateFormat
 
@@ -131,7 +131,9 @@ private fun MapView.UpdateMarkers(
 ) {
     debug("Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints")
     overlays.removeAll(overlays.filterIsInstance<MarkerWithLabel>())
+//    overlays.addAll(nodeMarkers + waypointMarkers)
     overlays.addAll(waypointMarkers)
+    nodeClusterer.getItems().clear()
     nodeMarkers.forEach {
         nodeClusterer.add(it)
     }

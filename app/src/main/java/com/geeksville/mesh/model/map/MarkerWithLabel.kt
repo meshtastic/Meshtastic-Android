@@ -63,9 +63,10 @@ class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
         val bgRect = getTextBackgroundSize(mLabel, (p.x - 0F), (p.y - LABEL_Y_OFFSET))
         bgRect.inset(-8F, -2F)
 
-        c.drawRoundRect(bgRect, LABEL_CORNER_RADIUS, LABEL_CORNER_RADIUS, bgPaint)
-        c.drawText(mLabel, (p.x - 0F), (p.y - LABEL_Y_OFFSET), textPaint)
+       if(mLabel.isNotEmpty()) {
+            c.drawRoundRect(bgRect, LABEL_CORNER_RADIUS, LABEL_CORNER_RADIUS, bgPaint)
+            c.drawText(mLabel, (p.x - 0F), (p.y - LABEL_Y_OFFSET), textPaint)
+        }
         mEmoji?.let { c.drawText(it, (p.x - 0f), (p.y - 30f), emojiPaint) }
     }
-
 }
