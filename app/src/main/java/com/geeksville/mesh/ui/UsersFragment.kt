@@ -140,6 +140,14 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                         debug("requesting traceroute for '${user.longName}'")
                         model.requestTraceroute(node.num)
                     }
+                    R.id.forget_node -> {
+                        debug("Forgetting node '${user.longName}'")
+
+                            model.forgetNode(node.num)
+                            onNodesChanged(nodes)
+
+
+                    }
                     R.id.ignore -> {
                         val message = if (isIgnored) R.string.ignore_remove else R.string.ignore_add
                         MaterialAlertDialogBuilder(requireContext())

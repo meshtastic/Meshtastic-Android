@@ -11,6 +11,10 @@
             android:title="@string/request_position"
             app:showAsAction="withText" />
         <item
+            android:id="@+id/forget_node"
+            android:title="@string/forget_node"
+            app:showAsAction="withText" />
+        <item
             android:id="@+id/traceroute"
             android:title="@string/traceroute"
             app:showAsAction="withText" />

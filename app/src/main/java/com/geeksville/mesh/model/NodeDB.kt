@@ -60,6 +60,9 @@ class NodeDB @Inject constructor(
 
     fun myNodeInfoFlow(): Flow<MyNodeInfo?> = nodeInfoDao.getMyNodeInfo()
     fun nodeInfoFlow(): Flow<List<NodeInfo>> = nodeInfoDao.getNodes()
+    fun delNode(num: Int) {
+        nodeInfoDao.delNode(num)
+    }
     suspend fun upsert(node: NodeInfo) = withContext(Dispatchers.IO) {
         nodeInfoDao.upsert(node)
     }
