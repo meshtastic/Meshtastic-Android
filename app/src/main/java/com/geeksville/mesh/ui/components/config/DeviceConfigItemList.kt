@@ -3,6 +3,7 @@ package com.geeksville.mesh.ui.components.config
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -11,6 +12,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.copy
@@ -131,6 +134,22 @@ fun DeviceConfigItemList(
                 })
         }
         item { Divider() }
+
+        item {
+            EditTextPreference(title = "POSIX Timezone",
+                value = deviceInput.tzdef,
+                maxSize = 64, // tzdef max_size:65
+                enabled = enabled,
+                isError = false,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    deviceInput = deviceInput.copy { tzdef = it }
+                },
+            )
+        }
 
         item {
             PreferenceFooter(
