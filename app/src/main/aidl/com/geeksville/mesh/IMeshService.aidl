@@ -115,6 +115,9 @@ interface IMeshService {
     /// Send commitEditSettings admin packet to nodeNum
     void commitEditSettings();
 
+    /// delete a specific nodeNum from nodeDB
+    void removeByNodenum(in int requestID, in int nodeNum);
+
     /// Send position packet with wantResponse to nodeNum
     void requestPosition(in int destNum, in Position position);
 
