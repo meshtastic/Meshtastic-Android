@@ -1020,7 +1020,12 @@ class MeshService : Service(), Logging {
                 it.snr = packet.rxSnr
                 it.rssi = packet.rxRssi
             }
-
+            //generate our own hopsAway, comparing hopStart to hopLimit
+        if (packet.hopStart != 0){
+            updateNodeInfo(fromNum){
+                it.hopsAway = packet.hopStart - packet.hopLimit
+            }
+        }
             handleReceivedData(packet)
         }
     }
