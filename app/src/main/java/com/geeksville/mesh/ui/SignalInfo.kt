@@ -24,11 +24,14 @@ fun signalInfo(
     } else {
         buildString {
             if (nodeInfo.channel > 0) append("ch:${nodeInfo.channel}")
-            if (nodeInfo.snr < 100F && nodeInfo.rssi < 0) {
-                if (isNotEmpty()) append(" ")
-                append("RSSI: %d SNR: %.1f".format(nodeInfo.rssi, nodeInfo.snr))
-            }
+            if (nodeInfo.hopsAway == 0){
+                if (nodeInfo.snr < 100F && nodeInfo.rssi < 0) {
+                    if (isNotEmpty()) append(" ")
+                    append("RSSI: %d SNR: %.1f".format(nodeInfo.rssi, nodeInfo.snr))
+                }
+            }else{append("Hops Away: %d".format(nodeInfo.hopsAway))}
         }
+
     }
     return if (text.isNotEmpty()) {
         Text(

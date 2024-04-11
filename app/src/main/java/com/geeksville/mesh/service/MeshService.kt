@@ -1314,6 +1314,7 @@ class MeshService : Service(), Logging {
             }
 
             it.channel = info.channel
+            it.hopsAway = info.hopsAway
         }
     }
 

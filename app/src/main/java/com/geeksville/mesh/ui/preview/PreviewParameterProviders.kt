@@ -35,7 +35,8 @@ class NodeInfoPreviewParameterProvider: PreviewParameterProvider<NodeInfo> {
             shortName = "MM",
             id = "mickeyMouseId",
             hwModel = MeshProtos.HardwareModel.TBEAM
-        )
+        ),
+        hopsAway = 0
     )
 
     private val minnieMouse = mickeyMouse.copy(
@@ -48,7 +49,8 @@ class NodeInfoPreviewParameterProvider: PreviewParameterProvider<NodeInfo> {
         ),
         snr = 12.5F,
         rssi = -42,
-        position = null
+        position = null,
+        hopsAway = 1
     )
 
     private val donaldDuck = NodeInfo(
@@ -81,7 +83,8 @@ class NodeInfoPreviewParameterProvider: PreviewParameterProvider<NodeInfo> {
             gasResistance = 0.0F,
             voltage = 3.7F,
             current = 0.0F
-        )
+        ),
+        hopsAway = 2
     )
 
     private val unknown = donaldDuck.copy(
