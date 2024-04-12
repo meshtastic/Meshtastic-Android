@@ -1021,26 +1021,19 @@ class MeshService : Service(), Logging {
                 it.rssi = packet.rxRssi
             }
             //generate our own hopsAway, comparing hopStart to hopLimit.
-            //if hopStart isn't 0, work out the hopsAway.
-        if (packet.hopStart != 0){
-            updateNodeInfo(fromNum){
-                it.hopsAway = packet.hopStart - packet.hopLimit
-            }
-        } else {
-            //if hopStart is 0 but hopLimit isn't, the sending node isn't sending hopStart,
-            // and we can't work out if direct, set hopsAway to -1
-            if (packet.hopStart == 0 && packet.hopLimit !=0) {
-                updateNodeInfo(fromNum) { it.hopsAway = -1 }
-            } else {
-                //in this instance it's hard to say if an old FW node went full hopLimit, or node with 0 hopLimit
+            when {
+                //if hopStart isn't 0, work out the hopsAway.
+                packet.hopStart != 0 -> updateNodeInfo(fromNum) { it.hopsAway = packet.hopStart - packet.hopLimit }
+                //if hopLimit is greater than hopStart, the sending node isn't sending hopStart,
+                // and we can't work out if direct, set hopsAway to -1
+                packet.hopLimit > packet.hopStart -> updateNodeInfo(fromNum) { it.hopsAway = -1 }
+                //in this instance it's hard to say if an old FW node went full hopLimit, or node with 0 hopStart
                 // received direct, make -1 to say we don't know.
-                updateNodeInfo(fromNum){it.hopsAway = -1}
+                packet.hopStart == 0 && packet.hopLimit == 0 -> updateNodeInfo(fromNum) { it.hopsAway = -1 }
             }
-        }
             handleReceivedData(packet)
         }
     }
-
     private fun insertPacket(packet: Packet) {
         serviceScope.handledLaunch {
             packetRepository.get().insert(packet)
