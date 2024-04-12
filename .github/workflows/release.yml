@@ -20,7 +20,7 @@ jobs:
         echo "versionName=$(grep -oP 'versionName \"\K[^\"]+' ./app/build.gradle)" >> $GITHUB_ENV
 
     - name: Validate Gradle wrapper
-      uses: gradle/wrapper-validation-action@v2
+      uses: gradle/wrapper-validation-action@v3
 
     - name: Load secrets
       run: |
