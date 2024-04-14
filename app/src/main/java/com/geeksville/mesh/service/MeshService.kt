@@ -1019,17 +1019,18 @@ class MeshService : Service(), Logging {
                 updateNodeInfoTime(it, rxTime)
                 it.snr = packet.rxSnr
                 it.rssi = packet.rxRssi
-            }
-            //generate our own hopsAway, comparing hopStart to hopLimit.
-            when {
-                //if hopStart isn't 0, work out the hopsAway.
-                packet.hopStart != 0 -> updateNodeInfo(fromNum) { it.hopsAway = packet.hopStart - packet.hopLimit }
-                //if hopLimit is greater than hopStart, the sending node isn't sending hopStart,
-                // and we can't work out if direct, set hopsAway to -1
-                packet.hopLimit > packet.hopStart -> updateNodeInfo(fromNum) { it.hopsAway = -1 }
-                //in this instance it's hard to say if an old FW node went full hopLimit, or node with 0 hopStart
-                // received direct, make -1 to say we don't know.
-                packet.hopStart == 0 && packet.hopLimit == 0 -> updateNodeInfo(fromNum) { it.hopsAway = -1 }
+
+                //Generate our own hopsAway, comparing hopStart to hopLimit.
+                when {
+                    //if hopStart isn't 0, work out the hopsAway.
+                    packet.hopStart != 0 -> it.hopsAway = packet.hopStart - packet.hopLimit
+                    //if hopStart is less than hopLimit, the sending node isn't sending hopStart,
+                    // and we can't work out if direct, set hopsAway to -1
+                    packet.hopStart < packet.hopLimit -> it.hopsAway = -1
+                    //in this instance it's hard to say if an old FW node went full hopLimit, or node with 0 hopStart
+                    // received direct, make -1 to say we don't know.
+                    packet.hopStart == 0 && packet.hopLimit == 0 -> it.hopsAway = -1
+                }
             }
             handleReceivedData(packet)
         }

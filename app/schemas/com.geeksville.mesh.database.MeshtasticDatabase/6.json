@@ -98,7 +98,7 @@
       },
       {
         "tableName": "NodeInfo",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`num` INTEGER NOT NULL, `snr` REAL NOT NULL, `rssi` INTEGER NOT NULL, `lastHeard` INTEGER NOT NULL, `hopsAway` INTEGER NOT NULL DEFAULT -1, `channel` INTEGER NOT NULL, `user_id` TEXT, `user_longName` TEXT, `user_shortName` TEXT, `user_hwModel` TEXT, `user_isLicensed` INTEGER, `position_latitude` REAL, `position_longitude` REAL, `position_altitude` INTEGER, `position_time` INTEGER, `position_satellitesInView` INTEGER, `position_groundSpeed` INTEGER, `position_groundTrack` INTEGER, `position_precisionBits` INTEGER, `devMetrics_time` INTEGER, `devMetrics_batteryLevel` INTEGER, `devMetrics_voltage` REAL, `devMetrics_channelUtilization` REAL, `devMetrics_airUtilTx` REAL, `envMetrics_time` INTEGER, `envMetrics_temperature` REAL, `envMetrics_relativeHumidity` REAL, `envMetrics_barometricPressure` REAL, `envMetrics_gasResistance` REAL, `envMetrics_voltage` REAL, `envMetrics_current` REAL, PRIMARY KEY(`num`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`num` INTEGER NOT NULL, `snr` REAL NOT NULL, `rssi` INTEGER NOT NULL, `lastHeard` INTEGER NOT NULL, `channel` INTEGER NOT NULL, `hopsAway` INTEGER NOT NULL DEFAULT -1, `user_id` TEXT, `user_longName` TEXT, `user_shortName` TEXT, `user_hwModel` TEXT, `user_isLicensed` INTEGER, `position_latitude` REAL, `position_longitude` REAL, `position_altitude` INTEGER, `position_time` INTEGER, `position_satellitesInView` INTEGER, `position_groundSpeed` INTEGER, `position_groundTrack` INTEGER, `position_precisionBits` INTEGER, `devMetrics_time` INTEGER, `devMetrics_batteryLevel` INTEGER, `devMetrics_voltage` REAL, `devMetrics_channelUtilization` REAL, `devMetrics_airUtilTx` REAL, `envMetrics_time` INTEGER, `envMetrics_temperature` REAL, `envMetrics_relativeHumidity` REAL, `envMetrics_barometricPressure` REAL, `envMetrics_gasResistance` REAL, `envMetrics_voltage` REAL, `envMetrics_current` REAL, PRIMARY KEY(`num`))",
         "fields": [
           {
             "fieldPath": "num",
@@ -125,17 +125,17 @@
             "notNull": true
           },
           {
+            "fieldPath": "channel",
+            "columnName": "channel",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "hopsAway",
             "columnName": "hopsAway",
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "-1"
-          },
-          {
-            "fieldPath": "channel",
-            "columnName": "channel",
-            "affinity": "INTEGER",
-            "notNull": true
           },
           {
             "fieldPath": "user.id",

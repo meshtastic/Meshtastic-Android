@@ -220,13 +220,13 @@ data class NodeInfo(
     var snr: Float = Float.MAX_VALUE,
     var rssi: Int = Int.MAX_VALUE,
     var lastHeard: Int = 0, // the last time we've seen this node in secs since 1970
-    @ColumnInfo(name="hopsAway", defaultValue = "-1")
-    var hopsAway: Int = -1,
     @Embedded(prefix = "devMetrics_")
     var deviceMetrics: DeviceMetrics? = null,
     var channel: Int = 0,
     @Embedded(prefix = "envMetrics_")
     var environmentMetrics: EnvironmentMetrics? = null,
+    @ColumnInfo(name = "hopsAway", defaultValue = "-1")
+    var hopsAway: Int = -1
 ) : Parcelable {
 
     val colors: Pair<Int, Int>
