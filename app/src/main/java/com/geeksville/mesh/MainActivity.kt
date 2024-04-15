@@ -646,7 +646,6 @@ class MainActivity : AppCompatActivity(), Logging {
                 return true
             }
             R.id.radio_config -> {
-                model.setDestNode(null)
                 supportFragmentManager.beginTransaction()
                     .add(R.id.mainActivityLayout, DeviceSettingsFragment())
                     .addToBackStack(null)

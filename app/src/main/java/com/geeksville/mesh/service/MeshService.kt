@@ -1904,6 +1904,10 @@ class MeshService : Service(), Logging {
                         removeFixedPosition = true
                     }
                 })
+
+                updateNodeInfo(myNodeNum) {
+                    it.position = position.copy(time = currentSecond())
+                }
             }
         }
 

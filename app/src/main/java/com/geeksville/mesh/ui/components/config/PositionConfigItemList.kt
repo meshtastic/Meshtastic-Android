@@ -32,8 +32,8 @@ fun PositionConfigItemList(
     onSaveClicked: (position: Position?, config: PositionConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var locationInput by remember { mutableStateOf(location) }
-    var positionInput by remember { mutableStateOf(positionConfig) }
+    var locationInput by remember(location) { mutableStateOf(location) }
+    var positionInput by remember(positionConfig) { mutableStateOf(positionConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -182,8 +182,6 @@ fun PositionConfigItemList(
                 enabled = positionInput != positionConfig || locationInput != location,
                 onCancelClicked = {
                     focusManager.clearFocus()
-                    locationInput = location
-                    positionInput = positionConfig
                 },
                 onSaveClicked = {
                     focusManager.clearFocus()

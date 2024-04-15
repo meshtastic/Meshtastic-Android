@@ -229,17 +229,6 @@ class UIViewModel @Inject constructor(
             .filterValues { it.data.waypoint!!.expire > System.currentTimeMillis() / 1000 }
     }.asLiveData()
 
-    private val _destNode = MutableStateFlow<NodeInfo?>(null)
-    val destNode: StateFlow<NodeInfo?> get() = if (_destNode.value != null) _destNode else ourNodeInfo
-
-    /**
-     * Sets the destination [NodeInfo] used in Radio Configuration.
-     * @param node Destination [NodeInfo] (or null for our local NodeInfo).
-     */
-    fun setDestNode(node: NodeInfo?) {
-        _destNode.value = node
-    }
-
     fun generatePacketId(): Int? {
         return try {
             meshService?.packetId

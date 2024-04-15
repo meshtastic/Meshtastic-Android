@@ -48,7 +48,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
+import androidx.fragment.app.viewModels
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -61,7 +62,6 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.RadioConfigViewModel
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.ui.components.PreferenceCategory
@@ -95,18 +95,22 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class DeviceSettingsFragment : ScreenFragment("Radio Configuration"), Logging {
 
-    private val model: UIViewModel by activityViewModels()
+    private val model: RadioConfigViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        setFragmentResultListener("requestKey") { _, bundle ->
+            val destNum = bundle.getInt("destNum")
+            model.setDestNum(destNum)
+        }
+
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setBackgroundColor(ContextCompat.getColor(context, R.color.colorAdvancedBackground))
             setContent {
-                // TODO change destNode to destNum and pass as navigation argument
                 val node by model.destNode.collectAsStateWithLifecycle()
 
                 AppCompatTheme {
@@ -138,6 +142,7 @@ class DeviceSettingsFragment : ScreenFragment("Radio Configuration"), Logging {
                     ) { innerPadding ->
                         RadioConfigNavHost(
                             node = node,
+                            viewModel = model,
                             navController = navController,
                             modifier = Modifier.padding(innerPadding),
                         )
@@ -231,12 +236,10 @@ fun RadioConfigNavHost(
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val connected = connectionState == ConnectionState.CONNECTED && node != null
 
-    val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle() // FIXME
     val destNum = node?.num ?: 0
-    val isLocal = destNum == myNodeInfo?.myNodeNum
+    val isLocal = destNum == viewModel.myNodeNum
 
     val radioConfigState by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    var location by remember(node) { mutableStateOf(node?.position) } // FIXME
 
     val deviceProfile by viewModel.deviceProfile.collectAsStateWithLifecycle()
     val isWaiting = radioConfigState.responseState.isWaiting()
@@ -399,14 +402,13 @@ fun RadioConfigNavHost(
         composable(ConfigRoute.POSITION.name) {
             PositionConfigItemList(
                 isLocal = isLocal,
-                location = location,
+                location = node?.position,
                 positionConfig = radioConfigState.radioConfig.position,
                 enabled = connected,
                 onSaveClicked = { locationInput, positionInput ->
                     if (positionInput.fixedPosition) {
-                        if (locationInput != null && locationInput != location) {
+                        if (locationInput != null && locationInput != node?.position) {
                             viewModel.setFixedPosition(locationInput)
-                            location = locationInput
                         }
                     } else {
                         if (radioConfigState.radioConfig.position.fixedPosition) {
