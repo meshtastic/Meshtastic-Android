@@ -225,8 +225,8 @@ data class NodeInfo(
     var channel: Int = 0,
     @Embedded(prefix = "envMetrics_")
     var environmentMetrics: EnvironmentMetrics? = null,
-    @ColumnInfo(name = "hopsAway", defaultValue = "-1")
-    var hopsAway: Int = -1
+    @ColumnInfo(name = "hopsAway", defaultValue = "0")
+    var hopsAway: Int = 0
 ) : Parcelable {
 
     val colors: Pair<Int, Int>
