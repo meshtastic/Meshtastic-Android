@@ -18,7 +18,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
+import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -171,7 +173,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                     }
                     R.id.remote_admin -> {
                         debug("calling remote admin --> destNum: ${node.num.toUInt()}")
-                        model.setDestNode(node)
+                        setFragmentResult("requestKey", bundleOf("destNum" to node.num))
                         parentFragmentManager.beginTransaction()
                             .replace(R.id.mainActivityLayout, DeviceSettingsFragment())
                             .addToBackStack(null)

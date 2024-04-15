@@ -28,6 +28,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -44,8 +45,8 @@ data class RadioConfigState(
     val route: String = "",
     val userConfig: MeshProtos.User = MeshProtos.User.getDefaultInstance(),
     val channelList: List<ChannelProtos.ChannelSettings> = emptyList(),
-    val radioConfig: ConfigProtos.Config = ConfigProtos.Config.getDefaultInstance(),
-    val moduleConfig: ModuleConfigProtos.ModuleConfig = ModuleConfigProtos.ModuleConfig.getDefaultInstance(),
+    val radioConfig: ConfigProtos.Config = config {},
+    val moduleConfig: ModuleConfigProtos.ModuleConfig = moduleConfig {},
     val ringtone: String = "",
     val cannedMessageMessages: String = "",
     val responseState: ResponseState<Boolean> = ResponseState.Empty,
@@ -57,17 +58,22 @@ class RadioConfigViewModel @Inject constructor(
     private val radioConfigRepository: RadioConfigRepository,
 ) : ViewModel(), Logging {
 
-    private var destNum: Int = 0
     private val meshService: IMeshService? get() = radioConfigRepository.meshService
 
     // Connection state to our radio device
     val connectionState get() = radioConfigRepository.connectionState
 
-    // A map from nodeNum to NodeInfo
-    val nodes: StateFlow<Map<Int, NodeInfo>> get() = radioConfigRepository.nodeDBbyNum
+    private val _destNum = MutableStateFlow<Int?>(null)
+    private val _destNode = MutableStateFlow<NodeInfo?>(null)
+    val destNode: StateFlow<NodeInfo?> get() = _destNode
 
-    val myNodeInfo: StateFlow<MyNodeInfo?> get() = radioConfigRepository.myNodeInfo
-    val ourNodeInfo: StateFlow<NodeInfo?> get() = radioConfigRepository.ourNodeInfo
+    /**
+     * Sets the destination [NodeInfo] used in Radio Configuration.
+     * @param num Destination nodeNum (or null for our local [NodeInfo]).
+     */
+    fun setDestNum(num: Int?) {
+        _destNum.value = num
+    }
 
     private val requestIds = MutableStateFlow(hashSetOf<Int>())
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
@@ -77,6 +83,10 @@ class RadioConfigViewModel @Inject constructor(
     val currentDeviceProfile get() = _currentDeviceProfile.value
 
     init {
+        combine(_destNum, radioConfigRepository.nodeDBbyNum) { destNum, nodes ->
+            nodes[destNum] ?: nodes.values.firstOrNull()
+        }.onEach { _destNode.value = it }.launchIn(viewModelScope)
+
         radioConfigRepository.deviceProfileFlow.onEach {
             _currentDeviceProfile.value = it
         }.launchIn(viewModelScope)
@@ -87,6 +97,7 @@ class RadioConfigViewModel @Inject constructor(
         debug("RadioConfigViewModel created")
     }
 
+    private val myNodeInfo: StateFlow<MyNodeInfo?> get() = radioConfigRepository.myNodeInfo
     val myNodeNum get() = myNodeInfo.value?.myNodeNum
     val maxChannels get() = myNodeInfo.value?.maxChannels ?: 8
 
@@ -101,7 +112,6 @@ class RadioConfigViewModel @Inject constructor(
         errorMessage: String,
     ) = viewModelScope.launch {
         meshService?.let { service ->
-            this@RadioConfigViewModel.destNum = destNum
             val packetId = service.packetId
             try {
                 requestAction(service, packetId, destNum)
@@ -313,7 +323,7 @@ class RadioConfigViewModel @Inject constructor(
     fun installProfile(protobuf: DeviceProfile) = with(protobuf) {
         _deviceProfile.value = null
         // meshService?.beginEditSettings()
-        if (hasLongName() || hasShortName()) ourNodeInfo.value?.user?.let {
+        if (hasLongName() || hasShortName()) destNode.value?.user?.let {
             val user = it.copy(
                 longName = if (hasLongName()) longName else it.longName,
                 shortName = if (hasShortName()) shortName else it.shortName
@@ -409,9 +419,8 @@ class RadioConfigViewModel @Inject constructor(
         if (data.requestId !in requestIds.value) return
         val route = radioConfigState.value.route
 
-        // val destNum = destNode.value?.num ?: return
-        val debugMsg =
-            "requestId: ${data.requestId.toUInt()} to: ${destNum.toUInt()} received %s from: ${packet.from.toUInt()}"
+        val destNum = destNode.value?.num ?: return
+        val debugMsg = "requestId: ${data.requestId.toUInt()} to: ${destNum.toUInt()} received %s"
 
         if (data?.portnumValue == Portnums.PortNum.ROUTING_APP_VALUE) {
             val parsed = MeshProtos.Routing.parseFrom(data.payload)

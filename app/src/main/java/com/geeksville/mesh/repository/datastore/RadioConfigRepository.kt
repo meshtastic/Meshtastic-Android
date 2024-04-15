@@ -143,14 +143,13 @@ class RadioConfigRepository @Inject constructor(
      * Flow representing the combined [DeviceProfile] protobuf.
      */
     val deviceProfileFlow: Flow<DeviceProfile> = combine(
-        myNodeInfoFlow(),
         nodeDBbyNum,
         channelSetFlow,
         localConfigFlow,
         moduleConfigFlow,
-    ) { myInfo, nodes, channels, localConfig, localModuleConfig ->
+    ) { nodes, channels, localConfig, localModuleConfig ->
         deviceProfile {
-            nodes[myInfo?.myNodeNum]?.user?.let {
+            nodes.values.firstOrNull()?.user?.let {
                 longName = it.longName
                 shortName = it.shortName
             }
