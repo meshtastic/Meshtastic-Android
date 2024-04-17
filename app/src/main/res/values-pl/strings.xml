@@ -6,7 +6,6 @@
     <string name="unset">Odznacz</string>
     <string name="connection_status">Status połączenia</string>
     <string name="application_icon">ikona aplikacji</string>
-    <string name="unknown_username">Nieznana nazwa użytkownika</string>
     <string name="send">Wyślij</string>
     <string name="send_text">Wyślij wiadomość</string>
     <string name="warning_not_paired">Nie sparowałeś jeszcze radia kompatybilnego z Meshtastic z tym telefonem. Proszę sparować urządzenie i ustawić swoją nazwę użytkownika.\n\nTa aplikacja open-source jest w fazie rozwoju, jeśli znajdziesz problemy, napisz na naszym forum: meshtastic.discourse.group.\n\nWięcej informacji znajdziesz na naszej stronie internetowej -www.meshtastic.org.</string>

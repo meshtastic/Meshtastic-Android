@@ -6,7 +6,6 @@
     <string name="unset">לא מוגדר</string>
     <string name="connection_status">סטטוס חיבור</string>
     <string name="application_icon">אייקון אפליקציה</string>
-    <string name="unknown_username">שם המשתמש אינו מוכר</string>
     <string name="send">שלח</string>
     <string name="send_text">שלח טקסט</string>
     <string name="warning_not_paired">עוד לא צימדת מכשיר תומך משטסטיק לטלפון זה. בבקשה צמד מכשיר והגדר שם משתמש.\n\nאפליקציית קוד פתוח זה נמצא בפיתוח, במקשר של בעיות בבקשה גש לפורום: meshtastic.discourse.group.\n\n למידע נוסף בקרו באתר - www.meshtastic.org.</string>

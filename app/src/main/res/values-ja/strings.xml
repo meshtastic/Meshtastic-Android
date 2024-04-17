@@ -6,7 +6,6 @@
     <string name="unset">削除</string>
     <string name="connection_status">接続状態</string>
     <string name="application_icon">アプリアイコン</string>
-    <string name="unknown_username">Nanashisan</string>
     <string name="send">送信</string>
     <string name="send_text">メッセージを入力</string>
     <string name="warning_not_paired">このスマートフォンはMeshtasticデバイスとペアリングされていません。デバイスとペアリングしてユーザー名を設定してください。\n\nこのオープンソースアプリケーションはアルファテスト中です。問題を発見した場合はBBSに書き込んでください。 meshtastic.discourse.group \n\n詳しくはWEBページをご覧ください。 www.meshtastic.org</string>

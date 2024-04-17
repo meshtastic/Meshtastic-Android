@@ -145,8 +145,8 @@ class UIViewModel @Inject constructor(
         if (filterText.isBlank()) return@combine nodes
 
         nodes.filter { entry ->
-            entry.value.user?.longName?.contains(filterText, ignoreCase = true) == true ||
-            entry.value.user?.shortName?.contains(filterText, ignoreCase = true) == true
+            entry.value.user.longName.contains(filterText, ignoreCase = true) == true ||
+            entry.value.user.shortName.contains(filterText, ignoreCase = true) == true
         }
     }
 
@@ -204,8 +204,8 @@ class UIViewModel @Inject constructor(
             channelName ?: app.getString(R.string.channel_name)
         } else {
             // grab usernames from NodeInfo
-            val node = nodeDB.nodes.value[dest]
-            node?.user?.longName ?: app.getString(R.string.unknown_username)
+            val node = nodeDB.getNode(dest);
+            node.user.longName
         }
     }
 

@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="channel_name">頻道名稱</string>
     <string name="channel_options">頻道選項</string>
@@ -6,7 +5,6 @@
     <string name="unset">取消設定</string>
     <string name="connection_status">連線狀態</string>
     <string name="application_icon">應用程式圖示</string>
-    <string name="unknown_username">未知的使用者名称</string>
     <string name="send">传送</string>
     <string name="send_text">传送讯息</string>
     <string name="warning_not_paired">您尚未将手机与 Meshtastic 兼容的装置配对。请先配对装置并设置您的用户名称。\n\n此开源应用程序仍在开发中，如有问题，请在我们的论坛 meshtastic.discourse.group 上面发文询问。\n\n 也可参阅我们的网页 - www.meshtastic.org。</string>

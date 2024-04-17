@@ -6,7 +6,6 @@
     <string name="unset">Nesetat</string>
     <string name="connection_status">Statusul conexiunii</string>
     <string name="application_icon">Iconița aplicației</string>
-    <string name="unknown_username">Nume utilizator necunoscut</string>
     <string name="send">Trimite</string>
     <string name="send_text">Trimite textul</string>
     <string name="warning_not_paired">Încă nu ai asociat un radio compatibil cu Meshtastic cu acest telefon. Te rugăm să asociezi un dispozitiv și să îți setezi numele de utilizator.\n\nAceastă aplicaţie open-source este în dezvoltare, dacă întâmpinaţi probleme, vă rugăm să postaţi pe forumul nostru: meshtastic.discourse.group.\n\nPentru mai multe informații, consultați pagina noastră de internet - www.meshtastic.org.</string>

@@ -88,12 +88,23 @@ class NodeInfoPreviewParameterProvider: PreviewParameterProvider<NodeInfo> {
     )
 
     private val unknown = donaldDuck.copy(
-        user = null,
+        user = MeshUser(
+            id = "!12345678",
+            longName = "UNK: !12345678",
+            shortName = "UNK",
+            hwModel = MeshProtos.HardwareModel.UNSET,
+        ),
         environmentMetrics = null
     )
 
     private val almostNothing = NodeInfo(
         num = Random.nextInt(),
+        user = MeshUser(
+            id = "!12345678",
+            longName = "UNK: !12345678",
+            shortName = "UNK",
+            hwModel = MeshProtos.HardwareModel.UNSET,
+        ),
     )
 
     override val values: Sequence<NodeInfo>

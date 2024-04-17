@@ -125,8 +125,7 @@ class DeviceSettingsFragment : ScreenFragment("Radio Configuration"), Logging {
                     Scaffold(
                         topBar = {
                             MeshAppBar(
-                                currentScreen = node?.user?.longName
-                                    ?: stringResource(R.string.unknown_username),
+                                currentScreen = node!!.user.longName,
                                 // canNavigateBack = navController.previousBackStackEntry != null,
                                 // navigateUp = { navController.navigateUp() },
                                 canNavigateBack = true,

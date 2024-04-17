@@ -6,7 +6,6 @@
     <string name="unset">Nicht konfiguriert</string>
     <string name="connection_status">Verbindungsstatus</string>
     <string name="application_icon">Anwendungssymbol</string>
-    <string name="unknown_username">Unbekannter Nutzername</string>
     <string name="send">Senden</string>
     <string name="send_text">Text senden</string>
     <string name="warning_not_paired">Sie haben noch kein zu Meshtastic kompatibles Funkgerät mit diesem Telefon gekoppelt. Bitte koppeln Sie ein Gerät und legen Sie Ihren Benutzernamen fest.\n\nDiese quelloffene App befindet sich im Test. Wenn Sie Probleme finden, veröffentlichen Sie diese bitte auf unserer Website im Chat.\n\nWeitere Informationen finden Sie auf unserer Webseite - www.meshtastic.org.</string>

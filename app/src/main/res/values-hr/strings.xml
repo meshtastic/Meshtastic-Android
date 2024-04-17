@@ -6,7 +6,6 @@
     <string name="unset">Nepostavljeno</string>
     <string name="connection_status">Stanje veze</string>
     <string name="application_icon">ikona aplikacije</string>
-    <string name="unknown_username">Nepoznato korisničko ime</string>
     <string name="send">Primijeni</string>
     <string name="send_text">Pošalji poruku</string>
     <string name="warning_not_paired">Još niste povezali Meshtastic radio uređaj s ovim telefonom. Povežite uređaj i postavite svoje korisničko ime.\n\nOva aplikacija otvorenog koda je u razvoju, ako naiđete na probleme, objavite na našem forumu: meshtastic.discourse.group.\n\nZa više informacija pogledajte našu web stranicu - www.meshtastic.org.</string>

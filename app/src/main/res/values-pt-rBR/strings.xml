@@ -6,7 +6,6 @@
     <string name="unset">Não definido</string>
     <string name="connection_status">Status da conexão</string>
     <string name="application_icon">ícone do aplicativo</string>
-    <string name="unknown_username">Nome desconhecido</string>
     <string name="send">Enviar</string>
     <string name="send_text">Enviar Texto</string>
     <string name="warning_not_paired">Você ainda não pareou um rádio compatível ao Meshtastic com este smartphone. Por favor pareie um dispositivo e configure seu nome de usuário.\n\nEste aplicativo open source está em desenvolvimento, caso encontre algum problema por favor publique em nosso fórum: meshtastic.discourse.group.\n\nPara mais informações acesse nossa página: www.meshtastic.org.</string>

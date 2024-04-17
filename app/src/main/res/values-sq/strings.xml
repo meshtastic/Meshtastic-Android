@@ -6,7 +6,6 @@
     <string name="unset">I pa konfiguruar</string>
     <string name="connection_status">Gjendja e komunikimit radio</string>
     <string name="application_icon">Ikona e aplikacionit</string>
-    <string name="unknown_username">Emri i përdoruesit është i panjohur</string>
     <string name="send_text">Dërgo një Mesazh</string>
     <string name="warning_not_paired">Ju ende nuk keni lidhur një paisje radio Meshtastic me këtë telefon. Ju lutem lidhni një paisje radio dhe vendosni emrin e përdoruesit. Ky aplikacion është software i lire "open-source" dhe në variantin Alpha për testim. Nëse hasni probleme, ju lutem shkruani në çatin e faqes tonë të internetit. Për më shum informacione vizitoni faqen tonë në internet - www.meshtastic.org.</string>
     <string name="your_name">Emri juaj</string>

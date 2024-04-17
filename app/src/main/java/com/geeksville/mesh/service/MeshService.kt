@@ -152,9 +152,8 @@ class MeshService : Service(), Logging {
     private var locationFlow: Job? = null
     private var mqttMessageFlow: Job? = null
 
-    private fun getSenderName(packet: DataPacket?): String {
-        val name = nodeDBbyID[packet?.from]?.user?.longName
-        return name ?: getString(R.string.unknown_username)
+    private fun getSenderName(packet: DataPacket): String {
+        return nodeDBbyID[packet.from]!!.user.longName
     }
 
     private val notificationSummary
@@ -327,10 +326,7 @@ class MeshService : Service(), Logging {
 
         // put our node array into our two different map representations
         nodeDBbyNodeNum.putAll(nodes.map { it.num to it })
-        nodeDBbyID.putAll(nodes.mapNotNull {
-            // ignore records that don't have a valid user
-            it.user?.let { user -> user.id to it }
-        })
+        nodeDBbyID.putAll(nodes.map { it.user.id to it })
     }
 
     private fun loadSettings() {
@@ -399,7 +395,16 @@ class MeshService : Service(), Logging {
 
     /// given a nodenum, return a db entry - creating if necessary
     private fun getOrCreateNodeInfo(n: Int) =
-        nodeDBbyNodeNum.getOrPut(n) { NodeInfo(n) }
+        nodeDBbyNodeNum.getOrPut(n) {
+            var defaultId = DataPacket.nodeNumToDefaultId(n)
+            val defaultUser = MeshUser(
+                id = defaultId,
+                longName = getString(R.string.unknown_username, defaultId),
+                shortName = getString(R.string.unknown_node_short_name),
+                hwModel = MeshProtos.HardwareModel.UNSET,
+            )
+            NodeInfo(n, defaultUser)
+        }
 
     private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
     private val rangeTestRegex = Regex("seq (\\d{1,10})")
@@ -421,7 +426,8 @@ class MeshService : Service(), Logging {
     }
 
     private fun getLongName(num: Int) =
-        nodeDBbyNodeNum[num]?.user?.longName ?: getString(R.string.unknown_username)
+        // Called by traceroute where we may not have seen a packet from this node yet. So nodeDBbyNodeNum[num] can be null.
+        nodeDBbyNodeNum[num]?.user?.longName ?: getString(R.string.unknown_username, DataPacket.nodeNumToDefaultId(num))
 
     private val numNodes get() = nodeDBbyNodeNum.size
 
@@ -446,7 +452,7 @@ class MeshService : Service(), Logging {
         updateFn(info)
 
         // This might have been the first time we know an ID for this node, so also update the by ID map
-        val userId = info.user?.id.orEmpty()
+        val userId = info.user.id.orEmpty()
         if (userId.isNotEmpty()) {
             nodeDBbyID[userId] = info
             if (haveNodeDB) serviceScope.handledLaunch {
@@ -767,7 +773,7 @@ class MeshService : Service(), Logging {
     /// Update our DB of users based on someone sending out a User subpacket
     private fun handleReceivedUser(fromNum: Int, p: MeshProtos.User, channel: Int = 0) {
         updateNodeInfo(fromNum) {
-            val oldId = it.user?.id.orEmpty()
+            val oldId = it.user.id.orEmpty()
             it.user = MeshUser(
                 p.id.ifEmpty { oldId }, // If the new update doesn't contain an ID keep our old value
                 p.longName,
@@ -794,7 +800,7 @@ class MeshService : Service(), Logging {
             debug("Ignoring nop position update for the local node")
         else
             updateNodeInfo(fromNum) {
-                debug("update position: ${it.user?.longName?.toPIIString()} with ${p.toPIIString()}")
+                debug("update position: ${it.user.longName.toPIIString()} with ${p.toPIIString()}")
                 it.position = Position(p, (defaultTime / 1000L).toInt())
             }
     }
@@ -1606,7 +1612,7 @@ class MeshService : Service(), Logging {
     private fun setOwner(packetId: Int, user: MeshProtos.User) = with(user) {
         val dest = nodeDBbyID[id]
             ?: throw Exception("Can't set user without a NodeInfo") // this shouldn't happen
-        val old = dest.user!!
+        val old = dest.user
         if (longName == old.longName && shortName == old.shortName && isLicensed == old.isLicensed) {
             debug("Ignoring nop owner change")
         } else {

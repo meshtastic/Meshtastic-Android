@@ -6,7 +6,6 @@
     <string name="unset">Ej inställd</string>
     <string name="connection_status">Anslutningsstatus</string>
     <string name="application_icon">applikationsikon</string>
-    <string name="unknown_username">Okänt användarnamn</string>
     <string name="send">Skicka</string>
     <string name="send_text">Skicka text</string>
     <string name="warning_not_paired">Du har ännu inte parat en Meshtastic-kompatibel radio med den här telefonen. Koppla ihop en enhet och ange ditt användarnamn.\n\nDetta öppna källkodsprogram (open source) är under utveckling, om du hittar problem, vänligen publicera det på vårt forum: meshtastic.discourse.group\n\nFör mer information se vår webbsida - www.meshtastic.org.</string>

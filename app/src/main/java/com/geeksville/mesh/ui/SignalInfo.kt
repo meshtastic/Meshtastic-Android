@@ -6,7 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import com.geeksville.mesh.MeshProtos.HardwareModel
 import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.MeshUser
 import com.geeksville.mesh.ui.preview.NodeInfoPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 
@@ -59,7 +61,12 @@ fun SignalInfoSimplePreview() {
                 snr = 12.5F,
                 rssi = -42,
                 deviceMetrics = null,
-                user = null,
+                user = MeshUser(
+                    id = "!12345678",
+                    longName = "Bob",
+                    shortName = "BQ1",
+                    hwModel = HardwareModel.UNSET,
+                ),
                 hopsAway = 0
             ),
             isThisNode = false

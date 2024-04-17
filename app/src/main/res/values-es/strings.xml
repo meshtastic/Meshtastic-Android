@@ -6,7 +6,6 @@
     <string name="unset">Sin configurar</string>
     <string name="connection_status">Estado de conexión</string>
     <string name="application_icon">icono de la aplicación</string>
-    <string name="unknown_username">Nombre de usuario desconocido</string>
     <string name="send">Enviar</string>
     <string name="send_text">Enviar texto</string>
     <string name="warning_not_paired">Aún no ha emparejado una radio compatible con Meshtastic con este teléfono. Empareje un dispositivo y configure su nombre de usuario. \n\nEsta aplicación de código abierto es una prueba alfa; si encuentra un problema publiquelo en el foro: meshtastic.discourse.group. \n\nPara obtener más información visite nuestra página web - www.meshtastic.org.</string>

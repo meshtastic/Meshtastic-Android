@@ -209,7 +209,7 @@ fun MapView(
         val gpsFormat = model.config.display.gpsFormat.number
         val displayUnits = model.config.display.units.number
         return nodesWithPosition.map { node ->
-            val (p, u) = node.position!! to node.user!!
+            val (p, u) = node.position!! to node.user
             MarkerWithLabel(
                 mapView = this,
                 label = "${u.shortName} ${formatAgo(p.time)}"
@@ -269,8 +269,8 @@ fun MapView(
             showDeleteMarkerDialog(waypoint)
     }
 
-    fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) context.getString(R.string.you)
-    else model.nodeDB.nodes.value[id]?.user?.longName ?: context.getString(R.string.unknown_username)
+    fun getUsername(id: String) = if (id == DataPacket.ID_LOCAL) context.getString(R.string.you)
+    else model.nodeDB.getNode(id).user.longName
 
     fun MapView.onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
         return waypoints.mapNotNull { waypoint ->
@@ -282,7 +282,7 @@ fun MapView(
             val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
             MarkerWithLabel(this, label, emoji).apply {
                 id = "${pt.id}"
-                title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
+                title = "${pt.name} (${getUsername(waypoint.data.from!!)}$lock)"
                 snippet = "[$time] " + pt.description
                 position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
                 setVisible(false)

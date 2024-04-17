@@ -6,7 +6,6 @@
     <string name="unset">Nenastavené</string>
     <string name="connection_status">Stav pripojenia</string>
     <string name="application_icon">Ikona aplikácie</string>
-    <string name="unknown_username">Neznáme užívateľské meno</string>
     <string name="send">Odoslať</string>
     <string name="send_text">Odoslať text</string>
     <string name="warning_not_paired">K tomuto telefónu ste ešte nespárovalii žiadne zariadenie kompatibilné s Meshtastic. Prosím spárujte zariadenie a nastavte svoje užívateľské meno. Táto open-source aplikácia je v alpha testovacej fáze, ak nájdete chybu, prosím popíšte ju na fóre: meshtastic.discourse.group.\n\n Pre viac informácií navštívte web stránku - www.meshtastic.org.</string>

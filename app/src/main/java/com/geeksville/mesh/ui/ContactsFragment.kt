@@ -77,24 +77,30 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             val fromLocal = contact.from == DataPacket.ID_LOCAL
             val toBroadcast = contact.to == DataPacket.ID_BROADCAST
 
-            // grab usernames from NodeInfo
-            val nodes = model.nodeDB.nodes.value
-            val node = nodes[if (fromLocal) contact.to else contact.from]
 
-            //grab channel names from DeviceConfig
-            val channels = model.channelSet
-            val channelName = if (channels.settingsCount > contact.channel)
-                Channel(channels.settingsList[contact.channel], channels.loraConfig).name else null
+            if (toBroadcast) {
+                //grab channel names from DeviceConfig
+                val channels = model.channelSet
+                val channelName = if (channels.settingsCount > contact.channel)
+                    Channel(channels.settingsList[contact.channel], channels.loraConfig).name else null
 
-            val shortName = node?.user?.shortName ?: "???"
-            val longName = if (toBroadcast) channelName ?: getString(R.string.channel_name)
-            else node?.user?.longName ?: getString(R.string.unknown_username)
+                holder.shortName.text = "${contact.channel}"
+                holder.longName.text = channelName ?:  getString(R.string.channel_name)
 
-            holder.shortName.text = if (toBroadcast) "${contact.channel}" else shortName
-            holder.longName.text = longName
+                if (fromLocal) {
+                    holder.lastMessageText.text = contact.text
+                } else {
+                    var node = model.nodeDB.getNode(contact.from!!)
+                    holder.lastMessageText.text = "${node.user.shortName}: ${contact.text}"
+                }
 
-            val text = if (fromLocal) contact.text else "$shortName: ${contact.text}"
-            holder.lastMessageText.text = text
+            } else {
+                val node = if (fromLocal) model.nodeDB.getNode(contact.to!!) else model.nodeDB.getNode(contact.from!!)
+                holder.shortName.text = node.user.shortName
+                holder.longName.text = node.user.longName
+                holder.lastMessageText.text = if (fromLocal) contact.text else "${node.user.shortName}: ${contact.text}"
+            }
+
 
             if (contact.time != 0L) {
                 holder.lastMessageTime.visibility = View.VISIBLE

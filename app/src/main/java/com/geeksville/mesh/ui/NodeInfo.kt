@@ -61,9 +61,8 @@ fun NodeInfo(
     val BLINK_DURATION = 250
 
     val unknownShortName = stringResource(id = R.string.unknown_node_short_name)
-    val unknownLongName = stringResource(id = R.string.unknown_username)
 
-    val nodeName = thatNodeInfo.user?.longName ?: unknownLongName
+    val nodeName = thatNodeInfo.user.longName
     val isThisNode = thisNodeInfo?.num == thatNodeInfo.num
     val distance = thisNodeInfo?.distanceStr(thatNodeInfo, distanceUnits)
     val (textColor, nodeColor) = thatNodeInfo.colors
@@ -116,7 +115,7 @@ fun NodeInfo(
                         content = {
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
-                                text = (thatNodeInfo.user?.shortName ?: unknownShortName).strikeIf(isIgnored),
+                                text = (thatNodeInfo.user.shortName).strikeIf(isIgnored),
                                 fontWeight = FontWeight.Normal,
                                 fontSize = MaterialTheme.typography.button.fontSize,
                                 textAlign = TextAlign.Center,
@@ -137,7 +136,7 @@ fun NodeInfo(
                     )
                 }
 
-                val style = if (nodeName == unknownLongName) {
+                val style = if (thatNodeInfo.user.shortName == unknownShortName) {
                     LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)
                 } else {
                     LocalTextStyle.current

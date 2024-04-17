@@ -11,7 +11,7 @@
     <string name="sample_coords" translatable="false">55.332244 34.442211</string>
     <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
 
-    <string name="unknown_node_short_name" translatable="false">\???</string>
+    <string name="unknown_node_short_name">UNK</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">clear node filter</string>
 
@@ -23,7 +23,7 @@
     <string name="unset">Unset</string>
     <string name="connection_status">Connection status</string>
     <string name="application_icon">application icon</string>
-    <string name="unknown_username">Unknown Username</string>
+    <string name="unknown_username">UNK: %1$s</string>
     <string name="send">Send</string>
     <string name="send_text">Send Text</string>
     <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: meshtastic.discourse.group.\n\nFor more information see our web page - www.meshtastic.org.</string>

@@ -6,7 +6,6 @@
     <string name="unset">Díshocraigh</string>
     <string name="connection_status">Stádas ceangail</string>
     <string name="application_icon">deilbhín feidhmchláir</string>
-    <string name="unknown_username">Ainm Úsáideora Anaithnid</string>
     <string name="send_text">Seol Téacs</string>
     <string name="warning_not_paired">Níl raidió comhoiriúnach Meshtastic péireáilte leis an bhfón seo agat fós. Péireáil gléas le do thoil agus socraigh d’ainm úsáideora. Tá an feidhmchlár foinse oscailte seo faoi alfa-thástáil, má aimsíonn tú fadhbanna cuir leis an gcomhrá ar ár suíomh gréasáin iad le do thoil. Le haghaidh tuilleadh faisnéise féach ar ár leathanach gréasáin - www.meshtastic.org.</string>
     <string name="your_name">D\'ainm</string>

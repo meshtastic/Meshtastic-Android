@@ -2,10 +2,11 @@ package com.geeksville.mesh
 
 import android.graphics.Color
 import android.os.Parcelable
-import androidx.room.ColumnInfo
+import androidx.annotation.NonNull
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.ColumnInfo
 import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.bearing
 import com.geeksville.mesh.util.latLongToMeter
@@ -213,8 +214,9 @@ data class EnvironmentMetrics(
 data class NodeInfo(
     @PrimaryKey(autoGenerate = false)
     val num: Int, // This is immutable, and used as a key
+    @NonNull()
     @Embedded(prefix = "user_")
-    var user: MeshUser? = null,
+    var user: MeshUser,
     @Embedded(prefix = "position_")
     var position: Position? = null,
     var snr: Float = Float.MAX_VALUE,

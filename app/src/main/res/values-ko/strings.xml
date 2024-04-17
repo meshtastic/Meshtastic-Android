@@ -6,7 +6,6 @@
     <string name="unset">해제</string>
     <string name="connection_status">연결상태</string>
     <string name="application_icon">앱아이콘</string>
-    <string name="unknown_username">미확인 유저</string>
     <string name="send_text">텍스트 전송</string>
     <string name="warning_not_paired">아직 스마트폰과 메쉬타스틱 기기와 페어링을 하지 않았습니다. 장치와 페어링을 하고 사용자 이름을 정하세요. 이 오픈소스 응용 프로그램은 개발중입니다. 문제가 발견되면 포럼(meshtastic.discourse.group)을 통해 알려주세요. 자세한 정보는 웹페이지(www.meshtastic.org)를 참조하세요.</string>
     <string name="your_name">사용자 이름</string>

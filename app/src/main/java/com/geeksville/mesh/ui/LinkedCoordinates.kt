@@ -27,7 +27,7 @@ fun LinkedCoordinates(
     modifier : Modifier = Modifier,
     position: Position?,
     format: Int,
-    nodeName: String?
+    nodeName: String,
 ) {
     if (position?.isValid() == true) {
         val uriHandler = LocalUriHandler.current
@@ -36,7 +36,7 @@ fun LinkedCoordinates(
             fontSize = MaterialTheme.typography.button.fontSize,
             textDecoration = TextDecoration.Underline
         )
-        val name = nodeName ?: stringResource(id = R.string.unknown_username)
+        val name = nodeName
         val annotatedString = buildAnnotatedString {
             pushStringAnnotation(
                 tag = "gps",

@@ -6,7 +6,6 @@
     <string name="unset">Αναίρεση</string>
     <string name="connection_status">Κατάσταση Σύνδεσης</string>
     <string name="application_icon">Εικονίδιο εφαρμογής </string>
-    <string name="unknown_username">Άγνωστο Όνομα Χρήστη</string>
     <string name="send">Αποστολή</string>
     <string name="send_text">Αποστολή κειμένου</string>
     <string name="warning_not_paired">Δεν έχετε κάνει ακόμη pair μια συσκευή συμβατή με Meshtastic με το τηλέφωνο. Παρακαλώ κάντε pair μια συσκευή και ορίστε το όνομα χρήστη.\n\nΗ εφαρμογή ανοιχτού κώδικα βρίσκεται σε alpha-testing, αν εντοπίσετε προβλήματα παρακαλώ δημοσιεύστε τα στο forum: meshtastic.discourse.group.\n\nΠερισσότερες πληροφορίες στην ιστοσελίδα - www.meshtastic.org.</string>

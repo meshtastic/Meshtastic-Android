@@ -1,10 +1,15 @@
 package com.geeksville.mesh.model
 
+import android.app.Application
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
+import com.geeksville.mesh.R
 import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.MeshUser
+import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.database.dao.NodeInfoDao
+import com.geeksville.mesh.MeshProtos.HardwareModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +23,7 @@ import javax.inject.Singleton
 @Singleton
 class NodeDB @Inject constructor(
     processLifecycle: Lifecycle,
+    private val app: Application,
     private val nodeInfoDao: NodeInfoDao,
 ) {
 
@@ -60,6 +66,22 @@ class NodeDB @Inject constructor(
 
     fun myNodeInfoFlow(): Flow<MyNodeInfo?> = nodeInfoDao.getMyNodeInfo()
     fun nodeInfoFlow(): Flow<List<NodeInfo>> = nodeInfoDao.getNodes()
+    fun getNode(num: String): NodeInfo {
+        val node: NodeInfo? = nodes.value[num];
+        if (node != null) {
+            return node;
+        } else {
+            return NodeInfo(
+                DataPacket.idToDefaultNodeNum(num),
+                MeshUser(
+                    id = num,
+                    longName = app.getString(R.string.unknown_username, num),
+                    shortName = app.getString(R.string.unknown_node_short_name),
+                    hwModel = HardwareModel.UNSET,
+                )
+            );
+        }
+    }
     fun delNode(num: Int) {
         nodeInfoDao.delNode(num)
     }

@@ -6,7 +6,6 @@
     <string name="unset">Скинути</string>
     <string name="connection_status">Статус з`єднання</string>
     <string name="application_icon">значок додатку</string>
-    <string name="unknown_username">Невідомий юзернейм</string>
     <string name="send">Надіслати</string>
     <string name="send_text">Відправити повідомлення</string>
     <string name="warning_not_paired">Ви ще не підєднали пристрій, сумісний з Meshtastic. Будьласка приєднайте пристрій і введіть ім’я користувача.\n\nЦя програма з відкритим вихідним кодом знаходиться в розробці, якщо ви виявите проблеми, опублікуйте їх на нашому форумі: meshtastic.discourse.group.\n\nДля отримання додаткової інформації відвідайте нашу веб-сторінку - www.meshtastic.org.</string>

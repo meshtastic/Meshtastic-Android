@@ -168,7 +168,13 @@ data class DataPacket(
         const val NODENUM_BROADCAST = (0xffffffff).toInt()
 
         fun nodeNumToDefaultId(n: Int): String = "!%08x".format(n)
-        fun idToDefaultNodeNum(id: String?): Int? = id?.toLong(16)?.toInt()
+        fun idToDefaultNodeNum(id: String) : Int {
+            if (id == ID_BROADCAST) {
+                return NODENUM_BROADCAST;
+            } else {
+                return id.substring(1).toLong(16).toInt();
+            }
+        }
 
         override fun createFromParcel(parcel: Parcel): DataPacket {
             return DataPacket(parcel)

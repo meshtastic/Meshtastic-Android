@@ -6,7 +6,6 @@
     <string name="unset">Óstillt</string>
     <string name="connection_status">Staða tengingar</string>
     <string name="application_icon">tákn smáforrits</string>
-    <string name="unknown_username">Óþekkt notendanafn</string>
     <string name="send">Senda</string>
     <string name="send_text">Senda textaskilaboð</string>
     <string name="warning_not_paired">Þú hefur ekki parað Meshtastic radíó við þennan síma. Vinsamlegast paraðu búnað og veldu notendnafn.\n\nÞessi opni hugbúnaður er enn í þróun, finnir þú vandamál vinsamlegast búðu til þráð á spjallborðinu okkar: meshtastic.discourse.group.\n\nFyrir frekari upplýsingar sjá vefsíðu - www.meshtastic.org.</string>

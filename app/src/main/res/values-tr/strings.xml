@@ -6,7 +6,6 @@
     <string name="unset">Ayarlanmamış</string>
     <string name="connection_status">Bağlantı durumu</string>
     <string name="application_icon">uygulama ikonu</string>
-    <string name="unknown_username">Bilinmeyen kullanıcı adı</string>
     <string name="send">Gönder</string>
     <string name="send_text">Metni Gönder</string>
     <string name="warning_not_paired">Telefonu, Meshtastic uyumlu bir cihaz ile eşleştirmediniz. Bir cihazla eşleştirin ve kullanıcı adınızı belirleyin.\n\nAçık kaynaklı bu uygulama şu an alfa-test aşamasında, problem fark ederseniz forumda lütfen paylaşın: meshtastic.discourse.group.\n\nDaha fazla bilgi için, sitemiz: www.meshtastic.org.</string>

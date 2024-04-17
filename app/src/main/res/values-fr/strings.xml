@@ -6,7 +6,6 @@
     <string name="unset">Non défini</string>
     <string name="connection_status">État de la connexion</string>
     <string name="application_icon">icône de l\'application</string>
-    <string name="unknown_username">Nom d\'Utilisateur inconnu</string>
     <string name="send">Envoyer</string>
     <string name="send_text">Envoyer Texte</string>
     <string name="warning_not_paired">Aucune radio Meshtastic compatible n\'a été jumelée à ce téléphone. Jumelez un appareil et spécifiez votre nom d\'utilisateur.\n\nL\'application open-source est en test alpha, si vous rencontrez des problèmes postez au chat sur notre site web.\n\nPour plus d\'information visitez notre site web - www.meshtastic.org.</string>

@@ -6,7 +6,6 @@
     <string name="unset">Nenustatyti</string>
     <string name="connection_status">Ryšio būsena</string>
     <string name="application_icon">aplikacijos piktograma</string>
-    <string name="unknown_username">Nežinomas vartotojo vardas</string>
     <string name="send">Siųsti</string>
     <string name="send_text">Siųsti tekstą</string>
     <string name="warning_not_paired">Šiuo telefonu dar susietas joks Meshtastic suderinamas radijas. Prašome suporuoti įrenginį ir nustatyti savo vartotojo vardą..\n\nŠi atvirojo kodo programa yra kūrimo stadijoje, jei pastebėsite problemas, prašome pranešti mūsų forume: meshtastic.discourse.group.\n\nDaugiau informacijos rasite mūsų interneto svetainėje - www.meshtastic.org.</string>

@@ -5,7 +5,6 @@
     <string name="unset">Отказ</string>
     <string name="connection_status">Състояние на връзката</string>
     <string name="application_icon">икона на приложението</string>
-    <string name="unknown_username">Неизвестен потребител</string>
     <string name="send">Изпрати</string>
     <string name="send_text">Текст за изпращане</string>
     <string name="warning_not_paired">Все още не сте сдвоили радио, съвместимо с Meshtastic, с този телефон. Моля, сдвоете устройство и задайте вашето потребителско име.\n\nТова приложение с отворен код е в процес на разработка, ако откриете проблеми, моля, публикувайте в нашия форум: meshtastic.discourse.group.\n\nЗа повече информация вижте нашата уеб страница на адрес www.meshtastic.org.</string>

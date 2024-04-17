@@ -6,7 +6,6 @@
     <string name="unset">Nincs beállítva</string>
     <string name="connection_status">Kapcsolat állapota</string>
     <string name="application_icon">alkalmazás ikonja</string>
-    <string name="unknown_username">Ismeretlen felhasználónév</string>
     <string name="send">Küldeni</string>
     <string name="send_text">Szöveg elküldése</string>
     <string name="warning_not_paired">Még nem párosított egyetlen Meshtastic rádiót sem ehhez a telefonhoz. Kérem pároztasson egyet és állítsa be a felhasználónevet.\n\nEz a szabad forráskódú alkalmazás fejlesztés alatt áll, ha hibát talál kérem írjon a projekt fórumába: meshtastic.discourse.group.\n\nBővebb információért látogasson el a projekt veboldalára - www.meshtastic.org.</string>

@@ -111,7 +111,6 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
         private fun popup(view: View, node: NodeInfo) {
             if (!model.isConnected()) return
-            val user = node.user ?: return
             val isOurNode = node.num == model.myNodeNum
             val showAdmin = isOurNode || model.hasAdminChannel
             val isIgnored = ignoreIncomingList.contains(node.num)
@@ -127,48 +126,46 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             popup.setOnMenuItemClickListener { item: MenuItem ->
                 when (item.itemId) {
                     R.id.direct_message -> {
-                        debug("calling MessagesFragment filter: ${node.channel}${user.id}")
-                        model.setContactKey("${node.channel}${user.id}")
+                        debug("calling MessagesFragment filter: ${node.channel}${node.user.id}")
+                        model.setContactKey("${node.channel}${node.user.id}")
                         parentFragmentManager.beginTransaction()
                             .replace(R.id.mainActivityLayout, MessagesFragment())
                             .addToBackStack(null)
                             .commit()
                     }
                     R.id.request_position -> {
-                        debug("requesting position for '${user.longName}'")
+                        debug("requesting position for '${node.user.longName}'")
                         model.requestPosition(node.num)
                     }
                     R.id.traceroute -> {
-                        debug("requesting traceroute for '${user.longName}'")
+                        debug("requesting traceroute for '${node.user.longName}'")
                         model.requestTraceroute(node.num)
                     }
                     R.id.forget_node -> {
-
                         MaterialAlertDialogBuilder(requireContext())
                             .setTitle(R.string.forget_node)
                             .setMessage(getString(R.string.forget_node_message))
                             .setNeutralButton(R.string.cancel) { _, _ -> }
                             .setPositiveButton(R.string.forget_node) {_,_ ->
-                                debug("Forgetting node '${user.longName}'")
+                                debug("Forgetting node '${node.user.longName}'")
                                 model.forgetNode(node.num)
                                 onNodesChanged(nodes)
                             }
                             .show()
-
                     }
                     R.id.ignore -> {
                         val message = if (isIgnored) R.string.ignore_remove else R.string.ignore_add
                         MaterialAlertDialogBuilder(requireContext())
                             .setTitle(R.string.ignore)
-                            .setMessage(getString(message, user.longName))
+                            .setMessage(getString(message, node.user.longName))
                             .setNeutralButton(R.string.cancel) { _, _ -> }
                             .setPositiveButton(R.string.send) { _, _ ->
                                 model.ignoreIncomingList = ignoreIncomingList.apply {
                                     if (isIgnored) {
-                                        debug("removed '${user.longName}' from ignore list")
+                                        debug("removed '${node.user.longName}' from ignore list")
                                         remove(node.num)
                                     } else {
-                                        debug("added '${user.longName}' to ignore list")
+                                        debug("added '${node.user.longName}' to ignore list")
                                         add(node.num)
                                     }
                                 }
@@ -291,7 +288,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
         model.focusedNode.asLiveData().observe(viewLifecycleOwner) { node ->
             val idx = nodesAdapter.nodes.indexOfFirst {
-                it.user?.id == node?.user?.id
+                it.user.id == node?.user?.id
             }
 
             if (idx < 1) return@observe
