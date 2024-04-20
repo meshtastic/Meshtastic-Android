@@ -142,10 +142,15 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                     }
                     R.id.forget_node -> {
                         debug("Forgetting node '${user.longName}'")
-
-                            model.forgetNode(node.num)
-                            onNodesChanged(nodes)
-
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(R.string.forget_node)
+                            .setMessage(getString(R.string.forget_node_message))
+                            .setNeutralButton(R.string.cancel) { _, _ -> }
+                            .setPositiveButton(R.string.forget_node) {_,_ ->
+                                model.forgetNode(node.num)
+                                onNodesChanged(nodes)
+                            }
+                            .show()
 
                     }
                     R.id.ignore -> {
