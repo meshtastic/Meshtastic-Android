@@ -188,4 +188,5 @@
     <string name="waypoint_received">Received waypoint: %s</string>
     <string name="error_duty_cycle">Duty Cycle limit reached. Cannot send messages right now, please try again later.</string>
     <string name="forget_node">Forget Node</string>
+    <string name="forget_node_message">This node will be removed from your list until your node receives NodeInfo data from it again.</string>
 </resources>
