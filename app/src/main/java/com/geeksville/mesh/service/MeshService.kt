@@ -704,6 +704,7 @@ class MeshService : Service(), Logging {
                     }
 
                     Portnums.PortNum.TRACEROUTE_APP_VALUE -> {
+                        if (data.wantResponse) return // ignore data from traceroute requests
                         val parsed = MeshProtos.RouteDiscovery.parseFrom(data.payload)
                         radioConfigRepository.setTracerouteResponse(buildString {
                             append("${getLongName(packet.to)} --> ")
