@@ -39,6 +39,7 @@
     <string name="connected_count">Tengdar: %1$s af %2$s virkar</string>
     <string name="list_of_nodes">Listi yfir nóður á neti</string>
     <string name="update_firmware">Uppfæra fastbúnað</string>
+    <string name="ip_address">IP Tala:</string>
     <string name="connected">Tengdur við radíó</string>
     <string name="connected_to">Tengdur við radíó (%s)</string>
     <string name="not_connected">Ekki tengdur</string>
@@ -50,6 +51,7 @@
     <string name="modem_config_short">Skammdrægni / Hratt</string>
     <string name="modem_config_medium">Miðlungsdrægni / Hratt</string>
     <string name="modem_config_long">Langdrægni / Hratt</string>
+    <string name="modem_config_mod_long">Langdrægni / Meðal</string>
     <string name="modem_config_very_long">Mikil langdrægni / Hægt</string>
     <string name="modem_config_unrecognized">ÓÞEKKT</string>
     <string name="meshtastic_service_notifications">Tilkynningar um þjónustu</string>
@@ -93,6 +95,9 @@
     <string name="provide_location_to_mesh">Áframsenda staðsetningu á möskvanet</string>
     <string name="camera_required">Aðgangur að myndavél</string>
     <string name="why_camera_required">Okkur vantar aðgang að myndavél til að lesa QR kóða. Engar myndir né hreyfimyndir verða vistaðar.</string>
+    <string name="notification_required">Tilkynningar leyfi</string>
+    <string name="why_notification_required">Meshtastic þarf aðgang að þjónustu og skilaboða tilkynningar.</string>
+    <string name="notification_denied">Tilkynningar leyfi ekki til staðar. Til að leyfa tilkynningar, access: Android Settings &gt; Apps &gt; Meshtastic &gt; Notifications.</string>
     <string name="modem_config_slow_short">Skammdrægt / hægt</string>
     <string name="modem_config_slow_medium">Miðlungsdrægt / Hratt</string>
     <plurals name="delete_messages">
@@ -115,6 +120,7 @@
     <string name="resend">Endursenda</string>
     <string name="shutdown">Slökkva</string>
     <string name="reboot">Endurræsa</string>
+    <string name="traceroute">Ferilkönnun</string>
     <string name="intro_show">Sýna kynningu</string>
     <string name="intro_welcome">Velkomin til Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic er opinn hugbúnaður, utan kerfis, dulkóðað samskiptakerfi. Meshtastic radíó mynda möskva-net og hafa samskipti yfir LoRa staðalinn til að senda textaskilaboð.</string>
@@ -135,6 +141,9 @@
     <string name="direct_message">Bein skilaboð</string>
     <string name="nodedb_reset">Endurræsa NodeDB</string>
     <string name="nodedb_reset_description">Þetta mun hreinsa út allar nóður af listanum.</string>
+    <string name="ignore">Hunsa</string>
+    <string name="ignore_add">Bæta \'%s\' við Ignore lista?</string>
+    <string name="ignore_remove">Fjarlægja \'%s\' frá hunsa lista?</string>
     <string name="map_select_download_region">Veldu svæði til að niðurhala</string>
     <string name="map_tile_download_estimate">Áætlaður niðurhalstími reits:</string>
     <string name="map_start_download">Hefja niðurhal</string>
@@ -159,5 +168,6 @@
     <string name="waypoint_edit">Breyta leiðarpunkti</string>
     <string name="waypoint_delete">Eyða leiðarpunkti?</string>
     <string name="waypoint_new">Nýr leiðarpunktur</string>
+    <string name="waypoint_received">Móttekin leiðarpunktur: %s</string>
     <string name="error_duty_cycle">Hámarsksendingartíma náð. Ekki hægt að senda skilaboð, vinsamlegast reynið aftur síðar.</string>
 </resources>
