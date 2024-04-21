@@ -1020,14 +1020,15 @@ class MeshService : Service(), Logging {
                 it.snr = packet.rxSnr
                 it.rssi = packet.rxRssi
 
-                //Generate our own hopsAway, comparing hopStart to hopLimit.
-                if (packet.hopStart != 0 && packet.hopLimit <= packet.hopStart){
+                // Generate our own hopsAway, comparing hopStart to hopLimit.
+                if (packet.hopStart != 0 && packet.hopLimit <= packet.hopStart) {
                     it.hopsAway = packet.hopStart - packet.hopLimit
                 }
             }
             handleReceivedData(packet)
         }
     }
+
     private fun insertPacket(packet: Packet) {
         serviceScope.handledLaunch {
             packetRepository.get().insert(packet)
