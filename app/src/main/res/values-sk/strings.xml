@@ -129,7 +129,7 @@
     <string name="intro_started">Poďme začať!</string>
     <string name="intro_started_text">Pripojte vaše Meshtastic zariadenie pomocou Bluetooth, Serial, alebo WiFi. \n\nZistite, ktoré zariadenia sú kompatibilné na www.meshtastic.org/docs/hardware</string>
     <string name="intro_encryption">"Nastavenie enkryptovania"</string>
-    <string name="intro_encryption_text">As standard, a default encryption key is set. To enable your own channel and enhanced encryption, go to the channel tab and change the channel name, this will set a random key for AES256 encryption. \n\nTo communicate with other devices they will need to scan your QR code or follow the shared link to configure the channel settings.</string>
+    <string name="intro_encryption_text">Štandardne je nastavený predvolený šifrovací kľúč. Ak chcete povoliť vlastný kanál a vylepšené šifrovanie, prejdite na kartu Nastavenie kanálu a zmeňte názov kanálu, čím sa nastaví náhodný kľúč pre šifrovanie AES256. \n\nNa komunikáciu s inými zariadeniami, budu musieť naskenovať váš QR kód alebo kliknúť na zdieľaný odkaz a nakonfigurovať nastavenia kanála.</string>
     <string name="message">Správa</string>
     <string name="quick_chat">Rýchle četové nastavenia</string>
     <string name="quick_chat_new">Nový quick chat</string>
@@ -139,7 +139,7 @@
     <string name="factory_reset">Reset do výrobných nastavení</string>
     <string name="factory_reset_description">Toto vymaže všetky nastavenia zariadenia.</string>
     <string name="bluetooth_disabled">Bluetooth vypnutý</string>
-    <string name="permission_missing_31">Meshtastic needs Nearby devices permission to find and connect to devices via Bluetooth. You can turn it off when not in use.</string>
+    <string name="permission_missing_31">Meshtastic potrebuje povolenie Zariadenia v okolí, aby mohol nájsť zariadenia a pripojiť sa k nim cez Bluetooth. Môžete ho vypnúť, keď sa nepoužíva.</string>
     <string name="direct_message">Priama správa</string>
     <string name="nodedb_reset">Reset databázy nodov</string>
     <string name="nodedb_reset_description">Toto vymaže všetky nody zo zoznamu.</string>
@@ -167,9 +167,9 @@
     <string name="map_download_errors">Sťahovanie ukončené s %d chybami</string>
     <string name="map_cache_tiles">%d tiles</string>
     <string name="map_subDescription">bearing: %1$d° distance: %2$s</string>
-    <string name="waypoint_edit">Edit waypoint</string>
-    <string name="waypoint_delete">Delete waypoint?</string>
-    <string name="waypoint_new">New waypoint</string>
-    <string name="waypoint_received">Received waypoint: %s</string>
+    <string name="waypoint_edit">Upraviť waypoint</string>
+    <string name="waypoint_delete">Vymazať waypoint?</string>
+    <string name="waypoint_new">Vytvoriť waypoint</string>
+    <string name="waypoint_received">Prijatý waypoint: %s</string>
     <string name="error_duty_cycle">Duty Cycle limit reached. Cannot send messages right now, please try again later.</string>
 </resources>
