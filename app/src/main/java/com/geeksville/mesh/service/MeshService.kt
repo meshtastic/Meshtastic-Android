@@ -1019,8 +1019,12 @@ class MeshService : Service(), Logging {
                 updateNodeInfoTime(it, rxTime)
                 it.snr = packet.rxSnr
                 it.rssi = packet.rxRssi
-            }
 
+                // Generate our own hopsAway, comparing hopStart to hopLimit.
+                if (packet.hopStart != 0 && packet.hopLimit <= packet.hopStart) {
+                    it.hopsAway = packet.hopStart - packet.hopLimit
+                }
+            }
             handleReceivedData(packet)
         }
     }
@@ -1314,6 +1318,7 @@ class MeshService : Service(), Logging {
             }
 
             it.channel = info.channel
+            it.hopsAway = info.hopsAway
         }
     }
 

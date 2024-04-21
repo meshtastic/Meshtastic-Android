@@ -2,6 +2,7 @@ package com.geeksville.mesh
 
 import android.graphics.Color
 import android.os.Parcelable
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -224,6 +225,8 @@ data class NodeInfo(
     var channel: Int = 0,
     @Embedded(prefix = "envMetrics_")
     var environmentMetrics: EnvironmentMetrics? = null,
+    @ColumnInfo(name = "hopsAway", defaultValue = "0")
+    var hopsAway: Int = 0
 ) : Parcelable {
 
     val colors: Pair<Int, Int>
