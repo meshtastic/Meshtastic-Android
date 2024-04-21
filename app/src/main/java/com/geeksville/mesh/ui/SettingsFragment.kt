@@ -338,7 +338,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val deviceSelectIPAddress = binding.radioButtonManual
         val inputIPAddress = binding.editManualAddress
 
-        deviceSelectIPAddress.isEnabled = false
+        deviceSelectIPAddress.isEnabled = inputIPAddress.text.isIPAddress()
         deviceSelectIPAddress.setOnClickListener {
             deviceSelectIPAddress.isChecked = scanModel.onSelected(BTScanModel.DeviceListEntry("", "t" + inputIPAddress.text, true))
         }
