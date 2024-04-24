@@ -2,11 +2,12 @@ package com.geeksville.mesh.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.text.TextUtils
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import androidx.core.os.LocaleListCompat
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.Logging
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
 
@@ -52,14 +53,34 @@ object LanguageUtils : Logging {
             errormsg("Error parsing locale_config.xml ${e.message}")
         }
         return languageTags.associateBy { tag ->
-            val loc = Locale(tag)
+            val loc = locale(tag)
+
             when (tag) {
                 SYSTEM_DEFAULT -> context.getString(R.string.preferences_system_default)
                 "fr-HT" -> context.getString(R.string.fr_HT)
                 "pt-BR" -> context.getString(R.string.pt_BR)
-                else -> loc.getDisplayLanguage(loc)
-                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(loc) else it.toString() }
+                else -> {
+                    val displayStr: String = if (TextUtils.isEmpty(loc.getDisplayCountry(loc))) {
+                        loc.getDisplayLanguage(loc)
+                    } else {
+                        loc.getDisplayLanguage(loc) + " - " + loc.getDisplayCountry(loc)
+                    }
+                    displayStr.replaceFirstChar { if (it.isLowerCase()) it.titlecase(loc) else it.toString() }
+                }
             }
         }
+    }
+
+    private fun locale(tag: String): Locale {
+        var loc: Locale
+        val tagList = tag.split("-")
+        if (tagList.size == 3) {
+            loc = Locale(tagList[0], tagList[2], tagList[1])
+        } else if (tagList.size == 2) {
+            loc = Locale(tagList[0], tagList[1])
+        } else {
+            loc = Locale(tagList[0])
+        }
+        return loc
     }
 }
