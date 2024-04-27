@@ -2,6 +2,8 @@
     // Language tags native names (not available via .getDisplayLanguage)
     <string name="fr_HT" translatable="false">Kreyòl ayisyen</string>
     <string name="pt_BR" translatable="false">Português do Brasil</string>
+    <string name="zh_CN" translatable="false">简体中文</string>
+    <string name="zh_TW" translatable="false">繁體中文</string>
 
     <string name="app_name" translatable="false">Meshtastic</string>
     <string name="sample_distance" translatable="false">2.13 km</string>

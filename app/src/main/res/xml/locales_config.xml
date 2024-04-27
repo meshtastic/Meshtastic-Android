@@ -3,7 +3,8 @@
    <locale android:name="en"/> <!-- English (ultimate fallback locale) -->
    <locale android:name="bg"/> <!-- Bulgarian -->
    <locale android:name="cs"/> <!-- Czech -->
-   <locale android:name="zh"/> <!-- Chinese -->
+   <locale android:name="zh-CN"/> <!-- Chinese Simplified -->
+   <locale android:name="zh-TW"/> <!-- Chinese Traditional -->
    <locale android:name="de"/> <!-- German -->
    <locale android:name="es"/> <!-- Spanish (Spain) -->
    <locale android:name="fr"/> <!-- French (France) -->
