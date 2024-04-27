@@ -57,6 +57,8 @@ object LanguageUtils : Logging {
                 SYSTEM_DEFAULT -> context.getString(R.string.preferences_system_default)
                 "fr-HT" -> context.getString(R.string.fr_HT)
                 "pt-BR" -> context.getString(R.string.pt_BR)
+                "zh-CN" -> context.getString(R.string.zh_CN)
+                "zh-TW" -> context.getString(R.string.zh_TW)
                 else -> loc.getDisplayLanguage(loc)
                     .replaceFirstChar { if (it.isLowerCase()) it.titlecase(loc) else it.toString() }
             }
