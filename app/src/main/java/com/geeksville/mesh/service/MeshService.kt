@@ -574,7 +574,7 @@ class MeshService : Service(), Logging {
         Portnums.PortNum.WAYPOINT_APP_VALUE,
     )
 
-    private fun rememberDataPacket(dataPacket: DataPacket) {
+    private fun rememberDataPacket(dataPacket: DataPacket, updateNotification: Boolean = true) {
         if (dataPacket.dataType !in rememberDataType) return
         val fromLocal = dataPacket.from == DataPacket.ID_LOCAL
         val toBroadcast = dataPacket.to == DataPacket.ID_BROADCAST
@@ -590,7 +590,13 @@ class MeshService : Service(), Logging {
             System.currentTimeMillis(),
             dataPacket
         )
-        insertPacket(packetToSave)
+        serviceScope.handledLaunch {
+            packetRepository.get().apply {
+                insert(packetToSave)
+                val isMuted = getContactSettings(contactKey).isMuted
+                if (updateNotification && !isMuted) updateMessageNotification(dataPacket)
+            }
+        }
     }
 
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
@@ -625,15 +631,13 @@ class MeshService : Service(), Logging {
 
                         debug("Received CLEAR_TEXT from $fromId")
                         rememberDataPacket(dataPacket)
-                        updateMessageNotification(dataPacket)
                     }
 
                     Portnums.PortNum.WAYPOINT_APP_VALUE -> {
                         val u = MeshProtos.Waypoint.parseFrom(data.payload)
                         // Validate locked Waypoints from the original sender
                         if (u.lockedTo != 0 && u.lockedTo != packet.from) return
-                        rememberDataPacket(dataPacket)
-                        if (u.expire > currentSecond()) updateMessageNotification(dataPacket)
+                        rememberDataPacket(dataPacket, u.expire > currentSecond())
                     }
 
                     // Handle new style position info
@@ -694,13 +698,11 @@ class MeshService : Service(), Logging {
                         if (!moduleConfig.rangeTest.enabled) return
                         val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
                         rememberDataPacket(u)
-                        updateMessageNotification(u)
                     }
 
                     Portnums.PortNum.DETECTION_SENSOR_APP_VALUE -> {
                         val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
                         rememberDataPacket(u)
-                        updateMessageNotification(u)
                     }
 
                     Portnums.PortNum.TRACEROUTE_APP_VALUE -> {
@@ -849,7 +851,6 @@ class MeshService : Service(), Logging {
                     dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
                 )
                 rememberDataPacket(u)
-                updateMessageNotification(u)
             }
 
             else -> {}
@@ -1027,12 +1028,6 @@ class MeshService : Service(), Logging {
                 }
             }
             handleReceivedData(packet)
-        }
-    }
-
-    private fun insertPacket(packet: Packet) {
-        serviceScope.handledLaunch {
-            packetRepository.get().insert(packet)
         }
     }
 

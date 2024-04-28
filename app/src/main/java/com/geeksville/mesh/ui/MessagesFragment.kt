@@ -333,6 +333,7 @@ class MessagesFragment : Fragment(), Logging {
     private inner class ActionModeCallback : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             mode.menuInflater.inflate(R.menu.menu_messages, menu)
+            menu.findItem(R.id.muteButton).isVisible = false
             mode.title = "1"
             return true
         }
