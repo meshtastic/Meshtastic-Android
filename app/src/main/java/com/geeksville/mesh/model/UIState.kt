@@ -222,6 +222,12 @@ class UIViewModel @Inject constructor(
         contacts + (placeholder - contacts.keys)
     }.asLiveData()
 
+    val contactSettings get() = packetRepository.getContactSettings()
+
+    fun setMuteUntil(contacts: List<String>, until: Long) = viewModelScope.launch(Dispatchers.IO) {
+        packetRepository.setMuteUntil(contacts, until)
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val waypoints: LiveData<Map<Int, Packet>> = _packets.mapLatest { list ->
         list.filter { it.port_num == Portnums.PortNum.WAYPOINT_APP_VALUE }

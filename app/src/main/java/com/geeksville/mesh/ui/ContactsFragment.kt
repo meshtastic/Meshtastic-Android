@@ -7,6 +7,7 @@ import android.view.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
+import com.geeksville.mesh.database.entity.ContactSettings
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.databinding.AdapterContactLayoutBinding
 import com.geeksville.mesh.databinding.FragmentContactsBinding
@@ -21,7 +23,8 @@ import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.UIViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.*
+import java.util.Date
+import java.util.concurrent.TimeUnit
 
 @AndroidEntryPoint
 class ContactsFragment : ScreenFragment("Messages"), Logging {
@@ -43,6 +46,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         val longName = itemView.longName
         val lastMessageTime = itemView.lastMessageTime
         val lastMessageText = itemView.lastMessageText
+        val mutedIcon = itemView.mutedIcon
     }
 
     private val contactsAdapter = object : RecyclerView.Adapter<ViewHolder>() {
@@ -59,6 +63,9 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
 
         var contacts = arrayOf<Packet>()
         var selectedList = ArrayList<String>()
+
+        var contactSettings = mapOf<String, ContactSettings>()
+        val isAllMuted get() = selectedList.all { contactSettings[it]?.isMuted == true }
 
         override fun getItemCount(): Int = contacts.size
 
@@ -93,6 +100,8 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                 holder.lastMessageTime.visibility = View.VISIBLE
                 holder.lastMessageTime.text = getShortDateTime(Date(contact.time))
             } else holder.lastMessageTime.visibility = View.INVISIBLE
+
+            holder.mutedIcon.isVisible = contactSettings[packet.contact_key]?.isMuted == true
 
             holder.itemView.setOnLongClickListener {
                 clickItem(holder, packet.contact_key)
@@ -148,16 +157,13 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                 // show total items selected on action mode title
                 actionMode?.title = selectedList.size.toString()
             }
+            actionMode?.invalidate()
             notifyItemChanged(position)
         }
 
         fun onContactsChanged(contacts: Map<String, Packet>) {
             this.contacts = contacts.values.toTypedArray()
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all nodes
-        }
-
-        fun onChannelsChanged() {
-            onContactsChanged(contacts.associateBy { it.contact_key })
         }
     }
 
@@ -180,10 +186,6 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         binding.contactsView.adapter = contactsAdapter
         binding.contactsView.layoutManager = LinearLayoutManager(requireContext())
 
-        model.channels.asLiveData().observe(viewLifecycleOwner) {
-            contactsAdapter.onChannelsChanged()
-        }
-
         model.nodeDB.nodes.asLiveData().observe(viewLifecycleOwner) {
             contactsAdapter.notifyDataSetChanged()
         }
@@ -191,6 +193,11 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         model.contacts.observe(viewLifecycleOwner) {
             debug("New contacts received: ${it.size}")
             contactsAdapter.onContactsChanged(it)
+        }
+
+        model.contactSettings.asLiveData().observe(viewLifecycleOwner) {
+            contactsAdapter.contactSettings = it
+            contactsAdapter.notifyDataSetChanged()
         }
     }
 
@@ -210,11 +217,49 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         }
 
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+            menu.findItem(R.id.muteButton).setIcon(
+                if (contactsAdapter.isAllMuted) {
+                    R.drawable.ic_twotone_volume_up_24
+                } else {
+                    R.drawable.ic_twotone_volume_off_24
+                }
+            )
             return false
         }
 
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             when (item.itemId) {
+                R.id.muteButton -> if (contactsAdapter.isAllMuted) {
+                    model.setMuteUntil(contactsAdapter.selectedList.toList(), 0L)
+                    mode.finish()
+                } else {
+                    var muteUntil: Long = Long.MAX_VALUE
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.mute_notifications)
+                        .setSingleChoiceItems(
+                            setOf(
+                                R.string.mute_8_hours,
+                                R.string.mute_1_week,
+                                R.string.mute_always,
+                            ).map(::getString).toTypedArray(),
+                            2
+                        ) { _, which ->
+                            muteUntil = when (which) {
+                                0 -> System.currentTimeMillis() + TimeUnit.HOURS.toMillis(8)
+                                1 -> System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)
+                                else -> Long.MAX_VALUE // always
+                            }
+                        }
+                        .setPositiveButton(getString(R.string.okay)) { _, _ ->
+                            debug("User clicked muteButton")
+                            model.setMuteUntil(contactsAdapter.selectedList.toList(), muteUntil)
+                            mode.finish()
+                        }
+                        .setNeutralButton(R.string.cancel) { _, _ ->
+                        }
+                        .show()
+                }
+
                 R.id.deleteButton -> {
                     val messagesTotal = model.packets.value.filter { it.port_num == 1 }
                     val selectedList = contactsAdapter.selectedList
