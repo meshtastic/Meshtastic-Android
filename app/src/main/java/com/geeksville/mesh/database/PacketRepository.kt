@@ -3,6 +3,7 @@ package com.geeksville.mesh.database
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.database.dao.PacketDao
+import com.geeksville.mesh.database.entity.ContactSettings
 import com.geeksville.mesh.database.entity.Packet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -64,5 +65,15 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
 
     suspend fun update(packet: Packet) = withContext(Dispatchers.IO) {
         packetDao.update(packet)
+    }
+
+    fun getContactSettings(): Flow<Map<String, ContactSettings>> = packetDao.getContactSettings()
+
+    suspend fun getContactSettings(contact: String) = withContext(Dispatchers.IO) {
+        packetDao.getContactSettings(contact) ?: ContactSettings(contact)
+    }
+
+    suspend fun setMuteUntil(contacts: List<String>, until: Long) = withContext(Dispatchers.IO) {
+        packetDao.setMuteUntil(contacts, until)
     }
 }

@@ -6,8 +6,10 @@ import androidx.room.MapColumn
 import androidx.room.Update
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Upsert
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
+import com.geeksville.mesh.database.entity.ContactSettings
 import com.geeksville.mesh.database.entity.Packet
 import kotlinx.coroutines.flow.Flow
 
@@ -77,5 +79,23 @@ interface PacketDao {
     fun deleteWaypoint(id: Int) {
         val uuidList = getAllWaypoints().filter { it.data.waypoint?.id == id }.map { it.uuid }
         deleteMessages(uuidList)
+    }
+
+    @Query("SELECT * FROM contact_settings")
+    fun getContactSettings(): Flow<Map<@MapColumn(columnName = "contact_key") String, ContactSettings>>
+
+    @Query("SELECT * FROM contact_settings WHERE contact_key = :contact")
+    suspend fun getContactSettings(contact:String): ContactSettings?
+
+    @Upsert
+    fun upsertContactSettings(contacts: List<ContactSettings>)
+
+    @Transaction
+    suspend fun setMuteUntil(contacts: List<String>, until: Long) {
+        val contactList = contacts.map { contact ->
+            getContactSettings(contact)?.copy(muteUntil = until)
+                ?: ContactSettings(contact_key = contact, muteUntil = until)
+        }
+        upsertContactSettings(contactList)
     }
 }
