@@ -95,7 +95,7 @@
     <string name="provide_location_to_mesh">Poskytnout polohu síti</string>
     <string name="camera_required">Oprávnění přístupu k fotoaparátu</string>
     <string name="why_camera_required">Pro čtení QR kódů musíme mít přístup k fotoaparátu. Žádné obrázky nebo videa nebudou uloženy.</string>
-    <string name="notification_required">Notification permission</string>
+    <string name="notification_required">Povolení oznámení</string>
     <string name="why_notification_required">Meshtastic needs permission for service and message notifications.</string>
     <string name="notification_denied">Notification permission denied. To turn on notifications, access: Android Settings &gt; Apps &gt; Meshtastic &gt; Notifications.</string>
     <string name="modem_config_slow_short">Short Range / Slow</string>
@@ -144,8 +144,8 @@
     <string name="nodedb_reset">Reset NodeDB</string>
     <string name="nodedb_reset_description">Tímto vymažete všechny uzly z tohoto seznamu.</string>
     <string name="ignore">Ignorovat</string>
-    <string name="ignore_add">Add \'%s\' to ignore list? Your radio will reboot after making this change.</string>
-    <string name="ignore_remove">Remove \'%s\' from ignore list? Your radio will reboot after making this change.</string>
+    <string name="ignore_add">Add \'%s\' to ignore list?</string>
+    <string name="ignore_remove">Odstranit \'%s\' ze seznamu ignorování?</string>
     <string name="map_select_download_region">Vyberte oblast stahování</string>
     <string name="map_tile_download_estimate">Odhad stažení dlaždic:</string>
     <string name="map_start_download">Zahájit stahování</string>
@@ -167,9 +167,9 @@
     <string name="map_download_errors">Stahování dokončeno s %d chybami</string>
     <string name="map_cache_tiles">%d dlaždic</string>
     <string name="map_subDescription">směr: %1$d° vzdálenost: %2$s</string>
-    <string name="waypoint_edit">Edit waypoint</string>
-    <string name="waypoint_delete">Delete waypoint?</string>
-    <string name="waypoint_new">New waypoint</string>
-    <string name="waypoint_received">Received waypoint: %s</string>
+    <string name="waypoint_edit">Upravit waypoint</string>
+    <string name="waypoint_delete">Smazat waypoint?</string>
+    <string name="waypoint_new">Nový waypoint</string>
+    <string name="waypoint_received">Přijatý waypoint: %s</string>
     <string name="error_duty_cycle">Byl dosažen limit pro cyklus. Momentálně nelze odesílat zprávy, zkuste to prosím později.</string>
 </resources>
