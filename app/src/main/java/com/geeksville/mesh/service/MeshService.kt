@@ -1751,7 +1751,7 @@ class MeshService : Service(), Logging {
                 serviceBroadcasts.broadcastMessageStatus(p)
 
                 // Keep a record of DataPackets, so GUIs can show proper chat history
-                rememberDataPacket(p)
+                rememberDataPacket(p, false)
 
                 GeeksvilleApplication.analytics.track(
                     "data_send",
