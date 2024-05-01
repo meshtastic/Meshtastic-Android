@@ -1255,6 +1255,7 @@ class MeshService : Service(), Logging {
         )
         insertMeshLog(packetToSave)
         setLocalConfig(config)
+        radioConfigRepository.increaseConfigCount()
     }
 
     private fun handleModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
@@ -1267,6 +1268,7 @@ class MeshService : Service(), Logging {
         )
         insertMeshLog(packetToSave)
         setLocalModuleConfig(config)
+        radioConfigRepository.increaseModuleCount()
     }
 
     private fun handleQueueStatus(queueStatus: MeshProtos.QueueStatus) {
@@ -1289,6 +1291,7 @@ class MeshService : Service(), Logging {
         )
         insertMeshLog(packetToSave)
         if (ch.role != ChannelProtos.Channel.Role.DISABLED) updateChannelSettings(ch)
+        radioConfigRepository.increaseChannelCount()
     }
 
     /**
@@ -1330,6 +1333,7 @@ class MeshService : Service(), Logging {
         insertMeshLog(packetToSave)
 
         newNodes.add(info)
+        radioConfigRepository.increaseNodeCount()
     }
 
 
@@ -1540,6 +1544,7 @@ class MeshService : Service(), Logging {
         configNonce += 1
         newNodes.clear()
         newMyNodeInfo = null
+        radioConfigRepository.clearWantConfigState()
 
         if (BluetoothInterface.invalidVersion) onHasSettings() // Device firmware is too old
 
