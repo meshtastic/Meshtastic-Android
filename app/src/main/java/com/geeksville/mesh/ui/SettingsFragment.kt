@@ -188,30 +188,22 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             updateNodeInfo()
         }
 
-        model.localConfig.asLiveData().observe(viewLifecycleOwner) {
-            if (!model.isConnected()) {
-                val configCount = it.allFields.size
-                val configTotal = ConfigProtos.Config.getDescriptor().fields.size
-                if (configCount > 0)
-                    scanModel.setErrorText("Device config ($configCount / $configTotal)")
-            } else updateNodeInfo()
-        }
+        model.wantConfigState.asLiveData().observe(viewLifecycleOwner) {
+            if (model.isConnected()) return@observe
+            val configTotal = ConfigProtos.Config.getDescriptor().fields.size
+            val moduleTotal = ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size
 
-        model.moduleConfig.asLiveData().observe(viewLifecycleOwner) {
-            if (!model.isConnected()) {
-                val moduleCount = it.allFields.size
-                val moduleTotal = ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size
-                if (moduleCount > 0)
-                    scanModel.setErrorText("Module config ($moduleCount / $moduleTotal)")
-            } else updateNodeInfo()
-        }
-
-        model.channels.asLiveData().observe(viewLifecycleOwner) {
-            if (!model.isConnected()) {
-                val maxChannels = model.maxChannels
-                if (!it.hasLoraConfig() && it.settingsCount > 0)
-                    scanModel.setErrorText("Channels (${it.settingsCount} / $maxChannels)")
+            binding.scanStatusText.text = when {
+                it.moduleCount > 0 -> "Module config (${it.moduleCount} / $moduleTotal)"
+                it.configCount > 0 -> "Device config (${it.configCount} / $configTotal)"
+                it.channelCount > 0 -> "Channels (${it.channelCount} / ${model.maxChannels})"
+                it.nodeCount > 0 -> "Nodes (${it.nodeCount} / 100)"
+                else -> return@observe
             }
+        }
+
+        model.localConfig.asLiveData().observe(viewLifecycleOwner) {
+            if (model.isConnected()) updateNodeInfo()
         }
 
         // Also watch myNodeInfo because it might change later
