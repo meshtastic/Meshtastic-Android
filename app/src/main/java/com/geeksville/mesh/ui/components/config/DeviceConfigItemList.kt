@@ -152,6 +152,16 @@ fun DeviceConfigItemList(
         }
 
         item {
+            SwitchPreference(title = "Disable LED heartbeat",
+                checked = deviceInput.ledHeartbeatDisabled,
+                enabled = enabled,
+                onCheckedChange = {
+                    deviceInput = deviceInput.copy { ledHeartbeatDisabled = it }
+                })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = deviceInput != deviceConfig,
                 onCancelClicked = {
