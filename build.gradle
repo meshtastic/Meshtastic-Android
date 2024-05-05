@@ -23,7 +23,7 @@ buildscript {
         // Firebase Crashlytics
         if (useCrashlytics) {
             classpath 'com.google.gms:google-services:4.4.1'
-            classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
+            classpath 'com.google.firebase:firebase-crashlytics-gradle:3.0.0'
         }
 
         // protobuf plugin - docs here https://github.com/google/protobuf-gradle-plugin
