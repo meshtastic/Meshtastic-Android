@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui.components.config
 
+import android.util.Log // TODO remove when done <----
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -23,6 +24,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.RadioButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.Close
@@ -48,13 +50,14 @@ import com.geeksville.mesh.ui.components.PreferenceFooter
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ChannelCard(
+fun ChannelCard( // TODO needs shared: Boolean, onSharedToggled(): -> Unit <-
     index: Int,
     title: String,
     enabled: Boolean,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
 ) {
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -72,6 +75,11 @@ fun ChannelCard(
                 style = MaterialTheme.typography.body1,
                 color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
                 modifier = Modifier.weight(1f)
+            )
+            RadioButton( // TODO pass args <-
+                false,
+                { Log.d("MEME", "The Radio Button was clicked.") },
+                modifier = Modifier.padding(end = 8.dp)
             )
             IconButton(onClick = { onDeleteClick() }) {
                 Icon(
@@ -126,7 +134,7 @@ fun ChannelSettingsItemList(
             modifier = Modifier.padding(horizontal = 16.dp)
         ) {
             item { PreferenceCategory(text = "Channels") }
-
+            item { ChannelRowHeader(enabled) }
             itemsIndexed(settingsListInput) { index, channel ->
                 ChannelCard(
                     index = index,
@@ -181,6 +189,37 @@ fun ChannelSettingsItemList(
             ) { Icon(Icons.TwoTone.Add, stringResource(R.string.add)) }
         }
     }
+}
+
+@Composable
+fun ChannelRowHeader(enabled: Boolean) {
+    Row(
+        modifier = Modifier.padding(horizontal = 4.dp)
+    ) {
+        Text(
+            text="#",
+            style = MaterialTheme.typography.body1,
+            color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
+            modifier = Modifier.padding(start = 20.dp, end = 18.dp)
+        )
+        Text(
+            text = stringResource(id = R.string.channel_name),
+            style = MaterialTheme.typography.body1,
+            color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = stringResource(id = R.string.share),
+            style = MaterialTheme.typography.body1,
+            color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
+            modifier = Modifier.padding(end = 12.dp)
+        )
+        Text(
+            text = stringResource(id = R.string.delete),
+            style = MaterialTheme.typography.body1,
+            color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
+        )
+        }
 }
 
 @Preview(showBackground = true)

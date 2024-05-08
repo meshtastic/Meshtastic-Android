@@ -88,6 +88,7 @@ import com.geeksville.mesh.ui.components.ClickableTextField
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.config.ChannelCard
+import com.geeksville.mesh.ui.components.config.ChannelRowHeader
 import com.geeksville.mesh.ui.components.config.EditChannelDialog
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -288,8 +289,9 @@ fun ChannelScreen(
                 modifier = Modifier.fillMaxWidth(),
             )
         } else {
+            item { ChannelRowHeader(enabled) }
             itemsIndexed(channelSet.settingsList) { index, channel ->
-                ChannelCard(
+                ChannelCard( // TODO maybe this ChannelCard is where I can add the radio btn <-
                     index = index,
                     title = channel.name.ifEmpty { modemPresetName },
                     enabled = enabled,
@@ -440,5 +442,5 @@ fun ChannelScreen(
 @Preview(showBackground = true)
 @Composable
 private fun ChannelScreenPreview() {
-    // ChannelScreen()
+//     ChannelScreen()
 }
