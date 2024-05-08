@@ -38,7 +38,7 @@ buildscript {
 
 plugins {
     id "org.jetbrains.kotlin.jvm" version "$kotlin_version" apply false
-    id "com.google.devtools.ksp" version "1.9.23-1.0.20" apply false
+    id "com.google.devtools.ksp" version "1.9.24-1.0.20" apply false
 }
 
 allprojects {
