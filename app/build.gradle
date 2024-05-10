@@ -230,7 +230,7 @@ dependencies {
     googleImplementation 'com.suddenh4x.ratingdialog:awesome-app-rating:2.7.0'
 
     // Coroutines
-    def coroutines_version = '1.8.0'
+    def coroutines_version = '1.8.1'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-guava:$coroutines_version"
 
