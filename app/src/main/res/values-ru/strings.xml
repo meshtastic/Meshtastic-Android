@@ -3,7 +3,7 @@
     <string name="channel_name">Имя канала</string>
     <string name="channel_options">Настройки канала</string>
     <string name="qr_code">QR код</string>
-    <string name="unset">Сбросить</string>
+    <string name="unset">Не установлена</string>
     <string name="connection_status">Статус соединения</string>
     <string name="application_icon">значок приложения</string>
     <string name="unknown_username">Неизвестное имя пользователя</string>
