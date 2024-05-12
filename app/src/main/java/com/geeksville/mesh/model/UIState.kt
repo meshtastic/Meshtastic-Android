@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.RemoteException
 import android.view.Menu
+import androidx.compose.runtime.mutableStateListOf
 import androidx.core.content.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -131,6 +132,9 @@ class UIViewModel @Inject constructor(
     private val _channels = MutableStateFlow(channelSet {})
     val channels: StateFlow<AppOnlyProtos.ChannelSet> get() = _channels
     val channelSet get() = channels.value
+    /* Used to maintain Android only state of [Channel]s */
+    private val _channelList = MutableStateFlow<MutableList<Channel>>(mutableStateListOf())
+    val channelList: StateFlow<MutableList<Channel>> = _channelList
 
     private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
     val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
@@ -181,6 +185,8 @@ class UIViewModel @Inject constructor(
         }
         radioConfigRepository.channelSetFlow.onEach { channelSet ->
             _channels.value = channelSet
+            /* Make sure the [Channel]s known to the app match the [ChannelSet] */
+            updateChannelList(channelSet)
         }.launchIn(viewModelScope)
 
         debug("ViewModel created")
@@ -399,6 +405,8 @@ class UIViewModel @Inject constructor(
 
         val newConfig = config { lora = channelSet.loraConfig }
         if (config.lora != newConfig.lora) setConfig(newConfig)
+
+        updateChannelList(channelSet)
     }
 
     val provideLocation = object : MutableLiveData<Boolean>(preferences.getBoolean("provide-location", false)) {
@@ -597,6 +605,26 @@ class UIViewModel @Inject constructor(
 
     fun setNodeFilterText(text: String) {
         _nodeFilterText.value = text
+    }
+
+    /**
+     * Maintains the [channelList] up-to-date with the [channels].
+     * @param channelSet the update will be based on.
+     */
+    private fun updateChannelList(channelSet: AppOnlyProtos.ChannelSet) {
+        /* Update channelList */
+        for (i in 0 .. channelSet.settingsList.lastIndex) {
+            val ch = Channel(settings = channelSet.settingsList[i], loraConfig = channelSet.loraConfig)
+            if (channelList.value.getOrNull(i) != ch) {
+                channelList.value.add(index = i, element = ch)
+            }
+        }
+        /* Remove excess Channels */
+        if (channelSet.settingsList.lastIndex < channelList.value.lastIndex) {
+            val excessAmount = channelList.value.lastIndex - channelSet.settingsList.lastIndex
+            for (i in 0 ..< excessAmount)
+                channelList.value.removeLast()
+        }
     }
 
 }

@@ -35,6 +35,7 @@ import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -79,9 +80,9 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.model.getChannelUrl
+import com.geeksville.mesh.model.getQRCode
+import com.geeksville.mesh.model.getSelectedChannelUrl
 import com.geeksville.mesh.model.primaryChannel
-import com.geeksville.mesh.model.qrCode
 import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.ClickableTextField
@@ -151,7 +152,7 @@ fun ChannelScreen(
     val isEditing = channelSet != channels || showChannelEditor
 
     val primaryChannel = channelSet.primaryChannel
-    val channelUrl = channelSet.getChannelUrl()
+    val channelUrl = channelSet.getSelectedChannelUrl(channels = viewModel.channelList.collectAsState().value)
     val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
@@ -291,7 +292,7 @@ fun ChannelScreen(
         } else {
             item { ChannelRowHeader(enabled) }
             itemsIndexed(channelSet.settingsList) { index, channel ->
-                ChannelCard( // TODO maybe this ChannelCard is where I can add the radio btn <-
+                ChannelCard(
                     index = index,
                     title = channel.name.ifEmpty { modemPresetName },
                     enabled = enabled,
@@ -323,7 +324,8 @@ fun ChannelScreen(
 
         if (!isEditing) item {
             Image(
-                painter = channelSet.qrCode?.let { BitmapPainter(it.asImageBitmap()) }
+                painter = channelSet.getQRCode(
+                    channels = viewModel.channelList.collectAsState().value)?.let { BitmapPainter(it.asImageBitmap()) }
                     ?: painterResource(id = R.drawable.qrcode),
                 contentDescription = stringResource(R.string.qr_code),
                 contentScale = ContentScale.Inside,
@@ -354,7 +356,7 @@ fun ChannelScreen(
                 label = { Text("URL") },
                 isError = isError,
                 trailingIcon = {
-                    val isUrlEqual = channelUrl == channels.getChannelUrl()
+                    val isUrlEqual = channelUrl == channels.getSelectedChannelUrl(channels = viewModel.channelList.collectAsState().value)
                     IconButton(onClick = {
                         when {
                             isError -> valueState = channelUrl
