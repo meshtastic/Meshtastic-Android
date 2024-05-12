@@ -322,13 +322,13 @@ class RadioConfigViewModel @Inject constructor(
 
     fun installProfile(protobuf: DeviceProfile) = with(protobuf) {
         _deviceProfile.value = null
-        // meshService?.beginEditSettings()
+        meshService?.beginEditSettings()
         if (hasLongName() || hasShortName()) destNode.value?.user?.let {
             val user = it.copy(
                 longName = if (hasLongName()) longName else it.longName,
                 shortName = if (hasShortName()) shortName else it.shortName
             )
-            setOwner(user.toProto())
+            if (it != user) setOwner(user.toProto())
         }
         if (hasChannelUrl()) try {
             setChannels(channelUrl)
@@ -360,8 +360,7 @@ class RadioConfigViewModel @Inject constructor(
             setModuleConfig(moduleConfig { detectionSensor = it.detectionSensor })
             setModuleConfig(moduleConfig { paxcounter = it.paxcounter })
         }
-        setResponseStateSuccess()
-        // meshService?.commitEditSettings()
+        meshService?.commitEditSettings()
     }
 
     fun clearPacketResponse() {
