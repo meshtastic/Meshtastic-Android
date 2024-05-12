@@ -51,7 +51,7 @@
     <string name="modem_config_short">Curto alcance / rápido</string>
     <string name="modem_config_medium">Médio alcance / rápido</string>
     <string name="modem_config_long">Longo alcance / rápido</string>
-    <string name="modem_config_mod_long">Longo Alcance / Moderado</string>
+    <string name="modem_config_mod_long">Longo alcance / moderado</string>
     <string name="modem_config_very_long">Muito longo alcance / lento</string>
     <string name="modem_config_unrecognized">DESCONHECIDO</string>
     <string name="meshtastic_service_notifications">Notificações de serviço</string>
@@ -97,7 +97,7 @@
     <string name="why_camera_required">Precisamos acessar a câmera para escanear códigos QR. Nenhuma foto ou vídeo são armazenados.</string>
     <string name="notification_required">Permissão de Notificações</string>
     <string name="why_notification_required">Meshtastic precisa de permissões para serviços e notificações de mensagens.</string>
-    <string name="notification_denied">Permissão de notificações negada. Para ativar as notificações, acesse: Configurações do Android %gt; Apps %gt; Meshtastic %gt; Notificações.</string>
+    <string name="notification_denied">Permissão de notificações negada. Para ativar as notificações, acesse: Configurações do Android &gt; Apps &gt; Meshtastic &gt; Notificações.</string>
     <string name="modem_config_slow_short">Curto alcance / lento</string>
     <string name="modem_config_slow_medium">Médio alcance / lento</string>
     <plurals name="delete_messages">
@@ -168,6 +168,6 @@
     <string name="waypoint_edit">Editar ponto de referência</string>
     <string name="waypoint_delete">Excluir ponto de referência?</string>
     <string name="waypoint_new">Novo ponto de referência</string>
-    <string name="waypoint_received">Waypoint recebido de: %s</string>
+    <string name="waypoint_received">Ponto de referência recebido: %s</string>
     <string name="error_duty_cycle">Limite de capacidade atingido. Não é possível enviar mensagens no momento. Por favor, tente novamente mais tarde.</string>
 </resources>
