@@ -609,21 +609,26 @@ class UIViewModel @Inject constructor(
      * @param channelSet the update will be based on.
      */
     fun updateChannelList(channelSet: AppOnlyProtos.ChannelSet) {
-        /* Update channelList */
-        for (i in 0 .. channelSet.settingsList.lastIndex) {
-            val incoming = channelSet.settingsList[i]
-            val current = channelList.value.getOrNull(i)?.settings
-            if (incoming.name != current?.name || incoming.psk != current?.psk) {
-                if (current != null)
-                    channelList.value.removeAt(index = i)
-                channelList.value.add(index = i, element = Channel(settings = incoming, loraConfig = channelSet.loraConfig))
+        if (channelSet.settingsCount > 0) { /* Helps reduce updating when channelSet has be zeroed */
+            /* Update channelList */
+            for (i in 0..channelSet.settingsList.lastIndex) {
+                val incoming = channelSet.settingsList[i]
+                val current = channelList.value.getOrNull(i)?.settings
+                if (incoming.name != current?.name || incoming.psk != current?.psk) {
+                    if (current != null)
+                        channelList.value.removeAt(index = i)
+                    channelList.value.add(
+                        index = i,
+                        element = Channel(settings = incoming, loraConfig = channelSet.loraConfig)
+                    )
+                }
             }
-        }
-        /* Remove excess Channels */
-        if (channelSet.settingsList.lastIndex < channelList.value.lastIndex) {
-            val excessAmount = channelList.value.lastIndex - channelSet.settingsList.lastIndex
-            for (i in 0 ..< excessAmount)
-                channelList.value.removeLast()
+            /* Remove excess Channels */
+            if (channelSet.settingsList.lastIndex < channelList.value.lastIndex) {
+                val excessAmount = channelList.value.lastIndex - channelSet.settingsList.lastIndex
+                for (i in 0..<excessAmount)
+                    channelList.value.removeLast()
+            }
         }
     }
 
