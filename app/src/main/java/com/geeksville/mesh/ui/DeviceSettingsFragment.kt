@@ -292,7 +292,8 @@ fun RadioConfigNavHost(
             viewModel.clearPacketResponse()
         },
         onComplete = {
-            navController.navigate(radioConfigState.route)
+            val route = radioConfigState.route
+            if (route.isNotEmpty()) navController.navigate(route)
             viewModel.clearPacketResponse()
         }
     )

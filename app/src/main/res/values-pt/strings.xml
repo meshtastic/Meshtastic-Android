@@ -38,6 +38,7 @@
     <string name="connected_count">Conectado: %1$s de %2$s online</string>
     <string name="list_of_nodes">Lista de nós na rede</string>
     <string name="update_firmware">Atualizar Firmware</string>
+    <string name="ip_address">Endereço IP:</string>
     <string name="connected">Conectado ao rádio</string>
     <string name="connected_to">Conectado ao rádio (%s)</string>
     <string name="not_connected">Não conectado</string>
@@ -49,6 +50,7 @@
     <string name="modem_config_short">Curto alcance / rápido</string>
     <string name="modem_config_medium">Médio alcance / rápido</string>
     <string name="modem_config_long">Longo alcance / rápido</string>
+    <string name="modem_config_mod_long">Longo Alcance / Moderado</string>
     <string name="modem_config_very_long">Muito longo alcance / lento</string>
     <string name="modem_config_unrecognized">DESCONHECIDO</string>
     <string name="meshtastic_service_notifications">Notificações de serviço</string>
@@ -57,7 +59,6 @@
     <string name="a_list_of_nodes_in_the_mesh">Lista de nós na mesh</string>
     <string name="text_messages">Mensagem de Texto</string>
     <string name="channel_invalid">O Link Deste Canal é inválido e não pode ser usado</string>
-    <!--Bellow copied from Brazillian Portuguese (values-pt-rBR)-->
     <string name="debug_panel">Painel de depuração</string>
     <string name="debug_last_messages">500 últimas mensagens</string>
     <string name="clear">Limpar</string>
@@ -93,6 +94,9 @@
     <string name="provide_location_to_mesh">Fornecer localização para mesh</string>
     <string name="camera_required">Permissão da câmera</string>
     <string name="why_camera_required">Precisamos acessar a câmera para escanear códigos QR. Nenhuma foto ou vídeo são armazenados.</string>
+    <string name="notification_required">Autorização de Notificações</string>
+    <string name="why_notification_required">O Meshtastic precisa de autorização para o serviço e as notificações de mensagens.</string>
+    <string name="notification_denied">Permissão de notificação recusada. Para ativar, entre: Definições do Android &gt; Apps &gt; Meshtastic &gt; Notificações.</string>
     <string name="modem_config_slow_short">Curto alcance / lento</string>
     <string name="modem_config_slow_medium">Médio alcance / lento</string>
     <plurals name="delete_messages">
@@ -115,6 +119,7 @@
     <string name="resend">Reenviar</string>
     <string name="shutdown">Desligar</string>
     <string name="reboot">Reiniciar</string>
+    <string name="traceroute">Vestígio da Rota</string>
     <string name="intro_show">Mostrar Introdução</string>
     <string name="intro_welcome">Bem-vindo a Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic é uma plataforma de comunicação criptografada fora de rede de código aberto. Os rádios formam uma rede mesh e se comunicam usando o protocolo LoRa para enviar mensagens de texto.</string>
@@ -135,6 +140,9 @@
     <string name="direct_message">Mensagem direta</string>
     <string name="nodedb_reset">Redefinir NodeDB</string>
     <string name="nodedb_reset_description">Isto limpará todos os dispositivos desta lista.</string>
+    <string name="ignore">Ignorar</string>
+    <string name="ignore_add">Adicionar \'%s\' para a lista de ignorados?</string>
+    <string name="ignore_remove">Remover \'%s\' de lista dos ignorados?</string>
     <string name="map_select_download_region">Selecione a região para download</string>
     <string name="map_tile_download_estimate">Estimativa de download do bloco:</string>
     <string name="map_start_download">Iniciar download</string>
@@ -159,4 +167,6 @@
     <string name="waypoint_edit">Editar ponto de referência</string>
     <string name="waypoint_delete">Apagar o ponto de referência?</string>
     <string name="waypoint_new">Novo ponto de referência</string>
+    <string name="waypoint_received">Ponto de passagem recebido %s</string>
+    <string name="error_duty_cycle">Limite do ciclo de trabalho atingido. Não é possível enviar mensagens no momento. Tente novamente mais tarde.</string>
 </resources>
