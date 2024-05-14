@@ -1,6 +1,5 @@
 package com.geeksville.mesh.ui.components.config
 
-import android.util.Log // TODO remove when done <----
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -29,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,23 +41,26 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ChannelCard( // TODO needs shared: Boolean, onSharedToggled(): -> Unit <-
+fun ChannelCard(
     index: Int,
     title: String,
     enabled: Boolean,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
+    channel: Channel
 ) {
-
+    var selectedState by remember { mutableStateOf(channel.shared) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -76,10 +79,11 @@ fun ChannelCard( // TODO needs shared: Boolean, onSharedToggled(): -> Unit <-
                 color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
                 modifier = Modifier.weight(1f)
             )
-            RadioButton( // TODO pass args <-
-                false,
-                { Log.d("MEME", "The Radio Button was clicked.") },
-                modifier = Modifier.padding(end = 8.dp)
+            RadioButton(
+                selected = selectedState,
+                onClick = { selectedState = !selectedState
+                            channel.shared = !channel.shared },
+                modifier = Modifier.padding(end = 8.dp),
             )
             IconButton(onClick = { onDeleteClick() }) {
                 Icon(
@@ -101,6 +105,9 @@ fun ChannelSettingsItemList(
     onNegativeClicked: () -> Unit = { },
     onPositiveClicked: (List<ChannelSettings>) -> Unit,
 ) {
+    // FIXME cannot get the viewmodel this way
+    val uiViewModel: UIViewModel = viewModel()
+    val channelList = uiViewModel.channelList.collectAsState().value
     val focusManager = LocalFocusManager.current
     val settingsListInput = remember(settingsList) { settingsList.toMutableStateList() }
 
@@ -141,7 +148,8 @@ fun ChannelSettingsItemList(
                     title = channel.name.ifEmpty { modemPresetName },
                     enabled = enabled,
                     onEditClick = { showEditChannelDialog = index },
-                    onDeleteClick = { settingsListInput.removeAt(index) }
+                    onDeleteClick = { settingsListInput.removeAt(index) },
+                    channelList[index]
                 )
             }
 

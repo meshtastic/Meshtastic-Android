@@ -290,6 +290,7 @@ fun ChannelScreen(
                 modifier = Modifier.fillMaxWidth(),
             )
         } else {
+            viewModel.updateChannelList(channelSet)
             item { ChannelRowHeader(enabled) }
             itemsIndexed(channelSet.settingsList) { index, channel ->
                 ChannelCard(
@@ -302,7 +303,8 @@ fun ChannelScreen(
                             settings.clear()
                             settings.addAll(channelSet.settingsList.filterIndexed { i, _ -> i != index })
                         }
-                    }
+                    },
+                    viewModel.channelList.collectAsState().value[index]
                 )
             }
             item {

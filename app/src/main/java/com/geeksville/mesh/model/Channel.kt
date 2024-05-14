@@ -14,7 +14,7 @@ fun xorHash(b: ByteArray) = b.fold(0) { acc, x -> acc xor (x.toInt() and 0xff) }
 data class Channel(
     val settings: ChannelProtos.ChannelSettings = default.settings,
     val loraConfig: ConfigProtos.Config.LoRaConfig = default.loraConfig,
-    var shared: Boolean = true, /* Used to determine if the user wishes to include in the URL/QR */
+    var shared: Boolean = false, /* Used to determine if the user wishes to include in the URL/QR */
 ) {
     companion object {
         // These bytes must match the well known and not secret bytes used the default channel AES128 key device code

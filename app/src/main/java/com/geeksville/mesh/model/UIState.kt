@@ -185,8 +185,6 @@ class UIViewModel @Inject constructor(
         }
         radioConfigRepository.channelSetFlow.onEach { channelSet ->
             _channels.value = channelSet
-            /* Make sure the [Channel]s known to the app match the [ChannelSet] */
-            updateChannelList(channelSet)
         }.launchIn(viewModelScope)
 
         debug("ViewModel created")
@@ -406,7 +404,6 @@ class UIViewModel @Inject constructor(
         val newConfig = config { lora = channelSet.loraConfig }
         if (config.lora != newConfig.lora) setConfig(newConfig)
 
-        updateChannelList(channelSet)
     }
 
     val provideLocation = object : MutableLiveData<Boolean>(preferences.getBoolean("provide-location", false)) {
@@ -611,12 +608,15 @@ class UIViewModel @Inject constructor(
      * Maintains the [channelList] up-to-date with the [channels].
      * @param channelSet the update will be based on.
      */
-    private fun updateChannelList(channelSet: AppOnlyProtos.ChannelSet) {
+    fun updateChannelList(channelSet: AppOnlyProtos.ChannelSet) {
         /* Update channelList */
         for (i in 0 .. channelSet.settingsList.lastIndex) {
-            val ch = Channel(settings = channelSet.settingsList[i], loraConfig = channelSet.loraConfig)
-            if (channelList.value.getOrNull(i) != ch) {
-                channelList.value.add(index = i, element = ch)
+            val incoming = channelSet.settingsList[i]
+            val current = channelList.value.getOrNull(i)?.settings
+            if (incoming.name != current?.name || incoming.psk != current?.psk) {
+                if (current != null)
+                    channelList.value.removeAt(index = i)
+                channelList.value.add(index = i, element = Channel(settings = incoming, loraConfig = channelSet.loraConfig))
             }
         }
         /* Remove excess Channels */
