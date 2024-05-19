@@ -331,6 +331,7 @@ fun RadioConfigNavHost(
 
                         "EXPORT" -> {
                             viewModel.clearPacketResponse()
+                            viewModel.setDeviceProfile(null)
                             showEditDeviceProfileDialog = true
                         }
 
