@@ -54,6 +54,26 @@ fun PaxcounterConfigItemList(
         }
 
         item {
+            EditTextPreference(title = "WiFi RSSI threshold (defaults to -80)",
+                value = paxcounterInput.wifiThreshold,
+                enabled = enabled,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    paxcounterInput = paxcounterInput.copy { wifiThreshold = it }
+                })
+        }
+
+        item {
+            EditTextPreference(title = "BLE RSSI threshold (defaults to -80)",
+                value = paxcounterInput.bleThreshold,
+                enabled = enabled,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    paxcounterInput = paxcounterInput.copy { bleThreshold = it }
+                })
+        }
+
+        item {
             PreferenceFooter(
                 enabled = paxcounterInput != paxcounterConfig,
                 onCancelClicked = {
