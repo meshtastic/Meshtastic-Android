@@ -171,5 +171,5 @@
     <string name="waypoint_delete">Usuń punkt nawigacji?</string>
     <string name="waypoint_new">Nowy punkt nawigacyjny</string>
     <string name="waypoint_received">Otrzymano punkt orientacyjny: %s</string>
-    <string name="error_duty_cycle">Osiągnięto limit powtórzeń. Nie można teraz wysyłać wiadomości, spróbuj ponownie później.</string>
+    <string name="error_duty_cycle">Osiągnięto limit cyklu pracy. Nie można wysłać wiadomości w tej chwili, spróbuj później.</string>
 </resources>
