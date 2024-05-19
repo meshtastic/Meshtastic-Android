@@ -216,19 +216,22 @@ fun NodeInfo(
                         suffix = elevationSuffix
                     )
 
-                    SatelliteCountInfo(
-                        modifier = Modifier.constrainAs(sats) {
-                            top.linkTo(alt.bottom, 4.dp)
-                            linkTo(
-                                start = pos.start,
-                                end = env.start,
-                                endMargin = 8.dp,
-                                bias = 0F,
-                            )
-                            width = Dimension.preferredWrapContent
-                        },
-                        satCount = position.satellitesInView
-                    )
+                    val satCount = position.satellitesInView
+                    if (satCount > 0) {
+                        SatelliteCountInfo(
+                            modifier = Modifier.constrainAs(sats) {
+                                top.linkTo(alt.bottom, 4.dp)
+                                linkTo(
+                                    start = pos.start,
+                                    end = env.start,
+                                    endMargin = 8.dp,
+                                    bias = 0F,
+                                )
+                                width = Dimension.preferredWrapContent
+                            },
+                            satCount = satCount
+                        )
+                    }
                 }
 
                 BatteryInfo(
