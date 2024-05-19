@@ -20,6 +20,10 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# Disable code shrinking and optimization
+-dontshrink
+-dontoptimize
+
 # Needed for protobufs
 -keepclassmembers class * extends com.google.protobuf.GeneratedMessage { <fields>; }
 -keep class com.geeksville.mesh.**{*;}
