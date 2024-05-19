@@ -6,8 +6,8 @@
     <string name="unset">取消設定</string>
     <string name="connection_status">連線狀態</string>
     <string name="application_icon">應用程式圖示</string>
-    <string name="unknown_username">未知的使用者名称</string>
-    <string name="send">传送</string>
+    <string name="unknown_username">未知的使用者名稱</string>
+    <string name="send">傳送</string>
     <string name="send_text">傳送訊息</string>
     <string name="warning_not_paired">您尚未將手機與 Meshtastic 相容的裝置配對。請先配對裝置並設置您的使用者名稱。\n\n此開源應用程式仍在開發中，如有問題，請在我們的論壇 meshtastic.discourse.group 上面發文詢問。\n\n 也可參閱我們的網頁 - www.meshtastic.org。</string>
     <string name="you">你</string>
@@ -42,20 +42,20 @@
     <string name="ip_address">IP地址：</string>
     <string name="connected">連接到設備</string>
     <string name="connected_to">已連接至設備 (%s)</string>
-    <string name="not_connected">尚未联机</string>
+    <string name="not_connected">未連線</string>
     <string name="connected_sleeping">已連接至無線電，但它正在休眠中</string>
     <string name="update_to">更新到%s</string>
-    <string name="app_too_old">需要更新应用程序</string>
-    <string name="must_update">您必須在應用商店（或 Github）更新此應用程式。它太舊無法與此無線電固件通訊。請閱讀我們關於此主題的<a href="https://meshtastic.org/docs/software/android/installation">文件</a>。</string>
-    <string name="none">无 （停用）</string>
+    <string name="app_too_old">需要應用程式更新</string>
+    <string name="must_update">您必須在應用商店（或 Github）更新此應用程式。它太舊無法與此無線電韌體通訊。請閱讀我們關於此主題的<a href="https://meshtastic.org/docs/software/android/installation">文件</a>。</string>
+    <string name="none">無（停用）</string>
     <string name="modem_config_short">短距離（速度快）</string>
     <string name="modem_config_medium">中等距離（速度快）</string>
     <string name="modem_config_long">長距離 （速度快）</string>
-    <string name="modem_config_mod_long">長距離 （中等速度）</string>
+    <string name="modem_config_mod_long">長距離（中等速度）</string>
     <string name="modem_config_very_long">遠距離（速度慢）</string>
     <string name="modem_config_unrecognized">無法識別</string>
-    <string name="meshtastic_service_notifications">服务通知</string>
-    <string name="location_disabled_warning">您必须在设置中开启高精度定位服务</string>
+    <string name="meshtastic_service_notifications">服務通知</string>
+    <string name="location_disabled_warning">必須開啟位置設定（高準確度）才能通過藍牙尋找新裝置。之後可以再關閉位置設定。</string>
     <string name="about">關於</string>
     <string name="a_list_of_nodes_in_the_mesh">節點列表</string>
     <string name="text_messages">文字訊息</string>
@@ -66,12 +66,12 @@
     <string name="updating_firmware">更新韌體中，請等待最多八分鐘…</string>
     <string name="update_successful">更新成功</string>
     <string name="update_failed">更新失敗</string>
-    <string name="message_reception_time">消息接收时间</string>
+    <string name="message_reception_time">訊息接收時間</string>
     <string name="message_reception_state">訊息接收狀態</string>
     <string name="message_delivery_status">訊息傳遞狀態</string>
     <string name="meshtastic_messages_notifications">訊息通知</string>
     <string name="protocol_stress_test">通訊協定壓力測試</string>
-    <string name="firmware_too_old">需要韧体更新</string>
+    <string name="firmware_too_old">需要更新韌體</string>
     <string name="firmware_old">無法與此應用程式通訊，無線電韌體太舊。請前往設定面板並選擇「更新韌體」。有關詳細信息，請參閱<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">我們的韌體安裝指南</a>。</string>
     <string name="okay">好的</string>
     <string name="must_set_region">您必須設定一個區域！</string>
@@ -85,7 +85,7 @@
     <string name="apply">套用</string>
     <string name="no_app_found">找不到可用于发送 URL 的应用程序。</string>
     <string name="theme">主題</string>
-    <string name="theme_light">浅色</string>
+    <string name="theme_light">淺色</string>
     <string name="theme_dark">深色</string>
     <string name="theme_system">系統預設</string>
     <string name="choose_theme">選擇主題</string>
@@ -134,7 +134,7 @@
     <string name="quick_chat_append">附加到訊息</string>
     <string name="quick_chat_instant">实时发送</string>
     <string name="factory_reset">恢复出厂设置</string>
-    <string name="factory_reset_description">这将清除你已经完成的所有设备设定。</string>
+    <string name="factory_reset_description">這將清除您所做的所有設備配置。</string>
     <string name="bluetooth_disabled">藍牙已禁用</string>
     <string name="permission_missing_31">Meshtastic 需要附近設備許可才能通過藍牙查找和連接設備。 您可以在不使用時將其關閉。</string>
     <string name="direct_message">直接發訊息</string>
@@ -144,10 +144,10 @@
     <string name="ignore_add">將 \'%s\' 加入忽略清單嗎？</string>
     <string name="ignore_remove">從忽略清單中移除 \'%s\' 嗎？</string>
     <string name="map_select_download_region">選擇下載地區</string>
-    <string name="map_tile_download_estimate">瓷磚下載估計:</string>
+    <string name="map_tile_download_estimate">圖磚下載估計:</string>
     <string name="map_start_download">開始下載</string>
     <string name="request_position">要求位置</string>
-    <string name="close">关闭</string>
+    <string name="close">關閉</string>
     <string name="device_settings">設備設定</string>
     <string name="module_settings">模組設定</string>
     <string name="add">新增</string>
@@ -158,7 +158,7 @@
     <string name="map_clear_tiles">清除下載的圖磚</string>
     <string name="map_tile_source">圖磚來源</string>
     <string name="map_purge_success">清除 %s 的 SQL 快取</string>
-    <string name="map_purge_fail">清除 SQL 快取失败，请查看 logcat 纪录</string>
+    <string name="map_purge_fail">SQL快取清除失敗，請查看logcat以獲取詳細資訊。</string>
     <string name="map_cache_manager">緩存管理員</string>
     <string name="map_download_complete">下載已完成！</string>
     <string name="map_download_errors">下載完成，但有 %d 個錯誤</string>
