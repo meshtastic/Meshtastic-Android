@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="channel_name">Názov kanálu</string>
-    <string name="channel_options">Nastavenia kanálu</string>
+    <string name="channel_name">Názov kanála</string>
+    <string name="channel_options">Nastavenia kanála</string>
     <string name="qr_code">QR kód</string>
     <string name="unset">Nenastavené</string>
     <string name="connection_status">Stav pripojenia</string>
@@ -12,7 +12,7 @@
     <string name="warning_not_paired">K tomuto telefónu ste ešte nespárovalii žiadne zariadenie kompatibilné s Meshtastic. Prosím spárujte zariadenie a nastavte svoje užívateľské meno. Táto open-source aplikácia je v alpha testovacej fáze, ak nájdete chybu, prosím popíšte ju na fóre: meshtastic.discourse.group.\n\n Pre viac informácií navštívte web stránku - www.meshtastic.org.</string>
     <string name="you">Vy</string>
     <string name="your_name">Vaše meno</string>
-    <string name="analytics_okay">Anonymné hlásenia o používaní aplikácie a jej chybách.</string>
+    <string name="analytics_okay">Anonymné štatistiky používania a správy o zlyhaní.</string>
     <string name="looking_for_meshtastic_devices">Vyhľadávam Meshtastic zariadenia…</string>
     <string name="starting_pairing">Spúšťam párovanie</string>
     <string name="url_for_join">URL pre pripojenie sa do Meshtastic MESH siete</string>
@@ -37,7 +37,7 @@
     <string name="disconnected">Odpojené</string>
     <string name="device_sleeping">Vysielač uspaný</string>
     <string name="connected_count">Pripojený: %1$s z %2$s je online</string>
-    <string name="list_of_nodes">Zoznam vysielačov v sieti</string>
+    <string name="list_of_nodes">Zoznam uzlových bodov v sieti</string>
     <string name="update_firmware">Aktualizácia firmvéru</string>
     <string name="ip_address">IP Adresa:</string>
     <string name="connected">Pripojené k vysielaču</string>
@@ -101,9 +101,9 @@
     <string name="modem_config_slow_short">Krátky dosah / Pomalé</string>
     <string name="modem_config_slow_medium">Stredný dosah / Pomalé</string>
     <plurals name="delete_messages">
-        <item quantity="one">Odstrániť správu?</item>
+        <item quantity="one">Vymazať správu?</item>
         <item quantity="few">Vymazať %s správy?</item>
-        <item quantity="many">Delete %s messages?</item>
+        <item quantity="many">Vymazať %s správ?</item>
         <item quantity="other">Vymazať správy?</item>
     </plurals>
     <string name="delete">Vymazať</string>
@@ -129,7 +129,7 @@
     <string name="intro_started">Poďme začať!</string>
     <string name="intro_started_text">Pripojte vaše Meshtastic zariadenie pomocou Bluetooth, Serial, alebo WiFi. \n\nZistite, ktoré zariadenia sú kompatibilné na www.meshtastic.org/docs/hardware</string>
     <string name="intro_encryption">"Nastavenie enkryptovania"</string>
-    <string name="intro_encryption_text">Štandardne je nastavený predvolený šifrovací kľúč. Ak chcete povoliť vlastný kanál a vylepšené šifrovanie, prejdite na kartu Nastavenie kanálu a zmeňte názov kanálu, čím sa nastaví náhodný kľúč pre šifrovanie AES256. \n\nNa komunikáciu s inými zariadeniami, budu musieť naskenovať váš QR kód alebo kliknúť na zdieľaný odkaz a nakonfigurovať nastavenia kanála.</string>
+    <string name="intro_encryption_text">Štandardne je nastavený predvolený šifrovací kľúč. Ak chcete povoliť vlastný kanál a vylepšené šifrovanie, prejdite na kartu Nastavenie kanálu a zmeňte názov kanálu, čím sa nastaví náhodný kľúč pre šifrovanie AES256. \n\nNa komunikáciu s inými zariadeniami, budú musieť naskenovať váš QR kód, alebo kliknúť na zdieľaný odkaz a nakonfigurovať nastavenia kanála.</string>
     <string name="message">Správa</string>
     <string name="quick_chat">Nastavenia rýchleho četu</string>
     <string name="quick_chat_new">Nový rýchly čet</string>
@@ -144,10 +144,10 @@
     <string name="nodedb_reset">Reset databázy uzlov</string>
     <string name="nodedb_reset_description">Toto vymaže všetky uzlové body zo zoznamu.</string>
     <string name="ignore">Ignorovať</string>
-    <string name="ignore_add">Pridať \'%s\' do zoznamu ignorovaných? Váš vysielač sa po tejto zmene reštartuje.</string>
-    <string name="ignore_remove">Odstrániť \'%s\' zo zoznamu ignorovaných? Váš vysielač sa po tejto zmene reštartuje.</string>
+    <string name="ignore_add">Pridať \'%s\' do zoznamu ignorovaných?</string>
+    <string name="ignore_remove">Odstrániť \'%s\' zo zoznamu ignorovaných?</string>
     <string name="map_select_download_region">Vybrať oblasť na stiahnutie</string>
-    <string name="map_tile_download_estimate">Tile download estimate:</string>
+    <string name="map_tile_download_estimate">Odhad sťahovania dlaždíc:</string>
     <string name="map_start_download">Spustiť sťahovanie</string>
     <string name="request_position">Požiadať o pozíciu</string>
     <string name="close">Zavrieť</string>
@@ -158,14 +158,14 @@
     <string name="map_offline_manager">Offline manager</string>
     <string name="map_cache_size">Aktuálna veľkosť cache</string>
     <string name="map_cache_info">Kapacita cache: %1$.2f MB\nVyužitie cache: %2$.2f MB</string>
-    <string name="map_clear_tiles">Vymazať mapové podklady</string>
-    <string name="map_tile_source">Zdroj mapových podkladov</string>
-    <string name="map_purge_success">SQL Cache purged for %s</string>
-    <string name="map_purge_fail">SQL Cache purge failed, see logcat for details</string>
+    <string name="map_clear_tiles">Vymazať stiahnuté dlaždice</string>
+    <string name="map_tile_source">Zdroj dlaždíc</string>
+    <string name="map_purge_success">SQL Cache vyčistená pre %s</string>
+    <string name="map_purge_fail">Vyčistenie SQL Cache zlyhalo, podrobnosti nájdete v logcat</string>
     <string name="map_cache_manager">Cache Manager</string>
     <string name="map_download_complete">Sťahovanie dokončené!</string>
     <string name="map_download_errors">Sťahovanie ukončené s %d chybami</string>
-    <string name="map_cache_tiles">%d mapových podkladov</string>
+    <string name="map_cache_tiles">%d dlaždíc</string>
     <string name="map_subDescription">smer: %1$d° vzdialenosť: %2$s</string>
     <string name="waypoint_edit">Editovať cieľový bod</string>
     <string name="waypoint_delete">Vymazať cieľový bod?</string>
