@@ -397,9 +397,16 @@ class MeshService : Service(), Logging {
         if (n == DataPacket.NODENUM_BROADCAST) DataPacket.ID_BROADCAST
         else nodeDBbyNodeNum[n]?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
 
-    /// given a nodenum, return a db entry - creating if necessary
-    private fun getOrCreateNodeInfo(n: Int) =
-        nodeDBbyNodeNum.getOrPut(n) { NodeInfo(n) }
+    // given a nodeNum, return a db entry - creating if necessary
+    private fun getOrCreateNodeInfo(n: Int) = nodeDBbyNodeNum.getOrPut(n) {
+        val defaultUser = MeshUser(
+            id = DataPacket.nodeNumToDefaultId(n),
+            longName = getString(R.string.unknown_username),
+            shortName = getString(R.string.unknown_node_short_name),
+            hwModel = MeshProtos.HardwareModel.UNSET,
+        )
+        NodeInfo(n, defaultUser)
+    }
 
     private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
     private val rangeTestRegex = Regex("seq (\\d{1,10})")
