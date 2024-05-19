@@ -20,10 +20,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# Disable code shrinking and optimization
--dontshrink
--dontoptimize
-
 # eclipse.paho.client
 -keep class org.eclipse.paho.client.mqttv3.logging.JSR47Logger { *; }
 
