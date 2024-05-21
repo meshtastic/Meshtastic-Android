@@ -5,6 +5,9 @@ import android.net.Uri
 import android.util.Base64
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.android.BuildUtils.errormsg
+import com.geeksville.mesh.channelSet
+import com.geeksville.mesh.channelSettings
+import com.geeksville.mesh.copy
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
@@ -53,20 +56,59 @@ fun ChannelSet.getChannelUrl(upperCasePrefix: Boolean = false): Uri {
     return Uri.parse("$p$enc")
 }
 
-val ChannelSet.qrCode: Bitmap?
-    get() = try {
+/**
+ * Return a URL that represents a filtered [ChannelSet].
+ * @param upperCasePrefix portions of the URL can be upper case to make for more efficient QR codes
+ * @param channelSelection a list containing boolean values to determine filtering.
+ */
+fun ChannelSet.getChannelUrl(upperCasePrefix: Boolean = false,
+                             channelSelection: List<Boolean>): Uri {
+    /* Create a [ChannelSet] based on the channels selected by the user to Share */
+    val currentLoraConfig = this.loraConfig
+    var selectedChannelSet = channelSet {
+        loraConfig = loraConfig.copy {
+            usePreset = currentLoraConfig.usePreset
+            region = currentLoraConfig.region
+            hopLimit = currentLoraConfig.hopLimit
+            txEnabled = currentLoraConfig.txEnabled
+            txPower = currentLoraConfig.txPower
+        }
+    }
+    for (i in 0 .. this.settingsList.lastIndex) {
+        if (channelSelection.getOrNull(i) == true) {
+            selectedChannelSet = selectedChannelSet.copy {
+                settings.add(channelSettings {
+                    name = settingsList[i].name
+                    psk = settingsList[i].psk
+                })}
+        }
+    }
+    /* Make URL based on the selected channels */
+    /* Empty if unset or non are selected */
+    val channelBytes = selectedChannelSet.toByteArray() ?: ByteArray(0)
+    val enc = Base64.encodeToString(channelBytes, BASE64FLAGS)
+    val p = if (upperCasePrefix) URL_PREFIX.uppercase() else URL_PREFIX
+    return Uri.parse("$p$enc")
+}
+
+/**
+ * @param channelSelection contains boolean user selection to generate the desired QR code.
+ */
+fun ChannelSet.generateQrCode(channelSelection: List<Boolean>): Bitmap? {
+    try {
         val multiFormatWriter = MultiFormatWriter()
 
         val bitMatrix =
             multiFormatWriter.encode(
-                getChannelUrl(false).toString(),
+                getChannelUrl(upperCasePrefix = false, channelSelection = channelSelection).toString(),
                 BarcodeFormat.QR_CODE,
                 960,
                 960
             )
         val barcodeEncoder = BarcodeEncoder()
-        barcodeEncoder.createBitmap(bitMatrix)
+        return barcodeEncoder.createBitmap(bitMatrix)
     } catch (ex: Throwable) {
         errormsg("URL was too complex to render as barcode")
-        null
+        return null
     }
+}
