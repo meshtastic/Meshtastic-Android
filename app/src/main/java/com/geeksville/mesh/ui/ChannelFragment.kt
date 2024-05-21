@@ -10,6 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,7 +19,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
+import androidx.compose.material.Checkbox
+import androidx.compose.material.Chip
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
@@ -42,7 +47,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -59,6 +66,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -152,6 +160,11 @@ fun ChannelScreen(
     val primaryChannel = channelSet.primaryChannel
     val channelUrl = channelSet.getChannelUrl()
     val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
+
+    /* Holds selections made by the user for QR generation. */
+    val channelSelections by rememberSaveable { mutableStateOf(
+        MutableList(size = 8, init = { true })
+    ) }
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
@@ -278,15 +291,41 @@ fun ChannelScreen(
             .fillMaxSize()
             .padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
-        if (!showChannelEditor) item {
-            ClickableTextField(
-                label = R.string.channel_name,
-                value = primaryChannel?.name.orEmpty(),
-                onClick = { showChannelEditor = true },
-                enabled = enabled,
-                trailingIcon = Icons.TwoTone.Edit,
-                modifier = Modifier.fillMaxWidth(),
-            )
+        if (!showChannelEditor) {
+            item {
+                ClickableTextField(
+                    label = R.string.channel_name,
+                    value = primaryChannel?.name.orEmpty(),
+                    onClick = { showChannelEditor = true },
+                    enabled = enabled,
+                    trailingIcon = Icons.TwoTone.Edit,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+            item {
+                Text(
+                    text = "Generate QR Code",
+                    style = MaterialTheme.typography.body1,
+                    color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
+                    )
+                Text(
+                    text = "The Current LoRa configuration will also be shared.",
+                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.body1,
+                    color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
+                )
+            }
+            itemsIndexed(channelSet.settingsList) { index, channel ->
+                ChannelSelection(
+                    index = index,
+                    title = channel.name.ifEmpty { modemPresetName },
+                    enabled = enabled,
+                    isSelected = channelSelections[index],
+                    onSelected = {
+                        channelSelections[index] = it
+                    }
+                )
+            }
         } else {
             itemsIndexed(channelSet.settingsList) { index, channel ->
                 ChannelCard(
@@ -433,6 +472,48 @@ fun ChannelScreen(
                         if (context.hasCameraPermission()) zxingScan() else requestPermissionAndScan()
                     })
             }
+        }
+    }
+}
+
+/**
+ * Enables the user to select what channels are used for QR generation.
+ */
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ChannelSelection(
+    index: Int,
+    title: String,
+    enabled: Boolean,
+    isSelected: Boolean,
+    onSelected: (Boolean) -> Unit
+) {
+    var checked by remember { mutableStateOf(isSelected) }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        elevation = 4.dp
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp)
+        ) {
+            Chip(onClick = { }) { Text("$index") }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.body1,
+                color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
+                modifier = Modifier.weight(1f)
+            )
+            Checkbox(
+                checked = checked,
+                onCheckedChange = {
+                    onSelected.invoke(it)
+                    checked = it
+                }
+                // TODO need to trigger regeneration of the qr code
+            )
         }
     }
 }
