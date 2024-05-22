@@ -310,12 +310,12 @@ fun ChannelScreen(
             }
             item {
                 Text(
-                    text = "Generate QR Code",
+                    text = stringResource(id = R.string.generate_qr_code),
                     style = MaterialTheme.typography.body1,
                     color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
                     )
                 Text(
-                    text = "The Current LoRa configuration will also be shared.",
+                    text = stringResource(id = R.string.lora_config_shared),
                     fontSize = 12.sp,
                     style = MaterialTheme.typography.body1,
                     color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
@@ -513,6 +513,7 @@ private fun ChannelSelection(
                 modifier = Modifier.weight(1f)
             )
             Checkbox(
+                enabled = enabled,
                 checked = checked,
                 onCheckedChange = {
                     onSelected.invoke(it)
