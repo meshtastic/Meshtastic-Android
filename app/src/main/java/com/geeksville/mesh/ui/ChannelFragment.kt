@@ -42,11 +42,14 @@ import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -87,9 +90,9 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.model.generateQrCode
 import com.geeksville.mesh.model.getChannelUrl
 import com.geeksville.mesh.model.primaryChannel
-import com.geeksville.mesh.model.qrCode
 import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.ClickableTextField
@@ -157,14 +160,17 @@ fun ChannelScreen(
     var showChannelEditor by rememberSaveable { mutableStateOf(false) }
     val isEditing = channelSet != channels || showChannelEditor
 
-    val primaryChannel = channelSet.primaryChannel
-    val channelUrl = channelSet.getChannelUrl()
-    val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
-
     /* Holds selections made by the user for QR generation. */
-    val channelSelections by rememberSaveable { mutableStateOf(
-        MutableList(size = 8, init = { true })
-    ) }
+    val channelSelections = rememberSaveable(
+        saver = listSaver(
+            save = { stateList -> stateList.toList() },
+            restore = { it.toMutableStateList() }
+        )
+    ) { mutableStateListOf(elements = Array(size = 8, init = { true })) }
+
+    val primaryChannel = channelSet.primaryChannel
+    val channelUrl = channelSet.getChannelUrl(channelSelection = channelSelections)
+    val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
@@ -360,7 +366,7 @@ fun ChannelScreen(
 
         if (!isEditing) item {
             Image(
-                painter = channelSet.qrCode?.let { BitmapPainter(it.asImageBitmap()) }
+                painter = channelSet.generateQrCode(channelSelection = channelSelections)?.let { BitmapPainter(it.asImageBitmap()) }
                     ?: painterResource(id = R.drawable.qrcode),
                 contentDescription = stringResource(R.string.qr_code),
                 contentScale = ContentScale.Inside,
@@ -391,7 +397,7 @@ fun ChannelScreen(
                 label = { Text("URL") },
                 isError = isError,
                 trailingIcon = {
-                    val isUrlEqual = channelUrl == channels.getChannelUrl()
+                    val isUrlEqual = channelUrl == channels.getChannelUrl(channelSelection = channelSelections)
                     IconButton(onClick = {
                         when {
                             isError -> valueState = channelUrl
@@ -512,7 +518,6 @@ private fun ChannelSelection(
                     onSelected.invoke(it)
                     checked = it
                 }
-                // TODO need to trigger regeneration of the qr code
             )
         }
     }
