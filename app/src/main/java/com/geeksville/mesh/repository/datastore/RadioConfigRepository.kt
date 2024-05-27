@@ -84,7 +84,7 @@ class RadioConfigRepository @Inject constructor(
     /**
      * Flow representing the [NodeInfo] database.
      */
-    suspend fun getNodes(): List<NodeInfo>? = nodeDB.nodeInfoFlow().firstOrNull()
+    suspend fun getNodes(): List<NodeInfo>? = nodeDB.getNodes().firstOrNull()
 
     suspend fun upsert(node: NodeInfo) = nodeDB.upsert(node)
     suspend fun installNodeDB(mi: MyNodeInfo, nodes: List<NodeInfo>) {

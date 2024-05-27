@@ -32,6 +32,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedWriter
@@ -97,6 +99,16 @@ internal fun getChannelList(
     }
 }
 
+data class NodesUiState(
+    val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
+    val filter: String = "",
+    val includeUnknown: Boolean = false,
+) {
+    companion object {
+        val Empty = NodesUiState()
+    }
+}
+
 @HiltViewModel
 class UIViewModel @Inject constructor(
     private val app: Application,
@@ -138,17 +150,42 @@ class UIViewModel @Inject constructor(
     private val _focusedNode = MutableStateFlow<NodeInfo?>(null)
     val focusedNode: StateFlow<NodeInfo?> = _focusedNode
 
-    private val _nodeFilterText = MutableStateFlow("")
-    val nodeFilterText: StateFlow<String> = _nodeFilterText
+    private val nodeFilterText = MutableStateFlow("")
+    private val nodeSortOption = MutableStateFlow(NodeSortOption.LAST_HEARD)
+    private val includeUnknown = MutableStateFlow(false)
 
-    val filteredNodes = nodeDB.nodeDBbyNum.combine(_nodeFilterText) { nodes, filterText ->
-        if (filterText.isBlank()) return@combine nodes
-
-        nodes.filter { entry ->
-            entry.value.user?.longName?.contains(filterText, ignoreCase = true) == true ||
-            entry.value.user?.shortName?.contains(filterText, ignoreCase = true) == true
-        }
+    fun setSortOption(sort: NodeSortOption) {
+        nodeSortOption.value = sort
     }
+
+    fun toggleIncludeUnknown() {
+        includeUnknown.value = !includeUnknown.value
+    }
+
+    val nodeViewState: StateFlow<NodesUiState> = combine(
+        nodeFilterText,
+        nodeSortOption,
+        includeUnknown,
+    ) { filter, sort, includeUnknown ->
+        NodesUiState(
+            sort = sort,
+            filter = filter,
+            includeUnknown = includeUnknown,
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = WhileSubscribed(),
+        initialValue = NodesUiState.Empty,
+    )
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val filteredNodes: StateFlow<List<NodeInfo>> = nodeViewState.flatMapLatest { state ->
+        nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
+    }.stateIn(
+        scope = viewModelScope,
+        started = WhileSubscribed(5_000),
+        initialValue = emptyList(),
+    )
 
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
@@ -596,7 +633,7 @@ class UIViewModel @Inject constructor(
     }
 
     fun setNodeFilterText(text: String) {
-        _nodeFilterText.value = text
+        nodeFilterText.value = text
     }
 
 }

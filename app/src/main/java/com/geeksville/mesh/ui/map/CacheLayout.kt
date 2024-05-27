@@ -1,4 +1,4 @@
-package com.geeksville.mesh.ui.map.components
+package com.geeksville.mesh.ui.map
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 
 @Composable
-fun CacheLayout(
+internal fun CacheLayout(
     cacheEstimate: String,
     onExecuteJob: () -> Unit,
     onCancelDownload: () -> Unit,
