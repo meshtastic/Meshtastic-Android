@@ -505,7 +505,7 @@ private fun ChannelSelection(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp)
         ) {
-            Chip(onClick = { }) { Text("$index") }
+            Chip(onClick = { }, enabled = enabled) { Text("$index") }
             Text(
                 text = title,
                 style = MaterialTheme.typography.body1,
