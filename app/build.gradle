@@ -145,7 +145,7 @@ androidComponents {
 dependencies {
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    def appcompat_version = '1.6.1'
+    def appcompat_version = '1.7.0'
     implementation "androidx.appcompat:appcompat:$appcompat_version"
     // For loading and tinting drawables on older versions of the platform
     implementation "androidx.appcompat:appcompat-resources:$appcompat_version"
