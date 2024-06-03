@@ -21,13 +21,12 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
@@ -681,20 +680,19 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
         buttons = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                OutlinedButton(
+                Button(
                     modifier = Modifier.weight(1f),
                     onClick = { showDialog = false },
-                    colors = ButtonDefaults.buttonColors(),
                 ) { Text(stringResource(R.string.cancel)) }
-                OutlinedButton(
+                Button(
                     modifier = Modifier.weight(1f),
                     onClick = {
                         showDialog = false
                         onClick()
                     },
-                    colors = ButtonDefaults.buttonColors(),
                 ) { Text(stringResource(R.string.send)) }
             }
         }
@@ -702,15 +700,12 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
 
     Column {
         Spacer(modifier = Modifier.height(4.dp))
-        OutlinedButton(
+        Button(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
             enabled = enabled,
             onClick = { showDialog = true },
-            colors = ButtonDefaults.buttonColors(
-                disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-            )
         ) { Text(text = stringResource(title)) }
     }
 }
