@@ -20,7 +20,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
-import com.geeksville.mesh.ModuleConfigProtos
 import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BTScanModel
@@ -186,20 +185,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // Only let user edit their name or set software update while connected to a radio
         model.connectionState.observe(viewLifecycleOwner) {
             updateNodeInfo()
-        }
-
-        model.wantConfigState.asLiveData().observe(viewLifecycleOwner) {
-            if (model.isConnected()) return@observe
-            val configTotal = ConfigProtos.Config.getDescriptor().fields.size
-            val moduleTotal = ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size
-
-            binding.scanStatusText.text = when {
-                it.moduleCount > 0 -> "Module config (${it.moduleCount} / $moduleTotal)"
-                it.configCount > 0 -> "Device config (${it.configCount} / $configTotal)"
-                it.channelCount > 0 -> "Channels (${it.channelCount} / ${model.maxChannels})"
-                it.nodeCount > 0 -> "Nodes (${it.nodeCount} / 100)"
-                else -> return@observe
-            }
         }
 
         model.localConfig.asLiveData().observe(viewLifecycleOwner) {
