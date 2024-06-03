@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="node_filter_placeholder">Filtriraj</string>
+    <string name="desc_node_filter_clear">očisti filter čvorova</string>
     <string name="channel_name">Naziv kanala</string>
     <string name="channel_options">Mogućnosti kanala</string>
     <string name="qr_code">QR kod</string>
     <string name="unset">Nepostavljeno</string>
     <string name="connection_status">Stanje veze</string>
     <string name="application_icon">ikona aplikacije</string>
-    <string name="unknown_username">Nepoznato korisničko ime</string>
+    <string name="unknown_username">Nepoznati korisnik</string>
     <string name="send">Primijeni</string>
     <string name="send_text">Pošalji poruku</string>
     <string name="warning_not_paired">Još niste povezali Meshtastic radio uređaj s ovim telefonom. Povežite uređaj i postavite svoje korisničko ime.\n\nOva aplikacija otvorenog koda je u razvoju, ako naiđete na probleme, objavite na našem forumu: meshtastic.discourse.group.\n\nZa više informacija pogledajte našu web stranicu - www.meshtastic.org.</string>
@@ -32,7 +34,7 @@
     <string name="change_radio">Promijeni radio</string>
     <string name="pairing_completed">Uparivanje uspješno, usluga je pokrenuta</string>
     <string name="pairing_failed_try_again">Uparivanje nije uspjelo, molim odaberite ponovno</string>
-    <string name="location_disabled">Pristup lokaciji je onemogućen, mesh mreži se ne može pružiti lokacija.</string>
+    <string name="location_disabled">Pristup lokaciji je isključen, Vaš Android ne može pružiti lokaciju mesh mreži.</string>
     <string name="share">Podijeli</string>
     <string name="disconnected">Odspojeno</string>
     <string name="device_sleeping">Uređaj je u stanju mirovanja</string>
@@ -43,7 +45,7 @@
     <string name="connected">Spojen na radio</string>
     <string name="connected_to">Spojen na radio (%s)</string>
     <string name="not_connected">Nije povezano</string>
-    <string name="connected_sleeping">Povezan na radio, ali u stanju mirovanja</string>
+    <string name="connected_sleeping">Povezan na radio, ali je u stanju mirovanja</string>
     <string name="update_to">Ažuriraj na %s</string>
     <string name="app_too_old">Potrebna je nadogradnja aplikacije</string>
     <string name="must_update">Potrebno je ažurirati ovu aplikaciju putem Play Storea (ili Githuba). Aplikacija je prestara za komunikaciju s ovim firmwerom radija. Pročitajte našu <a href="https://meshtastic.org/docs/software/android/installation">dokumentaciju</a> o ovoj temi.</string>
@@ -137,11 +139,13 @@
     <string name="quick_chat_instant">Pošalji odmah</string>
     <string name="factory_reset">Vraćanje na tvorničke postavke</string>
     <string name="factory_reset_description">Ovo će izbrisati sve konfiguracije koje ste napravili na uređaju.</string>
-    <string name="bluetooth_disabled">Bluetooth onemogućen</string>
+    <string name="bluetooth_disabled">Bluetooth isključen</string>
     <string name="permission_missing_31">Meshtastic treba dozvolu za uređaje u blizini za pronalaženje i povezivanje uređaja putem Bluetootha. Opciju možete onemogućiti kada nije u upotrebi.</string>
     <string name="direct_message">Izravna poruka</string>
     <string name="nodedb_reset">Resetiraj NodeDB bazu</string>
     <string name="nodedb_reset_description">Ovo će izbrisati sve čvorove s ovog popisa.</string>
+    <string name="delivery_confirmed">Isporučeno</string>
+    <string name="error">Pogreška</string>
     <string name="ignore">Ignoriraj</string>
     <string name="ignore_add">Dodati \'%s\' na popis ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
     <string name="ignore_remove">Ukloniti \'%s\' s popisa ignoriranih? Vaš radio će se ponovno pokrenuti nakon ove promjene.</string>
@@ -150,7 +154,7 @@
     <string name="map_start_download">Pokreni Preuzimanje</string>
     <string name="request_position">Zatraži poziciju</string>
     <string name="close">Zatvori</string>
-    <string name="device_settings">Konfiguracija radio uređaja</string>
+    <string name="device_settings">Konfiguracija uređaja</string>
     <string name="module_settings">Konfiguracija modula</string>
     <string name="add">Dodaj</string>
     <string name="calculating">Izračunavanje…</string>
@@ -171,4 +175,11 @@
     <string name="waypoint_new">Nova putna točka</string>
     <string name="waypoint_received">Primljena putna točka: %s</string>
     <string name="error_duty_cycle">Dosegnuto je ograničenje radnog ciklusa. Trenutačno nije moguće poslati poruke, pokušajte ponovno kasnije.</string>
+    <string name="remove">Ukloni</string>
+    <string name="remove_node_text">Ovaj će čvor biti uklonjen s vašeg popisa sve dok vaš čvor ponovno ne primi podatke s njega.</string>
+    <string name="mute">Utišaj</string>
+    <string name="mute_notifications">Isključi obavijesti</string>
+    <string name="mute_8_hours">8 sati</string>
+    <string name="mute_1_week">1 tjedan</string>
+    <string name="mute_always">Uvijek</string>
 </resources>
