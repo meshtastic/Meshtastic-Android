@@ -17,7 +17,6 @@ import com.geeksville.mesh.model.NodeDB
 import com.geeksville.mesh.model.getChannelUrl
 import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.service.ServiceRepository
-import com.geeksville.mesh.service.WantConfigState
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
@@ -38,28 +37,6 @@ class RadioConfigRepository @Inject constructor(
     private val moduleConfigRepository: ModuleConfigRepository,
 ) {
     val meshService: IMeshService? get() = serviceRepository.meshService
-
-    val wantConfigState: StateFlow<WantConfigState> = serviceRepository.wantConfigState
-
-    fun clearWantConfigState() {
-        serviceRepository.setWantConfigState { WantConfigState() }
-    }
-
-    fun increaseNodeCount() {
-        serviceRepository.setWantConfigState { it.copy(nodeCount = it.nodeCount + 1) }
-    }
-
-    fun increaseChannelCount() {
-        serviceRepository.setWantConfigState { it.copy(channelCount = it.channelCount + 1) }
-    }
-
-    fun increaseConfigCount() {
-        serviceRepository.setWantConfigState { it.copy(configCount = it.configCount + 1) }
-    }
-
-    fun increaseModuleCount() {
-        serviceRepository.setWantConfigState { it.copy(moduleCount = it.moduleCount + 1) }
-    }
 
     // Connection state to our radio device
     val connectionState get() = serviceRepository.connectionState
@@ -190,6 +167,10 @@ class RadioConfigRepository @Inject constructor(
 
     fun clearErrorMessage() {
         serviceRepository.clearErrorMessage()
+    }
+
+    fun setStatusMessage(text: String) {
+        serviceRepository.setStatusMessage(text)
     }
 
     val meshPacketFlow: SharedFlow<MeshPacket> get() = serviceRepository.meshPacketFlow

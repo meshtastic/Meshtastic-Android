@@ -361,6 +361,9 @@ class MeshService : Service(), Logging {
 
     var myNodeInfo: MyNodeInfo? = null
 
+    private val configTotal by lazy { ConfigProtos.Config.getDescriptor().fields.size }
+    private val moduleTotal by lazy { ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size }
+
     private var localConfig: LocalConfig = LocalConfig.getDefaultInstance()
     private var moduleConfig: LocalModuleConfig = LocalModuleConfig.getDefaultInstance()
     private var channelSet: AppOnlyProtos.ChannelSet = AppOnlyProtos.ChannelSet.getDefaultInstance()
@@ -1262,7 +1265,8 @@ class MeshService : Service(), Logging {
         )
         insertMeshLog(packetToSave)
         setLocalConfig(config)
-        radioConfigRepository.increaseConfigCount()
+        val configCount = localConfig.allFields.size
+        radioConfigRepository.setStatusMessage("Device config ($configCount / $configTotal)")
     }
 
     private fun handleModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
@@ -1275,7 +1279,8 @@ class MeshService : Service(), Logging {
         )
         insertMeshLog(packetToSave)
         setLocalModuleConfig(config)
-        radioConfigRepository.increaseModuleCount()
+        val moduleCount = moduleConfig.allFields.size
+        radioConfigRepository.setStatusMessage("Module config ($moduleCount / $moduleTotal)")
     }
 
     private fun handleQueueStatus(queueStatus: MeshProtos.QueueStatus) {
@@ -1298,7 +1303,8 @@ class MeshService : Service(), Logging {
         )
         insertMeshLog(packetToSave)
         if (ch.role != ChannelProtos.Channel.Role.DISABLED) updateChannelSettings(ch)
-        radioConfigRepository.increaseChannelCount()
+        val maxChannels = myNodeInfo?.maxChannels ?: 8
+        radioConfigRepository.setStatusMessage("Channels (${ch.index + 1} / $maxChannels)")
     }
 
     /**
@@ -1340,7 +1346,7 @@ class MeshService : Service(), Logging {
         insertMeshLog(packetToSave)
 
         newNodes.add(info)
-        radioConfigRepository.increaseNodeCount()
+        radioConfigRepository.setStatusMessage("Nodes (${newNodes.size} / 100)")
     }
 
 
@@ -1551,7 +1557,6 @@ class MeshService : Service(), Logging {
         configNonce += 1
         newNodes.clear()
         newMyNodeInfo = null
-        radioConfigRepository.clearWantConfigState()
 
         if (BluetoothInterface.invalidVersion) onHasSettings() // Device firmware is too old
 

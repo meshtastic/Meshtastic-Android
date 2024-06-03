@@ -50,6 +50,7 @@ class BTScanModel @Inject constructor(
 
     private val context: Context get() = application.applicationContext
     val devices = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
+    val errorText = MutableLiveData<String?>(null)
 
     val isMockInterfaceAddressValid: Boolean by lazy {
         radioInterfaceService.isAddressValid(radioInterfaceService.mockInterfaceAddress)
@@ -86,6 +87,10 @@ class BTScanModel @Inject constructor(
                 }
             }
         }.launchIn(viewModelScope)
+
+        serviceRepository.statusMessage
+            .onEach { errorText.value = it }
+            .launchIn(viewModelScope)
 
         debug("BTScanModel created")
     }
@@ -133,8 +138,6 @@ class BTScanModel @Inject constructor(
         super.onCleared()
         debug("BTScanModel cleared")
     }
-
-    val errorText = MutableLiveData<String?>(null)
 
     fun setErrorText(text: String) {
         errorText.value = text

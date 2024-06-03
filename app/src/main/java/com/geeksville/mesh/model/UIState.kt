@@ -127,8 +127,6 @@ class UIViewModel @Inject constructor(
     val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()
     val selectedBluetooth get() = radioInterfaceService.getDeviceAddress()?.getOrNull(0) == 'x'
 
-    val wantConfigState get() = radioConfigRepository.wantConfigState
-
     private val _packets = MutableStateFlow<List<Packet>>(emptyList())
     val packets: StateFlow<List<Packet>> = _packets
 
