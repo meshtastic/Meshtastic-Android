@@ -24,7 +24,7 @@
     <string name="node_sort_last_heard">Last heard</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
 
-    <string name="elevation_suffix">ASL</string>
+    <string name="elevation_suffix" translatable="false">MSL</string>
 
     <string name="channel_name">Channel Name</string>
     <string name="channel_options">Channel options</string>
@@ -167,9 +167,11 @@
     <string name="direct_message">Direct Message</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <string name="nodedb_reset_description">This will clear all nodes from this list.</string>
+    <string name="delivery_confirmed">Delivery confirmed</string>
+    <string name="error">Error</string>
     <string name="ignore">Ignore</string>
-    <string name="ignore_add">Add \'%s\' to ignore list? Your radio will reboot after making this change.</string>
-    <string name="ignore_remove">Remove \'%s\' from ignore list? Your radio will reboot after making this change.</string>
+    <string name="ignore_add">Add \'%s\' to ignore list?</string>
+    <string name="ignore_remove">Remove \'%s\' from ignore list?</string>
     <string name="map_select_download_region">Select download region</string>
     <string name="map_tile_download_estimate">Tile download estimate:</string>
     <string name="map_start_download">Start Download</string>
@@ -196,8 +198,8 @@
     <string name="waypoint_new">New waypoint</string>
     <string name="waypoint_received">Received waypoint: %s</string>
     <string name="error_duty_cycle">Duty Cycle limit reached. Cannot send messages right now, please try again later.</string>
-    <string name="forget_node">Forget Node</string>
-    <string name="forget_node_message">This node will be removed from your list until your node receives NodeInfo data from it again.</string>
+    <string name="remove">Remove</string>
+    <string name="remove_node_text">This node will be removed from your list until your node receives data from it again.</string>
     <string name="mute">Mute</string>
     <string name="mute_notifications">Mute notifications</string>
     <string name="mute_8_hours">8 hours</string>

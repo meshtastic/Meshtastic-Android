@@ -316,17 +316,16 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun forgetNode(nodeNum: Int)  {
+    fun removeNode(nodeNum: Int) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            val packetId = meshService?.packetId ?: return
+            val packetId = meshService?.packetId ?: return@launch
             meshService?.removeByNodenum(packetId, nodeNum)
-            viewModelScope.launch(Dispatchers.IO) {
-                nodeDB.delNode(nodeNum)
-            }
+            nodeDB.deleteNode(nodeNum)
         } catch (ex: RemoteException) {
             errormsg("Request traceroute error: ${ex.message}")
         }
     }
+
     fun requestPosition(destNum: Int, position: Position = Position(0.0, 0.0, 0)) {
         try {
             meshService?.requestPosition(destNum, position)

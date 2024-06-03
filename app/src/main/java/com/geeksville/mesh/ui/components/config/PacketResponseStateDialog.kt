@@ -16,7 +16,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
@@ -51,11 +50,11 @@ fun <T> PacketResponseStateDialog(
                     if (state.total == state.completed) onComplete()
                 }
                 if (state is ResponseState.Success) {
-                    Text("Delivery confirmed")
+                    Text(text = stringResource(id = R.string.delivery_confirmed))
                 }
                 if (state is ResponseState.Error) {
-                    Text(text = "Error\n", textAlign = TextAlign.Center)
-                    Text(state.error)
+                    Text(text = stringResource(id = R.string.error), minLines = 2)
+                    Text(text = state.error)
                 }
             }
         },

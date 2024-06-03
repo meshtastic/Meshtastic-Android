@@ -71,9 +71,6 @@ class NodeDB @Inject constructor(
 
     fun myNodeInfoFlow(): Flow<MyNodeInfo?> = nodeInfoDao.getMyNodeInfo()
 
-    fun delNode(num: Int) {
-        nodeInfoDao.delNode(num)
-    }
     suspend fun upsert(node: NodeInfo) = withContext(Dispatchers.IO) {
         nodeInfoDao.upsert(node)
     }
@@ -85,5 +82,9 @@ class NodeDB @Inject constructor(
             setMyNodeInfo(mi) // set MyNodeInfo first
             putAll(nodes)
         }
+    }
+
+    suspend fun deleteNode(num: Int) = withContext(Dispatchers.IO) {
+        nodeInfoDao.deleteNode(num)
     }
 }

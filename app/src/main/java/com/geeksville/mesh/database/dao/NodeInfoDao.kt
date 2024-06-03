@@ -83,5 +83,5 @@ interface NodeInfoDao {
     fun clearNodeInfo()
 
     @Query("DELETE FROM NodeInfo WHERE num=:num")
-    fun delNode(num: Int)
+    fun deleteNode(num: Int)
 }
