@@ -20,6 +20,7 @@
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Channel</string>
     <string name="node_sort_distance">Distance</string>
+    <string name="node_sort_hops_away">Hops away</string>
     <string name="node_sort_last_heard">Last heard</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
 
