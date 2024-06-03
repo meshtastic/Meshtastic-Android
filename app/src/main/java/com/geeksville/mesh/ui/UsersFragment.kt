@@ -141,16 +141,15 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                         debug("requesting traceroute for '${user.longName}'")
                         model.requestTraceroute(node.num)
                     }
-                    R.id.forget_node -> {
+                    R.id.remove -> {
 
                         MaterialAlertDialogBuilder(requireContext())
-                            .setTitle(R.string.forget_node)
-                            .setMessage(getString(R.string.forget_node_message))
+                            .setTitle(R.string.remove)
+                            .setMessage(getString(R.string.remove_node_text))
                             .setNeutralButton(R.string.cancel) { _, _ -> }
-                            .setPositiveButton(R.string.forget_node) {_,_ ->
-                                debug("Forgetting node '${user.longName}'")
-                                model.forgetNode(node.num)
-                                onNodesChanged(nodes)
+                            .setPositiveButton(R.string.send) {_,_ ->
+                                debug("removing node '${user.longName}'")
+                                model.removeNode(node.num)
                             }
                             .show()
 
