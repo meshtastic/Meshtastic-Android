@@ -7,16 +7,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.updateAndGet
 import javax.inject.Inject
 import javax.inject.Singleton
-
-data class WantConfigState(
-    var nodeCount: Int = 0,
-    var channelCount: Int = 0,
-    var configCount: Int = 0,
-    var moduleCount: Int = 0,
-)
 
 /**
  * Repository class for managing the [IMeshService] instance and connection state
@@ -50,11 +42,14 @@ class ServiceRepository @Inject constructor() : Logging {
         _errorMessage.value = null
     }
 
-    private val _wantConfigState = MutableStateFlow(WantConfigState())
-    val wantConfigState: StateFlow<WantConfigState> = _wantConfigState
+    private val _statusMessage = MutableStateFlow<String?>(null)
+    val statusMessage: StateFlow<String?> get() = _statusMessage
 
-    fun setWantConfigState(update: (old: WantConfigState) -> WantConfigState): WantConfigState =
-        _wantConfigState.updateAndGet(update)
+    fun setStatusMessage(text: String) {
+        if (connectionState.value != MeshService.ConnectionState.CONNECTED) {
+            _statusMessage.value = text
+        }
+    }
 
     private val _meshPacketFlow = MutableSharedFlow<MeshPacket>()
     val meshPacketFlow: SharedFlow<MeshPacket> get() = _meshPacketFlow

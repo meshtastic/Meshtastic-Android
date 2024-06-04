@@ -7,21 +7,20 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
@@ -142,16 +141,15 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                         debug("requesting traceroute for '${user.longName}'")
                         model.requestTraceroute(node.num)
                     }
-                    R.id.forget_node -> {
+                    R.id.remove -> {
 
                         MaterialAlertDialogBuilder(requireContext())
-                            .setTitle(R.string.forget_node)
-                            .setMessage(getString(R.string.forget_node_message))
+                            .setTitle(R.string.remove)
+                            .setMessage(getString(R.string.remove_node_text))
                             .setNeutralButton(R.string.cancel) { _, _ -> }
-                            .setPositiveButton(R.string.forget_node) {_,_ ->
-                                debug("Forgetting node '${user.longName}'")
-                                model.forgetNode(node.num)
-                                onNodesChanged(nodes)
+                            .setPositiveButton(R.string.send) {_,_ ->
+                                debug("removing node '${user.longName}'")
+                                model.removeNode(node.num)
                             }
                             .show()
 
@@ -262,7 +260,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         binding.nodeFilter.initFilter()
 
         model.filteredNodes.asLiveData().observe(viewLifecycleOwner) { nodeMap ->
-            nodesAdapter.onNodesChanged(nodeMap.values.toTypedArray())
+            nodesAdapter.onNodesChanged(nodeMap.toTypedArray())
         }
 
         model.localConfig.asLiveData().observe(viewLifecycleOwner) { config ->
@@ -343,17 +341,24 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
     private fun ComposeView.initFilter() {
         this.setContent {
-            val filterText by model.nodeFilterText.collectAsState()
+            val nodeViewState by model.nodeViewState.collectAsStateWithLifecycle()
+
             AppTheme {
-                Box(
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp)
-                        .shadow(8.dp)
                 ) {
                     NodeFilterTextField(
-                        filterText = filterText,
-                        onTextChanged = { model.setNodeFilterText(it) }
+                        filterText = nodeViewState.filter,
+                        onTextChanged = model::setNodeFilterText,
+                        modifier = Modifier.weight(1f)
+                    )
+                    NodeSortButton(
+                        currentSortOption = nodeViewState.sort,
+                        onSortSelected = model::setSortOption,
+                        includeUnknown = nodeViewState.includeUnknown,
+                        onToggleIncludeUnknown = model::toggleIncludeUnknown,
                     )
                 }
             }

@@ -2,6 +2,7 @@ package com.geeksville.mesh.model
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.database.dao.NodeInfoDao
@@ -20,7 +21,6 @@ class NodeDB @Inject constructor(
     processLifecycle: Lifecycle,
     private val nodeInfoDao: NodeInfoDao,
 ) {
-
     // hardware info about our local device (can be null)
     private val _myNodeInfo = MutableStateFlow<MyNodeInfo?>(null)
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = _myNodeInfo
@@ -58,11 +58,19 @@ class NodeDB @Inject constructor(
             .launchIn(processLifecycle.coroutineScope)
     }
 
+    fun getNodes(
+        sort: NodeSortOption = NodeSortOption.LAST_HEARD,
+        filter: String = "",
+        includeUnknown: Boolean = true,
+    ) = nodeInfoDao.getNodes(
+        sort = sort.sqlValue,
+        filter = filter,
+        includeUnknown = includeUnknown,
+        unknownHwModel = MeshProtos.HardwareModel.UNSET
+    )
+
     fun myNodeInfoFlow(): Flow<MyNodeInfo?> = nodeInfoDao.getMyNodeInfo()
-    fun nodeInfoFlow(): Flow<List<NodeInfo>> = nodeInfoDao.getNodes()
-    fun delNode(num: Int) {
-        nodeInfoDao.delNode(num)
-    }
+
     suspend fun upsert(node: NodeInfo) = withContext(Dispatchers.IO) {
         nodeInfoDao.upsert(node)
     }
@@ -74,5 +82,9 @@ class NodeDB @Inject constructor(
             setMyNodeInfo(mi) // set MyNodeInfo first
             putAll(nodes)
         }
+    }
+
+    suspend fun deleteNode(num: Int) = withContext(Dispatchers.IO) {
+        nodeInfoDao.deleteNode(num)
     }
 }

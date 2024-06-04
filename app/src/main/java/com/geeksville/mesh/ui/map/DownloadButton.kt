@@ -1,4 +1,4 @@
-package com.geeksville.mesh.ui.map.components
+package com.geeksville.mesh.ui.map
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -16,7 +16,7 @@ import androidx.compose.ui.res.stringResource
 import com.geeksville.mesh.R
 
 @Composable
-fun DownloadButton(
+internal fun DownloadButton(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {

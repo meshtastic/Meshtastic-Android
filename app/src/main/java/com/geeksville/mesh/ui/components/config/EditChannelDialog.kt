@@ -1,6 +1,7 @@
 package com.geeksville.mesh.ui.components.config
 
 import android.util.Base64
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -171,6 +172,7 @@ fun EditChannelDialog(
         buttons = {
             Row(
                 modifier = modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Button(

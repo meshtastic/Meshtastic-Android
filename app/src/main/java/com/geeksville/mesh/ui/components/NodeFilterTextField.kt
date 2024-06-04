@@ -13,8 +13,14 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -26,15 +32,17 @@ import com.geeksville.mesh.ui.theme.AppTheme
 
 @Composable
 fun NodeFilterTextField(
-    filterText : String = "",
-    onTextChanged : (String) -> Unit
+    filterText : String,
+    onTextChanged : (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val focusManager = LocalFocusManager.current
+    var isFocused by remember { mutableStateOf(false) }
 
     OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = modifier
             .heightIn(max = 48.dp)
+            .onFocusEvent { isFocused = it.isFocused }
             .background(MaterialTheme.colors.background),
         value = filterText,
         placeholder = {
@@ -44,13 +52,22 @@ fun NodeFilterTextField(
                 color = MaterialTheme.colors.onBackground.copy(alpha = 0.35F)
             )
         },
+        leadingIcon = {
+            Icon(
+                Icons.Default.Search,
+                contentDescription = stringResource(id = R.string.node_filter_placeholder),
+            )
+        },
         onValueChange = onTextChanged,
         trailingIcon = {
-            if (filterText.isNotEmpty()) {
+            if (filterText.isNotEmpty() || isFocused) {
                 Icon(
                     Icons.Default.Clear,
                     contentDescription = stringResource(id = R.string.desc_node_filter_clear),
-                    modifier = Modifier.clickable { onTextChanged("") }
+                    modifier = Modifier.clickable {
+                        onTextChanged("")
+                        focusManager.clearFocus()
+                    }
                 )
             }
         },

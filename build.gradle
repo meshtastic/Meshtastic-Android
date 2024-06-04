@@ -5,7 +5,7 @@ buildscript {
         useCrashlytics = false
         kotlin_version = '1.9.24'
         hilt_version = '2.51.1'
-        protobuf_version = '4.26.1'
+        protobuf_version = '4.27.0'
     }
 
     repositories {
@@ -13,7 +13,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.4.0'
+        classpath 'com.android.tools.build:gradle:8.4.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
 
@@ -22,7 +22,7 @@ buildscript {
 
         // Firebase Crashlytics
         if (useCrashlytics) {
-            classpath 'com.google.gms:google-services:4.4.1'
+            classpath 'com.google.gms:google-services:4.4.2'
             classpath 'com.google.firebase:firebase-crashlytics-gradle:3.0.1'
         }
 
