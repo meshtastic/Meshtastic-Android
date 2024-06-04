@@ -259,7 +259,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
         binding.nodeFilter.initFilter()
 
-        model.filteredNodes.asLiveData().observe(viewLifecycleOwner) { nodeMap ->
+        model.nodeList.asLiveData().observe(viewLifecycleOwner) { nodeMap ->
             nodesAdapter.onNodesChanged(nodeMap.toTypedArray())
         }
 
@@ -341,7 +341,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
     private fun ComposeView.initFilter() {
         this.setContent {
-            val nodeViewState by model.nodeViewState.collectAsStateWithLifecycle()
+            val nodeViewState by model.nodesUiState.collectAsStateWithLifecycle()
 
             AppTheme {
                 Row(

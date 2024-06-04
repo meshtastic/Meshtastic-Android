@@ -16,11 +16,14 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PacketDao {
 
-    @Query("Select * from packet order by received_time asc")
-    fun getAllPackets(): Flow<List<Packet>>
+    @Query("SELECT * FROM packet WHERE port_num = :portNum ORDER BY received_time ASC")
+    fun getAllPackets(portNum: Int): Flow<List<Packet>>
 
     @Query("Select * from packet where port_num = 1 order by received_time desc")
     fun getContactKeys(): Flow<Map<@MapColumn(columnName = "contact_key") String, Packet>>
+
+    @Query("SELECT COUNT(*) FROM packet WHERE port_num = 1 AND contact_key = :contact")
+    suspend fun getMessageCount(contact: String): Int
 
     @Insert
     fun insert(packet: Packet)
@@ -31,11 +34,11 @@ interface PacketDao {
     @Query("Select * from packet where data = :data")
     fun findDataPacket(data: DataPacket): Packet?
 
-    @Query("Delete from packet where port_num = 1")
-    fun deleteAllMessages()
-
     @Query("Delete from packet where uuid in (:uuidList)")
     fun deleteMessages(uuidList: List<Long>)
+
+    @Query("DELETE FROM packet WHERE contact_key IN (:contactList)")
+    fun deleteContacts(contactList: List<String>)
 
     @Query("Delete from packet where uuid=:uuid")
     fun _delete(uuid: Long)

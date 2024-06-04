@@ -355,13 +355,7 @@ class MessagesFragment : Fragment(), Logging {
                         .setMessage(deleteMessagesString)
                         .setPositiveButton(getString(R.string.delete)) { _, _ ->
                             debug("User clicked deleteButton")
-                            // all items selected --> deleteAllMessages()
-                            val messagesTotal = model.packets.value.filter { it.port_num == 1 }
-                            if (selectedList.size == messagesTotal.size) {
-                                model.deleteAllMessages()
-                            } else {
-                                model.deleteMessages(selectedList.map { it.uuid })
-                            }
+                            model.deleteMessages(selectedList.map { it.uuid })
                             mode.finish()
                         }
                         .setNeutralButton(R.string.cancel) { _, _ ->

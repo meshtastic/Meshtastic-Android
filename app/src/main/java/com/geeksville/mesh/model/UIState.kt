@@ -18,7 +18,6 @@ import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
-import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
@@ -127,9 +126,6 @@ class UIViewModel @Inject constructor(
     val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()
     val selectedBluetooth get() = radioInterfaceService.getDeviceAddress()?.getOrNull(0) == 'x'
 
-    private val _packets = MutableStateFlow<List<Packet>>(emptyList())
-    val packets: StateFlow<List<Packet>> = _packets
-
     private val _localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
     val localConfig: StateFlow<LocalConfig> = _localConfig
     val config get() = _localConfig.value
@@ -160,7 +156,7 @@ class UIViewModel @Inject constructor(
         includeUnknown.value = !includeUnknown.value
     }
 
-    val nodeViewState: StateFlow<NodesUiState> = combine(
+    val nodesUiState: StateFlow<NodesUiState> = combine(
         nodeFilterText,
         nodeSortOption,
         includeUnknown,
@@ -177,7 +173,7 @@ class UIViewModel @Inject constructor(
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val filteredNodes: StateFlow<List<NodeInfo>> = nodeViewState.flatMapLatest { state ->
+    val nodeList: StateFlow<List<NodeInfo>> = nodesUiState.flatMapLatest { state ->
         nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
     }.stateIn(
         scope = viewModelScope,
@@ -198,11 +194,6 @@ class UIViewModel @Inject constructor(
             radioConfigRepository.clearErrorMessage()
         }.launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            packetRepository.getAllPackets().collect { packets ->
-                _packets.value = packets
-            }
-        }
         radioConfigRepository.localConfigFlow.onEach { config ->
             _localConfig.value = config
         }.launchIn(viewModelScope)
@@ -249,28 +240,11 @@ class UIViewModel @Inject constructor(
         packetRepository.getMessagesFrom(contactKey)
     }.asLiveData()
 
-    val contacts = combine(packetRepository.getContacts(), channels) { contacts, channelSet ->
-        // Add empty channel placeholders (always show Broadcast contacts, even when empty)
-        val placeholder = (0 until channelSet.settingsCount).associate { ch ->
-            val contactKey = "$ch${DataPacket.ID_BROADCAST}"
-            val data = DataPacket(bytes = null, dataType = 1, time = 0L, channel = ch)
-            contactKey to Packet(0L, 1, contactKey, 0L, data)
-        }
-        contacts + (placeholder - contacts.keys)
-    }.asLiveData()
-
-    val contactSettings get() = packetRepository.getContactSettings()
-
-    fun setMuteUntil(contacts: List<String>, until: Long) = viewModelScope.launch(Dispatchers.IO) {
-        packetRepository.setMuteUntil(contacts, until)
-    }
-
     @OptIn(ExperimentalCoroutinesApi::class)
-    val waypoints: LiveData<Map<Int, Packet>> = _packets.mapLatest { list ->
-        list.filter { it.port_num == Portnums.PortNum.WAYPOINT_APP_VALUE }
-            .associateBy { packet -> packet.data.waypoint!!.id }
+    val waypoints = packetRepository.getWaypoints().mapLatest { list ->
+        list.associateBy { packet -> packet.data.waypoint!!.id }
             .filterValues { it.data.waypoint!!.expire > System.currentTimeMillis() / 1000 }
-    }.asLiveData()
+    }
 
     fun generatePacketId(): Int? {
         return try {
@@ -332,10 +306,6 @@ class UIViewModel @Inject constructor(
         } catch (ex: RemoteException) {
             errormsg("Request position error: ${ex.message}")
         }
-    }
-
-    fun deleteAllMessages() = viewModelScope.launch(Dispatchers.IO) {
-        packetRepository.deleteAllMessages()
     }
 
     fun deleteMessages(uuidList: List<Long>) = viewModelScope.launch(Dispatchers.IO) {
