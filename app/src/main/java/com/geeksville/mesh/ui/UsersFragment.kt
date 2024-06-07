@@ -126,12 +126,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             popup.setOnMenuItemClickListener { item: MenuItem ->
                 when (item.itemId) {
                     R.id.direct_message -> {
-                        debug("calling MessagesFragment filter: ${node.channel}${user.id}")
-                        model.setContactKey("${node.channel}${user.id}")
-                        parentFragmentManager.beginTransaction()
-                            .replace(R.id.mainActivityLayout, MessagesFragment())
-                            .addToBackStack(null)
-                            .commit()
+                        val contactKey = "${node.channel}${user.id}"
+                        debug("calling MessagesFragment filter: $contactKey")
+                        parentFragmentManager.navigateToMessages(contactKey, user.longName)
                     }
                     R.id.request_position -> {
                         debug("requesting position for '${user.longName}'")

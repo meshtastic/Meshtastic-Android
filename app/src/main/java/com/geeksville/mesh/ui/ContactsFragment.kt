@@ -91,11 +91,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                 if (actionMode != null) clickItem(holder, contact.contactKey)
                 else {
                     debug("calling MessagesFragment filter:${contact.contactKey}")
-                    // TODO model.setContactKey(contact.contactKey)
-                    parentFragmentManager.beginTransaction()
-                        .replace(R.id.mainActivityLayout, MessagesFragment())
-                        .addToBackStack(null)
-                        .commit()
+                    parentFragmentManager.navigateToMessages(contact.contactKey, contact.longName)
                 }
             }
 

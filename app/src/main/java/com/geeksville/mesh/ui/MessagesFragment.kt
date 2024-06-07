@@ -9,8 +9,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.core.view.allViews
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -41,6 +43,16 @@ internal fun getShortDateTime(date: Date): String {
     } else {
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(date)
     }
+}
+
+internal fun FragmentManager.navigateToMessages(contactKey: String, contactName: String) {
+    val messagesFragment = MessagesFragment().apply {
+        arguments = bundleOf("contactKey" to contactKey, "contactName" to contactName)
+    }
+    beginTransaction()
+        .add(R.id.mainActivityLayout, messagesFragment)
+        .addToBackStack(null)
+        .commit()
 }
 
 @AndroidEntryPoint
@@ -244,10 +256,14 @@ class MessagesFragment : Fragment(), Logging {
             parentFragmentManager.popBackStack()
         }
 
+        val contactKey = arguments?.getString("contactKey").toString()
+        val contactName = arguments?.getString("contactName").toString()
+        binding.messageTitle.text = contactName
+
         fun sendMessageInputText() {
             val str = binding.messageInputText.text.toString().trim()
             if (str.isNotEmpty()) {
-                model.sendMessage(str)
+                model.sendMessage(str, contactKey)
                 messagesAdapter.scrollToBottom()
             }
             binding.messageInputText.setText("") // blow away the string the user just entered
@@ -267,8 +283,7 @@ class MessagesFragment : Fragment(), Logging {
         layoutManager.stackFromEnd = true // We want the last rows to always be shown
         binding.messageListView.layoutManager = layoutManager
 
-        model.messages.observe(viewLifecycleOwner) {
-            if (it.isNotEmpty() && it.first().contact_key != model.contactKey.value) return@observe
+        model.getMessagesFrom(contactKey).asLiveData().observe(viewLifecycleOwner) {
             debug("New messages received: ${it.size}")
             messagesAdapter.onMessagesChanged(it)
         }
@@ -284,10 +299,6 @@ class MessagesFragment : Fragment(), Logging {
                     subView.isEnabled = isConnected
                 }
             }
-        }
-
-        model.contactKey.asLiveData().observe(viewLifecycleOwner) {
-            binding.messageTitle.text = model.getContactName(it)
         }
 
         model.quickChatActions.asLiveData().observe(viewLifecycleOwner) { actions ->
@@ -313,7 +324,7 @@ class MessagesFragment : Fragment(), Logging {
                             binding.messageInputText.setText(newText)
                             binding.messageInputText.setSelection(newText.length)
                         } else {
-                            model.sendMessage(action.message)
+                            model.sendMessage(action.message, contactKey)
                             messagesAdapter.scrollToBottom()
                         }
                     }
