@@ -18,7 +18,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -196,8 +195,8 @@ fun MapView(
         requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
     }
 
-    val nodes by model.filteredNodes.collectAsStateWithLifecycle(emptyList())
-    val waypoints by model.waypoints.observeAsState(emptyMap())
+    val nodes by model.nodeList.collectAsStateWithLifecycle()
+    val waypoints by model.waypoints.collectAsStateWithLifecycle(emptyMap())
 
     var showDownloadButton: Boolean by remember { mutableStateOf(false) }
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
@@ -265,7 +264,7 @@ fun MapView(
     fun showMarkerLongPressDialog(id: Int) {
         performHapticFeedback()
         debug("marker long pressed id=${id}")
-        val waypoint = model.waypoints.value?.get(id)?.data?.waypoint ?: return
+        val waypoint = waypoints[id]?.data?.waypoint ?: return
         // edit only when unlocked or lockedTo myNodeNum
         if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected())
             showEditWaypointDialog = waypoint

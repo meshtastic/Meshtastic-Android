@@ -16,28 +16,70 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PacketDao {
 
-    @Query("Select * from packet order by received_time asc")
-    fun getAllPackets(): Flow<List<Packet>>
+    @Query(
+        """
+    SELECT * FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+        AND port_num = :portNum
+    ORDER BY received_time ASC
+    """
+    )
+    fun getAllPackets(portNum: Int): Flow<List<Packet>>
 
-    @Query("Select * from packet where port_num = 1 order by received_time desc")
+    @Query(
+        """
+    SELECT * FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+        AND port_num = 1
+    ORDER BY received_time DESC
+    """
+    )
     fun getContactKeys(): Flow<Map<@MapColumn(columnName = "contact_key") String, Packet>>
+
+    @Query(
+        """
+    SELECT COUNT(*) FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+        AND port_num = 1 AND contact_key = :contact
+    """
+    )
+    suspend fun getMessageCount(contact: String): Int
 
     @Insert
     fun insert(packet: Packet)
 
-    @Query("Select * from packet where port_num = 1 and contact_key = :contact order by received_time asc")
+    @Query(
+        """
+    SELECT * FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+        AND port_num = 1 AND contact_key = :contact
+    ORDER BY received_time ASC
+    """
+    )
     fun getMessagesFrom(contact: String): Flow<List<Packet>>
 
-    @Query("Select * from packet where data = :data")
+    @Query(
+        """
+    SELECT * FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+        AND data = :data
+    """
+    )
     fun findDataPacket(data: DataPacket): Packet?
 
-    @Query("Delete from packet where port_num = 1")
-    fun deleteAllMessages()
-
-    @Query("Delete from packet where uuid in (:uuidList)")
+    @Query("DELETE FROM packet WHERE uuid in (:uuidList)")
     fun deleteMessages(uuidList: List<Long>)
 
-    @Query("Delete from packet where uuid=:uuid")
+    @Query(
+        """
+    DELETE FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+        AND contact_key IN (:contactList)
+    """
+    )
+    fun deleteContacts(contactList: List<String>)
+
+    @Query("DELETE FROM packet WHERE uuid=:uuid")
     fun _delete(uuid: Long)
 
     @Transaction
@@ -60,7 +102,13 @@ interface PacketDao {
         findDataPacket(data)?.let { update(it.copy(data = new)) }
     }
 
-    @Query("Select data from packet order by received_time asc")
+    @Query(
+        """
+    SELECT data FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+    ORDER BY received_time ASC
+    """
+    )
     fun getDataPackets(): List<DataPacket>
 
     @Transaction
@@ -72,7 +120,14 @@ interface PacketDao {
     fun getQueuedPackets(): List<DataPacket>? =
         getDataPackets().filter { it.status == MessageStatus.QUEUED }
 
-    @Query("Select * from packet where port_num = 8 order by received_time asc")
+    @Query(
+        """
+    SELECT * FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+        AND port_num = 8
+    ORDER BY received_time ASC
+    """
+    )
     fun getAllWaypoints(): List<Packet>
 
     @Transaction

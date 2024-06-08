@@ -126,12 +126,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             popup.setOnMenuItemClickListener { item: MenuItem ->
                 when (item.itemId) {
                     R.id.direct_message -> {
-                        debug("calling MessagesFragment filter: ${node.channel}${user.id}")
-                        model.setContactKey("${node.channel}${user.id}")
-                        parentFragmentManager.beginTransaction()
-                            .replace(R.id.mainActivityLayout, MessagesFragment())
-                            .addToBackStack(null)
-                            .commit()
+                        val contactKey = "${node.channel}${user.id}"
+                        debug("calling MessagesFragment filter: $contactKey")
+                        parentFragmentManager.navigateToMessages(contactKey, user.longName)
                     }
                     R.id.request_position -> {
                         debug("requesting position for '${user.longName}'")
@@ -259,7 +256,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
         binding.nodeFilter.initFilter()
 
-        model.filteredNodes.asLiveData().observe(viewLifecycleOwner) { nodeMap ->
+        model.nodeList.asLiveData().observe(viewLifecycleOwner) { nodeMap ->
             nodesAdapter.onNodesChanged(nodeMap.toTypedArray())
         }
 
@@ -341,7 +338,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
     private fun ComposeView.initFilter() {
         this.setContent {
-            val nodeViewState by model.nodeViewState.collectAsStateWithLifecycle()
+            val nodeViewState by model.nodesUiState.collectAsStateWithLifecycle()
 
             AppTheme {
                 Row(
