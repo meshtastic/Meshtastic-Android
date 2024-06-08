@@ -62,7 +62,7 @@
     <string name="a_list_of_nodes_in_the_mesh">Popis čvorova u mesh mreži</string>
     <string name="text_messages">Tekstualne poruke</string>
     <string name="channel_invalid">Ovaj URL kanala je nevažeći i ne može se koristiti</string>
-    <string name="debug_panel">Prikaz za otklanjanje pogrešaka</string>
+    <string name="debug_panel">Otklanjanje pogrešaka</string>
     <string name="debug_last_messages">500 zadnjih poruka</string>
     <string name="clear">Očisti</string>
     <string name="updating_firmware">Ažuriranje firmwarea, pričekajte do osam minuta…</string>
