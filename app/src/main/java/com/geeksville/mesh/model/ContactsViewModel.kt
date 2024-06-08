@@ -50,15 +50,17 @@ class ContactsViewModel @Inject constructor(
 ) : ViewModel(), Logging {
 
     val contactList = combine(
+        nodeDB.myNodeInfo,
         packetRepository.getContacts(),
         channelSetRepository.channelSetFlow,
         packetRepository.getContactSettings(),
-    ) { contacts, channelSet, settings ->
+    ) { myNodeInfo, contacts, channelSet, settings ->
+        val myNodeNum = myNodeInfo?.myNodeNum ?: return@combine emptyList()
         // Add empty channel placeholders (always show Broadcast contacts, even when empty)
         val placeholder = (0 until channelSet.settingsCount).associate { ch ->
             val contactKey = "$ch${DataPacket.ID_BROADCAST}"
             val data = DataPacket(bytes = null, dataType = 1, time = 0L, channel = ch)
-            contactKey to Packet(0L, 1, contactKey, 0L, data)
+            contactKey to Packet(0L, myNodeNum, 1, contactKey, 0L, true, data)
         }
 
         (placeholder + contacts).values.map { packet ->
