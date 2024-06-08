@@ -82,6 +82,7 @@ enum class RegionInfo(
     MY_433(RegionCode.MY_433, 433.0f, 435.0f),
     MY_919(RegionCode.MY_919, 919.0f, 924.0f),
     SG_923(RegionCode.SG_923, 917.0f, 925.0f),
+    IL(RegionCode.IL, 917.0f, 920.0f),
     LORA_24(RegionCode.LORA_24, 2400.0f, 2483.5f),
     UNSET(RegionCode.UNSET, 902.0f, 928.0f),
     ;
