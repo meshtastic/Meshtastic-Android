@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="node_filter_placeholder">Filter</string>
-    <string name="desc_node_filter_clear">clear node filter</string>
+    <string name="desc_node_filter_clear">vymazať filter uzlov</string>
     <string name="channel_name">Názov kanála</string>
     <string name="channel_options">Nastavenia kanála</string>
     <string name="qr_code">QR kód</string>
@@ -145,8 +145,8 @@
     <string name="direct_message">Priama správa</string>
     <string name="nodedb_reset">Reset databázy uzlov</string>
     <string name="nodedb_reset_description">Toto vymaže všetky uzlové body zo zoznamu.</string>
-    <string name="delivery_confirmed">Delivery confirmed</string>
-    <string name="error">Error</string>
+    <string name="delivery_confirmed">Doručenie potvrdené</string>
+    <string name="error">Chyba</string>
     <string name="ignore">Ignorovať</string>
     <string name="ignore_add">Pridať \'%s\' do zoznamu ignorovaných?</string>
     <string name="ignore_remove">Odstrániť \'%s\' zo zoznamu ignorovaných?</string>
@@ -176,11 +176,11 @@
     <string name="waypoint_new">Nový cieľový bod</string>
     <string name="waypoint_received">Prijatý cieľový bod: %s</string>
     <string name="error_duty_cycle">Dosiahnutý limit pracovného cyklu. Nedá sa teraz posielať správy, skúste neskôr.</string>
-    <string name="remove">Remove</string>
-    <string name="remove_node_text">This node will be removed from your list until your node receives data from it again.</string>
-    <string name="mute">Mute</string>
-    <string name="mute_notifications">Mute notifications</string>
-    <string name="mute_8_hours">8 hours</string>
-    <string name="mute_1_week">1 week</string>
-    <string name="mute_always">Always</string>
+    <string name="remove">Odstrániť</string>
+    <string name="remove_node_text">Tento uzol bude odstránený z vášho zoznamu, kým váš uzol opäť príjme jeho údaje.</string>
+    <string name="mute">Stlmiť</string>
+    <string name="mute_notifications">Stlmiť notifikácie</string>
+    <string name="mute_8_hours">8 hodín</string>
+    <string name="mute_1_week">1 týždeň</string>
+    <string name="mute_always">Vždy</string>
 </resources>
