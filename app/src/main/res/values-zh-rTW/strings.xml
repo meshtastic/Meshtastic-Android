@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="node_filter_placeholder">過濾器</string>
+    <string name="desc_node_filter_clear">清除節點過濾器</string>
     <string name="channel_name">頻道名稱</string>
     <string name="channel_options">頻道選項</string>
     <string name="qr_code">QRCODE</string>
@@ -36,8 +38,8 @@
     <string name="share">分享</string>
     <string name="disconnected">已中斷連線</string>
     <string name="device_sleeping">設備休眠中</string>
-    <string name="connected_count">已連接：%1$s 的 %2$s 在線</string>
-    <string name="list_of_nodes">網絡中的節點列表</string>
+    <string name="connected_count">已連接：可用的節點數 %1$s 中有 %2$s 在線</string>
+    <string name="list_of_nodes">Mesh網路中的節點列表</string>
     <string name="update_firmware">更新韌體</string>
     <string name="ip_address">IP地址：</string>
     <string name="connected">連接到設備</string>
@@ -83,7 +85,7 @@
     <string name="are_you_sure_change_default">您確定要切換到預設頻道嗎？</string>
     <string name="reset_to_defaults">恢復預設設置</string>
     <string name="apply">套用</string>
-    <string name="no_app_found">找不到可用于发送 URL 的应用程序。</string>
+    <string name="no_app_found">找不到應用程式來發送網址。</string>
     <string name="theme">主題</string>
     <string name="theme_light">淺色</string>
     <string name="theme_dark">深色</string>
@@ -91,8 +93,8 @@
     <string name="choose_theme">選擇主題</string>
     <string name="background_required">背景定位</string>
     <string name="why_background_required">使用此功能，您必須授予「一直允許」的位置權限選項。\n這允許 Meshtastic 讀取您的智慧手機位置，並在應用程式關閉或未使用時，將位置發送給網狀網絡中的其他成員。</string>
-    <string name="required_permissions">所需權限：</string>
-    <string name="provide_location_to_mesh">提供網格的位置</string>
+    <string name="required_permissions">需要權限：</string>
+    <string name="provide_location_to_mesh">將手機位置提供給Mesh網路</string>
     <string name="camera_required">相機權限</string>
     <string name="why_camera_required">我們必須獲得訪問攝像頭的權限才能讀取 QR 碼。不會保存任何圖片或影片。</string>
     <string name="notification_required">通知欄權限</string>
@@ -132,14 +134,16 @@
     <string name="quick_chat_new">新的快速聊天</string>
     <string name="quick_chat_edit">編輯快速聊天</string>
     <string name="quick_chat_append">附加到訊息</string>
-    <string name="quick_chat_instant">实时发送</string>
-    <string name="factory_reset">恢复出厂设置</string>
+    <string name="quick_chat_instant">即時發送</string>
+    <string name="factory_reset">恢復出廠設置</string>
     <string name="factory_reset_description">這將清除您所做的所有設備配置。</string>
     <string name="bluetooth_disabled">藍牙已禁用</string>
     <string name="permission_missing_31">Meshtastic 需要附近設備許可才能通過藍牙查找和連接設備。 您可以在不使用時將其關閉。</string>
     <string name="direct_message">直接發訊息</string>
     <string name="nodedb_reset">節點數據庫重置</string>
     <string name="nodedb_reset_description">這將從該列表中清除所有節點。</string>
+    <string name="delivery_confirmed">已確認送達</string>
+    <string name="error">錯誤</string>
     <string name="ignore">忽略</string>
     <string name="ignore_add">將 \'%s\' 加入忽略清單嗎？</string>
     <string name="ignore_remove">從忽略清單中移除 \'%s\' 嗎？</string>
@@ -169,4 +173,11 @@
     <string name="waypoint_new">新建航點</string>
     <string name="waypoint_received">收到編輯航點：%s</string>
     <string name="error_duty_cycle">達到循環工作週期限制。目前無法發送訊息，請稍後再試。</string>
+    <string name="remove">移除</string>
+    <string name="remove_node_text">該節點將從您的列表中移除，直到您的節點再次收到來自該節點的數據。</string>
+    <string name="mute">靜音</string>
+    <string name="mute_notifications">靜音通知</string>
+    <string name="mute_8_hours">8小時</string>
+    <string name="mute_1_week">1週</string>
+    <string name="mute_always">總是</string>
 </resources>
