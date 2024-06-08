@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="node_filter_placeholder">Filtr</string>
+    <string name="desc_node_filter_clear">vyčistit filtr uzlů</string>
     <string name="channel_name">Název kanálu</string>
     <string name="channel_options">Nastavení kanálu</string>
     <string name="qr_code">QR kód</string>
@@ -96,8 +98,8 @@
     <string name="camera_required">Oprávnění přístupu k fotoaparátu</string>
     <string name="why_camera_required">Pro čtení QR kódů musíme mít přístup k fotoaparátu. Žádné obrázky nebo videa nebudou uloženy.</string>
     <string name="notification_required">Povolení oznámení</string>
-    <string name="why_notification_required">Meshtastic needs permission for service and message notifications.</string>
-    <string name="notification_denied">Notification permission denied. To turn on notifications, access: Android Settings &gt; Apps &gt; Meshtastic &gt; Notifications.</string>
+    <string name="why_notification_required">Meshtastic potřebuje oprávnění pro notifikace služeb a správ.</string>
+    <string name="notification_denied">Oprávnění k notifikacím zamítnuto. Chcete-li zapnout notifikace, jděte na: Nastavení Android &gt; Aplikace &gt; Meshtastic &gt; Oznámení.</string>
     <string name="modem_config_slow_short">Short Range / Slow</string>
     <string name="modem_config_slow_medium">Medium Range / Slow</string>
     <plurals name="delete_messages">
@@ -125,7 +127,7 @@
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Zobrazit úvod</string>
     <string name="intro_welcome">Vítejte v Meshtastic</string>
-    <string name="intro_welcome_text">Meshtastic is an open-source, off-grid, encrypted communication platform. The Meshtastic radios form a mesh network and communicate using the LoRa protocol to send text messages.</string>
+    <string name="intro_welcome_text">Meshtastic je open-source, mimo síťová, šifrovaná komunikační platforma. Meshtastic vysílače tvoří mesh síť a komunikují pomocí LoRa protokolu k odesílání textových zpráv.</string>
     <string name="intro_started">Pojďme začít!</string>
     <string name="intro_started_text">Připojte své Meshtastické zařízení pomocí buď Bluetooth, Sériové linky nebo WiFi. \n\nMůžete vidět, která zařízení jsou kompatibilní na www.meshtastic.org/docs/hardware</string>
     <string name="intro_encryption">"Nastavuji šifrování"</string>
@@ -143,8 +145,10 @@
     <string name="direct_message">Přímá zpráva</string>
     <string name="nodedb_reset">Reset NodeDB</string>
     <string name="nodedb_reset_description">Tímto vymažete všechny uzly z tohoto seznamu.</string>
+    <string name="delivery_confirmed">Dodání potvrzeno</string>
+    <string name="error">Chyba</string>
     <string name="ignore">Ignorovat</string>
-    <string name="ignore_add">Add \'%s\' to ignore list?</string>
+    <string name="ignore_add">Přidat \'%s\' do seznamu ignorovaných?</string>
     <string name="ignore_remove">Odstranit \'%s\' ze seznamu ignorování?</string>
     <string name="map_select_download_region">Vyberte oblast stahování</string>
     <string name="map_tile_download_estimate">Odhad stažení dlaždic:</string>
@@ -160,8 +164,8 @@
     <string name="map_cache_info">Kapacita mezipaměti: %1$.2f MB\nvyužití mezipaměti: %2$.2f MB</string>
     <string name="map_clear_tiles">Vymazat stažené dlaždice</string>
     <string name="map_tile_source">Zdroj dlaždic</string>
-    <string name="map_purge_success">SQL Cache purged for %s</string>
-    <string name="map_purge_fail">SQL Cache purge failed, see logcat for details</string>
+    <string name="map_purge_success">Mezipaměť SQL vyčištěna pro %s</string>
+    <string name="map_purge_fail">Vyčištění mezipaměti SQL selhalo, podrobnosti naleznete v logcat</string>
     <string name="map_cache_manager">Správce mezipaměti</string>
     <string name="map_download_complete">Stahování dokončeno!</string>
     <string name="map_download_errors">Stahování dokončeno s %d chybami</string>
@@ -172,4 +176,11 @@
     <string name="waypoint_new">Nový waypoint</string>
     <string name="waypoint_received">Přijatý waypoint: %s</string>
     <string name="error_duty_cycle">Byl dosažen limit pro cyklus. Momentálně nelze odesílat zprávy, zkuste to prosím později.</string>
+    <string name="remove">Odstranit</string>
+    <string name="remove_node_text">Tento uzel bude odstraněn z vašeho seznamu, dokud z něj váš uzel znovu neobdrží data.</string>
+    <string name="mute">Ztlumit</string>
+    <string name="mute_notifications">Ztlumit notifikace</string>
+    <string name="mute_8_hours">8 hodin</string>
+    <string name="mute_1_week">1 týden</string>
+    <string name="mute_always">Vždy</string>
 </resources>
