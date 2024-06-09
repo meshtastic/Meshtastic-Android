@@ -39,11 +39,13 @@ fun Uri.toChannelSet(): ChannelSet {
 val ChannelSet.subscribeList: List<String>
     get() = settingsList.filter { it.downlinkEnabled }.map { Channel(it, loraConfig).name }
 
+fun ChannelSet.getChannel(index: Int): Channel? =
+    if (settingsCount > index) Channel(getSettings(index), loraConfig) else null
+
 /**
  * Return the primary channel info
  */
-val ChannelSet.primaryChannel: Channel?
-    get() = if (settingsCount > 0) Channel(getSettings(0), loraConfig) else null
+val ChannelSet.primaryChannel: Channel? get() = getChannel(0)
 
 /**
  * Return a URL that represents the [ChannelSet]
