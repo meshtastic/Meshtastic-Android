@@ -46,6 +46,9 @@ import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.toByteString
 import java.security.SecureRandom
 
+// Allows 0, 128, 192, and 256-bit PSKs
+private val VALID_PSK_SIZES = setOf(0, 16, 24, 32)
+
 @Composable
 fun EditChannelDialog(
     channelSettings: ChannelProtos.ChannelSettings,
@@ -99,7 +102,7 @@ fun EditChannelDialog(
                                 pskString = it // empty (no crypto), 128 or 256 bit only
                                 val decoded = Base64.decode(it, Base64.DEFAULT).toByteString()
                                 val fullPsk = Channel(channelSettings { psk = decoded }).psk
-                                if (fullPsk.size() in setOf(0, 16, 32)) {
+                                if (fullPsk.size() in VALID_PSK_SIZES) {
                                     channelInput = channelInput.copy { psk = decoded }
                                 }
                             } catch (ex: Throwable) {
