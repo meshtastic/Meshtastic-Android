@@ -3,9 +3,11 @@ package com.geeksville.mesh.repository.location
 import android.annotation.SuppressLint
 import android.app.Application
 import android.location.LocationManager
+import androidx.core.location.LocationCompat
 import androidx.core.location.LocationListenerCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.core.location.LocationRequestCompat
+import androidx.core.location.altitude.AltitudeConverterCompat
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hasBackgroundPermission
@@ -43,6 +45,13 @@ class LocationRepository @Inject constructor(
             .build()
 
         val locationListener = LocationListenerCompat { location ->
+            if (location.hasAltitude() && !LocationCompat.hasMslAltitude(location)) {
+                try {
+                    AltitudeConverterCompat.addMslAltitudeToLocation(context, location)
+                } catch (e: Exception) {
+                    errormsg("addMslAltitudeToLocation() failed", e)
+                }
+            }
             // info("New location: $location")
             trySend(location)
         }
