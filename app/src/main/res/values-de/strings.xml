@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="node_filter_placeholder">Filter</string>
+    <string name="desc_node_filter_clear">node-filter löschen</string>
     <string name="channel_name">Kanalname</string>
     <string name="channel_options">Kanaloptionen</string>
     <string name="qr_code">QR-Code</string>
@@ -141,6 +143,8 @@
     <string name="direct_message">Direktnachricht</string>
     <string name="nodedb_reset">Node-Datenbank zurücksetzen</string>
     <string name="nodedb_reset_description">Dies löscht alle Knoten von dieser Liste.</string>
+    <string name="delivery_confirmed">Zustellung Bestätigt</string>
+    <string name="error">Fehler</string>
     <string name="ignore">Ignorieren</string>
     <string name="ignore_add">\'%s\' zur Ignorierliste hinzufügen? Deine Funkstation wird nach dieser Änderung neu gestartet.</string>
     <string name="ignore_remove">\'%s\' von der Ignorieren-Liste entfernen? Deine Funkstation wird nach dieser Änderung neu starten.</string>
@@ -170,4 +174,11 @@
     <string name="waypoint_new">Wegpunkt hinzufügen</string>
     <string name="waypoint_received">Wegpunkt: %s empfangen</string>
     <string name="error_duty_cycle">Limit für den aktuellen Zyklus erreicht. Nachrichten können momentan nicht gesendet werden, bitte versuchen Sie es später erneut.</string>
+    <string name="remove">Verwerfen</string>
+    <string name="remove_node_text">Diese Node wird aus deiner Liste entfernt, bis deine Node wieder Daten von ihr erhält.</string>
+    <string name="mute">Stummschalten</string>
+    <string name="mute_notifications">Benachrichtigungen stummschalten</string>
+    <string name="mute_8_hours">8 Stunden</string>
+    <string name="mute_1_week">Eine Woche</string>
+    <string name="mute_always">Immer</string>
 </resources>
