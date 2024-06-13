@@ -40,7 +40,9 @@ fun LinkedCoordinates(
         val annotatedString = buildAnnotatedString {
             pushStringAnnotation(
                 tag = "gps",
-                annotation = "geo:${position.latitude},${position.longitude}?z=17&label=${
+                // URI scheme is defined at:
+                //  https://developer.android.com/guide/components/intents-common#Maps
+                annotation = "geo:0,0?q=${position.latitude},${position.longitude}&z=17&label=${
                     URLEncoder.encode(name, "utf-8")
                 }"
             )
