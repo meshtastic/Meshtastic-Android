@@ -1,22 +1,36 @@
 package com.geeksville.mesh.ui
 
-import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import androidx.core.content.ContextCompat
-import androidx.core.view.isVisible
-import androidx.fragment.app.activityViewModels
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.dp
+import androidx.fragment.app.viewModels
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
-import com.geeksville.mesh.databinding.AdapterContactLayoutBinding
-import com.geeksville.mesh.databinding.FragmentContactsBinding
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.ContactsViewModel
+import com.geeksville.mesh.ui.theme.AppTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.TimeUnit
@@ -26,116 +40,36 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
 
     private val actionModeCallback: ActionModeCallback = ActionModeCallback()
     private var actionMode: ActionMode? = null
-    private var _binding: FragmentContactsBinding? = null
+    private val model: ContactsViewModel by viewModels()
 
-    // This property is only valid between onCreateView and onDestroyView.
-    private val binding get() = _binding!!
+    private val contacts get() = model.contactList.value
+    private val selectedList get() = model.selectedContacts.value.toList()
 
-    private val model: ContactsViewModel by activityViewModels()
+    private val selectedContacts get() = contacts.filter { it.contactKey in selectedList }
+    private val isAllMuted get() = selectedContacts.all { it.isMuted }
+    private val selectedCount get() = selectedContacts.sumOf { it.messageCount }
 
-    // Provide a direct reference to each of the views within a data item
-    // Used to cache the views within the item layout for fast access
-    class ViewHolder(itemView: AdapterContactLayoutBinding) :
-        RecyclerView.ViewHolder(itemView.root) {
-        val shortName = itemView.shortName
-        val longName = itemView.longName
-        val lastMessageTime = itemView.lastMessageTime
-        val lastMessageText = itemView.lastMessageText
-        val mutedIcon = itemView.mutedIcon
+    private fun onClick(contact: Contact) {
+        if (actionMode != null) {
+            onLongClick(contact)
+        } else {
+            debug("calling MessagesFragment filter:${contact.contactKey}")
+            parentFragmentManager.navigateToMessages(contact.contactKey, contact.longName)
+        }
     }
 
-    private val contactsAdapter = object : RecyclerView.Adapter<ViewHolder>() {
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val inflater = LayoutInflater.from(requireContext())
-
-            // Inflate the custom layout
-            val contactsView = AdapterContactLayoutBinding.inflate(inflater, parent, false)
-
-            // Return a new holder instance
-            return ViewHolder(contactsView)
+    private fun onLongClick(contact: Contact) {
+        if (actionMode == null) {
+            actionMode = (activity as AppCompatActivity).startSupportActionMode(actionModeCallback)
         }
 
-        var contacts = arrayOf<Contact>()
-        var selectedList = ArrayList<String>()
-
-        private val selectedContacts get() = contacts.filter { it.contactKey in selectedList }
-        val isAllMuted get() = selectedContacts.all { it.isMuted }
-        val selectedCount get() = selectedContacts.sumOf { it.messageCount }
-
-        override fun getItemCount(): Int = contacts.size
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val contact = contacts[position]
-
-            holder.shortName.text = contact.shortName
-            holder.longName.text = contact.longName
-            holder.lastMessageText.text = contact.lastMessageText
-
-            if (contact.lastMessageTime != null) {
-                holder.lastMessageTime.visibility = View.VISIBLE
-                holder.lastMessageTime.text = contact.lastMessageTime
-            } else holder.lastMessageTime.visibility = View.INVISIBLE
-
-            holder.mutedIcon.isVisible = contact.isMuted
-
-            holder.itemView.setOnLongClickListener {
-                clickItem(holder, contact.contactKey)
-                if (actionMode == null) {
-                    actionMode =
-                        (activity as AppCompatActivity).startSupportActionMode(actionModeCallback)
-                }
-                true
-            }
-            holder.itemView.setOnClickListener {
-                if (actionMode != null) clickItem(holder, contact.contactKey)
-                else {
-                    debug("calling MessagesFragment filter:${contact.contactKey}")
-                    parentFragmentManager.navigateToMessages(contact.contactKey, contact.longName)
-                }
-            }
-
-            if (selectedList.contains(contact.contactKey)) {
-                holder.itemView.background = GradientDrawable().apply {
-                    shape = GradientDrawable.RECTANGLE
-                    cornerRadius = 32f
-                    setColor(Color.rgb(127, 127, 127))
-                }
-            } else {
-                holder.itemView.background = GradientDrawable().apply {
-                    shape = GradientDrawable.RECTANGLE
-                    cornerRadius = 32f
-                    setColor(
-                        ContextCompat.getColor(
-                            holder.itemView.context,
-                            R.color.colorAdvancedBackground
-                        )
-                    )
-                }
-            }
-        }
-
-        private fun clickItem(holder: ViewHolder, contactKey: String) {
-            val position = holder.bindingAdapterPosition
-            if (!selectedList.contains(contactKey)) {
-                selectedList.add(contactKey)
-            } else {
-                selectedList.remove(contactKey)
-            }
-            if (selectedList.isEmpty()) {
-                // finish action mode when no items selected
-                actionMode?.finish()
-            } else {
-                // show total items selected on action mode title
-                actionMode?.title = selectedList.size.toString()
-            }
-            actionMode?.invalidate()
-            notifyItemChanged(position)
-        }
-
-        fun onContactsChanged(contacts: List<Contact>) {
-            this.contacts = contacts.toTypedArray()
-            notifyDataSetChanged() // FIXME, this is super expensive and redraws all nodes
+        val selected = model.updateSelectedContacts(contact.contactKey)
+        if (selected.isEmpty()) {
+            // finish action mode when no items selected
+            actionMode?.finish()
+        } else {
+            // show total items selected on action mode title
+            actionMode?.title = selected.size.toString()
         }
     }
 
@@ -145,22 +79,17 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentContactsBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        binding.contactsView.adapter = contactsAdapter
-        binding.contactsView.layoutManager = LinearLayoutManager(requireContext())
-
-        model.contactList.observe(viewLifecycleOwner) {
-            debug("New contacts received: ${it.size}")
-            contactsAdapter.onContactsChanged(it)
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                AppTheme {
+                    ContactsScreen(model, ::onClick, ::onLongClick)
+                }
+            }
         }
     }
 
@@ -168,7 +97,6 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         super.onDestroyView()
         actionMode?.finish()
         actionMode = null
-        _binding = null
     }
 
     private inner class ActionModeCallback : ActionMode.Callback {
@@ -181,7 +109,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
 
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
             menu.findItem(R.id.muteButton).setIcon(
-                if (contactsAdapter.isAllMuted) {
+                if (isAllMuted) {
                     R.drawable.ic_twotone_volume_up_24
                 } else {
                     R.drawable.ic_twotone_volume_off_24
@@ -192,8 +120,8 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
 
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             when (item.itemId) {
-                R.id.muteButton -> if (contactsAdapter.isAllMuted) {
-                    model.setMuteUntil(contactsAdapter.selectedList.toList(), 0L)
+                R.id.muteButton -> if (isAllMuted) {
+                    model.setMuteUntil(selectedList, 0L)
                     mode.finish()
                 } else {
                     var muteUntil: Long = Long.MAX_VALUE
@@ -215,7 +143,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                         }
                         .setPositiveButton(getString(R.string.okay)) { _, _ ->
                             debug("User clicked muteButton")
-                            model.setMuteUntil(contactsAdapter.selectedList.toList(), muteUntil)
+                            model.setMuteUntil(selectedList, muteUntil)
                             mode.finish()
                         }
                         .setNeutralButton(R.string.cancel) { _, _ ->
@@ -224,7 +152,6 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                 }
 
                 R.id.deleteButton -> {
-                    val selectedCount = contactsAdapter.selectedCount
                     val deleteMessagesString = resources.getQuantityString(
                         R.plurals.delete_messages,
                         selectedCount,
@@ -234,7 +161,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                         .setMessage(deleteMessagesString)
                         .setPositiveButton(getString(R.string.delete)) { _, _ ->
                             debug("User clicked deleteButton")
-                            model.deleteContacts(contactsAdapter.selectedList.toList())
+                            model.deleteContacts(selectedList)
                             mode.finish()
                         }
                         .setNeutralButton(R.string.cancel) { _, _ ->
@@ -243,27 +170,56 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                 }
                 R.id.selectAllButton -> {
                     // if all selected -> unselect all
-                    if (contactsAdapter.selectedList.size == contactsAdapter.contacts.size) {
-                        contactsAdapter.selectedList.clear()
+                    if (selectedList.size == contacts.size) {
+                        model.clearSelectedContacts()
                         mode.finish()
                     } else {
                         // else --> select all
-                        contactsAdapter.selectedList.clear()
-                        contactsAdapter.contacts.forEach {
-                            contactsAdapter.selectedList.add(it.contactKey)
+                        model.clearSelectedContacts()
+                        contacts.forEach {
+                            model.updateSelectedContacts(it.contactKey)
                         }
+                        actionMode?.title = contacts.size.toString()
                     }
-                    actionMode?.title = contactsAdapter.selectedList.size.toString()
-                    contactsAdapter.notifyDataSetChanged()
                 }
             }
             return true
         }
 
         override fun onDestroyActionMode(mode: ActionMode) {
-            contactsAdapter.selectedList.clear()
-            contactsAdapter.notifyDataSetChanged()
+            model.clearSelectedContacts()
             actionMode = null
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ContactsScreen(
+    model: ContactsViewModel = hiltViewModel(),
+    onClick: (Contact) -> Unit,
+    onLongClick: (Contact) -> Unit,
+) {
+    val contacts by model.contactList.collectAsStateWithLifecycle(emptyList())
+    val selectedKeys by model.selectedContacts.collectAsStateWithLifecycle()
+    // val inSelectionMode by remember { derivedStateOf { selectedContacts.isNotEmpty() } }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(6.dp),
+    ) {
+        items(contacts, key = { it.contactKey }) { contact ->
+            val selected = selectedKeys.contains(contact.contactKey)
+            ContactItem(
+                contact = contact,
+                modifier = Modifier
+                    .background(color = if (selected) Color.Gray else MaterialTheme.colors.background)
+                    .combinedClickable(
+                        onClick = { onClick(contact) },
+                        onLongClick = { onLongClick(contact) },
+                    )
+            )
         }
     }
 }
