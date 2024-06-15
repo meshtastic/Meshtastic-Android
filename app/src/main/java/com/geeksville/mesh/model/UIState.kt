@@ -290,6 +290,10 @@ class UIViewModel @Inject constructor(
         packetRepository.deleteWaypoint(id)
     }
 
+    fun clearUnreadCount(contact: String, timestamp: Long) = viewModelScope.launch(Dispatchers.IO) {
+        packetRepository.clearUnreadCount(contact, timestamp)
+    }
+
     companion object {
         fun getPreferences(context: Context): SharedPreferences =
             context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)

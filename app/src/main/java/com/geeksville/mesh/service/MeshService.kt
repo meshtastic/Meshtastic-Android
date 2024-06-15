@@ -603,7 +603,7 @@ class MeshService : Service(), Logging {
             dataPacket.dataType,
             contactKey,
             System.currentTimeMillis(),
-            true, // TODO isLocal
+            fromLocal,
             dataPacket
         )
         serviceScope.handledLaunch {
