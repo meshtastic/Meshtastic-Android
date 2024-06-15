@@ -106,7 +106,7 @@ class ContactsViewModel @Inject constructor(
                 longName = longName,
                 lastMessageTime = getShortDateTime(data.time),
                 lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
-                unreadCount = 0,
+                unreadCount = packetRepository.getUnreadCount(contactKey),
                 messageCount = packetRepository.getMessageCount(contactKey),
                 isMuted = settings[contactKey]?.isMuted == true,
             )

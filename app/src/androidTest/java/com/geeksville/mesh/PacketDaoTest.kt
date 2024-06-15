@@ -126,6 +126,24 @@ class PacketDaoTest {
     }
 
     @Test
+    fun test_getUnreadCount() = runBlocking {
+        testContactKeys.forEach { contactKey ->
+            val unreadCount = packetDao.getUnreadCount(contactKey)
+            assertEquals(SAMPLE_SIZE, unreadCount)
+        }
+    }
+
+    @Test
+    fun test_clearUnreadCount() = runBlocking {
+        val timestamp = System.currentTimeMillis()
+        testContactKeys.forEach { contactKey ->
+            packetDao.clearUnreadCount(contactKey, timestamp)
+            val unreadCount = packetDao.getUnreadCount(contactKey)
+            assertEquals(0, unreadCount)
+        }
+    }
+
+    @Test
     fun test_deleteContacts() = runBlocking {
         packetDao.deleteContacts(testContactKeys)
 

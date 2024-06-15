@@ -45,6 +45,25 @@ interface PacketDao {
     )
     suspend fun getMessageCount(contact: String): Int
 
+    @Query(
+        """
+    SELECT COUNT(*) FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+        AND port_num = 1 AND contact_key = :contact AND read = 0
+    """
+    )
+    suspend fun getUnreadCount(contact: String): Int
+
+    @Query(
+        """
+    UPDATE packet
+    SET read = 1
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+        AND port_num = 1 AND contact_key = :contact AND read = 0 AND received_time <= :timestamp
+    """
+    )
+    suspend fun clearUnreadCount(contact: String, timestamp: Long)
+
     @Insert
     fun insert(packet: Packet)
 
