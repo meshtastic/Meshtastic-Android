@@ -33,7 +33,7 @@ data class Contact(
     val isMuted: Boolean,
 )
 
-// return time if within 24 hours, otherwise date/time
+// return time if within 24 hours, otherwise date
 internal fun getShortDateTime(time: Long): String? {
     val date = if (time != 0L) Date(time) else return null
     val isWithin24Hours = System.currentTimeMillis() - date.time <= 24 * 60 * 60 * 1000L
@@ -41,7 +41,7 @@ internal fun getShortDateTime(time: Long): String? {
     return if (isWithin24Hours) {
         DateFormat.getTimeInstance(DateFormat.SHORT).format(date)
     } else {
-        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(date)
+        DateFormat.getDateInstance(DateFormat.SHORT).format(date)
     }
 }
 
