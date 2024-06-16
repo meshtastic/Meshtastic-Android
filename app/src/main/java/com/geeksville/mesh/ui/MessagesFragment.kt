@@ -101,16 +101,29 @@ class MessagesFragment : Fragment(), Logging {
 
         fun scrollToFirstUnreadMessage() {
             val position = messages.indexOfFirst { !it.read }
-            if (position > 0) {
+            if (position >= 0) {
                 val rect = Rect()
                 binding.toolbar.getGlobalVisibleRect(rect)
                 val toolbarOffset = rect.bottom
                 val offset = binding.messageListView.height - toolbarOffset
 
                 layoutManager.scrollToPositionWithOffset(position, offset)
-                messages[position].apply { model.clearUnreadCount(contact_key, received_time) }
             } else {
                 scrollToBottom()
+            }
+        }
+
+        fun clearUnreadCount() {
+            val firstUnreadItem = messages.firstOrNull { !it.read } ?: return
+            val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+            if (lastVisibleItemPosition != RecyclerView.NO_POSITION) {
+                val lastVisibleItem = messages[lastVisibleItemPosition]
+                val contactKey = lastVisibleItem.contact_key
+                val timestamp = lastVisibleItem.received_time
+
+                if (timestamp >= firstUnreadItem.received_time) {
+                    model.clearUnreadCount(contactKey, timestamp)
+                }
             }
         }
 
@@ -301,20 +314,19 @@ class MessagesFragment : Fragment(), Logging {
         binding.messageListView.layoutManager = layoutManager
 
         binding.messageListView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    messagesAdapter.clearUnreadCount()
+                }
+            }
+
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
-                val firstUnreadItem = messagesAdapter.messages.firstOrNull { !it.read }
-                if (firstUnreadItem != null && dy > 0) {
-                    val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
-                    if (lastVisibleItemPosition != RecyclerView.NO_POSITION) {
-                        val lastVisibleItem = messagesAdapter.messages[lastVisibleItemPosition]
-                        val timestamp = lastVisibleItem.received_time
-
-                        if (timestamp > firstUnreadItem.received_time) {
-                            model.clearUnreadCount(contactKey, timestamp)
-                        }
-                    }
+                if (dy == 0) {
+                    messagesAdapter.clearUnreadCount()
                 }
             }
         })
