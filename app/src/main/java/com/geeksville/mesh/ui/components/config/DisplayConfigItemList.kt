@@ -129,6 +129,17 @@ fun DisplayConfigItemList(
         item { Divider() }
 
         item {
+            DropDownPreference(title = "Compass orientation",
+                enabled = enabled,
+                items = DisplayConfig.CompassOrientation.entries
+                    .filter { it != DisplayConfig.CompassOrientation.UNRECOGNIZED }
+                    .map { it to it.name },
+                selectedItem = displayInput.compassOrientation,
+                onItemSelected = { displayInput = displayInput.copy { compassOrientation = it } })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = displayInput != displayConfig,
                 onCancelClicked = {
