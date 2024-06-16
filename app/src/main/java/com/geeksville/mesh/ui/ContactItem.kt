@@ -16,6 +16,7 @@ import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,74 +43,77 @@ fun ContactItem(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 6.dp),
-        elevation = 2.dp,
+        elevation = 4.dp,
         shape = RoundedCornerShape(12.dp),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Chip(
-                onClick = { },
+        Surface {
+            Row(
                 modifier = Modifier
-                    .width(72.dp)
-                    .padding(end = 8.dp),
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = shortName,
-                    modifier = Modifier.fillMaxWidth(),
-                    fontSize = MaterialTheme.typography.button.fontSize,
-                    fontWeight = FontWeight.Normal,
-                    textAlign = TextAlign.Center,
-                )
-            }
-            Column(
-                modifier = Modifier.weight(1f),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                Chip(
+                    onClick = { },
+                    modifier = Modifier
+                        .width(72.dp)
+                        .padding(end = 8.dp),
                 ) {
                     Text(
-                        text = longName,
+                        text = shortName,
+                        modifier = Modifier.fillMaxWidth(),
                         fontSize = MaterialTheme.typography.button.fontSize,
-                    )
-                    Text(
-                        text = lastMessageTime.orEmpty(),
-                        fontSize = MaterialTheme.typography.button.fontSize,
+                        fontWeight = FontWeight.Normal,
+                        textAlign = TextAlign.Center,
                     )
                 }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
+                Column(
+                    modifier = Modifier.weight(1f),
                 ) {
-                    Text(
-                        text = lastMessageText.orEmpty(),
-                        modifier = Modifier.weight(1f),
-                        color = MaterialTheme.colors.onSurface,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 2,
-                    )
-                    AnimatedVisibility(visible = isMuted) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_twotone_volume_off_24),
-                            contentDescription = null,
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            text = longName,
+                        )
+                        Text(
+                            text = lastMessageTime.orEmpty(),
+                            color = MaterialTheme.colors.onSurface,
+                            fontSize = MaterialTheme.typography.button.fontSize,
                         )
                     }
-                    AnimatedVisibility(visible = unreadCount > 0) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Text(
-                            text = unreadCount.toString(),
-                            modifier = Modifier
-                                .background(MaterialTheme.colors.primary, shape = CircleShape)
-                                .padding(horizontal = 6.dp, vertical = 3.dp),
-                            color = MaterialTheme.colors.onPrimary,
-                            style = MaterialTheme.typography.caption,
+                            text = lastMessageText.orEmpty(),
+                            modifier = Modifier.weight(1f),
+                            color = MaterialTheme.colors.onSurface,
+                            fontSize = MaterialTheme.typography.button.fontSize,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 2,
                         )
+                        AnimatedVisibility(visible = isMuted) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_twotone_volume_off_24),
+                                contentDescription = null,
+                            )
+                        }
+                        AnimatedVisibility(visible = unreadCount > 0) {
+                            Text(
+                                text = unreadCount.toString(),
+                                modifier = Modifier
+                                    .background(MaterialTheme.colors.primary, shape = CircleShape)
+                                    .padding(horizontal = 6.dp, vertical = 3.dp),
+                                color = MaterialTheme.colors.onPrimary,
+                                style = MaterialTheme.typography.caption,
+                            )
+                        }
                     }
                 }
             }

@@ -181,7 +181,9 @@ class MeshService : Service(), Logging {
                     position {
                         latitudeI = Position.degI(location.latitude)
                         longitudeI = Position.degI(location.longitude)
-                        altitude = LocationCompat.getMslAltitudeMeters(location).toInt()
+                        if (LocationCompat.hasMslAltitude(location)) {
+                            altitude = LocationCompat.getMslAltitudeMeters(location).toInt()
+                        }
                         altitudeHae = location.altitude.toInt()
                         time = (location.time / 1000).toInt()
                         groundSpeed = location.speed.toInt()
