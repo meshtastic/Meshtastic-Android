@@ -2,7 +2,6 @@ package com.geeksville.mesh.model
 
 import android.app.Application
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
@@ -12,7 +11,12 @@ import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.repository.datastore.ChannelSetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Date
@@ -49,6 +53,21 @@ class ContactsViewModel @Inject constructor(
     private val packetRepository: PacketRepository,
 ) : ViewModel(), Logging {
 
+    private val _selectedContacts = MutableStateFlow(emptySet<String>())
+    val selectedContacts get() = _selectedContacts.asStateFlow()
+
+    fun updateSelectedContacts(contact: String) = _selectedContacts.updateAndGet {
+        if (it.contains(contact)) {
+            it.minus(contact)
+        } else {
+            it.plus(contact)
+        }
+    }
+
+    fun clearSelectedContacts() {
+        _selectedContacts.value = emptySet()
+    }
+
     val contactList = combine(
         nodeDB.myNodeInfo,
         packetRepository.getContacts(),
@@ -63,7 +82,7 @@ class ContactsViewModel @Inject constructor(
             contactKey to Packet(0L, myNodeNum, 1, contactKey, 0L, true, data)
         }
 
-        (placeholder + contacts).values.map { packet ->
+        (contacts + (placeholder - contacts.keys)).values.map { packet ->
             val data = packet.data
             val contactKey = packet.contact_key
 
@@ -87,12 +106,16 @@ class ContactsViewModel @Inject constructor(
                 longName = longName,
                 lastMessageTime = getShortDateTime(data.time),
                 lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
-                unreadCount = 0,
+                unreadCount = packetRepository.getUnreadCount(contactKey),
                 messageCount = packetRepository.getMessageCount(contactKey),
                 isMuted = settings[contactKey]?.isMuted == true,
             )
         }
-    }.asLiveData()
+    }.stateIn(
+        scope = viewModelScope,
+        started = WhileSubscribed(5_000),
+        initialValue = emptyList(),
+    )
 
     fun setMuteUntil(contacts: List<String>, until: Long) = viewModelScope.launch(Dispatchers.IO) {
         packetRepository.setMuteUntil(contacts, until)

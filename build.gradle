@@ -5,7 +5,7 @@ buildscript {
         useCrashlytics = false
         kotlin_version = '1.9.24'
         hilt_version = '2.51.1'
-        protobuf_version = '4.27.0'
+        protobuf_version = '4.27.1'
     }
 
     repositories {
@@ -13,7 +13,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.4.1'
+        classpath 'com.android.tools.build:gradle:8.4.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
 

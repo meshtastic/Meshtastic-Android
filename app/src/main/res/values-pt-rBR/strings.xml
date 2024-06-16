@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
+    <string name="node_filter_placeholder">Filtro</string>
+    <string name="desc_node_filter_clear">limpar filtro de dispositivos</string>
     <string name="channel_name">Nome do canal</string>
     <string name="channel_options">Opções do canal</string>
     <string name="qr_code">Código QR</string>
@@ -70,10 +72,10 @@
     <string name="message_reception_state">estado de recebimento de mensagem</string>
     <string name="message_delivery_status">Status de entrega de mensagem</string>
     <string name="meshtastic_messages_notifications">Notificações de mensagens</string>
-    <string name="protocol_stress_test">Stress test do protocolo</string>
+    <string name="protocol_stress_test">Teste de estresse do protocolo</string>
     <string name="firmware_too_old">Atualização do firmware necessária</string>
     <string name="firmware_old">Versão de firmware do rádio muito antiga para comunicar com este aplicativo, favor acessar opção \"Atualizar firmware\" nas Configurações.  Para mais informações consultar <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Nosso guia de instalação de firmware</a> no Github.</string>
-    <string name="okay">Okay</string>
+    <string name="okay">Ok</string>
     <string name="must_set_region">Você deve informar uma região!</string>
     <string name="region">Região</string>
     <string name="cant_change_no_radio">Não foi possível mudar de canal, rádio não conectado. Tente novamente.</string>
@@ -101,7 +103,7 @@
     <string name="modem_config_slow_short">Curto alcance / lento</string>
     <string name="modem_config_slow_medium">Médio alcance / lento</string>
     <plurals name="delete_messages">
-        <item quantity="one" tools:ignore="ImpliedQuantity">Excluir mensagem?</item>
+        <item quantity="one">Excluir %s mensagem?</item>
         <item quantity="other">Excluir %s mensagens?</item>
     </plurals>
     <string name="delete">Excluir</string>
@@ -120,7 +122,7 @@
     <string name="resend">Reenviar</string>
     <string name="shutdown">Desligar</string>
     <string name="reboot">Reiniciar</string>
-    <string name="traceroute">Caminho do Sinal</string>
+    <string name="traceroute">Traçar rota</string>
     <string name="intro_show">Mostrar Introdução</string>
     <string name="intro_welcome">Bem-vindo a Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic é uma plataforma de comunicação criptografada fora de rede de código aberto. Os rádios formam uma rede mesh e se comunicam usando o protocolo LoRa para enviar mensagens de texto.</string>
@@ -141,6 +143,8 @@
     <string name="direct_message">Mensagem direta</string>
     <string name="nodedb_reset">Redefinir NodeDB</string>
     <string name="nodedb_reset_description">Isto limpará todos os dispositivos desta lista.</string>
+    <string name="delivery_confirmed">Entrega confirmada</string>
+    <string name="error">Erro</string>
     <string name="ignore">Ignorar</string>
     <string name="ignore_add">Adicionar \'%s\' na lista de ignorados?</string>
     <string name="ignore_remove">Remover \'%s\' da lista de ignorados?</string>
@@ -170,4 +174,11 @@
     <string name="waypoint_new">Novo ponto de referência</string>
     <string name="waypoint_received">Ponto de referência recebido: %s</string>
     <string name="error_duty_cycle">Limite de capacidade atingido. Não é possível enviar mensagens no momento. Por favor, tente novamente mais tarde.</string>
+    <string name="remove">Excluir</string>
+    <string name="remove_node_text">Este dispositivo será excluído de sua lista até que seu dispositivo receba dados dele novamente.</string>
+    <string name="mute">Silenciar</string>
+    <string name="mute_notifications">Desativar notificações</string>
+    <string name="mute_8_hours">8 horas</string>
+    <string name="mute_1_week">1 semana</string>
+    <string name="mute_always">Sempre</string>
 </resources>

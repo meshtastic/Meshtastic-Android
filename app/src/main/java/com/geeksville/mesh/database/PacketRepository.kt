@@ -24,6 +24,14 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
         packetDao.getMessageCount(contact)
     }
 
+    suspend fun getUnreadCount(contact: String): Int = withContext(Dispatchers.IO) {
+        packetDao.getUnreadCount(contact)
+    }
+
+    suspend fun clearUnreadCount(contact: String, timestamp: Long) = withContext(Dispatchers.IO) {
+        packetDao.clearUnreadCount(contact, timestamp)
+    }
+
     suspend fun getQueuedPackets(): List<DataPacket>? = withContext(Dispatchers.IO) {
         packetDao.getQueuedPackets()
     }

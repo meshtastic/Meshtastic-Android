@@ -1,6 +1,7 @@
 package com.geeksville.mesh.ui
 
 import android.graphics.Color
+import android.graphics.Rect
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.*
@@ -96,6 +97,21 @@ class MessagesFragment : Fragment(), Logging {
 
         fun scrollToBottom() {
             if (itemCount > 0) layoutManager.scrollToPosition(itemCount - 1)
+        }
+
+        fun scrollToFirstUnreadMessage() {
+            val position = messages.indexOfFirst { !it.read }
+            if (position > 0) {
+                val rect = Rect()
+                binding.toolbar.getGlobalVisibleRect(rect)
+                val toolbarOffset = rect.bottom
+                val offset = binding.messageListView.height - toolbarOffset
+
+                layoutManager.scrollToPositionWithOffset(position, offset)
+                messages[position].apply { model.clearUnreadCount(contact_key, received_time) }
+            } else {
+                scrollToBottom()
+            }
         }
 
         override fun getItemCount(): Int = messages.size
@@ -226,13 +242,14 @@ class MessagesFragment : Fragment(), Logging {
         /// Called when our node DB changes
         fun onMessagesChanged(messages: List<Packet>) {
             val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
-            val shouldScrollToBottom =
-                lastVisibleItemPosition <= 0 || lastVisibleItemPosition == itemCount - 1
+            val shouldScrollToUnread = lastVisibleItemPosition <= 0
+            val shouldScrollToBottom = lastVisibleItemPosition == itemCount - 1
 
             this.messages = messages
             notifyDataSetChanged() // FIXME, this is super expensive and redraws all messages
 
             if (shouldScrollToBottom) scrollToBottom()
+            if (shouldScrollToUnread) scrollToFirstUnreadMessage()
         }
     }
 
@@ -282,6 +299,25 @@ class MessagesFragment : Fragment(), Logging {
         val layoutManager = LinearLayoutManager(requireContext())
         layoutManager.stackFromEnd = true // We want the last rows to always be shown
         binding.messageListView.layoutManager = layoutManager
+
+        binding.messageListView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                val firstUnreadItem = messagesAdapter.messages.firstOrNull { !it.read }
+                if (firstUnreadItem != null && dy > 0) {
+                    val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
+                    if (lastVisibleItemPosition != RecyclerView.NO_POSITION) {
+                        val lastVisibleItem = messagesAdapter.messages[lastVisibleItemPosition]
+                        val timestamp = lastVisibleItem.received_time
+
+                        if (timestamp > firstUnreadItem.received_time) {
+                            model.clearUnreadCount(contactKey, timestamp)
+                        }
+                    }
+                }
+            }
+        })
 
         model.getMessagesFrom(contactKey).asLiveData().observe(viewLifecycleOwner) {
             debug("New messages received: ${it.size}")

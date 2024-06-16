@@ -7,6 +7,7 @@ import android.content.pm.ServiceInfo
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.app.ServiceCompat
+import androidx.core.location.LocationCompat
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
@@ -175,16 +176,19 @@ class MeshService : Service(), Logging {
         if (locationFlow?.isActive == true) return
 
         if (hasBackgroundPermission()) {
-            locationFlow = locationRepository.getLocations()
-                .onEach { location ->
-                    sendPosition(
-                        location.latitude,
-                        location.longitude,
-                        location.altitude.toInt(),
-                        (location.time / 1000).toInt(),
-                    )
-                }
-                .launchIn(serviceScope)
+            locationFlow = locationRepository.getLocations().onEach { location ->
+                sendPosition(
+                    position {
+                        latitudeI = Position.degI(location.latitude)
+                        longitudeI = Position.degI(location.longitude)
+                        altitude = LocationCompat.getMslAltitudeMeters(location).toInt()
+                        altitudeHae = location.altitude.toInt()
+                        time = (location.time / 1000).toInt()
+                        groundSpeed = location.speed.toInt()
+                        groundTrack = location.bearing.toInt()
+                    }
+                )
+            }.launchIn(serviceScope)
         }
     }
 
@@ -599,7 +603,7 @@ class MeshService : Service(), Logging {
             dataPacket.dataType,
             contactKey,
             System.currentTimeMillis(),
-            true, // TODO isLocal
+            fromLocal,
             dataPacket
         )
         serviceScope.handledLaunch {
@@ -802,13 +806,14 @@ class MeshService : Service(), Logging {
         // Nodes periodically send out position updates, but those updates might not contain a lat & lon (because no GPS lock)
         // We like to look at the local node to see if it has been sending out valid lat/lon, so for the LOCAL node (only)
         // we don't record these nop position updates
-        if (myNodeNum == fromNum && p.latitudeI == 0 && p.longitudeI == 0)
+        if (myNodeNum == fromNum && p.latitudeI == 0 && p.longitudeI == 0) {
             debug("Ignoring nop position update for the local node")
-        else
+        } else {
             updateNodeInfo(fromNum) {
                 debug("update position: ${it.user?.longName?.toPIIString()} with ${p.toPIIString()}")
                 it.position = Position(p, (defaultTime / 1000L).toInt())
             }
+        }
     }
 
     /// Update our DB of users based on someone sending out a Telemetry subpacket
@@ -1573,10 +1578,7 @@ class MeshService : Service(), Logging {
      * Send a position (typically from our built in GPS) into the mesh.
      */
     private fun sendPosition(
-        lat: Double = 0.0,
-        lon: Double = 0.0,
-        alt: Int = 0,
-        time: Int = currentSecond(),
+        position: MeshProtos.Position,
         destNum: Int? = null,
         wantResponse: Boolean = false
     ) {
@@ -1584,30 +1586,19 @@ class MeshService : Service(), Logging {
             val mi = myNodeInfo
             if (mi != null) {
                 val idNum = destNum ?: mi.myNodeNum // when null we just send to the local node
-                debug("Sending our position/time to=$idNum lat=${lat.anonymize}, lon=${lon.anonymize}, alt=$alt, time=$time")
-
-                val position = MeshProtos.Position.newBuilder().also {
-                    it.longitudeI = Position.degI(lon)
-                    it.latitudeI = Position.degI(lat)
-
-                    it.altitude = alt
-                    it.time = time
-                }.build()
+                debug("Sending our position/time to=$idNum ${Position(position)}")
 
                 // Also update our own map for our nodeNum, by handling the packet just like packets from other users
                 handleReceivedPosition(mi.myNodeNum, position)
 
-                val fullPacket = newMeshPacketTo(idNum).buildMeshPacket(
+                sendToRadio(newMeshPacketTo(idNum).buildMeshPacket(
                     channel = if (destNum == null) 0 else nodeDBbyNodeNum[destNum]?.channel ?: 0,
                     priority = MeshPacket.Priority.BACKGROUND,
                 ) {
                     portnumValue = Portnums.PortNum.POSITION_APP_VALUE
                     payload = position.toByteString()
                     this.wantResponse = wantResponse
-                }
-
-                // send the packet into the mesh
-                sendToRadio(fullPacket)
+                })
             }
         } catch (ex: BLEException) {
             warn("Ignoring disconnected radio during gps location update")
@@ -1916,16 +1907,15 @@ class MeshService : Service(), Logging {
                     wantResponse = true
                 })
             } else {
-                // send fixed position (local only/no remote method, so we force destNum to null)
-                val (lat, lon, alt) = position
-                sendPosition(destNum = null, lat = lat, lon = lon, alt = alt)
+                // send fixed position (local only/no remote method)
                 sendToRadio(newMeshPacketTo(destNum).buildAdminPacket {
                     if (position != Position(0.0, 0.0, 0)) {
                         setFixedPosition = position {
-                            longitudeI = Position.degI(lon)
-                            latitudeI = Position.degI(lat)
-                            altitude = alt
+                            latitudeI = Position.degI(position.latitude)
+                            longitudeI = Position.degI(position.longitude)
+                            altitude = position.altitude
                         }
+                            .also { sendPosition(it) } // TODO remove after minDeviceVersion >= 2.3.3
                     } else {
                         removeFixedPosition = true
                     }
