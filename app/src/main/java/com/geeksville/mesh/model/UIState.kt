@@ -102,6 +102,10 @@ data class NodesUiState(
     val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
     val filter: String = "",
     val includeUnknown: Boolean = false,
+    val gpsFormat:Int = 0,
+    val distanceUnits:Int = 0,
+    val tempInFahrenheit:Boolean = false,
+    val ignoreIncomingList: List<Int> = emptyList(),
 ) {
     companion object {
         val Empty = NodesUiState()
@@ -160,11 +164,16 @@ class UIViewModel @Inject constructor(
         nodeFilterText,
         nodeSortOption,
         includeUnknown,
-    ) { filter, sort, includeUnknown ->
+        radioConfigRepository.deviceProfileFlow,
+    ) { filter, sort, includeUnknown, profile ->
         NodesUiState(
             sort = sort,
             filter = filter,
             includeUnknown = includeUnknown,
+            gpsFormat = profile.config.display.gpsFormat.number,
+            distanceUnits = profile.config.display.units.number,
+            tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
+            ignoreIncomingList = profile.config.lora.ignoreIncomingList,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -256,6 +265,7 @@ class UIViewModel @Inject constructor(
     }
 
     fun requestTraceroute(destNum: Int) {
+        info("Requesting traceroute for '$destNum'")
         try {
             val packetId = meshService?.packetId ?: return
             meshService?.requestTraceroute(packetId, destNum)
@@ -265,16 +275,18 @@ class UIViewModel @Inject constructor(
     }
 
     fun removeNode(nodeNum: Int) = viewModelScope.launch(Dispatchers.IO) {
+        info("Removing node '$nodeNum'")
         try {
             val packetId = meshService?.packetId ?: return@launch
             meshService?.removeByNodenum(packetId, nodeNum)
             nodeDB.deleteNode(nodeNum)
         } catch (ex: RemoteException) {
-            errormsg("Request traceroute error: ${ex.message}")
+            errormsg("Remove node error: ${ex.message}")
         }
     }
 
     fun requestPosition(destNum: Int, position: Position = Position(0.0, 0.0, 0)) {
+        info("Requesting position for '$destNum'")
         try {
             meshService?.requestPosition(destNum, position)
         } catch (ex: RemoteException) {
@@ -580,5 +592,4 @@ class UIViewModel @Inject constructor(
     fun setNodeFilterText(text: String) {
         nodeFilterText.value = text
     }
-
 }

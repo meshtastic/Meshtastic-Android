@@ -518,13 +518,6 @@ class MainActivity : AppCompatActivity(), Logging {
 
     override fun onStop() {
         unbindMeshService()
-
-        model.connectionState.removeObservers(this)
-        bluetoothViewModel.enabled.removeObservers(this)
-        model.requestChannelUrl.removeObservers(this)
-        model.snackbarText.removeObservers(this)
-        model.currentTab.removeObservers(this)
-
         super.onStop()
     }
 
@@ -569,6 +562,17 @@ class MainActivity : AppCompatActivity(), Logging {
 
         model.currentTab.observe(this) {
             binding.tabLayout.getTabAt(it)?.select()
+        }
+
+        model.tracerouteResponse.observe(this) { response ->
+            MaterialAlertDialogBuilder(this)
+                .setCancelable(false)
+                .setTitle(R.string.traceroute)
+                .setMessage(response ?: return@observe)
+                .setPositiveButton(R.string.okay) { _, _ -> }
+                .show()
+
+            model.clearTracerouteResponse()
         }
 
         try {
@@ -646,10 +650,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 return true
             }
             R.id.radio_config -> {
-                supportFragmentManager.beginTransaction()
-                    .add(R.id.mainActivityLayout, DeviceSettingsFragment())
-                    .addToBackStack(null)
-                    .commit()
+                supportFragmentManager.navigateToRadioConfig()
                 return true
             }
             R.id.save_messages_csv -> {
