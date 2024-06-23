@@ -47,7 +47,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.setFragmentResultListener
+import androidx.core.os.bundleOf
+import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -91,6 +92,16 @@ import com.geeksville.mesh.ui.components.config.UserConfigItemList
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+internal fun FragmentManager.navigateToRadioConfig(destNum: Int? = null) {
+    val radioConfigFragment = DeviceSettingsFragment().apply {
+        arguments = bundleOf("destNum" to destNum)
+    }
+    beginTransaction()
+        .replace(R.id.mainActivityLayout, radioConfigFragment)
+        .addToBackStack(null)
+        .commit()
+}
+
 @AndroidEntryPoint
 class DeviceSettingsFragment : ScreenFragment("Radio Configuration"), Logging {
 
@@ -101,10 +112,8 @@ class DeviceSettingsFragment : ScreenFragment("Radio Configuration"), Logging {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        setFragmentResultListener("requestKey") { _, bundle ->
-            val destNum = bundle.getInt("destNum")
-            model.setDestNum(destNum)
-        }
+        val destNum = arguments?.getInt("destNum")
+        model.setDestNum(destNum)
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)

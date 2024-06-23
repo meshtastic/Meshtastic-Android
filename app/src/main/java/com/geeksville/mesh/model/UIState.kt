@@ -102,6 +102,10 @@ data class NodesUiState(
     val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
     val filter: String = "",
     val includeUnknown: Boolean = false,
+    val gpsFormat:Int = 0,
+    val distanceUnits:Int = 0,
+    val tempInFahrenheit:Boolean = false,
+    val ignoreIncomingList: List<Int> = emptyList(),
 ) {
     companion object {
         val Empty = NodesUiState()
@@ -160,11 +164,16 @@ class UIViewModel @Inject constructor(
         nodeFilterText,
         nodeSortOption,
         includeUnknown,
-    ) { filter, sort, includeUnknown ->
+        radioConfigRepository.deviceProfileFlow,
+    ) { filter, sort, includeUnknown, profile ->
         NodesUiState(
             sort = sort,
             filter = filter,
             includeUnknown = includeUnknown,
+            gpsFormat = profile.config.display.gpsFormat.number,
+            distanceUnits = profile.config.display.units.number,
+            tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
+            ignoreIncomingList = profile.config.lora.ignoreIncomingList,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -580,5 +589,4 @@ class UIViewModel @Inject constructor(
     fun setNodeFilterText(text: String) {
         nodeFilterText.value = text
     }
-
 }
