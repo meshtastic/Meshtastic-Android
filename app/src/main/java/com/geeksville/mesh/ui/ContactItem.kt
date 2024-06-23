@@ -56,8 +56,8 @@ fun ContactItem(
                 Chip(
                     onClick = { },
                     modifier = Modifier
-                        .width(72.dp)
-                        .padding(end = 8.dp),
+                        .padding(end = 8.dp)
+                        .width(72.dp),
                 ) {
                     Text(
                         text = shortName,
