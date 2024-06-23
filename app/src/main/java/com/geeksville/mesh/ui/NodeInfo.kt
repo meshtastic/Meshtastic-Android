@@ -3,7 +3,7 @@ package com.geeksville.mesh.ui
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.repeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -25,8 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -58,9 +56,6 @@ fun NodeInfo(
     onClicked: () -> Unit = {},
     blinking: Boolean = false,
 ) {
-
-    val BLINK_DURATION = 250
-
     val unknownShortName = stringResource(id = R.string.unknown_node_short_name)
     val unknownLongName = stringResource(id = R.string.unknown_username)
 
@@ -72,13 +67,14 @@ fun NodeInfo(
     val highlight = Color(0x33FFFFFF)
     val bgColor by animateColorAsState(
         targetValue = if (blinking) highlight else Color.Transparent,
-        animationSpec = infiniteRepeatable(
+        animationSpec = repeatable(
+            iterations = 6,
             animation = tween(
-                durationMillis = BLINK_DURATION,
+                durationMillis = 250,
                 easing = FastOutSlowInEasing
             ),
             repeatMode = RepeatMode.Reverse
-        )
+        ), label = "blinking node"
     )
 
     Card(
@@ -117,9 +113,10 @@ fun NodeInfo(
                         content = {
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
-                                text = (thatNodeInfo.user?.shortName ?: unknownShortName).strikeIf(isIgnored),
+                                text = thatNodeInfo.user?.shortName ?: unknownShortName,
                                 fontWeight = FontWeight.Normal,
                                 fontSize = MaterialTheme.typography.button.fontSize,
+                                textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                                 textAlign = TextAlign.Center,
                             )
                         },
@@ -156,8 +153,9 @@ fun NodeInfo(
                         )
                         width = Dimension.preferredWrapContent
                     },
-                    text = nodeName.strikeIf(isIgnored),
-                    style = style
+                    text = nodeName,
+                    style = style,
+                    textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                 )
 
                 val position = thatNodeInfo.position
@@ -273,18 +271,6 @@ fun NodeInfo(
         }
     }
 }
-
-private fun String.strike() = AnnotatedString(
-    this,
-    spanStyles = listOf(
-        AnnotatedString.Range(
-            SpanStyle(textDecoration = TextDecoration.LineThrough),
-            start = 0,
-            end = this.length
-        )
-    )
-)
-private fun String.strikeIf(isIgnored: Boolean): AnnotatedString = if (isIgnored) strike() else AnnotatedString(this)
 
 @Composable
 @Preview(showBackground = false)
