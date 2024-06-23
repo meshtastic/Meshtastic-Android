@@ -1,12 +1,9 @@
 package com.geeksville.mesh.ui
 
 import android.os.Bundle
-import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.PopupMenu
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
@@ -34,7 +31,6 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.components.NodeFilterTextField
 import com.geeksville.mesh.ui.theme.AppTheme
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -43,82 +39,63 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
     private val model: UIViewModel by activityViewModels()
 
-    private fun popup(view: View, node: NodeInfo) {
+    private fun popup(node: NodeInfo)  {
         if (!model.isConnected()) return
-        val user = node.user ?: return
         val isOurNode = node.num == model.myNodeNum
-        val showAdmin = isOurNode || model.hasAdminChannel
         val ignoreIncomingList = model.ignoreIncomingList
-        val isIgnored = ignoreIncomingList.contains(node.num)
-        val popup =
-            PopupMenu(view.context, view, Gravity.NO_GRAVITY, R.attr.actionOverflowMenuStyle, 0)
-        popup.inflate(R.menu.menu_nodes)
-        popup.menu.setGroupVisible(R.id.group_remote, !isOurNode)
-        popup.menu.setGroupVisible(R.id.group_admin, showAdmin)
-        popup.menu.setGroupEnabled(R.id.group_admin, !model.isManaged)
-        popup.menu.findItem(R.id.ignore).apply {
-            isEnabled = isIgnored || ignoreIncomingList.size < 3
-            isChecked = isIgnored
-        }
-        popup.setOnMenuItemClickListener { item: MenuItem ->
-            when (item.itemId) {
+
+        requireView().nodeMenu(
+            node = node,
+            ignoreIncomingList = ignoreIncomingList,
+            isOurNode = isOurNode,
+            showAdmin = isOurNode || model.hasAdminChannel,
+            isManaged = model.isManaged,
+        ) {
+            when (itemId) {
                 R.id.direct_message -> {
-                    val contactKey = "${node.channel}${user.id}"
-                    debug("calling MessagesFragment filter: $contactKey")
-                    parentFragmentManager.navigateToMessages(contactKey, user.longName)
+                    navigateToMessages(node)
                 }
 
                 R.id.request_position -> {
-                    debug("requesting position for '${user.longName}'")
                     model.requestPosition(node.num)
                 }
 
                 R.id.traceroute -> {
-                    debug("requesting traceroute for '${user.longName}'")
                     model.requestTraceroute(node.num)
                 }
 
                 R.id.remove -> {
-                    MaterialAlertDialogBuilder(view.context)
-                        .setTitle(R.string.remove)
-                        .setMessage(getString(R.string.remove_node_text))
-                        .setNeutralButton(R.string.cancel) { _, _ -> }
-                        .setPositiveButton(R.string.send) { _, _ ->
-                            debug("removing node '${user.longName}'")
-                            model.removeNode(node.num)
-                        }
-                        .show()
+                    model.removeNode(node.num)
                 }
 
                 R.id.ignore -> {
-                    val message = if (isIgnored) R.string.ignore_remove else R.string.ignore_add
-                    MaterialAlertDialogBuilder(view.context)
-                        .setTitle(R.string.ignore)
-                        .setMessage(getString(message, user.longName))
-                        .setNeutralButton(R.string.cancel) { _, _ -> }
-                        .setPositiveButton(R.string.send) { _, _ ->
-                            model.ignoreIncomingList = ignoreIncomingList.toMutableList().apply {
-                                if (isIgnored) {
-                                    debug("removed '${user.longName}' from ignore list")
-                                    remove(node.num)
-                                } else {
-                                    debug("added '${user.longName}' to ignore list")
-                                    add(node.num)
-                                }
-                            }
-                            item.isChecked = !item.isChecked
+                    model.ignoreIncomingList = ignoreIncomingList.toMutableList().apply {
+                        if (contains(node.num)) {
+                            debug("removed '${node.num}' from ignore list")
+                            remove(node.num)
+                        } else {
+                            debug("added '${node.num}' to ignore list")
+                            add(node.num)
                         }
-                        .show()
+                    }
                 }
 
                 R.id.remote_admin -> {
-                    debug("calling remote admin --> destNum: ${node.num.toUInt()}")
-                    parentFragmentManager.navigateToRadioConfig(node.num)
+                    navigateToRadioConfig(node)
                 }
             }
-            true
         }
-        popup.show()
+    }
+
+    private fun navigateToMessages(node: NodeInfo) = node.user?.let { user ->
+        val contactKey = "${node.channel}${user.id}"
+        info("calling MessagesFragment filter: $contactKey")
+        parentFragmentManager.navigateToMessages(contactKey, user.longName)
+    }
+
+    private fun navigateToRadioConfig(node: NodeInfo) {
+        info("calling RadioConfig --> destNum: ${node.num}")
+        parentFragmentManager.navigateToRadioConfig(node.num)
     }
 
     override fun onCreateView(
@@ -130,7 +107,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 AppTheme {
-                    NodesScreen(model = model, onClick = { popup(requireView(), it) })
+                    NodesScreen(model = model, onClick = ::popup)
                 }
             }
         }
