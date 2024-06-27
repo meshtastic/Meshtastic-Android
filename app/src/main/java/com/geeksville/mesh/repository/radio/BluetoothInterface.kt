@@ -279,13 +279,13 @@ class BluetoothInterface @AssistedInject constructor(
                             val logMessage = b.toString(Charsets.UTF_8)
 
                             if (logMessage.startsWith("INFO"))
-                                info(logMessage.replace("INFO  |", ""))
+                                info(logMessage.replace("INFO  | ", ""))
                             else if (logMessage.startsWith("DEBUG"))
-                                debug(logMessage.replace("DEBUG |", ""))
+                                debug(logMessage.replace("DEBUG | ", ""))
                             else if (logMessage.startsWith("WARN"))
-                                warn(logMessage.replace("WARN  |", ""))
+                                warn(logMessage.replace("WARN  | ", ""))
                             else if (logMessage.startsWith("ERROR"))
-                                error(logMessage.replace("ERROR |", ""))
+                                error(logMessage.replace("ERROR | ", ""))
                             else
                                 debug(logMessage)
                         }
