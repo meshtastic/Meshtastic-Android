@@ -15,8 +15,10 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import okio.Utf8
 import java.lang.reflect.Method
 import java.util.*
+import kotlin.math.log
 
 
 /* Info for the esp32 device side code.  See that source for the 'gold' standard docs on this interface.
@@ -98,6 +100,8 @@ class BluetoothInterface @AssistedInject constructor(
             UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
         val BTM_FROMNUM_CHARACTER: UUID =
             UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
+        val BTM_LOGRADIO_CHARACTER: UUID =
+            UUID.fromString("6c6fd238-78fa-436b-aacf-15c5be1ef2e2")
 
         /**
          * this is created in onCreate()
@@ -120,6 +124,7 @@ class BluetoothInterface @AssistedInject constructor(
 
     private lateinit var fromNum: BluetoothGattCharacteristic
     private lateinit var fromRadio: BluetoothGattCharacteristic
+    private lateinit var logRadio: BluetoothGattCharacteristic
 
     /**
      * With the new rev2 api, our first send is to start the configure readbacks.  In that case,
@@ -262,6 +267,37 @@ class BluetoothInterface @AssistedInject constructor(
         }
     }
 
+    private fun startWatchingLogRadio() {
+        safe?.setNotify(logRadio, true) {
+            service.serviceScope.handledLaunch {
+                safe?.asyncReadCharacteristic(logRadio) {
+                    try {
+                        val b = it.getOrThrow()
+                            .value.clone() // We clone the array just in case, I'm not sure if they keep reusing the array
+
+                        if (b.isNotEmpty()) {
+                            val logMessage = b.toString(Charsets.UTF_8)
+
+                            if (logMessage.startsWith("INFO"))
+                                info(logMessage.replace("INFO  |", ""))
+                            else if (logMessage.startsWith("DEBUG"))
+                                debug(logMessage.replace("DEBUG |", ""))
+                            else if (logMessage.startsWith("WARN"))
+                                warn(logMessage.replace("WARN  |", ""))
+                            else if (logMessage.startsWith("ERROR"))
+                                error(logMessage.replace("ERROR |", ""))
+                            else
+                                debug(logMessage)
+                        }
+
+                    } catch (ex: BLEException) {
+                        scheduleReconnect("error during doReadFromRadio - disconnecting, ${ex.message}")
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Some buggy BLE stacks can fail on initial connect, with either missing services or missing characteristics.  If that happens we
      * disconnect and try again when the device reenumerates.
@@ -326,6 +362,8 @@ class BluetoothInterface @AssistedInject constructor(
 
                             fromNum = getCharacteristic(BTM_FROMNUM_CHARACTER)
 
+                            logRadio = getCharacteristic(BTM_LOGRADIO_CHARACTER)
+
                             // We changed UUIDs to be able to identify old firmware (<1.3.43)
                             fromRadio = if (bservice.characteristics.map { it.uuid }
                                     .contains(EOL_FROMRADIO_CHARACTER)) {
@@ -344,6 +382,7 @@ class BluetoothInterface @AssistedInject constructor(
 
                             // Immediately broadcast any queued packets sitting on the device
                             doReadFromRadio(true)
+                            startWatchingLogRadio()
                         } catch (ex: BLEException) {
                             scheduleReconnect(
                                 "Unexpected error in initial device enumeration, forcing disconnect $ex"
