@@ -149,7 +149,6 @@ fun NodeInfo(
                             bias = 0F,
                             startMargin = 8.dp,
                             endMargin = 8.dp,
-
                             )
                         width = Dimension.preferredWrapContent
                     },
