@@ -90,7 +90,7 @@ fun NodeInfo(
                     .background(bgColor)
                     .padding(8.dp)
             ) {
-                val (chip, dist, name, pos, alt, sats, batt, heard, sig, env) = createRefs()
+                val (chip, dist, name, hw, pos, alt, sats, batt, heard, sig, env) = createRefs()
                 val barrierBattHeard = createStartBarrier(batt, heard)
                 val sigBarrier = createBottomBarrier(pos, heard)
 
@@ -150,7 +150,7 @@ fun NodeInfo(
                             startMargin = 8.dp,
                             endMargin = 8.dp,
 
-                        )
+                            )
                         width = Dimension.preferredWrapContent
                     },
                     text = nodeName,
@@ -158,11 +158,36 @@ fun NodeInfo(
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                 )
 
+                val hwInfoString = thisNodeInfo?.user?.hwModelString
+                if (hwInfoString != null){
+                    Text(
+                        modifier = Modifier.constrainAs(hw) {
+                            linkTo(
+                                top = name.bottom,
+                                bottom = pos.top,
+                                bias = 0F,
+                                topMargin = 4.dp,
+                                bottomMargin = 4.dp
+                            )
+                            linkTo(
+                                start = name.start,
+                                end = barrierBattHeard,
+                                bias = 0F,
+                                endMargin = 8.dp
+                            )
+                            width = Dimension.preferredWrapContent
+                        },
+                        text = hwInfoString,
+                        fontSize = MaterialTheme.typography.caption.fontSize,
+                        style = style,
+                    )
+                }
+
                 val position = thatNodeInfo.position
                 LinkedCoordinates(
                     modifier = Modifier.constrainAs(pos) {
                         linkTo(
-                            top = name.bottom,
+                            top = hw.bottom,
                             bottom = sig.top,
                             bias = 0F,
                             topMargin = 4.dp,
