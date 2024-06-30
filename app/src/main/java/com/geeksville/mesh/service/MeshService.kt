@@ -129,7 +129,7 @@ class MeshService : Service(), Logging {
         /** The minimum firmware version we know how to talk to. We'll still be able
          * to talk to 2.0 firmwares but only well enough to ask them to firmware update.
          */
-        val minDeviceVersion = DeviceVersion("2.0.21")
+        val minDeviceVersion = DeviceVersion("2.3.2")
     }
 
     enum class ConnectionState {
@@ -1714,7 +1714,7 @@ class MeshService : Service(), Logging {
                 clientPackages[receiverName] = packageName
             }
 
-        override fun getUpdateStatus(): Int = 0 // TODO reimplement this after we have a new firmware update mechanism
+        override fun getUpdateStatus(): Int = -4 // TODO reimplement this after we have a new firmware update mechanism
 
         override fun startFirmwareUpdate() = toRemoteExceptions {
             doFirmwareUpdate()

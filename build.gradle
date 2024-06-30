@@ -5,7 +5,7 @@ buildscript {
         useCrashlytics = false
         kotlin_version = '1.9.24'
         hilt_version = '2.51.1'
-        protobuf_version = '4.27.1'
+        protobuf_version = '4.27.2'
     }
 
     repositories {
@@ -23,7 +23,7 @@ buildscript {
         // Firebase Crashlytics
         if (useCrashlytics) {
             classpath 'com.google.gms:google-services:4.4.2'
-            classpath 'com.google.firebase:firebase-crashlytics-gradle:3.0.1'
+            classpath 'com.google.firebase:firebase-crashlytics-gradle:3.0.2'
         }
 
         // protobuf plugin - docs here https://github.com/google/protobuf-gradle-plugin

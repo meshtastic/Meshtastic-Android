@@ -8,14 +8,16 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ButtonDefaults
@@ -61,6 +63,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -100,6 +103,9 @@ import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.config.ChannelCard
 import com.geeksville.mesh.ui.components.config.EditChannelDialog
+import com.geeksville.mesh.ui.components.dragContainer
+import com.geeksville.mesh.ui.components.dragDropItemsIndexed
+import com.geeksville.mesh.ui.components.rememberDragDropState
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.journeyapps.barcodescanner.ScanContract
@@ -181,6 +187,19 @@ fun ChannelScreen(
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
             viewModel.setRequestChannelUrl(Uri.parse(result.contents))
+        }
+    }
+
+    fun updateSettingsList(update: MutableList<ChannelProtos.ChannelSettings>.() -> Unit) {
+        try {
+            val list = channelSet.settingsList.toMutableList()
+            list.update()
+            channelSet = channelSet.copy {
+                settings.clear()
+                settings.addAll(list)
+            }
+        } catch (ex: Exception) {
+            errormsg("Error updating ChannelSettings list:", ex)
         }
     }
 
@@ -298,10 +317,18 @@ fun ChannelScreen(
         )
     }
 
+    val listState = rememberLazyListState()
+    val dragDropState = rememberDragDropState(listState) { from, to ->
+        updateSettingsList { add(to.index, removeAt(from.index)) }
+    }
+
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+        modifier = Modifier.dragContainer(
+            dragDropState = dragDropState,
+            haptics = LocalHapticFeedback.current,
+        ),
+        state = listState,
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
     ) {
         if (!showChannelEditor) {
             item {
@@ -339,18 +366,18 @@ fun ChannelScreen(
                 )
             }
         } else {
-            itemsIndexed(channelSet.settingsList) { index, channel ->
+            dragDropItemsIndexed(
+                items = channelSet.settingsList,
+                dragDropState = dragDropState,
+            ) { index, channel, isDragging ->
+                val elevation by animateDpAsState(if (isDragging) 8.dp else 4.dp, label = "drag")
                 ChannelCard(
+                    elevation = elevation,
                     index = index,
                     title = channel.name.ifEmpty { modemPresetName },
                     enabled = enabled,
                     onEditClick = { showEditChannelDialog = index },
-                    onDeleteClick = {
-                        channelSet = channelSet.copy {
-                            settings.clear()
-                            settings.addAll(channelSet.settingsList.filterIndexed { i, _ -> i != index })
-                        }
-                    }
+                    onDeleteClick = { updateSettingsList { removeAt(index) } }
                 )
             }
             item {

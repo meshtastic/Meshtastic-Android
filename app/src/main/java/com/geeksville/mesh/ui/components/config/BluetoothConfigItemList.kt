@@ -65,6 +65,16 @@ fun BluetoothConfigItemList(
         }
 
         item {
+            SwitchPreference(title = "Device logging enabled",
+                checked = bluetoothInput.deviceLoggingEnabled,
+                enabled = enabled,
+                onCheckedChange = {
+                    bluetoothInput = bluetoothInput.copy { deviceLoggingEnabled = it }
+                })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = bluetoothInput != bluetoothConfig,
                 onCancelClicked = {
