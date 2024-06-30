@@ -1,7 +1,8 @@
 plugins {
     id 'com.android.application'
-    id 'kotlin-android'
-    id 'kotlin-parcelize'
+    id "org.jetbrains.kotlin.android"
+    id "org.jetbrains.kotlin.plugin.compose"
+    id "org.jetbrains.kotlin.plugin.parcelize"
     id 'kotlinx-serialization'
     id 'com.google.dagger.hilt.android'
     id 'de.mobilej.unmock'
@@ -36,8 +37,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdk 33
-        versionCode 30313 // format is Mmmss (where M is 1+the numeric major number
-        versionName "2.3.13"
+        versionCode 30314 // format is Mmmss (where M is 1+the numeric major number
+        versionName "2.3.14"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
@@ -91,9 +92,6 @@ android {
         compose true
         aidl true
         buildConfig true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
     }
     // Configure the build-logic plugins to target JDK 17
     // This matches the JDK used to build the project, and is not related to what is running on device.
@@ -153,7 +151,7 @@ dependencies {
 
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.core:core-location-altitude:1.0.0-alpha02'
-    implementation 'androidx.fragment:fragment-ktx:1.8.0'
+    implementation 'androidx.fragment:fragment-ktx:1.8.1'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
@@ -220,8 +218,8 @@ dependencies {
     implementation "mil.nga:mgrs:2.1.3"
 
     testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 
     // kotlin serialization
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
@@ -241,7 +239,7 @@ dependencies {
     implementation 'com.github.mik3y:usb-serial-for-android:3.7.3'
 
     // For Firebase Crashlytics & Analytics
-    googleImplementation platform('com.google.firebase:firebase-bom:33.1.0')
+    googleImplementation platform('com.google.firebase:firebase-bom:33.1.1')
     googleImplementation 'com.google.firebase:firebase-crashlytics'
     googleImplementation 'com.google.firebase:firebase-analytics'
 
