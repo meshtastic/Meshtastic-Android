@@ -90,9 +90,9 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.model.generateQrCode
 import com.geeksville.mesh.model.getChannelUrl
 import com.geeksville.mesh.model.primaryChannel
+import com.geeksville.mesh.model.qrCode
 import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.ClickableTextField
@@ -168,8 +168,14 @@ fun ChannelScreen(
         )
     ) { mutableStateListOf(elements = Array(size = 8, init = { true })) }
 
+    val selectedChannelSet = channelSet.copy {
+        val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+        settings.clear()
+        settings.addAll(result)
+    }
+
     val primaryChannel = channelSet.primaryChannel
-    val channelUrl = channelSet.getChannelUrl(channelSelection = channelSelections)
+    val channelUrl = channelSet.getChannelUrl()
     val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
@@ -366,7 +372,7 @@ fun ChannelScreen(
 
         if (!isEditing) item {
             Image(
-                painter = channelSet.generateQrCode(channelSelection = channelSelections)?.let { BitmapPainter(it.asImageBitmap()) }
+                painter = selectedChannelSet.qrCode?.let { BitmapPainter(it.asImageBitmap()) }
                     ?: painterResource(id = R.drawable.qrcode),
                 contentDescription = stringResource(R.string.qr_code),
                 contentScale = ContentScale.Inside,
@@ -397,7 +403,7 @@ fun ChannelScreen(
                 label = { Text("URL") },
                 isError = isError,
                 trailingIcon = {
-                    val isUrlEqual = channelUrl == channels.getChannelUrl(channelSelection = channelSelections)
+                    val isUrlEqual = channelUrl == channels.getChannelUrl()
                     IconButton(onClick = {
                         when {
                             isError -> valueState = channelUrl
