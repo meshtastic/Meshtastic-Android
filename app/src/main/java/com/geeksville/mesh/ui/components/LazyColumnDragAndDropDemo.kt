@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListItemInfo
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -268,3 +269,37 @@ fun LazyItemScope.DraggableItem(
     }
     Column(modifier = modifier.then(draggingModifier)) { content(dragging) }
 }
+
+/**
+ * Extension function for [LazyListScope] with drag-and-drop functionality for indexed items.
+ *
+ * Wraps [itemsIndexed] function with [detectDragGesturesAfterLongPress] to enable long-press
+ * drag gestures and allow items in the list to be reordered using the provided [DragDropState].
+ *
+ * Uses the item's `hashCode()` key internally (instead of the index) to allow handling headers,
+ * footers, and other non-draggable items.
+ *
+ * @param items The list of items to be displayed in the [LazyColumn].
+ * @param dragDropState The state object managing drag-and-drop interactions.
+ * @param contentType A function providing the content type of each item, used for item recycling
+ * optimizations. Defaults to null.
+ * @param itemContent A composable function defining the UI for each item. It provides the index,
+ * the item itself, and a boolean indicating if the item is currently being dragged.
+ */
+inline fun <T> LazyListScope.dragDropItemsIndexed(
+    items: List<T>,
+    dragDropState: DragDropState,
+    crossinline contentType: (index: Int, item: T) -> Any? = { _, _ -> null },
+    crossinline itemContent: @Composable LazyItemScope.(index: Int, item: T, isDragging: Boolean) -> Unit
+) = itemsIndexed(
+    items = items,
+    key = { _, item -> item.hashCode() },
+    contentType = contentType,
+    itemContent = { index, item ->
+        DraggableItem(
+            dragDropState = dragDropState,
+            key = item.hashCode(),
+            content = { isDragging -> itemContent(index, item, isDragging) }
+        )
+    }
+)
