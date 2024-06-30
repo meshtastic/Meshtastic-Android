@@ -76,6 +76,7 @@ fun ContactItem(
                     ) {
                         Text(
                             text = longName,
+                            modifier = Modifier.weight(1f),
                         )
                         Text(
                             text = lastMessageTime.orEmpty(),
