@@ -1,8 +1,7 @@
 plugins {
     id 'com.android.application'
-    id "org.jetbrains.kotlin.android"
-    id "org.jetbrains.kotlin.plugin.compose"
-    id "org.jetbrains.kotlin.plugin.parcelize"
+    id 'kotlin-android'
+    id 'kotlin-parcelize'
     id 'kotlinx-serialization'
     id 'com.google.dagger.hilt.android'
     id 'de.mobilej.unmock'
@@ -92,6 +91,9 @@ android {
         compose true
         aidl true
         buildConfig true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.14"
     }
     // Configure the build-logic plugins to target JDK 17
     // This matches the JDK used to build the project, and is not related to what is running on device.
