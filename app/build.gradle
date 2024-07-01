@@ -8,6 +8,7 @@ plugins {
     id 'de.mobilej.unmock'
     id 'com.google.protobuf'
     id "com.google.devtools.ksp"
+    id "org.jlleitschuh.gradle.ktlint"
 }
 
 unMock {
