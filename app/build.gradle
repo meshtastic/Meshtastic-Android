@@ -8,6 +8,7 @@ plugins {
     id 'de.mobilej.unmock'
     id 'com.google.protobuf'
     id "com.google.devtools.ksp"
+    id "io.gitlab.arturbosch.detekt" version "1.23.3"
 }
 
 unMock {
