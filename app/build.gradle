@@ -8,6 +8,7 @@ plugins {
     id 'de.mobilej.unmock'
     id 'com.google.protobuf'
     id "com.google.devtools.ksp"
+    id "io.gitlab.arturbosch.detekt" version "1.23.3"
     id "org.jlleitschuh.gradle.ktlint"
 }
 
@@ -161,7 +162,7 @@ dependencies {
     implementation 'androidx.datastore:datastore:1.1.1'
 
     // Lifecycle
-    def lifecycle_version = '2.7.0'
+    def lifecycle_version = '2.8.3'
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
