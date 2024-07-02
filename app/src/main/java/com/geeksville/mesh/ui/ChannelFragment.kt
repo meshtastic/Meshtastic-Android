@@ -11,16 +11,22 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
+import androidx.compose.material.Checkbox
+import androidx.compose.material.Chip
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
@@ -35,16 +41,20 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
-import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -83,11 +93,9 @@ import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannelUrl
-import com.geeksville.mesh.model.primaryChannel
 import com.geeksville.mesh.model.qrCode
 import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.ui.components.ClickableTextField
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.config.ChannelCard
@@ -155,7 +163,20 @@ fun ChannelScreen(
     var showChannelEditor by rememberSaveable { mutableStateOf(false) }
     val isEditing = channelSet != channels || showChannelEditor
 
-    val primaryChannel = channelSet.primaryChannel
+    /* Holds selections made by the user for QR generation. */
+    val channelSelections = rememberSaveable(
+        saver = listSaver(
+            save = { stateList -> stateList.toList() },
+            restore = { it.toMutableStateList() }
+        )
+    ) { mutableStateListOf(elements = Array(size = 8, init = { true })) }
+
+    val selectedChannelSet = channelSet.copy {
+        val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+        settings.clear()
+        settings.addAll(result)
+    }
+
     val channelUrl = channelSet.getChannelUrl()
     val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
@@ -305,15 +326,25 @@ fun ChannelScreen(
         state = listState,
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
     ) {
-        if (!showChannelEditor) item {
-            ClickableTextField(
-                label = R.string.channel_name,
-                value = primaryChannel?.name.orEmpty(),
-                onClick = { showChannelEditor = true },
-                enabled = enabled,
-                trailingIcon = Icons.TwoTone.Edit,
-                modifier = Modifier.fillMaxWidth(),
-            )
+        if (!showChannelEditor) {
+            itemsIndexed(channelSet.settingsList) { index, channel ->
+                ChannelSelection(
+                    index = index,
+                    title = channel.name.ifEmpty { modemPresetName },
+                    enabled = enabled,
+                    isSelected = channelSelections[index],
+                    onSelected = {
+                        channelSelections[index] = it
+                    }
+                )
+            }
+            item {
+                OutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { showChannelEditor = true },
+                    enabled = enabled,
+                ) { Text(text = stringResource(R.string.edit)) }
+            }
         } else {
             dragDropItemsIndexed(
                 items = channelSet.settingsList,
@@ -338,7 +369,7 @@ fun ChannelScreen(
                         }
                         showEditChannelDialog = channelSet.settingsList.lastIndex
                     },
-                    enabled = viewModel.maxChannels > channelSet.settingsCount,
+                    enabled = enabled && viewModel.maxChannels > channelSet.settingsCount,
                     colors = ButtonDefaults.buttonColors(
                         disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
                     )
@@ -348,7 +379,7 @@ fun ChannelScreen(
 
         if (!isEditing) item {
             Image(
-                painter = channelSet.qrCode?.let { BitmapPainter(it.asImageBitmap()) }
+                painter = selectedChannelSet.qrCode?.let { BitmapPainter(it.asImageBitmap()) }
                     ?: painterResource(id = R.drawable.qrcode),
                 contentDescription = stringResource(R.string.qr_code),
                 contentScale = ContentScale.Inside,
@@ -460,6 +491,48 @@ fun ChannelScreen(
                         if (context.hasCameraPermission()) zxingScan() else requestPermissionAndScan()
                     })
             }
+        }
+    }
+}
+
+/**
+ * Enables the user to select what channels are used for QR generation.
+ */
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ChannelSelection(
+    index: Int,
+    title: String,
+    enabled: Boolean,
+    isSelected: Boolean,
+    onSelected: (Boolean) -> Unit
+) {
+    var checked by remember { mutableStateOf(isSelected) }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        elevation = 4.dp
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp)
+        ) {
+            Chip(onClick = { }, enabled = enabled) { Text("$index") }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.body1,
+                color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
+                modifier = Modifier.weight(1f)
+            )
+            Checkbox(
+                enabled = enabled,
+                checked = checked,
+                onCheckedChange = {
+                    onSelected.invoke(it)
+                    checked = it
+                }
+            )
         }
     }
 }
