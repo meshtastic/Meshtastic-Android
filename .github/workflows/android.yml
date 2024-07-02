@@ -49,12 +49,6 @@ jobs:
     - name: Check lint
       run: ./gradlew lintFdroidDebug lintGoogleDebug
 
-    - name: Check detekt
-      run: ./gradlew detekt
-
-    - name: Check ktlint
-      run: ./gradlew ktlintCheck
-
     - name: Build debug artifacts
       run: ./gradlew assembleDebug
 
@@ -144,7 +138,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Check ktlint
-        run: ./gradlew ktlint
+        run: ./gradlew ktlintCheck
 
       - name: Upload build reports
         if: ${{ !cancelled() }}
