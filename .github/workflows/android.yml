@@ -49,6 +49,12 @@ jobs:
     - name: Check lint
       run: ./gradlew lintFdroidDebug lintGoogleDebug
 
+    - name: Check detekt
+      run: ./gradlew detektFdroidDebug detektGoogleDebug
+
+    - name: Check ktlint
+      run: ./gradlew ktlintFdroidDebug ktlintGoogleDebug
+
     - name: Build debug artifacts
       run: ./gradlew assembleDebug
 
