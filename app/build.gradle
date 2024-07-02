@@ -9,7 +9,7 @@ plugins {
     id 'com.google.protobuf'
     id "com.google.devtools.ksp"
     id "io.gitlab.arturbosch.detekt" version "1.23.3"
-    id "org.jlleitschuh.gradle.ktlint"
+    id "org.jlleitschuh.gradle.ktlint" version "12.1.1"
 }
 
 unMock {
@@ -274,4 +274,13 @@ ksp {
 
 repositories {
     maven { url "https://jitpack.io" }
+}
+
+detekt {
+    config.setFrom("../config/detekt/detekt.yml")
+    baseline = file("../config/detekt/detekt-baseline.xml")
+}
+
+ktlint {
+    baseline = file("../config/ktlint/baseline.xml")
 }
