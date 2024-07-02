@@ -7,19 +7,15 @@
     android:background="@color/colorAdvancedBackground"
     >
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/debug_recyclerview"
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/debugListView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="8dp"
-        android:scrollbarAlwaysDrawVerticalTrack="true"
-        android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/clearButton"
-        tools:itemCount="8"
-        tools:listitem="@layout/adapter_debug_layout" />
+        app:layout_constraintTop_toBottomOf="@+id/clearButton" />
 
     <Button
         android:id="@+id/clearButton"
