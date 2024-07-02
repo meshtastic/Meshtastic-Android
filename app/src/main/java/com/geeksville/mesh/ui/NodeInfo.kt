@@ -157,7 +157,7 @@ fun NodeInfo(
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                 )
 
-                val hwInfoString = thisNodeInfo?.user?.hwModelString
+                val hwInfoString = thatNodeInfo.user?.hwModelString
                 if (hwInfoString != null){
                     Text(
                         modifier = Modifier.constrainAs(hw) {
