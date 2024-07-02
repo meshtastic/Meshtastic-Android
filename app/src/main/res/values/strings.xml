@@ -180,6 +180,7 @@
     <string name="device_settings">Radio configuration</string>
     <string name="module_settings">Module configuration</string>
     <string name="add">Add</string>
+    <string name="edit">Edit</string>
     <string name="calculating">Calculating…</string>
     <string name="map_offline_manager">Offline Manager</string>
     <string name="map_cache_size">Current Cache size</string>
