@@ -41,7 +41,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
-import androidx.compose.material.icons.twotone.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -73,7 +72,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -95,11 +93,9 @@ import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannelUrl
-import com.geeksville.mesh.model.primaryChannel
 import com.geeksville.mesh.model.qrCode
 import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.ui.components.ClickableTextField
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.config.ChannelCard
@@ -181,7 +177,6 @@ fun ChannelScreen(
         settings.addAll(result)
     }
 
-    val primaryChannel = channelSet.primaryChannel
     val channelUrl = channelSet.getChannelUrl()
     val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
@@ -332,29 +327,6 @@ fun ChannelScreen(
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
     ) {
         if (!showChannelEditor) {
-            item {
-                ClickableTextField(
-                    label = R.string.channel_name,
-                    value = primaryChannel?.name.orEmpty(),
-                    onClick = { showChannelEditor = true },
-                    enabled = enabled,
-                    trailingIcon = Icons.TwoTone.Edit,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-            item {
-                Text(
-                    text = stringResource(id = R.string.generate_qr_code),
-                    style = MaterialTheme.typography.body1,
-                    color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
-                    )
-                Text(
-                    text = stringResource(id = R.string.lora_config_shared),
-                    fontSize = 12.sp,
-                    style = MaterialTheme.typography.body1,
-                    color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
-                )
-            }
             itemsIndexed(channelSet.settingsList) { index, channel ->
                 ChannelSelection(
                     index = index,
@@ -365,6 +337,13 @@ fun ChannelScreen(
                         channelSelections[index] = it
                     }
                 )
+            }
+            item {
+                OutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { showChannelEditor = true },
+                    enabled = enabled,
+                ) { Text(text = stringResource(R.string.edit)) }
             }
         } else {
             dragDropItemsIndexed(
@@ -390,7 +369,7 @@ fun ChannelScreen(
                         }
                         showEditChannelDialog = channelSet.settingsList.lastIndex
                     },
-                    enabled = viewModel.maxChannels > channelSet.settingsCount,
+                    enabled = enabled && viewModel.maxChannels > channelSet.settingsCount,
                     colors = ButtonDefaults.buttonColors(
                         disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
                     )
