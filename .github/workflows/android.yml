@@ -105,7 +105,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: build-reports
+          name: detekt-reports
           path: app/build/reports
           retention-days: 30
 
@@ -144,7 +144,7 @@ jobs:
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: build-reports
+          name: ktlint-reports
           path: app/build/reports
           retention-days: 30
 
