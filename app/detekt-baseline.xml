@@ -18,7 +18,7 @@
     <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
     <ID>CyclomaticComplexMethod:SettingsFragment.kt$SettingsFragment$private fun initCommonUI()</ID>
     <ID>CyclomaticComplexMethod:UIState.kt$UIViewModel$fun saveMessagesCSV(uri: Uri)</ID>
-    <ID>DestructuringDeclarationWithTooManyEntries:NodeInfo.kt$val (chip, dist, name, pos, alt, sats, batt, heard, sig, env) = createRefs()</ID>
+    <ID>DestructuringDeclarationWithTooManyEntries:NodeInfo.kt$val (chip, dist, name, hw, pos, alt, sats, batt, heard, sig, env) = createRefs()</ID>
     <ID>EmptyCatchBlock:MeshLog.kt$MeshLog${ }</ID>
     <ID>EmptyClassBlock:DebugLogFile.kt$BinaryLogFile${ }</ID>
     <ID>EmptyDefaultConstructor:SqlTileWriterExt.kt$SqlTileWriterExt$()</ID>
@@ -30,141 +30,8 @@
     <ID>ExceptionRaisedInUnexpectedLocation:DistanceExtensions.kt$fun Float.toString( system: ConfigProtos.Config.DisplayConfig.DisplayUnits ): String</ID>
     <ID>ForbiddenComment:MapFragment.kt$// TODO: Accept filename input param from user</ID>
     <ID>ForbiddenComment:SafeBluetooth.kt$SafeBluetooth$// TODO: display some kind of UI about restarting BLE</ID>
-    <ID>FunctionNaming:AmbientLightingConfigItemList.kt$@Composable fun AmbientLightingConfigItemList( ambientLightingConfig: ModuleConfigProtos.ModuleConfig.AmbientLightingConfig, enabled: Boolean, onSaveClicked: (ModuleConfigProtos.ModuleConfig.AmbientLightingConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:AmbientLightingConfigItemList.kt$@Preview(showBackground = true) @Composable private fun AmbientLightingConfigPreview()</ID>
-    <ID>FunctionNaming:AudioConfigItemList.kt$@Composable fun AudioConfigItemList( audioConfig: AudioConfig, enabled: Boolean, onSaveClicked: (AudioConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:AudioConfigItemList.kt$@Preview(showBackground = true) @Composable private fun AudioConfigPreview()</ID>
-    <ID>FunctionNaming:BatteryInfo.kt$@Composable @Preview fun BatteryInfoPreviewSimple()</ID>
-    <ID>FunctionNaming:BatteryInfo.kt$@Composable @Preview(showBackground = true) @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES) fun BatteryInfoPreview( @PreviewParameter(BatteryInfoPreviewParameterProvider::class) batteryInfo: Pair&lt;Int?, Float?&gt; )</ID>
-    <ID>FunctionNaming:BatteryInfo.kt$@Composable fun BatteryInfo( modifier: Modifier = Modifier, batteryLevel: Int?, voltage: Float? )</ID>
-    <ID>FunctionNaming:BitwisePreference.kt$@Composable fun BitwisePreference( title: String, value: Int, enabled: Boolean, items: List&lt;Pair&lt;Int, String&gt;&gt;, onItemSelected: (Int) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:BitwisePreference.kt$@Preview(showBackground = true) @Composable private fun BitwisePreferencePreview()</ID>
-    <ID>FunctionNaming:BluetoothConfigItemList.kt$@Composable fun BluetoothConfigItemList( bluetoothConfig: BluetoothConfig, enabled: Boolean, onSaveClicked: (BluetoothConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:BluetoothConfigItemList.kt$@Preview(showBackground = true) @Composable private fun BluetoothConfigPreview()</ID>
-    <ID>FunctionNaming:CacheLayout.kt$@Composable internal fun CacheLayout( cacheEstimate: String, onExecuteJob: () -&gt; Unit, onCancelDownload: () -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:CacheLayout.kt$@Preview(showBackground = true) @Composable private fun CacheLayoutPreview()</ID>
-    <ID>FunctionNaming:CannedMessageConfigItemList.kt$@Composable fun CannedMessageConfigItemList( messages: String, cannedMessageConfig: CannedMessageConfig, enabled: Boolean, onSaveClicked: (messages: String, config: CannedMessageConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:CannedMessageConfigItemList.kt$@Preview(showBackground = true) @Composable private fun CannedMessageConfigPreview()</ID>
-    <ID>FunctionNaming:ChannelFragment.kt$@Composable fun ChannelScreen( viewModel: UIViewModel = viewModel(), showSnackbar: (String) -&gt; Unit = {}, )</ID>
-    <ID>FunctionNaming:ChannelFragment.kt$@Preview(showBackground = true) @Composable private fun ChannelScreenPreview()</ID>
-    <ID>FunctionNaming:ChannelSettingsItemList.kt$@Composable fun ChannelSettingsItemList( settingsList: List&lt;ChannelSettings&gt;, modemPresetName: String = "Default", maxChannels: Int = 8, enabled: Boolean, onNegativeClicked: () -&gt; Unit = { }, onPositiveClicked: (List&lt;ChannelSettings&gt;) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:ChannelSettingsItemList.kt$@OptIn(ExperimentalMaterialApi::class) @Composable fun ChannelCard( index: Int, title: String, enabled: Boolean, onEditClick: () -&gt; Unit, onDeleteClick: () -&gt; Unit, elevation: Dp = 4.dp, )</ID>
-    <ID>FunctionNaming:ChannelSettingsItemList.kt$@Preview(showBackground = true) @Composable private fun ChannelSettingsPreview()</ID>
-    <ID>FunctionNaming:ClickableTextField.kt$@Composable fun ClickableTextField( @StringRes label: Int, enabled: Boolean, trailingIcon: ImageVector, value: String, onClick: () -&gt; Unit, modifier: Modifier = Modifier, isError: Boolean = false, )</ID>
-    <ID>FunctionNaming:ContactItem.kt$@OptIn(ExperimentalMaterialApi::class) @Composable fun ContactItem( contact: Contact, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:ContactItem.kt$@Preview(showBackground = true) @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES) @Composable private fun ContactItemPreview()</ID>
-    <ID>FunctionNaming:ContactsFragment.kt$@OptIn(ExperimentalFoundationApi::class) @Composable fun ContactsScreen( model: ContactsViewModel = hiltViewModel(), onClick: (Contact) -&gt; Unit, onLongClick: (Contact) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:DetectionSensorConfigItemList.kt$@Composable fun DetectionSensorConfigItemList( detectionSensorConfig: ModuleConfigProtos.ModuleConfig.DetectionSensorConfig, enabled: Boolean, onSaveClicked: (ModuleConfigProtos.ModuleConfig.DetectionSensorConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:DetectionSensorConfigItemList.kt$@Preview(showBackground = true) @Composable private fun DetectionSensorConfigPreview()</ID>
-    <ID>FunctionNaming:DeviceConfigItemList.kt$@Composable fun DeviceConfigItemList( deviceConfig: DeviceConfig, enabled: Boolean, onSaveClicked: (DeviceConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:DeviceConfigItemList.kt$@Preview(showBackground = true) @Composable private fun DeviceConfigPreview()</ID>
-    <ID>FunctionNaming:DeviceSettingsFragment.kt$@Composable fun RadioConfigNavHost( node: NodeInfo?, viewModel: RadioConfigViewModel = hiltViewModel(), navController: NavHostController = rememberNavController(), modifier: Modifier, )</ID>
-    <ID>FunctionNaming:DeviceSettingsFragment.kt$@Composable private fun MeshAppBar( currentScreen: String, canNavigateBack: Boolean, navigateUp: () -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:DeviceSettingsFragment.kt$@Composable private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -&gt; Unit)</ID>
-    <ID>FunctionNaming:DeviceSettingsFragment.kt$@Composable private fun NavCard( title: String, enabled: Boolean, onClick: () -&gt; Unit )</ID>
-    <ID>FunctionNaming:DeviceSettingsFragment.kt$@Composable private fun RadioSettingsScreen( enabled: Boolean = true, isLocal: Boolean = true, onRouteClick: (Any) -&gt; Unit = {}, )</ID>
-    <ID>FunctionNaming:DeviceSettingsFragment.kt$@Preview(showBackground = true) @Composable private fun RadioSettingsScreenPreview()</ID>
-    <ID>FunctionNaming:DisplayConfigItemList.kt$@Composable fun DisplayConfigItemList( displayConfig: DisplayConfig, enabled: Boolean, onSaveClicked: (DisplayConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:DisplayConfigItemList.kt$@Preview(showBackground = true) @Composable private fun DisplayConfigPreview()</ID>
-    <ID>FunctionNaming:DownloadButton.kt$@Composable internal fun DownloadButton( enabled: Boolean, onClick: () -&gt; Unit, )</ID>
-    <ID>FunctionNaming:DropDownPreference.kt$@Composable fun &lt;T&gt; DropDownPreference( title: String, enabled: Boolean, items: List&lt;Pair&lt;T, String&gt;&gt;, selectedItem: T, onItemSelected: (T) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:DropDownPreference.kt$@Preview(showBackground = true) @Composable private fun DropDownPreferencePreview()</ID>
-    <ID>FunctionNaming:EditChannelDialog.kt$@Composable fun EditChannelDialog( channelSettings: ChannelProtos.ChannelSettings, onAddClick: (ChannelProtos.ChannelSettings) -&gt; Unit, onDismissRequest: () -&gt; Unit, modifier: Modifier = Modifier, modemPresetName: String = "Default", )</ID>
-    <ID>FunctionNaming:EditChannelDialog.kt$@Preview(showBackground = true) @Composable private fun EditChannelDialogPreview()</ID>
-    <ID>FunctionNaming:EditDeviceProfileDialog.kt$@Composable fun EditDeviceProfileDialog( title: String, deviceProfile: ClientOnlyProtos.DeviceProfile, onAddClick: (ClientOnlyProtos.DeviceProfile) -&gt; Unit, onDismissRequest: () -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:EditDeviceProfileDialog.kt$@Preview(showBackground = true) @Composable private fun EditDeviceProfileDialogPreview()</ID>
-    <ID>FunctionNaming:EditIPv4Preference.kt$@Composable fun EditIPv4Preference( title: String, value: Int, enabled: Boolean, keyboardActions: KeyboardActions, onValueChanged: (Int) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:EditIPv4Preference.kt$@Preview(showBackground = true) @Composable private fun EditIPv4PreferencePreview()</ID>
-    <ID>FunctionNaming:EditListPreference.kt$@Composable inline fun &lt;reified T&gt; EditListPreference( title: String, list: List&lt;T&gt;, maxCount: Int, enabled: Boolean, keyboardActions: KeyboardActions, crossinline onValuesChanged: (List&lt;T&gt;) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:EditListPreference.kt$@Preview(showBackground = true) @Composable private fun EditListPreferencePreview()</ID>
-    <ID>FunctionNaming:EditPasswordPreference.kt$@Composable fun EditPasswordPreference( title: String, value: String, maxSize: Int, enabled: Boolean, keyboardActions: KeyboardActions, onValueChanged: (String) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:EditPasswordPreference.kt$@Preview(showBackground = true) @Composable private fun EditPasswordPreferencePreview()</ID>
-    <ID>FunctionNaming:EditTextPreference.kt$@Composable fun EditTextPreference( title: String, value: Double, enabled: Boolean, keyboardActions: KeyboardActions, onValueChanged: (Double) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:EditTextPreference.kt$@Composable fun EditTextPreference( title: String, value: Float, enabled: Boolean, keyboardActions: KeyboardActions, onValueChanged: (Float) -&gt; Unit, modifier: Modifier = Modifier, onFocusChanged: (FocusState) -&gt; Unit = {}, )</ID>
-    <ID>FunctionNaming:EditTextPreference.kt$@Composable fun EditTextPreference( title: String, value: Int, enabled: Boolean, keyboardActions: KeyboardActions, onValueChanged: (Int) -&gt; Unit, modifier: Modifier = Modifier, onFocusChanged: (FocusState) -&gt; Unit = {}, trailingIcon: (@Composable () -&gt; Unit)? = null, )</ID>
-    <ID>FunctionNaming:EditTextPreference.kt$@Composable fun EditTextPreference( title: String, value: String, enabled: Boolean, isError: Boolean, keyboardOptions: KeyboardOptions, keyboardActions: KeyboardActions, onValueChanged: (String) -&gt; Unit, modifier: Modifier = Modifier, maxSize: Int = 0, // max_size - 1 (in bytes) onFocusChanged: (FocusState) -&gt; Unit = {}, trailingIcon: (@Composable () -&gt; Unit)? = null, visualTransformation: VisualTransformation = VisualTransformation.None, )</ID>
-    <ID>FunctionNaming:EditTextPreference.kt$@Preview(showBackground = true) @Composable private fun EditTextPreferencePreview()</ID>
-    <ID>FunctionNaming:EditWaypointDialog.kt$@Composable internal fun EditWaypointDialog( waypoint: Waypoint, onSendClicked: (Waypoint) -&gt; Unit, onDeleteClicked: (Waypoint) -&gt; Unit, onDismissRequest: () -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:EditWaypointDialog.kt$@Preview(showBackground = true) @Composable private fun EditWaypointFormPreview()</ID>
-    <ID>FunctionNaming:ElevationInfo.kt$@Composable @Preview fun ElevationInfoPreview()</ID>
-    <ID>FunctionNaming:ElevationInfo.kt$@Composable fun ElevationInfo( modifier: Modifier = Modifier, altitude: Float, system: DisplayUnits, suffix: String )</ID>
-    <ID>FunctionNaming:ExternalNotificationConfigItemList.kt$@Composable fun ExternalNotificationConfigItemList( ringtone: String, extNotificationConfig: ExternalNotificationConfig, enabled: Boolean, onSaveClicked: (ringtone: String, config: ExternalNotificationConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:ExternalNotificationConfigItemList.kt$@Preview(showBackground = true) @Composable private fun ExternalNotificationConfigPreview()</ID>
-    <ID>FunctionNaming:IconButton.kt$@Composable fun IconButton( onClick: () -&gt; Unit, @DrawableRes drawableRes: Int, @StringRes contentDescription: Int, modifier: Modifier = Modifier, enabled: Boolean = true, )</ID>
-    <ID>FunctionNaming:IconButton.kt$@Composable fun IconButton( onClick: () -&gt; Unit, @DrawableRes drawableRes: Int, contentDescription: String?, modifier: Modifier = Modifier, enabled: Boolean = true, )</ID>
-    <ID>FunctionNaming:IconButton.kt$@Preview(showBackground = true) @Composable private fun IconButtonsPreview()</ID>
-    <ID>FunctionNaming:LastHeardInfo.kt$@Composable @Preview(showBackground = true) @Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES) fun LastHeardInfoPreview()</ID>
-    <ID>FunctionNaming:LastHeardInfo.kt$@Composable fun LastHeardInfo( modifier: Modifier = Modifier, lastHeard: Int )</ID>
-    <ID>FunctionNaming:LazyColumnDragAndDropDemo.kt$@OptIn(ExperimentalFoundationApi::class) @Composable fun LazyItemScope.DraggableItem( dragDropState: DragDropState, key: Int, modifier: Modifier = Modifier, content: @Composable ColumnScope.(isDragging: Boolean) -&gt; Unit )</ID>
-    <ID>FunctionNaming:LazyColumnDragAndDropDemo.kt$@Preview @Composable fun LazyColumnDragAndDropDemo()</ID>
-    <ID>FunctionNaming:LinkedCoordinates.kt$@Composable @Preview fun LinkedCoordinatesSimplePreview()</ID>
-    <ID>FunctionNaming:LinkedCoordinates.kt$@Composable @Preview(showBackground = true) @Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES) fun LinkedCoordinatesPreview( @PreviewParameter(GPSFormatPreviewParameterProvider::class) format: Int )</ID>
-    <ID>FunctionNaming:LinkedCoordinates.kt$@Composable fun LinkedCoordinates( modifier : Modifier = Modifier, position: Position?, format: Int, nodeName: String? )</ID>
-    <ID>FunctionNaming:LoRaConfigItemList.kt$@Composable fun LoRaConfigItemList( loraConfig: LoRaConfig, primarySettings: ChannelSettings, enabled: Boolean, onSaveClicked: (LoRaConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:LoRaConfigItemList.kt$@Preview(showBackground = true) @Composable private fun LoRaConfigPreview()</ID>
-    <ID>FunctionNaming:LocationUtils.kt$GPSFormat$fun DEC(p: Position): String</ID>
-    <ID>FunctionNaming:LocationUtils.kt$GPSFormat$fun DMS(p: Position): String</ID>
-    <ID>FunctionNaming:LocationUtils.kt$GPSFormat$fun MGRS(p: Position): String</ID>
-    <ID>FunctionNaming:LocationUtils.kt$GPSFormat$fun UTM(p: Position): String</ID>
-    <ID>FunctionNaming:LocationUtils.kt$fun DMSToDegrees( degrees: Double, minutes: Double, seconds: Double, isPostive: Boolean ): Double</ID>
-    <ID>FunctionNaming:LocationUtils.kt$fun DMSToDegrees( degrees: Int, minutes: Int, seconds: Float, isPostive: Boolean ): Double</ID>
-    <ID>FunctionNaming:MQTTConfigItemList.kt$@Composable fun MQTTConfigItemList( mqttConfig: MQTTConfig, enabled: Boolean, onSaveClicked: (MQTTConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:MQTTConfigItemList.kt$@Preview(showBackground = true) @Composable private fun MQTTConfigPreview()</ID>
-    <ID>FunctionNaming:MapFragment.kt$@Composable fun MapView( model: UIViewModel = viewModel(), )</ID>
-    <ID>FunctionNaming:MapFragment.kt$@Composable private fun MapView.UpdateMarkers( nodeMarkers: List&lt;MarkerWithLabel&gt;, waypointMarkers: List&lt;MarkerWithLabel&gt;, )</ID>
-    <ID>FunctionNaming:NeighborInfoConfigItemList.kt$@Composable fun NeighborInfoConfigItemList( neighborInfoConfig: ModuleConfigProtos.ModuleConfig.NeighborInfoConfig, enabled: Boolean, onSaveClicked: (ModuleConfigProtos.ModuleConfig.NeighborInfoConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:NeighborInfoConfigItemList.kt$@Preview(showBackground = true) @Composable private fun NeighborInfoConfigPreview()</ID>
-    <ID>FunctionNaming:NetworkConfigItemList.kt$@Composable fun NetworkConfigItemList( networkConfig: NetworkConfig, enabled: Boolean, onSaveClicked: (NetworkConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:NetworkConfigItemList.kt$@Preview(showBackground = true) @Composable private fun NetworkConfigPreview()</ID>
-    <ID>FunctionNaming:NodeFilterTextField.kt$@Composable @Preview(uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES) @Preview(uiMode = android.content.res.Configuration.UI_MODE_NIGHT_NO) fun NodeFilterTextFieldPreview()</ID>
-    <ID>FunctionNaming:NodeFilterTextField.kt$@Composable fun NodeFilterTextField( filterText : String, onTextChanged : (String) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:NodeInfo.kt$@Composable @Preview( showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES, ) fun NodeInfoPreview( @PreviewParameter(NodeInfoPreviewParameterProvider::class) thatNodeInfo: NodeInfo )</ID>
-    <ID>FunctionNaming:NodeInfo.kt$@Composable @Preview(showBackground = false) fun NodeInfoSimplePreview()</ID>
-    <ID>FunctionNaming:NodeInfo.kt$@OptIn(ExperimentalMaterialApi::class) @Composable fun NodeInfo( thisNodeInfo: NodeInfo?, thatNodeInfo: NodeInfo, gpsFormat: Int, distanceUnits: Int, tempInFahrenheit: Boolean, isIgnored: Boolean = false, onClicked: () -&gt; Unit = {}, blinking: Boolean = false, )</ID>
-    <ID>FunctionNaming:NodeSortButton.kt$@Composable internal fun NodeSortButton( currentSortOption: NodeSortOption, onSortSelected: (NodeSortOption) -&gt; Unit, includeUnknown: Boolean, onToggleIncludeUnknown: () -&gt; Unit, modifier: Modifier = Modifier, )</ID>
     <ID>FunctionNaming:PacketDao.kt$PacketDao$@Query("DELETE FROM packet WHERE uuid=:uuid") fun _delete(uuid: Long)</ID>
-    <ID>FunctionNaming:PacketResponseStateDialog.kt$@Composable fun &lt;T&gt; PacketResponseStateDialog( state: ResponseState&lt;T&gt;, onDismiss: () -&gt; Unit = {}, onComplete: () -&gt; Unit = {}, )</ID>
-    <ID>FunctionNaming:PacketResponseStateDialog.kt$@Preview(showBackground = true) @Composable private fun PacketResponseStateDialogPreview()</ID>
-    <ID>FunctionNaming:PaxcounterConfigItemList.kt$@Composable fun PaxcounterConfigItemList( paxcounterConfig: ModuleConfigProtos.ModuleConfig.PaxcounterConfig, enabled: Boolean, onSaveClicked: (ModuleConfigProtos.ModuleConfig.PaxcounterConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:PaxcounterConfigItemList.kt$@Preview(showBackground = true) @Composable private fun PaxcounterConfigPreview()</ID>
-    <ID>FunctionNaming:PositionConfigItemList.kt$@Composable fun PositionConfigItemList( isLocal: Boolean = false, location: Position?, positionConfig: PositionConfig, enabled: Boolean, onSaveClicked: (position: Position?, config: PositionConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:PositionConfigItemList.kt$@Preview(showBackground = true) @Composable private fun PositionConfigPreview()</ID>
-    <ID>FunctionNaming:PositionPrecisionPreference.kt$@Composable fun PositionPrecisionPreference( title: String, value: Int, enabled: Boolean, onValueChanged: (Int) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:PowerConfigItemList.kt$@Composable fun PowerConfigItemList( powerConfig: PowerConfig, enabled: Boolean, onSaveClicked: (PowerConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:PowerConfigItemList.kt$@Preview(showBackground = true) @Composable private fun PowerConfigPreview()</ID>
-    <ID>FunctionNaming:PreferenceCategory.kt$@Composable fun PreferenceCategory( text: String, modifier: Modifier = Modifier )</ID>
-    <ID>FunctionNaming:PreferenceCategory.kt$@Preview(showBackground = true) @Composable private fun PreferenceCategoryPreview()</ID>
-    <ID>FunctionNaming:PreferenceFooter.kt$@Composable fun PreferenceFooter( enabled: Boolean, @StringRes negativeText: Int, onNegativeClicked: () -&gt; Unit, @StringRes positiveText: Int, onPositiveClicked: () -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:PreferenceFooter.kt$@Composable fun PreferenceFooter( enabled: Boolean, onCancelClicked: () -&gt; Unit, onSaveClicked: () -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:PreferenceFooter.kt$@Preview(showBackground = true) @Composable private fun PreferenceFooterPreview()</ID>
     <ID>FunctionNaming:QuickChatActionDao.kt$QuickChatActionDao$@Query("Delete from quick_chat where uuid=:uuid") fun _delete(uuid: Long)</ID>
-    <ID>FunctionNaming:RangeTestConfigItemList.kt$@Composable fun RangeTestConfigItemList( rangeTestConfig: RangeTestConfig, enabled: Boolean, onSaveClicked: (RangeTestConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:RangeTestConfigItemList.kt$@Preview(showBackground = true) @Composable private fun RangeTestConfig()</ID>
-    <ID>FunctionNaming:RegularPreference.kt$@Composable fun RegularPreference( title: String, subtitle: AnnotatedString, onClick: () -&gt; Unit, modifier: Modifier = Modifier, enabled: Boolean = true, trailingIcon: ImageVector? = null, )</ID>
-    <ID>FunctionNaming:RegularPreference.kt$@Composable fun RegularPreference( title: String, subtitle: String, onClick: () -&gt; Unit, modifier: Modifier = Modifier, enabled: Boolean = true, trailingIcon: ImageVector? = null, )</ID>
-    <ID>FunctionNaming:RegularPreference.kt$@Preview(showBackground = true) @Composable private fun RegularPreferencePreview()</ID>
-    <ID>FunctionNaming:RemoteHardwareConfigItemList.kt$@Composable fun RemoteHardwareConfigItemList( remoteHardwareConfig: RemoteHardwareConfig, enabled: Boolean, onSaveClicked: (RemoteHardwareConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:RemoteHardwareConfigItemList.kt$@Preview(showBackground = true) @Composable private fun RemoteHardwareConfigPreview()</ID>
-    <ID>FunctionNaming:SatelliteCountInfo.kt$@Composable @Preview( showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES ) @Preview( showBackground = true, ) fun SatelliteCountInfoPreview()</ID>
-    <ID>FunctionNaming:SatelliteCountInfo.kt$@Composable fun SatelliteCountInfo( modifier: Modifier = Modifier, satCount: Int, )</ID>
-    <ID>FunctionNaming:SerialConfigItemList.kt$@Composable fun SerialConfigItemList( serialConfig: SerialConfig, enabled: Boolean, onSaveClicked: (SerialConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:SerialConfigItemList.kt$@Preview(showBackground = true) @Composable private fun SerialConfigPreview()</ID>
-    <ID>FunctionNaming:SignalInfo.kt$@Composable @Preview(showBackground = true) @Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES) fun SignalInfoPreview( @PreviewParameter(NodeInfoPreviewParameterProvider::class) nodeInfo: NodeInfo )</ID>
-    <ID>FunctionNaming:SignalInfo.kt$@Composable @Preview(showBackground = true) @Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES) fun SignalInfoSelfPreview( @PreviewParameter(NodeInfoPreviewParameterProvider::class) nodeInfo: NodeInfo )</ID>
-    <ID>FunctionNaming:SignalInfo.kt$@Composable @Preview(showBackground = true) fun SignalInfoSimplePreview()</ID>
-    <ID>FunctionNaming:StoreForwardConfigItemList.kt$@Composable fun StoreForwardConfigItemList( storeForwardConfig: StoreForwardConfig, enabled: Boolean, onSaveClicked: (StoreForwardConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:StoreForwardConfigItemList.kt$@Preview(showBackground = true) @Composable private fun StoreForwardConfigPreview()</ID>
-    <ID>FunctionNaming:SwitchPreference.kt$@Composable fun SwitchPreference( title: String, checked: Boolean, enabled: Boolean, onCheckedChange: (Boolean) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>FunctionNaming:SwitchPreference.kt$@Preview(showBackground = true) @Composable private fun SwitchPreferencePreview()</ID>
-    <ID>FunctionNaming:TelemetryConfigItemList.kt$@Composable fun TelemetryConfigItemList( telemetryConfig: TelemetryConfig, enabled: Boolean, onSaveClicked: (TelemetryConfig) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:TelemetryConfigItemList.kt$@Preview(showBackground = true) @Composable private fun TelemetryConfigPreview()</ID>
-    <ID>FunctionNaming:TextDividerPreference.kt$@Composable fun TextDividerPreference( title: AnnotatedString, modifier: Modifier = Modifier, enabled: Boolean = true, trailingIcon: ImageVector? = null, )</ID>
-    <ID>FunctionNaming:TextDividerPreference.kt$@Composable fun TextDividerPreference( title: String, modifier: Modifier = Modifier, enabled: Boolean = true, trailingIcon: ImageVector? = null, )</ID>
-    <ID>FunctionNaming:TextDividerPreference.kt$@Preview(showBackground = true) @Composable private fun TextDividerPreferencePreview()</ID>
-    <ID>FunctionNaming:Theme.kt$@Composable fun AppTheme( darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -&gt; Unit )</ID>
-    <ID>FunctionNaming:UserConfigItemList.kt$@Composable fun UserConfigItemList( userConfig: MeshProtos.User, enabled: Boolean, onSaveClicked: (MeshProtos.User) -&gt; Unit, )</ID>
-    <ID>FunctionNaming:UserConfigItemList.kt$@Preview(showBackground = true) @Composable private fun UserConfigPreview()</ID>
-    <ID>FunctionNaming:UsersFragment.kt$@OptIn(ExperimentalFoundationApi::class) @Composable fun NodesScreen( model: UIViewModel = hiltViewModel(), onClick: (NodeInfo) -&gt; Unit, )</ID>
     <ID>FunctionParameterNaming:LocationUtils.kt$_degIn: Double</ID>
     <ID>FunctionParameterNaming:LocationUtils.kt$lat_a: Double</ID>
     <ID>FunctionParameterNaming:LocationUtils.kt$lat_b: Double</ID>
@@ -218,27 +85,9 @@
     <ID>LongMethod:UIState.kt$UIViewModel$fun saveMessagesCSV(uri: Uri)</ID>
     <ID>LongMethod:UserConfigItemList.kt$@Composable fun UserConfigItemList( userConfig: MeshProtos.User, enabled: Boolean, onSaveClicked: (MeshProtos.User) -&gt; Unit, )</ID>
     <ID>LongParameterList:BTScanModel.kt$BTScanModel$( private val application: Application, private val serviceRepository: ServiceRepository, private val bluetoothRepository: BluetoothRepository, private val usbRepository: UsbRepository, private val usbManagerLazy: dagger.Lazy&lt;UsbManager&gt;, private val networkRepository: NetworkRepository, private val radioInterfaceService: RadioInterfaceService, )</ID>
-    <ID>LongParameterList:BitwisePreference.kt$( title: String, value: Int, enabled: Boolean, items: List&lt;Pair&lt;Int, String&gt;&gt;, onItemSelected: (Int) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>LongParameterList:ChannelSettingsItemList.kt$( index: Int, title: String, enabled: Boolean, onEditClick: () -&gt; Unit, onDeleteClick: () -&gt; Unit, elevation: Dp = 4.dp, )</ID>
-    <ID>LongParameterList:ChannelSettingsItemList.kt$( settingsList: List&lt;ChannelSettings&gt;, modemPresetName: String = "Default", maxChannels: Int = 8, enabled: Boolean, onNegativeClicked: () -&gt; Unit = { }, onPositiveClicked: (List&lt;ChannelSettings&gt;) -&gt; Unit, )</ID>
-    <ID>LongParameterList:ClickableTextField.kt$( @StringRes label: Int, enabled: Boolean, trailingIcon: ImageVector, value: String, onClick: () -&gt; Unit, modifier: Modifier = Modifier, isError: Boolean = false, )</ID>
-    <ID>LongParameterList:DropDownPreference.kt$( title: String, enabled: Boolean, items: List&lt;Pair&lt;T, String&gt;&gt;, selectedItem: T, onItemSelected: (T) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>LongParameterList:EditIPv4Preference.kt$( title: String, value: Int, enabled: Boolean, keyboardActions: KeyboardActions, onValueChanged: (Int) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>LongParameterList:EditListPreference.kt$( title: String, list: List&lt;T&gt;, maxCount: Int, enabled: Boolean, keyboardActions: KeyboardActions, crossinline onValuesChanged: (List&lt;T&gt;) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>LongParameterList:EditPasswordPreference.kt$( title: String, value: String, maxSize: Int, enabled: Boolean, keyboardActions: KeyboardActions, onValueChanged: (String) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>LongParameterList:EditTextPreference.kt$( title: String, value: Double, enabled: Boolean, keyboardActions: KeyboardActions, onValueChanged: (Double) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>LongParameterList:EditTextPreference.kt$( title: String, value: Float, enabled: Boolean, keyboardActions: KeyboardActions, onValueChanged: (Float) -&gt; Unit, modifier: Modifier = Modifier, onFocusChanged: (FocusState) -&gt; Unit = {}, )</ID>
-    <ID>LongParameterList:EditTextPreference.kt$( title: String, value: Int, enabled: Boolean, keyboardActions: KeyboardActions, onValueChanged: (Int) -&gt; Unit, modifier: Modifier = Modifier, onFocusChanged: (FocusState) -&gt; Unit = {}, trailingIcon: (@Composable () -&gt; Unit)? = null, )</ID>
-    <ID>LongParameterList:EditTextPreference.kt$( title: String, value: String, enabled: Boolean, isError: Boolean, keyboardOptions: KeyboardOptions, keyboardActions: KeyboardActions, onValueChanged: (String) -&gt; Unit, modifier: Modifier = Modifier, maxSize: Int = 0, // max_size - 1 (in bytes) onFocusChanged: (FocusState) -&gt; Unit = {}, trailingIcon: (@Composable () -&gt; Unit)? = null, visualTransformation: VisualTransformation = VisualTransformation.None, )</ID>
-    <ID>LongParameterList:MeshService.kt$MeshService$( wantAck: Boolean = false, id: Int = generatePacketId(), // always assign a packet ID if we didn't already have one hopLimit: Int = localConfig.lora.hopLimit, channel: Int = 0, priority: MeshPacket.Priority = MeshPacket.Priority.UNSET, initFn: MeshProtos.Data.Builder.() -&gt; Unit )</ID>
     <ID>LongParameterList:NOAAWmsTileSource.kt$NOAAWmsTileSource$( aName: String, aBaseUrl: Array&lt;String&gt;, layername: String, version: String, time: String?, srs: String, style: String?, format: String, )</ID>
-    <ID>LongParameterList:NodeInfo.kt$( thisNodeInfo: NodeInfo?, thatNodeInfo: NodeInfo, gpsFormat: Int, distanceUnits: Int, tempInFahrenheit: Boolean, isIgnored: Boolean = false, onClicked: () -&gt; Unit = {}, blinking: Boolean = false, )</ID>
-    <ID>LongParameterList:NodeMenu.kt$( node: NodeInfo, ignoreIncomingList: List&lt;Int&gt;, isOurNode: Boolean = false, showAdmin: Boolean = false, isManaged: Boolean = false, onMenuItemAction: MenuItem.() -&gt; Unit, )</ID>
     <ID>LongParameterList:OnlineTileSourceAuth.kt$OnlineTileSourceAuth$( aName: String, aZoomLevel: Int, aZoomMaxLevel: Int, aTileSizePixels: Int, aImageFileNameEnding: String, aBaseUrl: Array&lt;String&gt;, pCopyright: String, tileSourcePolicy: TileSourcePolicy, layerName: String?, apiKey: String )</ID>
-    <ID>LongParameterList:PreferenceFooter.kt$( enabled: Boolean, @StringRes negativeText: Int, onNegativeClicked: () -&gt; Unit, @StringRes positiveText: Int, onPositiveClicked: () -&gt; Unit, modifier: Modifier = Modifier, )</ID>
     <ID>LongParameterList:RadioInterfaceService.kt$RadioInterfaceService$( private val context: Application, private val dispatchers: CoroutineDispatchers, private val bluetoothRepository: BluetoothRepository, private val networkRepository: NetworkRepository, private val processLifecycle: Lifecycle, @RadioRepositoryQualifier private val prefs: SharedPreferences, private val interfaceFactory: InterfaceFactory, )</ID>
-    <ID>LongParameterList:RegularPreference.kt$( title: String, subtitle: AnnotatedString, onClick: () -&gt; Unit, modifier: Modifier = Modifier, enabled: Boolean = true, trailingIcon: ImageVector? = null, )</ID>
-    <ID>LongParameterList:RegularPreference.kt$( title: String, subtitle: String, onClick: () -&gt; Unit, modifier: Modifier = Modifier, enabled: Boolean = true, trailingIcon: ImageVector? = null, )</ID>
     <ID>LongParameterList:UIState.kt$UIViewModel$( private val app: Application, val nodeDB: NodeDB, private val radioConfigRepository: RadioConfigRepository, private val radioInterfaceService: RadioInterfaceService, private val meshLogRepository: MeshLogRepository, private val packetRepository: PacketRepository, private val quickChatActionRepository: QuickChatActionRepository, private val preferences: SharedPreferences )</ID>
     <ID>MagicNumber:BatteryInfo.kt$100</ID>
     <ID>MagicNumber:BatteryInfo.kt$101</ID>
@@ -250,21 +99,12 @@
     <ID>MagicNumber:BatteryInfo.kt$5</ID>
     <ID>MagicNumber:BatteryInfo.kt$79</ID>
     <ID>MagicNumber:BatteryInfo.kt$80</ID>
-    <ID>MagicNumber:BatteryInfo.kt$BatteryInfoPreviewParameterProvider$101</ID>
-    <ID>MagicNumber:BatteryInfo.kt$BatteryInfoPreviewParameterProvider$12</ID>
-    <ID>MagicNumber:BatteryInfo.kt$BatteryInfoPreviewParameterProvider$28</ID>
-    <ID>MagicNumber:BatteryInfo.kt$BatteryInfoPreviewParameterProvider$3.7F</ID>
-    <ID>MagicNumber:BatteryInfo.kt$BatteryInfoPreviewParameterProvider$4.5F</ID>
-    <ID>MagicNumber:BatteryInfo.kt$BatteryInfoPreviewParameterProvider$4.9F</ID>
-    <ID>MagicNumber:BatteryInfo.kt$BatteryInfoPreviewParameterProvider$50</ID>
-    <ID>MagicNumber:BatteryInfo.kt$BatteryInfoPreviewParameterProvider$85</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$1000</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$1500</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$500</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$512</ID>
     <ID>MagicNumber:BuildUtils.kt$BuildUtils$21</ID>
     <ID>MagicNumber:Channel.kt$0xff</ID>
-    <ID>MagicNumber:Channel.kt$Channel$0xff</ID>
     <ID>MagicNumber:ChannelOption.kt$.03125f</ID>
     <ID>MagicNumber:ChannelOption.kt$.0625f</ID>
     <ID>MagicNumber:ChannelOption.kt$.203125f</ID>
@@ -328,34 +168,15 @@
     <ID>MagicNumber:ChannelOption.kt$RegionInfo.US$928.0f</ID>
     <ID>MagicNumber:ChannelSet.kt$40</ID>
     <ID>MagicNumber:ChannelSet.kt$960</ID>
-    <ID>MagicNumber:Color.kt$0x8A000000</ID>
-    <ID>MagicNumber:Color.kt$0x99A6D1E6</ID>
-    <ID>MagicNumber:Color.kt$0xB3FFFFFF</ID>
-    <ID>MagicNumber:Color.kt$0xFF03DAC5</ID>
-    <ID>MagicNumber:Color.kt$0xFF3700B3</ID>
-    <ID>MagicNumber:Color.kt$0xFF43C3B0</ID>
-    <ID>MagicNumber:Color.kt$0xFF57AEFF</ID>
-    <ID>MagicNumber:Color.kt$0xFF6200EE</ID>
-    <ID>MagicNumber:Color.kt$0xFF67EA94</ID>
-    <ID>MagicNumber:Color.kt$0xFFA6D1E6</ID>
-    <ID>MagicNumber:Color.kt$0xFFBB86FC</ID>
-    <ID>MagicNumber:Color.kt$0xFFCFE8A9</ID>
-    <ID>MagicNumber:Color.kt$0xFFFAFAFA</ID>
-    <ID>MagicNumber:Color.kt$0xFFFFB3B3</ID>
-    <ID>MagicNumber:Color.kt$0xFFFFE6E6</ID>
     <ID>MagicNumber:ContactsFragment.kt$ContactsFragment.ActionModeCallback$7</ID>
     <ID>MagicNumber:ContactsFragment.kt$ContactsFragment.ActionModeCallback$8</ID>
     <ID>MagicNumber:ContactsViewModel.kt$1000L</ID>
     <ID>MagicNumber:ContactsViewModel.kt$24</ID>
     <ID>MagicNumber:ContactsViewModel.kt$60</ID>
-    <ID>MagicNumber:ContactsViewModel.kt$ContactsViewModel$5_000</ID>
     <ID>MagicNumber:ContextServices.kt$29</ID>
     <ID>MagicNumber:ContextServices.kt$33</ID>
-    <ID>MagicNumber:CustomTileSource.kt$CustomTileSource.Companion.&lt;no name provided&gt;$18</ID>
-    <ID>MagicNumber:CustomTileSource.kt$CustomTileSource.Companion.&lt;no name provided&gt;$20</ID>
-    <ID>MagicNumber:CustomTileSource.kt$CustomTileSource.Companion.&lt;no name provided&gt;$256</ID>
-    <ID>MagicNumber:CustomTileSource.kt$CustomTileSource.Companion.&lt;no name provided&gt;$4</ID>
     <ID>MagicNumber:DataPacket.kt$DataPacket.CREATOR$16</ID>
+    <ID>MagicNumber:DebugFragment.kt$DebugFragment$3</ID>
     <ID>MagicNumber:DeviceSettingsFragment.kt$ConfigRoute.BLUETOOTH$6</ID>
     <ID>MagicNumber:DeviceSettingsFragment.kt$ConfigRoute.DISPLAY$4</ID>
     <ID>MagicNumber:DeviceSettingsFragment.kt$ConfigRoute.LORA$5</ID>
@@ -431,8 +252,6 @@
     <ID>MagicNumber:MarkerWithLabel.kt$MarkerWithLabel$2F</ID>
     <ID>MagicNumber:MarkerWithLabel.kt$MarkerWithLabel$3</ID>
     <ID>MagicNumber:MarkerWithLabel.kt$MarkerWithLabel$30f</ID>
-    <ID>MagicNumber:MarkerWithLabel.kt$MarkerWithLabel$40f</ID>
-    <ID>MagicNumber:MarkerWithLabel.kt$MarkerWithLabel$80f</ID>
     <ID>MagicNumber:MarkerWithLabel.kt$MarkerWithLabel$8F</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$0xffffffff</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$0xffffffffL</ID>
@@ -447,16 +266,10 @@
     <ID>MagicNumber:MeshService.kt$MeshService$60</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$60000</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$8</ID>
-    <ID>MagicNumber:MeshService.kt$MeshService.&lt;no name provided&gt;$4</ID>
-    <ID>MagicNumber:MeshService.kt$MeshService.&lt;no name provided&gt;$5</ID>
-    <ID>MagicNumber:MeshServiceNotifications.kt$MeshServiceNotifications$101</ID>
-    <ID>MagicNumber:MeshServiceNotifications.kt$MeshServiceNotifications$102</ID>
     <ID>MagicNumber:MessagesFragment.kt$1000L</ID>
     <ID>MagicNumber:MessagesFragment.kt$24</ID>
     <ID>MagicNumber:MessagesFragment.kt$60</ID>
     <ID>MagicNumber:MessagesFragment.kt$MessagesFragment$234</ID>
-    <ID>MagicNumber:MessagesFragment.kt$MessagesFragment.&lt;no name provided&gt;$127</ID>
-    <ID>MagicNumber:MessagesFragment.kt$MessagesFragment.&lt;no name provided&gt;$32f</ID>
     <ID>MagicNumber:MockInterface.kt$MockInterface$1.5f</ID>
     <ID>MagicNumber:MockInterface.kt$MockInterface$1000</ID>
     <ID>MagicNumber:MockInterface.kt$MockInterface$16</ID>
@@ -464,13 +277,10 @@
     <ID>MagicNumber:MockInterface.kt$MockInterface$32.776665</ID>
     <ID>MagicNumber:MockInterface.kt$MockInterface$32.960758</ID>
     <ID>MagicNumber:MockInterface.kt$MockInterface$35</ID>
-    <ID>MagicNumber:MockInterface.kt$MockInterface$50</ID>
     <ID>MagicNumber:MockInterface.kt$MockInterface$96.733521</ID>
     <ID>MagicNumber:MockInterface.kt$MockInterface$96.796989</ID>
     <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$180</ID>
-    <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$20037508.34789244</ID>
     <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$256</ID>
-    <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$3</ID>
     <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$360.0</ID>
     <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$4</ID>
     <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$5</ID>
@@ -481,12 +291,10 @@
     <ID>MagicNumber:NodeInfo.kt$EnvironmentMetrics.Companion$1000</ID>
     <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.114</ID>
     <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.299</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.5</ID>
     <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.587</ID>
     <ID>MagicNumber:NodeInfo.kt$NodeInfo$0x0000FF</ID>
     <ID>MagicNumber:NodeInfo.kt$NodeInfo$0x00FF00</ID>
     <ID>MagicNumber:NodeInfo.kt$NodeInfo$0xFF0000</ID>
-    <ID>MagicNumber:NodeInfo.kt$NodeInfo$100</ID>
     <ID>MagicNumber:NodeInfo.kt$NodeInfo$1000</ID>
     <ID>MagicNumber:NodeInfo.kt$NodeInfo$1000.0</ID>
     <ID>MagicNumber:NodeInfo.kt$NodeInfo$15</ID>
@@ -514,20 +322,11 @@
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$6790</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$9114</ID>
     <ID>MagicNumber:QuickChatSettingsFragment.kt$QuickChatSettingsFragment$3</ID>
-    <ID>MagicNumber:RadioConfigViewModel.kt$RadioConfigViewModel$8</ID>
     <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$10</ID>
     <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$100</ID>
     <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$1000</ID>
-    <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$1000L</ID>
-    <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$20</ID>
     <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$2500</ID>
-    <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$4403</ID>
-    <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$4404</ID>
-    <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$4405</ID>
-    <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$4406</ID>
-    <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$133</ID>
     <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$2500</ID>
-    <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$257</ID>
     <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$115200</ID>
     <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$200</ID>
     <ID>MagicNumber:ServiceClient.kt$ServiceClient$500</ID>
@@ -538,8 +337,6 @@
     <ID>MagicNumber:SoftwareUpdateService.kt$3</ID>
     <ID>MagicNumber:SoftwareUpdateService.kt$4</ID>
     <ID>MagicNumber:SoftwareUpdateService.kt$8</ID>
-    <ID>MagicNumber:SqlTileWriterExt.kt$SqlTileWriterExt$3</ID>
-    <ID>MagicNumber:SqlTileWriterExt.kt$SqlTileWriterExt$4</ID>
     <ID>MagicNumber:StreamInterface.kt$StreamInterface$0xff</ID>
     <ID>MagicNumber:StreamInterface.kt$StreamInterface$3</ID>
     <ID>MagicNumber:StreamInterface.kt$StreamInterface$4</ID>
@@ -549,9 +346,6 @@
     <ID>MagicNumber:TCPInterface.kt$TCPInterface$4403</ID>
     <ID>MagicNumber:TCPInterface.kt$TCPInterface$500</ID>
     <ID>MagicNumber:UIState.kt$4</ID>
-    <ID>MagicNumber:UIState.kt$UIViewModel$1000</ID>
-    <ID>MagicNumber:UIState.kt$UIViewModel$5_000</ID>
-    <ID>MagicNumber:UIState.kt$UIViewModel$8</ID>
     <ID>MatchingDeclarationName:AnalyticsClient.kt$AnalyticsProvider</ID>
     <ID>MatchingDeclarationName:CompatExtensions.kt$PendingIntentCompat</ID>
     <ID>MatchingDeclarationName:DistanceExtensions.kt$DistanceUnit</ID>
@@ -576,6 +370,7 @@
     <ID>MaxLineLength:BluetoothState.kt$BluetoothState$"BluetoothState(hasPermissions=$hasPermissions, enabled=$enabled, bondedDevices=${bondedDevices.map { it.anonymize }})"</ID>
     <ID>MaxLineLength:Channel.kt$Channel$// We have a new style 'empty' channel name. Use the same logic from the device to convert that to a human readable name</ID>
     <ID>MaxLineLength:Channel.kt$Channel$/// Return the name of our channel as a human readable string. If empty string, assume "Default" per mesh.proto spec</ID>
+    <ID>MaxLineLength:ChannelFragment.kt$color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified</ID>
     <ID>MaxLineLength:ChannelSettingsItemList.kt$color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified</ID>
     <ID>MaxLineLength:ContextServices.kt$get</ID>
     <ID>MaxLineLength:ContextServices.kt$val Context.locationManager: LocationManager get() = requireNotNull(getSystemService(Context.LOCATION_SERVICE) as? LocationManager?)</ID>
@@ -686,8 +481,6 @@
     <ID>NewLineAtEndOfFile:DataPacket.kt$com.geeksville.mesh.DataPacket.kt</ID>
     <ID>NewLineAtEndOfFile:DatabaseModule.kt$com.geeksville.mesh.database.DatabaseModule.kt</ID>
     <ID>NewLineAtEndOfFile:DateUtils.kt$com.geeksville.mesh.android.DateUtils.kt</ID>
-    <ID>NewLineAtEndOfFile:DebugAdapter.kt$com.geeksville.mesh.ui.DebugAdapter.kt</ID>
-    <ID>NewLineAtEndOfFile:DebugFragment.kt$com.geeksville.mesh.ui.DebugFragment.kt</ID>
     <ID>NewLineAtEndOfFile:DebugLogFile.kt$com.geeksville.mesh.android.DebugLogFile.kt</ID>
     <ID>NewLineAtEndOfFile:DeferredExecution.kt$com.geeksville.mesh.concurrent.DeferredExecution.kt</ID>
     <ID>NewLineAtEndOfFile:DeviceVersion.kt$com.geeksville.mesh.model.DeviceVersion.kt</ID>
@@ -821,54 +614,22 @@
     <ID>TooManyFunctions:SafeBluetooth.kt$SafeBluetooth : LoggingCloseable</ID>
     <ID>TooManyFunctions:SettingsFragment.kt$SettingsFragment : ScreenFragmentLogging</ID>
     <ID>TooManyFunctions:UIState.kt$UIViewModel : ViewModelLogging</ID>
+    <ID>TopLevelPropertyNaming:ChannelSet.kt$internal const val URL_PREFIX = "https://meshtastic.org/e/#"</ID>
+    <ID>TopLevelPropertyNaming:Constants.kt$// a bool true means now connected, false means not const val EXTRA_CONNECTED = "$prefix.Connected"</ID>
+    <ID>TopLevelPropertyNaming:Constants.kt$/// a bool true means we expect this condition to continue until, false means device might come back const val EXTRA_PERMANENT = "$prefix.Permanent"</ID>
+    <ID>TopLevelPropertyNaming:Constants.kt$const val EXTRA_NODEINFO = "$prefix.NodeInfo"</ID>
+    <ID>TopLevelPropertyNaming:Constants.kt$const val EXTRA_PACKET_ID = "$prefix.PacketId"</ID>
+    <ID>TopLevelPropertyNaming:Constants.kt$const val EXTRA_PAYLOAD = "$prefix.Payload"</ID>
+    <ID>TopLevelPropertyNaming:Constants.kt$const val EXTRA_PROGRESS = "$prefix.Progress"</ID>
+    <ID>TopLevelPropertyNaming:Constants.kt$const val EXTRA_STATUS = "$prefix.Status"</ID>
     <ID>TopLevelPropertyNaming:Constants.kt$const val prefix = "com.geeksville.mesh"</ID>
+    <ID>TopLevelPropertyNaming:UsbManager.kt$private const val ACTION_USB_PERMISSION = "com.geeksville.mesh.USB_PERMISSION"</ID>
     <ID>UnusedParameter:PositionPrecisionPreference.kt$modifier: Modifier = Modifier</ID>
-    <ID>UnusedPrivateMember:AmbientLightingConfigItemList.kt$@Preview(showBackground = true) @Composable private fun AmbientLightingConfigPreview()</ID>
-    <ID>UnusedPrivateMember:AudioConfigItemList.kt$@Preview(showBackground = true) @Composable private fun AudioConfigPreview()</ID>
-    <ID>UnusedPrivateMember:BitwisePreference.kt$@Preview(showBackground = true) @Composable private fun BitwisePreferencePreview()</ID>
-    <ID>UnusedPrivateMember:BluetoothConfigItemList.kt$@Preview(showBackground = true) @Composable private fun BluetoothConfigPreview()</ID>
-    <ID>UnusedPrivateMember:CacheLayout.kt$@Preview(showBackground = true) @Composable private fun CacheLayoutPreview()</ID>
-    <ID>UnusedPrivateMember:CannedMessageConfigItemList.kt$@Preview(showBackground = true) @Composable private fun CannedMessageConfigPreview()</ID>
-    <ID>UnusedPrivateMember:ChannelFragment.kt$@Preview(showBackground = true) @Composable private fun ChannelScreenPreview()</ID>
-    <ID>UnusedPrivateMember:ChannelSettingsItemList.kt$@Preview(showBackground = true) @Composable private fun ChannelSettingsPreview()</ID>
-    <ID>UnusedPrivateMember:ContactItem.kt$@Preview(showBackground = true) @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES) @Composable private fun ContactItemPreview()</ID>
-    <ID>UnusedPrivateMember:DetectionSensorConfigItemList.kt$@Preview(showBackground = true) @Composable private fun DetectionSensorConfigPreview()</ID>
-    <ID>UnusedPrivateMember:DeviceConfigItemList.kt$@Preview(showBackground = true) @Composable private fun DeviceConfigPreview()</ID>
-    <ID>UnusedPrivateMember:DeviceSettingsFragment.kt$@Preview(showBackground = true) @Composable private fun RadioSettingsScreenPreview()</ID>
-    <ID>UnusedPrivateMember:DisplayConfigItemList.kt$@Preview(showBackground = true) @Composable private fun DisplayConfigPreview()</ID>
-    <ID>UnusedPrivateMember:DropDownPreference.kt$@Preview(showBackground = true) @Composable private fun DropDownPreferencePreview()</ID>
-    <ID>UnusedPrivateMember:EditChannelDialog.kt$@Preview(showBackground = true) @Composable private fun EditChannelDialogPreview()</ID>
-    <ID>UnusedPrivateMember:EditDeviceProfileDialog.kt$@Preview(showBackground = true) @Composable private fun EditDeviceProfileDialogPreview()</ID>
-    <ID>UnusedPrivateMember:EditIPv4Preference.kt$@Preview(showBackground = true) @Composable private fun EditIPv4PreferencePreview()</ID>
-    <ID>UnusedPrivateMember:EditListPreference.kt$@Preview(showBackground = true) @Composable private fun EditListPreferencePreview()</ID>
-    <ID>UnusedPrivateMember:EditPasswordPreference.kt$@Preview(showBackground = true) @Composable private fun EditPasswordPreferencePreview()</ID>
-    <ID>UnusedPrivateMember:EditTextPreference.kt$@Preview(showBackground = true) @Composable private fun EditTextPreferencePreview()</ID>
-    <ID>UnusedPrivateMember:EditWaypointDialog.kt$@Preview(showBackground = true) @Composable private fun EditWaypointFormPreview()</ID>
-    <ID>UnusedPrivateMember:ExternalNotificationConfigItemList.kt$@Preview(showBackground = true) @Composable private fun ExternalNotificationConfigPreview()</ID>
-    <ID>UnusedPrivateMember:IconButton.kt$@Preview(showBackground = true) @Composable private fun IconButtonsPreview()</ID>
-    <ID>UnusedPrivateMember:LoRaConfigItemList.kt$@Preview(showBackground = true) @Composable private fun LoRaConfigPreview()</ID>
-    <ID>UnusedPrivateMember:MQTTConfigItemList.kt$@Preview(showBackground = true) @Composable private fun MQTTConfigPreview()</ID>
     <ID>UnusedPrivateMember:MeshService.kt$MeshService$private fun processQueuedPackets()</ID>
     <ID>UnusedPrivateMember:MeshService.kt$MeshService$private fun requestAllConfig()</ID>
     <ID>UnusedPrivateMember:NOAAWmsTileSource.kt$NOAAWmsTileSource$private fun tile2lat(y: Int, z: Int): Double</ID>
     <ID>UnusedPrivateMember:NOAAWmsTileSource.kt$NOAAWmsTileSource$private fun tile2lon(x: Int, z: Int): Double</ID>
-    <ID>UnusedPrivateMember:NeighborInfoConfigItemList.kt$@Preview(showBackground = true) @Composable private fun NeighborInfoConfigPreview()</ID>
-    <ID>UnusedPrivateMember:NetworkConfigItemList.kt$@Preview(showBackground = true) @Composable private fun NetworkConfigPreview()</ID>
-    <ID>UnusedPrivateMember:PacketResponseStateDialog.kt$@Preview(showBackground = true) @Composable private fun PacketResponseStateDialogPreview()</ID>
-    <ID>UnusedPrivateMember:PaxcounterConfigItemList.kt$@Preview(showBackground = true) @Composable private fun PaxcounterConfigPreview()</ID>
-    <ID>UnusedPrivateMember:PositionConfigItemList.kt$@Preview(showBackground = true) @Composable private fun PositionConfigPreview()</ID>
-    <ID>UnusedPrivateMember:PowerConfigItemList.kt$@Preview(showBackground = true) @Composable private fun PowerConfigPreview()</ID>
-    <ID>UnusedPrivateMember:PreferenceCategory.kt$@Preview(showBackground = true) @Composable private fun PreferenceCategoryPreview()</ID>
-    <ID>UnusedPrivateMember:PreferenceFooter.kt$@Preview(showBackground = true) @Composable private fun PreferenceFooterPreview()</ID>
-    <ID>UnusedPrivateMember:RegularPreference.kt$@Preview(showBackground = true) @Composable private fun RegularPreferencePreview()</ID>
-    <ID>UnusedPrivateMember:RemoteHardwareConfigItemList.kt$@Preview(showBackground = true) @Composable private fun RemoteHardwareConfigPreview()</ID>
     <ID>UnusedPrivateMember:SafeBluetooth.kt$SafeBluetooth$private fun reconnect()</ID>
-    <ID>UnusedPrivateMember:SerialConfigItemList.kt$@Preview(showBackground = true) @Composable private fun SerialConfigPreview()</ID>
-    <ID>UnusedPrivateMember:StoreForwardConfigItemList.kt$@Preview(showBackground = true) @Composable private fun StoreForwardConfigPreview()</ID>
-    <ID>UnusedPrivateMember:SwitchPreference.kt$@Preview(showBackground = true) @Composable private fun SwitchPreferencePreview()</ID>
-    <ID>UnusedPrivateMember:TelemetryConfigItemList.kt$@Preview(showBackground = true) @Composable private fun TelemetryConfigPreview()</ID>
-    <ID>UnusedPrivateMember:TextDividerPreference.kt$@Preview(showBackground = true) @Composable private fun TextDividerPreferencePreview()</ID>
-    <ID>UnusedPrivateMember:UserConfigItemList.kt$@Preview(showBackground = true) @Composable private fun UserConfigPreview()</ID>
     <ID>UnusedPrivateProperty:BluetoothInterface.kt$BluetoothInterface$/// For testing @Volatile private var isFirstTime = true</ID>
     <ID>UnusedPrivateProperty:BluetoothInterface.kt$BluetoothInterface$/// We only force service refresh the _first_ time we connect to the device. Thereafter it is assumed the firmware didn't change private var hasForcedRefresh = false</ID>
     <ID>UnusedPrivateProperty:CustomTileSource.kt$CustomTileSource.Companion$private val SEAMAP: OnlineTileSourceBase = TileSourceFactory.OPEN_SEAMAP</ID>

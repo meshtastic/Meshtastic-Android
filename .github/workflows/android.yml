@@ -50,10 +50,10 @@ jobs:
       run: ./gradlew lintFdroidDebug lintGoogleDebug
 
     - name: Check detekt
-      run: ./gradlew detektFdroidDebug detektGoogleDebug
+      run: ./gradlew detekt
 
     - name: Check ktlint
-      run: ./gradlew ktlintFdroidDebug ktlintGoogleDebug
+      run: ./gradlew ktlintCheck
 
     - name: Build debug artifacts
       run: ./gradlew assembleDebug
