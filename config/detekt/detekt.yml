@@ -131,9 +131,9 @@ complexity:
     threshold: 60
   LongParameterList:
     active: true
-    functionThreshold: 6
+    functionThreshold: 12
     constructorThreshold: 7
-    ignoreDefaultParameters: false
+    ignoreDefaultParameters: true
     ignoreDataClasses: true
     ignoreAnnotatedParameter: []
   MethodOverloading:
@@ -175,6 +175,7 @@ complexity:
     ignoreDeprecated: false
     ignorePrivate: false
     ignoreOverridden: false
+    ignoreAnnotated: ['Preview']
 
 coroutines:
   active: true
@@ -331,7 +332,7 @@ naming:
   FunctionNaming:
     active: true
     excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/jsTest/**', '**/iosTest/**']
-    functionPattern: '[a-z][a-zA-Z0-9]*'
+    functionPattern: '[a-zA-Z][a-zA-Z0-9]*'
     excludeClassPattern: '$^'
   FunctionParameterNaming:
     active: true
@@ -364,7 +365,7 @@ naming:
     packagePattern: '[a-z]+(\.[a-z][A-Za-z0-9]*)*'
   TopLevelPropertyNaming:
     active: true
-    constantPattern: '[A-Z][_A-Z0-9]*'
+    constantPattern: '[A-Z][A-Za-z0-9]*'
     propertyPattern: '[A-Za-z][_A-Za-z0-9]*'
     privatePropertyPattern: '_?[A-Za-z][_A-Za-z0-9]*'
   VariableMaxLength:
@@ -615,7 +616,7 @@ style:
       - '1'
       - '2'
     ignoreHashCodeFunction: true
-    ignorePropertyDeclaration: false
+    ignorePropertyDeclaration: true
     ignoreLocalVariableDeclaration: false
     ignoreConstantDeclaration: true
     ignoreCompanionObjectPropertyDeclaration: true
@@ -738,6 +739,7 @@ style:
   UnusedPrivateMember:
     active: true
     allowedNames: ''
+    ignoreAnnotated: ['Preview']
   UnusedPrivateProperty:
     active: true
     allowedNames: '_|ignored|expected|serialVersionUID'
