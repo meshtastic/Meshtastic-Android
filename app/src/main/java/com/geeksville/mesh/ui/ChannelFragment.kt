@@ -314,8 +314,8 @@ fun ChannelScreen(
     }
 
     val listState = rememberLazyListState()
-    val dragDropState = rememberDragDropState(listState) { from, to ->
-        updateSettingsList { add(to.index, removeAt(from.index)) }
+    val dragDropState = rememberDragDropState(listState) { fromIndex, toIndex ->
+        updateSettingsList { add(toIndex, removeAt(fromIndex)) }
     }
 
     LazyColumn(

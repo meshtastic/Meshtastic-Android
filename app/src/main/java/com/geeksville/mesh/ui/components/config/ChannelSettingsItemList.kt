@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Card
 import androidx.compose.material.Chip
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -36,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -78,7 +76,6 @@ fun ChannelCard(
             Text(
                 text = title,
                 style = MaterialTheme.typography.body1,
-                color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
                 modifier = Modifier.weight(1f)
             )
             IconButton(onClick = { onDeleteClick() }) {
@@ -105,11 +102,9 @@ fun ChannelSettingsItemList(
     val settingsListInput = remember(settingsList) { settingsList.toMutableStateList() }
 
     val listState = rememberLazyListState()
-    val dragDropState = rememberDragDropState(listState) { from, to ->
-        settingsListInput.apply {
-            val fromIndex = indexOfFirst { it.hashCode() == from.key }
-            val toIndex = indexOfFirst { it.hashCode() == to.key }
-            add(toIndex, removeAt(fromIndex))
+    val dragDropState = rememberDragDropState(listState, headerCount = 1) { fromIndex, toIndex ->
+        if (toIndex in settingsListInput.indices && fromIndex in settingsListInput.indices) {
+            settingsListInput.apply { add(toIndex, removeAt(fromIndex)) }
         }
     }
 
