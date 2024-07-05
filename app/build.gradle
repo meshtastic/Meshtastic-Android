@@ -237,7 +237,7 @@ dependencies {
     implementation "com.google.protobuf:protobuf-kotlin:$protobuf_version"
 
     // For UART access
-    implementation 'com.github.mik3y:usb-serial-for-android:3.7.3'
+    implementation 'com.github.mik3y:usb-serial-for-android:3.8.0'
 
     // For Firebase Crashlytics & Analytics
     googleImplementation platform('com.google.firebase:firebase-bom:33.1.2')
