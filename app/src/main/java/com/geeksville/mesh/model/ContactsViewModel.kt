@@ -11,12 +11,9 @@ import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.repository.datastore.ChannelSetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Date
@@ -52,21 +49,6 @@ class ContactsViewModel @Inject constructor(
     channelSetRepository: ChannelSetRepository,
     private val packetRepository: PacketRepository,
 ) : ViewModel(), Logging {
-
-    private val _selectedContacts = MutableStateFlow(emptySet<String>())
-    val selectedContacts get() = _selectedContacts.asStateFlow()
-
-    fun updateSelectedContacts(contact: String) = _selectedContacts.updateAndGet {
-        if (it.contains(contact)) {
-            it.minus(contact)
-        } else {
-            it.plus(contact)
-        }
-    }
-
-    fun clearSelectedContacts() {
-        _selectedContacts.value = emptySet()
-    }
 
     val contactList = combine(
         nodeDB.myNodeInfo,

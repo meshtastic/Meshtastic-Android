@@ -18,13 +18,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
@@ -43,7 +43,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
     private val model: ContactsViewModel by viewModels()
 
     private val contacts get() = model.contactList.value
-    private val selectedList get() = model.selectedContacts.value.toList()
+    private val selectedList = emptyList<String>().toMutableStateList()
 
     private val selectedContacts get() = contacts.filter { it.contactKey in selectedList }
     private val isAllMuted get() = selectedContacts.all { it.isMuted }
@@ -63,13 +63,15 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             actionMode = (activity as AppCompatActivity).startSupportActionMode(actionModeCallback)
         }
 
-        val selected = model.updateSelectedContacts(contact.contactKey)
-        if (selected.isEmpty()) {
+        selectedList.apply {
+            if (!remove(contact.contactKey)) add(contact.contactKey)
+        }
+        if (selectedList.isEmpty()) {
             // finish action mode when no items selected
             actionMode?.finish()
         } else {
             // show total items selected on action mode title
-            actionMode?.title = selected.size.toString()
+            actionMode?.title = selectedList.size.toString()
         }
     }
 
@@ -86,8 +88,15 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
+                val contacts by model.contactList.collectAsStateWithLifecycle()
+
                 AppTheme {
-                    ContactsScreen(model, ::onClick, ::onLongClick)
+                    ContactListView(
+                        contacts = contacts,
+                        selectedList = selectedList,
+                        onClick = ::onClick,
+                        onLongClick = ::onLongClick,
+                    )
                 }
             }
         }
@@ -171,14 +180,12 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                 R.id.selectAllButton -> {
                     // if all selected -> unselect all
                     if (selectedList.size == contacts.size) {
-                        model.clearSelectedContacts()
+                        selectedList.clear()
                         mode.finish()
                     } else {
                         // else --> select all
-                        model.clearSelectedContacts()
-                        contacts.forEach {
-                            model.updateSelectedContacts(it.contactKey)
-                        }
+                        selectedList.clear()
+                        selectedList.addAll(contacts.map { it.contactKey })
                         actionMode?.title = contacts.size.toString()
                     }
                 }
@@ -187,7 +194,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         }
 
         override fun onDestroyActionMode(mode: ActionMode) {
-            model.clearSelectedContacts()
+            selectedList.clear()
             actionMode = null
         }
     }
@@ -195,26 +202,25 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ContactsScreen(
-    model: ContactsViewModel = hiltViewModel(),
+fun ContactListView(
+    contacts: List<Contact>,
+    selectedList: List<String>,
     onClick: (Contact) -> Unit,
     onLongClick: (Contact) -> Unit,
 ) {
-    val contacts by model.contactList.collectAsStateWithLifecycle(emptyList())
-    val selectedKeys by model.selectedContacts.collectAsStateWithLifecycle()
-    // val inSelectionMode by remember { derivedStateOf { selectedContacts.isNotEmpty() } }
-
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(6.dp),
     ) {
         items(contacts, key = { it.contactKey }) { contact ->
-            val selected = selectedKeys.contains(contact.contactKey)
+            val selected = selectedList.contains(contact.contactKey)
+            val selectedColor = if (selected) Color.Gray else MaterialTheme.colors.background
+
             ContactItem(
                 contact = contact,
                 modifier = Modifier
-                    .background(color = if (selected) Color.Gray else MaterialTheme.colors.background)
+                    .background(color = selectedColor)
                     .combinedClickable(
                         onClick = { onClick(contact) },
                         onLongClick = { onLongClick(contact) },
