@@ -175,7 +175,7 @@ complexity:
     ignoreDeprecated: false
     ignorePrivate: false
     ignoreOverridden: false
-    ignoreAnnotated: ['Preview']
+    ignoreAnnotated: [ 'Preview', 'PreviewLightDark' ]
 
 coroutines:
   active: true
@@ -739,7 +739,7 @@ style:
   UnusedPrivateMember:
     active: true
     allowedNames: ''
-    ignoreAnnotated: ['Preview']
+    ignoreAnnotated: [ 'Preview', 'PreviewLightDark' ]
   UnusedPrivateProperty:
     active: true
     allowedNames: '_|ignored|expected|serialVersionUID'
