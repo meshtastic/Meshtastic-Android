@@ -305,8 +305,8 @@ class MessagesFragment : Fragment(), Logging {
 
         val contactKey = arguments?.getString("contactKey").toString()
         val contactName = arguments?.getString("contactName").toString()
-        var title = contactName
-        binding.messageTitle.text = title
+        val title = contactName
+        binding.toolbar.title  = title
         if (contactKey[1] == '!') {
             lifecycleScope.launch {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -314,8 +314,8 @@ class MessagesFragment : Fragment(), Logging {
                     model.channels.collect { channels ->
                         val channelName =
                             channels.getChannel(channelNumber)?.name ?: "Unknown Channel"
-                        title += "\n(ch: $channelNumber - $channelName)"
-                        binding.messageTitle.text = title
+                        val subtitle = "(ch: $channelNumber - $channelName)"
+                        binding.toolbar.subtitle = subtitle
                     }
                 }
             }

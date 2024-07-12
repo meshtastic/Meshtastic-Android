@@ -10,28 +10,13 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         style="@style/MyToolbar"
+        android:title="@string/channel_name"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        app:layout_constraintHeight_min="?attr/actionBarSize"
+        android:layout_height="wrap_content"
         android:background="@color/toolbarBackground"
         app:layout_constraintTop_toTopOf="parent"
-        app:navigationIcon="?android:attr/homeAsUpIndicator">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/messageTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/channel_name"
-                android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </com.google.android.material.appbar.MaterialToolbar>
+        app:navigationIcon="?android:attr/homeAsUpIndicator"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/messageListView"
