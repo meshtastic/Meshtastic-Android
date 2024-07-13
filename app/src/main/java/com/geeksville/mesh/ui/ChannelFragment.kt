@@ -334,7 +334,9 @@ fun ChannelScreen(
                     enabled = enabled,
                     isSelected = channelSelections[index],
                     onSelected = {
-                        channelSelections[index] = it
+                        if (it || selectedChannelSet.settingsCount > 1) {
+                            channelSelections[index] = it
+                        }
                     }
                 )
             }
@@ -378,16 +380,12 @@ fun ChannelScreen(
         }
 
         if (!isEditing) item {
-            Image(
-                painter = selectedChannelSet.qrCode?.let { BitmapPainter(it.asImageBitmap()) }
-                    ?: painterResource(id = R.drawable.qrcode),
-                contentDescription = stringResource(R.string.qr_code),
-                contentScale = ContentScale.Inside,
-                alpha = if (enabled) 1f else 0.25f,
-                // colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
+            QRCodeImage(
+                enabled = enabled,
+                channelSet = selectedChannelSet,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 16.dp)
+                    .padding(vertical = 16.dp)
             )
         }
 
@@ -495,6 +493,22 @@ fun ChannelScreen(
     }
 }
 
+@Composable
+private fun QRCodeImage(
+    enabled: Boolean,
+    channelSet: AppOnlyProtos.ChannelSet,
+    modifier: Modifier = Modifier,
+) = Image(
+    painter = channelSet.qrCode
+        ?.let { BitmapPainter(it.asImageBitmap()) }
+        ?: painterResource(id = R.drawable.qrcode),
+    contentDescription = stringResource(R.string.qr_code),
+    modifier = modifier,
+    contentScale = ContentScale.Inside,
+    alpha = if (enabled) 1.0f else ContentAlpha.disabled,
+    // colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
+)
+
 /**
  * Enables the user to select what channels are used for QR generation.
  */
@@ -507,7 +521,6 @@ private fun ChannelSelection(
     isSelected: Boolean,
     onSelected: (Boolean) -> Unit
 ) {
-    var checked by remember { mutableStateOf(isSelected) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -527,11 +540,8 @@ private fun ChannelSelection(
             )
             Checkbox(
                 enabled = enabled,
-                checked = checked,
-                onCheckedChange = {
-                    onSelected.invoke(it)
-                    checked = it
-                }
+                checked = isSelected,
+                onCheckedChange = onSelected,
             )
         }
     }
