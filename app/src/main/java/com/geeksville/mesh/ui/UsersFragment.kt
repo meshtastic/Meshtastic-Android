@@ -17,7 +17,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -32,7 +31,6 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.components.NodeFilterTextField
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class UsersFragment : ScreenFragment("Users"), Logging {
@@ -126,18 +124,14 @@ fun NodesScreen(
     val ourNodeInfo by model.ourNodeInfo.collectAsStateWithLifecycle()
 
     val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
-
     val focusedNode by model.focusedNode.collectAsStateWithLifecycle()
     LaunchedEffect(focusedNode) {
         focusedNode?.let { node ->
             val index = nodes.indexOfFirst { it == node }
             if (index != -1) {
-                coroutineScope.launch {
-                    listState.animateScrollToItem(index)
-                    model.focusUserNode(null)
-                }
+                listState.animateScrollToItem(index)
             }
+            model.focusUserNode(null)
         }
     }
 
