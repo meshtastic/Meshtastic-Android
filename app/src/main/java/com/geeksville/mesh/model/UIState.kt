@@ -112,6 +112,16 @@ data class NodesUiState(
     }
 }
 
+data class Message(
+    val uuid: Long,
+    val receivedTime: Long,
+    val user: MeshUser,
+    val text: String,
+    val time: Long,
+    val read: Boolean,
+    val status: MessageStatus?,
+)
+
 @HiltViewModel
 class UIViewModel @Inject constructor(
     private val app: Application,
@@ -221,7 +231,28 @@ class UIViewModel @Inject constructor(
         debug("ViewModel created")
     }
 
-    fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey)
+    fun getMessagesFrom(contactKey: String) = combine(
+        nodeDB.users,
+        packetRepository.getMessagesFrom(contactKey),
+    ) { users, packets ->
+        packets.map {
+            val defaultUser = MeshUser(
+                it.data.from ?: DataPacket.ID_LOCAL,
+                app.getString(R.string.unknown_username),
+                app.getString(R.string.unknown_node_short_name),
+                MeshProtos.HardwareModel.UNSET,
+            )
+            Message(
+                uuid = it.uuid,
+                receivedTime = it.received_time,
+                user = users[it.data.from] ?: defaultUser,
+                text = it.data.text.orEmpty(),
+                time = it.data.time,
+                read = it.read,
+                status = it.data.status,
+            )
+        }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->

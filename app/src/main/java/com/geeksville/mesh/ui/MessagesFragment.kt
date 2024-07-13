@@ -1,8 +1,5 @@
 package com.geeksville.mesh.ui
 
-import android.graphics.Color
-import android.graphics.Rect
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -10,12 +7,10 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import androidx.cardview.widget.CardView
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.allViews
@@ -24,25 +19,21 @@ import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.geeksville.mesh.DataPacket
-import com.geeksville.mesh.MessageStatus
-import com.geeksville.mesh.NodeInfo
-import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.QuickChatAction
-import com.geeksville.mesh.databinding.AdapterMessageLayoutBinding
 import com.geeksville.mesh.databinding.MessagesFragmentBinding
+import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
+import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.Utf8ByteLengthFilter
-import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Date
@@ -80,206 +71,29 @@ class MessagesFragment : Fragment(), Logging {
 
     private val model: UIViewModel by activityViewModels()
 
-    // Provide a direct reference to each of the views within a data item
-    // Used to cache the views within the item layout for fast access
-    class ViewHolder(itemView: AdapterMessageLayoutBinding) :
-        RecyclerView.ViewHolder(itemView.root) {
-        val username: Chip = itemView.username
-        val messageText: TextView = itemView.messageText
-        val messageTime: TextView = itemView.messageTime
-        val messageStatusIcon: ImageView = itemView.messageStatusIcon
-        val card: CardView = itemView.Card
+    private lateinit var contactKey: String
+
+    private val selectedList = emptyList<Message>().toMutableStateList()
+
+    private fun onClick(message: Message) {
+        if (actionMode != null) {
+            onLongClick(message)
+        }
     }
 
-    private val messagesAdapter = object : RecyclerView.Adapter<ViewHolder>() {
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val inflater = LayoutInflater.from(requireContext())
-
-            // Inflate the custom layout
-            val contactViewBinding = AdapterMessageLayoutBinding.inflate(inflater, parent, false)
-
-            // Return a new holder instance
-            return ViewHolder(contactViewBinding)
+    private fun onLongClick(message: Message) {
+        if (actionMode == null) {
+            actionMode = (activity as AppCompatActivity).startSupportActionMode(actionModeCallback)
         }
-
-        var messages = listOf<Packet>()
-        var selectedList = ArrayList<Packet>()
-        val layoutManager get() = binding.messageListView.layoutManager as LinearLayoutManager
-
-        fun scrollToBottom() {
-            if (itemCount > 0) layoutManager.scrollToPosition(itemCount - 1)
+        selectedList.apply {
+            if (contains(message)) remove(message) else add(message)
         }
-
-        fun scrollToFirstUnreadMessage() {
-            val position = messages.indexOfFirst { !it.read }
-            if (position >= 0) {
-                val rect = Rect()
-                binding.toolbar.getGlobalVisibleRect(rect)
-                val toolbarOffset = rect.bottom
-                val offset = binding.messageListView.height - toolbarOffset
-
-                layoutManager.scrollToPositionWithOffset(position, offset)
-            } else {
-                scrollToBottom()
-            }
-        }
-
-        fun clearUnreadCount() {
-            val firstUnreadItem = messages.firstOrNull { !it.read } ?: return
-            val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
-            if (lastVisibleItemPosition != RecyclerView.NO_POSITION) {
-                val lastVisibleItem = messages[lastVisibleItemPosition]
-                val contactKey = lastVisibleItem.contact_key
-                val timestamp = lastVisibleItem.received_time
-
-                if (timestamp >= firstUnreadItem.received_time) {
-                    model.clearUnreadCount(contactKey, timestamp)
-                }
-            }
-        }
-
-        override fun getItemCount(): Int = messages.size
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val packet = messages[position]
-            val msg = packet.data
-            val nodes = model.nodeDB.nodes.value
-            val node = nodes[msg.from]
-            // Determine if this is my message (originated on this device)
-            val isLocal = msg.from == DataPacket.ID_LOCAL
-
-            // Set cardview offset and color.
-            val marginParams = holder.card.layoutParams as ViewGroup.MarginLayoutParams
-            val messageOffset = resources.getDimensionPixelOffset(R.dimen.message_offset)
-            if (isLocal) {
-                marginParams.leftMargin = messageOffset
-                marginParams.rightMargin = 0
-                holder.messageText.textAlignment = View.TEXT_ALIGNMENT_TEXT_END
-                context?.let {
-                    holder.card.setCardBackgroundColor(
-                        ContextCompat.getColor(
-                            it,
-                            R.color.colorMyMsg
-                        )
-                    )
-                }
-            } else {
-                marginParams.rightMargin = messageOffset
-                marginParams.leftMargin = 0
-                holder.messageText.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
-                context?.let {
-                    holder.card.setCardBackgroundColor(
-                        ContextCompat.getColor(
-                            it,
-                            R.color.colorMsg
-                        )
-                    )
-                }
-            }
-
-            // Hide the username chip for my messages
-            if (isLocal) {
-                holder.username.visibility = View.GONE
-            } else {
-                holder.username.visibility = View.VISIBLE
-                // If we can't find the sender, just use the ID
-                val user = node?.user
-                holder.username.text = user?.shortName ?: msg.from
-
-                holder.username.setOnClickListener {
-                    node?.let { openNodeInfo(it) }
-                }
-            }
-
-            if (msg.errorMessage != null) {
-                context?.let { holder.card.setCardBackgroundColor(Color.RED) }
-                holder.messageText.text = msg.errorMessage
-            } else {
-                holder.messageText.text = msg.text
-            }
-
-            holder.messageTime.text = getShortDateTime(Date(msg.time))
-
-            val icon = when (msg.status) {
-                MessageStatus.RECEIVED -> R.drawable.ic_twotone_how_to_reg_24
-                MessageStatus.QUEUED -> R.drawable.ic_twotone_cloud_upload_24
-                MessageStatus.DELIVERED -> R.drawable.cloud_on
-                MessageStatus.ENROUTE -> R.drawable.ic_twotone_cloud_24
-                MessageStatus.ERROR -> R.drawable.cloud_off
-                else -> null
-            }
-
-            if (icon != null && isLocal) {
-                holder.messageStatusIcon.setImageResource(icon)
-                holder.messageStatusIcon.visibility = View.VISIBLE
-            } else
-                holder.messageStatusIcon.visibility = View.GONE
-
-            holder.messageStatusIcon.setOnClickListener {
-                if (isAdded) {
-                    Toast.makeText(context, "${msg.status}", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            holder.itemView.setOnLongClickListener {
-                clickItem(position)
-                if (actionMode == null) {
-                    actionMode =
-                        (activity as AppCompatActivity).startSupportActionMode(actionModeCallback)
-                }
-                true
-            }
-            holder.itemView.setOnClickListener {
-                if (actionMode != null) clickItem(position)
-            }
-
-            if (selectedList.contains(packet)) {
-                holder.itemView.background = GradientDrawable().apply {
-                    shape = GradientDrawable.RECTANGLE
-                    cornerRadius = 32f
-                    setColor(Color.rgb(127, 127, 127))
-                }
-            } else {
-                holder.itemView.background = GradientDrawable().apply {
-                    shape = GradientDrawable.RECTANGLE
-                    cornerRadius = 32f
-                    setColor(
-                        ContextCompat.getColor(
-                            holder.itemView.context,
-                            R.color.colorAdvancedBackground
-                        )
-                    )
-                }
-            }
-        }
-
-        private fun clickItem(position: Int) {
-            val message = messages[position]
-            selectedList.apply {
-                if (contains(message)) remove(message) else add(message)
-            }
-            if (selectedList.isEmpty()) {
-                // finish action mode when no items selected
-                actionMode?.finish()
-            } else {
-                // show total items selected on action mode title
-                actionMode?.title = selectedList.size.toString()
-            }
-            notifyItemChanged(position)
-        }
-
-        /// Called when our node DB changes
-        fun onMessagesChanged(messages: List<Packet>) {
-            val lastVisibleItemPosition = layoutManager.findLastVisibleItemPosition()
-            val shouldScrollToUnread = lastVisibleItemPosition <= 0
-            val shouldScrollToBottom = lastVisibleItemPosition == itemCount - 1
-
-            this.messages = messages
-            notifyDataSetChanged() // FIXME, this is super expensive and redraws all messages
-
-            if (shouldScrollToBottom) scrollToBottom()
-            if (shouldScrollToUnread) scrollToFirstUnreadMessage()
+        if (selectedList.isEmpty()) {
+            // finish action mode when no items selected
+            actionMode?.finish()
+        } else {
+            // show total items selected on action mode title
+            actionMode?.title = selectedList.size.toString()
         }
     }
 
@@ -296,6 +110,7 @@ class MessagesFragment : Fragment(), Logging {
         return binding.root
     }
 
+    @Suppress("LongMethod", "CyclomaticComplexMethod")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -303,10 +118,9 @@ class MessagesFragment : Fragment(), Logging {
             parentFragmentManager.popBackStack()
         }
 
-        val contactKey = arguments?.getString("contactKey").toString()
+        contactKey = arguments?.getString("contactKey").toString()
         val contactName = arguments?.getString("contactName").toString()
-        val title = contactName
-        binding.toolbar.title  = title
+        binding.toolbar.title = contactName
         if (contactKey[1] == '!') {
             lifecycleScope.launch {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -325,7 +139,6 @@ class MessagesFragment : Fragment(), Logging {
             val str = binding.messageInputText.text.toString().trim()
             if (str.isNotEmpty()) {
                 model.sendMessage(str, contactKey)
-                messagesAdapter.scrollToBottom()
             }
             binding.messageInputText.setText("") // blow away the string the user just entered
             // requireActivity().hideKeyboard()
@@ -339,32 +152,21 @@ class MessagesFragment : Fragment(), Logging {
         // max payload length should be 237 bytes but anything over 235 bytes crashes the radio
         binding.messageInputText.filters += Utf8ByteLengthFilter(234)
 
-        binding.messageListView.adapter = messagesAdapter
-        val layoutManager = LinearLayoutManager(requireContext())
-        layoutManager.stackFromEnd = true // We want the last rows to always be shown
-        binding.messageListView.layoutManager = layoutManager
+        binding.messageListView.setContent {
+            val messages by model.getMessagesFrom(contactKey).collectAsStateWithLifecycle(listOf())
 
-        binding.messageListView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    messagesAdapter.clearUnreadCount()
+            AppTheme {
+                if (messages.isNotEmpty()) {
+                    MessageListView(
+                        messages = messages,
+                        selectedList = selectedList,
+                        onClick = ::onClick,
+                        onLongClick = ::onLongClick,
+                        onChipClick = ::openNodeInfo,
+                        onUnreadChanged = { model.clearUnreadCount(contactKey, it) },
+                    )
                 }
             }
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-
-                if (dy == 0) {
-                    messagesAdapter.clearUnreadCount()
-                }
-            }
-        })
-
-        model.getMessagesFrom(contactKey).asLiveData().observe(viewLifecycleOwner) {
-            debug("New messages received: ${it.size}")
-            messagesAdapter.onMessagesChanged(it)
         }
 
         // If connection state _OR_ myID changes we have to fix our ability to edit outgoing messages
@@ -406,7 +208,6 @@ class MessagesFragment : Fragment(), Logging {
                             binding.messageInputText.setSelection(newText.length)
                         } else {
                             model.sendMessage(action.message, contactKey)
-                            messagesAdapter.scrollToBottom()
                         }
                     }
                     binding.quickChatLayout.addView(button)
@@ -437,7 +238,6 @@ class MessagesFragment : Fragment(), Logging {
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             when (item.itemId) {
                 R.id.deleteButton -> {
-                    val selectedList = messagesAdapter.selectedList
                     val deleteMessagesString = resources.getQuantityString(
                         R.plurals.delete_messages,
                         selectedList.size,
@@ -454,27 +254,26 @@ class MessagesFragment : Fragment(), Logging {
                         }
                         .show()
                 }
-
-                R.id.selectAllButton -> {
-                    // if all selected -> unselect all
-                    if (messagesAdapter.selectedList.size == messagesAdapter.messages.size) {
-                        messagesAdapter.selectedList.clear()
-                        mode.finish()
-                    } else {
-                        // else --> select all
-                        messagesAdapter.selectedList.clear()
-                        messagesAdapter.selectedList.addAll(messagesAdapter.messages)
+                R.id.selectAllButton -> lifecycleScope.launch {
+                    model.getMessagesFrom(contactKey).firstOrNull()?.let { messages ->
+                        if (selectedList.size == messages.size) {
+                            // if all selected -> unselect all
+                            selectedList.clear()
+                            mode.finish()
+                        } else {
+                            // else --> select all
+                            selectedList.clear()
+                            selectedList.addAll(messages)
+                        }
+                        actionMode?.title = selectedList.size.toString()
                     }
-                    actionMode?.title = messagesAdapter.selectedList.size.toString()
-                    messagesAdapter.notifyDataSetChanged()
                 }
 
-                R.id.resendButton -> {
+                R.id.resendButton -> lifecycleScope.launch {
                     debug("User clicked resendButton")
-                    val selectedList = messagesAdapter.selectedList
                     var resendText = ""
                     selectedList.forEach {
-                        resendText = resendText + it.data.text + System.lineSeparator()
+                        resendText = resendText + it.text + System.lineSeparator()
                     }
                     if (resendText != "")
                         resendText = resendText.substring(0, resendText.length - 1)
@@ -486,15 +285,15 @@ class MessagesFragment : Fragment(), Logging {
         }
 
         override fun onDestroyActionMode(mode: ActionMode) {
-            messagesAdapter.selectedList.clear()
-            messagesAdapter.notifyDataSetChanged()
+            selectedList.clear()
             actionMode = null
         }
     }
 
-    private fun openNodeInfo(node: NodeInfo) {
-        parentFragmentManager.popBackStack()
-        model.focusUserNode(node)
+    private fun openNodeInfo(msg: Message) = lifecycleScope.launch {
+        model.nodeList.firstOrNull()?.find { it.user?.id == msg.user.id }?.let { node ->
+            parentFragmentManager.popBackStack()
+            model.focusUserNode(node)
+        }
     }
-
 }
