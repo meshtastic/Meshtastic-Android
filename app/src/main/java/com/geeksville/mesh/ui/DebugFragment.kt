@@ -20,7 +20,9 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
@@ -79,9 +81,12 @@ class DebugFragment : Fragment() {
             val listState = rememberLazyListState()
             val logs by model.meshLog.collectAsStateWithLifecycle()
 
-            LaunchedEffect(logs) {
-                if (listState.firstVisibleItemIndex < 3 && !listState.isScrollInProgress) {
-                    listState.scrollToItem(0)
+            val shouldAutoScroll by remember { derivedStateOf { listState.firstVisibleItemIndex < 3 } }
+            if (shouldAutoScroll) {
+                LaunchedEffect(logs) {
+                    if (!listState.isScrollInProgress) {
+                        listState.scrollToItem(0)
+                    }
                 }
             }
 
