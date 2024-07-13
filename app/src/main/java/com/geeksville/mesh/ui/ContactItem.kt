@@ -1,7 +1,9 @@
 package com.geeksville.mesh.ui
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,6 +22,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -32,20 +35,30 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.ui.theme.AppTheme
 
-@OptIn(ExperimentalMaterialApi::class)
+@Suppress("LongMethod")
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun ContactItem(
     contact: Contact,
+    selected: Boolean,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+    onLongClick: () -> Unit = {},
 ) = with(contact) {
     Card(
-        modifier = modifier
+        modifier = Modifier
+            .background(color = if (selected) Color.Gray else MaterialTheme.colors.background)
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 6.dp),
         elevation = 4.dp,
         shape = RoundedCornerShape(12.dp),
     ) {
-        Surface {
+        Surface(
+            modifier = modifier.combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick,
+            ),
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -136,6 +149,7 @@ private fun ContactItemPreview() {
                 messageCount = 10,
                 isMuted = true,
             ),
+            selected = false,
         )
     }
 }
