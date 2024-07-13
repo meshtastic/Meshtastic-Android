@@ -71,7 +71,7 @@
     <string name="message_reception_time">čas prijatia správy</string>
     <string name="message_reception_state">stav prijatia správy</string>
     <string name="message_delivery_status">Stav doručenia správy</string>
-    <string name="meshtastic_messages_notifications">Notifikácie správy</string>
+    <string name="meshtastic_messages_notifications">Upozornenia na správy</string>
     <string name="protocol_stress_test">Test vyťaženia protokolu</string>
     <string name="firmware_too_old">Nutná aktualizácia firmvéru</string>
     <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Prosím choďte na panel nastavení a zvoľte možnosť \"Aktualizácia firmvéru\". Viac informácií nájdete na <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">našom sprievodcovi inštaláciou firmvéru</a> na Github-e.</string>
@@ -94,7 +94,7 @@
     <string name="background_required">Poloha na pozadí</string>
     <string name="why_background_required">Pre túto možnosť musíte povoliť prístup ku polohe zariadenia v režime \"Vždy povolené\".\nTáto možnosť povolí aplikácii Meshtastic zistiť polohu Vášho zariadenia a odoslať ju členom Vašej siete aj keď je aplikácia Meshtastic vypnutá alebo sa nepoužíva.</string>
     <string name="required_permissions">Požadované oprávnenia</string>
-    <string name="provide_location_to_mesh">Odoslať polohu do siete</string>
+    <string name="provide_location_to_mesh">Odoslať polohu telefónu do siete</string>
     <string name="camera_required">Práva pre prístup k fotoaparátu</string>
     <string name="why_camera_required">Aplikácia Meshtastic potrebuje práva pre prístup ku fotoaparátu kvôli možnosti načítania QR kódov. Fotky ani videá nebudú ukladané na Vašom Android zariadení.</string>
     <string name="notification_required">Povoliť upozornenia</string>

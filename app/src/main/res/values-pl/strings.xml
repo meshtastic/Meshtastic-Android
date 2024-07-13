@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="node_filter_placeholder">Filtry</string>
+    <string name="desc_node_filter_clear">clear node filter</string>
     <string name="channel_name">Nazwa Kanału</string>
     <string name="channel_options">Opcje kanału</string>
     <string name="qr_code">Kod QR</string>
@@ -143,6 +145,8 @@
     <string name="direct_message">Bezpośrednia wiadomość</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <string name="nodedb_reset_description">To spowoduje usunięcie wszystkich węzłów z listy.</string>
+    <string name="delivery_confirmed">Delivery confirmed</string>
+    <string name="error">Error</string>
     <string name="ignore">Zignoruj</string>
     <string name="ignore_add">Dodaj \'%s\' do listy zignorowanych? Twoje radio zostanie zrestartowane po tej zmianie.</string>
     <string name="ignore_remove">Dodaj \'%s\' do listy zignorowanych? Twoje radio zostanie zrestartowane po tej zmianie.</string>
@@ -172,4 +176,11 @@
     <string name="waypoint_new">Nowy punkt nawigacyjny</string>
     <string name="waypoint_received">Otrzymano punkt orientacyjny: %s</string>
     <string name="error_duty_cycle">Osiągnięto limit cyklu pracy. Nie można wysłać wiadomości w tej chwili, spróbuj później.</string>
+    <string name="remove">Remove</string>
+    <string name="remove_node_text">This node will be removed from your list until your node receives data from it again.</string>
+    <string name="mute">Mute</string>
+    <string name="mute_notifications">Mute notifications</string>
+    <string name="mute_8_hours">8 hours</string>
+    <string name="mute_1_week">1 week</string>
+    <string name="mute_always">Always</string>
 </resources>
