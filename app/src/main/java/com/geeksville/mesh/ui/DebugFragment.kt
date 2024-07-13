@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
@@ -91,11 +92,13 @@ class DebugFragment : Fragment() {
             }
 
             AppTheme {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    state = listState,
-                ) {
-                    items(logs, key = { it.uuid }) { log -> DebugItem(annotateMeshLog(log)) }
+                SelectionContainer {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        state = listState,
+                    ) {
+                        items(logs, key = { it.uuid }) { log -> DebugItem(annotateMeshLog(log)) }
+                    }
                 }
             }
         }
