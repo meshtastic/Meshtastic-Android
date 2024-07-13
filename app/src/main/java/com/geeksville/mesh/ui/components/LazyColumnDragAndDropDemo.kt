@@ -148,14 +148,13 @@ internal constructor(
     internal var previousItemOffset = Animatable(0f)
         private set
 
-    internal fun onDragStart(offset: Offset) {
-        state.layoutInfo.visibleItemsInfo
-            .firstOrNull { item -> offset.y.toInt() in item.offset..(item.offset + item.size) }
-            ?.also {
-                draggingItemIndex = it.index
-                draggingItemInitialOffset = it.offset
-            }
-    }
+    internal fun onDragStart(offset: Offset): LazyListItemInfo? = state.layoutInfo.visibleItemsInfo
+        .filter { it.contentType == DragDropContentType }
+        .firstOrNull { item -> offset.y.toInt() in item.offset..(item.offset + item.size) }
+        ?.also {
+            draggingItemIndex = it.index
+            draggingItemInitialOffset = it.offset
+        }
 
     internal fun onDragInterrupted() {
         if (draggingItemIndex != null) {
@@ -240,7 +239,7 @@ fun Modifier.dragContainer(
                 dragDropState.onDrag(offset = offset)
             },
             onDragStart = { offset ->
-                dragDropState.onDragStart(offset)
+                dragDropState.onDragStart(offset) ?: return@detectDragGesturesAfterLongPress
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
             },
             onDragEnd = { dragDropState.onDragInterrupted() },
@@ -272,6 +271,8 @@ fun LazyItemScope.DraggableItem(
     Column(modifier = modifier.then(draggingModifier)) { content(dragging) }
 }
 
+const val DragDropContentType = "drag-and-drop"
+
 /**
  * Extension function for [LazyListScope] with drag-and-drop functionality for indexed items.
  *
@@ -282,12 +283,11 @@ inline fun <T> LazyListScope.dragDropItemsIndexed(
     items: List<T>,
     dragDropState: DragDropState,
     noinline key: ((index: Int, item: T) -> Any)? = null,
-    crossinline contentType: (index: Int, item: T) -> Any? = { _, _ -> null },
     crossinline itemContent: @Composable LazyItemScope.(index: Int, item: T, isDragging: Boolean) -> Unit
 ) = itemsIndexed(
     items = items,
     key = key,
-    contentType = contentType,
+    contentType = { _, _ -> DragDropContentType },
     itemContent = { index, item ->
         DraggableItem(
             dragDropState = dragDropState,
