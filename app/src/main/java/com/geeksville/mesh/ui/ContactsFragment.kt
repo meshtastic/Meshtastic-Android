@@ -70,8 +70,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             // finish action mode when no items selected
             actionMode?.finish()
         } else {
-            // show total items selected on action mode title
-            actionMode?.title = selectedList.size.toString()
+            actionMode?.invalidate()
         }
     }
 
@@ -117,6 +116,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         }
 
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+            mode.title = selectedList.size.toString()
             menu.findItem(R.id.muteButton).setIcon(
                 if (isAllMuted) {
                     R.drawable.ic_twotone_volume_up_24
@@ -130,7 +130,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             when (item.itemId) {
                 R.id.muteButton -> if (isAllMuted) {
-                    model.setMuteUntil(selectedList, 0L)
+                    model.setMuteUntil(selectedList.toList(), 0L)
                     mode.finish()
                 } else {
                     var muteUntil: Long = Long.MAX_VALUE
@@ -152,7 +152,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                         }
                         .setPositiveButton(getString(R.string.okay)) { _, _ ->
                             debug("User clicked muteButton")
-                            model.setMuteUntil(selectedList, muteUntil)
+                            model.setMuteUntil(selectedList.toList(), muteUntil)
                             mode.finish()
                         }
                         .setNeutralButton(R.string.cancel) { _, _ ->
@@ -170,7 +170,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                         .setMessage(deleteMessagesString)
                         .setPositiveButton(getString(R.string.delete)) { _, _ ->
                             debug("User clicked deleteButton")
-                            model.deleteContacts(selectedList)
+                            model.deleteContacts(selectedList.toList())
                             mode.finish()
                         }
                         .setNeutralButton(R.string.cancel) { _, _ ->
