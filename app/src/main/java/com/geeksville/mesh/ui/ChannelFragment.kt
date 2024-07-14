@@ -16,12 +16,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ButtonDefaults
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Chip
@@ -41,6 +43,9 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
+import androidx.compose.material.Button
+import androidx.compose.material.Surface
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -72,6 +77,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -180,9 +187,12 @@ fun ChannelScreen(
     val channelUrl = channelSet.getChannelUrl()
     val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
+    val userScannedQrCode = remember { mutableStateOf(false) }
+    val scannedQR = remember { mutableStateOf("") }
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
-            viewModel.setRequestChannelUrl(Uri.parse(result.contents))
+            scannedQR.value = result.contents
+            userScannedQrCode.value = true
         }
     }
 
@@ -292,6 +302,14 @@ fun ChannelScreen(
             }
             .show()
     }
+
+    if (userScannedQrCode.value)
+        /* Prompt the user to modify channels after scanning a QR code. */
+        ScannedQrCodeDialog(
+            viewModel,
+            scannedQR = scannedQR.value,
+            onDismissRequest = { userScannedQrCode.value = false }
+        )
 
     var showEditChannelDialog: Int? by remember { mutableStateOf(null) }
 
@@ -533,6 +551,157 @@ private fun ChannelSelection(
                     checked = it
                 }
             )
+        }
+    }
+}
+
+/**
+ * Enables the user to select which channels to accept after scanning a QR code.
+ */
+@Composable
+fun ScannedQrCodeDialog(
+    viewModel: UIViewModel = viewModel(),
+    scannedQR: String?,
+    onDismissRequest: () -> Unit
+) {
+    val channels by viewModel.channels.collectAsStateWithLifecycle()
+    var currentChannelSet by remember(channels) { mutableStateOf(channels) }
+    val modemPresetName = Channel(loraConfig = currentChannelSet.loraConfig).name
+
+    val incomingUri = Uri.parse(scannedQR)
+    var incomingChannelSet = incomingUri.toChannelSet()
+
+    /* Holds selections made by the user */
+    val channelSelections = remember { mutableStateListOf(elements = Array(size = 8, init = { true })) }
+
+    /* The save button is enabled based on this count */
+    var totalCount = currentChannelSet.settingsList.size
+    for ((index, isSelected) in channelSelections.withIndex()) {
+        if (index >= incomingChannelSet.settingsList.size)
+            break
+        if (isSelected)
+            totalCount++
+    }
+
+    Dialog(
+        onDismissRequest = { onDismissRequest() },
+        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnBackPress = true)
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colors.background
+        ) {
+            LazyColumn(
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                /* Incoming ChannelSet */
+                item {
+                    Text(
+                        style = MaterialTheme.typography.body1,
+                        text = stringResource(id = R.string.scanned_channels)
+                    )
+                }
+                itemsIndexed(incomingChannelSet.settingsList) { index, channel ->
+                    ChannelSelection(
+                        index = index,
+                        title = channel.name.ifEmpty { modemPresetName },
+                        enabled = true,
+                        isSelected = channelSelections[index],
+                        onSelected = { channelSelections[index] = it }
+                    )
+                }
+
+                /* Current ChannelSet */
+                item {
+                    Text(
+                        style = MaterialTheme.typography.body1,
+                        text = stringResource(id = R.string.current_channels)
+                    )
+                }
+                itemsIndexed(currentChannelSet.settingsList) { index, channel ->
+                    ChannelCard(
+                        index = index,
+                        title = channel.name.ifEmpty { modemPresetName },
+                        enabled = true,
+                        onEditClick = { /* Currently we don't enable editing from the dialog. */ },
+                        onDeleteClick = {
+                            val list = currentChannelSet.settingsList.toMutableList()
+                            list.removeAt(index)
+                            currentChannelSet = currentChannelSet.copy {
+                                settings.clear()
+                                settings.addAll(list)
+                            }
+                        }
+                    )
+                }
+
+                /* User Actions via buttons */
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        /* Cancel */
+                        Button(
+                            onClick = onDismissRequest,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .weight(1f)
+                                .padding(3.dp)
+                        ) {
+                            Text(
+                                style = MaterialTheme.typography.body1,
+                                text = stringResource(id = R.string.cancel)
+                            )
+                        }
+
+                        /* Replace - Replaces the previous set with the scanned channel set */
+                        Button(
+                            onClick = {
+                                onDismissRequest.invoke()
+                                viewModel.setRequestChannelUrl(Uri.parse(scannedQR))},
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .weight(1f)
+                                .padding(3.dp)
+                        ) {
+                            Text(
+                                style = MaterialTheme.typography.body1,
+                                text = stringResource(id = R.string.replace)
+                            )
+                        }
+
+                        /* Save - Appends incoming selected channels to the current set */
+                        Button(
+                            enabled = totalCount <= 8,
+                            onClick = {
+                                incomingChannelSet = incomingChannelSet.copy {
+                                    val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+                                    settings.clear()
+                                    settings.addAll(currentChannelSet.settingsList)
+                                    settings.addAll(result)
+                                }
+                                onDismissRequest.invoke()
+                                viewModel.setRequestChannelUrl(incomingChannelSet.getChannelUrl())
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .weight(1f)
+                                .padding(3.dp)
+                        ) {
+                            Text(
+                                style = MaterialTheme.typography.body1,
+                                text = stringResource(id = R.string.save)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
