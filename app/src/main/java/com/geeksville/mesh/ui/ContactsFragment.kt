@@ -8,20 +8,19 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.viewModels
@@ -70,8 +69,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             // finish action mode when no items selected
             actionMode?.finish()
         } else {
-            // show total items selected on action mode title
-            actionMode?.title = selectedList.size.toString()
+            actionMode?.invalidate()
         }
     }
 
@@ -117,6 +115,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         }
 
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+            mode.title = selectedList.size.toString()
             menu.findItem(R.id.muteButton).setIcon(
                 if (isAllMuted) {
                     R.drawable.ic_twotone_volume_up_24
@@ -130,7 +129,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
             when (item.itemId) {
                 R.id.muteButton -> if (isAllMuted) {
-                    model.setMuteUntil(selectedList, 0L)
+                    model.setMuteUntil(selectedList.toList(), 0L)
                     mode.finish()
                 } else {
                     var muteUntil: Long = Long.MAX_VALUE
@@ -152,7 +151,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                         }
                         .setPositiveButton(getString(R.string.okay)) { _, _ ->
                             debug("User clicked muteButton")
-                            model.setMuteUntil(selectedList, muteUntil)
+                            model.setMuteUntil(selectedList.toList(), muteUntil)
                             mode.finish()
                         }
                         .setNeutralButton(R.string.cancel) { _, _ ->
@@ -170,7 +169,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
                         .setMessage(deleteMessagesString)
                         .setPositiveButton(getString(R.string.delete)) { _, _ ->
                             debug("User clicked deleteButton")
-                            model.deleteContacts(selectedList)
+                            model.deleteContacts(selectedList.toList())
                             mode.finish()
                         }
                         .setNeutralButton(R.string.cancel) { _, _ ->
@@ -200,7 +199,6 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ContactListView(
     contacts: List<Contact>,
@@ -208,23 +206,23 @@ fun ContactListView(
     onClick: (Contact) -> Unit,
     onLongClick: (Contact) -> Unit,
 ) {
+    val haptics = LocalHapticFeedback.current
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(6.dp),
     ) {
         items(contacts, key = { it.contactKey }) { contact ->
-            val selected = selectedList.contains(contact.contactKey)
-            val selectedColor = if (selected) Color.Gray else MaterialTheme.colors.background
+            val selected by remember { derivedStateOf { selectedList.contains(contact.contactKey) } }
 
             ContactItem(
                 contact = contact,
-                modifier = Modifier
-                    .background(color = selectedColor)
-                    .combinedClickable(
-                        onClick = { onClick(contact) },
-                        onLongClick = { onLongClick(contact) },
-                    )
+                selected = selected,
+                onClick = { onClick(contact) },
+                onLongClick = {
+                    onLongClick(contact)
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                },
             )
         }
     }

@@ -13,6 +13,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.geeksville.mesh.Position
@@ -84,9 +85,8 @@ fun LinkedCoordinatesSimplePreview() {
     }
 }
 
+@PreviewLightDark
 @Composable
-@Preview(showBackground = true)
-@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 fun LinkedCoordinatesPreview(
     @PreviewParameter(GPSFormatPreviewParameterProvider::class) format: Int
 ) {

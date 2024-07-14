@@ -5,6 +5,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.ui.preview.NodeInfoPreviewParameterProvider
@@ -67,9 +68,8 @@ fun SignalInfoSimplePreview() {
     }
 }
 
+@PreviewLightDark
 @Composable
-@Preview(showBackground = true)
-@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 fun SignalInfoPreview(
     @PreviewParameter(NodeInfoPreviewParameterProvider::class)
     nodeInfo: NodeInfo
@@ -83,8 +83,7 @@ fun SignalInfoPreview(
 }
 
 @Composable
-@Preview(showBackground = true)
-@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 fun SignalInfoSelfPreview(
     @PreviewParameter(NodeInfoPreviewParameterProvider::class)
     nodeInfo: NodeInfo

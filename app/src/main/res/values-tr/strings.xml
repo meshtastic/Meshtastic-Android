@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="node_filter_placeholder">Filtre</string>
+    <string name="desc_node_filter_clear">clear node filter</string>
     <string name="channel_name">Kanal Adı</string>
     <string name="channel_options">Kanal Seçenekleri</string>
     <string name="qr_code">Karekod</string>
@@ -141,6 +143,8 @@
     <string name="direct_message">Direkt Mesaj</string>
     <string name="nodedb_reset">NodeDB sıfırla</string>
     <string name="nodedb_reset_description">Listeden tüm cihazları(node) siler.</string>
+    <string name="delivery_confirmed">Teslim Edildi</string>
+    <string name="error">Hata</string>
     <string name="ignore">Yok say</string>
     <string name="ignore_add">Yoksay listesine \'%s\' eklensin mi? Değişiklikten sonra cihazınız yeniden başlar.</string>
     <string name="ignore_remove">Yoksay listesinden \'%s\' çıkarılsın mı? Değişiklikten sonra cihazınız yeniden başlar.</string>
@@ -170,4 +174,11 @@
     <string name="waypoint_new">Yeni yer işareti</string>
     <string name="waypoint_received">Alınan yer işareti: %s</string>
     <string name="error_duty_cycle">Zaman limitine (duty cycle) ulaşıldı. Şu anda mesaj gönderilemiyor, lütfen daha sonra tekrar deneyin.</string>
+    <string name="remove">Kaldır</string>
+    <string name="remove_node_text">Bu node, kendisinden yeniden paket alınana kadar listenizden kaldırılacaktır.</string>
+    <string name="mute">Mute</string>
+    <string name="mute_notifications">Mute notifications</string>
+    <string name="mute_8_hours">8 saat</string>
+    <string name="mute_1_week">1 hafta</string>
+    <string name="mute_always">Her zaman</string>
 </resources>

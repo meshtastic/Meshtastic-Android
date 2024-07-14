@@ -1,6 +1,5 @@
 package com.geeksville.mesh.ui
 
-import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,13 +14,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
@@ -32,7 +34,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
@@ -80,18 +82,23 @@ class DebugFragment : Fragment() {
             val listState = rememberLazyListState()
             val logs by model.meshLog.collectAsStateWithLifecycle()
 
-            LaunchedEffect(logs) {
-                if (listState.firstVisibleItemIndex < 3 && !listState.isScrollInProgress) {
-                    listState.scrollToItem(0)
+            val shouldAutoScroll by remember { derivedStateOf { listState.firstVisibleItemIndex < 3 } }
+            if (shouldAutoScroll) {
+                LaunchedEffect(logs) {
+                    if (!listState.isScrollInProgress) {
+                        listState.scrollToItem(0)
+                    }
                 }
             }
 
             AppTheme {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    state = listState,
-                ) {
-                    items(logs, key = { it.uuid }) { log -> DebugItem(annotateMeshLog(log)) }
+                SelectionContainer {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        state = listState,
+                    ) {
+                        items(logs, key = { it.uuid }) { log -> DebugItem(annotateMeshLog(log)) }
+                    }
                 }
             }
         }
@@ -232,8 +239,7 @@ internal fun DebugItem(log: MeshLog) {
     }
 }
 
-@Preview(showBackground = true)
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 @Composable
 private fun DebugScreenPreview() {
     AppTheme {
