@@ -244,10 +244,14 @@ fun NodeInfo(
                     ) {
                         if (hwInfoString != null) {
                             Text(
-                                text = hwInfoString,
+                                text = "$hwInfoString",
                                 fontSize = MaterialTheme.typography.button.fontSize,
                                 style = style,
                             )
+                        }
+                        val nodeId = thatNodeInfo.user?.id
+                        if (nodeId != null) {
+                            Text(text = nodeId, fontSize = MaterialTheme.typography.button.fontSize)
                         }
                     }
                 }
