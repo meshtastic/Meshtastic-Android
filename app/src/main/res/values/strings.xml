@@ -17,6 +17,7 @@
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">clear node filter</string>
     <string name="node_filter_include_unknown">Include unknown</string>
+    <string name="node_filter_show_details">Show details</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Channel</string>
     <string name="node_sort_distance">Distance</string>

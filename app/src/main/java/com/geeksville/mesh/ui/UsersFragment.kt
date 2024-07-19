@@ -157,6 +157,8 @@ fun NodesScreen(
                     onSortSelected = model::setSortOption,
                     includeUnknown = state.includeUnknown,
                     onToggleIncludeUnknown = model::toggleIncludeUnknown,
+                    showDetails = state.showDetails,
+                    onToggleShowDetails = model::toggleShowDetails,
                 )
             }
         }
@@ -171,6 +173,7 @@ fun NodesScreen(
                 isIgnored = state.ignoreIncomingList.contains(node.num),
                 chipClicked = { chipClicked(node) },
                 blinking = node == focusedNode,
+                expanded = state.showDetails
             )
         }
     }
