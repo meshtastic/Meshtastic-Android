@@ -36,6 +36,8 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -101,8 +103,7 @@ fun NodeInfo(
         LocalTextStyle.current
     }
 
-    var detailsShown = expanded
-    val showDetails: (Boolean) -> Unit = { detailsShown = !detailsShown || expanded }
+    val (detailsShown, showDetails) = remember { mutableStateOf(expanded) }
 
     Card(
         modifier = Modifier
@@ -211,7 +212,7 @@ fun NodeInfo(
                     }
                 }
 
-                if (detailsShown) {
+                if (detailsShown || expanded) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Divider()
                     Spacer(modifier = Modifier.height(8.dp))
