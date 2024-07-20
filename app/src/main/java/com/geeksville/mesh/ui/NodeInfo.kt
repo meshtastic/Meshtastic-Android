@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.selection.DisableSelection
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Card
 import androidx.compose.material.Chip
 import androidx.compose.material.ChipDefaults
@@ -113,129 +115,88 @@ fun NodeInfo(
         onClick = { showDetails(!detailsShown) },
     ) {
         Surface {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .background(bgColor)
-            ) {
-                Row(
+            SelectionContainer {
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .background(bgColor)
                 ) {
-                    Chip(
+                    Row(
                         modifier = Modifier
-                            .width(72.dp)
-                            .padding(end = 8.dp)
-                            .defaultMinSize(minHeight = 32.dp)
-                            .clickable {
-                                chipClicked()
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Chip(
+                            modifier = Modifier
+                                .width(72.dp)
+                                .padding(end = 8.dp)
+                                .defaultMinSize(minHeight = 32.dp)
+                                .clickable {
+                                    chipClicked()
+                                },
+                            colors = ChipDefaults.chipColors(
+                                backgroundColor = Color(nodeColor),
+                                contentColor = Color(textColor)
+                            ),
+                            onClick = { chipClicked() },
+                            content = {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = thatNodeInfo.user?.shortName ?: unknownShortName,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = MaterialTheme.typography.button.fontSize,
+                                    textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
+                                    textAlign = TextAlign.Center,
+                                )
                             },
-                        colors = ChipDefaults.chipColors(
-                            backgroundColor = Color(nodeColor),
-                            contentColor = Color(textColor)
-                        ),
-                        onClick = { chipClicked() },
-                        content = {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = thatNodeInfo.user?.shortName ?: unknownShortName,
-                                fontWeight = FontWeight.Normal,
-                                fontSize = MaterialTheme.typography.button.fontSize,
-                                textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
-                                textAlign = TextAlign.Center,
-                            )
-                        },
-                    )
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = nodeName,
-                        style = style,
-                        textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
-                        softWrap = true,
-                    )
-
-                    LastHeardInfo(
-                        lastHeard = thatNodeInfo.lastHeard
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    if (distance != null) {
-                        Text(
-                            text = distance,
-                            fontSize = MaterialTheme.typography.button.fontSize,
                         )
-                    } else {
-                        Spacer(modifier = Modifier.width(16.dp))
-                    }
-                    BatteryInfo(
-                        batteryLevel = thatNodeInfo.batteryLevel,
-                        voltage = thatNodeInfo.voltage
-                    )
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    signalInfo(
-                        nodeInfo = thatNodeInfo,
-                        isThisNode = isThisNode
-                    )
-                    if (position?.isValid() == true) {
-                        val satCount = position.satellitesInView
-                        if (satCount > 0) {
-                            SatelliteCountInfo(
-                                satCount = satCount
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    val envMetrics = thatNodeInfo.environmentMetrics
-                        ?.getDisplayString(tempInFahrenheit) ?: ""
-                    if (envMetrics.isNotBlank()) {
                         Text(
-                            text = envMetrics,
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = MaterialTheme.typography.button.fontSize
+                            modifier = Modifier.weight(1f),
+                            text = nodeName,
+                            style = style,
+                            textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
+                            softWrap = true,
+                        )
+
+                        LastHeardInfo(
+                            lastHeard = thatNodeInfo.lastHeard
                         )
                     }
-                }
-
-                if (detailsShown || expanded) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Divider()
-                    Spacer(modifier = Modifier.height(8.dp))
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        LinkedCoordinates(
-                            position = position,
-                            format = gpsFormat,
-                            nodeName = nodeName
-                        )
-                        val system =
-                            ConfigProtos.Config.DisplayConfig.DisplayUnits.forNumber(distanceUnits)
-                        if (position?.isValid() == true) {
-                            val altitude = position.altitude.metersIn(system)
-                            val elevationSuffix = stringResource(id = R.string.elevation_suffix)
-                            ElevationInfo(
-                                altitude = altitude,
-                                system = system,
-                                suffix = elevationSuffix
+                        if (distance != null) {
+                            Text(
+                                text = distance,
+                                fontSize = MaterialTheme.typography.button.fontSize,
                             )
+                        } else {
+                            Spacer(modifier = Modifier.width(16.dp))
+                        }
+                        BatteryInfo(
+                            batteryLevel = thatNodeInfo.batteryLevel,
+                            voltage = thatNodeInfo.voltage
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        signalInfo(
+                            nodeInfo = thatNodeInfo,
+                            isThisNode = isThisNode
+                        )
+                        if (position?.isValid() == true) {
+                            val satCount = position.satellitesInView
+                            if (satCount > 0) {
+                                SatelliteCountInfo(
+                                    satCount = satCount
+                                )
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(4.dp))
@@ -243,16 +204,61 @@ fun NodeInfo(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        if (hwInfoString != null) {
+                        val envMetrics = thatNodeInfo.environmentMetrics
+                            ?.getDisplayString(tempInFahrenheit) ?: ""
+                        if (envMetrics.isNotBlank()) {
                             Text(
-                                text = "$hwInfoString",
-                                fontSize = MaterialTheme.typography.button.fontSize,
-                                style = style,
+                                text = envMetrics,
+                                color = MaterialTheme.colors.onSurface,
+                                fontSize = MaterialTheme.typography.button.fontSize
                             )
                         }
-                        val nodeId = thatNodeInfo.user?.id
-                        if (nodeId != null) {
-                            Text(text = nodeId, fontSize = MaterialTheme.typography.button.fontSize)
+                    }
+
+                    if (detailsShown || expanded) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Divider()
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            DisableSelection {
+                                LinkedCoordinates(
+                                    position = position,
+                                    format = gpsFormat,
+                                    nodeName = nodeName
+                                )
+                            }
+                            val system =
+                                ConfigProtos.Config.DisplayConfig.DisplayUnits.forNumber(distanceUnits)
+                            if (position?.isValid() == true) {
+                                val altitude = position.altitude.metersIn(system)
+                                val elevationSuffix = stringResource(id = R.string.elevation_suffix)
+                                ElevationInfo(
+                                    altitude = altitude,
+                                    system = system,
+                                    suffix = elevationSuffix
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            if (hwInfoString != null) {
+                                Text(
+                                    text = "$hwInfoString",
+                                    fontSize = MaterialTheme.typography.button.fontSize,
+                                    style = style,
+                                )
+                            }
+                            val nodeId = thatNodeInfo.user?.id
+                            if (nodeId != null) {
+                                Text(text = nodeId, fontSize = MaterialTheme.typography.button.fontSize)
+                            }
                         }
                     }
                 }
