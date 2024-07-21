@@ -2,6 +2,13 @@
 <resources>
     <string name="node_filter_placeholder">Filtr</string>
     <string name="desc_node_filter_clear">vyčistit filtr uzlů</string>
+    <string name="node_filter_include_unknown">Včítaně neznámých</string>
+    <string name="node_sort_alpha">A-Z</string>
+    <string name="node_sort_channel">Kanál</string>
+    <string name="node_sort_distance">Vzdálenost</string>
+    <string name="node_sort_hops_away">Počet hopů</string>
+    <string name="node_sort_last_heard">Naposledy slyšen</string>
+    <string name="node_sort_via_mqtt">přes MQTT</string>
     <string name="channel_name">Název kanálu</string>
     <string name="channel_options">Nastavení kanálu</string>
     <string name="qr_code">QR kód</string>
@@ -158,6 +165,7 @@
     <string name="device_settings">Nastavení zařízení</string>
     <string name="module_settings">Nastavení modulů</string>
     <string name="add">Přidat</string>
+    <string name="edit">Upravit</string>
     <string name="calculating">Vypočítávám…</string>
     <string name="map_offline_manager">Správce Offline</string>
     <string name="map_cache_size">Aktuální velikost mezipaměti</string>
