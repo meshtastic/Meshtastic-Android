@@ -17,14 +17,11 @@ fun signalInfo(
     nodeInfo: NodeInfo,
     isThisNode: Boolean
 ): Boolean {
-    var text = ""
-    text = if (isThisNode) {
-        nodeInfo.deviceMetrics?.let { metrics ->
-            "ChUtil %.1f%% AirUtilTX %.1f%%".format(
-                metrics.channelUtilization,
-                metrics.airUtilTx
-            )
-        } ?: ""
+    val text = if (isThisNode) {
+        "ChUtil %.1f%% AirUtilTX %.1f%%".format(
+            nodeInfo.deviceMetrics?.channelUtilization,
+            nodeInfo.deviceMetrics?.airUtilTx
+        )
     } else {
         buildList {
             if (nodeInfo.channel > 0) add("ch:${nodeInfo.channel}")
