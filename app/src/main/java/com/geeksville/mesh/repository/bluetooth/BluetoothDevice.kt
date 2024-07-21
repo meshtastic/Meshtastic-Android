@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.annotation.RequiresPermission
+import com.geeksville.mesh.util.registerReceiverCompat
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -24,7 +25,7 @@ internal fun BluetoothDevice.createBond(context: Context): Flow<Int> = callbackF
         }
     }
     val filter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-    context.registerReceiver(receiver, filter)
+    context.registerReceiverCompat(receiver, filter)
     createBond()
 
     awaitClose { context.unregisterReceiver(receiver) }
