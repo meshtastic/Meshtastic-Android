@@ -78,12 +78,12 @@ fun getInitials(nameIn: String): String {
  * Only changes are included in the resulting list.
  *
  * @param new The updated [ChannelSettings] list.
- * @param old The current [ChannelSettings] list (required to disable unused channels).
+ * @param old The current [ChannelSettings] list (required when disabling unused channels).
  * @return A [Channel] list containing only the modified channels.
  */
 internal fun getChannelList(
     new: List<ChannelSettings>,
-    old: List<ChannelSettings>,
+    old: List<ChannelSettings> = emptyList(),
 ): List<ChannelProtos.Channel> = buildList {
     for (i in 0..maxOf(old.lastIndex, new.lastIndex)) {
         if (old.getOrNull(i) != new.getOrNull(i)) add(channel {
@@ -386,13 +386,29 @@ class UIViewModel @Inject constructor(
         meshService?.setChannel(channel.toByteArray())
     }
 
-    // Set the radio config (also updates our saved copy in preferences)
-    fun setChannels(channelSet: AppOnlyProtos.ChannelSet) = viewModelScope.launch {
-        getChannelList(channelSet.settingsList, channels.value.settingsList).forEach(::setChannel)
-        radioConfigRepository.replaceAllSettings(channelSet.settingsList)
+    /**
+     * Set the radio config (also updates our saved copy in preferences). By default, this will replace
+     * all channels in the existing radio config. Otherwise, it will append all [ChannelSettings] that
+     * are unique in [channelSet] to the existing radio config.
+     */
+    fun setChannels(channelSet: AppOnlyProtos.ChannelSet, overwrite: Boolean = true) = viewModelScope.launch {
+        val newRadioSettings: List<ChannelSettings>
+        if (overwrite) {
+            getChannelList(channelSet.settingsList, channels.value.settingsList).forEach(::setChannel)
+            newRadioSettings = channelSet.settingsList
+        }  else {
+            // To guarantee consistent ordering, using a LinkedHashSet which iterates through it's
+            // entries according to the order an item was *first* inserted.
+            // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-linked-hash-set/
+            val uniqueChannels =
+                LinkedHashSet(channels.value.settingsList + channelSet.settingsList).toList()
+            getChannelList(uniqueChannels).forEach(::setChannel)
+            newRadioSettings = uniqueChannels
+        }
 
+        radioConfigRepository.replaceAllSettings(newRadioSettings)
         val newConfig = config { lora = channelSet.loraConfig }
-        if (config.lora != newConfig.lora) setConfig(newConfig)
+        if (overwrite && config.lora != newConfig.lora) setConfig(newConfig)
     }
 
     val provideLocation = object : MutableLiveData<Boolean>(preferences.getBoolean("provide-location", false)) {

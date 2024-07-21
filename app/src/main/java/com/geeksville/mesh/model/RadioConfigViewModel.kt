@@ -166,7 +166,7 @@ class RadioConfigViewModel @Inject constructor(
     }
 
     private fun setChannels(channelUrl: String) = viewModelScope.launch {
-        val new = Uri.parse(channelUrl).toChannelSet()
+        val new = Uri.parse(channelUrl).toChannelSet().first
         val old = radioConfigRepository.channelSetFlow.firstOrNull() ?: return@launch
         updateChannels(myNodeNum ?: return@launch, new.settingsList, old.settingsList)
     }

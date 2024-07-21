@@ -399,27 +399,36 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
+    @Suppress("NestedBlockDepth")
     private fun perhapsChangeChannel(url: Uri? = requestedChannelUrl) {
         // if the device is connected already, process it now
         if (url != null && model.isConnected()) {
             requestedChannelUrl = null
             try {
-                val channels = url.toChannelSet()
+                val (channels, shouldAdd) = url.toChannelSet()
                 val primary = channels.primaryChannel
                 if (primary == null)
                     showSnackbar(R.string.channel_invalid)
                 else {
-
+                    val dialogMessage = if (!shouldAdd) {
+                        getString(R.string.do_you_want_switch).format(primary.name)
+                    } else {
+                        resources.getQuantityString(
+                            R.plurals.add_channel_from_qr,
+                            channels.settingsCount,
+                            channels.settingsCount
+                        )
+                    }
                     MaterialAlertDialogBuilder(this)
                         .setTitle(R.string.new_channel_rcvd)
-                        .setMessage(getString(R.string.do_you_want_switch).format(primary.name))
+                        .setMessage(dialogMessage)
                         .setNeutralButton(R.string.cancel) { _, _ ->
                             // Do nothing
                         }
                         .setPositiveButton(R.string.accept) { _, _ ->
                             debug("Setting channel from URL")
                             try {
-                                model.setChannels(channels)
+                                model.setChannels(channels, !shouldAdd)
                             } catch (ex: RemoteException) {
                                 errormsg("Couldn't change channel ${ex.message}")
                                 showSnackbar(R.string.cant_change_no_radio)

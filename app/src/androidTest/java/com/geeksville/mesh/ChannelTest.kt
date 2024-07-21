@@ -21,7 +21,7 @@ class ChannelTest {
         val channelUrl = ch.getChannelUrl()
 
         Assert.assertTrue(channelUrl.toString().startsWith(URL_PREFIX))
-        Assert.assertEquals(channelUrl.toChannelSet(), ch)
+        Assert.assertEquals(channelUrl.toChannelSet().first, ch)
     }
 
     @Test

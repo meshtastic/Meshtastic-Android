@@ -206,4 +206,8 @@
     <string name="mute_8_hours">8 hours</string>
     <string name="mute_1_week">1 week</string>
     <string name="mute_always">Always</string>
+    <plurals name="add_channel_from_qr">
+        <item quantity="one">Do you want to add a new channel?</item>
+        <item quantity="other">Do you want to add %d new channels?</item>
+    </plurals>
 </resources>

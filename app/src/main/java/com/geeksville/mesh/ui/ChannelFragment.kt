@@ -398,7 +398,7 @@ fun ChannelScreen(
                 onValueChange = {
                     try {
                         valueState = Uri.parse(it)
-                        channelSet = valueState.toChannelSet()
+                        channelSet = valueState.toChannelSet().first
                     } catch (ex: Throwable) {
                         // channelSet failed to update, isError true
                     }
