@@ -8,6 +8,7 @@ import android.content.IntentFilter
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import com.geeksville.mesh.util.PendingIntentCompat
+import com.geeksville.mesh.util.registerReceiverCompat
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -32,7 +33,7 @@ internal fun UsbManager.requestPermission(
         PendingIntentCompat.FLAG_MUTABLE
     )
     val filter = IntentFilter(ACTION_USB_PERMISSION)
-    context.registerReceiver(receiver, filter)
+    context.registerReceiverCompat(receiver, filter)
     requestPermission(device, permissionIntent)
 
     awaitClose { context.unregisterReceiver(receiver) }

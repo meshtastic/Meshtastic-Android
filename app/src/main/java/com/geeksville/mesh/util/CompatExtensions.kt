@@ -5,11 +5,15 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.le.ScanResult
 import android.companion.AssociationInfo
 import android.companion.CompanionDeviceManager
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import androidx.core.os.ParcelCompat
 
@@ -39,6 +43,14 @@ fun PackageManager.getPackageInfoCompat(packageName: String, flags: Int = 0): Pa
     } else {
         @Suppress("DEPRECATION") getPackageInfo(packageName, flags)
     }
+
+fun Context.registerReceiverCompat(
+    receiver: BroadcastReceiver,
+    filter: IntentFilter,
+    flag: Int = ContextCompat.RECEIVER_NOT_EXPORTED,
+) {
+    ContextCompat.registerReceiver(this, receiver, filter, flag)
+}
 
 fun Intent.getAssociationResult(): String? = when {
     android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU ->

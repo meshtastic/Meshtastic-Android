@@ -47,6 +47,7 @@
 
     <!-- We run our mesh code as a foreground service - FIXME, find a way to stop doing this -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
 
     <!-- Needed to open our bluetooth connection to our paired device (after reboot) -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -101,11 +102,13 @@
             android:value="false" />
 
         <!-- we need bind job service for oreo -->
+<!--
         <service
             android:name="com.geeksville.mesh.service.SoftwareUpdateService"
             android:enabled="true"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+-->
 
         <!-- This is the public API for doing mesh radio operations from android apps -->
         <service
