@@ -2,6 +2,13 @@
 <resources>
     <string name="node_filter_placeholder">Filtriraj</string>
     <string name="desc_node_filter_clear">očisti filter čvorova</string>
+    <string name="node_filter_include_unknown">Uključujući nepoznate</string>
+    <string name="node_sort_alpha">A-Z</string>
+    <string name="node_sort_channel">Kanal</string>
+    <string name="node_sort_distance">Udaljenost</string>
+    <string name="node_sort_hops_away">Broj skokova</string>
+    <string name="node_sort_last_heard">Posljednje čuo</string>
+    <string name="node_sort_via_mqtt">putem MQTT</string>
     <string name="channel_name">Naziv kanala</string>
     <string name="channel_options">Mogućnosti kanala</string>
     <string name="qr_code">QR kod</string>
@@ -9,7 +16,7 @@
     <string name="connection_status">Stanje veze</string>
     <string name="application_icon">ikona aplikacije</string>
     <string name="unknown_username">Nepoznati korisnik</string>
-    <string name="send">Primijeni</string>
+    <string name="send">Potvrdi</string>
     <string name="send_text">Pošalji poruku</string>
     <string name="warning_not_paired">Još niste povezali Meshtastic radio uređaj s ovim telefonom. Povežite uređaj i postavite svoje korisničko ime.\n\nOva aplikacija otvorenog koda je u razvoju, ako naiđete na probleme, objavite na našem forumu: meshtastic.discourse.group.\n\nZa više informacija pogledajte našu web stranicu - www.meshtastic.org.</string>
     <string name="you">Vi</string>
@@ -84,7 +91,7 @@
     <string name="scan">Pretraži</string>
     <string name="are_you_sure_change_default">Jeste li sigurni da želite promijeniti na zadani kanal?</string>
     <string name="reset_to_defaults">Vrati na početne postavke</string>
-    <string name="apply">Primijeni</string>
+    <string name="apply">Potvrdi</string>
     <string name="no_app_found">Nije pronađena aplikacija za slanje URL-ova</string>
     <string name="theme">Tema</string>
     <string name="theme_light">Svijetla</string>
@@ -157,6 +164,7 @@
     <string name="device_settings">Konfiguracija uređaja</string>
     <string name="module_settings">Konfiguracija modula</string>
     <string name="add">Dodaj</string>
+    <string name="edit">Uredi</string>
     <string name="calculating">Izračunavanje…</string>
     <string name="map_offline_manager">Izvanmrežni upravitelj</string>
     <string name="map_cache_size">Trenutna veličina predmemorije</string>
