@@ -569,6 +569,7 @@ private fun ChannelSelection(
 /**
  * Enables the user to select which channels to accept after scanning a QR code.
  */
+@Suppress("LongMethod")
 @Composable
 fun ScannedQrCodeDialog(
     channels: AppOnlyProtos.ChannelSet,
@@ -697,7 +698,8 @@ fun ScannedQrCodeDialog(
                         Button(
                             onClick = {
                                 onDismiss.invoke()
-                                onConfirm.invoke(incoming)},
+                                onConfirm.invoke(incoming)
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp)
