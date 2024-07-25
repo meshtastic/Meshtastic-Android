@@ -306,9 +306,10 @@ fun ChannelScreen(
     if (userScannedQrCode.value)
         /* Prompt the user to modify channels after scanning a QR code. */
         ScannedQrCodeDialog(
-            viewModel,
-            scannedQR = scannedQR.value,
-            onDismissRequest = { userScannedQrCode.value = false }
+            channels = channels,
+            incoming = Uri.parse(scannedQR.value).toChannelSet(),
+            onDismiss = { userScannedQrCode.value = false },
+            onConfirm = { newChannelSet -> installSettings(newChannelSet) }
         )
 
     var showEditChannelDialog: Int? by remember { mutableStateOf(null) }
@@ -570,16 +571,13 @@ private fun ChannelSelection(
  */
 @Composable
 fun ScannedQrCodeDialog(
-    viewModel: UIViewModel = viewModel(),
-    scannedQR: String?,
-    onDismissRequest: () -> Unit
+    channels: AppOnlyProtos.ChannelSet,
+    incoming: AppOnlyProtos.ChannelSet,
+    onDismiss: () -> Unit,
+    onConfirm: (AppOnlyProtos.ChannelSet) -> Unit
 ) {
-    val channels by viewModel.channels.collectAsStateWithLifecycle()
     var currentChannelSet by remember(channels) { mutableStateOf(channels) }
     val modemPresetName = Channel(loraConfig = currentChannelSet.loraConfig).name
-
-    val incomingUri = Uri.parse(scannedQR)
-    var incomingChannelSet = incomingUri.toChannelSet()
 
     /* Holds selections made by the user */
     val channelSelections = remember { mutableStateListOf(elements = Array(size = 8, init = { true })) }
@@ -587,14 +585,14 @@ fun ScannedQrCodeDialog(
     /* The save button is enabled based on this count */
     var totalCount = currentChannelSet.settingsList.size
     for ((index, isSelected) in channelSelections.withIndex()) {
-        if (index >= incomingChannelSet.settingsList.size)
+        if (index >= incoming.settingsList.size)
             break
         if (isSelected)
             totalCount++
     }
 
     Dialog(
-        onDismissRequest = { onDismissRequest() },
+        onDismissRequest = { onDismiss() },
         properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnBackPress = true)
     ) {
         Surface(
@@ -613,7 +611,7 @@ fun ScannedQrCodeDialog(
                         text = stringResource(id = R.string.scanned_channels)
                     )
                 }
-                itemsIndexed(incomingChannelSet.settingsList) { index, channel ->
+                itemsIndexed(incoming.settingsList) { index, channel ->
                     ChannelSelection(
                         index = index,
                         title = channel.name.ifEmpty { modemPresetName },
@@ -635,7 +633,7 @@ fun ScannedQrCodeDialog(
                         index = index,
                         title = channel.name.ifEmpty { modemPresetName },
                         enabled = true,
-                        onEditClick = { /* Currently we don't enable editing from the dialog. */ },
+                        onEditClick = { /* Currently we don't enable editing from this dialog. */ },
                         onDeleteClick = {
                             val list = currentChannelSet.settingsList.toMutableList()
                             list.removeAt(index)
@@ -655,7 +653,7 @@ fun ScannedQrCodeDialog(
                     ) {
                         /* Cancel */
                         Button(
-                            onClick = onDismissRequest,
+                            onClick = onDismiss,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(48.dp)
@@ -668,35 +666,20 @@ fun ScannedQrCodeDialog(
                             )
                         }
 
-                        /* Replace - Replaces the previous set with the scanned channel set */
-                        Button(
-                            onClick = {
-                                onDismissRequest.invoke()
-                                viewModel.setRequestChannelUrl(Uri.parse(scannedQR))},
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp)
-                                .weight(1f)
-                                .padding(3.dp)
-                        ) {
-                            Text(
-                                style = MaterialTheme.typography.body1,
-                                text = stringResource(id = R.string.replace)
-                            )
-                        }
-
-                        /* Save - Appends incoming selected channels to the current set */
+                        /* Add - Appends incoming selected channels to the current set */
                         Button(
                             enabled = totalCount <= 8,
                             onClick = {
-                                incomingChannelSet = incomingChannelSet.copy {
-                                    val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+                                val appended = incoming.copy {
+                                    val result = settings.filterIndexed { i, _ ->
+                                        channelSelections.getOrNull(i) == true
+                                    }
                                     settings.clear()
                                     settings.addAll(currentChannelSet.settingsList)
                                     settings.addAll(result)
                                 }
-                                onDismissRequest.invoke()
-                                viewModel.setRequestChannelUrl(incomingChannelSet.getChannelUrl())
+                                onDismiss.invoke()
+                                onConfirm.invoke(appended)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -706,7 +689,24 @@ fun ScannedQrCodeDialog(
                         ) {
                             Text(
                                 style = MaterialTheme.typography.body1,
-                                text = stringResource(id = R.string.save)
+                                text = stringResource(id = R.string.add)
+                            )
+                        }
+
+                        /* Replace - Replaces the previous set with the scanned channel set */
+                        Button(
+                            onClick = {
+                                onDismiss.invoke()
+                                onConfirm.invoke(incoming)},
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .weight(1f)
+                                .padding(3.dp)
+                        ) {
+                            Text(
+                                style = MaterialTheme.typography.body1,
+                                text = stringResource(id = R.string.replace)
                             )
                         }
                     }
