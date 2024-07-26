@@ -414,10 +414,17 @@ class MeshService : Service(), Logging {
 
     // given a nodeNum, return a db entry - creating if necessary
     private fun getOrCreateNodeInfo(n: Int) = nodeDBbyNodeNum.getOrPut(n) {
+        val defaultId = DataPacket.nodeNumToDefaultId(n)
+        val shortName = if (defaultId.length >= 4) {
+            defaultId.takeLast(4)
+        } else {
+            getString(R.string.unknown_node_short_name)
+        }
+        
         val defaultUser = MeshUser(
-            id = DataPacket.nodeNumToDefaultId(n),
-            longName = DataPacket.nodeNumToDefaultId(n),
-            shortName = getString(R.string.unknown_node_short_name),
+            id = defaultId,
+            longName = defaultId,
+            shortName = shortName,
             hwModel = MeshProtos.HardwareModel.UNSET,
         )
         NodeInfo(n, defaultUser)
