@@ -416,7 +416,7 @@ class MeshService : Service(), Logging {
     private fun getOrCreateNodeInfo(n: Int) = nodeDBbyNodeNum.getOrPut(n) {
         val defaultUser = MeshUser(
             id = DataPacket.nodeNumToDefaultId(n),
-            longName = getString(R.string.unknown_username),
+            longName = DataPacket.nodeNumToDefaultId(n),
             shortName = getString(R.string.unknown_node_short_name),
             hwModel = MeshProtos.HardwareModel.UNSET,
         )
