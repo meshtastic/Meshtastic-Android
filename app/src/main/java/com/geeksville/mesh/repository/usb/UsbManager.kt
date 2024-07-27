@@ -1,13 +1,12 @@
 package com.geeksville.mesh.repository.usb
 
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import com.geeksville.mesh.util.PendingIntentCompat
+import androidx.core.app.PendingIntentCompat
 import com.geeksville.mesh.util.registerReceiverCompat
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -21,16 +20,19 @@ internal fun UsbManager.requestPermission(
 ): Flow<Boolean> = callbackFlow {
     val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val granted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
-            trySend(granted)
-            close()
+            if (ACTION_USB_PERMISSION == intent.action) {
+                val granted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
+                trySend(granted)
+                close()
+            }
         }
     }
-    val permissionIntent = PendingIntent.getBroadcast(
+    val permissionIntent = PendingIntentCompat.getBroadcast(
         context,
         0,
-        Intent(ACTION_USB_PERMISSION),
-        PendingIntentCompat.FLAG_MUTABLE
+        Intent(ACTION_USB_PERMISSION).apply { `package` = context.packageName },
+        0,
+        true
     )
     val filter = IntentFilter(ACTION_USB_PERMISSION)
     context.registerReceiverCompat(receiver, filter)
