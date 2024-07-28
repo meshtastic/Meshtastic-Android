@@ -17,26 +17,43 @@ private const val MESHTASTIC_CHANNEL_CONFIG_PATH = "/e/"
 private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
 
 /**
- * Return a [ChannelSet] that represents the ChannelSet encoded by the URL and [Boolean] if the URL
- * indicates the [ChannelSet] should be added to the existing configuration.
+ * Return a [ChannelSet] that represents the ChannelSet encoded by the URL.
  * @throws MalformedURLException when not recognized as a valid Meshtastic URL
  */
 @Throws(MalformedURLException::class)
-fun Uri.toChannelSet(): Pair<ChannelSet, Boolean> {
-    if (fragment.isNullOrBlank() || host != MESHTASTIC_DOMAIN || path != MESHTASTIC_CHANNEL_CONFIG_PATH) {
+fun Uri.toChannelSet(): ChannelSet {
+    if (fragment.isNullOrBlank() ||
+        !host.equals(MESHTASTIC_DOMAIN, true) ||
+        !path.equals(MESHTASTIC_CHANNEL_CONFIG_PATH, true)
+    ) {
         throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")
     }
 
     // Older versions of Meshtastic clients (Apple/web) included `?add=true` within the URL fragment.
     // This gracefully handles those cases until the newer version are generally available/used.
-    val channelSet =
-        ChannelSet.parseFrom(Base64.decode(fragment!!.substringBefore('?'), BASE64FLAGS))
-    val shouldAdd = fragment?.substringAfter('?', "")
+    return ChannelSet.parseFrom(Base64.decode(fragment!!.substringBefore('?'), BASE64FLAGS))
+}
+
+/**
+ * Return a [Boolean] if the URL indicates the associated [ChannelSet] should be added to the
+ * existing configuration.
+ * @throws MalformedURLException when not recognized as a valid Meshtastic URL
+ */
+@Throws(MalformedURLException::class)
+fun Uri.shouldAddChannels(): Boolean {
+    if (fragment.isNullOrBlank() ||
+        !host.equals(MESHTASTIC_DOMAIN, true) ||
+        !path.equals(MESHTASTIC_CHANNEL_CONFIG_PATH, true)
+    ) {
+        throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")
+    }
+
+    // Older versions of Meshtastic clients (Apple/web) included `?add=true` within the URL fragment.
+    // This gracefully handles those cases until the newer version are generally available/used.
+    return fragment?.substringAfter('?', "")
         ?.takeUnless { it.isBlank() }
         ?.equals("add=true")
         ?: getBooleanQueryParameter("add", false)
-
-    return channelSet to shouldAdd
 }
 
 /**

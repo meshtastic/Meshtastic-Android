@@ -35,6 +35,7 @@ import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.primaryChannel
+import com.geeksville.mesh.model.shouldAddChannels
 import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.service.*
@@ -405,7 +406,8 @@ class MainActivity : AppCompatActivity(), Logging {
         if (url != null && model.isConnected()) {
             requestedChannelUrl = null
             try {
-                val (channels, shouldAdd) = url.toChannelSet()
+                val channels = url.toChannelSet()
+                val shouldAdd = url.shouldAddChannels()
                 val primary = channels.primaryChannel
                 if (primary == null)
                     showSnackbar(R.string.channel_invalid)

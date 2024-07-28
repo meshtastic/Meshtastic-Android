@@ -83,7 +83,7 @@ fun getInitials(nameIn: String): String {
  */
 internal fun getChannelList(
     new: List<ChannelSettings>,
-    old: List<ChannelSettings> = emptyList(),
+    old: List<ChannelSettings>,
 ): List<ChannelProtos.Channel> = buildList {
     for (i in 0..maxOf(old.lastIndex, new.lastIndex)) {
         if (old.getOrNull(i) != new.getOrNull(i)) add(channel {
@@ -392,20 +392,16 @@ class UIViewModel @Inject constructor(
      * are unique in [channelSet] to the existing radio config.
      */
     fun setChannels(channelSet: AppOnlyProtos.ChannelSet, overwrite: Boolean = true) = viewModelScope.launch {
-        val newRadioSettings: List<ChannelSettings>
-        if (overwrite) {
-            getChannelList(channelSet.settingsList, channels.value.settingsList).forEach(::setChannel)
-            newRadioSettings = channelSet.settingsList
+        val newRadioSettings: List<ChannelSettings> = if (overwrite) {
+            channelSet.settingsList
         }  else {
             // To guarantee consistent ordering, using a LinkedHashSet which iterates through it's
             // entries according to the order an item was *first* inserted.
             // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-linked-hash-set/
-            val uniqueChannels =
-                LinkedHashSet(channels.value.settingsList + channelSet.settingsList).toList()
-            getChannelList(uniqueChannels).forEach(::setChannel)
-            newRadioSettings = uniqueChannels
+            LinkedHashSet(channels.value.settingsList + channelSet.settingsList).toList()
         }
 
+        getChannelList(newRadioSettings, channels.value.settingsList).forEach(::setChannel)
         radioConfigRepository.replaceAllSettings(newRadioSettings)
         val newConfig = config { lora = channelSet.loraConfig }
         if (overwrite && config.lora != newConfig.lora) setConfig(newConfig)
