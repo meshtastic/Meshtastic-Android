@@ -1,11 +1,15 @@
 package com.geeksville.mesh.ui
 
 import android.content.ActivityNotFoundException
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -23,9 +27,10 @@ import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.ui.theme.HyperlinkBlue
 import java.net.URLEncoder
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LinkedCoordinates(
-    modifier : Modifier = Modifier,
+    modifier: Modifier = Modifier,
     position: Position?,
     format: Int,
     nodeName: String?
@@ -52,20 +57,28 @@ fun LinkedCoordinates(
             }
             pop()
         }
-        ClickableText(
-            modifier = modifier,
-            text = annotatedString,
-            onClick = { offset ->
-                debug("Clicked on link")
-                annotatedString.getStringAnnotations(tag = "gps", start = offset, end = offset)
-                    .firstOrNull()?.let {
+        val clipboardManager: ClipboardManager = LocalClipboardManager.current
+        Text(
+            modifier = modifier.combinedClickable(
+                onClick = {
+                    annotatedString.getStringAnnotations(
+                        tag = "gps",
+                        start = 0,
+                        end = annotatedString.length
+                    ).firstOrNull()?.let {
                         try {
                             uriHandler.openUri(it.item)
                         } catch (ex: ActivityNotFoundException) {
                             debug("No application found: $ex")
                         }
                     }
-            }
+                },
+                onLongClick = {
+                    clipboardManager.setText(annotatedString)
+                    debug("Copied to clipboard")
+                }
+            ),
+            text = annotatedString
         )
     } else {
         // Placeholder for ConstraintLayoutReference; renders no visible content
@@ -99,7 +112,7 @@ fun LinkedCoordinatesPreview(
     }
 }
 
-class GPSFormatPreviewParameterProvider: PreviewParameterProvider<Int> {
+class GPSFormatPreviewParameterProvider : PreviewParameterProvider<Int> {
     override val values: Sequence<Int>
         get() = sequenceOf(0, 1, 2)
 }
