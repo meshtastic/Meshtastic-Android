@@ -24,11 +24,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Checkbox
-import androidx.compose.material.Chip
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
@@ -56,10 +52,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -75,7 +71,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -103,9 +99,11 @@ import com.geeksville.mesh.model.getChannelUrl
 import com.geeksville.mesh.model.qrCode
 import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.ui.components.AdaptiveTwoPane
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.config.ChannelCard
+import com.geeksville.mesh.ui.components.config.ChannelSelection
 import com.geeksville.mesh.ui.components.config.EditChannelDialog
 import com.geeksville.mesh.ui.components.dragContainer
 import com.geeksville.mesh.ui.components.dragDropItemsIndexed
@@ -177,12 +175,6 @@ fun ChannelScreen(
             restore = { it.toMutableStateList() }
         )
     ) { mutableStateListOf(elements = Array(size = 8, init = { true })) }
-
-    val selectedChannelSet = channelSet.copy {
-        val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
-        settings.clear()
-        settings.addAll(result)
-    }
 
     val channelUrl = channelSet.getChannelUrl()
     val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
@@ -346,25 +338,14 @@ fun ChannelScreen(
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
     ) {
         if (!showChannelEditor) {
-            itemsIndexed(channelSet.settingsList) { index, channel ->
-                ChannelSelection(
-                    index = index,
-                    title = channel.name.ifEmpty { modemPresetName },
-                    enabled = enabled,
-                    isSelected = channelSelections[index],
-                    onSelected = {
-                        if (it || selectedChannelSet.settingsCount > 1) {
-                            channelSelections[index] = it
-                        }
-                    }
-                )
-            }
             item {
-                OutlinedButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { showChannelEditor = true },
+                ChannelListView(
                     enabled = enabled,
-                ) { Text(text = stringResource(R.string.edit)) }
+                    channelSet = channelSet,
+                    modemPresetName = modemPresetName,
+                    channelSelections = channelSelections,
+                    onClick = { showChannelEditor = true }
+                )
             }
         } else {
             dragDropItemsIndexed(
@@ -396,16 +377,6 @@ fun ChannelScreen(
                     )
                 ) { Text(text = stringResource(R.string.add)) }
             }
-        }
-
-        if (!isEditing) item {
-            QRCodeImage(
-                enabled = enabled,
-                channelSet = selectedChannelSet,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-            )
         }
 
         item {
@@ -513,7 +484,7 @@ fun ChannelScreen(
 }
 
 @Composable
-private fun QRCodeImage(
+private fun QrCodeImage(
     enabled: Boolean,
     channelSet: AppOnlyProtos.ChannelSet,
     modifier: Modifier = Modifier,
@@ -528,42 +499,51 @@ private fun QRCodeImage(
     // colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
 )
 
-/**
- * Enables the user to select what channels are used for QR generation.
- */
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun ChannelSelection(
-    index: Int,
-    title: String,
+private fun ChannelListView(
     enabled: Boolean,
-    isSelected: Boolean,
-    onSelected: (Boolean) -> Unit
+    channelSet: AppOnlyProtos.ChannelSet,
+    modemPresetName: String,
+    channelSelections: SnapshotStateList<Boolean>,
+    onClick: () -> Unit = {},
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 2.dp),
-        elevation = 4.dp
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp)
-        ) {
-            Chip(onClick = { }, enabled = enabled) { Text("$index") }
-            Text(
-                text = title,
-                style = MaterialTheme.typography.body1,
-                color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
-                modifier = Modifier.weight(1f)
-            )
-            Checkbox(
-                enabled = enabled,
-                checked = isSelected,
-                onCheckedChange = onSelected,
-            )
-        }
+    val selectedChannelSet = channelSet.copy {
+        val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+        settings.clear()
+        settings.addAll(result)
     }
+
+    AdaptiveTwoPane(
+        first = {
+            channelSet.settingsList.forEachIndexed { index, channel ->
+                ChannelSelection(
+                    index = index,
+                    title = channel.name.ifEmpty { modemPresetName },
+                    enabled = enabled,
+                    isSelected = channelSelections[index],
+                    onSelected = {
+                        if (it || selectedChannelSet.settingsCount > 1) {
+                            channelSelections[index] = it
+                        }
+                    },
+                )
+            }
+            OutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onClick,
+                enabled = enabled,
+            ) { Text(text = stringResource(R.string.edit)) }
+        },
+        second = {
+            QrCodeImage(
+                enabled = enabled,
+                channelSet = selectedChannelSet,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            )
+        },
+    )
 }
 
 /**
@@ -718,8 +698,16 @@ fun ScannedQrCodeDialog(
     }
 }
 
-@Preview(showBackground = true)
+@PreviewScreenSizes
 @Composable
 private fun ChannelScreenPreview() {
-    // ChannelScreen()
+    ChannelListView(
+        enabled = true,
+        channelSet = channelSet {
+            settings.add(Channel.default.settings)
+            loraConfig = Channel.default.loraConfig
+        },
+        modemPresetName = Channel.default.name,
+        channelSelections = listOf(true).toMutableStateList(),
+    )
 }
