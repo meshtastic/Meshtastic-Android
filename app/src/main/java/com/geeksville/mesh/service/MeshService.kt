@@ -882,6 +882,9 @@ class MeshService : Service(), Logging {
         }
     }
 
+    // If apps try to send packets when our radio is sleeping, we queue them here instead
+    private val offlineSentPackets = mutableListOf<DataPacket>()
+
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
         if (haveNodeDB) {
@@ -954,21 +957,17 @@ class MeshService : Service(), Logging {
         sendToRadio(packet)
     }
 
-    private fun processQueuedPackets() = serviceScope.handledLaunch {
-        packetRepository.get().getQueuedPackets()?.forEach { p ->
-            // check for duplicate packet IDs before sending (so ACK/NAK updates can work)
-            if (getDataPacketById(p.id)?.time != p.time) {
-                val newId = generatePacketId()
-                debug("Replaced duplicate packet ID in queue: ${p.id}, with: $newId")
-                packetRepository.get().updateMessageId(p, newId)
-                p.id = newId
-            }
+    private fun processQueuedPackets() {
+        val sentPackets = mutableListOf<DataPacket>()
+        offlineSentPackets.forEach { p ->
             try {
                 sendNow(p)
+                sentPackets.add(p)
             } catch (ex: Exception) {
                 errormsg("Error sending queued message:", ex)
             }
         }
+        offlineSentPackets.removeAll(sentPackets)
     }
 
     private suspend fun getDataPacketById(packetId: Int): DataPacket? = withTimeoutOrNull(1000) {
@@ -1499,7 +1498,7 @@ class MeshService : Service(), Logging {
     /// If we've received our initial config, our radio settings and all of our channels, send any queued packets and broadcast connected to clients
     private fun onHasSettings() {
 
-        // processQueuedPackets() // send any packets that were queued up FIXME
+        processQueuedPackets() // send any packets that were queued up
         startMqttClientProxy()
 
         // broadcast an intent with our new connection state
@@ -1699,6 +1698,12 @@ class MeshService : Service(), Logging {
         }
     }
 
+    private fun enqueueForSending(p: DataPacket) {
+        if (p.dataType in rememberDataType) {
+            offlineSentPackets.add(p)
+        }
+    }
+
     private val binder = object : IMeshService.Stub() {
 
         override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
@@ -1765,6 +1770,9 @@ class MeshService : Service(), Logging {
                     sendNow(p)
                 } catch (ex: Exception) {
                     errormsg("Error sending message, so enqueueing", ex)
+                    enqueueForSending(p)
+                } else {
+                    enqueueForSending(p)
                 }
                 serviceBroadcasts.broadcastMessageStatus(p)
 
