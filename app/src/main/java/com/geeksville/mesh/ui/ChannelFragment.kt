@@ -179,12 +179,15 @@ fun ChannelScreen(
     val channelUrl = channelSet.getChannelUrl()
     val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
-    val userScannedQrCode = remember { mutableStateOf(false) }
-    val scannedQR = remember { mutableStateOf("") }
+    var scannedChannelSet by remember { mutableStateOf<AppOnlyProtos.ChannelSet?>(null) }
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
-            scannedQR.value = result.contents
-            userScannedQrCode.value = true
+            try {
+                scannedChannelSet = Uri.parse(result.contents).toChannelSet()
+            } catch (ex: Throwable) {
+                errormsg("Channel url error: ${ex.message}")
+                showSnackbar("${context.getString(R.string.channel_invalid)}: ${ex.message}")
+            }
         }
     }
 
@@ -295,14 +298,16 @@ fun ChannelScreen(
             .show()
     }
 
-    if (userScannedQrCode.value)
+    if (scannedChannelSet != null) {
+        val incoming = scannedChannelSet ?: return
         /* Prompt the user to modify channels after scanning a QR code. */
         ScannedQrCodeDialog(
             channels = channels,
-            incoming = Uri.parse(scannedQR.value).toChannelSet(),
-            onDismiss = { userScannedQrCode.value = false },
+            incoming = incoming,
+            onDismiss = { scannedChannelSet = null },
             onConfirm = { newChannelSet -> installSettings(newChannelSet) }
         )
+    }
 
     var showEditChannelDialog: Int? by remember { mutableStateOf(null) }
 
