@@ -206,4 +206,7 @@
     <string name="mute_8_hours">8 hours</string>
     <string name="mute_1_week">1 week</string>
     <string name="mute_always">Always</string>
+    <string name="scanned_channels">Scanned Channels</string>
+    <string name="current_channels">Current Channels</string>
+    <string name="replace">Replace</string>
 </resources>
