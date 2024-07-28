@@ -29,9 +29,6 @@ buildscript {
         // protobuf plugin - docs here https://github.com/google/protobuf-gradle-plugin
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.4'
 
-        // for unit testing https://github.com/bjoernQ/unmock-plugin
-        classpath 'com.github.bjoernq:unmockplugin:0.8.0'
-
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
     }
 }

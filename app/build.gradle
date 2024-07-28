@@ -5,18 +5,9 @@ plugins {
     id "org.jetbrains.kotlin.plugin.parcelize"
     id 'kotlinx-serialization'
     id 'com.google.dagger.hilt.android'
-    id 'de.mobilej.unmock'
     id 'com.google.protobuf'
     id "com.google.devtools.ksp"
     id "io.gitlab.arturbosch.detekt" version "1.23.6"
-}
-
-unMock {
-    keep "android.util.Base64"
-    keepStartingWith "libcore."
-    keep "android.net.Uri"
-
-    keepAndRename "java.nio.charset.Charsets" to "xjava.nio.charset.Charsets"
 }
 
 def keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -43,7 +34,7 @@ android {
         targetSdk 34
         versionCode 30318 // format is Mmmss (where M is 1+the numeric major number
         versionName "2.3.18"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.geeksville.mesh.TestRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
         vectorDrawables.useSupportLibrary = true
@@ -186,6 +177,8 @@ dependencies {
     implementation "com.google.dagger:hilt-android:$hilt_version"
     implementation "androidx.hilt:hilt-navigation-compose:1.2.0"
     ksp "com.google.dagger:hilt-compiler:$hilt_version"
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
+    kspAndroidTest "com.google.dagger:hilt-compiler:$hilt_version"
 
     // Navigation
     def nav_version = "2.7.7"
