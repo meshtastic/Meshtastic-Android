@@ -18,12 +18,6 @@ import androidx.core.content.IntentCompat
 import androidx.core.os.ParcelCompat
 
 object PendingIntentCompat {
-    val FLAG_MUTABLE = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-        PendingIntent.FLAG_MUTABLE
-    } else {
-        0
-    }
-
     val FLAG_IMMUTABLE = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
         PendingIntent.FLAG_IMMUTABLE
     } else {
