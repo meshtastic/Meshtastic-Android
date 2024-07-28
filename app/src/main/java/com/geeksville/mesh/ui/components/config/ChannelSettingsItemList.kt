@@ -10,6 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -17,7 +18,9 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Card
+import androidx.compose.material.Checkbox
 import androidx.compose.material.Chip
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -35,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -53,6 +57,41 @@ import com.geeksville.mesh.ui.components.rememberDragDropState
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
+private fun ChannelItem(
+    index: Int,
+    title: String,
+    enabled: Boolean,
+    onClick: () -> Unit = {},
+    elevation: Dp = 4.dp,
+    content: @Composable RowScope.() -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp)
+            .clickable(enabled = enabled) { onClick() },
+        elevation = elevation,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp)
+        ) {
+            val textColor = if (enabled) Color.Unspecified
+            else MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+
+            Chip(onClick = onClick) { Text("$index") }
+            Text(
+                text = title,
+                modifier = Modifier.weight(1f),
+                color = textColor,
+                style = MaterialTheme.typography.body1,
+            )
+            content()
+        }
+    }
+}
+
+@Composable
 fun ChannelCard(
     index: Int,
     title: String,
@@ -60,33 +99,40 @@ fun ChannelCard(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     elevation: Dp = 4.dp,
+) = ChannelItem(
+    index = index,
+    title = title,
+    enabled = enabled,
+    onClick = onEditClick,
+    elevation = elevation,
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 2.dp)
-            .clickable(enabled = enabled) { onEditClick() },
-        elevation = elevation,
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp)
-        ) {
-            Chip(onClick = onEditClick) { Text("$index") }
-            Text(
-                text = title,
-                style = MaterialTheme.typography.body1,
-                modifier = Modifier.weight(1f)
-            )
-            IconButton(onClick = { onDeleteClick() }) {
-                Icon(
-                    Icons.TwoTone.Close,
-                    stringResource(R.string.delete),
-                    modifier = Modifier.wrapContentSize(),
-                )
-            }
-        }
+    IconButton(onClick = { onDeleteClick() }) {
+        Icon(
+            imageVector = Icons.TwoTone.Close,
+            contentDescription = stringResource(R.string.delete),
+            modifier = Modifier.wrapContentSize(),
+        )
     }
+}
+
+@Composable
+fun ChannelSelection(
+    index: Int,
+    title: String,
+    enabled: Boolean,
+    isSelected: Boolean,
+    onSelected: (Boolean) -> Unit
+) = ChannelItem(
+    index = index,
+    title = title,
+    enabled = enabled,
+    onClick = {},
+) {
+    Checkbox(
+        enabled = enabled,
+        checked = isSelected,
+        onCheckedChange = onSelected,
+    )
 }
 
 @Composable
