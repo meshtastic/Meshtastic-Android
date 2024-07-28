@@ -1,10 +1,27 @@
-package com.geeksville.mesh.model
+package com.geeksville.mesh
 
 import android.net.Uri
+import com.geeksville.mesh.model.getChannelUrl
+import com.geeksville.mesh.model.primaryChannel
+import com.geeksville.mesh.model.shouldAddChannels
+import com.geeksville.mesh.model.toChannelSet
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Assert
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 
+@HiltAndroidTest
 class ChannelSetTest {
+
+    @get:Rule
+    var hiltRule = HiltAndroidRule(this)
+
+    @Before
+    fun init() {
+        hiltRule.inject()
+    }
 
     /** make sure we match the python and device code behavior */
     @Test
