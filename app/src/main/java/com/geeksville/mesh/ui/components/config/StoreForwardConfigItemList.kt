@@ -80,6 +80,15 @@ fun StoreForwardConfigItemList(
         }
 
         item {
+            SwitchPreference(
+                title = "Server",
+                checked = storeForwardInput.isServer,
+                enabled = enabled,
+                onCheckedChange = { storeForwardInput = storeForwardInput.copy { isServer = it } })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = storeForwardInput != storeForwardConfig,
                 onCancelClicked = {
