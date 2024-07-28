@@ -12,8 +12,11 @@ plugins {
 }
 
 unMock {
-    keep "android.net.Uri"
     keep "android.util.Base64"
+    keepStartingWith "libcore."
+    keep "android.net.Uri"
+
+    keepAndRename "java.nio.charset.Charsets" to "xjava.nio.charset.Charsets"
 }
 
 def keystorePropertiesFile = rootProject.file("keystore.properties")
