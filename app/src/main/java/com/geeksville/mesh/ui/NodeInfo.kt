@@ -17,6 +17,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewFontScale
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ConfigProtos
@@ -128,9 +130,9 @@ fun NodeInfo(
                     ) {
                         Chip(
                             modifier = Modifier
-                                .width(72.dp)
+                                .width(IntrinsicSize.Min)
                                 .padding(end = 8.dp)
-                                .defaultMinSize(minHeight = 32.dp),
+                                .defaultMinSize(minHeight = 32.dp, minWidth = 72.dp),
                             colors = ChipDefaults.chipColors(
                                 backgroundColor = Color(nodeColor),
                                 contentColor = Color(textColor)
