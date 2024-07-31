@@ -12,16 +12,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.*
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config
-import com.geeksville.mesh.database.MeshLogRepository
-import com.geeksville.mesh.database.QuickChatActionRepository
-import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
+import com.geeksville.mesh.database.QuickChatActionRepository
+import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
@@ -29,10 +29,10 @@ import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -78,7 +78,7 @@ fun getInitials(nameIn: String): String {
  * Only changes are included in the resulting list.
  *
  * @param new The updated [ChannelSettings] list.
- * @param old The current [ChannelSettings] list (required to disable unused channels).
+ * @param old The current [ChannelSettings] list (required when disabling unused channels).
  * @return A [Channel] list containing only the modified channels.
  */
 internal fun getChannelList(
@@ -102,10 +102,11 @@ data class NodesUiState(
     val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
     val filter: String = "",
     val includeUnknown: Boolean = false,
-    val gpsFormat:Int = 0,
-    val distanceUnits:Int = 0,
-    val tempInFahrenheit:Boolean = false,
+    val gpsFormat: Int = 0,
+    val distanceUnits: Int = 0,
+    val tempInFahrenheit: Boolean = false,
     val ignoreIncomingList: List<Int> = emptyList(),
+    val showDetails: Boolean = false,
 ) {
     companion object {
         val Empty = NodesUiState()
@@ -151,9 +152,14 @@ class UIViewModel @Inject constructor(
     private val nodeFilterText = MutableStateFlow("")
     private val nodeSortOption = MutableStateFlow(NodeSortOption.LAST_HEARD)
     private val includeUnknown = MutableStateFlow(false)
+    private val showDetails = MutableStateFlow(false)
 
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
+    }
+
+    fun toggleShowDetails() {
+        showDetails.value = !showDetails.value
     }
 
     fun toggleIncludeUnknown() {
@@ -164,8 +170,9 @@ class UIViewModel @Inject constructor(
         nodeFilterText,
         nodeSortOption,
         includeUnknown,
+        showDetails,
         radioConfigRepository.deviceProfileFlow,
-    ) { filter, sort, includeUnknown, profile ->
+    ) { filter, sort, includeUnknown, showDetails, profile ->
         NodesUiState(
             sort = sort,
             filter = filter,
@@ -174,6 +181,7 @@ class UIViewModel @Inject constructor(
             distanceUnits = profile.config.display.units.number,
             tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
             ignoreIncomingList = profile.config.lora.ignoreIncomingList,
+            showDetails = showDetails,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -386,13 +394,25 @@ class UIViewModel @Inject constructor(
         meshService?.setChannel(channel.toByteArray())
     }
 
-    // Set the radio config (also updates our saved copy in preferences)
-    fun setChannels(channelSet: AppOnlyProtos.ChannelSet) = viewModelScope.launch {
-        getChannelList(channelSet.settingsList, channels.value.settingsList).forEach(::setChannel)
-        radioConfigRepository.replaceAllSettings(channelSet.settingsList)
+    /**
+     * Set the radio config (also updates our saved copy in preferences). By default, this will replace
+     * all channels in the existing radio config. Otherwise, it will append all [ChannelSettings] that
+     * are unique in [channelSet] to the existing radio config.
+     */
+    fun setChannels(channelSet: AppOnlyProtos.ChannelSet, overwrite: Boolean = true) = viewModelScope.launch {
+        val newRadioSettings: List<ChannelSettings> = if (overwrite) {
+            channelSet.settingsList
+        }  else {
+            // To guarantee consistent ordering, using a LinkedHashSet which iterates through it's
+            // entries according to the order an item was *first* inserted.
+            // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-linked-hash-set/
+            LinkedHashSet(channels.value.settingsList + channelSet.settingsList).toList()
+        }
 
+        getChannelList(newRadioSettings, channels.value.settingsList).forEach(::setChannel)
+        radioConfigRepository.replaceAllSettings(newRadioSettings)
         val newConfig = config { lora = channelSet.loraConfig }
-        if (config.lora != newConfig.lora) setConfig(newConfig)
+        if (overwrite && config.lora != newConfig.lora) setConfig(newConfig)
     }
 
     val provideLocation = object : MutableLiveData<Boolean>(preferences.getBoolean("provide-location", false)) {

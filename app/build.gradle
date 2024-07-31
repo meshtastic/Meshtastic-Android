@@ -5,15 +5,9 @@ plugins {
     id "org.jetbrains.kotlin.plugin.parcelize"
     id 'kotlinx-serialization'
     id 'com.google.dagger.hilt.android'
-    id 'de.mobilej.unmock'
     id 'com.google.protobuf'
     id "com.google.devtools.ksp"
     id "io.gitlab.arturbosch.detekt" version "1.23.6"
-}
-
-unMock {
-    keep "android.net.Uri"
-    keep "android.util.Base64"
 }
 
 def keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -38,9 +32,9 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdk 34
-        versionCode 30318 // format is Mmmss (where M is 1+the numeric major number
-        versionName "2.3.18"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        versionCode 30400 // format is Mmmss (where M is 1+the numeric major number
+        versionName "2.4.0"
+        testInstrumentationRunner "com.geeksville.mesh.TestRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
         vectorDrawables.useSupportLibrary = true
@@ -183,6 +177,8 @@ dependencies {
     implementation "com.google.dagger:hilt-android:$hilt_version"
     implementation "androidx.hilt:hilt-navigation-compose:1.2.0"
     ksp "com.google.dagger:hilt-compiler:$hilt_version"
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
+    kspAndroidTest "com.google.dagger:hilt-compiler:$hilt_version"
 
     // Navigation
     def nav_version = "2.7.7"
@@ -193,7 +189,6 @@ dependencies {
     def composeBom = platform('androidx.compose:compose-bom:2024.06.00')
     implementation composeBom
     androidTestImplementation composeBom
-    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
 
     implementation 'androidx.compose.material:material'
     implementation 'androidx.activity:activity-compose'

@@ -96,6 +96,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         parentFragmentManager.navigateToRadioConfig(node.num)
     }
 
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -105,7 +106,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 AppTheme {
-                    NodesScreen(model = model, onClick = ::popup)
+                    NodesScreen(model = model, chipClicked = ::popup)
                 }
             }
         }
@@ -116,7 +117,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 @Composable
 fun NodesScreen(
     model: UIViewModel = hiltViewModel(),
-    onClick: (NodeInfo) -> Unit,
+    chipClicked: (NodeInfo) -> Unit,
 ) {
     val state by model.nodesUiState.collectAsStateWithLifecycle()
 
@@ -156,6 +157,8 @@ fun NodesScreen(
                     onSortSelected = model::setSortOption,
                     includeUnknown = state.includeUnknown,
                     onToggleIncludeUnknown = model::toggleIncludeUnknown,
+                    showDetails = state.showDetails,
+                    onToggleShowDetails = model::toggleShowDetails,
                 )
             }
         }
@@ -168,8 +171,9 @@ fun NodesScreen(
                 distanceUnits = state.distanceUnits,
                 tempInFahrenheit = state.tempInFahrenheit,
                 isIgnored = state.ignoreIncomingList.contains(node.num),
-                onClicked = { onClick(node) },
+                chipClicked = { chipClicked(node) },
                 blinking = node == focusedNode,
+                expanded = state.showDetails
             )
         }
     }

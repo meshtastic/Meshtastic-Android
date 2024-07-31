@@ -182,6 +182,15 @@ fun LoRaConfigItemList(
         }
 
         item {
+            SwitchPreference(
+                title = "PA fan disabled",
+                checked = loraInput.paFanDisabled,
+                enabled = enabled,
+                onCheckedChange = { loraInput = loraInput.copy { paFanDisabled = it } })
+        }
+        item { Divider() }
+
+        item {
             SwitchPreference(title = "Ignore MQTT",
                 checked = loraInput.ignoreMqtt,
                 enabled = enabled,

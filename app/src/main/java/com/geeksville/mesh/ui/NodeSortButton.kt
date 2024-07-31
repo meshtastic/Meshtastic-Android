@@ -28,12 +28,15 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.NodeSortOption
 
+@Suppress("LongMethod")
 @Composable
 internal fun NodeSortButton(
     currentSortOption: NodeSortOption,
     onSortSelected: (NodeSortOption) -> Unit,
     includeUnknown: Boolean,
     onToggleIncludeUnknown: () -> Unit,
+    showDetails: Boolean,
+    onToggleShowDetails: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier) {
@@ -77,6 +80,24 @@ internal fun NodeSortButton(
                     text = stringResource(id = R.string.node_filter_include_unknown),
                 )
                 AnimatedVisibility(visible = includeUnknown) {
+                    Icon(
+                        imageVector = Icons.Default.Done,
+                        contentDescription = null,
+                        modifier = Modifier.padding(start = 4.dp),
+                    )
+                }
+            }
+            Divider()
+            DropdownMenuItem(
+                onClick = {
+                    onToggleShowDetails()
+                    expanded = false
+                },
+            ) {
+                Text(
+                    text = stringResource(id = R.string.node_filter_show_details),
+                )
+                AnimatedVisibility(visible = showDetails) {
                     Icon(
                         imageVector = Icons.Default.Done,
                         contentDescription = null,
