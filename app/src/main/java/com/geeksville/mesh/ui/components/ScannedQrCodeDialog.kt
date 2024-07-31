@@ -140,12 +140,10 @@ fun ScannedQrCodeDialog(
                         Button(
                             enabled = totalCount <= 8,
                             onClick = {
-                                val appended = incoming.copy {
-                                    val result = settings.filterIndexed { i, _ ->
+                                val appended = currentChannelSet.copy {
+                                    val result = incoming.settingsList.filterIndexed { i, _ ->
                                         channelSelections.getOrNull(i) == true
                                     }
-                                    settings.clear()
-                                    settings.addAll(currentChannelSet.settingsList)
                                     settings.addAll(result)
                                 }
                                 onDismiss.invoke()
