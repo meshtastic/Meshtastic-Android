@@ -25,6 +25,8 @@
     <string name="node_sort_last_heard">Last heard</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
 
+    <string name="more_details">More Details</string>
+
     <string name="elevation_suffix" translatable="false">MSL</string>
 
     <string name="channel_name">Channel Name</string>

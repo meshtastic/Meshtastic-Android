@@ -23,6 +23,10 @@
             android:id="@+id/remove"
             android:title="@string/remove"
             app:showAsAction="withText" />
+        <item
+            android:id="@+id/more_details"
+            android:title="@string/more_details"
+            app:showAsAction="withText" />
     </group>
     <group android:id="@+id/group_admin">
         <item
