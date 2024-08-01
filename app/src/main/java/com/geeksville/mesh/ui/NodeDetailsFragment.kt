@@ -20,6 +20,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
@@ -84,14 +86,18 @@ fun NodeDetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                backgroundColor = colorResource(R.color.toolbarBackground),
+                contentColor = colorResource(R.color.toolbarText),
                 title = {
-                    Text("Node Details: ${detailsNodeInfo?.user?.shortName}")
+                    Text(
+                        text = "Node Details: ${detailsNodeInfo?.user?.shortName}",
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Localized description"
+                            contentDescription = stringResource(R.string.navigate_back),
                         )
                     }
                 }
