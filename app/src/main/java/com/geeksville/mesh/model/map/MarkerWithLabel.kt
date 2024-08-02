@@ -8,7 +8,7 @@ import android.view.MotionEvent
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 
-class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) : Marker(mapView) {
+class MarkerWithLabel(val mapView: MapView?, label: String, emoji: String? = null) : Marker(mapView) {
 
     companion object {
         private const val LABEL_CORNER_RADIUS = 12F
