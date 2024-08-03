@@ -158,6 +158,8 @@ fun MapView(
     var zoomLevelMin = 0.0
     var zoomLevelMax = 0.0
 
+    val primaryColor = ContextCompat.getColor(LocalContext.current, R.color.colorPrimary)
+
     // Map Elements
     var downloadRegionBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
     var myLocationOverlay: MyLocationNewOverlay? by remember { mutableStateOf(null) }
@@ -254,13 +256,9 @@ fun MapView(
                             )
                             val polygon = Polygon(this.mapView)
                             polygon.points = circle
-                            mapView?.context?.let { context ->
-                                val primaryColor =
-                                    ContextCompat.getColor(context, R.color.colorPrimary)
-                                polygon.fillPaint.color = primaryColor
-                                polygon.fillPaint.alpha = 64
-                                polygon.outlinePaint.color = primaryColor
-                            }
+                            polygon.fillPaint.color = primaryColor
+                            polygon.fillPaint.alpha = 64
+                            polygon.outlinePaint.color = primaryColor
                             this.mapView?.overlays?.add(polygon)
                         }
                     }
