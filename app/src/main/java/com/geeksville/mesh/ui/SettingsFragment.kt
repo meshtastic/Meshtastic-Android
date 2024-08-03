@@ -15,6 +15,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.RadioButton
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
@@ -29,7 +30,6 @@ import com.geeksville.mesh.model.getInitials
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.util.exceptionToSnackbar
-import com.geeksville.mesh.util.getAssociationResult
 import com.geeksville.mesh.util.onEditorAction
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -50,7 +50,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     internal lateinit var locationRepository: LocationRepository
 
     private val hasGps by lazy { requireContext().hasGps() }
-    private val hasCompanionDeviceApi by lazy { requireContext().hasCompanionDeviceApi() }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -139,14 +138,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private fun initCommonUI() {
 
-        val associationResultLauncher = registerForActivityResult(
-            ActivityResultContracts.StartIntentSenderForResult()
-        ) {
-            it.data
-                ?.getAssociationResult()
-                ?.let { address -> scanModel.onSelectedBle(address) }
-        }
-
         val requestBackgroundAndCheckLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 if (permissions.entries.any { !it.value }) {
@@ -202,17 +193,34 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
         }
 
+        var scanDialog: AlertDialog? = null
+        scanModel.scanResult.observe(viewLifecycleOwner) { results ->
+            val devices = results.values.ifEmpty { return@observe }
+            scanDialog?.dismiss()
+            scanDialog = MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Select a Bluetooth device")
+                .setSingleChoiceItems(
+                    devices.map { it.name }.toTypedArray(),
+                    -1
+                ) { dialog, position ->
+                    val selectedDevice = devices.elementAt(position)
+                    scanModel.onSelected(selectedDevice)
+                    scanModel.clearScanResults()
+                    dialog.dismiss()
+                    scanDialog = null
+                }
+                .setPositiveButton(R.string.cancel) { dialog, _ ->
+                    scanModel.clearScanResults()
+                    dialog.dismiss()
+                    scanDialog = null
+                }
+                .show()
+        }
+
         // show the spinner when [spinner] is true
         scanModel.spinner.observe(viewLifecycleOwner) { show ->
             binding.changeRadioButton.isEnabled = !show
             binding.scanProgressBar.visibility = if (show) View.VISIBLE else View.GONE
-        }
-
-        scanModel.associationRequest.observe(viewLifecycleOwner) { request ->
-            request?.let {
-                associationResultLauncher.launch(request)
-                scanModel.clearAssociationRequest()
-            }
         }
 
         binding.usernameEditText.onEditorAction(EditorInfo.IME_ACTION_DONE) {
@@ -372,7 +380,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private var scanning = false
     private fun scanLeDevice() {
         if (!checkBTEnabled()) return
-        if (!hasCompanionDeviceApi) checkLocationEnabled()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) checkLocationEnabled()
 
         if (!scanning) { // Stops scanning after a pre-defined scan period.
             Handler(Looper.getMainLooper()).postDelayed({
@@ -380,7 +388,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 scanModel.stopScan()
             }, SCAN_PERIOD)
             scanning = true
-            scanModel.startScan(requireActivity().takeIf { hasCompanionDeviceApi })
+            scanModel.startScan()
         } else {
             scanning = false
             scanModel.stopScan()

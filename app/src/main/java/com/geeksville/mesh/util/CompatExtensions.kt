@@ -1,10 +1,6 @@
 package com.geeksville.mesh.util
 
 import android.app.PendingIntent
-import android.bluetooth.BluetoothDevice
-import android.bluetooth.le.ScanResult
-import android.companion.AssociationInfo
-import android.companion.CompanionDeviceManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -44,20 +40,4 @@ fun Context.registerReceiverCompat(
     flag: Int = ContextCompat.RECEIVER_EXPORTED,
 ) {
     ContextCompat.registerReceiver(this, receiver, filter, flag)
-}
-
-fun Intent.getAssociationResult(): String? = when {
-    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU ->
-        getParcelableExtraCompat<AssociationInfo>(CompanionDeviceManager.EXTRA_ASSOCIATION)
-            ?.deviceMacAddress?.toString()?.uppercase()
-
-    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O ->
-        @Suppress("DEPRECATION")
-        when (val it = getParcelableExtra<Parcelable>(CompanionDeviceManager.EXTRA_DEVICE)) {
-            is BluetoothDevice -> it.address
-            is ScanResult -> it.device.address
-            else -> null
-        }
-
-    else -> null
 }
