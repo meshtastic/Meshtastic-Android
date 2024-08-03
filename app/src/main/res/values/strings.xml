@@ -211,7 +211,5 @@
         <item quantity="one">Do you want to add a new channel?</item>
         <item quantity="other">Do you want to add %d new channels?</item>
     </plurals>
-    <string name="scanned_channels">Scanned Channels</string>
-    <string name="current_channels">Current Channels</string>
     <string name="replace">Replace</string>
 </resources>

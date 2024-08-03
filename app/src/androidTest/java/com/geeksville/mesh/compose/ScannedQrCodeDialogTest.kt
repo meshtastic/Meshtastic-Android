@@ -68,13 +68,34 @@ class ScannedQrCodeDialogTest {
     }
 
     @Test
-    fun testScannedQrCodeDialog_showsCancelAddAndReplaceButtons() {
+    fun testScannedQrCodeDialog_showsDialogTitle() {
         composeTestRule.apply {
             testScannedQrCodeDialog()
 
-            onNodeWithText(getString(R.string.cancel)).assertIsDisplayed()
+            // Verify that the dialog title is displayed
+            onNodeWithText(getString(R.string.new_channel_rcvd)).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun testScannedQrCodeDialog_showsAddAndReplaceButtons() {
+        composeTestRule.apply {
+            testScannedQrCodeDialog()
+
+            // Verify that the "Add" and "Replace" buttons are displayed
             onNodeWithText(getString(R.string.add)).assertIsDisplayed()
             onNodeWithText(getString(R.string.replace)).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun testScannedQrCodeDialog_showsCancelAndAcceptButtons() {
+        composeTestRule.apply {
+            testScannedQrCodeDialog()
+
+            // Verify the "Cancel" and "Accept" buttons are displayed
+            onNodeWithText(getString(R.string.cancel)).assertIsDisplayed()
+            onNodeWithText(getString(R.string.accept)).assertIsDisplayed()
         }
     }
 
@@ -98,8 +119,8 @@ class ScannedQrCodeDialogTest {
         composeTestRule.apply {
             testScannedQrCodeDialog(onConfirm = { actualChannelSet = it })
 
-            // Click the "Replace" button
-            onNodeWithText(getString(R.string.replace)).performClick()
+            // Click the "Accept" button
+            onNodeWithText(getString(R.string.accept)).performClick()
         }
 
         // Verify onConfirm is called with the correct ChannelSet
@@ -112,13 +133,16 @@ class ScannedQrCodeDialogTest {
         composeTestRule.apply {
             testScannedQrCodeDialog(onConfirm = { actualChannelSet = it })
 
-            // Click the "Add" button
+            // Click the "Add" button then the "Accept" button
             onNodeWithText(getString(R.string.add)).performClick()
+            onNodeWithText(getString(R.string.accept)).performClick()
         }
 
         // Verify onConfirm is called with the correct ChannelSet
         val expectedChannelSet = channels.copy {
-            settings.addAll(incoming.settingsList)
+            val list = LinkedHashSet(settings + incoming.settingsList)
+            settings.clear()
+            settings.addAll(list)
         }
         Assert.assertEquals(expectedChannelSet, actualChannelSet)
     }
