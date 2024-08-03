@@ -41,7 +41,7 @@ fun PackageManager.getPackageInfoCompat(packageName: String, flags: Int = 0): Pa
 fun Context.registerReceiverCompat(
     receiver: BroadcastReceiver,
     filter: IntentFilter,
-    flag: Int = ContextCompat.RECEIVER_NOT_EXPORTED,
+    flag: Int = ContextCompat.RECEIVER_EXPORTED,
 ) {
     ContextCompat.registerReceiver(this, receiver, filter, flag)
 }
