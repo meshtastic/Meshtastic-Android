@@ -1,3 +1,5 @@
+@file:Suppress("MagicNumber")
+
 package com.geeksville.mesh.ui.map
 
 import android.content.Context
@@ -30,6 +32,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -53,8 +56,8 @@ import com.geeksville.mesh.ui.ScreenFragment
 import com.geeksville.mesh.ui.components.IconButton
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.SqlTileWriterExt
-import com.geeksville.mesh.util.requiredZoomLevel
 import com.geeksville.mesh.util.formatAgo
+import com.geeksville.mesh.util.requiredZoomLevel
 import com.geeksville.mesh.util.zoomIn
 import com.geeksville.mesh.waypoint
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -104,7 +107,32 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
             }
         }
     }
+}
 
+private enum class PositionPrecision(val value: Int, val precisionMeters: Double) {
+    TWO(2, 5976446.981252),
+    THREE(3, 2988223.4850600003),
+    FOUR(4, 1494111.7369640006),
+    FIVE(5, 747055.8629159998),
+    SIX(6, 373527.9258920002),
+    SEVEN(7, 186763.95738000044),
+    EIGHT(8, 93381.97312400135),
+    NINE(9, 46690.98099600022),
+    TEN(10, 23345.48493200123),
+    ELEVEN(11, 11672.736900000944),
+    TWELVE(12, 5836.362884000802),
+    THIRTEEN(13, 2918.1758760007315),
+    FOURTEEN(14, 1459.0823719999053),
+    FIFTEEN(15, 729.5356200010741),
+    SIXTEEN(16, 364.7622440000765),
+    SEVENTEEN(17, 182.37555600115968),
+    EIGHTEEN(18, 91.1822120001193),
+    NINETEEN(19, 45.58554000039009),
+    TWENTY(20, 22.787204001316468),
+    TWENTY_ONE(21, 11.388036000988677),
+    TWENTY_TWO(22, 5.688452000824781),
+    TWENTY_THREE(23, 2.8386600007428338),
+    TWENTY_FOUR(24, 1.413763999910884),
 }
 
 @Composable
@@ -127,7 +155,6 @@ private fun MapView.UpdateMarkers(
 fun MapView(
     model: UIViewModel = viewModel(),
 ) {
-
     // UI Elements
     var cacheEstimate by remember { mutableStateOf("") }
 
@@ -137,6 +164,7 @@ fun MapView(
 
     var zoomLevelMin = 0.0
     var zoomLevelMax = 0.0
+
 
     // Map Elements
     var downloadRegionBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
@@ -151,6 +179,7 @@ fun MapView(
     val hasGps = context.hasGps()
 
     val map = rememberMapViewWithLifecycle(context)
+    val primaryColor = ContextCompat.getColor(context, R.color.colorPrimary)
 
     val nodeClusterer = RadiusMarkerClusterer(context)
     map.overlays.add(nodeClusterer)
@@ -228,6 +257,23 @@ fun MapView(
                 position = GeoPoint(p.latitude, p.longitude)
                 icon = markerIcon
 
+                PositionPrecision.entries.find { it.value == p.precisionBits }?.let { precision ->
+                    if (precision in PositionPrecision.TEN..PositionPrecision.NINETEEN) {
+                        if ((precision.precisionMeters) > 0) {
+                            val circle = Polygon.pointsAsCircle(
+                                position,
+                                precision.precisionMeters
+                            )
+                            val polygon = Polygon(this@onNodesChanged)
+                            polygon.points = circle
+                            polygon.fillPaint.color = primaryColor
+                            polygon.fillPaint.alpha = 64
+                            polygon.outlinePaint.color = primaryColor
+                            this@onNodesChanged.overlays.add(polygon)
+                        }
+                    }
+                }
+
                 setOnLongClickListener {
                     performHapticFeedback()
                     model.focusUserNode(node)
@@ -273,7 +319,8 @@ fun MapView(
     }
 
     fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) context.getString(R.string.you)
-    else model.nodeDB.nodes.value[id]?.user?.longName ?: context.getString(R.string.unknown_username)
+    else model.nodeDB.nodes.value[id]?.user?.longName
+        ?: context.getString(R.string.unknown_username)
 
     fun MapView.onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
         return waypoints.mapNotNull { waypoint ->
@@ -538,7 +585,8 @@ fun MapView(
                 append("mainFile.sqlite") // TODO: Accept filename input param from user
             }
             val writer = SqliteArchiveTileWriter(outputName)
-            val cacheManager = CacheManager(map, writer) // Make sure cacheManager has latest from map
+            val cacheManager =
+                CacheManager(map, writer) // Make sure cacheManager has latest from map
             //this triggers the download
             downloadRegion(
                 cacheManager,
