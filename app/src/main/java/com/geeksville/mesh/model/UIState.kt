@@ -199,8 +199,9 @@ class UIViewModel @Inject constructor(
         initialValue = emptyList(),
     )
 
-    fun getNodeByNum(nodeNum: Int): StateFlow<NodeInfo?> = nodeList.map { list ->
-        list.firstOrNull { it.num == nodeNum }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getNodeByNum(nodeNum: Int): StateFlow<NodeInfo?> = nodeDB.nodeDBbyNum.mapLatest { nodes ->
+        nodes[nodeNum]
     }.stateIn(
         scope = viewModelScope,
         started = WhileSubscribed(STOP_TIMEOUT_MILLIS),
