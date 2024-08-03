@@ -82,7 +82,7 @@
     <string name="modem_config_very_long">Very Long Range / Slow</string>
     <string name="modem_config_unrecognized">UNRECOGNIZED</string>
     <string name="meshtastic_service_notifications">Service notifications</string>
-    <string name="location_disabled_warning">Location must be turned on (high accuracy) to find new devices via bluetooth. You can turn it off again afterwards.</string>
+    <string name="location_disabled_warning">Location must be turned on to find new devices via Bluetooth. You can turn it off again afterwards.</string>
     <string name="about">About</string>
     <string name="a_list_of_nodes_in_the_mesh">A list of nodes in the mesh</string>
     <string name="text_messages">Text messages</string>
@@ -211,7 +211,5 @@
         <item quantity="one">Do you want to add a new channel?</item>
         <item quantity="other">Do you want to add %d new channels?</item>
     </plurals>
-    <string name="scanned_channels">Scanned Channels</string>
-    <string name="current_channels">Current Channels</string>
     <string name="replace">Replace</string>
 </resources>

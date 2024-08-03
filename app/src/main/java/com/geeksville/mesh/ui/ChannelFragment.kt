@@ -525,9 +525,12 @@ private fun ChannelListView(
                 )
             }
             OutlinedButton(
-                modifier = Modifier.fillMaxWidth(),
                 onClick = onClick,
+                modifier = Modifier.fillMaxWidth(),
                 enabled = enabled,
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colors.onSurface,
+                ),
             ) { Text(text = stringResource(R.string.edit)) }
         },
         second = {

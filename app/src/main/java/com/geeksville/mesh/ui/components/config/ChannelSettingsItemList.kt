@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -79,11 +80,18 @@ private fun ChannelItem(
             val textColor = if (enabled) Color.Unspecified
             else MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
 
-            Chip(onClick = onClick) { Text("$index") }
+            Chip(onClick = onClick) {
+                Text(
+                    text = "$index",
+                    color = textColor,
+                )
+            }
             Text(
                 text = title,
                 modifier = Modifier.weight(1f),
                 color = textColor,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
                 style = MaterialTheme.typography.body1,
             )
             content()
