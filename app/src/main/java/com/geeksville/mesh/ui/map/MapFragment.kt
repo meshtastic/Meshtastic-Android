@@ -158,7 +158,6 @@ fun MapView(
     var zoomLevelMin = 0.0
     var zoomLevelMax = 0.0
 
-    val primaryColor = ContextCompat.getColor(LocalContext.current, R.color.colorPrimary)
 
     // Map Elements
     var downloadRegionBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
@@ -173,6 +172,7 @@ fun MapView(
     val hasGps = context.hasGps()
 
     val map = rememberMapViewWithLifecycle(context)
+    val primaryColor = ContextCompat.getColor(context, R.color.colorPrimary)
 
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
