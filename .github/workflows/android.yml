@@ -30,7 +30,7 @@ jobs:
         submodules: 'recursive'
 
     - name: Validate Gradle wrapper
-      uses: gradle/actions/wrapper-validation@v3
+      uses: gradle/actions/wrapper-validation@v4
 
     - name: Mock files for CI
       run: |
@@ -44,7 +44,7 @@ jobs:
         distribution: 'zulu'
 
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
+      uses: gradle/actions/setup-gradle@v4
 
     - name: Check lint
       run: ./gradlew lintFdroidDebug lintGoogleDebug
@@ -82,7 +82,7 @@ jobs:
           submodules: 'recursive'
 
       - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@v3
+        uses: gradle/actions/wrapper-validation@v4
 
       - name: Mock files for CI
         run: |
@@ -96,7 +96,7 @@ jobs:
           distribution: 'zulu'
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Check detekt
         run: ./gradlew detekt
@@ -132,7 +132,7 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
 
-      - uses: gradle/actions/setup-gradle@v3
+      - uses: gradle/actions/setup-gradle@v4
 
       - uses: actions/cache@v4
         id: avd-cache
