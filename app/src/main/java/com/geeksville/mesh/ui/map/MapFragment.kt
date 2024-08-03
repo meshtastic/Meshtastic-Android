@@ -254,12 +254,12 @@ fun MapView(
                                 position,
                                 precision.precisionMeters
                             )
-                            val polygon = Polygon(this.mapView)
+                            val polygon = Polygon(this@onNodesChanged)
                             polygon.points = circle
                             polygon.fillPaint.color = primaryColor
                             polygon.fillPaint.alpha = 64
                             polygon.outlinePaint.color = primaryColor
-                            this.mapView?.overlays?.add(polygon)
+                            this@onNodesChanged.overlays.add(polygon)
                         }
                     }
                 }
