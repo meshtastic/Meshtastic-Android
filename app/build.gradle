@@ -101,6 +101,10 @@ android {
     lint {
         abortOnError false
     }
+    sourceSets {
+        // Adds exported schema location as test app assets.
+        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
+    }
 }
 
 // per protobuf-gradle-plugin docs, this is recommended for android
@@ -171,7 +175,7 @@ dependencies {
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:$room_version"
     // optional - Test helpers
-    testImplementation "androidx.room:room-testing:$room_version"
+    androidTestImplementation "androidx.room:room-testing:$room_version"
 
     // Hilt
     implementation "com.google.dagger:hilt-android:$hilt_version"
