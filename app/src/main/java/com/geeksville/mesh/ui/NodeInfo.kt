@@ -73,6 +73,7 @@ fun NodeInfo(
     chipClicked: () -> Unit = {},
     blinking: Boolean = false,
     expanded: Boolean = false,
+    currentTimeMillis: Long,
 ) {
     val unknownShortName = stringResource(id = R.string.unknown_node_short_name)
     val unknownLongName = stringResource(id = R.string.unknown_username)
@@ -157,7 +158,8 @@ fun NodeInfo(
                         )
 
                         LastHeardInfo(
-                            lastHeard = thatNodeInfo.lastHeard
+                            lastHeard = thatNodeInfo.lastHeard,
+                            currentTimeMillis = currentTimeMillis
                         )
                     }
                     Row(
@@ -273,7 +275,8 @@ fun NodeInfoSimplePreview() {
             thatNodeInfo = thatNodeInfo,
             1,
             0,
-            true
+            true,
+            currentTimeMillis = System.currentTimeMillis()
         )
     }
 }
@@ -300,7 +303,8 @@ fun NodeInfoPreview(
                 gpsFormat = 0,
                 distanceUnits = 1,
                 tempInFahrenheit = true,
-                expanded = false
+                expanded = false,
+                currentTimeMillis = System.currentTimeMillis()
             )
             Text(
                 text = "Details Shown",
@@ -312,7 +316,8 @@ fun NodeInfoPreview(
                 gpsFormat = 0,
                 distanceUnits = 1,
                 tempInFahrenheit = true,
-                expanded = true
+                expanded = true,
+                currentTimeMillis = System.currentTimeMillis()
             )
         }
     }
