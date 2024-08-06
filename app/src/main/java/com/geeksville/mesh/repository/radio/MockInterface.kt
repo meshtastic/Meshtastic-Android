@@ -9,6 +9,7 @@ import com.google.protobuf.ByteString
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
+import kotlin.random.Random
 
 private val defaultLoRaConfig = ConfigKt.loRaConfig {
     usePreset = true
@@ -156,6 +157,7 @@ class MockInterface @AssistedInject constructor(
     private fun sendConfigResponse(configId: Int) {
         debug("Sending mock config response")
 
+        @Suppress("MagicNumber")
         /// Generate a fake node info entry
         fun makeNodeInfo(numIn: Int, lat: Double, lon: Double) =
             MeshProtos.FromRadio.newBuilder().apply {
@@ -172,6 +174,7 @@ class MockInterface @AssistedInject constructor(
                         longitudeI = Position.degI(lon)
                         altitude = 35
                         time = (System.currentTimeMillis() / 1000).toInt()
+                        precisionBits = Random.nextInt(10, 19)
                     }.build()
                 }.build()
             }
