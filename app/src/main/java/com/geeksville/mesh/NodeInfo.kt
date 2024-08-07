@@ -35,11 +35,11 @@ data class MeshUser(
 
     override fun toString(): String {
         return "MeshUser(id=${id.anonymize}, " +
-                "longName=${longName.anonymize}, " +
-                "shortName=${shortName.anonymize}, " +
-                "hwModel=${hwModelString}, " +
-                "isLicensed=${isLicensed}), " +
-                "role=${role})"
+            "longName=${longName.anonymize}, " +
+            "shortName=${shortName.anonymize}, " +
+            "hwModel=$hwModelString, " +
+            "isLicensed=$isLicensed, " +
+            "role=$role)"
     }
 
     /** Create our model object from a protobuf.
@@ -60,7 +60,7 @@ data class MeshUser(
             .setShortName(shortName)
             .setHwModel(hwModel)
             .setIsLicensed(isLicensed)
-            .setRole(ConfigProtos.Config.DeviceConfig.Role.forNumber(role))
+            .setRoleValue(role)
             .build()
 
     /** a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot
