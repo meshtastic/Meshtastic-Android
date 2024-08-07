@@ -29,10 +29,17 @@ data class MeshUser(
     val shortName: String,
     val hwModel: MeshProtos.HardwareModel,
     val isLicensed: Boolean = false,
+    @ColumnInfo(name = "role", defaultValue = "0")
+    val role: Int = 0,
 ) : Parcelable {
 
     override fun toString(): String {
-        return "MeshUser(id=${id.anonymize}, longName=${longName.anonymize}, shortName=${shortName.anonymize}, hwModel=${hwModelString}, isLicensed=${isLicensed})"
+        return "MeshUser(id=${id.anonymize}, " +
+            "longName=${longName.anonymize}, " +
+            "shortName=${shortName.anonymize}, " +
+            "hwModel=$hwModelString, " +
+            "isLicensed=$isLicensed, " +
+            "role=$role)"
     }
 
     /** Create our model object from a protobuf.
@@ -43,6 +50,7 @@ data class MeshUser(
         p.shortName,
         p.hwModel,
         p.isLicensed,
+        p.roleValue
     )
 
     fun toProto(): MeshProtos.User =
@@ -52,6 +60,7 @@ data class MeshUser(
             .setShortName(shortName)
             .setHwModel(hwModel)
             .setIsLicensed(isLicensed)
+            .setRoleValue(role)
             .build()
 
     /** a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot

@@ -52,6 +52,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
@@ -250,6 +251,13 @@ fun NodeInfo(
                                     text = "$hwInfoString",
                                     fontSize = MaterialTheme.typography.button.fontSize,
                                     style = style,
+                                )
+                            }
+                            val role = thatNodeInfo.user?.role
+                            role?.let {
+                                Text(
+                                    text = DeviceConfig.Role.forNumber(it).name,
+                                    fontSize = MaterialTheme.typography.button.fontSize
                                 )
                             }
                             val nodeId = thatNodeInfo.user?.id
