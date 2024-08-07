@@ -255,7 +255,10 @@ fun NodeInfo(
                             }
                             val role = thatNodeInfo.user?.role
                             role?.let {
-                                Text(DeviceConfig.Role.forNumber(it).name, fontSize = MaterialTheme.typography.button.fontSize)
+                                Text(
+                                    text = DeviceConfig.Role.forNumber(it).name,
+                                    fontSize = MaterialTheme.typography.button.fontSize
+                                )
                             }
                             val nodeId = thatNodeInfo.user?.id
                             if (nodeId != null) {
