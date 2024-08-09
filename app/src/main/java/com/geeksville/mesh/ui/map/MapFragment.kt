@@ -32,7 +32,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -137,11 +136,13 @@ private enum class PositionPrecision(val value: Int, val precisionMeters: Double
 @Composable
 private fun MapView.UpdateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
-    waypointMarkers: List<MarkerWithLabel>,
+    precisionCircles: List<Polygon>,
+    waypointMarkers: List<MarkerWithLabel>
 ) {
     debug("Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints")
     overlays.removeAll(overlays.filterIsInstance<MarkerWithLabel>())
-    overlays.addAll(nodeMarkers + waypointMarkers)
+    overlays.removeAll(overlays.filterIsInstance<Polygon>())
+    overlays.addAll(nodeMarkers + waypointMarkers + precisionCircles)
 }
 
 @Composable
@@ -172,7 +173,6 @@ fun MapView(
     val hasGps = context.hasGps()
 
     val map = rememberMapViewWithLifecycle(context)
-    val primaryColor = ContextCompat.getColor(context, R.color.colorPrimary)
 
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
@@ -236,14 +236,18 @@ fun MapView(
         AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24)
     }
 
-    fun MapView.onNodesChanged(nodes: Collection<NodeInfo>): List<MarkerWithLabel> {
+    fun MapView.onNodesChanged(nodes: Collection<NodeInfo>): Pair<List<MarkerWithLabel>,List<Polygon>> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
         val ourNode = model.ourNodeInfo.value
         val gpsFormat = model.config.display.gpsFormat.number
         val displayUnits = model.config.display.units.number
-        return nodesWithPosition.map { node ->
+        val markers = mutableListOf<MarkerWithLabel>()
+        val precisionCircles = mutableListOf<Polygon>()
+        nodesWithPosition.map { node ->
             val (p, u) = node.position!! to node.user!!
-            MarkerWithLabel(
+            val nodePosition = GeoPoint(p.latitude, p.longitude)
+            val (_, nodeColor) = node.colors
+            markers.add(MarkerWithLabel(
                 mapView = this,
                 label = "${u.shortName} ${formatAgo(p.time)}"
             ).apply {
@@ -255,33 +259,39 @@ fun MapView(
                         context.getString(R.string.map_subDescription, ourNode.bearing(node), dist)
                 }
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                position = GeoPoint(p.latitude, p.longitude)
+                position = nodePosition
                 icon = markerIcon
-
-                PositionPrecision.entries.find { it.value == p.precisionBits }?.let { precision ->
-                    if (precision in PositionPrecision.TEN..PositionPrecision.NINETEEN) {
-                        if ((precision.precisionMeters) > 0) {
-                            val circle = Polygon.pointsAsCircle(
-                                position,
-                                precision.precisionMeters
-                            )
-                            val polygon = Polygon(this@onNodesChanged)
-                            polygon.points = circle
-                            polygon.fillPaint.color = primaryColor
-                            polygon.fillPaint.alpha = 64
-                            polygon.outlinePaint.color = primaryColor
-                            this@onNodesChanged.overlays.add(polygon)
-                        }
-                    }
-                }
 
                 setOnLongClickListener {
                     performHapticFeedback()
                     model.focusUserNode(node)
                     true
                 }
+            })
+            PositionPrecision.entries.find { it.value == p.precisionBits }?.let { precision ->
+                if (precision in PositionPrecision.TEN..PositionPrecision.NINETEEN) {
+                    if ((precision.precisionMeters) > 0) {
+                        val circle = Polygon.pointsAsCircle(
+                            nodePosition,
+                            precision.precisionMeters
+                        )
+                        val polygon = Polygon(this@onNodesChanged)
+                        polygon.points = circle
+                        polygon.fillPaint.apply {
+                            color = nodeColor
+                            alpha = 48
+                        }
+                        polygon.outlinePaint.apply {
+                            color = nodeColor
+                            alpha = 64
+                        }
+                        polygon.setOnClickListener { _, _, _ -> true }
+                        precisionCircles.add(polygon)
+                    }
+                }
             }
         }
+        return Pair(markers.toList(), precisionCircles.toList())
     }
 
     fun showDeleteMarkerDialog(waypoint: Waypoint) {
@@ -513,7 +523,8 @@ fun MapView(
     }
 
     with(map) {
-        UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values))
+        val (markers, precisionCircles) = onNodesChanged(nodes)
+        UpdateMarkers(markers, precisionCircles, onWaypointChanged(waypoints.values))
     }
 
 //    private fun addWeatherLayer() {
@@ -533,7 +544,7 @@ fun MapView(
 //    }
 
     fun MapView.zoomToNodes() {
-        val nodeMarkers = onNodesChanged(model.nodeDB.nodesByNum.values)
+        val (nodeMarkers,_) = onNodesChanged(model.nodeDB.nodesByNum.values)
         if (nodeMarkers.isNotEmpty()) {
             val box = BoundingBox.fromGeoPoints(nodeMarkers.map { it.position })
             val center = GeoPoint(box.centerLatitude, box.centerLongitude)
