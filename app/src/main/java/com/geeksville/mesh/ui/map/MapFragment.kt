@@ -107,42 +107,14 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
     }
 }
 
-private enum class PositionPrecision(val value: Int, val precisionMeters: Double) {
-    TWO(2, 5976446.981252),
-    THREE(3, 2988223.4850600003),
-    FOUR(4, 1494111.7369640006),
-    FIVE(5, 747055.8629159998),
-    SIX(6, 373527.9258920002),
-    SEVEN(7, 186763.95738000044),
-    EIGHT(8, 93381.97312400135),
-    NINE(9, 46690.98099600022),
-    TEN(10, 23345.48493200123),
-    ELEVEN(11, 11672.736900000944),
-    TWELVE(12, 5836.362884000802),
-    THIRTEEN(13, 2918.1758760007315),
-    FOURTEEN(14, 1459.0823719999053),
-    FIFTEEN(15, 729.5356200010741),
-    SIXTEEN(16, 364.7622440000765),
-    SEVENTEEN(17, 182.37555600115968),
-    EIGHTEEN(18, 91.1822120001193),
-    NINETEEN(19, 45.58554000039009),
-    TWENTY(20, 22.787204001316468),
-    TWENTY_ONE(21, 11.388036000988677),
-    TWENTY_TWO(22, 5.688452000824781),
-    TWENTY_THREE(23, 2.8386600007428338),
-    TWENTY_FOUR(24, 1.413763999910884),
-}
-
 @Composable
 private fun MapView.UpdateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
-    precisionCircles: List<Polygon>,
     waypointMarkers: List<MarkerWithLabel>
 ) {
     debug("Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints")
     overlays.removeAll(overlays.filterIsInstance<MarkerWithLabel>())
-    overlays.removeAll(overlays.filterIsInstance<Polygon>())
-    overlays.addAll(nodeMarkers + waypointMarkers + precisionCircles)
+    overlays.addAll(nodeMarkers + waypointMarkers)
 }
 
 @Composable
@@ -236,18 +208,15 @@ fun MapView(
         AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24)
     }
 
-    fun MapView.onNodesChanged(nodes: Collection<NodeInfo>): Pair<List<MarkerWithLabel>,List<Polygon>> {
+    fun MapView.onNodesChanged(nodes: Collection<NodeInfo>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
         val ourNode = model.ourNodeInfo.value
         val gpsFormat = model.config.display.gpsFormat.number
         val displayUnits = model.config.display.units.number
-        val markers = mutableListOf<MarkerWithLabel>()
-        val precisionCircles = mutableListOf<Polygon>()
-        nodesWithPosition.map { node ->
+        return nodesWithPosition.map { node ->
             val (p, u) = node.position!! to node.user!!
             val nodePosition = GeoPoint(p.latitude, p.longitude)
-            val (_, nodeColor) = node.colors
-            markers.add(MarkerWithLabel(
+            MarkerWithLabel(
                 mapView = this,
                 label = "${u.shortName} ${formatAgo(p.time)}"
             ).apply {
@@ -267,31 +236,10 @@ fun MapView(
                     model.focusUserNode(node)
                     true
                 }
-            })
-            PositionPrecision.entries.find { it.value == p.precisionBits }?.let { precision ->
-                if (precision in PositionPrecision.TEN..PositionPrecision.NINETEEN) {
-                    if ((precision.precisionMeters) > 0) {
-                        val circle = Polygon.pointsAsCircle(
-                            nodePosition,
-                            precision.precisionMeters
-                        )
-                        val polygon = Polygon(this@onNodesChanged)
-                        polygon.points = circle
-                        polygon.fillPaint.apply {
-                            color = nodeColor
-                            alpha = 48
-                        }
-                        polygon.outlinePaint.apply {
-                            color = nodeColor
-                            alpha = 64
-                        }
-                        polygon.setOnClickListener { _, _, _ -> true }
-                        precisionCircles.add(polygon)
-                    }
-                }
+                setNodeColors(node.colors)
+                setPrecisionBits(p.precisionBits)
             }
         }
-        return Pair(markers.toList(), precisionCircles.toList())
     }
 
     fun showDeleteMarkerDialog(waypoint: Waypoint) {
@@ -523,8 +471,7 @@ fun MapView(
     }
 
     with(map) {
-        val (markers, precisionCircles) = onNodesChanged(nodes)
-        UpdateMarkers(markers, precisionCircles, onWaypointChanged(waypoints.values))
+        UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values))
     }
 
 //    private fun addWeatherLayer() {
@@ -544,7 +491,7 @@ fun MapView(
 //    }
 
     fun MapView.zoomToNodes() {
-        val (nodeMarkers,_) = onNodesChanged(model.nodeDB.nodesByNum.values)
+        val nodeMarkers = onNodesChanged(model.nodeDB.nodesByNum.values)
         if (nodeMarkers.isNotEmpty()) {
             val box = BoundingBox.fromGeoPoints(nodeMarkers.map { it.position })
             val center = GeoPoint(box.centerLatitude, box.centerLongitude)
