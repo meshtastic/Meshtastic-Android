@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="node_filter_placeholder">Filtrer</string>
+    <string name="desc_node_filter_clear">clear node filter</string>
+    <string name="node_filter_include_unknown">Inclure les inconnus</string>
+    <string name="node_sort_alpha">A-Z</string>
+    <string name="node_sort_channel">Canal</string>
+    <string name="node_sort_distance">Distance</string>
+    <string name="node_sort_hops_away">Nœuds intermédiaires</string>
+    <string name="node_sort_last_heard">Dernière écoute</string>
+    <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="channel_name">Nom du canal</string>
     <string name="channel_options">Options du canal</string>
     <string name="qr_code">Code QR</string>
@@ -141,6 +150,8 @@
     <string name="direct_message">Message direct</string>
     <string name="nodedb_reset">Reconfiguration de NodeDB</string>
     <string name="nodedb_reset_description">Ceci effacera tous les nœuds de cette liste.</string>
+    <string name="delivery_confirmed">Réception confirmée</string>
+    <string name="error">Erreur</string>
     <string name="ignore">Ignorer</string>
     <string name="ignore_add">Ajouter \'%s\' à la liste des ignorés ? Votre radio va redémarrer après avoir effectué ce changement.</string>
     <string name="ignore_remove">Supprimer \'%s\' de la liste des ignorés ? Votre radio va redémarrer après avoir effectué ce changement.</string>
@@ -152,6 +163,7 @@
     <string name="device_settings">Réglages de l\'appareil</string>
     <string name="module_settings">Réglages du module</string>
     <string name="add">Ajouter</string>
+    <string name="edit">Modifier</string>
     <string name="calculating">Calcul en cours…</string>
     <string name="map_offline_manager">Gestionnaire hors-ligne</string>
     <string name="map_cache_size">Taille actuelle du cache</string>
@@ -170,4 +182,11 @@
     <string name="waypoint_new">Nouveau point de repère</string>
     <string name="waypoint_received">Point de passage reçu : %s</string>
     <string name="error_duty_cycle">Limite du temps d\'utilisation atteinte. Vous ne pouvez pas envoyer de messages maintenant, veuillez réessayer plus tard.</string>
+    <string name="remove">Supprimer</string>
+    <string name="remove_node_text">This node will be removed from your list until your node receives data from it again.</string>
+    <string name="mute">Mute</string>
+    <string name="mute_notifications">Désactiver les notifications</string>
+    <string name="mute_8_hours">8 heures</string>
+    <string name="mute_1_week">1 semaine</string>
+    <string name="mute_always">Toujours</string>
 </resources>
