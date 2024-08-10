@@ -221,7 +221,18 @@ fun MapView(
         }
 
     fun requestPermissionAndToggle() {
-        requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+        // Google rejects releases claiming this requires BACKGROUND_LOCATION prominent
+        // disclosure. Adding to comply even though it does not use background location.
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.background_required)
+            .setMessage(R.string.why_background_required)
+            .setNeutralButton(R.string.cancel) { _, _ ->
+                debug("User denied location permission")
+            }
+            .setPositiveButton(R.string.accept) { _, _ ->
+                requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+            }
+            .show()
     }
 
     val nodes by model.nodeList.collectAsStateWithLifecycle()
