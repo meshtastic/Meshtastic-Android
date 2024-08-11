@@ -1,0 +1,10 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Meshtastic-Android Discussions
+    url: https://github.com/meshtastic/Meshtastic-Android/discussions
+    about: Please ask and answer questions here.
+  - name: Meshtastic Website
+    url: https://meshtastic.org/
+    about: Docs and other ways to contact us here.
+
+
