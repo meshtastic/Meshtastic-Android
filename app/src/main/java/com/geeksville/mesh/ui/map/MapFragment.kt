@@ -5,7 +5,6 @@ package com.geeksville.mesh.ui.map
 import android.content.Context
 import android.content.Intent;
 import android.net.Uri;
-import android.app.Activity;
 import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
