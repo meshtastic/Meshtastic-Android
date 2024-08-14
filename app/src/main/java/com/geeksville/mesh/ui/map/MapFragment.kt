@@ -3,6 +3,9 @@
 package com.geeksville.mesh.ui.map
 
 import android.content.Context
+import android.content.Intent;
+import android.net.Uri;
+import android.app.Activity;
 import android.graphics.Color
 import android.graphics.Paint
 import android.os.Bundle
@@ -86,6 +89,7 @@ import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
 import java.text.DateFormat
+
 
 @AndroidEntryPoint
 class MapFragment : ScreenFragment("Map Fragment"), Logging {
@@ -618,6 +622,25 @@ fun MapView(
         dialog.show()
     }
 
+    fun showOpenStreetMap() {
+        try {
+            val nodesWithPosition = nodes.filter { it.validPosition != null }
+
+            var u = "om://map?v=1";
+            nodesWithPosition.forEach{
+                u += "&ll=${it.position?.latitude},${it.position?.longitude}&n=${it.user?.shortName}";
+            }
+
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(u)
+            );
+            context.startActivity(intent);
+        } catch (e: Exception) {
+            //errormsg("Can not find organic map")
+        }
+    }
+
     fun showCacheManagerDialog() {
         MaterialAlertDialogBuilder(context)
             .setTitle(R.string.map_offline_manager)
@@ -715,6 +738,12 @@ fun MapView(
                     drawableRes = if (myLocationOverlay == null) R.drawable.ic_twotone_my_location_24
                     else R.drawable.ic_twotone_location_disabled_24,
                     contentDescription = null,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+                IconButton(
+                    onClick = { showOpenStreetMap() },
+                    drawableRes = R.drawable.ic_twotone_layers_24,
+                    contentDescription = R.string.map_style_selection,
                     modifier = Modifier.padding(top = 8.dp),
                 )
             }
