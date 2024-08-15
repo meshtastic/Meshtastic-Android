@@ -1,1 +1,40 @@
-../../google-services.json
+{
+  "project_info": {
+    "project_number": "1111",
+    "firebase_url": "https://xxx.firebaseio.com",
+    "project_id": "xxx",
+    "storage_bucket": "xxx.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:xxx:android:1111",
+        "android_client_info": {
+          "package_name": "com.geeksville.mesh"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "111-xxx.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "xxx-c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "111-xxx.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

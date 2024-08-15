@@ -62,6 +62,10 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                     navigateToMessages(node)
                 }
 
+                R.id.request_nodeinfo -> {
+                    model.requestNodeInfo(node.num)
+                }
+
                 R.id.request_position -> {
                     model.requestPosition(node.num)
                 }
