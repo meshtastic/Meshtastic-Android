@@ -23,15 +23,17 @@
             android:id="@+id/remove"
             android:title="@string/remove"
             app:showAsAction="withText" />
-        <item
-            android:id="@+id/more_details"
-            android:title="@string/more_details"
-            app:showAsAction="withText" />
     </group>
     <group android:id="@+id/group_admin">
         <item
             android:id="@+id/remote_admin"
             android:title="@string/device_settings"
+            app:showAsAction="withText" />
+    </group>
+    <group android:id="@+id/group_both">
+        <item
+            android:id="@+id/more_details"
+            android:title="@string/more_details"
             app:showAsAction="withText" />
     </group>
 </menu>

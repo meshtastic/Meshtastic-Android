@@ -215,4 +215,8 @@
     </plurals>
     <string name="replace">Replace</string>
     <string name="navigate_back">Navigate Back</string>
+    <string name="battery">Battery</string>
+    <string name="channel_utilization">Channel Utilization</string>
+    <string name="air_utilization">Air Utilization</string>
+    <string name="device_metrics">Device Metrics</string>
 </resources>
