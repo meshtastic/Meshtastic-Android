@@ -2,6 +2,13 @@
 <resources>
     <string name="node_filter_placeholder">過濾器</string>
     <string name="desc_node_filter_clear">清除節點過濾器</string>
+    <string name="node_filter_include_unknown">顯示未知節點</string>
+    <string name="node_sort_alpha">依名字排序</string>
+    <string name="node_sort_channel">頻道</string>
+    <string name="node_sort_distance">距離</string>
+    <string name="node_sort_hops_away">依轉跳排序</string>
+    <string name="node_sort_last_heard">最近一次收到排序</string>
+    <string name="node_sort_via_mqtt">有節點MQTT排序</string>
     <string name="channel_name">頻道名稱</string>
     <string name="channel_options">頻道選項</string>
     <string name="qr_code">QRCODE</string>
@@ -155,6 +162,7 @@
     <string name="device_settings">設備設定</string>
     <string name="module_settings">模組設定</string>
     <string name="add">新增</string>
+    <string name="edit">編輯</string>
     <string name="calculating">正在計算……</string>
     <string name="map_offline_manager">離線管理</string>
     <string name="map_cache_size">目前快取大小</string>
