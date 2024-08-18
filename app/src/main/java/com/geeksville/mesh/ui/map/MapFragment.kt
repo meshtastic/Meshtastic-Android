@@ -245,7 +245,7 @@ fun MapView(
             val (p, u) = node.position!! to node.user!!
             MarkerWithLabel(
                 mapView = this,
-                label = "${u.shortName} ${formatAgo(p.time)}"
+                label = "${u.shortName} ${formatAgo(node.lastHeard)}"
             ).apply {
                 id = u.id
                 title = "${u.longName} ${node.batteryStr}"
