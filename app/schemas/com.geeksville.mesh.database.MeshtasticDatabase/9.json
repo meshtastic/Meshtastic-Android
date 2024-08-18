@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 9,
-    "identityHash": "dc2d59cd4747857da210b4cf21de549c",
+    "identityHash": "cfce409437d68cdbeb5e4307483de717",
     "entities": [
       {
         "tableName": "MyNodeInfo",
@@ -98,7 +98,7 @@
       },
       {
         "tableName": "NodeInfo",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`num` INTEGER NOT NULL, `snr` REAL NOT NULL, `rssi` INTEGER NOT NULL, `lastHeard` INTEGER NOT NULL, `channel` INTEGER NOT NULL, `hopsAway` INTEGER NOT NULL DEFAULT 0, `user_id` TEXT, `user_longName` TEXT, `user_shortName` TEXT, `user_hwModel` TEXT, `user_isLicensed` INTEGER, `user_role` INTEGER DEFAULT 0, `position_latitude` REAL, `position_longitude` REAL, `position_altitude` INTEGER, `position_time` INTEGER, `position_satellitesInView` INTEGER, `position_groundSpeed` INTEGER, `position_groundTrack` INTEGER, `position_precisionBits` INTEGER, `devMetrics_time` INTEGER, `devMetrics_batteryLevel` INTEGER, `devMetrics_voltage` REAL, `devMetrics_channelUtilization` REAL, `devMetrics_airUtilTx` REAL, `devMetrics_uptimeSeconds` INTEGER, `envMetrics_time` INTEGER, `envMetrics_temperature` REAL, `envMetrics_relativeHumidity` REAL, `envMetrics_barometricPressure` REAL, `envMetrics_gasResistance` REAL, `envMetrics_voltage` REAL, `envMetrics_current` REAL, `envMetrics_iaq` INTEGER, PRIMARY KEY(`num`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`num` INTEGER NOT NULL, `snr` REAL NOT NULL, `rssi` INTEGER NOT NULL, `lastHeard` INTEGER NOT NULL, `channel` INTEGER NOT NULL, `hopsAway` INTEGER NOT NULL DEFAULT 0, `sendPackets` INTEGER NOT NULL DEFAULT 0, `user_id` TEXT, `user_longName` TEXT, `user_shortName` TEXT, `user_hwModel` TEXT, `user_isLicensed` INTEGER, `user_role` INTEGER DEFAULT 0, `position_latitude` REAL, `position_longitude` REAL, `position_altitude` INTEGER, `position_time` INTEGER, `position_satellitesInView` INTEGER, `position_groundSpeed` INTEGER, `position_groundTrack` INTEGER, `position_precisionBits` INTEGER, `devMetrics_time` INTEGER, `devMetrics_batteryLevel` INTEGER, `devMetrics_voltage` REAL, `devMetrics_channelUtilization` REAL, `devMetrics_airUtilTx` REAL, `devMetrics_uptimeSeconds` INTEGER, `envMetrics_time` INTEGER, `envMetrics_temperature` REAL, `envMetrics_relativeHumidity` REAL, `envMetrics_barometricPressure` REAL, `envMetrics_gasResistance` REAL, `envMetrics_voltage` REAL, `envMetrics_current` REAL, `envMetrics_iaq` INTEGER, PRIMARY KEY(`num`))",
         "fields": [
           {
             "fieldPath": "num",
@@ -133,6 +133,13 @@
           {
             "fieldPath": "hopsAway",
             "columnName": "hopsAway",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "sendPackets",
+            "columnName": "sendPackets",
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
@@ -514,7 +521,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dc2d59cd4747857da210b4cf21de549c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cfce409437d68cdbeb5e4307483de717')"
     ]
   }
 }

@@ -128,6 +128,7 @@ fun NodeInfo(
                         modifier = Modifier
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Chip(
                             modifier = Modifier
@@ -161,6 +162,11 @@ fun NodeInfo(
                         LastHeardInfo(
                             lastHeard = thatNodeInfo.lastHeard,
                             currentTimeMillis = currentTimeMillis
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+
+                        PacketCounterInfo(
+                            packets = thatNodeInfo.sendPackets
                         )
                     }
                     Row(

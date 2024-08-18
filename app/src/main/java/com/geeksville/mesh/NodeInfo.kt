@@ -233,7 +233,9 @@ data class NodeInfo(
     @Embedded(prefix = "envMetrics_")
     var environmentMetrics: EnvironmentMetrics? = null,
     @ColumnInfo(name = "hopsAway", defaultValue = "0")
-    var hopsAway: Int = 0
+    var hopsAway: Int = 0,
+    @ColumnInfo(name = "sendPackets", defaultValue = "0")
+    var sendPackets: Int = 0
 ) : Parcelable {
 
     val colors: Pair<Int, Int>
