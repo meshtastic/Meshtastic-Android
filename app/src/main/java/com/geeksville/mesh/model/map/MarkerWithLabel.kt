@@ -27,8 +27,8 @@ class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
     }
 
     @Suppress("MagicNumber")
-    private val precisionMeters =
-        when (precisionBits) {
+    private fun getPrecisionMeters(): Double? {
+        return when (precisionBits) {
             10 -> 23345.484932
             11 -> 11672.7369
             12 -> 5836.36288
@@ -41,6 +41,7 @@ class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
             19 -> 45.58554
             else -> null
         }
+    }
 
 
     private var onLongClickListener: (() -> Boolean)? = null
@@ -96,7 +97,7 @@ class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
         c.drawText(mLabel, (p.x - 0F), (p.y - LABEL_Y_OFFSET), textPaint)
         mEmoji?.let { c.drawText(it, (p.x - 0f), (p.y - 30f), emojiPaint) }
 
-        precisionMeters?.let { radius ->
+        getPrecisionMeters()?.let { radius ->
             val polygon = Polygon(osmv).apply {
                 points = Polygon.pointsAsCircle(
                     position,
