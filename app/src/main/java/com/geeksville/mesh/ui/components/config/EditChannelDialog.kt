@@ -3,7 +3,9 @@ package com.geeksville.mesh.ui.components.config
 import android.util.Base64
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
@@ -16,8 +18,8 @@ import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Switch
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.Refresh
@@ -26,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -41,11 +42,14 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PositionPrecisionPreference
+import com.geeksville.mesh.ui.components.SwitchPreference
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.toByteString
 import java.security.SecureRandom
 
+@Suppress("LongMethod")
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun EditChannelDialog(
     channelSettings: ChannelProtos.ChannelSettings,
@@ -133,32 +137,28 @@ fun EditChannelDialog(
                         },
                     )
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Uplink enabled", // TODO move to resource strings
-                            modifier = modifier.weight(1f)
-                        )
-                        Switch(
-                            checked = channelInput.uplinkEnabled,
-                            onCheckedChange = {
-                                channelInput = channelInput.copy { uplinkEnabled = it }
-                            },
-                        )
-                    }
+                    SwitchPreference(
+                        title = "Uplink enabled",
+                        checked = channelInput.uplinkEnabled,
+                        enabled = true,
+                        onCheckedChange = {
+                            channelInput = channelInput.copy { uplinkEnabled = it }
+                        },
+                        padding = PaddingValues(0.dp)
+                    )
 
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Downlink enabled", // TODO move to resource strings
-                            modifier = modifier.weight(1f)
-                        )
-                        Switch(
-                            checked = channelInput.downlinkEnabled,
-                            onCheckedChange = {
-                                channelInput = channelInput.copy { downlinkEnabled = it }
-                            },
-                        )
-                    }
+                    SwitchPreference(
+                        title = "Downlink enabled",
+                        checked = channelInput.downlinkEnabled,
+                        enabled = true,
+                        onCheckedChange = {
+                            channelInput = channelInput.copy { downlinkEnabled = it }
+                        },
+                        padding = PaddingValues(0.dp)
+                    )
 
                     PositionPrecisionPreference(
-                        title = "Position",
+                        title = "Position enabled",
                         enabled = true,
                         value = channelInput.moduleSettings.positionPrecision,
                         onValueChanged = {
@@ -170,22 +170,21 @@ fun EditChannelDialog(
             }
         },
         buttons = {
-            Row(
-                modifier = modifier.fillMaxWidth(),
+            FlowRow(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Button(
+                TextButton(
                     modifier = modifier
                         .fillMaxWidth()
-                        .padding(start = 24.dp)
                         .weight(1f),
                     onClick = onDismissRequest
                 ) { Text(stringResource(R.string.cancel)) }
                 Button(
                     modifier = modifier
                         .fillMaxWidth()
-                        .padding(end = 24.dp)
                         .weight(1f),
                     onClick = {
                         onAddClick(channelInput.copy { name = channelInput.name.trim() })

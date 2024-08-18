@@ -1,0 +1,41 @@
+name: Feature Request
+description: File a request for new feature or functionality.
+title: "[Feature Request]: "
+labels: ["enhancement"]
+projects: ["meshtastic/Meshtastic-Android"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!
+  - type: input
+    id: contact
+    attributes:
+      label: Contact Details
+      description: How can we get in touch with you if we need more info?
+      placeholder: ex. email@example.com, discord username
+    validations:
+      required: false
+  - type: textarea
+    id: request
+    attributes:
+      label: Tell us your idea.
+      description: Tell us what you'd like the app to do. Give as much detail as you can.
+      placeholder: Your idea
+      value: "I'd like the app to..."
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://meshtastic.org/docs/legal/conduct/).
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true

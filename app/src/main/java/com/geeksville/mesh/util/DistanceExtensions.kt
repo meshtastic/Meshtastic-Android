@@ -1,46 +1,74 @@
 package com.geeksville.mesh.util
 
-import com.geeksville.mesh.ConfigProtos
+import android.icu.util.LocaleData
+import android.icu.util.ULocale
+import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
+import java.util.Locale
 
 enum class DistanceUnit(
     val symbol: String,
     val multiplier: Float,
     val system: Int
 ) {
-    METERS("m", 1F, ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE),
-    KILOMETERS("km", 0.001F, ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE),
-    FEET("ft", 3.28084F, ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE),
-    MILES("mi", 0.000621371F, ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE),
+    METER("m", multiplier = 1F, DisplayConfig.DisplayUnits.METRIC_VALUE),
+    KILOMETER("km", multiplier = 0.001F, DisplayConfig.DisplayUnits.METRIC_VALUE),
+    FOOT("ft", multiplier = 3.28084F, DisplayConfig.DisplayUnits.IMPERIAL_VALUE),
+    MILE("mi", multiplier = 0.000621371F, DisplayConfig.DisplayUnits.IMPERIAL_VALUE),
+    ;
+
+    companion object {
+        fun getFromLocale(locale: Locale): DisplayConfig.DisplayUnits {
+            return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                when (LocaleData.getMeasurementSystem(ULocale.forLocale(locale))) {
+                    LocaleData.MeasurementSystem.SI -> DisplayConfig.DisplayUnits.METRIC
+                    else -> DisplayConfig.DisplayUnits.IMPERIAL
+                }
+            } else {
+                when (locale.country.uppercase(locale)) {
+                    "US", "LR", "MM", "GB" -> DisplayConfig.DisplayUnits.IMPERIAL
+                    else -> DisplayConfig.DisplayUnits.METRIC
+                }
+            }
+        }
+    }
 }
 
 fun Int.metersIn(unit: DistanceUnit): Float {
     return this * unit.multiplier
 }
 
-fun Int.metersIn(system: ConfigProtos.Config.DisplayConfig.DisplayUnits): Float {
-    return this * when (system.number) {
-        ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE -> DistanceUnit.METERS.multiplier
-        ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE -> DistanceUnit.FEET.multiplier
-        else -> throw IllegalArgumentException("Unknown distance system $system")
+fun Int.metersIn(system: DisplayConfig.DisplayUnits): Float {
+    val unit = when (system.number) {
+        DisplayConfig.DisplayUnits.IMPERIAL_VALUE -> DistanceUnit.FOOT
+        else -> DistanceUnit.METER
     }
+    return this.metersIn(unit)
 }
 
 fun Float.toString(unit: DistanceUnit): String {
-    return "%.1f %s".format(this, unit.symbol)
+    return if (unit in setOf(DistanceUnit.METER, DistanceUnit.FOOT)) {
+        "%.0f %s"
+    } else {
+        "%.1f %s"
+    }.format(this, unit.symbol)
 }
 
-fun Float.toString(
-    system: ConfigProtos.Config.DisplayConfig.DisplayUnits
-): String {
-    return "%.1f %s".format(this,
-        when (system.number) {
-            ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE -> {
-                DistanceUnit.METERS.symbol
-            }
-            ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE -> {
-                DistanceUnit.FEET.symbol
-            }
-            else -> throw IllegalArgumentException("Unknown distance system $system")
-        },
-    )
+fun Float.toString(system: DisplayConfig.DisplayUnits): String {
+    val unit = when (system.number) {
+        DisplayConfig.DisplayUnits.IMPERIAL_VALUE -> DistanceUnit.FOOT
+        else -> DistanceUnit.METER
+    }
+    return this.toString(unit)
+}
+
+private const val KILOMETER_THRESHOLD = 1000
+private const val MILE_THRESHOLD = 1609
+fun Int.toDistanceString(system: DisplayConfig.DisplayUnits): String {
+    val unit = if (system.number == DisplayConfig.DisplayUnits.METRIC_VALUE) {
+        if (this < KILOMETER_THRESHOLD) DistanceUnit.METER else DistanceUnit.KILOMETER
+    } else {
+        if (this < MILE_THRESHOLD) DistanceUnit.FOOT else DistanceUnit.MILE
+    }
+    val valueInUnit = this * unit.multiplier
+    return valueInUnit.toString(unit)
 }

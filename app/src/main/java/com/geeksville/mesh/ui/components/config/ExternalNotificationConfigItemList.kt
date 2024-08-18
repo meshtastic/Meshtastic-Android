@@ -8,7 +8,7 @@ import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -31,8 +31,8 @@ fun ExternalNotificationConfigItemList(
     onSaveClicked: (ringtone: String, config: ExternalNotificationConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var ringtoneInput by remember { mutableStateOf(ringtone) }
-    var externalNotificationInput by remember { mutableStateOf(extNotificationConfig) }
+    var ringtoneInput by rememberSaveable { mutableStateOf(ringtone) }
+    var externalNotificationInput by rememberSaveable { mutableStateOf(extNotificationConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
