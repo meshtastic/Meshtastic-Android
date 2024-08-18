@@ -18,7 +18,7 @@ class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
 
     private var nodeColor: Int = Color.GRAY
     fun setNodeColors(colors: Pair<Int, Int>) {
-        nodeColor = colors.first
+        nodeColor = colors.second
     }
 
     private var precisionBits: Int? = null
