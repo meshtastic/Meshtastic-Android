@@ -1,9 +1,15 @@
 package com.geeksville.mesh.database
 
+import com.geeksville.mesh.Portnums
+import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.database.dao.MeshLogDao
 import com.geeksville.mesh.database.entity.MeshLog
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -19,6 +25,18 @@ class MeshLogRepository @Inject constructor(private val meshLogDaoLazy: dagger.L
     suspend fun getAllLogsInReceiveOrder(maxItems: Int = MAX_ITEMS): Flow<List<MeshLog>> = withContext(Dispatchers.IO) {
         meshLogDao.getAllLogsInReceiveOrder(maxItems)
     }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getMeshPacketsFrom(nodeNum: Int) = meshLogDao.getAllLogsInReceiveOrder(Int.MAX_VALUE)
+        .mapLatest { list -> list.mapNotNull { it.meshPacket }.filter { it.from == nodeNum } }
+        .distinctUntilChanged()
+        .flowOn(Dispatchers.IO)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getTelemetryFrom(nodeNum: Int) = getMeshPacketsFrom(nodeNum).mapLatest { list ->
+        list.filter { it.hasDecoded() && it.decoded.portnum == Portnums.PortNum.TELEMETRY_APP }
+            .mapNotNull { runCatching { Telemetry.parseFrom(it.decoded.payload) }.getOrNull() }
+    }.flowOn(Dispatchers.IO)
 
     suspend fun insert(log: MeshLog) = withContext(Dispatchers.IO) {
         meshLogDao.insert(log)
