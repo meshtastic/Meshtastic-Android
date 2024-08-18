@@ -1968,7 +1968,7 @@ class MeshService : Service(), Logging {
 
         override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {
             sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
-                factoryReset = 1
+                factoryResetDevice = 1
             })
         }
 
