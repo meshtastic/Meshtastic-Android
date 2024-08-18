@@ -8,7 +8,7 @@ import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -31,7 +31,7 @@ fun MQTTConfigItemList(
     onSaveClicked: (MQTTConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var mqttInput by remember(mqttConfig) { mutableStateOf(mqttConfig) }
+    var mqttInput by rememberSaveable { mutableStateOf(mqttConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()

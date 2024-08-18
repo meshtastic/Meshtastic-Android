@@ -7,7 +7,7 @@ import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -32,8 +32,8 @@ fun PositionConfigItemList(
     onSaveClicked: (position: Position?, config: PositionConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var locationInput by remember(location) { mutableStateOf(location) }
-    var positionInput by remember(positionConfig) { mutableStateOf(positionConfig) }
+    var locationInput by rememberSaveable { mutableStateOf(location) }
+    var positionInput by rememberSaveable { mutableStateOf(positionConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()

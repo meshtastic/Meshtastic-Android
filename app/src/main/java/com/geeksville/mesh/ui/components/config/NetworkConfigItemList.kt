@@ -8,7 +8,7 @@ import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -32,7 +32,7 @@ fun NetworkConfigItemList(
     onSaveClicked: (NetworkConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var networkInput by remember(networkConfig) { mutableStateOf(networkConfig) }
+    var networkInput by rememberSaveable { mutableStateOf(networkConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()

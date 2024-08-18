@@ -8,7 +8,7 @@ import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -31,8 +31,8 @@ fun CannedMessageConfigItemList(
     onSaveClicked: (messages: String, config: CannedMessageConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var messagesInput by remember { mutableStateOf(messages) }
-    var cannedMessageInput by remember { mutableStateOf(cannedMessageConfig) }
+    var messagesInput by rememberSaveable { mutableStateOf(messages) }
+    var cannedMessageInput by rememberSaveable { mutableStateOf(cannedMessageConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()

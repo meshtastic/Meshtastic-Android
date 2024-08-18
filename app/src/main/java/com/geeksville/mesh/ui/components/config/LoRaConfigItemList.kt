@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -32,7 +33,7 @@ fun LoRaConfigItemList(
     onSaveClicked: (LoRaConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var loraInput by remember(loraConfig) { mutableStateOf(loraConfig) }
+    var loraInput by rememberSaveable { mutableStateOf(loraConfig) }
     val primaryChannel = Channel(primarySettings, loraInput)
 
     LazyColumn(
