@@ -293,6 +293,15 @@ class UIViewModel @Inject constructor(
         }
     }
 
+    fun requestNodeInfo(destNum: Int){
+        info("Requesting NodeInfo for '$destNum'")
+        try {
+            meshService?.requestNodeInfo(destNum)
+        } catch (ex: RemoteException) {
+            errormsg("Request NodeInfo error: ${ex.message}")
+        }
+    }
+
     fun requestPosition(destNum: Int, position: Position = Position(0.0, 0.0, 0)) {
         info("Requesting position for '$destNum'")
         try {
