@@ -1,7 +1,6 @@
 package com.geeksville.mesh.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,27 +17,21 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.activityViewModels
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.components.NodeFilterTextField
+import com.geeksville.mesh.ui.components.rememberTimeTickWithLifecycle
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.minutes
 
 @AndroidEntryPoint
 class UsersFragment : ScreenFragment("Users"), Logging {
@@ -144,7 +137,7 @@ fun NodesScreen(
         }
     }
 
-    val currentTimeMillis = getCurrentTimeMillisWithLifecycle()
+    val currentTimeMillis = rememberTimeTickWithLifecycle()
 
     LazyColumn(
         state = listState,
@@ -188,27 +181,4 @@ fun NodesScreen(
             )
         }
     }
-}
-
-@Composable
-private fun getCurrentTimeMillisWithLifecycle(): Long {
-    var currentTimeMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    var running by remember { mutableStateOf(false) }
-    LaunchedEffect(running) {
-        if (running) {
-            while (true) {
-                delay(1.minutes)
-                currentTimeMillis = System.currentTimeMillis()
-                Log.d("NodesScreen", "NodesScreen: $currentTimeMillis")
-            }
-        }
-    }
-
-    LifecycleResumeEffect(Unit) {
-        running = true
-        onPauseOrDispose {
-            running = false
-        }
-    }
-    return currentTimeMillis
 }
