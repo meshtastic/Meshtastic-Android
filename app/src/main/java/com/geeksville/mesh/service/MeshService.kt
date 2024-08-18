@@ -442,8 +442,12 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private fun getLongName(num: Int) =
-        nodeDBbyNodeNum[num]?.user?.longName ?: getString(R.string.unknown_username)
+    private fun getUserName(num: Int): String {
+        val user = nodeDBbyNodeNum[num]?.user
+        val longName = user?.longName ?: getString(R.string.unknown_username)
+        val shortName = user?.shortName ?: DataPacket.nodeNumToDefaultId(num)
+        return "$longName ($shortName)"
+    }
 
     private val numNodes get() = nodeDBbyNodeNum.size
 
@@ -733,9 +737,9 @@ class MeshService : Service(), Logging {
                         if (data.wantResponse) return // ignore data from traceroute requests
                         val parsed = MeshProtos.RouteDiscovery.parseFrom(data.payload)
                         radioConfigRepository.setTracerouteResponse(buildString {
-                            append("${getLongName(packet.to)} --> ")
-                            parsed.routeList.forEach { num -> append("${getLongName(num)} --> ") }
-                            append(getLongName(packet.from))
+                            append("${getUserName(packet.to)} --> ")
+                            parsed.routeList.forEach { num -> append("${getUserName(num)} --> ") }
+                            append(getUserName(packet.from))
                         })
                     }
 
