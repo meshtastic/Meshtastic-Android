@@ -293,6 +293,17 @@ class UIViewModel @Inject constructor(
         }
     }
 
+    fun requestUserInfo(destNum: Int){
+        info("Requesting UserInfo for '$destNum'")
+        try {
+            val packetId = meshService?.packetId ?: return
+            val ourNodeInfo = nodeDB.ourNodeInfo.value
+            meshService?.requestUserInfo(packetId, destNum, ourNodeInfo)
+        } catch (ex: RemoteException) {
+            errormsg("Request NodeInfo error: ${ex.message}")
+        }
+    }
+
     fun requestPosition(destNum: Int, position: Position = Position(0.0, 0.0, 0)) {
         info("Requesting position for '$destNum'")
         try {

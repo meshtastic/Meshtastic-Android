@@ -82,6 +82,10 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 R.id.remote_admin -> {
                     navigateToRadioConfig(node)
                 }
+
+                R.id.request_userinfo -> {
+                    model.requestUserInfo(node.num)
+                }
             }
         }
     }

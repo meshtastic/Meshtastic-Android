@@ -165,4 +165,7 @@ interface IMeshService {
 
     /// Stop providing location (from phone GPS) to mesh
     void stopProvideLocation();
+
+    /// Send request for node UserInfo
+    void requestUserInfo(in int requestID, in int destNum, in NodeInfo nodeInfo);
 }

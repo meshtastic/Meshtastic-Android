@@ -1914,7 +1914,25 @@ class MeshService : Service(), Logging {
                 removeByNodenum = nodeNum
 
             })
+        }
+        override fun requestUserInfo(packetId: Int, destNum: Int, sourceNodeInfo: NodeInfo) = toRemoteExceptions {
+            val protoSourceNodeInfo =  MeshProtos.User.newBuilder().apply {
+                id = DataPacket.nodeNumToDefaultId(sourceNodeInfo.num)
+                longName = sourceNodeInfo.user!!.longName
+                shortName = sourceNodeInfo.user!!.shortName
+                hwModel = sourceNodeInfo.user!!.hwModel
+            }.build()
 
+            if (destNum != myNodeNum) {
+                sendToRadio(newMeshPacketTo(destNum
+                ).buildMeshPacket(
+                    channel = nodeDBbyNodeNum[destNum]?.channel ?: 0
+                ) {
+                    portnumValue = Portnums.PortNum.NODEINFO_APP_VALUE
+                    wantResponse = true
+                    payload = protoSourceNodeInfo.toByteString()
+                })
+            }
         }
         override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
             if (destNum != myNodeNum) {

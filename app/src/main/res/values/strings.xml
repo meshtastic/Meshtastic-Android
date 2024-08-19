@@ -212,4 +212,5 @@
         <item quantity="other">Do you want to add %d new channels?</item>
     </plurals>
     <string name="replace">Replace</string>
+    <string name="request_userinfo">Request user info</string>
 </resources>
