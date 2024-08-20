@@ -23,6 +23,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ConfigProtos.Config.NetworkConfig
+import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditIPv4Preference
@@ -30,9 +31,19 @@ import com.geeksville.mesh.ui.components.EditPasswordPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
+import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.components.SwitchPreference
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+
+@Composable
+private fun ScanErrorDialog(
+    onDismiss: () -> Unit = {}
+) = SimpleAlertDialog(
+    title = R.string.error,
+    text = R.string.wifi_qr_code_error,
+    onDismiss = onDismiss,
+)
 
 @Composable
 fun NetworkConfigItemList(
@@ -42,6 +53,11 @@ fun NetworkConfigItemList(
 ) {
     val focusManager = LocalFocusManager.current
     var networkInput by rememberSaveable { mutableStateOf(networkConfig) }
+
+    var showScanErrorDialog: Boolean by rememberSaveable { mutableStateOf(false) }
+    if (showScanErrorDialog) {
+        ScanErrorDialog { showScanErrorDialog = false }
+    }
 
     fun extractWifiCredentials(qrCode: String) = Regex("""WIFI:S:(.*?);.*?P:(.*?);""")
         .find(qrCode)?.destructured
@@ -55,7 +71,7 @@ fun NetworkConfigItemList(
                 networkInput = networkInput.copy { wifiSsid = ssid }
                 networkInput = networkInput.copy { wifiPsk = psk }
             } else {
-                // TODO show: "Invalid WiFi Credential QR code format"
+                showScanErrorDialog = true
             }
         }
     }
@@ -236,4 +252,10 @@ private fun NetworkConfigPreview() {
         enabled = true,
         onSaveClicked = { },
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun QrCodeErrorDialogPreview() {
+    ScanErrorDialog()
 }
