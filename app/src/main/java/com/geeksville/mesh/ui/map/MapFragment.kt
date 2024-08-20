@@ -144,12 +144,12 @@ fun MapView(
     var myLocationOverlay: MyLocationNewOverlay? by remember { mutableStateOf(null) }
 
     val context = LocalContext.current
-    val mPrefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+    val mPrefs = remember { context.getSharedPreferences(prefsName, Context.MODE_PRIVATE) }
 
     val haptic = LocalHapticFeedback.current
     fun performHapticFeedback() = haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
-    val hasGps = context.hasGps()
+    val hasGps = remember { context.hasGps() }
 
     val map = rememberMapViewWithLifecycle(context)
 
@@ -214,7 +214,7 @@ fun MapView(
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
 
-    val markerIcon by lazy {
+    val markerIcon = remember {
         AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24)
     }
 
