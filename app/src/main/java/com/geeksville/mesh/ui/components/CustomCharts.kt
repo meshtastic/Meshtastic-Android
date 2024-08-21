@@ -36,12 +36,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.DeviceMetrics
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.DataEntry
 import com.geeksville.mesh.ui.BatteryInfo
 import com.geeksville.mesh.ui.components.ChartConstants.COLORS
 import com.geeksville.mesh.ui.components.ChartConstants.TIME_FORMAT
 import com.geeksville.mesh.ui.components.ChartConstants.MAX_PERCENT_VALUE
+import com.geeksville.mesh.ui.components.ChartConstants.PERCENT_LINE_LIMIT
+import com.geeksville.mesh.ui.components.ChartConstants.PERCENT_VERTICAL_SPACING
+import com.geeksville.mesh.ui.components.ChartConstants.TEXT_PAINT_ALPHA
+import com.geeksville.mesh.ui.theme.Orange
 import java.text.DateFormat
 
 
@@ -49,15 +53,14 @@ private object ChartConstants {
     val COLORS = listOf(Color.Green, Color.Magenta, Color.Cyan)
     val TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     const val MAX_PERCENT_VALUE = 100f
+    const val PERCENT_VERTICAL_SPACING = 25f
+    const val PERCENT_LINE_LIMIT = 4
+    const val TEXT_PAINT_ALPHA = 192
 }
 
-/**
- * Contains the data necessary to build any of the available charts.
- */
-data class DataEntry(val time: Long, val deviceMetrics: DeviceMetrics)
-
+@Suppress("LongMethod")
 @Composable
-fun DeviceMetricsChart(modifier: Modifier = Modifier, data: MutableList<DataEntry>) {
+fun DeviceMetricsChart(modifier: Modifier = Modifier, data: List<DataEntry>) {
 
     if (data.isEmpty())
         return
@@ -80,6 +83,7 @@ fun DeviceMetricsChart(modifier: Modifier = Modifier, data: MutableList<DataEntr
 
         PercentageChartLayer(modifier = modifier, graphColor = graphColor)
 
+        /* Plot Battery Line, ChUtil, and AirUtilTx */
         Canvas(modifier = modifier) {
 
             val height = size.height
@@ -90,10 +94,9 @@ fun DeviceMetricsChart(modifier: Modifier = Modifier, data: MutableList<DataEntr
                 textAlign = Paint.Align.LEFT
                 textSize = density.run { 12.dp.toPx() }
                 typeface = setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD))
-                alpha = 192
+                alpha = TEXT_PAINT_ALPHA
             }
 
-            /* Battery Line, ChUtil, and AirUtilTx */
             val spacePerEntry = (width - spacing) / data.size
             val dataPointRadius = 2.dp.toPx()
             var lastX: Float
@@ -136,6 +139,7 @@ fun DeviceMetricsChart(modifier: Modifier = Modifier, data: MutableList<DataEntr
                 }
             }
 
+            /* Battery Line */
             drawPath(
                 path = strokePath,
                 color = COLORS[0],
@@ -148,13 +152,13 @@ fun DeviceMetricsChart(modifier: Modifier = Modifier, data: MutableList<DataEntr
             /* X - Labels: Time */
             drawContext.canvas.nativeCanvas.apply {
                 drawText(
-                    TIME_FORMAT.format(newestMetrics.time),
+                    TIME_FORMAT.format(oldestMetrics.time),
                     8.dp.toPx(),
                     12.dp.toPx(),
                     textPaint
                 )
                 drawText(
-                    TIME_FORMAT.format(oldestMetrics.time),
+                    TIME_FORMAT.format(newestMetrics.time),
                     width - 116.dp.toPx(),
                     12.dp.toPx(),
                     textPaint
@@ -246,7 +250,6 @@ private fun ChartHeader(amount: Int, title: String) {
 @Composable
 private fun PercentageChartLayer(modifier: Modifier, graphColor: Color) {
     val density = LocalDensity.current
-    val verticalSpacing = 25f
     Canvas(modifier = modifier) {
 
         val height = size.height
@@ -254,12 +257,12 @@ private fun PercentageChartLayer(modifier: Modifier, graphColor: Color) {
 
         /* Horizontal Lines */
         var lineY = 0f
-        for (i in 0..4) {
+        for (i in 0..PERCENT_LINE_LIMIT) {
             val ratio = lineY / MAX_PERCENT_VALUE
             val y = height - (ratio * height)
             val color: Color = when (i) {
                 1 -> Color.Red
-                2 -> Color(255, 153, 0)
+                2 -> Orange
                 else -> graphColor
             }
             drawLine(
@@ -270,7 +273,7 @@ private fun PercentageChartLayer(modifier: Modifier, graphColor: Color) {
                 cap = StrokeCap.Round,
                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 20f), 0f)
             )
-            lineY += verticalSpacing
+            lineY += PERCENT_VERTICAL_SPACING
         }
 
         /* Y Labels */
@@ -280,11 +283,11 @@ private fun PercentageChartLayer(modifier: Modifier, graphColor: Color) {
             textAlign = Paint.Align.LEFT
             textSize = density.run { 12.dp.toPx() }
             typeface = setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD))
-            alpha = 192
+            alpha = TEXT_PAINT_ALPHA
         }
         drawContext.canvas.nativeCanvas.apply {
             var currentLabel = 0f
-            for (i in 0..4) {
+            for (i in 0..PERCENT_LINE_LIMIT) {
                 val ratio = currentLabel / MAX_PERCENT_VALUE
                 val y = height - (ratio * height)
                 drawText(
@@ -293,7 +296,7 @@ private fun PercentageChartLayer(modifier: Modifier, graphColor: Color) {
                     y + 4.dp.toPx(),
                     textPaint
                 )
-                currentLabel += verticalSpacing
+                currentLabel += PERCENT_VERTICAL_SPACING
             }
         }
 

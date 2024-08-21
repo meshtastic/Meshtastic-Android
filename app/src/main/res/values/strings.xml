@@ -219,4 +219,5 @@
     <string name="channel_utilization">Channel Utilization</string>
     <string name="air_utilization">Air Utilization</string>
     <string name="device_metrics">Device Metrics</string>
+    <string name="node_details">Node Details</string>
 </resources>

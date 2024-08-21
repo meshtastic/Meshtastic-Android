@@ -1,10 +1,10 @@
 package com.geeksville.mesh.ui
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -28,20 +28,19 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.DeviceMetrics
+import androidx.lifecycle.lifecycleScope
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.model.DebugViewModel
-import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.components.DataEntry
+import com.geeksville.mesh.model.NodeDetailsViewModel
 import com.geeksville.mesh.ui.components.DeviceMetricsCard
 import com.geeksville.mesh.ui.components.DeviceMetricsChart
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 internal fun FragmentManager.navigateToNodeDetails(nodeNum: Int? = null) {
     val nodeDetailsFragment = NodeDetailsFragment().apply {
@@ -56,9 +55,7 @@ internal fun FragmentManager.navigateToNodeDetails(nodeNum: Int? = null) {
 @AndroidEntryPoint
 class NodeDetailsFragment : ScreenFragment("NodeDetails"), Logging {
 
-    private val model: UIViewModel by activityViewModels()
-
-    private val debugModel: DebugViewModel by viewModels()
+    private val model: NodeDetailsViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,6 +63,8 @@ class NodeDetailsFragment : ScreenFragment("NodeDetails"), Logging {
         savedInstanceState: Bundle?
     ): View {
         val nodeNum = arguments?.getInt("nodeNum")
+        if (nodeNum != null)
+            model.setSelectedNode(nodeNum)
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -73,7 +72,7 @@ class NodeDetailsFragment : ScreenFragment("NodeDetails"), Logging {
                 AppTheme {
                     NodeDetailsScreen(
                         model = model,
-                        debugModel = debugModel,
+                        coroutineScope = lifecycleScope,
                         nodeNum = nodeNum,
                         navigateBack = {
                             parentFragmentManager.popBackStack()
@@ -85,41 +84,32 @@ class NodeDetailsFragment : ScreenFragment("NodeDetails"), Logging {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@SuppressLint("CoroutineCreationDuringComposition")
 @Composable
 fun NodeDetailsScreen(
-    model: UIViewModel = hiltViewModel(),
-    debugModel: DebugViewModel, // TODO do I need something similar to hiltViewModel()?
+    model: NodeDetailsViewModel = hiltViewModel(),
+    coroutineScope: CoroutineScope,
     nodeNum: Int? = null,
     navigateBack: () -> Unit,
 ) {
-    val ourNodeInfo by model.ourNodeInfo.collectAsStateWithLifecycle()
-    val selectedNodeInfo by model.getNodeByNum(nodeNum ?: ourNodeInfo?.num ?: 0)
-        .collectAsStateWithLifecycle()
-
-    val nodeId = selectedNodeInfo?.user?.id
-    val logs by debugModel.meshLog.collectAsStateWithLifecycle()
-    val data = mutableListOf<DataEntry>()
-
-    /* Retrieve only the data belonging to the selected node. */
-    for (log in logs) {
-        log.nodeInfo?.let { nodeInfo ->
-            val currentId = nodeInfo.user.id
-            if (nodeInfo.hasDeviceMetrics() && currentId == nodeId)
-                data.add(DataEntry(log.received_date, DeviceMetrics(nodeInfo.deviceMetrics)))
-        }
-    }
-
+    // TODO Need to let user know when we don't have data to display
+    val data by model.dataEntries.collectAsStateWithLifecycle()
+    /* We only need to get the nodes name once. */
+    var nodeName: String? = ""
+    coroutineScope.launch { nodeName = model.getNodeName(nodeNum ?: 0) }
 
     Scaffold(
-        /* TODO NOTE: Suggesting that we add a bottom bar that allows the user to toggle between graphs */
+        /*
+         * NOTE: Perhaps we can use a Pager to navigate from graph to graph.
+         *       The bottom bar could be used to enable other actions such as clear data.
+         **/
         topBar = {
             TopAppBar(
                 backgroundColor = colorResource(R.color.toolbarBackground),
                 contentColor = colorResource(R.color.toolbarText),
                 title = {
                     Text(
-                        text = "Node Details: ${selectedNodeInfo?.user?.shortName}", // TODO res
+                        text = "${stringResource(R.string.node_details)}: $nodeName",
                     )
                 },
                 navigationIcon = {
@@ -135,12 +125,11 @@ fun NodeDetailsScreen(
     ) { innerPadding ->
 
         Column {
-            val reversed = data.reversed()
             DeviceMetricsChart(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.33f),
-                reversed.toMutableList()
+                data.toList()
             )
 
             /* Device Metric Cards */
@@ -149,7 +138,7 @@ fun NodeDetailsScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
             ) {
-                items(data) { dataEntry -> DeviceMetricsCard(dataEntry) }
+                items(data.reversed()) { dataEntry -> DeviceMetricsCard(dataEntry) }
             }
         }
     }
