@@ -128,7 +128,7 @@ fun NodeDetailsScreen(
             DeviceMetricsChart(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.33f),
+                    .fillMaxHeight(fraction = 0.33f),
                 data.toList()
             )
 

@@ -3,6 +3,7 @@ package com.geeksville.mesh.model
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.DeviceMetrics
+import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.database.MeshLogRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,8 +25,12 @@ class NodeDetailsViewModel @Inject constructor(
     private val meshLogRepository: MeshLogRepository
 ) : ViewModel() {
 
+    // TODO Switch this to use the proto buf directly, this will impact our composable functions.
     private val _dataEntry = MutableStateFlow<List<DataEntry>>(emptyList())
     val dataEntries: StateFlow<List<DataEntry>> = _dataEntry
+
+    private val _environmentMetrics = MutableStateFlow<List<TelemetryProtos.EnvironmentMetrics>>(emptyList())
+    val environmentMetrics: StateFlow<List<TelemetryProtos.EnvironmentMetrics>> = _environmentMetrics
 
     /**
      * Gets the short name of the node identified by `nodeNum`.
@@ -36,20 +41,22 @@ class NodeDetailsViewModel @Inject constructor(
     }
 
     /**
-     * Used to set the Node we will be viewing charts for.
+     * Used to set the Node for which the user will see charts for.
      */
     fun setSelectedNode(nodeNum: Int) {
         viewModelScope.launch {
             meshLogRepository.getTelemetryFrom(nodeNum).collect {
-                val tmp = mutableListOf<DataEntry>()
+                val deviceMet = mutableListOf<DataEntry>()
+                val environmentMet = mutableListOf<TelemetryProtos.EnvironmentMetrics>()
                 for (telemetry in it) {
-                    val time = telemetry.time * 1000.0.toLong()
+                    val time = telemetry.time * 1000.0.toLong() // TODO Won't need
                     if (telemetry.hasDeviceMetrics())
-                        tmp.add(DataEntry(time = time, DeviceMetrics(telemetry.deviceMetrics)))
+                        deviceMet.add(DataEntry(time = time, DeviceMetrics(telemetry.deviceMetrics)))
+                    if (telemetry.hasEnvironmentMetrics())
+                        environmentMet.add(telemetry.environmentMetrics)
                 }
-                _dataEntry.value = tmp
+                _dataEntry.value = deviceMet
             }
-
         }
     }
 }

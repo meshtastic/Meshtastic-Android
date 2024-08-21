@@ -40,6 +40,8 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DataEntry
 import com.geeksville.mesh.ui.BatteryInfo
 import com.geeksville.mesh.ui.components.ChartConstants.COLORS
+import com.geeksville.mesh.ui.components.ChartConstants.LINE_OFF
+import com.geeksville.mesh.ui.components.ChartConstants.LINE_ON
 import com.geeksville.mesh.ui.components.ChartConstants.TIME_FORMAT
 import com.geeksville.mesh.ui.components.ChartConstants.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.components.ChartConstants.PERCENT_LINE_LIMIT
@@ -56,6 +58,8 @@ private object ChartConstants {
     const val PERCENT_VERTICAL_SPACING = 25f
     const val PERCENT_LINE_LIMIT = 4
     const val TEXT_PAINT_ALPHA = 192
+    const val LINE_ON = 10f
+    const val LINE_OFF = 20f
 }
 
 @Suppress("LongMethod")
@@ -271,7 +275,7 @@ private fun PercentageChartLayer(modifier: Modifier, graphColor: Color) {
                 color = color,
                 strokeWidth = 1.dp.toPx(),
                 cap = StrokeCap.Round,
-                pathEffect = PathEffect.dashPathEffect(floatArrayOf(10f, 20f), 0f)
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(LINE_ON, LINE_OFF), 0f)
             )
             lineY += PERCENT_VERTICAL_SPACING
         }
@@ -335,8 +339,8 @@ private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
         if (isLine) {
             drawLine(
                 color = color,
-                start = Offset(0f, size.height / 2f),
-                end = Offset(16f, size.height / 2f),
+                start = Offset(x = 0f, y = size.height / 2f),
+                end = Offset(x = 16f, y = size.height / 2f),
                 strokeWidth = 2.dp.toPx(),
                 cap = StrokeCap.Round,
             )
