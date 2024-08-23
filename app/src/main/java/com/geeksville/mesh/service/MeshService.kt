@@ -635,6 +635,8 @@ class MeshService : Service(), Logging {
             val fromId = toNodeID(packet.from)
             val dataPacket = toDataPacket(packet)
 
+            handleReceivedPacket(packet.from)
+
             if (dataPacket != null) {
 
                 // We ignore most messages that we sent
@@ -789,6 +791,13 @@ class MeshService : Service(), Logging {
                     warn("No special processing needed for ${a.payloadVariantCase}")
 
             }
+        }
+    }
+
+    /// Update our DB user send packets counter by one
+    private fun handleReceivedPacket(fromNodeNum: Int){
+        updateNodeInfo(fromNodeNum) {
+            it.sendPackets += 1
         }
     }
 

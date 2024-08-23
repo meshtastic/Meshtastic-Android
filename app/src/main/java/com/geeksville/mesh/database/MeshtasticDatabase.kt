@@ -6,6 +6,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.database.dao.PacketDao
@@ -34,7 +36,7 @@ import com.geeksville.mesh.database.entity.QuickChatAction
         AutoMigration (from = 7, to = 8),
         AutoMigration (from = 8, to = 9),
     ],
-    version = 9,
+    version = 10,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -45,6 +47,14 @@ abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun quickChatActionDao(): QuickChatActionDao
 
     companion object {
+
+        // Adds sendPackets column for statistics purposes
+        val MIGRATION_9_10 = object : Migration(11, 12) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE NodeInfo ADD COLUMN sendPackets INTEGER DEFAULT 0 NOT NULL")
+            }
+        }
+
         fun getDatabase(context: Context): MeshtasticDatabase {
 
             return Room.databaseBuilder(
