@@ -30,6 +30,10 @@ buildscript {
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.4'
 
         classpath "com.google.dagger:hilt-android-gradle-plugin:$hilt_version"
+
+        // application config serialization
+        classpath "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
+
     }
 }
 
@@ -37,6 +41,7 @@ plugins {
     id "org.jetbrains.kotlin.jvm" version "$kotlin_version" apply false
     id "com.google.devtools.ksp" version "2.0.10-1.0.24" apply false
     id "org.jetbrains.kotlin.plugin.compose" version "$kotlin_version" apply false
+    id 'org.jetbrains.kotlin.android' version '2.0.10' apply false
 }
 
 allprojects {

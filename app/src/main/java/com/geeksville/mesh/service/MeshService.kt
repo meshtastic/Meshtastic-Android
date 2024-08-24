@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.IBinder
 import android.os.RemoteException
+import androidx.compose.runtime.getValue
 import androidx.core.app.ServiceCompat
 import androidx.core.location.LocationCompat
 import com.geeksville.mesh.analytics.DataPair
@@ -43,6 +44,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -51,6 +53,9 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import kotlin.math.absoluteValue
+import com.geeksville.mesh.model.NodeListConfig
+import com.geeksville.mesh.repository.datastore.ApplicationConfigRepository
+
 
 /**
  * Handles all the communication with android apps.  Also keeps an internal model
@@ -78,6 +83,9 @@ class MeshService : Service(), Logging {
 
     @Inject
     lateinit var radioConfigRepository: RadioConfigRepository
+
+    @Inject
+    lateinit var applicationConfigRepository: ApplicationConfigRepository
 
     @Inject
     lateinit var mqttRepository: MQTTRepository
@@ -270,6 +278,8 @@ class MeshService : Service(), Logging {
 
         loadSettings() // Load our last known node DB
 
+         start()
+
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
 
@@ -314,6 +324,50 @@ class MeshService : Service(), Logging {
         } else {
             START_STICKY
         }
+    }
+
+    private var resetJob: Job? = null
+
+    private lateinit var nodeListConfig: NodeListConfig
+
+    fun start() {
+
+        println("****************** starting packet resetter!")
+        resetJob?.cancel()
+
+        nodeListConfig = applicationConfigRepository.getNodeListConfig()
+        val interval = nodeListConfig.interval
+
+        resetJob = serviceScope.launch {
+            while (true) {
+                delay(interval * 1000L)
+                resetPacketCounter()
+            }
+        }
+    }
+
+    fun setUpdatePacketResetCounterInterval(newInterval: Int) {
+        val updatedConfig = nodeListConfig.copy(interval = newInterval)
+        applicationConfigRepository.saveNodeListConfig(updatedConfig)
+        resetJob?.cancel()
+        println("********** NEW INTERVAL " + newInterval.toString())
+        start()
+    }
+
+    private suspend fun resetPacketCounter() {
+        val nodes = radioConfigRepository.getNodes()
+
+        nodes?.forEach { node ->
+            updateNodeInfo(node.num) {
+                it.sendPackets = 0
+            }
+        }
+
+        println("******************  Packet counter has been reset.")
+    }
+
+    fun stop() {
+        resetJob?.cancel() // Anuluj zadanie
     }
 
     override fun onDestroy() {
@@ -810,7 +864,7 @@ class MeshService : Service(), Logging {
                 p.longName,
                 p.shortName,
                 p.hwModel,
-                p.isLicensed
+                p.isLicensed,
             )
             it.channel = channel
         }
@@ -1718,6 +1772,10 @@ class MeshService : Service(), Logging {
     }
 
     private val binder = object : IMeshService.Stub() {
+
+        override fun updatePacketResetCounterInterval(interval: Int){
+            setUpdatePacketResetCounterInterval(interval)
+        }
 
         override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
             debug("Passing through device change to radio service: ${deviceAddr.anonymize}")

@@ -11,7 +11,6 @@
         android:title="@string/disconnected"
         app:showAsAction="ifRoom"
         />
-
     <item
         android:id="@+id/debug"
         android:title="@string/debug_panel"
@@ -25,6 +24,10 @@
         android:id="@+id/radio_config"
         app:showAsAction="withText"
         android:title="@string/device_settings" />
+    <item
+        android:id="@+id/application_config"
+        app:showAsAction="withText"
+        android:title="@string/application_settings" />
     <item
         android:id="@+id/save_messages_csv"
         app:showAsAction="withText"

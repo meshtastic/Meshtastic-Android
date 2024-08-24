@@ -664,6 +664,10 @@ class MainActivity : AppCompatActivity(), Logging {
                 supportFragmentManager.navigateToRadioConfig()
                 return true
             }
+            R.id.application_config -> {
+                supportFragmentManager.navigateToApplicationConfig()
+                return true
+            }
             R.id.save_messages_csv -> {
                 val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)

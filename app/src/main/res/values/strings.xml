@@ -212,4 +212,7 @@
         <item quantity="other">Do you want to add %d new channels?</item>
     </plurals>
     <string name="replace">Replace</string>
+    <string name="application_settings">Application settings</string>
+    <string name="node_settings">Node settings</string>
+    <string name="node_list">Node list</string>
 </resources>

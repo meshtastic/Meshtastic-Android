@@ -55,6 +55,7 @@ interface IMeshService {
 
     void setRemoteOwner(in int requestId, in byte []payload);
     void getRemoteOwner(in int requestId, in int destNum);
+    void updatePacketResetCounterInterval(in int interval);
 
     /// Return my unique user ID string
     String getMyId();
