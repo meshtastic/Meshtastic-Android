@@ -1918,9 +1918,9 @@ class MeshService : Service(), Logging {
         override fun requestUserInfo(packetId: Int, destNum: Int, sourceNodeInfo: NodeInfo) = toRemoteExceptions {
             val protoSourceNodeInfo =  MeshProtos.User.newBuilder().apply {
                 id = DataPacket.nodeNumToDefaultId(sourceNodeInfo.num)
-                longName = sourceNodeInfo.user!!.longName
-                shortName = sourceNodeInfo.user!!.shortName
-                hwModel = sourceNodeInfo.user!!.hwModel
+                longName = sourceNodeInfo.user?.longName
+                shortName = sourceNodeInfo.user?.shortName
+                hwModel = sourceNodeInfo.user?.hwModel
             }.build()
 
             if (destNum != myNodeNum) {
