@@ -1,6 +1,5 @@
 package com.geeksville.mesh.ui.components.config
 
-import android.util.Base64
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -12,17 +11,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Close
-import androidx.compose.material.icons.twotone.Refresh
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,13 +30,11 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.ui.components.EditBase64Preference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PositionPrecisionPreference
 import com.geeksville.mesh.ui.components.SwitchPreference
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
-import com.google.protobuf.ByteString
-import com.google.protobuf.kotlin.toByteString
-import java.security.SecureRandom
 
 @Suppress("LongMethod")
 @OptIn(ExperimentalLayoutApi::class)
@@ -58,19 +46,7 @@ fun EditChannelDialog(
     modifier: Modifier = Modifier,
     modemPresetName: String = "Default",
 ) {
-    fun encodeToString(input: ByteString) =
-        Base64.encodeToString(input.toByteArray() ?: ByteArray(0), Base64.DEFAULT)
-
     var channelInput by remember(channelSettings) { mutableStateOf(channelSettings) }
-    var pskString by remember(channelInput) { mutableStateOf(encodeToString(channelInput.psk)) }
-    val pskError = pskString != encodeToString(channelInput.psk)
-
-    fun getRandomKey() {
-        val random = SecureRandom()
-        val bytes = ByteArray(32)
-        random.nextBytes(bytes)
-        channelInput = channelInput.copy { psk = ByteString.copyFrom(bytes) }
-    }
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -90,49 +66,23 @@ fun EditChannelDialog(
                         ),
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                         onValueChanged = {
-                            channelInput = channelInput.copy { name = it }
-                            if (channelInput.psk == Channel.default.settings.psk) getRandomKey()
+                            channelInput = channelInput.copy {
+                                name = it
+                                if (psk == Channel.default.settings.psk) psk = Channel.getRandomKey()
+                            }
                         },
                         onFocusChanged = { isFocused = it.isFocused },
                     )
 
-                    OutlinedTextField(
-                        value = pskString,
-                        onValueChange = {
-                            try {
-                                pskString = it // empty (no crypto), 128 or 256 bit only
-                                val decoded = Base64.decode(it, Base64.DEFAULT).toByteString()
-                                val fullPsk = Channel(channelSettings { psk = decoded }).psk
-                                if (fullPsk.size() in setOf(0, 16, 32)) {
-                                    channelInput = channelInput.copy { psk = decoded }
-                                }
-                            } catch (ex: Throwable) {
-                                // Base64 decode failed, pskError true
-                            }
-                        },
-                        modifier = modifier.fillMaxWidth(),
+                    EditBase64Preference(
+                        title = "PSK",
+                        value = channelInput.psk,
                         enabled = true,
-                        label = { Text("PSK") },
-                        isError = pskError,
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Password, imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(onDone = { }),
-                        trailingIcon = {
-                            IconButton(
-                                onClick = {
-                                    if (pskError) {
-                                        channelInput = channelInput.copy { psk = channelSettings.psk }
-                                        pskString = encodeToString(channelInput.psk)
-                                    } else getRandomKey()
-                                }
-                            ) {
-                                Icon(
-                                    if (pskError) Icons.TwoTone.Close else Icons.TwoTone.Refresh,
-                                    contentDescription = stringResource(R.string.reset),
-                                    tint = if (pskError) MaterialTheme.colors.error
-                                    else LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
-                                )
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        onValueChange = {
+                            val fullPsk = Channel(channelSettings { psk = it }).psk
+                            if (fullPsk.size() in setOf(0, 16, 32)) {
+                                channelInput = channelInput.copy { psk = it }
                             }
                         },
                     )
@@ -189,7 +139,7 @@ fun EditChannelDialog(
                     onClick = {
                         onAddClick(channelInput.copy { name = channelInput.name.trim() })
                     },
-                    enabled = !pskError,
+                    enabled = true,
                 ) { Text(stringResource(R.string.save)) }
             }
         }

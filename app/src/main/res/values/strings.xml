@@ -214,6 +214,8 @@
         <item quantity="other">Do you want to add %d new channels?</item>
     </plurals>
     <string name="replace">Replace</string>
+    <string name="wifi_qr_code_scan">Scan WiFi QR code</string>
+    <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>
     <string name="navigate_back">Navigate Back</string>
     <string name="battery">Battery</string>
     <string name="channel_utilization">Channel Utilization</string>

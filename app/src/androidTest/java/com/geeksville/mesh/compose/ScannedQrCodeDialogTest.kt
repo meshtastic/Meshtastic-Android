@@ -14,12 +14,10 @@ import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
-import com.google.protobuf.ByteString
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.security.SecureRandom
 
 @RunWith(AndroidJUnit4::class)
 class ScannedQrCodeDialogTest {
@@ -30,12 +28,7 @@ class ScannedQrCodeDialogTest {
     private fun getString(id: Int): String =
         InstrumentationRegistry.getInstrumentation().targetContext.getString(id)
 
-    private fun getRandomKey(): ByteString {
-        val random = SecureRandom()
-        val bytes = ByteArray(32)
-        random.nextBytes(bytes)
-        return ByteString.copyFrom(bytes)
-    }
+    private fun getRandomKey() = Channel.getRandomKey()
 
     private val channels = channelSet {
         settings.add(Channel.default.settings)
