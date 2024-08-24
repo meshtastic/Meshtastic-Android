@@ -1,17 +1,12 @@
 package com.geeksville.mesh.ui
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
@@ -21,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
@@ -35,11 +29,10 @@ import androidx.lifecycle.lifecycleScope
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.NodeDetailsViewModel
-import com.geeksville.mesh.ui.components.DeviceMetricsCard
-import com.geeksville.mesh.ui.components.DeviceMetricsChart
+import com.geeksville.mesh.ui.components.DeviceMetricsScreen
+import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 internal fun FragmentManager.navigateToNodeDetails(nodeNum: Int? = null) {
@@ -65,6 +58,9 @@ class NodeDetailsFragment : ScreenFragment("NodeDetails"), Logging {
         val nodeNum = arguments?.getInt("nodeNum")
         if (nodeNum != null)
             model.setSelectedNode(nodeNum)
+        /* We only need to get the nodes name once. */
+        var nodeName: String? = ""
+        lifecycleScope.launch { nodeName = model.getNodeName(nodeNum ?: 0) }
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -72,8 +68,7 @@ class NodeDetailsFragment : ScreenFragment("NodeDetails"), Logging {
                 AppTheme {
                     NodeDetailsScreen(
                         model = model,
-                        coroutineScope = lifecycleScope,
-                        nodeNum = nodeNum,
+                        nodeName = nodeName,
                         navigateBack = {
                             parentFragmentManager.popBackStack()
                         }
@@ -84,24 +79,23 @@ class NodeDetailsFragment : ScreenFragment("NodeDetails"), Logging {
     }
 }
 
-@SuppressLint("CoroutineCreationDuringComposition")
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NodeDetailsScreen(
     model: NodeDetailsViewModel = hiltViewModel(),
-    coroutineScope: CoroutineScope,
-    nodeNum: Int? = null,
+    nodeName: String?,
     navigateBack: () -> Unit,
 ) {
     // TODO Need to let user know when we don't have data to display
-    val data by model.dataEntries.collectAsStateWithLifecycle()
-    /* We only need to get the nodes name once. */
-    var nodeName: String? = ""
-    coroutineScope.launch { nodeName = model.getNodeName(nodeNum ?: 0) }
+
+    val deviceMetrics by model.deviceMetrics.collectAsStateWithLifecycle()
+    val environmentMetrics by model.environmentMetrics.collectAsStateWithLifecycle()
+
+    val pagerState = rememberPagerState(pageCount = { 2 })
 
     Scaffold(
         /*
-         * NOTE: Perhaps we can use a Pager to navigate from graph to graph.
-         *       The bottom bar could be used to enable other actions such as clear data.
+         * NOTE: The bottom bar could be used to enable other actions such as clear or export data.
          **/
         topBar = {
             TopAppBar(
@@ -124,22 +118,17 @@ fun NodeDetailsScreen(
         },
     ) { innerPadding ->
 
-        Column {
-            DeviceMetricsChart(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(fraction = 0.33f),
-                data.toList()
-            )
-
-            /* Device Metric Cards */
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
-                items(data.reversed()) { dataEntry -> DeviceMetricsCard(dataEntry) }
+        // TODO need tabs that help the user know what tab they are located in
+        // TODO it would be cool to animate swipe
+        HorizontalPager(
+            state = pagerState,
+        ) { page ->
+            // TODO Maybe the no data thing can be handled here also
+            when (page) {
+                0 -> DeviceMetricsScreen(innerPadding = innerPadding, telemetries = deviceMetrics)
+                1 -> EnvironmentMetricsScreen(innerPadding = innerPadding, telemetries = environmentMetrics)
             }
+
         }
     }
 }

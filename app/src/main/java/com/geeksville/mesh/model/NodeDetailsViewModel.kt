@@ -2,8 +2,7 @@ package com.geeksville.mesh.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.DeviceMetrics
-import com.geeksville.mesh.TelemetryProtos
+import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.database.MeshLogRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -14,10 +13,6 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/**
- * Contains the data necessary to build the Device Metrics Chart.
- */
-data class DataEntry(val time: Long, val deviceMetrics: DeviceMetrics)
 
 @HiltViewModel
 class NodeDetailsViewModel @Inject constructor(
@@ -25,12 +20,11 @@ class NodeDetailsViewModel @Inject constructor(
     private val meshLogRepository: MeshLogRepository
 ) : ViewModel() {
 
-    // TODO Switch this to use the proto buf directly, this will impact our composable functions.
-    private val _dataEntry = MutableStateFlow<List<DataEntry>>(emptyList())
-    val dataEntries: StateFlow<List<DataEntry>> = _dataEntry
+    private val _deviceMetrics = MutableStateFlow<List<Telemetry>>(emptyList())
+    val deviceMetrics: StateFlow<List<Telemetry>> = _deviceMetrics
 
-    private val _environmentMetrics = MutableStateFlow<List<TelemetryProtos.EnvironmentMetrics>>(emptyList())
-    val environmentMetrics: StateFlow<List<TelemetryProtos.EnvironmentMetrics>> = _environmentMetrics
+    private val _environmentMetrics = MutableStateFlow<List<Telemetry>>(emptyList())
+    val environmentMetrics: StateFlow<List<Telemetry>> = _environmentMetrics
 
     /**
      * Gets the short name of the node identified by `nodeNum`.
@@ -46,16 +40,17 @@ class NodeDetailsViewModel @Inject constructor(
     fun setSelectedNode(nodeNum: Int) {
         viewModelScope.launch {
             meshLogRepository.getTelemetryFrom(nodeNum).collect {
-                val deviceMet = mutableListOf<DataEntry>()
-                val environmentMet = mutableListOf<TelemetryProtos.EnvironmentMetrics>()
+                val deviceList = mutableListOf<Telemetry>()
+                val environmentList = mutableListOf<Telemetry>()
                 for (telemetry in it) {
-                    val time = telemetry.time * 1000.0.toLong() // TODO Won't need
                     if (telemetry.hasDeviceMetrics())
-                        deviceMet.add(DataEntry(time = time, DeviceMetrics(telemetry.deviceMetrics)))
-                    if (telemetry.hasEnvironmentMetrics())
-                        environmentMet.add(telemetry.environmentMetrics)
+                        deviceList.add(telemetry)
+                    /* Avoiding negative outliers */
+                    if (telemetry.hasEnvironmentMetrics() && telemetry.environmentMetrics.relativeHumidity >= 0f)
+                        environmentList.add(telemetry)
                 }
-                _dataEntry.value = deviceMet
+                _deviceMetrics.value = deviceList
+                _environmentMetrics.value = environmentList
             }
         }
     }

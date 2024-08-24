@@ -220,4 +220,7 @@
     <string name="air_utilization">Air Utilization</string>
     <string name="device_metrics">Device Metrics</string>
     <string name="node_details">Node Details</string>
+    <string name="environment_metrics">Environment Metrics</string>
+    <string name="temperature">Temperature</string>
+    <string name="humidity">Humidity</string>
 </resources>
