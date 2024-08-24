@@ -278,7 +278,7 @@ class MeshService : Service(), Logging {
 
         loadSettings() // Load our last known node DB
 
-         start()
+         startPacketReset()
 
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
@@ -326,19 +326,17 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private var resetJob: Job? = null
+    private var packetResetJob: Job? = null
 
     private lateinit var nodeListConfig: NodeListConfig
 
-    fun start() {
-
-        println("****************** starting packet resetter!")
-        resetJob?.cancel()
+    fun startPacketReset() {
+        packetResetJob?.cancel()
 
         nodeListConfig = applicationConfigRepository.getNodeListConfig()
         val interval = nodeListConfig.interval
 
-        resetJob = serviceScope.launch {
+        packetResetJob = serviceScope.launch {
             while (true) {
                 delay(interval * 1000L)
                 resetPacketCounter()
@@ -349,9 +347,8 @@ class MeshService : Service(), Logging {
     fun setUpdatePacketResetCounterInterval(newInterval: Int) {
         val updatedConfig = nodeListConfig.copy(interval = newInterval)
         applicationConfigRepository.saveNodeListConfig(updatedConfig)
-        resetJob?.cancel()
-        println("********** NEW INTERVAL " + newInterval.toString())
-        start()
+        packetResetJob?.cancel()
+        startPacketReset()
     }
 
     private suspend fun resetPacketCounter() {
@@ -362,12 +359,10 @@ class MeshService : Service(), Logging {
                 it.sendPackets = 0
             }
         }
-
-        println("******************  Packet counter has been reset.")
     }
 
     fun stop() {
-        resetJob?.cancel() // Anuluj zadanie
+        packetResetJob?.cancel()
     }
 
     override fun onDestroy() {
