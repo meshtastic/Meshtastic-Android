@@ -1257,6 +1257,9 @@ class MeshService : Service(), Logging {
                 MeshProtos.FromRadio.QUEUESTATUS_FIELD_NUMBER -> handleQueueStatus(proto.queueStatus)
                 MeshProtos.FromRadio.METADATA_FIELD_NUMBER -> handleMetadata(proto.metadata)
                 MeshProtos.FromRadio.MQTTCLIENTPROXYMESSAGE_FIELD_NUMBER -> handleMqttProxyMessage(proto.mqttClientProxyMessage)
+                MeshProtos.FromRadio.CLIENTNOTIFICATION_FIELD_NUMBER -> {
+                    handleClientNotification(proto.clientNotification)
+                }
                 else -> errormsg("Unexpected FromRadio variant")
             }
         } catch (ex: InvalidProtocolBufferException) {
@@ -1475,6 +1478,11 @@ class MeshService : Service(), Logging {
                 else -> {}
             }
         }
+    }
+
+    private fun handleClientNotification(notification: MeshProtos.ClientNotification) {
+        debug("Received clientNotification ${notification.toOneLineString()}")
+        radioConfigRepository.setErrorMessage(notification.message)
     }
 
     /**
