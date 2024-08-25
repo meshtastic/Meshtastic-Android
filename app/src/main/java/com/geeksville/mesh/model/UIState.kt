@@ -370,7 +370,7 @@ class UIViewModel @Inject constructor(
         }
 
     // managed mode disables all access to configuration
-    val isManaged: Boolean get() = config.device.isManaged
+    val isManaged: Boolean get() = config.device.isManaged || config.security.isManaged
 
     val myNodeNum get() = myNodeInfo.value?.myNodeNum
     val maxChannels get() = myNodeInfo.value?.maxChannels ?: 8
