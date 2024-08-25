@@ -173,7 +173,7 @@ enum class ConfigRoute(val title: String, val configType: Int = 0) {
     DISPLAY("Display", 4),
     LORA("LoRa", 5),
     BLUETOOTH("Bluetooth", 6),
-    SECURITY("Security", 7),
+    SECURITY("Security", configType = 7),
     ;
 }
 
