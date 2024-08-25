@@ -52,6 +52,7 @@ data class Channel(
         get() = settings.name.ifEmpty {
             // We have a new style 'empty' channel name.  Use the same logic from the device to convert that to a human readable name
             if (loraConfig.usePreset) when (loraConfig.modemPreset) {
+                ModemPreset.SHORT_TURBO -> "ShortTurbo"
                 ModemPreset.SHORT_FAST -> "ShortFast"
                 ModemPreset.SHORT_SLOW -> "ShortSlow"
                 ModemPreset.MEDIUM_FAST -> "MediumFast"
