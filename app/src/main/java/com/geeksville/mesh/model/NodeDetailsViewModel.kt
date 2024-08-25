@@ -29,10 +29,7 @@ class NodeDetailsViewModel @Inject constructor(
     /**
      * Gets the short name of the node identified by `nodeNum`.
      */
-    @OptIn(ExperimentalCoroutinesApi::class)
-    suspend fun getNodeName(nodeNum: Int): String? {
-        return nodeDB.nodeDBbyNum.mapLatest { it[nodeNum] }.first()?.user?.shortName
-    }
+    fun getNodeName(nodeNum: Int): String? = nodeDB.nodeDBbyNum.value[nodeNum]?.user?.shortName
 
     /**
      * Used to set the Node for which the user will see charts for.

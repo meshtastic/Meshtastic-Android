@@ -69,9 +69,8 @@ class NodeDetailsFragment : ScreenFragment("NodeDetails"), Logging {
         val nodeNum = arguments?.getInt("nodeNum")
         if (nodeNum != null)
             model.setSelectedNode(nodeNum)
-        /* We only need to get the nodes name once. */
-        var nodeName: String? = ""
-        lifecycleScope.launch { nodeName = model.getNodeName(nodeNum ?: 0) }
+
+        val nodeName = model.getNodeName(nodeNum ?: 0)
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
@@ -159,13 +158,19 @@ fun HorizontalTabs(pagerState: PagerState) {
             else
                 Color.LightGray
 
-            val imageVector = if (iteration == 0)
-                ImageVector.vectorResource(R.drawable.baseline_charging_station_24)
+            val (imageVector, contentDescription) = if (iteration == 0)
+                Pair(ImageVector.vectorResource(
+                    R.drawable.baseline_charging_station_24),
+                    stringResource(R.string.device_metrics)
+                )
             else
-                ImageVector.vectorResource(R.drawable.baseline_thermostat_24)
+                Pair(
+                    ImageVector.vectorResource(R.drawable.baseline_thermostat_24),
+                    stringResource(R.string.environment_metrics)
+                )
             Icon(
-                imageVector = imageVector,
-                contentDescription = stringResource(R.string.tab),
+                imageVector,
+                contentDescription,
                 tint = color
             )
         }
