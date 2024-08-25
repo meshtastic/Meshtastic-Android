@@ -85,11 +85,12 @@ class MQTTRepository @Inject constructor(
 
         val callback = object : MqttCallbackExtended {
             override fun connectComplete(reconnect: Boolean, serverURI: String) {
-                info("MQTT connectComplete: $serverURI reconnect: $reconnect ")
-                channelSet.subscribeList.forEach { globalId ->
-                    subscribe("$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/#")
-                    if (mqttConfig.jsonEnabled) subscribe("$rootTopic$JSON_TOPIC_LEVEL$globalId/#")
+                info("MQTT connectComplete: $serverURI reconnect: $reconnect")
+                channelSet.subscribeList.ifEmpty { return }.forEach { globalId ->
+                    subscribe("$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/+")
+                    if (mqttConfig.jsonEnabled) subscribe("$rootTopic$JSON_TOPIC_LEVEL$globalId/+")
                 }
+                subscribe("$rootTopic${DEFAULT_TOPIC_LEVEL}PKI/+")
             }
 
             override fun connectionLost(cause: Throwable) {
