@@ -5,7 +5,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -16,10 +22,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
@@ -96,7 +107,7 @@ fun NodeDetailsScreen(
     Scaffold(
         /*
          * NOTE: The bottom bar could be used to enable other actions such as clear or export data.
-         **/
+         */
         topBar = {
             TopAppBar(
                 backgroundColor = colorResource(R.color.toolbarBackground),
@@ -105,6 +116,7 @@ fun NodeDetailsScreen(
                     Text(
                         text = "${stringResource(R.string.node_details)}: $nodeName",
                     )
+                    HorizontalTabs(pagerState)
                 },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
@@ -117,18 +129,47 @@ fun NodeDetailsScreen(
             )
         },
     ) { innerPadding ->
-
-        // TODO need tabs that help the user know what tab they are located in
-        // TODO it would be cool to animate swipe
-        HorizontalPager(
-            state = pagerState,
-        ) { page ->
-            // TODO Maybe the no data thing can be handled here also
+        HorizontalPager(state = pagerState) { page ->
             when (page) {
-                0 -> DeviceMetricsScreen(innerPadding = innerPadding, telemetries = deviceMetrics)
-                1 -> EnvironmentMetricsScreen(innerPadding = innerPadding, telemetries = environmentMetrics)
+                0 -> DeviceMetricsScreen(
+                    innerPadding = innerPadding,
+                    telemetries = deviceMetrics
+                )
+                1 -> EnvironmentMetricsScreen(
+                    innerPadding = innerPadding,
+                    telemetries = environmentMetrics
+                )
             }
+        }
+    }
+}
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun HorizontalTabs(pagerState: PagerState) {
+
+    Row(
+        Modifier
+            .wrapContentHeight()
+            .fillMaxWidth()
+            .padding(bottom = 8.dp),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        repeat(pagerState.pageCount) { iteration ->
+            val color = if (pagerState.currentPage == iteration)
+                colorResource(R.color.toolbarText)
+            else
+                Color.LightGray
+
+            val imageVector = if (iteration == 0)
+                ImageVector.vectorResource(R.drawable.baseline_charging_station_24)
+            else
+                ImageVector.vectorResource(R.drawable.baseline_thermostat_24)
+            Icon(
+                imageVector = imageVector,
+                contentDescription = stringResource(R.string.tab),
+                tint = color
+            )
         }
     }
 }

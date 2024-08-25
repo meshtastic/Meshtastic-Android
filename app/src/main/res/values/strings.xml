@@ -225,4 +225,5 @@
     <string name="environment_metrics">Environment Metrics</string>
     <string name="temperature">Temperature</string>
     <string name="humidity">Humidity</string>
+    <string name="tab">Tab</string>
 </resources>
