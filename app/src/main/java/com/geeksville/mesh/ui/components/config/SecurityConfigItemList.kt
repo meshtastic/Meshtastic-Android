@@ -113,6 +113,7 @@ fun SecurityConfigItemList(
                 enabled = securityInput != securityConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
+                    securityInput = securityConfig
                 },
                 onSaveClicked = {
                     focusManager.clearFocus()
