@@ -194,7 +194,7 @@ class UIViewModel @Inject constructor(
         nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
     }.stateIn(
         scope = viewModelScope,
-        started = WhileSubscribed(STOP_TIMEOUT_MILLIS),
+        started = WhileSubscribed(5_000),
         initialValue = emptyList(),
     )
 
@@ -315,7 +315,6 @@ class UIViewModel @Inject constructor(
     }
 
     companion object {
-        private const val STOP_TIMEOUT_MILLIS = 5_000L
         fun getPreferences(context: Context): SharedPreferences =
             context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
     }

@@ -1,3 +1,5 @@
+@file:Suppress("TooManyFunctions")
+
 package com.geeksville.mesh.ui.components
 
 import android.graphics.Paint
