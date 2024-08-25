@@ -85,6 +85,7 @@ import com.geeksville.mesh.ui.components.config.PositionConfigItemList
 import com.geeksville.mesh.ui.components.config.PowerConfigItemList
 import com.geeksville.mesh.ui.components.config.RangeTestConfigItemList
 import com.geeksville.mesh.ui.components.config.RemoteHardwareConfigItemList
+import com.geeksville.mesh.ui.components.config.SecurityConfigItemList
 import com.geeksville.mesh.ui.components.config.SerialConfigItemList
 import com.geeksville.mesh.ui.components.config.StoreForwardConfigItemList
 import com.geeksville.mesh.ui.components.config.TelemetryConfigItemList
@@ -172,6 +173,7 @@ enum class ConfigRoute(val title: String, val configType: Int = 0) {
     DISPLAY("Display", 4),
     LORA("LoRa", 5),
     BLUETOOTH("Bluetooth", 6),
+    SECURITY("Security", 7),
     ;
 }
 
@@ -478,6 +480,16 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { bluetoothInput ->
                     val config = config { bluetooth = bluetoothInput }
+                    viewModel.setRemoteConfig(destNum, config)
+                }
+            )
+        }
+        composable(ConfigRoute.SECURITY.name) {
+            SecurityConfigItemList(
+                securityConfig = radioConfigState.radioConfig.security,
+                enabled = connected,
+                onConfirm = { securityInput ->
+                    val config = config { security = securityInput }
                     viewModel.setRemoteConfig(destNum, config)
                 }
             )
