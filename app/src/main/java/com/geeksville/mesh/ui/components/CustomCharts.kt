@@ -89,7 +89,7 @@ fun DeviceMetricsScreen(innerPadding: PaddingValues, telemetries: List<Telemetry
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            items(telemetries.reversed()) { dataEntry -> DeviceMetricsCard(dataEntry) }
+            items(telemetries.reversed()) { telemetry -> DeviceMetricsCard(telemetry) }
         }
     }
 }
@@ -110,7 +110,7 @@ fun EnvironmentMetricsScreen(innerPadding: PaddingValues, telemetries: List<Tele
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            items(telemetries.reversed()) { envMetric -> EnvironmentMetricsCard(telemetry = envMetric)}
+            items(telemetries.reversed()) { telemetry -> EnvironmentMetricsCard(telemetry)}
         }
     }
 }
@@ -119,10 +119,9 @@ fun EnvironmentMetricsScreen(innerPadding: PaddingValues, telemetries: List<Tele
 @Composable
 private fun DeviceMetricsChart(modifier: Modifier = Modifier, telemetries: List<Telemetry>) {
 
+    ChartHeader(amount = telemetries.size, title = stringResource(R.string.device_metrics))
     if (telemetries.isEmpty())
         return
-
-    ChartHeader(amount = telemetries.size, title = stringResource(R.string.device_metrics))
 
     Spacer(modifier = Modifier.height(16.dp))
 
@@ -209,10 +208,9 @@ private fun DeviceMetricsChart(modifier: Modifier = Modifier, telemetries: List<
 @Composable
 private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: List<Telemetry>) {
 
+    ChartHeader(amount = telemetries.size, title = stringResource(R.string.environment_metrics))
     if (telemetries.isEmpty())
         return
-
-    ChartHeader(amount = telemetries.size, title = stringResource(R.string.environment_metrics))
 
     Spacer(modifier = Modifier.height(16.dp))
 

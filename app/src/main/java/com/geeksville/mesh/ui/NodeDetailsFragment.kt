@@ -97,8 +97,6 @@ fun NodeDetailsScreen(
     nodeName: String?,
     navigateBack: () -> Unit,
 ) {
-    // TODO Need to let user know when we don't have data to display
-
     val deviceMetrics by model.deviceMetrics.collectAsStateWithLifecycle()
     val environmentMetrics by model.environmentMetrics.collectAsStateWithLifecycle()
 
