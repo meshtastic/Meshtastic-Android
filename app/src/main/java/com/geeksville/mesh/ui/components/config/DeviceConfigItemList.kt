@@ -49,22 +49,6 @@ fun DeviceConfigItemList(
         item { Divider() }
 
         item {
-            SwitchPreference(title = "Serial output enabled",
-                checked = deviceInput.serialEnabled,
-                enabled = enabled,
-                onCheckedChange = { deviceInput = deviceInput.copy { serialEnabled = it } })
-        }
-        item { Divider() }
-
-        item {
-            SwitchPreference(title = "Debug log enabled",
-                checked = deviceInput.debugLogEnabled,
-                enabled = enabled,
-                onCheckedChange = { deviceInput = deviceInput.copy { debugLogEnabled = it } })
-        }
-        item { Divider() }
-
-        item {
             EditTextPreference(title = "Redefine PIN_BUTTON",
                 value = deviceInput.buttonGpio,
                 enabled = enabled,
@@ -111,16 +95,6 @@ fun DeviceConfigItemList(
                 enabled = enabled,
                 onCheckedChange = {
                     deviceInput = deviceInput.copy { doubleTapAsButtonPress = it }
-                })
-        }
-        item { Divider() }
-
-        item {
-            SwitchPreference(title = "Managed mode",
-                checked = deviceInput.isManaged,
-                enabled = enabled,
-                onCheckedChange = {
-                    deviceInput = deviceInput.copy { isManaged = it }
                 })
         }
         item { Divider() }

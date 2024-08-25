@@ -19,7 +19,7 @@ class ModuleConfigRepository @Inject constructor(
         .catch { exception ->
             // dataStore.data throws an IOException when an error is encountered when reading data
             if (exception is IOException) {
-                errormsg("Error reading LocalConfig settings: ${exception.message}")
+                errormsg("Error reading LocalModuleConfig settings: ${exception.message}")
                 emit(LocalModuleConfig.getDefaultInstance())
             } else {
                 throw exception
@@ -35,97 +35,16 @@ class ModuleConfigRepository @Inject constructor(
     /**
      * Updates [LocalModuleConfig] from each [ModuleConfig] oneOf.
      */
-    suspend fun setLocalModuleConfig(config: ModuleConfig) {
-        if (config.hasMqtt()) setMQTTConfig(config.mqtt)
-        if (config.hasSerial()) setSerialConfig(config.serial)
-        if (config.hasExternalNotification()) setExternalNotificationConfig(config.externalNotification)
-        if (config.hasStoreForward()) setStoreForwardConfig(config.storeForward)
-        if (config.hasRangeTest()) setRangeTestConfig(config.rangeTest)
-        if (config.hasTelemetry()) setTelemetryConfig(config.telemetry)
-        if (config.hasCannedMessage()) setCannedMessageConfig(config.cannedMessage)
-        if (config.hasAudio()) setAudioConfig(config.audio)
-        if (config.hasRemoteHardware()) setRemoteHardwareConfig(config.remoteHardware)
-        if (config.hasNeighborInfo()) setNeighborInfoConfig(config.neighborInfo)
-        if (config.hasAmbientLighting()) setAmbientLightingConfig(config.ambientLighting)
-        if (config.hasDetectionSensor()) setDetectionSensorConfig(config.detectionSensor)
-        if (config.hasPaxcounter()) setPaxcounterConfig(config.paxcounter)
-    }
-
-    private suspend fun setMQTTConfig(config: ModuleConfig.MQTTConfig) {
-        moduleConfigStore.updateData { preference ->
-            preference.toBuilder().setMqtt(config).build()
+    suspend fun setLocalModuleConfig(config: ModuleConfig) = moduleConfigStore.updateData {
+        val builder = it.toBuilder()
+        config.allFields.forEach { (field, value) ->
+            val localField = it.descriptorForType.findFieldByName(field.name)
+            if (localField != null) {
+                builder.setField(localField, value)
+            } else {
+                errormsg("Error writing LocalModuleConfig settings: ${config.payloadVariantCase}")
+            }
         }
-    }
-
-    private suspend fun setSerialConfig(config: ModuleConfig.SerialConfig) {
-        moduleConfigStore.updateData { preference ->
-            preference.toBuilder().setSerial(config).build()
-        }
-    }
-
-    private suspend fun setExternalNotificationConfig(config: ModuleConfig.ExternalNotificationConfig) {
-        moduleConfigStore.updateData { preference ->
-            preference.toBuilder().setExternalNotification(config).build()
-        }
-    }
-
-    private suspend fun setStoreForwardConfig(config: ModuleConfig.StoreForwardConfig) {
-        moduleConfigStore.updateData { preference ->
-            preference.toBuilder().setStoreForward(config).build()
-        }
-    }
-
-    private suspend fun setRangeTestConfig(config: ModuleConfig.RangeTestConfig) {
-        moduleConfigStore.updateData { preference ->
-            preference.toBuilder().setRangeTest(config).build()
-        }
-    }
-
-    private suspend fun setTelemetryConfig(config: ModuleConfig.TelemetryConfig) {
-        moduleConfigStore.updateData { preference ->
-            preference.toBuilder().setTelemetry(config).build()
-        }
-    }
-
-    private suspend fun setCannedMessageConfig(config: ModuleConfig.CannedMessageConfig) {
-        moduleConfigStore.updateData { preference ->
-            preference.toBuilder().setCannedMessage(config).build()
-        }
-    }
-
-    private suspend fun setAudioConfig(config: ModuleConfig.AudioConfig) {
-        moduleConfigStore.updateData { preference ->
-            preference.toBuilder().setAudio(config).build()
-        }
-    }
-
-    private suspend fun setRemoteHardwareConfig(config: ModuleConfig.RemoteHardwareConfig) {
-        moduleConfigStore.updateData { preference ->
-            preference.toBuilder().setRemoteHardware(config).build()
-        }
-    }
-
-    private suspend fun setNeighborInfoConfig(config: ModuleConfig.NeighborInfoConfig) {
-        moduleConfigStore.updateData { preference ->
-            preference.toBuilder().setNeighborInfo(config).build()
-        }
-    }
-
-    private suspend fun setAmbientLightingConfig(config: ModuleConfig.AmbientLightingConfig) {
-        moduleConfigStore.updateData { preference ->
-            preference.toBuilder().setAmbientLighting(config).build()
-        }
-    }
-
-    private suspend fun setDetectionSensorConfig(config: ModuleConfig.DetectionSensorConfig) {
-        moduleConfigStore.updateData { preference ->
-            preference.toBuilder().setDetectionSensor(config).build()
-        }
-    }
-
-    private suspend fun setPaxcounterConfig(config: ModuleConfig.PaxcounterConfig) {
-        moduleConfigStore.updateData { preference ->
-            preference.toBuilder().setPaxcounter(config).build()
-        }
+        builder.build()
     }
 }

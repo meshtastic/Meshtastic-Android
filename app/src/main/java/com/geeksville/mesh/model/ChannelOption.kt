@@ -60,6 +60,7 @@ internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
     return 0f
 }
 
+@Suppress("MagicNumber")
 enum class RegionInfo(
     val regionCode: RegionCode,
     val freqStart: Float,
@@ -69,7 +70,7 @@ enum class RegionInfo(
     EU_433(RegionCode.EU_433, 433.0f, 434.0f),
     EU_868(RegionCode.EU_868, 869.4f, 869.65f),
     CN(RegionCode.CN, 470.0f, 510.0f),
-    JP(RegionCode.JP, 920.8f, 927.8f),
+    JP(RegionCode.JP, 920.5f, 923.5f),
     ANZ(RegionCode.ANZ, 915.0f, 928.0f),
     RU(RegionCode.RU, 868.7f, 869.2f),
     KR(RegionCode.KR, 920.0f, 923.0f),
@@ -92,6 +93,7 @@ enum class ChannelOption(
     val configRes: Int,
     val bandwidth: Float,
 ) {
+    SHORT_TURBO(ModemPreset.SHORT_TURBO, R.string.modem_config_turbo, bandwidth = .500f),
     SHORT_FAST(ModemPreset.SHORT_FAST, R.string.modem_config_short, .250f),
     SHORT_SLOW(ModemPreset.SHORT_SLOW, R.string.modem_config_slow_short, .250f),
     MEDIUM_FAST(ModemPreset.MEDIUM_FAST, R.string.modem_config_medium, .250f),
@@ -99,6 +101,5 @@ enum class ChannelOption(
     LONG_FAST(ModemPreset.LONG_FAST, R.string.modem_config_long, .250f),
     LONG_MODERATE(ModemPreset.LONG_MODERATE, R.string.modem_config_mod_long, .125f),
     LONG_SLOW(ModemPreset.LONG_SLOW, R.string.modem_config_slow_long, .125f),
-    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, R.string.modem_config_very_long, .0625f),
     ;
 }
