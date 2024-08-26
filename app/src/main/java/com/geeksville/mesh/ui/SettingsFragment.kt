@@ -138,24 +138,16 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private fun initCommonUI() {
 
-        val requestBackgroundAndCheckLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-                if (permissions.entries.any { !it.value }) {
-                    debug("User denied background permission")
-                    model.showSnackbar(getString(R.string.why_background_required))
-                }
-            }
-
-        val requestLocationAndBackgroundLauncher =
+        val requestLocationPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 if (permissions.entries.all { it.value }) {
-                    // Older versions of android only need Location permission
-                    if (!requireContext().hasBackgroundPermission())
-                        requestBackgroundAndCheckLauncher.launch(requireContext().getBackgroundPermissions())
+                    model.provideLocation.value = true
+                    model.meshService?.startProvideLocation()
                 } else {
                     debug("User denied location permission")
                     model.showSnackbar(getString(R.string.why_background_required))
                 }
+                bluetoothViewModel.permissionsUpdated()
             }
 
         // init our region spinner
@@ -240,7 +232,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
             // Don't check the box until the system setting changes
-            view.isChecked = isChecked && requireContext().hasBackgroundPermission()
+            view.isChecked = isChecked && requireContext().hasLocationPermission()
 
             if (view.isPressed) { // We want to ignore changes caused by code (as opposed to the user)
                 debug("User changed location tracking to $isChecked")
@@ -255,9 +247,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                         .setPositiveButton(getString(R.string.accept)) { _, _ ->
                             // Make sure we have location permission (prerequisite)
                             if (!requireContext().hasLocationPermission()) {
-                                requestLocationAndBackgroundLauncher.launch(requireContext().getLocationPermissions())
-                            } else {
-                                requestBackgroundAndCheckLauncher.launch(requireContext().getBackgroundPermissions())
+                                requestLocationPermissionLauncher.launch(requireContext().getLocationPermissions())
                             }
                         }
                         .show()

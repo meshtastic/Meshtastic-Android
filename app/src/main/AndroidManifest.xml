@@ -29,7 +29,6 @@
     <!-- Permissions required for providing location (from phone GPS) to mesh -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <!-- This permission is required for analytics - and soon the MQTT gateway -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -48,6 +47,7 @@
     <!-- We run our mesh code as a foreground service - FIXME, find a way to stop doing this -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 
     <!-- Needed to open our bluetooth connection to our paired device (after reboot) -->
@@ -104,7 +104,7 @@
         <service
             android:name="com.geeksville.mesh.service.MeshService"
             android:enabled="true"
-            android:foregroundServiceType="connectedDevice"
+            android:foregroundServiceType="connectedDevice|location"
             android:exported="true" tools:ignore="ExportedActivity">
             <intent-filter>
                 <action android:name="com.geeksville.mesh.Service" />
