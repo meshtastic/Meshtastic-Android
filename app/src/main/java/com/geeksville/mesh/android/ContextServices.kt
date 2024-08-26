@@ -146,21 +146,6 @@ fun Context.getLocationPermissions(): Array<String> {
 fun Context.hasLocationPermission() = getLocationPermissions().isEmpty()
 
 /**
- * A list of missing background location permissions (or empty if we already have what we need)
- */
-fun Context.getBackgroundPermissions(): Array<String> {
-    val perms = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
-
-    if (android.os.Build.VERSION.SDK_INT >= 29) // only added later
-        perms.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-
-    return getMissingPermissions(perms)
-}
-
-/** @return true if the user already has background location permission */
-fun Context.hasBackgroundPermission() = getBackgroundPermissions().isEmpty()
-
-/**
  * Notification permission (or empty if we already have what we need)
  */
 fun Context.getNotificationPermissions(): Array<String> {
