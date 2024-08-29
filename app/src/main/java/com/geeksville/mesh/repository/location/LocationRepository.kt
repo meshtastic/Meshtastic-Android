@@ -1,8 +1,10 @@
 package com.geeksville.mesh.repository.location
 
-import android.annotation.SuppressLint
+import android.Manifest.permission.ACCESS_COARSE_LOCATION
+import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.app.Application
 import android.location.LocationManager
+import androidx.annotation.RequiresPermission
 import androidx.core.location.LocationCompat
 import androidx.core.location.LocationListenerCompat
 import androidx.core.location.LocationManagerCompat
@@ -10,7 +12,6 @@ import androidx.core.location.LocationRequestCompat
 import androidx.core.location.altitude.AltitudeConverterCompat
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.hasBackgroundPermission
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
@@ -32,9 +33,8 @@ class LocationRepository @Inject constructor(
     private val _receivingLocationUpdates: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val receivingLocationUpdates: StateFlow<Boolean> get() = _receivingLocationUpdates
 
-    @SuppressLint("MissingPermission")
+    @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     private fun LocationManager.requestLocationUpdates() = callbackFlow {
-        if (!context.hasBackgroundPermission()) close()
 
         val intervalMs = 30 * 1000L // 30 seconds
         val minDistanceM = 0f
@@ -96,5 +96,6 @@ class LocationRepository @Inject constructor(
     /**
      * Observable flow for location updates
      */
+    @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     fun getLocations() = locationManager.get().requestLocationUpdates()
 }

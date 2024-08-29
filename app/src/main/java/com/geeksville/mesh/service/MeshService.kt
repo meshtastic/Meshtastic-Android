@@ -1,5 +1,6 @@
 package com.geeksville.mesh.service
 
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -17,7 +18,7 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
-import com.geeksville.mesh.android.hasBackgroundPermission
+import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.MeshLog
@@ -175,7 +176,8 @@ class MeshService : Service(), Logging {
         // If we're already observing updates, don't register again
         if (locationFlow?.isActive == true) return
 
-        if (hasBackgroundPermission()) {
+        @SuppressLint("MissingPermission")
+        if (hasLocationPermission()) {
             locationFlow = locationRepository.getLocations().onEach { location ->
                 sendPosition(
                     position {
@@ -299,7 +301,7 @@ class MeshService : Service(), Logging {
                 serviceNotifications.notifyId,
                 notification,
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
                 } else {
                     0
                 },
