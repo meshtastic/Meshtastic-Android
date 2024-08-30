@@ -29,8 +29,8 @@ data class MeshUser(
     val shortName: String,
     val hwModel: MeshProtos.HardwareModel,
     val isLicensed: Boolean = false,
-    @ColumnInfo(name = "role", defaultValue = "0")
-    val role: Int = 0,
+    @ColumnInfo(name = "role", defaultValue = "-1")
+    val role: Int = -1,
 ) : Parcelable {
 
     override fun toString(): String {

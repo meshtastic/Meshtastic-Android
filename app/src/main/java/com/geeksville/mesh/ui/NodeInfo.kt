@@ -85,7 +85,12 @@ fun NodeInfo(
     val (textColor, nodeColor) = thatNodeInfo.colors
 
     val position = thatNodeInfo.position
-    val hwInfoString = thatNodeInfo.user?.hwModelString
+    val hwInfoString = thatNodeInfo.user?.hwModelString ?: MeshProtos.HardwareModel.UNSET.name
+    val roleName = thatNodeInfo.user?.role?.let { role ->
+        DeviceConfig.Role.forNumber(role)?.name
+    } ?: DeviceConfig.Role.UNRECOGNIZED.name
+    val nodeId = thatNodeInfo.user?.id ?: "???"
+
 
     val highlight = Color(0x33FFFFFF)
     val bgColor by animateColorAsState(
@@ -244,26 +249,25 @@ fun NodeInfo(
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            if (hwInfoString != null) {
-                                Text(
-                                    text = "$hwInfoString",
-                                    fontSize = MaterialTheme.typography.button.fontSize,
-                                    style = style,
-                                )
-                            }
-                            val role = thatNodeInfo.user?.role
-                            role?.let {
-                                Text(
-                                    text = DeviceConfig.Role.forNumber(it).name,
-                                    fontSize = MaterialTheme.typography.button.fontSize
-                                )
-                            }
-                            val nodeId = thatNodeInfo.user?.id
-                            if (nodeId != null) {
-                                Text(text = nodeId, fontSize = MaterialTheme.typography.button.fontSize)
-                            }
+                            Text(
+                                modifier = Modifier.weight(1f),
+                                text = hwInfoString,
+                                fontSize = MaterialTheme.typography.button.fontSize,
+                                style = style,
+                            )
+                            Text(
+                                modifier = Modifier.weight(1f),
+                                text = roleName,
+                                textAlign = TextAlign.Center,
+                                fontSize = MaterialTheme.typography.button.fontSize
+                            )
+                            Text(
+                                modifier = Modifier.weight(1f),
+                                text = nodeId,
+                                textAlign = TextAlign.End,
+                                fontSize = MaterialTheme.typography.button.fontSize
+                            )
                         }
                     }
                 }
