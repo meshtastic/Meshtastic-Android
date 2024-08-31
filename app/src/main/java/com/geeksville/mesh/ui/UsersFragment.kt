@@ -82,6 +82,10 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 R.id.remote_admin -> {
                     navigateToRadioConfig(node)
                 }
+
+                R.id.more_details -> {
+                    navigateToMoreDetails(node)
+                }
             }
         }
     }
@@ -95,6 +99,11 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     private fun navigateToRadioConfig(node: NodeInfo) {
         info("calling RadioConfig --> destNum: ${node.num}")
         parentFragmentManager.navigateToRadioConfig(node.num)
+    }
+
+    private fun navigateToMoreDetails(node: NodeInfo) {
+        info("calling MoreDetails --> destNum: ${node.num}")
+        parentFragmentManager.navigateToNodeDetails(node.num)
     }
 
 
