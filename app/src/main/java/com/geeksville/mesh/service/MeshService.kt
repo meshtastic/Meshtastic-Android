@@ -14,6 +14,7 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.*
+import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos.MeshPacket
@@ -421,6 +422,7 @@ class MeshService : Service(), Logging {
             longName = getString(R.string.unknown_username),
             shortName = getString(R.string.unknown_node_short_name),
             hwModel = MeshProtos.HardwareModel.UNSET,
+            role = -1,
         )
         NodeInfo(n, defaultUser)
     }
@@ -803,7 +805,8 @@ class MeshService : Service(), Logging {
                 p.longName,
                 p.shortName,
                 p.hwModel,
-                p.isLicensed
+                p.isLicensed,
+                p.roleValue
             )
             it.channel = channel
         }
@@ -1231,7 +1234,7 @@ class MeshService : Service(), Logging {
 
     private fun onRadioConnectionState(state: RadioServiceConnectionState) {
         // sleep now disabled by default on ESP32, permanent is true unless light sleep enabled
-        val isRouter = localConfig.device.role == ConfigProtos.Config.DeviceConfig.Role.ROUTER
+        val isRouter = localConfig.device.role == DeviceConfig.Role.ROUTER
         val lsEnabled = localConfig.power.isPowerSaving || isRouter
         val connected = state.isConnected
         val permanent = state.isPermanent || !lsEnabled
