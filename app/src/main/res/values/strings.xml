@@ -25,6 +25,8 @@
     <string name="node_sort_last_heard">Last heard</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
 
+    <string name="more_details">More Details</string>
+
     <string name="elevation_suffix" translatable="false">MSL</string>
 
     <string name="channel_name">Channel Name</string>
@@ -215,4 +217,13 @@
     <string name="replace">Replace</string>
     <string name="wifi_qr_code_scan">Scan WiFi QR code</string>
     <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>
+    <string name="navigate_back">Navigate Back</string>
+    <string name="battery">Battery</string>
+    <string name="channel_utilization">Channel Utilization</string>
+    <string name="air_utilization">Air Utilization</string>
+    <string name="device_metrics">Device Metrics</string>
+    <string name="node_details">Node Details</string>
+    <string name="environment_metrics">Environment Metrics</string>
+    <string name="temperature">Temperature</string>
+    <string name="humidity">Humidity</string>
 </resources>
