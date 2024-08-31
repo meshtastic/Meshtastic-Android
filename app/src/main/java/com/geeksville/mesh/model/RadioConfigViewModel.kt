@@ -338,7 +338,7 @@ class RadioConfigViewModel @Inject constructor(
             setResponseStateError(ex.customMessage)
         }
         if (hasConfig()) {
-            val descriptor = config.descriptorForType
+            val descriptor = ConfigProtos.Config.getDescriptor()
             config.allFields.forEach { (field, value) ->
                 val newConfig = ConfigProtos.Config.newBuilder()
                     .setField(descriptor.findFieldByName(field.name), value)
@@ -347,7 +347,7 @@ class RadioConfigViewModel @Inject constructor(
             }
         }
         if (hasModuleConfig()) {
-            val descriptor = moduleConfig.descriptorForType
+            val descriptor = ModuleConfigProtos.ModuleConfig.getDescriptor()
             moduleConfig.allFields.forEach { (field, value) ->
                 val newConfig = ModuleConfigProtos.ModuleConfig.newBuilder()
                     .setField(descriptor.findFieldByName(field.name), value)
