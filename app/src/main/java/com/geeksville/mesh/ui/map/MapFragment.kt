@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -52,7 +53,6 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.model.map.MarkerWithLabel
 import com.geeksville.mesh.ui.ScreenFragment
-import com.geeksville.mesh.ui.components.IconButton
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.formatAgo
@@ -643,13 +643,14 @@ fun MapView(
                 modifier = Modifier
                     .padding(top = 16.dp, end = 16.dp)
                     .align(Alignment.TopEnd),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                IconButton(
+                MapButton(
                     onClick = { showMapStyleDialog() },
                     drawableRes = R.drawable.ic_twotone_layers_24,
                     contentDescription = R.string.map_style_selection,
                 )
-                IconButton(
+                MapButton(
                     onClick = {
                         if (context.hasLocationPermission()) map.toggleMyLocation()
                         else requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
@@ -658,7 +659,6 @@ fun MapView(
                     drawableRes = if (myLocationOverlay == null) R.drawable.ic_twotone_my_location_24
                     else R.drawable.ic_twotone_location_disabled_24,
                     contentDescription = null,
-                    modifier = Modifier.padding(top = 8.dp),
                 )
             }
         }
