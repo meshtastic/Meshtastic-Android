@@ -8,7 +8,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -77,7 +76,7 @@ private object ChartConstants {
 }
 
 @Composable
-fun DeviceMetricsScreen(innerPadding: PaddingValues, telemetries: List<Telemetry>) {
+fun DeviceMetricsScreen(telemetries: List<Telemetry>) {
     Column {
         DeviceMetricsChart(
             modifier = Modifier
@@ -87,9 +86,7 @@ fun DeviceMetricsScreen(innerPadding: PaddingValues, telemetries: List<Telemetry
         )
         /* Device Metric Cards */
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+            modifier = Modifier.fillMaxSize()
         ) {
             items(telemetries.reversed()) { telemetry -> DeviceMetricsCard(telemetry) }
         }
@@ -97,7 +94,7 @@ fun DeviceMetricsScreen(innerPadding: PaddingValues, telemetries: List<Telemetry
 }
 
 @Composable
-fun EnvironmentMetricsScreen(innerPadding: PaddingValues, telemetries: List<Telemetry>) {
+fun EnvironmentMetricsScreen(telemetries: List<Telemetry>) {
     Column {
         EnvironmentMetricsChart(
             modifier = Modifier
@@ -108,9 +105,7 @@ fun EnvironmentMetricsScreen(innerPadding: PaddingValues, telemetries: List<Tele
 
         /* Environment Metric Cards */
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+            modifier = Modifier.fillMaxSize()
         ) {
             items(telemetries.reversed()) { telemetry -> EnvironmentMetricsCard(telemetry)}
         }
