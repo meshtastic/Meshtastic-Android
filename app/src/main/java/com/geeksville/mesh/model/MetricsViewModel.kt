@@ -16,27 +16,27 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.enums.EnumEntries
 
-enum class NodeDetailPage(
+enum class MetricsPage(
     @StringRes val titleResId: Int,
     @DrawableRes val drawableResId: Int,
 ) {
-    DEVICE(R.string.device_metrics, R.drawable.baseline_charging_station_24),
-    ENVIRONMENT(R.string.environment_metrics, R.drawable.baseline_thermostat_24),
+    DEVICE(R.string.device, R.drawable.baseline_charging_station_24),
+    ENVIRONMENT(R.string.environment, R.drawable.baseline_thermostat_24),
 }
 
-data class NodeDetailsState(
-    val pages: EnumEntries<NodeDetailPage> = NodeDetailPage.entries,
+data class MetricsState(
+    val pages: EnumEntries<MetricsPage> = MetricsPage.entries,
     val isLoading: Boolean = false,
     val deviceMetrics: List<Telemetry> = emptyList(),
     val environmentMetrics: List<Telemetry> = emptyList(),
 ) {
     companion object {
-        val Empty = NodeDetailsState()
+        val Empty = MetricsState()
     }
 }
 
 @HiltViewModel
-class NodeDetailsViewModel @Inject constructor(
+class MetricsViewModel @Inject constructor(
     val nodeDB: NodeDB,
     private val meshLogRepository: MeshLogRepository
 ) : ViewModel() {
@@ -50,7 +50,7 @@ class NodeDetailsViewModel @Inject constructor(
         _deviceMetrics,
         _environmentMetrics,
     ) { isLoading, device, environment ->
-        NodeDetailsState(
+        MetricsState(
             isLoading = isLoading,
             deviceMetrics = device,
             environmentMetrics = environment,
@@ -58,7 +58,7 @@ class NodeDetailsViewModel @Inject constructor(
     }.stateIn(
         scope = viewModelScope,
         started = WhileSubscribed(5_000),
-        initialValue = NodeDetailsState.Empty,
+        initialValue = MetricsState.Empty,
     )
 
     /**

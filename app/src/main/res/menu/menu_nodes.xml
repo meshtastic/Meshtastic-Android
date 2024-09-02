@@ -32,8 +32,8 @@
     </group>
     <group android:id="@+id/group_both">
         <item
-            android:id="@+id/more_details"
-            android:title="@string/more_details"
+            android:id="@+id/metrics"
+            android:title="@string/metrics"
             app:showAsAction="withText" />
     </group>
 </menu>
