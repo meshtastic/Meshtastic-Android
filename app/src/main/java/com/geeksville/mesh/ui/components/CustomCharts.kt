@@ -406,10 +406,8 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        val text = "%s %.2f%%  %s %.2f%%".format(
-                            stringResource(R.string.channel_utilization),
+                        val text = stringResource(R.string.channel_air_util).format(
                             deviceMetrics.channelUtilization,
-                            stringResource(R.string.air_utilization),
                             deviceMetrics.airUtilTx
                         )
                         Text(

@@ -4,10 +4,12 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.preview.NodeInfoPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 
@@ -18,7 +20,7 @@ fun signalInfo(
     isThisNode: Boolean
 ): Boolean {
     val text = if (isThisNode) {
-        "ChUtil %.1f%% AirUtilTX %.1f%%".format(
+        stringResource(R.string.channel_air_util).format(
             nodeInfo.deviceMetrics?.channelUtilization,
             nodeInfo.deviceMetrics?.airUtilTx
         )

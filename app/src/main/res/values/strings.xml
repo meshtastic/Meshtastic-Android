@@ -28,6 +28,7 @@
     <string name="more_details">More Details</string>
 
     <string name="elevation_suffix" translatable="false">MSL</string>
+    <string name="channel_air_util" translatable="false">ChUtil %.1f%% AirUtilTX %.1f%%</string>
 
     <string name="channel_name">Channel Name</string>
     <string name="channel_options">Channel options</string>
