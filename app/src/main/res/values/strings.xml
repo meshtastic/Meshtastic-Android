@@ -226,4 +226,5 @@
     <string name="temperature">Temperature</string>
     <string name="humidity">Humidity</string>
     <string name="logs">Logs</string>
+    <string name="hops_away">Hops Away</string>
 </resources>

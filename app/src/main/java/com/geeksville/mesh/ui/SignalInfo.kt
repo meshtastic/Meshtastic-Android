@@ -32,7 +32,7 @@ fun signalInfo(
                     add("RSSI: %d SNR: %.1f".format(nodeInfo.rssi, nodeInfo.snr))
                 }
             } else {
-                add("Hops Away: %d".format(nodeInfo.hopsAway))
+                add("%s: %d".format(stringResource(R.string.hops_away), nodeInfo.hopsAway))
             }
         }.joinToString(" ")
     }
