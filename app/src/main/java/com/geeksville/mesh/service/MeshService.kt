@@ -190,6 +190,7 @@ class MeshService : Service(), Logging {
                         time = (location.time / 1000).toInt()
                         groundSpeed = location.speed.toInt()
                         groundTrack = location.bearing.toInt()
+                        locationSource = MeshProtos.Position.LocSource.LOC_EXTERNAL
                     }
                 )
             }.launchIn(serviceScope)
