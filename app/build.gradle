@@ -146,7 +146,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$appcompat_version"
     // For loading and tinting drawables on older versions of the platform
     implementation "androidx.appcompat:appcompat-resources:$appcompat_version"
-    implementation "androidx.emoji2:emoji2-emojipicker:1.4.0"
+    implementation "androidx.emoji2:emoji2-emojipicker:1.5.0"
 
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.core:core-location-altitude:1.0.0-alpha02'
