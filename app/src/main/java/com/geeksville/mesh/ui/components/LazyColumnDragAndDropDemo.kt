@@ -20,10 +20,8 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.scrollBy
-import androidx.compose.foundation.gestures.stopScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -192,19 +190,10 @@ internal constructor(
                 draggingItem.index == state.firstVisibleItemIndex ||
                 targetItem.index == state.firstVisibleItemIndex
             ) {
-//                state.requestScrollToItem( FIXME 1.7.0 method
-//                    state.firstVisibleItemIndex,
-//                    state.firstVisibleItemScrollOffset
-//                )
-                scope.launch {
-                    if (state.isScrollInProgress) {
-                        state.stopScroll()
-                    }
-                    state.scrollToItem(
-                        state.firstVisibleItemIndex,
-                        state.firstVisibleItemScrollOffset
-                    )
-                }
+                state.requestScrollToItem(
+                    state.firstVisibleItemIndex,
+                    state.firstVisibleItemScrollOffset
+                )
             }
             onMove.invoke(draggingItem.index - headerCount, targetItem.index - headerCount)
             draggingItemIndex = targetItem.index
@@ -248,7 +237,6 @@ fun Modifier.dragContainer(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LazyItemScope.DraggableItem(
     dragDropState: DragDropState,
@@ -266,7 +254,7 @@ fun LazyItemScope.DraggableItem(
             .zIndex(1f)
             .graphicsLayer { translationY = dragDropState.previousItemOffset.value }
     } else {
-        Modifier.animateItemPlacement()
+        Modifier.animateItem(fadeInSpec = null, fadeOutSpec = null)
     }
     Column(modifier = modifier.then(draggingModifier)) { content(dragging) }
 }

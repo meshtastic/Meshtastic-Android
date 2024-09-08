@@ -326,7 +326,8 @@ class RadioConfigViewModel @Inject constructor(
         if (hasLongName() || hasShortName()) destNode.value?.user?.let {
             val user = it.copy(
                 longName = if (hasLongName()) longName else it.longName,
-                shortName = if (hasShortName()) shortName else it.shortName
+                shortName = if (hasShortName()) shortName else it.shortName,
+                hwModel = MeshProtos.HardwareModel.UNSET,
             )
             if (it != user) setOwner(user.toProto())
         }
@@ -337,28 +338,22 @@ class RadioConfigViewModel @Inject constructor(
             setResponseStateError(ex.customMessage)
         }
         if (hasConfig()) {
-            setConfig(config { device = config.device })
-            setConfig(config { position = config.position })
-            setConfig(config { power = config.power })
-            setConfig(config { network = config.network })
-            setConfig(config { display = config.display })
-            setConfig(config { lora = config.lora })
-            setConfig(config { bluetooth = config.bluetooth })
+            val descriptor = ConfigProtos.Config.getDescriptor()
+            config.allFields.forEach { (field, value) ->
+                val newConfig = ConfigProtos.Config.newBuilder()
+                    .setField(descriptor.findFieldByName(field.name), value)
+                    .build()
+                setConfig(newConfig)
+            }
         }
-        if (hasModuleConfig()) moduleConfig.let {
-            setModuleConfig(moduleConfig { mqtt = it.mqtt })
-            setModuleConfig(moduleConfig { serial = it.serial })
-            setModuleConfig(moduleConfig { externalNotification = it.externalNotification })
-            setModuleConfig(moduleConfig { storeForward = it.storeForward })
-            setModuleConfig(moduleConfig { rangeTest = it.rangeTest })
-            setModuleConfig(moduleConfig { telemetry = it.telemetry })
-            setModuleConfig(moduleConfig { cannedMessage = it.cannedMessage })
-            setModuleConfig(moduleConfig { audio = it.audio })
-            setModuleConfig(moduleConfig { remoteHardware = it.remoteHardware })
-            setModuleConfig(moduleConfig { neighborInfo = it.neighborInfo })
-            setModuleConfig(moduleConfig { ambientLighting = it.ambientLighting })
-            setModuleConfig(moduleConfig { detectionSensor = it.detectionSensor })
-            setModuleConfig(moduleConfig { paxcounter = it.paxcounter })
+        if (hasModuleConfig()) {
+            val descriptor = ModuleConfigProtos.ModuleConfig.getDescriptor()
+            moduleConfig.allFields.forEach { (field, value) ->
+                val newConfig = ModuleConfigProtos.ModuleConfig.newBuilder()
+                    .setField(descriptor.findFieldByName(field.name), value)
+                    .build()
+                setModuleConfig(newConfig)
+            }
         }
         meshService?.commitEditSettings()
     }

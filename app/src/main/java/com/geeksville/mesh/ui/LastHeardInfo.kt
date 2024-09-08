@@ -20,8 +20,10 @@ import com.geeksville.mesh.util.formatAgo
 @Composable
 fun LastHeardInfo(
     modifier: Modifier = Modifier,
-    lastHeard: Int
+    lastHeard: Int,
+    currentTimeMillis: Long,
 ) {
+
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -34,7 +36,7 @@ fun LastHeardInfo(
             tint = MaterialTheme.colors.onSurface,
         )
         Text(
-            text = formatAgo(lastHeard),
+            text = formatAgo(lastHeard, currentTimeMillis),
             color = MaterialTheme.colors.onSurface,
             fontSize = MaterialTheme.typography.button.fontSize
         )
@@ -45,6 +47,9 @@ fun LastHeardInfo(
 @Composable
 fun LastHeardInfoPreview() {
     AppTheme {
-        LastHeardInfo(lastHeard = (System.currentTimeMillis() / 1000).toInt() - 8600)
+        LastHeardInfo(
+            lastHeard = (System.currentTimeMillis() / 1000).toInt() - 8600,
+            currentTimeMillis = System.currentTimeMillis()
+        )
     }
 }

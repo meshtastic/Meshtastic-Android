@@ -30,4 +30,10 @@
             android:title="@string/device_settings"
             app:showAsAction="withText" />
     </group>
+    <group android:id="@+id/group_both">
+        <item
+            android:id="@+id/metrics"
+            android:title="@string/metrics"
+            app:showAsAction="withText" />
+    </group>
 </menu>

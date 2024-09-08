@@ -2,6 +2,13 @@
 <resources>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">vymazať filter uzlov</string>
+    <string name="node_filter_include_unknown">Vrátane neznámych</string>
+    <string name="node_sort_alpha">A-Z</string>
+    <string name="node_sort_channel">Kanál</string>
+    <string name="node_sort_distance">Vzdialenosť</string>
+    <string name="node_sort_hops_away">Počet skokov</string>
+    <string name="node_sort_last_heard">Posledný príjem</string>
+    <string name="node_sort_via_mqtt">cez MQTT</string>
     <string name="channel_name">Názov kanála</string>
     <string name="channel_options">Nastavenia kanála</string>
     <string name="qr_code">QR kód</string>
@@ -158,6 +165,7 @@
     <string name="device_settings">Konfigurácia vysielača</string>
     <string name="module_settings">Konfigurácia modulu</string>
     <string name="add">Pridať</string>
+    <string name="edit">Upraviť</string>
     <string name="calculating">Prepočítavanie…</string>
     <string name="map_offline_manager">Offline manager</string>
     <string name="map_cache_size">Aktuálna veľkosť cache</string>

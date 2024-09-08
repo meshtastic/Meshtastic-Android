@@ -14,6 +14,7 @@ import androidx.lifecycle.coroutineScope
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.android.hasBluetoothPermission
+import com.geeksville.mesh.util.registerReceiverCompat
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -46,7 +47,7 @@ class BluetoothRepository @Inject constructor(
         processLifecycle.coroutineScope.launch(dispatchers.default) {
             updateBluetoothState()
             bluetoothBroadcastReceiverLazy.get().let { receiver ->
-                application.registerReceiver(receiver, receiver.intentFilter)
+                application.registerReceiverCompat(receiver, receiver.intentFilter)
             }
         }
     }

@@ -17,6 +17,7 @@
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">clear node filter</string>
     <string name="node_filter_include_unknown">Include unknown</string>
+    <string name="node_filter_show_details">Show details</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Channel</string>
     <string name="node_sort_distance">Distance</string>
@@ -25,6 +26,7 @@
     <string name="node_sort_via_mqtt">via MQTT</string>
 
     <string name="elevation_suffix" translatable="false">MSL</string>
+    <string name="channel_air_util" translatable="false">ChUtil %.1f%% AirUtilTX %.1f%%</string>
 
     <string name="channel_name">Channel Name</string>
     <string name="channel_options">Channel options</string>
@@ -74,6 +76,7 @@
     <string name="app_too_old">Application update required</string>
     <string name="must_update">You must update this application on the app store (or Github). It is too old to talk to this radio firmware.  Please read our <a href="https://meshtastic.org/docs/software/android/installation">docs</a> on this topic.</string>
     <string name="none">None (disable)</string>
+    <string name="modem_config_turbo">Short Range / Turbo</string>
     <string name="modem_config_short">Short Range / Fast</string>
     <string name="modem_config_medium">Medium Range / Fast</string>
     <string name="modem_config_long">Long Range / Fast</string>
@@ -81,7 +84,7 @@
     <string name="modem_config_very_long">Very Long Range / Slow</string>
     <string name="modem_config_unrecognized">UNRECOGNIZED</string>
     <string name="meshtastic_service_notifications">Service notifications</string>
-    <string name="location_disabled_warning">Location must be turned on (high accuracy) to find new devices via bluetooth. You can turn it off again afterwards.</string>
+    <string name="location_disabled_warning">Location must be turned on to find new devices via Bluetooth. You can turn it off again afterwards.</string>
     <string name="about">About</string>
     <string name="a_list_of_nodes_in_the_mesh">A list of nodes in the mesh</string>
     <string name="text_messages">Text messages</string>
@@ -206,4 +209,22 @@
     <string name="mute_8_hours">8 hours</string>
     <string name="mute_1_week">1 week</string>
     <string name="mute_always">Always</string>
+    <plurals name="add_channel_from_qr">
+        <item quantity="one">Do you want to add a new channel?</item>
+        <item quantity="other">Do you want to add %d new channels?</item>
+    </plurals>
+    <string name="replace">Replace</string>
+    <string name="wifi_qr_code_scan">Scan WiFi QR code</string>
+    <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>
+    <string name="navigate_back">Navigate Back</string>
+    <string name="battery">Battery</string>
+    <string name="channel_utilization">Channel Utilization</string>
+    <string name="air_utilization">Air Utilization</string>
+    <string name="device">Device</string>
+    <string name="metrics">Metrics</string>
+    <string name="environment">Environment</string>
+    <string name="temperature">Temperature</string>
+    <string name="humidity">Humidity</string>
+    <string name="logs">Logs</string>
+    <string name="hops_away">Hops Away</string>
 </resources>

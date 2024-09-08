@@ -2,6 +2,7 @@
 <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
    <locale android:name="en"/> <!-- English (ultimate fallback locale) -->
    <locale android:name="bg"/> <!-- Bulgarian -->
+   <locale android:name="ca"/> <!-- Catalan -->
    <locale android:name="cs"/> <!-- Czech -->
    <locale android:name="zh-CN"/> <!-- Chinese Simplified -->
    <locale android:name="zh-TW"/> <!-- Chinese Traditional -->
@@ -9,6 +10,7 @@
    <locale android:name="es"/> <!-- Spanish (Spain) -->
    <locale android:name="fr"/> <!-- French (France) -->
    <locale android:name="ga"/> <!-- Irish -->
+   <locale android:name="gl"/> <!-- Galician -->
    <locale android:name="hr"/> <!-- Croatian -->
    <locale android:name="el"/> <!-- Greek -->
    <locale android:name="fr-HT"/> <!-- Haitian Creole -->

@@ -1,11 +1,9 @@
 package com.geeksville.mesh.android
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.NotificationManager
 import android.bluetooth.BluetoothManager
-import android.companion.CompanionDeviceManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
@@ -21,21 +19,9 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 val Context.bluetoothManager: BluetoothManager?
     get() = getSystemService(Context.BLUETOOTH_SERVICE).takeIf { hasBluetoothPermission() } as? BluetoothManager?
 
-val Context.companionDeviceManager: CompanionDeviceManager?
-    @SuppressLint("NewApi")
-    get() = getSystemService(Context.COMPANION_DEVICE_SERVICE).takeIf { hasCompanionDeviceApi() } as? CompanionDeviceManager?
-
 val Context.notificationManager: NotificationManager get() = requireNotNull(getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager?)
 
 val Context.locationManager: LocationManager get() = requireNotNull(getSystemService(Context.LOCATION_SERVICE) as? LocationManager?)
-
-/**
- * @return true if CompanionDeviceManager API is present
- */
-fun Context.hasCompanionDeviceApi(): Boolean =
-    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O)
-        packageManager.hasSystemFeature(PackageManager.FEATURE_COMPANION_DEVICE_SETUP)
-    else false
 
 /**
  * @return true if the device has a GPS receiver
@@ -126,7 +112,7 @@ fun Context.getBluetoothPermissions(): Array<String> {
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
         perms.add(Manifest.permission.BLUETOOTH_SCAN)
         perms.add(Manifest.permission.BLUETOOTH_CONNECT)
-    } else if (!hasCompanionDeviceApi()) {
+    } else {
         perms.add(Manifest.permission.ACCESS_FINE_LOCATION)
     }
     return getMissingPermissions(perms)
@@ -158,21 +144,6 @@ fun Context.getLocationPermissions(): Array<String> {
 
 /** @return true if the user already has location permission */
 fun Context.hasLocationPermission() = getLocationPermissions().isEmpty()
-
-/**
- * A list of missing background location permissions (or empty if we already have what we need)
- */
-fun Context.getBackgroundPermissions(): Array<String> {
-    val perms = mutableListOf(Manifest.permission.ACCESS_FINE_LOCATION)
-
-    if (android.os.Build.VERSION.SDK_INT >= 29) // only added later
-        perms.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-
-    return getMissingPermissions(perms)
-}
-
-/** @return true if the user already has background location permission */
-fun Context.hasBackgroundPermission() = getBackgroundPermissions().isEmpty()
 
 /**
  * Notification permission (or empty if we already have what we need)

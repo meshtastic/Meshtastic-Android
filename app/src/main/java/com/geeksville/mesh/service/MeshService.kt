@@ -1,5 +1,6 @@
 package com.geeksville.mesh.service
 
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -17,7 +18,7 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
-import com.geeksville.mesh.android.hasBackgroundPermission
+import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.MeshLog
@@ -175,7 +176,8 @@ class MeshService : Service(), Logging {
         // If we're already observing updates, don't register again
         if (locationFlow?.isActive == true) return
 
-        if (hasBackgroundPermission()) {
+        @SuppressLint("MissingPermission")
+        if (hasLocationPermission()) {
             locationFlow = locationRepository.getLocations().onEach { location ->
                 sendPosition(
                     position {
@@ -188,6 +190,7 @@ class MeshService : Service(), Logging {
                         time = (location.time / 1000).toInt()
                         groundSpeed = location.speed.toInt()
                         groundTrack = location.bearing.toInt()
+                        locationSource = MeshProtos.Position.LocSource.LOC_EXTERNAL
                     }
                 )
             }.launchIn(serviceScope)
@@ -293,14 +296,20 @@ class MeshService : Service(), Logging {
         // but if we don't really need foreground we immediately stop it.
         val notification = serviceNotifications.createServiceStateNotification(notificationSummary)
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-            startForeground(
+        try {
+            ServiceCompat.startForeground(
+                this,
                 serviceNotifications.notifyId,
                 notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
+                } else {
+                    0
+                },
             )
-        } else {
-            startForeground(serviceNotifications.notifyId, notification)
+        } catch (ex: Exception) {
+            errormsg("startForeground failed", ex)
+            return START_NOT_STICKY
         }
         return if (!wantForeground) {
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
@@ -369,6 +378,7 @@ class MeshService : Service(), Logging {
 
     private val configTotal by lazy { ConfigProtos.Config.getDescriptor().fields.size }
     private val moduleTotal by lazy { ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size }
+    private var sessionPasskey: ByteString = ByteString.EMPTY
 
     private var localConfig: LocalConfig = LocalConfig.getDefaultInstance()
     private var moduleConfig: LocalModuleConfig = LocalModuleConfig.getDefaultInstance()
@@ -436,8 +446,12 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private fun getLongName(num: Int) =
-        nodeDBbyNodeNum[num]?.user?.longName ?: getString(R.string.unknown_username)
+    private fun getUserName(num: Int): String {
+        val user = nodeDBbyNodeNum[num]?.user
+        val longName = user?.longName ?: getString(R.string.unknown_username)
+        val shortName = user?.shortName ?: DataPacket.nodeNumToDefaultId(num)
+        return "$longName ($shortName)"
+    }
 
     private val numNodes get() = nodeDBbyNodeNum.size
 
@@ -546,6 +560,7 @@ class MeshService : Service(), Logging {
         portnumValue = Portnums.PortNum.ADMIN_APP_VALUE
         payload = AdminProtos.AdminMessage.newBuilder().also {
             initFn(it)
+            it.sessionPasskey = sessionPasskey
         }.build().toByteString()
     }
 
@@ -727,9 +742,9 @@ class MeshService : Service(), Logging {
                         if (data.wantResponse) return // ignore data from traceroute requests
                         val parsed = MeshProtos.RouteDiscovery.parseFrom(data.payload)
                         radioConfigRepository.setTracerouteResponse(buildString {
-                            append("${getLongName(packet.to)} --> ")
-                            parsed.routeList.forEach { num -> append("${getLongName(num)} --> ") }
-                            append(getLongName(packet.from))
+                            append("${getUserName(packet.to)} --> ")
+                            parsed.routeList.forEach { num -> append("${getUserName(num)} --> ") }
+                            append(getUserName(packet.from))
                         })
                     }
 
@@ -755,7 +770,6 @@ class MeshService : Service(), Logging {
     }
 
     private fun handleReceivedAdmin(fromNodeNum: Int, a: AdminProtos.AdminMessage) {
-        // For the time being we only care about admin messages from our local node
         if (fromNodeNum == myNodeNum) {
             when (a.payloadVariantCase) {
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CONFIG_RESPONSE -> {
@@ -779,6 +793,9 @@ class MeshService : Service(), Logging {
                     warn("No special processing needed for ${a.payloadVariantCase}")
 
             }
+        } else {
+            debug("Admin: Received session_passkey from $fromNodeNum")
+            sessionPasskey = a.sessionPasskey
         }
     }
 
@@ -876,6 +893,9 @@ class MeshService : Service(), Logging {
         }
     }
 
+    // If apps try to send packets when our radio is sleeping, we queue them here instead
+    private val offlineSentPackets = mutableListOf<DataPacket>()
+
     /// Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
         if (haveNodeDB) {
@@ -948,21 +968,17 @@ class MeshService : Service(), Logging {
         sendToRadio(packet)
     }
 
-    private fun processQueuedPackets() = serviceScope.handledLaunch {
-        packetRepository.get().getQueuedPackets()?.forEach { p ->
-            // check for duplicate packet IDs before sending (so ACK/NAK updates can work)
-            if (getDataPacketById(p.id)?.time != p.time) {
-                val newId = generatePacketId()
-                debug("Replaced duplicate packet ID in queue: ${p.id}, with: $newId")
-                packetRepository.get().updateMessageId(p, newId)
-                p.id = newId
-            }
+    private fun processQueuedPackets() {
+        val sentPackets = mutableListOf<DataPacket>()
+        offlineSentPackets.forEach { p ->
             try {
                 sendNow(p)
+                sentPackets.add(p)
             } catch (ex: Exception) {
                 errormsg("Error sending queued message:", ex)
             }
         }
+        offlineSentPackets.removeAll(sentPackets)
     }
 
     private suspend fun getDataPacketById(packetId: Int): DataPacket? = withTimeoutOrNull(1000) {
@@ -1037,7 +1053,7 @@ class MeshService : Service(), Logging {
                 val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
 
                 // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
-                updateNodeInfoTime(it, rxTime)
+                it.lastHeard = rxTime
                 it.snr = packet.rxSnr
                 it.rssi = packet.rxRssi
 
@@ -1248,6 +1264,9 @@ class MeshService : Service(), Logging {
                 MeshProtos.FromRadio.QUEUESTATUS_FIELD_NUMBER -> handleQueueStatus(proto.queueStatus)
                 MeshProtos.FromRadio.METADATA_FIELD_NUMBER -> handleMetadata(proto.metadata)
                 MeshProtos.FromRadio.MQTTCLIENTPROXYMESSAGE_FIELD_NUMBER -> handleMqttProxyMessage(proto.mqttClientProxyMessage)
+                MeshProtos.FromRadio.CLIENTNOTIFICATION_FIELD_NUMBER -> {
+                    handleClientNotification(proto.clientNotification)
+                }
                 else -> errormsg("Unexpected FromRadio variant")
             }
         } catch (ex: InvalidProtocolBufferException) {
@@ -1358,7 +1377,6 @@ class MeshService : Service(), Logging {
         radioConfigRepository.setStatusMessage("Nodes (${newNodes.size} / 100)")
     }
 
-
     private var rawMyNodeInfo: MeshProtos.MyNodeInfo? = null
     private var rawDeviceMetadata: MeshProtos.DeviceMetadata? = null
 
@@ -1468,6 +1486,11 @@ class MeshService : Service(), Logging {
         }
     }
 
+    private fun handleClientNotification(notification: MeshProtos.ClientNotification) {
+        debug("Received clientNotification ${notification.toOneLineString()}")
+        radioConfigRepository.setErrorMessage(notification.message)
+    }
+
     /**
      * Connect, subscribe and receive Flow of MqttClientProxyMessage (toRadio)
      */
@@ -1493,7 +1516,7 @@ class MeshService : Service(), Logging {
     /// If we've received our initial config, our radio settings and all of our channels, send any queued packets and broadcast connected to clients
     private fun onHasSettings() {
 
-        // processQueuedPackets() // send any packets that were queued up FIXME
+        processQueuedPackets() // send any packets that were queued up
         startMqttClientProxy()
 
         // broadcast an intent with our new connection state
@@ -1538,7 +1561,7 @@ class MeshService : Service(), Logging {
                 if (deviceVersion < minDeviceVersion || appVersion < minAppVersion) {
                     info("Device firmware or app is too old, faking config so firmware update can occur")
                     clearLocalConfig()
-                    setLocalConfig(config { device = device.copy { isManaged = true } })
+                    setLocalConfig(config { security = security.copy { isManaged = true } })
                 }
                 onHasSettings()
             }
@@ -1693,6 +1716,12 @@ class MeshService : Service(), Logging {
         }
     }
 
+    private fun enqueueForSending(p: DataPacket) {
+        if (p.dataType in rememberDataType) {
+            offlineSentPackets.add(p)
+        }
+    }
+
     private val binder = object : IMeshService.Stub() {
 
         override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
@@ -1759,6 +1788,9 @@ class MeshService : Service(), Logging {
                     sendNow(p)
                 } catch (ex: Exception) {
                     errormsg("Error sending message, so enqueueing", ex)
+                    enqueueForSending(p)
+                } else {
+                    enqueueForSending(p)
                 }
                 serviceBroadcasts.broadcastMessageStatus(p)
 
@@ -1954,7 +1986,7 @@ class MeshService : Service(), Logging {
 
         override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {
             sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
-                factoryReset = 1
+                factoryResetDevice = 1
             })
         }
 
@@ -1964,8 +1996,4 @@ class MeshService : Service(), Logging {
             })
         }
     }
-}
-
-fun updateNodeInfoTime(it: NodeInfo, rxTime: Int) {
-    it.lastHeard = rxTime
 }

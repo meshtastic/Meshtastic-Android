@@ -3,7 +3,8 @@ package com.geeksville.mesh.ui.map
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,13 +16,13 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun CacheLayout(
     cacheEstimate: String,
@@ -33,7 +34,7 @@ internal fun CacheLayout(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .background(colorResource(R.color.colorAdvancedBackground))
+            .background(color = MaterialTheme.colors.background)
             .padding(8.dp),
     ) {
         Text(
@@ -54,15 +55,15 @@ internal fun CacheLayout(
             color = MaterialTheme.colors.onBackground.copy(alpha = ContentAlpha.medium),
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
         ) {
             Button(
                 onClick = onCancelDownload,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 8.dp),
+                modifier = Modifier.weight(1f),
             ) {
                 Text(
                     text = stringResource(id = R.string.cancel),
@@ -71,9 +72,7 @@ internal fun CacheLayout(
             }
             Button(
                 onClick = onExecuteJob,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp),
+                modifier = Modifier.weight(1f),
             ) {
                 Text(
                     text = stringResource(id = R.string.map_start_download),

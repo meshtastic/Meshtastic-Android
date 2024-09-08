@@ -8,7 +8,7 @@ import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -30,7 +30,7 @@ fun DeviceConfigItemList(
     onSaveClicked: (DeviceConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var deviceInput by remember(deviceConfig) { mutableStateOf(deviceConfig) }
+    var deviceInput by rememberSaveable { mutableStateOf(deviceConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -45,22 +45,6 @@ fun DeviceConfigItemList(
                     .map { it to it.name },
                 selectedItem = deviceInput.role,
                 onItemSelected = { deviceInput = deviceInput.copy { role = it } })
-        }
-        item { Divider() }
-
-        item {
-            SwitchPreference(title = "Serial output enabled",
-                checked = deviceInput.serialEnabled,
-                enabled = enabled,
-                onCheckedChange = { deviceInput = deviceInput.copy { serialEnabled = it } })
-        }
-        item { Divider() }
-
-        item {
-            SwitchPreference(title = "Debug log enabled",
-                checked = deviceInput.debugLogEnabled,
-                enabled = enabled,
-                onCheckedChange = { deviceInput = deviceInput.copy { debugLogEnabled = it } })
         }
         item { Divider() }
 
@@ -111,16 +95,6 @@ fun DeviceConfigItemList(
                 enabled = enabled,
                 onCheckedChange = {
                     deviceInput = deviceInput.copy { doubleTapAsButtonPress = it }
-                })
-        }
-        item { Divider() }
-
-        item {
-            SwitchPreference(title = "Managed mode",
-                checked = deviceInput.isManaged,
-                enabled = enabled,
-                onCheckedChange = {
-                    deviceInput = deviceInput.copy { isManaged = it }
                 })
         }
         item { Divider() }

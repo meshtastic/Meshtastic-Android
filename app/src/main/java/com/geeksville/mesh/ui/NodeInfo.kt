@@ -1,3 +1,12 @@
+@file:Suppress(
+    "FunctionNaming",
+    "LongMethod",
+    "LongParameterList",
+    "DestructuringDeclarationWithTooManyEntries",
+    "MagicNumber",
+    "CyclomaticComplexMethod",
+)
+
 package com.geeksville.mesh.ui
 
 import androidx.compose.animation.animateColorAsState
@@ -6,15 +15,22 @@ import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.repeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.selection.DisableSelection
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Card
 import androidx.compose.material.Chip
 import androidx.compose.material.ChipDefaults
+import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
@@ -22,6 +38,9 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -32,9 +51,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
@@ -53,8 +71,10 @@ fun NodeInfo(
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
     isIgnored: Boolean = false,
-    onClicked: () -> Unit = {},
+    chipClicked: () -> Unit = {},
     blinking: Boolean = false,
+    expanded: Boolean = false,
+    currentTimeMillis: Long,
 ) {
     val unknownShortName = stringResource(id = R.string.unknown_node_short_name)
     val unknownLongName = stringResource(id = R.string.unknown_username)
@@ -63,6 +83,9 @@ fun NodeInfo(
     val isThisNode = thisNodeInfo?.num == thatNodeInfo.num
     val distance = thisNodeInfo?.distanceStr(thatNodeInfo, distanceUnits)
     val (textColor, nodeColor) = thatNodeInfo.colors
+
+    val position = thatNodeInfo.position
+    val hwInfoString = thatNodeInfo.user?.hwModelString
 
     val highlight = Color(0x33FFFFFF)
     val bgColor by animateColorAsState(
@@ -74,222 +97,175 @@ fun NodeInfo(
                 easing = FastOutSlowInEasing
             ),
             repeatMode = RepeatMode.Reverse
-        ), label = "blinking node"
+        ),
+        label = "blinking node"
     )
+
+    val style = if (thatNodeInfo.user?.hwModel == MeshProtos.HardwareModel.UNSET) {
+        LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)
+    } else {
+        LocalTextStyle.current
+    }
+
+    val (detailsShown, showDetails) = remember { mutableStateOf(expanded) }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
-            .defaultMinSize(minHeight = 80.dp)
+            .defaultMinSize(minHeight = 80.dp),
+        onClick = { showDetails(!detailsShown) },
     ) {
         Surface {
-            ConstraintLayout(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(bgColor)
-                    .padding(8.dp)
-            ) {
-                val (chip, dist, name, hw, pos, alt, sats, batt, heard, sig, env) = createRefs()
-                val barrierBattHeard = createStartBarrier(batt, heard)
-                val sigBarrier = createBottomBarrier(pos, heard)
-
-                Box(
-                    // removes the extra spacing above the chip
+            SelectionContainer {
+                Column(
                     modifier = Modifier
-                        .height(32.dp)
-                        .constrainAs(chip) {
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                        }
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .background(bgColor)
                 ) {
-                    Chip(
-                        modifier = Modifier.width(72.dp),
-                        onClick = onClicked,
-                        colors = ChipDefaults.chipColors(
-                            backgroundColor = Color(nodeColor),
-                            contentColor = Color(textColor)
-                        ),
-                        content = {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = thatNodeInfo.user?.shortName ?: unknownShortName,
-                                fontWeight = FontWeight.Normal,
-                                fontSize = MaterialTheme.typography.button.fontSize,
-                                textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
-                                textAlign = TextAlign.Center,
-                            )
-                        },
-                    )
-                }
-
-                if (distance != null) {
-                    Text(
-                        modifier = Modifier.constrainAs(dist) {
-                            top.linkTo(chip.bottom, 8.dp)
-                            start.linkTo(chip.start)
-                            end.linkTo(chip.end)
-                        },
-                        text = distance,
-                        fontSize = MaterialTheme.typography.button.fontSize,
-                    )
-                }
-
-                val style = if (thatNodeInfo.user?.hwModel == MeshProtos.HardwareModel.UNSET) {
-                    LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)
-                } else {
-                    LocalTextStyle.current
-                }
-                Text(
-                    modifier = Modifier.constrainAs(name) {
-                        top.linkTo(parent.top)
-                        linkTo(
-                            start = chip.end,
-                            end = barrierBattHeard,
-                            bias = 0F,
-                            startMargin = 8.dp,
-                            endMargin = 8.dp,
-                            )
-                        width = Dimension.preferredWrapContent
-                    },
-                    text = nodeName,
-                    style = style,
-                    textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
-                )
-
-                val hwInfoString = thatNodeInfo.user?.hwModelString
-                if (hwInfoString != null){
-                    Text(
-                        modifier = Modifier.constrainAs(hw) {
-                            linkTo(
-                                top = name.bottom,
-                                bottom = pos.top,
-                                bias = 0F,
-                                topMargin = 4.dp,
-                                bottomMargin = 4.dp
-                            )
-                            linkTo(
-                                start = name.start,
-                                end = barrierBattHeard,
-                                bias = 0F,
-                                endMargin = 8.dp
-                            )
-                            width = Dimension.preferredWrapContent
-                        },
-                        text = hwInfoString,
-                        fontSize = MaterialTheme.typography.caption.fontSize,
-                        style = style,
-                    )
-                }
-
-                val position = thatNodeInfo.position
-                LinkedCoordinates(
-                    modifier = Modifier.constrainAs(pos) {
-                        linkTo(
-                            top = hw.bottom,
-                            bottom = sig.top,
-                            bias = 0F,
-                            topMargin = 4.dp,
-                            bottomMargin = 4.dp
-                        )
-                        linkTo(
-                            start = name.start,
-                            end = barrierBattHeard,
-                            bias = 0F,
-                            endMargin = 8.dp
-                        )
-                        width = Dimension.preferredWrapContent
-                    },
-                    position = position,
-                    format = gpsFormat,
-                    nodeName = nodeName
-                )
-
-                val signalShown = signalInfo(
-                    modifier = Modifier.constrainAs(sig) {
-                        top.linkTo(sigBarrier, 4.dp)
-                        bottom.linkTo(env.top, 4.dp)
-                        end.linkTo(parent.end)
-                    },
-                    nodeInfo = thatNodeInfo,
-                    isThisNode = isThisNode
-                )
-
-                if (position?.isValid() == true) {
-                    val system = ConfigProtos.Config.DisplayConfig.DisplayUnits.forNumber(distanceUnits)
-                    val altitude = position.altitude.metersIn(system)
-                    val elevationSuffix = stringResource(id = R.string.elevation_suffix)
-
-                    ElevationInfo(
-                        modifier = Modifier.constrainAs(alt) {
-                            top.linkTo(pos.bottom, 4.dp)
-                            if (signalShown) {
-                                baseline.linkTo(sig.baseline)
-                            }
-                            linkTo(
-                                start = pos.start,
-                                end = sig.start,
-                                endMargin = 8.dp,
-                                bias = 0F,
-                            )
-                            width = Dimension.preferredWrapContent
-                        },
-                        altitude = altitude,
-                        system = system,
-                        suffix = elevationSuffix
-                    )
-
-                    val satCount = position.satellitesInView
-                    if (satCount > 0) {
-                        SatelliteCountInfo(
-                            modifier = Modifier.constrainAs(sats) {
-                                top.linkTo(alt.bottom, 4.dp)
-                                linkTo(
-                                    start = pos.start,
-                                    end = env.start,
-                                    endMargin = 8.dp,
-                                    bias = 0F,
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Chip(
+                            modifier = Modifier
+                                .width(IntrinsicSize.Min)
+                                .padding(end = 8.dp)
+                                .defaultMinSize(minHeight = 32.dp, minWidth = 72.dp),
+                            colors = ChipDefaults.chipColors(
+                                backgroundColor = Color(nodeColor),
+                                contentColor = Color(textColor)
+                            ),
+                            onClick = { chipClicked() },
+                            content = {
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = thatNodeInfo.user?.shortName ?: unknownShortName,
+                                    fontWeight = FontWeight.Normal,
+                                    fontSize = MaterialTheme.typography.button.fontSize,
+                                    textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
+                                    textAlign = TextAlign.Center,
                                 )
-                                width = Dimension.preferredWrapContent
                             },
-                            satCount = satCount
+                        )
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = nodeName,
+                            style = style,
+                            textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
+                            softWrap = true,
+                        )
+
+                        LastHeardInfo(
+                            lastHeard = thatNodeInfo.lastHeard,
+                            currentTimeMillis = currentTimeMillis
                         )
                     }
-                }
-
-                BatteryInfo(
-                    modifier = Modifier.constrainAs(batt) {
-                        top.linkTo(parent.top)
-                        end.linkTo(parent.end)
-                    },
-                    batteryLevel = thatNodeInfo.batteryLevel,
-                    voltage = thatNodeInfo.voltage
-                )
-
-                LastHeardInfo(
-                    modifier = Modifier.constrainAs(heard) {
-                        top.linkTo(batt.bottom, 4.dp)
-                        end.linkTo(parent.end)
-                    },
-                    lastHeard = thatNodeInfo.lastHeard
-                )
-
-                val envMetrics = thatNodeInfo.environmentMetrics
-                    ?.getDisplayString(tempInFahrenheit) ?: ""
-                if (envMetrics.isNotBlank()) {
-                    Text(
-                        modifier = Modifier.constrainAs(env) {
-                            if (signalShown) {
-                                top.linkTo(sig.bottom, 4.dp)
-                            } else {
-                                top.linkTo(pos.bottom, 4.dp)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        if (distance != null) {
+                            Text(
+                                text = distance,
+                                fontSize = MaterialTheme.typography.button.fontSize,
+                            )
+                        } else {
+                            Spacer(modifier = Modifier.width(16.dp))
+                        }
+                        BatteryInfo(
+                            batteryLevel = thatNodeInfo.batteryLevel,
+                            voltage = thatNodeInfo.voltage
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        signalInfo(
+                            nodeInfo = thatNodeInfo,
+                            isThisNode = isThisNode
+                        )
+                        if (position?.isValid() == true) {
+                            val satCount = position.satellitesInView
+                            if (satCount > 0) {
+                                SatelliteCountInfo(
+                                    satCount = satCount
+                                )
                             }
-                            end.linkTo(parent.end)
-                        },
-                        text = envMetrics,
-                        color = MaterialTheme.colors.onSurface,
-                        fontSize = MaterialTheme.typography.button.fontSize
-                    )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        thatNodeInfo.environmentMetrics?.getDisplayString(tempInFahrenheit)?.let { envMetrics ->
+                            Text(
+                                text = envMetrics,
+                                color = MaterialTheme.colors.onSurface,
+                                fontSize = MaterialTheme.typography.button.fontSize
+                            )
+                        }
+                    }
+
+                    if (detailsShown || expanded) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Divider()
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            DisableSelection {
+                                LinkedCoordinates(
+                                    position = position,
+                                    format = gpsFormat,
+                                    nodeName = nodeName
+                                )
+                            }
+                            val system =
+                                ConfigProtos.Config.DisplayConfig.DisplayUnits.forNumber(distanceUnits)
+                            if (position?.isValid() == true) {
+                                val altitude = position.altitude.metersIn(system)
+                                val elevationSuffix = stringResource(id = R.string.elevation_suffix)
+                                ElevationInfo(
+                                    altitude = altitude,
+                                    system = system,
+                                    suffix = elevationSuffix
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            if (hwInfoString != null) {
+                                Text(
+                                    text = "$hwInfoString",
+                                    fontSize = MaterialTheme.typography.button.fontSize,
+                                    style = style,
+                                )
+                            }
+                            val role = thatNodeInfo.user?.role
+                            role?.let {
+                                Text(
+                                    text = DeviceConfig.Role.forNumber(it).name,
+                                    fontSize = MaterialTheme.typography.button.fontSize
+                                )
+                            }
+                            val nodeId = thatNodeInfo.user?.id
+                            if (nodeId != null) {
+                                Text(text = nodeId, fontSize = MaterialTheme.typography.button.fontSize)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -307,7 +283,8 @@ fun NodeInfoSimplePreview() {
             thatNodeInfo = thatNodeInfo,
             1,
             0,
-            true
+            true,
+            currentTimeMillis = System.currentTimeMillis()
         )
     }
 }
@@ -323,12 +300,33 @@ fun NodeInfoPreview(
 ) {
     AppTheme {
         val thisNodeInfo = NodeInfoPreviewParameterProvider().values.first()
-        NodeInfo(
-            thisNodeInfo,
-            thatNodeInfo,
-            0,
-            1,
-            true
-        )
+        Column {
+            Text(
+                text = "Details Collapsed",
+                color = MaterialTheme.colors.onBackground
+            )
+            NodeInfo(
+                thisNodeInfo = thisNodeInfo,
+                thatNodeInfo = thatNodeInfo,
+                gpsFormat = 0,
+                distanceUnits = 1,
+                tempInFahrenheit = true,
+                expanded = false,
+                currentTimeMillis = System.currentTimeMillis()
+            )
+            Text(
+                text = "Details Shown",
+                color = MaterialTheme.colors.onBackground
+            )
+            NodeInfo(
+                thisNodeInfo = thisNodeInfo,
+                thatNodeInfo = thatNodeInfo,
+                gpsFormat = 0,
+                distanceUnits = 1,
+                tempInFahrenheit = true,
+                expanded = true,
+                currentTimeMillis = System.currentTimeMillis()
+            )
+        }
     }
 }

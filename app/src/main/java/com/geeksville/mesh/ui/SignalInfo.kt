@@ -4,10 +4,12 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.preview.NodeInfoPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 
@@ -18,7 +20,7 @@ fun signalInfo(
     isThisNode: Boolean
 ): Boolean {
     val text = if (isThisNode) {
-        "ChUtil %.1f%% AirUtilTX %.1f%%".format(
+        stringResource(R.string.channel_air_util).format(
             nodeInfo.deviceMetrics?.channelUtilization,
             nodeInfo.deviceMetrics?.airUtilTx
         )
@@ -30,7 +32,7 @@ fun signalInfo(
                     add("RSSI: %d SNR: %.1f".format(nodeInfo.rssi, nodeInfo.snr))
                 }
             } else {
-                add("Hops Away: %d".format(nodeInfo.hopsAway))
+                add("%s: %d".format(stringResource(R.string.hops_away), nodeInfo.hopsAway))
             }
         }.joinToString(" ")
     }

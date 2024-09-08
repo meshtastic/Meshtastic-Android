@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="node_filter_placeholder">Filtro</string>
+    <string name="desc_node_filter_clear">quitar filtro de nodo</string>
+    <string name="node_filter_include_unknown">Incluir desconocido</string>
+    <string name="node_sort_alpha">A-Z</string>
+    <string name="node_sort_channel">Canal</string>
+    <string name="node_sort_distance">Distancia</string>
+    <string name="node_sort_hops_away">Brinca afuera</string>
+    <string name="node_sort_last_heard">Última escucha</string>
+    <string name="node_sort_via_mqtt">vía MQTT</string>
     <string name="channel_name">Nombre del canal</string>
     <string name="channel_options">Opciones del canal</string>
     <string name="qr_code">Código QR</string>
@@ -141,6 +150,8 @@
     <string name="direct_message">Mensaje Directo</string>
     <string name="nodedb_reset">Reinicio de NodeDB</string>
     <string name="nodedb_reset_description">Esto borrará todos los nodos de esta lista.</string>
+    <string name="delivery_confirmed">Envío confirmado</string>
+    <string name="error">Error</string>
     <string name="ignore">Ignorar</string>
     <string name="ignore_add">¿Añadir \'%s\' para ignorar la lista? Tu radio se reiniciará después de hacer este cambio.</string>
     <string name="ignore_remove">¿Eliminar \'%s\' para ignorar la lista? Tu radio se reiniciará después de hacer este cambio.</string>
@@ -152,6 +163,7 @@
     <string name="device_settings">Configuración de radio</string>
     <string name="module_settings">Configuración de módulo</string>
     <string name="add">Añadir</string>
+    <string name="edit">Editar</string>
     <string name="calculating">Calculando…</string>
     <string name="map_offline_manager">Administrador sin conexión</string>
     <string name="map_cache_size">Tamaño actual de Caché</string>
@@ -170,4 +182,11 @@
     <string name="waypoint_new">Nuevo punto de referencia</string>
     <string name="waypoint_received">Punto de referencia recibido: %s</string>
     <string name="error_duty_cycle">Límite de Ciclo de Trabajo alcanzado. No se pueden enviar mensajes en este momento, por favor inténtalo de nuevo más tarde.</string>
+    <string name="remove">Quitar</string>
+    <string name="remove_node_text">Este nodo será retirado de tu lista hasta que tu nodo reciba datos de él otra vez.</string>
+    <string name="mute">Silenciar</string>
+    <string name="mute_notifications">Silenciar notificaciones</string>
+    <string name="mute_8_hours">8 horas</string>
+    <string name="mute_1_week">1 semana</string>
+    <string name="mute_always">Siempre</string>
 </resources>

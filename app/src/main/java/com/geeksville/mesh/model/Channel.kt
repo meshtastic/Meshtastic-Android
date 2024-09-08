@@ -6,6 +6,7 @@ import com.geeksville.mesh.ConfigKt.loRaConfig
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.channelSettings
 import com.google.protobuf.ByteString
+import java.security.SecureRandom
 
 /** Utility function to make it easy to declare byte arrays - FIXME move someplace better */
 fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
@@ -37,6 +38,13 @@ data class Channel(
                 txEnabled = true
             }
         )
+
+        fun getRandomKey(size: Int = 32): ByteString {
+            val bytes = ByteArray(size)
+            val random = SecureRandom()
+            random.nextBytes(bytes)
+            return ByteString.copyFrom(bytes)
+        }
     }
 
     /// Return the name of our channel as a human readable string.  If empty string, assume "Default" per mesh.proto spec
@@ -44,6 +52,7 @@ data class Channel(
         get() = settings.name.ifEmpty {
             // We have a new style 'empty' channel name.  Use the same logic from the device to convert that to a human readable name
             if (loraConfig.usePreset) when (loraConfig.modemPreset) {
+                ModemPreset.SHORT_TURBO -> "ShortTurbo"
                 ModemPreset.SHORT_FAST -> "ShortFast"
                 ModemPreset.SHORT_SLOW -> "ShortSlow"
                 ModemPreset.MEDIUM_FAST -> "MediumFast"

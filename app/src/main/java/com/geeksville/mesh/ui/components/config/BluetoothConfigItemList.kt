@@ -7,7 +7,7 @@ import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -27,7 +27,7 @@ fun BluetoothConfigItemList(
     onSaveClicked: (BluetoothConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var bluetoothInput by remember(bluetoothConfig) { mutableStateOf(bluetoothConfig) }
+    var bluetoothInput by rememberSaveable { mutableStateOf(bluetoothConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -63,16 +63,6 @@ fun BluetoothConfigItemList(
                         bluetoothInput = bluetoothInput.copy { fixedPin = it }
                 })
         }
-
-        item {
-            SwitchPreference(title = "Device logging enabled",
-                checked = bluetoothInput.deviceLoggingEnabled,
-                enabled = enabled,
-                onCheckedChange = {
-                    bluetoothInput = bluetoothInput.copy { deviceLoggingEnabled = it }
-                })
-        }
-        item { Divider() }
 
         item {
             PreferenceFooter(

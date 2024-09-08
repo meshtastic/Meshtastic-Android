@@ -5,15 +5,9 @@ plugins {
     id "org.jetbrains.kotlin.plugin.parcelize"
     id 'kotlinx-serialization'
     id 'com.google.dagger.hilt.android'
-    id 'de.mobilej.unmock'
     id 'com.google.protobuf'
     id "com.google.devtools.ksp"
     id "io.gitlab.arturbosch.detekt" version "1.23.6"
-}
-
-unMock {
-    keep "android.net.Uri"
-    keep "android.util.Base64"
 }
 
 def keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -37,10 +31,10 @@ android {
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
-        targetSdk 33
-        versionCode 30315 // format is Mmmss (where M is 1+the numeric major number
-        versionName "2.3.15"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        targetSdk 34
+        versionCode 30404 // format is Mmmss (where M is 1+the numeric major number
+        versionName "2.4.4"
+        testInstrumentationRunner "com.geeksville.mesh.TestRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
         vectorDrawables.useSupportLibrary = true
@@ -77,7 +71,7 @@ android {
     defaultConfig {
         // We have to list all translated languages here, because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
-        resConfigs "bg", "cs", "de", "el", "en", "es", "fi", "fr", "fr-rHT", "ga", "hr", "hu", "is", "it", "iw", "ja", "ko", "lt", "nl", "nb", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sq", "sv", "tr", "zh-rCN", "zh-rTW", "uk"
+        resConfigs "bg", "ca", "cs", "de", "el", "en", "es", "fi", "fr", "fr-rHT", "ga", "gl", "hr", "hu", "is", "it", "iw", "ja", "ko", "lt", "nl", "nb", "pl", "pt", "pt-rBR", "ro", "ru", "sk", "sl", "sq", "sv", "tr", "zh-rCN", "zh-rTW", "uk"
 
         ndk {
             // abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
@@ -106,6 +100,10 @@ android {
     }
     lint {
         abortOnError false
+    }
+    sourceSets {
+        // Adds exported schema location as test app assets.
+        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
 }
 
@@ -148,11 +146,11 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$appcompat_version"
     // For loading and tinting drawables on older versions of the platform
     implementation "androidx.appcompat:appcompat-resources:$appcompat_version"
-    implementation "androidx.emoji2:emoji2-emojipicker:1.4.0"
+    implementation "androidx.emoji2:emoji2-emojipicker:1.5.0"
 
     implementation 'androidx.core:core-ktx:1.13.1'
     implementation 'androidx.core:core-location-altitude:1.0.0-alpha02'
-    implementation 'androidx.fragment:fragment-ktx:1.8.1'
+    implementation 'androidx.fragment:fragment-ktx:1.8.3'
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'com.google.android.material:material:1.12.0'
@@ -160,7 +158,7 @@ dependencies {
     implementation 'androidx.datastore:datastore:1.1.1'
 
     // Lifecycle
-    def lifecycle_version = '2.8.3'
+    def lifecycle_version = '2.8.5'
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
@@ -176,28 +174,29 @@ dependencies {
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation "androidx.room:room-ktx:$room_version"
     // optional - Test helpers
-    testImplementation "androidx.room:room-testing:$room_version"
+    androidTestImplementation "androidx.room:room-testing:$room_version"
 
     // Hilt
     implementation "com.google.dagger:hilt-android:$hilt_version"
     implementation "androidx.hilt:hilt-navigation-compose:1.2.0"
     ksp "com.google.dagger:hilt-compiler:$hilt_version"
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$hilt_version"
+    kspAndroidTest "com.google.dagger:hilt-compiler:$hilt_version"
 
     // Navigation
-    def nav_version = "2.7.7"
+    def nav_version = "2.8.0"
     implementation "androidx.navigation:navigation-compose:$nav_version"
     androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
 
     // Compose
-    def composeBom = platform('androidx.compose:compose-bom:2024.06.00')
+    def composeBom = platform('androidx.compose:compose-bom:2024.09.00')
     implementation composeBom
     androidTestImplementation composeBom
-    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
 
     implementation 'androidx.compose.material:material'
     implementation 'androidx.activity:activity-compose'
     implementation 'androidx.compose.runtime:runtime-livedata'
-    implementation "com.google.accompanist:accompanist-themeadapter-appcompat:0.34.0"
+    implementation "com.google.accompanist:accompanist-themeadapter-appcompat:0.36.0"
 
     // Android Studio Preview support
     implementation 'androidx.compose.ui:ui-tooling-preview'
@@ -222,7 +221,7 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 
     // kotlin serialization
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.2"
 
     // rate this app
     googleImplementation 'com.suddenh4x.ratingdialog:awesome-app-rating:2.7.0'
@@ -239,7 +238,7 @@ dependencies {
     implementation 'com.github.mik3y:usb-serial-for-android:3.8.0'
 
     // For Firebase Crashlytics & Analytics
-    googleImplementation platform('com.google.firebase:firebase-bom:33.1.2')
+    googleImplementation platform('com.google.firebase:firebase-bom:33.2.0')
     googleImplementation 'com.google.firebase:firebase-crashlytics'
     googleImplementation 'com.google.firebase:firebase-analytics'
 
@@ -249,7 +248,7 @@ dependencies {
     //noinspection GradleDependency
     implementation 'com.google.zxing:core:3.3.0' // <-- don't update
 
-    def work_version = '2.9.0'
+    def work_version = '2.9.1'
     // Work Request - used to delay boot event handling
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
