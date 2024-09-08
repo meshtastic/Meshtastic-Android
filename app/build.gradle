@@ -7,7 +7,7 @@ plugins {
     id 'com.google.dagger.hilt.android'
     id 'com.google.protobuf'
     id "com.google.devtools.ksp"
-    id "io.gitlab.arturbosch.detekt" version "1.23.6"
+    id "io.gitlab.arturbosch.detekt" version "1.23.7"
 }
 
 def keystorePropertiesFile = rootProject.file("keystore.properties")
