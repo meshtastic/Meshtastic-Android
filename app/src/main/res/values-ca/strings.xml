@@ -21,7 +21,7 @@
     <string name="warning_not_paired">Encara no has emparellat una ràdio compatible amb Meshtastic amb aquest telèfon. Si us plau emparella un dispositiu i configura el teu nom d\'usuari. \n\nAquesta aplicació de codi obert està en desenvolupament. Si hi trobes problemes publica-ho en el nostre fòrum meshtastic.discourse.group.\n\nPer a més informació visita la nostra pàgina web - www.meshtastic.org.</string>
     <string name="you">Tu</string>
     <string name="your_name">El teu nom</string>
-    <string name="analytics_okay">Estadístiques anònimes d\'ús i informes d\'accidents.</string>
+    <string name="analytics_okay">Estadístiques anònimes d\'ús i informes de fallades.</string>
     <string name="looking_for_meshtastic_devices">Cercant dispositius Meshtastic…</string>
     <string name="starting_pairing">Iniciant emparellament</string>
     <string name="url_for_join">URL per unir-se a una xarxa Meshtastic</string>

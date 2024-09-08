@@ -6,7 +6,7 @@
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanál</string>
     <string name="node_sort_distance">Vzdialenosť</string>
-    <string name="node_sort_hops_away">Počet hopov</string>
+    <string name="node_sort_hops_away">Počet skokov</string>
     <string name="node_sort_last_heard">Posledný príjem</string>
     <string name="node_sort_via_mqtt">cez MQTT</string>
     <string name="channel_name">Názov kanála</string>
