@@ -41,29 +41,29 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.model.NodeDetailPage
-import com.geeksville.mesh.model.NodeDetailsState
-import com.geeksville.mesh.model.NodeDetailsViewModel
+import com.geeksville.mesh.model.MetricsPage
+import com.geeksville.mesh.model.MetricsState
+import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.components.DeviceMetricsScreen
 import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-internal fun FragmentManager.navigateToNodeDetails(nodeNum: Int? = null) {
-    val nodeDetailsFragment = NodeDetailsFragment().apply {
+internal fun FragmentManager.navigateToMetrics(nodeNum: Int? = null) {
+    val metricsFragment = MetricsFragment().apply {
         arguments = bundleOf("nodeNum" to nodeNum)
     }
     beginTransaction()
-        .replace(R.id.mainActivityLayout, nodeDetailsFragment)
+        .replace(R.id.mainActivityLayout, metricsFragment)
         .addToBackStack(null)
         .commit()
 }
 
 @AndroidEntryPoint
-class NodeDetailsFragment : ScreenFragment("NodeDetails"), Logging {
+class MetricsFragment : ScreenFragment("Metrics"), Logging {
 
-    private val model: NodeDetailsViewModel by viewModels()
+    private val model: MetricsViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -80,7 +80,7 @@ class NodeDetailsFragment : ScreenFragment("NodeDetails"), Logging {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 AppTheme {
-                    NodeDetailsScreen(
+                    MetricsScreen(
                         model = model,
                         nodeName = nodeName,
                         navigateBack = {
@@ -95,8 +95,8 @@ class NodeDetailsFragment : ScreenFragment("NodeDetails"), Logging {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun NodeDetailsScreen(
-    model: NodeDetailsViewModel = hiltViewModel(),
+fun MetricsScreen(
+    model: MetricsViewModel = hiltViewModel(),
     nodeName: String?,
     navigateBack: () -> Unit,
 ) {
@@ -113,7 +113,7 @@ fun NodeDetailsScreen(
                 contentColor = colorResource(R.color.toolbarText),
                 title = {
                     Text(
-                        text = "${stringResource(R.string.node_details)}: $nodeName",
+                        text = "${stringResource(R.string.metrics)}: $nodeName",
                     )
                 },
                 navigationIcon = {
@@ -127,7 +127,7 @@ fun NodeDetailsScreen(
             )
         },
     ) { innerPadding ->
-        NodeDetailsPagerScreen(
+        MetricsPagerScreen(
             state = state,
             pagerState = pagerState,
             modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
@@ -137,8 +137,8 @@ fun NodeDetailsScreen(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun NodeDetailsPagerScreen(
-    state: NodeDetailsState,
+fun MetricsPagerScreen(
+    state: MetricsState,
     pagerState: PagerState,
     modifier: Modifier = Modifier,
 ) = with(state) {
@@ -178,8 +178,8 @@ fun NodeDetailsPagerScreen(
                 }
             } else {
                 when (pages[index]) {
-                    NodeDetailPage.DEVICE -> DeviceMetricsScreen(deviceMetrics)
-                    NodeDetailPage.ENVIRONMENT -> EnvironmentMetricsScreen(environmentMetrics)
+                    MetricsPage.DEVICE -> DeviceMetricsScreen(deviceMetrics)
+                    MetricsPage.ENVIRONMENT -> EnvironmentMetricsScreen(environmentMetrics)
                 }
             }
         }
@@ -189,10 +189,10 @@ fun NodeDetailsPagerScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @PreviewLightDark
 @Composable
-private fun NodeDetailsPreview() {
+private fun MetricsPreview() {
     AppTheme {
-        val state = NodeDetailsState.Empty
-        NodeDetailsPagerScreen(
+        val state = MetricsState.Empty
+        MetricsPagerScreen(
             state = state,
             pagerState = rememberPagerState(pageCount = { state.pages.size }),
         )

@@ -25,9 +25,8 @@
     <string name="node_sort_last_heard">Last heard</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
 
-    <string name="more_details">More Details</string>
-
     <string name="elevation_suffix" translatable="false">MSL</string>
+    <string name="channel_air_util" translatable="false">ChUtil %.1f%% AirUtilTX %.1f%%</string>
 
     <string name="channel_name">Channel Name</string>
     <string name="channel_options">Channel options</string>
@@ -221,9 +220,11 @@
     <string name="battery">Battery</string>
     <string name="channel_utilization">Channel Utilization</string>
     <string name="air_utilization">Air Utilization</string>
-    <string name="device_metrics">Device Metrics</string>
-    <string name="node_details">Node Details</string>
-    <string name="environment_metrics">Environment Metrics</string>
+    <string name="device">Device</string>
+    <string name="metrics">Metrics</string>
+    <string name="environment">Environment</string>
     <string name="temperature">Temperature</string>
     <string name="humidity">Humidity</string>
+    <string name="logs">Logs</string>
+    <string name="hops_away">Hops Away</string>
 </resources>
