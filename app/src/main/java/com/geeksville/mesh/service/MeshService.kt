@@ -1053,7 +1053,7 @@ class MeshService : Service(), Logging {
                 val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
 
                 // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
-                updateNodeInfoTime(it, rxTime)
+                it.lastHeard = rxTime
                 it.snr = packet.rxSnr
                 it.rssi = packet.rxRssi
 
@@ -1996,8 +1996,4 @@ class MeshService : Service(), Logging {
             })
         }
     }
-}
-
-fun updateNodeInfoTime(it: NodeInfo, rxTime: Int) {
-    it.lastHeard = rxTime
 }
