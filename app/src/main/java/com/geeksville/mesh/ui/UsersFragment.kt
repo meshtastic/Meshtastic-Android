@@ -129,6 +129,7 @@ fun NodesScreen(
     model: UIViewModel = hiltViewModel(),
     chipClicked: (NodeInfo) -> Unit,
 ) {
+    val focusManager = LocalFocusManager.current
     val state by model.nodesUiState.collectAsStateWithLifecycle()
 
     val nodes by model.nodeList.collectAsStateWithLifecycle()
@@ -183,7 +184,10 @@ fun NodesScreen(
                 distanceUnits = state.distanceUnits,
                 tempInFahrenheit = state.tempInFahrenheit,
                 isIgnored = state.ignoreIncomingList.contains(node.num),
-                chipClicked = { chipClicked(node) },
+                chipClicked = {
+                    focusManager.clearFocus()
+                    chipClicked(node)
+                },
                 blinking = node == focusedNode,
                 expanded = state.showDetails,
                 currentTimeMillis = currentTimeMillis
