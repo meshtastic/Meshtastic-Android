@@ -83,8 +83,8 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                     navigateToRadioConfig(node)
                 }
 
-                R.id.more_details -> {
-                    navigateToMoreDetails(node)
+                R.id.metrics -> {
+                    navigateToMetrics(node)
                 }
             }
         }
@@ -101,9 +101,9 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         parentFragmentManager.navigateToRadioConfig(node.num)
     }
 
-    private fun navigateToMoreDetails(node: NodeInfo) {
-        info("calling MoreDetails --> destNum: ${node.num}")
-        parentFragmentManager.navigateToNodeDetails(node.num)
+    private fun navigateToMetrics(node: NodeInfo) {
+        info("calling Metrics --> destNum: ${node.num}")
+        parentFragmentManager.navigateToMetrics(node.num)
     }
 
 

@@ -116,7 +116,7 @@ fun EnvironmentMetricsScreen(telemetries: List<Telemetry>) {
 @Composable
 private fun DeviceMetricsChart(modifier: Modifier = Modifier, telemetries: List<Telemetry>) {
 
-    ChartHeader(amount = telemetries.size, title = stringResource(R.string.device_metrics))
+    ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty())
         return
 
@@ -205,7 +205,7 @@ private fun DeviceMetricsChart(modifier: Modifier = Modifier, telemetries: List<
 @Composable
 private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: List<Telemetry>) {
 
-    ChartHeader(amount = telemetries.size, title = stringResource(R.string.environment_metrics))
+    ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty())
         return
 
@@ -406,10 +406,8 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        val text = "%s %.2f%%  %s %.2f%%".format(
-                            stringResource(R.string.channel_utilization),
+                        val text = stringResource(R.string.channel_air_util).format(
                             deviceMetrics.channelUtilization,
-                            stringResource(R.string.air_utilization),
                             deviceMetrics.airUtilTx
                         )
                         Text(
@@ -493,14 +491,14 @@ private fun EnvironmentMetricsCard(telemetry: Telemetry) {
 }
 
 @Composable
-private fun ChartHeader(amount: Int, title: String) {
+private fun ChartHeader(amount: Int) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "$amount $title",
+            text = "$amount ${stringResource(R.string.logs)}",
             modifier = Modifier.wrapContentWidth(),
             style = TextStyle(fontWeight = FontWeight.Bold),
             fontSize = MaterialTheme.typography.button.fontSize
