@@ -1386,30 +1386,24 @@ class MeshService : Service(), Logging {
     private fun regenMyNodeInfo() {
         val myInfo = rawMyNodeInfo
         if (myInfo != null) {
-            val a = radioInterfaceService.getBondedDeviceAddress()
-            val isBluetoothInterface = a != null && a.startsWith("x")
-            val firmwareVersion = rawDeviceMetadata?.firmwareVersion.orEmpty()
-
-            val nodeNum =
-                myInfo.myNodeNum // Note: can't use the normal property because myNodeInfo not yet setup
-            val ni = nodeDBbyNodeNum[nodeNum] // can't use toNodeInfo because too early
-            val hwModelStr = ni?.user?.hwModelString
-            setFirmwareUpdateFilename(hwModelStr)
             val mi = with(myInfo) {
                 MyNodeInfo(
-                    myNodeNum,
-                    false,
-                    hwModelStr,
-                    firmwareVersion,
-                    firmwareUpdateFilename?.appLoad != null && firmwareUpdateFilename?.littlefs != null,
+                    myNodeNum = myNodeNum,
+                    hasGPS = false,
+                    model = rawDeviceMetadata?.hwModel?.let { hwModel ->
+                        if (hwModel == MeshProtos.HardwareModel.UNSET) null
+                        else hwModel.name.replace('_', '-').replace('p', '.').lowercase()
+                    },
+                    firmwareVersion = rawDeviceMetadata?.firmwareVersion,
+                    couldUpdate = false,
                     shouldUpdate = false, // TODO add check after re-implementing firmware updates
-                    currentPacketId and 0xffffffffL,
-                    5 * 60 * 1000, // constants from current device code
-                    minAppVersion,
-                    8,
-                    false,
-                    0f,
-                    0f,
+                    currentPacketId = currentPacketId and 0xffffffffL,
+                    messageTimeoutMsec = 5 * 60 * 1000, // constants from current firmware code
+                    minAppVersion = minAppVersion,
+                    maxChannels = 8,
+                    hasWifi = rawDeviceMetadata?.hasWifi ?: false,
+                    channelUtilization = 0f,
+                    airUtilTx = 0f,
                 )
             }
             newMyNodeInfo = mi
@@ -1441,7 +1435,6 @@ class MeshService : Service(), Logging {
         insertMeshLog(packetToSave)
 
         rawMyNodeInfo = myInfo
-        regenMyNodeInfo()
 
         // We'll need to get a new set of channels and settings now
         serviceScope.handledLaunch {
@@ -1465,6 +1458,7 @@ class MeshService : Service(), Logging {
         insertMeshLog(packetToSave)
 
         rawDeviceMetadata = metadata
+        regenMyNodeInfo()
     }
 
     /**
@@ -1542,18 +1536,15 @@ class MeshService : Service(), Logging {
             } else {
                 discardNodeDB()
                 debug("Installing new node DB")
-                myNodeInfo = newMyNodeInfo // Install myNodeInfo as current
+                myNodeInfo = newMyNodeInfo
 
                 newNodes.forEach(::installNodeInfo)
                 newNodes.clear() // Just to save RAM ;-)
 
                 haveNodeDB = true // we now have nodes from real hardware
 
-                regenMyNodeInfo() // we have a node db now, so can possibly find a better hwmodel
-                myNodeInfo = newMyNodeInfo // we might have just updated myNodeInfo
-
                 serviceScope.handledLaunch {
-                    radioConfigRepository.installNodeDB(newMyNodeInfo!!, nodeDBbyID.values.toList())
+                    radioConfigRepository.installNodeDB(myNodeInfo!!, nodeDBbyID.values.toList())
                 }
 
                 sendAnalytics()
