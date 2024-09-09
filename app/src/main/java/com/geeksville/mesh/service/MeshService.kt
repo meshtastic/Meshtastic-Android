@@ -1533,6 +1533,9 @@ class MeshService : Service(), Logging {
                     radioConfigRepository.installNodeDB(myNodeInfo!!, nodeDBbyID.values.toList())
                 }
 
+                sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+                    setTimeOnly = currentSecond()
+                })
                 sendAnalytics()
 
                 if (deviceVersion < minDeviceVersion || appVersion < minAppVersion) {
