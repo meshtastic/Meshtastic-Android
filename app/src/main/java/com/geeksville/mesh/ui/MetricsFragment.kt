@@ -5,32 +5,35 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Tab
+import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
@@ -38,26 +41,29 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.model.NodeDetailsViewModel
+import com.geeksville.mesh.model.MetricsPage
+import com.geeksville.mesh.model.MetricsState
+import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.components.DeviceMetricsScreen
 import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
-internal fun FragmentManager.navigateToNodeDetails(nodeNum: Int? = null) {
-    val nodeDetailsFragment = NodeDetailsFragment().apply {
+internal fun FragmentManager.navigateToMetrics(nodeNum: Int? = null) {
+    val metricsFragment = MetricsFragment().apply {
         arguments = bundleOf("nodeNum" to nodeNum)
     }
     beginTransaction()
-        .replace(R.id.mainActivityLayout, nodeDetailsFragment)
+        .replace(R.id.mainActivityLayout, metricsFragment)
         .addToBackStack(null)
         .commit()
 }
 
 @AndroidEntryPoint
-class NodeDetailsFragment : ScreenFragment("NodeDetails"), Logging {
+class MetricsFragment : ScreenFragment("Metrics"), Logging {
 
-    private val model: NodeDetailsViewModel by viewModels()
+    private val model: MetricsViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -74,7 +80,7 @@ class NodeDetailsFragment : ScreenFragment("NodeDetails"), Logging {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 AppTheme {
-                    NodeDetailsScreen(
+                    MetricsScreen(
                         model = model,
                         nodeName = nodeName,
                         navigateBack = {
@@ -89,15 +95,13 @@ class NodeDetailsFragment : ScreenFragment("NodeDetails"), Logging {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun NodeDetailsScreen(
-    model: NodeDetailsViewModel = hiltViewModel(),
+fun MetricsScreen(
+    model: MetricsViewModel = hiltViewModel(),
     nodeName: String?,
     navigateBack: () -> Unit,
 ) {
-    val deviceMetrics by model.deviceMetrics.collectAsStateWithLifecycle()
-    val environmentMetrics by model.environmentMetrics.collectAsStateWithLifecycle()
-
-    val pagerState = rememberPagerState(pageCount = { 2 })
+    val state by model.state.collectAsStateWithLifecycle()
+    val pagerState = rememberPagerState(pageCount = { state.pages.size })
 
     Scaffold(
         /*
@@ -109,9 +113,8 @@ fun NodeDetailsScreen(
                 contentColor = colorResource(R.color.toolbarText),
                 title = {
                     Text(
-                        text = "${stringResource(R.string.node_details)}: $nodeName",
+                        text = "${stringResource(R.string.metrics)}: $nodeName",
                     )
-                    HorizontalTabs(pagerState)
                 },
                 navigationIcon = {
                     IconButton(onClick = navigateBack) {
@@ -124,53 +127,74 @@ fun NodeDetailsScreen(
             )
         },
     ) { innerPadding ->
-        HorizontalPager(state = pagerState) { page ->
-            when (page) {
-                0 -> DeviceMetricsScreen(
-                    innerPadding = innerPadding,
-                    telemetries = deviceMetrics
+        MetricsPagerScreen(
+            state = state,
+            pagerState = pagerState,
+            modifier = Modifier.padding(top = innerPadding.calculateTopPadding())
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun MetricsPagerScreen(
+    state: MetricsState,
+    pagerState: PagerState,
+    modifier: Modifier = Modifier,
+) = with(state) {
+    Column(modifier) {
+        val coroutineScope = rememberCoroutineScope()
+
+        TabRow(
+            selectedTabIndex = pagerState.currentPage,
+        ) {
+            pages.forEachIndexed { index, page ->
+                val title = stringResource(id = page.titleResId)
+                Tab(
+                    selected = pagerState.currentPage == index,
+                    onClick = { coroutineScope.launch { pagerState.animateScrollToPage(index) } },
+                    text = { Text(text = title) },
+                    icon = {
+                        Icon(
+                            painter = painterResource(id = page.drawableResId),
+                            contentDescription = title
+                        )
+                    },
+                    unselectedContentColor = MaterialTheme.colors.secondaryVariant
                 )
-                1 -> EnvironmentMetricsScreen(
-                    innerPadding = innerPadding,
-                    telemetries = environmentMetrics
-                )
+            }
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            verticalAlignment = Alignment.Top,
+        ) { index ->
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                when (pages[index]) {
+                    MetricsPage.DEVICE -> DeviceMetricsScreen(deviceMetrics)
+                    MetricsPage.ENVIRONMENT -> EnvironmentMetricsScreen(environmentMetrics)
+                }
             }
         }
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
+@PreviewLightDark
 @Composable
-fun HorizontalTabs(pagerState: PagerState) {
-
-    Row(
-        Modifier
-            .wrapContentHeight()
-            .fillMaxWidth()
-            .padding(bottom = 8.dp),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        repeat(pagerState.pageCount) { iteration ->
-            val color = if (pagerState.currentPage == iteration)
-                colorResource(R.color.toolbarText)
-            else
-                Color.LightGray
-
-            val (imageVector, contentDescription) = if (iteration == 0)
-                Pair(ImageVector.vectorResource(
-                    R.drawable.baseline_charging_station_24),
-                    stringResource(R.string.device_metrics)
-                )
-            else
-                Pair(
-                    ImageVector.vectorResource(R.drawable.baseline_thermostat_24),
-                    stringResource(R.string.environment_metrics)
-                )
-            Icon(
-                imageVector,
-                contentDescription,
-                tint = color
-            )
-        }
+private fun MetricsPreview() {
+    AppTheme {
+        val state = MetricsState.Empty
+        MetricsPagerScreen(
+            state = state,
+            pagerState = rememberPagerState(pageCount = { state.pages.size }),
+        )
     }
 }

@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="node_filter_placeholder">Фильтр</string>
+    <string name="desc_node_filter_clear">очистить фильтр узлов</string>
+    <string name="node_filter_include_unknown">Включать неизвестно</string>
+    <string name="node_sort_alpha">А-Я</string>
+    <string name="node_sort_channel">Канал</string>
+    <string name="node_sort_distance">Расстояние</string>
+    <string name="node_sort_hops_away">Hops away</string>
+    <string name="node_sort_last_heard">Last heard</string>
+    <string name="node_sort_via_mqtt">через MQTT</string>
     <string name="channel_name">Имя канала</string>
     <string name="channel_options">Настройки канала</string>
     <string name="qr_code">QR код</string>
@@ -143,6 +152,8 @@
     <string name="direct_message">Прямое сообщение</string>
     <string name="nodedb_reset">Очистка списка узлов сети</string>
     <string name="nodedb_reset_description">Это очистит все узлы из этого списка.</string>
+    <string name="delivery_confirmed">Доставка подтверждена</string>
+    <string name="error">Ошибка</string>
     <string name="ignore">Игнорировать</string>
     <string name="ignore_add">Добавить \'%s\' в список игнорирования? Ваше радио перезагрузится после внесения этого изменения.</string>
     <string name="ignore_remove">Удалить \'%s\' из списка игнорирования? Ваше радио перезагрузится после внесения этого изменения.</string>
@@ -154,6 +165,7 @@
     <string name="device_settings">Настройки устройства</string>
     <string name="module_settings">Настройки модуля</string>
     <string name="add">Добавить</string>
+    <string name="edit">Редактировать</string>
     <string name="calculating">Вычисление…</string>
     <string name="map_offline_manager">Оффлайн менеджер</string>
     <string name="map_cache_size">Текущий размер кэша</string>
@@ -172,4 +184,11 @@
     <string name="waypoint_new">Установить путевую точку</string>
     <string name="waypoint_received">Принята путевая точка: %s</string>
     <string name="error_duty_cycle">Достигнут лимит отправки сообщений в единицу времени. Не удается отправить сообщения прямо сейчас, пожалуйста, повторите попытку позже.</string>
+    <string name="remove">Удалить</string>
+    <string name="remove_node_text">This node will be removed from your list until your node receives data from it again.</string>
+    <string name="mute">Заглушить</string>
+    <string name="mute_notifications">Отключить уведомления</string>
+    <string name="mute_8_hours">8 часов</string>
+    <string name="mute_1_week">1 неделя</string>
+    <string name="mute_always">Всегда</string>
 </resources>

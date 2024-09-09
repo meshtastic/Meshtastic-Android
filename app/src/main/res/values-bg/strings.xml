@@ -1,4 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="node_filter_placeholder">Филтър</string>
+    <string name="desc_node_filter_clear">clear node филтър</string>
+    <string name="node_filter_include_unknown">Включително неизвестните</string>
+    <string name="node_sort_alpha">А-Я</string>
+    <string name="node_sort_channel">Канал</string>
+    <string name="node_sort_distance">Разстояние</string>
+    <string name="node_sort_hops_away">Брой хопове</string>
+    <string name="node_sort_last_heard">Последно чут</string>
+    <string name="node_sort_via_mqtt">с MQTT</string>
     <string name="channel_name">Име на канал</string>
     <string name="channel_options">Настройки на канал</string>
     <string name="qr_code">QR код</string>
@@ -38,6 +48,7 @@
     <string name="connected_count">Свързани: %1$s от %2$s на линия</string>
     <string name="list_of_nodes">Списък с възлите в мрежата</string>
     <string name="update_firmware">Актуализиране на фърмуера</string>
+    <string name="ip_address">IP адрес:</string>
     <string name="connected">Свързан с радио</string>
     <string name="connected_to">Свързан с радио (%s)</string>
     <string name="not_connected">Няма връзка</string>
@@ -93,6 +104,9 @@
     <string name="provide_location_to_mesh">Изпращане на местоположение в мрежата</string>
     <string name="camera_required">Разрешение за камерата</string>
     <string name="why_camera_required">Трябва да ни бъде предоставен достъп до камерата, за да четем QR кодове. Няма да се запазват снимки или видеоклипове.</string>
+    <string name="notification_required">Разрешение за нотификация</string>
+    <string name="why_notification_required">Meshtastic има нужда от разрешение за сервизни и текстови нотификации.</string>
+    <string name="notification_denied">Няма разрешение за нотификации. За промяна отидете на Android Settings &gt; Apps &gt; Meshtastic &gt; Notifications.</string>
     <string name="modem_config_slow_short">Къс обхват / Бавен</string>
     <string name="modem_config_slow_medium">Среден обхват / Бавен</string>
     <plurals name="delete_messages">
@@ -121,7 +135,7 @@
     <string name="intro_welcome_text">Meshtastic е криптирана комуникационна платформа с отворен код, извън мрежата. Радиостанциите Meshtastic образуват мрежа и комуникират с помощта на протокола LoRa за изпращане на текстови съобщения.</string>
     <string name="intro_started">Нека да започваме!</string>
     <string name="intro_started_text">Свържете вашето устройство Meshtastic чрез Bluetooth, серийна комуникация или WiFi.\n\nМожете да видите кои устройства са съвместими на www.meshtastic.org/docs/hardware</string>
-    <string name="intro_encryption">Настройка на криптиране</string>
+    <string name="intro_encryption">"Настройка на криптиране"</string>
     <string name="intro_encryption_text">Стандартно е зададен ключ за криптиране по подразбиране. За да активирате свой собствен канал и подобрено криптиране, отидете в раздела на канала и променете името на канала, това ще зададе произволен ключ за AES256 криптиране.\n\nЗа да комуникират с други устройства, те ще трябва да сканират вашия QR код или да последват споделената връзка, за да конфигурират настройките на канала.</string>
     <string name="message">Съобщение</string>
     <string name="quick_chat">Опции за бърз разговор</string>
@@ -136,6 +150,11 @@
     <string name="direct_message">Директно съобщение</string>
     <string name="nodedb_reset">Нулиране на базата данни с възли</string>
     <string name="nodedb_reset_description">Това ще изчисти всички възли от този списък.</string>
+    <string name="delivery_confirmed">Съобщението е доставено</string>
+    <string name="error">Грешка</string>
+    <string name="ignore">Игнорирай</string>
+    <string name="ignore_add">Добави \'%s\' към списъка с игнорирани?</string>
+    <string name="ignore_remove">Изтрий \'%s\' от списъка с игнорирани?</string>
     <string name="map_select_download_region">Избор на регион за сваляне</string>
     <string name="map_tile_download_estimate">Прогноза за изтегляне на картинки:</string>
     <string name="map_start_download">Започни свалянето</string>
@@ -144,6 +163,7 @@
     <string name="device_settings">Конфигурация на радиото</string>
     <string name="module_settings">Конфигурация на модула</string>
     <string name="add">Добавяне</string>
+    <string name="edit">Редактирай</string>
     <string name="calculating">Изчисляване...</string>
     <string name="map_offline_manager">Управление извън линия</string>
     <string name="map_cache_size">Текущ размер на свалените данни</string>
@@ -160,4 +180,13 @@
     <string name="waypoint_edit">Редакция на точка</string>
     <string name="waypoint_delete">Изтриване на точка?</string>
     <string name="waypoint_new">Нова точка</string>
+    <string name="waypoint_received">Получен waypoint: %s</string>
+    <string name="error_duty_cycle">Достигнат лимит на Duty Cycle. Не може да се изпрати съобщение сега, опитайте по-късно.</string>
+    <string name="remove">Изтрий</string>
+    <string name="remove_node_text">Този node ще бъде изтрит от твоят лист докато вашият node не получи отново съобшение от него.</string>
+    <string name="mute">Заглуши</string>
+    <string name="mute_notifications">Заглуши нотификациите</string>
+    <string name="mute_8_hours">8 часа</string>
+    <string name="mute_1_week">1 седмица</string>
+    <string name="mute_always">Винаги</string>
 </resources>

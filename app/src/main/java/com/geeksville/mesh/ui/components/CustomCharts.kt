@@ -8,7 +8,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -77,7 +76,7 @@ private object ChartConstants {
 }
 
 @Composable
-fun DeviceMetricsScreen(innerPadding: PaddingValues, telemetries: List<Telemetry>) {
+fun DeviceMetricsScreen(telemetries: List<Telemetry>) {
     Column {
         DeviceMetricsChart(
             modifier = Modifier
@@ -87,9 +86,7 @@ fun DeviceMetricsScreen(innerPadding: PaddingValues, telemetries: List<Telemetry
         )
         /* Device Metric Cards */
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+            modifier = Modifier.fillMaxSize()
         ) {
             items(telemetries.reversed()) { telemetry -> DeviceMetricsCard(telemetry) }
         }
@@ -97,7 +94,7 @@ fun DeviceMetricsScreen(innerPadding: PaddingValues, telemetries: List<Telemetry
 }
 
 @Composable
-fun EnvironmentMetricsScreen(innerPadding: PaddingValues, telemetries: List<Telemetry>) {
+fun EnvironmentMetricsScreen(telemetries: List<Telemetry>) {
     Column {
         EnvironmentMetricsChart(
             modifier = Modifier
@@ -108,9 +105,7 @@ fun EnvironmentMetricsScreen(innerPadding: PaddingValues, telemetries: List<Tele
 
         /* Environment Metric Cards */
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+            modifier = Modifier.fillMaxSize()
         ) {
             items(telemetries.reversed()) { telemetry -> EnvironmentMetricsCard(telemetry)}
         }
@@ -121,7 +116,7 @@ fun EnvironmentMetricsScreen(innerPadding: PaddingValues, telemetries: List<Tele
 @Composable
 private fun DeviceMetricsChart(modifier: Modifier = Modifier, telemetries: List<Telemetry>) {
 
-    ChartHeader(amount = telemetries.size, title = stringResource(R.string.device_metrics))
+    ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty())
         return
 
@@ -210,7 +205,7 @@ private fun DeviceMetricsChart(modifier: Modifier = Modifier, telemetries: List<
 @Composable
 private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: List<Telemetry>) {
 
-    ChartHeader(amount = telemetries.size, title = stringResource(R.string.environment_metrics))
+    ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty())
         return
 
@@ -411,10 +406,8 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        val text = "%s %.2f%%  %s %.2f%%".format(
-                            stringResource(R.string.channel_utilization),
+                        val text = stringResource(R.string.channel_air_util).format(
                             deviceMetrics.channelUtilization,
-                            stringResource(R.string.air_utilization),
                             deviceMetrics.airUtilTx
                         )
                         Text(
@@ -498,14 +491,14 @@ private fun EnvironmentMetricsCard(telemetry: Telemetry) {
 }
 
 @Composable
-private fun ChartHeader(amount: Int, title: String) {
+private fun ChartHeader(amount: Int) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "$amount $title",
+            text = "$amount ${stringResource(R.string.logs)}",
             modifier = Modifier.wrapContentWidth(),
             style = TextStyle(fontWeight = FontWeight.Bold),
             fontSize = MaterialTheme.typography.button.fontSize

@@ -1,5 +1,3 @@
-@file:Suppress("MagicNumber")
-
 package com.geeksville.mesh.ui.map
 
 import android.content.Context
@@ -12,6 +10,7 @@ import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -52,7 +51,6 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.model.map.MarkerWithLabel
 import com.geeksville.mesh.ui.ScreenFragment
-import com.geeksville.mesh.ui.components.IconButton
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.formatAgo
@@ -113,8 +111,128 @@ private fun MapView.UpdateMarkers(
     waypointMarkers: List<MarkerWithLabel>
 ) {
     debug("Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints")
-    overlays.removeAll(overlays.filterIsInstance<MarkerWithLabel>())
+    overlays.removeAll { it is MarkerWithLabel }
     overlays.addAll(nodeMarkers + waypointMarkers)
+}
+
+/**
+ * Adds copyright to map depending on what source is showing
+ */
+private fun MapView.addCopyright() {
+    if (overlays.none { it is CopyrightOverlay }) {
+        val copyrightNotice: String = tileProvider.tileSource.copyrightNotice ?: return
+        val copyrightOverlay = CopyrightOverlay(context)
+        copyrightOverlay.setCopyrightNotice(copyrightNotice)
+        overlays.add(copyrightOverlay)
+    }
+}
+
+/**
+ * Create LatLong Grid line overlay
+ * @param enabled: turn on/off gridlines
+ */
+private fun MapView.createLatLongGrid(enabled: Boolean) {
+    val latLongGridOverlay = LatLonGridlineOverlay2()
+    latLongGridOverlay.isEnabled = enabled
+    if (latLongGridOverlay.isEnabled) {
+        val textPaint = Paint().apply {
+            textSize = 40f
+            color = Color.GRAY
+            isAntiAlias = true
+            isFakeBoldText = true
+            textAlign = Paint.Align.CENTER
+        }
+        latLongGridOverlay.textPaint = textPaint
+        latLongGridOverlay.setBackgroundColor(Color.TRANSPARENT)
+        latLongGridOverlay.setLineWidth(3.0f)
+        latLongGridOverlay.setLineColor(Color.GRAY)
+        overlays.add(latLongGridOverlay)
+    }
+}
+
+//    private fun addWeatherLayer() {
+//        if (map.tileProvider.tileSource.name()
+//                .equals(CustomTileSource.getTileSource("ESRI World TOPO").name())
+//        ) {
+//            val layer = TilesOverlay(
+//                MapTileProviderBasic(
+//                    activity,
+//                    CustomTileSource.OPENWEATHER_RADAR
+//                ), context
+//            )
+//            layer.loadingBackgroundColor = Color.TRANSPARENT
+//            layer.loadingLineColor = Color.TRANSPARENT
+//            map.overlayManager.add(layer)
+//        }
+//    }
+
+private fun cacheManagerCallback(
+    onTaskComplete: () -> Unit,
+    onTaskFailed: (Int) -> Unit,
+) = object : CacheManager.CacheManagerCallback {
+    override fun onTaskComplete() {
+        onTaskComplete()
+    }
+
+    override fun onTaskFailed(errors: Int) {
+        onTaskFailed(errors)
+    }
+
+    override fun updateProgress(
+        progress: Int,
+        currentZoomLevel: Int,
+        zoomMin: Int,
+        zoomMax: Int
+    ) {
+        // NOOP since we are using the build in UI
+    }
+
+    override fun downloadStarted() {
+        // NOOP since we are using the build in UI
+    }
+
+    override fun setPossibleTilesInArea(total: Int) {
+        // NOOP since we are using the build in UI
+    }
+}
+
+private fun Context.purgeTileSource(onResult: (String) -> Unit) {
+    val cache = SqlTileWriterExt()
+    val builder = MaterialAlertDialogBuilder(this)
+    builder.setTitle(R.string.map_tile_source)
+    val sources = cache.sources
+    val sourceList = mutableListOf<String>()
+    for (i in sources.indices) {
+        sourceList.add(sources[i].source as String)
+    }
+    val selected: BooleanArray? = null
+    val selectedList = mutableListOf<Int>()
+    builder.setMultiChoiceItems(
+        sourceList.toTypedArray(),
+        selected
+    ) { _, i, b ->
+        if (b) {
+            selectedList.add(i)
+        } else {
+            selectedList.remove(i)
+        }
+
+    }
+    builder.setPositiveButton(R.string.clear) { _, _ ->
+        for (x in selectedList) {
+            val item = sources[x]
+            val b = cache.purgeCache(item.source)
+            onResult(
+                if (b) {
+                    getString(R.string.map_purge_success, item.source)
+                } else {
+                    getString(R.string.map_purge_fail)
+                }
+            )
+        }
+    }
+    builder.setNegativeButton(R.string.cancel) { dialog, _ -> dialog.cancel() }
+    builder.show()
 }
 
 @Composable
@@ -130,7 +248,6 @@ fun MapView(
 
     var zoomLevelMin = 0.0
     var zoomLevelMax = 0.0
-
 
     // Map Elements
     var downloadRegionBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
@@ -256,15 +373,18 @@ fun MapView(
         debug("marker long pressed id=${id}")
         val waypoint = waypoints[id]?.data?.waypoint ?: return
         // edit only when unlocked or lockedTo myNodeNum
-        if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected())
+        if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected()) {
             showEditWaypointDialog = waypoint
-        else
+        } else {
             showDeleteMarkerDialog(waypoint)
+        }
     }
 
-    fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) context.getString(R.string.you)
-    else model.nodeDB.nodes.value[id]?.user?.longName
-        ?: context.getString(R.string.unknown_username)
+    fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) {
+        context.getString(R.string.you)
+    } else {
+        model.nodeDB.nodes.value[id]?.user?.longName ?: context.getString(R.string.unknown_username)
+    }
 
     fun MapView.onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
         return waypoints.mapNotNull { waypoint ->
@@ -288,43 +408,6 @@ fun MapView(
         }
     }
 
-    fun purgeTileSource() {
-        val cache = SqlTileWriterExt()
-        val builder = MaterialAlertDialogBuilder(context)
-        builder.setTitle(R.string.map_tile_source)
-        val sources = cache.sources
-        val sourceList = mutableListOf<String>()
-        for (i in sources.indices) {
-            sourceList.add(sources[i].source as String)
-        }
-        val selected: BooleanArray? = null
-        val selectedList = mutableListOf<Int>()
-        builder.setMultiChoiceItems(
-            sourceList.toTypedArray(),
-            selected
-        ) { _, i, b ->
-            if (b) {
-                selectedList.add(i)
-            } else {
-                selectedList.remove(i)
-            }
-
-        }
-        builder.setPositiveButton(R.string.clear) { _, _ ->
-            for (x in selectedList) {
-                val item = sources[x]
-                val b = cache.purgeCache(item.source)
-                if (b) model.showSnackbar(
-                    context.getString(R.string.map_purge_success, item.source)
-                ) else model.showSnackbar(
-                    context.getString(R.string.map_purge_fail)
-                )
-            }
-        }
-        builder.setNegativeButton(R.string.cancel) { dialog, _ -> dialog.cancel() }
-        builder.show()
-    }
-
     LaunchedEffect(showCurrentCacheInfo) {
         if (!showCurrentCacheInfo) return@LaunchedEffect
         model.showSnackbar(R.string.calculating)
@@ -346,82 +429,6 @@ fun MapView(
                 dialog.dismiss()
             }
             .show()
-    }
-
-    fun downloadRegion(
-        cacheManager: CacheManager,
-        writer: SqliteArchiveTileWriter,
-        bb: BoundingBox,
-        zoomMin: Int,
-        zoomMax: Int
-    ) {
-        cacheManager.downloadAreaAsync(
-            context,
-            bb,
-            zoomMin,
-            zoomMax,
-            object : CacheManager.CacheManagerCallback {
-                override fun onTaskComplete() {
-                    model.showSnackbar(R.string.map_download_complete)
-                    writer.onDetach()
-                }
-
-                override fun onTaskFailed(errors: Int) {
-                    model.showSnackbar(context.getString(R.string.map_download_errors, errors))
-                    writer.onDetach()
-                }
-
-                override fun updateProgress(
-                    progress: Int,
-                    currentZoomLevel: Int,
-                    zoomMin: Int,
-                    zoomMax: Int
-                ) {
-                    //NOOP since we are using the build in UI
-                }
-
-                override fun downloadStarted() {
-                    //NOOP since we are using the build in UI
-                }
-
-                override fun setPossibleTilesInArea(total: Int) {
-                    //NOOP since we are using the build in UI
-                }
-            })
-    }
-
-    /**
-     * Create LatLong Grid line overlay
-     * @param enabled: turn on/off gridlines
-     */
-    fun MapView.createLatLongGrid(enabled: Boolean) {
-        val latLongGridOverlay = LatLonGridlineOverlay2()
-        latLongGridOverlay.isEnabled = enabled
-        if (latLongGridOverlay.isEnabled) {
-            val textPaint = Paint()
-            textPaint.textSize = 40f
-            textPaint.color = Color.GRAY
-            textPaint.isAntiAlias = true
-            textPaint.isFakeBoldText = true
-            textPaint.textAlign = Paint.Align.CENTER
-            latLongGridOverlay.textPaint = textPaint
-            latLongGridOverlay.setBackgroundColor(Color.TRANSPARENT)
-            latLongGridOverlay.setLineWidth(3.0f)
-            latLongGridOverlay.setLineColor(Color.GRAY)
-            overlays.add(latLongGridOverlay)
-        }
-    }
-
-    /**
-     * Adds copyright to map depending on what source is showing
-     */
-    fun MapView.addCopyright() {
-        if (overlays.none { it is CopyrightOverlay }) {
-            val copyrightNotice: String = tileProvider.tileSource.copyrightNotice ?: return
-            val copyrightOverlay = CopyrightOverlay(context)
-            copyrightOverlay.setCopyrightNotice(copyrightNotice)
-            overlays.add(copyrightOverlay)
-        }
     }
 
     val mapEventsReceiver = object : MapEventsReceiver {
@@ -459,22 +466,6 @@ fun MapView(
         UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values))
     }
 
-//    private fun addWeatherLayer() {
-//        if (map.tileProvider.tileSource.name()
-//                .equals(CustomTileSource.getTileSource("ESRI World TOPO").name())
-//        ) {
-//            val layer = TilesOverlay(
-//                MapTileProviderBasic(
-//                    activity,
-//                    CustomTileSource.OPENWEATHER_RADAR
-//                ), context
-//            )
-//            layer.loadingBackgroundColor = Color.TRANSPARENT
-//            layer.loadingLineColor = Color.TRANSPARENT
-//            map.overlayManager.add(layer)
-//        }
-//    }
-
     fun MapView.zoomToNodes() {
         val nodeMarkers = onNodesChanged(model.nodeDB.nodesByNum.values)
         if (nodeMarkers.isNotEmpty()) {
@@ -501,7 +492,7 @@ fun MapView(
      * Creates Box overlay showing what area can be downloaded
      */
     fun MapView.generateBoxOverlay() {
-        overlays.removeAll(overlays.filterIsInstance<Polygon>())
+        overlays.removeAll { it is Polygon }
         val zoomFactor = 1.3 // zoom difference between view and download area polygon
         zoomLevelMax = maxZoomLevel
         zoomLevelMin = maxOf(zoomLevelDouble, maxZoomLevel)
@@ -512,6 +503,7 @@ fun MapView(
             }
         }
         overlays.add(polygon)
+        invalidate()
         val tileCount: Int = CacheManager(this).possibleTilesInArea(
             downloadRegionBoundingBox,
             zoomLevelMin.toInt(),
@@ -529,15 +521,24 @@ fun MapView(
                 append("mainFile.sqlite") // TODO: Accept filename input param from user
             }
             val writer = SqliteArchiveTileWriter(outputName)
-            val cacheManager =
-                CacheManager(map, writer) // Make sure cacheManager has latest from map
-            //this triggers the download
-            downloadRegion(
-                cacheManager,
-                writer,
+            // Make sure cacheManager has latest from map
+            val cacheManager = CacheManager(map, writer)
+            // this triggers the download
+            cacheManager.downloadAreaAsync(
+                context,
                 boundingBox,
                 zoomLevelMin.toInt(),
                 zoomLevelMax.toInt(),
+                cacheManagerCallback(
+                    onTaskComplete = {
+                        model.showSnackbar(R.string.map_download_complete)
+                        writer.onDetach()
+                    },
+                    onTaskFailed = { errors ->
+                        model.showSnackbar(context.getString(R.string.map_download_errors, errors))
+                        writer.onDetach()
+                    },
+                )
             )
         } catch (ex: TileSourcePolicyException) {
             debug("Tile source does not allow archiving: ${ex.message}")
@@ -561,15 +562,15 @@ fun MapView(
         dialog.show()
     }
 
-    fun showCacheManagerDialog() {
-        MaterialAlertDialogBuilder(context)
+    fun Context.showCacheManagerDialog() {
+        MaterialAlertDialogBuilder(this)
             .setTitle(R.string.map_offline_manager)
             .setItems(
                 arrayOf<CharSequence>(
-                    context.getString(R.string.map_cache_size),
-                    context.getString(R.string.map_download_region),
-                    context.getString(R.string.map_clear_tiles),
-                    context.getString(R.string.cancel)
+                    getString(R.string.map_cache_size),
+                    getString(R.string.map_download_region),
+                    getString(R.string.map_clear_tiles),
+                    getString(R.string.cancel)
                 )
             ) { dialog, which ->
                 when (which) {
@@ -579,7 +580,7 @@ fun MapView(
                         dialog.dismiss()
                     }
 
-                    2 -> purgeTileSource()
+                    2 -> purgeTileSource { model.showSnackbar(it) }
                     else -> dialog.dismiss()
                 }
             }.show()
@@ -587,7 +588,9 @@ fun MapView(
 
     Scaffold(
         floatingActionButton = {
-            DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) { showCacheManagerDialog() }
+            DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) {
+                context.showCacheManagerDialog()
+            }
         },
     ) { innerPadding ->
         Box(
@@ -636,20 +639,22 @@ fun MapView(
                 onExecuteJob = { startDownload() },
                 onCancelDownload = {
                     downloadRegionBoundingBox = null
-                    map.overlays.removeAll(map.overlays.filterIsInstance<Polygon>())
+                    map.overlays.removeAll { it is Polygon }
+                    map.invalidate()
                 },
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) else Column(
                 modifier = Modifier
                     .padding(top = 16.dp, end = 16.dp)
                     .align(Alignment.TopEnd),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                IconButton(
+                MapButton(
                     onClick = { showMapStyleDialog() },
                     drawableRes = R.drawable.ic_twotone_layers_24,
                     contentDescription = R.string.map_style_selection,
                 )
-                IconButton(
+                MapButton(
                     onClick = {
                         if (context.hasLocationPermission()) map.toggleMyLocation()
                         else requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
@@ -658,7 +663,6 @@ fun MapView(
                     drawableRes = if (myLocationOverlay == null) R.drawable.ic_twotone_my_location_24
                     else R.drawable.ic_twotone_location_disabled_24,
                     contentDescription = null,
-                    modifier = Modifier.padding(top = 8.dp),
                 )
             }
         }

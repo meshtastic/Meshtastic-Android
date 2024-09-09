@@ -500,7 +500,7 @@ class UIViewModel @Inject constructor(
                             val rxLat = rxPos?.latitude ?: ""
                             val rxLong = rxPos?.longitude ?: ""
                             val rxAlt = rxPos?.altitude ?: ""
-                            val rxSnr = "%f".format(proto.rxSnr)
+                            val rxSnr = proto.rxSnr
 
                             // Calculate the distance if both positions are valid
 

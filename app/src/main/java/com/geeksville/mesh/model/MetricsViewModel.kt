@@ -1,27 +1,65 @@
 package com.geeksville.mesh.model
 
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.database.MeshLogRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.enums.EnumEntries
 
+enum class MetricsPage(
+    @StringRes val titleResId: Int,
+    @DrawableRes val drawableResId: Int,
+) {
+    DEVICE(R.string.device, R.drawable.baseline_charging_station_24),
+    ENVIRONMENT(R.string.environment, R.drawable.baseline_thermostat_24),
+}
+
+data class MetricsState(
+    val pages: EnumEntries<MetricsPage> = MetricsPage.entries,
+    val isLoading: Boolean = false,
+    val deviceMetrics: List<Telemetry> = emptyList(),
+    val environmentMetrics: List<Telemetry> = emptyList(),
+) {
+    companion object {
+        val Empty = MetricsState()
+    }
+}
 
 @HiltViewModel
-class NodeDetailsViewModel @Inject constructor(
+class MetricsViewModel @Inject constructor(
     val nodeDB: NodeDB,
     private val meshLogRepository: MeshLogRepository
 ) : ViewModel() {
 
+    private val isLoading = MutableStateFlow(false)
     private val _deviceMetrics = MutableStateFlow<List<Telemetry>>(emptyList())
-    val deviceMetrics: StateFlow<List<Telemetry>> = _deviceMetrics
-
     private val _environmentMetrics = MutableStateFlow<List<Telemetry>>(emptyList())
-    val environmentMetrics: StateFlow<List<Telemetry>> = _environmentMetrics
+
+    val state = combine(
+        isLoading,
+        _deviceMetrics,
+        _environmentMetrics,
+    ) { isLoading, device, environment ->
+        MetricsState(
+            isLoading = isLoading,
+            deviceMetrics = device,
+            environmentMetrics = environment,
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = WhileSubscribed(5_000),
+        initialValue = MetricsState.Empty,
+    )
 
     /**
      * Gets the short name of the node identified by `nodeNum`.
@@ -33,6 +71,7 @@ class NodeDetailsViewModel @Inject constructor(
      */
     fun setSelectedNode(nodeNum: Int) {
         viewModelScope.launch {
+            isLoading.value = true
             meshLogRepository.getTelemetryFrom(nodeNum).collect {
                 val deviceList = mutableListOf<Telemetry>()
                 val environmentList = mutableListOf<Telemetry>()
@@ -45,6 +84,7 @@ class NodeDetailsViewModel @Inject constructor(
                 }
                 _deviceMetrics.value = deviceList
                 _environmentMetrics.value = environmentList
+                isLoading.value = false
             }
         }
     }
