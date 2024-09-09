@@ -23,12 +23,12 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
-import com.geeksville.mesh.model.ContactsViewModel
+import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,7 +39,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
 
     private val actionModeCallback: ActionModeCallback = ActionModeCallback()
     private var actionMode: ActionMode? = null
-    private val model: ContactsViewModel by viewModels()
+    private val model: UIViewModel by activityViewModels()
 
     private val contacts get() = model.contactList.value
     private val selectedList = emptyList<String>().toMutableStateList()
