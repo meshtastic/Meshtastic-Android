@@ -18,6 +18,7 @@ import com.geeksville.mesh.ui.components.EditBase64Preference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.SwitchPreference
+import com.google.protobuf.ByteString
 
 @Suppress("LongMethod")
 @Composable
@@ -61,17 +62,20 @@ fun SecurityConfigItemList(
         item {
             EditBase64Preference(
                 title = "Admin Key",
-                value = securityInput.adminKey,
+                value = securityInput.adminKeyList.firstOrNull() ?: ByteString.EMPTY,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChange = {
-                    securityInput = securityInput.copy { adminKey = it }
+                    securityInput = securityInput.copy {
+                        adminKey.clear()
+                        adminKey.add(it)
+                    }
                 },
             )
         }
 
         item {
-            SwitchPreference(title = "Managed mode",
+            SwitchPreference(title = "Managed Mode",
                 checked = securityInput.isManaged,
                 enabled = enabled,
                 onCheckedChange = {
@@ -81,7 +85,7 @@ fun SecurityConfigItemList(
         item { Divider() }
 
         item {
-            SwitchPreference(title = "Serial enabled",
+            SwitchPreference(title = "Serial console",
                 checked = securityInput.serialEnabled,
                 enabled = enabled,
                 onCheckedChange = { securityInput = securityInput.copy { serialEnabled = it } })
@@ -99,7 +103,7 @@ fun SecurityConfigItemList(
         item { Divider() }
 
         item {
-            SwitchPreference(title = "Legacy Admin Channel",
+            SwitchPreference(title = "Legacy Admin channel",
                 checked = securityInput.adminChannelEnabled,
                 enabled = enabled,
                 onCheckedChange = {
