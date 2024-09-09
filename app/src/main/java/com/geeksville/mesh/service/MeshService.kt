@@ -676,11 +676,7 @@ class MeshService : Service(), Logging {
                     // Handle new style position info
                     Portnums.PortNum.POSITION_APP_VALUE -> {
                         if (data.wantResponse) return // ignore data from position requests
-                        var u = MeshProtos.Position.parseFrom(data.payload)
-                        // position updates from mesh usually don't include times.  So promote rx time
-                        if (u.time == 0 && packet.rxTime != 0)
-                            u = u.toBuilder().setTime(packet.rxTime).build()
-                        // PII
+                        val u = MeshProtos.Position.parseFrom(data.payload)
                         // debug("position_app ${packet.from} ${u.toOneLineString()}")
                         handleReceivedPosition(packet.from, u, dataPacket.time)
                     }
@@ -695,9 +691,7 @@ class MeshService : Service(), Logging {
 
                     // Handle new telemetry info
                     Portnums.PortNum.TELEMETRY_APP_VALUE -> {
-                        var u = TelemetryProtos.Telemetry.parseFrom(data.payload)
-                        if (u.time == 0 && packet.rxTime != 0)
-                            u = u.toBuilder().setTime(packet.rxTime).build()
+                        val u = TelemetryProtos.Telemetry.parseFrom(data.payload)
                         handleReceivedTelemetry(packet.from, u, dataPacket.time)
                     }
 
