@@ -7,7 +7,7 @@ plugins {
     id 'com.google.dagger.hilt.android'
     id 'com.google.protobuf'
     id "com.google.devtools.ksp"
-    id "io.gitlab.arturbosch.detekt" version "1.23.6"
+    id "io.gitlab.arturbosch.detekt" version "1.23.7"
 }
 
 def keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -264,7 +264,7 @@ dependencies {
     implementation "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5"
 
     //detekt ktlint formatting
-    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.6")
+    detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.7")
 
 }
 
