@@ -72,7 +72,7 @@ interface PacketDao {
     SELECT * FROM packet
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
         AND port_num = 1 AND contact_key = :contact
-    ORDER BY received_time ASC
+    ORDER BY received_time DESC
     """
     )
     fun getMessagesFrom(contact: String): Flow<List<Packet>>
