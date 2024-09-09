@@ -263,9 +263,11 @@ dependencies {
     // MQTT
     implementation "org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5"
 
-    //detekt ktlint formatting
+    // detekt ktlint formatting
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.7")
 
+    // https://github.com/Calvin-LL/AutoLinkText
+    implementation 'sh.calvin.autolinktext:autolinktext:1.1.1'
 }
 
 ksp {
