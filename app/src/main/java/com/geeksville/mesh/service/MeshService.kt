@@ -109,10 +109,6 @@ class MeshService : Service(), Logging {
         class NoDeviceConfigException(message: String = "No radio settings received (is our app too old?)") :
             RadioNotConnectedException(message)
 
-        /** We treat software update as similar to loss of comms to the regular bluetooth service (so things like sendPosition for background GPS ignores the problem */
-        class IsUpdatingException :
-            RadioNotConnectedException("Operation prohibited during firmware update")
-
         /**
          * Talk to our running service and try to set a new device address.  And then immediately
          * call start on the service to possibly promote our service to be a foreground service.
@@ -212,10 +208,6 @@ class MeshService : Service(), Logging {
         val built = p.build()
         debug("Sending to radio ${built.toPIIString()}")
         val b = built.toByteArray()
-
-        if (false) { // TODO check if radio is updating
-            throw IsUpdatingException()
-        }
 
         radioInterfaceService.sendToRadio(b)
         changeStatus(p.packet.id, MessageStatus.ENROUTE)
@@ -1555,18 +1547,6 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private fun requestConfig(config: AdminProtos.AdminMessage.ConfigType) {
-        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
-            getConfigRequest = config
-        })
-    }
-
-    private fun requestAllConfig() {
-        AdminProtos.AdminMessage.ConfigType.entries.filter {
-            it != AdminProtos.AdminMessage.ConfigType.UNRECOGNIZED
-        }.forEach(::requestConfig)
-    }
-
     /**
      * Start the modern (REV2) API configuration flow
      */
@@ -1657,50 +1637,6 @@ class MeshService : Service(), Logging {
         return ((currentPacketId % numPacketIds) + 1L).toInt()
     }
 
-    private var firmwareUpdateFilename: UpdateFilenames? = null
-
-    /***
-     * Return the filename we will install on the device
-     */
-    private fun setFirmwareUpdateFilename(model: String?) {
-        firmwareUpdateFilename = try {
-            if (model != null)
-                // TODO reimplement this after we have a new firmware update mechanism
-                null
-            else
-                null
-        } catch (ex: Exception) {
-            errormsg("Unable to update", ex)
-            null
-        }
-
-        debug("setFirmwareUpdateFilename $firmwareUpdateFilename")
-    }
-
-    /// We only allow one update to be running at a time
-    private var updateJob: Job? = null
-
-    private fun doFirmwareUpdate() {
-        // Run in the IO thread
-        val filename = firmwareUpdateFilename ?: throw Exception("No update filename")
-        val safe =
-            BluetoothInterface.safe
-                ?: throw Exception("Can't update - no bluetooth connected")
-
-        if (updateJob?.isActive == true) {
-            errormsg("A firmware update is already running")
-            throw Exception("Firmware update already running")
-        } else {
-            debug("Creating firmware update coroutine")
-            updateJob = serviceScope.handledLaunch {
-                exceptionReporter {
-                    debug("Starting firmware update coroutine")
-                    // TODO perform update with new firmware update mechanism
-                }
-            }
-        }
-    }
-
     private fun enqueueForSending(p: DataPacket) {
         if (p.dataType in rememberDataType) {
             offlineSentPackets.add(p)
@@ -1728,10 +1664,10 @@ class MeshService : Service(), Logging {
                 clientPackages[receiverName] = packageName
             }
 
-        override fun getUpdateStatus(): Int = -4 // TODO reimplement this after we have a new firmware update mechanism
+        override fun getUpdateStatus(): Int = -4 // ProgressNotStarted
 
         override fun startFirmwareUpdate() = toRemoteExceptions {
-            doFirmwareUpdate()
+            // TODO reimplement this after we have a new firmware update mechanism
         }
 
         override fun getMyNodeInfo(): MyNodeInfo? = this@MeshService.myNodeInfo
