@@ -576,6 +576,7 @@ class MeshService : Service(), Logging {
                 bytes = data.payload.toByteArray(),
                 hopLimit = packet.hopLimit,
                 channel = packet.channel,
+                pkiEncrypted = packet.pkiEncrypted
             )
         }
     }

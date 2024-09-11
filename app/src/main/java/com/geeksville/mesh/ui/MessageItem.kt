@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
@@ -49,6 +50,7 @@ internal fun MessageItem(
     messageText: String?,
     messageTime: String,
     messageStatus: MessageStatus?,
+    pkiEncrypted: Boolean = false,
     selected: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
@@ -57,7 +59,7 @@ internal fun MessageItem(
 ) {
     val fromLocal = shortName == null
     val messageColor = if (fromLocal) R.color.colorMyMsg else R.color.colorMsg
-    val (topStart, topEnd) =  if (fromLocal) 12.dp to 4.dp else 4.dp to 12.dp
+    val (topStart, topEnd) = if (fromLocal) 12.dp to 4.dp else 4.dp to 12.dp
     val messageModifier = if (fromLocal) {
         Modifier.padding(start = 48.dp, top = 8.dp, end = 8.dp, bottom = 6.dp)
     } else {
@@ -148,6 +150,19 @@ internal fun MessageItem(
                                 modifier = Modifier.padding(start = 8.dp),
                             )
                         }
+                        Icon(
+                            painter = if (pkiEncrypted) {
+                                painterResource(id = R.drawable.ic_twotone_lock_24)
+                            } else {
+                                painterResource(id = R.drawable.ic_twotone_lock_open_24)
+                            },
+                            contentDescription = if (pkiEncrypted) {
+                                stringResource(R.string.encrypted_message)
+                            } else {
+                                stringResource(R.string.unencrypted_message)
+                            },
+                            modifier = Modifier.padding(start = 8.dp),
+                        )
                     }
                 }
             }

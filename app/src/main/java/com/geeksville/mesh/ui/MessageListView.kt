@@ -48,6 +48,7 @@ internal fun MessageListView(
                 messageText = msg.text,
                 messageTime = getShortDateTime(Date(msg.time)),
                 messageStatus = msg.status,
+                pkiEncrypted = msg.pkiEncrypted,
                 selected = selected,
                 onClick = { onClick(msg) },
                 onLongClick = { onLongClick(msg) },

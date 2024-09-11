@@ -136,6 +136,7 @@ data class Message(
     val time: Long,
     val read: Boolean,
     val status: MessageStatus?,
+    val pkiEncrypted: Boolean = false,
 )
 
 // return time if within 24 hours, otherwise date
@@ -334,6 +335,7 @@ class UIViewModel @Inject constructor(
                 time = it.data.time,
                 read = it.read,
                 status = it.data.status,
+                pkiEncrypted = it.data.pkiEncrypted,
             )
         }
     }

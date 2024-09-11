@@ -227,4 +227,6 @@
     <string name="humidity">Humidity</string>
     <string name="logs">Logs</string>
     <string name="hops_away">Hops Away</string>
+    <string name="encrypted_message">Message is PKI encrypted</string>
+    <string name="unencrypted_message">Message is not PKI encrypted</string>
 </resources>
