@@ -3,7 +3,6 @@ package com.geeksville.mesh.model
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.MeshUser
 import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.database.dao.NodeInfoDao
@@ -44,9 +43,6 @@ class NodeDB @Inject constructor(
     val nodeDBbyID: StateFlow<Map<String, NodeInfo>> get() = _nodeDBbyID
     val nodes get() = nodeDBbyID
 
-    private val _users = MutableStateFlow<Map<String, MeshUser?>>(mapOf())
-    val users: StateFlow<Map<String, MeshUser?>> get() = _users
-
     init {
         nodeInfoDao.getMyNodeInfo().onEach { _myNodeInfo.value = it }
             .launchIn(processLifecycle.coroutineScope)
@@ -60,7 +56,6 @@ class NodeDB @Inject constructor(
 
         nodeInfoDao.nodeDBbyID().onEach {
             _nodeDBbyID.value = it
-            _users.value = it.mapValues { node -> node.value.user }
         }
             .launchIn(processLifecycle.coroutineScope)
     }
