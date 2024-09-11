@@ -53,10 +53,7 @@ class RadioConfigRepository @Inject constructor(
     fun myNodeInfoFlow(): Flow<MyNodeInfo?> = nodeDB.myNodeInfoFlow()
     suspend fun getMyNodeInfo(): MyNodeInfo? = myNodeInfoFlow().firstOrNull()
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
-    val ourNodeInfo: StateFlow<NodeInfo?> get() = nodeDB.ourNodeInfo
-
     val nodeDBbyNum: StateFlow<Map<Int, NodeInfo>> get() = nodeDB.nodeDBbyNum
-    val nodeDBbyID: StateFlow<Map<String, NodeInfo>> get() = nodeDB.nodeDBbyID
 
     /**
      * Flow representing the [NodeInfo] database.
