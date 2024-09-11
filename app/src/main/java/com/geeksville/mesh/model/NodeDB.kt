@@ -36,12 +36,10 @@ class NodeDB @Inject constructor(
     // A map from nodeNum to NodeInfo
     private val _nodeDBbyNum = MutableStateFlow<Map<Int, NodeInfo>>(mapOf())
     val nodeDBbyNum: StateFlow<Map<Int, NodeInfo>> get() = _nodeDBbyNum
-    val nodesByNum get() = nodeDBbyNum.value
 
-    // A map from userId to NodeInfo
-    private val _nodeDBbyID = MutableStateFlow<Map<String, NodeInfo>>(mapOf())
-    val nodeDBbyID: StateFlow<Map<String, NodeInfo>> get() = _nodeDBbyID
-    val nodes get() = nodeDBbyID
+    fun getUser(userId: String?) = userId?.let { id ->
+        nodeDBbyNum.value.values.find { it.user?.id == id }?.user
+    }
 
     init {
         nodeInfoDao.getMyNodeInfo().onEach { _myNodeInfo.value = it }
@@ -53,11 +51,6 @@ class NodeDB @Inject constructor(
             _ourNodeInfo.value = ourNodeInfo
             _myId.value = ourNodeInfo?.user?.id
         }.launchIn(processLifecycle.coroutineScope)
-
-        nodeInfoDao.nodeDBbyID().onEach {
-            _nodeDBbyID.value = it
-        }
-            .launchIn(processLifecycle.coroutineScope)
     }
 
     fun getNodes(

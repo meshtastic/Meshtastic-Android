@@ -26,9 +26,6 @@ interface NodeInfoDao {
     @Query("SELECT * FROM NodeInfo ORDER BY CASE WHEN num = (SELECT myNodeNum FROM MyNodeInfo LIMIT 1) THEN 0 ELSE 1 END, lastHeard DESC")
     fun nodeDBbyNum(): Flow<Map<@MapColumn(columnName = "num") Int, NodeInfo>>
 
-    @Query("SELECT * FROM NodeInfo")
-    fun nodeDBbyID(): Flow<Map<@MapColumn(columnName = "user_id") String, NodeInfo>>
-
     @Query(
         """
     WITH OurNode AS (

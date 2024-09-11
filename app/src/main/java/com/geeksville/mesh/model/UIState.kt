@@ -150,10 +150,11 @@ internal fun getShortDateTime(time: Long): String? {
     }
 }
 
+@Suppress("LongParameterList")
 @HiltViewModel
 class UIViewModel @Inject constructor(
     private val app: Application,
-    val nodeDB: NodeDB,
+    private val nodeDB: NodeDB,
     private val radioConfigRepository: RadioConfigRepository,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: MeshLogRepository,
@@ -238,6 +239,14 @@ class UIViewModel @Inject constructor(
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
     val ourNodeInfo: StateFlow<NodeInfo?> get() = nodeDB.ourNodeInfo
+    val nodesByNum get() = nodeDB.nodeDBbyNum.value // FIXME only used in MapFragment
+
+    fun getUser(userId: String?) = nodeDB.getUser(userId) ?: MeshUser(
+        userId ?: DataPacket.ID_LOCAL,
+        app.getString(R.string.unknown_username),
+        app.getString(R.string.unknown_node_short_name),
+        MeshProtos.HardwareModel.UNSET,
+    )
 
     private val _snackbarText = MutableLiveData<Any?>(null)
     val snackbarText: LiveData<Any?> get() = _snackbarText
@@ -289,13 +298,13 @@ class UIViewModel @Inject constructor(
             val toBroadcast = data.to == DataPacket.ID_BROADCAST
 
             // grab usernames from NodeInfo
-            val node = nodeDB.nodes.value[if (fromLocal) data.to else data.from]
+            val user = getUser(if (fromLocal) data.to else data.from)
 
-            val shortName = node?.user?.shortName ?: app.getString(R.string.unknown_node_short_name)
+            val shortName = user.shortName
             val longName = if (toBroadcast) {
                 channelSet.getChannel(data.channel)?.name ?: app.getString(R.string.channel_name)
             } else {
-                node?.user?.longName ?: app.getString(R.string.unknown_username)
+                user.longName
             }
 
             Contact(
@@ -318,16 +327,10 @@ class UIViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey).mapLatest { list ->
         list.map {
-            val defaultUser = MeshUser(
-                it.data.from ?: DataPacket.ID_LOCAL,
-                app.getString(R.string.unknown_username),
-                app.getString(R.string.unknown_node_short_name),
-                MeshProtos.HardwareModel.UNSET,
-            )
             Message(
                 uuid = it.uuid,
                 receivedTime = it.received_time,
-                user = nodeDB.nodes.value[it.data.from]?.user ?: defaultUser,
+                user = getUser(it.data.from),
                 text = it.data.text.orEmpty(),
                 time = it.data.time,
                 read = it.read,
