@@ -560,7 +560,7 @@ class UIViewModel @Inject constructor(
             val myNodeNum = myNodeNum ?: return@launch
 
             // Capture the current node value while we're still on main thread
-            val nodes = nodeDB.nodes.value
+            val nodes = nodeDB.nodeDBbyNum.value
 
             val positionToPos: (MeshProtos.Position?) -> Position? = { meshPosition ->
                 meshPosition?.let { Position(it) }.takeIf {
@@ -569,8 +569,6 @@ class UIViewModel @Inject constructor(
             }
 
             writeToUri(uri) { writer ->
-                // Create a map of nodes keyed by their ID
-                val nodesById = nodes.values.associateBy { it.num }.toMutableMap()
                 val nodePositions = mutableMapOf<Int, MeshProtos.Position?>()
 
                 writer.appendLine("\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance\",\"hop limit\",\"payload\"")
@@ -599,7 +597,7 @@ class UIViewModel @Inject constructor(
                         if (proto.rxSnr != 0.0f) {
                             val rxDateTime = dateFormat.format(packet.received_date)
                             val rxFrom = proto.from.toUInt()
-                            val senderName = nodesById[proto.from]?.user?.longName ?: ""
+                            val senderName = nodes[proto.from]?.user?.longName ?: ""
 
                             // sender lat & long
                             val senderPosition = nodePositions[proto.from]
