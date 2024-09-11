@@ -315,11 +315,9 @@ class UIViewModel @Inject constructor(
         initialValue = emptyList(),
     )
 
-    fun getMessagesFrom(contactKey: String) = combine(
-        nodeDB.users,
-        packetRepository.getMessagesFrom(contactKey),
-    ) { users, packets ->
-        packets.map {
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey).mapLatest { list ->
+        list.map {
             val defaultUser = MeshUser(
                 it.data.from ?: DataPacket.ID_LOCAL,
                 app.getString(R.string.unknown_username),
@@ -329,7 +327,7 @@ class UIViewModel @Inject constructor(
             Message(
                 uuid = it.uuid,
                 receivedTime = it.received_time,
-                user = users[it.data.from] ?: defaultUser,
+                user = nodeDB.nodes.value[it.data.from]?.user ?: defaultUser,
                 text = it.data.text.orEmpty(),
                 time = it.data.time,
                 read = it.read,
