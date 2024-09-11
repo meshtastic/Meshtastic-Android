@@ -334,10 +334,6 @@ class MeshService : Service(), Logging {
 
         // put our node array into our two different map representations
         nodeDBbyNodeNum.putAll(nodes.map { it.num to it })
-        nodeDBbyID.putAll(nodes.mapNotNull {
-            // ignore records that don't have a valid user
-            it.user?.let { user -> user.id to it }
-        })
     }
 
     private fun loadSettings() {
@@ -362,7 +358,6 @@ class MeshService : Service(), Logging {
         debug("Discarding NodeDB")
         myNodeInfo = null
         nodeDBbyNodeNum.clear()
-        nodeDBbyID.clear()
         haveNodeDB = false
     }
 
@@ -383,11 +378,9 @@ class MeshService : Service(), Logging {
     // The database of active nodes, index is the node number
     private val nodeDBbyNodeNum = ConcurrentHashMap<Int, NodeInfo>()
 
-    /// The database of active nodes, index is the node user ID string
-    /// NOTE: some NodeInfos might be in only nodeDBbyNodeNum (because we don't yet know
-    /// an ID).  But if a NodeInfo is in both maps, it must be one instance shared by
-    /// both datastructures.
-    private val nodeDBbyID = mutableMapOf<String, NodeInfo>()
+    // The database of active nodes, index is the node user ID string
+    // NOTE: some NodeInfos might be in only nodeDBbyNodeNum (because we don't yet know an ID).
+    private val nodeDBbyID get() = nodeDBbyNodeNum.mapKeys { it.value.user?.id }
 
     ///
     /// END OF MODEL
@@ -470,7 +463,6 @@ class MeshService : Service(), Logging {
         // This might have been the first time we know an ID for this node, so also update the by ID map
         val userId = info.user?.id.orEmpty()
         if (userId.isNotEmpty()) {
-            nodeDBbyID[userId] = info
             if (haveNodeDB) serviceScope.handledLaunch {
                 radioConfigRepository.upsert(info)
             }
