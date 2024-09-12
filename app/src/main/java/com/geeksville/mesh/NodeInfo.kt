@@ -7,9 +7,10 @@ import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.geeksville.mesh.util.GPSFormat
+import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.bearing
 import com.geeksville.mesh.util.latLongToMeter
-import com.geeksville.mesh.util.anonymize
+import com.google.protobuf.kotlin.toByteStringUtf8
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -31,6 +32,8 @@ data class MeshUser(
     val isLicensed: Boolean = false,
     @ColumnInfo(name = "role", defaultValue = "0")
     val role: Int = 0,
+    @ColumnInfo(name = "publicKey", defaultValue = "")
+    val publicKey: String = "",
 ) : Parcelable {
 
     override fun toString(): String {
@@ -39,7 +42,8 @@ data class MeshUser(
             "shortName=${shortName.anonymize}, " +
             "hwModel=$hwModelString, " +
             "isLicensed=$isLicensed, " +
-            "role=$role)"
+            "role=$role, " +
+            "publicKey=${publicKey.anonymize})"
     }
 
     /** Create our model object from a protobuf.
@@ -50,7 +54,8 @@ data class MeshUser(
         p.shortName,
         p.hwModel,
         p.isLicensed,
-        p.roleValue
+        p.roleValue,
+        p.publicKey.toStringUtf8()
     )
 
     fun toProto(): MeshProtos.User =
@@ -61,6 +66,7 @@ data class MeshUser(
             .setHwModel(hwModel)
             .setIsLicensed(isLicensed)
             .setRoleValue(role)
+            .setPublicKey(publicKey.toByteStringUtf8())
             .build()
 
     /** a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot
@@ -233,7 +239,7 @@ data class NodeInfo(
     @Embedded(prefix = "envMetrics_")
     var environmentMetrics: EnvironmentMetrics? = null,
     @ColumnInfo(name = "hopsAway", defaultValue = "0")
-    var hopsAway: Int = 0
+    var hopsAway: Int = 0,
 ) : Parcelable {
 
     val colors: Pair<Int, Int>

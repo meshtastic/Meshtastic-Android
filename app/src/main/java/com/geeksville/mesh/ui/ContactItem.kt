@@ -33,6 +33,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
+import com.geeksville.mesh.ui.components.PkiLockChipLeadingIcon
 import com.geeksville.mesh.ui.theme.AppTheme
 
 @Suppress("LongMethod")
@@ -66,6 +67,7 @@ fun ContactItem(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Chip(
+                    leadingIcon = { PkiLockChipLeadingIcon(publicKey.isNullOrEmpty().not()) },
                     onClick = { },
                     modifier = Modifier
                         .padding(end = 8.dp)
@@ -148,6 +150,7 @@ private fun ContactItemPreview() {
                 unreadCount = 2,
                 messageCount = 10,
                 isMuted = true,
+                publicKey = "some public key",
             ),
             selected = false,
         )

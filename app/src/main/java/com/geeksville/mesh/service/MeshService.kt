@@ -795,7 +795,9 @@ class MeshService : Service(), Logging {
                 p.longName,
                 p.shortName,
                 p.hwModel,
-                p.isLicensed
+                p.isLicensed,
+                p.role.number,
+                p.publicKey.toStringUtf8(),
             )
             it.channel = channel
         }

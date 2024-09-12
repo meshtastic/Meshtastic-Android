@@ -126,6 +126,7 @@ data class Contact(
     val unreadCount: Int,
     val messageCount: Int,
     val isMuted: Boolean,
+    val publicKey: String?,
 )
 
 data class Message(
@@ -308,6 +309,7 @@ class UIViewModel @Inject constructor(
                 unreadCount = packetRepository.getUnreadCount(contactKey),
                 messageCount = packetRepository.getMessageCount(contactKey),
                 isMuted = settings[contactKey]?.isMuted == true,
+                publicKey = node?.user?.publicKey,
             )
         }
     }.stateIn(

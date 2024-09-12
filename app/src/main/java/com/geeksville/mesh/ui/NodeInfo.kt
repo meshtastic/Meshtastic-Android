@@ -56,6 +56,7 @@ import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
+import com.geeksville.mesh.ui.components.PkiLockChipLeadingIcon
 import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
 import com.geeksville.mesh.ui.preview.NodeInfoPreviewParameterProvider
@@ -130,6 +131,11 @@ fun NodeInfo(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Chip(
+                            leadingIcon = {
+                                PkiLockChipLeadingIcon(
+                                    thatNodeInfo.user?.publicKey.isNullOrEmpty().not()
+                                )
+                            },
                             modifier = Modifier
                                 .width(IntrinsicSize.Min)
                                 .padding(end = 8.dp)

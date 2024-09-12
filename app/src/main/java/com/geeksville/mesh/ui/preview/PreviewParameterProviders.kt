@@ -79,6 +79,7 @@ class NodeInfoPreviewParameterProvider: PreviewParameterProvider<NodeInfo> {
             shortName = "DoDu",
             id = "donaldDuckId",
             hwModel = MeshProtos.HardwareModel.HELTEC_V3,
+            publicKey = "some public key"
         ),
         environmentMetrics = EnvironmentMetrics(
             temperature = 28.0F,
@@ -89,7 +90,7 @@ class NodeInfoPreviewParameterProvider: PreviewParameterProvider<NodeInfo> {
             current = 0.0F,
             iaq = 100,
         ),
-        hopsAway = 2
+        hopsAway = 2,
     )
 
     private val unknown = donaldDuck.copy(
