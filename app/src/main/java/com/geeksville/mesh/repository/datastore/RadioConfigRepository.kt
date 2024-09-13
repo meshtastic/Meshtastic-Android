@@ -57,7 +57,6 @@ class RadioConfigRepository @Inject constructor(
     val nodeDBbyNum: StateFlow<Map<Int, NodeInfo>> get() = nodeDB.nodeDBbyNum
 
     suspend fun upsert(node: NodeInfo) = nodeDB.upsert(node)
-    suspend fun clearNodeDB() = nodeDB.clearNodeDB()
     suspend fun installNodeDB(mi: MyNodeInfo, nodes: List<NodeInfo>) {
         nodeDB.installNodeDB(mi, nodes)
     }

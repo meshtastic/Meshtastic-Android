@@ -323,15 +323,6 @@ class MeshService : Service(), Logging {
     /// BEGINNING OF MODEL - FIXME, move elsewhere
     ///
 
-    /**
-     * discard entire node db - used before downloading a new db from the device
-     */
-    private fun discardNodeDB() = serviceScope.handledLaunch {
-        debug("Discarding NodeDB")
-        radioConfigRepository.clearNodeDB()
-        haveNodeDB = false
-    }
-
     val myNodeInfo: MyNodeInfo? get() = radioConfigRepository.myNodeInfo.value
 
     private val configTotal by lazy { ConfigProtos.Config.getDescriptor().fields.size }
@@ -1591,7 +1582,7 @@ class MeshService : Service(), Logging {
 
             val res = radioInterfaceService.setDeviceAddress(deviceAddr)
             if (res) {
-                discardNodeDB()
+                haveNodeDB = false
             } else {
                 serviceBroadcasts.broadcastConnection()
             }
