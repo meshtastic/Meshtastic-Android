@@ -1766,7 +1766,7 @@ class MeshService : Service(), Logging {
         }
 
         override fun getNodes(): MutableList<NodeInfo> = toRemoteExceptions {
-            val r = nodeDBbyID.values.toMutableList()
+            val r = nodeDBbyNodeNum.values.toMutableList()
             info("in getOnline, count=${r.size}")
             // return arrayOf("+16508675309")
             r
