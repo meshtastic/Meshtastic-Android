@@ -7,6 +7,7 @@
    <locale android:name="zh-CN"/> <!-- Chinese Simplified -->
    <locale android:name="zh-TW"/> <!-- Chinese Traditional -->
    <locale android:name="de"/> <!-- German -->
+   <locale android:name="et"/> <!-- Estonian -->
    <locale android:name="es"/> <!-- Spanish (Spain) -->
    <locale android:name="fr"/> <!-- French (France) -->
    <locale android:name="ga"/> <!-- Irish -->
