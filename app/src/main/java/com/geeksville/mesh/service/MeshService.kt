@@ -1463,6 +1463,12 @@ class MeshService : Service(), Logging {
                 radioConfigRepository.installNodeDB(newMyNodeInfo!!, newNodes.map { it.toEntity() })
                 newNodes.clear() // Just to save RAM ;-)
 
+                withTimeoutOrNull(timeMillis = 5000) {
+                    while (myNodeInfo == null) {
+                        delay(100)
+                    }
+                } ?: errormsg("Timeout: installNodeDB failed!")
+
                 haveNodeDB = true // we now have nodes from real hardware
 
                 sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
