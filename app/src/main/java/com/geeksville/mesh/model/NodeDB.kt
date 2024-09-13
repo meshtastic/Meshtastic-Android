@@ -70,13 +70,15 @@ class NodeDB @Inject constructor(
         nodeInfoDao.upsert(node)
     }
 
+    suspend fun clearNodeDB() = withContext(Dispatchers.IO) {
+        nodeInfoDao.clearNodeInfo()
+        nodeInfoDao.clearMyNodeInfo()
+    }
+
     suspend fun installNodeDB(mi: MyNodeInfo, nodes: List<NodeInfo>) = withContext(Dispatchers.IO) {
-        nodeInfoDao.apply {
-            clearNodeInfo()
-            clearMyNodeInfo()
-            setMyNodeInfo(mi) // set MyNodeInfo first
-            putAll(nodes)
-        }
+        clearNodeDB()
+        nodeInfoDao.setMyNodeInfo(mi) // set MyNodeInfo first
+        nodeInfoDao.putAll(nodes)
     }
 
     suspend fun deleteNode(num: Int) = withContext(Dispatchers.IO) {
