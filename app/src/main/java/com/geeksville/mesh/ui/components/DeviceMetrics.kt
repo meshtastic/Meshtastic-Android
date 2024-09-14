@@ -47,13 +47,13 @@ fun DeviceMetricsScreen(telemetries: List<Telemetry>) {
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.33f),
-            telemetries
+            telemetries.reversed()
         )
         /* Device Metric Cards */
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(telemetries.reversed()) { telemetry -> DeviceMetricsCard(telemetry) }
+            items(telemetries) { telemetry -> DeviceMetricsCard(telemetry) }
         }
     }
 }

@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -93,7 +92,6 @@ class MetricsFragment : ScreenFragment("Metrics"), Logging {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MetricsScreen(
     model: MetricsViewModel = hiltViewModel(),
@@ -135,7 +133,6 @@ fun MetricsScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MetricsPagerScreen(
     state: MetricsState,
@@ -186,7 +183,6 @@ fun MetricsPagerScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @PreviewLightDark
 @Composable
 private fun MetricsPreview() {

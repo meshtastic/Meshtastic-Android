@@ -49,14 +49,14 @@ fun EnvironmentMetricsScreen(telemetries: List<Telemetry>) {
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.33f),
-            telemetries = telemetries
+            telemetries = telemetries.reversed()
         )
 
         /* Environment Metric Cards */
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(telemetries.reversed()) { telemetry -> EnvironmentMetricsCard(telemetry)}
+            items(telemetries) { telemetry -> EnvironmentMetricsCard(telemetry)}
         }
     }
 }
