@@ -27,16 +27,16 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
-import com.geeksville.mesh.ui.components.ChartConstants.LINE_OFF
-import com.geeksville.mesh.ui.components.ChartConstants.LINE_ON
-import com.geeksville.mesh.ui.components.ChartConstants.TIME_FORMAT
-import com.geeksville.mesh.ui.components.ChartConstants.LINE_LIMIT
-import com.geeksville.mesh.ui.components.ChartConstants.TEXT_PAINT_ALPHA
+import com.geeksville.mesh.ui.components.CommonCharts.LINE_OFF
+import com.geeksville.mesh.ui.components.CommonCharts.LINE_ON
+import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
+import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
+import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
 import com.geeksville.mesh.ui.theme.Orange
 import java.text.DateFormat
 
 
-object ChartConstants {
+object CommonCharts {
     val DEVICE_METRICS_COLORS = listOf(Color.Green, Color.Magenta, Color.Cyan)
     val ENVIRONMENT_METRICS_COLORS = listOf(Color.Red, Color.Blue)
     val TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)

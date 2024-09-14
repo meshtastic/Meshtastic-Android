@@ -36,10 +36,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
-import com.geeksville.mesh.ui.components.ChartConstants.ENVIRONMENT_METRICS_COLORS
-import com.geeksville.mesh.ui.components.ChartConstants.LEFT_CHART_SPACING
-import com.geeksville.mesh.ui.components.ChartConstants.MS_PER_SEC
-import com.geeksville.mesh.ui.components.ChartConstants.TIME_FORMAT
+import com.geeksville.mesh.ui.components.CommonCharts.ENVIRONMENT_METRICS_COLORS
+import com.geeksville.mesh.ui.components.CommonCharts.LEFT_CHART_SPACING
+import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
+import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 
 
 @Composable
