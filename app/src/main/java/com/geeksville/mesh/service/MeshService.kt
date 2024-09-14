@@ -363,16 +363,15 @@ class MeshService : Service(), Logging {
         if (n == DataPacket.NODENUM_BROADCAST) DataPacket.ID_BROADCAST
         else nodeDBbyNodeNum[n]?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
 
-    // given a nodeNum, return a db entry - creating if necessary
-    private fun getOrCreateNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: NodeInfo(
-        n,
-        MeshUser(
-            id = DataPacket.nodeNumToDefaultId(n),
-            longName = getString(R.string.unknown_username),
-            shortName = getString(R.string.unknown_node_short_name),
-            hwModel = MeshProtos.HardwareModel.UNSET,
-        )
+    private fun defaultUser(num: Int) = MeshUser(
+        id = DataPacket.nodeNumToDefaultId(num),
+        longName = getString(R.string.unknown_username),
+        shortName = getString(R.string.unknown_node_short_name),
+        hwModel = MeshProtos.HardwareModel.UNSET,
     )
+
+    // given a nodeNum, return a db entry - creating if necessary
+    private fun getOrCreateNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: NodeInfo(n, defaultUser(n))
 
     private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
     private val rangeTestRegex = Regex("seq (\\d{1,10})")
@@ -1270,10 +1269,23 @@ class MeshService : Service(), Logging {
 
     private fun MeshProtos.NodeInfo.toEntity() = NodeInfo(
         num = num,
-        user = MeshUser(user.copy { if (viaMqtt) longName = "$longName (MQTT)" }),
-        position = Position(position),
+        user = if (hasUser()) {
+            MeshUser(user.copy { if (viaMqtt) longName = "$longName (MQTT)" })
+        } else {
+            defaultUser(num)
+        },
+        position = if (hasPosition()) {
+            Position(position)
+        } else {
+            null
+        },
+        snr = snr,
         lastHeard = lastHeard,
-        deviceMetrics = DeviceMetrics(deviceMetrics),
+        deviceMetrics = if(hasDeviceMetrics()) {
+            DeviceMetrics(deviceMetrics)
+        } else {
+            null
+        },
         channel = channel,
         hopsAway = hopsAway,
     )
