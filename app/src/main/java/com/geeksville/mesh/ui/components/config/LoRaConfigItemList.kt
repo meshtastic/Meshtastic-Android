@@ -200,6 +200,14 @@ fun LoRaConfigItemList(
         item { Divider() }
 
         item {
+            SwitchPreference(title = "OK to MQTT",
+                checked = loraInput.configOkToMqtt,
+                enabled = enabled,
+                onCheckedChange = { loraInput = loraInput.copy { configOkToMqtt = it } })
+        }
+        item { Divider() }
+
+        item {
             PreferenceFooter(
                 enabled = loraInput != loraConfig,
                 onCancelClicked = {

@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 
 /**
@@ -50,18 +49,12 @@ class RadioConfigRepository @Inject constructor(
     /**
      * Flow representing the [MyNodeInfo] database.
      */
-    fun myNodeInfoFlow(): Flow<MyNodeInfo?> = nodeDB.myNodeInfoFlow()
-    suspend fun getMyNodeInfo(): MyNodeInfo? = myNodeInfoFlow().firstOrNull()
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
-    val ourNodeInfo: StateFlow<NodeInfo?> get() = nodeDB.ourNodeInfo
-
-    val nodeDBbyNum: StateFlow<Map<Int, NodeInfo>> get() = nodeDB.nodeDBbyNum
-    val nodeDBbyID: StateFlow<Map<String, NodeInfo>> get() = nodeDB.nodeDBbyID
 
     /**
      * Flow representing the [NodeInfo] database.
      */
-    suspend fun getNodes(): List<NodeInfo>? = nodeDB.getNodes().firstOrNull()
+    val nodeDBbyNum: StateFlow<Map<Int, NodeInfo>> get() = nodeDB.nodeDBbyNum
 
     suspend fun upsert(node: NodeInfo) = nodeDB.upsert(node)
     suspend fun installNodeDB(mi: MyNodeInfo, nodes: List<NodeInfo>) {

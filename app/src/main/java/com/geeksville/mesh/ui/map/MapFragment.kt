@@ -383,7 +383,7 @@ fun MapView(
     fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) {
         context.getString(R.string.you)
     } else {
-        model.nodeDB.nodes.value[id]?.user?.longName ?: context.getString(R.string.unknown_username)
+        model.getUser(id).longName
     }
 
     fun MapView.onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
@@ -467,7 +467,7 @@ fun MapView(
     }
 
     fun MapView.zoomToNodes() {
-        val nodeMarkers = onNodesChanged(model.nodeDB.nodesByNum.values)
+        val nodeMarkers = onNodesChanged(model.nodesByNum.values)
         if (nodeMarkers.isNotEmpty()) {
             val box = BoundingBox.fromGeoPoints(nodeMarkers.map { it.position })
             val center = GeoPoint(box.centerLatitude, box.centerLongitude)

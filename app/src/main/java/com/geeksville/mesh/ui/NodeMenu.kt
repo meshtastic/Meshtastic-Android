@@ -12,7 +12,6 @@ internal fun View.nodeMenu(
     node: NodeInfo,
     ignoreIncomingList: List<Int>,
     isOurNode: Boolean = false,
-    showAdmin: Boolean = false,
     isManaged: Boolean = false,
     onMenuItemAction: MenuItem.() -> Unit,
 ) = PopupMenu(context, this, Gravity.NO_GRAVITY, R.attr.actionOverflowMenuStyle, 0).apply {
@@ -21,7 +20,6 @@ internal fun View.nodeMenu(
     inflate(R.menu.menu_nodes)
     menu.apply {
         setGroupVisible(R.id.group_remote, !isOurNode)
-        setGroupVisible(R.id.group_admin, showAdmin)
         setGroupEnabled(R.id.group_admin, !isManaged)
         findItem(R.id.ignore).apply {
             isEnabled = isIgnored || ignoreIncomingList.size < 3

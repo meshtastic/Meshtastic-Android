@@ -47,7 +47,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -109,10 +108,6 @@ class MeshService : Service(), Logging {
 
         class NoDeviceConfigException(message: String = "No radio settings received (is our app too old?)") :
             RadioNotConnectedException(message)
-
-        /** We treat software update as similar to loss of comms to the regular bluetooth service (so things like sendPosition for background GPS ignores the problem */
-        class IsUpdatingException :
-            RadioNotConnectedException("Operation prohibited during firmware update")
 
         /**
          * Talk to our running service and try to set a new device address.  And then immediately
@@ -214,10 +209,6 @@ class MeshService : Service(), Logging {
         debug("Sending to radio ${built.toPIIString()}")
         val b = built.toByteArray()
 
-        if (false) { // TODO check if radio is updating
-            throw IsUpdatingException()
-        }
-
         radioInterfaceService.sendToRadio(b)
         changeStatus(p.packet.id, MessageStatus.ENROUTE)
 
@@ -272,8 +263,6 @@ class MeshService : Service(), Logging {
         radioConfigRepository.channelSetFlow.onEach { channelSet = it }
             .launchIn(serviceScope)
 
-        loadSettings() // Load our last known node DB
-
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
 
@@ -303,7 +292,11 @@ class MeshService : Service(), Logging {
                 serviceNotifications.notifyId,
                 notification,
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
+                    if (hasLocationPermission()) {
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
+                    } else {
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+                    }
                 } else {
                     0
                 },
@@ -335,47 +328,7 @@ class MeshService : Service(), Logging {
     /// BEGINNING OF MODEL - FIXME, move elsewhere
     ///
 
-    private fun installNewNodeDB(ni: MyNodeInfo, nodes: List<NodeInfo>) {
-
-        discardNodeDB() // Get rid of any old state
-
-        myNodeInfo = ni
-
-        // put our node array into our two different map representations
-        nodeDBbyNodeNum.putAll(nodes.map { it.num to it })
-        nodeDBbyID.putAll(nodes.mapNotNull {
-            // ignore records that don't have a valid user
-            it.user?.let { user -> user.id to it }
-        })
-    }
-
-    private fun loadSettings() {
-        try {
-            serviceScope.handledLaunch {
-
-                val myInfo = radioConfigRepository.getMyNodeInfo()
-                val nodeDB = radioConfigRepository.getNodes()
-                if (myInfo != null && nodeDB != null) installNewNodeDB(myInfo, nodeDB)
-
-                // Note: we do not haveNodeDB = true because that means we've got a valid db from a real device (rather than this possibly stale hint)
-            }
-        } catch (ex: Exception) {
-            errormsg("Ignoring error loading saved state for service: ${ex.message}")
-        }
-    }
-
-    /**
-     * discard entire node db & message state - used when downloading a new db from the device
-     */
-    private fun discardNodeDB() {
-        debug("Discarding NodeDB")
-        myNodeInfo = null
-        nodeDBbyNodeNum.clear()
-        nodeDBbyID.clear()
-        haveNodeDB = false
-    }
-
-    var myNodeInfo: MyNodeInfo? = null
+    val myNodeInfo: MyNodeInfo? get() = radioConfigRepository.myNodeInfo.value
 
     private val configTotal by lazy { ConfigProtos.Config.getDescriptor().fields.size }
     private val moduleTotal by lazy { ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size }
@@ -390,13 +343,11 @@ class MeshService : Service(), Logging {
     private var haveNodeDB = false
 
     // The database of active nodes, index is the node number
-    private val nodeDBbyNodeNum = ConcurrentHashMap<Int, NodeInfo>()
+    private val nodeDBbyNodeNum get() = radioConfigRepository.nodeDBbyNum.value
 
-    /// The database of active nodes, index is the node user ID string
-    /// NOTE: some NodeInfos might be in only nodeDBbyNodeNum (because we don't yet know
-    /// an ID).  But if a NodeInfo is in both maps, it must be one instance shared by
-    /// both datastructures.
-    private val nodeDBbyID = mutableMapOf<String, NodeInfo>()
+    // The database of active nodes, index is the node user ID string
+    // NOTE: some NodeInfos might be in only nodeDBbyNodeNum (because we don't yet know an ID).
+    private val nodeDBbyID get() = nodeDBbyNodeNum.mapKeys { it.value.user?.id }
 
     ///
     /// END OF MODEL
@@ -417,17 +368,16 @@ class MeshService : Service(), Logging {
         if (n == DataPacket.NODENUM_BROADCAST) DataPacket.ID_BROADCAST
         else nodeDBbyNodeNum[n]?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
 
+    private fun defaultUser(num: Int) = MeshUser(
+        id = DataPacket.nodeNumToDefaultId(num),
+        longName = getString(R.string.unknown_username),
+        shortName = getString(R.string.unknown_node_short_name),
+        hwModel = MeshProtos.HardwareModel.UNSET,
+        role = -1,
+    )
+
     // given a nodeNum, return a db entry - creating if necessary
-    private fun getOrCreateNodeInfo(n: Int) = nodeDBbyNodeNum.getOrPut(n) {
-        val defaultUser = MeshUser(
-            id = DataPacket.nodeNumToDefaultId(n),
-            longName = getString(R.string.unknown_username),
-            shortName = getString(R.string.unknown_node_short_name),
-            hwModel = MeshProtos.HardwareModel.UNSET,
-            role = -1,
-        )
-        NodeInfo(n, defaultUser)
-    }
+    private fun getOrCreateNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: NodeInfo(n, defaultUser(n))
 
     private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
     private val rangeTestRegex = Regex("seq (\\d{1,10})")
@@ -480,7 +430,6 @@ class MeshService : Service(), Logging {
         // This might have been the first time we know an ID for this node, so also update the by ID map
         val userId = info.user?.id.orEmpty()
         if (userId.isNotEmpty()) {
-            nodeDBbyID[userId] = info
             if (haveNodeDB) serviceScope.handledLaunch {
                 radioConfigRepository.upsert(info)
             }
@@ -678,11 +627,7 @@ class MeshService : Service(), Logging {
                     // Handle new style position info
                     Portnums.PortNum.POSITION_APP_VALUE -> {
                         if (data.wantResponse) return // ignore data from position requests
-                        var u = MeshProtos.Position.parseFrom(data.payload)
-                        // position updates from mesh usually don't include times.  So promote rx time
-                        if (u.time == 0 && packet.rxTime != 0)
-                            u = u.toBuilder().setTime(packet.rxTime).build()
-                        // PII
+                        val u = MeshProtos.Position.parseFrom(data.payload)
                         // debug("position_app ${packet.from} ${u.toOneLineString()}")
                         handleReceivedPosition(packet.from, u, dataPacket.time)
                     }
@@ -697,9 +642,7 @@ class MeshService : Service(), Logging {
 
                     // Handle new telemetry info
                     Portnums.PortNum.TELEMETRY_APP_VALUE -> {
-                        var u = TelemetryProtos.Telemetry.parseFrom(data.payload)
-                        if (u.time == 0 && packet.rxTime != 0)
-                            u = u.toBuilder().setTime(packet.rxTime).build()
+                        val u = TelemetryProtos.Telemetry.parseFrom(data.payload)
                         handleReceivedTelemetry(packet.from, u, dataPacket.time)
                     }
 
@@ -804,15 +747,7 @@ class MeshService : Service(), Logging {
     /// Update our DB of users based on someone sending out a User subpacket
     private fun handleReceivedUser(fromNum: Int, p: MeshProtos.User, channel: Int = 0) {
         updateNodeInfo(fromNum) {
-            val oldId = it.user?.id.orEmpty()
-            it.user = MeshUser(
-                p.id.ifEmpty { oldId }, // If the new update doesn't contain an ID keep our old value
-                p.longName,
-                p.shortName,
-                p.hwModel,
-                p.isLicensed,
-                p.roleValue
-            )
+            it.user = MeshUser(p)
             it.channel = channel
         }
     }
@@ -1338,32 +1273,28 @@ class MeshService : Service(), Logging {
         radioConfigRepository.setStatusMessage("Channels (${ch.index + 1} / $maxChannels)")
     }
 
-    /**
-     * Convert a protobuf NodeInfo into our model objects and update our node DB
-     */
-    private fun installNodeInfo(info: MeshProtos.NodeInfo) {
-        // Just replace/add any entry
-        updateNodeInfo(info.num) {
-            if (info.hasUser()) {
-                it.user = MeshUser(info.user.copy { if (info.viaMqtt) longName = "$longName (MQTT)" })
-            }
-
-            if (info.hasPosition()) {
-                // For the local node, it might not be able to update its times because it doesn't have a valid GPS reading yet
-                // so if the info is for _our_ node we always assume time is current
-                it.position = Position(info.position)
-            }
-
-            it.lastHeard = info.lastHeard
-
-            if (info.hasDeviceMetrics()) {
-                it.deviceMetrics = DeviceMetrics(info.deviceMetrics)
-            }
-
-            it.channel = info.channel
-            it.hopsAway = info.hopsAway
-        }
-    }
+    private fun MeshProtos.NodeInfo.toEntity() = NodeInfo(
+        num = num,
+        user = if (hasUser()) {
+            MeshUser(user.copy { if (viaMqtt) longName = "$longName (MQTT)" })
+        } else {
+            defaultUser(num)
+        },
+        position = if (hasPosition()) {
+            Position(position)
+        } else {
+            null
+        },
+        snr = snr,
+        lastHeard = lastHeard,
+        deviceMetrics = if(hasDeviceMetrics()) {
+            DeviceMetrics(deviceMetrics)
+        } else {
+            null
+        },
+        channel = channel,
+        hopsAway = hopsAway,
+    )
 
     private fun handleNodeInfo(info: MeshProtos.NodeInfo) {
         debug("Received nodeinfo num=${info.num}, hasUser=${info.hasUser()}, hasPosition=${info.hasPosition()}, hasDeviceMetrics=${info.hasDeviceMetrics()}")
@@ -1389,30 +1320,24 @@ class MeshService : Service(), Logging {
     private fun regenMyNodeInfo() {
         val myInfo = rawMyNodeInfo
         if (myInfo != null) {
-            val a = radioInterfaceService.getBondedDeviceAddress()
-            val isBluetoothInterface = a != null && a.startsWith("x")
-            val firmwareVersion = rawDeviceMetadata?.firmwareVersion.orEmpty()
-
-            val nodeNum =
-                myInfo.myNodeNum // Note: can't use the normal property because myNodeInfo not yet setup
-            val ni = nodeDBbyNodeNum[nodeNum] // can't use toNodeInfo because too early
-            val hwModelStr = ni?.user?.hwModelString
-            setFirmwareUpdateFilename(hwModelStr)
             val mi = with(myInfo) {
                 MyNodeInfo(
-                    myNodeNum,
-                    false,
-                    hwModelStr,
-                    firmwareVersion,
-                    firmwareUpdateFilename?.appLoad != null && firmwareUpdateFilename?.littlefs != null,
+                    myNodeNum = myNodeNum,
+                    hasGPS = false,
+                    model = rawDeviceMetadata?.hwModel?.let { hwModel ->
+                        if (hwModel == MeshProtos.HardwareModel.UNSET) null
+                        else hwModel.name.replace('_', '-').replace('p', '.').lowercase()
+                    },
+                    firmwareVersion = rawDeviceMetadata?.firmwareVersion,
+                    couldUpdate = false,
                     shouldUpdate = false, // TODO add check after re-implementing firmware updates
-                    currentPacketId and 0xffffffffL,
-                    5 * 60 * 1000, // constants from current device code
-                    minAppVersion,
-                    8,
-                    false,
-                    0f,
-                    0f,
+                    currentPacketId = currentPacketId and 0xffffffffL,
+                    messageTimeoutMsec = 5 * 60 * 1000, // constants from current firmware code
+                    minAppVersion = minAppVersion,
+                    maxChannels = 8,
+                    hasWifi = rawDeviceMetadata?.hasWifi ?: false,
+                    channelUtilization = 0f,
+                    airUtilTx = 0f,
                 )
             }
             newMyNodeInfo = mi
@@ -1444,7 +1369,6 @@ class MeshService : Service(), Logging {
         insertMeshLog(packetToSave)
 
         rawMyNodeInfo = myInfo
-        regenMyNodeInfo()
 
         // We'll need to get a new set of channels and settings now
         serviceScope.handledLaunch {
@@ -1468,6 +1392,7 @@ class MeshService : Service(), Logging {
         insertMeshLog(packetToSave)
 
         rawDeviceMetadata = metadata
+        regenMyNodeInfo()
     }
 
     /**
@@ -1528,7 +1453,7 @@ class MeshService : Service(), Logging {
         reportConnection()
     }
 
-    private fun handleConfigComplete(configCompleteId: Int) {
+    private fun handleConfigComplete(configCompleteId: Int) = serviceScope.handledLaunch {
         if (configCompleteId == configNonce) {
 
             val packetToSave = MeshLog(
@@ -1543,22 +1468,21 @@ class MeshService : Service(), Logging {
             if (newMyNodeInfo == null || newNodes.isEmpty()) {
                 errormsg("Did not receive a valid config")
             } else {
-                discardNodeDB()
                 debug("Installing new node DB")
-                myNodeInfo = newMyNodeInfo // Install myNodeInfo as current
-
-                newNodes.forEach(::installNodeInfo)
+                radioConfigRepository.installNodeDB(newMyNodeInfo!!, newNodes.map { it.toEntity() })
                 newNodes.clear() // Just to save RAM ;-)
+
+                withTimeoutOrNull(timeMillis = 5000) {
+                    while (myNodeInfo == null) {
+                        delay(100)
+                    }
+                } ?: errormsg("Timeout: installNodeDB failed!")
 
                 haveNodeDB = true // we now have nodes from real hardware
 
-                regenMyNodeInfo() // we have a node db now, so can possibly find a better hwmodel
-                myNodeInfo = newMyNodeInfo // we might have just updated myNodeInfo
-
-                serviceScope.handledLaunch {
-                    radioConfigRepository.installNodeDB(newMyNodeInfo!!, nodeDBbyID.values.toList())
-                }
-
+                sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+                    setTimeOnly = currentSecond()
+                })
                 sendAnalytics()
 
                 if (deviceVersion < minDeviceVersion || appVersion < minAppVersion) {
@@ -1571,18 +1495,6 @@ class MeshService : Service(), Logging {
         } else {
             warn("Ignoring stale config complete")
         }
-    }
-
-    private fun requestConfig(config: AdminProtos.AdminMessage.ConfigType) {
-        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket(wantResponse = true) {
-            getConfigRequest = config
-        })
-    }
-
-    private fun requestAllConfig() {
-        AdminProtos.AdminMessage.ConfigType.entries.filter {
-            it != AdminProtos.AdminMessage.ConfigType.UNRECOGNIZED
-        }.forEach(::requestConfig)
     }
 
     /**
@@ -1675,50 +1587,6 @@ class MeshService : Service(), Logging {
         return ((currentPacketId % numPacketIds) + 1L).toInt()
     }
 
-    private var firmwareUpdateFilename: UpdateFilenames? = null
-
-    /***
-     * Return the filename we will install on the device
-     */
-    private fun setFirmwareUpdateFilename(model: String?) {
-        firmwareUpdateFilename = try {
-            if (model != null)
-                // TODO reimplement this after we have a new firmware update mechanism
-                null
-            else
-                null
-        } catch (ex: Exception) {
-            errormsg("Unable to update", ex)
-            null
-        }
-
-        debug("setFirmwareUpdateFilename $firmwareUpdateFilename")
-    }
-
-    /// We only allow one update to be running at a time
-    private var updateJob: Job? = null
-
-    private fun doFirmwareUpdate() {
-        // Run in the IO thread
-        val filename = firmwareUpdateFilename ?: throw Exception("No update filename")
-        val safe =
-            BluetoothInterface.safe
-                ?: throw Exception("Can't update - no bluetooth connected")
-
-        if (updateJob?.isActive == true) {
-            errormsg("A firmware update is already running")
-            throw Exception("Firmware update already running")
-        } else {
-            debug("Creating firmware update coroutine")
-            updateJob = serviceScope.handledLaunch {
-                exceptionReporter {
-                    debug("Starting firmware update coroutine")
-                    // TODO perform update with new firmware update mechanism
-                }
-            }
-        }
-    }
-
     private fun enqueueForSending(p: DataPacket) {
         if (p.dataType in rememberDataType) {
             offlineSentPackets.add(p)
@@ -1732,7 +1600,7 @@ class MeshService : Service(), Logging {
 
             val res = radioInterfaceService.setDeviceAddress(deviceAddr)
             if (res) {
-                discardNodeDB()
+                haveNodeDB = false
             } else {
                 serviceBroadcasts.broadcastConnection()
             }
@@ -1746,10 +1614,10 @@ class MeshService : Service(), Logging {
                 clientPackages[receiverName] = packageName
             }
 
-        override fun getUpdateStatus(): Int = -4 // TODO reimplement this after we have a new firmware update mechanism
+        override fun getUpdateStatus(): Int = -4 // ProgressNotStarted
 
         override fun startFirmwareUpdate() = toRemoteExceptions {
-            doFirmwareUpdate()
+            // TODO reimplement this after we have a new firmware update mechanism
         }
 
         override fun getMyNodeInfo(): MyNodeInfo? = this@MeshService.myNodeInfo
@@ -1907,7 +1775,7 @@ class MeshService : Service(), Logging {
         }
 
         override fun getNodes(): MutableList<NodeInfo> = toRemoteExceptions {
-            val r = nodeDBbyID.values.toMutableList()
+            val r = nodeDBbyNodeNum.values.toMutableList()
             info("in getOnline, count=${r.size}")
             // return arrayOf("+16508675309")
             r
@@ -1957,10 +1825,6 @@ class MeshService : Service(), Logging {
                         removeFixedPosition = true
                     }
                 })
-
-                updateNodeInfo(myNodeNum) {
-                    it.position = position.copy(time = currentSecond())
-                }
             }
         }
 

@@ -27,7 +27,7 @@ class MeshLogRepository @Inject constructor(private val meshLogDaoLazy: dagger.L
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getMeshPacketsFrom(nodeNum: Int) = meshLogDao.getAllLogsInReceiveOrder(Int.MAX_VALUE)
+    fun getMeshPacketsFrom(nodeNum: Int) = meshLogDao.getAllLogs(MAX_MESH_PACKETS)
         .mapLatest { list -> list.mapNotNull { it.meshPacket }.filter { it.from == nodeNum } }
         .distinctUntilChanged()
         .flowOn(Dispatchers.IO)
@@ -48,5 +48,6 @@ class MeshLogRepository @Inject constructor(private val meshLogDaoLazy: dagger.L
 
     companion object {
         private const val MAX_ITEMS = 500
+        private const val MAX_MESH_PACKETS = 10000
     }
 }

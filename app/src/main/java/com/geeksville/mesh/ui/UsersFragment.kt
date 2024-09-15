@@ -45,7 +45,6 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             node = node,
             ignoreIncomingList = ignoreIncomingList,
             isOurNode = isOurNode,
-            showAdmin = isOurNode || model.hasAdminChannel,
             isManaged = model.isManaged,
         ) {
             when (itemId) {

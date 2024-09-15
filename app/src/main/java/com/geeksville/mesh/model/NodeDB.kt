@@ -3,7 +3,6 @@ package com.geeksville.mesh.model
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.MeshUser
 import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.database.dao.NodeInfoDao
@@ -37,15 +36,10 @@ class NodeDB @Inject constructor(
     // A map from nodeNum to NodeInfo
     private val _nodeDBbyNum = MutableStateFlow<Map<Int, NodeInfo>>(mapOf())
     val nodeDBbyNum: StateFlow<Map<Int, NodeInfo>> get() = _nodeDBbyNum
-    val nodesByNum get() = nodeDBbyNum.value
 
-    // A map from userId to NodeInfo
-    private val _nodeDBbyID = MutableStateFlow<Map<String, NodeInfo>>(mapOf())
-    val nodeDBbyID: StateFlow<Map<String, NodeInfo>> get() = _nodeDBbyID
-    val nodes get() = nodeDBbyID
-
-    private val _users = MutableStateFlow<Map<String, MeshUser?>>(mapOf())
-    val users: StateFlow<Map<String, MeshUser?>> get() = _users
+    fun getUser(userId: String?) = userId?.let { id ->
+        nodeDBbyNum.value.values.find { it.user?.id == id }?.user
+    }
 
     init {
         nodeInfoDao.getMyNodeInfo().onEach { _myNodeInfo.value = it }
@@ -57,12 +51,6 @@ class NodeDB @Inject constructor(
             _ourNodeInfo.value = ourNodeInfo
             _myId.value = ourNodeInfo?.user?.id
         }.launchIn(processLifecycle.coroutineScope)
-
-        nodeInfoDao.nodeDBbyID().onEach {
-            _nodeDBbyID.value = it
-            _users.value = it.mapValues { node -> node.value.user }
-        }
-            .launchIn(processLifecycle.coroutineScope)
     }
 
     fun getNodes(
@@ -83,12 +71,10 @@ class NodeDB @Inject constructor(
     }
 
     suspend fun installNodeDB(mi: MyNodeInfo, nodes: List<NodeInfo>) = withContext(Dispatchers.IO) {
-        nodeInfoDao.apply {
-            clearNodeInfo()
-            clearMyNodeInfo()
-            setMyNodeInfo(mi) // set MyNodeInfo first
-            putAll(nodes)
-        }
+        nodeInfoDao.clearMyNodeInfo()
+        nodeInfoDao.setMyNodeInfo(mi) // set MyNodeInfo first
+        nodeInfoDao.clearNodeInfo()
+        nodeInfoDao.putAll(nodes)
     }
 
     suspend fun deleteNode(num: Int) = withContext(Dispatchers.IO) {
