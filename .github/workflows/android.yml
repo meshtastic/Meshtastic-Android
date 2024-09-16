@@ -154,10 +154,12 @@ jobs:
           script: echo "Generated AVD snapshot for caching."
 
       - uses: reactivecircus/android-emulator-runner@v2
+        env:
+            ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL: 60
         with:
           api-level: ${{ matrix.api-level }}
           arch: x86_64
           force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -camera-back none
           disable-animations: true
           script: ./gradlew connectedFdroidDebugAndroidTest
