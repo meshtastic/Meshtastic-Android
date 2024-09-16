@@ -34,7 +34,9 @@ fun LoRaConfigItemList(
 ) {
     val focusManager = LocalFocusManager.current
     var loraInput by rememberSaveable { mutableStateOf(loraConfig) }
-    val primaryChannel = Channel(primarySettings, loraInput)
+    val primaryChannel by remember(loraInput) {
+        mutableStateOf(Channel(primarySettings, loraInput))
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
