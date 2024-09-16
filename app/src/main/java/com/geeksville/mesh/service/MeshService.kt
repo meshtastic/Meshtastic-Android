@@ -826,6 +826,7 @@ class MeshService : Service(), Logging {
         }
     }
 
+    @Suppress("MagicNumber")
     private fun formatTraceroutePath(nodesList: List<Int>, snrList: List<Int>): String {
         // nodesList should include both origin and destination nodes
         // origin will not have an SNR value, but destination should
