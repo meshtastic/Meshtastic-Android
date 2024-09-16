@@ -14,16 +14,18 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.*
-import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos.MeshPacket
+import com.geeksville.mesh.MeshProtos.RouteDiscovery
 import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.MeshLog
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.database.entity.toNodeInfo
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
@@ -347,7 +349,7 @@ class MeshService : Service(), Logging {
 
     // The database of active nodes, index is the node user ID string
     // NOTE: some NodeInfos might be in only nodeDBbyNodeNum (because we don't yet know an ID).
-    private val nodeDBbyID get() = nodeDBbyNodeNum.mapKeys { it.value.user?.id }
+    private val nodeDBbyID get() = nodeDBbyNodeNum.mapKeys { it.value.user.id }
 
     ///
     /// END OF MODEL
@@ -368,23 +370,23 @@ class MeshService : Service(), Logging {
         if (n == DataPacket.NODENUM_BROADCAST) DataPacket.ID_BROADCAST
         else nodeDBbyNodeNum[n]?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
 
-    private fun defaultUser(num: Int) = MeshUser(
-        id = DataPacket.nodeNumToDefaultId(num),
-        longName = getString(R.string.unknown_username),
-        shortName = getString(R.string.unknown_node_short_name),
-        hwModel = MeshProtos.HardwareModel.UNSET,
-        role = -1,
-    )
+    private fun defaultUser(num: Int) = user {
+        val userId = DataPacket.nodeNumToDefaultId(num)
+        id = userId
+        longName = "Meshtastic ${userId.takeLast(n = 4)}"
+        shortName = userId.takeLast(n = 4)
+        hwModel = MeshProtos.HardwareModel.UNSET
+    }
 
     // given a nodeNum, return a db entry - creating if necessary
-    private fun getOrCreateNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: NodeInfo(n, defaultUser(n))
+    private fun getOrCreateNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: NodeEntity(n, defaultUser(n))
 
     private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
     private val rangeTestRegex = Regex("seq (\\d{1,10})")
 
     /// Map a userid to a node/ node num, or throw an exception if not found
     /// We prefer to find nodes based on their assigned IDs, but if no ID has been assigned to a node, we can also find it based on node number
-    private fun toNodeInfo(id: String): NodeInfo {
+    private fun toNodeInfo(id: String): NodeEntity {
         // If this is a valid hexaddr will be !null
         val hexStr = hexIdRegex.matchEntire(id)?.groups?.get(1)?.value
 
@@ -422,22 +424,19 @@ class MeshService : Service(), Logging {
     private inline fun updateNodeInfo(
         nodeNum: Int,
         withBroadcast: Boolean = true,
-        crossinline updateFn: (NodeInfo) -> Unit,
+        crossinline updateFn: (NodeEntity) -> Unit,
     ) {
         val info = getOrCreateNodeInfo(nodeNum)
         updateFn(info)
 
-        // This might have been the first time we know an ID for this node, so also update the by ID map
-        val userId = info.user?.id.orEmpty()
-        if (userId.isNotEmpty()) {
+        if (info.user.id.isNotEmpty()) {
             if (haveNodeDB) serviceScope.handledLaunch {
                 radioConfigRepository.upsert(info)
             }
         }
 
-        // parcelable is busted
         if (withBroadcast)
-            serviceBroadcasts.broadcastNodeChange(info)
+            serviceBroadcasts.broadcastNodeChange(info.toNodeInfo())
     }
 
     /// My node num
@@ -489,6 +488,12 @@ class MeshService : Service(), Logging {
         decoded = MeshProtos.Data.newBuilder().also {
             initFn(it)
         }.build()
+        if (decoded.portnum in setOf(Portnums.PortNum.TEXT_MESSAGE_APP, Portnums.PortNum.ADMIN_APP)) {
+            nodeDBbyNodeNum[to]?.user?.publicKey?.let { publicKey ->
+                pkiEncrypted = !publicKey.isEmpty
+                this.publicKey = publicKey
+            }
+        }
 
         return build()
     }
@@ -534,7 +539,7 @@ class MeshService : Service(), Logging {
                 dataType = data.portnumValue,
                 bytes = data.payload.toByteArray(),
                 hopLimit = packet.hopLimit,
-                channel = packet.channel,
+                channel = if (packet.pkiEncrypted) DataPacket.PKC_CHANNEL_INDEX else packet.channel,
             )
         }
     }
@@ -643,7 +648,8 @@ class MeshService : Service(), Logging {
                     // Handle new telemetry info
                     Portnums.PortNum.TELEMETRY_APP_VALUE -> {
                         val u = TelemetryProtos.Telemetry.parseFrom(data.payload)
-                        handleReceivedTelemetry(packet.from, u, dataPacket.time)
+                            .copy { if (time == 0) time = (dataPacket.time / 1000L).toInt() }
+                        handleReceivedTelemetry(packet.from, u)
                     }
 
                     Portnums.PortNum.ROUTING_APP_VALUE -> {
@@ -663,6 +669,12 @@ class MeshService : Service(), Logging {
                     Portnums.PortNum.ADMIN_APP_VALUE -> {
                         val u = AdminProtos.AdminMessage.parseFrom(data.payload)
                         handleReceivedAdmin(packet.from, u)
+                        shouldBroadcast = false
+                    }
+
+                    Portnums.PortNum.PAXCOUNTER_APP_VALUE -> {
+                        val p = PaxcountProtos.Paxcount.parseFrom(data.payload)
+                        handleReceivedPaxcounter(packet.from, p)
                         shouldBroadcast = false
                     }
 
@@ -686,11 +698,7 @@ class MeshService : Service(), Logging {
                     Portnums.PortNum.TRACEROUTE_APP_VALUE -> {
                         if (data.wantResponse) return // ignore data from traceroute requests
                         val parsed = MeshProtos.RouteDiscovery.parseFrom(data.payload)
-                        radioConfigRepository.setTracerouteResponse(buildString {
-                            append("${getUserName(packet.to)} --> ")
-                            parsed.routeList.forEach { num -> append("${getUserName(num)} --> ") }
-                            append(getUserName(packet.from))
-                        })
+                        handleReceivedTraceroute(packet, parsed)
                     }
 
                     else -> debug("No custom processing needed for ${data.portnumValue}")
@@ -747,7 +755,9 @@ class MeshService : Service(), Logging {
     /// Update our DB of users based on someone sending out a User subpacket
     private fun handleReceivedUser(fromNum: Int, p: MeshProtos.User, channel: Int = 0) {
         updateNodeInfo(fromNum) {
-            it.user = MeshUser(p)
+            it.user = p
+            it.longName = p.longName
+            it.shortName = p.shortName
             it.channel = channel
         }
     }
@@ -767,8 +777,8 @@ class MeshService : Service(), Logging {
             debug("Ignoring nop position update for the local node")
         } else {
             updateNodeInfo(fromNum) {
-                debug("update position: ${it.user?.longName?.toPIIString()} with ${p.toPIIString()}")
-                it.position = Position(p, (defaultTime / 1000L).toInt())
+                debug("update position: ${it.longName?.toPIIString()} with ${p.toPIIString()}")
+                it.setPosition(p, (defaultTime / 1000L).toInt())
             }
         }
     }
@@ -777,16 +787,18 @@ class MeshService : Service(), Logging {
     private fun handleReceivedTelemetry(
         fromNum: Int,
         t: TelemetryProtos.Telemetry,
-        defaultTime: Long = System.currentTimeMillis()
     ) {
         updateNodeInfo(fromNum) {
-            if (t.hasDeviceMetrics()) it.deviceMetrics = DeviceMetrics(
-                t.deviceMetrics, if (t.time != 0) t.time else (defaultTime / 1000L).toInt()
-            )
-            if (t.hasEnvironmentMetrics()) it.environmentMetrics = EnvironmentMetrics(
-                t.environmentMetrics, if (t.time != 0) t.time else (defaultTime / 1000L).toInt()
-            )
+            when {
+                t.hasDeviceMetrics() -> it.deviceTelemetry = t
+                t.hasEnvironmentMetrics() -> it.environmentTelemetry = t
+                t.hasPowerMetrics() -> it.powerTelemetry = t
+            }
         }
+    }
+
+    private fun handleReceivedPaxcounter(fromNum: Int, p: PaxcountProtos.Paxcount) {
+        updateNodeInfo(fromNum) { it.paxcounter = p }
     }
 
     private fun handleReceivedStoreAndForward(
@@ -829,6 +841,49 @@ class MeshService : Service(), Logging {
 
             else -> {}
         }
+    }
+
+    @Suppress("MagicNumber")
+    private fun formatTraceroutePath(nodesList: List<Int>, snrList: List<Int>): String {
+        // nodesList should include both origin and destination nodes
+        // origin will not have an SNR value, but destination should
+        val snrStr = if (snrList.size == nodesList.size - 1) snrList else {
+            // use unknown SNR for entire route if snrList has invalid size
+            List(nodesList.size - 1) { -128 }
+        }.map { snr ->
+            val str = if (snr == -128) "?" else "${snr / 4}"
+            "⇊ $str dB"
+        }
+
+        return nodesList.map { nodeId ->
+            "■ ${getUserName(nodeId)}"
+        }.flatMapIndexed { i, nodeStr ->
+            if (i == 0) listOf(nodeStr) else listOf(snrStr[i-1], nodeStr)
+        }.joinToString("\n")
+    }
+
+    private fun handleReceivedTraceroute(packet: MeshPacket, trace: RouteDiscovery) {
+        val nodesToward = mutableListOf<Int>()
+        nodesToward.add(packet.to)
+        nodesToward += trace.routeList
+        nodesToward.add(packet.from)
+
+        val nodesBack = mutableListOf<Int>()
+        if (packet.hopStart > 0 && trace.snrBackList.size > 0) { // otherwise back route is invalid
+            nodesBack.add(packet.from)
+            nodesBack += trace.routeBackList
+            nodesBack.add(packet.to)
+        }
+
+        radioConfigRepository.setTracerouteResponse(buildString {
+            append("Route traced toward destination:\n\n")
+            append(formatTraceroutePath(nodesToward, trace.snrTowardsList))
+            if (nodesBack.size > 0) {
+                append("\n\n")
+                append("Route traced back to us:\n\n")
+                append(formatTraceroutePath(nodesBack, trace.snrBackList))
+            }
+        })
     }
 
     // If apps try to send packets when our radio is sleeping, we queue them here instead
@@ -1174,7 +1229,7 @@ class MeshService : Service(), Logging {
 
     private fun onRadioConnectionState(state: RadioServiceConnectionState) {
         // sleep now disabled by default on ESP32, permanent is true unless light sleep enabled
-        val isRouter = localConfig.device.role == DeviceConfig.Role.ROUTER
+        val isRouter = localConfig.device.role == ConfigProtos.Config.DeviceConfig.Role.ROUTER
         val lsEnabled = localConfig.power.isPowerSaving || isRouter
         val connected = state.isConnected
         val permanent = state.isPermanent || !lsEnabled
@@ -1273,27 +1328,21 @@ class MeshService : Service(), Logging {
         radioConfigRepository.setStatusMessage("Channels (${ch.index + 1} / $maxChannels)")
     }
 
-    private fun MeshProtos.NodeInfo.toEntity() = NodeInfo(
+    private fun MeshProtos.NodeInfo.toEntity() = NodeEntity(
         num = num,
-        user = if (hasUser()) {
-            MeshUser(user.copy { if (viaMqtt) longName = "$longName (MQTT)" })
-        } else {
-            defaultUser(num)
-        },
-        position = if (hasPosition()) {
-            Position(position)
-        } else {
-            null
-        },
-        snr = snr,
+        user = if (hasUser()) user else defaultUser(num)
+            .copy { if (viaMqtt) longName = "$longName (MQTT)" },
+        longName = user.longName,
+        shortName = user.shortName.takeIf { hasUser() },
+        position = position,
+        latitude = position.latitudeI * 1e-7,
+        longitude = position.longitudeI * 1e-7,
         lastHeard = lastHeard,
-        deviceMetrics = if(hasDeviceMetrics()) {
-            DeviceMetrics(deviceMetrics)
-        } else {
-            null
-        },
+        deviceTelemetry = telemetry { deviceMetrics = deviceMetrics },
         channel = channel,
+        viaMqtt = viaMqtt,
         hopsAway = hopsAway,
+        isFavorite = isFavorite,
     )
 
     private fun handleNodeInfo(info: MeshProtos.NodeInfo) {
@@ -1551,7 +1600,7 @@ class MeshService : Service(), Logging {
     private fun setOwner(packetId: Int, user: MeshProtos.User) = with(user) {
         val dest = nodeDBbyID[id]
             ?: throw Exception("Can't set user without a NodeInfo") // this shouldn't happen
-        val old = dest.user!!
+        val old = dest.user
         if (longName == old.longName && shortName == old.shortName && isLicensed == old.isLicensed) {
             debug("Ignoring nop owner change")
         } else {
@@ -1627,7 +1676,12 @@ class MeshService : Service(), Logging {
         override fun getPacketId() = toRemoteExceptions { generatePacketId() }
 
         override fun setOwner(user: MeshUser) = toRemoteExceptions {
-            setOwner(generatePacketId(), user.toProto())
+            setOwner(generatePacketId(), user {
+                id = user.id
+                longName = user.longName
+                shortName = user.shortName
+                isLicensed = user.isLicensed
+            })
         }
 
         override fun setRemoteOwner(id: Int, payload: ByteArray) = toRemoteExceptions {
@@ -1775,7 +1829,7 @@ class MeshService : Service(), Logging {
         }
 
         override fun getNodes(): MutableList<NodeInfo> = toRemoteExceptions {
-            val r = nodeDBbyNodeNum.values.toMutableList()
+            val r = nodeDBbyNodeNum.values.map { it.toNodeInfo() }.toMutableList()
             info("in getOnline, count=${r.size}")
             // return arrayOf("+16508675309")
             r

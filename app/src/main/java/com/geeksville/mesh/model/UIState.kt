@@ -23,6 +23,7 @@ import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
+import com.geeksville.mesh.database.entity.toNodeInfo
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
@@ -230,7 +231,7 @@ class UIViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val nodeList: StateFlow<List<NodeInfo>> = nodesUiState.flatMapLatest { state ->
         nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
-    }.stateIn(
+    }.mapLatest { list -> list.map { it.toNodeInfo() } }.stateIn(
         scope = viewModelScope,
         started = Eagerly,
         initialValue = emptyList(),
@@ -239,14 +240,16 @@ class UIViewModel @Inject constructor(
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
     val ourNodeInfo: StateFlow<NodeInfo?> get() = nodeDB.ourNodeInfo
-    val nodesByNum get() = nodeDB.nodeDBbyNum.value // FIXME only used in MapFragment
 
-    fun getUser(userId: String?) = nodeDB.getUser(userId) ?: MeshUser(
-        userId ?: DataPacket.ID_LOCAL,
-        app.getString(R.string.unknown_username),
-        app.getString(R.string.unknown_node_short_name),
-        MeshProtos.HardwareModel.UNSET,
-    )
+    // FIXME only used in MapFragment
+    val initialNodes get() = nodeDB.nodeDBbyNum.value.values.map { it.toNodeInfo() }
+
+    fun getUser(userId: String?) = nodeDB.getUser(userId) ?: user {
+        id = userId.orEmpty()
+        longName = app.getString(R.string.unknown_username)
+        shortName = app.getString(R.string.unknown_node_short_name)
+        hwModel = MeshProtos.HardwareModel.UNSET
+    }
 
     private val _snackbarText = MutableLiveData<Any?>(null)
     val snackbarText: LiveData<Any?> get() = _snackbarText
@@ -330,7 +333,7 @@ class UIViewModel @Inject constructor(
             Message(
                 uuid = it.uuid,
                 receivedTime = it.received_time,
-                user = getUser(it.data.from),
+                user = MeshUser(getUser(it.data.from)), // FIXME convert to proto User
                 text = it.data.text.orEmpty(),
                 time = it.data.time,
                 read = it.read,

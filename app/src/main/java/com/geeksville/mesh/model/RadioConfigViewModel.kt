@@ -18,6 +18,7 @@ import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
+import com.geeksville.mesh.database.entity.toNodeInfo
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -85,7 +86,7 @@ class RadioConfigViewModel @Inject constructor(
     init {
         combine(_destNum, radioConfigRepository.nodeDBbyNum) { destNum, nodes ->
             nodes[destNum] ?: nodes.values.firstOrNull()
-        }.onEach { _destNode.value = it }.launchIn(viewModelScope)
+        }.onEach { _destNode.value = it?.toNodeInfo() }.launchIn(viewModelScope)
 
         radioConfigRepository.deviceProfileFlow.onEach {
             _currentDeviceProfile.value = it
