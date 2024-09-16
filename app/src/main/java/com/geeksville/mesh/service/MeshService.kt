@@ -533,7 +533,7 @@ class MeshService : Service(), Logging {
                 dataType = data.portnumValue,
                 bytes = data.payload.toByteArray(),
                 hopLimit = packet.hopLimit,
-                channel = packet.channel,
+                channel = if (packet.pkiEncrypted) DataPacket.PKC_CHANNEL_INDEX else packet.channel,
             )
         }
     }

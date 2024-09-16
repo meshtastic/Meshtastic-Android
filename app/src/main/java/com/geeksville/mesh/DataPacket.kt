@@ -167,6 +167,9 @@ data class DataPacket(
         /// special broadcast address
         const val NODENUM_BROADCAST = (0xffffffff).toInt()
 
+        // Public-key cryptography (PKC) channel index
+        const val PKC_CHANNEL_INDEX = 8
+
         fun nodeNumToDefaultId(n: Int): String = "!%08x".format(n)
         fun idToDefaultNodeNum(id: String?): Int? = id?.toLong(16)?.toInt()
 
