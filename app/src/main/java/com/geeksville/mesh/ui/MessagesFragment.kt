@@ -26,6 +26,7 @@ import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.QuickChatAction
+import com.geeksville.mesh.database.entity.toNodeInfo
 import com.geeksville.mesh.databinding.MessagesFragmentBinding
 import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.UIViewModel
@@ -294,9 +295,9 @@ class MessagesFragment : Fragment(), Logging {
     }
 
     private fun openNodeInfo(msg: Message) = lifecycleScope.launch {
-        model.nodeList.firstOrNull()?.find { it.user?.id == msg.user.id }?.let { node ->
+        model.nodeList.firstOrNull()?.find { it.user.id == msg.user.id }?.let { node ->
             parentFragmentManager.popBackStack()
-            model.focusUserNode(node)
+            model.focusUserNode(node.toNodeInfo())
         }
     }
 }

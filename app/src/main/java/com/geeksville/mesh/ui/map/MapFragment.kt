@@ -47,6 +47,7 @@ import com.geeksville.mesh.android.hasGps
 import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.database.entity.toNodeInfo
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.model.map.MarkerWithLabel
@@ -59,6 +60,8 @@ import com.geeksville.mesh.util.zoomIn
 import com.geeksville.mesh.waypoint
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.mapLatest
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
@@ -299,7 +302,10 @@ fun MapView(
             if (permissions.entries.all { it.value }) map.toggleMyLocation()
         }
 
-    val nodes by model.nodeList.collectAsStateWithLifecycle()
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val nodes by model.nodeList
+        .mapLatest { list -> list.map { it.toNodeInfo() } }
+        .collectAsStateWithLifecycle(emptyList())
     val waypoints by model.waypoints.collectAsStateWithLifecycle(emptyMap())
 
     var showDownloadButton: Boolean by remember { mutableStateOf(false) }
