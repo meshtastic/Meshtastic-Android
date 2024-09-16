@@ -88,11 +88,15 @@ fun NodeInfo(
 
     val position = thatNodeInfo.position
     val hwInfoString = thatNodeInfo.user?.hwModelString ?: MeshProtos.HardwareModel.UNSET.name
-    val roleName = thatNodeInfo.user?.role?.let { role ->
-        DeviceConfig.Role.forNumber(role)?.name
-    } ?: DeviceConfig.Role.UNRECOGNIZED.name
+    val roleName =
+        if (isUnknownUser) {
+            DeviceConfig.Role.UNRECOGNIZED.name
+        } else {
+            thatNodeInfo.user?.role?.let { role ->
+                DeviceConfig.Role.forNumber(role)?.name
+            } ?: DeviceConfig.Role.UNRECOGNIZED.name
+        }
     val nodeId = thatNodeInfo.user?.id ?: "???"
-
 
     val highlight = Color(0x33FFFFFF)
     val bgColor by animateColorAsState(
