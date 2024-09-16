@@ -46,9 +46,10 @@ val LoRaConfig.numChannels: Int get() {
     return 0
 }
 
-internal fun LoRaConfig.channelNum(primaryName: String): Int {
-    return if (channelNum != 0) channelNum
-    else (hash(primaryName) % numChannels.toUInt()).toInt() + 1
+internal fun LoRaConfig.channelNum(primaryName: String): Int = when {
+    channelNum != 0 -> channelNum
+    numChannels == 0 -> 0
+    else -> (hash(primaryName) % numChannels.toUInt()).toInt() + 1
 }
 
 internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
