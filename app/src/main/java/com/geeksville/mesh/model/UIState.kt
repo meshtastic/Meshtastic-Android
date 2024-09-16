@@ -21,6 +21,7 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.database.entity.toNodeInfo
@@ -229,9 +230,9 @@ class UIViewModel @Inject constructor(
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val nodeList: StateFlow<List<NodeInfo>> = nodesUiState.flatMapLatest { state ->
+    val nodeList: StateFlow<List<NodeEntity>> = nodesUiState.flatMapLatest { state ->
         nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
-    }.mapLatest { list -> list.map { it.toNodeInfo() } }.stateIn(
+    }.stateIn(
         scope = viewModelScope,
         started = Eagerly,
         initialValue = emptyList(),
