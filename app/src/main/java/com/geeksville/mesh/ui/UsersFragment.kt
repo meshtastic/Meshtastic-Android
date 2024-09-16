@@ -171,7 +171,7 @@ fun NodesScreen(
 
         items(nodes, key = { it.num }) { node ->
             val nodeInfo = node.toNodeInfo()
-            NodeInfo(
+            NodeItem(
                 thisNodeInfo = ourNodeInfo,
                 thatNodeInfo = nodeInfo,
                 gpsFormat = state.gpsFormat,
