@@ -477,7 +477,7 @@ fun MapView(
     }
 
     fun MapView.zoomToNodes() {
-        val nodeMarkers = onNodesChanged(model.nodesByNum.values)
+        val nodeMarkers = onNodesChanged(model.initialNodes)
         if (nodeMarkers.isNotEmpty()) {
             val box = BoundingBox.fromGeoPoints(nodeMarkers.map { it.position })
             val center = GeoPoint(box.centerLatitude, box.centerLongitude)

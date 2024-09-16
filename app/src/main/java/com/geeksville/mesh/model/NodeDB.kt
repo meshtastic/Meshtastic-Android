@@ -2,12 +2,12 @@ package com.geeksville.mesh.model
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.database.dao.NodeInfoDao
+import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.database.entity.toNodeInfo
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -33,12 +33,12 @@ class NodeDB @Inject constructor(
     private val _myId = MutableStateFlow<String?>(null)
     val myId: StateFlow<String?> get() = _myId
 
-    // A map from nodeNum to NodeInfo
-    private val _nodeDBbyNum = MutableStateFlow<Map<Int, NodeInfo>>(mapOf())
-    val nodeDBbyNum: StateFlow<Map<Int, NodeInfo>> get() = _nodeDBbyNum
+    // A map from nodeNum to NodeEntity
+    private val _nodeDBbyNum = MutableStateFlow<Map<Int, NodeEntity>>(mapOf())
+    val nodeDBbyNum: StateFlow<Map<Int, NodeEntity>> get() = _nodeDBbyNum
 
     fun getUser(userId: String?) = userId?.let { id ->
-        nodeDBbyNum.value.values.find { it.user?.id == id }?.user
+        nodeDBbyNum.value.values.find { it.user.id == id }?.user
     }
 
     init {
@@ -47,7 +47,7 @@ class NodeDB @Inject constructor(
 
         nodeInfoDao.nodeDBbyNum().onEach {
             _nodeDBbyNum.value = it
-            val ourNodeInfo = it.values.firstOrNull()
+            val ourNodeInfo = it.values.firstOrNull()?.toNodeInfo()
             _ourNodeInfo.value = ourNodeInfo
             _myId.value = ourNodeInfo?.user?.id
         }.launchIn(processLifecycle.coroutineScope)
@@ -61,16 +61,13 @@ class NodeDB @Inject constructor(
         sort = sort.sqlValue,
         filter = filter,
         includeUnknown = includeUnknown,
-        unknownHwModel = MeshProtos.HardwareModel.UNSET
     )
 
-    fun myNodeInfoFlow(): Flow<MyNodeInfo?> = nodeInfoDao.getMyNodeInfo()
-
-    suspend fun upsert(node: NodeInfo) = withContext(Dispatchers.IO) {
+    suspend fun upsert(node: NodeEntity) = withContext(Dispatchers.IO) {
         nodeInfoDao.upsert(node)
     }
 
-    suspend fun installNodeDB(mi: MyNodeInfo, nodes: List<NodeInfo>) = withContext(Dispatchers.IO) {
+    suspend fun installNodeDB(mi: MyNodeInfo, nodes: List<NodeEntity>) = withContext(Dispatchers.IO) {
         nodeInfoDao.clearMyNodeInfo()
         nodeInfoDao.setMyNodeInfo(mi) // set MyNodeInfo first
         nodeInfoDao.clearNodeInfo()
