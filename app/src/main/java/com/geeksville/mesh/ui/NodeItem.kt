@@ -64,7 +64,7 @@ import com.geeksville.mesh.util.metersIn
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun NodeInfo(
+fun NodeItem(
     thisNodeInfo: NodeInfo?,
     thatNodeInfo: NodeInfo,
     gpsFormat: Int,
@@ -288,7 +288,7 @@ fun NodeInfoSimplePreview() {
     AppTheme {
         val thisNodeInfo = NodeInfoPreviewParameterProvider().values.first()
         val thatNodeInfo = NodeInfoPreviewParameterProvider().values.last()
-        NodeInfo(
+        NodeItem(
             thisNodeInfo = thisNodeInfo,
             thatNodeInfo = thatNodeInfo,
             1,
@@ -315,7 +315,7 @@ fun NodeInfoPreview(
                 text = "Details Collapsed",
                 color = MaterialTheme.colors.onBackground
             )
-            NodeInfo(
+            NodeItem(
                 thisNodeInfo = thisNodeInfo,
                 thatNodeInfo = thatNodeInfo,
                 gpsFormat = 0,
@@ -328,7 +328,7 @@ fun NodeInfoPreview(
                 text = "Details Shown",
                 color = MaterialTheme.colors.onBackground
             )
-            NodeInfo(
+            NodeItem(
                 thisNodeInfo = thisNodeInfo,
                 thatNodeInfo = thatNodeInfo,
                 gpsFormat = 0,
