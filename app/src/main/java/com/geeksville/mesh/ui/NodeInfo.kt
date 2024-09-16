@@ -75,11 +75,13 @@ fun NodeInfo(
     blinking: Boolean = false,
     expanded: Boolean = false,
     currentTimeMillis: Long,
+    hasPublicKey: Boolean = false,
 ) {
+    val isUnknownUser = thatNodeInfo.user?.hwModel == MeshProtos.HardwareModel.UNSET
     val unknownShortName = stringResource(id = R.string.unknown_node_short_name)
-    val unknownLongName = stringResource(id = R.string.unknown_username)
+    val longName = thatNodeInfo.user?.longName ?: stringResource(id = R.string.unknown_username)
 
-    val nodeName = thatNodeInfo.user?.longName ?: unknownLongName
+    val nodeName = if (hasPublicKey) "🔒 $longName" else longName
     val isThisNode = thisNodeInfo?.num == thatNodeInfo.num
     val distance = thisNodeInfo?.distanceStr(thatNodeInfo, distanceUnits)
     val (textColor, nodeColor) = thatNodeInfo.colors
@@ -106,7 +108,7 @@ fun NodeInfo(
         label = "blinking node"
     )
 
-    val style = if (thatNodeInfo.user?.hwModel == MeshProtos.HardwareModel.UNSET) {
+    val style = if (isUnknownUser) {
         LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)
     } else {
         LocalTextStyle.current
