@@ -45,6 +45,7 @@ import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 @Composable
 fun EnvironmentMetricsScreen(telemetries: List<Telemetry>, environmentDisplayFahrenheit: Boolean) {
     /* Convert Celsius to Fahrenheit */
+    @Suppress("MagicNumber")
     fun celsiusToFahrenheit(celsius: Float): Float {
         return (celsius * 1.8F) + 32
     }
