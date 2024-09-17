@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.database.MeshLogRepository
+import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
@@ -29,6 +30,7 @@ data class MetricsState(
     val isLoading: Boolean = false,
     val deviceMetrics: List<Telemetry> = emptyList(),
     val environmentMetrics: List<Telemetry> = emptyList(),
+    val environmentDisplayTempInFahrenheit: Boolean = false,
 ) {
     companion object {
         val Empty = MetricsState()
@@ -38,7 +40,8 @@ data class MetricsState(
 @HiltViewModel
 class MetricsViewModel @Inject constructor(
     val nodeDB: NodeDB,
-    private val meshLogRepository: MeshLogRepository
+    private val meshLogRepository: MeshLogRepository,
+    radioConfigRepository: RadioConfigRepository,
 ) : ViewModel() {
 
     private val isLoading = MutableStateFlow(false)
@@ -49,11 +52,13 @@ class MetricsViewModel @Inject constructor(
         isLoading,
         _deviceMetrics,
         _environmentMetrics,
-    ) { isLoading, device, environment ->
+        radioConfigRepository.deviceProfileFlow,
+    ) { isLoading, device, environment, profile ->
         MetricsState(
             isLoading = isLoading,
             deviceMetrics = device,
             environmentMetrics = environment,
+            environmentDisplayTempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -76,11 +81,13 @@ class MetricsViewModel @Inject constructor(
                 val deviceList = mutableListOf<Telemetry>()
                 val environmentList = mutableListOf<Telemetry>()
                 for (telemetry in it) {
-                    if (telemetry.hasDeviceMetrics())
+                    if (telemetry.hasDeviceMetrics()) {
                         deviceList.add(telemetry)
+                    }
                     /* Avoiding negative outliers */
-                    if (telemetry.hasEnvironmentMetrics() && telemetry.environmentMetrics.relativeHumidity >= 0f)
+                    if (telemetry.hasEnvironmentMetrics() && telemetry.environmentMetrics.relativeHumidity >= 0f) {
                         environmentList.add(telemetry)
+                    }
                 }
                 _deviceMetrics.value = deviceList
                 _environmentMetrics.value = environmentList

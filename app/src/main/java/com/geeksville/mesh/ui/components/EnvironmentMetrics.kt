@@ -36,27 +36,50 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
+import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.components.CommonCharts.ENVIRONMENT_METRICS_COLORS
 import com.geeksville.mesh.ui.components.CommonCharts.LEFT_CHART_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 
-
 @Composable
-fun EnvironmentMetricsScreen(telemetries: List<Telemetry>) {
+fun EnvironmentMetricsScreen(telemetries: List<Telemetry>, environmentDisplayFahrenheit: Boolean) {
+    /* Convert Celsius to Fahrenheit */
+    fun celsiusToFahrenheit(celsius: Float): Float {
+        return (celsius * 1.8F) + 32
+    }
+
+    val processedTelemetries: List<Telemetry> = if (environmentDisplayFahrenheit) {
+        telemetries.map { telemetry ->
+            val temperatureFahrenheit =
+                celsiusToFahrenheit(telemetry.environmentMetrics.temperature)
+            telemetry.copy {
+                environmentMetrics =
+                    telemetry.environmentMetrics.copy { temperature = temperatureFahrenheit }
+            }
+        }
+    } else {
+        telemetries
+    }
+
     Column {
         EnvironmentMetricsChart(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.33f),
-            telemetries = telemetries.reversed()
+            telemetries = processedTelemetries.reversed(),
         )
 
         /* Environment Metric Cards */
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(telemetries) { telemetry -> EnvironmentMetricsCard(telemetry)}
+            items(processedTelemetries) { telemetry ->
+                EnvironmentMetricsCard(
+                    telemetry,
+                    environmentDisplayFahrenheit
+                )
+            }
         }
     }
 }
@@ -94,12 +117,10 @@ private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: 
     val diff = max - min
 
     Box(contentAlignment = Alignment.TopStart) {
-
         ChartOverlay(modifier = modifier, graphColor = graphColor, minValue = min, maxValue = max)
 
         /* Plot Temperature and Relative Humidity */
         Canvas(modifier = modifier) {
-
             val height = size.height
             val width = size.width - 28.dp.toPx()
             val spacePerEntry = (width - spacing) / telemetries.size
@@ -227,7 +248,7 @@ private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: 
 
 @Suppress("LongMethod")
 @Composable
-private fun EnvironmentMetricsCard(telemetry: Telemetry) {
+private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
     val envMetrics = telemetry.environmentMetrics
     val time = telemetry.time * MS_PER_SEC
     Card(
@@ -253,9 +274,9 @@ private fun EnvironmentMetricsCard(telemetry: Telemetry) {
                             style = TextStyle(fontWeight = FontWeight.Bold),
                             fontSize = MaterialTheme.typography.button.fontSize
                         )
-
+                        val textFormat = if (environmentDisplayFahrenheit) "%s %.1f°F" else "%s %.1f°C"
                         Text(
-                            text = "%s %.1f°C".format(
+                            text = textFormat.format(
                                 stringResource(id = R.string.temperature),
                                 envMetrics.temperature
                             ),
