@@ -27,27 +27,21 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
-import com.geeksville.mesh.ui.components.CommonCharts.LINE_OFF
-import com.geeksville.mesh.ui.components.CommonCharts.LINE_ON
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
-import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
-import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
 import com.geeksville.mesh.ui.theme.Orange
 import java.text.DateFormat
 
 
 object CommonCharts {
-    val DEVICE_METRICS_COLORS = listOf(Color.Green, Color.Magenta, Color.Cyan)
-    val ENVIRONMENT_METRICS_COLORS = listOf(Color.Red, Color.Blue)
     val TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
-    const val MAX_PERCENT_VALUE = 100f
-    const val LINE_LIMIT = 4
-    const val TEXT_PAINT_ALPHA = 192
-    const val LINE_ON = 10f
-    const val LINE_OFF = 20f
     const val LEFT_CHART_SPACING = 8f
     const val MS_PER_SEC = 1000.0f
 }
+
+private const val LINE_LIMIT = 4
+private const val TEXT_PAINT_ALPHA = 192
+private const val LINE_ON = 10f
+private const val LINE_OFF = 20f
 
 
 @Composable

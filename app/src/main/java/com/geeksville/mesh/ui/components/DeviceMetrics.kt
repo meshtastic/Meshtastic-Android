@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -33,12 +34,13 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.ui.BatteryInfo
-import com.geeksville.mesh.ui.components.CommonCharts.DEVICE_METRICS_COLORS
 import com.geeksville.mesh.ui.components.CommonCharts.LEFT_CHART_SPACING
-import com.geeksville.mesh.ui.components.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 
+
+private val DEVICE_METRICS_COLORS = listOf(Color.Green, Color.Magenta, Color.Cyan)
+private const val MAX_PERCENT_VALUE = 100f
 
 @Composable
 fun DeviceMetricsScreen(telemetries: List<Telemetry>) {
