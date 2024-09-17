@@ -30,7 +30,7 @@ data class MetricsState(
     val isLoading: Boolean = false,
     val deviceMetrics: List<Telemetry> = emptyList(),
     val environmentMetrics: List<Telemetry> = emptyList(),
-    val environmentDisplayTempInFahrenheit: Boolean = false,
+    val environmentDisplayFahrenheit: Boolean = false,
 ) {
     companion object {
         val Empty = MetricsState()
@@ -58,7 +58,7 @@ class MetricsViewModel @Inject constructor(
             isLoading = isLoading,
             deviceMetrics = device,
             environmentMetrics = environment,
-            environmentDisplayTempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
+            environmentDisplayFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
         )
     }.stateIn(
         scope = viewModelScope,

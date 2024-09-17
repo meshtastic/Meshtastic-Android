@@ -179,7 +179,7 @@ fun MetricsPagerScreen(
                     MetricsPage.DEVICE -> DeviceMetricsScreen(deviceMetrics)
                     MetricsPage.ENVIRONMENT -> EnvironmentMetricsScreen(
                         environmentMetrics,
-                        state.environmentDisplayTempInFahrenheit
+                        state.environmentDisplayFahrenheit
                     )
                 }
             }
