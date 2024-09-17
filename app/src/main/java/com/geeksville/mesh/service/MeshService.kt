@@ -17,7 +17,6 @@ import com.geeksville.mesh.*
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos.MeshPacket
-import com.geeksville.mesh.MeshProtos.RouteDiscovery
 import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.database.MeshLogRepository
@@ -862,7 +861,7 @@ class MeshService : Service(), Logging {
         }.joinToString("\n")
     }
 
-    private fun handleReceivedTraceroute(packet: MeshPacket, trace: RouteDiscovery) {
+    private fun handleReceivedTraceroute(packet: MeshPacket, trace: MeshProtos.RouteDiscovery) {
         val nodesToward = mutableListOf<Int>()
         nodesToward.add(packet.to)
         nodesToward += trace.routeList
@@ -1338,7 +1337,7 @@ class MeshService : Service(), Logging {
         latitude = position.latitudeI * 1e-7,
         longitude = position.longitudeI * 1e-7,
         lastHeard = lastHeard,
-        deviceTelemetry = telemetry { deviceMetrics = deviceMetrics },
+        deviceTelemetry = telemetry { deviceMetrics = this@toEntity.deviceMetrics },
         channel = channel,
         viaMqtt = viaMqtt,
         hopsAway = hopsAway,
