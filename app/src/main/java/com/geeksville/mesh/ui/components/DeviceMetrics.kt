@@ -1,6 +1,7 @@
 package com.geeksville.mesh.ui.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,11 +16,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Card
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -30,6 +40,9 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
@@ -45,12 +58,20 @@ private const val MAX_PERCENT_VALUE = 100f
 
 @Composable
 fun DeviceMetricsScreen(telemetries: List<Telemetry>) {
+
+    var displayInfoDialog by remember { mutableStateOf(false) }
+
     Column {
+
+        if (displayInfoDialog)
+            DeviceInfoDialog { displayInfoDialog = false }
+
         DeviceMetricsChart(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.33f),
-            telemetries.reversed()
+            telemetries.reversed(),
+            promptInfoDialog = { displayInfoDialog = true }
         )
         /* Device Metric Cards */
         LazyColumn(
@@ -63,7 +84,11 @@ fun DeviceMetricsScreen(telemetries: List<Telemetry>) {
 
 @Suppress("LongMethod")
 @Composable
-private fun DeviceMetricsChart(modifier: Modifier = Modifier, telemetries: List<Telemetry>) {
+private fun DeviceMetricsChart(
+    modifier: Modifier = Modifier,
+    telemetries: List<Telemetry>,
+    promptInfoDialog: () -> Unit
+) {
 
     ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty())
@@ -156,7 +181,7 @@ private fun DeviceMetricsChart(modifier: Modifier = Modifier, telemetries: List<
     }
     Spacer(modifier = Modifier.height(16.dp))
 
-    DeviceLegend()
+    DeviceLegend(promptInfoDialog)
 
     Spacer(modifier = Modifier.height(16.dp))
 }
@@ -219,7 +244,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
 }
 
 @Composable
-private fun DeviceLegend() {
+private fun DeviceLegend(promptInfoDialog: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -237,6 +262,65 @@ private fun DeviceLegend() {
 
         LegendLabel(text = stringResource(R.string.air_utilization), color = DEVICE_METRICS_COLORS[2])
 
+        Spacer(modifier = Modifier.width(4.dp))
+
+        Icon(
+            imageVector = Icons.Default.Info,
+            modifier = Modifier.clickable { promptInfoDialog() },
+            contentDescription = stringResource(R.string.info)
+        )
+
         Spacer(modifier = Modifier.weight(1f))
     }
+}
+
+@Composable
+private fun DeviceInfoDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        title = {
+            Text(
+                text = stringResource(R.string.info),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        },
+        text = {
+            Column {
+                Text(
+                    text = stringResource(R.string.channel_utilization),
+                    style = TextStyle(fontWeight = FontWeight.Bold),
+                    textDecoration = TextDecoration.Underline
+                )
+                Text(
+                    text = stringResource(R.string.ch_util_definition),
+                    style = TextStyle.Default,
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    text = stringResource(R.string.air_utilization),
+                    style = TextStyle(fontWeight = FontWeight.Bold),
+                    textDecoration = TextDecoration.Underline
+                )
+                Text(
+                    text = stringResource(R.string.air_util_definition),
+                    style = TextStyle.Default
+                )
+            }
+        },
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.okay))
+            }
+        },
+        backgroundColor = MaterialTheme.colors.background
+    )
+}
+
+@Preview
+@Composable
+private fun DeviceInfoDialogPreview() {
+    DeviceInfoDialog {}
 }
