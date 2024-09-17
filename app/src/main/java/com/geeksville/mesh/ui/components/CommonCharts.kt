@@ -28,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
-import com.geeksville.mesh.ui.theme.Orange
 import java.text.DateFormat
 
 
@@ -62,11 +61,13 @@ fun ChartHeader(amount: Int) {
 
 /**
  * Draws chart lines and labels with respect to the Y-axis range; defined by (`maxValue` - `minValue`).
+ * Assumes `lineColors` is a list of 5 `Color`s with index 0 being the lowest line on the chart.
  */
 @Composable
 fun ChartOverlay(
     modifier: Modifier,
     graphColor: Color,
+    lineColors: List<Color>,
     minValue: Float,
     maxValue: Float
 ) {
@@ -83,15 +84,10 @@ fun ChartOverlay(
         for (i in 0..LINE_LIMIT) {
             val ratio = (lineY - minValue) / range
             val y = height - (ratio * height)
-            val color: Color = when (i) {
-                1 -> Color.Red
-                2 -> Orange
-                else -> graphColor
-            }
             drawLine(
                 start = Offset(0f, y),
                 end = Offset(width, y),
-                color = color,
+                color = lineColors[i],
                 strokeWidth = 1.dp.toPx(),
                 cap = StrokeCap.Round,
                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(LINE_ON, LINE_OFF), 0f)

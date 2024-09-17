@@ -37,6 +37,7 @@ import com.geeksville.mesh.ui.BatteryInfo
 import com.geeksville.mesh.ui.components.CommonCharts.LEFT_CHART_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
+import com.geeksville.mesh.ui.theme.Orange
 
 
 private val DEVICE_METRICS_COLORS = listOf(Color.Green, Color.Magenta, Color.Cyan)
@@ -75,7 +76,18 @@ private fun DeviceMetricsChart(modifier: Modifier = Modifier, telemetries: List<
 
     Box(contentAlignment = Alignment.TopStart) {
 
-        ChartOverlay(modifier, graphColor, minValue = 0f, maxValue = 100f)
+        /*
+         * The order of the colors are with respect to the ChUtil.
+         * 25 - 49  Orange
+         * 50 - 100 Red
+         */
+        ChartOverlay(
+            modifier,
+            graphColor,
+            lineColors = listOf(graphColor, Orange, Color.Red, graphColor, graphColor),
+            minValue = 0f,
+            maxValue = 100f
+        )
 
         /* Plot Battery Line, ChUtil, and AirUtilTx */
         Canvas(modifier = modifier) {

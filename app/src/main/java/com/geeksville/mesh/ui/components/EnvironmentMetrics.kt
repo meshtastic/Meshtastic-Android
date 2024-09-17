@@ -96,7 +96,13 @@ private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: 
 
     Box(contentAlignment = Alignment.TopStart) {
 
-        ChartOverlay(modifier = modifier, graphColor = graphColor, minValue = min, maxValue = max)
+        ChartOverlay(
+            modifier = modifier,
+            graphColor = graphColor,
+            lineColors = List(size = 5) { graphColor },
+            minValue = min,
+            maxValue = max
+        )
 
         /* Plot Temperature and Relative Humidity */
         Canvas(modifier = modifier) {
