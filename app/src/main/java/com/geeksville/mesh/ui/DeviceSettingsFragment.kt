@@ -471,7 +471,8 @@ fun RadioConfigNavHost(
                 onSaveClicked = { loraInput ->
                     val config = config { lora = loraInput }
                     viewModel.setRemoteConfig(destNum, config)
-                }
+                },
+                hasPaFan = viewModel.hasPaFan,
             )
         }
         composable(ConfigRoute.BLUETOOTH.name) {

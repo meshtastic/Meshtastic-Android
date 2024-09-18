@@ -102,6 +102,15 @@ class RadioConfigViewModel @Inject constructor(
     val myNodeNum get() = myNodeInfo.value?.myNodeNum
     val maxChannels get() = myNodeInfo.value?.maxChannels ?: 8
 
+    val hasPaFan: Boolean
+        get() = destNode.value?.user?.hwModel in setOf(
+            null,
+            MeshProtos.HardwareModel.UNSET,
+            MeshProtos.HardwareModel.BETAFPV_2400_TX,
+            MeshProtos.HardwareModel.RADIOMASTER_900_BANDIT_NANO,
+            MeshProtos.HardwareModel.RADIOMASTER_900_BANDIT,
+        )
+
     override fun onCleared() {
         super.onCleared()
         debug("RadioConfigViewModel cleared")
