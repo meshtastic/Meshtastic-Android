@@ -42,7 +42,7 @@ import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 
 
-private val ENVIRONMENT_METRICS_COLORS = listOf(Color.Red, Color.Blue)
+private val ENVIRONMENT_METRICS_COLORS = listOf(Color.Red, Color.Blue, Color.Green)
 
 @Composable
 fun EnvironmentMetricsScreen(telemetries: List<Telemetry>, environmentDisplayFahrenheit: Boolean) {
