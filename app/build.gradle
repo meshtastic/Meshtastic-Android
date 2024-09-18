@@ -158,7 +158,7 @@ dependencies {
     implementation 'androidx.datastore:datastore:1.1.1'
 
     // Lifecycle
-    def lifecycle_version = '2.8.5'
+    def lifecycle_version = '2.8.6'
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
@@ -184,7 +184,7 @@ dependencies {
     kspAndroidTest "com.google.dagger:hilt-compiler:$hilt_version"
 
     // Navigation
-    def nav_version = "2.8.0"
+    def nav_version = "2.8.1"
     implementation "androidx.navigation:navigation-compose:$nav_version"
     androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
 
