@@ -227,4 +227,8 @@
     <string name="humidity">Humidity</string>
     <string name="logs">Logs</string>
     <string name="hops_away">Hops Away</string>
+    <string name="info">Information</string>
+    <string name="ch_util_definition">Utilization for the current channel, including well formed TX, RX and malformed RX (aka noise).</string>
+    <string name="air_util_definition">Percent of airtime for transmission used within the last hour.</string>
+    <string name="iaq">IAQ</string>
 </resources>
