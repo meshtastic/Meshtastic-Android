@@ -23,6 +23,7 @@ import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.SwitchPreference
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun PositionConfigItemList(
     location: Position?,

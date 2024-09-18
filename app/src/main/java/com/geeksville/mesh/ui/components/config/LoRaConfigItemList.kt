@@ -25,6 +25,7 @@ import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.SwitchPreference
 
+@Suppress("LongMethod")
 @Composable
 fun LoRaConfigItemList(
     loraConfig: LoRaConfig,
