@@ -57,24 +57,25 @@ fun EnvironmentMetricsScreen(telemetries: List<Telemetry>) {
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(telemetries) { telemetry -> EnvironmentMetricsCard(telemetry)}
+            items(telemetries) { telemetry -> EnvironmentMetricsCard(telemetry) }
         }
     }
 }
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: List<Telemetry>) {
-
     ChartHeader(amount = telemetries.size)
-    if (telemetries.isEmpty())
+    if (telemetries.isEmpty()) {
         return
+    }
 
     Spacer(modifier = Modifier.height(16.dp))
 
     val graphColor = MaterialTheme.colors.onSurface
     val transparentTemperatureColor = remember { ENVIRONMENT_METRICS_COLORS[0].copy(alpha = 0.5f) }
     val transparentHumidityColor = remember { ENVIRONMENT_METRICS_COLORS[1].copy(alpha = 0.5f) }
+    val transparentIAQColor = remember { ENVIRONMENT_METRICS_COLORS[2].copy(alpha = 0.5f) }
     val spacing = LEFT_CHART_SPACING
 
     /* Since both temperature and humidity are being plotted we need a combined min and max. */
@@ -90,8 +91,22 @@ private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: 
             telemetries.maxBy { it.environmentMetrics.relativeHumidity }
         )
     }
-    val min = minOf(minTemp.environmentMetrics.temperature, minHumidity.environmentMetrics.relativeHumidity)
-    val max = maxOf(maxTemp.environmentMetrics.temperature, maxHumidity.environmentMetrics.relativeHumidity)
+    val (minIAQ, maxIAQ) = remember(key1 = telemetries) {
+        Pair(
+            telemetries.minBy { it.environmentMetrics.iaq },
+            telemetries.maxBy { it.environmentMetrics.iaq }
+        )
+    }
+    val min = minOf(
+        minTemp.environmentMetrics.temperature,
+        minHumidity.environmentMetrics.relativeHumidity,
+        minIAQ.environmentMetrics.iaq.toFloat()
+    )
+    val max = maxOf(
+        maxTemp.environmentMetrics.temperature,
+        maxHumidity.environmentMetrics.relativeHumidity,
+        maxIAQ.environmentMetrics.iaq.toFloat()
+    )
     val diff = max - min
 
     Box(contentAlignment = Alignment.TopStart) {
@@ -106,7 +121,6 @@ private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: 
 
         /* Plot Temperature and Relative Humidity */
         Canvas(modifier = modifier) {
-
             val height = size.height
             val width = size.width - 28.dp.toPx()
             val spacePerEntry = (width - spacing) / telemetries.size
@@ -216,6 +230,62 @@ private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: 
                     cap = StrokeCap.Round
                 )
             )
+
+            /* Air Quality */
+            var lastIaqX = 0f
+            val iaqPath = Path().apply {
+                for (i in telemetries.indices) {
+                    val envMetrics = telemetries[i].environmentMetrics
+                    val nextEnvMetrics =
+                        (telemetries.getOrNull(i + 1) ?: telemetries.last()).environmentMetrics
+                    val leftRatio = (envMetrics.iaq - min) / diff
+                    val rightRatio = (nextEnvMetrics.iaq - min) / diff
+
+                    val x1 = spacing + i * spacePerEntry
+                    val y1 = height - spacing - (leftRatio * height)
+
+                    val x2 = spacing + (i + 1) * spacePerEntry
+
+                    val y2 = height - spacing - (rightRatio * height)
+                    if (i == 0) {
+                        moveTo(x1, y1)
+                    }
+                    lastIaqX = (x1 + x2) / 2f
+                    quadraticBezierTo(
+                        x1,
+                        y1,
+                        lastIaqX,
+                        (y1 + y2) / 2f
+                    )
+                }
+            }
+
+            val fillIaqPath = android.graphics.Path(iaqPath.asAndroidPath())
+                .asComposePath()
+                .apply {
+                    lineTo(lastIaqX, height - spacing)
+                    lineTo(spacing, height - spacing)
+                    close()
+                }
+            drawPath(
+                path = fillIaqPath,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        transparentIAQColor,
+                        Color.Transparent
+                    ),
+                    endY = height - spacing
+                ),
+            )
+
+            drawPath(
+                path = iaqPath,
+                color = ENVIRONMENT_METRICS_COLORS[2],
+                style = Stroke(
+                    width = 2.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+            )
         }
         TimeLabels(
             modifier = modifier,
@@ -294,6 +364,26 @@ private fun EnvironmentMetricsCard(telemetry: Telemetry) {
                             )
                         }
                     }
+                    if (telemetry.environmentMetrics.hasIaq()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        /* Air Quality */
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+
+                        ) {
+                            Text(
+                                text = stringResource(R.string.iaq),
+                                color = MaterialTheme.colors.onSurface,
+                                fontSize = MaterialTheme.typography.button.fontSize
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            IndoorAirQuality(
+                                iaq = telemetry.environmentMetrics.iaq,
+                                displayMode = IaqDisplayMode.Dot
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -311,9 +401,17 @@ private fun EnvironmentLegend() {
 
         LegendLabel(text = stringResource(R.string.temperature), color = ENVIRONMENT_METRICS_COLORS[0], isLine = true)
 
-        Spacer(modifier = Modifier.width(4.dp))
+        Spacer(modifier = Modifier.width(8.dp))
 
         LegendLabel(text = stringResource(R.string.humidity), color = ENVIRONMENT_METRICS_COLORS[1], isLine = true)
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        LegendLabel(
+            text = stringResource(R.string.iaq),
+            color = ENVIRONMENT_METRICS_COLORS[2],
+            isLine = true
+        )
 
         Spacer(modifier = Modifier.weight(1f))
     }
