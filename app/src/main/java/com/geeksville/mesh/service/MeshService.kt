@@ -1850,31 +1850,31 @@ class MeshService : Service(), Logging {
             })
 
         }
+
         override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
-            if (destNum != myNodeNum) {
-                // request position
-                sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
-                    channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
-                    priority = MeshPacket.Priority.BACKGROUND,
-                ) {
-                    portnumValue = Portnums.PortNum.POSITION_APP_VALUE
-                    wantResponse = true
-                })
-            } else {
-                // send fixed position (local only/no remote method)
-                sendToRadio(newMeshPacketTo(destNum).buildAdminPacket {
-                    if (position != Position(0.0, 0.0, 0)) {
-                        setFixedPosition = position {
-                            latitudeI = Position.degI(position.latitude)
-                            longitudeI = Position.degI(position.longitude)
-                            altitude = position.altitude
-                        }
-                            .also { sendPosition(it) } // TODO remove after minDeviceVersion >= 2.3.3
-                    } else {
-                        removeFixedPosition = true
-                    }
-                })
+            sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
+                channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                priority = MeshPacket.Priority.BACKGROUND,
+            ) {
+                portnumValue = Portnums.PortNum.POSITION_APP_VALUE
+                wantResponse = true
+            })
+        }
+
+        override fun setFixedPosition(destNum: Int, position: Position) = toRemoteExceptions {
+            val pos = position {
+                latitudeI = Position.degI(position.latitude)
+                longitudeI = Position.degI(position.longitude)
+                altitude = position.altitude
             }
+            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket {
+                if (position != Position(0.0, 0.0, 0)) {
+                    setFixedPosition = pos
+                } else {
+                    removeFixedPosition = true
+                }
+            })
+            handleReceivedPosition(destNum, pos)
         }
 
         override fun requestTraceroute(requestId: Int, destNum: Int) = toRemoteExceptions {

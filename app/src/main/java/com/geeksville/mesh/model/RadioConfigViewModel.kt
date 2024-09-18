@@ -271,15 +271,15 @@ class RadioConfigViewModel @Inject constructor(
         "Request NodeDB reset error"
     )
 
-    fun setFixedPosition(position: Position) {
+    fun setFixedPosition(destNum: Int, position: Position) {
         try {
-            meshService?.requestPosition(myNodeNum ?: return, position)
+            meshService?.setFixedPosition(destNum, position)
         } catch (ex: RemoteException) {
-            errormsg("Request position error: ${ex.message}")
+            errormsg("Set fixed position error: ${ex.message}")
         }
     }
 
-    fun removeFixedPosition() = setFixedPosition(Position(0.0, 0.0, 0))
+    fun removeFixedPosition(destNum: Int) = setFixedPosition(destNum, Position(0.0, 0.0, 0))
 
     // Set the radio config (also updates our saved copy in preferences)
     fun setConfig(config: ConfigProtos.Config) {
