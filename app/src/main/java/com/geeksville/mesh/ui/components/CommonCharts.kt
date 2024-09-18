@@ -27,27 +27,20 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
-import com.geeksville.mesh.ui.components.CommonCharts.LINE_OFF
-import com.geeksville.mesh.ui.components.CommonCharts.LINE_ON
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
-import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
-import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
-import com.geeksville.mesh.ui.theme.Orange
 import java.text.DateFormat
 
 
 object CommonCharts {
-    val DEVICE_METRICS_COLORS = listOf(Color.Green, Color.Magenta, Color.Cyan)
-    val ENVIRONMENT_METRICS_COLORS = listOf(Color.Red, Color.Blue)
     val TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
-    const val MAX_PERCENT_VALUE = 100f
-    const val LINE_LIMIT = 4
-    const val TEXT_PAINT_ALPHA = 192
-    const val LINE_ON = 10f
-    const val LINE_OFF = 20f
     const val LEFT_CHART_SPACING = 8f
     const val MS_PER_SEC = 1000.0f
 }
+
+private const val LINE_LIMIT = 4
+private const val TEXT_PAINT_ALPHA = 192
+private const val LINE_ON = 10f
+private const val LINE_OFF = 20f
 
 
 @Composable
@@ -68,11 +61,13 @@ fun ChartHeader(amount: Int) {
 
 /**
  * Draws chart lines and labels with respect to the Y-axis range; defined by (`maxValue` - `minValue`).
+ * Assumes `lineColors` is a list of 5 `Color`s with index 0 being the lowest line on the chart.
  */
 @Composable
 fun ChartOverlay(
     modifier: Modifier,
     graphColor: Color,
+    lineColors: List<Color>,
     minValue: Float,
     maxValue: Float
 ) {
@@ -89,15 +84,10 @@ fun ChartOverlay(
         for (i in 0..LINE_LIMIT) {
             val ratio = (lineY - minValue) / range
             val y = height - (ratio * height)
-            val color: Color = when (i) {
-                1 -> Color.Red
-                2 -> Orange
-                else -> graphColor
-            }
             drawLine(
                 start = Offset(0f, y),
                 end = Offset(width, y),
-                color = color,
+                color = lineColors[i],
                 strokeWidth = 1.dp.toPx(),
                 cap = StrokeCap.Round,
                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(LINE_ON, LINE_OFF), 0f)
