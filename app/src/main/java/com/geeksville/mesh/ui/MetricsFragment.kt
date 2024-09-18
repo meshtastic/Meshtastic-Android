@@ -70,8 +70,9 @@ class MetricsFragment : ScreenFragment("Metrics"), Logging {
         savedInstanceState: Bundle?
     ): View {
         val nodeNum = arguments?.getInt("nodeNum")
-        if (nodeNum != null)
+        if (nodeNum != null) {
             model.setSelectedNode(nodeNum)
+        }
 
         val nodeName = model.getNodeName(nodeNum ?: 0)
 
@@ -176,7 +177,10 @@ fun MetricsPagerScreen(
             } else {
                 when (pages[index]) {
                     MetricsPage.DEVICE -> DeviceMetricsScreen(deviceMetrics)
-                    MetricsPage.ENVIRONMENT -> EnvironmentMetricsScreen(environmentMetrics)
+                    MetricsPage.ENVIRONMENT -> EnvironmentMetricsScreen(
+                        environmentMetrics,
+                        state.environmentDisplayFahrenheit
+                    )
                 }
             }
         }
