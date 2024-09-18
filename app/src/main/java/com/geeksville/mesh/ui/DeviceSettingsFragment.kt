@@ -413,19 +413,18 @@ fun RadioConfigNavHost(
         }
         composable(ConfigRoute.POSITION.name) {
             PositionConfigItemList(
-                isLocal = isLocal,
                 location = node?.position,
                 positionConfig = radioConfigState.radioConfig.position,
                 enabled = connected,
                 onSaveClicked = { locationInput, positionInput ->
                     if (positionInput.fixedPosition) {
                         if (locationInput != null && locationInput != node?.position) {
-                            viewModel.setFixedPosition(locationInput)
+                            viewModel.setFixedPosition(destNum, locationInput)
                         }
                     } else {
                         if (radioConfigState.radioConfig.position.fixedPosition) {
                             // fixed position changed from enabled to disabled
-                            viewModel.removeFixedPosition()
+                            viewModel.removeFixedPosition(destNum)
                         }
                     }
                     val config = config { position = positionInput }
