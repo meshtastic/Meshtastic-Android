@@ -36,11 +36,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
-import com.geeksville.mesh.ui.components.CommonCharts.ENVIRONMENT_METRICS_COLORS
 import com.geeksville.mesh.ui.components.CommonCharts.LEFT_CHART_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 
+
+private val ENVIRONMENT_METRICS_COLORS = listOf(Color.Red, Color.Blue)
 
 @Composable
 fun EnvironmentMetricsScreen(telemetries: List<Telemetry>) {
@@ -95,7 +96,13 @@ private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: 
 
     Box(contentAlignment = Alignment.TopStart) {
 
-        ChartOverlay(modifier = modifier, graphColor = graphColor, minValue = min, maxValue = max)
+        ChartOverlay(
+            modifier = modifier,
+            graphColor = graphColor,
+            lineColors = List(size = 5) { graphColor },
+            minValue = min,
+            maxValue = max
+        )
 
         /* Plot Temperature and Relative Humidity */
         Canvas(modifier = modifier) {
