@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.ui.components.CommonCharts.ENVIRONMENT_METRICS_COLORS
 import com.geeksville.mesh.ui.components.CommonCharts.LEFT_CHART_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
