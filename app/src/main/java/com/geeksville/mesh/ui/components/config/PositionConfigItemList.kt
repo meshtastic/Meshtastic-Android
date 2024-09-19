@@ -26,10 +26,10 @@ import com.geeksville.mesh.ui.components.SwitchPreference
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun PositionConfigItemList(
-    location: Position?,
+    location: Position,
     positionConfig: PositionConfig,
     enabled: Boolean,
-    onSaveClicked: (position: Position?, config: PositionConfig) -> Unit,
+    onSaveClicked: (position: Position, config: PositionConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     var locationInput by rememberSaveable { mutableStateOf(location) }
@@ -93,31 +93,31 @@ fun PositionConfigItemList(
         if (positionInput.fixedPosition) {
             item {
                 EditTextPreference(title = "Latitude",
-                    value = locationInput?.latitude ?: 0.0,
+                    value = locationInput.latitude,
                     enabled = enabled,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { value ->
                         if (value >= -90 && value <= 90.0)
-                            locationInput?.let { locationInput = it.copy(latitude = value) }
+                            locationInput = locationInput.copy(latitude = value)
                     })
             }
             item {
                 EditTextPreference(title = "Longitude",
-                    value = locationInput?.longitude ?: 0.0,
+                    value = locationInput.longitude,
                     enabled = enabled,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { value ->
                         if (value >= -180 && value <= 180.0)
-                            locationInput?.let { locationInput = it.copy(longitude = value) }
+                            locationInput = locationInput.copy(longitude = value)
                     })
             }
             item {
                 EditTextPreference(title = "Altitude (meters)",
-                    value = locationInput?.altitude ?: 0,
+                    value = locationInput.altitude,
                     enabled = enabled,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { value ->
-                        locationInput?.let { locationInput = it.copy(altitude = value) }
+                        locationInput = locationInput.copy(altitude = value)
                     })
             }
         }
@@ -196,7 +196,7 @@ fun PositionConfigItemList(
 @Composable
 private fun PositionConfigPreview() {
     PositionConfigItemList(
-        location = null,
+        location = Position(0.0, 0.0, 0),
         positionConfig = PositionConfig.getDefaultInstance(),
         enabled = true,
         onSaveClicked = { _, _ -> },

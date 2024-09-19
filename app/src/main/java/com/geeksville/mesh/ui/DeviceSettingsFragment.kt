@@ -57,6 +57,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
@@ -413,12 +414,12 @@ fun RadioConfigNavHost(
         }
         composable(ConfigRoute.POSITION.name) {
             PositionConfigItemList(
-                location = node?.position,
+                location = node?.position ?: Position(0.0, 0.0, 0),
                 positionConfig = radioConfigState.radioConfig.position,
                 enabled = connected,
                 onSaveClicked = { locationInput, positionInput ->
                     if (positionInput.fixedPosition) {
-                        if (locationInput != null && locationInput != node?.position) {
+                        if (locationInput != node?.position) {
                             viewModel.setFixedPosition(destNum, locationInput)
                         }
                     } else {
