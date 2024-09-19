@@ -182,6 +182,8 @@ fun PositionConfigItemList(
                 enabled = positionInput != positionConfig || locationInput != location,
                 onCancelClicked = {
                     focusManager.clearFocus()
+                    locationInput = location
+                    positionInput = positionConfig
                 },
                 onSaveClicked = {
                     focusManager.clearFocus()
