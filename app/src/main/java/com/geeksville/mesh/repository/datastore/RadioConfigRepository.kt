@@ -11,7 +11,6 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.MyNodeInfo
-import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.NodeDB
@@ -53,7 +52,7 @@ class RadioConfigRepository @Inject constructor(
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
 
     /**
-     * Flow representing the [NodeInfo] database.
+     * Flow representing the [NodeEntity] database.
      */
     val nodeDBbyNum: StateFlow<Map<Int, NodeEntity>> get() = nodeDB.nodeDBbyNum
 

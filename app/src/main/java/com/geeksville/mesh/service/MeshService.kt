@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -264,6 +265,8 @@ class MeshService : Service(), Logging {
         radioConfigRepository.channelSetFlow.onEach { channelSet = it }
             .launchIn(serviceScope)
 
+        loadSettings() // Load our last known node DB
+
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
 
@@ -329,6 +332,23 @@ class MeshService : Service(), Logging {
     /// BEGINNING OF MODEL - FIXME, move elsewhere
     ///
 
+    private fun loadSettings() {
+        discardNodeDB() // Get rid of any old state
+        myNodeInfo = radioConfigRepository.myNodeInfo.value
+        nodeDBbyNodeNum.putAll(radioConfigRepository.nodeDBbyNum.value)
+        // Note: we do not haveNodeDB = true because that means we've got a valid db from a real device (rather than this possibly stale hint)
+    }
+
+    /**
+     * discard entire node db & message state - used when downloading a new db from the device
+     */
+    private fun discardNodeDB() {
+        debug("Discarding NodeDB")
+        myNodeInfo = null
+        nodeDBbyNodeNum.clear()
+        haveNodeDB = false
+    }
+
     private var myNodeInfo: MyNodeInfo? = null
 
     private val configTotal by lazy { ConfigProtos.Config.getDescriptor().fields.size }
@@ -344,7 +364,7 @@ class MeshService : Service(), Logging {
     private var haveNodeDB = false
 
     // The database of active nodes, index is the node number
-    private val nodeDBbyNodeNum get() = radioConfigRepository.nodeDBbyNum.value
+    private val nodeDBbyNodeNum = ConcurrentHashMap<Int, NodeEntity>()
 
     // The database of active nodes, index is the node user ID string
     // NOTE: some NodeInfos might be in only nodeDBbyNodeNum (because we don't yet know an ID).
@@ -369,16 +389,22 @@ class MeshService : Service(), Logging {
         if (n == DataPacket.NODENUM_BROADCAST) DataPacket.ID_BROADCAST
         else nodeDBbyNodeNum[n]?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
 
-    private fun defaultUser(num: Int) = user {
-        val userId = DataPacket.nodeNumToDefaultId(num)
-        id = userId
-        longName = "Meshtastic ${userId.takeLast(n = 4)}"
-        shortName = userId.takeLast(n = 4)
-        hwModel = MeshProtos.HardwareModel.UNSET
-    }
-
     // given a nodeNum, return a db entry - creating if necessary
-    private fun getOrCreateNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: NodeEntity(n, defaultUser(n))
+    private fun getOrCreateNodeInfo(n: Int) = nodeDBbyNodeNum.getOrPut(n) {
+        val userId = DataPacket.nodeNumToDefaultId(n)
+        val defaultUser = user {
+            id = userId
+            longName = "Meshtastic ${userId.takeLast(n = 4)}"
+            shortName = userId.takeLast(n = 4)
+            hwModel = MeshProtos.HardwareModel.UNSET
+        }
+
+        NodeEntity(
+            num = n,
+            user = defaultUser,
+            longName = defaultUser.longName,
+        )
+    }
 
     private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
     private val rangeTestRegex = Regex("seq (\\d{1,10})")
@@ -1327,22 +1353,36 @@ class MeshService : Service(), Logging {
         radioConfigRepository.setStatusMessage("Channels (${ch.index + 1} / $maxChannels)")
     }
 
-    private fun MeshProtos.NodeInfo.toEntity() = NodeEntity(
-        num = num,
-        user = if (hasUser()) user else defaultUser(num)
-            .copy { if (viaMqtt) longName = "$longName (MQTT)" },
-        longName = user.longName,
-        shortName = user.shortName.takeIf { hasUser() },
-        position = position,
-        latitude = position.latitudeI * 1e-7,
-        longitude = position.longitudeI * 1e-7,
-        lastHeard = lastHeard,
-        deviceTelemetry = telemetry { deviceMetrics = this@toEntity.deviceMetrics },
-        channel = channel,
-        viaMqtt = viaMqtt,
-        hopsAway = hopsAway,
-        isFavorite = isFavorite,
-    )
+    /**
+     * Convert a protobuf NodeInfo into our model objects and update our node DB
+     */
+    private fun installNodeInfo(info: MeshProtos.NodeInfo) {
+        // Just replace/add any entry
+        updateNodeInfo(info.num) {
+            if (info.hasUser()) {
+                it.user = info.user.copy { if (info.viaMqtt) longName = "$longName (MQTT)" }
+                it.longName = info.user.longName
+                it.shortName = info.user.shortName
+            }
+
+            if (info.hasPosition()) {
+                it.position = info.position
+                it.latitude = Position.degD(info.position.latitudeI)
+                it.longitude = Position.degD(info.position.longitudeI)
+            }
+
+            it.lastHeard = info.lastHeard
+
+            if (info.hasDeviceMetrics()) {
+                it.deviceTelemetry = telemetry { deviceMetrics = info.deviceMetrics }
+            }
+
+            it.channel = info.channel
+            it.viaMqtt = info.viaMqtt
+            it.hopsAway = info.hopsAway
+            it.isFavorite = info.isFavorite
+        }
+    }
 
     private fun handleNodeInfo(info: MeshProtos.NodeInfo) {
         debug("Received nodeinfo num=${info.num}, hasUser=${info.hasUser()}, hasPosition=${info.hasPosition()}, hasDeviceMetrics=${info.hasDeviceMetrics()}")
@@ -1501,7 +1541,7 @@ class MeshService : Service(), Logging {
         reportConnection()
     }
 
-    private fun handleConfigComplete(configCompleteId: Int) = serviceScope.handledLaunch {
+    private fun handleConfigComplete(configCompleteId: Int) {
         if (configCompleteId == configNonce) {
 
             val packetToSave = MeshLog(
@@ -1516,11 +1556,16 @@ class MeshService : Service(), Logging {
             if (newMyNodeInfo == null || newNodes.isEmpty()) {
                 errormsg("Did not receive a valid config")
             } else {
+                discardNodeDB()
                 debug("Installing new node DB")
                 myNodeInfo = newMyNodeInfo
 
-                radioConfigRepository.installNodeDB(newMyNodeInfo!!, newNodes.map { it.toEntity() })
+                newNodes.forEach(::installNodeInfo)
                 newNodes.clear() // Just to save RAM ;-)
+
+                serviceScope.handledLaunch {
+                    radioConfigRepository.installNodeDB(myNodeInfo!!, nodeDBbyNodeNum.values.toList())
+                }
 
                 haveNodeDB = true // we now have nodes from real hardware
 
@@ -1644,7 +1689,7 @@ class MeshService : Service(), Logging {
 
             val res = radioInterfaceService.setDeviceAddress(deviceAddr)
             if (res) {
-                haveNodeDB = false
+                discardNodeDB()
             } else {
                 serviceBroadcasts.broadcastConnection()
             }
