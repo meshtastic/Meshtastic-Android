@@ -1794,7 +1794,11 @@ class MeshService : Service(), Logging {
 
         override fun getRemoteConfig(id: Int, destNum: Int, config: Int) = toRemoteExceptions {
             sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
-                getConfigRequestValue = config
+                if (config == AdminProtos.AdminMessage.ConfigType.SESSIONKEY_CONFIG_VALUE) {
+                    getDeviceMetadataRequest = true
+                } else {
+                    getConfigRequestValue = config
+                }
             })
         }
 
