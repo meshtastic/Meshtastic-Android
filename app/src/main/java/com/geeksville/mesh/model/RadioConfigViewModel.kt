@@ -16,12 +16,14 @@ import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Position
+import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
 import com.geeksville.mesh.database.entity.toNodeInfo
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.ui.AdminRoute
 import com.geeksville.mesh.ui.ConfigRoute
 import com.geeksville.mesh.ui.ResponseState
 import com.google.protobuf.MessageLite
@@ -44,6 +46,7 @@ import javax.inject.Inject
  */
 data class RadioConfigState(
     val route: String = "",
+    val metadata: MeshProtos.DeviceMetadata = MeshProtos.DeviceMetadata.getDefaultInstance(),
     val userConfig: MeshProtos.User = MeshProtos.User.getDefaultInstance(),
     val channelList: List<ChannelProtos.ChannelSettings> = emptyList(),
     val radioConfig: ConfigProtos.Config = config {},
@@ -51,7 +54,9 @@ data class RadioConfigState(
     val ringtone: String = "",
     val cannedMessageMessages: String = "",
     val responseState: ResponseState<Boolean> = ResponseState.Empty,
-)
+) {
+    fun hasMetadata() = metadata != MeshProtos.DeviceMetadata.getDefaultInstance()
+}
 
 @HiltViewModel
 class RadioConfigViewModel @Inject constructor(
@@ -247,29 +252,54 @@ class RadioConfigViewModel @Inject constructor(
         "Request getCannedMessages error"
     )
 
-    fun requestShutdown(destNum: Int) = request(
+    private fun requestShutdown(destNum: Int) = request(
         destNum,
         { service, packetId, dest -> service.requestShutdown(packetId, dest) },
         "Request shutdown error"
     )
 
-    fun requestReboot(destNum: Int) = request(
+    private fun requestReboot(destNum: Int) = request(
         destNum,
         { service, packetId, dest -> service.requestReboot(packetId, dest) },
         "Request reboot error"
     )
 
-    fun requestFactoryReset(destNum: Int) = request(
+    private fun requestFactoryReset(destNum: Int) = request(
         destNum,
         { service, packetId, dest -> service.requestFactoryReset(packetId, dest) },
         "Request factory reset error"
     )
 
-    fun requestNodedbReset(destNum: Int) = request(
+    private fun requestNodedbReset(destNum: Int) = request(
         destNum,
         { service, packetId, dest -> service.requestNodedbReset(packetId, dest) },
         "Request NodeDB reset error"
     )
+
+    private fun sendAdminRequest(destNum: Int) {
+        when (radioConfigState.value.route) {
+            AdminRoute.REBOOT.name -> requestReboot(destNum)
+            AdminRoute.SHUTDOWN.name -> with(radioConfigState.value) {
+                if (hasMetadata() && !metadata.canShutdown) {
+                    setResponseStateError(app.getString(R.string.cant_shutdown))
+                } else {
+                    requestShutdown(destNum)
+                }
+            }
+
+            AdminRoute.FACTORY_RESET.name -> requestFactoryReset(destNum)
+            AdminRoute.NODEDB_RESET.name -> requestNodedbReset(destNum)
+        }
+    }
+
+    fun getSessionPasskey(destNum: Int) {
+        if (radioConfigState.value.hasMetadata()) {
+            sendAdminRequest(destNum)
+        } else {
+            getConfig(destNum, AdminProtos.AdminMessage.ConfigType.SESSIONKEY_CONFIG_VALUE)
+            setResponseStateTotal(2)
+        }
+    }
 
     fun setFixedPosition(destNum: Int, position: Position) {
         try {
@@ -444,9 +474,12 @@ class RadioConfigViewModel @Inject constructor(
                 setResponseStateError("Unexpected sender: ${packet.from.toUInt()} instead of ${destNum.toUInt()}.")
                 return
             }
-            // check if destination is channel editor
-            val goChannels = route == ConfigRoute.CHANNELS.name
             when (parsed.payloadVariantCase) {
+                AdminProtos.AdminMessage.PayloadVariantCase.GET_DEVICE_METADATA_RESPONSE -> {
+                    _radioConfigState.update { it.copy(metadata = parsed.getDeviceMetadataResponse) }
+                    incrementCompleted()
+                }
+
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
                     val response = parsed.getChannelResponse
                     // Stop once we get to the first disabled entry
@@ -457,7 +490,7 @@ class RadioConfigViewModel @Inject constructor(
                             })
                         }
                         incrementCompleted()
-                        if (response.index + 1 < maxChannels && goChannels) {
+                        if (response.index + 1 < maxChannels && route == ConfigRoute.CHANNELS.name) {
                             // Not done yet, request next channel
                             getChannel(destNum, response.index + 1)
                         }
@@ -503,6 +536,10 @@ class RadioConfigViewModel @Inject constructor(
                 }
 
                 else -> TODO()
+            }
+
+            if (AdminRoute.entries.any { it.name == route }) {
+                sendAdminRequest(destNum)
             }
             requestIds.update { it.apply { remove(data.requestId) } }
         }
