@@ -3,10 +3,8 @@ package com.geeksville.mesh.model
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.geeksville.mesh.MyNodeInfo
-import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.database.entity.toNodeInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,8 +24,8 @@ class NodeDB @Inject constructor(
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = _myNodeInfo
 
     // our node info
-    private val _ourNodeInfo = MutableStateFlow<NodeInfo?>(null)
-    val ourNodeInfo: StateFlow<NodeInfo?> get() = _ourNodeInfo
+    private val _ourNodeInfo = MutableStateFlow<NodeEntity?>(null)
+    val ourNodeInfo: StateFlow<NodeEntity?> get() = _ourNodeInfo
 
     // The unique userId of our node
     private val _myId = MutableStateFlow<String?>(null)
@@ -47,7 +45,7 @@ class NodeDB @Inject constructor(
 
         nodeInfoDao.nodeDBbyNum().onEach {
             _nodeDBbyNum.value = it
-            val ourNodeInfo = it.values.firstOrNull()?.toNodeInfo()
+            val ourNodeInfo = it.values.firstOrNull()
             _ourNodeInfo.value = ourNodeInfo
             _myId.value = ourNodeInfo?.user?.id
         }.launchIn(processLifecycle.coroutineScope)

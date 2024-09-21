@@ -318,7 +318,7 @@ fun MapView(
 
     fun MapView.onNodesChanged(nodes: Collection<NodeInfo>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
-        val ourNode = model.ourNodeInfo.value
+        val ourNode = model.ourNodeInfo.value?.toNodeInfo()
         val gpsFormat = model.config.display.gpsFormat.number
         val displayUnits = model.config.display.units.number
         return nodesWithPosition.map { node ->

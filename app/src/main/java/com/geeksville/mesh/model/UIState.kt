@@ -240,7 +240,7 @@ class UIViewModel @Inject constructor(
 
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
-    val ourNodeInfo: StateFlow<NodeInfo?> get() = nodeDB.ourNodeInfo
+    val ourNodeInfo: StateFlow<NodeEntity?> get() = nodeDB.ourNodeInfo
 
     // FIXME only used in MapFragment
     val initialNodes get() = nodeDB.nodeDBbyNum.value.values.map { it.toNodeInfo() }
@@ -545,10 +545,15 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun setOwner(user: MeshUser) {
+    fun setOwner(name: String) {
+        val user = ourNodeInfo.value?.user?.copy {
+            longName = name
+            shortName = getInitials(name)
+        } ?: return
+
         try {
             // Note: we use ?. here because we might be running in the emulator
-            meshService?.setOwner(user)
+            meshService?.setRemoteOwner(myNodeNum ?: return, user.toByteArray())
         } catch (ex: RemoteException) {
             errormsg("Can't set username on device, is device offline? ${ex.message}")
         }
