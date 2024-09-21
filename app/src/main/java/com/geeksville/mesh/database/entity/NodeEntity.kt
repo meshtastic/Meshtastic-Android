@@ -89,8 +89,56 @@ data class NodeEntity(
         longitude = degD(p.longitudeI)
     }
 
+    private fun hasValidPosition(): Boolean {
+        return latitude != 0.0 && longitude != 0.0 &&
+                (latitude >= -90 && latitude <= 90.0) &&
+                (longitude >= -180 && longitude <= 180)
+    }
+
+    val validPosition: MeshProtos.Position? get() = position.takeIf { hasValidPosition() }
+
     // @return distance in meters to some other node (or null if unknown)
-    fun distance(o: NodeEntity) = latLongToMeter(latitude, longitude, o.latitude, o.longitude)
+    fun distance(o: NodeEntity): Int? {
+        return if (validPosition == null || o.validPosition == null) null
+        else latLongToMeter(latitude, longitude, o.latitude, o.longitude).toInt()
+    }
+
+    private fun TelemetryProtos.EnvironmentMetrics.getDisplayString(isFahrenheit: Boolean): String {
+        val temp = if (temperature != 0f) {
+            if (isFahrenheit) {
+                val fahrenheit = temperature * 1.8F + 32
+                "%.1f°F".format(fahrenheit)
+            } else {
+                "%.1f°C".format(temperature)
+            }
+        } else null
+        val humidity = if (relativeHumidity != 0f) "%.0f%%".format(relativeHumidity) else null
+        val pressure = if (barometricPressure != 0f) "%.1fhPa".format(barometricPressure) else null
+        val gas = if (gasResistance != 0f) "%.0fMΩ".format(gasResistance) else null
+        val voltage = if (this.voltage != 0f) "%.2fV".format(this.voltage) else null
+        val current = if (current != 0f) "%.1fmA".format(current) else null
+        val iaq = if (iaq != 0) "IAQ: $iaq" else null
+
+        return listOfNotNull(
+            temp,
+            humidity,
+            pressure,
+            gas,
+            voltage,
+            current,
+            iaq,
+        ).joinToString(" ")
+    }
+
+    private fun PaxcountProtos.Paxcount.getDisplayString() =
+        "PAX: ${ble + wifi} (B:$ble/W:$wifi)".takeIf { ble != 0 && wifi != 0 }
+
+    fun getTelemetryString(isFahrenheit: Boolean = false): String {
+        return listOfNotNull(
+            paxcounter.getDisplayString(),
+            environmentMetrics.getDisplayString(isFahrenheit)
+        ).joinToString(" ")
+    }
 
     /**
      * true if the device was heard from recently
