@@ -1,8 +1,5 @@
 @file:Suppress(
-    "FunctionNaming",
     "LongMethod",
-    "LongParameterList",
-    "DestructuringDeclarationWithTooManyEntries",
     "MagicNumber",
     "CyclomaticComplexMethod",
 )
@@ -53,20 +50,22 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
+import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
-import com.geeksville.mesh.ui.preview.NodeInfoPreviewParameterProvider
+import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.metersIn
+import com.geeksville.mesh.util.toDistanceString
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun NodeItem(
-    thisNodeInfo: NodeInfo?,
-    thatNodeInfo: NodeInfo,
+    thisNode: NodeEntity?,
+    thatNode: NodeEntity,
     gpsFormat: Int,
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
@@ -75,28 +74,29 @@ fun NodeItem(
     blinking: Boolean = false,
     expanded: Boolean = false,
     currentTimeMillis: Long,
-    hasPublicKey: Boolean = false,
 ) {
-    val isUnknownUser = thatNodeInfo.user?.hwModel == MeshProtos.HardwareModel.UNSET
+    val hasPublicKey = !thatNode.user.publicKey.isEmpty
+    val isUnknownUser = thatNode.user.hwModel == MeshProtos.HardwareModel.UNSET
     val unknownShortName = stringResource(id = R.string.unknown_node_short_name)
-    val longName = thatNodeInfo.user?.longName ?: stringResource(id = R.string.unknown_username)
+    val longName = thatNode.user.longName.ifEmpty { stringResource(id = R.string.unknown_username) }
 
-    val nodeName = if (hasPublicKey) "🔒 $longName" else longName
-    val isThisNode = thisNodeInfo?.num == thatNodeInfo.num
-    val distance = thisNodeInfo?.distanceStr(thatNodeInfo, distanceUnits)
-    val (textColor, nodeColor) = thatNodeInfo.colors
+    val isThisNode = thisNode?.num == thatNode.num
+    val distance = thisNode?.distance(thatNode)?.let {
+        val system = DisplayConfig.DisplayUnits.forNumber(distanceUnits)
+        if (it == 0) null else it.toDistanceString(system)
+    }
+    val (textColor, nodeColor) = thatNode.colors
 
-    val position = thatNodeInfo.position
-    val hwInfoString = thatNodeInfo.user?.hwModelString ?: MeshProtos.HardwareModel.UNSET.name
-    val roleName =
-        if (isUnknownUser) {
-            DeviceConfig.Role.UNRECOGNIZED.name
-        } else {
-            thatNodeInfo.user?.role?.let { role ->
-                DeviceConfig.Role.forNumber(role)?.name
-            } ?: DeviceConfig.Role.UNRECOGNIZED.name
-        }
-    val nodeId = thatNodeInfo.user?.id ?: "???"
+    val hwInfoString = thatNode.user.hwModel.let { hwModel ->
+        if (hwModel == MeshProtos.HardwareModel.UNSET) MeshProtos.HardwareModel.UNSET.name
+        else hwModel.name.replace('_', '-').replace('p', '.').lowercase()
+    }
+    val roleName = if (isUnknownUser) {
+        DeviceConfig.Role.UNRECOGNIZED.name
+    } else {
+        thatNode.user.role.name
+    }
+    val nodeId = thatNode.user.id.ifEmpty { "???" }
 
     val highlight = Color(0x33FFFFFF)
     val bgColor by animateColorAsState(
@@ -153,7 +153,7 @@ fun NodeItem(
                             content = {
                                 Text(
                                     modifier = Modifier.fillMaxWidth(),
-                                    text = thatNodeInfo.user?.shortName ?: unknownShortName,
+                                    text = thatNode.user.shortName.ifEmpty { unknownShortName },
                                     fontWeight = FontWeight.Normal,
                                     fontSize = MaterialTheme.typography.button.fontSize,
                                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
@@ -163,14 +163,14 @@ fun NodeItem(
                         )
                         Text(
                             modifier = Modifier.weight(1f),
-                            text = nodeName,
+                            text = if (hasPublicKey) "🔒 $longName" else longName,
                             style = style,
                             textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                             softWrap = true,
                         )
 
                         LastHeardInfo(
-                            lastHeard = thatNodeInfo.lastHeard,
+                            lastHeard = thatNode.lastHeard,
                             currentTimeMillis = currentTimeMillis
                         )
                     }
@@ -188,8 +188,8 @@ fun NodeItem(
                             Spacer(modifier = Modifier.width(16.dp))
                         }
                         BatteryInfo(
-                            batteryLevel = thatNodeInfo.batteryLevel,
-                            voltage = thatNodeInfo.voltage
+                            batteryLevel = thatNode.batteryLevel,
+                            voltage = thatNode.voltage
                         )
                     }
                     Spacer(modifier = Modifier.height(4.dp))
@@ -198,11 +198,11 @@ fun NodeItem(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         signalInfo(
-                            nodeInfo = thatNodeInfo,
+                            node = thatNode,
                             isThisNode = isThisNode
                         )
-                        if (position?.isValid() == true) {
-                            val satCount = position.satellitesInView
+                        thatNode.validPosition?.let { position ->
+                            val satCount = position.satsInView
                             if (satCount > 0) {
                                 SatelliteCountInfo(
                                     satCount = satCount
@@ -215,9 +215,10 @@ fun NodeItem(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        thatNodeInfo.environmentMetrics?.getDisplayString(tempInFahrenheit)?.let { envMetrics ->
+                        val telemetryString = thatNode.getTelemetryString(tempInFahrenheit)
+                        if (telemetryString.isNotEmpty()) {
                             Text(
-                                text = envMetrics,
+                                text = telemetryString,
                                 color = MaterialTheme.colors.onSurface,
                                 fontSize = MaterialTheme.typography.button.fontSize
                             )
@@ -233,16 +234,19 @@ fun NodeItem(
                                 .fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            DisableSelection {
-                                LinkedCoordinates(
-                                    position = position,
-                                    format = gpsFormat,
-                                    nodeName = nodeName
-                                )
+                            thatNode.validPosition?.let {
+                                DisableSelection {
+                                    LinkedCoordinates(
+                                        latitude = thatNode.latitude,
+                                        longitude = thatNode.longitude,
+                                        format = gpsFormat,
+                                        nodeName = longName
+                                    )
+                                }
                             }
                             val system =
                                 ConfigProtos.Config.DisplayConfig.DisplayUnits.forNumber(distanceUnits)
-                            if (position?.isValid() == true) {
+                            thatNode.validPosition?.let { position ->
                                 val altitude = position.altitude.metersIn(system)
                                 val elevationSuffix = stringResource(id = R.string.elevation_suffix)
                                 ElevationInfo(
@@ -266,13 +270,15 @@ fun NodeItem(
                                 modifier = Modifier.weight(1f),
                                 text = roleName,
                                 textAlign = TextAlign.Center,
-                                fontSize = MaterialTheme.typography.button.fontSize
+                                fontSize = MaterialTheme.typography.button.fontSize,
+                                style = style,
                             )
                             Text(
                                 modifier = Modifier.weight(1f),
                                 text = nodeId,
                                 textAlign = TextAlign.End,
-                                fontSize = MaterialTheme.typography.button.fontSize
+                                fontSize = MaterialTheme.typography.button.fontSize,
+                                style = style,
                             )
                         }
                     }
@@ -286,11 +292,11 @@ fun NodeItem(
 @Preview(showBackground = false)
 fun NodeInfoSimplePreview() {
     AppTheme {
-        val thisNodeInfo = NodeInfoPreviewParameterProvider().values.first()
-        val thatNodeInfo = NodeInfoPreviewParameterProvider().values.last()
+        val thisNode = NodeEntityPreviewParameterProvider().values.first()
+        val thatNode = NodeEntityPreviewParameterProvider().values.last()
         NodeItem(
-            thisNodeInfo = thisNodeInfo,
-            thatNodeInfo = thatNodeInfo,
+            thisNode = thisNode,
+            thatNode = thatNode,
             1,
             0,
             true,
@@ -305,19 +311,19 @@ fun NodeInfoSimplePreview() {
     uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES,
 )
 fun NodeInfoPreview(
-    @PreviewParameter(NodeInfoPreviewParameterProvider::class)
-    thatNodeInfo: NodeInfo
+    @PreviewParameter(NodeEntityPreviewParameterProvider::class)
+    thatNode: NodeEntity
 ) {
     AppTheme {
-        val thisNodeInfo = NodeInfoPreviewParameterProvider().values.first()
+        val thisNode = NodeEntityPreviewParameterProvider().values.first()
         Column {
             Text(
                 text = "Details Collapsed",
                 color = MaterialTheme.colors.onBackground
             )
             NodeItem(
-                thisNodeInfo = thisNodeInfo,
-                thatNodeInfo = thatNodeInfo,
+                thisNode = thisNode,
+                thatNode = thatNode,
                 gpsFormat = 0,
                 distanceUnits = 1,
                 tempInFahrenheit = true,
@@ -329,8 +335,8 @@ fun NodeInfoPreview(
                 color = MaterialTheme.colors.onBackground
             )
             NodeItem(
-                thisNodeInfo = thisNodeInfo,
-                thatNodeInfo = thatNodeInfo,
+                thisNode = thisNode,
+                thatNode = thatNode,
                 gpsFormat = 0,
                 distanceUnits = 1,
                 tempInFahrenheit = true,

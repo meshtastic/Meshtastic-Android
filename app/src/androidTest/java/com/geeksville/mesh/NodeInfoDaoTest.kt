@@ -140,7 +140,9 @@ class NodeInfoDaoTest {
     @Test
     fun testSortByDistance() = runBlocking {
         val nodes = getNodes(sort = NodeSortOption.DISTANCE)
-        val sortedNodes = nodes.sortedBy { it.distance(ourNode) }
+        val sortedNodes = nodes.sortedWith( // nodes with invalid (null) positions at the end
+            compareBy<NodeEntity> { it.validPosition == null }.thenBy { it.distance(ourNode) }
+        )
         assertEquals(sortedNodes, nodes)
     }
 

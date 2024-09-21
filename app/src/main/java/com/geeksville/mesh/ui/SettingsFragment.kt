@@ -26,7 +26,6 @@ import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.model.getInitials
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.util.exceptionToSnackbar
@@ -218,10 +217,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         binding.usernameEditText.onEditorAction(EditorInfo.IME_ACTION_DONE) {
             debug("received IME_ACTION_DONE")
             val n = binding.usernameEditText.text.toString().trim()
-            model.ourNodeInfo.value?.user?.let {
-                val user = it.copy(longName = n, shortName = getInitials(n))
-                if (n.isNotEmpty()) model.setOwner(user)
-            }
+            if (n.isNotEmpty()) model.setOwner(n)
             requireActivity().hideKeyboard()
         }
 

@@ -133,7 +133,7 @@ fun NodesScreen(
     val state by model.nodesUiState.collectAsStateWithLifecycle()
 
     val nodes by model.nodeList.collectAsStateWithLifecycle()
-    val ourNodeInfo by model.ourNodeInfo.collectAsStateWithLifecycle()
+    val ourNode by model.ourNodeInfo.collectAsStateWithLifecycle()
 
     val listState = rememberLazyListState()
     val focusedNode by model.focusedNode.collectAsStateWithLifecycle()
@@ -172,8 +172,8 @@ fun NodesScreen(
         items(nodes, key = { it.num }) { node ->
             val nodeInfo = node.toNodeInfo()
             NodeItem(
-                thisNodeInfo = ourNodeInfo,
-                thatNodeInfo = nodeInfo,
+                thisNode = ourNode,
+                thatNode = node,
                 gpsFormat = state.gpsFormat,
                 distanceUnits = state.distanceUnits,
                 tempInFahrenheit = state.tempInFahrenheit,
@@ -185,7 +185,6 @@ fun NodesScreen(
                 blinking = nodeInfo == focusedNode,
                 expanded = state.showDetails,
                 currentTimeMillis = currentTimeMillis,
-                hasPublicKey = !node.user.publicKey.isEmpty
             )
         }
     }
