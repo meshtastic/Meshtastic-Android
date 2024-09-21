@@ -277,7 +277,10 @@ class RadioConfigViewModel @Inject constructor(
     )
 
     private fun sendAdminRequest(destNum: Int) {
-        when (radioConfigState.value.route) {
+        val route = radioConfigState.value.route
+        _radioConfigState.update { it.copy(route = "") } // setter (response is PortNum.ROUTING_APP)
+
+        when (route) {
             AdminRoute.REBOOT.name -> requestReboot(destNum)
             AdminRoute.SHUTDOWN.name -> with(radioConfigState.value) {
                 if (hasMetadata() && !metadata.canShutdown) {
