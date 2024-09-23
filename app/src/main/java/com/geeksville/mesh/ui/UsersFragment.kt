@@ -90,7 +90,8 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     }
 
     private fun navigateToMessages(node: NodeEntity) = node.user.let { user ->
-        val channel = if (user.publicKey.isEmpty) node.channel else DataPacket.PKC_CHANNEL_INDEX
+        val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC // TODO use meta.hasPKC
+        val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
         val contactKey = "$channel${user.id}"
         info("calling MessagesFragment filter: $contactKey")
         parentFragmentManager.navigateToMessages(contactKey, user.longName)

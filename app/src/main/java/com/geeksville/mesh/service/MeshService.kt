@@ -474,8 +474,13 @@ class MeshService : Service(), Logging {
 
     /// Admin channel index
     private val adminChannelIndex: Int
-        get() = channelSet.settingsList.indexOfFirst { it.name.equals("admin", ignoreCase = true) }
-            .coerceAtLeast(0)
+        get() = if (nodeDBbyNodeNum[myNodeNum]?.hasPKC == true) { // TODO use meta.hasPKC
+            DataPacket.PKC_CHANNEL_INDEX
+        } else {
+            channelSet.settingsList
+                .indexOfFirst { it.name.equals("admin", ignoreCase = true) }
+                .coerceAtLeast(0)
+        }
 
     /// Generate a new mesh packet builder with our node as the sender, and the specified node num
     private fun newMeshPacketTo(idNum: Int) = MeshPacket.newBuilder().apply {
@@ -513,7 +518,7 @@ class MeshService : Service(), Logging {
         decoded = MeshProtos.Data.newBuilder().also {
             initFn(it)
         }.build()
-        if (decoded.portnum in setOf(Portnums.PortNum.TEXT_MESSAGE_APP, Portnums.PortNum.ADMIN_APP)) {
+        if (channel == DataPacket.PKC_CHANNEL_INDEX) {
             nodeDBbyNodeNum[to]?.user?.publicKey?.let { publicKey ->
                 pkiEncrypted = !publicKey.isEmpty
                 this.publicKey = publicKey

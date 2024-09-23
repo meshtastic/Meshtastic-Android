@@ -79,6 +79,8 @@ data class NodeEntity(
             return (if (brightness > 0.5) Color.BLACK else Color.WHITE) to Color.rgb(r, g, b)
         }
 
+    val hasPKC get() = !user.publicKey.isEmpty
+
     val batteryLevel get() = deviceMetrics.batteryLevel
     val voltage get() = deviceMetrics.voltage
     val batteryStr get() = if (batteryLevel in 1..100) "$batteryLevel%" else ""
