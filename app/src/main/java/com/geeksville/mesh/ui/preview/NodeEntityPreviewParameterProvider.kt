@@ -10,6 +10,7 @@ import com.geeksville.mesh.paxcount
 import com.geeksville.mesh.position
 import com.geeksville.mesh.telemetry
 import com.geeksville.mesh.user
+import com.google.protobuf.ByteString
 import kotlin.random.Random
 
 class NodeEntityPreviewParameterProvider : PreviewParameterProvider<NodeEntity> {
@@ -94,6 +95,7 @@ class NodeEntityPreviewParameterProvider : PreviewParameterProvider<NodeEntity> 
             longName = "Donald Duck, the Grand Duck of the Ducks"
             shortName = "DoDu"
             hwModel = MeshProtos.HardwareModel.HELTEC_V3
+            publicKey = ByteString.copyFrom(ByteArray(32) { 1 })
         },
         longName = "Donald Duck, the Grand Duck of the Ducks",
         shortName = "DoDu",

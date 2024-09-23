@@ -232,4 +232,10 @@
     <string name="ch_util_definition">Utilization for the current channel, including well formed TX, RX and malformed RX (aka noise).</string>
     <string name="air_util_definition">Percent of airtime for transmission used within the last hour.</string>
     <string name="iaq">IAQ</string>
+    <string name="encryption_psk">Shared Key</string>
+    <string name="encryption_psk_text">Direct messages are using the shared key for the channel.</string>
+    <string name="encryption_pkc">Public Key Encryption</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption. Requires firmware version 2.5 or greater.</string>
+    <string name="encryption_error">Public key mismatch</string>
+    <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more serious security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
 </resources>
