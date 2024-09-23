@@ -75,7 +75,6 @@ fun NodeItem(
     expanded: Boolean = false,
     currentTimeMillis: Long,
 ) {
-    val hasPublicKey = !thatNode.user.publicKey.isEmpty
     val isUnknownUser = thatNode.user.hwModel == MeshProtos.HardwareModel.UNSET
     val unknownShortName = stringResource(id = R.string.unknown_node_short_name)
     val longName = thatNode.user.longName.ifEmpty { stringResource(id = R.string.unknown_username) }
@@ -163,7 +162,7 @@ fun NodeItem(
                         )
                         Text(
                             modifier = Modifier.weight(1f),
-                            text = if (hasPublicKey) "🔒 $longName" else longName,
+                            text = if (thatNode.hasPKC) "🔒 $longName" else longName,
                             style = style,
                             textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                             softWrap = true,
