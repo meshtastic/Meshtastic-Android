@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -37,6 +38,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,6 +56,8 @@ import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
+import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
 import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
@@ -119,6 +123,16 @@ fun NodeItem(
 
     val (detailsShown, showDetails) = remember { mutableStateOf(expanded) }
 
+    var showEncryptionDialog by remember { mutableStateOf(false) }
+    if (showEncryptionDialog) {
+        val (title, text) = when {
+            thatNode.mismatchKey -> R.string.encryption_error to R.string.encryption_error_text
+            thatNode.hasPKC -> R.string.encryption_pkc to R.string.encryption_pkc_text
+            else -> R.string.encryption_psk to R.string.encryption_psk_text
+        }
+        SimpleAlertDialog(title, text) { showEncryptionDialog = false }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -142,7 +156,6 @@ fun NodeItem(
                         Chip(
                             modifier = Modifier
                                 .width(IntrinsicSize.Min)
-                                .padding(end = 8.dp)
                                 .defaultMinSize(minHeight = 32.dp, minWidth = 72.dp),
                             colors = ChipDefaults.chipColors(
                                 backgroundColor = Color(nodeColor),
@@ -160,9 +173,14 @@ fun NodeItem(
                                 )
                             },
                         )
+                        NodeKeyStatusIcon(
+                            hasPKC = thatNode.hasPKC,
+                            mismatchKey = thatNode.mismatchKey,
+                            modifier = Modifier.size(32.dp)
+                        ) { showEncryptionDialog = true }
                         Text(
                             modifier = Modifier.weight(1f),
-                            text = if (thatNode.hasPKC) "🔒 $longName" else longName,
+                            text = longName,
                             style = style,
                             textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                             softWrap = true,

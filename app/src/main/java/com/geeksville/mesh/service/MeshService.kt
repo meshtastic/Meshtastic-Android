@@ -785,7 +785,11 @@ class MeshService : Service(), Logging {
     /// Update our DB of users based on someone sending out a User subpacket
     private fun handleReceivedUser(fromNum: Int, p: MeshProtos.User, channel: Int = 0) {
         updateNodeInfo(fromNum) {
-            it.user = p
+            val keyMatch = !it.hasPKC || it.user.publicKey == p.publicKey
+            it.user = if (keyMatch) p else p.copy {
+                warn("Public key mismatch from $longName ($shortName)")
+                publicKey = it.errorByteString
+            }
             it.longName = p.longName
             it.shortName = p.shortName
             it.channel = channel

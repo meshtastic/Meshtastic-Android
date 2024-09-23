@@ -14,6 +14,7 @@ import com.geeksville.mesh.Position
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.util.latLongToMeter
+import com.google.protobuf.ByteString
 
 @Suppress("MagicNumber")
 @Entity(tableName = "nodes")
@@ -80,6 +81,8 @@ data class NodeEntity(
         }
 
     val hasPKC get() = !user.publicKey.isEmpty
+    val errorByteString: ByteString get() = ByteString.copyFrom(ByteArray(32) { 0 })
+    val mismatchKey get() = user.publicKey == errorByteString
 
     val batteryLevel get() = deviceMetrics.batteryLevel
     val voltage get() = deviceMetrics.voltage
