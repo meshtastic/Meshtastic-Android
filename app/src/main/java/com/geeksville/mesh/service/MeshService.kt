@@ -1901,12 +1901,12 @@ class MeshService : Service(), Logging {
         override fun stopProvideLocation() = toRemoteExceptions {
             stopLocationRequests()
         }
+
         override fun removeByNodenum(requestId: Int, nodeNum: Int) = toRemoteExceptions {
+            nodeDBbyNodeNum.remove(nodeNum)
             sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
                 removeByNodenum = nodeNum
-
             })
-
         }
 
         override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
