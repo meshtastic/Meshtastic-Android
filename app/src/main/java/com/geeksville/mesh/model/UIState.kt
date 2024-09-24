@@ -507,11 +507,19 @@ class UIViewModel @Inject constructor(
 
     // Set the radio config (also updates our saved copy in preferences)
     fun setConfig(config: Config) {
-        meshService?.setConfig(config.toByteArray())
+        try {
+            meshService?.setConfig(config.toByteArray())
+        } catch (ex: RemoteException) {
+            errormsg("Set config error:", ex)
+        }
     }
 
     fun setChannel(channel: ChannelProtos.Channel) {
-        meshService?.setChannel(channel.toByteArray())
+        try {
+            meshService?.setChannel(channel.toByteArray())
+        } catch (ex: RemoteException) {
+            errormsg("Set channel error:", ex)
+        }
     }
 
     /**
