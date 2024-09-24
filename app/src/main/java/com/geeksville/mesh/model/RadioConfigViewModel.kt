@@ -463,7 +463,7 @@ class RadioConfigViewModel @Inject constructor(
             val parsed = MeshProtos.Routing.parseFrom(data.payload)
             debug(debugMsg.format(parsed.errorReason.name))
             if (parsed.errorReason != MeshProtos.Routing.Error.NONE) {
-                setResponseStateError(parsed.errorReason.name)
+                setResponseStateError(app.getString(parsed.errorReason.stringRes))
             } else if (packet.from == destNum && route.isEmpty()) {
                 requestIds.update { it.apply { remove(data.requestId) } }
                 if (requestIds.value.isEmpty()) setResponseStateSuccess()

@@ -25,6 +25,24 @@
     <string name="node_sort_last_heard">Last heard</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
 
+    <string name="unrecognized">Unrecognized</string>
+    <string name="message_status_enroute">Waiting to be acknowledged</string>
+    <string name="message_status_queued">Queued for sending</string>
+    <string name="routing_error_none">Acknowledged</string>
+    <string name="routing_error_no_route">No route</string>
+    <string name="routing_error_got_nak">Received a negative acknowledgment</string>
+    <string name="routing_error_timeout">Timeout</string>
+    <string name="routing_error_no_interface">No Interface</string>
+    <string name="routing_error_max_retransmit">Max Retransmission Reached</string>
+    <string name="routing_error_no_channel">No Channel</string>
+    <string name="routing_error_too_large">Packet too large</string>
+    <string name="routing_error_no_response">No response</string>
+    <string name="routing_error_bad_request">Bad Request</string>
+    <string name="routing_error_duty_cycle_limit">Regional Duty Cycle Limit Reached</string>
+    <string name="routing_error_not_authorized">Not Authorized</string>
+    <string name="routing_error_pki_failed">Encrypted Send Failed</string>
+    <string name="routing_error_pki_unknown_pubkey">Unknown Public Key</string>
+
     <string name="elevation_suffix" translatable="false">MSL</string>
     <string name="channel_air_util" translatable="false">ChUtil %.1f%% AirUtilTX %.1f%%</string>
 

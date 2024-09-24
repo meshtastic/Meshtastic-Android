@@ -9,11 +9,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.model.Message
+import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
@@ -34,6 +37,13 @@ internal fun MessageListView(
     AutoScrollToBottom(listState, messages)
     UpdateUnreadCount(listState, messages, onUnreadChanged)
 
+    var showStatusDialog by remember { mutableStateOf<Message?>(null) }
+    if (showStatusDialog != null) {
+        val msg = showStatusDialog ?: return
+        val (title, text) = msg.getStatusStringRes()
+        SimpleAlertDialog(title = title, text = text) { showStatusDialog = null }
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         state = listState,
@@ -52,6 +62,7 @@ internal fun MessageListView(
                 onClick = { onClick(msg) },
                 onLongClick = { onLongClick(msg) },
                 onChipClick = { onChipClick(msg) },
+                onStatusClick = { showStatusDialog = msg }
             )
         }
     }

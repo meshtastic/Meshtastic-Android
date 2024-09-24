@@ -130,16 +130,6 @@ data class Contact(
     val isMuted: Boolean,
 )
 
-data class Message(
-    val uuid: Long,
-    val receivedTime: Long,
-    val user: MeshUser,
-    val text: String,
-    val time: Long,
-    val read: Boolean,
-    val status: MessageStatus?,
-)
-
 // return time if within 24 hours, otherwise date
 internal fun getShortDateTime(time: Long): String? {
     val date = if (time != 0L) Date(time) else return null
@@ -181,7 +171,6 @@ class UIViewModel @Inject constructor(
 
     private val _channels = MutableStateFlow(channelSet {})
     val channels: StateFlow<AppOnlyProtos.ChannelSet> get() = _channels
-    val channelSet get() = channels.value
 
     private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
     val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
@@ -339,6 +328,7 @@ class UIViewModel @Inject constructor(
                 time = it.data.time,
                 read = it.read,
                 status = it.data.status,
+                routingError = it.routingError,
             )
         }
     }
