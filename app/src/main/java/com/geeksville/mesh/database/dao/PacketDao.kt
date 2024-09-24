@@ -130,10 +130,15 @@ interface PacketDao {
     )
     fun getDataPackets(): List<DataPacket>
 
-    @Transaction
-    fun getDataPacketById(requestId: Int): DataPacket? {
-        return getDataPackets().lastOrNull { it.id == requestId }
-    }
+    @Query(
+        """
+    SELECT * FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+        AND packet_id = :requestId
+    ORDER BY received_time DESC
+    """
+    )
+    fun getPacketById(requestId: Int): Packet?
 
     @Transaction
     fun getQueuedPackets(): List<DataPacket>? =
