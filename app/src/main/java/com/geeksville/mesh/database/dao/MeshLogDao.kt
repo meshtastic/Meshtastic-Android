@@ -9,16 +9,25 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface MeshLogDao {
 
-    @Query("Select * from log order by received_date desc limit 0,:maxItem")
+    @Query("SELECT * FROM log ORDER BY received_date DESC LIMIT 0,:maxItem")
     fun getAllLogs(maxItem: Int): Flow<List<MeshLog>>
 
-    @Query("Select * from log order by received_date asc limit 0,:maxItem")
+    @Query("SELECT * FROM log ORDER BY received_date ASC LIMIT 0,:maxItem")
     fun getAllLogsInReceiveOrder(maxItem: Int): Flow<List<MeshLog>>
+
+    @Query(
+        """
+        SELECT * FROM log 
+        WHERE from_num = :fromNum AND port_num = :portNum
+        ORDER BY received_date DESC LIMIT 0,:maxItem
+        """
+    )
+    fun getLogsFrom(fromNum: Int, portNum: Int, maxItem: Int): Flow<List<MeshLog>>
 
     @Insert
     fun insert(log: MeshLog)
 
-    @Query("DELETE from log")
+    @Query("DELETE FROM log")
     fun deleteAll()
 
 }

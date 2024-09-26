@@ -9,6 +9,7 @@ import com.geeksville.mesh.android.Logging
 import com.google.protobuf.InvalidProtocolBufferException
 import kotlinx.serialization.json.Json
 
+@Suppress("TooManyFunctions")
 class Converters : Logging {
     @TypeConverter
     fun dataFromString(value: String): DataPacket {
@@ -20,6 +21,21 @@ class Converters : Logging {
     fun dataToString(value: DataPacket): String {
         val json = Json { isLenient = true }
         return json.encodeToString(DataPacket.serializer(), value)
+    }
+
+    @TypeConverter
+    fun bytesToFromRadio(bytes: ByteArray): MeshProtos.FromRadio {
+        return try {
+            MeshProtos.FromRadio.parseFrom(bytes)
+        } catch (ex: InvalidProtocolBufferException) {
+            errormsg("bytesToFromRadio TypeConverter error:", ex)
+            MeshProtos.FromRadio.getDefaultInstance()
+        }
+    }
+
+    @TypeConverter
+    fun fromRadioToBytes(value: MeshProtos.FromRadio): ByteArray? {
+        return value.toByteArray()
     }
 
     @TypeConverter
