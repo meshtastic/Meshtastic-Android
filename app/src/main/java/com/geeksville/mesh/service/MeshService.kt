@@ -216,10 +216,13 @@ class MeshService : Service(), Logging {
 
         if (p.packet.hasDecoded()) {
             val packetToSave = MeshLog(
-                UUID.randomUUID().toString(),
-                "Packet",
-                System.currentTimeMillis(),
-                p.packet.toString()
+                uuid = UUID.randomUUID().toString(),
+                message_type = "Packet",
+                received_date = System.currentTimeMillis(),
+                raw_message = p.packet.toString(),
+                fromNum = p.packet.from,
+                portNum = p.packet.decoded.portnumValue,
+                fromRadio = fromRadio { packet = p.packet },
             )
             insertMeshLog(packetToSave)
         }
@@ -1061,10 +1064,13 @@ class MeshService : Service(), Logging {
         // debug("Recieved: $packet")
         if (packet.hasDecoded()) {
             val packetToSave = MeshLog(
-                UUID.randomUUID().toString(),
-                "Packet",
-                System.currentTimeMillis(),
-                packet.toString()
+                uuid = UUID.randomUUID().toString(),
+                message_type = "Packet",
+                received_date = System.currentTimeMillis(),
+                raw_message = packet.toString(),
+                fromNum = packet.from,
+                portNum = packet.decoded.portnumValue,
+                fromRadio = fromRadio { this.packet = packet },
             )
             insertMeshLog(packetToSave)
 
@@ -1320,10 +1326,11 @@ class MeshService : Service(), Logging {
     private fun handleDeviceConfig(config: ConfigProtos.Config) {
         debug("Received config ${config.toOneLineString()}")
         val packetToSave = MeshLog(
-            UUID.randomUUID().toString(),
-            "Config ${config.payloadVariantCase}",
-            System.currentTimeMillis(),
-            config.toString()
+            uuid = UUID.randomUUID().toString(),
+            message_type = "Config ${config.payloadVariantCase}",
+            received_date = System.currentTimeMillis(),
+            raw_message = config.toString(),
+            fromRadio = fromRadio { this.config = config },
         )
         insertMeshLog(packetToSave)
         setLocalConfig(config)
@@ -1334,10 +1341,11 @@ class MeshService : Service(), Logging {
     private fun handleModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
         debug("Received moduleConfig ${config.toOneLineString()}")
         val packetToSave = MeshLog(
-            UUID.randomUUID().toString(),
-            "ModuleConfig ${config.payloadVariantCase}",
-            System.currentTimeMillis(),
-            config.toString()
+            uuid = UUID.randomUUID().toString(),
+            message_type = "ModuleConfig ${config.payloadVariantCase}",
+            received_date = System.currentTimeMillis(),
+            raw_message = config.toString(),
+            fromRadio = fromRadio { moduleConfig = config },
         )
         insertMeshLog(packetToSave)
         setLocalModuleConfig(config)
@@ -1358,10 +1366,11 @@ class MeshService : Service(), Logging {
     private fun handleChannel(ch: ChannelProtos.Channel) {
         debug("Received channel ${ch.index}")
         val packetToSave = MeshLog(
-            UUID.randomUUID().toString(),
-            "Channel",
-            System.currentTimeMillis(),
-            ch.toString()
+            uuid = UUID.randomUUID().toString(),
+            message_type = "Channel",
+            received_date = System.currentTimeMillis(),
+            raw_message = ch.toString(),
+            fromRadio = fromRadio { channel = ch },
         )
         insertMeshLog(packetToSave)
         if (ch.role != ChannelProtos.Channel.Role.DISABLED) updateChannelSettings(ch)
@@ -1404,10 +1413,11 @@ class MeshService : Service(), Logging {
         debug("Received nodeinfo num=${info.num}, hasUser=${info.hasUser()}, hasPosition=${info.hasPosition()}, hasDeviceMetrics=${info.hasDeviceMetrics()}")
 
         val packetToSave = MeshLog(
-            UUID.randomUUID().toString(),
-            "NodeInfo",
-            System.currentTimeMillis(),
-            info.toString()
+            uuid = UUID.randomUUID().toString(),
+            message_type = "NodeInfo",
+            received_date = System.currentTimeMillis(),
+            raw_message = info.toString(),
+            fromRadio = fromRadio { nodeInfo = info },
         )
         insertMeshLog(packetToSave)
 
@@ -1465,10 +1475,11 @@ class MeshService : Service(), Logging {
      */
     private fun handleMyInfo(myInfo: MeshProtos.MyNodeInfo) {
         val packetToSave = MeshLog(
-            UUID.randomUUID().toString(),
-            "MyNodeInfo",
-            System.currentTimeMillis(),
-            myInfo.toString()
+            uuid = UUID.randomUUID().toString(),
+            message_type = "MyNodeInfo",
+            received_date = System.currentTimeMillis(),
+            raw_message = myInfo.toString(),
+            fromRadio = fromRadio { this.myInfo = myInfo },
         )
         insertMeshLog(packetToSave)
 
@@ -1488,10 +1499,11 @@ class MeshService : Service(), Logging {
     private fun handleMetadata(metadata: MeshProtos.DeviceMetadata) {
         debug("Received deviceMetadata ${metadata.toOneLineString()}")
         val packetToSave = MeshLog(
-            UUID.randomUUID().toString(),
-            "DeviceMetadata",
-            System.currentTimeMillis(),
-            metadata.toString()
+            uuid = UUID.randomUUID().toString(),
+            message_type = "DeviceMetadata",
+            received_date = System.currentTimeMillis(),
+            raw_message = metadata.toString(),
+            fromRadio = fromRadio { this.metadata = metadata },
         )
         insertMeshLog(packetToSave)
 
@@ -1561,10 +1573,11 @@ class MeshService : Service(), Logging {
         if (configCompleteId == configNonce) {
 
             val packetToSave = MeshLog(
-                UUID.randomUUID().toString(),
-                "ConfigComplete",
-                System.currentTimeMillis(),
-                configCompleteId.toString()
+                uuid = UUID.randomUUID().toString(),
+                message_type = "ConfigComplete",
+                received_date = System.currentTimeMillis(),
+                raw_message = configCompleteId.toString(),
+                fromRadio = fromRadio { this.configCompleteId = configCompleteId },
             )
             insertMeshLog(packetToSave)
 
