@@ -67,7 +67,7 @@ fun EditChannelDialog(
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                         onValueChanged = {
                             channelInput = channelInput.copy {
-                                name = it
+                                name = it.trim()
                                 if (psk == Channel.default.settings.psk) psk = Channel.getRandomKey()
                             }
                         },
@@ -84,6 +84,9 @@ fun EditChannelDialog(
                             if (fullPsk.size() in setOf(0, 16, 32)) {
                                 channelInput = channelInput.copy { psk = it }
                             }
+                        },
+                        onGenerateKey = {
+                            channelInput = channelInput.copy { psk = Channel.getRandomKey() }
                         },
                     )
 
@@ -137,7 +140,7 @@ fun EditChannelDialog(
                         .fillMaxWidth()
                         .weight(1f),
                     onClick = {
-                        onAddClick(channelInput.copy { name = channelInput.name.trim() })
+                        onAddClick(channelInput)
                     },
                     enabled = true,
                 ) { Text(stringResource(R.string.save)) }
