@@ -27,6 +27,7 @@ fun <T> DropDownPreference(
     selectedItem: T,
     onItemSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
+    summary: String? = null,
 ) {
     var dropDownExpanded by remember { mutableStateOf(value = false) }
 
@@ -39,7 +40,8 @@ fun <T> DropDownPreference(
         enabled = enabled,
         trailingIcon = if (dropDownExpanded) Icons.TwoTone.KeyboardArrowUp
         else Icons.TwoTone.KeyboardArrowDown,
-        )
+        summary = summary,
+    )
 
     Box {
         DropdownMenu(
@@ -76,6 +78,7 @@ fun <T> DropDownPreference(
 private fun DropDownPreferencePreview() {
     DropDownPreference(
         title = "Settings",
+        summary = "Lorem ipsum dolor sit amet",
         enabled = true,
         items = listOf("TEST1" to "text1", "TEST2" to "text2"),
         selectedItem = "TEST2",
