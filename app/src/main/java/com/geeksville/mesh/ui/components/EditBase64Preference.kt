@@ -41,6 +41,7 @@ fun EditBase64Preference(
     keyboardActions: KeyboardActions,
     onValueChange: (ByteString) -> Unit,
     modifier: Modifier = Modifier,
+    onGenerateKey: (() -> Unit)? = null,
 ) {
     fun ByteString.encodeToString() = Base64.encodeToString(this.toByteArray(), Base64.NO_WRAP)
     fun String.toByteString() = Base64.decode(this, Base64.NO_WRAP).toByteString()
@@ -54,6 +55,12 @@ fun EditBase64Preference(
         if (!isFocused) {
             valueState = value.encodeToString()
         }
+    }
+
+    val (icon, description) = when {
+        isError -> Icons.TwoTone.Close to stringResource(R.string.error)
+        onGenerateKey != null && !isFocused -> Icons.TwoTone.Refresh to stringResource(R.string.reset)
+        else -> null to null
     }
 
     OutlinedTextField(
@@ -75,14 +82,18 @@ fun EditBase64Preference(
         trailingIcon = {
             IconButton(
                 onClick = {
-                    val psk = if (isError) value else Channel.getRandomKey()
-                    valueState = psk.encodeToString()
-                    onValueChange(psk)
-                }
+                    if (isError) {
+                        valueState = value.encodeToString()
+                        onValueChange(value)
+                    } else if (onGenerateKey != null && !isFocused) {
+                        onGenerateKey()
+                    }
+                },
+                enabled = enabled,
             ) {
                 Icon(
-                    imageVector = if (isError) Icons.TwoTone.Close else Icons.TwoTone.Refresh,
-                    contentDescription = stringResource(if (isError) R.string.error else R.string.reset),
+                    imageVector = icon ?: return@IconButton,
+                    contentDescription = description,
                     tint = if (isError) MaterialTheme.colors.error
                     else LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
                 )
@@ -100,6 +111,7 @@ private fun EditBase64PreferencePreview() {
         enabled = true,
         keyboardActions = KeyboardActions {},
         onValueChange = {},
+        onGenerateKey = {},
         modifier = Modifier.padding(16.dp)
     )
 }

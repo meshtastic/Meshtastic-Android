@@ -42,7 +42,9 @@ fun SecurityConfigItemList(
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChange = {
-                    securityInput = securityInput.copy { publicKey = it }
+                    if (it.size() == 32) {
+                        securityInput = securityInput.copy { publicKey = it }
+                    }
                 },
             )
         }
@@ -54,7 +56,9 @@ fun SecurityConfigItemList(
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChange = {
-                    securityInput = securityInput.copy { privateKey = it }
+                    if (it.size() == 32) {
+                        securityInput = securityInput.copy { privateKey = it }
+                    }
                 },
             )
         }
@@ -66,9 +70,11 @@ fun SecurityConfigItemList(
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChange = {
-                    securityInput = securityInput.copy {
-                        adminKey.clear()
-                        adminKey.add(it)
+                    if (it.size() == 32) {
+                        securityInput = securityInput.copy {
+                            adminKey.clear()
+                            adminKey.add(it)
+                        }
                     }
                 },
             )
