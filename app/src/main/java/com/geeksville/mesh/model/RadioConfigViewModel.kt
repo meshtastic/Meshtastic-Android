@@ -13,13 +13,12 @@ import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.ModuleConfigProtos
 import com.geeksville.mesh.MyNodeInfo
-import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
-import com.geeksville.mesh.database.entity.toNodeInfo
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -70,12 +69,12 @@ class RadioConfigViewModel @Inject constructor(
     val connectionState get() = radioConfigRepository.connectionState
 
     private val _destNum = MutableStateFlow<Int?>(null)
-    private val _destNode = MutableStateFlow<NodeInfo?>(null)
-    val destNode: StateFlow<NodeInfo?> get() = _destNode
+    private val _destNode = MutableStateFlow<NodeEntity?>(null)
+    val destNode: StateFlow<NodeEntity?> get() = _destNode
 
     /**
-     * Sets the destination [NodeInfo] used in Radio Configuration.
-     * @param num Destination nodeNum (or null for our local [NodeInfo]).
+     * Sets the destination [NodeEntity] used in Radio Configuration.
+     * @param num Destination nodeNum (or null for our local [NodeEntity]).
      */
     fun setDestNum(num: Int?) {
         _destNum.value = num
@@ -91,7 +90,7 @@ class RadioConfigViewModel @Inject constructor(
     init {
         combine(_destNum, radioConfigRepository.nodeDBbyNum) { destNum, nodes ->
             nodes[destNum] ?: nodes.values.firstOrNull()
-        }.onEach { _destNode.value = it?.toNodeInfo() }.launchIn(viewModelScope)
+        }.onEach { _destNode.value = it }.launchIn(viewModelScope)
 
         radioConfigRepository.deviceProfileFlow.onEach {
             _currentDeviceProfile.value = it
@@ -110,6 +109,7 @@ class RadioConfigViewModel @Inject constructor(
     val hasPaFan: Boolean
         get() = destNode.value?.user?.hwModel in setOf(
             null,
+            MeshProtos.HardwareModel.UNRECOGNIZED,
             MeshProtos.HardwareModel.UNSET,
             MeshProtos.HardwareModel.BETAFPV_2400_TX,
             MeshProtos.HardwareModel.RADIOMASTER_900_BANDIT_NANO,
@@ -367,12 +367,12 @@ class RadioConfigViewModel @Inject constructor(
         _deviceProfile.value = null
         meshService?.beginEditSettings()
         if (hasLongName() || hasShortName()) destNode.value?.user?.let {
-            val user = it.copy(
-                longName = if (hasLongName()) longName else it.longName,
-                shortName = if (hasShortName()) shortName else it.shortName,
-                hwModel = MeshProtos.HardwareModel.UNSET,
-            )
-            if (it != user) setOwner(user.toProto())
+            val user = MeshProtos.User.newBuilder()
+                .setLongName(if (hasLongName()) longName else it.longName)
+                .setShortName(if (hasShortName()) shortName else it.shortName)
+                .setIsLicensed(it.isLicensed)
+                .build()
+            if (it != user) setOwner(user)
         }
         if (hasChannelUrl()) try {
             setChannels(channelUrl)

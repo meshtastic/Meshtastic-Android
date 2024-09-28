@@ -1647,7 +1647,9 @@ class MeshService : Service(), Logging {
                 debug("Sending our position/time to=$idNum ${Position(position)}")
 
                 // Also update our own map for our nodeNum, by handling the packet just like packets from other users
-                handleReceivedPosition(mi.myNodeNum, position)
+                if (!localConfig.position.fixedPosition) {
+                    handleReceivedPosition(mi.myNodeNum, position)
+                }
 
                 sendToRadio(newMeshPacketTo(idNum).buildMeshPacket(
                     channel = if (destNum == null) 0 else nodeDBbyNodeNum[destNum]?.channel ?: 0,
@@ -1952,7 +1954,9 @@ class MeshService : Service(), Logging {
                     removeFixedPosition = true
                 }
             })
-            handleReceivedPosition(destNum, pos)
+            updateNodeInfo(destNum) {
+                it.setPosition(pos, currentSecond())
+            }
         }
 
         override fun requestTraceroute(requestId: Int, destNum: Int) = toRemoteExceptions {

@@ -56,11 +56,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.moduleConfig
@@ -246,9 +246,10 @@ private fun MeshAppBar(
     )
 }
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun RadioConfigNavHost(
-    node: NodeInfo?,
+    node: NodeEntity?,
     viewModel: RadioConfigViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
     modifier: Modifier,
@@ -413,13 +414,19 @@ fun RadioConfigNavHost(
             )
         }
         composable(ConfigRoute.POSITION.name) {
+            val currentPosition = Position(
+                latitude = node?.latitude ?: 0.0,
+                longitude = node?.longitude ?: 0.0,
+                altitude = node?.position?.altitude ?: 0,
+                time = 1, // ignore time for fixed_position
+            )
             PositionConfigItemList(
-                location = node?.position ?: Position(0.0, 0.0, 0),
+                location = currentPosition,
                 positionConfig = radioConfigState.radioConfig.position,
                 enabled = connected,
                 onSaveClicked = { locationInput, positionInput ->
                     if (positionInput.fixedPosition) {
-                        if (locationInput != node?.position) {
+                        if (locationInput != currentPosition) {
                             viewModel.setFixedPosition(destNum, locationInput)
                         }
                     } else {
