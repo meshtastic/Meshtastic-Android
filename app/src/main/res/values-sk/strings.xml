@@ -68,7 +68,7 @@
     <string name="about">O aplikácii</string>
     <string name="a_list_of_nodes_in_the_mesh">Zoznam uzlových bodov v mesh sieti</string>
     <string name="text_messages">Textové správy</string>
-    <string name="channel_invalid">URL tohoto kanála nie je platná a nemôže byť použitá</string>
+    <string name="channel_invalid">URL adresa tohoto kanála nie je platná a nedá sa použiť</string>
     <string name="debug_panel">Debug okno</string>
     <string name="debug_last_messages">500 posledných správ</string>
     <string name="clear">Zmazať</string>
@@ -81,7 +81,7 @@
     <string name="meshtastic_messages_notifications">Upozornenia na správy</string>
     <string name="protocol_stress_test">Test vyťaženia protokolu</string>
     <string name="firmware_too_old">Nutná aktualizácia firmvéru</string>
-    <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Prosím choďte na panel nastavení a zvoľte možnosť \"Aktualizácia firmvéru\". Viac informácií nájdete na <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">našom sprievodcovi inštaláciou firmvéru</a> na Github-e.</string>
+    <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Prosím prejdite do nastavení a zvoľte možnosť \"Aktualizácia firmvéru\". Viac informácií nájdete na <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">našom sprievodcovi inštaláciou firmvéru</a> na Github-e.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Musíte nastaviť región!</string>
     <string name="region">Región</string>
