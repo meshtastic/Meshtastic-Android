@@ -43,6 +43,18 @@
     <string name="routing_error_pki_failed">Encrypted Send Failed</string>
     <string name="routing_error_pki_unknown_pubkey">Unknown Public Key</string>
 
+    <string name="role_client">App connected or standalone messaging device.</string>
+    <string name="role_client_mute">Device that does not forward packets from other devices.</string>
+    <string name="role_router">Infrastructure node for extending network coverage by relaying messages. Visible in nodes list.</string>
+    <string name="role_router_client">Combination of both ROUTER and CLIENT. Not for mobile devices.</string>
+    <string name="role_repeater">Infrastructure node for extending network coverage by relaying messages with minimal overhead. Not visible in nodes list.</string>
+    <string name="role_tracker">Broadcasts GPS position packets as priority.</string>
+    <string name="role_sensor">Broadcasts telemetry packets as priority.</string>
+    <string name="role_tak">Optimized for ATAK system communication, reduces routine broadcasts.</string>
+    <string name="role_client_hidden">Device that only broadcasts as needed for stealth or power savings.</string>
+    <string name="role_lost_and_found">Broadcasts location as message to default channel regularly for to assist with device recovery.</string>
+    <string name="role_tak_tracker">Enables automatic TAK PLI broadcasts and reduces routine broadcasts.</string>
+
     <string name="elevation_suffix" translatable="false">MSL</string>
     <string name="channel_air_util" translatable="false">ChUtil %.1f%% AirUtilTX %.1f%%</string>
 

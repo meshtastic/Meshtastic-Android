@@ -12,16 +12,34 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
+import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.SwitchPreference
+
+private val  DeviceConfig.Role.stringRes: Int
+    get() = when (this) {
+        DeviceConfig.Role.CLIENT -> R.string.role_client
+        DeviceConfig.Role.CLIENT_MUTE -> R.string.role_client_mute
+        DeviceConfig.Role.ROUTER -> R.string.role_router
+        DeviceConfig.Role.ROUTER_CLIENT -> R.string.role_router_client
+        DeviceConfig.Role.REPEATER -> R.string.role_repeater
+        DeviceConfig.Role.TRACKER -> R.string.role_tracker
+        DeviceConfig.Role.SENSOR -> R.string.role_sensor
+        DeviceConfig.Role.TAK -> R.string.role_tak
+        DeviceConfig.Role.CLIENT_HIDDEN -> R.string.role_client_hidden
+        DeviceConfig.Role.LOST_AND_FOUND -> R.string.role_lost_and_found
+        DeviceConfig.Role.TAK_TRACKER -> R.string.role_tak_tracker
+        else -> R.string.unrecognized
+    }
 
 @Composable
 fun DeviceConfigItemList(
@@ -39,6 +57,7 @@ fun DeviceConfigItemList(
 
         item {
             DropDownPreference(title = "Role",
+                summary = stringResource(id = deviceInput.role.stringRes),
                 enabled = enabled,
                 items = DeviceConfig.Role.entries
                     .filter { it != DeviceConfig.Role.UNRECOGNIZED }
