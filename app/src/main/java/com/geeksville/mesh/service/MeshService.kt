@@ -1533,6 +1533,8 @@ class MeshService : Service(), Logging {
     private fun handleClientNotification(notification: MeshProtos.ClientNotification) {
         debug("Received clientNotification ${notification.toOneLineString()}")
         radioConfigRepository.setErrorMessage(notification.message)
+        // if the future for the originating request is still in the queue, complete as unsuccessful for now
+        queueResponse.remove(notification.replyId)?.complete(false)
     }
 
     /**
