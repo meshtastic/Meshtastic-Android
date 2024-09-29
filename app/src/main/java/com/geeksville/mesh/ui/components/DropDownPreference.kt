@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import com.google.protobuf.ProtocolMessageEnum
 
 @Composable
 fun <T> DropDownPreference(
@@ -30,6 +31,20 @@ fun <T> DropDownPreference(
     summary: String? = null,
 ) {
     var dropDownExpanded by remember { mutableStateOf(value = false) }
+
+    val deprecatedItems: List<T> = remember {
+        if (selectedItem is ProtocolMessageEnum) {
+            val enum = (selectedItem as? Enum<*>)?.declaringJavaClass?.enumConstants
+            val descriptor = (selectedItem as ProtocolMessageEnum).descriptorForType
+
+            @Suppress("UNCHECKED_CAST")
+            enum?.filter { entries ->
+                descriptor.values.any { it.name == entries.name && it.options.deprecated }
+            } as? List<T> ?: emptyList() // Safe cast to List<T> or return emptyList if cast fails
+        } else {
+            emptyList()
+        }
+    }
 
     RegularPreference(
         title = title,
@@ -48,7 +63,7 @@ fun <T> DropDownPreference(
             expanded = dropDownExpanded,
             onDismissRequest = { dropDownExpanded = !dropDownExpanded },
         ) {
-            items.forEach { item ->
+            items.filterNot { it.first in deprecatedItems }.forEach { item ->
                 DropdownMenuItem(
                     onClick = {
                         dropDownExpanded = false
