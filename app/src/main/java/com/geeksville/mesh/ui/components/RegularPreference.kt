@@ -3,6 +3,8 @@ package com.geeksville.mesh.ui.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -42,6 +44,7 @@ fun RegularPreference(
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RegularPreference(
     title: String,
@@ -52,6 +55,12 @@ fun RegularPreference(
     summary: String? = null,
     trailingIcon: ImageVector? = null,
 ) {
+    val color = if (enabled) {
+        MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
+    } else {
+        MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -62,48 +71,43 @@ fun RegularPreference(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
-                text = title,
+            FlowRow(
                 modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.body1,
-                color = if (enabled) {
-                    Color.Unspecified
-                } else {
-                    MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-                },
-            )
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.body1,
+                    color = if (enabled) {
+                        Color.Unspecified
+                    } else {
+                        MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+                    },
+                )
 
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.body1,
-                color = if (enabled) {
-                    MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
-                } else {
-                    MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-                },
-            )
-            if (trailingIcon != null) Icon(
-                trailingIcon, "trailingIcon",
-                modifier = modifier
-                    .padding(start = 8.dp)
-                    .wrapContentWidth(Alignment.End),
-                tint = if (enabled) {
-                    MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
-                } else {
-                    MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-                },
-            )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.body1,
+                    color = color,
+                )
+            }
+            if (trailingIcon != null) {
+                Icon(
+                    imageVector = trailingIcon,
+                    contentDescription = "trailingIcon",
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .wrapContentWidth(Alignment.End),
+                    tint = color,
+                )
+            }
         }
         if (summary != null) {
             Divider(modifier = Modifier.padding(vertical = 8.dp))
             Text(
                 text = summary,
                 style = MaterialTheme.typography.body2,
-                color = if (enabled) {
-                    MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
-                } else {
-                    MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-                },
+                color = color,
             )
         }
     }
