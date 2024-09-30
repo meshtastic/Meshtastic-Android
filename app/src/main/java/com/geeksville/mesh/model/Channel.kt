@@ -33,7 +33,8 @@ data class Channel(
             // references: NodeDB::installDefaultConfig / Channels::initDefaultChannel
             loRaConfig {
                 usePreset = true
-                modemPreset = ModemPreset.LONG_FAST
+                // default is set to Primary in iPhone, must be set to Primary here to support iPhone to Android compatibility
+                modemPreset = "Primary"
                 hopLimit = 3
                 txEnabled = true
             }
