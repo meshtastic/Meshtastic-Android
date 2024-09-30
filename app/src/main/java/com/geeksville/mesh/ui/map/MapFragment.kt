@@ -64,6 +64,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.mapLatest
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
+import org.osmdroid.events.DelayedMapListener
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
@@ -245,6 +246,21 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
     builder.show()
 }
 
+private const val INACTIVITY_DELAY_MILLIS = 500L
+private fun MapView.addMapEventListener(onEvent: () -> Unit) {
+    addMapListener(DelayedMapListener(object : MapListener {
+        override fun onScroll(event: ScrollEvent): Boolean {
+            onEvent()
+            return true
+        }
+
+        override fun onZoom(event: ZoomEvent): Boolean {
+            onEvent()
+            return true
+        }
+    }, INACTIVITY_DELAY_MILLIS))
+}
+
 @Composable
 fun MapView(
     model: UIViewModel = viewModel(),
@@ -272,6 +288,7 @@ fun MapView(
     val hasGps = remember { context.hasGps() }
 
     val map = rememberMapViewWithLifecycle(context)
+    val state by model.mapState.collectAsStateWithLifecycle()
 
     val nodeClusterer = RadiusMarkerClusterer(context)
     map.overlays.add(nodeClusterer)
@@ -483,15 +500,17 @@ fun MapView(
     }
 
     fun MapView.zoomToNodes() {
-        val nodeMarkers = onNodesChanged(model.initialNodes)
-        if (nodeMarkers.isNotEmpty()) {
-            val box = BoundingBox.fromGeoPoints(nodeMarkers.map { it.position })
+        if (state.center == null) {
+            val geoPoints = model.nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
+            val box = BoundingBox.fromGeoPoints(geoPoints)
             val center = GeoPoint(box.centerLatitude, box.centerLongitude)
-            val maximumZoomLevel = tileProvider.tileSource.maximumZoomLevel.toDouble()
-            val finalZoomLevel = minOf(box.requiredZoomLevel() * 0.8, maximumZoomLevel)
+            val finalZoomLevel = minOf(box.requiredZoomLevel() * 0.8, maxZoomLevel)
             controller.setCenter(center)
             controller.setZoom(finalZoomLevel)
-        } else controller.zoomIn()
+        } else {
+            controller.setCenter(state.center)
+            controller.setZoom(state.zoom)
+        }
     }
 
     fun loadOnlineTileSourceBase(): ITileSource {
@@ -634,16 +653,9 @@ fun MapView(
                         minZoomLevel = 1.5
                         // Disables default +/- button for zooming
                         zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-                        addMapListener(object : MapListener {
-                            override fun onScroll(event: ScrollEvent): Boolean {
-                                if (downloadRegionBoundingBox != null) generateBoxOverlay()
-                                return true
-                            }
-
-                            override fun onZoom(event: ZoomEvent): Boolean {
-                                return false
-                            }
-                        })
+                        addMapEventListener {
+                            model.updateMapCenterAndZoom(map.projection.currentCenter, map.zoomLevelDouble)
+                        }
                         zoomToNodes()
                     }
                 },
