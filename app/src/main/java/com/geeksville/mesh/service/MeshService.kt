@@ -516,16 +516,17 @@ class MeshService : Service(), Logging {
         this.wantAck = wantAck
         this.id = id
         this.hopLimit = hopLimit
-        this.channel = channel
         this.priority = priority
         decoded = MeshProtos.Data.newBuilder().also {
             initFn(it)
         }.build()
         if (channel == DataPacket.PKC_CHANNEL_INDEX) {
+            pkiEncrypted = true
             nodeDBbyNodeNum[to]?.user?.publicKey?.let { publicKey ->
-                pkiEncrypted = !publicKey.isEmpty
                 this.publicKey = publicKey
             }
+        } else {
+            this.channel = channel
         }
 
         return build()
