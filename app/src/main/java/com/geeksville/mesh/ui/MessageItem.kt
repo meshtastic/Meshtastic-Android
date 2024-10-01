@@ -34,18 +34,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
+import com.geeksville.mesh.ui.components.AutoLinkText
 import com.geeksville.mesh.ui.theme.AppTheme
-import com.geeksville.mesh.ui.theme.HyperlinkBlue
-import sh.calvin.autolinktext.AutoLinkText
-import sh.calvin.autolinktext.TextRuleDefaults
 
 @Suppress("LongMethod")
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
@@ -121,14 +117,6 @@ internal fun MessageItem(
                         style = LocalTextStyle.current.copy(
                             color = LocalContentColor.current,
                         ),
-                        textRules = TextRuleDefaults.defaultList().map {
-                            it.copy(
-                                style = SpanStyle(
-                                    color = HyperlinkBlue,
-                                    textDecoration = TextDecoration.Underline
-                                )
-                            )
-                        }
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
