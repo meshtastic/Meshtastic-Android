@@ -266,9 +266,6 @@ dependencies {
 
     // detekt ktlint formatting
     detektPlugins("io.gitlab.arturbosch.detekt:detekt-formatting:1.23.7")
-
-    // https://github.com/Calvin-LL/AutoLinkText
-    implementation 'sh.calvin.autolinktext:autolinktext:1.1.1'
 }
 
 ksp {
