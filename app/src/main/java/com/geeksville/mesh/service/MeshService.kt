@@ -22,6 +22,7 @@ import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.MeshLog
+import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.toNodeInfo
@@ -352,7 +353,7 @@ class MeshService : Service(), Logging {
         haveNodeDB = false
     }
 
-    private var myNodeInfo: MyNodeInfo? = null
+    private var myNodeInfo: MyNodeEntity? = null
 
     private val configTotal by lazy { ConfigProtos.Config.getDescriptor().fields.size }
     private val moduleTotal by lazy { ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size }
@@ -1316,7 +1317,7 @@ class MeshService : Service(), Logging {
     }
 
     /// A provisional MyNodeInfo that we will install if all of our node config downloads go okay
-    private var newMyNodeInfo: MyNodeInfo? = null
+    private var newMyNodeInfo: MyNodeEntity? = null
 
     /// provisional NodeInfos we will install if all goes well
     private val newNodes = mutableListOf<MeshProtos.NodeInfo>()
@@ -1436,9 +1437,8 @@ class MeshService : Service(), Logging {
         val myInfo = rawMyNodeInfo
         if (myInfo != null) {
             val mi = with(myInfo) {
-                MyNodeInfo(
+                MyNodeEntity(
                     myNodeNum = myNodeNum,
-                    hasGPS = false,
                     model = rawDeviceMetadata?.hwModel?.let { hwModel ->
                         if (hwModel == MeshProtos.HardwareModel.UNSET) null
                         else hwModel.name.replace('_', '-').replace('p', '.').lowercase()
@@ -1451,8 +1451,6 @@ class MeshService : Service(), Logging {
                     minAppVersion = minAppVersion,
                     maxChannels = 8,
                     hasWifi = rawDeviceMetadata?.hasWifi ?: false,
-                    channelUtilization = 0f,
-                    airUtilTx = 0f,
                 )
             }
             newMyNodeInfo = mi
@@ -1743,7 +1741,7 @@ class MeshService : Service(), Logging {
             // TODO reimplement this after we have a new firmware update mechanism
         }
 
-        override fun getMyNodeInfo(): MyNodeInfo? = this@MeshService.myNodeInfo
+        override fun getMyNodeInfo(): MyNodeInfo? = this@MeshService.myNodeInfo?.toMyNodeInfo()
 
         override fun getMyId() = toRemoteExceptions { myNodeID }
 

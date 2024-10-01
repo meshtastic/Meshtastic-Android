@@ -12,12 +12,12 @@ import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.ModuleConfigProtos
-import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
+import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.moduleConfig
@@ -102,7 +102,7 @@ class RadioConfigViewModel @Inject constructor(
         debug("RadioConfigViewModel created")
     }
 
-    private val myNodeInfo: StateFlow<MyNodeInfo?> get() = radioConfigRepository.myNodeInfo
+    private val myNodeInfo: StateFlow<MyNodeEntity?> get() = radioConfigRepository.myNodeInfo
     val myNodeNum get() = myNodeInfo.value?.myNodeNum
     val maxChannels get() = myNodeInfo.value?.maxChannels ?: 8
 

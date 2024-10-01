@@ -10,7 +10,7 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
-import com.geeksville.mesh.MyNodeInfo
+import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.NodeDB
@@ -47,9 +47,9 @@ class RadioConfigRepository @Inject constructor(
     val myId: StateFlow<String?> get() = nodeDB.myId
 
     /**
-     * Flow representing the [MyNodeInfo] database.
+     * Flow representing the [MyNodeEntity] database.
      */
-    val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
+    val myNodeInfo: StateFlow<MyNodeEntity?> get() = nodeDB.myNodeInfo
 
     /**
      * Flow representing the [NodeEntity] database.
@@ -57,7 +57,7 @@ class RadioConfigRepository @Inject constructor(
     val nodeDBbyNum: StateFlow<Map<Int, NodeEntity>> get() = nodeDB.nodeDBbyNum
 
     suspend fun upsert(node: NodeEntity) = nodeDB.upsert(node)
-    suspend fun installNodeDB(mi: MyNodeInfo, nodes: List<NodeEntity>) {
+    suspend fun installNodeDB(mi: MyNodeEntity, nodes: List<NodeEntity>) {
         nodeDB.installNodeDB(mi, nodes)
     }
 

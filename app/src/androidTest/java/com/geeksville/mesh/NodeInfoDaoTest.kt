@@ -5,6 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.geeksville.mesh.database.MeshtasticDatabase
 import com.geeksville.mesh.database.dao.NodeInfoDao
+import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.NodeSortOption
 import kotlinx.coroutines.flow.first
@@ -35,9 +36,8 @@ class NodeInfoDaoTest {
         latitude = 30.267153, longitude = -97.743057 // Austin
     )
 
-    private val myNodeInfo: MyNodeInfo = MyNodeInfo(
+    private val myNodeInfo: MyNodeEntity = MyNodeEntity(
         myNodeNum = ourNode.num,
-        hasGPS = false,
         model = null,
         firmwareVersion = null,
         couldUpdate = false,
@@ -47,8 +47,6 @@ class NodeInfoDaoTest {
         minAppVersion = 1,
         maxChannels = 8,
         hasWifi = false,
-        channelUtilization = 0f,
-        airUtilTx = 0f,
     )
 
     private val testPositions = arrayOf(
