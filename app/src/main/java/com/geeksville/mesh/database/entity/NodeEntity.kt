@@ -135,13 +135,21 @@ data class NodeEntity(
         ).joinToString(" ")
     }
 
+    private fun TelemetryProtos.PowerMetrics.getDisplayString(): String = listOfNotNull(
+        "%.2fV".format(ch2Voltage).takeIf { hasCh2Voltage() },
+        "%.1fmA".format(ch2Current).takeIf { hasCh2Current() },
+        "%.2fV".format(ch3Voltage).takeIf { hasCh3Voltage() },
+        "%.1fmA".format(ch3Current).takeIf { hasCh3Current() },
+    ).joinToString(" ")
+
     private fun PaxcountProtos.Paxcount.getDisplayString() =
         "PAX: ${ble + wifi} (B:$ble/W:$wifi)".takeIf { ble != 0 && wifi != 0 }
 
     fun getTelemetryString(isFahrenheit: Boolean = false): String {
         return listOfNotNull(
             paxcounter.getDisplayString(),
-            environmentMetrics.getDisplayString(isFahrenheit)
+            environmentMetrics.getDisplayString(isFahrenheit),
+            powerMetrics.getDisplayString(),
         ).joinToString(" ")
     }
 
