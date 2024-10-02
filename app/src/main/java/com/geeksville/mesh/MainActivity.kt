@@ -37,7 +37,6 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.primaryChannel
 import com.geeksville.mesh.model.shouldAddChannels
 import com.geeksville.mesh.model.toChannelSet
-import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.service.*
 import com.geeksville.mesh.ui.*
 import com.geeksville.mesh.ui.map.MapFragment
@@ -355,8 +354,6 @@ class MainActivity : AppCompatActivity(), Logging {
                                 }
                             }
                         }
-                    } else if (BluetoothInterface.invalidVersion) {
-                        showAlert(R.string.firmware_too_old, R.string.firmware_old)
                     }
                 } catch (ex: RemoteException) {
                     warn("Abandoning connect $ex, because we probably just lost device connection")
