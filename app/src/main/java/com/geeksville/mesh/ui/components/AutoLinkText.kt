@@ -6,6 +6,7 @@ import android.text.style.URLSpan
 import android.text.util.Linkify
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
@@ -19,52 +20,49 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.text.util.LinkifyCompat
 import com.geeksville.mesh.ui.theme.HyperlinkBlue
 
+private val DefaultTextLinkStyles = TextLinkStyles(
+    style = SpanStyle(
+        color = HyperlinkBlue,
+        textDecoration = TextDecoration.Underline,
+    )
+)
+
 @Composable
-internal fun AutoLinkText(
+fun AutoLinkText(
     text: String,
     modifier: Modifier = Modifier,
     style: TextStyle = TextStyle.Default,
+    linkStyles: TextLinkStyles = DefaultTextLinkStyles,
 ) {
+    val spannable = remember(text) {
+        linkify(text)
+    }
     Text(
-        text = autoLinkText(text),
+        text = spannable.toAnnotatedString(linkStyles),
         modifier = modifier,
         style = style,
     )
 }
 
-private fun autoLinkText(
-    text: String,
-): AnnotatedString = spannableToAnnotated(
-    Factory.getInstance()
-        .newSpannable(text)
-        .also {
-            LinkifyCompat.addLinks(
-                it, Linkify.WEB_URLS or Linkify.EMAIL_ADDRESSES or Linkify.PHONE_NUMBERS
-            )
-        }
-)
+private fun linkify(text: String) = Factory.getInstance().newSpannable(text).also {
+    LinkifyCompat.addLinks(it, Linkify.WEB_URLS or Linkify.EMAIL_ADDRESSES or Linkify.PHONE_NUMBERS)
+}
 
-private fun spannableToAnnotated(spannable: Spannable): AnnotatedString = buildAnnotatedString {
-    val linkSpanStyle = SpanStyle(
-        color = HyperlinkBlue,
-        textDecoration = TextDecoration.Underline,
-    )
+private fun Spannable.toAnnotatedString(
+    linkStyles: TextLinkStyles,
+): AnnotatedString = buildAnnotatedString {
+    val spannable = this@toAnnotatedString
     var lastEnd = 0
-    for (span in spannable.getSpans(0, spannable.length, Any::class.java)) {
+    spannable.getSpans(0, spannable.length, Any::class.java).forEach { span ->
         val start = spannable.getSpanStart(span)
         val end = spannable.getSpanEnd(span)
         append(spannable.subSequence(lastEnd, start))
-        if (span is URLSpan) {
-            withLink(
-                LinkAnnotation.Url(
-                    url = span.url,
-                    styles = TextLinkStyles(style = linkSpanStyle)
-                )
-            ) {
+        when (span) {
+            is URLSpan -> withLink(LinkAnnotation.Url(url = span.url, styles = linkStyles)) {
                 append(spannable.subSequence(start, end))
             }
-        } else {
-            append(spannable.subSequence(start, end))
+
+            else -> append(spannable.subSequence(start, end))
         }
         lastEnd = end
     }
@@ -73,6 +71,6 @@ private fun spannableToAnnotated(spannable: Spannable): AnnotatedString = buildA
 
 @Preview(showBackground = true)
 @Composable
-private fun PreviewAutoLinkedText() {
+private fun AutoLinkTextPreview() {
     AutoLinkText("A text containing a link https://example.com")
 }
