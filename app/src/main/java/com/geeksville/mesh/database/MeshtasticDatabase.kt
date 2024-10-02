@@ -3,24 +3,26 @@ package com.geeksville.mesh.database
 import android.content.Context
 import androidx.room.AutoMigration
 import androidx.room.Database
+import androidx.room.DeleteTable
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.geeksville.mesh.MyNodeInfo
-import com.geeksville.mesh.NodeInfo
+import androidx.room.migration.AutoMigrationSpec
 import com.geeksville.mesh.database.dao.PacketDao
 import com.geeksville.mesh.database.dao.MeshLogDao
 import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.database.dao.QuickChatActionDao
 import com.geeksville.mesh.database.entity.ContactSettings
 import com.geeksville.mesh.database.entity.MeshLog
+import com.geeksville.mesh.database.entity.MyNodeEntity
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
 
 @Database(
     entities = [
-        MyNodeInfo::class,
-        NodeInfo::class,
+        MyNodeEntity::class,
+        NodeEntity::class,
         Packet::class,
         ContactSettings::class,
         MeshLog::class,
@@ -33,8 +35,12 @@ import com.geeksville.mesh.database.entity.QuickChatAction
         AutoMigration (from = 6, to = 7),
         AutoMigration (from = 7, to = 8),
         AutoMigration (from = 8, to = 9),
+        AutoMigration (from = 9, to = 10),
+        AutoMigration (from = 10, to = 11),
+        AutoMigration (from = 11, to = 12),
+        AutoMigration(from = 12, to = 13, spec = AutoMigration12to13::class),
     ],
-    version = 9,
+    version = 13,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -57,3 +63,9 @@ abstract class MeshtasticDatabase : RoomDatabase() {
         }
     }
 }
+
+@DeleteTable.Entries(
+    DeleteTable(tableName = "NodeInfo"),
+    DeleteTable(tableName = "MyNodeInfo")
+)
+class AutoMigration12to13 : AutoMigrationSpec

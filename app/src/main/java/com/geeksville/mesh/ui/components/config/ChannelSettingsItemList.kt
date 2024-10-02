@@ -33,6 +33,7 @@ import androidx.compose.material.icons.twotone.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
@@ -153,7 +154,9 @@ fun ChannelSettingsItemList(
     onPositiveClicked: (List<ChannelSettings>) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    val settingsListInput = rememberSaveable { settingsList.toMutableStateList() }
+    val settingsListInput = rememberSaveable(
+        saver = listSaver(save = { it.toList() }, restore = { it.toMutableStateList() })
+    ) { settingsList.toMutableStateList() }
 
     val listState = rememberLazyListState()
     val dragDropState = rememberDragDropState(listState, headerCount = 1) { fromIndex, toIndex ->

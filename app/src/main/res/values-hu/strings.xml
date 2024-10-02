@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="node_filter_placeholder">Filter</string>
+    <string name="desc_node_filter_clear">clear node filter</string>
+    <string name="node_filter_include_unknown">Include unknown</string>
+    <string name="node_sort_alpha">A-Z</string>
+    <string name="node_sort_channel">Csatorna</string>
+    <string name="node_sort_distance">Distance</string>
+    <string name="node_sort_hops_away">Hops away</string>
+    <string name="node_sort_last_heard">Last heard</string>
+    <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="channel_name">Csatorna neve</string>
     <string name="channel_options">Csatorna opciók</string>
     <string name="qr_code">QR kód</string>
@@ -39,6 +48,7 @@
     <string name="connected_count">Kapcsolódva: %1$s a %2$s-ból(ből) elérhető</string>
     <string name="list_of_nodes">Hálózati állomások listája</string>
     <string name="update_firmware">Firmware frissítés</string>
+    <string name="ip_address">IP cím:</string>
     <string name="connected">Kapcsolódva a rádióhoz</string>
     <string name="connected_to">Kapcsolódva a(z) %s rádióhoz</string>
     <string name="not_connected">Nincs kapcsolat</string>
@@ -94,6 +104,9 @@
     <string name="provide_location_to_mesh">Pozíció hozzáférés a mesh számára</string>
     <string name="camera_required">Kamera hozzáférés engedély</string>
     <string name="why_camera_required">A QR kód olvasáshoz kötelező megadni a kamera hozzáférést. A képek vagy videók nem kerülnek mentésre.</string>
+    <string name="notification_required">Értesítések engedélyezése</string>
+    <string name="why_notification_required">Meshtastic needs permission for service and message notifications.</string>
+    <string name="notification_denied">Notification permission denied. To turn on notifications, access: Android Settings &gt; Apps &gt; Meshtastic &gt; Notifications.</string>
     <string name="modem_config_slow_short">Rövid hatótáv (lassú)</string>
     <string name="modem_config_slow_medium">Közepes hatótáv (lassú)</string>
     <plurals name="delete_messages">
@@ -137,6 +150,11 @@
     <string name="direct_message">Közvetlen üzenet</string>
     <string name="nodedb_reset">NodeDB törlése</string>
     <string name="nodedb_reset_description">Ezzel minden állomást törölni fogsz erről listáról.</string>
+    <string name="delivery_confirmed">Delivery confirmed</string>
+    <string name="error">Error</string>
+    <string name="ignore">Ignore</string>
+    <string name="ignore_add">Add \'%s\' to ignore list?</string>
+    <string name="ignore_remove">Remove \'%s\' from ignore list?</string>
     <string name="map_select_download_region">Válassz letöltési régiót</string>
     <string name="map_tile_download_estimate">Csempe letöltés számítása:</string>
     <string name="map_start_download">Letöltés indítása</string>
@@ -145,6 +163,7 @@
     <string name="device_settings">Eszköz beállítások</string>
     <string name="module_settings">Modul beállítások</string>
     <string name="add">Új hozzáadása</string>
+    <string name="edit">Edit</string>
     <string name="calculating">Számolás…</string>
     <string name="map_offline_manager">Offline kezelő</string>
     <string name="map_cache_size">Gyorsítótár mérete jelenleg</string>
@@ -161,4 +180,13 @@
     <string name="waypoint_edit">Útpont szerkesztés</string>
     <string name="waypoint_delete">Útpont törlés?</string>
     <string name="waypoint_new">Új útpont</string>
+    <string name="waypoint_received">Received waypoint: %s</string>
+    <string name="error_duty_cycle">Duty Cycle limit reached. Cannot send messages right now, please try again later.</string>
+    <string name="remove">Remove</string>
+    <string name="remove_node_text">This node will be removed from your list until your node receives data from it again.</string>
+    <string name="mute">Mute</string>
+    <string name="mute_notifications">Mute notifications</string>
+    <string name="mute_8_hours">8 hours</string>
+    <string name="mute_1_week">1 week</string>
+    <string name="mute_always">Always</string>
 </resources>

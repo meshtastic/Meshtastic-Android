@@ -33,6 +33,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.KeyboardArrowRight
+import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,10 +56,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.moduleConfig
@@ -85,6 +86,7 @@ import com.geeksville.mesh.ui.components.config.PositionConfigItemList
 import com.geeksville.mesh.ui.components.config.PowerConfigItemList
 import com.geeksville.mesh.ui.components.config.RangeTestConfigItemList
 import com.geeksville.mesh.ui.components.config.RemoteHardwareConfigItemList
+import com.geeksville.mesh.ui.components.config.SecurityConfigItemList
 import com.geeksville.mesh.ui.components.config.SerialConfigItemList
 import com.geeksville.mesh.ui.components.config.StoreForwardConfigItemList
 import com.geeksville.mesh.ui.components.config.TelemetryConfigItemList
@@ -161,6 +163,14 @@ class DeviceSettingsFragment : ScreenFragment("Radio Configuration"), Logging {
     }
 }
 
+enum class AdminRoute(@StringRes val title: Int) {
+    REBOOT(R.string.reboot),
+    SHUTDOWN(R.string.shutdown),
+    FACTORY_RESET(R.string.factory_reset),
+    NODEDB_RESET(R.string.nodedb_reset),
+    ;
+}
+
 // Config (configType = AdminProtos.AdminMessage.ConfigType)
 enum class ConfigRoute(val title: String, val configType: Int = 0) {
     USER("User"),
@@ -172,6 +182,7 @@ enum class ConfigRoute(val title: String, val configType: Int = 0) {
     DISPLAY("Display", 4),
     LORA("LoRa", 5),
     BLUETOOTH("Bluetooth", 6),
+    SECURITY("Security", configType = 7),
     ;
 }
 
@@ -194,6 +205,7 @@ enum class ModuleRoute(val title: String, val configType: Int = 0) {
 }
 
 private fun getName(route: Any): String = when (route) {
+    is AdminRoute -> route.name
     is ConfigRoute -> route.name
     is ModuleRoute -> route.name
     else -> ""
@@ -234,9 +246,10 @@ private fun MeshAppBar(
     )
 }
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun RadioConfigNavHost(
-    node: NodeInfo?,
+    node: NodeEntity?,
     viewModel: RadioConfigViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
     modifier: Modifier,
@@ -301,8 +314,11 @@ fun RadioConfigNavHost(
         },
         onComplete = {
             val route = radioConfigState.route
-            if (route.isNotEmpty()) navController.navigate(route)
-            viewModel.clearPacketResponse()
+            if (ConfigRoute.entries.any { it.name == route } ||
+                ModuleRoute.entries.any { it.name == route }) {
+                navController.navigate(route)
+                viewModel.clearPacketResponse()
+            }
         }
     )
 
@@ -343,20 +359,8 @@ fun RadioConfigNavHost(
                             showEditDeviceProfileDialog = true
                         }
 
-                        "REBOOT" -> {
-                            viewModel.requestReboot(destNum)
-                        }
-
-                        "SHUTDOWN" -> {
-                            viewModel.requestShutdown(destNum)
-                        }
-
-                        "FACTORY_RESET" -> {
-                            viewModel.requestFactoryReset(destNum)
-                        }
-
-                        "NODEDB_RESET" -> {
-                            viewModel.requestNodedbReset(destNum)
+                        is AdminRoute -> {
+                            viewModel.getSessionPasskey(destNum)
                         }
 
                         is ConfigRoute -> {
@@ -410,20 +414,25 @@ fun RadioConfigNavHost(
             )
         }
         composable(ConfigRoute.POSITION.name) {
+            val currentPosition = Position(
+                latitude = node?.latitude ?: 0.0,
+                longitude = node?.longitude ?: 0.0,
+                altitude = node?.position?.altitude ?: 0,
+                time = 1, // ignore time for fixed_position
+            )
             PositionConfigItemList(
-                isLocal = isLocal,
-                location = node?.position,
+                location = currentPosition,
                 positionConfig = radioConfigState.radioConfig.position,
                 enabled = connected,
                 onSaveClicked = { locationInput, positionInput ->
                     if (positionInput.fixedPosition) {
-                        if (locationInput != null && locationInput != node?.position) {
-                            viewModel.setFixedPosition(locationInput)
+                        if (locationInput != currentPosition) {
+                            viewModel.setFixedPosition(destNum, locationInput)
                         }
                     } else {
                         if (radioConfigState.radioConfig.position.fixedPosition) {
                             // fixed position changed from enabled to disabled
-                            viewModel.removeFixedPosition()
+                            viewModel.removeFixedPosition(destNum)
                         }
                     }
                     val config = config { position = positionInput }
@@ -469,7 +478,8 @@ fun RadioConfigNavHost(
                 onSaveClicked = { loraInput ->
                     val config = config { lora = loraInput }
                     viewModel.setRemoteConfig(destNum, config)
-                }
+                },
+                hasPaFan = viewModel.hasPaFan,
             )
         }
         composable(ConfigRoute.BLUETOOTH.name) {
@@ -478,6 +488,16 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { bluetoothInput ->
                     val config = config { bluetooth = bluetoothInput }
+                    viewModel.setRemoteConfig(destNum, config)
+                }
+            )
+        }
+        composable(ConfigRoute.SECURITY.name) {
+            SecurityConfigItemList(
+                securityConfig = radioConfigState.radioConfig.security,
+                enabled = connected,
+                onConfirm = { securityInput ->
+                    val config = config { security = securityInput }
                     viewModel.setRemoteConfig(destNum, config)
                 }
             )
@@ -673,15 +693,15 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
                 horizontalArrangement = Arrangement.Center,
             ) {
                 Icon(
-                    painterResource(R.drawable.ic_twotone_warning_24),
-                    "warning",
+                    imageVector = Icons.TwoTone.Warning,
+                    contentDescription = "warning",
                     modifier = Modifier.padding(end = 8.dp)
                 )
                 Text(
                     text = "${stringResource(title)}?\n")
                 Icon(
-                    painterResource(R.drawable.ic_twotone_warning_24),
-                    "warning",
+                    imageVector = Icons.TwoTone.Warning,
+                    contentDescription = "warning",
                     modifier = Modifier.padding(start = 8.dp)
                 )
             }
@@ -740,10 +760,7 @@ private fun RadioSettingsScreen(
             item { NavCard("Export configuration", enabled = enabled) { onRouteClick("EXPORT") } }
         }
 
-        item { NavButton(R.string.reboot, enabled) { onRouteClick("REBOOT") } }
-        item { NavButton(R.string.shutdown, enabled) { onRouteClick("SHUTDOWN") } }
-        item { NavButton(R.string.factory_reset, enabled) { onRouteClick("FACTORY_RESET") } }
-        item { NavButton(R.string.nodedb_reset, enabled) { onRouteClick("NODEDB_RESET") } }
+        items(AdminRoute.entries) { NavButton(it.title, enabled) { onRouteClick(it) } }
     }
 }
 

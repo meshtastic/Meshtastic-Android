@@ -3,7 +3,6 @@ package com.geeksville.mesh.ui
 import android.content.ActivityNotFoundException
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -11,91 +10,79 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.geeksville.mesh.Position
-import com.geeksville.mesh.R
+import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.ui.theme.HyperlinkBlue
+import com.geeksville.mesh.util.GPSFormat
 import java.net.URLEncoder
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LinkedCoordinates(
     modifier: Modifier = Modifier,
-    position: Position?,
+    latitude: Double,
+    longitude: Double,
     format: Int,
-    nodeName: String?
+    nodeName: String,
 ) {
-    if (position?.isValid() == true) {
-        val uriHandler = LocalUriHandler.current
-        val style = SpanStyle(
-            color = HyperlinkBlue,
-            fontSize = MaterialTheme.typography.button.fontSize,
-            textDecoration = TextDecoration.Underline
+    val uriHandler = LocalUriHandler.current
+    val style = SpanStyle(
+        color = HyperlinkBlue,
+        fontSize = MaterialTheme.typography.button.fontSize,
+        textDecoration = TextDecoration.Underline
+    )
+    val annotatedString = buildAnnotatedString {
+        pushStringAnnotation(
+            tag = "gps",
+            // URI scheme is defined at:
+            //  https://developer.android.com/guide/components/intents-common#Maps
+            annotation = "geo:0,0?q=${latitude},${longitude}&z=17&label=${
+                URLEncoder.encode(nodeName, "utf-8")
+            }"
         )
-        val name = nodeName ?: stringResource(id = R.string.unknown_username)
-        val annotatedString = buildAnnotatedString {
-            pushStringAnnotation(
-                tag = "gps",
-                // URI scheme is defined at:
-                //  https://developer.android.com/guide/components/intents-common#Maps
-                annotation = "geo:0,0?q=${position.latitude},${position.longitude}&z=17&label=${
-                    URLEncoder.encode(name, "utf-8")
-                }"
-            )
-            withStyle(style = style) {
-                append(position.gpsString(format))
+        withStyle(style = style) {
+            val gpsString = when (format) {
+                GpsCoordinateFormat.DEC_VALUE -> GPSFormat.toDEC(latitude, longitude)
+                GpsCoordinateFormat.DMS_VALUE -> GPSFormat.toDMS(latitude, longitude)
+                GpsCoordinateFormat.UTM_VALUE -> GPSFormat.toUTM(latitude, longitude)
+                GpsCoordinateFormat.MGRS_VALUE -> GPSFormat.toMGRS(latitude, longitude)
+                else -> GPSFormat.toDEC(latitude, longitude)
             }
-            pop()
+            append(gpsString)
         }
-        val clipboardManager: ClipboardManager = LocalClipboardManager.current
-        Text(
-            modifier = modifier.combinedClickable(
-                onClick = {
-                    annotatedString.getStringAnnotations(
-                        tag = "gps",
-                        start = 0,
-                        end = annotatedString.length
-                    ).firstOrNull()?.let {
-                        try {
-                            uriHandler.openUri(it.item)
-                        } catch (ex: ActivityNotFoundException) {
-                            debug("No application found: $ex")
-                        }
+        pop()
+    }
+    val clipboardManager: ClipboardManager = LocalClipboardManager.current
+    Text(
+        modifier = modifier.combinedClickable(
+            onClick = {
+                annotatedString.getStringAnnotations(
+                    tag = "gps",
+                    start = 0,
+                    end = annotatedString.length
+                ).firstOrNull()?.let {
+                    try {
+                        uriHandler.openUri(it.item)
+                    } catch (ex: ActivityNotFoundException) {
+                        debug("No application found: $ex")
                     }
-                },
-                onLongClick = {
-                    clipboardManager.setText(annotatedString)
-                    debug("Copied to clipboard")
                 }
-            ),
-            text = annotatedString
-        )
-    } else {
-        // Placeholder for ConstraintLayoutReference; renders no visible content
-        Box(modifier = modifier)
-    }
-}
-
-@Composable
-@Preview
-fun LinkedCoordinatesSimplePreview() {
-    AppTheme {
-        LinkedCoordinates(
-            position = Position(37.7749, -122.4194, 0),
-            format = 1,
-            nodeName = "Test Node Name"
-        )
-    }
+            },
+            onLongClick = {
+                clipboardManager.setText(annotatedString)
+                debug("Copied to clipboard")
+            }
+        ),
+        text = annotatedString
+    )
 }
 
 @PreviewLightDark
@@ -105,7 +92,8 @@ fun LinkedCoordinatesPreview(
 ) {
     AppTheme {
         LinkedCoordinates(
-            position = Position(37.7749, -122.4194, 0),
+            latitude = 37.7749,
+            longitude = -122.4194,
             format = format,
             nodeName = "Test Node Name"
         )

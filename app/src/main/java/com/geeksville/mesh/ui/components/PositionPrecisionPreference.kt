@@ -18,6 +18,7 @@ import com.geeksville.mesh.util.DistanceUnit
 import com.geeksville.mesh.util.toDistanceString
 import java.util.Locale
 import kotlin.math.pow
+import kotlin.math.roundToInt
 
 private const val PositionEnabled = 32
 private const val PositionDisabled = 0
@@ -68,7 +69,7 @@ fun PositionPrecisionPreference(
             ) {
                 Slider(
                     value = value.toFloat(),
-                    onValueChange = { onValueChanged(it.toInt()) },
+                    onValueChange = { onValueChanged(it.roundToInt()) },
                     enabled = enabled,
                     valueRange = PositionPrecisionMin.toFloat()..PositionPrecisionMax.toFloat(),
                     steps = PositionPrecisionMax - PositionPrecisionMin - 1,

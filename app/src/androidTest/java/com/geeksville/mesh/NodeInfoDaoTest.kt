@@ -5,6 +5,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.geeksville.mesh.database.MeshtasticDatabase
 import com.geeksville.mesh.database.dao.NodeInfoDao
+import com.geeksville.mesh.database.entity.MyNodeEntity
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.NodeSortOption
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -17,25 +19,25 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class NodeDBTest {
+class NodeInfoDaoTest {
     private lateinit var database: MeshtasticDatabase
     private lateinit var nodeInfoDao: NodeInfoDao
 
-    private val ourNodeInfo = NodeInfo(
+    private val ourNode = NodeEntity(
         num = 8,
-        user = MeshUser(
-            "+16508765308".format(8),
-            "Kevin Mester",
-            "KLO",
-            MeshProtos.HardwareModel.ANDROID_SIM,
-            false
-        ),
-        position = Position(30.267153, -97.743057, 35, 123), // Austin
+        user = user {
+            id = "+16508765308".format(8)
+            longName = "Kevin Mester"
+            shortName = "KLO"
+            hwModel = MeshProtos.HardwareModel.ANDROID_SIM
+            isLicensed = false
+        },
+        longName = "Kevin Mester", shortName = "KLO",
+        latitude = 30.267153, longitude = -97.743057 // Austin
     )
 
-    private val myNodeInfo: MyNodeInfo = MyNodeInfo(
-        myNodeNum = ourNodeInfo.num,
-        hasGPS = false,
+    private val myNodeInfo: MyNodeEntity = MyNodeEntity(
+        myNodeNum = ourNode.num,
         model = null,
         firmwareVersion = null,
         couldUpdate = false,
@@ -45,33 +47,33 @@ class NodeDBTest {
         minAppVersion = 1,
         maxChannels = 8,
         hasWifi = false,
-        channelUtilization = 0f,
-        airUtilTx = 0f,
     )
 
     private val testPositions = arrayOf(
-        Position(32.776665, -96.796989, 35, 123),  // Dallas
-        Position(32.960758, -96.733521, 35, 456),  // Richardson
-        Position(32.912901, -96.781776, 35, 789),  // North Dallas
-        Position(29.760427, -95.369804, 35, 123),  // Houston
-        Position(33.748997, -84.387985, 35, 456),  // Atlanta
-        Position(34.052235, -118.243683, 35, 789), // Los Angeles
-        Position(40.712776, -74.005974, 35, 123),  // New York City
-        Position(41.878113, -87.629799, 35, 456),  // Chicago
-        Position(39.952583, -75.165222, 35, 789),  // Philadelphia
+        0.0 to 0.0,
+        32.776665 to -96.796989,  // Dallas
+        32.960758 to -96.733521,  // Richardson
+        32.912901 to -96.781776,  // North Dallas
+        29.760427 to -95.369804,  // Houston
+        33.748997 to -84.387985,  // Atlanta
+        34.052235 to -118.243683, // Los Angeles
+        40.712776 to -74.005974,  // New York City
+        41.878113 to -87.629799,  // Chicago
+        39.952583 to -75.165222,  // Philadelphia
     )
 
-    private val testNodes = listOf(ourNodeInfo) + testPositions.mapIndexed { index, it ->
-        NodeInfo(
+    private val testNodes = listOf(ourNode) + testPositions.mapIndexed { index, pos ->
+        NodeEntity(
             num = 9 + index,
-            user = MeshUser(
-                "+165087653%02d".format(9 + index),
-                "Kevin Mester$index",
-                "KM$index",
-                if (index == 2) MeshProtos.HardwareModel.UNSET else MeshProtos.HardwareModel.ANDROID_SIM,
-                false
-            ),
-            position = it,
+            user = user {
+                id = "+165087653%02d".format(9 + index)
+                longName = "Kevin Mester$index"
+                shortName = "KM$index"
+                hwModel = MeshProtos.HardwareModel.ANDROID_SIM
+                isLicensed = false
+            },
+            longName = "Kevin Mester$index", shortName = if (index == 2) null else "KM$index",
+            latitude = pos.first, longitude = pos.second,
             lastHeard = 9 + index,
         )
     }
@@ -95,7 +97,7 @@ class NodeDBTest {
 
     /**
      * Retrieves a list of nodes based on [sort], [filter] and [includeUnknown] parameters.
-     * The list excludes [ourNodeInfo] (our NodeInfo) to ensure consistency in the results.
+     * The list excludes [ourNode] to ensure consistency in the results.
      */
     private suspend fun getNodes(
         sort: NodeSortOption = NodeSortOption.LAST_HEARD,
@@ -105,19 +107,18 @@ class NodeDBTest {
         sort = sort.sqlValue,
         filter = filter,
         includeUnknown = includeUnknown,
-        unknownHwModel = MeshProtos.HardwareModel.UNSET
-    ).first().filter { it != ourNodeInfo }
+    ).first().filter { it != ourNode }
 
     @Test // node list size
     fun testNodeListSize() = runBlocking {
         val nodes = nodeInfoDao.nodeDBbyNum().first()
-        assertEquals(10, nodes.size)
+        assertEquals(11, nodes.size)
     }
 
     @Test // nodeDBbyNum() re-orders our node at the top of the list
     fun testOurNodeInfoIsFirst() = runBlocking {
         val nodes = nodeInfoDao.nodeDBbyNum().first()
-        assertEquals(ourNodeInfo, nodes.values.first())
+        assertEquals(ourNode, nodes.values.first())
     }
 
     @Test
@@ -130,14 +131,16 @@ class NodeDBTest {
     @Test
     fun testSortByAlpha() = runBlocking {
         val nodes = getNodes(sort = NodeSortOption.ALPHABETICAL)
-        val sortedNodes = nodes.sortedBy { it.user?.longName?.uppercase() }
+        val sortedNodes = nodes.sortedBy { it.user.longName.uppercase() }
         assertEquals(sortedNodes, nodes)
     }
 
     @Test
     fun testSortByDistance() = runBlocking {
         val nodes = getNodes(sort = NodeSortOption.DISTANCE)
-        val sortedNodes = nodes.sortedBy { it.distance(ourNodeInfo) }
+        val sortedNodes = nodes.sortedWith( // nodes with invalid (null) positions at the end
+            compareBy<NodeEntity> { it.validPosition == null }.thenBy { it.distance(ourNode) }
+        )
         assertEquals(sortedNodes, nodes)
     }
 
@@ -151,7 +154,7 @@ class NodeDBTest {
     @Test
     fun testSortByViaMqtt() = runBlocking {
         val nodes = getNodes(sort = NodeSortOption.VIA_MQTT)
-        val sortedNodes = nodes.sortedBy { it.user?.longName?.contains("(MQTT)") == true }
+        val sortedNodes = nodes.sortedBy { it.user.longName.contains("(MQTT)") }
         assertEquals(sortedNodes, nodes)
     }
 
@@ -159,7 +162,7 @@ class NodeDBTest {
     fun testIncludeUnknownIsFalse() = runBlocking {
         val nodes = getNodes(includeUnknown = false)
         val containsUnsetNode = nodes.any { node ->
-            node.user?.hwModel == MeshProtos.HardwareModel.UNSET
+            node.user.hwModel == MeshProtos.HardwareModel.UNSET
         }
         assertFalse(containsUnsetNode)
     }
@@ -167,9 +170,7 @@ class NodeDBTest {
     @Test
     fun testIncludeUnknownIsTrue() = runBlocking {
         val nodes = getNodes(includeUnknown = true)
-        val containsUnsetNode = nodes.any { node ->
-            node.user?.hwModel == MeshProtos.HardwareModel.UNSET
-        }
+        val containsUnsetNode = nodes.any { it.shortName == null }
         assertTrue(containsUnsetNode)
     }
 }

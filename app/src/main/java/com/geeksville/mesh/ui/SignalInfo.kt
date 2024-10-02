@@ -4,33 +4,35 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import com.geeksville.mesh.NodeInfo
-import com.geeksville.mesh.ui.preview.NodeInfoPreviewParameterProvider
+import com.geeksville.mesh.R
+import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 
 @Composable
 fun signalInfo(
     modifier: Modifier = Modifier,
-    nodeInfo: NodeInfo,
+    node: NodeEntity,
     isThisNode: Boolean
 ): Boolean {
     val text = if (isThisNode) {
-        "ChUtil %.1f%% AirUtilTX %.1f%%".format(
-            nodeInfo.deviceMetrics?.channelUtilization,
-            nodeInfo.deviceMetrics?.airUtilTx
+        stringResource(R.string.channel_air_util).format(
+            node.deviceMetrics.channelUtilization,
+            node.deviceMetrics.airUtilTx
         )
     } else {
         buildList {
-            if (nodeInfo.channel > 0) add("ch:${nodeInfo.channel}")
-            if (nodeInfo.hopsAway == 0) {
-                if (nodeInfo.snr < 100F && nodeInfo.rssi < 0) {
-                    add("RSSI: %d SNR: %.1f".format(nodeInfo.rssi, nodeInfo.snr))
+            if (node.channel > 0) add("ch:${node.channel}")
+            if (node.hopsAway == 0) {
+                if (node.snr < 100F && node.rssi < 0) {
+                    add("RSSI: %d SNR: %.1f".format(node.rssi, node.snr))
                 }
             } else {
-                add("Hops Away: %d".format(nodeInfo.hopsAway))
+                add("%s: %d".format(stringResource(R.string.hops_away), node.hopsAway))
             }
         }.joinToString(" ")
     }
@@ -52,15 +54,12 @@ fun signalInfo(
 fun SignalInfoSimplePreview() {
     AppTheme {
         signalInfo(
-            nodeInfo = NodeInfo(
+            node = NodeEntity(
                 num = 1,
-                position = null,
                 lastHeard = 0,
                 channel = 0,
                 snr = 12.5F,
                 rssi = -42,
-                deviceMetrics = null,
-                user = null,
                 hopsAway = 0
             ),
             isThisNode = false
@@ -71,12 +70,12 @@ fun SignalInfoSimplePreview() {
 @PreviewLightDark
 @Composable
 fun SignalInfoPreview(
-    @PreviewParameter(NodeInfoPreviewParameterProvider::class)
-    nodeInfo: NodeInfo
+    @PreviewParameter(NodeEntityPreviewParameterProvider::class)
+    node: NodeEntity
 ) {
     AppTheme {
         signalInfo(
-            nodeInfo = nodeInfo,
+            node = node,
             isThisNode = false
         )
     }
@@ -85,12 +84,12 @@ fun SignalInfoPreview(
 @Composable
 @PreviewLightDark
 fun SignalInfoSelfPreview(
-    @PreviewParameter(NodeInfoPreviewParameterProvider::class)
-    nodeInfo: NodeInfo
+    @PreviewParameter(NodeEntityPreviewParameterProvider::class)
+    node: NodeEntity
 ) {
     AppTheme {
         signalInfo(
-            nodeInfo = nodeInfo,
+            node = node,
             isThisNode = true
         )
     }

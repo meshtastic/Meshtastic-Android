@@ -1,12 +1,16 @@
 package com.geeksville.mesh.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -26,6 +30,7 @@ fun RegularPreference(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    summary: String? = null,
     trailingIcon: ImageVector? = null,
 ) {
     RegularPreference(
@@ -34,10 +39,12 @@ fun RegularPreference(
         onClick = onClick,
         modifier = modifier,
         enabled = enabled,
+        summary = summary,
         trailingIcon = trailingIcon,
     )
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RegularPreference(
     title: String,
@@ -45,41 +52,64 @@ fun RegularPreference(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    summary: String? = null,
     trailingIcon: ImageVector? = null,
 ) {
-    Row(
+    val color = if (enabled) {
+        MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
+    } else {
+        MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+    }
+
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(
-                enabled = enabled,
-                onClick = onClick,
-            )
+            .clickable(enabled = enabled, onClick = onClick)
             .padding(all = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.body2,
-                color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else MaterialTheme.colors.onSurface.copy(
-                    alpha = ContentAlpha.medium
-                ),
-            )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            FlowRow(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.body1,
+                    color = if (enabled) {
+                        Color.Unspecified
+                    } else {
+                        MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+                    },
+                )
 
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.body1,
+                    color = color,
+                )
+            }
+            if (trailingIcon != null) {
+                Icon(
+                    imageVector = trailingIcon,
+                    contentDescription = "trailingIcon",
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .wrapContentWidth(Alignment.End),
+                    tint = color,
+                )
+            }
+        }
+        if (summary != null) {
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
             Text(
-                text = subtitle,
-                style = MaterialTheme.typography.body1,
-                color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
+                text = summary,
+                style = MaterialTheme.typography.body2,
+                color = color,
             )
         }
-        if (trailingIcon != null) Icon(
-            trailingIcon, "trailingIcon",
-            modifier = modifier
-                .fillMaxWidth()
-                .wrapContentWidth(Alignment.End),
-            tint = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-            else MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
-        )
     }
 }
 
@@ -88,7 +118,7 @@ fun RegularPreference(
 private fun RegularPreferencePreview() {
     RegularPreference(
         title = "Advanced settings",
-        subtitle = AnnotatedString(text = "Lorem ipsum dolor sit amet"),
+        subtitle = "Text2",
         onClick = { },
     )
 }

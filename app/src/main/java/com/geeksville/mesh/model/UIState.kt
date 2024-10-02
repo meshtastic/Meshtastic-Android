@@ -21,6 +21,9 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
+import com.geeksville.mesh.database.entity.MyNodeEntity
+import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
@@ -30,7 +33,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
+import kotlinx.coroutines.flow.SharingStarted.Companion.Eagerly
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
@@ -40,13 +43,18 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.osmdroid.util.GeoPoint
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
+import java.text.DateFormat
 import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -113,10 +121,43 @@ data class NodesUiState(
     }
 }
 
+data class MapState(
+    val center: GeoPoint? = null,
+    val zoom: Double = 0.0,
+) {
+    companion object {
+        val Empty = MapState()
+    }
+}
+
+data class Contact(
+    val contactKey: String,
+    val shortName: String,
+    val longName: String,
+    val lastMessageTime: String?,
+    val lastMessageText: String?,
+    val unreadCount: Int,
+    val messageCount: Int,
+    val isMuted: Boolean,
+)
+
+// return time if within 24 hours, otherwise date
+internal fun getShortDateTime(time: Long): String? {
+    val date = if (time != 0L) Date(time) else return null
+    val isWithin24Hours = System.currentTimeMillis() - date.time <= TimeUnit.DAYS.toMillis(1)
+
+    return if (isWithin24Hours) {
+        DateFormat.getTimeInstance(DateFormat.SHORT).format(date)
+    } else {
+        DateFormat.getDateInstance(DateFormat.SHORT).format(date)
+    }
+}
+
+@Suppress("LongParameterList")
 @HiltViewModel
 class UIViewModel @Inject constructor(
     private val app: Application,
-    val nodeDB: NodeDB,
+    private val nodeDB: NodeDB,
     private val radioConfigRepository: RadioConfigRepository,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: MeshLogRepository,
@@ -141,7 +182,6 @@ class UIViewModel @Inject constructor(
 
     private val _channels = MutableStateFlow(channelSet {})
     val channels: StateFlow<AppOnlyProtos.ChannelSet> get() = _channels
-    val channelSet get() = channels.value
 
     private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
     val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
@@ -185,22 +225,37 @@ class UIViewModel @Inject constructor(
         )
     }.stateIn(
         scope = viewModelScope,
-        started = WhileSubscribed(),
+        started = Eagerly,
         initialValue = NodesUiState.Empty,
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val nodeList: StateFlow<List<NodeInfo>> = nodesUiState.flatMapLatest { state ->
+    val nodeList: StateFlow<List<NodeEntity>> = nodesUiState.flatMapLatest { state ->
         nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
     }.stateIn(
         scope = viewModelScope,
-        started = WhileSubscribed(5_000),
+        started = Eagerly,
         initialValue = emptyList(),
     )
 
     // hardware info about our local device (can be null)
-    val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
-    val ourNodeInfo: StateFlow<NodeInfo?> get() = nodeDB.ourNodeInfo
+    val myNodeInfo: StateFlow<MyNodeEntity?> get() = nodeDB.myNodeInfo
+    val ourNodeInfo: StateFlow<NodeEntity?> get() = nodeDB.ourNodeInfo
+
+    val nodesWithPosition get() = nodeDB.nodeDBbyNum.value.values.filter { it.validPosition != null }
+
+    private val _mapState = MutableStateFlow(MapState.Empty)
+    val mapState: StateFlow<MapState> get() = _mapState
+
+    fun updateMapCenterAndZoom(center: GeoPoint, zoom: Double) =
+        _mapState.update { it.copy(center = center, zoom = zoom) }
+
+    fun getUser(userId: String?) = nodeDB.getUser(userId) ?: user {
+        id = userId.orEmpty()
+        longName = app.getString(R.string.unknown_username)
+        shortName = app.getString(R.string.unknown_node_short_name)
+        hwModel = MeshProtos.HardwareModel.UNSET
+    }
 
     private val _snackbarText = MutableLiveData<Any?>(null)
     val snackbarText: LiveData<Any?> get() = _snackbarText
@@ -229,7 +284,70 @@ class UIViewModel @Inject constructor(
         debug("ViewModel created")
     }
 
-    fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey)
+    val contactList = combine(
+        nodeDB.myNodeInfo,
+        packetRepository.getContacts(),
+        channels,
+        packetRepository.getContactSettings(),
+    ) { myNodeInfo, contacts, channelSet, settings ->
+        val myNodeNum = myNodeInfo?.myNodeNum ?: return@combine emptyList()
+        // Add empty channel placeholders (always show Broadcast contacts, even when empty)
+        val placeholder = (0 until channelSet.settingsCount).associate { ch ->
+            val contactKey = "$ch${DataPacket.ID_BROADCAST}"
+            val data = DataPacket(bytes = null, dataType = 1, time = 0L, channel = ch)
+            contactKey to Packet(0L, myNodeNum, 1, contactKey, 0L, true, data)
+        }
+
+        (contacts + (placeholder - contacts.keys)).values.map { packet ->
+            val data = packet.data
+            val contactKey = packet.contact_key
+
+            // Determine if this is my message (originated on this device)
+            val fromLocal = data.from == DataPacket.ID_LOCAL
+            val toBroadcast = data.to == DataPacket.ID_BROADCAST
+
+            // grab usernames from NodeInfo
+            val user = getUser(if (fromLocal) data.to else data.from)
+
+            val shortName = user.shortName
+            val longName = if (toBroadcast) {
+                channelSet.getChannel(data.channel)?.name ?: app.getString(R.string.channel_name)
+            } else {
+                user.longName
+            }
+
+            Contact(
+                contactKey = contactKey,
+                shortName = if (toBroadcast) "${data.channel}" else shortName,
+                longName = longName,
+                lastMessageTime = getShortDateTime(data.time),
+                lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
+                unreadCount = packetRepository.getUnreadCount(contactKey),
+                messageCount = packetRepository.getMessageCount(contactKey),
+                isMuted = settings[contactKey]?.isMuted == true,
+            )
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = Eagerly,
+        initialValue = emptyList(),
+    )
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey).mapLatest { list ->
+        list.map {
+            Message(
+                uuid = it.uuid,
+                receivedTime = it.received_time,
+                user = MeshUser(getUser(it.data.from)), // FIXME convert to proto User
+                text = it.data.text.orEmpty(),
+                time = it.data.time,
+                read = it.read,
+                status = it.data.status,
+                routingError = it.routingError,
+            )
+        }
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->
@@ -313,6 +431,14 @@ class UIViewModel @Inject constructor(
         }
     }
 
+    fun setMuteUntil(contacts: List<String>, until: Long) = viewModelScope.launch(Dispatchers.IO) {
+        packetRepository.setMuteUntil(contacts, until)
+    }
+
+    fun deleteContacts(contacts: List<String>) = viewModelScope.launch(Dispatchers.IO) {
+        packetRepository.deleteContacts(contacts)
+    }
+
     fun deleteMessages(uuidList: List<Long>) = viewModelScope.launch(Dispatchers.IO) {
         packetRepository.deleteMessages(uuidList)
     }
@@ -381,7 +507,7 @@ class UIViewModel @Inject constructor(
         }
 
     // managed mode disables all access to configuration
-    val isManaged: Boolean get() = config.device.isManaged
+    val isManaged: Boolean get() = config.device.isManaged || config.security.isManaged
 
     val myNodeNum get() = myNodeInfo.value?.myNodeNum
     val maxChannels get() = myNodeInfo.value?.maxChannels ?: 8
@@ -398,11 +524,19 @@ class UIViewModel @Inject constructor(
 
     // Set the radio config (also updates our saved copy in preferences)
     fun setConfig(config: Config) {
-        meshService?.setConfig(config.toByteArray())
+        try {
+            meshService?.setConfig(config.toByteArray())
+        } catch (ex: RemoteException) {
+            errormsg("Set config error:", ex)
+        }
     }
 
     fun setChannel(channel: ChannelProtos.Channel) {
-        meshService?.setChannel(channel.toByteArray())
+        try {
+            meshService?.setChannel(channel.toByteArray())
+        } catch (ex: RemoteException) {
+            errormsg("Set channel error:", ex)
+        }
     }
 
     /**
@@ -436,17 +570,19 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun setOwner(user: MeshUser) {
+    fun setOwner(name: String) {
+        val user = ourNodeInfo.value?.user?.copy {
+            longName = name
+            shortName = getInitials(name)
+        } ?: return
+
         try {
             // Note: we use ?. here because we might be running in the emulator
-            meshService?.setOwner(user)
+            meshService?.setRemoteOwner(myNodeNum ?: return, user.toByteArray())
         } catch (ex: RemoteException) {
             errormsg("Can't set username on device, is device offline? ${ex.message}")
         }
     }
-
-    val hasAdminChannel: Boolean
-        get() = channelSet.settingsList.any { it.name.equals("admin", ignoreCase = true) }
 
     /**
      * Write the persisted packet data out to a CSV file in the specified location.
@@ -458,7 +594,7 @@ class UIViewModel @Inject constructor(
             val myNodeNum = myNodeNum ?: return@launch
 
             // Capture the current node value while we're still on main thread
-            val nodes = nodeDB.nodes.value
+            val nodes = nodeDB.nodeDBbyNum.value
 
             val positionToPos: (MeshProtos.Position?) -> Position? = { meshPosition ->
                 meshPosition?.let { Position(it) }.takeIf {
@@ -467,8 +603,6 @@ class UIViewModel @Inject constructor(
             }
 
             writeToUri(uri) { writer ->
-                // Create a map of nodes keyed by their ID
-                val nodesById = nodes.values.associateBy { it.num }.toMutableMap()
                 val nodePositions = mutableMapOf<Int, MeshProtos.Position?>()
 
                 writer.appendLine("\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance\",\"hop limit\",\"payload\"")
@@ -497,7 +631,7 @@ class UIViewModel @Inject constructor(
                         if (proto.rxSnr != 0.0f) {
                             val rxDateTime = dateFormat.format(packet.received_date)
                             val rxFrom = proto.from.toUInt()
-                            val senderName = nodesById[proto.from]?.user?.longName ?: ""
+                            val senderName = nodes[proto.from]?.user?.longName ?: ""
 
                             // sender lat & long
                             val senderPosition = nodePositions[proto.from]
@@ -511,7 +645,7 @@ class UIViewModel @Inject constructor(
                             val rxLat = rxPos?.latitude ?: ""
                             val rxLong = rxPos?.longitude ?: ""
                             val rxAlt = rxPos?.altitude ?: ""
-                            val rxSnr = "%f".format(proto.rxSnr)
+                            val rxSnr = proto.rxSnr
 
                             // Calculate the distance if both positions are valid
 

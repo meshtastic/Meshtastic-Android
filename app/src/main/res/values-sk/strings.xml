@@ -6,7 +6,7 @@
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanál</string>
     <string name="node_sort_distance">Vzdialenosť</string>
-    <string name="node_sort_hops_away">Počet hopov</string>
+    <string name="node_sort_hops_away">Počet skokov</string>
     <string name="node_sort_last_heard">Posledný príjem</string>
     <string name="node_sort_via_mqtt">cez MQTT</string>
     <string name="channel_name">Názov kanála</string>
@@ -48,13 +48,13 @@
     <string name="connected_count">Pripojený: %1$s z %2$s je online</string>
     <string name="list_of_nodes">Zoznam uzlových bodov v sieti</string>
     <string name="update_firmware">Aktualizácia firmvéru</string>
-    <string name="ip_address">IP Adresa:</string>
+    <string name="ip_address">IP adresa:</string>
     <string name="connected">Pripojené k vysielaču</string>
     <string name="connected_to">Pripojené k vysielaču (%s)</string>
     <string name="not_connected">Nepripojené</string>
     <string name="connected_sleeping">Pripojené k uspanému vysielaču</string>
     <string name="update_to">Aktualizovať na %s</string>
-    <string name="app_too_old">Aplikáciu je nutné aktualizovať</string>
+    <string name="app_too_old">Aplikáciu je potrebné aktualizovať</string>
     <string name="must_update">Musíte aktualizovať aplikáciu na Google Play store (alebo z Github). Je príliš stará pre komunikáciu s touto verziou firmvéru vysielača. Viac informácií k tejto téme nájdete na <a href="https://meshtastic.org/docs/software/android/installation">Meshtastic docs</a>.</string>
     <string name="none">Žiaden (zakázať)</string>
     <string name="modem_config_short">Krátky dosah / Rýchle</string>
@@ -68,7 +68,7 @@
     <string name="about">O aplikácii</string>
     <string name="a_list_of_nodes_in_the_mesh">Zoznam uzlových bodov v mesh sieti</string>
     <string name="text_messages">Textové správy</string>
-    <string name="channel_invalid">URL tohoto kanála nie je platná a nemôže byť použitá</string>
+    <string name="channel_invalid">URL adresa tohoto kanála nie je platná a nedá sa použiť</string>
     <string name="debug_panel">Debug okno</string>
     <string name="debug_last_messages">500 posledných správ</string>
     <string name="clear">Zmazať</string>
@@ -81,7 +81,7 @@
     <string name="meshtastic_messages_notifications">Upozornenia na správy</string>
     <string name="protocol_stress_test">Test vyťaženia protokolu</string>
     <string name="firmware_too_old">Nutná aktualizácia firmvéru</string>
-    <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Prosím choďte na panel nastavení a zvoľte možnosť \"Aktualizácia firmvéru\". Viac informácií nájdete na <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">našom sprievodcovi inštaláciou firmvéru</a> na Github-e.</string>
+    <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Prosím prejdite do nastavení a zvoľte možnosť \"Aktualizácia firmvéru\". Viac informácií nájdete na <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">našom sprievodcovi inštaláciou firmvéru</a> na Github-e.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Musíte nastaviť región!</string>
     <string name="region">Región</string>
