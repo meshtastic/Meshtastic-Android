@@ -24,6 +24,7 @@ import com.geeksville.mesh.util.anonymize
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
@@ -45,24 +46,27 @@ class BTScanModel @Inject constructor(
     val devices = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
     val errorText = MutableLiveData<String?>(null)
 
-    val isMockInterfaceAddressValid: Boolean by lazy {
-        radioInterfaceService.isAddressValid(radioInterfaceService.mockInterfaceAddress)
+    private val showMockInterface = MutableStateFlow(radioInterfaceService.isMockInterface)
+
+    fun showMockInterface() {
+        showMockInterface.value = true
     }
 
     init {
         combine(
             bluetoothRepository.state,
             networkRepository.resolvedList,
-            usbRepository.serialDevicesWithDrivers
-        ) { ble, tcp, usb ->
+            usbRepository.serialDevicesWithDrivers,
+            showMockInterface,
+        ) { ble, tcp, usb, showMockInterface ->
             devices.value = mutableMapOf<String, DeviceListEntry>().apply {
                 fun addDevice(entry: DeviceListEntry) { this[entry.fullAddress] = entry }
 
                 // Include a placeholder for "None"
                 addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
 
-                if (isMockInterfaceAddressValid) {
-                    addDevice(DeviceListEntry("Included simulator", "m", true))
+                if (showMockInterface) {
+                    addDevice(DeviceListEntry("Demo Mode", "m", true))
                 }
 
                 // Include paired Bluetooth devices
