@@ -6,6 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.geeksville.mesh.database.MeshtasticDatabase
 import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.database.dao.PacketDao
+import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -22,9 +23,8 @@ class PacketDaoTest {
     private lateinit var nodeInfoDao: NodeInfoDao
     private lateinit var packetDao: PacketDao
 
-    private val myNodeInfo: MyNodeInfo = MyNodeInfo(
+    private val myNodeInfo: MyNodeEntity = MyNodeEntity(
         myNodeNum = 42424242,
-        hasGPS = false,
         model = null,
         firmwareVersion = null,
         couldUpdate = false,
@@ -34,8 +34,6 @@ class PacketDaoTest {
         minAppVersion = 1,
         maxChannels = 8,
         hasWifi = false,
-        channelUtilization = 0f,
-        airUtilTx = 0f,
     )
 
     private val myNodeNum: Int get() = myNodeInfo.myNodeNum

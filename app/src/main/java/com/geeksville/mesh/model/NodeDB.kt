@@ -2,8 +2,8 @@ package com.geeksville.mesh.model
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
-import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.database.dao.NodeInfoDao
+import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,8 +20,8 @@ class NodeDB @Inject constructor(
     private val nodeInfoDao: NodeInfoDao,
 ) {
     // hardware info about our local device (can be null)
-    private val _myNodeInfo = MutableStateFlow<MyNodeInfo?>(null)
-    val myNodeInfo: StateFlow<MyNodeInfo?> get() = _myNodeInfo
+    private val _myNodeInfo = MutableStateFlow<MyNodeEntity?>(null)
+    val myNodeInfo: StateFlow<MyNodeEntity?> get() = _myNodeInfo
 
     // our node info
     private val _ourNodeInfo = MutableStateFlow<NodeEntity?>(null)
@@ -65,9 +65,9 @@ class NodeDB @Inject constructor(
         nodeInfoDao.upsert(node)
     }
 
-    suspend fun installNodeDB(mi: MyNodeInfo, nodes: List<NodeEntity>) = withContext(Dispatchers.IO) {
+    suspend fun installNodeDB(mi: MyNodeEntity, nodes: List<NodeEntity>) = withContext(Dispatchers.IO) {
         nodeInfoDao.clearMyNodeInfo()
-        nodeInfoDao.setMyNodeInfo(mi) // set MyNodeInfo first
+        nodeInfoDao.setMyNodeInfo(mi) // set MyNodeEntity first
         nodeInfoDao.clearNodeInfo()
         nodeInfoDao.putAll(nodes)
     }
