@@ -246,5 +246,5 @@
     <string name="encryption_pkc">Avaliku võtme krüpteerimine</string>
     <string name="encryption_pkc_text">Otsesõnumid kasutavad krüpteerimiseks uut avaliku võtme taristut. Eeldab püsivara versiooni 2.5 või uuemat.</string>
     <string name="encryption_error">Kokkusobimatu avalik võti</string>
-    <string name="encryption_error_text">Avalik võti ei ühti salvestatud võtmega. Võite sõlme eemaldada ja lasta sellel uuesti võtmeid vahetada, kuid see võib viidata tõsisemale turvaprobleemile. Võtke kasutajaga ühendust mõne muu usaldusväärse kanali kaudu, et teha kindlaks, kas võtme muudatuse põhjuseks oli tehaseseadete lähtestamine või muu tahtlik tegevus.</string>
+    <string name="encryption_error_text">Avalik võti ei ühti salvestatud võtmega. Võite sõlme eemaldada ja lasta sellel uuesti võtmeid vahetada, kuid see võib viidata tõsisemale turvaprobleemile. Võtke kasutajaga ühendust mõne muu usaldusväärse kanali kaudu, et teha kindlaks, kas võtme muudatuse põhjuseks oli tehaseseadete taastamine või muu tahtlik tegevus.</string>
 </resources>
