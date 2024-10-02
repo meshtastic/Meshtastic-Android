@@ -21,6 +21,7 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
+import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
@@ -238,7 +239,7 @@ class UIViewModel @Inject constructor(
     )
 
     // hardware info about our local device (can be null)
-    val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
+    val myNodeInfo: StateFlow<MyNodeEntity?> get() = nodeDB.myNodeInfo
     val ourNodeInfo: StateFlow<NodeEntity?> get() = nodeDB.ourNodeInfo
 
     val nodesWithPosition get() = nodeDB.nodeDBbyNum.value.values.filter { it.validPosition != null }

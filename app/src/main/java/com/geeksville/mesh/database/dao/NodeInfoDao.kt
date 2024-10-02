@@ -6,27 +6,27 @@ import androidx.room.MapColumn
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Upsert
-import com.geeksville.mesh.MyNodeInfo
+import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NodeInfoDao {
 
-    @Query("SELECT * FROM MyNodeInfo")
-    fun getMyNodeInfo(): Flow<MyNodeInfo?>
+    @Query("SELECT * FROM my_node")
+    fun getMyNodeInfo(): Flow<MyNodeEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun setMyNodeInfo(myInfo: MyNodeInfo)
+    fun setMyNodeInfo(myInfo: MyNodeEntity)
 
-    @Query("DELETE FROM MyNodeInfo")
+    @Query("DELETE FROM my_node")
     fun clearMyNodeInfo()
 
     @Query(
         """
         SELECT * FROM nodes
         ORDER BY CASE
-            WHEN num = (SELECT myNodeNum FROM MyNodeInfo LIMIT 1) THEN 0
+            WHEN num = (SELECT myNodeNum FROM my_node LIMIT 1) THEN 0
             ELSE 1
         END,
         last_heard DESC
@@ -39,7 +39,7 @@ interface NodeInfoDao {
     WITH OurNode AS (
         SELECT latitude, longitude
         FROM nodes
-        WHERE num = (SELECT myNodeNum FROM MyNodeInfo LIMIT 1)
+        WHERE num = (SELECT myNodeNum FROM my_node LIMIT 1)
     )
     SELECT * FROM nodes
     WHERE (:includeUnknown = 1 OR short_name IS NOT NULL)
@@ -47,7 +47,7 @@ interface NodeInfoDao {
             OR (long_name LIKE '%' || :filter || '%'
             OR short_name LIKE '%' || :filter || '%'))
     ORDER BY CASE
-        WHEN num = (SELECT myNodeNum FROM MyNodeInfo LIMIT 1) THEN 0
+        WHEN num = (SELECT myNodeNum FROM my_node LIMIT 1) THEN 0
         ELSE 1
     END,
     CASE
