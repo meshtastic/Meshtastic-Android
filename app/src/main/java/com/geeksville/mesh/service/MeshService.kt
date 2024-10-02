@@ -30,7 +30,6 @@ import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.network.MQTTRepository
-import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
 import com.geeksville.mesh.util.*
@@ -1623,8 +1622,6 @@ class MeshService : Service(), Logging {
         configNonce += 1
         newNodes.clear()
         newMyNodeInfo = null
-
-        if (BluetoothInterface.invalidVersion) onHasSettings() // Device firmware is too old
 
         debug("Starting config nonce=$configNonce")
 
