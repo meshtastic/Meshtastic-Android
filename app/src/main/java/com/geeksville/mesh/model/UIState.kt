@@ -25,6 +25,7 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
+import com.geeksville.mesh.database.entity.toNodeInfo
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
@@ -58,10 +59,10 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-/// Given a human name, strip out the first letter of the first three words and return that as the initials for
-/// that user. If the original name is only one word, strip vowels from the original name and if the result is
-/// 3 or more characters, use the first three characters. If not, just take the first 3 characters of the
-/// original name.
+// / Given a human name, strip out the first letter of the first three words and return that as the initials for
+// / that user. If the original name is only one word, strip vowels from the original name and if the result is
+// / 3 or more characters, use the first three characters. If not, just take the first 3 characters of the
+// / original name.
 fun getInitials(nameIn: String): String {
     val nchars = 4
     val minchars = 2
@@ -411,11 +412,11 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun requestUserInfo(destNum: Int){
+    fun requestUserInfo(destNum: Int) {
         info("Requesting UserInfo for '$destNum'")
         try {
             val packetId = meshService?.packetId ?: return
-            val ourNodeInfo = nodeDB.ourNodeInfo.value
+            val ourNodeInfo = nodeDB.ourNodeInfo.value?.toNodeInfo()
             meshService?.requestUserInfo(packetId, destNum, ourNodeInfo)
         } catch (ex: RemoteException) {
             errormsg("Request NodeInfo error: ${ex.message}")
