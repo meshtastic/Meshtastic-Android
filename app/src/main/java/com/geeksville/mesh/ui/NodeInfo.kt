@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.compose.ElevationInfo
@@ -137,7 +138,7 @@ fun NodeInfo(
                     )
                 }
 
-                val style = if (nodeName == unknownLongName) {
+                val style = if (thatNodeInfo.user?.hwModel == MeshProtos.HardwareModel.UNSET) {
                     LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)
                 } else {
                     LocalTextStyle.current

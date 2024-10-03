@@ -50,19 +50,14 @@ import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.model.map.MarkerWithLabel
-import com.geeksville.mesh.ui.MessagesFragment
 import com.geeksville.mesh.ui.ScreenFragment
-import com.geeksville.mesh.ui.map.components.CacheLayout
-import com.geeksville.mesh.ui.map.components.DownloadButton
-import com.geeksville.mesh.ui.map.components.EditWaypointDialog
 import com.geeksville.mesh.ui.components.IconButton
-import com.geeksville.mesh.ui.map.components.rememberMapViewWithLifecycle
+import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.requiredZoomLevel
 import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.util.zoomIn
 import com.geeksville.mesh.waypoint
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
@@ -91,7 +86,6 @@ import com.geeksville.mesh.model.map.clustering.RadiusMarkerClusterer
 import java.io.File
 import java.text.DateFormat
 
-
 @AndroidEntryPoint
 class MapFragment : ScreenFragment("Map Fragment"), Logging {
 
@@ -105,7 +99,7 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                AppCompatTheme {
+                AppTheme {
                     MapView(model)
                 }
             }
@@ -202,7 +196,7 @@ fun MapView(
         requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
     }
 
-    val nodes by model.nodeDB.nodes.collectAsStateWithLifecycle()
+    val nodes by model.filteredNodes.collectAsStateWithLifecycle(emptyList())
     val waypoints by model.waypoints.observeAsState(emptyMap())
 
     var showDownloadButton: Boolean by remember { mutableStateOf(false) }
@@ -472,7 +466,7 @@ fun MapView(
     }
 
     with(map) {
-        UpdateMarkers(onNodesChanged(nodes.values), onWaypointChanged(waypoints.values), nodeClusterer)
+        UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values), nodeClusterer)
     }
 
 //    private fun addWeatherLayer() {
@@ -492,7 +486,7 @@ fun MapView(
 //    }
 
     fun MapView.zoomToNodes() {
-        val nodeMarkers = onNodesChanged(nodes.values)
+        val nodeMarkers = onNodesChanged(nodes)
         if (nodeMarkers.isNotEmpty()) {
             val box = BoundingBox.fromGeoPoints(nodeMarkers.map { it.position })
             val center = GeoPoint(box.centerLatitude, box.centerLongitude)
