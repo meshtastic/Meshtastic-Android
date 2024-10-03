@@ -20,14 +20,9 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
-# Disable code shrinking and optimization
--dontshrink
--dontoptimize
-
 # Needed for protobufs
--keepclassmembers class * extends com.google.protobuf.GeneratedMessage { <fields>; }
--keep class com.geeksville.mesh.**{*;}
--keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite { <fields>; }
+-keep class com.google.protobuf.** { *; }
+-keep class com.geeksville.mesh.** { *; }
 
 # eclipse.paho.client
 -keep class org.eclipse.paho.client.mqttv3.logging.JSR47Logger { *; }

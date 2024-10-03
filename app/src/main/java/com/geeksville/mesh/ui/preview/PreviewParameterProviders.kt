@@ -36,7 +36,8 @@ class NodeInfoPreviewParameterProvider: PreviewParameterProvider<NodeInfo> {
             longName = "Micky Mouse",
             shortName = "MM",
             id = "mickeyMouseId",
-            hwModel = MeshProtos.HardwareModel.TBEAM
+            hwModel = MeshProtos.HardwareModel.TBEAM,
+            role = 0,
         ),
         hopsAway = 0
     )

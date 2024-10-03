@@ -26,7 +26,6 @@ import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.model.getInitials
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.util.exceptionToSnackbar
@@ -138,24 +137,16 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private fun initCommonUI() {
 
-        val requestBackgroundAndCheckLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-                if (permissions.entries.any { !it.value }) {
-                    debug("User denied background permission")
-                    model.showSnackbar(getString(R.string.why_background_required))
-                }
-            }
-
-        val requestLocationAndBackgroundLauncher =
+        val requestLocationPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 if (permissions.entries.all { it.value }) {
-                    // Older versions of android only need Location permission
-                    if (!requireContext().hasBackgroundPermission())
-                        requestBackgroundAndCheckLauncher.launch(requireContext().getBackgroundPermissions())
+                    model.provideLocation.value = true
+                    model.meshService?.startProvideLocation()
                 } else {
                     debug("User denied location permission")
                     model.showSnackbar(getString(R.string.why_background_required))
                 }
+                bluetoothViewModel.permissionsUpdated()
             }
 
         // init our region spinner
@@ -226,10 +217,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         binding.usernameEditText.onEditorAction(EditorInfo.IME_ACTION_DONE) {
             debug("received IME_ACTION_DONE")
             val n = binding.usernameEditText.text.toString().trim()
-            model.ourNodeInfo.value?.user?.let {
-                val user = it.copy(longName = n, shortName = getInitials(n))
-                if (n.isNotEmpty()) model.setOwner(user)
-            }
+            if (n.isNotEmpty()) model.setOwner(n)
             requireActivity().hideKeyboard()
         }
 
@@ -240,7 +228,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
             // Don't check the box until the system setting changes
-            view.isChecked = isChecked && requireContext().hasBackgroundPermission()
+            view.isChecked = isChecked && requireContext().hasLocationPermission()
 
             if (view.isPressed) { // We want to ignore changes caused by code (as opposed to the user)
                 debug("User changed location tracking to $isChecked")
@@ -255,9 +243,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                         .setPositiveButton(getString(R.string.accept)) { _, _ ->
                             // Make sure we have location permission (prerequisite)
                             if (!requireContext().hasLocationPermission()) {
-                                requestLocationAndBackgroundLauncher.launch(requireContext().getLocationPermissions())
-                            } else {
-                                requestBackgroundAndCheckLauncher.launch(requireContext().getBackgroundPermissions())
+                                requestLocationPermissionLauncher.launch(requireContext().getLocationPermissions())
                             }
                         }
                         .show()
@@ -304,6 +290,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             .show()
     }
 
+    private var tapCount = 0
+    private var lastTapTime: Long = 0
+
     private fun addDeviceButton(device: BTScanModel.DeviceListEntry, enabled: Boolean) {
         val b = RadioButton(requireActivity())
         b.text = device.name
@@ -313,6 +302,19 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         binding.deviceRadioGroup.addView(b)
 
         b.setOnClickListener {
+            if (device.fullAddress == "n") {
+                val currentTapTime = System.currentTimeMillis()
+                if (currentTapTime - lastTapTime > TAP_THRESHOLD) {
+                    tapCount = 0
+                }
+                lastTapTime = currentTapTime
+                tapCount++
+
+                if (tapCount >= TAP_TRIGGER) {
+                    model.showSnackbar("Demo Mode enabled")
+                    scanModel.showMockInterface()
+                }
+            }
             if (!device.bonded) // If user just clicked on us, try to bond
                 binding.scanStatusText.setText(R.string.starting_pairing)
             b.isChecked = scanModel.onSelected(device)
@@ -368,7 +370,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // If we are running on an emulator, always leave this message showing so we can test the worst case layout
         val curRadio = scanModel.selectedAddress
 
-        if (curRadio != null && !scanModel.isMockInterfaceAddressValid) {
+        if (curRadio != null && curRadio != "m") {
             binding.warningNotPaired.visibility = View.GONE
         } else if (bluetoothViewModel.enabled.value == true) {
             binding.warningNotPaired.visibility = View.VISIBLE
@@ -463,6 +465,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     companion object {
         const val SCAN_PERIOD: Long = 10000 // Stops scanning after 10 seconds
+        private const val TAP_TRIGGER: Int = 7
+        private const val TAP_THRESHOLD: Long = 500 // max 500 ms between taps
+
     }
 
     private fun Editable.isIPAddress(): Boolean {

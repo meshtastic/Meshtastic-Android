@@ -25,7 +25,38 @@
     <string name="node_sort_last_heard">Last heard</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
 
+    <string name="unrecognized">Unrecognized</string>
+    <string name="message_status_enroute">Waiting to be acknowledged</string>
+    <string name="message_status_queued">Queued for sending</string>
+    <string name="routing_error_none">Acknowledged</string>
+    <string name="routing_error_no_route">No route</string>
+    <string name="routing_error_got_nak">Received a negative acknowledgment</string>
+    <string name="routing_error_timeout">Timeout</string>
+    <string name="routing_error_no_interface">No Interface</string>
+    <string name="routing_error_max_retransmit">Max Retransmission Reached</string>
+    <string name="routing_error_no_channel">No Channel</string>
+    <string name="routing_error_too_large">Packet too large</string>
+    <string name="routing_error_no_response">No response</string>
+    <string name="routing_error_bad_request">Bad Request</string>
+    <string name="routing_error_duty_cycle_limit">Regional Duty Cycle Limit Reached</string>
+    <string name="routing_error_not_authorized">Not Authorized</string>
+    <string name="routing_error_pki_failed">Encrypted Send Failed</string>
+    <string name="routing_error_pki_unknown_pubkey">Unknown Public Key</string>
+
+    <string name="role_client">App connected or standalone messaging device.</string>
+    <string name="role_client_mute">Device that does not forward packets from other devices.</string>
+    <string name="role_router">Infrastructure node for extending network coverage by relaying messages. Visible in nodes list.</string>
+    <string name="role_router_client">Combination of both ROUTER and CLIENT. Not for mobile devices.</string>
+    <string name="role_repeater">Infrastructure node for extending network coverage by relaying messages with minimal overhead. Not visible in nodes list.</string>
+    <string name="role_tracker">Broadcasts GPS position packets as priority.</string>
+    <string name="role_sensor">Broadcasts telemetry packets as priority.</string>
+    <string name="role_tak">Optimized for ATAK system communication, reduces routine broadcasts.</string>
+    <string name="role_client_hidden">Device that only broadcasts as needed for stealth or power savings.</string>
+    <string name="role_lost_and_found">Broadcasts location as message to default channel regularly for to assist with device recovery.</string>
+    <string name="role_tak_tracker">Enables automatic TAK PLI broadcasts and reduces routine broadcasts.</string>
+
     <string name="elevation_suffix" translatable="false">MSL</string>
+    <string name="channel_air_util" translatable="false">ChUtil %.1f%% AirUtilTX %.1f%%</string>
 
     <string name="channel_name">Channel Name</string>
     <string name="channel_options">Channel options</string>
@@ -75,6 +106,7 @@
     <string name="app_too_old">Application update required</string>
     <string name="must_update">You must update this application on the app store (or Github). It is too old to talk to this radio firmware.  Please read our <a href="https://meshtastic.org/docs/software/android/installation">docs</a> on this topic.</string>
     <string name="none">None (disable)</string>
+    <string name="modem_config_turbo">Short Range / Turbo</string>
     <string name="modem_config_short">Short Range / Fast</string>
     <string name="modem_config_medium">Medium Range / Fast</string>
     <string name="modem_config_long">Long Range / Fast</string>
@@ -146,6 +178,7 @@
     <string name="preferences_system_default">System default</string>
     <string name="resend">Resend</string>
     <string name="shutdown">Shutdown</string>
+    <string name="cant_shutdown">Shutdown not supported on this device</string>
     <string name="reboot">Reboot</string>
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Show Introduction</string>
@@ -214,4 +247,26 @@
     <string name="replace">Replace</string>
     <string name="wifi_qr_code_scan">Scan WiFi QR code</string>
     <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>
+    <string name="navigate_back">Navigate Back</string>
+    <string name="battery">Battery</string>
+    <string name="channel_utilization">Channel Utilization</string>
+    <string name="air_utilization">Air Utilization</string>
+    <string name="device">Device</string>
+    <string name="metrics">Metrics</string>
+    <string name="environment">Environment</string>
+    <string name="temperature">Temperature</string>
+    <string name="humidity">Humidity</string>
+    <string name="logs">Logs</string>
+    <string name="hops_away">Hops Away</string>
+    <string name="info">Information</string>
+    <string name="ch_util_definition">Utilization for the current channel, including well formed TX, RX and malformed RX (aka noise).</string>
+    <string name="air_util_definition">Percent of airtime for transmission used within the last hour.</string>
+    <string name="iaq">IAQ</string>
+    <string name="encryption_psk">Shared Key</string>
+    <string name="encryption_psk_text">Direct messages are using the shared key for the channel.</string>
+    <string name="encryption_pkc">Public Key Encryption</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption. Requires firmware version 2.5 or greater.</string>
+    <string name="encryption_error">Public key mismatch</string>
+    <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more serious security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
+    <string name="request_userinfo">Request user info</string>
 </resources>

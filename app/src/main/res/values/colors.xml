@@ -6,7 +6,6 @@
     <color name="colorMsg">#F2F2F2</color>
     <color name="colorMyMsg">#EDEAF4</color>
     <color name="colorAdvancedBackground">#FFFFFF</color>
-    <color name="colorIconTint">#000000</color>
     <color name="colorMenuItem">#000000</color>
     <color name="selectedColor">#67EA94</color>
     <color name="unselectedColor">#212121</color>

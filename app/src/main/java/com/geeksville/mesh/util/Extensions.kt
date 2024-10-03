@@ -2,6 +2,7 @@ package com.geeksville.mesh.util
 
 import android.widget.EditText
 import com.geeksville.mesh.BuildConfig
+import com.geeksville.mesh.ConfigProtos
 
 /**
  * When printing strings to logs sometimes we want to print useful debugging information about users
@@ -21,6 +22,13 @@ fun Any?.anonymize(maxLen: Int = 3) =
 
 /// A toString that makes sure all newlines are removed (for nice logging).
 fun Any.toOneLineString() = this.toString().replace('\n', ' ')
+
+fun ConfigProtos.Config.toOneLineString(): String {
+    val redactedFields = """(wifi_psk:|public_key:|private_key:|admin_key:)\s*".*"""
+    return this.toString()
+        .replace(redactedFields.toRegex()) { "${it.groupValues[1]} \"[REDACTED]\"" }
+        .replace('\n', ' ')
+}
 
 /// Return a one line string version of an object (but if a release build, just say 'might be PII)
 fun Any.toPIIString() =

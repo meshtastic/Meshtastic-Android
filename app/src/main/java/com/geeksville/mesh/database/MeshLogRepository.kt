@@ -26,17 +26,15 @@ class MeshLogRepository @Inject constructor(private val meshLogDaoLazy: dagger.L
         meshLogDao.getAllLogsInReceiveOrder(maxItems)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun getMeshPacketsFrom(nodeNum: Int) = meshLogDao.getAllLogsInReceiveOrder(Int.MAX_VALUE)
-        .mapLatest { list -> list.mapNotNull { it.meshPacket }.filter { it.from == nodeNum } }
-        .distinctUntilChanged()
-        .flowOn(Dispatchers.IO)
+    private fun parseTelemetryLog(log: MeshLog): Telemetry? =
+        runCatching { Telemetry.parseFrom(log.fromRadio.packet.decoded.payload) }.getOrNull()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getTelemetryFrom(nodeNum: Int) = getMeshPacketsFrom(nodeNum).mapLatest { list ->
-        list.filter { it.hasDecoded() && it.decoded.portnum == Portnums.PortNum.TELEMETRY_APP }
-            .mapNotNull { runCatching { Telemetry.parseFrom(it.decoded.payload) }.getOrNull() }
-    }.flowOn(Dispatchers.IO)
+    fun getTelemetryFrom(nodeNum: Int): Flow<List<Telemetry>> =
+        meshLogDao.getLogsFrom(nodeNum, Portnums.PortNum.TELEMETRY_APP_VALUE, MAX_MESH_PACKETS)
+            .distinctUntilChanged()
+            .mapLatest { list -> list.mapNotNull(::parseTelemetryLog) }
+            .flowOn(Dispatchers.IO)
 
     suspend fun insert(log: MeshLog) = withContext(Dispatchers.IO) {
         meshLogDao.insert(log)
@@ -48,5 +46,6 @@ class MeshLogRepository @Inject constructor(private val meshLogDaoLazy: dagger.L
 
     companion object {
         private const val MAX_ITEMS = 500
+        private const val MAX_MESH_PACKETS = 10000
     }
 }

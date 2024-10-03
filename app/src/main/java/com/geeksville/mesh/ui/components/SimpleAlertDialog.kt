@@ -1,6 +1,7 @@
 package com.geeksville.mesh.ui.components
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,6 +36,7 @@ fun SimpleAlertDialog(
             ),
         ) { Text(text = stringResource(id = R.string.close)) }
     },
+    modifier = Modifier.background(MaterialTheme.colors.background.copy(alpha = 1f)),
     title = {
         Text(
             text = stringResource(id = title),

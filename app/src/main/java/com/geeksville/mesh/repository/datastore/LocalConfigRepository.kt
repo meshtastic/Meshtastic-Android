@@ -35,55 +35,16 @@ class LocalConfigRepository @Inject constructor(
     /**
      * Updates [LocalConfig] from each [Config] oneOf.
      */
-    suspend fun setLocalConfig(config: Config) {
-        if (config.hasDevice()) setDeviceConfig(config.device)
-        if (config.hasPosition()) setPositionConfig(config.position)
-        if (config.hasPower()) setPowerConfig(config.power)
-        if (config.hasNetwork()) setWifiConfig(config.network)
-        if (config.hasDisplay()) setDisplayConfig(config.display)
-        if (config.hasLora()) setLoraConfig(config.lora)
-        if (config.hasBluetooth()) setBluetoothConfig(config.bluetooth)
-    }
-
-    private suspend fun setDeviceConfig(config: Config.DeviceConfig) {
-        localConfigStore.updateData { preference ->
-            preference.toBuilder().setDevice(config).build()
+    suspend fun setLocalConfig(config: Config) = localConfigStore.updateData {
+        val builder = it.toBuilder()
+        config.allFields.forEach { (field, value) ->
+            val localField = it.descriptorForType.findFieldByName(field.name)
+            if (localField != null) {
+                builder.setField(localField, value)
+            } else {
+                errormsg("Error writing LocalConfig settings: ${config.payloadVariantCase}")
+            }
         }
-    }
-
-    private suspend fun setPositionConfig(config: Config.PositionConfig) {
-        localConfigStore.updateData { preference ->
-            preference.toBuilder().setPosition(config).build()
-        }
-    }
-
-    private suspend fun setPowerConfig(config: Config.PowerConfig) {
-        localConfigStore.updateData { preference ->
-            preference.toBuilder().setPower(config).build()
-        }
-    }
-
-    private suspend fun setWifiConfig(config: Config.NetworkConfig) {
-        localConfigStore.updateData { preference ->
-            preference.toBuilder().setNetwork(config).build()
-        }
-    }
-
-    private suspend fun setDisplayConfig(config: Config.DisplayConfig) {
-        localConfigStore.updateData { preference ->
-            preference.toBuilder().setDisplay(config).build()
-        }
-    }
-
-    private suspend fun setLoraConfig(config: Config.LoRaConfig) {
-        localConfigStore.updateData { preference ->
-            preference.toBuilder().setLora(config).build()
-        }
-    }
-
-    private suspend fun setBluetoothConfig(config: Config.BluetoothConfig) {
-        localConfigStore.updateData { preference ->
-            preference.toBuilder().setBluetooth(config).build()
-        }
+        builder.build()
     }
 }

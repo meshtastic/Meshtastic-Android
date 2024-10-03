@@ -35,6 +35,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.icons.twotone.ContentCopy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -50,7 +51,6 @@ import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -410,10 +410,10 @@ fun ChannelScreen(
                         }
                     }) {
                         Icon(
-                            painter = when {
-                                isError -> rememberVectorPainter(Icons.TwoTone.Close)
-                                !isUrlEqual -> rememberVectorPainter(Icons.TwoTone.Check)
-                                else -> painterResource(R.drawable.ic_twotone_content_copy_24)
+                            imageVector = when {
+                                isError -> Icons.TwoTone.Close
+                                !isUrlEqual -> Icons.TwoTone.Check
+                                else -> Icons.TwoTone.ContentCopy
                             },
                             contentDescription = when {
                                 isError -> "Error"

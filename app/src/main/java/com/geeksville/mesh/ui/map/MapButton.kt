@@ -1,4 +1,4 @@
-package com.geeksville.mesh.ui.components
+package com.geeksville.mesh.ui.map
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -15,14 +15,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun IconButton(
+fun MapButton(
     onClick: () -> Unit,
     @DrawableRes drawableRes: Int,
     @StringRes contentDescription: Int,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
-    IconButton(
+    MapButton(
         onClick = onClick,
         drawableRes = drawableRes,
         contentDescription = stringResource(contentDescription),
@@ -32,7 +32,7 @@ fun IconButton(
 }
 
 @Composable
-fun IconButton(
+fun MapButton(
     onClick: () -> Unit,
     @DrawableRes drawableRes: Int,
     contentDescription: String?,
@@ -47,15 +47,15 @@ fun IconButton(
         Icon(
             painterResource(id = drawableRes),
             contentDescription,
-            modifier = Modifier.scale(1.5f),
+            modifier = Modifier.scale(scale = 1.5f),
         )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-private fun IconButtonsPreview() {
-    IconButton(
+private fun MapButtonPreview() {
+    MapButton(
         onClick = {},
         drawableRes = R.drawable.ic_twotone_layers_24,
         R.string.map_style_selection,

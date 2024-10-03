@@ -20,3 +20,4 @@ val AlmostWhite = Color(0xB3FFFFFF)
 val AlmostBlack = Color(0x8A000000)
 
 val HyperlinkBlue = Color(0xFF43C3B0)
+val Orange = Color(255, 153, 0)
