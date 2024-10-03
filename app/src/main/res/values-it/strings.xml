@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="node_filter_placeholder">Filter</string>
+    <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">cancella filtro nodi</string>
-    <string name="node_filter_include_unknown">Include unknown</string>
+    <string name="node_filter_include_unknown">Includi sconosciuti</string>
     <string name="node_filter_show_details">Mostra dettagli</string>
     <string name="node_sort_alpha">A-Z</string>
-    <string name="node_sort_channel">Channel</string>
-    <string name="node_sort_distance">Distance</string>
-    <string name="node_sort_hops_away">Hops away</string>
-    <string name="node_sort_last_heard">Last heard</string>
+    <string name="node_sort_channel">Canale</string>
+    <string name="node_sort_distance">Distanza</string>
+    <string name="node_sort_hops_away">Distanza in Hop</string>
+    <string name="node_sort_last_heard">Ricevuto più di recente</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="unrecognized">Non riconosciuto</string>
     <string name="message_status_enroute">In attesa di conferma</string>
@@ -49,7 +49,7 @@
     <string name="warning_not_paired">Non è ancora stato abbinato un dispositivo radio compatibile Meshtastic a questo telefono. È necessario abbinare un dispositivo e impostare il nome utente.\n\nQuesta applicazione open-source è ancora in via di sviluppo, se si riscontrano problemi, rivolgersi al forum: meshtastic.discourse.group.\n\nPer maggiori informazioni visitare la pagina web - www.meshtastic.org.</string>
     <string name="you">Tu</string>
     <string name="your_name">Il tuo nome</string>
-    <string name="analytics_okay">Le statistiche di utilizzo e i rapporti sugli arresti anomali sono anonimi</string>
+    <string name="analytics_okay">Invia statistiche di utilizzo anonime e rapporti sugli arresti anomali.</string>
     <string name="looking_for_meshtastic_devices">Ricerca di dispositivi Meshtastic in corso…</string>
     <string name="starting_pairing">Inizio abbinamento</string>
     <string name="url_for_join">Una URL per unirsi a una rete Meshtastic</string>
@@ -193,7 +193,7 @@
     <string name="device_settings">Impostazioni dispositivo</string>
     <string name="module_settings">Impostazioni moduli</string>
     <string name="add">Aggiungere</string>
-    <string name="edit">Edit</string>
+    <string name="edit">Modifica</string>
     <string name="calculating">Calcolo…</string>
     <string name="map_offline_manager">Gestore Offline</string>
     <string name="map_cache_size">Dimensione Cache attuale</string>
