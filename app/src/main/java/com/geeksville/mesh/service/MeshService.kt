@@ -1928,7 +1928,18 @@ class MeshService : Service(), Logging {
                 removeByNodenum = nodeNum
             })
         }
-
+        override fun requestUserInfo( destNum: Int ) = toRemoteExceptions {
+            if (destNum != myNodeNum) {
+                sendToRadio(newMeshPacketTo(destNum
+                ).buildMeshPacket(
+                    channel = nodeDBbyNodeNum[destNum]?.channel ?: 0
+                ) {
+                    portnumValue = Portnums.PortNum.NODEINFO_APP_VALUE
+                    wantResponse = true
+                    payload = nodeDBbyNodeNum[myNodeNum]!!.user.toByteString()
+                })
+            }
+        }
         override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
             sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
                 channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
