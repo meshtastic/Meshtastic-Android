@@ -2,6 +2,8 @@
     // Language tags native names (not available via .getDisplayLanguage)
     <string name="fr_HT" translatable="false">Kreyòl ayisyen</string>
     <string name="pt_BR" translatable="false">Português do Brasil</string>
+    <string name="zh_CN" translatable="false">简体中文</string>
+    <string name="zh_TW" translatable="false">繁體中文</string>
 
     <string name="app_name" translatable="false">Meshtastic</string>
     <string name="sample_distance" translatable="false">2.13 km</string>
@@ -12,8 +14,18 @@
     <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
 
     <string name="unknown_node_short_name" translatable="false">\???</string>
+    <string name="node_filter_placeholder">Filter</string>
+    <string name="desc_node_filter_clear">clear node filter</string>
+    <string name="node_filter_include_unknown">Include unknown</string>
+    <string name="node_filter_show_details">Show details</string>
+    <string name="node_sort_alpha">A-Z</string>
+    <string name="node_sort_channel">Channel</string>
+    <string name="node_sort_distance">Distance</string>
+    <string name="node_sort_hops_away">Hops away</string>
+    <string name="node_sort_last_heard">Last heard</string>
+    <string name="node_sort_via_mqtt">via MQTT</string>
 
-    <string name="elevation_suffix">ASL</string>
+    <string name="elevation_suffix" translatable="false">MSL</string>
 
     <string name="channel_name">Channel Name</string>
     <string name="channel_options">Channel options</string>
@@ -70,7 +82,7 @@
     <string name="modem_config_very_long">Very Long Range / Slow</string>
     <string name="modem_config_unrecognized">UNRECOGNIZED</string>
     <string name="meshtastic_service_notifications">Service notifications</string>
-    <string name="location_disabled_warning">Location must be turned on (high accuracy) to find new devices via bluetooth. You can turn it off again afterwards.</string>
+    <string name="location_disabled_warning">Location must be turned on to find new devices via Bluetooth. You can turn it off again afterwards.</string>
     <string name="about">About</string>
     <string name="a_list_of_nodes_in_the_mesh">A list of nodes in the mesh</string>
     <string name="text_messages">Text messages</string>
@@ -149,7 +161,6 @@
     <string name="quick_chat_edit">Edit quick chat</string>
     <string name="quick_chat_append">Append to message</string>
     <string name="quick_chat_instant">Instantly send</string>
-    <string name="warning_default_psk">Empty channel names use the default encryption key (any device on %s can read your messages).</string>
     <string name="factory_reset">Factory reset</string>
     <string name="factory_reset_description">This will clear all device configuration you have done.</string>
     <string name="bluetooth_disabled">Bluetooth disabled</string>
@@ -157,9 +168,11 @@
     <string name="direct_message">Direct Message</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <string name="nodedb_reset_description">This will clear all nodes from this list.</string>
+    <string name="delivery_confirmed">Delivery confirmed</string>
+    <string name="error">Error</string>
     <string name="ignore">Ignore</string>
-    <string name="ignore_add">Add \'%s\' to ignore list? Your radio will reboot after making this change.</string>
-    <string name="ignore_remove">Remove \'%s\' from ignore list? Your radio will reboot after making this change.</string>
+    <string name="ignore_add">Add \'%s\' to ignore list?</string>
+    <string name="ignore_remove">Remove \'%s\' from ignore list?</string>
     <string name="map_select_download_region">Select download region</string>
     <string name="map_tile_download_estimate">Tile download estimate:</string>
     <string name="map_start_download">Start Download</string>
@@ -168,6 +181,7 @@
     <string name="device_settings">Radio configuration</string>
     <string name="module_settings">Module configuration</string>
     <string name="add">Add</string>
+    <string name="edit">Edit</string>
     <string name="calculating">Calculating…</string>
     <string name="map_offline_manager">Offline Manager</string>
     <string name="map_cache_size">Current Cache size</string>
@@ -186,4 +200,18 @@
     <string name="waypoint_new">New waypoint</string>
     <string name="waypoint_received">Received waypoint: %s</string>
     <string name="error_duty_cycle">Duty Cycle limit reached. Cannot send messages right now, please try again later.</string>
+    <string name="remove">Remove</string>
+    <string name="remove_node_text">This node will be removed from your list until your node receives data from it again.</string>
+    <string name="mute">Mute</string>
+    <string name="mute_notifications">Mute notifications</string>
+    <string name="mute_8_hours">8 hours</string>
+    <string name="mute_1_week">1 week</string>
+    <string name="mute_always">Always</string>
+    <plurals name="add_channel_from_qr">
+        <item quantity="one">Do you want to add a new channel?</item>
+        <item quantity="other">Do you want to add %d new channels?</item>
+    </plurals>
+    <string name="replace">Replace</string>
+    <string name="wifi_qr_code_scan">Scan WiFi QR code</string>
+    <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>
 </resources>

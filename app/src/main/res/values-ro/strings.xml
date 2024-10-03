@@ -135,7 +135,6 @@
     <string name="quick_chat_edit">Editare chat rapid</string>
     <string name="quick_chat_append">Adaugă la mesaj</string>
     <string name="quick_chat_instant">Trimite instant</string>
-    <string name="warning_default_psk">Numele goale de canale folosesc cheia de criptare implicită (orice dispozitiv de pe %s poate citi mesajele).</string>
     <string name="factory_reset">Resetare la setările din fabrică</string>
     <string name="factory_reset_description">Această acțiune va șterge toate configurările dispozitivului pe care le-ați modificat.</string>
     <string name="bluetooth_disabled">Bluetooth dezactivat</string>

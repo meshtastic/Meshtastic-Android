@@ -40,7 +40,6 @@ class MQTTRepository @Inject constructor(
          */
         private const val DEFAULT_QOS = 1
         private const val DEFAULT_TOPIC_ROOT = "msh"
-        private const val STAT_TOPIC_LEVEL = "/2/stat/"
         private const val DEFAULT_TOPIC_LEVEL = "/2/e/"
         private const val JSON_TOPIC_LEVEL = "/2/json/"
         private const val DEFAULT_SERVER_ADDRESS = "mqtt.meshtastic.org"
@@ -58,7 +57,7 @@ class MQTTRepository @Inject constructor(
     }
 
     val proxyMessageFlow: Flow<MqttClientProxyMessage> = callbackFlow {
-        val ownerId = radioConfigRepository.nodeDB.myId.value ?: generateClientId()
+        val ownerId = radioConfigRepository.myId.value ?: generateClientId()
         val channelSet = radioConfigRepository.channelSetFlow.first()
         val mqttConfig = radioConfigRepository.moduleConfigFlow.first().mqtt
 
@@ -67,7 +66,6 @@ class MQTTRepository @Inject constructor(
         sslContext.init(null, arrayOf<TrustManager>(TrustAllX509TrustManager()), SecureRandom())
 
         val rootTopic = mqttConfig.root.ifEmpty { DEFAULT_TOPIC_ROOT }
-        val statTopic = "$rootTopic$STAT_TOPIC_LEVEL$ownerId"
 
         val connectOptions = MqttConnectOptions().apply {
             userName = mqttConfig.username
@@ -76,7 +74,6 @@ class MQTTRepository @Inject constructor(
             if (mqttConfig.tlsEnabled) {
                 socketFactory = sslContext.socketFactory
             }
-            setWill(statTopic, "offline".encodeToByteArray(), DEFAULT_QOS, true)
         }
 
         val bufferOptions = DisconnectedBufferOptions().apply {
@@ -93,7 +90,6 @@ class MQTTRepository @Inject constructor(
                     subscribe("$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/#")
                     if (mqttConfig.jsonEnabled) subscribe("$rootTopic$JSON_TOPIC_LEVEL$globalId/#")
                 }
-                // publish(statTopic, "online".encodeToByteArray(), DEFAULT_QOS, true)
             }
 
             override fun connectionLost(cause: Throwable) {

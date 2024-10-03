@@ -31,18 +31,16 @@ fun Any.toPIIString() =
 
 fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 
-fun formatAgo(lastSeenUnix: Int): String {
-    val currentTime = (System.currentTimeMillis() / 1000).toInt()
+fun formatAgo(lastSeenUnix: Int, currentTimeMillis: Long = System.currentTimeMillis()): String {
+    val currentTime = (currentTimeMillis / 1000).toInt()
     val diffMin = (currentTime - lastSeenUnix) / 60
-    if (diffMin < 1)
-        return "now"
-    if (diffMin < 59)
-        return diffMin.toString() + " min"
-    if (diffMin < 2880)
-        return (diffMin / 60).toString() + " h"
-    if (diffMin < 1440000)
-        return (diffMin / (60 * 24)).toString() + " d"
-    return "?"
+    return when {
+        diffMin < 1 -> "now"
+        diffMin < 60 -> diffMin.toString() + " min"
+        diffMin < 2880 -> (diffMin / 60).toString() + " h"
+        diffMin < 1440000 -> (diffMin / (60 * 24)).toString() + " d"
+        else -> "?"
+    }
 }
 
 /// Allows usage like email.onEditorAction(EditorInfo.IME_ACTION_NEXT, { confirm() })

@@ -12,22 +12,48 @@ import java.net.MalformedURLException
 import kotlin.jvm.Throws
 
 internal const val URL_PREFIX = "https://meshtastic.org/e/#"
+private const val MESHTASTIC_DOMAIN = "meshtastic.org"
+private const val MESHTASTIC_CHANNEL_CONFIG_PATH = "/e/"
 private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
 
 /**
- * Return a [ChannelSet] that represents the URL
+ * Return a [ChannelSet] that represents the ChannelSet encoded by the URL.
  * @throws MalformedURLException when not recognized as a valid Meshtastic URL
  */
 @Throws(MalformedURLException::class)
 fun Uri.toChannelSet(): ChannelSet {
-    val urlStr = this.toString()
+    if (fragment.isNullOrBlank() ||
+        !host.equals(MESHTASTIC_DOMAIN, true) ||
+        !path.equals(MESHTASTIC_CHANNEL_CONFIG_PATH, true)
+    ) {
+        throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")
+    }
 
-    val pathRegex = Regex("$URL_PREFIX(.*)", RegexOption.IGNORE_CASE)
-    val (base64) = pathRegex.find(urlStr)?.destructured
-        ?: throw MalformedURLException("Not a Meshtastic URL: ${urlStr.take(40)}")
-    val bytes = Base64.decode(base64, BASE64FLAGS)
+    // Older versions of Meshtastic clients (Apple/web) included `?add=true` within the URL fragment.
+    // This gracefully handles those cases until the newer version are generally available/used.
+    return ChannelSet.parseFrom(Base64.decode(fragment!!.substringBefore('?'), BASE64FLAGS))
+}
 
-    return ChannelSet.parseFrom(bytes)
+/**
+ * Return a [Boolean] if the URL indicates the associated [ChannelSet] should be added to the
+ * existing configuration.
+ * @throws MalformedURLException when not recognized as a valid Meshtastic URL
+ */
+@Throws(MalformedURLException::class)
+fun Uri.shouldAddChannels(): Boolean {
+    if (fragment.isNullOrBlank() ||
+        !host.equals(MESHTASTIC_DOMAIN, true) ||
+        !path.equals(MESHTASTIC_CHANNEL_CONFIG_PATH, true)
+    ) {
+        throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")
+    }
+
+    // Older versions of Meshtastic clients (Apple/web) included `?add=true` within the URL fragment.
+    // This gracefully handles those cases until the newer version are generally available/used.
+    return fragment?.substringAfter('?', "")
+        ?.takeUnless { it.isBlank() }
+        ?.equals("add=true")
+        ?: getBooleanQueryParameter("add", false)
 }
 
 /**
@@ -36,11 +62,13 @@ fun Uri.toChannelSet(): ChannelSet {
 val ChannelSet.subscribeList: List<String>
     get() = settingsList.filter { it.downlinkEnabled }.map { Channel(it, loraConfig).name }
 
+fun ChannelSet.getChannel(index: Int): Channel? =
+    if (settingsCount > index) Channel(getSettings(index), loraConfig) else null
+
 /**
  * Return the primary channel info
  */
-val ChannelSet.primaryChannel: Channel?
-    get() = if (settingsCount > 0) Channel(getSettings(0), loraConfig) else null
+val ChannelSet.primaryChannel: Channel? get() = getChannel(0)
 
 /**
  * Return a URL that represents the [ChannelSet]

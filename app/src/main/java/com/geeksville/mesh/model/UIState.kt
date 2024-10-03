@@ -12,18 +12,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.*
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config
-import com.geeksville.mesh.database.MeshLogRepository
-import com.geeksville.mesh.database.QuickChatActionRepository
-import com.geeksville.mesh.database.entity.Packet
-import com.geeksville.mesh.database.entity.MeshLog
-import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
+import com.geeksville.mesh.database.QuickChatActionRepository
+import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
@@ -31,16 +29,17 @@ import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedWriter
@@ -79,7 +78,7 @@ fun getInitials(nameIn: String): String {
  * Only changes are included in the resulting list.
  *
  * @param new The updated [ChannelSettings] list.
- * @param old The current [ChannelSettings] list (required to disable unused channels).
+ * @param old The current [ChannelSettings] list (required when disabling unused channels).
  * @return A [Channel] list containing only the modified channels.
  */
 internal fun getChannelList(
@@ -96,6 +95,21 @@ internal fun getChannelList(
             index = i
             settings = new.getOrNull(i) ?: channelSettings { }
         })
+    }
+}
+
+data class NodesUiState(
+    val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
+    val filter: String = "",
+    val includeUnknown: Boolean = false,
+    val gpsFormat: Int = 0,
+    val distanceUnits: Int = 0,
+    val tempInFahrenheit: Boolean = false,
+    val ignoreIncomingList: List<Int> = emptyList(),
+    val showDetails: Boolean = false,
+) {
+    companion object {
+        val Empty = NodesUiState()
     }
 }
 
@@ -117,12 +131,6 @@ class UIViewModel @Inject constructor(
     val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()
     val selectedBluetooth get() = radioInterfaceService.getDeviceAddress()?.getOrNull(0) == 'x'
 
-    private val _meshLog = MutableStateFlow<List<MeshLog>>(emptyList())
-    val meshLog: StateFlow<List<MeshLog>> = _meshLog
-
-    private val _packets = MutableStateFlow<List<Packet>>(emptyList())
-    val packets: StateFlow<List<Packet>> = _packets
-
     private val _localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
     val localConfig: StateFlow<LocalConfig> = _localConfig
     val config get() = _localConfig.value
@@ -141,31 +149,68 @@ class UIViewModel @Inject constructor(
     private val _focusedNode = MutableStateFlow<NodeInfo?>(null)
     val focusedNode: StateFlow<NodeInfo?> = _focusedNode
 
+    private val nodeFilterText = MutableStateFlow("")
+    private val nodeSortOption = MutableStateFlow(NodeSortOption.LAST_HEARD)
+    private val includeUnknown = MutableStateFlow(false)
+    private val showDetails = MutableStateFlow(false)
+
+    fun setSortOption(sort: NodeSortOption) {
+        nodeSortOption.value = sort
+    }
+
+    fun toggleShowDetails() {
+        showDetails.value = !showDetails.value
+    }
+
+    fun toggleIncludeUnknown() {
+        includeUnknown.value = !includeUnknown.value
+    }
+
+    val nodesUiState: StateFlow<NodesUiState> = combine(
+        nodeFilterText,
+        nodeSortOption,
+        includeUnknown,
+        showDetails,
+        radioConfigRepository.deviceProfileFlow,
+    ) { filter, sort, includeUnknown, showDetails, profile ->
+        NodesUiState(
+            sort = sort,
+            filter = filter,
+            includeUnknown = includeUnknown,
+            gpsFormat = profile.config.display.gpsFormat.number,
+            distanceUnits = profile.config.display.units.number,
+            tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
+            ignoreIncomingList = profile.config.lora.ignoreIncomingList,
+            showDetails = showDetails,
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = WhileSubscribed(),
+        initialValue = NodesUiState.Empty,
+    )
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val nodeList: StateFlow<List<NodeInfo>> = nodesUiState.flatMapLatest { state ->
+        nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
+    }.stateIn(
+        scope = viewModelScope,
+        started = WhileSubscribed(5_000),
+        initialValue = emptyList(),
+    )
+
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
     val ourNodeInfo: StateFlow<NodeInfo?> get() = nodeDB.ourNodeInfo
-
-    private val requestIds = MutableStateFlow<HashMap<Int, Boolean>>(hashMapOf())
 
     private val _snackbarText = MutableLiveData<Any?>(null)
     val snackbarText: LiveData<Any?> get() = _snackbarText
 
     init {
-        radioInterfaceService.errorMessage.filterNotNull().onEach {
+        radioConfigRepository.errorMessage.filterNotNull().onEach {
             _snackbarText.value = it
-            radioInterfaceService.clearErrorMessage()
+            radioConfigRepository.clearErrorMessage()
         }.launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            meshLogRepository.getAllLogs().collect { logs ->
-                _meshLog.value = logs
-            }
-        }
-        viewModelScope.launch {
-            packetRepository.getAllPackets().collect { packets ->
-                _packets.value = packets
-            }
-        }
         radioConfigRepository.localConfigFlow.onEach { config ->
             _localConfig.value = config
         }.launchIn(viewModelScope)
@@ -181,69 +226,15 @@ class UIViewModel @Inject constructor(
             _channels.value = channelSet
         }.launchIn(viewModelScope)
 
-        viewModelScope.launch {
-            combine(meshLogRepository.getAllLogs(9), requestIds) { list, ids ->
-                val unprocessed = ids.filterValues { !it }.keys.ifEmpty { return@combine emptyList() }
-                list.filter { log -> log.meshPacket?.decoded?.requestId in unprocessed }
-            }.collect { it.forEach(::processPacketResponse) }
-        }
         debug("ViewModel created")
     }
 
-    private val _contactKey = MutableStateFlow("0${DataPacket.ID_BROADCAST}")
-    val contactKey: StateFlow<String> = _contactKey
-    fun setContactKey(contact: String) {
-        _contactKey.value = contact
-    }
-
-    fun getContactName(contactKey: String): String {
-        val (channel, dest) = contactKey[0].digitToIntOrNull() to contactKey.substring(1)
-
-        return if (channel == null || dest == DataPacket.ID_BROADCAST) {
-            // grab channel names from ChannelSet
-            val channelName = with(channelSet) {
-                if (channel != null && settingsCount > channel)
-                    Channel(settingsList[channel], loraConfig).name else null
-            }
-            channelName ?: app.getString(R.string.channel_name)
-        } else {
-            // grab usernames from NodeInfo
-            val node = nodeDB.nodes.value[dest]
-            node?.user?.longName ?: app.getString(R.string.unknown_username)
-        }
-    }
+    fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val messages: LiveData<List<Packet>> = contactKey.flatMapLatest { contactKey ->
-        packetRepository.getMessagesFrom(contactKey)
-    }.asLiveData()
-
-    val contacts = combine(packetRepository.getContacts(), channels) { contacts, channelSet ->
-        // Add empty channel placeholders (always show Broadcast contacts, even when empty)
-        val placeholder = (0 until channelSet.settingsCount).associate { ch ->
-            val contactKey = "$ch${DataPacket.ID_BROADCAST}"
-            val data = DataPacket(bytes = null, dataType = 1, time = 0L, channel = ch)
-            contactKey to Packet(0L, 1, contactKey, 0L, data)
-        }
-        contacts + (placeholder - contacts.keys)
-    }.asLiveData()
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val waypoints: LiveData<Map<Int, Packet>> = _packets.mapLatest { list ->
-        list.filter { it.port_num == Portnums.PortNum.WAYPOINT_APP_VALUE }
-            .associateBy { packet -> packet.data.waypoint!!.id }
+    val waypoints = packetRepository.getWaypoints().mapLatest { list ->
+        list.associateBy { packet -> packet.data.waypoint!!.id }
             .filterValues { it.data.waypoint!!.expire > System.currentTimeMillis() / 1000 }
-    }.asLiveData()
-
-    private val _destNode = MutableStateFlow<NodeInfo?>(null)
-    val destNode: StateFlow<NodeInfo?> get() = if (_destNode.value != null) _destNode else ourNodeInfo
-
-    /**
-     * Sets the destination [NodeInfo] used in Radio Configuration.
-     * @param node Destination [NodeInfo] (or null for our local NodeInfo).
-     */
-    fun setDestNode(node: NodeInfo?) {
-        _destNode.value = node
     }
 
     fun generatePacketId(): Int? {
@@ -255,7 +246,7 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun sendMessage(str: String, contactKey: String = this.contactKey.value) {
+    fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
@@ -282,29 +273,33 @@ class UIViewModel @Inject constructor(
     }
 
     fun requestTraceroute(destNum: Int) {
+        info("Requesting traceroute for '$destNum'")
         try {
             val packetId = meshService?.packetId ?: return
             meshService?.requestTraceroute(packetId, destNum)
-            requestIds.update { it.apply { put(packetId, false) } }
         } catch (ex: RemoteException) {
             errormsg("Request traceroute error: ${ex.message}")
         }
     }
 
+    fun removeNode(nodeNum: Int) = viewModelScope.launch(Dispatchers.IO) {
+        info("Removing node '$nodeNum'")
+        try {
+            val packetId = meshService?.packetId ?: return@launch
+            meshService?.removeByNodenum(packetId, nodeNum)
+            nodeDB.deleteNode(nodeNum)
+        } catch (ex: RemoteException) {
+            errormsg("Remove node error: ${ex.message}")
+        }
+    }
+
     fun requestPosition(destNum: Int, position: Position = Position(0.0, 0.0, 0)) {
+        info("Requesting position for '$destNum'")
         try {
             meshService?.requestPosition(destNum, position)
         } catch (ex: RemoteException) {
             errormsg("Request position error: ${ex.message}")
         }
-    }
-
-    fun deleteAllLogs() = viewModelScope.launch(Dispatchers.IO) {
-        meshLogRepository.deleteAll()
-    }
-
-    fun deleteAllMessages() = viewModelScope.launch(Dispatchers.IO) {
-        packetRepository.deleteAllMessages()
     }
 
     fun deleteMessages(uuidList: List<Long>) = viewModelScope.launch(Dispatchers.IO) {
@@ -313,6 +308,10 @@ class UIViewModel @Inject constructor(
 
     fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) {
         packetRepository.deleteWaypoint(id)
+    }
+
+    fun clearUnreadCount(contact: String, timestamp: Long) = viewModelScope.launch(Dispatchers.IO) {
+        packetRepository.clearUnreadCount(contact, timestamp)
     }
 
     companion object {
@@ -395,13 +394,25 @@ class UIViewModel @Inject constructor(
         meshService?.setChannel(channel.toByteArray())
     }
 
-    // Set the radio config (also updates our saved copy in preferences)
-    fun setChannels(channelSet: AppOnlyProtos.ChannelSet) = viewModelScope.launch {
-        getChannelList(channelSet.settingsList, channels.value.settingsList).forEach(::setChannel)
-        radioConfigRepository.replaceAllSettings(channelSet.settingsList)
+    /**
+     * Set the radio config (also updates our saved copy in preferences). By default, this will replace
+     * all channels in the existing radio config. Otherwise, it will append all [ChannelSettings] that
+     * are unique in [channelSet] to the existing radio config.
+     */
+    fun setChannels(channelSet: AppOnlyProtos.ChannelSet, overwrite: Boolean = true) = viewModelScope.launch {
+        val newRadioSettings: List<ChannelSettings> = if (overwrite) {
+            channelSet.settingsList
+        }  else {
+            // To guarantee consistent ordering, using a LinkedHashSet which iterates through it's
+            // entries according to the order an item was *first* inserted.
+            // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-linked-hash-set/
+            LinkedHashSet(channels.value.settingsList + channelSet.settingsList).toList()
+        }
 
+        getChannelList(newRadioSettings, channels.value.settingsList).forEach(::setChannel)
+        radioConfigRepository.replaceAllSettings(newRadioSettings)
         val newConfig = config { lora = channelSet.loraConfig }
-        if (config.lora != newConfig.lora) setConfig(newConfig)
+        if (overwrite && config.lora != newConfig.lora) setConfig(newConfig)
     }
 
     val provideLocation = object : MutableLiveData<Boolean>(preferences.getBoolean("provide-location", false)) {
@@ -579,29 +590,11 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    private val _tracerouteResponse = MutableLiveData<String?>(null)
-    val tracerouteResponse: LiveData<String?> get() = _tracerouteResponse
+    val tracerouteResponse: LiveData<String?>
+        get() = radioConfigRepository.tracerouteResponse.asLiveData()
 
     fun clearTracerouteResponse() {
-        _tracerouteResponse.value = null
-    }
-
-    private fun processPacketResponse(log: MeshLog?) {
-        val packet = log?.meshPacket ?: return
-        val data = packet.decoded
-
-        if (data?.portnumValue == Portnums.PortNum.TRACEROUTE_APP_VALUE) {
-            val parsed = MeshProtos.RouteDiscovery.parseFrom(data.payload)
-            fun nodeName(num: Int) = nodeDB.nodesByNum[num]?.user?.longName
-                ?: app.getString(R.string.unknown_username)
-
-            _tracerouteResponse.value = buildString {
-                append("${nodeName(packet.to)} --> ")
-                parsed.routeList.forEach { num -> append("${nodeName(num)} --> ") }
-                append(nodeName(packet.from))
-            }
-            requestIds.update { it.apply { put(data.requestId, true) } }
-        }
+        radioConfigRepository.clearTracerouteResponse()
     }
 
     private val _currentTab = MutableLiveData(0)
@@ -614,5 +607,9 @@ class UIViewModel @Inject constructor(
     fun focusUserNode(node: NodeInfo?) {
         _currentTab.value = 1
         _focusedNode.value = node
+    }
+
+    fun setNodeFilterText(text: String) {
+        nodeFilterText.value = text
     }
 }

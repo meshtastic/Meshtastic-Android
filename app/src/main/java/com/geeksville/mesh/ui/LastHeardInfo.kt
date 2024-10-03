@@ -11,7 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.theme.AppTheme
@@ -20,8 +20,10 @@ import com.geeksville.mesh.util.formatAgo
 @Composable
 fun LastHeardInfo(
     modifier: Modifier = Modifier,
-    lastHeard: Int
+    lastHeard: Int,
+    currentTimeMillis: Long,
 ) {
+
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -34,18 +36,20 @@ fun LastHeardInfo(
             tint = MaterialTheme.colors.onSurface,
         )
         Text(
-            text = formatAgo(lastHeard),
+            text = formatAgo(lastHeard, currentTimeMillis),
             color = MaterialTheme.colors.onSurface,
             fontSize = MaterialTheme.typography.button.fontSize
         )
     }
 }
 
+@PreviewLightDark
 @Composable
-@Preview(showBackground = true)
-@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 fun LastHeardInfoPreview() {
     AppTheme {
-        LastHeardInfo(lastHeard = (System.currentTimeMillis() / 1000).toInt() - 8600)
+        LastHeardInfo(
+            lastHeard = (System.currentTimeMillis() / 1000).toInt() - 8600,
+            currentTimeMillis = System.currentTimeMillis()
+        )
     }
 }

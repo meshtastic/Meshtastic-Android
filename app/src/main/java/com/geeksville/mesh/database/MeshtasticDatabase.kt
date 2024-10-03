@@ -12,6 +12,7 @@ import com.geeksville.mesh.database.dao.PacketDao
 import com.geeksville.mesh.database.dao.MeshLogDao
 import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.database.dao.QuickChatActionDao
+import com.geeksville.mesh.database.entity.ContactSettings
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
@@ -21,14 +22,19 @@ import com.geeksville.mesh.database.entity.QuickChatAction
         MyNodeInfo::class,
         NodeInfo::class,
         Packet::class,
+        ContactSettings::class,
         MeshLog::class,
         QuickChatAction::class
     ],
     autoMigrations = [
         AutoMigration (from = 3, to = 4),
         AutoMigration (from = 4, to = 5),
+        AutoMigration (from = 5, to = 6),
+        AutoMigration (from = 6, to = 7),
+        AutoMigration (from = 7, to = 8),
+        AutoMigration (from = 8, to = 9),
     ],
-    version = 5,
+    version = 9,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)

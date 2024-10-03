@@ -5,6 +5,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.ui.preview.NodeInfoPreviewParameterProvider
@@ -22,13 +23,16 @@ fun signalInfo(
             nodeInfo.deviceMetrics?.airUtilTx
         )
     } else {
-        buildString {
-            if (nodeInfo.channel > 0) append("ch:${nodeInfo.channel}")
-            if (nodeInfo.snr < 100F && nodeInfo.rssi < 0) {
-                if (isNotEmpty()) append(" ")
-                append("RSSI: %d SNR: %.1f".format(nodeInfo.rssi, nodeInfo.snr))
+        buildList {
+            if (nodeInfo.channel > 0) add("ch:${nodeInfo.channel}")
+            if (nodeInfo.hopsAway == 0) {
+                if (nodeInfo.snr < 100F && nodeInfo.rssi < 0) {
+                    add("RSSI: %d SNR: %.1f".format(nodeInfo.rssi, nodeInfo.snr))
+                }
+            } else {
+                add("Hops Away: %d".format(nodeInfo.hopsAway))
             }
-        }
+        }.joinToString(" ")
     }
     return if (text.isNotEmpty()) {
         Text(
@@ -56,16 +60,16 @@ fun SignalInfoSimplePreview() {
                 snr = 12.5F,
                 rssi = -42,
                 deviceMetrics = null,
-                user = null
+                user = null,
+                hopsAway = 0
             ),
             isThisNode = false
         )
     }
 }
 
+@PreviewLightDark
 @Composable
-@Preview(showBackground = true)
-@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
 fun SignalInfoPreview(
     @PreviewParameter(NodeInfoPreviewParameterProvider::class)
     nodeInfo: NodeInfo
@@ -79,8 +83,7 @@ fun SignalInfoPreview(
 }
 
 @Composable
-@Preview(showBackground = true)
-@Preview(showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES)
+@PreviewLightDark
 fun SignalInfoSelfPreview(
     @PreviewParameter(NodeInfoPreviewParameterProvider::class)
     nodeInfo: NodeInfo

@@ -1,3 +1,5 @@
+@file:Suppress("MagicNumber")
+
 package com.geeksville.mesh.ui.map
 
 import android.content.Context
@@ -18,7 +20,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -50,19 +51,14 @@ import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.model.map.MarkerWithLabel
-import com.geeksville.mesh.ui.MessagesFragment
 import com.geeksville.mesh.ui.ScreenFragment
-import com.geeksville.mesh.ui.map.components.CacheLayout
-import com.geeksville.mesh.ui.map.components.DownloadButton
-import com.geeksville.mesh.ui.map.components.EditWaypointDialog
 import com.geeksville.mesh.ui.components.IconButton
-import com.geeksville.mesh.ui.map.components.rememberMapViewWithLifecycle
+import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.SqlTileWriterExt
-import com.geeksville.mesh.util.requiredZoomLevel
 import com.geeksville.mesh.util.formatAgo
+import com.geeksville.mesh.util.requiredZoomLevel
 import com.geeksville.mesh.util.zoomIn
 import com.geeksville.mesh.waypoint
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
@@ -90,7 +86,6 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
 import java.text.DateFormat
 
-
 @AndroidEntryPoint
 class MapFragment : ScreenFragment("Map Fragment"), Logging {
 
@@ -104,28 +99,18 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                AppCompatTheme {
-                    MapView(model, ::openDirectMessage)
+                AppTheme {
+                    MapView(model)
                 }
             }
         }
     }
-
-    private fun openDirectMessage(node: NodeInfo) {
-        val user = node.user ?: return
-        model.setContactKey("${node.channel}${user.id}")
-        parentFragmentManager.beginTransaction()
-            .replace(R.id.mainActivityLayout, MessagesFragment())
-            .addToBackStack(null)
-            .commit()
-    }
-
 }
 
 @Composable
 private fun MapView.UpdateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
-    waypointMarkers: List<MarkerWithLabel>,
+    waypointMarkers: List<MarkerWithLabel>
 ) {
     debug("Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints")
     overlays.removeAll(overlays.filterIsInstance<MarkerWithLabel>())
@@ -135,9 +120,7 @@ private fun MapView.UpdateMarkers(
 @Composable
 fun MapView(
     model: UIViewModel = viewModel(),
-    openDirectMessage: (NodeInfo) -> Unit = { },
 ) {
-
     // UI Elements
     var cacheEstimate by remember { mutableStateOf("") }
 
@@ -148,17 +131,18 @@ fun MapView(
     var zoomLevelMin = 0.0
     var zoomLevelMax = 0.0
 
+
     // Map Elements
     var downloadRegionBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
     var myLocationOverlay: MyLocationNewOverlay? by remember { mutableStateOf(null) }
 
     val context = LocalContext.current
-    val mPrefs = context.getSharedPreferences(prefsName, Context.MODE_PRIVATE)
+    val mPrefs = remember { context.getSharedPreferences(prefsName, Context.MODE_PRIVATE) }
 
     val haptic = LocalHapticFeedback.current
     fun performHapticFeedback() = haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
-    val hasGps = context.hasGps()
+    val hasGps = remember { context.hasGps() }
 
     val map = rememberMapViewWithLifecycle(context)
 
@@ -199,17 +183,28 @@ fun MapView(
         }
 
     fun requestPermissionAndToggle() {
-        requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+        // Google rejects releases claiming this requires BACKGROUND_LOCATION prominent
+        // disclosure. Adding to comply even though it does not use background location.
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.background_required)
+            .setMessage(R.string.why_background_required)
+            .setNeutralButton(R.string.cancel) { _, _ ->
+                debug("User denied location permission")
+            }
+            .setPositiveButton(R.string.accept) { _, _ ->
+                requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+            }
+            .show()
     }
 
-    val nodes by model.nodeDB.nodes.collectAsStateWithLifecycle()
-    val waypoints by model.waypoints.observeAsState(emptyMap())
+    val nodes by model.nodeList.collectAsStateWithLifecycle()
+    val waypoints by model.waypoints.collectAsStateWithLifecycle(emptyMap())
 
     var showDownloadButton: Boolean by remember { mutableStateOf(false) }
     var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
     var showCurrentCacheInfo by remember { mutableStateOf(false) }
 
-    val markerIcon by lazy {
+    val markerIcon = remember {
         AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24)
     }
 
@@ -220,6 +215,7 @@ fun MapView(
         val displayUnits = model.config.display.units.number
         return nodesWithPosition.map { node ->
             val (p, u) = node.position!! to node.user!!
+            val nodePosition = GeoPoint(p.latitude, p.longitude)
             MarkerWithLabel(
                 mapView = this,
                 label = "${u.shortName} ${formatAgo(p.time)}"
@@ -232,13 +228,16 @@ fun MapView(
                         context.getString(R.string.map_subDescription, ourNode.bearing(node), dist)
                 }
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-                position = GeoPoint(p.latitude, p.longitude)
+                position = nodePosition
                 icon = markerIcon
 
                 setOnLongClickListener {
-                    openDirectMessage(node)
+                    performHapticFeedback()
+                    model.focusUserNode(node)
                     true
                 }
+                setNodeColors(node.colors)
+                setPrecisionBits(p.precisionBits)
             }
         }
     }
@@ -270,7 +269,7 @@ fun MapView(
     fun showMarkerLongPressDialog(id: Int) {
         performHapticFeedback()
         debug("marker long pressed id=${id}")
-        val waypoint = model.waypoints.value?.get(id)?.data?.waypoint ?: return
+        val waypoint = waypoints[id]?.data?.waypoint ?: return
         // edit only when unlocked or lockedTo myNodeNum
         if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected())
             showEditWaypointDialog = waypoint
@@ -279,7 +278,8 @@ fun MapView(
     }
 
     fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) context.getString(R.string.you)
-    else model.nodeDB.nodes.value[id]?.user?.longName ?: context.getString(R.string.unknown_username)
+    else model.nodeDB.nodes.value[id]?.user?.longName
+        ?: context.getString(R.string.unknown_username)
 
     fun MapView.onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
         return waypoints.mapNotNull { waypoint ->
@@ -471,7 +471,7 @@ fun MapView(
     }
 
     with(map) {
-        UpdateMarkers(onNodesChanged(nodes.values), onWaypointChanged(waypoints.values))
+        UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values))
     }
 
 //    private fun addWeatherLayer() {
@@ -491,7 +491,7 @@ fun MapView(
 //    }
 
     fun MapView.zoomToNodes() {
-        val nodeMarkers = onNodesChanged(nodes.values)
+        val nodeMarkers = onNodesChanged(model.nodeDB.nodesByNum.values)
         if (nodeMarkers.isNotEmpty()) {
             val box = BoundingBox.fromGeoPoints(nodeMarkers.map { it.position })
             val center = GeoPoint(box.centerLatitude, box.centerLongitude)
@@ -544,7 +544,8 @@ fun MapView(
                 append("mainFile.sqlite") // TODO: Accept filename input param from user
             }
             val writer = SqliteArchiveTileWriter(outputName)
-            val cacheManager = CacheManager(map, writer) // Make sure cacheManager has latest from map
+            val cacheManager =
+                CacheManager(map, writer) // Make sure cacheManager has latest from map
             //this triggers the download
             downloadRegion(
                 cacheManager,

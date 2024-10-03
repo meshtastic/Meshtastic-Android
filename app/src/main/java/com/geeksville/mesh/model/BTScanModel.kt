@@ -3,22 +3,16 @@ package com.geeksville.mesh.model
 import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothDevice
-import android.companion.AssociationRequest
-import android.companion.BluetoothDeviceFilter
-import android.companion.BluetoothLeDeviceFilter
-import android.companion.CompanionDeviceManager
-import android.content.*
+import android.content.Context
 import android.hardware.usb.UsbManager
 import android.net.nsd.NsdServiceInfo
 import android.os.RemoteException
-import androidx.activity.result.IntentSenderRequest
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.*
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.repository.radio.InterfaceId
@@ -34,7 +28,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import java.util.regex.Pattern
 import javax.inject.Inject
 
 @HiltViewModel
@@ -50,6 +43,7 @@ class BTScanModel @Inject constructor(
 
     private val context: Context get() = application.applicationContext
     val devices = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
+    val errorText = MutableLiveData<String?>(null)
 
     val isMockInterfaceAddressValid: Boolean by lazy {
         radioInterfaceService.isAddressValid(radioInterfaceService.mockInterfaceAddress)
@@ -86,6 +80,10 @@ class BTScanModel @Inject constructor(
                 }
             }
         }.launchIn(viewModelScope)
+
+        serviceRepository.statusMessage
+            .onEach { errorText.value = it }
+            .launchIn(viewModelScope)
 
         debug("BTScanModel created")
     }
@@ -134,8 +132,6 @@ class BTScanModel @Inject constructor(
         debug("BTScanModel cleared")
     }
 
-    val errorText = MutableLiveData<String?>(null)
-
     fun setErrorText(text: String) {
         errorText.value = text
     }
@@ -148,10 +144,11 @@ class BTScanModel @Inject constructor(
     /// Use the string for the NopInterface
     val selectedNotNull: String get() = selectedAddress ?: "n"
 
-    private fun addDevice(entry: DeviceListEntry) {
-        val oldDevs = devices.value!!
-        oldDevs[entry.fullAddress] = entry // Add/replace entry
-        devices.value = oldDevs // trigger gui updates
+    val scanResult = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
+
+    fun clearScanResults() {
+        stopScan()
+        scanResult.value = mutableMapOf()
     }
 
     fun stopScan() {
@@ -163,21 +160,16 @@ class BTScanModel @Inject constructor(
                 warn("Ignoring error stopping scan, probably BT adapter was disabled suddenly: ${ex.message}")
             } finally {
                 scanJob = null
-                _spinner.value = false
             }
-        } else _spinner.value = false
-    }
-
-    fun startScan(context: Context?) {
-        _spinner.value = true
-
-        if (context != null) startCompanionScan(context) else startClassicScan()
+        }
+        _spinner.value = false
     }
 
     @SuppressLint("MissingPermission")
-    private fun startClassicScan() {
+    fun startScan() {
         debug("starting classic scan")
 
+        _spinner.value = true
         scanJob = bluetoothRepository.scan()
             .onEach { result ->
             val fullAddress = radioInterfaceService.toInterfaceAddress(
@@ -186,15 +178,16 @@ class BTScanModel @Inject constructor(
             )
             // prevent log spam because we'll get lots of redundant scan results
             val isBonded = result.device.bondState == BluetoothDevice.BOND_BONDED
-            val oldDevs = devices.value ?: emptyMap()
+            val oldDevs = scanResult.value!!
             val oldEntry = oldDevs[fullAddress]
             // Don't spam the GUI with endless updates for non changing nodes
             if (oldEntry == null || oldEntry.bonded != isBonded) {
                 val entry = DeviceListEntry(result.device.name, fullAddress, isBonded)
-                addDevice(entry)
+                oldDevs[entry.fullAddress] = entry
+                scanResult.value = oldDevs
             }
         }.catch { ex ->
-            radioInterfaceService.setErrorMessage("Unexpected Bluetooth scan failure: ${ex.message}")
+            serviceRepository.setErrorMessage("Unexpected Bluetooth scan failure: ${ex.message}")
         }.launchIn(viewModelScope)
     }
 
@@ -268,72 +261,6 @@ class BTScanModel @Inject constructor(
         }
     }
 
-    fun onSelectedBle(address: String): Boolean {
-        val device = bluetoothRepository.getRemoteDevice(address) ?: return false
-        return onSelected(BLEDeviceListEntry(device))
-    }
-
     private val _spinner = MutableLiveData(false)
     val spinner: LiveData<Boolean> get() = _spinner
-
-    private val _associationRequest = MutableLiveData<IntentSenderRequest?>(null)
-    val associationRequest: LiveData<IntentSenderRequest?> get() = _associationRequest
-
-    /**
-     * Called immediately after fragment observes CompanionDeviceManager activity result
-     */
-    fun clearAssociationRequest() {
-        _associationRequest.value = null
-    }
-
-    @SuppressLint("NewApi")
-    private fun associationRequest(): AssociationRequest = AssociationRequest.Builder()
-        .addDeviceFilter(
-            BluetoothDeviceFilter.Builder()
-                .setNamePattern(Pattern.compile(BLE_NAME_PATTERN))
-                .build()
-        )
-        .addDeviceFilter(
-            BluetoothLeDeviceFilter.Builder()
-                .setNamePattern(Pattern.compile(BLE_NAME_PATTERN))
-                // .setScanFilter(
-                //     ScanFilter.Builder()
-                //         .setServiceUuid(ParcelUuid(BluetoothInterface.BTM_SERVICE_UUID))
-                //         .build()
-                // )
-                .build()
-        )
-        .setSingleDevice(false)
-        .build()
-
-    @SuppressLint("NewApi")
-    private fun startCompanionScan(context: Context) {
-        debug("starting companion scan")
-        context.companionDeviceManager?.associate(
-            associationRequest(),
-            object : CompanionDeviceManager.Callback() {
-                @Deprecated("Deprecated in Java", ReplaceWith("onAssociationPending(intentSender)"))
-                override fun onDeviceFound(intentSender: IntentSender) {
-                    onAssociationPending(intentSender)
-                }
-
-                override fun onAssociationPending(chooserLauncher: IntentSender) {
-                    debug("CompanionDeviceManager - device found")
-                    _spinner.value = false
-                    chooserLauncher.let {
-                        val request: IntentSenderRequest = IntentSenderRequest.Builder(it).build()
-                        _associationRequest.value = request
-                    }
-                }
-
-                override fun onFailure(error: CharSequence?) {
-                    warn("BLE selection service failed $error")
-                }
-            }, null
-        )
-    }
-
-    companion object {
-        const val BLE_NAME_PATTERN = BluetoothRepository.BLE_NAME_PATTERN
-    }
 }

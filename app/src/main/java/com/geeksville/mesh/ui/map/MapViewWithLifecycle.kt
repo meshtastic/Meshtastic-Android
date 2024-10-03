@@ -1,4 +1,4 @@
-package com.geeksville.mesh.ui.map.components
+package com.geeksville.mesh.ui.map
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -6,7 +6,7 @@ import android.os.PowerManager
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.geeksville.mesh.android.BuildUtils.errormsg
@@ -32,7 +32,7 @@ private fun PowerManager.WakeLock.safeRelease() {
 }
 
 @Composable
-fun rememberMapViewWithLifecycle(context: Context): MapView {
+internal fun rememberMapViewWithLifecycle(context: Context): MapView {
     val mapView = remember {
         MapView(context).apply {
             clipToOutline = true

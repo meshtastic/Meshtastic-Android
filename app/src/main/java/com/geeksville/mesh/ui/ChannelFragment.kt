@@ -8,16 +8,17 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -33,15 +34,19 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
-import androidx.compose.material.icons.twotone.Edit
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
@@ -51,18 +56,19 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.geeksville.mesh.AppOnlyProtos
+import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
@@ -80,15 +86,19 @@ import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannelUrl
-import com.geeksville.mesh.model.primaryChannel
 import com.geeksville.mesh.model.qrCode
 import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.ui.components.ClickableTextField
+import com.geeksville.mesh.ui.components.AdaptiveTwoPane
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.PreferenceFooter
+import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.components.config.ChannelCard
+import com.geeksville.mesh.ui.components.config.ChannelSelection
 import com.geeksville.mesh.ui.components.config.EditChannelDialog
+import com.geeksville.mesh.ui.components.dragContainer
+import com.geeksville.mesh.ui.components.dragDropItemsIndexed
+import com.geeksville.mesh.ui.components.rememberDragDropState
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.journeyapps.barcodescanner.ScanContract
@@ -149,13 +159,39 @@ fun ChannelScreen(
     var showChannelEditor by rememberSaveable { mutableStateOf(false) }
     val isEditing = channelSet != channels || showChannelEditor
 
-    val primaryChannel = channelSet.primaryChannel
+    /* Holds selections made by the user for QR generation. */
+    val channelSelections = rememberSaveable(
+        saver = listSaver(
+            save = { stateList -> stateList.toList() },
+            restore = { it.toMutableStateList() }
+        )
+    ) { mutableStateListOf(elements = Array(size = 8, init = { true })) }
+
     val channelUrl = channelSet.getChannelUrl()
     val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
+    var scannedChannelSet by remember { mutableStateOf<ChannelSet?>(null) }
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
-            viewModel.setRequestChannelUrl(Uri.parse(result.contents))
+            try {
+                scannedChannelSet = Uri.parse(result.contents).toChannelSet()
+            } catch (ex: Throwable) {
+                errormsg("Channel url error: ${ex.message}")
+                showSnackbar("${context.getString(R.string.channel_invalid)}: ${ex.message}")
+            }
+        }
+    }
+
+    fun updateSettingsList(update: MutableList<ChannelProtos.ChannelSettings>.() -> Unit) {
+        try {
+            val list = channelSet.settingsList.toMutableList()
+            list.update()
+            channelSet = channelSet.copy {
+                settings.clear()
+                settings.addAll(list)
+            }
+        } catch (ex: Exception) {
+            errormsg("Error updating ChannelSettings list:", ex)
         }
     }
 
@@ -189,7 +225,7 @@ fun ChannelScreen(
 
     /// Send new channel settings to the device
     fun installSettings(
-        newChannelSet: AppOnlyProtos.ChannelSet
+        newChannelSet: ChannelSet
     ) {
         // Try to change the radio, if it fails, tell the user why and throw away their edits
         try {
@@ -240,26 +276,28 @@ fun ChannelScreen(
     }
 
     fun sendButton() {
-        primaryChannel?.let { primaryChannel ->
-            val humanName = primaryChannel.humanName
-            val message = buildString {
-                append(context.getString(R.string.are_you_sure_channel))
-                if (primaryChannel.settings == Channel.default.settings)
-                    append("\n\n" + context.getString(R.string.warning_default_psk, humanName))
+        MaterialAlertDialogBuilder(context)
+            .setTitle(R.string.change_channel)
+            .setMessage(R.string.are_you_sure_channel)
+            .setNeutralButton(R.string.cancel) { _, _ ->
+                showChannelEditor = false
+                channelSet = channels
             }
+            .setPositiveButton(R.string.accept) { _, _ ->
+                installSettings(channelSet)
+            }
+            .show()
+    }
 
-            MaterialAlertDialogBuilder(context)
-                .setTitle(R.string.change_channel)
-                .setMessage(message)
-                .setNeutralButton(R.string.cancel) { _, _ ->
-                    showChannelEditor = false
-                    channelSet = channels
-                }
-                .setPositiveButton(R.string.accept) { _, _ ->
-                    installSettings(channelSet)
-                }
-                .show()
-        }
+    if (scannedChannelSet != null) {
+        val incoming = scannedChannelSet ?: return
+        /* Prompt the user to modify channels after scanning a QR code. */
+        ScannedQrCodeDialog(
+            channels = channels,
+            incoming = incoming,
+            onDismiss = { scannedChannelSet = null },
+            onConfirm = { newChannelSet -> installSettings(newChannelSet) }
+        )
     }
 
     var showEditChannelDialog: Int? by remember { mutableStateOf(null) }
@@ -282,33 +320,42 @@ fun ChannelScreen(
         )
     }
 
+    val listState = rememberLazyListState()
+    val dragDropState = rememberDragDropState(listState) { fromIndex, toIndex ->
+        updateSettingsList { add(toIndex, removeAt(fromIndex)) }
+    }
+
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+        modifier = Modifier.dragContainer(
+            dragDropState = dragDropState,
+            haptics = LocalHapticFeedback.current,
+        ),
+        state = listState,
+        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
     ) {
-        if (!showChannelEditor) item {
-            ClickableTextField(
-                label = R.string.channel_name,
-                value = primaryChannel?.humanName.orEmpty(),
-                onClick = { showChannelEditor = true },
-                enabled = enabled,
-                trailingIcon = Icons.TwoTone.Edit,
-                modifier = Modifier.fillMaxWidth(),
-            )
+        if (!showChannelEditor) {
+            item {
+                ChannelListView(
+                    enabled = enabled,
+                    channelSet = channelSet,
+                    modemPresetName = modemPresetName,
+                    channelSelections = channelSelections,
+                    onClick = { showChannelEditor = true }
+                )
+            }
         } else {
-            itemsIndexed(channelSet.settingsList) { index, channel ->
+            dragDropItemsIndexed(
+                items = channelSet.settingsList,
+                dragDropState = dragDropState,
+            ) { index, channel, isDragging ->
+                val elevation by animateDpAsState(if (isDragging) 8.dp else 4.dp, label = "drag")
                 ChannelCard(
+                    elevation = elevation,
                     index = index,
                     title = channel.name.ifEmpty { modemPresetName },
                     enabled = enabled,
                     onEditClick = { showEditChannelDialog = index },
-                    onDeleteClick = {
-                        channelSet = channelSet.copy {
-                            settings.clear()
-                            settings.addAll(channelSet.settingsList.filterIndexed { i, _ -> i != index })
-                        }
-                    }
+                    onDeleteClick = { updateSettingsList { removeAt(index) } }
                 )
             }
             item {
@@ -320,26 +367,12 @@ fun ChannelScreen(
                         }
                         showEditChannelDialog = channelSet.settingsList.lastIndex
                     },
-                    enabled = viewModel.maxChannels > channelSet.settingsCount,
+                    enabled = enabled && viewModel.maxChannels > channelSet.settingsCount,
                     colors = ButtonDefaults.buttonColors(
                         disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
                     )
                 ) { Text(text = stringResource(R.string.add)) }
             }
-        }
-
-        if (!isEditing) item {
-            Image(
-                painter = channelSet.qrCode?.let { BitmapPainter(it.asImageBitmap()) }
-                    ?: painterResource(id = R.drawable.qrcode),
-                contentDescription = stringResource(R.string.qr_code),
-                contentScale = ContentScale.Inside,
-                alpha = if (enabled) 1f else 0.25f,
-                // colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp, bottom = 16.dp)
-            )
         }
 
         item {
@@ -446,8 +479,82 @@ fun ChannelScreen(
     }
 }
 
-@Preview(showBackground = true)
+@Composable
+private fun QrCodeImage(
+    enabled: Boolean,
+    channelSet: ChannelSet,
+    modifier: Modifier = Modifier,
+) = Image(
+    painter = channelSet.qrCode
+        ?.let { BitmapPainter(it.asImageBitmap()) }
+        ?: painterResource(id = R.drawable.qrcode),
+    contentDescription = stringResource(R.string.qr_code),
+    modifier = modifier,
+    contentScale = ContentScale.Inside,
+    alpha = if (enabled) 1.0f else ContentAlpha.disabled,
+    // colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
+)
+
+@Composable
+private fun ChannelListView(
+    enabled: Boolean,
+    channelSet: ChannelSet,
+    modemPresetName: String,
+    channelSelections: SnapshotStateList<Boolean>,
+    onClick: () -> Unit = {},
+) {
+    val selectedChannelSet = channelSet.copy {
+        val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+        settings.clear()
+        settings.addAll(result)
+    }
+
+    AdaptiveTwoPane(
+        first = {
+            channelSet.settingsList.forEachIndexed { index, channel ->
+                ChannelSelection(
+                    index = index,
+                    title = channel.name.ifEmpty { modemPresetName },
+                    enabled = enabled,
+                    isSelected = channelSelections[index],
+                    onSelected = {
+                        if (it || selectedChannelSet.settingsCount > 1) {
+                            channelSelections[index] = it
+                        }
+                    },
+                )
+            }
+            OutlinedButton(
+                onClick = onClick,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = enabled,
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colors.onSurface,
+                ),
+            ) { Text(text = stringResource(R.string.edit)) }
+        },
+        second = {
+            QrCodeImage(
+                enabled = enabled,
+                channelSet = selectedChannelSet,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            )
+        },
+    )
+}
+
+@PreviewScreenSizes
 @Composable
 private fun ChannelScreenPreview() {
-    // ChannelScreen()
+    ChannelListView(
+        enabled = true,
+        channelSet = channelSet {
+            settings.add(Channel.default.settings)
+            loraConfig = Channel.default.loraConfig
+        },
+        modemPresetName = Channel.default.name,
+        channelSelections = listOf(true).toMutableStateList(),
+    )
 }

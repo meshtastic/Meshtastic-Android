@@ -39,6 +39,7 @@
     <string name="connected_count">已连接：%1$s 的 %2$s 上线</string>
     <string name="list_of_nodes">網絡中的節點列表</string>
     <string name="update_firmware">更新韌體</string>
+    <string name="ip_address">IP地址：</string>
     <string name="connected">連接到設備</string>
     <string name="connected_to">已连接至设备 (%s)</string>
     <string name="not_connected">尚未联机</string>
@@ -49,7 +50,8 @@
     <string name="none">无 （停用）</string>
     <string name="modem_config_short">短距離（速度快）</string>
     <string name="modem_config_medium">中等距离（速度快）</string>
-    <string name="modem_config_long">长距离（速度快）</string>
+    <string name="modem_config_long">長距離 （速度快）</string>
+    <string name="modem_config_mod_long">長距離 （中等速度）</string>
     <string name="modem_config_very_long">远距离（速度慢）</string>
     <string name="modem_config_unrecognized">无法识别</string>
     <string name="meshtastic_service_notifications">服务通知</string>
@@ -93,6 +95,9 @@
     <string name="provide_location_to_mesh">提供網格的位置</string>
     <string name="camera_required">相机权限</string>
     <string name="why_camera_required">我们必须获得访问摄像头的权限才能读取 QR 码。不会保存任何图片或影片。</string>
+    <string name="notification_required">通知欄權限</string>
+    <string name="why_notification_required">Meshtastic needs permission for service and message notifications.</string>
+    <string name="notification_denied">Notification permission denied. To turn on notifications, access: Android Settings &gt; Apps &gt; Meshtastic &gt; Notifications.</string>
     <string name="modem_config_slow_short">短距離（速度慢）</string>
     <string name="modem_config_slow_medium">中等距離（速度慢）</string>
     <plurals name="delete_messages">
@@ -102,7 +107,7 @@
     <string name="delete_for_everyone">也从所有人的聊天纪录中删除</string>
     <string name="delete_for_me">從我的聊天紀錄中刪除</string>
     <string name="select_all">選擇全部</string>
-    <string name="modem_config_slow_long">长距离（速度慢）</string>
+    <string name="modem_config_slow_long">長距離（速度慢）</string>
     <string name="map_style_selection">样式选择</string>
     <string name="map_download_region">下载区域</string>
     <string name="name">名稱</string>
@@ -114,6 +119,7 @@
     <string name="resend">重新傳送</string>
     <string name="shutdown">關機</string>
     <string name="reboot">重新開機</string>
+    <string name="traceroute">Traceroute</string>
     <string name="intro_show">顯示介紹指南</string>
     <string name="intro_welcome">歡迎來到 Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic 是一个开源、离网、加密的通讯平台。Meshtastic 无线电组成网状网络，使用 LoRa 协议传送文字讯息进行通讯。</string>
@@ -127,7 +133,6 @@
     <string name="quick_chat_edit">编辑快速聊天</string>
     <string name="quick_chat_append">附加到讯息</string>
     <string name="quick_chat_instant">实时发送</string>
-    <string name="warning_default_psk">空频道名称使用默认的加密密钥（%s上的任何设备都可以读取你的信息）。</string>
     <string name="factory_reset">恢复出厂设置</string>
     <string name="factory_reset_description">这将清除你已经完成的所有设备设定。</string>
     <string name="bluetooth_disabled">蓝牙已禁用</string>
@@ -135,6 +140,9 @@
     <string name="direct_message">直接发讯息</string>
     <string name="nodedb_reset">节点数据库重置</string>
     <string name="nodedb_reset_description">这将从该列表中清除所有节点。</string>
+    <string name="ignore">Ignore</string>
+    <string name="ignore_add">Add \'%s\' to ignore list?</string>
+    <string name="ignore_remove">Remove \'%s\' from ignore list?</string>
     <string name="map_select_download_region">选择下载地区</string>
     <string name="map_tile_download_estimate">瓷砖下载估计:</string>
     <string name="map_start_download">开始下载</string>
@@ -156,7 +164,9 @@
     <string name="map_download_errors">下载完成，但有 %d 个错误</string>
     <string name="map_cache_tiles">%d 图砖</string>
     <string name="map_subDescription">方位：%1$d° 距离：%2$s</string>
-    <string name="waypoint_edit">编辑航点</string>
-    <string name="waypoint_delete">删除航点?</string>
-    <string name="waypoint_new">新建航点</string>
+    <string name="waypoint_edit">編輯航點</string>
+    <string name="waypoint_delete">刪除航點?</string>
+    <string name="waypoint_new">新建航點</string>
+    <string name="waypoint_received">收到編輯航點：%s</string>
+    <string name="error_duty_cycle">Duty Cycle limit reached. Cannot send messages right now, please try again later.</string>
 </resources>

@@ -8,6 +8,7 @@ import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.MyNodeInfo
 import com.geeksville.mesh.NodeInfo
@@ -16,7 +17,9 @@ import com.geeksville.mesh.model.NodeDB
 import com.geeksville.mesh.model.getChannelUrl
 import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.service.ServiceRepository
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
@@ -28,7 +31,7 @@ import javax.inject.Inject
  */
 class RadioConfigRepository @Inject constructor(
     private val serviceRepository: ServiceRepository,
-    val nodeDB: NodeDB,
+    private val nodeDB: NodeDB,
     private val channelSetRepository: ChannelSetRepository,
     private val localConfigRepository: LocalConfigRepository,
     private val moduleConfigRepository: ModuleConfigRepository,
@@ -40,11 +43,17 @@ class RadioConfigRepository @Inject constructor(
     fun setConnectionState(state: ConnectionState) = serviceRepository.setConnectionState(state)
 
     /**
+     * Flow representing the unique userId of our node.
+     */
+    val myId: StateFlow<String?> get() = nodeDB.myId
+
+    /**
      * Flow representing the [MyNodeInfo] database.
      */
     fun myNodeInfoFlow(): Flow<MyNodeInfo?> = nodeDB.myNodeInfoFlow()
     suspend fun getMyNodeInfo(): MyNodeInfo? = myNodeInfoFlow().firstOrNull()
     val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
+    val ourNodeInfo: StateFlow<NodeInfo?> get() = nodeDB.ourNodeInfo
 
     val nodeDBbyNum: StateFlow<Map<Int, NodeInfo>> get() = nodeDB.nodeDBbyNum
     val nodeDBbyID: StateFlow<Map<String, NodeInfo>> get() = nodeDB.nodeDBbyID
@@ -52,7 +61,7 @@ class RadioConfigRepository @Inject constructor(
     /**
      * Flow representing the [NodeInfo] database.
      */
-    suspend fun getNodes(): List<NodeInfo>? = nodeDB.nodeInfoFlow().firstOrNull()
+    suspend fun getNodes(): List<NodeInfo>? = nodeDB.getNodes().firstOrNull()
 
     suspend fun upsert(node: NodeInfo) = nodeDB.upsert(node)
     suspend fun installNodeDB(mi: MyNodeInfo, nodes: List<NodeInfo>) {
@@ -134,14 +143,13 @@ class RadioConfigRepository @Inject constructor(
      * Flow representing the combined [DeviceProfile] protobuf.
      */
     val deviceProfileFlow: Flow<DeviceProfile> = combine(
-        myNodeInfoFlow(),
         nodeDBbyNum,
         channelSetFlow,
         localConfigFlow,
         moduleConfigFlow,
-    ) { myInfo, nodes, channels, localConfig, localModuleConfig ->
+    ) { nodes, channels, localConfig, localModuleConfig ->
         deviceProfile {
-            nodes[myInfo?.myNodeNum]?.user?.let {
+            nodes.values.firstOrNull()?.user?.let {
                 longName = it.longName
                 shortName = it.shortName
             }
@@ -149,5 +157,35 @@ class RadioConfigRepository @Inject constructor(
             config = localConfig
             moduleConfig = localModuleConfig
         }
+    }
+
+    val errorMessage: StateFlow<String?> get() = serviceRepository.errorMessage
+
+    fun setErrorMessage(text: String) {
+        serviceRepository.setErrorMessage(text)
+    }
+
+    fun clearErrorMessage() {
+        serviceRepository.clearErrorMessage()
+    }
+
+    fun setStatusMessage(text: String) {
+        serviceRepository.setStatusMessage(text)
+    }
+
+    val meshPacketFlow: SharedFlow<MeshPacket> get() = serviceRepository.meshPacketFlow
+
+    suspend fun emitMeshPacket(packet: MeshPacket) = coroutineScope {
+        serviceRepository.emitMeshPacket(packet)
+    }
+
+    val tracerouteResponse: StateFlow<String?> get() = serviceRepository.tracerouteResponse
+
+    fun setTracerouteResponse(value: String?) {
+        serviceRepository.setTracerouteResponse(value)
+    }
+
+    fun clearTracerouteResponse() {
+        setTracerouteResponse(null)
     }
 }

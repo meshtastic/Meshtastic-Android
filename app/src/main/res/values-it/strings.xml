@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="node_filter_placeholder">Filter</string>
+    <string name="desc_node_filter_clear">cancella filtro nodi</string>
     <string name="channel_name">Nome del canale</string>
     <string name="channel_options">Opzioni del canale</string>
     <string name="qr_code">Codice QR</string>
@@ -134,7 +136,6 @@
     <string name="quick_chat_edit">Modifica chat rapida</string>
     <string name="quick_chat_append">Aggiungi al messaggio</string>
     <string name="quick_chat_instant">Invio immediato</string>
-    <string name="warning_default_psk">I nomi dei canali vuoti utilizzano la chiave di crittografia predefinita (qualsiasi dispositivo su %s può leggere i messaggi).</string>
     <string name="factory_reset">Ripristina impostazioni di fabbrica</string>
     <string name="factory_reset_description">Questo cancellerà tutta la configurazione del dispositivo che hai fatto.</string>
     <string name="bluetooth_disabled">Bluetooth disabilitato</string>
@@ -142,6 +143,8 @@
     <string name="direct_message">Messaggio diretto</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <string name="nodedb_reset_description">Questo cancellerà tutti i nodi da questo elenco.</string>
+    <string name="delivery_confirmed">Consegna confermata</string>
+    <string name="error">Errore</string>
     <string name="ignore">Ignora</string>
     <string name="ignore_add">Aggiungere \'%s\' alla lista degli ignorati? La radio si riavvierà dopo aver apportato questa modifica.</string>
     <string name="ignore_remove">Rimuovere \'%s\' dalla lista degli ignorati? La radio si riavvierà dopo aver apportato questa modifica.</string>
@@ -171,4 +174,11 @@
     <string name="waypoint_new">Nuovo waypoint</string>
     <string name="waypoint_received">Waypoint ricevuto: %s</string>
     <string name="error_duty_cycle">Limite di Duty Cycle raggiunto. Impossibile inviare messaggi in questo momento, riprovare più tardi.</string>
+    <string name="remove">Elimina</string>
+    <string name="remove_node_text">Questo nodo verrà rimosso dalla tua lista fino a quando il tuo nodo non riceverà di nuovo dei dati.</string>
+    <string name="mute">Silenzia</string>
+    <string name="mute_notifications">Disattiva notifiche</string>
+    <string name="mute_8_hours">8 ore</string>
+    <string name="mute_1_week">1 settimana</string>
+    <string name="mute_always">Sempre</string>
 </resources>

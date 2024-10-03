@@ -136,7 +136,6 @@
     <string name="quick_chat_edit">ערוך צ\'ט מהיר</string>
     <string name="quick_chat_append">הוסף להודעה</string>
     <string name="quick_chat_instant">שלח מייד</string>
-    <string name="warning_default_psk">ערוצים ללא שם משתמשים במפתח הצפנה ברירת מחדל (כל מכשיר המחובר ל-%s יכול לקרוא את הודעותיך).</string>
     <string name="factory_reset">איפוס להגדרות היצרן</string>
     <string name="factory_reset_description">יאפס את כל הגדרות המכשיר.</string>
     <string name="bluetooth_disabled">בלוטוס כבוי</string>

@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/muteButton"
+        android:icon="@drawable/ic_twotone_volume_off_24"
+        android:title="@string/mute"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/resendButton"
         android:icon="@drawable/ic_twotone_content_paste_go_24"
         android:title="@string/resend"

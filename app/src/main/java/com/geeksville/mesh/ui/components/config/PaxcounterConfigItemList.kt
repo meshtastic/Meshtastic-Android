@@ -7,7 +7,7 @@ import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -26,7 +26,7 @@ fun PaxcounterConfigItemList(
     onSaveClicked: (ModuleConfigProtos.ModuleConfig.PaxcounterConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var paxcounterInput by remember(paxcounterConfig) { mutableStateOf(paxcounterConfig) }
+    var paxcounterInput by rememberSaveable { mutableStateOf(paxcounterConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -50,6 +50,26 @@ fun PaxcounterConfigItemList(
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     paxcounterInput = paxcounterInput.copy { paxcounterUpdateInterval = it }
+                })
+        }
+
+        item {
+            EditTextPreference(title = "WiFi RSSI threshold (defaults to -80)",
+                value = paxcounterInput.wifiThreshold,
+                enabled = enabled,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    paxcounterInput = paxcounterInput.copy { wifiThreshold = it }
+                })
+        }
+
+        item {
+            EditTextPreference(title = "BLE RSSI threshold (defaults to -80)",
+                value = paxcounterInput.bleThreshold,
+                enabled = enabled,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = {
+                    paxcounterInput = paxcounterInput.copy { bleThreshold = it }
                 })
         }
 

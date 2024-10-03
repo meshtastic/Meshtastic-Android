@@ -134,7 +134,6 @@
     <string name="quick_chat_edit">Redigera snabbchatt</string>
     <string name="quick_chat_append">Lägg till i meddelandet</string>
     <string name="quick_chat_instant">Skicka direkt</string>
-    <string name="warning_default_psk">Odöpta kanalnamn använder standardkrypteringsnyckeln (alla enheter på %s kan läsa dina meddelanden).</string>
     <string name="factory_reset">Återställ till standardinställningar</string>
     <string name="factory_reset_description">Detta kommer att rensa all enhetskonfiguration som du har gjort.</string>
     <string name="bluetooth_disabled">Bluetooth är inaktiverad</string>

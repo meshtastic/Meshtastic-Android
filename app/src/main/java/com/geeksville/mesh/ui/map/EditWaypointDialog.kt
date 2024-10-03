@@ -1,4 +1,4 @@
-package com.geeksville.mesh.ui.map.components
+package com.geeksville.mesh.ui.map
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -42,7 +42,7 @@ import com.geeksville.mesh.util.CustomRecentEmojiProvider
 import com.geeksville.mesh.waypoint
 
 @Composable
-fun EditWaypointDialog(
+internal fun EditWaypointDialog(
     waypoint: Waypoint,
     onSendClicked: (Waypoint) -> Unit,
     onDeleteClicked: (Waypoint) -> Unit,

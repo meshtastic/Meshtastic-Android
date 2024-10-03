@@ -7,7 +7,7 @@ import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -26,7 +26,7 @@ fun TelemetryConfigItemList(
     onSaveClicked: (TelemetryConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var telemetryInput by remember(telemetryConfig) { mutableStateOf(telemetryConfig) }
+    var telemetryInput by rememberSaveable { mutableStateOf(telemetryConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()

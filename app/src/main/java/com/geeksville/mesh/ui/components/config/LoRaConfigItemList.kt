@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -32,7 +33,7 @@ fun LoRaConfigItemList(
     onSaveClicked: (LoRaConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var loraInput by remember(loraConfig) { mutableStateOf(loraConfig) }
+    var loraInput by rememberSaveable { mutableStateOf(loraConfig) }
     val primaryChannel = Channel(primarySettings, loraInput)
 
     LazyColumn(
@@ -121,7 +122,7 @@ fun LoRaConfigItemList(
         item { Divider() }
 
         item {
-            EditTextPreference(title = "TX power",
+            EditTextPreference(title = "TX power (dBm)",
                 value = loraInput.txPower,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -180,6 +181,15 @@ fun LoRaConfigItemList(
                 onFocusChanged = { isFocused = it.isFocused },
                 onValueChanged = { loraInput = loraInput.copy { overrideFrequency = it } })
         }
+
+        item {
+            SwitchPreference(
+                title = "PA fan disabled",
+                checked = loraInput.paFanDisabled,
+                enabled = enabled,
+                onCheckedChange = { loraInput = loraInput.copy { paFanDisabled = it } })
+        }
+        item { Divider() }
 
         item {
             SwitchPreference(title = "Ignore MQTT",

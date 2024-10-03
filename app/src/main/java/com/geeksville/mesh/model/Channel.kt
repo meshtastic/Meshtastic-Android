@@ -6,6 +6,7 @@ import com.geeksville.mesh.ConfigKt.loRaConfig
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.channelSettings
 import com.google.protobuf.ByteString
+import java.security.SecureRandom
 
 /** Utility function to make it easy to declare byte arrays - FIXME move someplace better */
 fun byteArrayOfInts(vararg ints: Int) = ByteArray(ints.size) { pos -> ints[pos].toByte() }
@@ -37,6 +38,13 @@ data class Channel(
                 txEnabled = true
             }
         )
+
+        fun getRandomKey(size: Int = 32): ByteString {
+            val bytes = ByteArray(size)
+            val random = SecureRandom()
+            random.nextBytes(bytes)
+            return ByteString.copyFrom(bytes)
+        }
     }
 
     /// Return the name of our channel as a human readable string.  If empty string, assume "Default" per mesh.proto spec
@@ -71,21 +79,6 @@ data class Channel(
                 bytes[bytes.size - 1] = (0xff and (bytes[bytes.size - 1] + pskIndex - 1)).toByte()
                 ByteString.copyFrom(bytes)
             }
-        }
-
-    /**
-     * Return a name that is formatted as #channename-suffix
-     *
-     * Where suffix indicates the hash of the PSK
-     */
-    val humanName: String
-        get() {
-            // start with the PSK then xor in the name
-            val pskCode = xorHash(psk.toByteArray())
-            val nameCode = xorHash(name.toByteArray())
-            val suffix = 'A' + ((pskCode xor nameCode) % 26)
-
-            return "#${name}-${suffix}"
         }
 
     /**

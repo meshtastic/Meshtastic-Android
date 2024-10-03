@@ -1,4 +1,7 @@
-# Meshtastic-Android
+<p align="center">
+  <a href=""><img width="200" height="200" src="https://github.com/meshtastic/Meshtastic-Android/blob/master/app/src/main/res/mipmap-xxxhdpi/ic_launcher2.png"></a>
+</p>
+<h1 align="center">Meshtastic-Android</h1>
 
 ![GitHub all releases](https://img.shields.io/github/downloads/meshtastic/meshtastic-android/total)
 [![Android CI](https://github.com/meshtastic/Meshtastic-Android/actions/workflows/android.yml/badge.svg)](https://github.com/meshtastic/Meshtastic-Android/actions/workflows/android.yml)
@@ -13,14 +16,17 @@ This project is currently beta testing, if you have questions or feedback
 please [Join our discussion forum](https://meshtastic.discourse.group/). We would love to hear from
 you!
 
-[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png"
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
 alt="Get it on F-Droid"
-width="49%">](https://apt.izzysoft.de/fdroid/repo)
+width="32%">](https://f-droid.org/packages/com.geeksville.mesh/)
+[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png"
+alt="Get it on IzzyOnDroid"
+width="32%">](https://apt.izzysoft.de/fdroid/index/apk/com.geeksville.mesh)
 [<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
 alt="Download at https://play.google.com/store/apps/details?id=com.geeksville.mesh]"
-width="49%">](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dgithub-android-readme)
+width="32%">](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dgithub-android-readme)
 
-If you want to join the Play Store beta program go to [this URL](https://play.google.com/apps/testing/com.geeksville.mesh) and opt-in to the alpha/beta test.
+If you want to join the Play Store testing program go to [this URL](https://play.google.com/apps/testing/com.geeksville.mesh) and opt-in to become a tester.
 If you encounter any problems or have questions, [post in the forum](https://meshtastic.discourse.group/) and we'll help.
 
 However, if you must use 'raw' APKs you can get them from our [github releases](https://github.com/meshtastic/Meshtastic-Android/releases). This is not recommended because if you manually install an APK it will not automatically update.
@@ -64,4 +70,4 @@ for verbose logging:
 adb shell setprop log.tag.FA VERBOSE
 ```
 
-Copyright 2023, Meshtastic LLC. GPL-3.0 license
+Copyright 2024, Meshtastic LLC. GPL-3.0 license

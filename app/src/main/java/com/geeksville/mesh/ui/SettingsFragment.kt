@@ -15,12 +15,12 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.RadioButton
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
-import com.geeksville.mesh.ModuleConfigProtos
 import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BTScanModel
@@ -30,7 +30,6 @@ import com.geeksville.mesh.model.getInitials
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.util.exceptionToSnackbar
-import com.geeksville.mesh.util.getAssociationResult
 import com.geeksville.mesh.util.onEditorAction
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -51,7 +50,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     internal lateinit var locationRepository: LocationRepository
 
     private val hasGps by lazy { requireContext().hasGps() }
-    private val hasCompanionDeviceApi by lazy { requireContext().hasCompanionDeviceApi() }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -140,14 +138,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     private fun initCommonUI() {
 
-        val associationResultLauncher = registerForActivityResult(
-            ActivityResultContracts.StartIntentSenderForResult()
-        ) {
-            it.data
-                ?.getAssociationResult()
-                ?.let { address -> scanModel.onSelectedBle(address) }
-        }
-
         val requestBackgroundAndCheckLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 if (permissions.entries.any { !it.value }) {
@@ -189,29 +179,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         model.localConfig.asLiveData().observe(viewLifecycleOwner) {
-            if (!model.isConnected()) {
-                val configCount = it.allFields.size
-                val configTotal = ConfigProtos.Config.getDescriptor().fields.size
-                if (configCount > 0)
-                    scanModel.setErrorText("Device config ($configCount / $configTotal)")
-            } else updateNodeInfo()
-        }
-
-        model.moduleConfig.asLiveData().observe(viewLifecycleOwner) {
-            if (!model.isConnected()) {
-                val moduleCount = it.allFields.size
-                val moduleTotal = ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size
-                if (moduleCount > 0)
-                    scanModel.setErrorText("Module config ($moduleCount / $moduleTotal)")
-            } else updateNodeInfo()
-        }
-
-        model.channels.asLiveData().observe(viewLifecycleOwner) {
-            if (!model.isConnected()) {
-                val maxChannels = model.maxChannels
-                if (!it.hasLoraConfig() && it.settingsCount > 0)
-                    scanModel.setErrorText("Channels (${it.settingsCount} / $maxChannels)")
-            }
+            if (model.isConnected()) updateNodeInfo()
         }
 
         // Also watch myNodeInfo because it might change later
@@ -225,17 +193,34 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
         }
 
+        var scanDialog: AlertDialog? = null
+        scanModel.scanResult.observe(viewLifecycleOwner) { results ->
+            val devices = results.values.ifEmpty { return@observe }
+            scanDialog?.dismiss()
+            scanDialog = MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Select a Bluetooth device")
+                .setSingleChoiceItems(
+                    devices.map { it.name }.toTypedArray(),
+                    -1
+                ) { dialog, position ->
+                    val selectedDevice = devices.elementAt(position)
+                    scanModel.onSelected(selectedDevice)
+                    scanModel.clearScanResults()
+                    dialog.dismiss()
+                    scanDialog = null
+                }
+                .setPositiveButton(R.string.cancel) { dialog, _ ->
+                    scanModel.clearScanResults()
+                    dialog.dismiss()
+                    scanDialog = null
+                }
+                .show()
+        }
+
         // show the spinner when [spinner] is true
         scanModel.spinner.observe(viewLifecycleOwner) { show ->
             binding.changeRadioButton.isEnabled = !show
             binding.scanProgressBar.visibility = if (show) View.VISIBLE else View.GONE
-        }
-
-        scanModel.associationRequest.observe(viewLifecycleOwner) { request ->
-            request?.let {
-                associationResultLauncher.launch(request)
-                scanModel.clearAssociationRequest()
-            }
         }
 
         binding.usernameEditText.onEditorAction(EditorInfo.IME_ACTION_DONE) {
@@ -338,7 +323,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         val deviceSelectIPAddress = binding.radioButtonManual
         val inputIPAddress = binding.editManualAddress
 
-        deviceSelectIPAddress.isEnabled = false
+        deviceSelectIPAddress.isEnabled = inputIPAddress.text.isIPAddress()
         deviceSelectIPAddress.setOnClickListener {
             deviceSelectIPAddress.isChecked = scanModel.onSelected(BTScanModel.DeviceListEntry("", "t" + inputIPAddress.text, true))
         }
@@ -395,7 +380,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private var scanning = false
     private fun scanLeDevice() {
         if (!checkBTEnabled()) return
-        if (!hasCompanionDeviceApi) checkLocationEnabled()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) checkLocationEnabled()
 
         if (!scanning) { // Stops scanning after a pre-defined scan period.
             Handler(Looper.getMainLooper()).postDelayed({
@@ -403,7 +388,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 scanModel.stopScan()
             }, SCAN_PERIOD)
             scanning = true
-            scanModel.startScan(requireActivity().takeIf { hasCompanionDeviceApi })
+            scanModel.startScan()
         } else {
             scanning = false
             scanModel.stopScan()

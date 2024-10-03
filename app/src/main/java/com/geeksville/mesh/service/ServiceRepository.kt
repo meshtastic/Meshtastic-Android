@@ -1,7 +1,11 @@
 package com.geeksville.mesh.service
 
 import com.geeksville.mesh.IMeshService
+import com.geeksville.mesh.MeshProtos.MeshPacket
+import com.geeksville.mesh.android.Logging
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -10,7 +14,7 @@ import javax.inject.Singleton
  * Repository class for managing the [IMeshService] instance and connection state
  */
 @Singleton
-class ServiceRepository @Inject constructor() {
+class ServiceRepository @Inject constructor() : Logging {
     var meshService: IMeshService? = null
         private set
 
@@ -24,5 +28,44 @@ class ServiceRepository @Inject constructor() {
 
     fun setConnectionState(connectionState: MeshService.ConnectionState) {
         _connectionState.value = connectionState
+    }
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> get() = _errorMessage
+
+    fun setErrorMessage(text: String) {
+        errormsg(text)
+        _errorMessage.value = text
+    }
+
+    fun clearErrorMessage() {
+        _errorMessage.value = null
+    }
+
+    private val _statusMessage = MutableStateFlow<String?>(null)
+    val statusMessage: StateFlow<String?> get() = _statusMessage
+
+    fun setStatusMessage(text: String) {
+        if (connectionState.value != MeshService.ConnectionState.CONNECTED) {
+            _statusMessage.value = text
+        }
+    }
+
+    private val _meshPacketFlow = MutableSharedFlow<MeshPacket>()
+    val meshPacketFlow: SharedFlow<MeshPacket> get() = _meshPacketFlow
+
+    suspend fun emitMeshPacket(packet: MeshPacket) {
+        _meshPacketFlow.emit(packet)
+    }
+
+    private val _tracerouteResponse = MutableStateFlow<String?>(null)
+    val tracerouteResponse: StateFlow<String?> get() = _tracerouteResponse
+
+    fun setTracerouteResponse(value: String?) {
+        _tracerouteResponse.value = value
+    }
+
+    fun clearTracerouteResponse() {
+        setTracerouteResponse(null)
     }
 }

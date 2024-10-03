@@ -35,6 +35,7 @@ import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.primaryChannel
+import com.geeksville.mesh.model.shouldAddChannels
 import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.repository.radio.BluetoothInterface
 import com.geeksville.mesh.service.*
@@ -399,27 +400,37 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
+    @Suppress("NestedBlockDepth")
     private fun perhapsChangeChannel(url: Uri? = requestedChannelUrl) {
         // if the device is connected already, process it now
         if (url != null && model.isConnected()) {
             requestedChannelUrl = null
             try {
                 val channels = url.toChannelSet()
+                val shouldAdd = url.shouldAddChannels()
                 val primary = channels.primaryChannel
                 if (primary == null)
                     showSnackbar(R.string.channel_invalid)
                 else {
-
+                    val dialogMessage = if (!shouldAdd) {
+                        getString(R.string.do_you_want_switch).format(primary.name)
+                    } else {
+                        resources.getQuantityString(
+                            R.plurals.add_channel_from_qr,
+                            channels.settingsCount,
+                            channels.settingsCount
+                        )
+                    }
                     MaterialAlertDialogBuilder(this)
                         .setTitle(R.string.new_channel_rcvd)
-                        .setMessage(getString(R.string.do_you_want_switch).format(primary.name))
+                        .setMessage(dialogMessage)
                         .setNeutralButton(R.string.cancel) { _, _ ->
                             // Do nothing
                         }
                         .setPositiveButton(R.string.accept) { _, _ ->
                             debug("Setting channel from URL")
                             try {
-                                model.setChannels(channels)
+                                model.setChannels(channels, !shouldAdd)
                             } catch (ex: RemoteException) {
                                 errormsg("Couldn't change channel ${ex.message}")
                                 showSnackbar(R.string.cant_change_no_radio)
@@ -518,13 +529,6 @@ class MainActivity : AppCompatActivity(), Logging {
 
     override fun onStop() {
         unbindMeshService()
-
-        model.connectionState.removeObservers(this)
-        bluetoothViewModel.enabled.removeObservers(this)
-        model.requestChannelUrl.removeObservers(this)
-        model.snackbarText.removeObservers(this)
-        model.currentTab.removeObservers(this)
-
         super.onStop()
     }
 
@@ -569,6 +573,17 @@ class MainActivity : AppCompatActivity(), Logging {
 
         model.currentTab.observe(this) {
             binding.tabLayout.getTabAt(it)?.select()
+        }
+
+        model.tracerouteResponse.observe(this) { response ->
+            MaterialAlertDialogBuilder(this)
+                .setCancelable(false)
+                .setTitle(R.string.traceroute)
+                .setMessage(response ?: return@observe)
+                .setPositiveButton(R.string.okay) { _, _ -> }
+                .show()
+
+            model.clearTracerouteResponse()
         }
 
         try {
@@ -646,11 +661,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 return true
             }
             R.id.radio_config -> {
-                model.setDestNode(null)
-                supportFragmentManager.beginTransaction()
-                    .add(R.id.mainActivityLayout, DeviceSettingsFragment())
-                    .addToBackStack(null)
-                    .commit()
+                supportFragmentManager.navigateToRadioConfig()
                 return true
             }
             R.id.save_messages_csv -> {
