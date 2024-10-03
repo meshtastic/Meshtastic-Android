@@ -25,8 +25,8 @@ fun NodeKeyStatusIcon(
 ) {
     val (icon, tint) = when {
         mismatchKey -> rememberVectorPainter(Icons.Default.KeyOff) to Color.Red
-        hasPKC -> rememberVectorPainter(Icons.Default.Lock) to Color.Green
-        else -> painterResource(R.drawable.ic_lock_open_right_24) to Color.Yellow
+        hasPKC -> rememberVectorPainter(Icons.Default.Lock) to Color(color = 0xFF30C047)
+        else -> painterResource(R.drawable.ic_lock_open_right_24) to Color(color = 0xFFFEC30A)
     }
     Icon(
         painter = icon,
