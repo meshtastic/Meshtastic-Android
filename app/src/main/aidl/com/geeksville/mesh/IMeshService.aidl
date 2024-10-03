@@ -170,5 +170,5 @@ interface IMeshService {
     void stopProvideLocation();
 
     /// Send request for node UserInfo
-    void requestUserInfo(in int requestID, in int destNum, in NodeInfo nodeInfo);
+    void requestUserInfo(in int destNum);
 }

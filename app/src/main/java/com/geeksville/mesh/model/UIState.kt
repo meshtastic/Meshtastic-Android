@@ -415,9 +415,7 @@ class UIViewModel @Inject constructor(
     fun requestUserInfo(destNum: Int) {
         info("Requesting UserInfo for '$destNum'")
         try {
-            val packetId = meshService?.packetId ?: return
-            val ourNodeInfo = nodeDB.ourNodeInfo.value?.toNodeInfo()
-            meshService?.requestUserInfo(packetId, destNum, ourNodeInfo)
+            meshService?.requestUserInfo( destNum )
         } catch (ex: RemoteException) {
             errormsg("Request NodeInfo error: ${ex.message}")
         }
