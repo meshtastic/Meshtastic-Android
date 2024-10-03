@@ -85,6 +85,7 @@ import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
+import com.geeksville.mesh.model.map.clustering.RadiusMarkerClusterer
 import java.io.File
 import java.text.DateFormat
 
@@ -112,11 +113,17 @@ class MapFragment : ScreenFragment("Map Fragment"), Logging {
 @Composable
 private fun MapView.UpdateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
-    waypointMarkers: List<MarkerWithLabel>
+    waypointMarkers: List<MarkerWithLabel>,
+    nodeClusterer: RadiusMarkerClusterer
 ) {
     debug("Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints")
     overlays.removeAll { it is MarkerWithLabel }
-    overlays.addAll(nodeMarkers + waypointMarkers)
+    // overlays.addAll(nodeMarkers + waypointMarkers)
+    overlays.addAll(waypointMarkers)
+    nodeClusterer.getItems().clear()
+    nodeMarkers.forEach {
+        nodeClusterer.add(it)
+    }
 }
 
 /**
@@ -282,6 +289,9 @@ fun MapView(
 
     val map = rememberMapViewWithLifecycle(context)
     val state by model.mapState.collectAsStateWithLifecycle()
+
+    val nodeClusterer = RadiusMarkerClusterer(context)
+    map.overlays.add(nodeClusterer)
 
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
@@ -486,7 +496,7 @@ fun MapView(
     }
 
     with(map) {
-        UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values))
+        UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values), nodeClusterer)
     }
 
     fun MapView.zoomToNodes() {
