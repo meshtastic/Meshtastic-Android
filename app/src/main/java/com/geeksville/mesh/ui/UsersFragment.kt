@@ -85,6 +85,10 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                 R.id.metrics -> {
                     navigateToMetrics(node.num)
                 }
+
+                R.id.request_userinfo -> {
+                    model.requestUserInfo(node.num)
+                }
             }
         }
     }
