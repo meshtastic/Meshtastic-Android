@@ -254,6 +254,7 @@ private fun MapView.addMapEventListener(onEvent: () -> Unit) {
     }, INACTIVITY_DELAY_MILLIS))
 }
 
+private const val FORCE_MAX_ZOOM_LEVEL = 20
 @Composable
 fun MapView(
     model: UIViewModel = viewModel(),
@@ -507,7 +508,7 @@ fun MapView(
         val id = mPrefs.getInt(mapStyleId, 0)
         debug("mapStyleId from prefs: $id")
         return CustomTileSource.getTileSource(id).also {
-            map.maxZoomLevel = it.maximumZoomLevel.coerceAtLeast(20).toDouble();
+            map.maxZoomLevel = it.maximumZoomLevel.coerceAtLeast(FORCE_MAX_ZOOM_LEVEL).toDouble()
             showDownloadButton =
                 if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
         }
@@ -517,10 +518,13 @@ fun MapView(
      * Creates Box overlay showing what area can be downloaded
      */
     fun MapView.generateBoxOverlay() {
+        val sourceMaxZoom = map.getTileProvider().getTileSource().getMaximumZoomLevel().toDouble()
+        map.setMaxZoomLevel(sourceMaxZoom)
+        if (zoomLevelDouble > sourceMaxZoom) controller.setZoom(sourceMaxZoom)
         overlays.removeAll { it is Polygon }
         val zoomFactor = 1.3 // zoom difference between view and download area polygon
-        zoomLevelMax = maxZoomLevel
-        zoomLevelMin = maxOf(zoomLevelDouble, maxZoomLevel)
+        zoomLevelMax = sourceMaxZoom
+        zoomLevelMin = maxOf(zoomLevelDouble, sourceMaxZoom)
         downloadRegionBoundingBox = boundingBox.zoomIn(zoomFactor)
         val polygon = Polygon().apply {
             points = Polygon.pointsAsRect(downloadRegionBoundingBox).map {
@@ -656,9 +660,12 @@ fun MapView(
                 cacheEstimate = cacheEstimate,
                 onExecuteJob = { startDownload() },
                 onCancelDownload = {
+                    val resetMaxZoom = map.getTileProvider().getTileSource().getMaximumZoomLevel().coerceAtLeast(FORCE_MAX_ZOOM_LEVEL).toDouble()
+                    map.setMaxZoomLevel(resetMaxZoom)
                     downloadRegionBoundingBox = null
                     map.overlays.removeAll { it is Polygon }
                     map.invalidate()
+                    
                 },
                 modifier = Modifier.align(Alignment.BottomCenter)
             ) else Column(
