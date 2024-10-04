@@ -291,7 +291,6 @@ fun MapView(
     val state by model.mapState.collectAsStateWithLifecycle()
 
     val nodeClusterer = RadiusMarkerClusterer(context)
-    map.overlays.add(nodeClusterer)
 
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
@@ -489,6 +488,8 @@ fun MapView(
         if (myLocationOverlay != null && overlays.none { it is MyLocationNewOverlay }) {
             overlays.add(myLocationOverlay)
         }
+        map.overlays.add(nodeClusterer)
+
         addCopyright()  // Copyright is required for certain map sources
         createLatLongGrid(false)
 
