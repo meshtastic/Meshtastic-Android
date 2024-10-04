@@ -138,6 +138,7 @@ fun NodeItem(
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .defaultMinSize(minHeight = 80.dp),
+        elevation = 4.dp,
         onClick = { showDetails(!detailsShown) },
     ) {
         Surface {
