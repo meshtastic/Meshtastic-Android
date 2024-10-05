@@ -19,6 +19,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -272,8 +273,8 @@ fun MapView(
     val prefsName = "org.geeksville.osm.prefs"
     val mapStyleId = "map_style_id"
 
-    var zoomLevelMin = 0.0
-    var zoomLevelMax = 0.0
+    var zoomLevelMin by remember { mutableDoubleStateOf(0.0) }
+    var zoomLevelMax by remember { mutableDoubleStateOf(0.0) }
 
     // Map Elements
     var downloadRegionBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
@@ -290,7 +291,7 @@ fun MapView(
     val map = rememberMapViewWithLifecycle(context)
     val state by model.mapState.collectAsStateWithLifecycle()
 
-    val nodeClusterer = RadiusMarkerClusterer(context)
+    val nodeClusterer = remember { RadiusMarkerClusterer(context) }
 
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
