@@ -262,6 +262,8 @@ private fun MapView.addMapEventListener(onEvent: () -> Unit) {
     }, INACTIVITY_DELAY_MILLIS))
 }
 
+private const val MaxZoomLevel = 20.0
+
 @Composable
 fun MapView(
     model: UIViewModel = viewModel(),
@@ -519,7 +521,7 @@ fun MapView(
         val id = mPrefs.getInt(mapStyleId, 0)
         debug("mapStyleId from prefs: $id")
         return CustomTileSource.getTileSource(id).also {
-            map.maxZoomLevel = it.maximumZoomLevel.toDouble()
+            zoomLevelMax = it.maximumZoomLevel.toDouble()
             showDownloadButton =
                 if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
         }
@@ -531,8 +533,7 @@ fun MapView(
     fun MapView.generateBoxOverlay() {
         overlays.removeAll { it is Polygon }
         val zoomFactor = 1.3 // zoom difference between view and download area polygon
-        zoomLevelMax = maxZoomLevel
-        zoomLevelMin = maxOf(zoomLevelDouble, maxZoomLevel)
+        zoomLevelMin = minOf(zoomLevelDouble, zoomLevelMax)
         downloadRegionBoundingBox = boundingBox.zoomIn(zoomFactor)
         val polygon = Polygon().apply {
             points = Polygon.pointsAsRect(downloadRegionBoundingBox).map {
@@ -665,6 +666,7 @@ fun MapView(
                         isTilesScaledToDpi = true
                         // sets the minimum zoom level (the furthest out you can zoom)
                         minZoomLevel = 1.5
+                        maxZoomLevel = MaxZoomLevel
                         // Disables default +/- button for zooming
                         zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
                         addMapEventListener {
