@@ -121,10 +121,9 @@ private fun MapView.UpdateMarkers(
     overlays.removeAll { it is MarkerWithLabel }
     // overlays.addAll(nodeMarkers + waypointMarkers)
     overlays.addAll(waypointMarkers)
-    nodeClusterer.getItems().clear()
-    nodeMarkers.forEach {
-        nodeClusterer.add(it)
-    }
+    nodeClusterer.items.clear()
+    nodeClusterer.items.addAll(nodeMarkers)
+    nodeClusterer.invalidate()
 }
 
 /**
@@ -491,7 +490,9 @@ fun MapView(
         if (myLocationOverlay != null && overlays.none { it is MyLocationNewOverlay }) {
             overlays.add(myLocationOverlay)
         }
-        map.overlays.add(nodeClusterer)
+        if (overlays.none { it is RadiusMarkerClusterer }) {
+            overlays.add(nodeClusterer)
+        }
 
         addCopyright()  // Copyright is required for certain map sources
         createLatLongGrid(false)
