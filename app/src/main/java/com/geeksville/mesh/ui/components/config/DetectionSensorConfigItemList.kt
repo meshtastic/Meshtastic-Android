@@ -15,18 +15,20 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import com.geeksville.mesh.ModuleConfigProtos
+import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.SwitchPreference
 
+@Suppress("LongMethod")
 @Composable
 fun DetectionSensorConfigItemList(
-    detectionSensorConfig: ModuleConfigProtos.ModuleConfig.DetectionSensorConfig,
+    detectionSensorConfig: ModuleConfig.DetectionSensorConfig,
     enabled: Boolean,
-    onSaveClicked: (ModuleConfigProtos.ModuleConfig.DetectionSensorConfig) -> Unit,
+    onSaveClicked: (ModuleConfig.DetectionSensorConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     var detectionSensorInput by rememberSaveable { mutableStateOf(detectionSensorConfig) }
@@ -102,12 +104,17 @@ fun DetectionSensorConfigItemList(
         }
 
         item {
-            SwitchPreference(title = "Detection is triggered on HIGH (1)",
-                checked = detectionSensorInput.detectionTriggeredHigh,
+            DropDownPreference(
+                title = "Detection trigger type",
                 enabled = enabled,
-                onCheckedChange = {
-                    detectionSensorInput = detectionSensorInput.copy { detectionTriggeredHigh = it }
-                })
+                items = ModuleConfig.DetectionSensorConfig.TriggerType.entries
+                    .filter { it != ModuleConfig.DetectionSensorConfig.TriggerType.UNRECOGNIZED }
+                    .map { it to it.name },
+                selectedItem = detectionSensorInput.detectionTriggerType,
+                onItemSelected = {
+                    detectionSensorInput = detectionSensorInput.copy { detectionTriggerType = it }
+                }
+            )
         }
         item { Divider() }
 
@@ -141,7 +148,7 @@ fun DetectionSensorConfigItemList(
 @Composable
 private fun DetectionSensorConfigPreview() {
     DetectionSensorConfigItemList(
-        detectionSensorConfig = ModuleConfigProtos.ModuleConfig.DetectionSensorConfig.getDefaultInstance(),
+        detectionSensorConfig = ModuleConfig.DetectionSensorConfig.getDefaultInstance(),
         enabled = true,
         onSaveClicked = { },
     )
