@@ -21,6 +21,8 @@ val Routing.Error.stringRes: Int
         Routing.Error.NOT_AUTHORIZED -> R.string.routing_error_not_authorized
         Routing.Error.PKI_FAILED -> R.string.routing_error_pki_failed
         Routing.Error.PKI_UNKNOWN_PUBKEY -> R.string.routing_error_pki_unknown_pubkey
+        Routing.Error.ADMIN_BAD_SESSION_KEY -> R.string.routing_error_admin_bad_session_key
+        Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED -> R.string.routing_error_admin_public_key_unauthorized
         else -> R.string.unrecognized
     }
 
