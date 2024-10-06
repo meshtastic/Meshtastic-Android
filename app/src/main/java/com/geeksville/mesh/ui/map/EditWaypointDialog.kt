@@ -1,20 +1,29 @@
 package com.geeksville.mesh.ui.map
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,11 +31,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -41,6 +52,8 @@ import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.CustomRecentEmojiProvider
 import com.geeksville.mesh.waypoint
 
+@Suppress("LongMethod")
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun EditWaypointDialog(
     waypoint: Waypoint,
@@ -56,10 +69,22 @@ internal fun EditWaypointDialog(
 
     if (!showEmojiPickerView) AlertDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text(stringResource(title)) },
+        shape = RoundedCornerShape(16.dp),
+        backgroundColor = MaterialTheme.colors.background,
         text = {
             Column(modifier = modifier.fillMaxWidth()) {
-                EditTextPreference(title = stringResource(R.string.name),
+                Text(
+                    text = stringResource(title),
+                    style = MaterialTheme.typography.h6.copy(
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                )
+                EditTextPreference(
+                    title = stringResource(R.string.name),
                     value = waypointInput.name,
                     maxSize = 29, // name max_size:30
                     enabled = true,
@@ -71,7 +96,14 @@ internal fun EditWaypointDialog(
                     onValueChanged = { waypointInput = waypointInput.copy { name = it } },
                     trailingIcon = {
                         IconButton(onClick = { showEmojiPickerView = true }) {
-                            Text(String(Character.toChars(emoji)), fontSize = 24.sp)
+                            Text(
+                                text = String(Character.toChars(emoji)),
+                                modifier = Modifier
+                                    .background(MaterialTheme.colors.background, CircleShape)
+                                    .padding(4.dp),
+                                fontSize = 24.sp,
+                                color = Color.Unspecified.copy(alpha = 1f),
+                            )
                         }
                     },
                 )
@@ -111,50 +143,57 @@ internal fun EditWaypointDialog(
             }
         },
         buttons = {
-            Row(
-                modifier = modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
+            FlowRow(
+                modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.Center,
             ) {
-                Button(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .weight(1f),
+                TextButton(
+                    modifier = modifier.weight(1f),
                     onClick = onDismissRequest
                 ) { Text(stringResource(R.string.cancel)) }
-                if (waypoint.id != 0) Button(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    onClick = { onDeleteClicked(waypointInput) },
-                    enabled = waypointInput.name.isNotEmpty(),
-                ) { Text(stringResource(R.string.delete)) }
+                if (waypoint.id != 0) {
+                    Button(
+                        modifier = modifier.weight(1f),
+                        onClick = { onDeleteClicked(waypointInput) },
+                        enabled = waypointInput.name.isNotEmpty(),
+                    ) { Text(stringResource(R.string.delete)) }
+                }
                 Button(
-                    modifier = modifier
-                        .fillMaxWidth()
-                        .weight(1f),
+                    modifier = modifier.weight(1f),
                     onClick = { onSendClicked(waypointInput) },
                     enabled = waypointInput.name.isNotEmpty(),
                 ) { Text(stringResource(R.string.send)) }
             }
         },
-        modifier = modifier.fillMaxWidth(),
-    ) else AndroidView(
-        factory = { context ->
-            EmojiPickerView(context).apply {
-                clipToOutline = true
-                setRecentEmojiProvider(
-                    RecentEmojiProviderAdapter(CustomRecentEmojiProvider(context))
-                )
-                setOnEmojiPickedListener { emoji ->
-                    showEmojiPickerView = false
-                    waypointInput = waypointInput.copy { icon = emoji.emoji.codePointAt(0) }
-                }
+    ) else {
+        Column(
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            BackHandler {
+                showEmojiPickerView = false
             }
-        },
-        modifier = Modifier
-            .fillMaxHeight(0.4f) // FIXME
-            .background(colorResource(R.color.colorAdvancedBackground))
-    )
+
+            AndroidView(
+                factory = { context ->
+                    EmojiPickerView(context).apply {
+                        clipToOutline = true
+                        setRecentEmojiProvider(
+                            RecentEmojiProviderAdapter(CustomRecentEmojiProvider(context))
+                        )
+                        setOnEmojiPickedListener { emoji ->
+                            showEmojiPickerView = false
+                            waypointInput = waypointInput.copy { icon = emoji.emoji.codePointAt(0) }
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.4f)
+                    .background(MaterialTheme.colors.background)
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true)
