@@ -36,7 +36,6 @@ fun SimpleAlertDialog(
             ),
         ) { Text(text = stringResource(id = R.string.close)) }
     },
-    modifier = Modifier.background(MaterialTheme.colors.background.copy(alpha = 1f)),
     title = {
         Text(
             text = stringResource(id = title),
@@ -46,6 +45,7 @@ fun SimpleAlertDialog(
     },
     text = text,
     shape = RoundedCornerShape(16.dp),
+    backgroundColor = MaterialTheme.colors.background,
 )
 
 @Composable

@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Card
@@ -29,6 +30,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -686,7 +688,9 @@ private fun NavCard(
 private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Unit) {
     var showDialog by remember { mutableStateOf(false) }
     if (showDialog) AlertDialog(
-        onDismissRequest = { },
+        onDismissRequest = {},
+        shape = RoundedCornerShape(16.dp),
+        backgroundColor = MaterialTheme.colors.background,
         title = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -708,11 +712,13 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
         },
         buttons = {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Button(
+                TextButton(
                     modifier = Modifier.weight(1f),
                     onClick = { showDialog = false },
                 ) { Text(stringResource(R.string.cancel)) }

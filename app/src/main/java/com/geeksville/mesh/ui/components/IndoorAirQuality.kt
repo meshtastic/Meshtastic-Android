@@ -15,12 +15,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.Warning
@@ -34,9 +34,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.geeksville.mesh.R
 
 enum class Iaq(val color: Color, val description: String) {
     Excellent(Color.Green, "Excellent"),
@@ -173,13 +175,14 @@ fun IndoorAirQuality(iaq: Int, displayMode: IaqDisplayMode = IaqDisplayMode.Pill
         if (isLegendOpen) {
             AlertDialog(
                 onDismissRequest = { isLegendOpen = false },
-                title = { Text("IAQ Scale") },
+                shape = RoundedCornerShape(16.dp),
+                backgroundColor = MaterialTheme.colors.background,
                 text = {
                     IAQScale()
                 },
                 confirmButton = {
-                    Button(onClick = { isLegendOpen = false }) {
-                        Text("Close")
+                    TextButton(onClick = { isLegendOpen = false }) {
+                        Text(text = stringResource(id = R.string.close))
                     }
                 }
             )
@@ -198,8 +201,15 @@ fun IAQScale(modifier: Modifier = Modifier) {
             .padding(16.dp),
         horizontalAlignment = Alignment.Start
     ) {
-        Text("Indoor Air Quality (IAQ)", style = MaterialTheme.typography.h6)
-        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Indoor Air Quality (IAQ)",
+            style = MaterialTheme.typography.h6.copy(
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+            ),
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Spacer(modifier = Modifier.height(16.dp))
         for (iaq in Iaq.entries) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
