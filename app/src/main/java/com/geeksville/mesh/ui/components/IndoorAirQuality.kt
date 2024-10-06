@@ -36,6 +36,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
@@ -223,5 +225,79 @@ fun IAQScale(modifier: Modifier = Modifier) {
             }
             Spacer(modifier = Modifier.height(4.dp))
         }
+    }
+}
+
+@Suppress("LongMethod")
+@Preview(showBackground = true)
+@Composable
+private fun IndoorAirQualityPreview() {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text("Pill", style = MaterialTheme.typography.h6)
+        Row {
+            IndoorAirQuality(iaq = 6)
+            IndoorAirQuality(iaq = 51)
+        }
+        Row {
+            IndoorAirQuality(iaq = 101)
+            IndoorAirQuality(iaq = 201)
+        }
+        Row {
+            IndoorAirQuality(iaq = 350)
+            IndoorAirQuality(iaq = 351)
+        }
+
+        Text("Dot", style = MaterialTheme.typography.h6)
+        Row {
+            IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Dot)
+            IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Dot)
+            IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Dot)
+            IndoorAirQuality(iaq = 201, displayMode = IaqDisplayMode.Dot)
+            IndoorAirQuality(iaq = 350, displayMode = IaqDisplayMode.Dot)
+            IndoorAirQuality(iaq = 351, displayMode = IaqDisplayMode.Dot)
+        }
+
+        Text("Text", style = MaterialTheme.typography.h6)
+        Row {
+            IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Text)
+            IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Text)
+            IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Text)
+        }
+        Row {
+            IndoorAirQuality(iaq = 201, displayMode = IaqDisplayMode.Text)
+            IndoorAirQuality(iaq = 350, displayMode = IaqDisplayMode.Text)
+            IndoorAirQuality(iaq = 500, displayMode = IaqDisplayMode.Text)
+        }
+
+        Text("Gauge", style = MaterialTheme.typography.h6)
+        Row {
+            IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Gauge)
+            IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Gauge)
+            IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Gauge)
+            IndoorAirQuality(iaq = 151, displayMode = IaqDisplayMode.Gauge)
+        }
+        Row {
+            IndoorAirQuality(iaq = 201, displayMode = IaqDisplayMode.Gauge)
+            IndoorAirQuality(iaq = 251, displayMode = IaqDisplayMode.Gauge)
+            IndoorAirQuality(iaq = 301, displayMode = IaqDisplayMode.Gauge)
+            IndoorAirQuality(iaq = 351, displayMode = IaqDisplayMode.Gauge)
+        }
+        Row {
+            IndoorAirQuality(iaq = 401, displayMode = IaqDisplayMode.Gauge)
+            IndoorAirQuality(iaq = 500, displayMode = IaqDisplayMode.Gauge)
+        }
+
+        Text("Gradient", style = MaterialTheme.typography.h6)
+        IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Gradient)
+        IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Gradient)
+        IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Gradient)
+        IndoorAirQuality(iaq = 201, displayMode = IaqDisplayMode.Gradient)
+        IndoorAirQuality(iaq = 351, displayMode = IaqDisplayMode.Gradient)
+        IndoorAirQuality(iaq = 401, displayMode = IaqDisplayMode.Gradient)
+        IndoorAirQuality(iaq = 500, displayMode = IaqDisplayMode.Gradient)
     }
 }
