@@ -14,6 +14,7 @@ import kotlin.math.cos
 import kotlin.math.log2
 import kotlin.math.pow
 import kotlin.math.sin
+import kotlin.math.PI
 
 /*******************************************************************************
  * Revive some of my old Gaggle source code...
@@ -22,8 +23,6 @@ import kotlin.math.sin
  * All other distribution of Gaggle must conform to the terms of the GNU Public License, version 2.  The full
  * text of this license is included in the Gaggle source, see assets/manual/gpl-2.0.txt.
  ******************************************************************************/
-
-private const val PI = 3.14159
 
 object GPSFormat {
     fun DEC(p: Position): String {
