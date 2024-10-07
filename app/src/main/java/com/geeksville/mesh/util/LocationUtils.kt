@@ -23,6 +23,8 @@ import kotlin.math.sin
  * text of this license is included in the Gaggle source, see assets/manual/gpl-2.0.txt.
  ******************************************************************************/
 
+private const val PI = 3.14159
+
 object GPSFormat {
     fun DEC(p: Position): String {
         return String.format("%.5f %.5f", p.latitude, p.longitude).replace(",", ".")
@@ -181,7 +183,7 @@ fun latLongToMeter(
     lat_b: Double,
     lng_b: Double
 ): Double {
-    val pk = (180 / 3.14159)
+    val pk = (180 / PI)
     val a1 = lat_a / pk
     val a2 = lng_a / pk
     val b1 = lat_b / pk
