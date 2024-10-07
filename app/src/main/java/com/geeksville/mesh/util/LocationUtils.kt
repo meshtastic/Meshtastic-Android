@@ -181,7 +181,7 @@ fun latLongToMeter(
     lat_b: Double,
     lng_b: Double
 ): Double {
-    val pk = (180 / 3.14169)
+    val pk = (180 / 3.14159)
     val a1 = lat_a / pk
     val a2 = lng_a / pk
     val b1 = lat_b / pk
