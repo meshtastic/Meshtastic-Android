@@ -476,11 +476,13 @@ class MeshService : Service(), Logging {
     private val myNodeID get() = toNodeID(myNodeNum)
 
     /// Admin channel index
-    private val adminChannelIndex: Int
-        get() = if (nodeDBbyNodeNum[myNodeNum]?.hasPKC == true) { // TODO use meta.hasPKC
-            DataPacket.PKC_CHANNEL_INDEX
-        } else {
-            channelSet.settingsList
+    private val MeshPacket.Builder.adminChannelIndex: Int
+        get() = when {
+            myNodeNum == to -> 0
+            nodeDBbyNodeNum[myNodeNum]?.hasPKC == true && nodeDBbyNodeNum[to]?.hasPKC == true ->
+                DataPacket.PKC_CHANNEL_INDEX
+
+            else -> channelSet.settingsList
                 .indexOfFirst { it.name.equals("admin", ignoreCase = true) }
                 .coerceAtLeast(0)
         }
