@@ -26,15 +26,16 @@ fun signalInfo(
         )
     } else {
         buildList {
-            if (node.channel > 0) add("ch:${node.channel}")
-            if (node.hopsAway == null) {
-                if (node.snr < 100F && node.rssi < 0) {
-                    add("RSSI: %d SNR: %.1f".format(node.rssi, node.snr))
-                }
-            } else {
-                add("%s: %d".format(stringResource(R.string.hops_away), node.hopsAway))
+            val rssiSnrString = "RSSI: %d SNR: %.1f".format(node.rssi, node.snr)
+            val hopsString = "%s: %s".format(stringResource(R.string.hops_away), node.hopsAway?.toString() ?: stringResource(R.string.unknown))
+            if (node.channel > 0) {
+                add("ch:${node.channel}")
             }
-        }.joinToString(" ")
+            if (node.hopsAway == null || node.hopsAway == 0) {
+                add(rssiSnrString)
+            }
+            add(hopsString)
+        }.joinToString(" | ")
     }
     return if (text.isNotEmpty()) {
         Text(

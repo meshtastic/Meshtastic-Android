@@ -163,6 +163,7 @@ class MeshService : Service(), Logging {
                 numOnlineNodes,
                 numNodes
             )
+
             ConnectionState.DISCONNECTED -> getString(R.string.disconnected)
             ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
         }
@@ -424,6 +425,7 @@ class MeshService : Service(), Logging {
                 val n = hexStr.toLong(16).toInt()
                 nodeDBbyNodeNum[n] ?: throw IdNotFoundException(id)
             }
+
             else -> throw InvalidNodeIdException(id)
         }
     }
@@ -778,6 +780,7 @@ class MeshService : Service(), Logging {
                         }
                     }
                 }
+
                 else ->
                     warn("No special processing needed for ${a.payloadVariantCase}")
 
@@ -898,7 +901,7 @@ class MeshService : Service(), Logging {
         return nodesList.map { nodeId ->
             "■ ${getUserName(nodeId)}"
         }.flatMapIndexed { i, nodeStr ->
-            if (i == 0) listOf(nodeStr) else listOf(snrStr[i-1], nodeStr)
+            if (i == 0) listOf(nodeStr) else listOf(snrStr[i - 1], nodeStr)
         }.joinToString("\n")
     }
 
@@ -1101,8 +1104,11 @@ class MeshService : Service(), Logging {
                 it.rssi = packet.rxRssi
 
                 // Generate our own hopsAway, comparing hopStart to hopLimit.
-                if (packet.hopStart != 0 && packet.hopLimit <= packet.hopStart) {
-                    it.hopsAway = packet.hopStart - packet.hopLimit
+                //
+                it.hopsAway = if (packet.hopStart == 0 || packet.hopLimit < packet.hopStart) {
+                    null
+                } else {
+                    packet.hopStart - packet.hopLimit
                 }
             }
             handleReceivedData(packet)
@@ -1306,10 +1312,14 @@ class MeshService : Service(), Logging {
                 MeshProtos.FromRadio.MODULECONFIG_FIELD_NUMBER -> handleModuleConfig(proto.moduleConfig)
                 MeshProtos.FromRadio.QUEUESTATUS_FIELD_NUMBER -> handleQueueStatus(proto.queueStatus)
                 MeshProtos.FromRadio.METADATA_FIELD_NUMBER -> handleMetadata(proto.metadata)
-                MeshProtos.FromRadio.MQTTCLIENTPROXYMESSAGE_FIELD_NUMBER -> handleMqttProxyMessage(proto.mqttClientProxyMessage)
+                MeshProtos.FromRadio.MQTTCLIENTPROXYMESSAGE_FIELD_NUMBER -> handleMqttProxyMessage(
+                    proto.mqttClientProxyMessage
+                )
+
                 MeshProtos.FromRadio.CLIENTNOTIFICATION_FIELD_NUMBER -> {
                     handleClientNotification(proto.clientNotification)
                 }
+
                 else -> errormsg("Unexpected FromRadio variant")
             }
         } catch (ex: InvalidProtocolBufferException) {
@@ -1407,7 +1417,13 @@ class MeshService : Service(), Logging {
 
             it.channel = info.channel
             it.viaMqtt = info.viaMqtt
-            it.hopsAway = info.hopsAway
+
+            // hopsAway should be nullable/optional from the proto, but explicitly checking it's existence first
+            if (info.hasHopsAway()) {
+                it.hopsAway = info.hopsAway
+            } else {
+                it.hopsAway = null
+            }
             it.isFavorite = info.isFavorite
         }
     }
@@ -1595,7 +1611,10 @@ class MeshService : Service(), Logging {
                 newNodes.clear() // Just to save RAM ;-)
 
                 serviceScope.handledLaunch {
-                    radioConfigRepository.installNodeDB(myNodeInfo!!, nodeDBbyNodeNum.values.toList())
+                    radioConfigRepository.installNodeDB(
+                        myNodeInfo!!,
+                        nodeDBbyNodeNum.values.toList()
+                    )
                 }
 
                 haveNodeDB = true // we now have nodes from real hardware
@@ -1930,9 +1949,11 @@ class MeshService : Service(), Logging {
                 removeByNodenum = nodeNum
             })
         }
-        override fun requestUserInfo( destNum: Int ) = toRemoteExceptions {
+
+        override fun requestUserInfo(destNum: Int) = toRemoteExceptions {
             if (destNum != myNodeNum) {
-                sendToRadio(newMeshPacketTo(destNum
+                sendToRadio(newMeshPacketTo(
+                    destNum
                 ).buildMeshPacket(
                     channel = nodeDBbyNodeNum[destNum]?.channel ?: 0
                 ) {
@@ -1942,6 +1963,7 @@ class MeshService : Service(), Logging {
                 })
             }
         }
+
         override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
             sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
                 channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
