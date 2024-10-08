@@ -48,7 +48,7 @@ data class NodeEntity(
     var viaMqtt: Boolean = false,
 
     @ColumnInfo(name = "hops_away")
-    var hopsAway: Int = 0,
+    var hopsAway: Int? = null,
 
     @ColumnInfo(name = "is_favorite")
     var isFavorite: Boolean = false,
