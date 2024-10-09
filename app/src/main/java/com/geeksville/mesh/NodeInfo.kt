@@ -164,7 +164,7 @@ data class NodeInfo(
     var deviceMetrics: DeviceMetrics? = null,
     var channel: Int = 0,
     var environmentMetrics: EnvironmentMetrics? = null,
-    var hopsAway: Int? = null
+    var hopsAway: Int = 0
 ) : Parcelable {
 
     val colors: Pair<Int, Int>
