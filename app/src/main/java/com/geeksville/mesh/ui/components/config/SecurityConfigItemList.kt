@@ -15,10 +15,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ConfigProtos.Config.SecurityConfig
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.components.EditBase64Preference
+import com.geeksville.mesh.ui.components.EditListPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.SwitchPreference
-import com.google.protobuf.ByteString
 
 @Suppress("LongMethod")
 @Composable
@@ -64,17 +64,16 @@ fun SecurityConfigItemList(
         }
 
         item {
-            EditBase64Preference(
+            EditListPreference(
                 title = "Admin Key",
-                value = securityInput.adminKeyList.firstOrNull() ?: ByteString.EMPTY,
+                list = securityInput.adminKeyList,
+                maxCount = 3,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChange = {
-                    if (it.size() == 32) {
-                        securityInput = securityInput.copy {
-                            adminKey.clear()
-                            adminKey.add(it)
-                        }
+                onValuesChanged = {
+                    securityInput = securityInput.copy {
+                        adminKey.clear()
+                        adminKey.addAll(it)
                     }
                 },
             )
