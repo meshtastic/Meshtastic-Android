@@ -13,8 +13,8 @@ import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 
-const val MIN_SNR = 100F
-const val MIN_RSSI = 0
+const val MAX_VALID_SNR = 100F
+const val MAX_VALID_RSSI = 0
 
 @Composable
 fun signalInfo(
@@ -37,7 +37,7 @@ fun signalInfo(
                 add("ch:${node.channel}")
             }
             if (node.hopsAway == null || node.hopsAway == 0) {
-                if (node.snr < MIN_SNR && node.rssi < MIN_RSSI) {
+                if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
                     add("RSSI: %d SNR: %.1f".format(node.rssi, node.snr))
                 }
             }
