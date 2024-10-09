@@ -42,6 +42,7 @@ fun EditBase64Preference(
     onValueChange: (ByteString) -> Unit,
     modifier: Modifier = Modifier,
     onGenerateKey: (() -> Unit)? = null,
+    trailingIcon: (@Composable () -> Unit)? = null,
 ) {
     fun ByteString.encodeToString() = Base64.encodeToString(this.toByteArray(), Base64.NO_WRAP)
     fun String.toByteString() = Base64.decode(this, Base64.NO_WRAP).toByteString()
@@ -80,23 +81,30 @@ fun EditBase64Preference(
         ),
         keyboardActions = keyboardActions,
         trailingIcon = {
-            IconButton(
-                onClick = {
-                    if (isError) {
-                        valueState = value.encodeToString()
-                        onValueChange(value)
-                    } else if (onGenerateKey != null && !isFocused) {
-                        onGenerateKey()
-                    }
-                },
-                enabled = enabled,
-            ) {
-                Icon(
-                    imageVector = icon ?: return@IconButton,
-                    contentDescription = description,
-                    tint = if (isError) MaterialTheme.colors.error
-                    else LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
-                )
+            if (trailingIcon != null) {
+                trailingIcon()
+            } else if (icon != null) {
+                IconButton(
+                    onClick = {
+                        if (isError) {
+                            valueState = value.encodeToString()
+                            onValueChange(value)
+                        } else if (onGenerateKey != null && !isFocused) {
+                            onGenerateKey()
+                        }
+                    },
+                    enabled = enabled,
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = description,
+                        tint = if (isError) {
+                            MaterialTheme.colors.error
+                        } else {
+                            LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+                        }
+                    )
+                }
             }
         },
     )

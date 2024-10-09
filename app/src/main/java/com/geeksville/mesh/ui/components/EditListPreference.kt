@@ -31,6 +31,7 @@ import com.geeksville.mesh.ModuleConfigProtos.RemoteHardwarePinType
 import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.remoteHardwarePin
+import com.google.protobuf.ByteString
 
 @Composable
 inline fun <reified T> EditListPreference(
@@ -50,9 +51,29 @@ inline fun <reified T> EditListPreference(
             modifier = modifier.padding(16.dp),
             text = title,
             style = MaterialTheme.typography.body2,
-            color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
+            color = if (enabled) {
+                Color.Unspecified
+            } else {
+                MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+            },
         )
         listState.forEachIndexed { index, value ->
+            val trailingIcon = @Composable {
+                IconButton(
+                    onClick = {
+                        focusManager.clearFocus()
+                        listState.removeAt(index)
+                        onValuesChanged(listState)
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.TwoTone.Close,
+                        contentDescription = stringResource(R.string.delete),
+                        modifier = Modifier.wrapContentSize(),
+                    )
+                }
+            }
+
             // handle lora.ignoreIncoming: List<Int>
             if (value is Int) EditTextPreference(
                 title = "${index + 1}/$maxCount",
@@ -64,21 +85,21 @@ inline fun <reified T> EditListPreference(
                     onValuesChanged(listState)
                 },
                 modifier = modifier.fillMaxWidth(),
-                trailingIcon = {
-                    IconButton(
-                        onClick = {
-                            focusManager.clearFocus()
-                            listState.removeAt(index)
-                            onValuesChanged(listState)
-                        }
-                    ) {
-                        Icon(
-                            Icons.TwoTone.Close,
-                            stringResource(R.string.delete),
-                            modifier = Modifier.wrapContentSize(),
-                        )
-                    }
-                }
+                trailingIcon = trailingIcon,
+            )
+
+            // handle security.adminKey: List<ByteString>
+            if (value is ByteString) EditBase64Preference(
+                title = "${index + 1}/$maxCount",
+                value = value,
+                enabled = enabled,
+                keyboardActions = keyboardActions,
+                onValueChange = {
+                    listState[index] = it as T
+                    onValuesChanged(listState)
+                },
+                modifier = modifier.fillMaxWidth(),
+                trailingIcon = trailingIcon,
             )
 
             // handle remoteHardware.availablePins: List<RemoteHardwarePin>
@@ -109,21 +130,7 @@ inline fun <reified T> EditListPreference(
                         listState[index] = value.copy { name = it } as T
                         onValuesChanged(listState)
                     },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = {
-                                focusManager.clearFocus()
-                                listState.removeAt(index)
-                                onValuesChanged(listState)
-                            }
-                        ) {
-                            Icon(
-                                Icons.TwoTone.Close,
-                                stringResource(R.string.delete),
-                                modifier = Modifier.wrapContentSize(),
-                            )
-                        }
-                    }
+                    trailingIcon = trailingIcon,
                 )
                 DropDownPreference(
                     title = "Type",
@@ -145,6 +152,7 @@ inline fun <reified T> EditListPreference(
                 // Add element based on the type T
                 val newElement = when (T::class) {
                     Int::class -> 0 as T
+                    ByteString::class -> ByteString.EMPTY as T
                     RemoteHardwarePin::class -> remoteHardwarePin {} as T
                     else -> throw IllegalArgumentException("Unsupported type: ${T::class}")
                 }
