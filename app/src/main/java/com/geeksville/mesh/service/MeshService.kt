@@ -898,7 +898,7 @@ class MeshService : Service(), Logging {
         return nodesList.map { nodeId ->
             "■ ${getUserName(nodeId)}"
         }.flatMapIndexed { i, nodeStr ->
-            if (i == 0) listOf(nodeStr) else listOf(snrStr[i - 1], nodeStr)
+            if (i == 0) listOf(nodeStr) else listOf(snrStr[i-1], nodeStr)
         }.joinToString("\n")
     }
 
@@ -1308,9 +1308,7 @@ class MeshService : Service(), Logging {
                 MeshProtos.FromRadio.MODULECONFIG_FIELD_NUMBER -> handleModuleConfig(proto.moduleConfig)
                 MeshProtos.FromRadio.QUEUESTATUS_FIELD_NUMBER -> handleQueueStatus(proto.queueStatus)
                 MeshProtos.FromRadio.METADATA_FIELD_NUMBER -> handleMetadata(proto.metadata)
-                MeshProtos.FromRadio.MQTTCLIENTPROXYMESSAGE_FIELD_NUMBER -> handleMqttProxyMessage(
-                    proto.mqttClientProxyMessage
-                )
+                MeshProtos.FromRadio.MQTTCLIENTPROXYMESSAGE_FIELD_NUMBER -> handleMqttProxyMessage(proto.mqttClientProxyMessage)
                 MeshProtos.FromRadio.CLIENTNOTIFICATION_FIELD_NUMBER -> {
                     handleClientNotification(proto.clientNotification)
                 }
@@ -1605,10 +1603,7 @@ class MeshService : Service(), Logging {
                 newNodes.clear() // Just to save RAM ;-)
 
                 serviceScope.handledLaunch {
-                    radioConfigRepository.installNodeDB(
-                        myNodeInfo!!,
-                        nodeDBbyNodeNum.values.toList()
-                    )
+                    radioConfigRepository.installNodeDB(myNodeInfo!!, nodeDBbyNodeNum.values.toList())
                 }
 
                 haveNodeDB = true // we now have nodes from real hardware
@@ -1943,11 +1938,9 @@ class MeshService : Service(), Logging {
                 removeByNodenum = nodeNum
             })
         }
-        override fun requestUserInfo(destNum: Int) = toRemoteExceptions {
+        override fun requestUserInfo( destNum: Int ) = toRemoteExceptions {
             if (destNum != myNodeNum) {
-                sendToRadio(
-                    newMeshPacketTo(
-                        destNum
+                sendToRadio(newMeshPacketTo(destNum
                 ).buildMeshPacket(
                     channel = nodeDBbyNodeNum[destNum]?.channel ?: 0
                 ) {
