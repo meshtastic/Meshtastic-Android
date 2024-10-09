@@ -14,6 +14,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.RadioButton
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doAfterTextChanged
@@ -25,6 +26,7 @@ import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
+import com.geeksville.mesh.model.RegionInfo
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.service.MeshService
@@ -80,13 +82,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // update the region selection from the device
         val region = model.region
         val spinner = binding.regionSpinner
-        val unsetIndex = regions.indexOf(ConfigProtos.Config.LoRaConfig.RegionCode.UNSET.name)
         spinner.onItemSelectedListener = null
 
         debug("current region is $region")
-        var regionIndex = regions.indexOf(region.name)
+        var regionIndex = regions.indexOfFirst { it.regionCode == region }
         if (regionIndex == -1) // Not found, probably because the device has a region our app doesn't yet understand.  Punt and say Unset
-            regionIndex = unsetIndex
+            regionIndex = ConfigProtos.Config.LoRaConfig.RegionCode.UNSET_VALUE
 
         // We don't want to be notified of our own changes, so turn off listener while making them
         spinner.setSelection(regionIndex, false)
@@ -114,8 +115,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             position: Int,
             id: Long
         ) {
-            val item = parent.getItemAtPosition(position) as String?
-            val asProto = item!!.let { ConfigProtos.Config.LoRaConfig.RegionCode.valueOf(it) }
+            val item = RegionInfo.entries[position]
+            val asProto = item.regionCode
             exceptionToSnackbar(requireView()) {
                 debug("regionSpinner onItemSelected $asProto")
                 if (asProto != model.region) model.region = asProto
@@ -128,12 +129,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
     }
 
-    /// the sorted list of region names like arrayOf("US", "CN", "EU488")
-    private val regions = ConfigProtos.Config.LoRaConfig.RegionCode.entries.filter {
-        it != ConfigProtos.Config.LoRaConfig.RegionCode.UNRECOGNIZED
-    }.map {
-        it.name
-    }.sorted()
+    private val regions = RegionInfo.entries
 
     private fun initCommonUI() {
 
@@ -151,8 +147,27 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         // init our region spinner
         val spinner = binding.regionSpinner
-        val regionAdapter =
-            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, regions)
+        val regionAdapter = object : ArrayAdapter<RegionInfo>(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            regions
+        ) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent)
+                (view as? TextView)?.text = regions[position].name
+                return view
+            }
+
+            override fun getDropDownView(
+                position: Int,
+                convertView: View?,
+                parent: ViewGroup
+            ): View {
+                val view = super.getDropDownView(position, convertView, parent)
+                (view as? TextView)?.text = regions[position].description
+                return view
+            }
+        }
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = regionAdapter
 

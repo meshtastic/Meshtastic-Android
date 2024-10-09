@@ -17,6 +17,7 @@ import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.RegionInfo
 import com.geeksville.mesh.model.numChannels
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditListPreference
@@ -101,9 +102,7 @@ fun LoRaConfigItemList(
         item {
             DropDownPreference(title = "Region (frequency plan)",
                 enabled = enabled,
-                items = LoRaConfig.RegionCode.entries
-                    .filter { it != LoRaConfig.RegionCode.UNRECOGNIZED }
-                    .map { it to it.name },
+                items = RegionInfo.entries.map { it.regionCode to it.description },
                 selectedItem = loraInput.region,
                 onItemSelected = { loraInput = loraInput.copy { region = it } })
         }
