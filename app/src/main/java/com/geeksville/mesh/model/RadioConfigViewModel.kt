@@ -372,7 +372,7 @@ class RadioConfigViewModel @Inject constructor(
                 .setShortName(if (hasShortName()) shortName else it.shortName)
                 .setIsLicensed(it.isLicensed)
                 .build()
-            if (it != user) setOwner(user)
+            setOwner(user)
         }
         if (hasChannelUrl()) try {
             setChannels(channelUrl)
@@ -388,6 +388,9 @@ class RadioConfigViewModel @Inject constructor(
                     .build()
                 setConfig(newConfig)
             }
+        }
+        if (hasFixedPosition()) {
+            setFixedPosition(myNodeNum!!, Position(fixedPosition))
         }
         if (hasModuleConfig()) {
             val descriptor = ModuleConfigProtos.ModuleConfig.getDescriptor()

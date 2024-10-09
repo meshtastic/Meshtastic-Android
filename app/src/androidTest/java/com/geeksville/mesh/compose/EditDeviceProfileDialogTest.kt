@@ -9,6 +9,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
 import com.geeksville.mesh.deviceProfile
+import com.geeksville.mesh.position
 import com.geeksville.mesh.ui.components.config.EditDeviceProfileDialog
 import org.junit.Assert
 import org.junit.Rule
@@ -29,17 +30,22 @@ class EditDeviceProfileDialogTest {
         longName = "Long name"
         shortName = "Short name"
         channelUrl = "https://meshtastic.org/e/#CgMSAQESBggBQANIAQ"
+        fixedPosition = position {
+            latitudeI = 327766650
+            longitudeI = -967969890
+            altitude = 138
+        }
     }
 
     private fun testEditDeviceProfileDialog(
-        onDismissRequest: () -> Unit = {},
-        onAddClick: (DeviceProfile) -> Unit = {},
+        onDismiss: () -> Unit = {},
+        onConfirm: (DeviceProfile) -> Unit = {},
     ) = composeTestRule.setContent {
         EditDeviceProfileDialog(
             title = title,
             deviceProfile = deviceProfile,
-            onAddClick = onAddClick,
-            onDismissRequest = onDismissRequest,
+            onConfirm = onConfirm,
+            onDismiss = onDismiss,
         )
     }
 
@@ -68,7 +74,7 @@ class EditDeviceProfileDialogTest {
     fun testEditDeviceProfileDialog_clickCancelButton() {
         var onDismissClicked = false
         composeTestRule.apply {
-            testEditDeviceProfileDialog(onDismissRequest = { onDismissClicked = true })
+            testEditDeviceProfileDialog(onDismiss = { onDismissClicked = true })
 
             // Click the "Cancel" button
             onNodeWithText(getString(R.string.cancel)).performClick()
@@ -82,7 +88,7 @@ class EditDeviceProfileDialogTest {
     fun testEditDeviceProfileDialog_addChannels() {
         var actualDeviceProfile: DeviceProfile? = null
         composeTestRule.apply {
-            testEditDeviceProfileDialog(onAddClick = { actualDeviceProfile = it })
+            testEditDeviceProfileDialog(onConfirm = { actualDeviceProfile = it })
 
             onNodeWithText(getString(R.string.save)).performClick()
         }

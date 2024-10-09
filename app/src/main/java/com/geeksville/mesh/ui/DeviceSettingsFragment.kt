@@ -288,7 +288,7 @@ fun RadioConfigNavHost(
     if (showEditDeviceProfileDialog) EditDeviceProfileDialog(
         title = if (deviceProfile != null) "Import configuration" else "Export configuration",
         deviceProfile = deviceProfile ?: viewModel.currentDeviceProfile,
-        onAddClick = {
+        onConfirm = {
             showEditDeviceProfileDialog = false
             if (deviceProfile != null) {
                 viewModel.installProfile(it)
@@ -302,7 +302,7 @@ fun RadioConfigNavHost(
                 exportConfigLauncher.launch(intent)
             }
         },
-        onDismissRequest = {
+        onDismiss = {
             showEditDeviceProfileDialog = false
             viewModel.setDeviceProfile(null)
         }
