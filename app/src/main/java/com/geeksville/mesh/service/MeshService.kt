@@ -1101,8 +1101,10 @@ class MeshService : Service(), Logging {
                 it.rssi = packet.rxRssi
 
                 // Generate our own hopsAway, comparing hopStart to hopLimit.
-                if (packet.hopStart != 0 && packet.hopLimit <= packet.hopStart) {
-                    it.hopsAway = packet.hopStart - packet.hopLimit
+                it.hopsAway = if (packet.hopStart == 0 || packet.hopLimit < packet.hopStart) {
+                    -1
+                } else {
+                    packet.hopStart - packet.hopLimit
                 }
             }
             handleReceivedData(packet)
@@ -1407,7 +1409,13 @@ class MeshService : Service(), Logging {
 
             it.channel = info.channel
             it.viaMqtt = info.viaMqtt
-            it.hopsAway = info.hopsAway
+
+            // hopsAway should be nullable/optional from the proto, but explicitly checking it's existence first
+            it.hopsAway = if (info.hasHopsAway()) {
+                info.hopsAway
+            } else {
+                -1
+            }
             it.isFavorite = info.isFavorite
         }
     }

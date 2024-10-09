@@ -13,6 +13,9 @@ import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 
+const val MAX_VALID_SNR = 100F
+const val MAX_VALID_RSSI = 0
+
 @Composable
 fun signalInfo(
     modifier: Modifier = Modifier,
@@ -26,15 +29,24 @@ fun signalInfo(
         )
     } else {
         buildList {
-            if (node.channel > 0) add("ch:${node.channel}")
-            if (node.hopsAway == 0) {
-                if (node.snr < 100F && node.rssi < 0) {
+            val hopsString = "%s: %s".format(
+                stringResource(R.string.hops_away),
+                if (node.hopsAway == -1) {
+                    stringResource(R.string.unknown)
+                } else {
+                    node.hopsAway.toString()
+                }
+            )
+            if (node.channel > 0) {
+                add("ch:${node.channel}")
+            }
+            if (node.hopsAway <= 0) {
+                if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
                     add("RSSI: %d SNR: %.1f".format(node.rssi, node.snr))
                 }
-            } else {
-                add("%s: %d".format(stringResource(R.string.hops_away), node.hopsAway))
             }
-        }.joinToString(" ")
+            add(hopsString)
+        }.joinToString(" | ")
     }
     return if (text.isNotEmpty()) {
         Text(
