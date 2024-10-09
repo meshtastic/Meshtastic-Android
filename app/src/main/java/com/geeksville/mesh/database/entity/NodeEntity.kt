@@ -213,5 +213,5 @@ fun NodeEntity.toNodeInfo() = NodeInfo(
         current = environmentMetrics.current,
         iaq = environmentMetrics.iaq,
     ),
-    hopsAway = hopsAway,
+    hopsAway = hopsAway ?:0,
 )
