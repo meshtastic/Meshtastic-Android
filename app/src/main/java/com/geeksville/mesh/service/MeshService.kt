@@ -1102,7 +1102,7 @@ class MeshService : Service(), Logging {
 
                 // Generate our own hopsAway, comparing hopStart to hopLimit.
                 it.hopsAway = if (packet.hopStart == 0 || packet.hopLimit < packet.hopStart) {
-                    null
+                    -1
                 } else {
                     packet.hopStart - packet.hopLimit
                 }
@@ -1414,7 +1414,7 @@ class MeshService : Service(), Logging {
             it.hopsAway = if (info.hasHopsAway()) {
                 info.hopsAway
             } else {
-                null
+                -1
             }
             it.isFavorite = info.isFavorite
         }

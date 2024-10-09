@@ -31,12 +31,16 @@ fun signalInfo(
         buildList {
             val hopsString = "%s: %s".format(
                 stringResource(R.string.hops_away),
-                node.hopsAway?.toString() ?: stringResource(R.string.unknown)
+                if (node.hopsAway == -1) {
+                    stringResource(R.string.unknown)
+                } else {
+                    node.hopsAway.toString()
+                }
             )
             if (node.channel > 0) {
                 add("ch:${node.channel}")
             }
-            if (node.hopsAway == null || node.hopsAway == 0) {
+            if (node.hopsAway <= 0) {
                 if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
                     add("RSSI: %d SNR: %.1f".format(node.rssi, node.snr))
                 }

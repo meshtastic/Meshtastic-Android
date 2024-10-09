@@ -48,7 +48,7 @@ data class NodeEntity(
     var viaMqtt: Boolean = false,
 
     @ColumnInfo(name = "hops_away")
-    var hopsAway: Int? = null,
+    var hopsAway: Int = -1,
 
     @ColumnInfo(name = "is_favorite")
     var isFavorite: Boolean = false,
@@ -213,5 +213,5 @@ fun NodeEntity.toNodeInfo() = NodeInfo(
         current = environmentMetrics.current,
         iaq = environmentMetrics.iaq,
     ),
-    hopsAway = hopsAway ?:0,
+    hopsAway = hopsAway,
 )

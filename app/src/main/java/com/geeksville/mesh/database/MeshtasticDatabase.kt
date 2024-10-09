@@ -39,9 +39,8 @@ import com.geeksville.mesh.database.entity.QuickChatAction
         AutoMigration (from = 10, to = 11),
         AutoMigration (from = 11, to = 12),
         AutoMigration(from = 12, to = 13, spec = AutoMigration12to13::class),
-        AutoMigration(from = 13, to = 14)
     ],
-    version = 14,
+    version = 13,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
