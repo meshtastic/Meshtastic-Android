@@ -33,7 +33,7 @@ import java.util.Iterator;
 
 public class RadiusMarkerClusterer extends MarkerClusterer {
 
-    protected int mMaxClusteringZoomLevel = 17;
+    protected int mMaxClusteringZoomLevel = 7;
     protected int mRadiusInPixels = 100;
     protected double mRadiusInMeters;
     protected Paint mTextPaint;
@@ -175,7 +175,7 @@ public class RadiusMarkerClusterer extends MarkerClusterer {
     public void zoomOnCluster(MapView mapView, StaticCluster cluster){
         BoundingBox bb = cluster.getBoundingBox();
         if (bb.getLatNorth()!=bb.getLatSouth() || bb.getLonEast()!=bb.getLonWest()) {
-            bb = bb.increaseByScale(1.15f);
+            bb = bb.increaseByScale(2.3f);
             mapView.zoomToBoundingBox(bb, true);
         } else //all points exactly at the same place:
             mapView.setExpectedCenter(bb.getCenterWithDateLine());
