@@ -16,8 +16,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import com.geeksville.mesh.R
 import com.google.protobuf.ProtocolMessageEnum
 
 @Composable
@@ -48,7 +50,8 @@ fun <T> DropDownPreference(
 
     RegularPreference(
         title = title,
-        subtitle = items.first { it.first == selectedItem }.second,
+        subtitle = items.find { it.first == selectedItem }?.second
+            ?: stringResource(id = R.string.unrecognized),
         onClick = {
             dropDownExpanded = true
         },
