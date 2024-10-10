@@ -168,9 +168,9 @@
     <string name="intro_encryption">"Krüpteerimise seadistamine"</string>
     <string name="intro_encryption_text">Vaikimisi on vaikimisi krüpteerimisvõti määratud. Enda kanali ja täiustatud krüpteerimise lubamiseks mine kanali vahekaardile ja muuda kanali nime. See määrab AES256 krüpteerimiseks juhusliku võtme. \n\nSelleks et teised saaksid sinu seadmetega suhelda, peavad nad skanneerima QR-koodi või kasutama jagatud linki, mis sisaldab kanali seadeid.</string>
     <string name="message">Sõnum</string>
-    <string name="quick_chat">Kiirsuhtlus valikud</string>
+    <string name="quick_chat">Kiirvestlus valikud</string>
     <string name="quick_chat_new">Uus kiirvestlus</string>
-    <string name="quick_chat_edit">Kiirsõnumi muutmine</string>
+    <string name="quick_chat_edit">Kiirvestluse muutmine</string>
     <string name="quick_chat_append">Lisa sõnumisse</string>
     <string name="quick_chat_instant">Saada kohe</string>
     <string name="factory_reset">Tehaseseaded</string>
