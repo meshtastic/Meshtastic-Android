@@ -553,7 +553,9 @@ fun MapView(
 
     val boxOverlayListener = object : MapListener {
         override fun onScroll(event: ScrollEvent): Boolean {
-            map.generateBoxOverlay()
+            if (downloadRegionBoundingBox != null) {
+                event.source.generateBoxOverlay()
+            }
             return true
         }
 
@@ -627,7 +629,6 @@ fun MapView(
                     0 -> showCurrentCacheInfo = true
                     1 -> {
                         map.generateBoxOverlay()
-                        map.addMapListener(boxOverlayListener)
                         dialog.dismiss()
                     }
 
@@ -670,6 +671,7 @@ fun MapView(
                         maxZoomLevel = MaxZoomLevel
                         // Disables default +/- button for zooming
                         zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
+                        addMapListener(boxOverlayListener)
                         addMapEventListener {
                             model.updateMapCenterAndZoom(projection.currentCenter, zoomLevelDouble)
                         }
@@ -683,7 +685,6 @@ fun MapView(
                 cacheEstimate = cacheEstimate,
                 onExecuteJob = { startDownload() },
                 onCancelDownload = {
-                    map.removeMapListener(boxOverlayListener)
                     downloadRegionBoundingBox = null
                     map.overlays.removeAll { it is Polygon }
                     map.invalidate()
