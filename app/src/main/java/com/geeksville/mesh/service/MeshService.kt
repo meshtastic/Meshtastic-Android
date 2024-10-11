@@ -1101,7 +1101,7 @@ class MeshService : Service(), Logging {
                 it.rssi = packet.rxRssi
 
                 // Generate our own hopsAway, comparing hopStart to hopLimit.
-                it.hopsAway = if (packet.hopStart == 0 || packet.hopLimit < packet.hopStart) {
+                it.hopsAway = if (packet.hopStart == 0 || packet.hopLimit > packet.hopStart) {
                     -1
                 } else {
                     packet.hopStart - packet.hopLimit
