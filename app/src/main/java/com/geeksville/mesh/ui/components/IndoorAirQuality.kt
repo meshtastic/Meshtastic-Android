@@ -42,15 +42,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
 
-enum class Iaq(val color: Color, val description: String) {
-    Excellent(Color.Green, "Excellent"),
-    Good(Color.Green, "Good"),
-    LightlyPolluted(Color.Yellow, "Lightly Polluted"),
-    ModeratelyPolluted(Color.Orange, "Moderately Polluted"),
-    HeavilyPolluted(Color.Red, "Heavily Polluted"),
-    SeverelyPolluted(Color.Purple, "Severely Polluted"),
-    ExtremelyPolluted(Color.Purple, "Extremely Polluted"),
-    DangerouslyPolluted(Color.Brown, "Dangerously Polluted")
+enum class Iaq(val color: Color, val description: String, val range: IntRange) {
+    Excellent(Color.Green, "Excellent (0-50)", 0..50),
+    Good(Color.Green, "Good (51-100)", 51..100),
+    LightlyPolluted(Color.Yellow, "Lightly Polluted", 101..150),
+    ModeratelyPolluted(Color.Orange, "Moderately Polluted", 151..200),
+    HeavilyPolluted(Color.Red, "Heavily Polluted", 201..300),
+    SeverelyPolluted(Color.Purple, "Severely Polluted", 301..400),
+    ExtremelyPolluted(Color.Purple, "Extremely Polluted", 401..500),
+    DangerouslyPolluted(Color.Brown, "Dangerously Polluted", 501..Int.MAX_VALUE)
 }
 
 val Color.Companion.Mint: Color
@@ -65,13 +65,13 @@ val Color.Companion.Orange: Color
 @Suppress("MagicNumber")
 fun getIaq(iaq: Int): Iaq {
     return when {
-        iaq <= 50 -> Iaq.Excellent
-        iaq <= 100 -> Iaq.Good
-        iaq <= 150 -> Iaq.LightlyPolluted
-        iaq <= 200 -> Iaq.ModeratelyPolluted
-        iaq <= 300 -> Iaq.HeavilyPolluted
-        iaq <= 400 -> Iaq.SeverelyPolluted
-        iaq <= 500 -> Iaq.ExtremelyPolluted
+        iaq in Iaq.Excellent.range -> Iaq.Excellent
+        iaq in Iaq.Good.range -> Iaq.Good
+        iaq in Iaq.LightlyPolluted.range -> Iaq.LightlyPolluted
+        iaq in Iaq.ModeratelyPolluted.range -> Iaq.ModeratelyPolluted
+        iaq in Iaq.HeavilyPolluted.range -> Iaq.HeavilyPolluted
+        iaq in Iaq.SeverelyPolluted.range -> Iaq.SeverelyPolluted
+        iaq in Iaq.ExtremelyPolluted.range -> Iaq.ExtremelyPolluted
         else -> Iaq.DangerouslyPolluted
     }
 }
@@ -139,7 +139,7 @@ fun IndoorAirQuality(iaq: Int, displayMode: IaqDisplayMode = IaqDisplayMode.Pill
 
             IaqDisplayMode.Text -> {
                 Text(
-                    text = iaqEnum.description,
+                    text = "${iaqEnum.description} (${iaqEnum.range.first}-${iaqEnum.range.last})",
                     fontSize = 12.sp,
                     modifier = Modifier.clickable { isLegendOpen = true }
                 )
