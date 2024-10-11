@@ -63,7 +63,11 @@ interface NodeInfoDao {
                     (longitude - (SELECT longitude FROM OurNode)) *
                     (longitude - (SELECT longitude FROM OurNode))
             END
-        WHEN :sort = 'hops_away' THEN hops_away
+        WHEN :sort = 'hops_away' THEN
+            CASE
+                WHEN hops_away = -1 THEN 999999999
+                ELSE hops_away
+            END
         WHEN :sort = 'channel' THEN channel
         WHEN :sort = 'via_mqtt' THEN long_name LIKE '%(MQTT)' -- viaMqtt
         ELSE 0
