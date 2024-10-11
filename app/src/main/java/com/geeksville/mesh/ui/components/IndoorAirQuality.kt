@@ -42,27 +42,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
 
+@Suppress("MagicNumber")
 enum class Iaq(val color: Color, val description: String, val range: IntRange) {
-    Excellent(Color.Green, "Excellent (0-50)", 0..50),
-    Good(Color.Green, "Good (51-100)", 51..100),
-    LightlyPolluted(Color.Yellow, "Lightly Polluted", 101..150),
-    ModeratelyPolluted(Color.Orange, "Moderately Polluted", 151..200),
-    HeavilyPolluted(Color.Red, "Heavily Polluted", 201..300),
-    SeverelyPolluted(Color.Purple, "Severely Polluted", 301..400),
-    ExtremelyPolluted(Color.Purple, "Extremely Polluted", 401..500),
-    DangerouslyPolluted(Color.Brown, "Dangerously Polluted", 501..Int.MAX_VALUE)
+    Excellent(Color(0xFF00E400), "Excellent", 0..50),
+    Good(Color(0xFF92D050), "Good", 51..100),
+    LightlyPolluted(Color(0xFFFFFF00), "Lightly Polluted", 101..150),
+    ModeratelyPolluted(Color(0xFFFF7300), "Moderately Polluted", 151..200),
+    HeavilyPolluted(Color(0xFFFF0000), "Heavily Polluted", 201..300),
+    SeverelyPolluted(Color(0xFF99004C), "Severely Polluted", 301..400),
+    ExtremelyPolluted(Color(0xFF663300), "Extremely Polluted", 401..500),
+    DangerouslyPolluted(Color(0xFF663300), "Dangerously Polluted", 501..Int.MAX_VALUE)
 }
 
-val Color.Companion.Mint: Color
-    get() = Color(0xFF98FB98)
-val Color.Companion.Purple: Color
-    get() = Color(0xFF800080)
-val Color.Companion.Brown: Color
-    get() = Color(0xFFA52A2A)
-val Color.Companion.Orange: Color
-    get() = Color(0xFFFFA500)
 
-@Suppress("MagicNumber")
+
 fun getIaq(iaq: Int): Iaq {
     return when {
         iaq in Iaq.Excellent.range -> Iaq.Excellent
@@ -76,6 +69,14 @@ fun getIaq(iaq: Int): Iaq {
     }
 }
 
+private fun getIaqDescriptionWithRange(iaqEnum: Iaq): String {
+    return if (iaqEnum.range.last == Int.MAX_VALUE){
+        "${iaqEnum.description} (${iaqEnum.range.first}+)"
+    } else {
+        "${iaqEnum.description} (${iaqEnum.range.first}-${iaqEnum.range.last})"
+    }
+}
+
 enum class IaqDisplayMode {
     Pill, Dot, Text, Gauge, Gradient
 }
@@ -86,10 +87,7 @@ fun IndoorAirQuality(iaq: Int, displayMode: IaqDisplayMode = IaqDisplayMode.Pill
     var isLegendOpen by remember { mutableStateOf(false) }
     val iaqEnum = getIaq(iaq)
     val gradient = Brush.linearGradient(
-        colors = listOf(
-            Color.Green, Color.Mint, Color.Yellow, Color.Orange, Color.Red,
-            Color.Purple, Color.Purple, Color.Brown, Color.Brown, Color.Brown, Color.Brown
-        )
+        colors = Iaq.entries.map { it.color },
     )
 
     Column {
@@ -139,7 +137,7 @@ fun IndoorAirQuality(iaq: Int, displayMode: IaqDisplayMode = IaqDisplayMode.Pill
 
             IaqDisplayMode.Text -> {
                 Text(
-                    text = "${iaqEnum.description} (${iaqEnum.range.first}-${iaqEnum.range.last})",
+                    text = getIaqDescriptionWithRange(iaqEnum),
                     fontSize = 12.sp,
                     modifier = Modifier.clickable { isLegendOpen = true }
                 )
@@ -221,11 +219,17 @@ fun IAQScale(modifier: Modifier = Modifier) {
                         .background(iaq.color)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(iaq.description, style = MaterialTheme.typography.body2)
+                Text(getIaqDescriptionWithRange(iaq), style = MaterialTheme.typography.body2)
             }
             Spacer(modifier = Modifier.height(4.dp))
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun IAQScalePreview() {
+    IAQScale()
 }
 
 @Suppress("LongMethod")
