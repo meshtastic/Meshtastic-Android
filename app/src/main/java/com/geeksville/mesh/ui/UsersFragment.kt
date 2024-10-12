@@ -26,7 +26,6 @@ import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.database.entity.toNodeInfo
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.components.NodeFilterTextField
 import com.geeksville.mesh.ui.components.rememberTimeTickWithLifecycle
@@ -175,7 +174,6 @@ fun NodesScreen(
         }
 
         items(nodes, key = { it.num }) { node ->
-            val nodeInfo = node.toNodeInfo()
             NodeItem(
                 thisNode = ourNode,
                 thatNode = node,
@@ -187,7 +185,7 @@ fun NodesScreen(
                     focusManager.clearFocus()
                     chipClicked(node)
                 },
-                blinking = nodeInfo == focusedNode,
+                blinking = node == focusedNode,
                 expanded = state.showDetails,
                 currentTimeMillis = currentTimeMillis,
             )

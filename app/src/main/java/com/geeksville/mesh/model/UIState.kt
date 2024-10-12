@@ -186,8 +186,8 @@ class UIViewModel @Inject constructor(
     private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
     val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
 
-    private val _focusedNode = MutableStateFlow<NodeInfo?>(null)
-    val focusedNode: StateFlow<NodeInfo?> = _focusedNode
+    private val _focusedNode = MutableStateFlow<NodeEntity?>(null)
+    val focusedNode: StateFlow<NodeEntity?> = _focusedNode
 
     private val nodeFilterText = MutableStateFlow("")
     private val nodeSortOption = MutableStateFlow(NodeSortOption.LAST_HEARD)
@@ -747,7 +747,7 @@ class UIViewModel @Inject constructor(
         _currentTab.value = tab
     }
 
-    fun focusUserNode(node: NodeInfo?) {
+    fun focusUserNode(node: NodeEntity?) {
         _currentTab.value = 1
         _focusedNode.value = node
     }

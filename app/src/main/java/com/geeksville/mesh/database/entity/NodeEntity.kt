@@ -4,6 +4,7 @@ import android.graphics.Color
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.DeviceMetrics
 import com.geeksville.mesh.EnvironmentMetrics
 import com.geeksville.mesh.MeshProtos
@@ -13,7 +14,10 @@ import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.util.bearing
+import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.latLongToMeter
+import com.geeksville.mesh.util.toDistanceString
 import com.google.protobuf.ByteString
 
 @Suppress("MagicNumber")
@@ -106,6 +110,26 @@ data class NodeEntity(
     fun distance(o: NodeEntity): Int? {
         return if (validPosition == null || o.validPosition == null) null
         else latLongToMeter(latitude, longitude, o.latitude, o.longitude).toInt()
+    }
+
+    // @return a nice human readable string for the distance, or null for unknown
+    fun distanceStr(o: NodeEntity, displayUnits: Int = 0): String? = distance(o)?.let { dist ->
+        val system = DisplayConfig.DisplayUnits.forNumber(displayUnits)
+        return if (dist > 0) dist.toDistanceString(system) else null
+    }
+
+    // @return bearing to the other position in degrees
+    fun bearing(o: NodeEntity?): Int? {
+        return if (validPosition == null || o?.validPosition == null) null
+        else bearing(latitude, longitude, o.latitude, o.longitude).toInt()
+    }
+
+    fun gpsString(gpsFormat: Int): String = when (gpsFormat) {
+        DisplayConfig.GpsCoordinateFormat.DEC_VALUE -> GPSFormat.toDEC(latitude, longitude)
+        DisplayConfig.GpsCoordinateFormat.DMS_VALUE -> GPSFormat.toDMS(latitude, longitude)
+        DisplayConfig.GpsCoordinateFormat.UTM_VALUE -> GPSFormat.toUTM(latitude, longitude)
+        DisplayConfig.GpsCoordinateFormat.MGRS_VALUE -> GPSFormat.toMGRS(latitude, longitude)
+        else -> GPSFormat.toDEC(latitude, longitude)
     }
 
     private fun TelemetryProtos.EnvironmentMetrics.getDisplayString(isFahrenheit: Boolean): String {

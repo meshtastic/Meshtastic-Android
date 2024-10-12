@@ -38,7 +38,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos.Waypoint
-import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.Logging
@@ -47,8 +46,8 @@ import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.android.hasGps
 import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
-import com.geeksville.mesh.database.entity.toNodeInfo
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.model.map.MarkerWithLabel
@@ -61,8 +60,6 @@ import com.geeksville.mesh.util.zoomIn
 import com.geeksville.mesh.waypoint
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.mapLatest
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.DelayedMapListener
@@ -330,10 +327,7 @@ fun MapView(
             if (permissions.entries.all { it.value }) map.toggleMyLocation()
         }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val nodes by model.nodeList
-        .mapLatest { list -> list.map { it.toNodeInfo() } }
-        .collectAsStateWithLifecycle(emptyList())
+    val nodes by model.nodeList.collectAsStateWithLifecycle()
     val waypoints by model.waypoints.collectAsStateWithLifecycle(emptyMap())
 
     var showDownloadButton: Boolean by remember { mutableStateOf(false) }
@@ -344,21 +338,21 @@ fun MapView(
         AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24)
     }
 
-    fun MapView.onNodesChanged(nodes: Collection<NodeInfo>): List<MarkerWithLabel> {
+    fun MapView.onNodesChanged(nodes: Collection<NodeEntity>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
-        val ourNode = model.ourNodeInfo.value?.toNodeInfo()
+        val ourNode = model.ourNodeInfo.value
         val gpsFormat = model.config.display.gpsFormat.number
         val displayUnits = model.config.display.units.number
         return nodesWithPosition.map { node ->
-            val (p, u) = node.position!! to node.user!!
-            val nodePosition = GeoPoint(p.latitude, p.longitude)
+            val (p, u) = node.position to node.user
+            val nodePosition = GeoPoint(node.latitude, node.longitude)
             MarkerWithLabel(
                 mapView = this,
                 label = "${u.shortName} ${formatAgo(p.time)}"
             ).apply {
                 id = u.id
                 title = "${u.longName} ${node.batteryStr}"
-                snippet = p.gpsString(gpsFormat)
+                snippet = node.gpsString(gpsFormat)
                 ourNode?.distanceStr(node, displayUnits)?.let { dist ->
                     subDescription =
                         context.getString(R.string.map_subDescription, ourNode.bearing(node), dist)
