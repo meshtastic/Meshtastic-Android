@@ -9,16 +9,17 @@ import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.app.ServiceCompat
 import androidx.core.location.LocationCompat
-import com.geeksville.mesh.analytics.DataPair
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.*
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
+import com.geeksville.mesh.TelemetryProtos.LocalStats
+import com.geeksville.mesh.analytics.DataPair
+import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hasLocationPermission
+import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.MeshLog
@@ -138,6 +139,7 @@ class MeshService : Service(), Logging {
     }
 
     private var previousSummary: String? = null
+    private var previousStats: LocalStats? = null
 
     /// A mapping of receiver class name to package name - used for explicit broadcasts
     private val clientPackages = mutableMapOf<String, String>()
@@ -166,6 +168,10 @@ class MeshService : Service(), Logging {
             ConnectionState.DISCONNECTED -> getString(R.string.disconnected)
             ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
         }
+
+    private var localStatsTelemetry: TelemetryProtos.Telemetry? = null
+    private val localStats: LocalStats? get() = localStatsTelemetry?.localStats
+    private val localStatsUpdatedAtMillis: Long? get() = localStatsTelemetry?.time?.let { it * 1000L }
 
     /**
      * start our location requests (if they weren't already running)
@@ -823,11 +829,21 @@ class MeshService : Service(), Logging {
         }
     }
 
+
+    private fun handleLocalStats(stats: TelemetryProtos.Telemetry) {
+        localStatsTelemetry = stats
+        maybeUpdateServiceStatusNotification()
+    }
+
+
     /// Update our DB of users based on someone sending out a Telemetry subpacket
     private fun handleReceivedTelemetry(
         fromNum: Int,
         t: TelemetryProtos.Telemetry,
     ) {
+        if (t.hasLocalStats()) {
+            handleLocalStats(t)
+        }
         updateNodeInfo(fromNum) {
             when {
                 t.hasDeviceMetrics() -> it.deviceTelemetry = t
@@ -1272,10 +1288,30 @@ class MeshService : Service(), Logging {
     }
 
     private fun maybeUpdateServiceStatusNotification() {
+        var update = false
         val currentSummary = notificationSummary
-        if (previousSummary == null || !previousSummary.equals(currentSummary)) {
-            serviceNotifications.updateServiceStateNotification(currentSummary)
+        val currentStats = localStats
+        val currentStatsUpdatedAtMillis = localStatsUpdatedAtMillis
+        if (
+            !currentSummary.isNullOrBlank() &&
+            (previousSummary == null || !previousSummary.equals(currentSummary))
+        ) {
             previousSummary = currentSummary
+            update = true
+        }
+        if (
+            currentStats != null &&
+            (previousStats == null || !(previousStats?.equals(currentStats) ?: false))
+        ) {
+            previousStats = currentStats
+            update = true
+        }
+        if (update) {
+            serviceNotifications.updateServiceStateNotification(
+                summaryString = currentSummary,
+                localStats = currentStats,
+                currentStatsUpdatedAtMillis = currentStatsUpdatedAtMillis
+            )
         }
     }
 
