@@ -360,7 +360,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (devices == null) return
 
         var hasShownOurDevice = false
-        devices.values.forEach { device ->
+        devices.values
+            // Display the device list in alphabetical order while keeping the "None (Disabled)"
+            // device (fullAddress == n) at the top
+            .sortedBy { dle -> if (dle.fullAddress == "n") "0" else dle.name  }
+            .forEach { device ->
             if (device.fullAddress == scanModel.selectedNotNull)
                 hasShownOurDevice = true
             addDeviceButton(device, true)
