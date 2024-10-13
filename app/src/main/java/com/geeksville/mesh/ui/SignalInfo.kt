@@ -32,7 +32,7 @@ fun signalInfo(
             val hopsString = "%s: %s".format(
                 stringResource(R.string.hops_away),
                 if (node.hopsAway == -1) {
-                    stringResource(R.string.unknown)
+                    "?"
                 } else {
                     node.hopsAway.toString()
                 }
