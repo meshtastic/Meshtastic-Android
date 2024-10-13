@@ -17,14 +17,22 @@ import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.toBitmapOrNull
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
+import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.android.notificationManager
 import com.geeksville.mesh.util.PendingIntentCompat
 import java.io.Closeable
-
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MeshServiceNotifications(
     private val context: Context
 ) : Closeable {
+
+    companion object {
+        private const val FIFTEEN_MINUTES_IN_MILLIS = 15L * 60 * 1000
+    }
+
     private val notificationManager: NotificationManager get() = context.notificationManager
 
     // We have two notification channels: one for general service status and another one for messages
@@ -93,11 +101,37 @@ class MeshServiceNotifications(
         }
     }
 
-    fun updateServiceStateNotification(summaryString: String) =
+    private fun formatStatsString(stats: LocalStats?, currentStatsUpdatedAtMillis: Long?): String {
+        val updatedAt = "Next update at: ${
+            currentStatsUpdatedAtMillis?.let {
+                val date = Date(it + FIFTEEN_MINUTES_IN_MILLIS) // Add 15 minutes in milliseconds
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+                dateFormat.format(date)
+            } ?: "???"
+        }"
+        val statsJoined = stats?.allFields?.mapNotNull { (k, v) ->
+            if (k.name == "num_online_nodes" || k.name == "num_total_nodes") {
+                return@mapNotNull null
+            }
+            "${
+                k.name.replace('_', ' ').split(" ")
+                    .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
+            }=$v"
+        }?.joinToString("\n") ?: "No Local Stats"
+        return "$updatedAt\n$statsJoined"
+    }
+
+    fun updateServiceStateNotification(
+        summaryString: String? = null,
+        localStats: LocalStats? = null,
+        currentStatsUpdatedAtMillis: Long? = null,
+    ) {
+        val statsString = formatStatsString(localStats, currentStatsUpdatedAtMillis)
         notificationManager.notify(
             notifyId,
-            createServiceStateNotification(summaryString)
+            createServiceStateNotification(summaryString.orEmpty(), statsString)
         )
+    }
 
     fun updateMessageNotification(name: String, message: String) =
         notificationManager.notify(
@@ -139,28 +173,44 @@ class MeshServiceNotifications(
 
             builder.setSmallIcon(
                 // vector form icons don't work reliably on older androids
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) R.drawable.app_icon_novect
-                else R.drawable.app_icon
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                    R.drawable.app_icon_novect
+                } else {
+                    R.drawable.app_icon
+                }
             )
                 .setLargeIcon(largeIcon)
         }
         return builder
     }
 
-    fun createServiceStateNotification(summaryString: String): Notification {
-        val builder = commonBuilder(channelId)
-        with(builder) {
+    lateinit var serviceNotificationBuilder: NotificationCompat.Builder
+    fun createServiceStateNotification(name: String, message: String? = null): Notification {
+        if (!::serviceNotificationBuilder.isInitialized) {
+            serviceNotificationBuilder = commonBuilder(channelId)
+        }
+        with(serviceNotificationBuilder) {
             priority = NotificationCompat.PRIORITY_MIN
             setCategory(Notification.CATEGORY_SERVICE)
             setOngoing(true)
-            setContentTitle(summaryString) // leave this off for now so our notification looks smaller
+            setContentTitle(name)
+            message?.let {
+                setContentText(it)
+                setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(message),
+                )
+            }
         }
-        return builder.build()
+        return serviceNotificationBuilder.build()
     }
 
+    lateinit var messageNotificationBuilder: NotificationCompat.Builder
     private fun createMessageNotification(name: String, message: String): Notification {
-        val builder = commonBuilder(messageChannelId)
-        with(builder) {
+        if (!::messageNotificationBuilder.isInitialized) {
+            messageNotificationBuilder = commonBuilder(messageChannelId)
+        }
+        with(messageNotificationBuilder) {
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_MESSAGE)
             setAutoCancel(true)
@@ -171,7 +221,7 @@ class MeshServiceNotifications(
                     .bigText(message),
             )
         }
-        return builder.build()
+        return messageNotificationBuilder.build()
     }
 
     override fun close() {
