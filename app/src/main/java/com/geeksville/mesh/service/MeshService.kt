@@ -678,10 +678,13 @@ class MeshService : Service(), Logging {
 
                     // Handle new style position info
                     Portnums.PortNum.POSITION_APP_VALUE -> {
-                        if (data.wantResponse) return // ignore data from position requests
                         val u = MeshProtos.Position.parseFrom(data.payload)
                         // debug("position_app ${packet.from} ${u.toOneLineString()}")
-                        handleReceivedPosition(packet.from, u, dataPacket.time)
+                        if (data.wantResponse && u.latitudeI == 0 && u.longitudeI == 0) {
+                            debug("Ignoring nop position update from position request")
+                        } else {
+                            handleReceivedPosition(packet.from, u, dataPacket.time)
+                        }
                     }
 
                     // Handle new style user info
