@@ -16,12 +16,26 @@
       "oauth_client": [
         {
           "client_id": "111-xxx.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.geeksville.mesh"
+          }
+        },
+        {
+          "client_id": "111-xxx.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.geeksville.mesh"
+          }
+        },
+        {
+          "client_id": "111-xxx.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "xxx-c"
+          "current_key": "APlaceholderAPIKeyWith-ThirtyNineCharsX"
         }
       ],
       "services": {
