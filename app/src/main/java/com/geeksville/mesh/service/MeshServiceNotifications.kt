@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@Suppress("TooManyFunctions")
 class MeshServiceNotifications(
     private val context: Context
 ) : Closeable {
@@ -139,6 +140,13 @@ class MeshServiceNotifications(
             createMessageNotification(name, message)
         )
 
+    fun updateNewNodeSeenNotification(name: String) {
+        notificationManager.notify(
+            messageNotifyId,
+            createNewNodeSeenNotification(name)
+        )
+    }
+
     private val openAppIntent: PendingIntent by lazy {
         PendingIntent.getActivity(
             context,
@@ -222,6 +230,27 @@ class MeshServiceNotifications(
             )
         }
         return messageNotificationBuilder.build()
+    }
+
+    lateinit var newNodeSeenNotificationBuilder: NotificationCompat.Builder
+    private fun createNewNodeSeenNotification(name: String, message: String? = null): Notification {
+        if (!::newNodeSeenNotificationBuilder.isInitialized) {
+            newNodeSeenNotificationBuilder = commonBuilder(messageChannelId)
+        }
+        with(newNodeSeenNotificationBuilder) {
+            priority = NotificationCompat.PRIORITY_DEFAULT
+            setCategory(Notification.CATEGORY_STATUS)
+            setAutoCancel(true)
+            setContentTitle("New Node Seen: $name")
+            message?.let {
+                setContentText(it)
+                setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(message),
+                )
+            }
+        }
+        return newNodeSeenNotificationBuilder.build()
     }
 
     override fun close() {
