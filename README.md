@@ -41,14 +41,6 @@ If you would like to develop this application we'd love your help! These build i
 
 - Use Android Studio to build/debug
 - Use "git submodule update --init --recursive" to pull in the various submodules we depend on
-- There are a few config files which you'll need to copy from templates included in the project. Run
-  the following commands to do so:
-
-```bash
-rm ./app/google-services.json
-cp ./app/google-services-example.json ./app/google-services.json
-```
-
 - Now you should be able to select "Run / Run" in the IDE and it will happily start running on your
   phone or the emulator. Note: The emulators don't support bluetooth, so some features can not be
   used in that environment.
