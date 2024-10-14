@@ -7,6 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.CoroutineDispatchers
+import com.geeksville.mesh.util.registerReceiverCompat
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialProber
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,7 +38,7 @@ class UsbRepository @Inject constructor(
 
     @Suppress("unused") // Retained as public API
     val serialDevicesWithDrivers = _serialDevices
-        .mapLatest {  serialDevices ->
+        .mapLatest { serialDevices ->
             val serialProber = usbSerialProberLazy.get()
             buildMap {
                 serialDevices.forEach { (k, v) ->
@@ -62,7 +63,7 @@ class UsbRepository @Inject constructor(
         processLifecycle.coroutineScope.launch(dispatchers.default) {
             refreshStateInternal()
             usbBroadcastReceiverLazy.get().let { receiver ->
-                application.registerReceiver(receiver, receiver.intentFilter)
+                application.registerReceiverCompat(receiver, receiver.intentFilter)
             }
         }
     }
@@ -71,7 +72,7 @@ class UsbRepository @Inject constructor(
      * Creates a USB serial connection to the specified USB device.  State changes and data arrival
      * result in async callbacks on the supplied listener.
      */
-    fun createSerialConnection(device: UsbSerialDriver, listener: SerialConnectionListener) : SerialConnection {
+    fun createSerialConnection(device: UsbSerialDriver, listener: SerialConnectionListener): SerialConnection {
         return SerialConnectionImpl(usbManagerLazy, device, listener)
     }
 

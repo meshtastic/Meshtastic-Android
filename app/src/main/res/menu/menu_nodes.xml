@@ -7,6 +7,10 @@
             android:title="@string/direct_message"
             app:showAsAction="withText" />
         <item
+            android:id="@+id/request_userinfo"
+            android:title="@string/request_userinfo"
+            app:showAsAction="withText" />
+        <item
             android:id="@+id/request_position"
             android:title="@string/request_position"
             app:showAsAction="withText" />
@@ -22,6 +26,12 @@
         <item
             android:id="@+id/remove"
             android:title="@string/remove"
+            app:showAsAction="withText" />
+    </group>
+    <group android:id="@+id/group_both">
+        <item
+            android:id="@+id/metrics"
+            android:title="@string/metrics"
             app:showAsAction="withText" />
     </group>
     <group android:id="@+id/group_admin">

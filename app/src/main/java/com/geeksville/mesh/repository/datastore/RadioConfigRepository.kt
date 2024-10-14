@@ -10,8 +10,8 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
-import com.geeksville.mesh.MyNodeInfo
-import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.database.entity.MyNodeEntity
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.NodeDB
 import com.geeksville.mesh.model.getChannelUrl
@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.firstOrNull
 import javax.inject.Inject
 
 /**
@@ -48,23 +47,17 @@ class RadioConfigRepository @Inject constructor(
     val myId: StateFlow<String?> get() = nodeDB.myId
 
     /**
-     * Flow representing the [MyNodeInfo] database.
+     * Flow representing the [MyNodeEntity] database.
      */
-    fun myNodeInfoFlow(): Flow<MyNodeInfo?> = nodeDB.myNodeInfoFlow()
-    suspend fun getMyNodeInfo(): MyNodeInfo? = myNodeInfoFlow().firstOrNull()
-    val myNodeInfo: StateFlow<MyNodeInfo?> get() = nodeDB.myNodeInfo
-    val ourNodeInfo: StateFlow<NodeInfo?> get() = nodeDB.ourNodeInfo
-
-    val nodeDBbyNum: StateFlow<Map<Int, NodeInfo>> get() = nodeDB.nodeDBbyNum
-    val nodeDBbyID: StateFlow<Map<String, NodeInfo>> get() = nodeDB.nodeDBbyID
+    val myNodeInfo: StateFlow<MyNodeEntity?> get() = nodeDB.myNodeInfo
 
     /**
-     * Flow representing the [NodeInfo] database.
+     * Flow representing the [NodeEntity] database.
      */
-    suspend fun getNodes(): List<NodeInfo>? = nodeDB.getNodes().firstOrNull()
+    val nodeDBbyNum: StateFlow<Map<Int, NodeEntity>> get() = nodeDB.nodeDBbyNum
 
-    suspend fun upsert(node: NodeInfo) = nodeDB.upsert(node)
-    suspend fun installNodeDB(mi: MyNodeInfo, nodes: List<NodeInfo>) {
+    suspend fun upsert(node: NodeEntity) = nodeDB.upsert(node)
+    suspend fun installNodeDB(mi: MyNodeEntity, nodes: List<NodeEntity>) {
         nodeDB.installNodeDB(mi, nodes)
     }
 
@@ -143,19 +136,22 @@ class RadioConfigRepository @Inject constructor(
      * Flow representing the combined [DeviceProfile] protobuf.
      */
     val deviceProfileFlow: Flow<DeviceProfile> = combine(
-        nodeDBbyNum,
+        nodeDB.ourNodeInfo,
         channelSetFlow,
         localConfigFlow,
         moduleConfigFlow,
-    ) { nodes, channels, localConfig, localModuleConfig ->
+    ) { node, channels, localConfig, localModuleConfig ->
         deviceProfile {
-            nodes.values.firstOrNull()?.user?.let {
+            node?.user?.let {
                 longName = it.longName
                 shortName = it.shortName
             }
             channelUrl = channels.getChannelUrl().toString()
             config = localConfig
             moduleConfig = localModuleConfig
+            if (node != null && localConfig.position.fixedPosition) {
+                fixedPosition = node.position
+            }
         }
     }
 

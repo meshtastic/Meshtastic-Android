@@ -7,6 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.android.BinaryLogFile
+import com.geeksville.mesh.android.BuildUtils
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
@@ -28,7 +29,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
-
 
 /**
  * Handles the bluetooth link with a mesh radio device.  Does not cache any device state,
@@ -78,7 +78,7 @@ class RadioInterfaceService @Inject constructor(
      */
     private var isStarted = false
 
-    /// true if our interface is currently connected to a device
+    // true if our interface is currently connected to a device
     private var isConnected = false
 
     private fun initStateListeners() {
@@ -104,8 +104,8 @@ class RadioInterfaceService @Inject constructor(
         return interfaceFactory.toInterfaceAddress(interfaceId, rest)
     }
 
-    fun isAddressValid(address: String?): Boolean {
-        return interfaceFactory.addressValid(address)
+    val isMockInterface: Boolean by lazy {
+        BuildUtils.isEmulator || (context as GeeksvilleApplication).isInTestLab
     }
 
     /** Return the device we are configured to use, or null for none
@@ -121,7 +121,7 @@ class RadioInterfaceService @Inject constructor(
         var address = prefs.getString(DEVADDR_KEY, null)
 
         // If we are running on the emulator we default to the mock interface, so we can have some data to show to the user
-        if (address == null && isAddressValid(mockInterfaceAddress)) {
+        if (address == null && isMockInterface) {
             address = mockInterfaceAddress
         }
 
@@ -155,7 +155,7 @@ class RadioInterfaceService @Inject constructor(
         }
     }
 
-    /// Send a packet/command out the radio link, this routine can block if it needs to
+    // Send a packet/command out the radio link, this routine can block if it needs to
     private fun handleSendToRadio(p: ByteArray) {
         radioIf.handleSendToRadio(p)
     }
@@ -190,20 +190,22 @@ class RadioInterfaceService @Inject constructor(
 
     /** Start our configured interface (if it isn't already running) */
     private fun startInterface() {
-        if (radioIf !is NopInterface)
+        if (radioIf !is NopInterface) {
             warn("Can't start interface - $radioIf is already running")
-        else {
+        } else {
             val address = getBondedDeviceAddress()
-            if (address == null)
+            if (address == null) {
                 warn("No bonded mesh radio, can't start interface")
-            else {
+            } else {
                 info("Starting radio ${address.anonymize}")
                 isStarted = true
 
-                if (logSends)
+                if (logSends) {
                     sentPacketsLog = BinaryLogFile(context, "sent_log.pb")
-                if (logReceives)
+                }
+                if (logReceives) {
                     receivedPacketsLog = BinaryLogFile(context, "receive_log.pb")
+                }
 
                 radioIf = interfaceFactory.createInterface(address)
             }
@@ -221,16 +223,18 @@ class RadioInterfaceService @Inject constructor(
         serviceScope.cancel("stopping interface")
         serviceScope = CoroutineScope(Dispatchers.IO + Job())
 
-        if (logSends)
+        if (logSends) {
             sentPacketsLog.close()
-        if (logReceives)
+        }
+        if (logReceives) {
             receivedPacketsLog.close()
+        }
 
         // Don't broadcast disconnects if we were just using the nop device
-        if (r !is NopInterface)
+        if (r !is NopInterface) {
             onDisconnect(isPermanent = true) // Tell any clients we are now offline
+        }
     }
-
 
     /**
      * Change to a new device
@@ -257,10 +261,11 @@ class RadioInterfaceService @Inject constructor(
             debug("Setting bonded device to ${address.anonymize}")
 
             prefs.edit {
-                if (address == null)
+                if (address == null) {
                     this.remove(DEVADDR_KEY)
-                else
+                } else {
                     putString(DEVADDR_KEY, address)
+                }
             }
 
             // Force the service to reconnect

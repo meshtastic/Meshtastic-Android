@@ -1,6 +1,5 @@
 package com.geeksville.mesh.model
 
-import android.net.Uri
 import org.junit.Assert.*
 import org.junit.Test
 

@@ -14,7 +14,9 @@ import android.view.inputmethod.EditorInfo
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.RadioButton
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
@@ -24,12 +26,11 @@ import com.geeksville.mesh.android.*
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
+import com.geeksville.mesh.model.RegionInfo
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.model.getInitials
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.util.exceptionToSnackbar
-import com.geeksville.mesh.util.getAssociationResult
 import com.geeksville.mesh.util.onEditorAction
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -50,10 +51,10 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     internal lateinit var locationRepository: LocationRepository
 
     private val hasGps by lazy { requireContext().hasGps() }
-    private val hasCompanionDeviceApi by lazy { requireContext().hasCompanionDeviceApi() }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = SettingsFragmentBinding.inflate(inflater, container, false)
@@ -82,13 +83,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // update the region selection from the device
         val region = model.region
         val spinner = binding.regionSpinner
-        val unsetIndex = regions.indexOf(ConfigProtos.Config.LoRaConfig.RegionCode.UNSET.name)
         spinner.onItemSelectedListener = null
 
         debug("current region is $region")
-        var regionIndex = regions.indexOf(region.name)
-        if (regionIndex == -1) // Not found, probably because the device has a region our app doesn't yet understand.  Punt and say Unset
-            regionIndex = unsetIndex
+        var regionIndex = regions.indexOfFirst { it.regionCode == region }
+        if (regionIndex == -1) { // Not found, probably because the device has a region our app doesn't yet understand.  Punt and say Unset
+            regionIndex = ConfigProtos.Config.LoRaConfig.RegionCode.UNSET_VALUE
+        }
 
         // We don't want to be notified of our own changes, so turn off listener while making them
         spinner.setSelection(regionIndex, false)
@@ -116,8 +117,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             position: Int,
             id: Long
         ) {
-            val item = parent.getItemAtPosition(position) as String?
-            val asProto = item!!.let { ConfigProtos.Config.LoRaConfig.RegionCode.valueOf(it) }
+            val item = RegionInfo.entries[position]
+            val asProto = item.regionCode
             exceptionToSnackbar(requireView()) {
                 debug("regionSpinner onItemSelected $asProto")
                 if (asProto != model.region) model.region = asProto
@@ -126,51 +127,49 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         override fun onNothingSelected(parent: AdapterView<*>) {
-            //TODO("Not yet implemented")
+            // TODO("Not yet implemented")
         }
     }
 
-    /// the sorted list of region names like arrayOf("US", "CN", "EU488")
-    private val regions = ConfigProtos.Config.LoRaConfig.RegionCode.entries.filter {
-        it != ConfigProtos.Config.LoRaConfig.RegionCode.UNRECOGNIZED
-    }.map {
-        it.name
-    }.sorted()
+    private val regions = RegionInfo.entries
 
     private fun initCommonUI() {
 
-        val associationResultLauncher = registerForActivityResult(
-            ActivityResultContracts.StartIntentSenderForResult()
-        ) {
-            it.data
-                ?.getAssociationResult()
-                ?.let { address -> scanModel.onSelectedBle(address) }
-        }
-
-        val requestBackgroundAndCheckLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-                if (permissions.entries.any { !it.value }) {
-                    debug("User denied background permission")
-                    model.showSnackbar(getString(R.string.why_background_required))
-                }
-            }
-
-        val requestLocationAndBackgroundLauncher =
+        val requestLocationPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
                 if (permissions.entries.all { it.value }) {
-                    // Older versions of android only need Location permission
-                    if (!requireContext().hasBackgroundPermission())
-                        requestBackgroundAndCheckLauncher.launch(requireContext().getBackgroundPermissions())
+                    model.provideLocation.value = true
+                    model.meshService?.startProvideLocation()
                 } else {
                     debug("User denied location permission")
                     model.showSnackbar(getString(R.string.why_background_required))
                 }
+                bluetoothViewModel.permissionsUpdated()
             }
 
         // init our region spinner
         val spinner = binding.regionSpinner
-        val regionAdapter =
-            ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, regions)
+        val regionAdapter = object : ArrayAdapter<RegionInfo>(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            regions
+        ) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val view = super.getView(position, convertView, parent)
+                (view as? TextView)?.text = regions[position].name
+                return view
+            }
+
+            override fun getDropDownView(
+                position: Int,
+                convertView: View?,
+                parent: ViewGroup
+            ): View {
+                val view = super.getDropDownView(position, convertView, parent)
+                (view as? TextView)?.text = regions[position].description
+                return view
+            }
+        }
         regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = regionAdapter
 
@@ -202,26 +201,40 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             }
         }
 
+        var scanDialog: AlertDialog? = null
+        scanModel.scanResult.observe(viewLifecycleOwner) { results ->
+            val devices = results.values.ifEmpty { return@observe }
+            scanDialog?.dismiss()
+            scanDialog = MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Select a Bluetooth device")
+                .setSingleChoiceItems(
+                    devices.map { it.name }.toTypedArray(),
+                    -1
+                ) { dialog, position ->
+                    val selectedDevice = devices.elementAt(position)
+                    scanModel.onSelected(selectedDevice)
+                    scanModel.clearScanResults()
+                    dialog.dismiss()
+                    scanDialog = null
+                }
+                .setPositiveButton(R.string.cancel) { dialog, _ ->
+                    scanModel.clearScanResults()
+                    dialog.dismiss()
+                    scanDialog = null
+                }
+                .show()
+        }
+
         // show the spinner when [spinner] is true
         scanModel.spinner.observe(viewLifecycleOwner) { show ->
             binding.changeRadioButton.isEnabled = !show
             binding.scanProgressBar.visibility = if (show) View.VISIBLE else View.GONE
         }
 
-        scanModel.associationRequest.observe(viewLifecycleOwner) { request ->
-            request?.let {
-                associationResultLauncher.launch(request)
-                scanModel.clearAssociationRequest()
-            }
-        }
-
         binding.usernameEditText.onEditorAction(EditorInfo.IME_ACTION_DONE) {
             debug("received IME_ACTION_DONE")
             val n = binding.usernameEditText.text.toString().trim()
-            model.ourNodeInfo.value?.user?.let {
-                val user = it.copy(longName = n, shortName = getInitials(n))
-                if (n.isNotEmpty()) model.setOwner(user)
-            }
+            if (n.isNotEmpty()) model.setOwner(n)
             requireActivity().hideKeyboard()
         }
 
@@ -232,12 +245,12 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         binding.provideLocationCheckbox.setOnCheckedChangeListener { view, isChecked ->
             // Don't check the box until the system setting changes
-            view.isChecked = isChecked && requireContext().hasBackgroundPermission()
+            view.isChecked = isChecked && requireContext().hasLocationPermission()
 
             if (view.isPressed) { // We want to ignore changes caused by code (as opposed to the user)
                 debug("User changed location tracking to $isChecked")
                 model.provideLocation.value = isChecked
-                if (isChecked && !view.isChecked)
+                if (isChecked && !view.isChecked) {
                     MaterialAlertDialogBuilder(requireContext())
                         .setTitle(R.string.background_required)
                         .setMessage(R.string.why_background_required)
@@ -247,12 +260,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                         .setPositiveButton(getString(R.string.accept)) { _, _ ->
                             // Make sure we have location permission (prerequisite)
                             if (!requireContext().hasLocationPermission()) {
-                                requestLocationAndBackgroundLauncher.launch(requireContext().getLocationPermissions())
-                            } else {
-                                requestBackgroundAndCheckLauncher.launch(requireContext().getBackgroundPermissions())
+                                requestLocationPermissionLauncher.launch(requireContext().getLocationPermissions())
                             }
                         }
                         .show()
+                }
             }
             if (view.isChecked) {
                 checkLocationEnabled(getString(R.string.location_disabled))
@@ -296,6 +308,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             .show()
     }
 
+    private var tapCount = 0
+    private var lastTapTime: Long = 0
+
     private fun addDeviceButton(device: BTScanModel.DeviceListEntry, enabled: Boolean) {
         val b = RadioButton(requireActivity())
         b.text = device.name
@@ -305,8 +320,22 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         binding.deviceRadioGroup.addView(b)
 
         b.setOnClickListener {
-            if (!device.bonded) // If user just clicked on us, try to bond
+            if (device.fullAddress == "n") {
+                val currentTapTime = System.currentTimeMillis()
+                if (currentTapTime - lastTapTime > TAP_THRESHOLD) {
+                    tapCount = 0
+                }
+                lastTapTime = currentTapTime
+                tapCount++
+
+                if (tapCount >= TAP_TRIGGER) {
+                    model.showSnackbar("Demo Mode enabled")
+                    scanModel.showMockInterface()
+                }
+            }
+            if (!device.bonded) { // If user just clicked on us, try to bond
                 binding.scanStatusText.setText(R.string.starting_pairing)
+            }
             b.isChecked = scanModel.onSelected(device)
         }
     }
@@ -335,9 +364,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (devices == null) return
 
         var hasShownOurDevice = false
-        devices.values.forEach { device ->
-            if (device.fullAddress == scanModel.selectedNotNull)
+        devices.values
+            // Display the device list in alphabetical order while keeping the "None (Disabled)"
+            // device (fullAddress == n) at the top
+            .sortedBy { dle -> if (dle.fullAddress == "n") "0" else dle.name }
+            .forEach { device ->
+            if (device.fullAddress == scanModel.selectedNotNull) {
                 hasShownOurDevice = true
+            }
             addDeviceButton(device, true)
         }
 
@@ -360,7 +394,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         // If we are running on an emulator, always leave this message showing so we can test the worst case layout
         val curRadio = scanModel.selectedAddress
 
-        if (curRadio != null && !scanModel.isMockInterfaceAddressValid) {
+        if (curRadio != null && curRadio != "m") {
             binding.warningNotPaired.visibility = View.GONE
         } else if (bluetoothViewModel.enabled.value == true) {
             binding.warningNotPaired.visibility = View.VISIBLE
@@ -372,7 +406,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private var scanning = false
     private fun scanLeDevice() {
         if (!checkBTEnabled()) return
-        if (!hasCompanionDeviceApi) checkLocationEnabled()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) checkLocationEnabled()
 
         if (!scanning) { // Stops scanning after a pre-defined scan period.
             Handler(Looper.getMainLooper()).postDelayed({
@@ -380,7 +414,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 scanModel.stopScan()
             }, SCAN_PERIOD)
             scanning = true
-            scanModel.startScan(requireActivity().takeIf { hasCompanionDeviceApi })
+            scanModel.startScan()
         } else {
             scanning = false
             scanModel.stopScan()
@@ -444,8 +478,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (scanModel.selectedBluetooth) checkBTEnabled()
 
         // Warn user if provide location is selected but location disabled
-        if (binding.provideLocationCheckbox.isChecked)
+        if (binding.provideLocationCheckbox.isChecked) {
             checkLocationEnabled(getString(R.string.location_disabled))
+        }
     }
 
     override fun onDestroyView() {
@@ -455,6 +490,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
     companion object {
         const val SCAN_PERIOD: Long = 10000 // Stops scanning after 10 seconds
+        private const val TAP_TRIGGER: Int = 7
+        private const val TAP_THRESHOLD: Long = 500 // max 500 ms between taps
     }
 
     private fun Editable.isIPAddress(): Boolean {
@@ -465,5 +502,4 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             Patterns.IP_ADDRESS.matcher(this).matches()
         }
     }
-
 }

@@ -2,6 +2,13 @@
 <resources>
     <string name="node_filter_placeholder">過濾器</string>
     <string name="desc_node_filter_clear">清除節點過濾器</string>
+    <string name="node_filter_include_unknown">顯示未知節點</string>
+    <string name="node_sort_alpha">依名字排序</string>
+    <string name="node_sort_channel">頻道</string>
+    <string name="node_sort_distance">距離</string>
+    <string name="node_sort_hops_away">依轉跳排序</string>
+    <string name="node_sort_last_heard">最近一次收到排序</string>
+    <string name="node_sort_via_mqtt">有節點MQTT排序</string>
     <string name="channel_name">頻道名稱</string>
     <string name="channel_options">頻道選項</string>
     <string name="qr_code">QRCODE</string>
@@ -80,7 +87,7 @@
     <string name="region">地區</string>
     <string name="cant_change_no_radio">無法更改頻道，因為裝置尚未連接。請再試一次。</string>
     <string name="save_messages">匯出  範圍測試.csv</string>
-    <string name="reset">重置</string>
+    <string name="reset">重設</string>
     <string name="scan">掃描</string>
     <string name="are_you_sure_change_default">您確定要切換到預設頻道嗎？</string>
     <string name="reset_to_defaults">恢復預設設置</string>
@@ -140,7 +147,7 @@
     <string name="bluetooth_disabled">藍牙已禁用</string>
     <string name="permission_missing_31">Meshtastic 需要附近設備許可才能通過藍牙查找和連接設備。 您可以在不使用時將其關閉。</string>
     <string name="direct_message">直接發訊息</string>
-    <string name="nodedb_reset">節點數據庫重置</string>
+    <string name="nodedb_reset">重設節點資料庫</string>
     <string name="nodedb_reset_description">這將從該列表中清除所有節點。</string>
     <string name="delivery_confirmed">已確認送達</string>
     <string name="error">錯誤</string>
@@ -155,15 +162,16 @@
     <string name="device_settings">設備設定</string>
     <string name="module_settings">模組設定</string>
     <string name="add">新增</string>
+    <string name="edit">編輯</string>
     <string name="calculating">正在計算……</string>
     <string name="map_offline_manager">離線管理</string>
-    <string name="map_cache_size">當前緩存大小</string>
-    <string name="map_cache_info">緩存容量: %1$.2f MB\n緩存使用: %2$.2f MB</string>
+    <string name="map_cache_size">目前快取大小</string>
+    <string name="map_cache_info">快取容量: %1$.2f MB\n快取使用: %2$.2f MB</string>
     <string name="map_clear_tiles">清除下載的圖磚</string>
     <string name="map_tile_source">圖磚來源</string>
     <string name="map_purge_success">清除 %s 的 SQL 快取</string>
     <string name="map_purge_fail">SQL快取清除失敗，請查看logcat以獲取詳細資訊。</string>
-    <string name="map_cache_manager">緩存管理員</string>
+    <string name="map_cache_manager">快取管理</string>
     <string name="map_download_complete">下載已完成！</string>
     <string name="map_download_errors">下載完成，但有 %d 個錯誤</string>
     <string name="map_cache_tiles">%d 圖磚</string>

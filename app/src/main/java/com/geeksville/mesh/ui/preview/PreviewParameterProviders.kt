@@ -19,6 +19,7 @@ class NodeInfoPreviewParameterProvider: PreviewParameterProvider<NodeInfo> {
             latitude = 33.812511,
             longitude = -117.918976,
             altitude = 138,
+            satellitesInView = 4,
         ),
         lastHeard = currentTime(),
         channel = 0,
@@ -35,7 +36,8 @@ class NodeInfoPreviewParameterProvider: PreviewParameterProvider<NodeInfo> {
             longName = "Micky Mouse",
             shortName = "MM",
             id = "mickeyMouseId",
-            hwModel = MeshProtos.HardwareModel.TBEAM
+            hwModel = MeshProtos.HardwareModel.TBEAM,
+            role = 0,
         ),
         hopsAway = 0
     )
@@ -60,6 +62,7 @@ class NodeInfoPreviewParameterProvider: PreviewParameterProvider<NodeInfo> {
             latitude = 33.80523471893125,
             longitude = -117.92084605996297,
             altitude = 121,
+            satellitesInView = 66,
         ),
         lastHeard = currentTime() - 300,
         channel = 0,

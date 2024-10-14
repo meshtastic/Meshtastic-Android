@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="node_filter_placeholder">Filter</string>
+    <string name="desc_node_filter_clear">rensa filtrering av noder</string>
+    <string name="node_filter_include_unknown">Inkludera okända</string>
+    <string name="node_sort_alpha">A-Ö</string>
+    <string name="node_sort_channel">Kanal</string>
+    <string name="node_sort_distance">Avstånd</string>
+    <string name="node_sort_hops_away">Antal hopp</string>
+    <string name="node_sort_last_heard">Senast hörd</string>
+    <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="channel_name">Kanalnamn</string>
     <string name="channel_options">Kanalegenskaper</string>
     <string name="qr_code">QR-kod</string>
@@ -141,6 +150,8 @@
     <string name="direct_message">Direktmeddelande</string>
     <string name="nodedb_reset">Nollställ NodeDB</string>
     <string name="nodedb_reset_description">Detta kommer att rensa alla noder från listan.</string>
+    <string name="delivery_confirmed">Sändning bekräftad</string>
+    <string name="error">Fel</string>
     <string name="ignore">Ignorera</string>
     <string name="ignore_add">Lägg till \'%s\' på ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
     <string name="ignore_remove">Ta bort \'%s\' från ignorera-listan? Din radioenhet kommer att starta om efter denna ändring.</string>
@@ -152,6 +163,7 @@
     <string name="device_settings">Konfiguration av radioenhet</string>
     <string name="module_settings">Modul konfiguration</string>
     <string name="add">Lägg till</string>
+    <string name="edit">Ändra</string>
     <string name="calculating">Beräknar…</string>
     <string name="map_offline_manager">Offline-hanterare</string>
     <string name="map_cache_size">Aktuell cachestorlek</string>
@@ -170,4 +182,11 @@
     <string name="waypoint_new">Ny vägpunkt</string>
     <string name="waypoint_received">Mottagen vägpunkt: %s</string>
     <string name="error_duty_cycle">Gränsen för sändningscykeln har uppnåtts. Kan inte skicka meddelanden just nu, försök igen senare.</string>
+    <string name="remove">Ta bort</string>
+    <string name="remove_node_text">Denna nod kommer att tas bort från din lista till dess att din nod tar emot data från den igen.</string>
+    <string name="mute">Tysta</string>
+    <string name="mute_notifications">Tysta notifieringar</string>
+    <string name="mute_8_hours">8 timmar</string>
+    <string name="mute_1_week">1 vecka</string>
+    <string name="mute_always">Alltid</string>
 </resources>

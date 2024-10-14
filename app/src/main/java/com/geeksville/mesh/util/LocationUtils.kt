@@ -14,6 +14,7 @@ import kotlin.math.cos
 import kotlin.math.log2
 import kotlin.math.pow
 import kotlin.math.sin
+import kotlin.math.PI
 
 /*******************************************************************************
  * Revive some of my old Gaggle source code...
@@ -50,6 +51,34 @@ object GPSFormat {
         val MGRS = MGRS.from(Point.point(p.longitude, p.latitude))
         return String.format(
             "%s%s %s%s %05d %05d",
+            MGRS.zone,
+            MGRS.band,
+            MGRS.column,
+            MGRS.row,
+            MGRS.easting,
+            MGRS.northing
+        )
+    }
+
+    fun toDEC(latitude: Double, longitude: Double): String {
+        return "%.5f %.5f".format(latitude, longitude).replace(",", ".")
+    }
+
+    fun toDMS(latitude: Double, longitude: Double): String {
+        val lat = degreesToDMS(latitude, true)
+        val lon = degreesToDMS(longitude, false)
+        fun string(a: Array<String>) = "%s°%s'%.5s\"%s".format(a[0], a[1], a[2], a[3])
+        return string(lat) + " " + string(lon)
+    }
+
+    fun toUTM(latitude: Double, longitude: Double): String {
+        val UTM = UTM.from(Point.point(longitude, latitude))
+        return "%s%s %.6s %.7s".format(UTM.zone, UTM.toMGRS().band, UTM.easting, UTM.northing)
+    }
+
+    fun toMGRS(latitude: Double, longitude: Double): String {
+        val MGRS = MGRS.from(Point.point(longitude, latitude))
+        return "%s%s %s%s %05d %05d".format(
             MGRS.zone,
             MGRS.band,
             MGRS.column,
@@ -153,7 +182,7 @@ fun latLongToMeter(
     lat_b: Double,
     lng_b: Double
 ): Double {
-    val pk = (180 / 3.14169)
+    val pk = (180 / PI)
     val a1 = lat_a / pk
     val a2 = lng_a / pk
     val b1 = lat_b / pk

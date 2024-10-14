@@ -8,7 +8,7 @@ import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -32,7 +32,7 @@ fun UserConfigItemList(
     onSaveClicked: (MeshProtos.User) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var userInput by remember(userConfig) { mutableStateOf(userConfig) }
+    var userInput by rememberSaveable { mutableStateOf(userConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -58,8 +58,9 @@ fun UserConfigItemList(
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     userInput = userInput.copy { longName = it }
-                    if (getInitials(it).toByteArray().size <= 4) // short_name max_size:5
+                    if (getInitials(it).toByteArray().size <= 4) { // short_name max_size:5
                         userInput = userInput.copy { shortName = getInitials(it) }
+                    }
                 })
         }
 

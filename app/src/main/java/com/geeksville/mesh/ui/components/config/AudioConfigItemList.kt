@@ -7,7 +7,7 @@ import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -27,7 +27,7 @@ fun AudioConfigItemList(
     onSaveClicked: (AudioConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var audioInput by remember(audioConfig) { mutableStateOf(audioConfig) }
+    var audioInput by rememberSaveable { mutableStateOf(audioConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()

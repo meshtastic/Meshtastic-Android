@@ -7,7 +7,7 @@ import javax.inject.Inject
  */
 class NopInterfaceSpec @Inject constructor(
     private val factory: NopInterfaceFactory
-): InterfaceSpec<NopInterface> {
+) : InterfaceSpec<NopInterface> {
     override fun createInterface(rest: String): NopInterface {
         return factory.create(rest)
     }

@@ -21,3 +21,6 @@ keystore.properties
 
 # AGP profiling traces
 *.trace
+
+# Kotlin compiler
+.kotlin

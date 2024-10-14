@@ -7,7 +7,7 @@ import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -26,7 +26,7 @@ fun StoreForwardConfigItemList(
     onSaveClicked: (StoreForwardConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var storeForwardInput by remember(storeForwardConfig) { mutableStateOf(storeForwardConfig) }
+    var storeForwardInput by rememberSaveable { mutableStateOf(storeForwardConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -78,6 +78,15 @@ fun StoreForwardConfigItemList(
                     storeForwardInput = storeForwardInput.copy { historyReturnWindow = it }
                 })
         }
+
+        item {
+            SwitchPreference(
+                title = "Server",
+                checked = storeForwardInput.isServer,
+                enabled = enabled,
+                onCheckedChange = { storeForwardInput = storeForwardInput.copy { isServer = it } })
+        }
+        item { Divider() }
 
         item {
             PreferenceFooter(

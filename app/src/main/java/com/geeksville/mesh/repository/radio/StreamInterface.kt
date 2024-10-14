@@ -2,7 +2,6 @@ package com.geeksville.mesh.repository.radio
 
 import com.geeksville.mesh.android.Logging
 
-
 /**
  * An interface that assumes we are talking to a meshtastic device over some sort of stream connection (serial or TCP probably)
  */
@@ -49,7 +48,7 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) :
 
     abstract fun sendBytes(p: ByteArray)
 
-    /// If subclasses need to flash at the end of a packet they can implement
+    // If subclasses need to flash at the end of a packet they can implement
     open fun flushBytes() {}
 
     override fun handleSendToRadio(p: ByteArray) {
@@ -65,7 +64,6 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) :
         sendBytes(p)
         flushBytes()
     }
-
 
     /** Print device serial debug output somewhere */
     private fun debugOut(b: Byte) {
@@ -92,7 +90,7 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) :
             nextPtr = 0
         }
 
-        /// Deliver our current packet and restart our reader
+        // Deliver our current packet and restart our reader
         fun deliverPacket() {
             val buf = rxPacket.copyOf(packetLen)
             service.handleFromRadio(buf)
@@ -107,8 +105,9 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) :
                     nextPtr = 0 // Restart from scratch
                 }
             1 -> // Looking for START2
-                if (c != START2)
+                if (c != START2) {
                     lostSync() // Restart from scratch
+                }
             2 -> // Looking for MSB of our 16 bit length
                 msb = c.toInt() and 0xff
             3 -> { // Looking for LSB of our 16 bit length
@@ -116,10 +115,11 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) :
 
                 // We've read our header, do one big read for the packet itself
                 packetLen = (msb shl 8) or lsb
-                if (packetLen > MAX_TO_FROM_RADIO_SIZE)
-                    lostSync()  // If packet len is too long, the bytes must have been corrupted, start looking for START1 again
-                else if (packetLen == 0)
+                if (packetLen > MAX_TO_FROM_RADIO_SIZE) {
+                    lostSync() // If packet len is too long, the bytes must have been corrupted, start looking for START1 again
+                } else if (packetLen == 0) {
                     deliverPacket() // zero length packets are valid and should be delivered immediately (because there won't be a next byte of payload)
+                }
             }
             else -> {
                 // We are looking at the packet bytes now

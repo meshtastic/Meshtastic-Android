@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -16,6 +17,7 @@ import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.RegionInfo
 import com.geeksville.mesh.model.numChannels
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditListPreference
@@ -24,16 +26,20 @@ import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.SwitchPreference
 
+@Suppress("LongMethod")
 @Composable
 fun LoRaConfigItemList(
     loraConfig: LoRaConfig,
     primarySettings: ChannelSettings,
     enabled: Boolean,
     onSaveClicked: (LoRaConfig) -> Unit,
+    hasPaFan: Boolean = false,
 ) {
     val focusManager = LocalFocusManager.current
-    var loraInput by remember(loraConfig) { mutableStateOf(loraConfig) }
-    val primaryChannel = Channel(primarySettings, loraInput)
+    var loraInput by rememberSaveable { mutableStateOf(loraConfig) }
+    val primaryChannel by remember(loraInput) {
+        mutableStateOf(Channel(primarySettings, loraInput))
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -96,9 +102,7 @@ fun LoRaConfigItemList(
         item {
             DropDownPreference(title = "Region (frequency plan)",
                 enabled = enabled,
-                items = LoRaConfig.RegionCode.entries
-                    .filter { it != LoRaConfig.RegionCode.UNRECOGNIZED }
-                    .map { it to it.name },
+                items = RegionInfo.entries.map { it.regionCode to it.description },
                 selectedItem = loraInput.region,
                 onItemSelected = { loraInput = loraInput.copy { region = it } })
         }
@@ -136,8 +140,9 @@ fun LoRaConfigItemList(
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onFocusChanged = { isFocused = it.isFocused },
                 onValueChanged = {
-                    if (it <= loraInput.numChannels) // total num of LoRa channels
+                    if (it <= loraInput.numChannels) { // total num of LoRa channels
                         loraInput = loraInput.copy { channelNum = it }
+                    }
                 })
         }
 
@@ -181,11 +186,30 @@ fun LoRaConfigItemList(
                 onValueChanged = { loraInput = loraInput.copy { overrideFrequency = it } })
         }
 
+        if (hasPaFan) {
+            item {
+                SwitchPreference(
+                    title = "PA fan disabled",
+                    checked = loraInput.paFanDisabled,
+                    enabled = enabled,
+                    onCheckedChange = { loraInput = loraInput.copy { paFanDisabled = it } })
+            }
+            item { Divider() }
+        }
+
         item {
             SwitchPreference(title = "Ignore MQTT",
                 checked = loraInput.ignoreMqtt,
                 enabled = enabled,
                 onCheckedChange = { loraInput = loraInput.copy { ignoreMqtt = it } })
+        }
+        item { Divider() }
+
+        item {
+            SwitchPreference(title = "OK to MQTT",
+                checked = loraInput.configOkToMqtt,
+                enabled = enabled,
+                onCheckedChange = { loraInput = loraInput.copy { configOkToMqtt = it } })
         }
         item { Divider() }
 

@@ -19,7 +19,7 @@ interface PacketDao {
     @Query(
         """
     SELECT * FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND port_num = :portNum
     ORDER BY received_time ASC
     """
@@ -29,7 +29,7 @@ interface PacketDao {
     @Query(
         """
     SELECT * FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND port_num = 1
     ORDER BY received_time DESC
     """
@@ -39,7 +39,7 @@ interface PacketDao {
     @Query(
         """
     SELECT COUNT(*) FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND port_num = 1 AND contact_key = :contact
     """
     )
@@ -48,7 +48,7 @@ interface PacketDao {
     @Query(
         """
     SELECT COUNT(*) FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND port_num = 1 AND contact_key = :contact AND read = 0
     """
     )
@@ -58,7 +58,7 @@ interface PacketDao {
         """
     UPDATE packet
     SET read = 1
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND port_num = 1 AND contact_key = :contact AND read = 0 AND received_time <= :timestamp
     """
     )
@@ -70,9 +70,9 @@ interface PacketDao {
     @Query(
         """
     SELECT * FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND port_num = 1 AND contact_key = :contact
-    ORDER BY received_time ASC
+    ORDER BY received_time DESC
     """
     )
     fun getMessagesFrom(contact: String): Flow<List<Packet>>
@@ -80,7 +80,7 @@ interface PacketDao {
     @Query(
         """
     SELECT * FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND data = :data
     """
     )
@@ -92,7 +92,7 @@ interface PacketDao {
     @Query(
         """
     DELETE FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND contact_key IN (:contactList)
     """
     )
@@ -124,16 +124,21 @@ interface PacketDao {
     @Query(
         """
     SELECT data FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
     ORDER BY received_time ASC
     """
     )
     fun getDataPackets(): List<DataPacket>
 
-    @Transaction
-    fun getDataPacketById(requestId: Int): DataPacket? {
-        return getDataPackets().lastOrNull { it.id == requestId }
-    }
+    @Query(
+        """
+    SELECT * FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND packet_id = :requestId
+    ORDER BY received_time DESC
+    """
+    )
+    fun getPacketById(requestId: Int): Packet?
 
     @Transaction
     fun getQueuedPackets(): List<DataPacket>? =
@@ -142,7 +147,7 @@ interface PacketDao {
     @Query(
         """
     SELECT * FROM packet
-    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM MyNodeInfo))
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
         AND port_num = 8
     ORDER BY received_time ASC
     """
@@ -159,7 +164,7 @@ interface PacketDao {
     fun getContactSettings(): Flow<Map<@MapColumn(columnName = "contact_key") String, ContactSettings>>
 
     @Query("SELECT * FROM contact_settings WHERE contact_key = :contact")
-    suspend fun getContactSettings(contact:String): ContactSettings?
+    suspend fun getContactSettings(contact: String): ContactSettings?
 
     @Upsert
     fun upsertContactSettings(contacts: List<ContactSettings>)

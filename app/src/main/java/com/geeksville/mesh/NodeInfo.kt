@@ -2,21 +2,11 @@ package com.geeksville.mesh
 
 import android.graphics.Color
 import android.os.Parcelable
-import androidx.room.ColumnInfo
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.bearing
 import com.geeksville.mesh.util.latLongToMeter
 import com.geeksville.mesh.util.anonymize
 import kotlinx.parcelize.Parcelize
-
-/**
- * Room [Embedded], [Entity] and [PrimaryKey] annotations and imports, as well as any protobuf
- * reference [MeshProtos], [TelemetryProtos], [ConfigProtos] can be removed when only using the API.
- * For details check the AIDL interface in [com.geeksville.mesh.IMeshService]
- */
 
 //
 // model objects that directly map to the corresponding protobufs
@@ -29,10 +19,16 @@ data class MeshUser(
     val shortName: String,
     val hwModel: MeshProtos.HardwareModel,
     val isLicensed: Boolean = false,
+    val role: Int = 0,
 ) : Parcelable {
 
     override fun toString(): String {
-        return "MeshUser(id=${id.anonymize}, longName=${longName.anonymize}, shortName=${shortName.anonymize}, hwModel=${hwModelString}, isLicensed=${isLicensed})"
+        return "MeshUser(id=${id.anonymize}, " +
+            "longName=${longName.anonymize}, " +
+            "shortName=${shortName.anonymize}, " +
+            "hwModel=$hwModelString, " +
+            "isLicensed=$isLicensed, " +
+            "role=$role)"
     }
 
     /** Create our model object from a protobuf.
@@ -43,16 +39,8 @@ data class MeshUser(
         p.shortName,
         p.hwModel,
         p.isLicensed,
+        p.roleValue
     )
-
-    fun toProto(): MeshProtos.User =
-        MeshProtos.User.newBuilder()
-            .setId(id)
-            .setLongName(longName)
-            .setShortName(shortName)
-            .setHwModel(hwModel)
-            .setIsLicensed(isLicensed)
-            .build()
 
     /** a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot
      * or null if unset
@@ -163,67 +151,19 @@ data class EnvironmentMetrics(
     companion object {
         fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
     }
-
-    /** Create our model object from a protobuf.
-     */
-    constructor(t: TelemetryProtos.EnvironmentMetrics, telemetryTime: Int = currentTime()) : this(
-        telemetryTime,
-        t.temperature,
-        t.relativeHumidity,
-        t.barometricPressure,
-        t.gasResistance,
-        t.voltage,
-        t.current,
-        t.iaq,
-    )
-
-    fun getDisplayString(inFahrenheit: Boolean = false): String {
-        val temp = if (temperature != 0f) {
-            if (inFahrenheit) {
-                val fahrenheit = temperature * 1.8F + 32
-                String.format("%.1f°F", fahrenheit)
-            } else {
-                String.format("%.1f°C", temperature)
-            }
-        } else null
-        val humidity = if (relativeHumidity != 0f) String.format("%.0f%%", relativeHumidity) else null
-        val pressure = if (barometricPressure != 0f) String.format("%.1fhPa", barometricPressure) else null
-        val gas = if (gasResistance != 0f) String.format("%.0fMΩ", gasResistance) else null
-        val voltage = if (voltage != 0f) String.format("%.2fV", voltage) else null
-        val current = if (current != 0f) String.format("%.1fmA", current) else null
-        val iaq = if (iaq != 0) "IAQ: $iaq" else null
-
-        return listOfNotNull(
-            temp,
-            humidity,
-            pressure,
-            gas,
-            voltage,
-            current,
-            iaq,
-        ).joinToString(" ")
-    }
-
 }
 
 @Parcelize
-@Entity(tableName = "NodeInfo")
 data class NodeInfo(
-    @PrimaryKey(autoGenerate = false)
     val num: Int, // This is immutable, and used as a key
-    @Embedded(prefix = "user_")
     var user: MeshUser? = null,
-    @Embedded(prefix = "position_")
     var position: Position? = null,
     var snr: Float = Float.MAX_VALUE,
     var rssi: Int = Int.MAX_VALUE,
     var lastHeard: Int = 0, // the last time we've seen this node in secs since 1970
-    @Embedded(prefix = "devMetrics_")
     var deviceMetrics: DeviceMetrics? = null,
     var channel: Int = 0,
-    @Embedded(prefix = "envMetrics_")
     var environmentMetrics: EnvironmentMetrics? = null,
-    @ColumnInfo(name = "hopsAway", defaultValue = "0")
     var hopsAway: Int = 0
 ) : Parcelable {
 

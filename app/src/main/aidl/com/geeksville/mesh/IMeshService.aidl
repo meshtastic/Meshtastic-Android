@@ -121,6 +121,9 @@ interface IMeshService {
     /// Send position packet with wantResponse to nodeNum
     void requestPosition(in int destNum, in Position position);
 
+    /// Send setFixedPosition admin packet (or removeFixedPosition if Position is empty)
+    void setFixedPosition(in int destNum, in Position position);
+
     /// Send traceroute packet with wantResponse to nodeNum
     void requestTraceroute(in int requestId, in int destNum);
 
@@ -165,4 +168,7 @@ interface IMeshService {
 
     /// Stop providing location (from phone GPS) to mesh
     void stopProvideLocation();
+
+    /// Send request for node UserInfo
+    void requestUserInfo(in int destNum);
 }

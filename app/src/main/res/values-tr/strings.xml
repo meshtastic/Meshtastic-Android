@@ -1,5 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="node_filter_placeholder">Filtre</string>
+    <string name="desc_node_filter_clear">clear node filter</string>
+    <string name="node_filter_include_unknown">Bilinmeyenleri göster</string>
+    <string name="node_filter_show_details">Detaylar</string>
+    <string name="node_sort_alpha">A-Z</string>
+    <string name="node_sort_channel">Kanal</string>
+    <string name="node_sort_distance">Mesafe</string>
+    <string name="node_sort_hops_away">Hops away</string>
+    <string name="node_sort_last_heard">Son duyulma</string>
+    <string name="node_sort_via_mqtt">MQTT yoluyla</string>
+    <string name="unrecognized">Unrecognized</string>
+    <string name="message_status_enroute">Ulaştı bildirisi bekleniyor</string>
+    <string name="message_status_queued">Gönderilmek üzere sırada</string>
+    <string name="routing_error_none">Ulaştı</string>
+    <string name="routing_error_no_route">Rota yok</string>
+    <string name="routing_error_got_nak">Received a negative acknowledgment</string>
+    <string name="routing_error_timeout">Timeout</string>
+    <string name="routing_error_no_interface">No Interface</string>
+    <string name="routing_error_max_retransmit">Max Retransmission Reached</string>
+    <string name="routing_error_no_channel">No Channel</string>
+    <string name="routing_error_too_large">Packet too large</string>
+    <string name="routing_error_no_response">No response</string>
+    <string name="routing_error_bad_request">Bad Request</string>
+    <string name="routing_error_duty_cycle_limit">Regional Duty Cycle Limit Reached</string>
+    <string name="routing_error_not_authorized">Not Authorized</string>
+    <string name="routing_error_pki_failed">Encrypted Send Failed</string>
+    <string name="routing_error_pki_unknown_pubkey">Unknown Public Key</string>
+    <string name="role_client">App connected or standalone messaging device.</string>
+    <string name="role_client_mute">Device that does not forward packets from other devices.</string>
+    <string name="role_router">Infrastructure node for extending network coverage by relaying messages. Visible in nodes list.</string>
+    <string name="role_repeater">Infrastructure node for extending network coverage by relaying messages with minimal overhead. Not visible in nodes list.</string>
+    <string name="role_tracker">Broadcasts GPS position packets as priority.</string>
+    <string name="role_sensor">Broadcasts telemetry packets as priority.</string>
+    <string name="role_tak">Optimized for ATAK system communication, reduces routine broadcasts.</string>
+    <string name="role_client_hidden">Device that only broadcasts as needed for stealth or power savings.</string>
+    <string name="role_lost_and_found">Broadcasts location as message to default channel regularly for to assist with device recovery.</string>
+    <string name="role_tak_tracker">Enables automatic TAK PLI broadcasts and reduces routine broadcasts.</string>
     <string name="channel_name">Kanal Adı</string>
     <string name="channel_options">Kanal Seçenekleri</string>
     <string name="qr_code">Karekod</string>
@@ -48,6 +85,7 @@
     <string name="app_too_old">Uygulama güncellemesi gerekli</string>
     <string name="must_update">Uygulamayı Google Play store (ya da GitHub)\'dan güncelleyin. Bu cihaz ile haberleşmek için uygulama çok eski. İlgili <a href="https://meshtastic.org/docs/software/android/installation"> Dokümantasyon</a>.</string>
     <string name="none">Hiçbiri (kapat)</string>
+    <string name="modem_config_turbo">Short Range / Turbo</string>
     <string name="modem_config_short">Kısa menzil / Hızlı</string>
     <string name="modem_config_medium">Orta menzil / Hızlı</string>
     <string name="modem_config_long">Uzun menzil / Hızlı</string>
@@ -55,7 +93,7 @@
     <string name="modem_config_very_long">Çok uzun menzil / Yavaş</string>
     <string name="modem_config_unrecognized">BELİRLENMEDİ</string>
     <string name="meshtastic_service_notifications">Servis bildirimleri</string>
-    <string name="location_disabled_warning">Android ayarlarında (hassas) konum servislerine izin vermelisiniz. Sonrasında isterseniz kapatabilirsiniz.</string>
+    <string name="location_disabled_warning">Location must be turned on to find new devices via Bluetooth. You can turn it off again afterwards.</string>
     <string name="about">Hakkında</string>
     <string name="a_list_of_nodes_in_the_mesh">Ağdaki cihazların(node) listesi</string>
     <string name="text_messages">Metin mesajları</string>
@@ -119,6 +157,7 @@
     <string name="preferences_system_default">Sistem varsayılanı</string>
     <string name="resend">Tekrar gönder</string>
     <string name="shutdown">Kapat</string>
+    <string name="cant_shutdown">Shutdown not supported on this device</string>
     <string name="reboot">Yeniden başlat</string>
     <string name="traceroute">Yol izle</string>
     <string name="intro_show">Tanıtımı Göster</string>
@@ -141,6 +180,8 @@
     <string name="direct_message">Direkt Mesaj</string>
     <string name="nodedb_reset">NodeDB sıfırla</string>
     <string name="nodedb_reset_description">Listeden tüm cihazları(node) siler.</string>
+    <string name="delivery_confirmed">Teslim Edildi</string>
+    <string name="error">Hata</string>
     <string name="ignore">Yok say</string>
     <string name="ignore_add">Yoksay listesine \'%s\' eklensin mi? Değişiklikten sonra cihazınız yeniden başlar.</string>
     <string name="ignore_remove">Yoksay listesinden \'%s\' çıkarılsın mı? Değişiklikten sonra cihazınız yeniden başlar.</string>
@@ -152,6 +193,7 @@
     <string name="device_settings">Cihaz ayarları</string>
     <string name="module_settings">Modül ayarları</string>
     <string name="add">Ekle</string>
+    <string name="edit">Edit</string>
     <string name="calculating">Hesaplanıyor…</string>
     <string name="map_offline_manager">Çevrim dışı işlemleri</string>
     <string name="map_cache_size">Önbellek doluluğu</string>
@@ -170,4 +212,39 @@
     <string name="waypoint_new">Yeni yer işareti</string>
     <string name="waypoint_received">Alınan yer işareti: %s</string>
     <string name="error_duty_cycle">Zaman limitine (duty cycle) ulaşıldı. Şu anda mesaj gönderilemiyor, lütfen daha sonra tekrar deneyin.</string>
+    <string name="remove">Kaldır</string>
+    <string name="remove_node_text">Bu node, kendisinden yeniden paket alınana kadar listenizden kaldırılacaktır.</string>
+    <string name="mute">Mute</string>
+    <string name="mute_notifications">Mute notifications</string>
+    <string name="mute_8_hours">8 saat</string>
+    <string name="mute_1_week">1 hafta</string>
+    <string name="mute_always">Her zaman</string>
+    <plurals name="add_channel_from_qr">
+        <item quantity="one">Do you want to add a new channel?</item>
+        <item quantity="other">Do you want to add %d new channels?</item>
+    </plurals>
+    <string name="replace">Replace</string>
+    <string name="wifi_qr_code_scan">Scan WiFi QR code</string>
+    <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>
+    <string name="navigate_back">Navigate Back</string>
+    <string name="battery">Battery</string>
+    <string name="channel_utilization">Channel Utilization</string>
+    <string name="air_utilization">Air Utilization</string>
+    <string name="device">Device</string>
+    <string name="metrics">Metrics</string>
+    <string name="environment">Environment</string>
+    <string name="temperature">Temperature</string>
+    <string name="humidity">Humidity</string>
+    <string name="logs">Logs</string>
+    <string name="hops_away">Hops Away</string>
+    <string name="info">Information</string>
+    <string name="ch_util_definition">Utilization for the current channel, including well formed TX, RX and malformed RX (aka noise).</string>
+    <string name="air_util_definition">Percent of airtime for transmission used within the last hour.</string>
+    <string name="iaq">IAQ</string>
+    <string name="encryption_psk">Shared Key</string>
+    <string name="encryption_psk_text">Direct messages are using the shared key for the channel.</string>
+    <string name="encryption_pkc">Public Key Encryption</string>
+    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption. Requires firmware version 2.5 or greater.</string>
+    <string name="encryption_error">Public key mismatch</string>
+    <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more serious security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
 </resources>

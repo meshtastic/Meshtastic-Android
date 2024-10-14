@@ -7,20 +7,49 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
+import androidx.annotation.StringRes
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.LocalContentColor
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.asLiveData
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.databinding.QuickChatSettingsFragmentBinding
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.ui.components.dragContainer
+import com.geeksville.mesh.ui.components.dragDropItemsIndexed
+import com.geeksville.mesh.ui.components.rememberDragDropState
+import com.geeksville.mesh.ui.theme.AppTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.switchmaterial.SwitchMaterial
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.*
 
 @AndroidEntryPoint
 class QuickChatSettingsFragment : ScreenFragment("Quick Chat Settings"), Logging {
@@ -30,10 +59,9 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat Settings"), Logging
 
     private val model: UIViewModel by activityViewModels()
 
-    private lateinit var actions: List<QuickChatAction>
-
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = QuickChatSettingsFragmentBinding.inflate(inflater, container, false)
@@ -43,68 +71,60 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat Settings"), Logging
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.quickChatSettingsToolbar.setNavigationOnClickListener {
+            parentFragmentManager.popBackStack()
+        }
+
         binding.quickChatSettingsCreateButton.setOnClickListener {
-            val builder = createEditDialog(requireContext(), getString(R.string.quick_chat_new))
+            val builder = createEditDialog(requireContext(), R.string.quick_chat_new)
 
             builder.builder.setPositiveButton(R.string.add) { _, _ ->
 
                 val name = builder.nameInput.text.toString().trim()
                 val message = builder.messageInput.text.toString()
-                if (builder.isNotEmpty())
+                if (builder.isNotEmpty()) {
                     model.addQuickChatAction(
                         name, message,
                         if (builder.modeSwitch.isChecked) QuickChatAction.Mode.Instant else QuickChatAction.Mode.Append
                     )
+                }
             }
 
             val dialog = builder.builder.create()
             dialog.show()
         }
 
-        val quickChatActionAdapter =
-            QuickChatActionAdapter(requireContext(), { action: QuickChatAction ->
-                val builder = createEditDialog(requireContext(), getString(R.string.quick_chat_edit))
-                builder.nameInput.setText(action.name)
-                builder.messageInput.setText(action.message)
-                val isInstant = action.mode == QuickChatAction.Mode.Instant
-                builder.modeSwitch.isChecked = isInstant
-                builder.instantImage.visibility = if (isInstant) View.VISIBLE else View.INVISIBLE
+        binding.quickChatSettingsView.setContent {
+            val actions by model.quickChatActions.collectAsStateWithLifecycle()
 
-                builder.builder.setNegativeButton(R.string.delete) { _, _ ->
-                    model.deleteQuickChatAction(action)
-                }
-                builder.builder.setPositiveButton(R.string.save) { _, _ ->
-                    if (builder.isNotEmpty()) {
-                        model.updateQuickChatAction(
-                            action,
-                            builder.nameInput.text.toString(),
-                            builder.messageInput.text.toString(),
-                            if (builder.modeSwitch.isChecked) QuickChatAction.Mode.Instant else QuickChatAction.Mode.Append
+            val listState = rememberLazyListState()
+            val dragDropState = rememberDragDropState(listState) { fromIndex, toIndex ->
+                val list = actions.toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
+                model.updateActionPositions(list)
+            }
+
+            AppTheme {
+                LazyColumn(
+                    modifier = Modifier.dragContainer(
+                        dragDropState = dragDropState,
+                        haptics = LocalHapticFeedback.current,
+                    ),
+                    state = listState,
+                    // contentPadding = PaddingValues(16.dp),
+                ) {
+                    dragDropItemsIndexed(
+                        items = actions,
+                        dragDropState = dragDropState,
+                        key = { _, item -> item.uuid },
+                    ) { _, action, isDragging ->
+                        val elevation by animateDpAsState(if (isDragging) 8.dp else 4.dp)
+                        QuickChatItem(
+                            elevation = elevation,
+                            action = action,
+                            onEditClick = ::onEditAction,
                         )
                     }
                 }
-                val dialog = builder.builder.create()
-                dialog.show()
-            }, { fromPos, toPos ->
-                Collections.swap(actions, fromPos, toPos)
-            }, {
-                model.updateActionPositions(actions)
-            })
-
-        val dragCallback =
-            DragManageAdapter(quickChatActionAdapter, ItemTouchHelper.UP or ItemTouchHelper.DOWN, 0)
-        val helper = ItemTouchHelper(dragCallback)
-
-        binding.quickChatSettingsView.apply {
-            this.layoutManager = LinearLayoutManager(requireContext())
-            this.adapter = quickChatActionAdapter
-            helper.attachToRecyclerView(this)
-        }
-
-        model.quickChatActions.asLiveData().observe(viewLifecycleOwner) { actions ->
-            actions?.let {
-                quickChatActionAdapter.setActions(actions)
-                this.actions = actions
             }
         }
     }
@@ -136,7 +156,7 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat Settings"), Logging
         }
     }
 
-    private fun createEditDialog(context: Context, title: String): DialogBuilder {
+    private fun createEditDialog(context: Context, @StringRes title: Int): DialogBuilder {
         val builder = MaterialAlertDialogBuilder(context)
         builder.setTitle(title)
 
@@ -149,7 +169,7 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat Settings"), Logging
         instantImage.visibility = if (modeSwitch.isChecked) View.VISIBLE else View.INVISIBLE
 
         // don't change action name on edits
-        var nameHasChanged = title == getString(R.string.quick_chat_edit)
+        var nameHasChanged = title == R.string.quick_chat_edit
 
         modeSwitch.setOnCheckedChangeListener { _, _ ->
             if (modeSwitch.isChecked) {
@@ -174,5 +194,117 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat Settings"), Logging
         builder.setView(layout)
 
         return DialogBuilder(builder, nameInput, messageInput, modeSwitch, instantImage)
+    }
+
+    private fun onEditAction(action: QuickChatAction) {
+        val builder = createEditDialog(requireContext(), R.string.quick_chat_edit)
+        builder.nameInput.setText(action.name)
+        builder.messageInput.setText(action.message)
+        val isInstant = action.mode == QuickChatAction.Mode.Instant
+        builder.modeSwitch.isChecked = isInstant
+        builder.instantImage.visibility = if (isInstant) View.VISIBLE else View.INVISIBLE
+
+        builder.builder.setNegativeButton(R.string.delete) { _, _ ->
+            model.deleteQuickChatAction(action)
+        }
+        builder.builder.setPositiveButton(R.string.save) { _, _ ->
+            if (builder.isNotEmpty()) {
+                model.updateQuickChatAction(
+                    action,
+                    builder.nameInput.text.toString(),
+                    builder.messageInput.text.toString(),
+                    if (builder.modeSwitch.isChecked) {
+                        QuickChatAction.Mode.Instant
+                    } else {
+                        QuickChatAction.Mode.Append
+                    }
+                )
+            }
+        }
+        val dialog = builder.builder.create()
+        dialog.show()
+    }
+}
+
+@Composable
+internal fun QuickChatItem(
+    action: QuickChatAction,
+    modifier: Modifier = Modifier,
+    onEditClick: (QuickChatAction) -> Unit = {},
+    elevation: Dp = 4.dp,
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        elevation = elevation,
+        shape = RoundedCornerShape(12.dp),
+    ) {
+        Surface {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                val showInstantIcon = action.mode == QuickChatAction.Mode.Instant
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_baseline_fast_forward_24),
+                    contentDescription = null,
+                    modifier = Modifier.padding(start = 8.dp),
+                    tint = if (showInstantIcon) LocalContentColor.current else Color.Transparent,
+                )
+
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp)
+                ) {
+                    Text(
+                        text = action.name,
+                        fontSize = 20.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+
+                    Text(
+                        text = action.message,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+
+                IconButton(
+                    onClick = { onEditClick(action) },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_edit_24),
+                        contentDescription = null
+                    )
+                }
+
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_baseline_drag_handle_24),
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 8.dp),
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun QuickChatItemPreview() {
+    AppTheme {
+        QuickChatItem(
+            action = QuickChatAction(
+                uuid = 0L,
+                name = "TST",
+                message = "Test",
+                mode = QuickChatAction.Mode.Instant,
+                position = 0,
+            ),
+        )
     }
 }

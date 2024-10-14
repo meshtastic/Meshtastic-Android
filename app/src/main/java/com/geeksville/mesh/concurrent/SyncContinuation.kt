@@ -2,7 +2,6 @@ package com.geeksville.mesh.concurrent
 
 import com.geeksville.mesh.android.Logging
 
-
 /**
  * A deferred execution object (with various possible implementations)
  */
@@ -52,15 +51,17 @@ class SyncContinuation<T> : Continuation<T> {
             while (result == null) {
                 mbox.wait(timeoutMsecs)
 
-                if (timeoutMsecs > 0 && ((System.currentTimeMillis() - startT) >= timeoutMsecs))
+                if (timeoutMsecs > 0 && ((System.currentTimeMillis() - startT) >= timeoutMsecs)) {
                     throw Exception("SyncContinuation timeout")
+                }
             }
 
             val r = result
-            if (r != null)
+            if (r != null) {
                 return r.getOrThrow()
-            else
+            } else {
                 throw Exception("This shouldn't happen")
+            }
         }
     }
 }

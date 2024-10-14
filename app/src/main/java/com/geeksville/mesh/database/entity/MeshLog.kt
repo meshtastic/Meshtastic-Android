@@ -2,18 +2,30 @@ package com.geeksville.mesh.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.MeshProtos.FromRadio
 import com.geeksville.mesh.Portnums
 import com.google.protobuf.TextFormat
 import java.io.IOException
 
-
-@Entity(tableName = "log")
-data class MeshLog(@PrimaryKey val uuid: String,
-                   @ColumnInfo(name = "type") val message_type: String,
-                   @ColumnInfo(name = "received_date") val received_date: Long,
-                   @ColumnInfo(name = "message") val raw_message: String
+@Entity(
+    tableName = "log",
+    indices = [
+        Index(value = ["from_num"]),
+        Index(value = ["port_num"]),
+    ],
+)
+data class MeshLog(
+    @PrimaryKey val uuid: String,
+    @ColumnInfo(name = "type") val message_type: String,
+    @ColumnInfo(name = "received_date") val received_date: Long,
+    @ColumnInfo(name = "message") val raw_message: String,
+    @ColumnInfo(name = "from_num", defaultValue = "0") val fromNum: Int = 0,
+    @ColumnInfo(name = "port_num", defaultValue = "0") val portNum: Int = 0,
+    @ColumnInfo(name = "from_radio", typeAffinity = ColumnInfo.BLOB, defaultValue = "x''")
+    val fromRadio: FromRadio = FromRadio.getDefaultInstance(),
 ) {
 
     val meshPacket: MeshProtos.MeshPacket?

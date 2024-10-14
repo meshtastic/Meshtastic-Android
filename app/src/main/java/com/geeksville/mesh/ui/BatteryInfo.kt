@@ -1,6 +1,5 @@
 package com.geeksville.mesh.ui
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.Icon
@@ -12,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
@@ -53,9 +53,8 @@ fun BatteryInfo(
     }
 }
 
+@PreviewLightDark
 @Composable
-@Preview(showBackground = true)
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 fun BatteryInfoPreview(
     @PreviewParameter(BatteryInfoPreviewParameterProvider::class)
     batteryInfo: Pair<Int?, Float?>

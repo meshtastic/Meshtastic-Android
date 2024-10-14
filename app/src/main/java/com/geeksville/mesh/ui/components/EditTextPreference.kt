@@ -21,11 +21,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.geeksville.mesh.R
 
 @Composable
 fun EditTextPreference(
@@ -167,8 +169,12 @@ fun EditTextPreference(
         trailingIcon = {
             if (trailingIcon != null) {
                 trailingIcon()
-            } else {
-                if (isError) Icon(Icons.TwoTone.Info, "Error", tint = MaterialTheme.colors.error)
+            } else if (isError) {
+                Icon(
+                    imageVector = Icons.TwoTone.Info,
+                    contentDescription = stringResource(id = R.string.error),
+                    tint = MaterialTheme.colors.error
+                )
             }
         },
     )

@@ -7,7 +7,7 @@ import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -27,7 +27,7 @@ fun DisplayConfigItemList(
     onSaveClicked: (DisplayConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    var displayInput by remember(displayConfig) { mutableStateOf(displayConfig) }
+    var displayInput by rememberSaveable { mutableStateOf(displayConfig) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -153,7 +153,6 @@ fun DisplayConfigItemList(
             )
         }
     }
-
 }
 
 @Preview(showBackground = true)

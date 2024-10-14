@@ -2,12 +2,10 @@ package com.geeksville.mesh.model
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
-import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.MyNodeInfo
-import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.database.dao.NodeInfoDao
+import com.geeksville.mesh.database.entity.MyNodeEntity
+import com.geeksville.mesh.database.entity.NodeEntity
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.launchIn
@@ -22,26 +20,24 @@ class NodeDB @Inject constructor(
     private val nodeInfoDao: NodeInfoDao,
 ) {
     // hardware info about our local device (can be null)
-    private val _myNodeInfo = MutableStateFlow<MyNodeInfo?>(null)
-    val myNodeInfo: StateFlow<MyNodeInfo?> get() = _myNodeInfo
+    private val _myNodeInfo = MutableStateFlow<MyNodeEntity?>(null)
+    val myNodeInfo: StateFlow<MyNodeEntity?> get() = _myNodeInfo
 
     // our node info
-    private val _ourNodeInfo = MutableStateFlow<NodeInfo?>(null)
-    val ourNodeInfo: StateFlow<NodeInfo?> get() = _ourNodeInfo
+    private val _ourNodeInfo = MutableStateFlow<NodeEntity?>(null)
+    val ourNodeInfo: StateFlow<NodeEntity?> get() = _ourNodeInfo
 
     // The unique userId of our node
     private val _myId = MutableStateFlow<String?>(null)
     val myId: StateFlow<String?> get() = _myId
 
-    // A map from nodeNum to NodeInfo
-    private val _nodeDBbyNum = MutableStateFlow<Map<Int, NodeInfo>>(mapOf())
-    val nodeDBbyNum: StateFlow<Map<Int, NodeInfo>> get() = _nodeDBbyNum
-    val nodesByNum get() = nodeDBbyNum.value
+    // A map from nodeNum to NodeEntity
+    private val _nodeDBbyNum = MutableStateFlow<Map<Int, NodeEntity>>(mapOf())
+    val nodeDBbyNum: StateFlow<Map<Int, NodeEntity>> get() = _nodeDBbyNum
 
-    // A map from userId to NodeInfo
-    private val _nodeDBbyID = MutableStateFlow<Map<String, NodeInfo>>(mapOf())
-    val nodeDBbyID: StateFlow<Map<String, NodeInfo>> get() = _nodeDBbyID
-    val nodes get() = nodeDBbyID
+    fun getUser(userId: String?) = userId?.let { id ->
+        nodeDBbyNum.value.values.find { it.user.id == id }?.user
+    }
 
     init {
         nodeInfoDao.getMyNodeInfo().onEach { _myNodeInfo.value = it }
@@ -53,9 +49,6 @@ class NodeDB @Inject constructor(
             _ourNodeInfo.value = ourNodeInfo
             _myId.value = ourNodeInfo?.user?.id
         }.launchIn(processLifecycle.coroutineScope)
-
-        nodeInfoDao.nodeDBbyID().onEach { _nodeDBbyID.value = it }
-            .launchIn(processLifecycle.coroutineScope)
     }
 
     fun getNodes(
@@ -66,22 +59,17 @@ class NodeDB @Inject constructor(
         sort = sort.sqlValue,
         filter = filter,
         includeUnknown = includeUnknown,
-        unknownHwModel = MeshProtos.HardwareModel.UNSET
     )
 
-    fun myNodeInfoFlow(): Flow<MyNodeInfo?> = nodeInfoDao.getMyNodeInfo()
-
-    suspend fun upsert(node: NodeInfo) = withContext(Dispatchers.IO) {
+    suspend fun upsert(node: NodeEntity) = withContext(Dispatchers.IO) {
         nodeInfoDao.upsert(node)
     }
 
-    suspend fun installNodeDB(mi: MyNodeInfo, nodes: List<NodeInfo>) = withContext(Dispatchers.IO) {
-        nodeInfoDao.apply {
-            clearNodeInfo()
-            clearMyNodeInfo()
-            setMyNodeInfo(mi) // set MyNodeInfo first
-            putAll(nodes)
-        }
+    suspend fun installNodeDB(mi: MyNodeEntity, nodes: List<NodeEntity>) = withContext(Dispatchers.IO) {
+        nodeInfoDao.clearMyNodeInfo()
+        nodeInfoDao.setMyNodeInfo(mi) // set MyNodeEntity first
+        nodeInfoDao.clearNodeInfo()
+        nodeInfoDao.putAll(nodes)
     }
 
     suspend fun deleteNode(num: Int) = withContext(Dispatchers.IO) {

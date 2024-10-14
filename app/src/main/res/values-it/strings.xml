@@ -1,7 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="node_filter_placeholder">Filter</string>
+    <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">cancella filtro nodi</string>
+    <string name="node_filter_include_unknown">Includi sconosciuti</string>
+    <string name="node_filter_show_details">Mostra dettagli</string>
+    <string name="node_sort_alpha">A-Z</string>
+    <string name="node_sort_channel">Canale</string>
+    <string name="node_sort_distance">Distanza</string>
+    <string name="node_sort_hops_away">Distanza in Hop</string>
+    <string name="node_sort_last_heard">Ricevuto più di recente</string>
+    <string name="node_sort_via_mqtt">via MQTT</string>
+    <string name="unrecognized">Non riconosciuto</string>
+    <string name="message_status_enroute">In attesa di conferma</string>
+    <string name="message_status_queued">In coda per l\'invio</string>
+    <string name="routing_error_none">Confermato</string>
+    <string name="routing_error_no_route">Nessuna route</string>
+    <string name="routing_error_got_nak">Ricevuta una conferma negativa</string>
+    <string name="routing_error_timeout">Timeout</string>
+    <string name="routing_error_no_interface">Nessuna Interfaccia</string>
+    <string name="routing_error_max_retransmit">Tentativi di Ritrasmissione Esauriti</string>
+    <string name="routing_error_no_channel">Nessun Canale</string>
+    <string name="routing_error_too_large">Pacchetto troppo grande</string>
+    <string name="routing_error_no_response">Nessuna risposta</string>
+    <string name="routing_error_bad_request">Richiesta Non Valida</string>
+    <string name="routing_error_duty_cycle_limit">Raggiunto il limite di duty cycle regionale</string>
+    <string name="routing_error_not_authorized">Non Autorizzato</string>
+    <string name="routing_error_pki_failed">Invio Criptato Non Riuscito</string>
+    <string name="routing_error_pki_unknown_pubkey">Chiave Pubblica Sconosciuta</string>
+    <string name="role_client">App collegata o dispositivo di messaggistica standalone.</string>
+    <string name="role_client_mute">Dispositivo che non inoltra pacchetti da altri dispositivi.</string>
+    <string name="role_router">Nodo d\'infrastruttura per estendere la copertura di rete tramite inoltro dei messaggi. Visibile nell\'elenco dei nodi.</string>
+    <string name="role_repeater">Nodo d\'infrastruttura per estendere la copertura della rete tramite inoltro dei messaggi con overhead minimo. Non visibile nell\'elenco dei nodi.</string>
+    <string name="role_tracker">Dà priorità alla trasmissione di pacchetti di posizione GPS.</string>
+    <string name="role_sensor">Dà priorità alla trasmissione di pacchetti di telemetria.</string>
+    <string name="role_tak">Ottimizzato per la comunicazione del sistema ATAK, riduce le trasmissioni di routine.</string>
+    <string name="role_client_hidden">Dispositivo che trasmette solo quando necessario, per risparmiare energia o restare invisibile.</string>
+    <string name="role_lost_and_found">Trasmette a intervalli regolari la posizione come messaggio nel canale predefinito per aiutare il recupero del dispositivo.</string>
+    <string name="role_tak_tracker">Abilita le trasmissioni automatiche TAK PLI e riduce le trasmissioni di routine.</string>
     <string name="channel_name">Nome del canale</string>
     <string name="channel_options">Opzioni del canale</string>
     <string name="qr_code">Codice QR</string>
@@ -14,7 +49,7 @@
     <string name="warning_not_paired">Non è ancora stato abbinato un dispositivo radio compatibile Meshtastic a questo telefono. È necessario abbinare un dispositivo e impostare il nome utente.\n\nQuesta applicazione open-source è ancora in via di sviluppo, se si riscontrano problemi, rivolgersi al forum: meshtastic.discourse.group.\n\nPer maggiori informazioni visitare la pagina web - www.meshtastic.org.</string>
     <string name="you">Tu</string>
     <string name="your_name">Il tuo nome</string>
-    <string name="analytics_okay">Le statistiche di utilizzo e i rapporti sugli arresti anomali sono anonimi</string>
+    <string name="analytics_okay">Invia statistiche di utilizzo anonime e rapporti sugli arresti anomali.</string>
     <string name="looking_for_meshtastic_devices">Ricerca di dispositivi Meshtastic in corso…</string>
     <string name="starting_pairing">Inizio abbinamento</string>
     <string name="url_for_join">Una URL per unirsi a una rete Meshtastic</string>
@@ -50,6 +85,7 @@
     <string name="app_too_old">Aggiornamento dell\'applicazione necessario</string>
     <string name="must_update">È necessario aggiornare questa applicazione nell\'app store (o Github). È troppo vecchio per parlare con questo firmware radio. Per favore leggi i nostri <a href="https://meshtastic.org/docs/software/android/installation">documenti</a> su questo argomento.</string>
     <string name="none">Nessuno (disattiva)</string>
+    <string name="modem_config_turbo">Distanza Breve / Turbo</string>
     <string name="modem_config_short">Distanza Breve / Veloce</string>
     <string name="modem_config_medium">Distanza Media / Veloce</string>
     <string name="modem_config_long">Distanza Grande / Veloce</string>
@@ -57,7 +93,7 @@
     <string name="modem_config_very_long">Distanza Molto Grande / Lento</string>
     <string name="modem_config_unrecognized">NON RICONOSCIUTO</string>
     <string name="meshtastic_service_notifications">Notifiche di servizio</string>
-    <string name="location_disabled_warning">La geolocalizzazione deve essere attiva (alta precisione) per cercare nuovi dispositivi tramite bluetooth. Può essere spenta di nuovo successivamente.</string>
+    <string name="location_disabled_warning">La localizzazione deve essere attiva per cercare nuovi dispositivi tramite Bluetooth. Può essere spenta di nuovo successivamente.</string>
     <string name="about">Informazioni</string>
     <string name="a_list_of_nodes_in_the_mesh">Un elenco di nodi nel mesh</string>
     <string name="text_messages">Messaggi di testo</string>
@@ -121,6 +157,7 @@
     <string name="preferences_system_default">Predefinito di sistema</string>
     <string name="resend">Reinvia</string>
     <string name="shutdown">Spegni</string>
+    <string name="cant_shutdown">Spegnimento non supportato su questo dispositivo</string>
     <string name="reboot">Riavvia</string>
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Mostra Guida introduttiva</string>
@@ -156,6 +193,7 @@
     <string name="device_settings">Impostazioni dispositivo</string>
     <string name="module_settings">Impostazioni moduli</string>
     <string name="add">Aggiungere</string>
+    <string name="edit">Modifica</string>
     <string name="calculating">Calcolo…</string>
     <string name="map_offline_manager">Gestore Offline</string>
     <string name="map_cache_size">Dimensione Cache attuale</string>
@@ -181,4 +219,32 @@
     <string name="mute_8_hours">8 ore</string>
     <string name="mute_1_week">1 settimana</string>
     <string name="mute_always">Sempre</string>
+    <plurals name="add_channel_from_qr">
+        <item quantity="one">Si desidera aggiungere un nuovo canale?</item>
+        <item quantity="other">Si desidera aggiungere %d nuovi canali?</item>
+    </plurals>
+    <string name="replace">Sostituisci</string>
+    <string name="wifi_qr_code_scan">Scansiona codice QR WiFi</string>
+    <string name="wifi_qr_code_error">Formato codice QR delle Credenziali WiFi non valido</string>
+    <string name="navigate_back">Torna Indietro</string>
+    <string name="battery">Batteria</string>
+    <string name="channel_utilization">Utilizzo Canale</string>
+    <string name="air_utilization">Tempo di Trasmissione Utilizzato</string>
+    <string name="device">Dispositivo</string>
+    <string name="metrics">Statistiche</string>
+    <string name="environment">Ambiente</string>
+    <string name="temperature">Temperatura</string>
+    <string name="humidity">Umidità</string>
+    <string name="logs">Registri</string>
+    <string name="hops_away">Distanza in Hop</string>
+    <string name="info">Informazioni</string>
+    <string name="ch_util_definition">Utilizzazione del canale attuale, compreso TX, RX ben formato e RX malformato (cioè rumore).</string>
+    <string name="air_util_definition">Percentuale di tempo di trasmissione utilizzato nell’ultima ora.</string>
+    <string name="iaq">IAQ</string>
+    <string name="encryption_psk">Chiave Condivisa</string>
+    <string name="encryption_psk_text">I messaggi privati usano la chiave condivisa del canale.</string>
+    <string name="encryption_pkc">Crittografia a Chiave Pubblica</string>
+    <string name="encryption_pkc_text">I messaggi privati utilizzano la nuova infrastruttura a chiave pubblica per la crittografia. Richiede la versione 2.5 o superiore.</string>
+    <string name="encryption_error">Chiave pubblica errata</string>
+    <string name="encryption_error_text">La chiave pubblica non corrisponde alla chiave salvata. È possibile rimuovere il nodo e lasciarlo scambiare le chiavi, ma questo può indicare un problema di sicurezza più serio. Contattare l\'utente attraverso un altro canale attendibile, per determinare se il cambiamento di chiave è dovuto a un ripristino di fabbrica o ad altre azioni intenzionali.</string>
 </resources>

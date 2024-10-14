@@ -1,5 +1,6 @@
 package com.geeksville.mesh.ui.components
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,18 +27,23 @@ fun SwitchPreference(
     enabled: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    padding: PaddingValues = PaddingValues(horizontal = 16.dp),
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .size(48.dp)
-            .padding(start = 16.dp, end = 16.dp),
+            .padding(padding),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.body2,
-            color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
+            style = MaterialTheme.typography.body1,
+            color = if (enabled) {
+                Color.Unspecified
+            } else {
+                MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+            },
         )
         Switch(
             modifier = modifier
