@@ -161,9 +161,7 @@ class NodeInfoDaoTest {
     @Test
     fun testIncludeUnknownIsFalse() = runBlocking {
         val nodes = getNodes(includeUnknown = false)
-        val containsUnsetNode = nodes.any { node ->
-            node.user.hwModel == MeshProtos.HardwareModel.UNSET
-        }
+        val containsUnsetNode = nodes.any { it.isUnknownUser }
         assertFalse(containsUnsetNode)
     }
 

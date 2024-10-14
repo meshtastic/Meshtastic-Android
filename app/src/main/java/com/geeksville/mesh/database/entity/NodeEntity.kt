@@ -84,6 +84,7 @@ data class NodeEntity(
             return (if (brightness > 0.5) Color.BLACK else Color.WHITE) to Color.rgb(r, g, b)
         }
 
+    val isUnknownUser get() = user.hwModel == MeshProtos.HardwareModel.UNSET
     val hasPKC get() = !user.publicKey.isEmpty
     val errorByteString: ByteString get() = ByteString.copyFrom(ByteArray(32) { 0 })
     val mismatchKey get() = user.publicKey == errorByteString

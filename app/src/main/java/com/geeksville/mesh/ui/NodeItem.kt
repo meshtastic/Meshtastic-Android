@@ -79,7 +79,7 @@ fun NodeItem(
     expanded: Boolean = false,
     currentTimeMillis: Long,
 ) {
-    val isUnknownUser = thatNode.user.hwModel == MeshProtos.HardwareModel.UNSET
+    val isUnknownUser = thatNode.isUnknownUser
     val unknownShortName = stringResource(id = R.string.unknown_node_short_name)
     val longName = thatNode.user.longName.ifEmpty { stringResource(id = R.string.unknown_username) }
 
