@@ -271,4 +271,5 @@
     <string name="encryption_error">Public key mismatch</string>
     <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more serious security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
     <string name="request_userinfo">Request user info</string>
+    <string name="meshtastic_new_nodes_notifications">New nodes notifications</string>
 </resources>
