@@ -19,6 +19,7 @@ import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.android.notificationManager
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.util.PendingIntentCompat
 import java.io.Closeable
 import java.text.SimpleDateFormat
@@ -140,10 +141,10 @@ class MeshServiceNotifications(
             createMessageNotification(name, message)
         )
 
-    fun updateNewNodeSeenNotification(name: String) {
+    fun showNewNodeSeenNotification(node: NodeEntity) {
         notificationManager.notify(
-            messageNotifyId,
-            createNewNodeSeenNotification(name)
+            node.num, // show unique notifications
+            createNewNodeSeenNotification(node.user.shortName, node.user.longName)
         )
     }
 
