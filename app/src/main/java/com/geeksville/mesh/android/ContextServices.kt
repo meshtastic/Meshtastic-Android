@@ -150,8 +150,9 @@ fun Context.hasLocationPermission() = getLocationPermissions().isEmpty()
  */
 fun Context.getNotificationPermissions(): Array<String> {
     val perms = mutableListOf<String>()
-    if (android.os.Build.VERSION.SDK_INT >= 33)
+    if (android.os.Build.VERSION.SDK_INT >= 33) {
         perms.add(Manifest.permission.POST_NOTIFICATIONS)
+    }
 
     return getMissingPermissions(perms)
 }

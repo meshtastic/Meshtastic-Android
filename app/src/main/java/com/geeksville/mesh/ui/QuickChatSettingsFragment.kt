@@ -60,7 +60,8 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat Settings"), Logging
     private val model: UIViewModel by activityViewModels()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = QuickChatSettingsFragmentBinding.inflate(inflater, container, false)
@@ -81,11 +82,12 @@ class QuickChatSettingsFragment : ScreenFragment("Quick Chat Settings"), Logging
 
                 val name = builder.nameInput.text.toString().trim()
                 val message = builder.messageInput.text.toString()
-                if (builder.isNotEmpty())
+                if (builder.isNotEmpty()) {
                     model.addQuickChatAction(
                         name, message,
                         if (builder.modeSwitch.isChecked) QuickChatAction.Mode.Instant else QuickChatAction.Mode.Append
                     )
+                }
             }
 
             val dialog = builder.builder.create()

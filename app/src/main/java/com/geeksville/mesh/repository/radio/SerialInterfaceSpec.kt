@@ -12,7 +12,7 @@ class SerialInterfaceSpec @Inject constructor(
     private val factory: SerialInterfaceFactory,
     private val usbManager: dagger.Lazy<UsbManager>,
     private val usbRepository: UsbRepository,
-): InterfaceSpec<SerialInterface> {
+) : InterfaceSpec<SerialInterface> {
     override fun createInterface(rest: String): SerialInterface {
         return factory.create(rest)
     }

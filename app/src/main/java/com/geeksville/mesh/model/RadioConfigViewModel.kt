@@ -469,8 +469,11 @@ class RadioConfigViewModel @Inject constructor(
                 setResponseStateError(app.getString(parsed.errorReason.stringRes))
             } else if (packet.from == destNum && route.isEmpty()) {
                 requestIds.update { it.apply { remove(data.requestId) } }
-                if (requestIds.value.isEmpty()) setResponseStateSuccess()
-                else incrementCompleted()
+                if (requestIds.value.isEmpty()) {
+                    setResponseStateSuccess()
+                } else {
+                    incrementCompleted()
+                }
             }
         }
         if (data?.portnumValue == Portnums.PortNum.ADMIN_APP_VALUE) {

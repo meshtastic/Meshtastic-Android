@@ -68,7 +68,7 @@ fun EditDeviceProfileDialog(
                     SwitchPreference(
                         title = field.name,
                         checked = state[field] == true,
-                        enabled =  deviceProfile.hasField(field),
+                        enabled = deviceProfile.hasField(field),
                         onCheckedChange = { state[field] = it },
                         padding = PaddingValues(0.dp)
                     )

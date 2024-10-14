@@ -11,7 +11,7 @@ import javax.inject.Inject
 class BluetoothInterfaceSpec @Inject constructor(
     private val factory: BluetoothInterfaceFactory,
     private val bluetoothRepository: BluetoothRepository,
-): InterfaceSpec<BluetoothInterface>, Logging {
+) : InterfaceSpec<BluetoothInterface>, Logging {
     override fun createInterface(rest: String): BluetoothInterface {
         return factory.create(rest)
     }
@@ -23,7 +23,8 @@ class BluetoothInterfaceSpec @Inject constructor(
         return if (!allPaired.contains(rest)) {
             warn("Ignoring stale bond to ${rest.anonymize}")
             false
-        } else
+        } else {
             true
+        }
     }
 }

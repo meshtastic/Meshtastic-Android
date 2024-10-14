@@ -9,6 +9,6 @@ package com.geeksville.mesh.repository.radio
  * This is primarily used in conjunction with Dagger assisted injection for each backend
  * interface type.
  */
-interface InterfaceFactorySpi<T: IRadioInterface> {
+interface InterfaceFactorySpi<T : IRadioInterface> {
     fun create(rest: String): T
 }

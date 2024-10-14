@@ -223,7 +223,7 @@ fun ChannelScreen(
             .show()
     }
 
-    /// Send new channel settings to the device
+    // Send new channel settings to the device
     fun installSettings(
         newChannelSet: ChannelSet
     ) {
@@ -420,8 +420,11 @@ fun ChannelScreen(
                                 !isUrlEqual -> stringResource(R.string.send)
                                 else -> "Copy"
                             },
-                            tint = if (isError) MaterialTheme.colors.error
-                            else LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+                            tint = if (isError) {
+                                MaterialTheme.colors.error
+                            } else {
+                                LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+                            }
                         )
                     }
                 },

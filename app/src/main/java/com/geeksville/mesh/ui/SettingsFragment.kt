@@ -53,7 +53,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private val hasGps by lazy { requireContext().hasGps() }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = SettingsFragmentBinding.inflate(inflater, container, false)
@@ -86,8 +87,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         debug("current region is $region")
         var regionIndex = regions.indexOfFirst { it.regionCode == region }
-        if (regionIndex == -1) // Not found, probably because the device has a region our app doesn't yet understand.  Punt and say Unset
+        if (regionIndex == -1) { // Not found, probably because the device has a region our app doesn't yet understand.  Punt and say Unset
             regionIndex = ConfigProtos.Config.LoRaConfig.RegionCode.UNSET_VALUE
+        }
 
         // We don't want to be notified of our own changes, so turn off listener while making them
         spinner.setSelection(regionIndex, false)
@@ -125,7 +127,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         override fun onNothingSelected(parent: AdapterView<*>) {
-            //TODO("Not yet implemented")
+            // TODO("Not yet implemented")
         }
     }
 
@@ -248,7 +250,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             if (view.isPressed) { // We want to ignore changes caused by code (as opposed to the user)
                 debug("User changed location tracking to $isChecked")
                 model.provideLocation.value = isChecked
-                if (isChecked && !view.isChecked)
+                if (isChecked && !view.isChecked) {
                     MaterialAlertDialogBuilder(requireContext())
                         .setTitle(R.string.background_required)
                         .setMessage(R.string.why_background_required)
@@ -262,6 +264,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                             }
                         }
                         .show()
+                }
             }
             if (view.isChecked) {
                 checkLocationEnabled(getString(R.string.location_disabled))
@@ -330,8 +333,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                     scanModel.showMockInterface()
                 }
             }
-            if (!device.bonded) // If user just clicked on us, try to bond
+            if (!device.bonded) { // If user just clicked on us, try to bond
                 binding.scanStatusText.setText(R.string.starting_pairing)
+            }
             b.isChecked = scanModel.onSelected(device)
         }
     }
@@ -363,10 +367,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         devices.values
             // Display the device list in alphabetical order while keeping the "None (Disabled)"
             // device (fullAddress == n) at the top
-            .sortedBy { dle -> if (dle.fullAddress == "n") "0" else dle.name  }
+            .sortedBy { dle -> if (dle.fullAddress == "n") "0" else dle.name }
             .forEach { device ->
-            if (device.fullAddress == scanModel.selectedNotNull)
+            if (device.fullAddress == scanModel.selectedNotNull) {
                 hasShownOurDevice = true
+            }
             addDeviceButton(device, true)
         }
 
@@ -473,8 +478,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (scanModel.selectedBluetooth) checkBTEnabled()
 
         // Warn user if provide location is selected but location disabled
-        if (binding.provideLocationCheckbox.isChecked)
+        if (binding.provideLocationCheckbox.isChecked) {
             checkLocationEnabled(getString(R.string.location_disabled))
+        }
     }
 
     override fun onDestroyView() {
@@ -486,7 +492,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         const val SCAN_PERIOD: Long = 10000 // Stops scanning after 10 seconds
         private const val TAP_TRIGGER: Int = 7
         private const val TAP_THRESHOLD: Long = 500 // max 500 ms between taps
-
     }
 
     private fun Editable.isIPAddress(): Boolean {
@@ -497,5 +502,4 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             Patterns.IP_ADDRESS.matcher(this).matches()
         }
     }
-
 }

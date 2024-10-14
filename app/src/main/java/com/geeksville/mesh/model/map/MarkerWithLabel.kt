@@ -43,7 +43,6 @@ class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
         }
     }
 
-
     private var onLongClickListener: (() -> Boolean)? = null
 
     fun setOnLongClickListener(listener: () -> Boolean) {
@@ -93,7 +92,7 @@ class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
         val bgRect = getTextBackgroundSize(mLabel, (p.x - 0F), (p.y - LABEL_Y_OFFSET))
         bgRect.inset(-8F, -2F)
 
-        if(mLabel.isNotEmpty()) {
+        if (mLabel.isNotEmpty()) {
             c.drawRoundRect(bgRect, LABEL_CORNER_RADIUS, LABEL_CORNER_RADIUS, bgPaint)
             c.drawText(mLabel, (p.x - 0F), (p.y - LABEL_Y_OFFSET), textPaint)
         }

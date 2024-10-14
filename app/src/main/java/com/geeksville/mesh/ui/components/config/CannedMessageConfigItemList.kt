@@ -187,7 +187,7 @@ fun CannedMessageConfigItemList(
                 },
                 onSaveClicked = {
                     focusManager.clearFocus()
-                    onSaveClicked(messagesInput,cannedMessageInput)
+                    onSaveClicked(messagesInput, cannedMessageInput)
                 }
             )
         }

@@ -60,7 +60,7 @@ internal fun MessageItem(
 ) {
     val fromLocal = shortName == null
     val messageColor = if (fromLocal) R.color.colorMyMsg else R.color.colorMsg
-    val (topStart, topEnd) =  if (fromLocal) 12.dp to 4.dp else 4.dp to 12.dp
+    val (topStart, topEnd) = if (fromLocal) 12.dp to 4.dp else 4.dp to 12.dp
     val messageModifier = if (fromLocal) {
         Modifier.padding(start = 48.dp, top = 8.dp, end = 8.dp, bottom = 6.dp)
     } else {

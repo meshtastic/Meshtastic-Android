@@ -16,7 +16,7 @@ internal class SerialConnectionImpl(
     private val device: UsbSerialDriver,
     private val listener: SerialConnectionListener
 ) : SerialConnection, Logging {
-    private val port = device.ports[0]  // Most devices have just one port (port 0)
+    private val port = device.ports[0] // Most devices have just one port (port 0)
     private val closedLatch = CountDownLatch(1)
     private val closed = AtomicBoolean(false)
     private val ioRef = AtomicReference<SerialInputOutputManager>()
@@ -80,7 +80,7 @@ internal class SerialConnectionImpl(
                 listener.onDisconnected(e)
             }
         }).apply {
-            readTimeout = 200  // To save battery we only timeout ever so often
+            readTimeout = 200 // To save battery we only timeout ever so often
             ioRef.set(this)
         }
 

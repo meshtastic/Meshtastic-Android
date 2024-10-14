@@ -38,7 +38,7 @@ class UsbRepository @Inject constructor(
 
     @Suppress("unused") // Retained as public API
     val serialDevicesWithDrivers = _serialDevices
-        .mapLatest {  serialDevices ->
+        .mapLatest { serialDevices ->
             val serialProber = usbSerialProberLazy.get()
             buildMap {
                 serialDevices.forEach { (k, v) ->
@@ -72,7 +72,7 @@ class UsbRepository @Inject constructor(
      * Creates a USB serial connection to the specified USB device.  State changes and data arrival
      * result in async callbacks on the supplied listener.
      */
-    fun createSerialConnection(device: UsbSerialDriver, listener: SerialConnectionListener) : SerialConnection {
+    fun createSerialConnection(device: UsbSerialDriver, listener: SerialConnectionListener): SerialConnection {
         return SerialConnectionImpl(usbManagerLazy, device, listener)
     }
 

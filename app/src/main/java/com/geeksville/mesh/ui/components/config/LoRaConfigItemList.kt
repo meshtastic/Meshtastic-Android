@@ -140,8 +140,9 @@ fun LoRaConfigItemList(
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onFocusChanged = { isFocused = it.isFocused },
                 onValueChanged = {
-                    if (it <= loraInput.numChannels) // total num of LoRa channels
+                    if (it <= loraInput.numChannels) { // total num of LoRa channels
                         loraInput = loraInput.copy { channelNum = it }
+                    }
                 })
         }
 

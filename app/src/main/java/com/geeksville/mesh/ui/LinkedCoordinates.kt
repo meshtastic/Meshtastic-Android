@@ -44,7 +44,7 @@ fun LinkedCoordinates(
             tag = "gps",
             // URI scheme is defined at:
             //  https://developer.android.com/guide/components/intents-common#Maps
-            annotation = "geo:0,0?q=${latitude},${longitude}&z=17&label=${
+            annotation = "geo:0,0?q=$latitude,$longitude&z=17&label=${
                 URLEncoder.encode(nodeName, "utf-8")
             }"
         )

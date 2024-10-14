@@ -59,8 +59,9 @@ fun BluetoothConfigItemList(
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
-                    if (it.toString().length == 6) // ensure 6 digits
+                    if (it.toString().length == 6) { // ensure 6 digits
                         bluetoothInput = bluetoothInput.copy { fixedPin = it }
+                    }
                 })
         }
 

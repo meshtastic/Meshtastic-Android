@@ -56,8 +56,11 @@ fun <T> DropDownPreference(
             dropDownExpanded = true
         },
         enabled = enabled,
-        trailingIcon = if (dropDownExpanded) Icons.TwoTone.KeyboardArrowUp
-        else Icons.TwoTone.KeyboardArrowDown,
+        trailingIcon = if (dropDownExpanded) {
+            Icons.TwoTone.KeyboardArrowUp
+        } else {
+            Icons.TwoTone.KeyboardArrowDown
+        },
         summary = summary,
     )
 
@@ -74,15 +77,17 @@ fun <T> DropDownPreference(
                     },
                     modifier = modifier
                         .background(
-                            color = if (selectedItem == item.first)
+                            color = if (selectedItem == item.first) {
                                 MaterialTheme.colors.primary.copy(alpha = 0.3f)
-                            else
-                                Color.Unspecified,
+                            } else {
+                                Color.Unspecified
+                            },
                         ),
                     content = {
                         Text(
                             text = item.second,
                             overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
                         )
                     }
                 )

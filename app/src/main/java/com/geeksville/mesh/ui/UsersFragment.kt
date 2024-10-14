@@ -110,7 +110,6 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         parentFragmentManager.navigateToMetrics(nodeNum)
     }
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

@@ -53,7 +53,6 @@ import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 import com.geeksville.mesh.ui.theme.Orange
 
-
 private val DEVICE_METRICS_COLORS = listOf(Color.Green, Color.Magenta, Color.Cyan)
 private const val MAX_PERCENT_VALUE = 100f
 
@@ -64,8 +63,9 @@ fun DeviceMetricsScreen(telemetries: List<Telemetry>) {
 
     Column {
 
-        if (displayInfoDialog)
+        if (displayInfoDialog) {
             DeviceInfoDialog { displayInfoDialog = false }
+        }
 
         DeviceMetricsChart(
             modifier = Modifier
@@ -92,8 +92,7 @@ private fun DeviceMetricsChart(
 ) {
 
     ChartHeader(amount = telemetries.size)
-    if (telemetries.isEmpty())
-        return
+    if (telemetries.isEmpty()) return
 
     Spacer(modifier = Modifier.height(16.dp))
 
@@ -153,8 +152,9 @@ private fun DeviceMetricsChart(
 
                     val x2 = spacing + (i + 1) * spacePerEntry
                     val y2 = height - spacing - (rightRatio * height)
-                    if (i == 0)
+                    if (i == 0) {
                         moveTo(x1, y1)
+                    }
 
                     lastX = (x1 + x2) / 2f
 
