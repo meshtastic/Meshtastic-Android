@@ -164,7 +164,7 @@ interface PacketDao {
     fun getContactSettings(): Flow<Map<@MapColumn(columnName = "contact_key") String, ContactSettings>>
 
     @Query("SELECT * FROM contact_settings WHERE contact_key = :contact")
-    suspend fun getContactSettings(contact:String): ContactSettings?
+    suspend fun getContactSettings(contact: String): ContactSettings?
 
     @Upsert
     fun upsertContactSettings(contacts: List<ContactSettings>)

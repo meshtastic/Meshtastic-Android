@@ -78,8 +78,11 @@ private fun ChannelItem(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp)
         ) {
-            val textColor = if (enabled) Color.Unspecified
-            else MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+            val textColor = if (enabled) {
+                Color.Unspecified
+            } else {
+                MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+            }
 
             Chip(onClick = onClick) {
                 Text(
@@ -165,8 +168,8 @@ fun ChannelSettingsItemList(
         }
     }
 
-    val isEditing: Boolean = settingsList.size != settingsListInput.size
-            || settingsList.zip(settingsListInput).any { (item1, item2) -> item1 != item2 }
+    val isEditing: Boolean = settingsList.size != settingsListInput.size ||
+            settingsList.zip(settingsListInput).any { (item1, item2) -> item1 != item2 }
 
     var showEditChannelDialog: Int? by rememberSaveable { mutableStateOf(null) }
 
@@ -178,8 +181,11 @@ fun ChannelSettingsItemList(
             },
             modemPresetName = modemPresetName,
             onAddClick = {
-                if (settingsListInput.size > index) settingsListInput[index] = it
-                else settingsListInput.add(it)
+                if (settingsListInput.size > index) {
+                    settingsListInput[index] = it
+                } else {
+                    settingsListInput.add(it)
+                }
                 showEditChannelDialog = null
             },
             onDismissRequest = { showEditChannelDialog = null }

@@ -104,7 +104,8 @@ class MessagesFragment : Fragment(), Logging {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = MessagesFragmentBinding.inflate(inflater, container, false)
@@ -278,8 +279,9 @@ class MessagesFragment : Fragment(), Logging {
                     selectedList.forEach {
                         resendText = resendText + it.text + System.lineSeparator()
                     }
-                    if (resendText != "")
+                    if (resendText != "") {
                         resendText = resendText.substring(0, resendText.length - 1)
+                    }
                     binding.messageInputText.setText(resendText)
                     mode.finish()
                 }

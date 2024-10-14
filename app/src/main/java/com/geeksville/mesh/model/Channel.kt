@@ -47,7 +47,7 @@ data class Channel(
         }
     }
 
-    /// Return the name of our channel as a human readable string.  If empty string, assume "Default" per mesh.proto spec
+    // Return the name of our channel as a human readable string.  If empty string, assume "Default" per mesh.proto spec
     val name: String
         get() = settings.name.ifEmpty {
             // We have a new style 'empty' channel name.  Use the same logic from the device to convert that to a human readable name
@@ -66,15 +66,15 @@ data class Channel(
         }
 
     val psk: ByteString
-        get() = if (settings.psk.size() != 1)
+        get() = if (settings.psk.size() != 1) {
             settings.psk // A standard PSK
-        else {
+        } else {
             // One of our special 1 byte PSKs, see mesh.proto for docs.
             val pskIndex = settings.psk.byteAt(0).toInt()
 
-            if (pskIndex == 0)
+            if (pskIndex == 0) {
                 cleartextPSK
-            else {
+            } else {
                 // Treat an index of 1 as the old channelDefaultKey and work up from there
                 val bytes = channelDefaultKey.clone()
                 bytes[bytes.size - 1] = (0xff and (bytes[bytes.size - 1] + pskIndex - 1)).toByte()

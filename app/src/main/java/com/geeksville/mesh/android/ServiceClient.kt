@@ -22,7 +22,7 @@ open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T
 
     var serviceP: T? = null
 
-    /// A getter that returns the bound service or throws if not bound
+    // A getter that returns the bound service or throws if not bound
     val service: T
         get() {
             waitConnect() // Wait for at least the initial connection to happen
@@ -40,11 +40,13 @@ open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T
     fun waitConnect() {
         // Wait until this service is connected
         lock.withLock {
-            if (context == null)
+            if (context == null) {
                 throw Exception("Haven't called connect")
+            }
 
-            if (serviceP == null)
+            if (serviceP == null) {
                 condition.await()
+            }
         }
     }
 
@@ -71,8 +73,7 @@ open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T
         isClosed = true
         try {
             context?.unbindService(connection)
-        }
-        catch(ex: IllegalArgumentException) {
+        } catch (ex: IllegalArgumentException) {
             // Autobugs show this can generate an illegal arg exception for "service not registered" during reinstall?
             warn("Ignoring error in ServiceClient.close, probably harmless")
         }
@@ -80,11 +81,11 @@ open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T
         context = null
     }
 
-    /// Called when we become connected
+    // Called when we become connected
     open fun onConnected(service: T) {
     }
 
-    /// called on loss of connection
+    // called on loss of connection
     open fun onDisconnected() {
     }
 

@@ -224,7 +224,6 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
         } else {
             selectedList.remove(i)
         }
-
     }
     builder.setPositiveButton(R.string.clear) { _, _ ->
         for (x in selectedList) {
@@ -382,12 +381,13 @@ fun MapView(
             debug("User deleted waypoint ${waypoint.id} for me")
             model.deleteWaypoint(waypoint.id)
         }
-        if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected())
+        if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected()) {
             builder.setPositiveButton(R.string.delete_for_everyone) { _, _ ->
                 debug("User deleted waypoint ${waypoint.id} for everyone")
                 model.sendWaypoint(waypoint.copy { expire = 1 })
                 model.deleteWaypoint(waypoint.id)
             }
+        }
         val dialog = builder.show()
         for (button in setOf(
             androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL,
@@ -398,7 +398,7 @@ fun MapView(
 
     fun showMarkerLongPressDialog(id: Int) {
         performHapticFeedback()
-        debug("marker long pressed id=${id}")
+        debug("marker long pressed id=$id")
         val waypoint = waypoints[id]?.data?.waypoint ?: return
         // edit only when unlocked or lockedTo myNodeNum
         if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected()) {
@@ -488,7 +488,7 @@ fun MapView(
             overlays.add(nodeClusterer)
         }
 
-        addCopyright()  // Copyright is required for certain map sources
+        addCopyright() // Copyright is required for certain map sources
         createLatLongGrid(false)
 
         invalidate()
@@ -697,12 +697,18 @@ fun MapView(
                 )
                 MapButton(
                     onClick = {
-                        if (context.hasLocationPermission()) map.toggleMyLocation()
-                        else requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+                        if (context.hasLocationPermission()) {
+                            map.toggleMyLocation()
+                        } else {
+                            requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+                        }
                     },
                     enabled = hasGps,
-                    drawableRes = if (myLocationOverlay == null) R.drawable.ic_twotone_my_location_24
-                    else R.drawable.ic_twotone_location_disabled_24,
+                    drawableRes = if (myLocationOverlay == null) {
+                        R.drawable.ic_twotone_my_location_24
+                    } else {
+                        R.drawable.ic_twotone_location_disabled_24
+                    },
                     contentDescription = null,
                 )
             }
@@ -720,7 +726,6 @@ fun MapView(
                     expire = Int.MAX_VALUE // TODO add expire picker
                     lockedTo = if (waypoint.lockedTo != 0) model.myNodeNum ?: 0 else 0
                 })
-
             },
             onDeleteClicked = { waypoint ->
                 debug("User clicked delete waypoint ${waypoint.id}")

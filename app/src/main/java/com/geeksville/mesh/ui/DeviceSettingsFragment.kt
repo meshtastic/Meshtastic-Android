@@ -170,7 +170,6 @@ enum class AdminRoute(@StringRes val title: Int) {
     SHUTDOWN(R.string.shutdown),
     FACTORY_RESET(R.string.factory_reset),
     NODEDB_RESET(R.string.nodedb_reset),
-    ;
 }
 
 // Config (configType = AdminProtos.AdminMessage.ConfigType)
@@ -185,7 +184,6 @@ enum class ConfigRoute(val title: String, val configType: Int = 0) {
     LORA("LoRa", 5),
     BLUETOOTH("Bluetooth", 6),
     SECURITY("Security", configType = 7),
-    ;
 }
 
 // ModuleConfig (configType = AdminProtos.AdminMessage.ModuleConfigType)
@@ -203,7 +201,6 @@ enum class ModuleRoute(val title: String, val configType: Int = 0) {
     AMBIENT_LIGHTING("Ambient Lighting", 10),
     DETECTION_SENSOR("Detection Sensor", 11),
     PAXCOUNTER("Paxcounter", 12),
-    ;
 }
 
 private fun getName(route: Any): String = when (route) {
@@ -655,8 +652,11 @@ private fun NavCard(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
-    val color = if (enabled) MaterialTheme.colors.onSurface
-    else MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+    val color = if (enabled) {
+        MaterialTheme.colors.onSurface
+    } else {
+        MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+    }
 
     Card(
         modifier = Modifier

@@ -39,7 +39,11 @@ fun SwitchPreference(
         Text(
             text = title,
             style = MaterialTheme.typography.body1,
-            color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified,
+            color = if (enabled) {
+                Color.Unspecified
+            } else {
+                MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+            },
         )
         Switch(
             modifier = modifier

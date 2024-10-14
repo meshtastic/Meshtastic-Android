@@ -12,7 +12,7 @@ import javax.inject.Provider
 class InterfaceFactory @Inject constructor(
     private val nopInterfaceFactory: NopInterfaceFactory,
     private val specMap: Map<InterfaceId, @JvmSuppressWildcards Provider<InterfaceSpec<*>>>
-)  {
+) {
     internal val nopInterface by lazy {
         nopInterfaceFactory.create("")
     }

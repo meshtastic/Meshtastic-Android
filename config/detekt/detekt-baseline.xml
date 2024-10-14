@@ -2,6 +2,68 @@
 <SmellBaseline>
   <ManuallySuppressedIssues></ManuallySuppressedIssues>
   <CurrentIssues>
+    <ID>ChainWrapping:Channel.kt$Channel$&amp;&amp;</ID>
+    <ID>ChainWrapping:CustomTileSource.kt$CustomTileSource.Companion.&lt;no name provided&gt;$+</ID>
+    <ID>ChainWrapping:SqlTileWriterExt.kt$SqlTileWriterExt$+</ID>
+    <ID>CommentSpacing:AppIntroduction.kt$AppIntroduction$//addSlide(SlideTwoFragment())</ID>
+    <ID>CommentSpacing:BLEException.kt$BLEConnectionClosing$/// Our interface is being shut down</ID>
+    <ID>CommentSpacing:BTScanModel.kt$BTScanModel$/// Use the string for the NopInterface</ID>
+    <ID>CommentSpacing:BluetoothInterface.kt$BluetoothInterface$/// Attempt to read from the fromRadio mailbox, if data is found broadcast it to android apps</ID>
+    <ID>CommentSpacing:BluetoothInterface.kt$BluetoothInterface$/// For testing</ID>
+    <ID>CommentSpacing:BluetoothInterface.kt$BluetoothInterface$/// Our BLE device</ID>
+    <ID>CommentSpacing:BluetoothInterface.kt$BluetoothInterface$/// Our service - note - it is possible to get back a null response for getService if the device services haven't yet been found</ID>
+    <ID>CommentSpacing:BluetoothInterface.kt$BluetoothInterface$/// Send a packet/command out the radio link</ID>
+    <ID>CommentSpacing:BluetoothInterface.kt$BluetoothInterface$/// Start a connection attempt</ID>
+    <ID>CommentSpacing:BluetoothInterface.kt$BluetoothInterface$/// We gracefully handle safe being null because this can occur if someone has unpaired from our device - just abandon the reconnect attempt</ID>
+    <ID>CommentSpacing:BluetoothInterface.kt$BluetoothInterface$/// We only force service refresh the _first_ time we connect to the device. Thereafter it is assumed the firmware didn't change</ID>
+    <ID>CommentSpacing:BluetoothInterface.kt$BluetoothInterface$/// We only try to set MTU once, because some buggy implementations fail</ID>
+    <ID>CommentSpacing:BluetoothInterface.kt$BluetoothInterface$//needForceRefresh = false // In fact, because of tearing down BLE in sleep on the ESP32, our handle # assignments are not stable across sleep - so we much refetch every time</ID>
+    <ID>CommentSpacing:BluetoothInterface.kt$BluetoothInterface.Companion$/// this service UUID is publicly visible for scanning</ID>
+    <ID>CommentSpacing:Constants.kt$/// a bool true means we expect this condition to continue until, false means device might come back</ID>
+    <ID>CommentSpacing:ContextExtensions.kt$/// Utility function to hide the soft keyboard per stack overflow</ID>
+    <ID>CommentSpacing:ContextExtensions.kt$/// show a toast</ID>
+    <ID>CommentSpacing:Coroutines.kt$/// Wrap launch with an exception handler, FIXME, move into a utility lib</ID>
+    <ID>CommentSpacing:DeferredExecution.kt$DeferredExecution$/// Queue some new work</ID>
+    <ID>CommentSpacing:DeferredExecution.kt$DeferredExecution$/// run all work in the queue and clear it to be ready to accept new work</ID>
+    <ID>CommentSpacing:DownloadButton.kt$//@Composable</ID>
+    <ID>CommentSpacing:DownloadButton.kt$//@Preview(showBackground = true)</ID>
+    <ID>CommentSpacing:DownloadButton.kt$//private fun DownloadButtonPreview() {</ID>
+    <ID>CommentSpacing:DownloadButton.kt$//}</ID>
+    <ID>CommentSpacing:Exceptions.kt$/// Convert any exceptions in this service call into a RemoteException that the client can</ID>
+    <ID>CommentSpacing:Exceptions.kt$/// then handle</ID>
+    <ID>CommentSpacing:Exceptions.kt$Exceptions$/// Set in Application.onCreate</ID>
+    <ID>CommentSpacing:Logging.kt$Logging$/// Kotlin assertions are disabled on android, so instead we use this assert helper</ID>
+    <ID>CommentSpacing:Logging.kt$Logging$/// Report an error (including messaging our crash reporter service if allowed</ID>
+    <ID>CommentSpacing:Logging.kt$Logging.Companion$/// If false debug logs will not be shown (but others might)</ID>
+    <ID>CommentSpacing:Logging.kt$Logging.Companion$/// if false NO logs will be shown, set this in the application based on BuildConfig.DEBUG</ID>
+    <ID>CommentSpacing:MeshServiceStarter.kt$/// Helper function to start running our service</ID>
+    <ID>CommentSpacing:MockInterface.kt$MockInterface$/// Generate a fake node info entry</ID>
+    <ID>CommentSpacing:MockInterface.kt$MockInterface$/// Generate a fake text message from a node</ID>
+    <ID>CommentSpacing:MockInterface.kt$MockInterface$/// Send a fake ack packet back if the sender asked for want_ack</ID>
+    <ID>CommentSpacing:NOAAWmsTileSource.kt$NOAAWmsTileSource$//array indexes for that data</ID>
+    <ID>CommentSpacing:NOAAWmsTileSource.kt$NOAAWmsTileSource$//used by geo server</ID>
+    <ID>CommentSpacing:NodeInfo.kt$NodeInfo$/// @return a nice human readable string for the distance, or null for unknown</ID>
+    <ID>CommentSpacing:NodeInfo.kt$NodeInfo$/// @return bearing to the other position in degrees</ID>
+    <ID>CommentSpacing:NodeInfo.kt$NodeInfo$/// @return distance in meters to some other node (or null if unknown)</ID>
+    <ID>CommentSpacing:NodeInfo.kt$NodeInfo$/// return the position if it is valid, else null</ID>
+    <ID>CommentSpacing:NodeInfo.kt$Position$/// @return bearing to the other position in degrees</ID>
+    <ID>CommentSpacing:NodeInfo.kt$Position$/// @return distance in meters to some other node (or null if unknown)</ID>
+    <ID>CommentSpacing:NodeInfo.kt$Position.Companion$/// Convert to a double representation of degrees</ID>
+    <ID>CommentSpacing:SafeBluetooth.kt$/// Return a standard BLE 128 bit UUID from the short 16 bit versions</ID>
+    <ID>CommentSpacing:SafeBluetooth.kt$SafeBluetooth$/// Drop our current connection and then requeue a connect as needed</ID>
+    <ID>CommentSpacing:SafeBluetooth.kt$SafeBluetooth$/// If we have work we can do, start doing it.</ID>
+    <ID>CommentSpacing:SafeBluetooth.kt$SafeBluetooth$/// Restart any previous connect attempts</ID>
+    <ID>CommentSpacing:SafeBluetooth.kt$SafeBluetooth$/// Timeout before we declare a bluetooth operation failed (used for synchronous API operations only)</ID>
+    <ID>CommentSpacing:SafeBluetooth.kt$SafeBluetooth$/// True if the current active connection is auto (possible for this to be false but autoConnect to be true</ID>
+    <ID>CommentSpacing:SafeBluetooth.kt$SafeBluetooth$/// Users can access the GATT directly as needed</ID>
+    <ID>CommentSpacing:SafeBluetooth.kt$SafeBluetooth$/// asyncronously turn notification on/off for a characteristic</ID>
+    <ID>CommentSpacing:SafeBluetooth.kt$SafeBluetooth$/// from characteristic UUIDs to the handler function for notfies</ID>
+    <ID>CommentSpacing:SafeBluetooth.kt$SafeBluetooth$/// helper glue to make sync continuations and then wait for the result</ID>
+    <ID>CommentSpacing:SafeBluetooth.kt$SafeBluetooth$/// if we are in the first non-automated lowLevel connect.</ID>
+    <ID>CommentSpacing:SafeBluetooth.kt$SafeBluetooth$//com.geeksville.mesh.service.SafeBluetooth.closeGatt</ID>
+    <ID>CommentSpacing:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$//throw Exception("Mystery bluetooth failure - debug me")</ID>
+    <ID>CommentSpacing:SafeBluetooth.kt$SafeBluetooth.BluetoothContinuation$/// Connection work items are treated specially</ID>
+    <ID>CommentSpacing:SafeBluetooth.kt$SafeBluetooth.BluetoothContinuation$/// Start running a queued bit of work, return true for success or false for fatal bluetooth error</ID>
     <ID>ConstructorParameterNaming:MeshLog.kt$MeshLog$@ColumnInfo(name = "message") val raw_message: String</ID>
     <ID>ConstructorParameterNaming:MeshLog.kt$MeshLog$@ColumnInfo(name = "received_date") val received_date: Long</ID>
     <ID>ConstructorParameterNaming:MeshLog.kt$MeshLog$@ColumnInfo(name = "type") val message_type: String</ID>
@@ -10,15 +72,11 @@
     <ID>ConstructorParameterNaming:Packet.kt$Packet$@ColumnInfo(name = "port_num") val port_num: Int</ID>
     <ID>ConstructorParameterNaming:Packet.kt$Packet$@ColumnInfo(name = "received_time") val received_time: Long</ID>
     <ID>CyclomaticComplexMethod:ChannelFragment.kt$@Composable fun ChannelScreen( viewModel: UIViewModel = viewModel(), showSnackbar: (String) -&gt; Unit = {}, )</ID>
-    <ID>CyclomaticComplexMethod:DeviceSettingsFragment.kt$@Composable fun RadioConfigNavHost( node: NodeInfo?, viewModel: RadioConfigViewModel = hiltViewModel(), navController: NavHostController = rememberNavController(), modifier: Modifier, )</ID>
     <ID>CyclomaticComplexMethod:MainActivity.kt$MainActivity$override fun onOptionsItemSelected(item: MenuItem): Boolean</ID>
     <ID>CyclomaticComplexMethod:MapFragment.kt$@Composable fun MapView( model: UIViewModel = viewModel(), )</ID>
     <ID>CyclomaticComplexMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
-    <ID>CyclomaticComplexMethod:PositionConfigItemList.kt$@Composable fun PositionConfigItemList( isLocal: Boolean = false, location: Position?, positionConfig: PositionConfig, enabled: Boolean, onSaveClicked: (position: Position?, config: PositionConfig) -&gt; Unit, )</ID>
     <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
-    <ID>CyclomaticComplexMethod:SettingsFragment.kt$SettingsFragment$private fun initCommonUI()</ID>
     <ID>CyclomaticComplexMethod:UIState.kt$UIViewModel$fun saveMessagesCSV(uri: Uri)</ID>
-    <ID>DestructuringDeclarationWithTooManyEntries:NodeInfo.kt$val (chip, dist, name, hw, pos, alt, sats, batt, heard, sig, env) = createRefs()</ID>
     <ID>EmptyCatchBlock:MeshLog.kt$MeshLog${ }</ID>
     <ID>EmptyClassBlock:DebugLogFile.kt$BinaryLogFile${ }</ID>
     <ID>EmptyDefaultConstructor:SqlTileWriterExt.kt$SqlTileWriterExt$()</ID>
@@ -27,7 +85,54 @@
     <ID>EmptyFunctionBlock:NopInterface.kt$NopInterface${ }</ID>
     <ID>EmptyFunctionBlock:NsdManager.kt$&lt;no name provided&gt;${ }</ID>
     <ID>EmptyFunctionBlock:TrustAllX509TrustManager.kt$TrustAllX509TrustManager${}</ID>
-    <ID>ExceptionRaisedInUnexpectedLocation:DistanceExtensions.kt$fun Float.toString( system: ConfigProtos.Config.DisplayConfig.DisplayUnits ): String</ID>
+    <ID>FinalNewline:AppIntroduction.kt$com.geeksville.mesh.AppIntroduction.kt</ID>
+    <ID>FinalNewline:AppPrefs.kt$com.geeksville.mesh.android.AppPrefs.kt</ID>
+    <ID>FinalNewline:ApplicationModule.kt$com.geeksville.mesh.ApplicationModule.kt</ID>
+    <ID>FinalNewline:BLEException.kt$com.geeksville.mesh.service.BLEException.kt</ID>
+    <ID>FinalNewline:BluetoothInterfaceFactory.kt$com.geeksville.mesh.repository.radio.BluetoothInterfaceFactory.kt</ID>
+    <ID>FinalNewline:BluetoothRepositoryModule.kt$com.geeksville.mesh.repository.bluetooth.BluetoothRepositoryModule.kt</ID>
+    <ID>FinalNewline:BluetoothViewModel.kt$com.geeksville.mesh.model.BluetoothViewModel.kt</ID>
+    <ID>FinalNewline:BootCompleteReceiver.kt$com.geeksville.mesh.service.BootCompleteReceiver.kt</ID>
+    <ID>FinalNewline:Color.kt$com.geeksville.mesh.ui.theme.Color.kt</ID>
+    <ID>FinalNewline:CoroutineDispatchers.kt$com.geeksville.mesh.CoroutineDispatchers.kt</ID>
+    <ID>FinalNewline:Coroutines.kt$com.geeksville.mesh.concurrent.Coroutines.kt</ID>
+    <ID>FinalNewline:CustomTileSource.kt$com.geeksville.mesh.model.map.CustomTileSource.kt</ID>
+    <ID>FinalNewline:DatabaseModule.kt$com.geeksville.mesh.database.DatabaseModule.kt</ID>
+    <ID>FinalNewline:DateUtils.kt$com.geeksville.mesh.android.DateUtils.kt</ID>
+    <ID>FinalNewline:DebugLogFile.kt$com.geeksville.mesh.android.DebugLogFile.kt</ID>
+    <ID>FinalNewline:DeferredExecution.kt$com.geeksville.mesh.concurrent.DeferredExecution.kt</ID>
+    <ID>FinalNewline:DeviceVersion.kt$com.geeksville.mesh.model.DeviceVersion.kt</ID>
+    <ID>FinalNewline:DeviceVersionTest.kt$com.geeksville.mesh.model.DeviceVersionTest.kt</ID>
+    <ID>FinalNewline:ElevationInfo.kt$com.geeksville.mesh.ui.compose.ElevationInfo.kt</ID>
+    <ID>FinalNewline:ExpireChecker.kt$com.geeksville.mesh.android.ExpireChecker.kt</ID>
+    <ID>FinalNewline:InterfaceId.kt$com.geeksville.mesh.repository.radio.InterfaceId.kt</ID>
+    <ID>FinalNewline:InterfaceSpec.kt$com.geeksville.mesh.repository.radio.InterfaceSpec.kt</ID>
+    <ID>FinalNewline:Logging.kt$com.geeksville.mesh.android.Logging.kt</ID>
+    <ID>FinalNewline:MockInterfaceFactory.kt$com.geeksville.mesh.repository.radio.MockInterfaceFactory.kt</ID>
+    <ID>FinalNewline:NOAAWmsTileSource.kt$com.geeksville.mesh.model.map.NOAAWmsTileSource.kt</ID>
+    <ID>FinalNewline:NopInterface.kt$com.geeksville.mesh.repository.radio.NopInterface.kt</ID>
+    <ID>FinalNewline:NopInterfaceFactory.kt$com.geeksville.mesh.repository.radio.NopInterfaceFactory.kt</ID>
+    <ID>FinalNewline:OnlineTileSourceAuth.kt$com.geeksville.mesh.model.map.OnlineTileSourceAuth.kt</ID>
+    <ID>FinalNewline:PreferenceCategory.kt$com.geeksville.mesh.ui.components.PreferenceCategory.kt</ID>
+    <ID>FinalNewline:PreviewParameterProviders.kt$com.geeksville.mesh.ui.preview.PreviewParameterProviders.kt</ID>
+    <ID>FinalNewline:ProbeTableProvider.kt$com.geeksville.mesh.repository.usb.ProbeTableProvider.kt</ID>
+    <ID>FinalNewline:QuickChatActionDao.kt$com.geeksville.mesh.database.dao.QuickChatActionDao.kt</ID>
+    <ID>FinalNewline:QuickChatActionRepository.kt$com.geeksville.mesh.database.QuickChatActionRepository.kt</ID>
+    <ID>FinalNewline:RadioNotConnectedException.kt$com.geeksville.mesh.service.RadioNotConnectedException.kt</ID>
+    <ID>FinalNewline:RadioRepositoryModule.kt$com.geeksville.mesh.repository.radio.RadioRepositoryModule.kt</ID>
+    <ID>FinalNewline:RegularPreference.kt$com.geeksville.mesh.ui.components.RegularPreference.kt</ID>
+    <ID>FinalNewline:SafeBluetooth.kt$com.geeksville.mesh.service.SafeBluetooth.kt</ID>
+    <ID>FinalNewline:SatelliteCountInfo.kt$com.geeksville.mesh.ui.compose.SatelliteCountInfo.kt</ID>
+    <ID>FinalNewline:SerialConnection.kt$com.geeksville.mesh.repository.usb.SerialConnection.kt</ID>
+    <ID>FinalNewline:SerialConnectionListener.kt$com.geeksville.mesh.repository.usb.SerialConnectionListener.kt</ID>
+    <ID>FinalNewline:SerialInterface.kt$com.geeksville.mesh.repository.radio.SerialInterface.kt</ID>
+    <ID>FinalNewline:SerialInterfaceFactory.kt$com.geeksville.mesh.repository.radio.SerialInterfaceFactory.kt</ID>
+    <ID>FinalNewline:SoftwareUpdateService.kt$com.geeksville.mesh.service.SoftwareUpdateService.kt</ID>
+    <ID>FinalNewline:SqlTileWriterExt.kt$com.geeksville.mesh.util.SqlTileWriterExt.kt</ID>
+    <ID>FinalNewline:TCPInterfaceFactory.kt$com.geeksville.mesh.repository.radio.TCPInterfaceFactory.kt</ID>
+    <ID>FinalNewline:Theme.kt$com.geeksville.mesh.ui.theme.Theme.kt</ID>
+    <ID>FinalNewline:UsbBroadcastReceiver.kt$com.geeksville.mesh.repository.usb.UsbBroadcastReceiver.kt</ID>
+    <ID>FinalNewline:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
     <ID>ForbiddenComment:MapFragment.kt$// TODO: Accept filename input param from user</ID>
     <ID>ForbiddenComment:SafeBluetooth.kt$SafeBluetooth$// TODO: display some kind of UI about restarting BLE</ID>
     <ID>FunctionNaming:PacketDao.kt$PacketDao$@Query("DELETE FROM packet WHERE uuid=:uuid") fun _delete(uuid: Long)</ID>
@@ -41,13 +146,6 @@
     <ID>ImplicitDefaultLocale:LocationUtils.kt$GPSFormat$String.format( "%s%s %s%s %05d %05d", MGRS.zone, MGRS.band, MGRS.column, MGRS.row, MGRS.easting, MGRS.northing )</ID>
     <ID>ImplicitDefaultLocale:LocationUtils.kt$GPSFormat$String.format("%.5f %.5f", p.latitude, p.longitude)</ID>
     <ID>ImplicitDefaultLocale:LocationUtils.kt$GPSFormat$String.format("%s°%s'%.5s\"%s", a[0], a[1], a[2], a[3])</ID>
-    <ID>ImplicitDefaultLocale:NodeInfo.kt$EnvironmentMetrics$String.format("%.0f%%", relativeHumidity)</ID>
-    <ID>ImplicitDefaultLocale:NodeInfo.kt$EnvironmentMetrics$String.format("%.0fMΩ", gasResistance)</ID>
-    <ID>ImplicitDefaultLocale:NodeInfo.kt$EnvironmentMetrics$String.format("%.1fhPa", barometricPressure)</ID>
-    <ID>ImplicitDefaultLocale:NodeInfo.kt$EnvironmentMetrics$String.format("%.1fmA", current)</ID>
-    <ID>ImplicitDefaultLocale:NodeInfo.kt$EnvironmentMetrics$String.format("%.1f°C", temperature)</ID>
-    <ID>ImplicitDefaultLocale:NodeInfo.kt$EnvironmentMetrics$String.format("%.1f°F", fahrenheit)</ID>
-    <ID>ImplicitDefaultLocale:NodeInfo.kt$EnvironmentMetrics$String.format("%.2fV", voltage)</ID>
     <ID>ImplicitDefaultLocale:NodeInfo.kt$NodeInfo$String.format("%d%%", batteryLevel)</ID>
     <ID>LargeClass:MeshService.kt$MeshService : ServiceLogging</ID>
     <ID>LongMethod:AmbientLightingConfigItemList.kt$@Composable fun AmbientLightingConfigItemList( ambientLightingConfig: ModuleConfigProtos.ModuleConfig.AmbientLightingConfig, enabled: Boolean, onSaveClicked: (ModuleConfigProtos.ModuleConfig.AmbientLightingConfig) -&gt; Unit, )</ID>
@@ -55,27 +153,17 @@
     <ID>LongMethod:CannedMessageConfigItemList.kt$@Composable fun CannedMessageConfigItemList( messages: String, cannedMessageConfig: CannedMessageConfig, enabled: Boolean, onSaveClicked: (messages: String, config: CannedMessageConfig) -&gt; Unit, )</ID>
     <ID>LongMethod:ChannelFragment.kt$@Composable fun ChannelScreen( viewModel: UIViewModel = viewModel(), showSnackbar: (String) -&gt; Unit = {}, )</ID>
     <ID>LongMethod:ChannelSettingsItemList.kt$@Composable fun ChannelSettingsItemList( settingsList: List&lt;ChannelSettings&gt;, modemPresetName: String = "Default", maxChannels: Int = 8, enabled: Boolean, onNegativeClicked: () -&gt; Unit = { }, onPositiveClicked: (List&lt;ChannelSettings&gt;) -&gt; Unit, )</ID>
-    <ID>LongMethod:ContactItem.kt$@OptIn(ExperimentalMaterialApi::class) @Composable fun ContactItem( contact: Contact, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:ContactsFragment.kt$ContactsFragment.ActionModeCallback$override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean</ID>
-    <ID>LongMethod:DetectionSensorConfigItemList.kt$@Composable fun DetectionSensorConfigItemList( detectionSensorConfig: ModuleConfigProtos.ModuleConfig.DetectionSensorConfig, enabled: Boolean, onSaveClicked: (ModuleConfigProtos.ModuleConfig.DetectionSensorConfig) -&gt; Unit, )</ID>
     <ID>LongMethod:DeviceConfigItemList.kt$@Composable fun DeviceConfigItemList( deviceConfig: DeviceConfig, enabled: Boolean, onSaveClicked: (DeviceConfig) -&gt; Unit, )</ID>
-    <ID>LongMethod:DeviceSettingsFragment.kt$@Composable fun RadioConfigNavHost( node: NodeInfo?, viewModel: RadioConfigViewModel = hiltViewModel(), navController: NavHostController = rememberNavController(), modifier: Modifier, )</ID>
     <ID>LongMethod:DisplayConfigItemList.kt$@Composable fun DisplayConfigItemList( displayConfig: DisplayConfig, enabled: Boolean, onSaveClicked: (DisplayConfig) -&gt; Unit, )</ID>
-    <ID>LongMethod:EditChannelDialog.kt$@Composable fun EditChannelDialog( channelSettings: ChannelProtos.ChannelSettings, onAddClick: (ChannelProtos.ChannelSettings) -&gt; Unit, onDismissRequest: () -&gt; Unit, modifier: Modifier = Modifier, modemPresetName: String = "Default", )</ID>
-    <ID>LongMethod:EditDeviceProfileDialog.kt$@Composable fun EditDeviceProfileDialog( title: String, deviceProfile: ClientOnlyProtos.DeviceProfile, onAddClick: (ClientOnlyProtos.DeviceProfile) -&gt; Unit, onDismissRequest: () -&gt; Unit, modifier: Modifier = Modifier, )</ID>
+    <ID>LongMethod:DropDownPreference.kt$@Composable fun &lt;T&gt; DropDownPreference( title: String, enabled: Boolean, items: List&lt;Pair&lt;T, String&gt;&gt;, selectedItem: T, onItemSelected: (T) -&gt; Unit, modifier: Modifier = Modifier, summary: String? = null, )</ID>
     <ID>LongMethod:EditListPreference.kt$@Composable inline fun &lt;reified T&gt; EditListPreference( title: String, list: List&lt;T&gt;, maxCount: Int, enabled: Boolean, keyboardActions: KeyboardActions, crossinline onValuesChanged: (List&lt;T&gt;) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
-    <ID>LongMethod:EditWaypointDialog.kt$@Composable internal fun EditWaypointDialog( waypoint: Waypoint, onSendClicked: (Waypoint) -&gt; Unit, onDeleteClicked: (Waypoint) -&gt; Unit, onDismissRequest: () -&gt; Unit, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:ExternalNotificationConfigItemList.kt$@Composable fun ExternalNotificationConfigItemList( ringtone: String, extNotificationConfig: ExternalNotificationConfig, enabled: Boolean, onSaveClicked: (ringtone: String, config: ExternalNotificationConfig) -&gt; Unit, )</ID>
-    <ID>LongMethod:LoRaConfigItemList.kt$@Composable fun LoRaConfigItemList( loraConfig: LoRaConfig, primarySettings: ChannelSettings, enabled: Boolean, onSaveClicked: (LoRaConfig) -&gt; Unit, )</ID>
     <ID>LongMethod:MQTTConfigItemList.kt$@Composable fun MQTTConfigItemList( mqttConfig: MQTTConfig, enabled: Boolean, onSaveClicked: (MQTTConfig) -&gt; Unit, )</ID>
     <ID>LongMethod:MainActivity.kt$MainActivity$override fun onOptionsItemSelected(item: MenuItem): Boolean</ID>
     <ID>LongMethod:MapFragment.kt$@Composable fun MapView( model: UIViewModel = viewModel(), )</ID>
     <ID>LongMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
-    <ID>LongMethod:MessagesFragment.kt$MessagesFragment$override fun onViewCreated(view: View, savedInstanceState: Bundle?)</ID>
-    <ID>LongMethod:MessagesFragment.kt$MessagesFragment.&lt;no name provided&gt;$override fun onBindViewHolder(holder: ViewHolder, position: Int)</ID>
     <ID>LongMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigItemList( networkConfig: NetworkConfig, enabled: Boolean, onSaveClicked: (NetworkConfig) -&gt; Unit, )</ID>
-    <ID>LongMethod:NodeInfo.kt$@OptIn(ExperimentalMaterialApi::class) @Composable fun NodeInfo( thisNodeInfo: NodeInfo?, thatNodeInfo: NodeInfo, gpsFormat: Int, distanceUnits: Int, tempInFahrenheit: Boolean, isIgnored: Boolean = false, onClicked: () -&gt; Unit = {}, blinking: Boolean = false, )</ID>
-    <ID>LongMethod:PositionConfigItemList.kt$@Composable fun PositionConfigItemList( isLocal: Boolean = false, location: Position?, positionConfig: PositionConfig, enabled: Boolean, onSaveClicked: (position: Position?, config: PositionConfig) -&gt; Unit, )</ID>
     <ID>LongMethod:PowerConfigItemList.kt$@Composable fun PowerConfigItemList( powerConfig: PowerConfig, enabled: Boolean, onSaveClicked: (PowerConfig) -&gt; Unit, )</ID>
     <ID>LongMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
     <ID>LongMethod:SerialConfigItemList.kt$@Composable fun SerialConfigItemList( serialConfig: SerialConfig, enabled: Boolean, onSaveClicked: (SerialConfig) -&gt; Unit, )</ID>
@@ -88,7 +176,6 @@
     <ID>LongParameterList:NOAAWmsTileSource.kt$NOAAWmsTileSource$( aName: String, aBaseUrl: Array&lt;String&gt;, layername: String, version: String, time: String?, srs: String, style: String?, format: String, )</ID>
     <ID>LongParameterList:OnlineTileSourceAuth.kt$OnlineTileSourceAuth$( aName: String, aZoomLevel: Int, aZoomMaxLevel: Int, aTileSizePixels: Int, aImageFileNameEnding: String, aBaseUrl: Array&lt;String&gt;, pCopyright: String, tileSourcePolicy: TileSourcePolicy, layerName: String?, apiKey: String )</ID>
     <ID>LongParameterList:RadioInterfaceService.kt$RadioInterfaceService$( private val context: Application, private val dispatchers: CoroutineDispatchers, private val bluetoothRepository: BluetoothRepository, private val networkRepository: NetworkRepository, private val processLifecycle: Lifecycle, @RadioRepositoryQualifier private val prefs: SharedPreferences, private val interfaceFactory: InterfaceFactory, )</ID>
-    <ID>LongParameterList:UIState.kt$UIViewModel$( private val app: Application, val nodeDB: NodeDB, private val radioConfigRepository: RadioConfigRepository, private val radioInterfaceService: RadioInterfaceService, private val meshLogRepository: MeshLogRepository, private val packetRepository: PacketRepository, private val quickChatActionRepository: QuickChatActionRepository, private val preferences: SharedPreferences )</ID>
     <ID>MagicNumber:BatteryInfo.kt$100</ID>
     <ID>MagicNumber:BatteryInfo.kt$101</ID>
     <ID>MagicNumber:BatteryInfo.kt$14</ID>
@@ -128,52 +215,10 @@
     <ID>MagicNumber:ChannelOption.kt$ChannelOption.SHORT_FAST$.250f</ID>
     <ID>MagicNumber:ChannelOption.kt$ChannelOption.SHORT_SLOW$.250f</ID>
     <ID>MagicNumber:ChannelOption.kt$ChannelOption.VERY_LONG_SLOW$.0625f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.ANZ$915.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.ANZ$928.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.CN$470.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.CN$510.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.EU_433$433.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.EU_433$434.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.EU_868$869.4f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.EU_868$869.65f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.IN$865.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.IN$867.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.JP$920.8f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.JP$927.8f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.KR$920.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.KR$923.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.LORA_24$2400.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.LORA_24$2483.5f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.MY_433$433.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.MY_433$435.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.MY_919$919.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.MY_919$924.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.NZ_865$864.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.NZ_865$868.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.RU$868.7f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.RU$869.2f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.SG_923$917.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.SG_923$925.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.TH$920.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.TH$925.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.TW$920.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.TW$925.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.UA_433$433.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.UA_433$434.7f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.UA_868$868.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.UA_868$868.6f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.UNSET$902.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.UNSET$928.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.US$902.0f</ID>
-    <ID>MagicNumber:ChannelOption.kt$RegionInfo.US$928.0f</ID>
     <ID>MagicNumber:ChannelSet.kt$40</ID>
     <ID>MagicNumber:ChannelSet.kt$960</ID>
     <ID>MagicNumber:ContactsFragment.kt$ContactsFragment.ActionModeCallback$7</ID>
     <ID>MagicNumber:ContactsFragment.kt$ContactsFragment.ActionModeCallback$8</ID>
-    <ID>MagicNumber:ContactsViewModel.kt$1000L</ID>
-    <ID>MagicNumber:ContactsViewModel.kt$24</ID>
-    <ID>MagicNumber:ContactsViewModel.kt$60</ID>
-    <ID>MagicNumber:ContextServices.kt$29</ID>
     <ID>MagicNumber:ContextServices.kt$33</ID>
     <ID>MagicNumber:DataPacket.kt$DataPacket.CREATOR$16</ID>
     <ID>MagicNumber:DebugFragment.kt$DebugFragment$3</ID>
@@ -193,9 +238,6 @@
     <ID>MagicNumber:DeviceSettingsFragment.kt$ModuleRoute.TELEMETRY$5</ID>
     <ID>MagicNumber:DeviceVersion.kt$DeviceVersion$100</ID>
     <ID>MagicNumber:DeviceVersion.kt$DeviceVersion$10000</ID>
-    <ID>MagicNumber:DistanceExtensions.kt$DistanceUnit.FEET$3.28084F</ID>
-    <ID>MagicNumber:DistanceExtensions.kt$DistanceUnit.KILOMETERS$0.001F</ID>
-    <ID>MagicNumber:DistanceExtensions.kt$DistanceUnit.MILES$0.000621371F</ID>
     <ID>MagicNumber:DownloadButton.kt$1.25f</ID>
     <ID>MagicNumber:EditChannelDialog.kt$16</ID>
     <ID>MagicNumber:EditChannelDialog.kt$32</ID>
@@ -215,10 +257,7 @@
     <ID>MagicNumber:Extensions.kt$24</ID>
     <ID>MagicNumber:Extensions.kt$2880</ID>
     <ID>MagicNumber:Extensions.kt$60</ID>
-    <ID>MagicNumber:IconButton.kt$1.5f</ID>
     <ID>MagicNumber:LazyColumnDragAndDropDemo.kt$50</ID>
-    <ID>MagicNumber:LinkedCoordinates.kt$122.4194</ID>
-    <ID>MagicNumber:LinkedCoordinates.kt$37.7749</ID>
     <ID>MagicNumber:LocationRepository.kt$LocationRepository$1000L</ID>
     <ID>MagicNumber:LocationRepository.kt$LocationRepository$30</ID>
     <ID>MagicNumber:LocationRepository.kt$LocationRepository$31</ID>
@@ -226,7 +265,6 @@
     <ID>MagicNumber:LocationUtils.kt$111320</ID>
     <ID>MagicNumber:LocationUtils.kt$180</ID>
     <ID>MagicNumber:LocationUtils.kt$1e-7</ID>
-    <ID>MagicNumber:LocationUtils.kt$3.14169</ID>
     <ID>MagicNumber:LocationUtils.kt$360</ID>
     <ID>MagicNumber:LocationUtils.kt$360.0</ID>
     <ID>MagicNumber:LocationUtils.kt$3600.0</ID>
@@ -249,12 +287,8 @@
     <ID>MagicNumber:MapFragment.kt$3.0f</ID>
     <ID>MagicNumber:MapFragment.kt$40f</ID>
     <ID>MagicNumber:MapFragment.kt$&lt;no name provided&gt;$1e7</ID>
-    <ID>MagicNumber:MarkerWithLabel.kt$MarkerWithLabel$2F</ID>
     <ID>MagicNumber:MarkerWithLabel.kt$MarkerWithLabel$3</ID>
-    <ID>MagicNumber:MarkerWithLabel.kt$MarkerWithLabel$30f</ID>
-    <ID>MagicNumber:MarkerWithLabel.kt$MarkerWithLabel$8F</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$0xffffffff</ID>
-    <ID>MagicNumber:MeshService.kt$MeshService$0xffffffffL</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$100</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$1000</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$1000.0</ID>
@@ -262,8 +296,6 @@
     <ID>MagicNumber:MeshService.kt$MeshService$16</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$30</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$32</ID>
-    <ID>MagicNumber:MeshService.kt$MeshService$5</ID>
-    <ID>MagicNumber:MeshService.kt$MeshService$60</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$60000</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$8</ID>
     <ID>MagicNumber:MessagesFragment.kt$1000L</ID>
@@ -276,7 +308,6 @@
     <ID>MagicNumber:MockInterface.kt$MockInterface$2000</ID>
     <ID>MagicNumber:MockInterface.kt$MockInterface$32.776665</ID>
     <ID>MagicNumber:MockInterface.kt$MockInterface$32.960758</ID>
-    <ID>MagicNumber:MockInterface.kt$MockInterface$35</ID>
     <ID>MagicNumber:MockInterface.kt$MockInterface$96.733521</ID>
     <ID>MagicNumber:MockInterface.kt$MockInterface$96.796989</ID>
     <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$180</ID>
@@ -284,10 +315,7 @@
     <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$360.0</ID>
     <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$4</ID>
     <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$5</ID>
-    <ID>MagicNumber:NodeInfo.kt$0x33FFFFFF</ID>
     <ID>MagicNumber:NodeInfo.kt$DeviceMetrics.Companion$1000</ID>
-    <ID>MagicNumber:NodeInfo.kt$EnvironmentMetrics$1.8F</ID>
-    <ID>MagicNumber:NodeInfo.kt$EnvironmentMetrics$32</ID>
     <ID>MagicNumber:NodeInfo.kt$EnvironmentMetrics.Companion$1000</ID>
     <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.114</ID>
     <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.299</ID>
@@ -314,9 +342,6 @@
     <ID>MagicNumber:NodeMenu.kt$3</ID>
     <ID>MagicNumber:PacketRepository.kt$PacketRepository$500</ID>
     <ID>MagicNumber:PacketResponseStateDialog.kt$100</ID>
-    <ID>MagicNumber:PositionPrecisionPreference.kt$PositionPrecision.HIGH_PRECISION$32</ID>
-    <ID>MagicNumber:PositionPrecisionPreference.kt$PositionPrecision.LOW_PRECISION$11</ID>
-    <ID>MagicNumber:PositionPrecisionPreference.kt$PositionPrecision.MED_PRECISION$16</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$21972</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$32809</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$6790</ID>
@@ -330,7 +355,6 @@
     <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$115200</ID>
     <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$200</ID>
     <ID>MagicNumber:ServiceClient.kt$ServiceClient$500</ID>
-    <ID>MagicNumber:SignalInfo.kt$100F</ID>
     <ID>MagicNumber:SoftwareUpdateService.kt$0xFF</ID>
     <ID>MagicNumber:SoftwareUpdateService.kt$16</ID>
     <ID>MagicNumber:SoftwareUpdateService.kt$24</ID>
@@ -369,15 +393,10 @@
     <ID>MaxLineLength:BluetoothInterface.kt$BluetoothInterface$null</ID>
     <ID>MaxLineLength:BluetoothState.kt$BluetoothState$"BluetoothState(hasPermissions=$hasPermissions, enabled=$enabled, bondedDevices=${bondedDevices.map { it.anonymize }})"</ID>
     <ID>MaxLineLength:Channel.kt$Channel$// We have a new style 'empty' channel name. Use the same logic from the device to convert that to a human readable name</ID>
-    <ID>MaxLineLength:Channel.kt$Channel$/// Return the name of our channel as a human readable string. If empty string, assume "Default" per mesh.proto spec</ID>
-    <ID>MaxLineLength:ChannelFragment.kt$color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified</ID>
-    <ID>MaxLineLength:ChannelSettingsItemList.kt$color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified</ID>
-    <ID>MaxLineLength:ContextServices.kt$get</ID>
     <ID>MaxLineLength:ContextServices.kt$val Context.locationManager: LocationManager get() = requireNotNull(getSystemService(Context.LOCATION_SERVICE) as? LocationManager?)</ID>
     <ID>MaxLineLength:ContextServices.kt$val Context.notificationManager: NotificationManager get() = requireNotNull(getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager?)</ID>
     <ID>MaxLineLength:CustomTileSource.kt$CustomTileSource.Companion$arrayOf("https://new.nowcoast.noaa.gov/arcgis/services/nowcoast/radar_meteo_imagery_nexrad_time/MapServer/WmsServer?")</ID>
     <ID>MaxLineLength:DataPacket.kt$DataPacket$val dataType: Int</ID>
-    <ID>MaxLineLength:EditListPreference.kt$color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified</ID>
     <ID>MaxLineLength:LoRaConfigItemList.kt$value = if (isFocused || loraInput.overrideFrequency != 0f) loraInput.overrideFrequency else primaryChannel.radioFreq</ID>
     <ID>MaxLineLength:LocationRepository.kt$LocationRepository$info("Starting location updates with $providerList intervalMs=${intervalMs}ms and minDistanceM=${minDistanceM}m")</ID>
     <ID>MaxLineLength:MQTTRepository.kt$MQTTRepository.Companion$*</ID>
@@ -391,40 +410,32 @@
     <ID>MaxLineLength:MainActivity.kt$MainActivity$debug("Asked to open a channel URL - ask user if they want to switch to that channel. If so send the config to the radio")</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$*</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$* Send a mesh packet to the radio, if the radio is not currently connected this function will throw NotConnectedException</ID>
-    <ID>MaxLineLength:MeshService.kt$MeshService$// For the local node, it might not be able to update its times because it doesn't have a valid GPS reading yet</ID>
+    <ID>MaxLineLength:MeshService.kt$MeshService$// If we've received our initial config, our radio settings and all of our channels, send any queued packets and broadcast connected to clients</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$// Nodes periodically send out position updates, but those updates might not contain a lat &amp; lon (because no GPS lock)</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$// Note: we do not haveNodeDB = true because that means we've got a valid db from a real device (rather than this possibly stale hint)</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$// Update last seen for the node that sent the packet, but also for _our node_ because anytime a packet passes</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$// Update our last seen based on any valid timestamps. If the device didn't provide a timestamp make one</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$// We always start foreground because that's how our service is always started (if we didn't then android would kill us)</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$// We like to look at the local node to see if it has been sending out valid lat/lon, so for the LOCAL node (only)</ID>
+    <ID>MaxLineLength:MeshService.kt$MeshService$// We prefer to find nodes based on their assigned IDs, but if no ID has been assigned to a node, we can also find it based on node number</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$// because apps really only care about important updates of node state - which handledReceivedData will give them</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$// causes the phone to try and reconnect. If we fail downloading our initial radio state we don't want to</ID>
+    <ID>MaxLineLength:MeshService.kt$MeshService$// logAssert(earlyReceivedPackets.size &lt; 128) // The max should normally be about 32, but if the device is messed up it might try to send forever</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$// note: no need to call startDeviceSleep(), because this exception could only have reached us if it was already called</ID>
-    <ID>MaxLineLength:MeshService.kt$MeshService$/// If we've received our initial config, our radio settings and all of our channels, send any queued packets and broadcast connected to clients</ID>
-    <ID>MaxLineLength:MeshService.kt$MeshService$/// We prefer to find nodes based on their assigned IDs, but if no ID has been assigned to a node, we can also find it based on node number</ID>
-    <ID>MaxLineLength:MeshService.kt$MeshService$//logAssert(earlyReceivedPackets.size &lt; 128) // The max should normally be about 32, but if the device is messed up it might try to send forever</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$MeshProtos.FromRadio.MQTTCLIENTPROXYMESSAGE_FIELD_NUMBER -&gt; handleMqttProxyMessage(proto.mqttClientProxyMessage)</ID>
     <ID>MaxLineLength:MeshService.kt$MeshService$debug("Received nodeinfo num=${info.num}, hasUser=${info.hasUser()}, hasPosition=${info.hasPosition()}, hasDeviceMetrics=${info.hasDeviceMetrics()}")</ID>
-    <ID>MaxLineLength:MeshService.kt$MeshService.Companion$/// generate a RECEIVED action filter string that includes either the portnumber as an int, or preferably a symbolic name from portnums.proto</ID>
-    <ID>MaxLineLength:MeshService.kt$MeshService.Companion.IsUpdatingException$/** We treat software update as similar to loss of comms to the regular bluetooth service (so things like sendPosition for background GPS ignores the problem */</ID>
+    <ID>MaxLineLength:MeshService.kt$MeshService.Companion$// generate a RECEIVED action filter string that includes either the portnumber as an int, or preferably a symbolic name from portnums.proto</ID>
     <ID>MaxLineLength:MeshServiceBroadcasts.kt$MeshServiceBroadcasts$context.sendBroadcast(intent)</ID>
     <ID>MaxLineLength:MeshServiceNotifications.kt$MeshServiceNotifications$// If running on really old versions of android (&lt;= 5.1.1) (possibly only cyanogen) we might encounter a bug with setting application specific icons</ID>
-    <ID>MaxLineLength:MessagesFragment.kt$MessagesFragment$button.backgroundTintList = ContextCompat.getColorStateList(requireActivity(), R.color.colorMyMsg)</ID>
-    <ID>MaxLineLength:NodeInfo.kt$MeshUser$return "MeshUser(id=${id.anonymize}, longName=${longName.anonymize}, shortName=${shortName.anonymize}, hwModel=${hwModelString}, isLicensed=${isLicensed})"</ID>
     <ID>MaxLineLength:NodeInfo.kt$NodeInfo$prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE &amp;&amp; dist &lt; 1609 -&gt; "%.0f ft".format(dist.toDouble()*3.281)</ID>
     <ID>MaxLineLength:NodeInfo.kt$NodeInfo$prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE &amp;&amp; dist &gt;= 1609 -&gt; "%.1f mi".format(dist / 1609.34)</ID>
     <ID>MaxLineLength:NodeInfo.kt$NodeInfo$prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE &amp;&amp; dist &lt; 1000 -&gt; "%.0f m".format(dist.toDouble())</ID>
     <ID>MaxLineLength:NodeInfo.kt$NodeInfo$prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE &amp;&amp; dist &gt;= 1000 -&gt; "%.1f km".format(dist / 1000.0)</ID>
     <ID>MaxLineLength:NodeInfo.kt$Position$/**</ID>
     <ID>MaxLineLength:NodeInfo.kt$Position$return "Position(lat=${latitude.anonymize}, lon=${longitude.anonymize}, alt=${altitude.anonymize}, time=${time})"</ID>
-    <ID>MaxLineLength:NodeInfoDao.kt$NodeInfoDao$@Query("SELECT * FROM NodeInfo ORDER BY CASE WHEN num = (SELECT myNodeNum FROM MyNodeInfo LIMIT 1) THEN 0 ELSE 1 END, lastHeard DESC")</ID>
     <ID>MaxLineLength:PositionConfigItemList.kt$.</ID>
-    <ID>MaxLineLength:QuickChatSettingsFragment.kt$QuickChatSettingsFragment$if (builder.modeSwitch.isChecked) QuickChatAction.Mode.Instant else QuickChatAction.Mode.Append</ID>
     <ID>MaxLineLength:RadioInterfaceService.kt$RadioInterfaceService$/**</ID>
     <ID>MaxLineLength:RadioInterfaceService.kt$RadioInterfaceService$// If we are running on the emulator we default to the mock interface, so we can have some data to show to the user</ID>
-    <ID>MaxLineLength:RegularPreference.kt$color</ID>
-    <ID>MaxLineLength:RegularPreference.kt$color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified</ID>
     <ID>MaxLineLength:SafeBluetooth.kt$SafeBluetooth$*</ID>
     <ID>MaxLineLength:SafeBluetooth.kt$SafeBluetooth$* mtu operations seem to hang sometimes. To cope with this we have a 5 second timeout before throwing an exception and cancelling the work</ID>
     <ID>MaxLineLength:SafeBluetooth.kt$SafeBluetooth$// Attempt to invoke virtual method 'com.android.bluetooth.gatt.AdvertiseClient com.android.bluetooth.gatt.AdvertiseManager.getAdvertiseClient(int)' on a null object reference</ID>
@@ -452,102 +463,211 @@
     <ID>MaxLineLength:StreamInterface.kt$StreamInterface$deliverPacket()</ID>
     <ID>MaxLineLength:StreamInterface.kt$StreamInterface$lostSync()</ID>
     <ID>MaxLineLength:StreamInterface.kt$StreamInterface$service.onDisconnect(isPermanent = true)</ID>
-    <ID>MaxLineLength:SwitchPreference.kt$color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified</ID>
     <ID>MaxLineLength:TextDividerPreference.kt$color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified</ID>
     <ID>MaxLineLength:UIState.kt$UIViewModel$// date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload</ID>
     <ID>MaxLineLength:UIState.kt$UIViewModel$writer.appendLine("$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$dist\",\"$hopLimit\",\"$payload\"")</ID>
     <ID>MaxLineLength:UIState.kt$UIViewModel$writer.appendLine("\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance\",\"hop limit\",\"payload\"")</ID>
     <ID>MayBeConst:AppPrefs.kt$AppPrefs.Companion$private val baseName = "appPrefs_"</ID>
+    <ID>MultiLineIfElse:BluetoothInterface.kt$BluetoothInterface$doDiscoverServicesAndInit()</ID>
+    <ID>MultiLineIfElse:BluetoothInterface.kt$BluetoothInterface$s.asyncDiscoverServices { discRes -&gt; try { discRes.getOrThrow() service.serviceScope.handledLaunch { try { debug("Discovered services!") delay(1000) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null /* if (isFirstTime) { isFirstTime = false throw BLEException("Faking a BLE failure") } */ fromNum = getCharacteristic(BTM_FROMNUM_CHARACTER) // We treat the first send by a client as special isFirstSend = true // Now tell clients they can (finally use the api) service.onConnect() // Immediately broadcast any queued packets sitting on the device doReadFromRadio(true) } catch (ex: BLEException) { scheduleReconnect( "Unexpected error in initial device enumeration, forcing disconnect $ex" ) } } } catch (ex: BLEException) { if (s.gatt == null) warn("GATT was closed while discovering, assume we are shutting down") else scheduleReconnect( "Unexpected error discovering services, forcing disconnect $ex" ) } }</ID>
+    <ID>MultiLineIfElse:BluetoothInterface.kt$BluetoothInterface$safe?.asyncRequestMtu(512) { mtuRes -&gt; try { mtuRes.getOrThrow() debug("MTU change attempted") // throw BLEException("Test MTU set failed") doDiscoverServicesAndInit() } catch (ex: BLEException) { shouldSetMtu = false scheduleReconnect( "Giving up on setting MTUs, forcing disconnect $ex" ) } }</ID>
+    <ID>MultiLineIfElse:BluetoothInterface.kt$BluetoothInterface$scheduleReconnect( "Unexpected error discovering services, forcing disconnect $ex" )</ID>
+    <ID>MultiLineIfElse:BluetoothInterface.kt$BluetoothInterface$startConnect()</ID>
+    <ID>MultiLineIfElse:BluetoothInterface.kt$BluetoothInterface$startWatchingFromNum()</ID>
+    <ID>MultiLineIfElse:BluetoothInterface.kt$BluetoothInterface$warn("GATT was closed while discovering, assume we are shutting down")</ID>
+    <ID>MultiLineIfElse:BluetoothInterface.kt$BluetoothInterface$warn("Interface is shutting down, so skipping discover")</ID>
+    <ID>MultiLineIfElse:BluetoothInterface.kt$BluetoothInterface$warn("Not connecting, because safe==null, someone must have closed us")</ID>
+    <ID>MultiLineIfElse:BluetoothRepository.kt$BluetoothRepository$bondedDevices.filter { it.name?.matches(Regex(BLE_NAME_PATTERN)) == true }</ID>
+    <ID>MultiLineIfElse:BluetoothRepository.kt$BluetoothRepository$emptyList()</ID>
+    <ID>MultiLineIfElse:BuildUtils.kt$BuildUtils$return Build.SUPPORTED_64_BIT_ABIS.size &gt; 0</ID>
+    <ID>MultiLineIfElse:BuildUtils.kt$BuildUtils$return false</ID>
+    <ID>MultiLineIfElse:Channel.kt$Channel$"Custom"</ID>
+    <ID>MultiLineIfElse:Channel.kt$Channel$when (loraConfig.modemPreset) { ModemPreset.SHORT_TURBO -&gt; "ShortTurbo" ModemPreset.SHORT_FAST -&gt; "ShortFast" ModemPreset.SHORT_SLOW -&gt; "ShortSlow" ModemPreset.MEDIUM_FAST -&gt; "MediumFast" ModemPreset.MEDIUM_SLOW -&gt; "MediumSlow" ModemPreset.LONG_FAST -&gt; "LongFast" ModemPreset.LONG_SLOW -&gt; "LongSlow" ModemPreset.LONG_MODERATE -&gt; "LongMod" ModemPreset.VERY_LONG_SLOW -&gt; "VLongSlow" else -&gt; "Invalid" }</ID>
+    <ID>MultiLineIfElse:ChannelFragment.kt$channelSet = copy { settings.add(it) }</ID>
+    <ID>MultiLineIfElse:ChannelFragment.kt$channelSet = copy { settings[index] = it }</ID>
+    <ID>MultiLineIfElse:ChannelFragment.kt$item { PreferenceFooter( enabled = enabled, onCancelClicked = { focusManager.clearFocus() showChannelEditor = false channelSet = channels }, onSaveClicked = { focusManager.clearFocus() // viewModel.setRequestChannelUrl(channelUrl) sendButton() }) }</ID>
+    <ID>MultiLineIfElse:ChannelOption.kt$when (bandwidth) { 31 -&gt; .03125f 62 -&gt; .0625f 200 -&gt; .203125f 400 -&gt; .40625f 800 -&gt; .8125f 1600 -&gt; 1.6250f else -&gt; bandwidth / 1000f }</ID>
+    <ID>MultiLineIfElse:ContextServices.kt$MaterialAlertDialogBuilder(this) .setTitle(title) .setMessage(rationale) .setNeutralButton(R.string.cancel) { _, _ -&gt; } .setPositiveButton(R.string.accept) { _, _ -&gt; invokeFun() } .show()</ID>
+    <ID>MultiLineIfElse:ContextServices.kt$invokeFun()</ID>
+    <ID>MultiLineIfElse:DeviceSettingsFragment.kt$AlertDialog( onDismissRequest = {}, shape = RoundedCornerShape(16.dp), backgroundColor = MaterialTheme.colors.background, title = { Row( modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, ) { Icon( imageVector = Icons.TwoTone.Warning, contentDescription = "warning", modifier = Modifier.padding(end = 8.dp) ) Text( text = "${stringResource(title)}?\n") Icon( imageVector = Icons.TwoTone.Warning, contentDescription = "warning", modifier = Modifier.padding(start = 8.dp) ) } }, buttons = { Row( modifier = Modifier .fillMaxWidth() .padding(start = 16.dp, end = 16.dp, bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically, ) { TextButton( modifier = Modifier.weight(1f), onClick = { showDialog = false }, ) { Text(stringResource(R.string.cancel)) } Button( modifier = Modifier.weight(1f), onClick = { showDialog = false onClick() }, ) { Text(stringResource(R.string.send)) } } } )</ID>
+    <ID>MultiLineIfElse:DeviceSettingsFragment.kt$EditDeviceProfileDialog( title = if (deviceProfile != null) "Import configuration" else "Export configuration", deviceProfile = deviceProfile ?: viewModel.currentDeviceProfile, onConfirm = { showEditDeviceProfileDialog = false if (deviceProfile != null) { viewModel.installProfile(it) } else { viewModel.setDeviceProfile(it) val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply { addCategory(Intent.CATEGORY_OPENABLE) type = "application/*" putExtra(Intent.EXTRA_TITLE, "${destNum.toUInt()}.cfg") } exportConfigLauncher.launch(intent) } }, onDismiss = { showEditDeviceProfileDialog = false viewModel.setDeviceProfile(null) } )</ID>
+    <ID>MultiLineIfElse:DeviceSettingsFragment.kt$PacketResponseStateDialog( radioConfigState.responseState, onDismiss = { showEditDeviceProfileDialog = false viewModel.clearPacketResponse() }, onComplete = { val route = radioConfigState.route if (ConfigRoute.entries.any { it.name == route } || ModuleRoute.entries.any { it.name == route }) { navController.navigate(route) viewModel.clearPacketResponse() } } )</ID>
+    <ID>MultiLineIfElse:EditListPreference.kt$EditBase64Preference( title = "${index + 1}/$maxCount", value = value, enabled = enabled, keyboardActions = keyboardActions, onValueChange = { listState[index] = it as T onValuesChanged(listState) }, modifier = modifier.fillMaxWidth(), trailingIcon = trailingIcon, )</ID>
+    <ID>MultiLineIfElse:EditListPreference.kt$EditTextPreference( title = "${index + 1}/$maxCount", value = value, enabled = enabled, keyboardActions = keyboardActions, onValueChanged = { listState[index] = it as T onValuesChanged(listState) }, modifier = modifier.fillMaxWidth(), trailingIcon = trailingIcon, )</ID>
+    <ID>MultiLineIfElse:EditPasswordPreference.kt$painterResource(R.drawable.ic_twotone_visibility_24)</ID>
+    <ID>MultiLineIfElse:EditPasswordPreference.kt$painterResource(R.drawable.ic_twotone_visibility_off_24)</ID>
+    <ID>MultiLineIfElse:EditTextPreference.kt$it.toDoubleOrNull()?.let { double -&gt; valueState = it onValueChanged(double) }</ID>
+    <ID>MultiLineIfElse:EditTextPreference.kt$it.toFloatOrNull()?.let { float -&gt; valueState = it onValueChanged(float) }</ID>
+    <ID>MultiLineIfElse:EditTextPreference.kt$it.toUIntOrNull()?.toInt()?.let { int -&gt; valueState = it onValueChanged(int) }</ID>
+    <ID>MultiLineIfElse:EditTextPreference.kt$onValueChanged(it)</ID>
+    <ID>MultiLineIfElse:EditTextPreference.kt$valueState = it</ID>
+    <ID>MultiLineIfElse:EditWaypointDialog.kt$AlertDialog( onDismissRequest = onDismissRequest, shape = RoundedCornerShape(16.dp), backgroundColor = MaterialTheme.colors.background, text = { Column(modifier = modifier.fillMaxWidth()) { Text( text = stringResource(title), style = MaterialTheme.typography.h6.copy( fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, ), modifier = Modifier .fillMaxWidth() .padding(bottom = 16.dp), ) EditTextPreference( title = stringResource(R.string.name), value = waypointInput.name, maxSize = 29, // name max_size:30 enabled = true, isError = false, keyboardOptions = KeyboardOptions.Default.copy( keyboardType = KeyboardType.Text, imeAction = ImeAction.Done ), keyboardActions = KeyboardActions(onDone = { /*TODO*/ }), onValueChanged = { waypointInput = waypointInput.copy { name = it } }, trailingIcon = { IconButton(onClick = { showEmojiPickerView = true }) { Text( text = String(Character.toChars(emoji)), modifier = Modifier .background(MaterialTheme.colors.background, CircleShape) .padding(4.dp), fontSize = 24.sp, color = Color.Unspecified.copy(alpha = 1f), ) } }, ) EditTextPreference(title = stringResource(R.string.description), value = waypointInput.description, maxSize = 99, // description max_size:100 enabled = true, isError = false, keyboardOptions = KeyboardOptions.Default.copy( keyboardType = KeyboardType.Text, imeAction = ImeAction.Done ), keyboardActions = KeyboardActions(onDone = { /*TODO*/ }), onValueChanged = { waypointInput = waypointInput.copy { description = it } } ) Row( modifier = Modifier .fillMaxWidth() .size(48.dp), verticalAlignment = Alignment.CenterVertically ) { Image( painter = painterResource(R.drawable.ic_twotone_lock_24), contentDescription = stringResource(R.string.locked), ) Text(stringResource(R.string.locked)) Switch( modifier = Modifier .fillMaxWidth() .wrapContentWidth(Alignment.End), checked = waypointInput.lockedTo != 0, onCheckedChange = { waypointInput = waypointInput.copy { lockedTo = if (it) 1 else 0 } } ) } } }, buttons = { FlowRow( modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.Center, ) { TextButton( modifier = modifier.weight(1f), onClick = onDismissRequest ) { Text(stringResource(R.string.cancel)) } if (waypoint.id != 0) { Button( modifier = modifier.weight(1f), onClick = { onDeleteClicked(waypointInput) }, enabled = waypointInput.name.isNotEmpty(), ) { Text(stringResource(R.string.delete)) } } Button( modifier = modifier.weight(1f), onClick = { onSendClicked(waypointInput) }, enabled = waypointInput.name.isNotEmpty(), ) { Text(stringResource(R.string.send)) } } }, )</ID>
+    <ID>MultiLineIfElse:Exceptions.kt$Exceptions.errormsg("ignoring exception", ex)</ID>
+    <ID>MultiLineIfElse:ExpireChecker.kt$ExpireChecker$doExpire()</ID>
+    <ID>MultiLineIfElse:ExternalNotificationConfigItemList.kt$item { SwitchPreference(title = "Output LED active high", checked = externalNotificationInput.active, enabled = enabled, onCheckedChange = { externalNotificationInput = externalNotificationInput.copy { active = it } }) }</ID>
+    <ID>MultiLineIfElse:ExternalNotificationConfigItemList.kt$item { SwitchPreference(title = "Use PWM buzzer", checked = externalNotificationInput.usePwm, enabled = enabled, onCheckedChange = { externalNotificationInput = externalNotificationInput.copy { usePwm = it } }) }</ID>
+    <ID>MultiLineIfElse:Logging.kt$Logging$printlog(Log.ERROR, tag(), "$msg (exception ${ex.message})")</ID>
+    <ID>MultiLineIfElse:Logging.kt$Logging$printlog(Log.ERROR, tag(), "$msg")</ID>
+    <ID>MultiLineIfElse:MapFragment.kt$&lt;no name provided&gt;$showEditWaypointDialog = waypoint { latitudeI = (p.latitude * 1e7).toInt() longitudeI = (p.longitude * 1e7).toInt() }</ID>
+    <ID>MultiLineIfElse:MapFragment.kt$CacheLayout( cacheEstimate = cacheEstimate, onExecuteJob = { startDownload() }, onCancelDownload = { downloadRegionBoundingBox = null map.overlays.removeAll { it is Polygon } map.invalidate() }, modifier = Modifier.align(Alignment.BottomCenter) )</ID>
+    <ID>MultiLineIfElse:MapFragment.kt$Column( modifier = Modifier .padding(top = 16.dp, end = 16.dp) .align(Alignment.TopEnd), verticalArrangement = Arrangement.spacedBy(8.dp), ) { MapButton( onClick = { showMapStyleDialog() }, drawableRes = R.drawable.ic_twotone_layers_24, contentDescription = R.string.map_style_selection, ) MapButton( onClick = { if (context.hasLocationPermission()) { map.toggleMyLocation() } else { requestPermissionAndToggleLauncher.launch(context.getLocationPermissions()) } }, enabled = hasGps, drawableRes = if (myLocationOverlay == null) { R.drawable.ic_twotone_my_location_24 } else { R.drawable.ic_twotone_location_disabled_24 }, contentDescription = null, ) }</ID>
+    <ID>MultiLineIfElse:MapViewWithLifecycle.kt$try { acquire() } catch (e: SecurityException) { errormsg("WakeLock permission exception: ${e.message}") } catch (e: IllegalStateException) { errormsg("WakeLock acquire() exception: ${e.message}") }</ID>
+    <ID>MultiLineIfElse:MapViewWithLifecycle.kt$try { release() } catch (e: IllegalStateException) { errormsg("WakeLock release() exception: ${e.message}") }</ID>
+    <ID>MultiLineIfElse:MeshService.kt$MeshService$getDataPacketById(packetId)?.let { p -&gt; if (p.status == m) return@handledLaunch packetRepository.get().updateMessageStatus(p, m) serviceBroadcasts.broadcastMessageStatus(packetId, m) }</ID>
+    <ID>MultiLineIfElse:MeshService.kt$MeshService$p</ID>
+    <ID>MultiLineIfElse:MeshService.kt$MeshService$p.copy { warn("Public key mismatch from $longName ($shortName)") publicKey = it.errorByteString }</ID>
+    <ID>MultiLineIfElse:MeshService.kt$MeshService.&lt;no name provided&gt;$try { sendNow(p) } catch (ex: Exception) { errormsg("Error sending message, so enqueueing", ex) enqueueForSending(p) }</ID>
+    <ID>MultiLineIfElse:NOAAWmsTileSource.kt$NOAAWmsTileSource$sb.append("service=WMS")</ID>
+    <ID>MultiLineIfElse:NodeInfo.kt$MeshUser$hwModel.name.replace('_', '-').replace('p', '.').lowercase()</ID>
+    <ID>MultiLineIfElse:NodeInfo.kt$MeshUser$null</ID>
+    <ID>MultiLineIfElse:RadioConfigViewModel.kt$RadioConfigViewModel$destNode.value?.user?.let { val user = MeshProtos.User.newBuilder() .setLongName(if (hasLongName()) longName else it.longName) .setShortName(if (hasShortName()) shortName else it.shortName) .setIsLicensed(it.isLicensed) .build() setOwner(user) }</ID>
+    <ID>MultiLineIfElse:RadioConfigViewModel.kt$RadioConfigViewModel$try { setChannels(channelUrl) } catch (ex: Exception) { errormsg("DeviceProfile channel import error", ex) setResponseStateError(ex.customMessage) }</ID>
+    <ID>MultiLineIfElse:RadioConfigViewModel.kt$RadioConfigViewModel$viewModelScope.launch { radioConfigRepository.replaceAllSettings(new) }</ID>
+    <ID>MultiLineIfElse:RadioInterfaceService.kt$RadioInterfaceService$startInterface()</ID>
+    <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth$cb</ID>
+    <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth$null</ID>
+    <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth$startNewWork()</ID>
+    <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth$throw AssertionError("currentWork was not null: $currentWork")</ID>
+    <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth$warn("wor completed, but we already killed it via failsafetimer? status=$status, res=$res")</ID>
+    <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth$work.completion.resume(Result.success(res) as Result&lt;Nothing&gt;)</ID>
+    <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth$work.completion.resumeWithException( BLEStatusException( status, "Bluetooth status=$status while doing ${work.tag}" ) )</ID>
+    <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$completeWork(status, Unit)</ID>
+    <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$completeWork(status, characteristic)</ID>
+    <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$dropAndReconnect()</ID>
+    <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$errormsg("Ignoring bogus onMtuChanged")</ID>
+    <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$if (!characteristic.value.contentEquals(reliable)) { errormsg("A reliable write failed!") gatt.abortReliableWrite() completeWork( STATUS_RELIABLE_WRITE_FAILED, characteristic ) // skanky code to indicate failure } else { logAssert(gatt.executeReliableWrite()) // After this execute reliable completes - we can continue with normal operations (see onReliableWriteCompleted) }</ID>
+    <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$lostConnection("lost connection")</ID>
+    <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$warn("Received notification from $characteristic, but no handler registered")</ID>
+    <ID>MultiLineIfElse:TextDividerPreference.kt$Icon( trailingIcon, "trailingIcon", modifier = modifier .fillMaxWidth() .wrapContentWidth(Alignment.End), )</ID>
+    <ID>MultiLineIfElse:UIState.kt$add(channel { role = when (i) { 0 -&gt; ChannelProtos.Channel.Role.PRIMARY in 1..new.lastIndex -&gt; ChannelProtos.Channel.Role.SECONDARY else -&gt; ChannelProtos.Channel.Role.DISABLED } index = i settings = new.getOrNull(i) ?: channelSettings { } })</ID>
     <ID>NestedBlockDepth:LanguageUtils.kt$LanguageUtils$fun getLanguageTags(context: Context): Map&lt;String, String&gt;</ID>
     <ID>NestedBlockDepth:MainActivity.kt$MainActivity$private fun onMeshConnectionChanged(newConnection: MeshService.ConnectionState)</ID>
     <ID>NestedBlockDepth:MeshService.kt$MeshService$private fun handleReceivedAdmin(fromNodeNum: Int, a: AdminProtos.AdminMessage)</ID>
     <ID>NestedBlockDepth:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
-    <ID>NestedBlockDepth:RadioConfigViewModel.kt$RadioConfigViewModel$fun installProfile(protobuf: DeviceProfile)</ID>
     <ID>NestedBlockDepth:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
     <ID>NewLineAtEndOfFile:AppIntroduction.kt$com.geeksville.mesh.AppIntroduction.kt</ID>
     <ID>NewLineAtEndOfFile:AppPrefs.kt$com.geeksville.mesh.android.AppPrefs.kt</ID>
     <ID>NewLineAtEndOfFile:ApplicationModule.kt$com.geeksville.mesh.ApplicationModule.kt</ID>
     <ID>NewLineAtEndOfFile:BLEException.kt$com.geeksville.mesh.service.BLEException.kt</ID>
     <ID>NewLineAtEndOfFile:BluetoothInterfaceFactory.kt$com.geeksville.mesh.repository.radio.BluetoothInterfaceFactory.kt</ID>
-    <ID>NewLineAtEndOfFile:BluetoothInterfaceSpec.kt$com.geeksville.mesh.repository.radio.BluetoothInterfaceSpec.kt</ID>
     <ID>NewLineAtEndOfFile:BluetoothRepositoryModule.kt$com.geeksville.mesh.repository.bluetooth.BluetoothRepositoryModule.kt</ID>
     <ID>NewLineAtEndOfFile:BluetoothViewModel.kt$com.geeksville.mesh.model.BluetoothViewModel.kt</ID>
     <ID>NewLineAtEndOfFile:BootCompleteReceiver.kt$com.geeksville.mesh.service.BootCompleteReceiver.kt</ID>
     <ID>NewLineAtEndOfFile:Color.kt$com.geeksville.mesh.ui.theme.Color.kt</ID>
-    <ID>NewLineAtEndOfFile:ContactsViewModel.kt$com.geeksville.mesh.model.ContactsViewModel.kt</ID>
     <ID>NewLineAtEndOfFile:CoroutineDispatchers.kt$com.geeksville.mesh.CoroutineDispatchers.kt</ID>
     <ID>NewLineAtEndOfFile:Coroutines.kt$com.geeksville.mesh.concurrent.Coroutines.kt</ID>
     <ID>NewLineAtEndOfFile:CustomTileSource.kt$com.geeksville.mesh.model.map.CustomTileSource.kt</ID>
-    <ID>NewLineAtEndOfFile:DataPacket.kt$com.geeksville.mesh.DataPacket.kt</ID>
     <ID>NewLineAtEndOfFile:DatabaseModule.kt$com.geeksville.mesh.database.DatabaseModule.kt</ID>
     <ID>NewLineAtEndOfFile:DateUtils.kt$com.geeksville.mesh.android.DateUtils.kt</ID>
     <ID>NewLineAtEndOfFile:DebugLogFile.kt$com.geeksville.mesh.android.DebugLogFile.kt</ID>
     <ID>NewLineAtEndOfFile:DeferredExecution.kt$com.geeksville.mesh.concurrent.DeferredExecution.kt</ID>
     <ID>NewLineAtEndOfFile:DeviceVersion.kt$com.geeksville.mesh.model.DeviceVersion.kt</ID>
     <ID>NewLineAtEndOfFile:DeviceVersionTest.kt$com.geeksville.mesh.model.DeviceVersionTest.kt</ID>
-    <ID>NewLineAtEndOfFile:DistanceExtensions.kt$com.geeksville.mesh.util.DistanceExtensions.kt</ID>
-    <ID>NewLineAtEndOfFile:DragManageAdapter.kt$com.geeksville.mesh.ui.DragManageAdapter.kt</ID>
     <ID>NewLineAtEndOfFile:ElevationInfo.kt$com.geeksville.mesh.ui.compose.ElevationInfo.kt</ID>
     <ID>NewLineAtEndOfFile:ExpireChecker.kt$com.geeksville.mesh.android.ExpireChecker.kt</ID>
-    <ID>NewLineAtEndOfFile:InterfaceFactory.kt$com.geeksville.mesh.repository.radio.InterfaceFactory.kt</ID>
-    <ID>NewLineAtEndOfFile:InterfaceFactorySpi.kt$com.geeksville.mesh.repository.radio.InterfaceFactorySpi.kt</ID>
     <ID>NewLineAtEndOfFile:InterfaceId.kt$com.geeksville.mesh.repository.radio.InterfaceId.kt</ID>
     <ID>NewLineAtEndOfFile:InterfaceSpec.kt$com.geeksville.mesh.repository.radio.InterfaceSpec.kt</ID>
-    <ID>NewLineAtEndOfFile:LanguageUtils.kt$com.geeksville.mesh.util.LanguageUtils.kt</ID>
-    <ID>NewLineAtEndOfFile:LastHeardInfo.kt$com.geeksville.mesh.ui.LastHeardInfo.kt</ID>
-    <ID>NewLineAtEndOfFile:LinkedCoordinates.kt$com.geeksville.mesh.ui.LinkedCoordinates.kt</ID>
     <ID>NewLineAtEndOfFile:Logging.kt$com.geeksville.mesh.android.Logging.kt</ID>
-    <ID>NewLineAtEndOfFile:MeshLogDao.kt$com.geeksville.mesh.database.dao.MeshLogDao.kt</ID>
-    <ID>NewLineAtEndOfFile:MeshLogRepository.kt$com.geeksville.mesh.database.MeshLogRepository.kt</ID>
     <ID>NewLineAtEndOfFile:MockInterfaceFactory.kt$com.geeksville.mesh.repository.radio.MockInterfaceFactory.kt</ID>
-    <ID>NewLineAtEndOfFile:MockInterfaceSpec.kt$com.geeksville.mesh.repository.radio.MockInterfaceSpec.kt</ID>
     <ID>NewLineAtEndOfFile:NOAAWmsTileSource.kt$com.geeksville.mesh.model.map.NOAAWmsTileSource.kt</ID>
-    <ID>NewLineAtEndOfFile:NodeFilterTextField.kt$com.geeksville.mesh.ui.components.NodeFilterTextField.kt</ID>
     <ID>NewLineAtEndOfFile:NopInterface.kt$com.geeksville.mesh.repository.radio.NopInterface.kt</ID>
     <ID>NewLineAtEndOfFile:NopInterfaceFactory.kt$com.geeksville.mesh.repository.radio.NopInterfaceFactory.kt</ID>
-    <ID>NewLineAtEndOfFile:NopInterfaceSpec.kt$com.geeksville.mesh.repository.radio.NopInterfaceSpec.kt</ID>
     <ID>NewLineAtEndOfFile:OnlineTileSourceAuth.kt$com.geeksville.mesh.model.map.OnlineTileSourceAuth.kt</ID>
     <ID>NewLineAtEndOfFile:PreferenceCategory.kt$com.geeksville.mesh.ui.components.PreferenceCategory.kt</ID>
     <ID>NewLineAtEndOfFile:PreviewParameterProviders.kt$com.geeksville.mesh.ui.preview.PreviewParameterProviders.kt</ID>
     <ID>NewLineAtEndOfFile:ProbeTableProvider.kt$com.geeksville.mesh.repository.usb.ProbeTableProvider.kt</ID>
-    <ID>NewLineAtEndOfFile:QuickChatAction.kt$com.geeksville.mesh.database.entity.QuickChatAction.kt</ID>
-    <ID>NewLineAtEndOfFile:QuickChatActionAdapter.kt$com.geeksville.mesh.ui.QuickChatActionAdapter.kt</ID>
     <ID>NewLineAtEndOfFile:QuickChatActionDao.kt$com.geeksville.mesh.database.dao.QuickChatActionDao.kt</ID>
     <ID>NewLineAtEndOfFile:QuickChatActionRepository.kt$com.geeksville.mesh.database.QuickChatActionRepository.kt</ID>
-    <ID>NewLineAtEndOfFile:QuickChatSettingsFragment.kt$com.geeksville.mesh.ui.QuickChatSettingsFragment.kt</ID>
     <ID>NewLineAtEndOfFile:RadioNotConnectedException.kt$com.geeksville.mesh.service.RadioNotConnectedException.kt</ID>
     <ID>NewLineAtEndOfFile:RadioRepositoryModule.kt$com.geeksville.mesh.repository.radio.RadioRepositoryModule.kt</ID>
     <ID>NewLineAtEndOfFile:RegularPreference.kt$com.geeksville.mesh.ui.components.RegularPreference.kt</ID>
     <ID>NewLineAtEndOfFile:SafeBluetooth.kt$com.geeksville.mesh.service.SafeBluetooth.kt</ID>
     <ID>NewLineAtEndOfFile:SatelliteCountInfo.kt$com.geeksville.mesh.ui.compose.SatelliteCountInfo.kt</ID>
     <ID>NewLineAtEndOfFile:SerialConnection.kt$com.geeksville.mesh.repository.usb.SerialConnection.kt</ID>
-    <ID>NewLineAtEndOfFile:SerialConnectionImpl.kt$com.geeksville.mesh.repository.usb.SerialConnectionImpl.kt</ID>
     <ID>NewLineAtEndOfFile:SerialConnectionListener.kt$com.geeksville.mesh.repository.usb.SerialConnectionListener.kt</ID>
     <ID>NewLineAtEndOfFile:SerialInterface.kt$com.geeksville.mesh.repository.radio.SerialInterface.kt</ID>
     <ID>NewLineAtEndOfFile:SerialInterfaceFactory.kt$com.geeksville.mesh.repository.radio.SerialInterfaceFactory.kt</ID>
-    <ID>NewLineAtEndOfFile:SerialInterfaceSpec.kt$com.geeksville.mesh.repository.radio.SerialInterfaceSpec.kt</ID>
-    <ID>NewLineAtEndOfFile:ServiceClient.kt$com.geeksville.mesh.android.ServiceClient.kt</ID>
     <ID>NewLineAtEndOfFile:SoftwareUpdateService.kt$com.geeksville.mesh.service.SoftwareUpdateService.kt</ID>
     <ID>NewLineAtEndOfFile:SqlTileWriterExt.kt$com.geeksville.mesh.util.SqlTileWriterExt.kt</ID>
-    <ID>NewLineAtEndOfFile:StreamInterface.kt$com.geeksville.mesh.repository.radio.StreamInterface.kt</ID>
     <ID>NewLineAtEndOfFile:TCPInterfaceFactory.kt$com.geeksville.mesh.repository.radio.TCPInterfaceFactory.kt</ID>
-    <ID>NewLineAtEndOfFile:TCPInterfaceSpec.kt$com.geeksville.mesh.repository.radio.TCPInterfaceSpec.kt</ID>
     <ID>NewLineAtEndOfFile:Theme.kt$com.geeksville.mesh.ui.theme.Theme.kt</ID>
     <ID>NewLineAtEndOfFile:UsbBroadcastReceiver.kt$com.geeksville.mesh.repository.usb.UsbBroadcastReceiver.kt</ID>
-    <ID>NewLineAtEndOfFile:UsbRepository.kt$com.geeksville.mesh.repository.usb.UsbRepository.kt</ID>
     <ID>NewLineAtEndOfFile:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
+    <ID>NoBlankLineBeforeRbrace:BluetoothInterface.kt$BluetoothInterface$ </ID>
+    <ID>NoBlankLineBeforeRbrace:CustomTileSource.kt$CustomTileSource$ </ID>
+    <ID>NoBlankLineBeforeRbrace:DebugLogFile.kt$BinaryLogFile$ </ID>
+    <ID>NoBlankLineBeforeRbrace:NOAAWmsTileSource.kt$NOAAWmsTileSource$ </ID>
+    <ID>NoBlankLineBeforeRbrace:NopInterface.kt$NopInterface$ </ID>
+    <ID>NoBlankLineBeforeRbrace:OnlineTileSourceAuth.kt$OnlineTileSourceAuth$ </ID>
+    <ID>NoBlankLineBeforeRbrace:PositionTest.kt$PositionTest$ </ID>
+    <ID>NoBlankLineBeforeRbrace:PreviewParameterProviders.kt$NodeInfoPreviewParameterProvider$ </ID>
+    <ID>NoBlankLineBeforeRbrace:QuickChatActionDao.kt$QuickChatActionDao$ </ID>
+    <ID>NoConsecutiveBlankLines:AppIntroduction.kt$AppIntroduction$ </ID>
+    <ID>NoConsecutiveBlankLines:AppPrefs.kt$ </ID>
+    <ID>NoConsecutiveBlankLines:BluetoothInterface.kt$ </ID>
+    <ID>NoConsecutiveBlankLines:BluetoothInterface.kt$BluetoothInterface$ </ID>
+    <ID>NoConsecutiveBlankLines:BootCompleteReceiver.kt$ </ID>
+    <ID>NoConsecutiveBlankLines:CommonCharts.kt$ </ID>
+    <ID>NoConsecutiveBlankLines:Constants.kt$ </ID>
+    <ID>NoConsecutiveBlankLines:CustomTileSource.kt$ </ID>
+    <ID>NoConsecutiveBlankLines:CustomTileSource.kt$CustomTileSource.Companion$ </ID>
+    <ID>NoConsecutiveBlankLines:DebugLogFile.kt$ </ID>
+    <ID>NoConsecutiveBlankLines:DeferredExecution.kt$ </ID>
+    <ID>NoConsecutiveBlankLines:EnvironmentMetrics.kt$ </ID>
+    <ID>NoConsecutiveBlankLines:Exceptions.kt$ </ID>
+    <ID>NoConsecutiveBlankLines:IRadioInterface.kt$ </ID>
+    <ID>NoConsecutiveBlankLines:NOAAWmsTileSource.kt$NOAAWmsTileSource$ </ID>
+    <ID>NoConsecutiveBlankLines:NodeInfo.kt$ </ID>
+    <ID>NoConsecutiveBlankLines:PositionTest.kt$ </ID>
+    <ID>NoConsecutiveBlankLines:PreviewParameterProviders.kt$ </ID>
+    <ID>NoConsecutiveBlankLines:SafeBluetooth.kt$ </ID>
+    <ID>NoConsecutiveBlankLines:SafeBluetooth.kt$SafeBluetooth$ </ID>
+    <ID>NoConsecutiveBlankLines:SqlTileWriterExt.kt$ </ID>
+    <ID>NoEmptyClassBody:DebugLogFile.kt$BinaryLogFile${ }</ID>
+    <ID>NoSemicolons:DateUtils.kt$DateUtils$;</ID>
+    <ID>NoTrailingSpaces:ExpireChecker.kt$ExpireChecker$ </ID>
+    <ID>NoWildcardImports:BluetoothInterface.kt$import com.geeksville.mesh.service.*</ID>
+    <ID>NoWildcardImports:DeviceVersionTest.kt$import org.junit.Assert.*</ID>
+    <ID>NoWildcardImports:ExampleUnitTest.kt$import org.junit.Assert.*</ID>
+    <ID>NoWildcardImports:MainActivity.kt$import android.content.*</ID>
+    <ID>NoWildcardImports:MainActivity.kt$import com.geeksville.mesh.android.*</ID>
+    <ID>NoWildcardImports:MainActivity.kt$import com.geeksville.mesh.service.*</ID>
+    <ID>NoWildcardImports:MainActivity.kt$import com.geeksville.mesh.ui.*</ID>
+    <ID>NoWildcardImports:MeshService.kt$import com.geeksville.mesh.*</ID>
+    <ID>NoWildcardImports:MeshService.kt$import com.geeksville.mesh.util.*</ID>
+    <ID>NoWildcardImports:MockInterface.kt$import com.geeksville.mesh.*</ID>
+    <ID>NoWildcardImports:PreferenceFooter.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>NoWildcardImports:PreferenceFooter.kt$import androidx.compose.material.*</ID>
+    <ID>NoWildcardImports:QuickChatActionDao.kt$import androidx.room.*</ID>
+    <ID>NoWildcardImports:SafeBluetooth.kt$import android.bluetooth.*</ID>
+    <ID>NoWildcardImports:SafeBluetooth.kt$import kotlinx.coroutines.*</ID>
+    <ID>NoWildcardImports:SettingsFragment.kt$import com.geeksville.mesh.android.*</ID>
+    <ID>NoWildcardImports:UIState.kt$import com.geeksville.mesh.*</ID>
+    <ID>NoWildcardImports:UsbRepository.kt$import kotlinx.coroutines.flow.*</ID>
     <ID>OptionalAbstractKeyword:SyncContinuation.kt$Continuation$abstract</ID>
+    <ID>ParameterListWrapping:AppPrefs.kt$FloatPref$(thisRef: AppPrefs, prop: KProperty&lt;Float&gt;)</ID>
+    <ID>ParameterListWrapping:AppPrefs.kt$StringPref$(thisRef: AppPrefs, prop: KProperty&lt;String&gt;)</ID>
+    <ID>ParameterListWrapping:SafeBluetooth.kt$SafeBluetooth$( c: BluetoothGattCharacteristic, cont: Continuation&lt;BluetoothGattCharacteristic&gt;, timeout: Long = 0 )</ID>
+    <ID>ParameterListWrapping:SafeBluetooth.kt$SafeBluetooth$( c: BluetoothGattCharacteristic, cont: Continuation&lt;Unit&gt;, timeout: Long = 0 )</ID>
+    <ID>ParameterListWrapping:SafeBluetooth.kt$SafeBluetooth$( c: BluetoothGattCharacteristic, v: ByteArray, cont: Continuation&lt;BluetoothGattCharacteristic&gt;, timeout: Long = 0 )</ID>
+    <ID>ParameterListWrapping:SafeBluetooth.kt$SafeBluetooth$( c: BluetoothGattDescriptor, cont: Continuation&lt;BluetoothGattDescriptor&gt;, timeout: Long = 0 )</ID>
     <ID>RethrowCaughtException:SyncContinuation.kt$Continuation$throw ex</ID>
     <ID>ReturnCount:ChannelOption.kt$internal fun LoRaConfig.radioFreq(channelNum: Int): Float</ID>
-    <ID>ReturnCount:Extensions.kt$fun formatAgo(lastSeenUnix: Int): String</ID>
     <ID>ReturnCount:MainActivity.kt$MainActivity$override fun onOptionsItemSelected(item: MenuItem): Boolean</ID>
     <ID>ReturnCount:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
     <ID>ReturnCount:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
+    <ID>SpacingAroundColon:PreviewParameterProviders.kt$NodeInfoPreviewParameterProvider$:</ID>
+    <ID>SpacingAroundCurly:AppPrefs.kt$FloatPref$}</ID>
+    <ID>SpacingAroundKeyword:AppPrefs.kt$AppPrefs$if</ID>
+    <ID>SpacingAroundKeyword:Exceptions.kt$if</ID>
+    <ID>SpacingAroundKeyword:Exceptions.kt$when</ID>
+    <ID>SpacingAroundOperators:NodeInfo.kt$NodeInfo$*</ID>
+    <ID>SpacingAroundRangeOperator:BatteryInfo.kt$..</ID>
+    <ID>StringTemplate:NodeInfo.kt$Position$${time}</ID>
     <ID>SwallowedException:BluetoothInterface.kt$BluetoothInterface$ex: CancellationException</ID>
     <ID>SwallowedException:ChannelFragment.kt$ex: Throwable</ID>
     <ID>SwallowedException:ChannelSet.kt$ex: Throwable</ID>
     <ID>SwallowedException:DeviceVersion.kt$DeviceVersion$e: Exception</ID>
-    <ID>SwallowedException:EditChannelDialog.kt$ex: Throwable</ID>
     <ID>SwallowedException:Exceptions.kt$ex: Throwable</ID>
     <ID>SwallowedException:MainActivity.kt$MainActivity$ex: BindFailedException</ID>
     <ID>SwallowedException:MainActivity.kt$MainActivity$ex: IllegalStateException</ID>
@@ -562,14 +682,12 @@
     <ID>SwallowedException:SafeBluetooth.kt$SafeBluetooth$ex: NullPointerException</ID>
     <ID>SwallowedException:ServiceClient.kt$ServiceClient$ex: IllegalArgumentException</ID>
     <ID>SwallowedException:TCPInterface.kt$TCPInterface$ex: SocketTimeoutException</ID>
-    <ID>ThrowsCount:MeshService.kt$MeshService$private fun doFirmwareUpdate()</ID>
     <ID>TooGenericExceptionCaught:BTScanModel.kt$BTScanModel$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:BluetoothInterface.kt$BluetoothInterface$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:ChannelFragment.kt$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:ChannelFragment.kt$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:ChannelSet.kt$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:DeviceVersion.kt$DeviceVersion$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:EditChannelDialog.kt$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:Exceptions.kt$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:LanguageUtils.kt$LanguageUtils$e: Exception</ID>
     <ID>TooGenericExceptionCaught:LocationRepository.kt$LocationRepository$e: Exception</ID>
@@ -589,23 +707,18 @@
     <ID>TooGenericExceptionCaught:TCPInterface.kt$TCPInterface$ex: Throwable</ID>
     <ID>TooGenericExceptionThrown:DeviceVersion.kt$DeviceVersion$throw Exception("Can't parse version $s")</ID>
     <ID>TooGenericExceptionThrown:MeshService.kt$MeshService$throw Exception("Can't set user without a NodeInfo")</ID>
-    <ID>TooGenericExceptionThrown:MeshService.kt$MeshService$throw Exception("Can't update - no bluetooth connected")</ID>
-    <ID>TooGenericExceptionThrown:MeshService.kt$MeshService$throw Exception("Firmware update already running")</ID>
-    <ID>TooGenericExceptionThrown:MeshService.kt$MeshService$throw Exception("No update filename")</ID>
     <ID>TooGenericExceptionThrown:MeshService.kt$MeshService.&lt;no name provided&gt;$throw Exception("Port numbers must be non-zero!")</ID>
     <ID>TooGenericExceptionThrown:ServiceClient.kt$ServiceClient$throw Exception("Haven't called connect")</ID>
     <ID>TooGenericExceptionThrown:ServiceClient.kt$ServiceClient$throw Exception("Service not bound")</ID>
     <ID>TooGenericExceptionThrown:SyncContinuation.kt$SyncContinuation$throw Exception("SyncContinuation timeout")</ID>
     <ID>TooGenericExceptionThrown:SyncContinuation.kt$SyncContinuation$throw Exception("This shouldn't happen")</ID>
     <ID>TooManyFunctions:AppPrefs.kt$AppPrefs</ID>
-    <ID>TooManyFunctions:BTScanModel.kt$BTScanModel : ViewModelLogging</ID>
     <ID>TooManyFunctions:BluetoothInterface.kt$BluetoothInterface : IRadioInterfaceLogging</ID>
     <ID>TooManyFunctions:ContextServices.kt$com.geeksville.mesh.android.ContextServices.kt</ID>
     <ID>TooManyFunctions:LocationUtils.kt$com.geeksville.mesh.util.LocationUtils.kt</ID>
     <ID>TooManyFunctions:MainActivity.kt$MainActivity : AppCompatActivityLogging</ID>
     <ID>TooManyFunctions:MeshService.kt$MeshService : ServiceLogging</ID>
     <ID>TooManyFunctions:MeshService.kt$MeshService$&lt;no name provided&gt; : Stub</ID>
-    <ID>TooManyFunctions:ModuleConfigRepository.kt$ModuleConfigRepository : Logging</ID>
     <ID>TooManyFunctions:PacketDao.kt$PacketDao</ID>
     <ID>TooManyFunctions:PacketRepository.kt$PacketRepository</ID>
     <ID>TooManyFunctions:RadioConfigRepository.kt$RadioConfigRepository</ID>
@@ -614,19 +727,7 @@
     <ID>TooManyFunctions:SafeBluetooth.kt$SafeBluetooth : LoggingCloseable</ID>
     <ID>TooManyFunctions:SettingsFragment.kt$SettingsFragment : ScreenFragmentLogging</ID>
     <ID>TooManyFunctions:UIState.kt$UIViewModel : ViewModelLogging</ID>
-    <ID>TopLevelPropertyNaming:ChannelSet.kt$internal const val URL_PREFIX = "https://meshtastic.org/e/#"</ID>
-    <ID>TopLevelPropertyNaming:Constants.kt$// a bool true means now connected, false means not const val EXTRA_CONNECTED = "$prefix.Connected"</ID>
-    <ID>TopLevelPropertyNaming:Constants.kt$/// a bool true means we expect this condition to continue until, false means device might come back const val EXTRA_PERMANENT = "$prefix.Permanent"</ID>
-    <ID>TopLevelPropertyNaming:Constants.kt$const val EXTRA_NODEINFO = "$prefix.NodeInfo"</ID>
-    <ID>TopLevelPropertyNaming:Constants.kt$const val EXTRA_PACKET_ID = "$prefix.PacketId"</ID>
-    <ID>TopLevelPropertyNaming:Constants.kt$const val EXTRA_PAYLOAD = "$prefix.Payload"</ID>
-    <ID>TopLevelPropertyNaming:Constants.kt$const val EXTRA_PROGRESS = "$prefix.Progress"</ID>
-    <ID>TopLevelPropertyNaming:Constants.kt$const val EXTRA_STATUS = "$prefix.Status"</ID>
     <ID>TopLevelPropertyNaming:Constants.kt$const val prefix = "com.geeksville.mesh"</ID>
-    <ID>TopLevelPropertyNaming:UsbManager.kt$private const val ACTION_USB_PERMISSION = "com.geeksville.mesh.USB_PERMISSION"</ID>
-    <ID>UnusedParameter:PositionPrecisionPreference.kt$modifier: Modifier = Modifier</ID>
-    <ID>UnusedPrivateMember:MeshService.kt$MeshService$private fun processQueuedPackets()</ID>
-    <ID>UnusedPrivateMember:MeshService.kt$MeshService$private fun requestAllConfig()</ID>
     <ID>UnusedPrivateMember:NOAAWmsTileSource.kt$NOAAWmsTileSource$private fun tile2lat(y: Int, z: Int): Double</ID>
     <ID>UnusedPrivateMember:NOAAWmsTileSource.kt$NOAAWmsTileSource$private fun tile2lon(x: Int, z: Int): Double</ID>
     <ID>UnusedPrivateMember:SafeBluetooth.kt$SafeBluetooth$private fun reconnect()</ID>
@@ -635,8 +736,6 @@
     <ID>UnusedPrivateProperty:CustomTileSource.kt$CustomTileSource.Companion$private val SEAMAP: OnlineTileSourceBase = TileSourceFactory.OPEN_SEAMAP</ID>
     <ID>UnusedPrivateProperty:CustomTileSource.kt$CustomTileSource.Companion$private val USGS_HYDRO_CACHE = object : OnlineTileSourceBase( "USGS Hydro Cache", 0, 18, 256, "", arrayOf( "https://basemap.nationalmap.gov/arcgis/rest/services/USGSHydroCached/MapServer/tile/" ), "USGS", TileSourcePolicy( 2, TileSourcePolicy.FLAG_NO_PREVENTIVE or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED ) ) { override fun getTileURLString(pMapTileIndex: Long): String { return baseUrl + (MapTileIndex.getZoom(pMapTileIndex) .toString() + "/" + MapTileIndex.getY(pMapTileIndex) + "/" + MapTileIndex.getX(pMapTileIndex) + mImageFilenameEnding) } }</ID>
     <ID>UnusedPrivateProperty:CustomTileSource.kt$CustomTileSource.Companion$private val USGS_SHADED_RELIEF = object : OnlineTileSourceBase( "USGS Shaded Relief Only", 0, 18, 256, "", arrayOf( "https://basemap.nationalmap.gov/arcgis/rest/services/USGSShadedReliefOnly/MapServer/tile/" ), "USGS", TileSourcePolicy( 2, TileSourcePolicy.FLAG_NO_PREVENTIVE or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED ) ) { override fun getTileURLString(pMapTileIndex: Long): String { return baseUrl + (MapTileIndex.getZoom(pMapTileIndex) .toString() + "/" + MapTileIndex.getY(pMapTileIndex) + "/" + MapTileIndex.getX(pMapTileIndex) + mImageFilenameEnding) } }</ID>
-    <ID>UnusedPrivateProperty:MeshService.kt$MeshService$val filename = firmwareUpdateFilename ?: throw Exception("No update filename")</ID>
-    <ID>UnusedPrivateProperty:MeshService.kt$MeshService$val isBluetoothInterface = a != null &amp;&amp; a.startsWith("x")</ID>
     <ID>UtilityClassWithPublicConstructor:CustomTileSource.kt$CustomTileSource</ID>
     <ID>UtilityClassWithPublicConstructor:NetworkRepositoryModule.kt$NetworkRepositoryModule</ID>
     <ID>VariableNaming:NOAAWmsTileSource.kt$NOAAWmsTileSource$// Size of square world map in meters, using WebMerc projection. private val MAP_SIZE = 20037508.34789244 * 2</ID>
@@ -651,8 +750,6 @@
     <ID>VariableNaming:SafeBluetooth.kt$SafeBluetooth$private val STATUS_NOSTART = 4405</ID>
     <ID>VariableNaming:SafeBluetooth.kt$SafeBluetooth$private val STATUS_SIMFAILURE = 4406</ID>
     <ID>VariableNaming:SafeBluetooth.kt$SafeBluetooth$private val STATUS_TIMEOUT = 4404</ID>
-    <ID>WildcardImport:BTScanModel.kt$import android.content.*</ID>
-    <ID>WildcardImport:BTScanModel.kt$import com.geeksville.mesh.android.*</ID>
     <ID>WildcardImport:BluetoothInterface.kt$import com.geeksville.mesh.service.*</ID>
     <ID>WildcardImport:DeviceVersionTest.kt$import org.junit.Assert.*</ID>
     <ID>WildcardImport:ExampleUnitTest.kt$import org.junit.Assert.*</ID>
@@ -662,8 +759,6 @@
     <ID>WildcardImport:MainActivity.kt$import com.geeksville.mesh.ui.*</ID>
     <ID>WildcardImport:MeshService.kt$import com.geeksville.mesh.*</ID>
     <ID>WildcardImport:MeshService.kt$import com.geeksville.mesh.util.*</ID>
-    <ID>WildcardImport:MessagesFragment.kt$import android.view.*</ID>
-    <ID>WildcardImport:MessagesFragment.kt$import android.widget.*</ID>
     <ID>WildcardImport:MockInterface.kt$import com.geeksville.mesh.*</ID>
     <ID>WildcardImport:PreferenceFooter.kt$import androidx.compose.foundation.layout.*</ID>
     <ID>WildcardImport:PreferenceFooter.kt$import androidx.compose.material.*</ID>

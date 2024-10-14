@@ -21,8 +21,11 @@ object LanguageUtils : Logging {
 
     fun setLocale(lang: String) {
         AppCompatDelegate.setApplicationLocales(
-            if (lang == SYSTEM_DEFAULT) LocaleListCompat.getEmptyLocaleList()
-            else LocaleListCompat.forLanguageTags(lang)
+            if (lang == SYSTEM_DEFAULT) {
+                LocaleListCompat.getEmptyLocaleList()
+            } else {
+                LocaleListCompat.forLanguageTags(lang)
+            }
         )
     }
 

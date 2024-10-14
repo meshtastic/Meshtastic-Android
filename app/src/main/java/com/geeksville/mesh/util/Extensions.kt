@@ -20,7 +20,7 @@ val Any?.anonymize: String
 fun Any?.anonymize(maxLen: Int = 3) =
     if (this != null) ("..." + this.toString().takeLast(maxLen)) else "null"
 
-/// A toString that makes sure all newlines are removed (for nice logging).
+// A toString that makes sure all newlines are removed (for nice logging).
 fun Any.toOneLineString() = this.toString().replace('\n', ' ')
 
 fun ConfigProtos.Config.toOneLineString(): String {
@@ -30,12 +30,13 @@ fun ConfigProtos.Config.toOneLineString(): String {
         .replace('\n', ' ')
 }
 
-/// Return a one line string version of an object (but if a release build, just say 'might be PII)
+// Return a one line string version of an object (but if a release build, just say 'might be PII)
 fun Any.toPIIString() =
-    if (!BuildConfig.DEBUG)
+    if (!BuildConfig.DEBUG) {
         "<PII?>"
-    else
+    } else {
         this.toOneLineString()
+    }
 
 fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 
@@ -51,7 +52,7 @@ fun formatAgo(lastSeenUnix: Int, currentTimeMillis: Long = System.currentTimeMil
     }
 }
 
-/// Allows usage like email.onEditorAction(EditorInfo.IME_ACTION_NEXT, { confirm() })
+// Allows usage like email.onEditorAction(EditorInfo.IME_ACTION_NEXT, { confirm() })
 fun EditText.onEditorAction(actionId: Int, func: () -> Unit) {
     setOnEditorActionListener { _, receivedActionId, _ ->
 

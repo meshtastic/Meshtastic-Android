@@ -25,7 +25,7 @@ import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.SwitchPreference
 
-private val  DeviceConfig.Role.stringRes: Int
+private val DeviceConfig.Role.stringRes: Int
     get() = when (this) {
         DeviceConfig.Role.CLIENT -> R.string.role_client
         DeviceConfig.Role.CLIENT_MUTE -> R.string.role_client_mute

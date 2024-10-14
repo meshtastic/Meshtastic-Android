@@ -97,8 +97,9 @@ fun PositionConfigItemList(
                     enabled = enabled,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { value ->
-                        if (value >= -90 && value <= 90.0)
+                        if (value >= -90 && value <= 90.0) {
                             locationInput = locationInput.copy(latitude = value)
+                        }
                     })
             }
             item {
@@ -107,8 +108,9 @@ fun PositionConfigItemList(
                     enabled = enabled,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { value ->
-                        if (value >= -180 && value <= 180.0)
+                        if (value >= -180 && value <= 180.0) {
                             locationInput = locationInput.copy(longitude = value)
+                        }
                     })
             }
             item {

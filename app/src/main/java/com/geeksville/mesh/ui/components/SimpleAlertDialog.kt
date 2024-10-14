@@ -31,7 +31,7 @@ fun SimpleAlertDialog(
             onClick = onDismiss,
             modifier = Modifier
                 .padding(horizontal = 16.dp),
-            colors =  ButtonDefaults.textButtonColors(
+            colors = ButtonDefaults.textButtonColors(
                 contentColor = MaterialTheme.colors.onSurface,
             ),
         ) { Text(text = stringResource(id = R.string.close)) }

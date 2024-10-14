@@ -212,7 +212,7 @@ class MainActivity : AppCompatActivity(), Logging {
             tab.icon = ContextCompat.getDrawable(this, tabInfos[position].icon)
         }.attach()
 
-        binding.tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 val mainTab = tab?.position ?: 0
                 model.setCurrentTab(mainTab)
@@ -254,7 +254,7 @@ class MainActivity : AppCompatActivity(), Logging {
 
     private var requestedChannelUrl: Uri? = null
 
-    /// Handle any itents that were passed into us
+    // Handle any intents that were passed into us
     private fun handleIntent(intent: Intent) {
         val appLinkAction = intent.action
         val appLinkData: Uri? = intent.data
@@ -327,7 +327,7 @@ class MainActivity : AppCompatActivity(), Logging {
         showSettingsPage() // Default to the settings page in this case
     }
 
-    /// Called when we gain/lose a connection to our mesh radio
+    // Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(newConnection: MeshService.ConnectionState) {
         if (newConnection == MeshService.ConnectionState.CONNECTED) {
             serviceRepository.meshService?.let { service ->
@@ -336,17 +336,17 @@ class MainActivity : AppCompatActivity(), Logging {
 
                     if (info != null) {
                         val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
-                        if (isOld)
+                        if (isOld) {
                             showAlert(R.string.app_too_old, R.string.must_update)
-                        else {
+                        } else {
                             // If we are already doing an update don't put up a dialog or try to get device info
                             val isUpdating = service.updateStatus >= 0
                             if (!isUpdating) {
                                 val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
 
-                                if (curVer < MeshService.minDeviceVersion)
+                                if (curVer < MeshService.minDeviceVersion) {
                                     showAlert(R.string.firmware_too_old, R.string.firmware_old)
-                                else {
+                                } else {
                                     // If our app is too old/new, we probably don't understand the new DeviceConfig messages, so we don't read them until here
 
                                     // we have a connection to our device now, do the channel change
@@ -359,8 +359,9 @@ class MainActivity : AppCompatActivity(), Logging {
                     warn("Abandoning connect $ex, because we probably just lost device connection")
                 }
                 // if provideLocation enabled: Start providing location (from phone GPS) to mesh
-                if (model.provideLocation.value == true)
+                if (model.provideLocation.value == true) {
                     service.startProvideLocation()
+                }
             }
 
             if (!hasNotificationPermission()) {
@@ -406,9 +407,9 @@ class MainActivity : AppCompatActivity(), Logging {
                 val channels = url.toChannelSet()
                 val shouldAdd = url.shouldAddChannels()
                 val primary = channels.primaryChannel
-                if (primary == null)
+                if (primary == null) {
                     showSnackbar(R.string.channel_invalid)
-                else {
+                } else {
                     val dialogMessage = if (!shouldAdd) {
                         getString(R.string.do_you_want_switch).format(primary.name)
                     } else {
@@ -651,10 +652,11 @@ class MainActivity : AppCompatActivity(), Logging {
                     handler.postDelayed({ postPing() }, 30000)
                 }
                 item.isChecked = !item.isChecked // toggle ping test
-                if (item.isChecked)
+                if (item.isChecked) {
                     postPing()
-                else
+                } else {
                     handler.removeCallbacksAndMessages(null)
+                }
                 return true
             }
             R.id.radio_config -> {
@@ -705,11 +707,11 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    /// Theme functions
+    // Theme functions
 
     private fun chooseThemeDialog() {
 
-        /// Prepare dialog and its items
+        // Prepare dialog and its items
         val builder = MaterialAlertDialogBuilder(this)
         builder.setTitle(getString(R.string.choose_theme))
 
@@ -719,7 +721,7 @@ class MainActivity : AppCompatActivity(), Logging {
             getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         )
 
-        /// Load preferences and its value
+        // Load preferences and its value
         val prefs = UIViewModel.getPreferences(this)
         val theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         debug("Theme from prefs: $theme")
@@ -740,13 +742,13 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     private fun chooseLangDialog() {
-        /// Prepare dialog and its items
+        // Prepare dialog and its items
         val builder = MaterialAlertDialogBuilder(this)
         builder.setTitle(getString(R.string.preferences_language))
 
         val languageTags = LanguageUtils.getLanguageTags(this)
 
-        /// Load preferences and its value
+        // Load preferences and its value
         val lang = LanguageUtils.getLocale()
         debug("Lang from prefs: $lang")
 

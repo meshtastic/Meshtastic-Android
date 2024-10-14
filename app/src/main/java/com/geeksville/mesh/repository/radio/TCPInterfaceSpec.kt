@@ -7,7 +7,7 @@ import javax.inject.Inject
  */
 class TCPInterfaceSpec @Inject constructor(
     private val factory: TCPInterfaceFactory
-): InterfaceSpec<TCPInterface> {
+) : InterfaceSpec<TCPInterface> {
     override fun createInterface(rest: String): TCPInterface {
         return factory.create(rest)
     }

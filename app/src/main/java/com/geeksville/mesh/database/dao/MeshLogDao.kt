@@ -29,5 +29,4 @@ interface MeshLogDao {
 
     @Query("DELETE FROM log")
     fun deleteAll()
-
 }

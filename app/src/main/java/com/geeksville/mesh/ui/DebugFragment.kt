@@ -60,7 +60,8 @@ class DebugFragment : Fragment() {
     private val model: DebugViewModel by viewModels()
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
+        inflater: LayoutInflater,
+        container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentDebugBinding.inflate(inflater, container, false)

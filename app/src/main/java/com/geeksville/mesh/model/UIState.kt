@@ -58,10 +58,10 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-// / Given a human name, strip out the first letter of the first three words and return that as the initials for
-// / that user. If the original name is only one word, strip vowels from the original name and if the result is
-// / 3 or more characters, use the first three characters. If not, just take the first 3 characters of the
-// / original name.
+// Given a human name, strip out the first letter of the first three words and return that as the initials for
+// that user. If the original name is only one word, strip vowels from the original name and if the result is
+// 3 or more characters, use the first three characters. If not, just take the first 3 characters of the
+// original name.
 fun getInitials(nameIn: String): String {
     val nchars = 4
     val minchars = 2
@@ -70,10 +70,11 @@ fun getInitials(nameIn: String): String {
 
     val initials = when (words.size) {
         in 0 until minchars -> {
-            val nm = if (name.isNotEmpty())
+            val nm = if (name.isNotEmpty()) {
                 name.first() + name.drop(1).filterNot { c -> c.lowercase() in "aeiou" }
-            else
+            } else {
                 ""
+            }
             if (nm.length >= nchars) nm else name
         }
         else -> words.map { it.first() }.joinToString("")
@@ -414,7 +415,7 @@ class UIViewModel @Inject constructor(
     fun requestUserInfo(destNum: Int) {
         info("Requesting UserInfo for '$destNum'")
         try {
-            meshService?.requestUserInfo( destNum )
+            meshService?.requestUserInfo(destNum)
         } catch (ex: RemoteException) {
             errormsg("Request NodeInfo error: ${ex.message}")
         }
@@ -545,7 +546,7 @@ class UIViewModel @Inject constructor(
     fun setChannels(channelSet: AppOnlyProtos.ChannelSet, overwrite: Boolean = true) = viewModelScope.launch {
         val newRadioSettings: List<ChannelSettings> = if (overwrite) {
             channelSet.settingsList
-        }  else {
+        } else {
             // To guarantee consistent ordering, using a LinkedHashSet which iterates through it's
             // entries according to the order an item was *first* inserted.
             // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-linked-hash-set/

@@ -40,8 +40,9 @@ private fun LoRaConfig.bandwidth() = if (usePreset) {
 
 val LoRaConfig.numChannels: Int get() {
     for (option in RegionInfo.entries) {
-        if (option.regionCode == region)
+        if (option.regionCode == region) {
             return ((option.freqEnd - option.freqStart) / bandwidth()).toInt()
+        }
     }
     return 0
 }
@@ -55,8 +56,9 @@ internal fun LoRaConfig.channelNum(primaryName: String): Int = when {
 internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
     if (overrideFrequency != 0f) return overrideFrequency + frequencyOffset
     for (option in RegionInfo.entries) {
-        if (option.regionCode == region)
+        if (option.regionCode == region) {
             return (option.freqStart + bandwidth() / 2) + (channelNum - 1) * bandwidth()
+        }
     }
     return 0f
 }
@@ -103,5 +105,4 @@ enum class ChannelOption(
     LONG_MODERATE(ModemPreset.LONG_MODERATE, R.string.modem_config_mod_long, .125f),
     LONG_SLOW(ModemPreset.LONG_SLOW, R.string.modem_config_slow_long, .125f),
     VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, R.string.modem_config_very_long, .0625f),
-    ;
 }

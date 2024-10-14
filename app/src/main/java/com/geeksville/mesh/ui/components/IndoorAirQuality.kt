@@ -54,8 +54,6 @@ enum class Iaq(val color: Color, val description: String, val range: IntRange) {
     DangerouslyPolluted(Color(0xFF663300), "Dangerously Polluted", 501..Int.MAX_VALUE)
 }
 
-
-
 fun getIaq(iaq: Int): Iaq {
     return when {
         iaq in Iaq.Excellent.range -> Iaq.Excellent
@@ -70,7 +68,7 @@ fun getIaq(iaq: Int): Iaq {
 }
 
 private fun getIaqDescriptionWithRange(iaqEnum: Iaq): String {
-    return if (iaqEnum.range.last == Int.MAX_VALUE){
+    return if (iaqEnum.range.last == Int.MAX_VALUE) {
         "${iaqEnum.description} (${iaqEnum.range.first}+)"
     } else {
         "${iaqEnum.description} (${iaqEnum.range.first}-${iaqEnum.range.last})"

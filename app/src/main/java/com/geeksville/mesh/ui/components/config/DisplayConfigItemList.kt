@@ -153,7 +153,6 @@ fun DisplayConfigItemList(
             )
         }
     }
-
 }
 
 @Preview(showBackground = true)

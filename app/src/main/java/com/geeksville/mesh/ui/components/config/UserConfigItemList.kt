@@ -58,8 +58,9 @@ fun UserConfigItemList(
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     userInput = userInput.copy { longName = it }
-                    if (getInitials(it).toByteArray().size <= 4) // short_name max_size:5
+                    if (getInitials(it).toByteArray().size <= 4) { // short_name max_size:5
                         userInput = userInput.copy { shortName = getInitials(it) }
+                    }
                 })
         }
 
