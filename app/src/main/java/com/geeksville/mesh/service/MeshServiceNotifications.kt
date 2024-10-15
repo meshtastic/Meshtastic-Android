@@ -19,12 +19,14 @@ import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.android.notificationManager
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.util.PendingIntentCompat
 import java.io.Closeable
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@Suppress("TooManyFunctions")
 class MeshServiceNotifications(
     private val context: Context
 ) : Closeable {
@@ -81,6 +83,30 @@ class MeshServiceNotifications(
         return channelId
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createNewNodeNotificationChannel(): String {
+        val channelId = "new_nodes"
+        val channelName = context.getString(R.string.meshtastic_new_nodes_notifications)
+        val channel = NotificationChannel(
+            channelId,
+            channelName,
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            lightColor = Color.BLUE
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            setShowBadge(true)
+            setSound(
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+        }
+        notificationManager.createNotificationChannel(channel)
+        return channelId
+    }
+
     private val channelId: String by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel()
@@ -97,6 +123,14 @@ class MeshServiceNotifications(
         } else {
             // If earlier version channel ID is not used
             // https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html#NotificationCompat.Builder(android.content.Context)
+            ""
+        }
+    }
+
+    private val newNodeChannelId: String by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNewNodeNotificationChannel()
+        } else {
             ""
         }
     }
@@ -138,6 +172,13 @@ class MeshServiceNotifications(
             messageNotifyId,
             createMessageNotification(name, message)
         )
+
+    fun showNewNodeSeenNotification(node: NodeEntity) {
+        notificationManager.notify(
+            node.num, // show unique notifications
+            createNewNodeSeenNotification(node.user.shortName, node.user.longName)
+        )
+    }
 
     private val openAppIntent: PendingIntent by lazy {
         PendingIntent.getActivity(
@@ -222,6 +263,27 @@ class MeshServiceNotifications(
             )
         }
         return messageNotificationBuilder.build()
+    }
+
+    lateinit var newNodeSeenNotificationBuilder: NotificationCompat.Builder
+    private fun createNewNodeSeenNotification(name: String, message: String? = null): Notification {
+        if (!::newNodeSeenNotificationBuilder.isInitialized) {
+            newNodeSeenNotificationBuilder = commonBuilder(newNodeChannelId)
+        }
+        with(newNodeSeenNotificationBuilder) {
+            priority = NotificationCompat.PRIORITY_DEFAULT
+            setCategory(Notification.CATEGORY_STATUS)
+            setAutoCancel(true)
+            setContentTitle("New Node Seen: $name")
+            message?.let {
+                setContentText(it)
+                setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(message),
+                )
+            }
+        }
+        return newNodeSeenNotificationBuilder.build()
     }
 
     override fun close() {
