@@ -10,9 +10,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,9 +25,6 @@ import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Check
@@ -42,7 +37,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -66,8 +60,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.activityViewModels
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
@@ -104,7 +98,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ChannelFragment : ScreenFragment("Channel"), Logging {
@@ -119,33 +112,18 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val scope = rememberCoroutineScope()
-                val snackbarHostState = remember { SnackbarHostState() }
-
                 AppCompatTheme {
-                    Scaffold(
-                        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-                    ) { paddingValues ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                        ) {
-                            ChannelScreen(model) { text ->
-                                scope.launch { snackbarHostState.showSnackbar(text) }
-                            }
-                        }
-                    }
+                    ChannelScreen(model)
                 }
             }
         }
     }
 }
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun ChannelScreen(
-    viewModel: UIViewModel = viewModel(),
-    showSnackbar: (String) -> Unit = {},
+    viewModel: UIViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
@@ -177,7 +155,7 @@ fun ChannelScreen(
                 scannedChannelSet = Uri.parse(result.contents).toChannelSet()
             } catch (ex: Throwable) {
                 errormsg("Channel url error: ${ex.message}")
-                showSnackbar("${context.getString(R.string.channel_invalid)}: ${ex.message}")
+                viewModel.showSnackbar(R.string.channel_invalid)
             }
         }
     }
@@ -237,7 +215,7 @@ fun ChannelScreen(
             channelSet = channels // Throw away user edits
 
             // Tell the user to try again
-            showSnackbar(context.getString(R.string.radio_sleeping))
+            viewModel.showSnackbar(R.string.cant_change_no_radio)
         } finally {
             showChannelEditor = false
         }
