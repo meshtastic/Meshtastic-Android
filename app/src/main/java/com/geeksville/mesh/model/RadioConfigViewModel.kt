@@ -150,10 +150,10 @@ class RadioConfigViewModel @Inject constructor(
     }
 
     fun setOwner(user: MeshProtos.User) {
-        setRemoteOwner(myNodeNum ?: return, user)
+        setRemoteOwner(destNode.value?.num ?: return, user)
     }
 
-    fun setRemoteOwner(destNum: Int, user: MeshProtos.User) = request(
+    private fun setRemoteOwner(destNum: Int, user: MeshProtos.User) = request(
         destNum,
         { service, packetId, _ ->
             _radioConfigState.update { it.copy(userConfig = user) }
@@ -169,10 +169,10 @@ class RadioConfigViewModel @Inject constructor(
     )
 
     fun updateChannels(
-        destNum: Int,
         new: List<ChannelProtos.ChannelSettings>,
         old: List<ChannelProtos.ChannelSettings>,
     ) {
+        val destNum = destNode.value?.num ?: return
         getChannelList(new, old).forEach { setRemoteChannel(destNum, it) }
 
         if (destNum == myNodeNum) viewModelScope.launch {
@@ -184,7 +184,7 @@ class RadioConfigViewModel @Inject constructor(
     private fun setChannels(channelUrl: String) = viewModelScope.launch {
         val new = Uri.parse(channelUrl).toChannelSet()
         val old = radioConfigRepository.channelSetFlow.firstOrNull() ?: return@launch
-        updateChannels(myNodeNum ?: return@launch, new.settingsList, old.settingsList)
+        updateChannels(new.settingsList, old.settingsList)
     }
 
     private fun setRemoteChannel(destNum: Int, channel: ChannelProtos.Channel) = request(
@@ -201,7 +201,11 @@ class RadioConfigViewModel @Inject constructor(
         "Request getChannel error"
     )
 
-    fun setRemoteConfig(destNum: Int, config: ConfigProtos.Config) = request(
+    fun setConfig(config: ConfigProtos.Config) {
+        setRemoteConfig(destNode.value?.num ?: return, config)
+    }
+
+    private fun setRemoteConfig(destNum: Int, config: ConfigProtos.Config) = request(
         destNum,
         { service, packetId, dest ->
             _radioConfigState.update { it.copy(radioConfig = config) }
@@ -216,7 +220,11 @@ class RadioConfigViewModel @Inject constructor(
         "Request getConfig error",
     )
 
-    fun setModuleConfig(destNum: Int, config: ModuleConfigProtos.ModuleConfig) = request(
+    fun setModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
+        setModuleConfig(destNode.value?.num ?: return, config)
+    }
+
+    private fun setModuleConfig(destNum: Int, config: ModuleConfigProtos.ModuleConfig) = request(
         destNum,
         { service, packetId, dest ->
             _radioConfigState.update { it.copy(moduleConfig = config) }
@@ -231,7 +239,8 @@ class RadioConfigViewModel @Inject constructor(
         "Request getModuleConfig error",
     )
 
-    fun setRingtone(destNum: Int, ringtone: String) {
+    fun setRingtone(ringtone: String) {
+        val destNum = destNode.value?.num ?: return
         _radioConfigState.update { it.copy(ringtone = ringtone) }
         meshService?.setRingtone(destNum, ringtone)
     }
@@ -242,7 +251,8 @@ class RadioConfigViewModel @Inject constructor(
         "Request getRingtone error"
     )
 
-    fun setCannedMessages(destNum: Int, messages: String) {
+    fun setCannedMessages(messages: String) {
+        val destNum = destNode.value?.num ?: return
         _radioConfigState.update { it.copy(cannedMessageMessages = messages) }
         meshService?.setCannedMessages(destNum, messages)
     }
@@ -305,7 +315,8 @@ class RadioConfigViewModel @Inject constructor(
         }
     }
 
-    fun setFixedPosition(destNum: Int, position: Position) {
+    fun setFixedPosition(position: Position) {
+        val destNum = destNode.value?.num ?: return
         try {
             meshService?.setFixedPosition(destNum, position)
         } catch (ex: RemoteException) {
@@ -313,16 +324,7 @@ class RadioConfigViewModel @Inject constructor(
         }
     }
 
-    fun removeFixedPosition(destNum: Int) = setFixedPosition(destNum, Position(0.0, 0.0, 0))
-
-    // Set the radio config (also updates our saved copy in preferences)
-    fun setConfig(config: ConfigProtos.Config) {
-        setRemoteConfig(myNodeNum ?: return, config)
-    }
-
-    fun setModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
-        setModuleConfig(myNodeNum ?: return, config)
-    }
+    fun removeFixedPosition() = setFixedPosition(Position(0.0, 0.0, 0))
 
     private val _deviceProfile = MutableStateFlow<DeviceProfile?>(null)
     val deviceProfile: StateFlow<DeviceProfile?> get() = _deviceProfile
@@ -391,7 +393,7 @@ class RadioConfigViewModel @Inject constructor(
             }
         }
         if (hasFixedPosition()) {
-            setFixedPosition(myNodeNum!!, Position(fixedPosition))
+            setFixedPosition(Position(fixedPosition))
         }
         if (hasModuleConfig()) {
             val descriptor = ModuleConfigProtos.ModuleConfig.getDescriptor()

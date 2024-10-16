@@ -250,8 +250,7 @@ fun RadioConfigNavHost(
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val connected = connectionState == ConnectionState.CONNECTED && node != null
 
-    val destNum = node?.num ?: 0
-    val isLocal = destNum == viewModel.myNodeNum
+    val isLocal = node?.num == viewModel.myNodeNum
 
     val radioConfigState by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
@@ -288,7 +287,7 @@ fun RadioConfigNavHost(
                 val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
                     type = "application/*"
-                    putExtra(Intent.EXTRA_TITLE, "${destNum.toUInt()}.cfg")
+                    putExtra(Intent.EXTRA_TITLE, "${node!!.num.toUInt()}.cfg")
                 }
                 exportConfigLauncher.launch(intent)
             }
@@ -348,7 +347,7 @@ fun RadioConfigNavHost(
                 userConfig = radioConfigState.userConfig,
                 enabled = connected,
                 onSaveClicked = { userInput ->
-                    viewModel.setRemoteOwner(destNum, userInput)
+                    viewModel.setOwner(userInput)
                 }
             )
         }
@@ -359,7 +358,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 maxChannels = viewModel.maxChannels,
                 onPositiveClicked = { channelListInput ->
-                    viewModel.updateChannels(destNum, channelListInput, radioConfigState.channelList)
+                    viewModel.updateChannels(channelListInput, radioConfigState.channelList)
                 },
             )
         }
@@ -369,7 +368,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { deviceInput ->
                     val config = config { device = deviceInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 }
             )
         }
@@ -387,16 +386,16 @@ fun RadioConfigNavHost(
                 onSaveClicked = { locationInput, positionInput ->
                     if (positionInput.fixedPosition) {
                         if (locationInput != currentPosition) {
-                            viewModel.setFixedPosition(destNum, locationInput)
+                            viewModel.setFixedPosition(locationInput)
                         }
                     } else {
                         if (radioConfigState.radioConfig.position.fixedPosition) {
                             // fixed position changed from enabled to disabled
-                            viewModel.removeFixedPosition(destNum)
+                            viewModel.removeFixedPosition()
                         }
                     }
                     val config = config { position = positionInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 }
             )
         }
@@ -406,7 +405,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { powerInput ->
                     val config = config { power = powerInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 }
             )
         }
@@ -416,7 +415,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { networkInput ->
                     val config = config { network = networkInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 }
             )
         }
@@ -426,7 +425,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { displayInput ->
                     val config = config { display = displayInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 }
             )
         }
@@ -437,7 +436,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { loraInput ->
                     val config = config { lora = loraInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 },
                 hasPaFan = viewModel.hasPaFan,
             )
@@ -448,7 +447,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { bluetoothInput ->
                     val config = config { bluetooth = bluetoothInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 }
             )
         }
@@ -458,7 +457,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onConfirm = { securityInput ->
                     val config = config { security = securityInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 }
             )
         }
@@ -468,7 +467,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { mqttInput ->
                     val config = moduleConfig { mqtt = mqttInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -478,7 +477,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { serialInput ->
                     val config = moduleConfig { serial = serialInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -489,11 +488,11 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { ringtoneInput, extNotificationInput ->
                     if (ringtoneInput != radioConfigState.ringtone) {
-                        viewModel.setRingtone(destNum, ringtoneInput)
+                        viewModel.setRingtone(ringtoneInput)
                     }
                     if (extNotificationInput != radioConfigState.moduleConfig.externalNotification) {
                         val config = moduleConfig { externalNotification = extNotificationInput }
-                        viewModel.setModuleConfig(destNum, config)
+                        viewModel.setModuleConfig(config)
                     }
                 }
             )
@@ -504,7 +503,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { storeForwardInput ->
                     val config = moduleConfig { storeForward = storeForwardInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -514,7 +513,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { rangeTestInput ->
                     val config = moduleConfig { rangeTest = rangeTestInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -524,7 +523,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { telemetryInput ->
                     val config = moduleConfig { telemetry = telemetryInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -535,11 +534,11 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { messagesInput, cannedMessageInput ->
                     if (messagesInput != radioConfigState.cannedMessageMessages) {
-                        viewModel.setCannedMessages(destNum, messagesInput)
+                        viewModel.setCannedMessages(messagesInput)
                     }
                     if (cannedMessageInput != radioConfigState.moduleConfig.cannedMessage) {
                         val config = moduleConfig { cannedMessage = cannedMessageInput }
-                        viewModel.setModuleConfig(destNum, config)
+                        viewModel.setModuleConfig(config)
                     }
                 }
             )
@@ -550,7 +549,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { audioInput ->
                     val config = moduleConfig { audio = audioInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -560,7 +559,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { remoteHardwareInput ->
                     val config = moduleConfig { remoteHardware = remoteHardwareInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -570,7 +569,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { neighborInfoInput ->
                     val config = moduleConfig { neighborInfo = neighborInfoInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -580,7 +579,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { ambientLightingInput ->
                     val config = moduleConfig { ambientLighting = ambientLightingInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -590,7 +589,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { detectionSensorInput ->
                     val config = moduleConfig { detectionSensor = detectionSensorInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -600,7 +599,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { paxcounterConfigInput ->
                     val config = moduleConfig { paxcounter = paxcounterConfigInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
