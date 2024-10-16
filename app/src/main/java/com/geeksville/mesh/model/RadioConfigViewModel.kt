@@ -24,6 +24,7 @@ import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.ui.AdminRoute
 import com.geeksville.mesh.ui.ConfigRoute
+import com.geeksville.mesh.ui.ModuleRoute
 import com.geeksville.mesh.ui.ResponseState
 import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -161,7 +162,7 @@ class RadioConfigViewModel @Inject constructor(
         "Request setOwner error",
     )
 
-    fun getOwner(destNum: Int) = request(
+    private fun getOwner(destNum: Int) = request(
         destNum,
         { service, packetId, dest -> service.getRemoteOwner(packetId, dest) },
         "Request getOwner error"
@@ -194,7 +195,7 @@ class RadioConfigViewModel @Inject constructor(
         "Request setRemoteChannel error"
     )
 
-    fun getChannel(destNum: Int, index: Int) = request(
+    private fun getChannel(destNum: Int, index: Int) = request(
         destNum,
         { service, packetId, dest -> service.getRemoteChannel(packetId, dest, index) },
         "Request getChannel error"
@@ -209,7 +210,7 @@ class RadioConfigViewModel @Inject constructor(
         "Request setConfig error",
     )
 
-    fun getConfig(destNum: Int, configType: Int) = request(
+    private fun getConfig(destNum: Int, configType: Int) = request(
         destNum,
         { service, packetId, dest -> service.getRemoteConfig(packetId, dest, configType) },
         "Request getConfig error",
@@ -224,7 +225,7 @@ class RadioConfigViewModel @Inject constructor(
         "Request setConfig error",
     )
 
-    fun getModuleConfig(destNum: Int, configType: Int) = request(
+    private fun getModuleConfig(destNum: Int, configType: Int) = request(
         destNum,
         { service, packetId, dest -> service.getModuleConfig(packetId, dest, configType) },
         "Request getModuleConfig error",
@@ -235,7 +236,7 @@ class RadioConfigViewModel @Inject constructor(
         meshService?.setRingtone(destNum, ringtone)
     }
 
-    fun getRingtone(destNum: Int) = request(
+    private fun getRingtone(destNum: Int) = request(
         destNum,
         { service, packetId, dest -> service.getRingtone(packetId, dest) },
         "Request getRingtone error"
@@ -246,7 +247,7 @@ class RadioConfigViewModel @Inject constructor(
         meshService?.setCannedMessages(destNum, messages)
     }
 
-    fun getCannedMessages(destNum: Int) = request(
+    private fun getCannedMessages(destNum: Int) = request(
         destNum,
         { service, packetId, dest -> service.getCannedMessages(packetId, dest) },
         "Request getCannedMessages error"
@@ -295,7 +296,7 @@ class RadioConfigViewModel @Inject constructor(
         }
     }
 
-    fun getSessionPasskey(destNum: Int) {
+    private fun getSessionPasskey(destNum: Int) {
         if (radioConfigState.value.hasMetadata()) {
             sendAdminRequest(destNum)
         } else {
@@ -409,13 +410,43 @@ class RadioConfigViewModel @Inject constructor(
         _radioConfigState.update { it.copy(responseState = ResponseState.Empty) }
     }
 
-    fun setResponseStateLoading(route: String) {
+    fun setResponseStateLoading(route: Enum<*>) {
+        val destNum = destNode.value?.num ?: return
+
         _radioConfigState.value = RadioConfigState(
-            route = route,
+            route = route.name,
             responseState = ResponseState.Loading(),
         )
-        // channel editor is synchronous, so we don't use requestIds as total
-        if (route == ConfigRoute.CHANNELS.name) setResponseStateTotal(maxChannels + 1)
+
+        when (route) {
+            ConfigRoute.USER -> getOwner(destNum)
+
+            ConfigRoute.CHANNELS -> {
+                getChannel(destNum, 0)
+                getConfig(destNum, ConfigRoute.LORA.configType)
+                // channel editor is synchronous, so we don't use requestIds as total
+                setResponseStateTotal(maxChannels + 1)
+            }
+
+            is AdminRoute -> getSessionPasskey(destNum)
+
+            is ConfigRoute -> {
+                if (route == ConfigRoute.LORA) {
+                    getChannel(destNum, 0)
+                }
+                getConfig(destNum, route.configType)
+            }
+
+            is ModuleRoute -> {
+                if (route == ModuleRoute.CANNED_MESSAGE) {
+                    getCannedMessages(destNum)
+                }
+                if (route == ModuleRoute.EXTERNAL_NOTIFICATION) {
+                    getRingtone(destNum)
+                }
+                getModuleConfig(destNum, route.configType)
+            }
+        }
     }
 
     private fun setResponseStateTotal(total: Int) {

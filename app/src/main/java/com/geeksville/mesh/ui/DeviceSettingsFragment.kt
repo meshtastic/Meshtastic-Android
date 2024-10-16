@@ -12,6 +12,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -203,13 +204,6 @@ enum class ModuleRoute(val title: String, val configType: Int = 0) {
     PAXCOUNTER("Paxcounter", 12),
 }
 
-private fun getName(route: Any): String = when (route) {
-    is AdminRoute -> route.name
-    is ConfigRoute -> route.name
-    is ModuleRoute -> route.name
-    else -> ""
-}
-
 /**
  * Generic sealed class defines each possible state of a response.
  */
@@ -327,58 +321,25 @@ fun RadioConfigNavHost(
         modifier = modifier,
     ) {
         composable("home") {
-            RadioSettingsScreen(
+            RadioConfigItemList(
                 enabled = connected && !isWaiting,
                 isLocal = isLocal,
                 onRouteClick = { route ->
-                    viewModel.setResponseStateLoading(getName(route))
-                    when (route) {
-                        ConfigRoute.USER -> {
-                            viewModel.getOwner(destNum)
-                        }
-
-                        ConfigRoute.CHANNELS -> {
-                            viewModel.getChannel(destNum, 0)
-                            viewModel.getConfig(destNum, ConfigRoute.LORA.configType)
-                        }
-
-                        "IMPORT" -> {
-                            viewModel.clearPacketResponse()
-                            viewModel.setDeviceProfile(null)
-                            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                                addCategory(Intent.CATEGORY_OPENABLE)
-                                type = "application/*"
-                            }
-                            importConfigLauncher.launch(intent)
-                        }
-
-                        "EXPORT" -> {
-                            viewModel.clearPacketResponse()
-                            viewModel.setDeviceProfile(null)
-                            showEditDeviceProfileDialog = true
-                        }
-
-                        is AdminRoute -> {
-                            viewModel.getSessionPasskey(destNum)
-                        }
-
-                        is ConfigRoute -> {
-                            if (route == ConfigRoute.LORA) {
-                                viewModel.getChannel(destNum, 0)
-                            }
-                            viewModel.getConfig(destNum, route.configType)
-                        }
-
-                        is ModuleRoute -> {
-                            if (route == ModuleRoute.CANNED_MESSAGE) {
-                                viewModel.getCannedMessages(destNum)
-                            }
-                            if (route == ModuleRoute.EXTERNAL_NOTIFICATION) {
-                                viewModel.getRingtone(destNum)
-                            }
-                            viewModel.getModuleConfig(destNum, route.configType)
-                        }
+                    viewModel.setResponseStateLoading(route)
+                },
+                onImport = {
+                    viewModel.clearPacketResponse()
+                    viewModel.setDeviceProfile(null)
+                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "application/*"
                     }
+                    importConfigLauncher.launch(intent)
+                },
+                onExport = {
+                    viewModel.clearPacketResponse()
+                    viewModel.setDeviceProfile(null)
+                    showEditDeviceProfileDialog = true
                 },
             )
         }
@@ -746,13 +707,17 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
 }
 
 @Composable
-private fun RadioSettingsScreen(
+private fun RadioConfigItemList(
     enabled: Boolean = true,
     isLocal: Boolean = true,
-    onRouteClick: (Any) -> Unit = {},
+    modifier: Modifier = Modifier,
+    onRouteClick: (Enum<*>) -> Unit = {},
+    onImport: () -> Unit = {},
+    onExport: () -> Unit = {},
 ) {
     LazyColumn(
-        modifier = Modifier.padding(horizontal = 16.dp)
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 16.dp),
     ) {
         item { PreferenceCategory(stringResource(R.string.device_settings)) }
         items(ConfigRoute.entries) { NavCard(it.title, enabled = enabled) { onRouteClick(it) } }
@@ -762,8 +727,8 @@ private fun RadioSettingsScreen(
 
         if (isLocal) {
             item { PreferenceCategory("Import / Export") }
-            item { NavCard("Import configuration", enabled = enabled) { onRouteClick("IMPORT") } }
-            item { NavCard("Export configuration", enabled = enabled) { onRouteClick("EXPORT") } }
+            item { NavCard("Import configuration", enabled = enabled) { onImport() } }
+            item { NavCard("Export configuration", enabled = enabled) { onExport() } }
         }
 
         items(AdminRoute.entries) { NavButton(it.title, enabled) { onRouteClick(it) } }
@@ -773,5 +738,5 @@ private fun RadioSettingsScreen(
 @Preview(showBackground = true)
 @Composable
 private fun RadioSettingsScreenPreview() {
-    RadioSettingsScreen()
+    RadioConfigItemList()
 }
