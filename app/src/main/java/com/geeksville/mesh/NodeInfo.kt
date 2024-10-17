@@ -186,7 +186,7 @@ data class NodeInfo(
     val isOnline: Boolean
         get() {
             val now = System.currentTimeMillis() / 1000
-            val timeout = 15 * 60
+            val timeout = 2 * 60 * 60
             return (now - lastHeard <= timeout)
         }
 
