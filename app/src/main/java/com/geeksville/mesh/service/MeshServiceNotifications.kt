@@ -163,7 +163,11 @@ class MeshServiceNotifications(
         val statsString = formatStatsString(localStats, currentStatsUpdatedAtMillis)
         notificationManager.notify(
             notifyId,
-            createServiceStateNotification(summaryString.orEmpty(), statsString)
+            createServiceStateNotification(
+                name = summaryString.orEmpty(),
+                message = statsString,
+                nextUpdateAt = currentStatsUpdatedAtMillis?.plus(FIFTEEN_MINUTES_IN_MILLIS)
+            )
         )
     }
 
@@ -226,7 +230,11 @@ class MeshServiceNotifications(
     }
 
     lateinit var serviceNotificationBuilder: NotificationCompat.Builder
-    fun createServiceStateNotification(name: String, message: String? = null): Notification {
+    fun createServiceStateNotification(
+        name: String,
+        message: String? = null,
+        nextUpdateAt: Long? = null
+    ): Notification {
         if (!::serviceNotificationBuilder.isInitialized) {
             serviceNotificationBuilder = commonBuilder(channelId)
         }
@@ -242,6 +250,16 @@ class MeshServiceNotifications(
                         .bigText(message),
                 )
             }
+            nextUpdateAt?.let {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                    setWhen(it)
+                    setUsesChronometer(true)
+                    setChronometerCountDown(true)
+                }
+            } ?: {
+                setWhen(System.currentTimeMillis())
+            }
+            setShowWhen(true)
         }
         return serviceNotificationBuilder.build()
     }
@@ -261,6 +279,8 @@ class MeshServiceNotifications(
                 NotificationCompat.BigTextStyle()
                     .bigText(message),
             )
+            setWhen(System.currentTimeMillis())
+            setShowWhen(true)
         }
         return messageNotificationBuilder.build()
     }
@@ -282,6 +302,8 @@ class MeshServiceNotifications(
                         .bigText(message),
                 )
             }
+            setWhen(System.currentTimeMillis())
+            setShowWhen(true)
         }
         return newNodeSeenNotificationBuilder.build()
     }
