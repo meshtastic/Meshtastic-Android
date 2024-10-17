@@ -12,6 +12,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -58,12 +59,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.RadioConfigState
 import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.service.MeshService.ConnectionState
@@ -203,13 +206,6 @@ enum class ModuleRoute(val title: String, val configType: Int = 0) {
     PAXCOUNTER("Paxcounter", 12),
 }
 
-private fun getName(route: Any): String = when (route) {
-    is AdminRoute -> route.name
-    is ConfigRoute -> route.name
-    is ModuleRoute -> route.name
-    else -> ""
-}
-
 /**
  * Generic sealed class defines each possible state of a response.
  */
@@ -245,81 +241,18 @@ private fun MeshAppBar(
     )
 }
 
-@Suppress("LongMethod", "CyclomaticComplexMethod")
+@Suppress("LongMethod")
 @Composable
 fun RadioConfigNavHost(
     node: NodeEntity?,
     viewModel: RadioConfigViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
 ) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val connected = connectionState == ConnectionState.CONNECTED && node != null
 
-    val destNum = node?.num ?: 0
-    val isLocal = destNum == viewModel.myNodeNum
-
     val radioConfigState by viewModel.radioConfigState.collectAsStateWithLifecycle()
-
-    val deviceProfile by viewModel.deviceProfile.collectAsStateWithLifecycle()
-    val isWaiting = radioConfigState.responseState.isWaiting()
-    var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
-
-    val importConfigLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        if (it.resultCode == Activity.RESULT_OK) {
-            showEditDeviceProfileDialog = true
-            it.data?.data?.let { uri -> viewModel.importProfile(uri) }
-        }
-    }
-
-    val exportConfigLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        if (it.resultCode == Activity.RESULT_OK) {
-            it.data?.data?.let { uri -> viewModel.exportProfile(uri) }
-        }
-    }
-
-    if (showEditDeviceProfileDialog) EditDeviceProfileDialog(
-        title = if (deviceProfile != null) "Import configuration" else "Export configuration",
-        deviceProfile = deviceProfile ?: viewModel.currentDeviceProfile,
-        onConfirm = {
-            showEditDeviceProfileDialog = false
-            if (deviceProfile != null) {
-                viewModel.installProfile(it)
-            } else {
-                viewModel.setDeviceProfile(it)
-                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "application/*"
-                    putExtra(Intent.EXTRA_TITLE, "${destNum.toUInt()}.cfg")
-                }
-                exportConfigLauncher.launch(intent)
-            }
-        },
-        onDismiss = {
-            showEditDeviceProfileDialog = false
-            viewModel.setDeviceProfile(null)
-        }
-    )
-
-    if (isWaiting) PacketResponseStateDialog(
-        radioConfigState.responseState,
-        onDismiss = {
-            showEditDeviceProfileDialog = false
-            viewModel.clearPacketResponse()
-        },
-        onComplete = {
-            val route = radioConfigState.route
-            if (ConfigRoute.entries.any { it.name == route } ||
-                ModuleRoute.entries.any { it.name == route }) {
-                navController.navigate(route)
-                viewModel.clearPacketResponse()
-            }
-        }
-    )
 
     NavHost(
         navController = navController,
@@ -327,59 +260,12 @@ fun RadioConfigNavHost(
         modifier = modifier,
     ) {
         composable("home") {
-            RadioSettingsScreen(
-                enabled = connected && !isWaiting,
-                isLocal = isLocal,
-                onRouteClick = { route ->
-                    viewModel.setResponseStateLoading(getName(route))
-                    when (route) {
-                        ConfigRoute.USER -> {
-                            viewModel.getOwner(destNum)
-                        }
-
-                        ConfigRoute.CHANNELS -> {
-                            viewModel.getChannel(destNum, 0)
-                            viewModel.getConfig(destNum, ConfigRoute.LORA.configType)
-                        }
-
-                        "IMPORT" -> {
-                            viewModel.clearPacketResponse()
-                            viewModel.setDeviceProfile(null)
-                            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                                addCategory(Intent.CATEGORY_OPENABLE)
-                                type = "application/*"
-                            }
-                            importConfigLauncher.launch(intent)
-                        }
-
-                        "EXPORT" -> {
-                            viewModel.clearPacketResponse()
-                            viewModel.setDeviceProfile(null)
-                            showEditDeviceProfileDialog = true
-                        }
-
-                        is AdminRoute -> {
-                            viewModel.getSessionPasskey(destNum)
-                        }
-
-                        is ConfigRoute -> {
-                            if (route == ConfigRoute.LORA) {
-                                viewModel.getChannel(destNum, 0)
-                            }
-                            viewModel.getConfig(destNum, route.configType)
-                        }
-
-                        is ModuleRoute -> {
-                            if (route == ModuleRoute.CANNED_MESSAGE) {
-                                viewModel.getCannedMessages(destNum)
-                            }
-                            if (route == ModuleRoute.EXTERNAL_NOTIFICATION) {
-                                viewModel.getRingtone(destNum)
-                            }
-                            viewModel.getModuleConfig(destNum, route.configType)
-                        }
-                    }
-                },
+            RadioConfigScreen(
+                node = node,
+                connected = connected,
+                radioConfigState = radioConfigState,
+                viewModel = viewModel,
+                onNavigate = { navController.navigate(route = it) },
             )
         }
         composable(ConfigRoute.USER.name) {
@@ -387,7 +273,7 @@ fun RadioConfigNavHost(
                 userConfig = radioConfigState.userConfig,
                 enabled = connected,
                 onSaveClicked = { userInput ->
-                    viewModel.setRemoteOwner(destNum, userInput)
+                    viewModel.setOwner(userInput)
                 }
             )
         }
@@ -398,7 +284,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 maxChannels = viewModel.maxChannels,
                 onPositiveClicked = { channelListInput ->
-                    viewModel.updateChannels(destNum, channelListInput, radioConfigState.channelList)
+                    viewModel.updateChannels(channelListInput, radioConfigState.channelList)
                 },
             )
         }
@@ -408,7 +294,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { deviceInput ->
                     val config = config { device = deviceInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 }
             )
         }
@@ -426,16 +312,16 @@ fun RadioConfigNavHost(
                 onSaveClicked = { locationInput, positionInput ->
                     if (positionInput.fixedPosition) {
                         if (locationInput != currentPosition) {
-                            viewModel.setFixedPosition(destNum, locationInput)
+                            viewModel.setFixedPosition(locationInput)
                         }
                     } else {
                         if (radioConfigState.radioConfig.position.fixedPosition) {
                             // fixed position changed from enabled to disabled
-                            viewModel.removeFixedPosition(destNum)
+                            viewModel.removeFixedPosition()
                         }
                     }
                     val config = config { position = positionInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 }
             )
         }
@@ -445,7 +331,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { powerInput ->
                     val config = config { power = powerInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 }
             )
         }
@@ -455,7 +341,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { networkInput ->
                     val config = config { network = networkInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 }
             )
         }
@@ -465,7 +351,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { displayInput ->
                     val config = config { display = displayInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 }
             )
         }
@@ -476,7 +362,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { loraInput ->
                     val config = config { lora = loraInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 },
                 hasPaFan = viewModel.hasPaFan,
             )
@@ -487,7 +373,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { bluetoothInput ->
                     val config = config { bluetooth = bluetoothInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 }
             )
         }
@@ -497,7 +383,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onConfirm = { securityInput ->
                     val config = config { security = securityInput }
-                    viewModel.setRemoteConfig(destNum, config)
+                    viewModel.setConfig(config)
                 }
             )
         }
@@ -507,7 +393,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { mqttInput ->
                     val config = moduleConfig { mqtt = mqttInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -517,7 +403,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { serialInput ->
                     val config = moduleConfig { serial = serialInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -528,11 +414,11 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { ringtoneInput, extNotificationInput ->
                     if (ringtoneInput != radioConfigState.ringtone) {
-                        viewModel.setRingtone(destNum, ringtoneInput)
+                        viewModel.setRingtone(ringtoneInput)
                     }
                     if (extNotificationInput != radioConfigState.moduleConfig.externalNotification) {
                         val config = moduleConfig { externalNotification = extNotificationInput }
-                        viewModel.setModuleConfig(destNum, config)
+                        viewModel.setModuleConfig(config)
                     }
                 }
             )
@@ -543,7 +429,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { storeForwardInput ->
                     val config = moduleConfig { storeForward = storeForwardInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -553,7 +439,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { rangeTestInput ->
                     val config = moduleConfig { rangeTest = rangeTestInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -563,7 +449,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { telemetryInput ->
                     val config = moduleConfig { telemetry = telemetryInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -574,11 +460,11 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { messagesInput, cannedMessageInput ->
                     if (messagesInput != radioConfigState.cannedMessageMessages) {
-                        viewModel.setCannedMessages(destNum, messagesInput)
+                        viewModel.setCannedMessages(messagesInput)
                     }
                     if (cannedMessageInput != radioConfigState.moduleConfig.cannedMessage) {
                         val config = moduleConfig { cannedMessage = cannedMessageInput }
-                        viewModel.setModuleConfig(destNum, config)
+                        viewModel.setModuleConfig(config)
                     }
                 }
             )
@@ -589,7 +475,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { audioInput ->
                     val config = moduleConfig { audio = audioInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -599,7 +485,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { remoteHardwareInput ->
                     val config = moduleConfig { remoteHardware = remoteHardwareInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -609,7 +495,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { neighborInfoInput ->
                     val config = moduleConfig { neighborInfo = neighborInfoInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -619,7 +505,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { ambientLightingInput ->
                     val config = moduleConfig { ambientLighting = ambientLightingInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -629,7 +515,7 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { detectionSensorInput ->
                     val config = moduleConfig { detectionSensor = detectionSensorInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
@@ -639,11 +525,113 @@ fun RadioConfigNavHost(
                 enabled = connected,
                 onSaveClicked = { paxcounterConfigInput ->
                     val config = moduleConfig { paxcounter = paxcounterConfigInput }
-                    viewModel.setModuleConfig(destNum, config)
+                    viewModel.setModuleConfig(config)
                 }
             )
         }
     }
+}
+
+@Suppress("LongMethod", "CyclomaticComplexMethod")
+@Composable
+fun RadioConfigScreen(
+    node: NodeEntity?,
+    connected: Boolean,
+    radioConfigState: RadioConfigState,
+    viewModel: RadioConfigViewModel,
+    modifier: Modifier = Modifier,
+    onNavigate: (String) -> Unit = {},
+) {
+    val isLocal = node?.num == viewModel.myNodeNum
+    val isWaiting = radioConfigState.responseState.isWaiting()
+
+    var deviceProfile by remember { mutableStateOf<DeviceProfile?>(null) }
+    var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
+
+    val importConfigLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            showEditDeviceProfileDialog = true
+            it.data?.data?.let { uri ->
+                viewModel.importProfile(uri) { profile -> deviceProfile = profile }
+            }
+        }
+    }
+
+    val exportConfigLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            it.data?.data?.let { uri -> viewModel.exportProfile(uri, deviceProfile!!) }
+        }
+    }
+
+    if (showEditDeviceProfileDialog) {
+        EditDeviceProfileDialog(
+            title = if (deviceProfile != null) "Import configuration" else "Export configuration",
+            deviceProfile = deviceProfile ?: viewModel.currentDeviceProfile,
+            onConfirm = {
+                showEditDeviceProfileDialog = false
+                if (deviceProfile != null) {
+                    viewModel.installProfile(it)
+                } else {
+                    deviceProfile = it
+                    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "application/*"
+                        putExtra(Intent.EXTRA_TITLE, "${node!!.num.toUInt()}.cfg")
+                    }
+                    exportConfigLauncher.launch(intent)
+                }
+            },
+            onDismiss = {
+                showEditDeviceProfileDialog = false
+                deviceProfile = null
+            }
+        )
+    }
+
+    if (isWaiting) {
+        PacketResponseStateDialog(
+            state = radioConfigState.responseState,
+            onDismiss = {
+                showEditDeviceProfileDialog = false
+                viewModel.clearPacketResponse()
+            },
+            onComplete = {
+                val route = radioConfigState.route
+                if (ConfigRoute.entries.any { it.name == route } ||
+                    ModuleRoute.entries.any { it.name == route }) {
+                    onNavigate(route)
+                    viewModel.clearPacketResponse()
+                }
+            },
+        )
+    }
+
+    RadioConfigItemList(
+        enabled = connected && !isWaiting,
+        isLocal = isLocal,
+        modifier = modifier,
+        onRouteClick = { route ->
+            viewModel.setResponseStateLoading(route)
+        },
+        onImport = {
+            viewModel.clearPacketResponse()
+            deviceProfile = null
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "application/*"
+            }
+            importConfigLauncher.launch(intent)
+        },
+        onExport = {
+            viewModel.clearPacketResponse()
+            deviceProfile = null
+            showEditDeviceProfileDialog = true
+        },
+    )
 }
 
 @Composable
@@ -746,13 +734,17 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
 }
 
 @Composable
-private fun RadioSettingsScreen(
+private fun RadioConfigItemList(
     enabled: Boolean = true,
     isLocal: Boolean = true,
-    onRouteClick: (Any) -> Unit = {},
+    modifier: Modifier = Modifier,
+    onRouteClick: (Enum<*>) -> Unit = {},
+    onImport: () -> Unit = {},
+    onExport: () -> Unit = {},
 ) {
     LazyColumn(
-        modifier = Modifier.padding(horizontal = 16.dp)
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 16.dp),
     ) {
         item { PreferenceCategory(stringResource(R.string.device_settings)) }
         items(ConfigRoute.entries) { NavCard(it.title, enabled = enabled) { onRouteClick(it) } }
@@ -762,8 +754,8 @@ private fun RadioSettingsScreen(
 
         if (isLocal) {
             item { PreferenceCategory("Import / Export") }
-            item { NavCard("Import configuration", enabled = enabled) { onRouteClick("IMPORT") } }
-            item { NavCard("Export configuration", enabled = enabled) { onRouteClick("EXPORT") } }
+            item { NavCard("Import configuration", enabled = enabled) { onImport() } }
+            item { NavCard("Export configuration", enabled = enabled) { onExport() } }
         }
 
         items(AdminRoute.entries) { NavButton(it.title, enabled) { onRouteClick(it) } }
@@ -773,5 +765,5 @@ private fun RadioSettingsScreen(
 @Preview(showBackground = true)
 @Composable
 private fun RadioSettingsScreenPreview() {
-    RadioSettingsScreen()
+    RadioConfigItemList()
 }
