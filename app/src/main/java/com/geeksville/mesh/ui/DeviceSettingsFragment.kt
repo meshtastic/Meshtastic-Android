@@ -59,6 +59,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
@@ -544,7 +545,7 @@ fun RadioConfigScreen(
     val isLocal = node?.num == viewModel.myNodeNum
     val isWaiting = radioConfigState.responseState.isWaiting()
 
-    val deviceProfile by viewModel.deviceProfile.collectAsStateWithLifecycle()
+    var deviceProfile by remember { mutableStateOf<DeviceProfile?>(null) }
     var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
 
     val importConfigLauncher = rememberLauncherForActivityResult(
@@ -552,7 +553,9 @@ fun RadioConfigScreen(
     ) {
         if (it.resultCode == Activity.RESULT_OK) {
             showEditDeviceProfileDialog = true
-            it.data?.data?.let { uri -> viewModel.importProfile(uri) }
+            it.data?.data?.let { uri ->
+                viewModel.importProfile(uri) { profile -> deviceProfile = profile }
+            }
         }
     }
 
@@ -560,7 +563,7 @@ fun RadioConfigScreen(
         ActivityResultContracts.StartActivityForResult()
     ) {
         if (it.resultCode == Activity.RESULT_OK) {
-            it.data?.data?.let { uri -> viewModel.exportProfile(uri) }
+            it.data?.data?.let { uri -> viewModel.exportProfile(uri, deviceProfile!!) }
         }
     }
 
@@ -573,7 +576,7 @@ fun RadioConfigScreen(
                 if (deviceProfile != null) {
                     viewModel.installProfile(it)
                 } else {
-                    viewModel.setDeviceProfile(it)
+                    deviceProfile = it
                     val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                         addCategory(Intent.CATEGORY_OPENABLE)
                         type = "application/*"
@@ -584,7 +587,7 @@ fun RadioConfigScreen(
             },
             onDismiss = {
                 showEditDeviceProfileDialog = false
-                viewModel.setDeviceProfile(null)
+                deviceProfile = null
             }
         )
     }
@@ -616,7 +619,7 @@ fun RadioConfigScreen(
         },
         onImport = {
             viewModel.clearPacketResponse()
-            viewModel.setDeviceProfile(null)
+            deviceProfile = null
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "application/*"
@@ -625,7 +628,7 @@ fun RadioConfigScreen(
         },
         onExport = {
             viewModel.clearPacketResponse()
-            viewModel.setDeviceProfile(null)
+            deviceProfile = null
             showEditDeviceProfileDialog = true
         },
     )
