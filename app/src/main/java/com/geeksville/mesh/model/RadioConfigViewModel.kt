@@ -326,19 +326,15 @@ class RadioConfigViewModel @Inject constructor(
 
     fun removeFixedPosition() = setFixedPosition(Position(0.0, 0.0, 0))
 
-    private val _deviceProfile = MutableStateFlow<DeviceProfile?>(null)
-    val deviceProfile: StateFlow<DeviceProfile?> get() = _deviceProfile
-
-    fun setDeviceProfile(deviceProfile: DeviceProfile?) {
-        _deviceProfile.value = deviceProfile
-    }
-
-    fun importProfile(uri: Uri) = viewModelScope.launch(Dispatchers.IO) {
+    fun importProfile(
+        uri: Uri,
+        onResult: (DeviceProfile) -> Unit,
+    ) = viewModelScope.launch(Dispatchers.IO) {
         try {
             app.contentResolver.openInputStream(uri).use { inputStream ->
                 val bytes = inputStream?.readBytes()
                 val protobuf = DeviceProfile.parseFrom(bytes)
-                _deviceProfile.value = protobuf
+                onResult(protobuf)
             }
         } catch (ex: Exception) {
             errormsg("Import DeviceProfile error: ${ex.message}")
@@ -346,10 +342,8 @@ class RadioConfigViewModel @Inject constructor(
         }
     }
 
-    fun exportProfile(uri: Uri) = viewModelScope.launch {
-        val profile = deviceProfile.value ?: return@launch
+    fun exportProfile(uri: Uri, profile: DeviceProfile) = viewModelScope.launch {
         writeToUri(uri, profile)
-        _deviceProfile.value = null
     }
 
     private suspend fun writeToUri(uri: Uri, message: MessageLite) = withContext(Dispatchers.IO) {
@@ -367,15 +361,17 @@ class RadioConfigViewModel @Inject constructor(
     }
 
     fun installProfile(protobuf: DeviceProfile) = with(protobuf) {
-        _deviceProfile.value = null
         meshService?.beginEditSettings()
-        if (hasLongName() || hasShortName()) destNode.value?.user?.let {
-            val user = MeshProtos.User.newBuilder()
-                .setLongName(if (hasLongName()) longName else it.longName)
-                .setShortName(if (hasShortName()) shortName else it.shortName)
-                .setIsLicensed(it.isLicensed)
-                .build()
-            setOwner(user)
+        if (hasLongName() || hasShortName()) {
+            destNode.value?.user?.let {
+                val user = MeshProtos.User.newBuilder()
+                    .setId(it.id)
+                    .setLongName(if (hasLongName()) longName else it.longName)
+                    .setShortName(if (hasShortName()) shortName else it.shortName)
+                    .setIsLicensed(it.isLicensed)
+                    .build()
+                setOwner(user)
+            }
         }
         if (hasChannelUrl()) try {
             setChannels(channelUrl)
