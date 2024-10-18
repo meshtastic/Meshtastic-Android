@@ -12,7 +12,6 @@ internal fun View.nodeMenu(
     node: NodeEntity,
     ignoreIncomingList: List<Int>,
     isOurNode: Boolean = false,
-    isManaged: Boolean = false,
     onMenuItemAction: MenuItem.() -> Unit,
 ) = PopupMenu(context, this, Gravity.NO_GRAVITY, R.attr.actionOverflowMenuStyle, 0).apply {
     val isIgnored = ignoreIncomingList.contains(node.num)
@@ -20,7 +19,6 @@ internal fun View.nodeMenu(
     inflate(R.menu.menu_nodes)
     menu.apply {
         setGroupVisible(R.id.group_remote, !isOurNode)
-        setGroupEnabled(R.id.group_admin, !isManaged)
         findItem(R.id.ignore).apply {
             isEnabled = isIgnored || ignoreIncomingList.size < 3
             isChecked = isIgnored
