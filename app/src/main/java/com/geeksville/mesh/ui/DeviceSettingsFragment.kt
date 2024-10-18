@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
@@ -44,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
@@ -66,10 +69,13 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.RadioConfigState
 import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.service.MeshService.ConnectionState
+import com.geeksville.mesh.ui.components.DeviceMetricsScreen
+import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.config.AmbientLightingConfigItemList
 import com.geeksville.mesh.ui.components.config.AudioConfigItemList
@@ -99,9 +105,12 @@ import com.geeksville.mesh.ui.components.config.UserConfigItemList
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import dagger.hilt.android.AndroidEntryPoint
 
-internal fun FragmentManager.navigateToRadioConfig(destNum: Int? = null) {
+internal fun FragmentManager.navigateToRadioConfig(
+    destNum: Int? = null,
+    startDestination: String = "RadioConfig",
+) {
     val radioConfigFragment = DeviceSettingsFragment().apply {
-        arguments = bundleOf("destNum" to destNum)
+        arguments = bundleOf("destNum" to destNum, "startDestination" to startDestination)
     }
     beginTransaction()
         .replace(R.id.mainActivityLayout, radioConfigFragment)
@@ -120,6 +129,7 @@ class DeviceSettingsFragment : ScreenFragment("Radio Configuration"), Logging {
         savedInstanceState: Bundle?
     ): View {
         val destNum = arguments?.getInt("destNum")
+        val startDestination = arguments?.getString("startDestination") ?: "RadioConfig"
         model.setDestNum(destNum)
 
         return ComposeView(requireContext()).apply {
@@ -159,6 +169,7 @@ class DeviceSettingsFragment : ScreenFragment("Radio Configuration"), Logging {
                             node = node,
                             viewModel = model,
                             navController = navController,
+                            startDestination = startDestination,
                             modifier = Modifier.padding(innerPadding),
                         )
                     }
@@ -247,6 +258,7 @@ fun RadioConfigNavHost(
     node: NodeEntity?,
     viewModel: RadioConfigViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
+    startDestination: String,
     modifier: Modifier = Modifier,
 ) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
@@ -254,12 +266,32 @@ fun RadioConfigNavHost(
 
     val radioConfigState by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
+    val metricsViewModel: MetricsViewModel = hiltViewModel()
+    val metricsState by metricsViewModel.state.collectAsStateWithLifecycle()
+
     NavHost(
         navController = navController,
-        startDestination = "home",
+        startDestination = startDestination,
         modifier = modifier,
     ) {
-        composable("home") {
+        composable("NodeDetails") {
+            NodeDetailsScreen(
+                node = node,
+                metricsState = metricsState,
+                onNavigate = { navController.navigate(route = it) },
+                setSelectedNode = metricsViewModel::setSelectedNode,
+            )
+        }
+        composable("DeviceMetrics") {
+            DeviceMetricsScreen(metricsState.deviceMetrics)
+        }
+        composable("EnvironmentMetrics") {
+            EnvironmentMetricsScreen(
+                metricsState.environmentMetrics,
+                metricsState.environmentDisplayFahrenheit,
+            )
+        }
+        composable("RadioConfig") {
             RadioConfigScreen(
                 node = node,
                 connected = connected,
@@ -635,9 +667,10 @@ fun RadioConfigScreen(
 }
 
 @Composable
-private fun NavCard(
+fun NavCard(
     title: String,
     enabled: Boolean,
+    icon: ImageVector? = null,
     onClick: () -> Unit
 ) {
     val color = if (enabled) {
@@ -655,8 +688,17 @@ private fun NavCard(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 12.dp, horizontal = 12.dp)
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp)
         ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    modifier = Modifier.size(24.dp),
+                    tint = color,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
             Text(
                 text = title,
                 style = MaterialTheme.typography.body1,

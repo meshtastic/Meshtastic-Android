@@ -46,7 +46,6 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             node = node,
             ignoreIncomingList = ignoreIncomingList,
             isOurNode = isOurNode,
-            isManaged = model.isManaged,
         ) {
             when (itemId) {
                 R.id.direct_message -> {
@@ -77,12 +76,8 @@ class UsersFragment : ScreenFragment("Users"), Logging {
                     }
                 }
 
-                R.id.remote_admin -> {
+                R.id.more_details -> {
                     navigateToRadioConfig(node.num)
-                }
-
-                R.id.metrics -> {
-                    navigateToMetrics(node.num)
                 }
 
                 R.id.request_userinfo -> {
@@ -101,13 +96,8 @@ class UsersFragment : ScreenFragment("Users"), Logging {
     }
 
     private fun navigateToRadioConfig(nodeNum: Int) {
-        info("calling RadioConfig --> destNum: $nodeNum")
-        parentFragmentManager.navigateToRadioConfig(nodeNum)
-    }
-
-    private fun navigateToMetrics(nodeNum: Int) {
-        info("calling Metrics --> destNum: $nodeNum")
-        parentFragmentManager.navigateToMetrics(nodeNum)
+        info("calling NodeDetails --> destNum: $nodeNum")
+        parentFragmentManager.navigateToRadioConfig(nodeNum, "NodeDetails")
     }
 
     override fun onCreateView(
