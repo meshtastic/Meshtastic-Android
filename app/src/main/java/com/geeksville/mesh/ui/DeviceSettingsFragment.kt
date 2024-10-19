@@ -95,7 +95,6 @@ import com.geeksville.mesh.config
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.MetricsViewModel
-import com.geeksville.mesh.model.RadioConfigState
 import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.service.MeshService.ConnectionState
@@ -277,7 +276,7 @@ private fun MeshAppBar(
     )
 }
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun RadioConfigNavHost(
     node: NodeEntity?,
@@ -290,9 +289,27 @@ fun RadioConfigNavHost(
     val connected = connectionState == ConnectionState.CONNECTED && node != null
 
     val radioConfigState by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val isWaiting = radioConfigState.responseState.isWaiting()
 
     val metricsViewModel: MetricsViewModel = hiltViewModel()
     val metricsState by metricsViewModel.state.collectAsStateWithLifecycle()
+
+    if (isWaiting) {
+        PacketResponseStateDialog(
+            state = radioConfigState.responseState,
+            onDismiss = {
+                viewModel.clearPacketResponse()
+            },
+            onComplete = {
+                val route = radioConfigState.route
+                if (ConfigRoute.entries.any { it.name == route } ||
+                    ModuleRoute.entries.any { it.name == route }) {
+                    navController.navigate(route = route)
+                    viewModel.clearPacketResponse()
+                }
+            },
+        )
+    }
 
     NavHost(
         navController = navController,
@@ -319,10 +336,8 @@ fun RadioConfigNavHost(
         composable("RadioConfig") {
             RadioConfigScreen(
                 node = node,
-                connected = connected,
-                radioConfigState = radioConfigState,
+                enabled = connected && !isWaiting,
                 viewModel = viewModel,
-                onNavigate = { navController.navigate(route = it) },
             )
         }
         composable(ConfigRoute.USER.name) {
@@ -593,14 +608,11 @@ fun RadioConfigNavHost(
 @Composable
 fun RadioConfigScreen(
     node: NodeEntity?,
-    connected: Boolean,
-    radioConfigState: RadioConfigState,
+    enabled: Boolean,
     viewModel: RadioConfigViewModel,
     modifier: Modifier = Modifier,
-    onNavigate: (String) -> Unit = {},
 ) {
     val isLocal = node?.num == viewModel.myNodeNum
-    val isWaiting = radioConfigState.responseState.isWaiting()
 
     var deviceProfile by remember { mutableStateOf<DeviceProfile?>(null) }
     var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
@@ -649,26 +661,8 @@ fun RadioConfigScreen(
         )
     }
 
-    if (isWaiting) {
-        PacketResponseStateDialog(
-            state = radioConfigState.responseState,
-            onDismiss = {
-                showEditDeviceProfileDialog = false
-                viewModel.clearPacketResponse()
-            },
-            onComplete = {
-                val route = radioConfigState.route
-                if (ConfigRoute.entries.any { it.name == route } ||
-                    ModuleRoute.entries.any { it.name == route }) {
-                    onNavigate(route)
-                    viewModel.clearPacketResponse()
-                }
-            },
-        )
-    }
-
     RadioConfigItemList(
-        enabled = connected && !isWaiting,
+        enabled = enabled,
         isLocal = isLocal,
         modifier = modifier,
         onRouteClick = { route ->
