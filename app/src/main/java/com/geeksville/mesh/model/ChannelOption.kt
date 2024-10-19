@@ -88,6 +88,9 @@ enum class RegionInfo(
     MY_433(RegionCode.MY_433, "Malaysia 433MHz", 433.0f, 435.0f),
     MY_919(RegionCode.MY_919, "Malaysia 919MHz", 919.0f, 924.0f),
     SG_923(RegionCode.SG_923, "Singapore 923MHz", 917.0f, 925.0f),
+    PH_433(RegionCode.PH_433, "Philippines 433MHz", 433.0f, 434.7f),
+    PH_868(RegionCode.PH_868, "Philippines 868MHz", 868.0f, 869.4f),
+    PH_915(RegionCode.PH_915, "Philippines 915MHz", 915.0f, 918.0f),
     LORA_24(RegionCode.LORA_24, "2.4 GHz", 2400.0f, 2483.5f),
 }
 
