@@ -72,8 +72,14 @@ data class NodeEntity(
     val environmentMetrics: TelemetryProtos.EnvironmentMetrics
         get() = environmentTelemetry.environmentMetrics
 
+    val hasEnvironmentMetrics: Boolean
+        get() = environmentMetrics != TelemetryProtos.EnvironmentMetrics.getDefaultInstance()
+
     val powerMetrics: TelemetryProtos.PowerMetrics
         get() = powerTelemetry.powerMetrics
+
+    val hasPowerMetrics: Boolean
+        get() = powerMetrics != TelemetryProtos.PowerMetrics.getDefaultInstance()
 
     val colors: Pair<Int, Int>
         get() { // returns foreground and background @ColorInt for each 'num'
@@ -145,8 +151,6 @@ data class NodeEntity(
             null
         }
         val humidity = if (relativeHumidity != 0f) "%.0f%%".format(relativeHumidity) else null
-        val pressure = if (barometricPressure != 0f) "%.1fhPa".format(barometricPressure) else null
-        val gas = if (gasResistance != 0f) "%.0fMΩ".format(gasResistance) else null
         val voltage = if (this.voltage != 0f) "%.2fV".format(this.voltage) else null
         val current = if (current != 0f) "%.1fmA".format(current) else null
         val iaq = if (iaq != 0) "IAQ: $iaq" else null
@@ -154,20 +158,11 @@ data class NodeEntity(
         return listOfNotNull(
             temp,
             humidity,
-            pressure,
-            gas,
             voltage,
             current,
             iaq,
         ).joinToString(" ")
     }
-
-    private fun TelemetryProtos.PowerMetrics.getDisplayString(): String = listOfNotNull(
-        "%.2fV".format(ch2Voltage).takeIf { hasCh2Voltage() },
-        "%.1fmA".format(ch2Current).takeIf { hasCh2Current() },
-        "%.2fV".format(ch3Voltage).takeIf { hasCh3Voltage() },
-        "%.1fmA".format(ch3Current).takeIf { hasCh3Current() },
-    ).joinToString(" ")
 
     private fun PaxcountProtos.Paxcount.getDisplayString() =
         "PAX: ${ble + wifi} (B:$ble/W:$wifi)".takeIf { ble != 0 && wifi != 0 }
@@ -176,7 +171,6 @@ data class NodeEntity(
         return listOfNotNull(
             paxcounter.getDisplayString(),
             environmentMetrics.getDisplayString(isFahrenheit),
-            powerMetrics.getDisplayString(),
         ).joinToString(" ")
     }
 
