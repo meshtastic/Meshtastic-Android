@@ -37,7 +37,32 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Forward
 import androidx.compose.material.icons.automirrored.twotone.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.material.icons.filled.DisplaySettings
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.Message
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.filled.CellTower
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.DataUsage
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.PermScanWifi
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Power
+import androidx.compose.material.icons.filled.Router
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Sensors
+import androidx.compose.material.icons.filled.SettingsRemote
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.Usb
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -187,34 +212,34 @@ enum class AdminRoute(@StringRes val title: Int) {
 }
 
 // Config (configType = AdminProtos.AdminMessage.ConfigType)
-enum class ConfigRoute(val title: String, val configType: Int = 0) {
-    USER("User"),
-    CHANNELS("Channels"),
-    DEVICE("Device", 0),
-    POSITION("Position", 1),
-    POWER("Power", 2),
-    NETWORK("Network", 3),
-    DISPLAY("Display", 4),
-    LORA("LoRa", 5),
-    BLUETOOTH("Bluetooth", 6),
-    SECURITY("Security", configType = 7),
+enum class ConfigRoute(val title: String, val icon: ImageVector?, val configType: Int = 0) {
+    USER("User", Icons.Default.Person, 0),
+    CHANNELS("Channels", Icons.AutoMirrored.Default.List, 0),
+    DEVICE("Device", Icons.Default.Router, 0),
+    POSITION("Position", Icons.Default.LocationOn, 1),
+    POWER("Power", Icons.Default.Power, 2),
+    NETWORK("Network", Icons.Default.Wifi, 3),
+    DISPLAY("Display", Icons.Default.DisplaySettings, 4),
+    LORA("LoRa", Icons.Default.CellTower, 5),
+    BLUETOOTH("Bluetooth", Icons.Default.Bluetooth, 6),
+    SECURITY("Security", Icons.Default.Security, configType = 7),
 }
 
 // ModuleConfig (configType = AdminProtos.AdminMessage.ModuleConfigType)
-enum class ModuleRoute(val title: String, val configType: Int = 0) {
-    MQTT("MQTT", 0),
-    SERIAL("Serial", 1),
-    EXTERNAL_NOTIFICATION("External Notification", 2),
-    STORE_FORWARD("Store & Forward", 3),
-    RANGE_TEST("Range Test", 4),
-    TELEMETRY("Telemetry", 5),
-    CANNED_MESSAGE("Canned Message", 6),
-    AUDIO("Audio", 7),
-    REMOTE_HARDWARE("Remote Hardware", 8),
-    NEIGHBOR_INFO("Neighbor Info", 9),
-    AMBIENT_LIGHTING("Ambient Lighting", 10),
-    DETECTION_SENSOR("Detection Sensor", 11),
-    PAXCOUNTER("Paxcounter", 12),
+enum class ModuleRoute(val title: String, val icon: ImageVector?, val configType: Int = 0) {
+    MQTT("MQTT", Icons.Default.Cloud, 0),
+    SERIAL("Serial", Icons.Default.Usb, 1),
+    EXTERNAL_NOTIFICATION("External Notification", Icons.Default.Notifications, 2),
+    STORE_FORWARD("Store & Forward", Icons.AutoMirrored.Default.Forward, 3),
+    RANGE_TEST("Range Test", Icons.Default.Speed, 4),
+    TELEMETRY("Telemetry", Icons.Default.DataUsage, 5),
+    CANNED_MESSAGE("Canned Message", Icons.AutoMirrored.Default.Message, 6),
+    AUDIO("Audio", Icons.AutoMirrored.Default.VolumeUp, 7),
+    REMOTE_HARDWARE("Remote Hardware", Icons.Default.SettingsRemote, 8),
+    NEIGHBOR_INFO("Neighbor Info", Icons.Default.People, 9),
+    AMBIENT_LIGHTING("Ambient Lighting", Icons.Default.LightMode, 10),
+    DETECTION_SENSOR("Detection Sensor", Icons.Default.Sensors, 11),
+    PAXCOUNTER("Paxcounter", Icons.Default.PermScanWifi, 12),
 }
 
 /**
@@ -789,15 +814,31 @@ private fun RadioConfigItemList(
         contentPadding = PaddingValues(horizontal = 16.dp),
     ) {
         item { PreferenceCategory(stringResource(R.string.device_settings)) }
-        items(ConfigRoute.entries) { NavCard(it.title, enabled = enabled) { onRouteClick(it) } }
+        items(ConfigRoute.entries) {
+            NavCard(title = it.title, icon = it.icon, enabled = enabled) { onRouteClick(it) }
+        }
 
         item { PreferenceCategory(stringResource(R.string.module_settings)) }
-        items(ModuleRoute.entries) { NavCard(it.title, enabled = enabled) { onRouteClick(it) } }
+        items(ModuleRoute.entries) {
+            NavCard(title = it.title, icon = it.icon, enabled = enabled) { onRouteClick(it) }
+        }
 
         if (isLocal) {
-            item { PreferenceCategory("Import / Export") }
-            item { NavCard("Import configuration", enabled = enabled) { onImport() } }
-            item { NavCard("Export configuration", enabled = enabled) { onExport() } }
+            item {
+                PreferenceCategory("Backup & Restore")
+                NavCard(
+                    title = "Import configuration",
+                    icon = Icons.Default.Download,
+                    enabled = enabled,
+                    onClick = onImport,
+                )
+                NavCard(
+                    title = "Export configuration",
+                    icon = Icons.Default.Upload,
+                    enabled = enabled,
+                    onClick = onExport,
+                )
+            }
         }
 
         items(AdminRoute.entries) { NavButton(it.title, enabled) { onRouteClick(it) } }
