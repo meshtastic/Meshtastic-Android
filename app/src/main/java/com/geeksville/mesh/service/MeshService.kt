@@ -135,7 +135,10 @@ class MeshService : Service(), Logging {
     enum class ConnectionState {
         DISCONNECTED,
         CONNECTED,
-        DEVICE_SLEEP // device is in LS sleep state, it will reconnected to us over bluetooth once it has data
+        DEVICE_SLEEP, // device is in LS sleep state, it will reconnected to us over bluetooth once it has data
+        ;
+
+        fun isDisconnected() = this == DISCONNECTED
     }
 
     private var previousSummary: String? = null

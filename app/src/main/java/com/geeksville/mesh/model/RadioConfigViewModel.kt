@@ -100,6 +100,12 @@ class RadioConfigViewModel @Inject constructor(
         radioConfigRepository.meshPacketFlow.onEach(::processPacketResponse)
             .launchIn(viewModelScope)
 
+        combine(connectionState, radioConfigState) { connState, configState ->
+            if (connState.isDisconnected() && configState.responseState.isWaiting()) {
+                setResponseStateError(app.getString(R.string.disconnected))
+            }
+        }.launchIn(viewModelScope)
+
         debug("RadioConfigViewModel created")
     }
 
