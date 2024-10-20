@@ -97,7 +97,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
     private fun navigateToRadioConfig(nodeNum: Int) {
         info("calling NodeDetails --> destNum: $nodeNum")
-        parentFragmentManager.navigateToRadioConfig(nodeNum, "NodeDetails")
+        parentFragmentManager.navigateToNavGraph(nodeNum, "NodeDetails")
     }
 
     override fun onCreateView(
