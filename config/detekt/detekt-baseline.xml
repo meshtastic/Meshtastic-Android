@@ -71,7 +71,6 @@
     <ID>ConstructorParameterNaming:Packet.kt$Packet$@ColumnInfo(name = "contact_key") val contact_key: String</ID>
     <ID>ConstructorParameterNaming:Packet.kt$Packet$@ColumnInfo(name = "port_num") val port_num: Int</ID>
     <ID>ConstructorParameterNaming:Packet.kt$Packet$@ColumnInfo(name = "received_time") val received_time: Long</ID>
-    <ID>CyclomaticComplexMethod:ChannelFragment.kt$@Composable fun ChannelScreen( viewModel: UIViewModel = viewModel(), showSnackbar: (String) -&gt; Unit = {}, )</ID>
     <ID>CyclomaticComplexMethod:MainActivity.kt$MainActivity$override fun onOptionsItemSelected(item: MenuItem): Boolean</ID>
     <ID>CyclomaticComplexMethod:MapFragment.kt$@Composable fun MapView( model: UIViewModel = viewModel(), )</ID>
     <ID>CyclomaticComplexMethod:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
@@ -151,7 +150,6 @@
     <ID>LongMethod:AmbientLightingConfigItemList.kt$@Composable fun AmbientLightingConfigItemList( ambientLightingConfig: ModuleConfigProtos.ModuleConfig.AmbientLightingConfig, enabled: Boolean, onSaveClicked: (ModuleConfigProtos.ModuleConfig.AmbientLightingConfig) -&gt; Unit, )</ID>
     <ID>LongMethod:AudioConfigItemList.kt$@Composable fun AudioConfigItemList( audioConfig: AudioConfig, enabled: Boolean, onSaveClicked: (AudioConfig) -&gt; Unit, )</ID>
     <ID>LongMethod:CannedMessageConfigItemList.kt$@Composable fun CannedMessageConfigItemList( messages: String, cannedMessageConfig: CannedMessageConfig, enabled: Boolean, onSaveClicked: (messages: String, config: CannedMessageConfig) -&gt; Unit, )</ID>
-    <ID>LongMethod:ChannelFragment.kt$@Composable fun ChannelScreen( viewModel: UIViewModel = viewModel(), showSnackbar: (String) -&gt; Unit = {}, )</ID>
     <ID>LongMethod:ChannelSettingsItemList.kt$@Composable fun ChannelSettingsItemList( settingsList: List&lt;ChannelSettings&gt;, modemPresetName: String = "Default", maxChannels: Int = 8, enabled: Boolean, onNegativeClicked: () -&gt; Unit = { }, onPositiveClicked: (List&lt;ChannelSettings&gt;) -&gt; Unit, )</ID>
     <ID>LongMethod:ContactsFragment.kt$ContactsFragment.ActionModeCallback$override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean</ID>
     <ID>LongMethod:DeviceConfigItemList.kt$@Composable fun DeviceConfigItemList( deviceConfig: DeviceConfig, enabled: Boolean, onSaveClicked: (DeviceConfig) -&gt; Unit, )</ID>
@@ -222,20 +220,6 @@
     <ID>MagicNumber:ContextServices.kt$33</ID>
     <ID>MagicNumber:DataPacket.kt$DataPacket.CREATOR$16</ID>
     <ID>MagicNumber:DebugFragment.kt$DebugFragment$3</ID>
-    <ID>MagicNumber:DeviceSettingsFragment.kt$ConfigRoute.BLUETOOTH$6</ID>
-    <ID>MagicNumber:DeviceSettingsFragment.kt$ConfigRoute.DISPLAY$4</ID>
-    <ID>MagicNumber:DeviceSettingsFragment.kt$ConfigRoute.LORA$5</ID>
-    <ID>MagicNumber:DeviceSettingsFragment.kt$ConfigRoute.NETWORK$3</ID>
-    <ID>MagicNumber:DeviceSettingsFragment.kt$ModuleRoute.AMBIENT_LIGHTING$10</ID>
-    <ID>MagicNumber:DeviceSettingsFragment.kt$ModuleRoute.AUDIO$7</ID>
-    <ID>MagicNumber:DeviceSettingsFragment.kt$ModuleRoute.CANNED_MESSAGE$6</ID>
-    <ID>MagicNumber:DeviceSettingsFragment.kt$ModuleRoute.DETECTION_SENSOR$11</ID>
-    <ID>MagicNumber:DeviceSettingsFragment.kt$ModuleRoute.NEIGHBOR_INFO$9</ID>
-    <ID>MagicNumber:DeviceSettingsFragment.kt$ModuleRoute.PAXCOUNTER$12</ID>
-    <ID>MagicNumber:DeviceSettingsFragment.kt$ModuleRoute.RANGE_TEST$4</ID>
-    <ID>MagicNumber:DeviceSettingsFragment.kt$ModuleRoute.REMOTE_HARDWARE$8</ID>
-    <ID>MagicNumber:DeviceSettingsFragment.kt$ModuleRoute.STORE_FORWARD$3</ID>
-    <ID>MagicNumber:DeviceSettingsFragment.kt$ModuleRoute.TELEMETRY$5</ID>
     <ID>MagicNumber:DeviceVersion.kt$DeviceVersion$100</ID>
     <ID>MagicNumber:DeviceVersion.kt$DeviceVersion$10000</ID>
     <ID>MagicNumber:DownloadButton.kt$1.25f</ID>
@@ -315,6 +299,20 @@
     <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$360.0</ID>
     <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$4</ID>
     <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$5</ID>
+    <ID>MagicNumber:NavGraph.kt$ConfigRoute.BLUETOOTH$6</ID>
+    <ID>MagicNumber:NavGraph.kt$ConfigRoute.DISPLAY$4</ID>
+    <ID>MagicNumber:NavGraph.kt$ConfigRoute.LORA$5</ID>
+    <ID>MagicNumber:NavGraph.kt$ConfigRoute.NETWORK$3</ID>
+    <ID>MagicNumber:NavGraph.kt$ModuleRoute.AMBIENT_LIGHTING$10</ID>
+    <ID>MagicNumber:NavGraph.kt$ModuleRoute.AUDIO$7</ID>
+    <ID>MagicNumber:NavGraph.kt$ModuleRoute.CANNED_MESSAGE$6</ID>
+    <ID>MagicNumber:NavGraph.kt$ModuleRoute.DETECTION_SENSOR$11</ID>
+    <ID>MagicNumber:NavGraph.kt$ModuleRoute.NEIGHBOR_INFO$9</ID>
+    <ID>MagicNumber:NavGraph.kt$ModuleRoute.PAXCOUNTER$12</ID>
+    <ID>MagicNumber:NavGraph.kt$ModuleRoute.RANGE_TEST$4</ID>
+    <ID>MagicNumber:NavGraph.kt$ModuleRoute.REMOTE_HARDWARE$8</ID>
+    <ID>MagicNumber:NavGraph.kt$ModuleRoute.STORE_FORWARD$3</ID>
+    <ID>MagicNumber:NavGraph.kt$ModuleRoute.TELEMETRY$5</ID>
     <ID>MagicNumber:NodeInfo.kt$DeviceMetrics.Companion$1000</ID>
     <ID>MagicNumber:NodeInfo.kt$EnvironmentMetrics.Companion$1000</ID>
     <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.114</ID>
@@ -489,9 +487,6 @@
     <ID>MultiLineIfElse:ChannelOption.kt$when (bandwidth) { 31 -&gt; .03125f 62 -&gt; .0625f 200 -&gt; .203125f 400 -&gt; .40625f 800 -&gt; .8125f 1600 -&gt; 1.6250f else -&gt; bandwidth / 1000f }</ID>
     <ID>MultiLineIfElse:ContextServices.kt$MaterialAlertDialogBuilder(this) .setTitle(title) .setMessage(rationale) .setNeutralButton(R.string.cancel) { _, _ -&gt; } .setPositiveButton(R.string.accept) { _, _ -&gt; invokeFun() } .show()</ID>
     <ID>MultiLineIfElse:ContextServices.kt$invokeFun()</ID>
-    <ID>MultiLineIfElse:DeviceSettingsFragment.kt$AlertDialog( onDismissRequest = {}, shape = RoundedCornerShape(16.dp), backgroundColor = MaterialTheme.colors.background, title = { Row( modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, ) { Icon( imageVector = Icons.TwoTone.Warning, contentDescription = "warning", modifier = Modifier.padding(end = 8.dp) ) Text( text = "${stringResource(title)}?\n") Icon( imageVector = Icons.TwoTone.Warning, contentDescription = "warning", modifier = Modifier.padding(start = 8.dp) ) } }, buttons = { Row( modifier = Modifier .fillMaxWidth() .padding(start = 16.dp, end = 16.dp, bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically, ) { TextButton( modifier = Modifier.weight(1f), onClick = { showDialog = false }, ) { Text(stringResource(R.string.cancel)) } Button( modifier = Modifier.weight(1f), onClick = { showDialog = false onClick() }, ) { Text(stringResource(R.string.send)) } } } )</ID>
-    <ID>MultiLineIfElse:DeviceSettingsFragment.kt$EditDeviceProfileDialog( title = if (deviceProfile != null) "Import configuration" else "Export configuration", deviceProfile = deviceProfile ?: viewModel.currentDeviceProfile, onConfirm = { showEditDeviceProfileDialog = false if (deviceProfile != null) { viewModel.installProfile(it) } else { viewModel.setDeviceProfile(it) val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply { addCategory(Intent.CATEGORY_OPENABLE) type = "application/*" putExtra(Intent.EXTRA_TITLE, "${destNum.toUInt()}.cfg") } exportConfigLauncher.launch(intent) } }, onDismiss = { showEditDeviceProfileDialog = false viewModel.setDeviceProfile(null) } )</ID>
-    <ID>MultiLineIfElse:DeviceSettingsFragment.kt$PacketResponseStateDialog( radioConfigState.responseState, onDismiss = { showEditDeviceProfileDialog = false viewModel.clearPacketResponse() }, onComplete = { val route = radioConfigState.route if (ConfigRoute.entries.any { it.name == route } || ModuleRoute.entries.any { it.name == route }) { navController.navigate(route) viewModel.clearPacketResponse() } } )</ID>
     <ID>MultiLineIfElse:EditListPreference.kt$EditBase64Preference( title = "${index + 1}/$maxCount", value = value, enabled = enabled, keyboardActions = keyboardActions, onValueChange = { listState[index] = it as T onValuesChanged(listState) }, modifier = modifier.fillMaxWidth(), trailingIcon = trailingIcon, )</ID>
     <ID>MultiLineIfElse:EditListPreference.kt$EditTextPreference( title = "${index + 1}/$maxCount", value = value, enabled = enabled, keyboardActions = keyboardActions, onValueChanged = { listState[index] = it as T onValuesChanged(listState) }, modifier = modifier.fillMaxWidth(), trailingIcon = trailingIcon, )</ID>
     <ID>MultiLineIfElse:EditPasswordPreference.kt$painterResource(R.drawable.ic_twotone_visibility_24)</ID>
@@ -520,7 +515,7 @@
     <ID>MultiLineIfElse:NOAAWmsTileSource.kt$NOAAWmsTileSource$sb.append("service=WMS")</ID>
     <ID>MultiLineIfElse:NodeInfo.kt$MeshUser$hwModel.name.replace('_', '-').replace('p', '.').lowercase()</ID>
     <ID>MultiLineIfElse:NodeInfo.kt$MeshUser$null</ID>
-    <ID>MultiLineIfElse:RadioConfigViewModel.kt$RadioConfigViewModel$destNode.value?.user?.let { val user = MeshProtos.User.newBuilder() .setLongName(if (hasLongName()) longName else it.longName) .setShortName(if (hasShortName()) shortName else it.shortName) .setIsLicensed(it.isLicensed) .build() setOwner(user) }</ID>
+    <ID>MultiLineIfElse:RadioConfigScreen.kt$AlertDialog( onDismissRequest = {}, shape = RoundedCornerShape(16.dp), backgroundColor = MaterialTheme.colors.background, title = { Row( modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, ) { Icon( imageVector = Icons.TwoTone.Warning, contentDescription = "warning", modifier = Modifier.padding(end = 8.dp) ) Text( text = "${stringResource(title)}?\n") Icon( imageVector = Icons.TwoTone.Warning, contentDescription = "warning", modifier = Modifier.padding(start = 8.dp) ) } }, buttons = { Row( modifier = Modifier .fillMaxWidth() .padding(start = 16.dp, end = 16.dp, bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically, ) { TextButton( modifier = Modifier.weight(1f), onClick = { showDialog = false }, ) { Text(stringResource(R.string.cancel)) } Button( modifier = Modifier.weight(1f), onClick = { showDialog = false onClick() }, ) { Text(stringResource(R.string.send)) } } } )</ID>
     <ID>MultiLineIfElse:RadioConfigViewModel.kt$RadioConfigViewModel$try { setChannels(channelUrl) } catch (ex: Exception) { errormsg("DeviceProfile channel import error", ex) setResponseStateError(ex.customMessage) }</ID>
     <ID>MultiLineIfElse:RadioConfigViewModel.kt$RadioConfigViewModel$viewModelScope.launch { radioConfigRepository.replaceAllSettings(new) }</ID>
     <ID>MultiLineIfElse:RadioInterfaceService.kt$RadioInterfaceService$startInterface()</ID>
