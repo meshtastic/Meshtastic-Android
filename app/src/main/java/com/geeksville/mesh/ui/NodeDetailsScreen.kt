@@ -226,16 +226,6 @@ private fun NodeDetailsContent(node: NodeEntity) {
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun InfoRow(content: @Composable () -> Unit) {
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalArrangement = Arrangement.SpaceEvenly,
-    ) { content() }
-}
-
 @Composable
 private fun InfoCard(
     icon: Painter,
@@ -292,28 +282,33 @@ private fun formatUptime(seconds: Long): String {
     ).joinToString(" ")
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Suppress("LongMethod")
 @Composable
 private fun EnvironmentMetrics(
     node: NodeEntity,
     isFahrenheit: Boolean = false,
 ) = with(node.environmentMetrics) {
-    InfoRow {
-        if (temperature > 0) {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        if (temperature != 0f) {
             InfoCard(
                 icon = rememberVectorPainter(Icons.Default.Thermostat),
                 text = "Temperature",
                 value = temperature.toTempString(isFahrenheit)
             )
         }
-        if (relativeHumidity > 0) {
+        if (relativeHumidity != 0f) {
             InfoCard(
                 icon = rememberVectorPainter(Icons.Default.WaterDrop),
                 text = "Humidity",
                 value = "%.0f%%".format(relativeHumidity)
             )
         }
-        if (temperature > 0 && relativeHumidity > 0) {
+        if (temperature != 0f && relativeHumidity != 0f) {
             val dewPoint = calculateDewPoint(temperature, relativeHumidity)
             InfoCard(
                 icon = painterResource(R.drawable.ic_outlined_dew_point_24),
@@ -321,35 +316,35 @@ private fun EnvironmentMetrics(
                 value = dewPoint.toTempString(isFahrenheit)
             )
         }
-        if (barometricPressure > 0) {
+        if (barometricPressure != 0f) {
             InfoCard(
                 icon = rememberVectorPainter(Icons.Default.Speed),
                 text = "Pressure",
                 value = "%.0f".format(barometricPressure)
             )
         }
-        if (gasResistance > 0) {
+        if (gasResistance != 0f) {
             InfoCard(
                 icon = rememberVectorPainter(Icons.Default.BlurOn),
                 text = "Gas Resistance",
                 value = "%.0f".format(gasResistance)
             )
         }
-        if (voltage > 0) {
+        if (voltage != 0f) {
             InfoCard(
                 icon = rememberVectorPainter(Icons.Default.Bolt),
                 text = "Voltage",
                 value = "%.1fV".format(voltage)
             )
         }
-        if (current > 0) {
+        if (current != 0f) {
             InfoCard(
                 icon = rememberVectorPainter(Icons.Default.Power),
                 text = "Current",
-                value = "%.1fA".format(current)
+                value = "%.1fmA".format(current)
             )
         }
-        if (iaq > 0) {
+        if (iaq != 0) {
             InfoCard(
                 icon = rememberVectorPainter(Icons.Default.Air),
                 text = "IAQ",
@@ -375,49 +370,54 @@ private fun calculateDewPoint(tempCelsius: Float, humidity: Float): Float {
     return (b * alpha) / (a - alpha)
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PowerMetrics(node: NodeEntity) = with(node.powerMetrics) {
-    InfoRow {
-        if (ch1Voltage > 0) {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        if (ch1Voltage != 0f) {
             InfoCard(
                 icon = rememberVectorPainter(Icons.Default.Bolt),
-                text = "Voltage",
+                text = "Channel 1",
                 value = "%.1fV".format(ch1Voltage)
             )
         }
-        if (ch1Current > 0) {
+        if (ch1Current != 0f) {
             InfoCard(
                 icon = rememberVectorPainter(Icons.Default.Power),
-                text = "Current",
-                value = "%.1fA".format(ch1Current)
+                text = "Channel 1",
+                value = "%.1fmA".format(ch1Current)
             )
         }
-        if (ch2Voltage > 0) {
+        if (ch2Voltage != 0f) {
             InfoCard(
                 icon = rememberVectorPainter(Icons.Default.Bolt),
-                text = "Voltage",
+                text = "Channel 2",
                 value = "%.1fV".format(ch2Voltage)
             )
         }
-        if (ch2Current > 0) {
+        if (ch2Current != 0f) {
             InfoCard(
                 icon = rememberVectorPainter(Icons.Default.Power),
-                text = "Current",
-                value = "%.1fA".format(ch2Current)
+                text = "Channel 2",
+                value = "%.1fmA".format(ch2Current)
             )
         }
-        if (ch3Voltage > 0) {
+        if (ch3Voltage != 0f) {
             InfoCard(
                 icon = rememberVectorPainter(Icons.Default.Bolt),
-                text = "Voltage",
+                text = "Channel 3",
                 value = "%.1fV".format(ch3Voltage)
             )
         }
-        if (ch3Current > 0) {
+        if (ch3Current != 0f) {
             InfoCard(
                 icon = rememberVectorPainter(Icons.Default.Power),
-                text = "Current",
-                value = "%.1fA".format(ch3Current)
+                text = "Channel 3",
+                value = "%.1fmA".format(ch3Current)
             )
         }
     }
