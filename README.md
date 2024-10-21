@@ -39,11 +39,19 @@ You can help translate the app into your native language using [Crowdin](https:/
 
 If you would like to develop this application we'd love your help! These build instructions are brief and should be improved, please send a PR if you can.
 
-- Use Android Studio to build/debug
-- Use "git submodule update --init --recursive" to pull in the various submodules we depend on
-- Now you should be able to select "Run / Run" in the IDE and it will happily start running on your
-  phone or the emulator. Note: The emulators don't support bluetooth, so some features can not be
-  used in that environment.
+1. Clone the project
+```bash
+git clone https://github.com/meshtastic/Meshtastic-Android.git
+```
+2. Then open Meshtastic-Android directory and pull various submodules we depend on
+```bash
+cd Meshtastic-Android/
+git submodule update --init --recursive
+```
+3. Use [Android Studio](https://developer.android.com/studio) to build/debug
+
+Now you should be able to select "Run / Run" in the IDE and it will happily start running on your phone or the emulator.
+__Note:__ The emulators don't support bluetooth, so some features can not be used in that environment.
 
 ## Analytics setup
 
