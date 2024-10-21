@@ -94,6 +94,11 @@ private fun DeviceMetricsChart(
     ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty()) return
 
+    TimeLabels(
+        oldest = telemetries.first().time * MS_PER_SEC,
+        newest = telemetries.last().time * MS_PER_SEC
+    )
+
     Spacer(modifier = Modifier.height(16.dp))
 
     val graphColor = MaterialTheme.colors.onSurface
@@ -172,13 +177,6 @@ private fun DeviceMetricsChart(
                 )
             )
         }
-
-        TimeLabels(
-            modifier = modifier,
-            graphColor = graphColor,
-            oldest = telemetries.first().time * MS_PER_SEC,
-            newest = telemetries.last().time * MS_PER_SEC
-        )
     }
     Spacer(modifier = Modifier.height(16.dp))
 

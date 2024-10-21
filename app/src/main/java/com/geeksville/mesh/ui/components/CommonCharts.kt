@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
 import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
@@ -134,36 +135,27 @@ fun ChartOverlay(
  */
 @Composable
 fun TimeLabels(
-    modifier: Modifier,
-    graphColor: Color,
     oldest: Float,
     newest: Float
 ) {
-    val density = LocalDensity.current
-    Canvas(modifier = modifier) {
-
-        val textPaint = Paint().apply {
-            color = graphColor.toArgb()
-            textAlign = Paint.Align.LEFT
-            textSize = density.run { 12.dp.toPx() }
-            typeface = setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD))
-            alpha = TEXT_PAINT_ALPHA
-        }
-
-        drawContext.canvas.nativeCanvas.apply {
-            drawText(
-                TIME_FORMAT.format(oldest),
-                8.dp.toPx(),
-                12.dp.toPx(),
-                textPaint
-            )
-            drawText(
-                TIME_FORMAT.format(newest),
-                size.width - 140.dp.toPx(),
-                12.dp.toPx(),
-                textPaint
-            )
-        }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = TIME_FORMAT.format(oldest),
+            modifier = Modifier.wrapContentWidth(),
+            style = TextStyle(fontWeight = FontWeight.Bold),
+            fontSize = 12.sp,
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Text(
+            text = TIME_FORMAT.format(newest),
+            modifier = Modifier.wrapContentWidth(),
+            style = TextStyle(fontWeight = FontWeight.Bold),
+            fontSize = 12.sp
+        )
     }
 }
 

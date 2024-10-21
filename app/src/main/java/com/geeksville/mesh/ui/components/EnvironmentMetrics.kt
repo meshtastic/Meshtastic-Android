@@ -94,6 +94,10 @@ private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: 
     if (telemetries.isEmpty()) {
         return
     }
+    TimeLabels(
+        oldest = telemetries.first().time * MS_PER_SEC,
+        newest = telemetries.last().time * MS_PER_SEC
+    )
 
     Spacer(modifier = Modifier.height(16.dp))
 
@@ -311,12 +315,6 @@ private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: 
                 )
             )
         }
-        TimeLabels(
-            modifier = modifier,
-            graphColor = graphColor,
-            oldest = telemetries.first().time * MS_PER_SEC,
-            newest = telemetries.last().time * MS_PER_SEC
-        )
     }
 
     Spacer(modifier = Modifier.height(16.dp))

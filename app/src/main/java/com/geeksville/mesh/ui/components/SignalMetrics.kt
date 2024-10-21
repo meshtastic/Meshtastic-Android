@@ -64,6 +64,11 @@ private fun SignalMetricsChart(modifier: Modifier = Modifier, meshPackets: List<
     if (meshPackets.isEmpty())
         return
 
+    TimeLabels(
+            oldest = meshPackets.last().rxTime * MS_PER_SEC,
+            newest = meshPackets.first().rxTime * MS_PER_SEC
+    )
+
     Spacer(modifier = Modifier.height(16.dp))
 
     val graphColor = MaterialTheme.colors.onSurface
@@ -115,12 +120,6 @@ private fun SignalMetricsChart(modifier: Modifier = Modifier, meshPackets: List<
                 )
             }
         }
-        TimeLabels(
-            modifier = modifier,
-            graphColor = graphColor,
-            oldest = meshPackets.last().rxTime * MS_PER_SEC,
-            newest = meshPackets.first().rxTime * MS_PER_SEC
-        )
     }
 
     Spacer(modifier = Modifier.height(16.dp))
