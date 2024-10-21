@@ -2,6 +2,7 @@ package com.geeksville.mesh.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -17,10 +18,12 @@ import javax.inject.Inject
 data class MetricsState(
     val deviceMetrics: List<Telemetry> = emptyList(),
     val environmentMetrics: List<Telemetry> = emptyList(),
+    val signalMetrics: List<MeshPacket> = emptyList(),
     val environmentDisplayFahrenheit: Boolean = false,
 ) {
     fun hasDeviceMetrics() = deviceMetrics.isNotEmpty()
     fun hasEnvironmentMetrics() = environmentMetrics.isNotEmpty()
+    fun hasSignalMetrics() = signalMetrics.isNotEmpty()
 
     companion object {
         val Empty = MetricsState()
@@ -38,16 +41,22 @@ class MetricsViewModel @Inject constructor(
     val state = destNum.flatMapLatest { destNum ->
         combine(
             meshLogRepository.getTelemetryFrom(destNum),
-            radioConfigRepository.moduleConfigFlow,
-        ) { telemetry, config ->
+            meshLogRepository.getMeshPacketsFrom(destNum)
+//            radioConfigRepository.moduleConfigFlow,
+        ) { telemetry, meshPackets ->
             MetricsState(
                 deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
                 environmentMetrics = telemetry.filter {
                     it.hasEnvironmentMetrics() && it.environmentMetrics.relativeHumidity >= 0f
                 },
-                environmentDisplayFahrenheit = config.telemetry.environmentDisplayFahrenheit,
+                signalMetrics = meshPackets.filter { it.rxTime > 0 }, // TODO if needed I can filter anything out here <---
+                // TODO might have to filter times = 0 <----
+//                signalMetrics = meshPackets
+                // TODO maybe it could be moved to its own or the packets can <--
+//                environmentDisplayFahrenheit = config.telemetry.environmentDisplayFahrenheit, // TODO getting this is taking up that second spot <---
             )
         }
+        // TODO maybe i can set the bla F thing here <--
     }.stateIn(
         scope = viewModelScope,
         started = WhileSubscribed(),

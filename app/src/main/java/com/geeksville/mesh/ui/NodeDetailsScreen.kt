@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.WaterDrop
@@ -142,6 +143,14 @@ private fun NodeDetailsItemList(
                 enabled = metricsState.hasEnvironmentMetrics()
             ) {
                 onNavigate("EnvironmentMetrics")
+            }
+
+            NavCard(
+                title = "Signal Metrics Logs",
+                icon = Icons.Default.SignalCellularAlt,
+                enabled = metricsState.hasSignalMetrics()
+            ) {
+                onNavigate("SignalMetrics")
             }
 
             NavCard(

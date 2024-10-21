@@ -137,7 +137,7 @@ private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: 
     Box(contentAlignment = Alignment.TopStart) {
         ChartOverlay(
             modifier = modifier,
-            graphColor = graphColor,
+            labelColor = graphColor,
             lineColors = List(size = 5) { graphColor },
             minValue = min,
             maxValue = max

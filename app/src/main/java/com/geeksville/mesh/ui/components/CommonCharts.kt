@@ -27,18 +27,22 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
+import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
+import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
+import com.geeksville.mesh.ui.components.CommonCharts.LEFT_LABEL_SPACING
 import java.text.DateFormat
 
 
 object CommonCharts {
     val TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     const val LEFT_CHART_SPACING = 8f
+    const val LEFT_LABEL_SPACING = 36
     const val MS_PER_SEC = 1000.0f
+    const val LINE_LIMIT = 4
+    const val TEXT_PAINT_ALPHA = 192
 }
 
-private const val LINE_LIMIT = 4
-private const val TEXT_PAINT_ALPHA = 192
 private const val LINE_ON = 10f
 private const val LINE_OFF = 20f
 
@@ -62,20 +66,23 @@ fun ChartHeader(amount: Int) {
 /**
  * Draws chart lines and labels with respect to the Y-axis range; defined by (`maxValue` - `minValue`).
  * Assumes `lineColors` is a list of 5 `Color`s with index 0 being the lowest line on the chart.
+ * `leaveSpace` when true the lines will leave space for Y labels on the left side of the graph.
  */
 @Composable
 fun ChartOverlay(
     modifier: Modifier,
-    graphColor: Color,
+    labelColor: Color,
     lineColors: List<Color>,
     minValue: Float,
-    maxValue: Float
+    maxValue: Float,
+    leaveSpace: Boolean = false
 ) {
     val range = maxValue - minValue
     val verticalSpacing = range / LINE_LIMIT
     val density = LocalDensity.current
     Canvas(modifier = modifier) {
 
+        val lineStart = if (leaveSpace) LEFT_LABEL_SPACING.dp.toPx() else 0f
         val height = size.height
         val width = size.width - 28.dp.toPx()
 
@@ -85,7 +92,7 @@ fun ChartOverlay(
             val ratio = (lineY - minValue) / range
             val y = height - (ratio * height)
             drawLine(
-                start = Offset(0f, y),
+                start = Offset(lineStart, y),
                 end = Offset(width, y),
                 color = lineColors[i],
                 strokeWidth = 1.dp.toPx(),
@@ -98,7 +105,7 @@ fun ChartOverlay(
         /* Y Labels */
 
         val textPaint = Paint().apply {
-            color = graphColor.toArgb()
+            color = labelColor.toArgb()
             textAlign = Paint.Align.LEFT
             textSize = density.run { 12.dp.toPx() }
             typeface = setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD))

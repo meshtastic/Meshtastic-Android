@@ -1,6 +1,7 @@
 package com.geeksville.mesh.database
 
 import com.geeksville.mesh.Portnums
+import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.database.dao.MeshLogDao
 import com.geeksville.mesh.database.entity.MeshLog
@@ -29,11 +30,21 @@ class MeshLogRepository @Inject constructor(private val meshLogDaoLazy: dagger.L
     private fun parseTelemetryLog(log: MeshLog): Telemetry? =
         runCatching { Telemetry.parseFrom(log.fromRadio.packet.decoded.payload) }.getOrNull()
 
+    private fun parseMeshPacket(log: MeshLog): MeshPacket? =
+        runCatching { log.meshPacket }.getOrNull()
+
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getTelemetryFrom(nodeNum: Int): Flow<List<Telemetry>> =
         meshLogDao.getLogsFrom(nodeNum, Portnums.PortNum.TELEMETRY_APP_VALUE, MAX_MESH_PACKETS)
             .distinctUntilChanged()
             .mapLatest { list -> list.mapNotNull(::parseTelemetryLog) }
+            .flowOn(Dispatchers.IO)
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun getMeshPacketsFrom(nodeNum: Int): Flow<List<MeshPacket>> =
+        meshLogDao.getLogsFrom(nodeNum, Portnums.PortNum.TELEMETRY_APP_VALUE, MAX_MESH_PACKETS)
+            .distinctUntilChanged()
+            .mapLatest { list -> list.mapNotNull(::parseMeshPacket) }
             .flowOn(Dispatchers.IO)
 
     suspend fun insert(log: MeshLog) = withContext(Dispatchers.IO) {
