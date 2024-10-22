@@ -3,16 +3,23 @@ package com.geeksville.mesh.ui.components
 import android.graphics.Paint
 import android.graphics.Typeface
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.Card
+import androidx.compose.material.Surface
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,6 +32,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.R
@@ -32,6 +42,7 @@ import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
 import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
 import com.geeksville.mesh.ui.components.CommonCharts.LEFT_LABEL_SPACING
+import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 
 
 private val METRICS_COLORS = listOf(Color.Green, Color.Blue)
@@ -69,14 +80,14 @@ fun SignalMetricsScreen(meshPackets: List<MeshPacket>) {
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.33f),
-            meshPackets = meshPackets,
+            meshPackets = meshPackets.reversed(),
             promptInfoDialog = { displayInfoDialog = true }
         )
 
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(meshPackets.reversed()) { meshPacket -> SignalMetricsCard(meshPacket)}
+            items(meshPackets) { meshPacket -> SignalMetricsCard(meshPacket)}
         }
     }
 }
@@ -93,8 +104,8 @@ private fun SignalMetricsChart(
         return
 
     TimeLabels(
-            oldest = meshPackets.last().rxTime * MS_PER_SEC,
-            newest = meshPackets.first().rxTime * MS_PER_SEC
+            oldest = meshPackets.first().rxTime * MS_PER_SEC,
+            newest = meshPackets.last().rxTime * MS_PER_SEC
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -200,4 +211,60 @@ private fun LeftYLabels(
 }
 
 @Composable
-private fun SignalMetricsCard(meshPacket: MeshPacket) {}
+private fun SignalMetricsCard(meshPacket: MeshPacket) {
+    val time = meshPacket.rxTime * MS_PER_SEC
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Surface {
+            SelectionContainer {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    /* Time */
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = TIME_FORMAT.format(time),
+                            style = TextStyle(fontWeight = FontWeight.Bold),
+                            fontSize = MaterialTheme.typography.button.fontSize
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        /* SNR */
+                        Text(
+                            text = "%s %.2fdB".format(
+                                stringResource(id = R.string.snr),
+                                meshPacket.rxSnr,
+                            ),
+                            color = MaterialTheme.colors.onSurface,
+                            fontSize = MaterialTheme.typography.button.fontSize
+                        )
+                        /* RSSI */
+                        Text(
+                            text = "%s %ddB".format(
+                                stringResource(id = R.string.rssi),
+                                meshPacket.rxRssi,
+                            ),
+                            color = MaterialTheme.colors.onSurface,
+                            fontSize = MaterialTheme.typography.button.fontSize
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
