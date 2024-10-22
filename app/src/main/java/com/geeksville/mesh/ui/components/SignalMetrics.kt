@@ -47,7 +47,7 @@ import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 
 private val METRICS_COLORS = listOf(Color.Green, Color.Blue)
 private enum class Metric(val min: Float, val max: Float) {
-    SNR(-20f, 10f),
+    SNR(-20f, 12f), /* Selected 12 as the max to get 4 equal vertical sections. */
     RSSI(-140f, -20f);
     /**
      * Difference between the metrics `max` and `min` values.
@@ -104,8 +104,8 @@ private fun SignalMetricsChart(
         return
 
     TimeLabels(
-            oldest = meshPackets.first().rxTime * MS_PER_SEC,
-            newest = meshPackets.last().rxTime * MS_PER_SEC
+        oldest = meshPackets.first().rxTime * MS_PER_SEC,
+        newest = meshPackets.last().rxTime * MS_PER_SEC
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -142,7 +142,7 @@ private fun SignalMetricsChart(
 
                 /* SNR */
                 val snrRatio = (packet.rxSnr - Metric.SNR.min) / snrDiff
-                val ySNR = height - spacing - (snrRatio * height)
+                val ySNR = height - (snrRatio * height)
                 drawCircle(
                     color = METRICS_COLORS[Metric.SNR.ordinal],
                     radius = dataPointRadius,
@@ -151,7 +151,7 @@ private fun SignalMetricsChart(
 
                 /* RSSI */
                 val rssiRatio = (packet.rxRssi - Metric.RSSI.min) / rssiDiff
-                val yRssi= height - spacing - (rssiRatio * height)
+                val yRssi= height - (rssiRatio * height)
                 drawCircle(
                     color = METRICS_COLORS[Metric.RSSI.ordinal],
                     radius = dataPointRadius,

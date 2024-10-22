@@ -252,7 +252,7 @@ fun LegendInfoDialog(pairedRes: List<Pair<Int, Int>>, onDismiss: () -> Unit) {
 }
 
 @Composable
-fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
+private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
     Canvas(
         modifier = Modifier.size(4.dp)
     ) {

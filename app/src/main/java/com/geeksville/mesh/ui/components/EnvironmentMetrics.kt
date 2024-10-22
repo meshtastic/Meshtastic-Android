@@ -194,10 +194,10 @@ private fun EnvironmentMetricsChart(
                     val rightRatio = (nextEnvMetrics.temperature - min) / diff
 
                     val x1 = spacing + i * spacePerEntry
-                    val y1 = height - spacing - (leftRatio * height)
+                    val y1 = height- (leftRatio * height)
 
                     val x2 = spacing + (i + 1) * spacePerEntry
-                    val y2 = height - spacing - (rightRatio * height)
+                    val y2 = height - (rightRatio * height)
                     if (i == 0) {
                         moveTo(x1, y1)
                     }
@@ -211,8 +211,8 @@ private fun EnvironmentMetricsChart(
             val fillPath = android.graphics.Path(temperaturePath.asAndroidPath())
                 .asComposePath()
                 .apply {
-                    lineTo(lastTempX, height - spacing)
-                    lineTo(spacing, height - spacing)
+                    lineTo(lastTempX, height)
+                    lineTo(spacing, height)
                     close()
                 }
 
@@ -223,7 +223,7 @@ private fun EnvironmentMetricsChart(
                         transparentTemperatureColor,
                         Color.Transparent
                     ),
-                    endY = height - spacing
+                    endY = height
                 ),
             )
 
@@ -247,10 +247,10 @@ private fun EnvironmentMetricsChart(
                     val rightRatio = (nextEnvMetrics.relativeHumidity - min) / diff
 
                     val x1 = spacing + i * spacePerEntry
-                    val y1 = height - spacing - (leftRatio * height)
+                    val y1 = height - (leftRatio * height)
 
                     val x2 = spacing + (i + 1) * spacePerEntry
-                    val y2 = height - spacing - (rightRatio * height)
+                    val y2 = height - (rightRatio * height)
                     if (i == 0) {
                         moveTo(x1, y1)
                     }
@@ -264,8 +264,8 @@ private fun EnvironmentMetricsChart(
             val fillHumidityPath = android.graphics.Path(humidityPath.asAndroidPath())
                 .asComposePath()
                 .apply {
-                    lineTo(lastHumidityX, height - spacing)
-                    lineTo(spacing, height - spacing)
+                    lineTo(lastHumidityX, height)
+                    lineTo(spacing, height)
                     close()
                 }
 
@@ -276,7 +276,7 @@ private fun EnvironmentMetricsChart(
                         transparentHumidityColor,
                         Color.Transparent
                     ),
-                    endY = height - spacing
+                    endY = height
                 ),
             )
 
@@ -300,11 +300,10 @@ private fun EnvironmentMetricsChart(
                     val rightRatio = (nextEnvMetrics.iaq - min) / diff
 
                     val x1 = spacing + i * spacePerEntry
-                    val y1 = height - spacing - (leftRatio * height)
+                    val y1 = height - (leftRatio * height)
 
                     val x2 = spacing + (i + 1) * spacePerEntry
-
-                    val y2 = height - spacing - (rightRatio * height)
+                    val y2 = height - (rightRatio * height)
                     if (i == 0) {
                         moveTo(x1, y1)
                     }
@@ -321,8 +320,8 @@ private fun EnvironmentMetricsChart(
             val fillIaqPath = android.graphics.Path(iaqPath.asAndroidPath())
                 .asComposePath()
                 .apply {
-                    lineTo(lastIaqX, height - spacing)
-                    lineTo(spacing, height - spacing)
+                    lineTo(lastIaqX, height)
+                    lineTo(spacing, height)
                     close()
                 }
             drawPath(
@@ -332,7 +331,7 @@ private fun EnvironmentMetricsChart(
                         transparentIAQColor,
                         Color.Transparent
                     ),
-                    endY = height - spacing
+                    endY = height
                 ),
             )
 

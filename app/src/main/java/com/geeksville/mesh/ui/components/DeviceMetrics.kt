@@ -140,11 +140,11 @@ private fun DeviceMetricsChart(
                     val rightRatio = nextTelemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
 
                     val x1 = spacing + i * spacePerEntry
-                    val y1 = height - spacing - (leftRatio * height)
+                    val y1 = height - (leftRatio * height)
 
                     /* Channel Utilization */
                     val chUtilRatio = telemetry.deviceMetrics.channelUtilization / MAX_PERCENT_VALUE
-                    val yChUtil = height - spacing - (chUtilRatio * height)
+                    val yChUtil = height - (chUtilRatio * height)
                     drawCircle(
                         color = DEVICE_METRICS_COLORS[Device.CH_UTIL.ordinal],
                         radius = dataPointRadius,
@@ -153,7 +153,7 @@ private fun DeviceMetricsChart(
 
                     /* Air Utilization Transmit  */
                     val airUtilRatio = telemetry.deviceMetrics.airUtilTx / MAX_PERCENT_VALUE
-                    val yAirUtil = height - spacing - (airUtilRatio * height)
+                    val yAirUtil = height - (airUtilRatio * height)
                     drawCircle(
                         color = DEVICE_METRICS_COLORS[Device.AIR_UTIL.ordinal],
                         radius = dataPointRadius,
@@ -161,7 +161,7 @@ private fun DeviceMetricsChart(
                     )
 
                     val x2 = spacing + (i + 1) * spacePerEntry
-                    val y2 = height - spacing - (rightRatio * height)
+                    val y2 = height - (rightRatio * height)
                     if (i == 0) {
                         moveTo(x1, y1)
                     }
