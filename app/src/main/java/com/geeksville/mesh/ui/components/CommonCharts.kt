@@ -48,7 +48,7 @@ import java.text.DateFormat
 
 object CommonCharts {
     val TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
-    const val LEFT_CHART_SPACING = 8f
+    const val X_AXIS_SPACING = 8f
     const val LEFT_LABEL_SPACING = 36
     const val MS_PER_SEC = 1000.0f
     const val LINE_LIMIT = 4

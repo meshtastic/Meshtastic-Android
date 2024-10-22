@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.ui.components.CommonCharts.LEFT_CHART_SPACING
+import com.geeksville.mesh.ui.components.CommonCharts.X_AXIS_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 
@@ -135,7 +135,7 @@ private fun EnvironmentMetricsChart(
     val transparentTemperatureColor = remember { ENVIRONMENT_METRICS_COLORS[Environment.TEMPERATURE.ordinal].copy(alpha = 0.5f) }
     val transparentHumidityColor = remember { ENVIRONMENT_METRICS_COLORS[Environment.HUMIDITY.ordinal].copy(alpha = 0.5f) }
     val transparentIAQColor = remember { ENVIRONMENT_METRICS_COLORS[Environment.IAQ.ordinal].copy(alpha = 0.5f) }
-    val spacing = LEFT_CHART_SPACING
+    val spacing = X_AXIS_SPACING
 
     /* Since both temperature and humidity are being plotted we need a combined min and max. */
     val (minTemp, maxTemp) = remember(key1 = telemetries) {

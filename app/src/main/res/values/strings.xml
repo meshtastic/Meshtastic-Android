@@ -278,4 +278,7 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Received Signal Strength Indicator, a measurement used to determine the power level being received by the antenna. A higher RSSI value generally indicates a stronger and more stable connection.</string>
     <string name="iaq_definition">(Indoor Air Quality) relative scale IAQ value as measured by Bosch BME680. Value Range 0–500.</string>
+    <string name="device_metrics_logs">Device Metrics Logs</string>
+    <string name="env_metrics_logs">Environment Metrics Logs</string>
+    <string name="sig_metrics_logs">Signal Metrics Logs</string>
 </resources>

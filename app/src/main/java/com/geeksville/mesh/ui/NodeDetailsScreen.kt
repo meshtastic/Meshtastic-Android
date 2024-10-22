@@ -130,7 +130,7 @@ private fun NodeDetailsItemList(
 
         item {
             NavCard(
-                title = "Device Metrics Logs",
+                title = stringResource(R.string.device_metrics_logs),
                 icon = Icons.Default.ChargingStation,
                 enabled = metricsState.hasDeviceMetrics()
             ) {
@@ -138,7 +138,7 @@ private fun NodeDetailsItemList(
             }
 
             NavCard(
-                title = "Environment Metrics Logs",
+                title = stringResource(R.string.env_metrics_logs),
                 icon = Icons.Default.Thermostat,
                 enabled = metricsState.hasEnvironmentMetrics()
             ) {
@@ -146,7 +146,7 @@ private fun NodeDetailsItemList(
             }
 
             NavCard(
-                title = "Signal Metrics Logs",
+                title = stringResource(R.string.sig_metrics_logs),
                 icon = Icons.Default.SignalCellularAlt,
                 enabled = metricsState.hasSignalMetrics()
             ) {
