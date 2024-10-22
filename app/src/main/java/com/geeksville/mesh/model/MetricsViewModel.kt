@@ -41,22 +41,18 @@ class MetricsViewModel @Inject constructor(
     val state = destNum.flatMapLatest { destNum ->
         combine(
             meshLogRepository.getTelemetryFrom(destNum),
-            meshLogRepository.getMeshPacketsFrom(destNum)
-//            radioConfigRepository.moduleConfigFlow,
-        ) { telemetry, meshPackets ->
+            meshLogRepository.getMeshPacketsFrom(destNum),
+            radioConfigRepository.moduleConfigFlow,
+        ) { telemetry, meshPackets, config ->
             MetricsState(
                 deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
                 environmentMetrics = telemetry.filter {
                     it.hasEnvironmentMetrics() && it.environmentMetrics.relativeHumidity >= 0f
                 },
-                signalMetrics = meshPackets.filter { it.rxTime > 0 }, // TODO if needed I can filter anything out here <---
-                // TODO might have to filter times = 0 <----
-//                signalMetrics = meshPackets
-                // TODO maybe it could be moved to its own or the packets can <--
-//                environmentDisplayFahrenheit = config.telemetry.environmentDisplayFahrenheit, // TODO getting this is taking up that second spot <---
+                signalMetrics = meshPackets.filter { it.rxTime > 0 },
+                environmentDisplayFahrenheit = config.telemetry.environmentDisplayFahrenheit,
             )
         }
-        // TODO maybe i can set the bla F thing here <--
     }.stateIn(
         scope = viewModelScope,
         started = WhileSubscribed(),
