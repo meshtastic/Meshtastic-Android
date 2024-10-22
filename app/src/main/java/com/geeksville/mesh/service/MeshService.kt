@@ -334,7 +334,6 @@ class MeshService : Service(), Logging {
 
         // Make sure we aren't using the notification first
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-        serviceNotifications.close()
 
         super.onDestroy()
         serviceJob.cancel()
