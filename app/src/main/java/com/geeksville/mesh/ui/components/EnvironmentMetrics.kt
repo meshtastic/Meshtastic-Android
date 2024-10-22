@@ -20,7 +20,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -43,6 +46,16 @@ import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 
 
 private val ENVIRONMENT_METRICS_COLORS = listOf(Color.Red, Color.Blue, Color.Green)
+private enum class Environment {
+    TEMPERATURE,
+    HUMIDITY,
+    IAQ
+}
+private val LEGEND_DATA = listOf(
+    LegendData(nameRes = R.string.temperature, color = ENVIRONMENT_METRICS_COLORS[Environment.TEMPERATURE.ordinal], isLine = true),
+    LegendData(nameRes = R.string.humidity, color = ENVIRONMENT_METRICS_COLORS[Environment.HUMIDITY.ordinal], isLine = true),
+    LegendData(nameRes = R.string.iaq, color = ENVIRONMENT_METRICS_COLORS[Environment.IAQ.ordinal], isLine = true),
+)
 
 @Composable
 fun EnvironmentMetricsScreen(telemetries: List<Telemetry>, environmentDisplayFahrenheit: Boolean) {
@@ -65,12 +78,25 @@ fun EnvironmentMetricsScreen(telemetries: List<Telemetry>, environmentDisplayFah
         telemetries
     }
 
+    var displayInfoDialog by remember { mutableStateOf(false) }
+
     Column {
+
+        if (displayInfoDialog) {
+            LegendInfoDialog(
+                pairedRes = listOf(
+                    Pair(R.string.iaq, R.string.iaq_definition)
+                ),
+                onDismiss = { displayInfoDialog = false }
+            )
+        }
+
         EnvironmentMetricsChart(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.33f),
             telemetries = processedTelemetries.reversed(),
+            promptInfoDialog = { displayInfoDialog = true }
         )
 
         /* Environment Metric Cards */
@@ -89,7 +115,11 @@ fun EnvironmentMetricsScreen(telemetries: List<Telemetry>, environmentDisplayFah
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: List<Telemetry>) {
+private fun EnvironmentMetricsChart(
+    modifier: Modifier = Modifier,
+    telemetries: List<Telemetry>,
+    promptInfoDialog: () -> Unit
+) {
     ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty()) {
         return
@@ -102,9 +132,9 @@ private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: 
     Spacer(modifier = Modifier.height(16.dp))
 
     val graphColor = MaterialTheme.colors.onSurface
-    val transparentTemperatureColor = remember { ENVIRONMENT_METRICS_COLORS[0].copy(alpha = 0.5f) }
-    val transparentHumidityColor = remember { ENVIRONMENT_METRICS_COLORS[1].copy(alpha = 0.5f) }
-    val transparentIAQColor = remember { ENVIRONMENT_METRICS_COLORS[2].copy(alpha = 0.5f) }
+    val transparentTemperatureColor = remember { ENVIRONMENT_METRICS_COLORS[Environment.TEMPERATURE.ordinal].copy(alpha = 0.5f) }
+    val transparentHumidityColor = remember { ENVIRONMENT_METRICS_COLORS[Environment.HUMIDITY.ordinal].copy(alpha = 0.5f) }
+    val transparentIAQColor = remember { ENVIRONMENT_METRICS_COLORS[Environment.IAQ.ordinal].copy(alpha = 0.5f) }
     val spacing = LEFT_CHART_SPACING
 
     /* Since both temperature and humidity are being plotted we need a combined min and max. */
@@ -199,7 +229,7 @@ private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: 
 
             drawPath(
                 path = temperaturePath,
-                color = ENVIRONMENT_METRICS_COLORS[0],
+                color = ENVIRONMENT_METRICS_COLORS[Environment.TEMPERATURE.ordinal],
                 style = Stroke(
                     width = 2.dp.toPx(),
                     cap = StrokeCap.Round
@@ -252,7 +282,7 @@ private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: 
 
             drawPath(
                 path = humidityPath,
-                color = ENVIRONMENT_METRICS_COLORS[1],
+                color = ENVIRONMENT_METRICS_COLORS[Environment.HUMIDITY.ordinal],
                 style = Stroke(
                     width = 2.dp.toPx(),
                     cap = StrokeCap.Round
@@ -308,7 +338,7 @@ private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: 
 
             drawPath(
                 path = iaqPath,
-                color = ENVIRONMENT_METRICS_COLORS[2],
+                color = ENVIRONMENT_METRICS_COLORS[Environment.IAQ.ordinal],
                 style = Stroke(
                     width = 2.dp.toPx(),
                     cap = StrokeCap.Round
@@ -319,7 +349,7 @@ private fun EnvironmentMetricsChart(modifier: Modifier = Modifier, telemetries: 
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    EnvironmentLegend()
+    Legend(LEGEND_DATA, promptInfoDialog)
 
     Spacer(modifier = Modifier.height(16.dp))
 }
@@ -409,32 +439,5 @@ private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahre
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun EnvironmentLegend() {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
-
-        LegendLabel(text = stringResource(R.string.temperature), color = ENVIRONMENT_METRICS_COLORS[0], isLine = true)
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        LegendLabel(text = stringResource(R.string.humidity), color = ENVIRONMENT_METRICS_COLORS[1], isLine = true)
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        LegendLabel(
-            text = stringResource(R.string.iaq),
-            color = ENVIRONMENT_METRICS_COLORS[2],
-            isLine = true
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
     }
 }

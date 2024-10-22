@@ -14,6 +14,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -23,6 +27,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.MeshProtos.MeshPacket
+import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
 import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
@@ -38,15 +43,34 @@ private enum class Metric(val min: Float, val max: Float) {
      */
     fun difference() = max - min
 }
+private val LEGEND_DATA = listOf(
+    LegendData(nameRes = R.string.snr, color = METRICS_COLORS[Metric.SNR.ordinal]),
+    LegendData(nameRes = R.string.rssi, color = METRICS_COLORS[Metric.RSSI.ordinal])
+)
 
 @Composable
 fun SignalMetricsScreen(meshPackets: List<MeshPacket>) {
+
+    var displayInfoDialog by remember { mutableStateOf(false) }
+
     Column {
+
+        if (displayInfoDialog) {
+            LegendInfoDialog(
+                pairedRes = listOf(
+                    Pair(R.string.snr,R.string.snr_definition),
+                    Pair(R.string.rssi,R.string.rssi_definition)
+                ),
+                onDismiss = { displayInfoDialog = false }
+            )
+        }
+
         SignalMetricsChart(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.33f),
-            meshPackets = meshPackets
+            meshPackets = meshPackets,
+            promptInfoDialog = { displayInfoDialog = true }
         )
 
         LazyColumn(
@@ -58,7 +82,11 @@ fun SignalMetricsScreen(meshPackets: List<MeshPacket>) {
 }
 
 @Composable
-private fun SignalMetricsChart(modifier: Modifier = Modifier, meshPackets: List<MeshPacket>) {
+private fun SignalMetricsChart(
+    modifier: Modifier = Modifier,
+    meshPackets: List<MeshPacket>,
+    promptInfoDialog: () -> Unit
+) {
 
     ChartHeader(amount = meshPackets.size)
     if (meshPackets.isEmpty())
@@ -124,7 +152,7 @@ private fun SignalMetricsChart(modifier: Modifier = Modifier, meshPackets: List<
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    // TODO legend
+    Legend(legendData = LEGEND_DATA, promptInfoDialog)
 
     Spacer(modifier = Modifier.height(16.dp))
 }
