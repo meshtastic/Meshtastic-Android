@@ -2,6 +2,7 @@ package com.geeksville.mesh.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -17,10 +18,12 @@ import javax.inject.Inject
 data class MetricsState(
     val deviceMetrics: List<Telemetry> = emptyList(),
     val environmentMetrics: List<Telemetry> = emptyList(),
+    val signalMetrics: List<MeshPacket> = emptyList(),
     val environmentDisplayFahrenheit: Boolean = false,
 ) {
     fun hasDeviceMetrics() = deviceMetrics.isNotEmpty()
     fun hasEnvironmentMetrics() = environmentMetrics.isNotEmpty()
+    fun hasSignalMetrics() = signalMetrics.isNotEmpty()
 
     companion object {
         val Empty = MetricsState()
@@ -38,13 +41,15 @@ class MetricsViewModel @Inject constructor(
     val state = destNum.flatMapLatest { destNum ->
         combine(
             meshLogRepository.getTelemetryFrom(destNum),
+            meshLogRepository.getMeshPacketsFrom(destNum),
             radioConfigRepository.moduleConfigFlow,
-        ) { telemetry, config ->
+        ) { telemetry, meshPackets, config ->
             MetricsState(
                 deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
                 environmentMetrics = telemetry.filter {
                     it.hasEnvironmentMetrics() && it.environmentMetrics.relativeHumidity >= 0f
                 },
+                signalMetrics = meshPackets.filter { it.rxTime > 0 },
                 environmentDisplayFahrenheit = config.telemetry.environmentDisplayFahrenheit,
             )
         }

@@ -1,7 +1,6 @@
 package com.geeksville.mesh.ui.components
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,20 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.Card
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,20 +33,27 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.ui.BatteryInfo
-import com.geeksville.mesh.ui.components.CommonCharts.LEFT_CHART_SPACING
+import com.geeksville.mesh.ui.components.CommonCharts.X_AXIS_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 import com.geeksville.mesh.ui.theme.Orange
 
 private val DEVICE_METRICS_COLORS = listOf(Color.Green, Color.Magenta, Color.Cyan)
 private const val MAX_PERCENT_VALUE = 100f
+private enum class Device {
+    BATTERY,
+    CH_UTIL,
+    AIR_UTIL
+}
+private val LEGEND_DATA = listOf(
+    LegendData(nameRes = R.string.battery, color = DEVICE_METRICS_COLORS[Device.BATTERY.ordinal], isLine = true),
+    LegendData(nameRes = R.string.channel_utilization, color = DEVICE_METRICS_COLORS[Device.CH_UTIL.ordinal]),
+    LegendData(nameRes = R.string.air_utilization, color = DEVICE_METRICS_COLORS[Device.AIR_UTIL.ordinal]),
+)
 
 @Composable
 fun DeviceMetricsScreen(telemetries: List<Telemetry>) {
@@ -64,7 +63,13 @@ fun DeviceMetricsScreen(telemetries: List<Telemetry>) {
     Column {
 
         if (displayInfoDialog) {
-            DeviceInfoDialog { displayInfoDialog = false }
+            LegendInfoDialog(
+                pairedRes = listOf(
+                    Pair(R.string.channel_utilization, R.string.ch_util_definition),
+                    Pair(R.string.air_utilization, R.string.air_util_definition)
+                ),
+                onDismiss = { displayInfoDialog = false }
+            )
         }
 
         DeviceMetricsChart(
@@ -94,10 +99,15 @@ private fun DeviceMetricsChart(
     ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty()) return
 
+    TimeLabels(
+        oldest = telemetries.first().time * MS_PER_SEC,
+        newest = telemetries.last().time * MS_PER_SEC
+    )
+
     Spacer(modifier = Modifier.height(16.dp))
 
     val graphColor = MaterialTheme.colors.onSurface
-    val spacing = LEFT_CHART_SPACING
+    val spacing = X_AXIS_SPACING
 
     Box(contentAlignment = Alignment.TopStart) {
 
@@ -130,28 +140,28 @@ private fun DeviceMetricsChart(
                     val rightRatio = nextTelemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
 
                     val x1 = spacing + i * spacePerEntry
-                    val y1 = height - spacing - (leftRatio * height)
+                    val y1 = height - (leftRatio * height)
 
                     /* Channel Utilization */
                     val chUtilRatio = telemetry.deviceMetrics.channelUtilization / MAX_PERCENT_VALUE
-                    val yChUtil = height - spacing - (chUtilRatio * height)
+                    val yChUtil = height - (chUtilRatio * height)
                     drawCircle(
-                        color = DEVICE_METRICS_COLORS[1],
+                        color = DEVICE_METRICS_COLORS[Device.CH_UTIL.ordinal],
                         radius = dataPointRadius,
                         center = Offset(x1, yChUtil)
                     )
 
                     /* Air Utilization Transmit  */
                     val airUtilRatio = telemetry.deviceMetrics.airUtilTx / MAX_PERCENT_VALUE
-                    val yAirUtil = height - spacing - (airUtilRatio * height)
+                    val yAirUtil = height - (airUtilRatio * height)
                     drawCircle(
-                        color = DEVICE_METRICS_COLORS[2],
+                        color = DEVICE_METRICS_COLORS[Device.AIR_UTIL.ordinal],
                         radius = dataPointRadius,
                         center = Offset(x1, yAirUtil)
                     )
 
                     val x2 = spacing + (i + 1) * spacePerEntry
-                    val y2 = height - spacing - (rightRatio * height)
+                    val y2 = height - (rightRatio * height)
                     if (i == 0) {
                         moveTo(x1, y1)
                     }
@@ -165,24 +175,17 @@ private fun DeviceMetricsChart(
             /* Battery Line */
             drawPath(
                 path = strokePath,
-                color = DEVICE_METRICS_COLORS[0],
+                color = DEVICE_METRICS_COLORS[Device.BATTERY.ordinal],
                 style = Stroke(
                     width = dataPointRadius,
                     cap = StrokeCap.Round
                 )
             )
         }
-
-        TimeLabels(
-            modifier = modifier,
-            graphColor = graphColor,
-            oldest = telemetries.first().time * MS_PER_SEC,
-            newest = telemetries.last().time * MS_PER_SEC
-        )
     }
     Spacer(modifier = Modifier.height(16.dp))
 
-    DeviceLegend(promptInfoDialog)
+    Legend(legendData = LEGEND_DATA, promptInfoDialog)
 
     Spacer(modifier = Modifier.height(16.dp))
 }
@@ -242,87 +245,4 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
             }
         }
     }
-}
-
-@Composable
-private fun DeviceLegend(promptInfoDialog: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-    ) {
-        Spacer(modifier = Modifier.weight(1f))
-
-        LegendLabel(text = stringResource(R.string.battery), color = DEVICE_METRICS_COLORS[0], isLine = true)
-
-        Spacer(modifier = Modifier.width(4.dp))
-
-        LegendLabel(text = stringResource(R.string.channel_utilization), color = DEVICE_METRICS_COLORS[1])
-
-        Spacer(modifier = Modifier.width(4.dp))
-
-        LegendLabel(text = stringResource(R.string.air_utilization), color = DEVICE_METRICS_COLORS[2])
-
-        Spacer(modifier = Modifier.width(4.dp))
-
-        Icon(
-            imageVector = Icons.Default.Info,
-            modifier = Modifier.clickable { promptInfoDialog() },
-            contentDescription = stringResource(R.string.info)
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-    }
-}
-
-@Composable
-private fun DeviceInfoDialog(onDismiss: () -> Unit) {
-    AlertDialog(
-        title = {
-            Text(
-                text = stringResource(R.string.info),
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-        },
-        text = {
-            Column {
-                Text(
-                    text = stringResource(R.string.channel_utilization),
-                    style = TextStyle(fontWeight = FontWeight.Bold),
-                    textDecoration = TextDecoration.Underline
-                )
-                Text(
-                    text = stringResource(R.string.ch_util_definition),
-                    style = TextStyle.Default,
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Text(
-                    text = stringResource(R.string.air_utilization),
-                    style = TextStyle(fontWeight = FontWeight.Bold),
-                    textDecoration = TextDecoration.Underline
-                )
-                Text(
-                    text = stringResource(R.string.air_util_definition),
-                    style = TextStyle.Default
-                )
-            }
-        },
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.close))
-            }
-        },
-        shape = RoundedCornerShape(16.dp),
-        backgroundColor = MaterialTheme.colors.background
-    )
-}
-
-@Preview
-@Composable
-private fun DeviceInfoDialogPreview() {
-    DeviceInfoDialog {}
 }

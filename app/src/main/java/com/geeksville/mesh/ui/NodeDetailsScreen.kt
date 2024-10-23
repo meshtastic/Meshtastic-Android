@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.WaterDrop
@@ -127,7 +128,7 @@ private fun NodeDetailsItemList(
 
         item {
             NavCard(
-                title = "Device Metrics Logs",
+                title = stringResource(R.string.device_metrics_logs),
                 icon = Icons.Default.ChargingStation,
                 enabled = metricsState.hasDeviceMetrics()
             ) {
@@ -135,11 +136,19 @@ private fun NodeDetailsItemList(
             }
 
             NavCard(
-                title = "Environment Metrics Logs",
+                title = stringResource(R.string.env_metrics_logs),
                 icon = Icons.Default.Thermostat,
                 enabled = metricsState.hasEnvironmentMetrics()
             ) {
                 onNavigate("EnvironmentMetrics")
+            }
+
+            NavCard(
+                title = stringResource(R.string.sig_metrics_logs),
+                icon = Icons.Default.SignalCellularAlt,
+                enabled = metricsState.hasSignalMetrics()
+            ) {
+                onNavigate("SignalMetrics")
             }
 
             NavCard(
