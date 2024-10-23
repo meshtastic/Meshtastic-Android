@@ -15,10 +15,14 @@ interface MeshLogDao {
     @Query("SELECT * FROM log ORDER BY received_date ASC LIMIT 0,:maxItem")
     fun getAllLogsInReceiveOrder(maxItem: Int): Flow<List<MeshLog>>
 
+    /*
+     * Retrieves MeshPackets matching 'from_num' (nodeNum) and 'port_num' (PortNum).
+     * If 'portNum' is 0, returns all MeshPackets. Otherwise, filters by 'port_num'.
+     */
     @Query(
         """
         SELECT * FROM log 
-        WHERE from_num = :fromNum AND port_num = :portNum
+        WHERE from_num = :fromNum AND (:portNum = 0 AND port_num != 0 OR port_num = :portNum)
         ORDER BY received_date DESC LIMIT 0,:maxItem
         """
     )

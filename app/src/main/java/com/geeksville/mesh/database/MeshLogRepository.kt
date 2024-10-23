@@ -30,9 +30,6 @@ class MeshLogRepository @Inject constructor(private val meshLogDaoLazy: dagger.L
     private fun parseTelemetryLog(log: MeshLog): Telemetry? =
         runCatching { Telemetry.parseFrom(log.fromRadio.packet.decoded.payload) }.getOrNull()
 
-    private fun parseMeshPacket(log: MeshLog): MeshPacket? =
-        runCatching { log.meshPacket }.getOrNull()
-
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getTelemetryFrom(nodeNum: Int): Flow<List<Telemetry>> =
         meshLogDao.getLogsFrom(nodeNum, Portnums.PortNum.TELEMETRY_APP_VALUE, MAX_MESH_PACKETS)
@@ -40,12 +37,18 @@ class MeshLogRepository @Inject constructor(private val meshLogDaoLazy: dagger.L
             .mapLatest { list -> list.mapNotNull(::parseTelemetryLog) }
             .flowOn(Dispatchers.IO)
 
+    /*
+     * Retrieves MeshPackets matching 'nodeNum' and 'portNum'.
+     * If 'portNum' is not specified, returns all MeshPackets. Otherwise, filters by 'portNum'.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getMeshPacketsFrom(nodeNum: Int): Flow<List<MeshPacket>> =
-        meshLogDao.getLogsFrom(nodeNum, Portnums.PortNum.TELEMETRY_APP_VALUE, MAX_MESH_PACKETS)
-            .distinctUntilChanged()
-            .mapLatest { list -> list.mapNotNull(::parseMeshPacket) }
-            .flowOn(Dispatchers.IO)
+    fun getMeshPacketsFrom(
+        nodeNum: Int,
+        portNum: Int = Portnums.PortNum.UNKNOWN_APP_VALUE,
+    ): Flow<List<MeshPacket>> = meshLogDao.getLogsFrom(nodeNum, portNum, MAX_MESH_PACKETS)
+        .distinctUntilChanged()
+        .mapLatest { list -> list.map { it.fromRadio.packet } }
+        .flowOn(Dispatchers.IO)
 
     suspend fun insert(log: MeshLog) = withContext(Dispatchers.IO) {
         meshLogDao.insert(log)
