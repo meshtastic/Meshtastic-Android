@@ -44,7 +44,6 @@ import com.geeksville.mesh.ui.components.CommonCharts.X_AXIS_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 
-
 private val ENVIRONMENT_METRICS_COLORS = listOf(Color.Red, Color.Blue, Color.Green)
 private enum class Environment {
     TEMPERATURE,
@@ -52,9 +51,21 @@ private enum class Environment {
     IAQ
 }
 private val LEGEND_DATA = listOf(
-    LegendData(nameRes = R.string.temperature, color = ENVIRONMENT_METRICS_COLORS[Environment.TEMPERATURE.ordinal], isLine = true),
-    LegendData(nameRes = R.string.humidity, color = ENVIRONMENT_METRICS_COLORS[Environment.HUMIDITY.ordinal], isLine = true),
-    LegendData(nameRes = R.string.iaq, color = ENVIRONMENT_METRICS_COLORS[Environment.IAQ.ordinal], isLine = true),
+    LegendData(
+        nameRes = R.string.temperature,
+        color = ENVIRONMENT_METRICS_COLORS[Environment.TEMPERATURE.ordinal],
+        isLine = true
+    ),
+    LegendData(
+        nameRes = R.string.humidity,
+        color = ENVIRONMENT_METRICS_COLORS[Environment.HUMIDITY.ordinal],
+        isLine = true
+    ),
+    LegendData(
+        nameRes = R.string.iaq,
+        color = ENVIRONMENT_METRICS_COLORS[Environment.IAQ.ordinal],
+        isLine = true
+    ),
 )
 
 @Composable
@@ -132,9 +143,15 @@ private fun EnvironmentMetricsChart(
     Spacer(modifier = Modifier.height(16.dp))
 
     val graphColor = MaterialTheme.colors.onSurface
-    val transparentTemperatureColor = remember { ENVIRONMENT_METRICS_COLORS[Environment.TEMPERATURE.ordinal].copy(alpha = 0.5f) }
-    val transparentHumidityColor = remember { ENVIRONMENT_METRICS_COLORS[Environment.HUMIDITY.ordinal].copy(alpha = 0.5f) }
-    val transparentIAQColor = remember { ENVIRONMENT_METRICS_COLORS[Environment.IAQ.ordinal].copy(alpha = 0.5f) }
+    val transparentTemperatureColor = remember {
+        ENVIRONMENT_METRICS_COLORS[Environment.TEMPERATURE.ordinal].copy(alpha = 0.5f)
+    }
+    val transparentHumidityColor = remember {
+        ENVIRONMENT_METRICS_COLORS[Environment.HUMIDITY.ordinal].copy(alpha = 0.5f)
+    }
+    val transparentIAQColor = remember {
+        ENVIRONMENT_METRICS_COLORS[Environment.IAQ.ordinal].copy(alpha = 0.5f)
+    }
     val spacing = X_AXIS_SPACING
 
     /* Since both temperature and humidity are being plotted we need a combined min and max. */
@@ -194,7 +211,7 @@ private fun EnvironmentMetricsChart(
                     val rightRatio = (nextEnvMetrics.temperature - min) / diff
 
                     val x1 = spacing + i * spacePerEntry
-                    val y1 = height- (leftRatio * height)
+                    val y1 = height - (leftRatio * height)
 
                     val x2 = spacing + (i + 1) * spacePerEntry
                     val y2 = height - (rightRatio * height)

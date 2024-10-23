@@ -45,7 +45,6 @@ import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 import com.geeksville.mesh.ui.components.CommonCharts.LEFT_LABEL_SPACING
 import java.text.DateFormat
 
-
 object CommonCharts {
     val TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     const val X_AXIS_SPACING = 8f
@@ -187,7 +186,7 @@ fun Legend(legendData: List<LegendData>, promptInfoDialog: () -> Unit) {
         horizontalArrangement = Arrangement.Center,
     ) {
         Spacer(modifier = Modifier.weight(1f))
-        for(data in legendData) {
+        for (data in legendData) {
             LegendLabel(
                 text = stringResource(data.nameRes),
                 color = data.color,
@@ -225,7 +224,7 @@ fun LegendInfoDialog(pairedRes: List<Pair<Int, Int>>, onDismiss: () -> Unit) {
         },
         text = {
             Column {
-                for(pair in pairedRes) {
+                for (pair in pairedRes) {
                     Text(
                         text = stringResource(pair.first),
                         style = TextStyle(fontWeight = FontWeight.Bold),

@@ -44,8 +44,9 @@ import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
 import com.geeksville.mesh.ui.components.CommonCharts.LEFT_LABEL_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 
-
 private val METRICS_COLORS = listOf(Color.Green, Color.Blue)
+
+@Suppress("MagicNumber")
 private enum class Metric(val min: Float, val max: Float) {
     SNR(-20f, 12f), /* Selected 12 as the max to get 4 equal vertical sections. */
     RSSI(-140f, -20f);
@@ -69,8 +70,8 @@ fun SignalMetricsScreen(meshPackets: List<MeshPacket>) {
         if (displayInfoDialog) {
             LegendInfoDialog(
                 pairedRes = listOf(
-                    Pair(R.string.snr,R.string.snr_definition),
-                    Pair(R.string.rssi,R.string.rssi_definition)
+                    Pair(R.string.snr, R.string.snr_definition),
+                    Pair(R.string.rssi, R.string.rssi_definition)
                 ),
                 onDismiss = { displayInfoDialog = false }
             )
@@ -87,7 +88,7 @@ fun SignalMetricsScreen(meshPackets: List<MeshPacket>) {
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(meshPackets) { meshPacket -> SignalMetricsCard(meshPacket)}
+            items(meshPackets) { meshPacket -> SignalMetricsCard(meshPacket) }
         }
     }
 }
@@ -100,8 +101,9 @@ private fun SignalMetricsChart(
 ) {
 
     ChartHeader(amount = meshPackets.size)
-    if (meshPackets.isEmpty())
+    if (meshPackets.isEmpty()) {
         return
+    }
 
     TimeLabels(
         oldest = meshPackets.first().rxTime * MS_PER_SEC,
@@ -151,7 +153,7 @@ private fun SignalMetricsChart(
 
                 /* RSSI */
                 val rssiRatio = (packet.rxRssi - Metric.RSSI.min) / rssiDiff
-                val yRssi= height - (rssiRatio * height)
+                val yRssi = height - (rssiRatio * height)
                 drawCircle(
                     color = METRICS_COLORS[Metric.RSSI.ordinal],
                     radius = dataPointRadius,
@@ -227,7 +229,7 @@ private fun SignalMetricsCard(meshPacket: MeshPacket) {
                     /* Data */
                     Box(
                         modifier = Modifier
-                            .weight(5f)
+                            .weight(weight = 5f)
                             .height(IntrinsicSize.Min)
                     ) {
                         Column(
@@ -261,7 +263,7 @@ private fun SignalMetricsCard(meshPacket: MeshPacket) {
                     /* Signal Indicator */
                     Box(
                         modifier = Modifier
-                            .weight(3f)
+                            .weight(weight = 3f)
                             .height(IntrinsicSize.Max)
                     ) {
                         LoraSignalIndicator(meshPacket.rxSnr, meshPacket.rxRssi)

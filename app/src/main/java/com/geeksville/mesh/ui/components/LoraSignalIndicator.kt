@@ -33,19 +33,20 @@ private enum class Quality(
     val color: Color
 ) {
     NONE(R.string.none_quality, Icons.Default.SignalCellularAlt1Bar, Color.Red),
-    BAD(R.string.bad, Icons.Default.SignalCellularAlt2Bar, Color(247, 147, 26)),
-    FAIR(R.string.fair, Icons.Default.SignalCellularAlt, Color(255, 230, 0)),
+    BAD(R.string.bad, Icons.Default.SignalCellularAlt2Bar, Color(red = 247, green = 147, blue = 26)),
+    FAIR(R.string.fair, Icons.Default.SignalCellularAlt, Color(red = 255, green = 230, blue = 0)),
     GOOD(R.string.good, Icons.Default.SignalCellular4Bar, Color.Green)
 }
 
 @Composable
 fun Snr(snr: Float) {
-    val color: Color = if (snr > SNR_GOOD_THRESHOLD)
+    val color: Color = if (snr > SNR_GOOD_THRESHOLD) {
         Quality.GOOD.color
-    else if (snr > SNR_FAIR_THRESHOLD)
+    } else if (snr > SNR_FAIR_THRESHOLD) {
         Quality.FAIR.color
-    else
+    } else {
         Quality.BAD.color
+    }
 
     Text(
         text = "%s %.2fdB".format(
@@ -59,12 +60,13 @@ fun Snr(snr: Float) {
 
 @Composable
 fun Rssi(rssi: Int) {
-    val color: Color = if (rssi > RSSI_GOOD_THRESHOLD)
+    val color: Color = if (rssi > RSSI_GOOD_THRESHOLD) {
         Quality.GOOD.color
-    else if (rssi > RSSI_FAIR_THRESHOLD)
+    } else if (rssi > RSSI_FAIR_THRESHOLD) {
         Quality.FAIR.color
-    else
+    } else {
         Quality.BAD.color
+    }
     Text(
         text = "%s %ddB".format(
             stringResource(id = R.string.rssi),
@@ -96,13 +98,10 @@ fun LoraSignalIndicator(snr: Float, rssi: Int) {
     }
 }
 
-private fun determineSignalQuality(snr: Float, rssi: Int) : Quality {
-    return if (snr > SNR_GOOD_THRESHOLD && rssi > RSSI_GOOD_THRESHOLD)
-        Quality.GOOD
-    else if (snr > SNR_GOOD_THRESHOLD && rssi > RSSI_FAIR_THRESHOLD || snr > SNR_FAIR_THRESHOLD && rssi > RSSI_GOOD_THRESHOLD)
-        Quality.FAIR
-    else if (snr <= SNR_FAIR_THRESHOLD && rssi <= RSSI_FAIR_THRESHOLD)
-        Quality.NONE
-    else
-        Quality.BAD
+private fun determineSignalQuality(snr: Float, rssi: Int): Quality = when {
+    snr > SNR_GOOD_THRESHOLD && rssi > RSSI_GOOD_THRESHOLD -> Quality.GOOD
+    snr > SNR_GOOD_THRESHOLD && rssi > RSSI_FAIR_THRESHOLD -> Quality.FAIR
+    snr > SNR_FAIR_THRESHOLD && rssi > RSSI_GOOD_THRESHOLD -> Quality.FAIR
+    snr <= SNR_FAIR_THRESHOLD && rssi <= RSSI_FAIR_THRESHOLD -> Quality.NONE
+    else -> Quality.BAD
 }
