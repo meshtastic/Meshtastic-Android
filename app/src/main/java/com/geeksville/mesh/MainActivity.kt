@@ -660,7 +660,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 return true
             }
             R.id.radio_config -> {
-                supportFragmentManager.navigateToRadioConfig()
+                supportFragmentManager.navigateToNavGraph()
                 return true
             }
             R.id.save_messages_csv -> {

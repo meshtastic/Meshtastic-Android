@@ -6,22 +6,18 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.NotificationCompat
-import androidx.core.graphics.drawable.toBitmapOrNull
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.android.notificationManager
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.util.PendingIntentCompat
-import java.io.Closeable
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -29,7 +25,7 @@ import java.util.Locale
 @Suppress("TooManyFunctions")
 class MeshServiceNotifications(
     private val context: Context
-) : Closeable {
+) {
 
     companion object {
         private const val FIFTEEN_MINUTES_IN_MILLIS = 15L * 60 * 1000
@@ -40,8 +36,6 @@ class MeshServiceNotifications(
     // We have two notification channels: one for general service status and another one for messages
     val notifyId = 101
     private val messageNotifyId = 102
-
-    private var largeIcon: Bitmap? = null
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(): String {
@@ -193,13 +187,6 @@ class MeshServiceNotifications(
         )
     }
 
-    /**
-     * Generate a bitmap from a vector drawable (even on old builds)
-     * https://stackoverflow.com/questions/33696488/getting-bitmap-from-vector-drawable/#51742167
-     */
-    private fun getBitmapFromVectorDrawable(drawableId: Int): Bitmap? =
-        AppCompatResources.getDrawable(context, drawableId)?.toBitmapOrNull()
-
     private fun commonBuilder(channel: String): NotificationCompat.Builder {
         val builder = NotificationCompat.Builder(context, channel)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
@@ -211,11 +198,6 @@ class MeshServiceNotifications(
             // so punt and stay with just the bluetooth icon - see https://meshtastic.discourse.group/t/android-1-1-42-ready-for-alpha-testing/2399/3?u=geeksville
             builder.setSmallIcon(android.R.drawable.stat_sys_data_bluetooth)
         } else {
-            // Newer androids also support a 'large' icon
-
-            // We delay making this bitmap until we know we need it
-            largeIcon = largeIcon ?: getBitmapFromVectorDrawable(R.mipmap.ic_launcher2)
-
             builder.setSmallIcon(
                 // vector form icons don't work reliably on older androids
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
@@ -224,7 +206,6 @@ class MeshServiceNotifications(
                     R.drawable.app_icon
                 }
             )
-                .setLargeIcon(largeIcon)
         }
         return builder
     }
@@ -306,10 +287,5 @@ class MeshServiceNotifications(
             setShowWhen(true)
         }
         return newNodeSeenNotificationBuilder.build()
-    }
-
-    override fun close() {
-        largeIcon?.recycle()
-        largeIcon = null
     }
 }
