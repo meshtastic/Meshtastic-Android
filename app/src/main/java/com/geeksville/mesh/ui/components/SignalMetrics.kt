@@ -6,6 +6,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -32,7 +33,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -220,48 +220,51 @@ private fun SignalMetricsCard(meshPacket: MeshPacket) {
     ) {
         Surface {
             SelectionContainer {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    /* Time */
-                    Row(
+
+                    /* Data */
+                    Box(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                            .weight(5f)
+                            .height(IntrinsicSize.Min)
                     ) {
-                        Text(
-                            text = TIME_FORMAT.format(time),
-                            style = TextStyle(fontWeight = FontWeight.Bold),
-                            fontSize = MaterialTheme.typography.button.fontSize
-                        )
+                        Column(
+                            modifier = Modifier
+                                .padding(8.dp)
+                        ) {
+                            /* Time */
+                            Row(
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = TIME_FORMAT.format(time),
+                                    style = TextStyle(fontWeight = FontWeight.Bold),
+                                    fontSize = MaterialTheme.typography.button.fontSize
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            /* SNR and RSSI */
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Snr(meshPacket.rxSnr)
+                                Rssi(meshPacket.rxRssi)
+                            }
+                        }
                     }
 
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                    /* Signal Indicator */
+                    Box(
+                        modifier = Modifier
+                            .weight(3f)
+                            .height(IntrinsicSize.Max)
                     ) {
-                        /* SNR */
-                        Text(
-                            text = "%s %.2fdB".format(
-                                stringResource(id = R.string.snr),
-                                meshPacket.rxSnr,
-                            ),
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = MaterialTheme.typography.button.fontSize
-                        )
-                        /* RSSI */
-                        Text(
-                            text = "%s %ddB".format(
-                                stringResource(id = R.string.rssi),
-                                meshPacket.rxRssi,
-                            ),
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = MaterialTheme.typography.button.fontSize
-                        )
+                        LoraSignalIndicator(meshPacket.rxSnr, meshPacket.rxRssi)
                     }
                 }
             }
