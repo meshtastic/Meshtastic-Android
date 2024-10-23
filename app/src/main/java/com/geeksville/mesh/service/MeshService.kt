@@ -28,6 +28,7 @@ import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.toNodeInfo
 import com.geeksville.mesh.model.DeviceVersion
+import com.geeksville.mesh.model.getTracerouteResponse
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.network.MQTTRepository
@@ -747,9 +748,9 @@ class MeshService : Service(), Logging {
                     }
 
                     Portnums.PortNum.TRACEROUTE_APP_VALUE -> {
-                        if (data.wantResponse) return // ignore data from traceroute requests
-                        val parsed = MeshProtos.RouteDiscovery.parseFrom(data.payload)
-                        handleReceivedTraceroute(packet, parsed)
+                        radioConfigRepository.setTracerouteResponse(
+                            packet.getTracerouteResponse(::getUserName)
+                        )
                     }
 
                     else -> debug("No custom processing needed for ${data.portnumValue}")
@@ -904,51 +905,6 @@ class MeshService : Service(), Logging {
 
             else -> {}
         }
-    }
-
-    @Suppress("MagicNumber")
-    private fun formatTraceroutePath(nodesList: List<Int>, snrList: List<Int>): String {
-        // nodesList should include both origin and destination nodes
-        // origin will not have an SNR value, but destination should
-        val snrStr = if (snrList.size == nodesList.size - 1) {
-            snrList
-        } else {
-            // use unknown SNR for entire route if snrList has invalid size
-            List(nodesList.size - 1) { -128 }
-        }.map { snr ->
-            val str = if (snr == -128) "?" else "${snr / 4}"
-            "⇊ $str dB"
-        }
-
-        return nodesList.map { nodeId ->
-            "■ ${getUserName(nodeId)}"
-        }.flatMapIndexed { i, nodeStr ->
-            if (i == 0) listOf(nodeStr) else listOf(snrStr[i - 1], nodeStr)
-        }.joinToString("\n")
-    }
-
-    private fun handleReceivedTraceroute(packet: MeshPacket, trace: MeshProtos.RouteDiscovery) {
-        val nodesToward = mutableListOf<Int>()
-        nodesToward.add(packet.to)
-        nodesToward += trace.routeList
-        nodesToward.add(packet.from)
-
-        val nodesBack = mutableListOf<Int>()
-        if (packet.hopStart > 0 && trace.snrBackList.size > 0) { // otherwise back route is invalid
-            nodesBack.add(packet.from)
-            nodesBack += trace.routeBackList
-            nodesBack.add(packet.to)
-        }
-
-        radioConfigRepository.setTracerouteResponse(buildString {
-            append("Route traced toward destination:\n\n")
-            append(formatTraceroutePath(nodesToward, trace.snrTowardsList))
-            if (nodesBack.size > 0) {
-                append("\n\n")
-                append("Route traced back to us:\n\n")
-                append(formatTraceroutePath(nodesBack, trace.snrBackList))
-            }
-        })
     }
 
     // If apps try to send packets when our radio is sleeping, we queue them here instead
