@@ -577,13 +577,10 @@ class MeshService : Service(), Logging {
         } else {
             val data = packet.decoded
 
-            // If the rxTime was not set by the device (because device software was old), guess at a time
-            val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
-
             DataPacket(
                 from = toNodeID(packet.from),
                 to = toNodeID(packet.to),
-                time = rxTime * 1000L,
+                time = packet.rxTime * 1000L,
                 id = packet.id,
                 dataType = data.portnumValue,
                 bytes = data.payload.toByteArray(),
@@ -913,7 +910,10 @@ class MeshService : Service(), Logging {
     // Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
         if (haveNodeDB) {
-            processReceivedMeshPacket(packet)
+            processReceivedMeshPacket(packet.toBuilder().apply {
+                // If the rxTime is invalid (earlier than build time), update with current time
+                if (packet.rxTime < BuildConfig.TIMESTAMP) setRxTime(currentSecond())
+            }.build())
             onNodeDBChanged()
         } else {
             warn("Ignoring early received packet: ${packet.toOneLineString()}")
@@ -1045,7 +1045,7 @@ class MeshService : Service(), Logging {
         // decided to pass through to us (except for broadcast packets)
         // val toNum = packet.to
 
-        // debug("Recieved: $packet")
+        // debug("Received: $packet")
         if (packet.hasDecoded()) {
             val packetToSave = MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -1073,11 +1073,8 @@ class MeshService : Service(), Logging {
             // Do not generate redundant broadcasts of node change for this bookkeeping updateNodeInfo call
             // because apps really only care about important updates of node state - which handledReceivedData will give them
             updateNodeInfo(fromNum, withBroadcast = false) {
-                // If the rxTime was not set by the device (because device software was old), guess at a time
-                val rxTime = if (packet.rxTime != 0) packet.rxTime else currentSecond()
-
                 // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
-                it.lastHeard = rxTime
+                it.lastHeard = packet.rxTime
                 it.snr = packet.rxSnr
                 it.rssi = packet.rxRssi
 
