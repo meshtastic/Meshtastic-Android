@@ -37,6 +37,9 @@ class MetricsViewModel @Inject constructor(
 ) : ViewModel() {
     private val destNum = MutableStateFlow(0)
 
+    private fun MeshPacket.hasValidSignal(): Boolean =
+        rxTime > 0 && (rxSnr != 0f && rxRssi != 0) && (hopStart > 0 && hopStart - hopLimit == 0)
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val state = destNum.flatMapLatest { destNum ->
         combine(
@@ -49,7 +52,7 @@ class MetricsViewModel @Inject constructor(
                 environmentMetrics = telemetry.filter {
                     it.hasEnvironmentMetrics() && it.environmentMetrics.relativeHumidity >= 0f
                 },
-                signalMetrics = meshPackets.filter { it.rxTime > 0 },
+                signalMetrics = meshPackets.filter { it.hasValidSignal() },
                 environmentDisplayFahrenheit = config.telemetry.environmentDisplayFahrenheit,
             )
         }
