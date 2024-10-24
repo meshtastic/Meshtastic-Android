@@ -137,7 +137,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 info("Notification permissions granted")
             } else {
                 warn("Notification permissions denied")
-                showSnackbar(getString(R.string.notification_denied))
+                showSnackbar(getString(R.string.notification_denied), Snackbar.LENGTH_SHORT)
             }
         }
 
@@ -385,9 +385,9 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    private fun showSnackbar(msg: String) {
+    private fun showSnackbar(msg: String, duration: Int = Snackbar.LENGTH_INDEFINITE) {
         try {
-            Snackbar.make(binding.root, msg, Snackbar.LENGTH_INDEFINITE)
+            Snackbar.make(binding.root, msg, duration)
                 .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
                 .setAction(R.string.okay) {
                     // dismiss
