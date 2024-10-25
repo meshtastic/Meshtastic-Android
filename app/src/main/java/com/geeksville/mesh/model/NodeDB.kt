@@ -2,6 +2,8 @@ package com.geeksville.mesh.model
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
+import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
@@ -35,9 +37,15 @@ class NodeDB @Inject constructor(
     private val _nodeDBbyNum = MutableStateFlow<Map<Int, NodeEntity>>(mapOf())
     val nodeDBbyNum: StateFlow<Map<Int, NodeEntity>> get() = _nodeDBbyNum
 
-    fun getUser(userId: String?) = userId?.let { id ->
-        nodeDBbyNum.value.values.find { it.user.id == id }?.user
-    }
+    fun getUser(nodeNum: Int): MeshProtos.User = getUser(DataPacket.nodeNumToDefaultId(nodeNum))
+
+    fun getUser(userId: String): MeshProtos.User =
+        nodeDBbyNum.value.values.find { it.user.id == userId }?.user
+            ?: MeshProtos.User.newBuilder()
+                .setLongName("Meshtastic ${userId.takeLast(n = 4)}")
+                .setShortName(userId.takeLast(n = 4))
+                .setHwModel(MeshProtos.HardwareModel.UNSET)
+                .build()
 
     init {
         nodeInfoDao.getMyNodeInfo().onEach { _myNodeInfo.value = it }

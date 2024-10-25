@@ -251,12 +251,7 @@ class UIViewModel @Inject constructor(
     fun updateMapCenterAndZoom(center: GeoPoint, zoom: Double) =
         _mapState.update { it.copy(center = center, zoom = zoom) }
 
-    fun getUser(userId: String?) = nodeDB.getUser(userId) ?: user {
-        id = userId.orEmpty()
-        longName = app.getString(R.string.unknown_username)
-        shortName = app.getString(R.string.unknown_node_short_name)
-        hwModel = MeshProtos.HardwareModel.UNSET
-    }
+    fun getUser(userId: String?) = nodeDB.getUser(userId ?: DataPacket.ID_BROADCAST)
 
     private val _snackbarText = MutableLiveData<Any?>(null)
     val snackbarText: LiveData<Any?> get() = _snackbarText

@@ -440,12 +440,8 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private fun getUserName(num: Int): String {
-        val user = nodeDBbyNodeNum[num]?.user
-        val longName = user?.longName ?: getString(R.string.unknown_username)
-        val shortName = user?.shortName ?: DataPacket.nodeNumToDefaultId(num)
-        return "$longName ($shortName)"
-    }
+    private fun getUserName(num: Int): String =
+        with(radioConfigRepository.getUser(num)) { "$longName ($shortName)" }
 
     private val numNodes get() = nodeDBbyNodeNum.size
 
