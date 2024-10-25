@@ -1,7 +1,7 @@
 package com.geeksville.mesh.model
 
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.Routing
-import com.geeksville.mesh.MeshUser
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 
@@ -29,7 +29,7 @@ val Routing.Error.stringRes: Int
 data class Message(
     val uuid: Long,
     val receivedTime: Long,
-    val user: MeshUser,
+    val user: MeshProtos.User,
     val text: String,
     val time: Long,
     val read: Boolean,
