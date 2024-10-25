@@ -27,8 +27,10 @@ class MeshLogRepository @Inject constructor(private val meshLogDaoLazy: dagger.L
         meshLogDao.getAllLogsInReceiveOrder(maxItems)
     }
 
-    private fun parseTelemetryLog(log: MeshLog): Telemetry? =
-        runCatching { Telemetry.parseFrom(log.fromRadio.packet.decoded.payload) }.getOrNull()
+    private fun parseTelemetryLog(log: MeshLog): Telemetry? = runCatching {
+        Telemetry.parseFrom(log.fromRadio.packet.decoded.payload)
+            .toBuilder().setTime((log.received_date / MILLIS_TO_SECONDS).toInt()).build()
+    }.getOrNull()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getTelemetryFrom(nodeNum: Int): Flow<List<Telemetry>> =
@@ -61,5 +63,6 @@ class MeshLogRepository @Inject constructor(private val meshLogDaoLazy: dagger.L
     companion object {
         private const val MAX_ITEMS = 500
         private const val MAX_MESH_PACKETS = 10000
+        private const val MILLIS_TO_SECONDS = 1000
     }
 }
