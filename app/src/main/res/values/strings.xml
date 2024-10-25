@@ -287,4 +287,11 @@
     <string name="none_quality">None</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Signal Quality</string>
+    <string name="traceroute_logs">Traceroute Logs</string>
+    <string name="traceroute_direct">Direct</string>
+    <plurals name="traceroute_hops">
+        <item quantity="one">1 hop</item>
+        <item quantity="other">%d hops</item>
+    </plurals>
+    <string name="traceroute_diff">Hops towards %d Hops back %d</string>
 </resources>

@@ -36,6 +36,8 @@ import androidx.compose.material.icons.filled.KeyOff
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Power
+import androidx.compose.material.icons.filled.Route
+import androidx.compose.material.icons.filled.Router
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Speed
@@ -93,6 +95,7 @@ fun NodeDetailsScreen(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun NodeDetailsItemList(
     node: NodeEntity,
@@ -152,9 +155,17 @@ private fun NodeDetailsItemList(
             }
 
             NavCard(
+                title = stringResource(R.string.traceroute_logs),
+                icon = Icons.Default.Route,
+                enabled = metricsState.hasTracerouteLogs
+            ) {
+                onNavigate("TracerouteList")
+            }
+
+            NavCard(
                 title = "Remote Administration",
                 icon = Icons.Default.Settings,
-                enabled = !node.user.isLicensed // TODO check for isManaged
+                enabled = !metricsState.isManaged || !node.user.isLicensed
             ) {
                 onNavigate("RadioConfig")
             }
@@ -218,6 +229,11 @@ private fun NodeDetailsContent(node: NodeEntity) {
         label = "Role",
         icon = Icons.Default.Work,
         value = node.user.role.name
+    )
+    NodeDetailRow(
+        label = "Hardware",
+        icon = Icons.Default.Router,
+        value = node.user.hwModel.name
     )
     if (node.deviceMetrics.uptimeSeconds > 0) {
         NodeDetailRow(

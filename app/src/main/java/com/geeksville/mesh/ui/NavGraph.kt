@@ -66,6 +66,7 @@ import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.ui.components.DeviceMetricsScreen
 import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
 import com.geeksville.mesh.ui.components.SignalMetricsScreen
+import com.geeksville.mesh.ui.components.TracerouteLogScreen
 import com.geeksville.mesh.ui.components.config.AmbientLightingConfigItemList
 import com.geeksville.mesh.ui.components.config.AudioConfigItemList
 import com.geeksville.mesh.ui.components.config.BluetoothConfigItemList
@@ -296,6 +297,9 @@ fun NavGraph(
                 metricsState.environmentMetrics,
                 metricsState.environmentDisplayFahrenheit,
             )
+        }
+        composable("TracerouteList") {
+            TracerouteLogScreen(metricsViewModel)
         }
         composable("SignalMetrics") {
             SignalMetricsScreen(metricsState.signalMetrics)
