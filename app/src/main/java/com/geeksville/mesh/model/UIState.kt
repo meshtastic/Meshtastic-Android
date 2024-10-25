@@ -335,7 +335,7 @@ class UIViewModel @Inject constructor(
             Message(
                 uuid = it.uuid,
                 receivedTime = it.received_time,
-                user = MeshUser(getUser(it.data.from)), // FIXME convert to proto User
+                user = getUser(it.data.from),
                 text = it.data.text.orEmpty(),
                 time = it.data.time,
                 read = it.read,

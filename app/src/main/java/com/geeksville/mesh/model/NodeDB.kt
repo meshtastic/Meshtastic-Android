@@ -42,6 +42,7 @@ class NodeDB @Inject constructor(
     fun getUser(userId: String): MeshProtos.User =
         nodeDBbyNum.value.values.find { it.user.id == userId }?.user
             ?: MeshProtos.User.newBuilder()
+                .setId(userId)
                 .setLongName("Meshtastic ${userId.takeLast(n = 4)}")
                 .setShortName(userId.takeLast(n = 4))
                 .setHwModel(MeshProtos.HardwareModel.UNSET)
