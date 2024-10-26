@@ -60,7 +60,6 @@
     <string name="new_channel_rcvd">Prijatá nová URL kanálu</string>
     <string name="do_you_want_switch">Chcete sa prepnúť na kanál \'%s\'?</string>
     <string name="permission_missing">Aplikácia Meshtastic nemá pridelené požadované oprávnenie a pravdepodobne nebude fungovať správne. Prosím povoľte tieto oprávnenia v nastaveniach aplikácie.</string>
-    <string name="radio_sleeping">Vysielač je uspaný, nepodarilo sa zmeniť kanál</string>
     <string name="report_bug">Nahlásiť chybu</string>
     <string name="report_a_bug">Nahlásiť chybu</string>
     <string name="report_bug_text">Ste si istý, že chcete nahlásiť chybu? Po odoslaní prosím pridajte správu do meshtastic.discourse.group aby sme vedeli priradiť Vami nahlásenú chybu ku Vášmu príspevku.</string>
@@ -74,7 +73,6 @@
     <string name="disconnected">Odpojené</string>
     <string name="device_sleeping">Vysielač uspaný</string>
     <string name="connected_count">Pripojený: %1$s z %2$s je online</string>
-    <string name="list_of_nodes">Zoznam uzlových bodov v sieti</string>
     <string name="update_firmware">Aktualizácia firmvéru</string>
     <string name="ip_address">IP adresa:</string>
     <string name="connected">Pripojené k vysielaču</string>
@@ -95,7 +93,6 @@
     <string name="meshtastic_service_notifications">Notifikácie zo služby</string>
     <string name="location_disabled_warning">Ak chcete nájsť nové zariadenia cez Bluetooth, musí byť zapnuté určovanie polohy. Potom ho môžete znova vypnúť.</string>
     <string name="about">O aplikácii</string>
-    <string name="a_list_of_nodes_in_the_mesh">Zoznam uzlových bodov v mesh sieti</string>
     <string name="text_messages">Textové správy</string>
     <string name="channel_invalid">URL adresa tohoto kanála nie je platná a nedá sa použiť</string>
     <string name="debug_panel">Debug okno</string>
@@ -228,9 +225,6 @@
     <string name="battery">Batéria</string>
     <string name="channel_utilization">Využitie kanálu</string>
     <string name="air_utilization">Využitie éteru</string>
-    <string name="device">Zariadenie</string>
-    <string name="metrics">Metriky</string>
-    <string name="environment">Prostredie</string>
     <string name="temperature">Teplota</string>
     <string name="humidity">Vlhkosť</string>
     <string name="logs">Záznamy</string>

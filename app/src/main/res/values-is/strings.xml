@@ -23,7 +23,6 @@
     <string name="new_channel_rcvd">Ný slóð fyrir rás móttekin</string>
     <string name="do_you_want_switch">Viltu skipta yfir á \'%s\' rás?</string>
     <string name="permission_missing">Meshtastic þarf leyfi til að nota staðsetningu símans og verður að vera kveikt á staðsetningu til að finna nýjan búnað yfir Blátönn. Þú getur slökkt á henni að því loknu.</string>
-    <string name="radio_sleeping">Radíó var í svefnham, gat ekki skipt um rás</string>
     <string name="report_bug">Tilkynna villu</string>
     <string name="report_a_bug">Tilkynna villu</string>
     <string name="report_bug_text">Er þú viss um að vilja tilkynna villu? Eftir tilkynningu, settu vinsamlega inn þráð á meshtastic.discourse.group svo við getum tengt saman tilkynninguna við villuna sem þú fannst.</string>
@@ -37,7 +36,6 @@
     <string name="disconnected">Aftengd</string>
     <string name="device_sleeping">Radíó er í svefnham</string>
     <string name="connected_count">Tengdar: %1$s af %2$s virkar</string>
-    <string name="list_of_nodes">Listi yfir nóður á neti</string>
     <string name="update_firmware">Uppfæra fastbúnað</string>
     <string name="ip_address">IP Tala:</string>
     <string name="connected">Tengdur við radíó</string>
@@ -57,7 +55,6 @@
     <string name="meshtastic_service_notifications">Tilkynningar um þjónustu</string>
     <string name="location_disabled_warning">Kveikt verður að vera á staðsetningu (Mikil nákvæmni) til að finna nýjan búnað yfir Blátönn. Þú getur slökkt á því eftir á.</string>
     <string name="about">Um smáforrit</string>
-    <string name="a_list_of_nodes_in_the_mesh">Listi yfir nóður á möskva</string>
     <string name="text_messages">Textaskilaboð</string>
     <string name="channel_invalid">Þetta rásar URL er ógilt og ónothæft</string>
     <string name="debug_panel">Villuleitarborð</string>

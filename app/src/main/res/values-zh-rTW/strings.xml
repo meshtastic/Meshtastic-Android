@@ -32,7 +32,6 @@
     <string name="new_channel_rcvd">收到新的頻道 URL</string>
     <string name="do_you_want_switch">您要切換到 \'%s\' 頻道嗎？</string>
     <string name="permission_missing">Meshtastic 需要位置權限並啟用位置信息才能通過藍牙查找新設備。找到之後可以再關閉這權限。</string>
-    <string name="radio_sleeping">無法更改頻道，因為無線電處於休眠狀態</string>
     <string name="report_bug">回報BUG</string>
     <string name="report_a_bug">回報問題</string>
     <string name="report_bug_text">您確定要報告錯誤嗎？報告後，請在 meshtastic.discourse.group 上貼文，以便我們可以將報告與您發現的問題匹配。</string>
@@ -46,7 +45,6 @@
     <string name="disconnected">已中斷連線</string>
     <string name="device_sleeping">設備休眠中</string>
     <string name="connected_count">已連接：可用的節點數 %1$s 中有 %2$s 在線</string>
-    <string name="list_of_nodes">Mesh網路中的節點列表</string>
     <string name="update_firmware">更新韌體</string>
     <string name="ip_address">IP地址：</string>
     <string name="connected">連接到設備</string>
@@ -66,7 +64,6 @@
     <string name="meshtastic_service_notifications">服務通知</string>
     <string name="location_disabled_warning">必須開啟位置設定（高準確度）才能通過藍牙尋找新裝置。之後可以再關閉位置設定。</string>
     <string name="about">關於</string>
-    <string name="a_list_of_nodes_in_the_mesh">節點列表</string>
     <string name="text_messages">文字訊息</string>
     <string name="channel_invalid">此頻道 URL 無效，無法使用</string>
     <string name="debug_panel">除錯面板</string>

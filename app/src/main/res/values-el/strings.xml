@@ -23,7 +23,6 @@
     <string name="new_channel_rcvd">Λήψη URL νέου καναλιού</string>
     <string name="do_you_want_switch">Θέλετε να αλλάξετε ‘%s’ κανάλι?</string>
     <string name="permission_missing">Λείπει μια απαιτούμενη άδεια, Meshtastic δεν θα λειτοργεί σωστά.  Ενεργοποιήστε τις ρυθμίσεις εφαρμογής Android.</string>
-    <string name="radio_sleeping">Radio σε κατάσταση ύπνου, δεν γίνεται αλλαγή καναλιού</string>
     <string name="report_bug">Αναφορά Σφάλματος</string>
     <string name="report_a_bug">Αναφέρετε ένα σφάλμα</string>
     <string name="report_bug_text">Είστε σίγουροι ότι θέλετε να αναφέρετε ένα σφαλμα? Μετά την αναφορά δημοσιεύστε στο meshtastic.discourse.group ώστε να συνδέσουμε την αναφορά με το συμβάν.</string>
@@ -37,7 +36,6 @@
     <string name="disconnected">Αποσυνδεδεμένο</string>
     <string name="device_sleeping">Συσκευή σε ύπνωση</string>
     <string name="connected_count">Συνδέθηκε: %1$s από %2$s σε σύνδεση</string>
-    <string name="list_of_nodes">Λίστα κόμβων δικτύου</string>
     <string name="update_firmware">Αναβάθμιση Firmware</string>
     <string name="connected">Συνδεδεμένο στο radio</string>
     <string name="connected_to">Συνδεδεμένο στο radio (%s)</string>
@@ -56,7 +54,6 @@
     <string name="meshtastic_service_notifications">Ειδοποιήσεις Υπηρεσίας</string>
     <string name="location_disabled_warning">Πρέπει να ενεργοποιήσετε τις υπηρεσίες εντοπισμού τοποθεσίας στις ρυθμίσεις Android</string>
     <string name="about">Σχετικά</string>
-    <string name="a_list_of_nodes_in_the_mesh">Λίστα κόμβων στο mesh</string>
     <string name="text_messages">Μηνύματα</string>
     <string name="channel_invalid">Αυτό το κανάλι URL δεν είναι ορθό και δεν μπορεί να χρησιμοποιηθεί</string>
     <string name="debug_panel">Πίνακας αποσφαλμάτωσης</string>

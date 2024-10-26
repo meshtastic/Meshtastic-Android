@@ -60,7 +60,6 @@
     <string name="new_channel_rcvd">Ny kanal URL mottatt</string>
     <string name="do_you_want_switch">Vil du bytte til \'%s\' kanal?</string>
     <string name="permission_missing">En påkrevet tilgang mangler, Meshtastic vil ikke fungere korrekt.  Vennligst slå på i Android appliksjonsinstillinger.</string>
-    <string name="radio_sleeping">Radio sov.kunne ikke endre kanal</string>
     <string name="report_bug">Rapporter Feil</string>
     <string name="report_a_bug">Rapporter en feil</string>
     <string name="report_bug_text">Er du sikker på at du vil rapportere en feil? Etter rapportering, vennligst posti meshtastic.discourse.group så vi kan matche rapporten med hva du fant</string>
@@ -74,7 +73,6 @@
     <string name="disconnected">Frakoblet</string>
     <string name="device_sleeping">Enhet sover</string>
     <string name="connected_count">Tilkoblet: %1$s av %2$s på nett</string>
-    <string name="list_of_nodes">En liste over noder i nettverket</string>
     <string name="update_firmware">Oppdater Firmware</string>
     <string name="ip_address">IP-adresse:</string>
     <string name="connected">Tilkoblet radio</string>
@@ -95,7 +93,6 @@
     <string name="meshtastic_service_notifications">Tjeneste meldinger</string>
     <string name="location_disabled_warning">Plassering må være slått på for å finne nye enheter via Bluetooth. Du kan skru den av igjen etterpå.</string>
     <string name="about">Om</string>
-    <string name="a_list_of_nodes_in_the_mesh">En liste over noder i nettet</string>
     <string name="text_messages">Tekstmeldinger</string>
     <string name="channel_invalid">Denne kanall URL er ugyldig og kan ikke benyttes</string>
     <string name="debug_panel">Feilsøkningspanel</string>
@@ -226,9 +223,6 @@
     <string name="battery">Battery</string>
     <string name="channel_utilization">Channel Utilization</string>
     <string name="air_utilization">Air Utilization</string>
-    <string name="device">Device</string>
-    <string name="metrics">Metrics</string>
-    <string name="environment">Environment</string>
     <string name="temperature">Temperature</string>
     <string name="humidity">Humidity</string>
     <string name="logs">Logs</string>

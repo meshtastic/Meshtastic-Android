@@ -23,7 +23,6 @@
     <string name="new_channel_rcvd">Vastaanotettu uuden kanavan URL</string>
     <string name="do_you_want_switch">Haluatko siirtyä kanavalle \'%s\'?</string>
     <string name="permission_missing">Meshtastic tarvitsee sijaintiluvan, ja sijainnin on oltava päällä uusien laitteiden löytämiseksi Bluetoothin kautta. Voit sammuttaa sen jälkeen sijainnin uudelleen.</string>
-    <string name="radio_sleeping">Radio nukkui, kanavaa ei voitu vaihtaa</string>
     <string name="report_bug">Ilmoita virheestä</string>
     <string name="report_a_bug">Ilmoita virheestä</string>
     <string name="report_bug_text">Oletko varma, että haluat ilmoittaa viasta? Raportoinnin jälkeen tee postaus meshtastic.discourse.group-ryhmään, jotta voimme sovittaa raportin yhteen sen kanssa mitä löysit.</string>
@@ -37,7 +36,6 @@
     <string name="disconnected">Yhteys Katkaistu</string>
     <string name="device_sleeping">Laite on nukkumassa</string>
     <string name="connected_count">Yhdistetty: %1$s / %2$s verkossa</string>
-    <string name="list_of_nodes">Luetelo verkon solmupisteistä</string>
     <string name="update_firmware">Päivitä laiteohjelmisto</string>
     <string name="ip_address">IP-osoite:</string>
     <string name="connected">Yhdistetty radioon</string>
@@ -57,7 +55,6 @@
     <string name="meshtastic_service_notifications">Palveluilmoitukset</string>
     <string name="location_disabled_warning">Sijainnin on oltava päällä (tarkka) uusien laitteiden löytämiseksi Bluetoothin kautta. Voit sammuttaa sen jälkeen päin.</string>
     <string name="about">Tietoja</string>
-    <string name="a_list_of_nodes_in_the_mesh">Luetelo verkon solmupisteistä</string>
     <string name="text_messages">Tekstiviestit</string>
     <string name="channel_invalid">Kanavan URL on virheellinen eikä sitä voida käyttää</string>
     <string name="debug_panel">Vianmääritys Paneeli</string>

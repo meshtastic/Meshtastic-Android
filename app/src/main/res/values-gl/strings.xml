@@ -32,7 +32,6 @@
     <string name="new_channel_rcvd">Novo enlace de canle recibida</string>
     <string name="do_you_want_switch">Queres cambiar ao canle \'%s\'?</string>
     <string name="permission_missing">Meshtástic precisa permisos de ubicación e ten que estar prendida para atopar novos dispositivos vía Bluetooth. Podes apagala despois.</string>
-    <string name="radio_sleeping">Radio estaba durmindo, non se puido cambiar canle</string>
     <string name="report_bug">Reportar erro</string>
     <string name="report_a_bug">Reporta un erro</string>
     <string name="report_bug_text">Seguro que queres reportar un erro? Despois de reportar, por favor publica en meshtastic.discourse.group para poder unir o reporte co que atopaches.</string>
@@ -46,7 +45,6 @@
     <string name="disconnected">Desconectado</string>
     <string name="device_sleeping">Dispositivo durmindo</string>
     <string name="connected_count">Conectado: %1$s de %2$s en liña</string>
-    <string name="list_of_nodes">Unha lista dos nodos na rede</string>
     <string name="update_firmware">Actualizar Firmware</string>
     <string name="ip_address">Enderezo IP:</string>
     <string name="connected">Conectado á radio</string>
@@ -66,7 +64,6 @@
     <string name="meshtastic_service_notifications">Notificacións de servizo</string>
     <string name="location_disabled_warning">A ubicación precisa estar prendida (precisión alta) para encontrar dispositivos vía Bluetooth. Podes apagala despois.</string>
     <string name="about">Acerca de</string>
-    <string name="a_list_of_nodes_in_the_mesh">Unha lista de nodos na rede</string>
     <string name="text_messages">Mensaxes de texto</string>
     <string name="channel_invalid">A ligazón desta canle non é válida e non pode usarse</string>
     <string name="debug_panel">Panel de depuración</string>

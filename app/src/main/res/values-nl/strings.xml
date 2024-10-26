@@ -25,7 +25,6 @@
     <string name="new_channel_rcvd">Nieuw kanaal URL ontvangen</string>
     <string name="do_you_want_switch">Wil je veranderen naar kanaal \'%s\' ?</string>
     <string name="permission_missing">Een vereiste toelating ontbreekt, Meshtastic kan niet goed werken. Graag aanzetten in Instellingen.</string>
-    <string name="radio_sleeping">Radio was in slaapmodus, kon het kanaal niet veranderen</string>
     <string name="report_bug">Rapporteer Bug</string>
     <string name="report_a_bug">Rapporteer een Bug</string>
     <string name="report_bug_text">Ben je zeker dat je een bug wil rapporteren? Na het doorsturen, graag een post in meshtastic.discourse.group zodat we het rapport kunnen toetsen aan hetgeen je ondervond.</string>
@@ -39,7 +38,6 @@
     <string name="disconnected">Niet verbonden</string>
     <string name="device_sleeping">Apparaat in slaapstand</string>
     <string name="connected_count">Verbonden: %1$s van %2$s online</string>
-    <string name="list_of_nodes">Een lijst van de nodes in het netwerk</string>
     <string name="update_firmware">Programma Updaten</string>
     <string name="ip_address">IP adres:</string>
     <string name="connected">Verbonden met een radio</string>
@@ -59,7 +57,6 @@
     <string name="meshtastic_service_notifications">Service berichten</string>
     <string name="location_disabled_warning">Noodzakelijk de (nauwkeurige) positioneringsservice te activeren in Android Instellingen. Je kunt dit achteraf weer uitzetten.</string>
     <string name="about">Over</string>
-    <string name="a_list_of_nodes_in_the_mesh">Een lijst van de nodes in het netwerk</string>
     <string name="text_messages">Tekstberichten</string>
     <string name="channel_invalid">Deze Kanaal URL is ongeldig en kan niet worden gebruikt</string>
     <string name="debug_panel">Foutopsporing Paneel</string>

@@ -32,7 +32,6 @@
     <string name="new_channel_rcvd">Получен е URL адрес на нов канал</string>
     <string name="do_you_want_switch">Искате ли да превключите към канала \'%s\'?</string>
     <string name="permission_missing">Meshtastic се нуждае от разрешение за местоположение. Местоположението трябва да е включено, за да намира нови устройства чрез Bluetooth. Можете да го изключите отново след това.</string>
-    <string name="radio_sleeping">Каналът не може да бъде променен, докато радиото не е активно</string>
     <string name="report_bug">Докладване за грешка</string>
     <string name="report_a_bug">Докладвайте грешка</string>
     <string name="report_bug_text">Сигурни ли сте, че искате да докладвате за грешка? След като докладвате, моля, публикувайте в meshtastic.discourse.group, за да можем да сравним доклада с това, което сте открили.</string>
@@ -46,7 +45,6 @@
     <string name="disconnected">Прекъсната връзка</string>
     <string name="device_sleeping">Устройството спи</string>
     <string name="connected_count">Свързани: %1$s от %2$s на линия</string>
-    <string name="list_of_nodes">Списък с възлите в мрежата</string>
     <string name="update_firmware">Актуализиране на фърмуера</string>
     <string name="ip_address">IP адрес:</string>
     <string name="connected">Свързан с радио</string>
@@ -66,7 +64,6 @@
     <string name="meshtastic_service_notifications">Сервизни известия</string>
     <string name="location_disabled_warning">Местоположението трябва да е включено (висока точност), за да намерите нови устройства чрез Bluetooth. Можете да го изключите отново след това.</string>
     <string name="about">Относно</string>
-    <string name="a_list_of_nodes_in_the_mesh">Списък с възли в мрежата</string>
     <string name="text_messages">Текстови съобщения</string>
     <string name="channel_invalid">URL адресът на този канал е невалиден и не може да се използва</string>
     <string name="debug_panel">Панел за отстраняване на грешки</string>

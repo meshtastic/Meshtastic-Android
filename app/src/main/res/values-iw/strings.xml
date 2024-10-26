@@ -23,7 +23,6 @@
     <string name="new_channel_rcvd">התקבל כתובת ערוץ חדשה</string>
     <string name="do_you_want_switch">תרצה לשנות לערוץ \'%s\'?</string>
     <string name="permission_missing">משטסטיק צריך גישה למיקום ועל מיקום להיות דולק בכדי למצוא מכשירי בלוטוס. ניתן לכבות חזרה לאחר מכן.</string>
-    <string name="radio_sleeping">מכשיר במצב שינה, לא ניתן לשנות ערוץ</string>
     <string name="report_bug">דווח על באג</string>
     <string name="report_a_bug">דווח על באג</string>
     <string name="report_bug_text">בטוח שתרצה לדווח על באג? לאחר דיווח, בבקשה תעלה פוסט לפורום meshtastic.discourse.group כדי שנוכל לחבר בין חווייתך לדווח זה.</string>
@@ -37,7 +36,6 @@
     <string name="disconnected">מנותק</string>
     <string name="device_sleeping">מכשיר במצב שינה</string>
     <string name="connected_count">מחובר: %1$s מתוך %2$s מחוברים</string>
-    <string name="list_of_nodes">רשימת מכשירים ברשת מש</string>
     <string name="update_firmware">עדכן קושחה</string>
     <string name="ip_address">‏כתובת IP:</string>
     <string name="connected">מחובר למכשיר</string>
@@ -57,7 +55,6 @@
     <string name="meshtastic_service_notifications">התראות שירות</string>
     <string name="location_disabled_warning">חובה להפעיל שירותי מיקום (רמת דיוק גבוהה) בכדי למצוא מכשירי בלוטוס חדשים. ניתן לכבות לאחר מכן.</string>
     <string name="about">אודות</string>
-    <string name="a_list_of_nodes_in_the_mesh">רשימת מכשירים ברשת מש</string>
     <string name="text_messages">הודעות טקסט</string>
     <string name="channel_invalid">כתובת ערוץ זה אינו תקין ולא ניתן לעשות בו שימוש</string>
     <string name="debug_panel">פאנל דיבאג</string>

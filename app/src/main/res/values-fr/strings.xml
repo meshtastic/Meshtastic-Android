@@ -60,7 +60,6 @@
     <string name="new_channel_rcvd">Nouvel URL canal reçu</string>
     <string name="do_you_want_switch">Voulez-vous basculer sur le canal \'%s\' ?</string>
     <string name="permission_missing">Une permission indispensable manque, Meshtastic ne peut pas fonctionner. Veuillez modifier dans Réglages.</string>
-    <string name="radio_sleeping">La radio était en veille, impossible de changer de canal</string>
     <string name="report_bug">Rapporter Bogue</string>
     <string name="report_a_bug">Rapporter un Bogue</string>
     <string name="report_bug_text">Êtes-vous certain de vouloir rapporter un bogue ? Après l\'envoi, veuillez poster dans meshtastic.discourse.group afin que nous puissions examiner ce que vous avez trouvé.</string>
@@ -74,7 +73,6 @@
     <string name="disconnected">Déconnecté</string>
     <string name="device_sleeping">Appareil en veille</string>
     <string name="connected_count">Connecté: %1$s sur %2$s en ligne</string>
-    <string name="list_of_nodes">Une liste de nœuds dans le réseau</string>
     <string name="update_firmware">Mise à jour du Firmware</string>
     <string name="ip_address">Adresse IP :</string>
     <string name="connected">Connecté à une radio</string>
@@ -95,7 +93,6 @@
     <string name="meshtastic_service_notifications">Notifications de service</string>
     <string name="location_disabled_warning">Location must be turned on to find new devices via Bluetooth. You can turn it off again afterwards.</string>
     <string name="about">A propos</string>
-    <string name="a_list_of_nodes_in_the_mesh">Une liste de nœuds dans le réseau</string>
     <string name="text_messages">Messages texte</string>
     <string name="channel_invalid">Cette URL de canal est invalide et ne peut pas être utilisée</string>
     <string name="debug_panel">Panneau de débogage</string>
@@ -226,9 +223,6 @@
     <string name="battery">Battery</string>
     <string name="channel_utilization">Channel Utilization</string>
     <string name="air_utilization">Air Utilization</string>
-    <string name="device">Device</string>
-    <string name="metrics">Metrics</string>
-    <string name="environment">Environment</string>
     <string name="temperature">Temperature</string>
     <string name="humidity">Humidity</string>
     <string name="logs">Logs</string>

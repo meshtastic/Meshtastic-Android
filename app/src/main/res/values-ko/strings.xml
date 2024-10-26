@@ -21,7 +21,6 @@
     <string name="new_channel_rcvd">새로운 채널 URL 수신</string>
     <string name="do_you_want_switch">\'%s\' 채널로 변경할 까요?</string>
     <string name="permission_missing">Meshtastic 작동에 필요한 권한을 얻지 못했습니다. 정상적으로 작동하지 않을 수도 있습니다. 스마트폰 설정에서 권한 허용 설정해주세요.</string>
-    <string name="radio_sleeping">메쉬타스틱 기기가 절전모드 상태이므로 채널을 변경할 수 없습니다.</string>
     <string name="report_bug">버그 보고</string>
     <string name="report_a_bug">버그 보고</string>
     <string name="report_bug_text">버그를 신고하시겠습니까? 신고 후 메쉬타스틱 포럼 (meshtastic.discourse.group) 에 당신이 발견한 내용을 게시해주시면 신고 내용과 귀하가 찾은 내용을 일치시킬 수 있습니다.</string>
@@ -35,7 +34,6 @@
     <string name="disconnected">연결 끊김</string>
     <string name="device_sleeping">기기 절전모드</string>
     <string name="connected_count">연결됨: %2$s 중 %1$s 온라인</string>
-    <string name="list_of_nodes">네트워크 노드 목록</string>
     <string name="update_firmware">펌웨어 업데이트</string>
     <string name="connected">메쉬타스틱 기기와 연결됨</string>
     <string name="connected_to">(%s)에 연결됨</string>
@@ -53,7 +51,6 @@
     <string name="meshtastic_service_notifications">서비스 알림</string>
     <string name="location_disabled_warning">블루투스를 통해 새 기기를 찾으려면 위치가 켜져 있어야 합니다(높은 정확도). 나중에 다시 끌 수 있습니다.</string>
     <string name="about">앱에 대하여</string>
-    <string name="a_list_of_nodes_in_the_mesh">매쉬망 안의 모든 노드 목록</string>
     <string name="text_messages">문자 메시지</string>
     <string name="channel_invalid">이 채널 URL은 잘못 되었습니다. 따라서 사용할 수 없습니다.</string>
     <string name="debug_panel">디버그 패널</string>

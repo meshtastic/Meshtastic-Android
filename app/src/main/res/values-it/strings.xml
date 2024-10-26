@@ -60,7 +60,6 @@
     <string name="new_channel_rcvd">Ricevuta URL del Nuovo Canale</string>
     <string name="do_you_want_switch">Passare al canale \'%s\' ?</string>
     <string name="permission_missing">Meshtastic necessita dei permessi di geolocalizzazione e la geolocalizzazione deve essere attiva per cercare nuovi dispositivi via Bluetooth. È possibile disattivarla successivamente.</string>
-    <string name="radio_sleeping">La radio era in sleep, non è stato possibile cambiare canale</string>
     <string name="report_bug">Segnala Bug</string>
     <string name="report_a_bug">Segnalazione di bug</string>
     <string name="report_bug_text">Procedere con la segnalazione di bug? Dopo averlo segnalato, si prega di postarlo in meshtastic.discourse.group in modo che possiamo associare la segnalazione al problema riscontrato.</string>
@@ -74,7 +73,6 @@
     <string name="disconnected">Disconnesso</string>
     <string name="device_sleeping">Il dispositivo è inattivo</string>
     <string name="connected_count">Connesso: %1$s di %2$s online</string>
-    <string name="list_of_nodes">Un elenco di nodi nella rete</string>
     <string name="update_firmware">Aggiorna Firmware</string>
     <string name="ip_address">Indirizzo IP:</string>
     <string name="connected">Connesso alla radio</string>
@@ -95,7 +93,6 @@
     <string name="meshtastic_service_notifications">Notifiche di servizio</string>
     <string name="location_disabled_warning">La localizzazione deve essere attiva per cercare nuovi dispositivi tramite Bluetooth. Può essere spenta di nuovo successivamente.</string>
     <string name="about">Informazioni</string>
-    <string name="a_list_of_nodes_in_the_mesh">Un elenco di nodi nel mesh</string>
     <string name="text_messages">Messaggi di testo</string>
     <string name="channel_invalid">L\'URL di questo Canale non è valida e non può essere usata</string>
     <string name="debug_panel">Pannello Di Debug</string>
@@ -230,9 +227,6 @@
     <string name="battery">Batteria</string>
     <string name="channel_utilization">Utilizzo Canale</string>
     <string name="air_utilization">Tempo di Trasmissione Utilizzato</string>
-    <string name="device">Dispositivo</string>
-    <string name="metrics">Statistiche</string>
-    <string name="environment">Ambiente</string>
     <string name="temperature">Temperatura</string>
     <string name="humidity">Umidità</string>
     <string name="logs">Registri</string>

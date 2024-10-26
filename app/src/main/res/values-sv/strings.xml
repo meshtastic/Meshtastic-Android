@@ -32,7 +32,6 @@
     <string name="new_channel_rcvd">Ny kanal-länk mottagen</string>
     <string name="do_you_want_switch">Vill du växla till kanalen \'%s\' </string>
     <string name="permission_missing">Meshtastic behöver platsbehörighet och Plats måste vara aktiverad för att hitta nya enheter via Bluetooth. Du kan stänga av Plats igen efteråt.</string>
-    <string name="radio_sleeping">Radiomodulen var i sovläge, kan inte byta kanal</string>
     <string name="report_bug">Rapportera bugg</string>
     <string name="report_a_bug">Rapportera bugg</string>
     <string name="report_bug_text">Är du säker på att du vill rapportera en bugg? Efter rapportering, vänligen posta i meshtastic.discourse.group så att vi kan matcha rapporten med buggen du hittat.</string>
@@ -46,7 +45,6 @@
     <string name="disconnected">Frånkopplad</string>
     <string name="device_sleeping">Enheten i sovläge</string>
     <string name="connected_count">Ansluten: %1$s av %2$s online</string>
-    <string name="list_of_nodes">Lista över noder i nätverket</string>
     <string name="update_firmware">Uppdatera Firmware</string>
     <string name="ip_address">IP-adress:</string>
     <string name="connected">Ansluten till radioenhet</string>
@@ -66,7 +64,6 @@
     <string name="meshtastic_service_notifications">Tjänsteaviseringar</string>
     <string name="location_disabled_warning">Plats måste vara påslagen (hög noggrannhet) för att hitta nya enheter via bluetooth. Du kan stänga av plats igen efteråt.</string>
     <string name="about">Om</string>
-    <string name="a_list_of_nodes_in_the_mesh">Lista över noder i meshnätverket</string>
     <string name="text_messages">Textmeddelanden</string>
     <string name="channel_invalid">Denna kanal-URL är ogiltig och kan inte användas</string>
     <string name="debug_panel">Felsökningspanel</string>

@@ -60,7 +60,6 @@
     <string name="new_channel_rcvd">Yeni Kanal Adresi(URL) alındı</string>
     <string name="do_you_want_switch">\'%s\' kanalına geçmek istiyor musunuz?</string>
     <string name="permission_missing">Meshtastic\'in konum iznine ihtiyacı var ve Bluetooth ile yeni cihazlar bulmak için konumun açık olması gerekiyor. Daha sonra isterseniz kapatabilirsiniz.</string>
-    <string name="radio_sleeping">Cihaz uyku durumundaydı, kanal değiştirilemedi</string>
     <string name="report_bug">Hata Bildir</string>
     <string name="report_a_bug">Hata Bildir</string>
     <string name="report_bug_text">Hata bildirmek istediğinizden emin misiniz? Hata bildirdikten sonra, lütfen meshtastic.discourse.group sayfasında paylaşınız ki raporu bulgularınızla eşleştirebilelim.</string>
@@ -74,7 +73,6 @@
     <string name="disconnected">Bağlantı kesildi</string>
     <string name="device_sleeping">Cihaz uyku durumunda</string>
     <string name="connected_count">Bağlandı: %1$s / %2$s online</string>
-    <string name="list_of_nodes">Ağdaki cihazların(node) listesi</string>
     <string name="update_firmware">Yazılım güncelle</string>
     <string name="ip_address">IP Adresi:</string>
     <string name="connected">Cihaza bağlandı</string>
@@ -95,7 +93,6 @@
     <string name="meshtastic_service_notifications">Servis bildirimleri</string>
     <string name="location_disabled_warning">Location must be turned on to find new devices via Bluetooth. You can turn it off again afterwards.</string>
     <string name="about">Hakkında</string>
-    <string name="a_list_of_nodes_in_the_mesh">Ağdaki cihazların(node) listesi</string>
     <string name="text_messages">Metin mesajları</string>
     <string name="channel_invalid">Bu Kanal URL\' si geçersiz ve kullanılamaz</string>
     <string name="debug_panel">Hata Ayıklama Paneli</string>
@@ -230,9 +227,6 @@
     <string name="battery">Battery</string>
     <string name="channel_utilization">Channel Utilization</string>
     <string name="air_utilization">Air Utilization</string>
-    <string name="device">Device</string>
-    <string name="metrics">Metrics</string>
-    <string name="environment">Environment</string>
     <string name="temperature">Temperature</string>
     <string name="humidity">Humidity</string>
     <string name="logs">Logs</string>

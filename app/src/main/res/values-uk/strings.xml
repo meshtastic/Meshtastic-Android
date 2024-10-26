@@ -32,7 +32,6 @@
     <string name="new_channel_rcvd">Отримано URL-адресу нового каналу</string>
     <string name="do_you_want_switch">Ви хочете підключитися до \'%s\' каналу?</string>
     <string name="permission_missing">Meshtastic потрібний дозвіл до геоданих для пошуку нових пристроїв через Bluetooth. Ви можете вимкнути його пізніше.</string>
-    <string name="radio_sleeping">Радіомодуль в режимі сну, зміна каналу не можлива</string>
     <string name="report_bug">Повідомити про помилку</string>
     <string name="report_a_bug">Повідомити про помилку</string>
     <string name="report_bug_text">Ви впевнені, що бажаєте повідомити про помилку? Після звіту опублікуйте його в meshtastic.discourse.group, щоб ми могли зіставити звіт із тим, що ви знайшли.</string>
@@ -46,7 +45,6 @@
     <string name="disconnected">Відключено</string>
     <string name="device_sleeping">Пристрій в режимі сну</string>
     <string name="connected_count">Підключено: %1$s із %2$s доступні</string>
-    <string name="list_of_nodes">Список вузлів мережі</string>
     <string name="update_firmware">Оновлення прошивки</string>
     <string name="ip_address">IP Адреса:</string>
     <string name="connected">Підключено до радіомодуля</string>
@@ -66,7 +64,6 @@
     <string name="meshtastic_service_notifications">Сервісні сповіщення</string>
     <string name="location_disabled_warning">Для пошуку нових пристроїв через bluetooth необхідно ввімкнути локацію (висока точність). Ви можете вимкнути його пізніше.</string>
     <string name="about">Про</string>
-    <string name="a_list_of_nodes_in_the_mesh">Список вузлів у мережі</string>
     <string name="text_messages">Текстові повідомлення</string>
     <string name="channel_invalid">URL-адреса цього каналу недійсна та не може бути використана</string>
     <string name="debug_panel">Панель налагодження</string>

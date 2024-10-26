@@ -32,7 +32,6 @@
     <string name="new_channel_rcvd">Nova URL de canal rebuda</string>
     <string name="do_you_want_switch">Vols canviar al canal \'%s\'?</string>
     <string name="permission_missing">Meshtastic necessita permisos de posicionament i la posició ha d\'estar activada per trobar nous dispositius Bluetooth. Els podràs apagar posteriorment.</string>
-    <string name="radio_sleeping">La ràdio estava hivernant, no s\'ha pogut canviar el canal</string>
     <string name="report_bug">Informar d\'error</string>
     <string name="report_a_bug">Informar d\'un error</string>
     <string name="report_bug_text">Estàs segur que vols informar d\'un error? Després d\'informar-ne, si us plau publica en meshtastic.discourse.group de tal manera que puguem emparellar l\'informe amb allò que has trobat.</string>
@@ -46,7 +45,6 @@
     <string name="disconnected">Desconnectat</string>
     <string name="device_sleeping">Dispositiu hivernant</string>
     <string name="connected_count">Connectat: %1$s de %2$s en línia</string>
-    <string name="list_of_nodes">Una llista de nodes en la xarxa</string>
     <string name="update_firmware">Actualitzar firmware</string>
     <string name="ip_address">Adreça IP:</string>
     <string name="connected">Connectat a ràdio</string>
@@ -66,7 +64,6 @@
     <string name="meshtastic_service_notifications">Notificacions de servei</string>
     <string name="location_disabled_warning">El posicionament ha d\'estar activat (alta precisió) per trobar un dispositiu via Bluetooth. El podràs desactivar després.</string>
     <string name="about">Sobre</string>
-    <string name="a_list_of_nodes_in_the_mesh">Llista de nodes en la xarxa</string>
     <string name="text_messages">Missatges de text</string>
     <string name="channel_invalid">La URL d\'aquest canal és invàlida i no es pot fer servir</string>
     <string name="debug_panel">Panell de depuració</string>

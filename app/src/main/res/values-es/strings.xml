@@ -32,7 +32,6 @@
     <string name="new_channel_rcvd">Nueva URL de canal recibida</string>
     <string name="do_you_want_switch">¿Quieres cambiar al canal de \'%s\'?</string>
     <string name="permission_missing">Meshtastic necesita permiso de ubicación y la ubicación debe estar encendida para encontrar nuevos dispositivos a través de Bluetooth. Puedes apagarla después.</string>
-    <string name="radio_sleeping">La radio estaba en reposo, no se pudo cambiar de canal</string>
     <string name="report_bug">Informar de un fallo</string>
     <string name="report_a_bug">Informar de un fallo</string>
     <string name="report_bug_text">¿Está seguro de que quiere informar de un error? Después de informar por favor publique en meshtastic.discourse.group para que podamos comparar el informe con lo que encontró.</string>
@@ -46,7 +45,6 @@
     <string name="disconnected">Desconectado</string>
     <string name="device_sleeping">Dispositivo en reposo</string>
     <string name="connected_count">Conectado: %1$s de %2$s en línea</string>
-    <string name="list_of_nodes">Una lista de nodos en la red</string>
     <string name="update_firmware">Actualizar el firmware</string>
     <string name="ip_address">Dirección IP:</string>
     <string name="connected">Conectado a la radio</string>
@@ -66,7 +64,6 @@
     <string name="meshtastic_service_notifications">Notificaciones de servicio</string>
     <string name="location_disabled_warning">Debes activar los servicios de localización (de alta precisión) en los Ajustes de Android</string>
     <string name="about">Acerca de</string>
-    <string name="a_list_of_nodes_in_the_mesh">Una lista de nodos en la malla</string>
     <string name="text_messages">Mensajes de texto</string>
     <string name="channel_invalid">La URL de este canal no es válida y no puede utilizarse</string>
     <string name="debug_panel">Panel de depuración</string>

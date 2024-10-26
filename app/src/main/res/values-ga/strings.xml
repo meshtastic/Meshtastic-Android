@@ -21,7 +21,6 @@
     <string name="new_channel_rcvd">URL Cainéal nua faighte</string>
     <string name="do_you_want_switch">Ar mhaith leat aistriú go dtí an cainéal \'%s\'?</string>
     <string name="permission_missing">Tá cead riachtanach ar iarraidh, ní bheidh Meshtastic in ann oibriú i gceart. Cumasaigh i socruithe feidhmchláir le do thoil.</string>
-    <string name="radio_sleeping">Bhí an raidió ina chodladh, ní raibh sé in ann an cainéal a athrú</string>
     <string name="report_bug">Tuairiscigh fabht</string>
     <string name="report_a_bug">Tuairiscigh fabht</string>
     <string name="report_bug_text">An bhfuil tú cinnte gur mhaith leat fabht a thuairisciú? Tar éis tuairisciú a dhéanamh, cuir sa phost é le do thoil i meshtastic.discourse.group ionas gur féidir

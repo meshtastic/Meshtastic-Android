@@ -32,7 +32,6 @@
     <string name="new_channel_rcvd">Primljen je URL novog kanala</string>
     <string name="do_you_want_switch">Želite li prijeći na kanal \'%s\'?</string>
     <string name="permission_missing">Meshtastic treba dopuštenje za lokaciju i lokacija mora biti uključena kako bi pronašao nove uređaje putem Bluetootha. Nakon toga ga možete ponovno isključiti.</string>
-    <string name="radio_sleeping">Radio je bio u stanju mirovanja i kanal se nije mogao promijeniti</string>
     <string name="report_bug">Prijavi grešku</string>
     <string name="report_a_bug">Prijavi grešku</string>
     <string name="report_bug_text">Jeste li sigurni da želite prijaviti grešku? Nakon prijave, objavite poruku na meshtastic.discourse.group kako bismo mogli utvrditi dosljednost poruke o pogrešci i onoga što ste pronašli.</string>
@@ -46,7 +45,6 @@
     <string name="disconnected">Odspojeno</string>
     <string name="device_sleeping">Uređaj je u stanju mirovanja</string>
     <string name="connected_count">Povezano: %1$s od %2$s online</string>
-    <string name="list_of_nodes">Popis čvorova u mreži</string>
     <string name="update_firmware">Ažuriranje firmwarea</string>
     <string name="ip_address">IP Adresa:</string>
     <string name="connected">Spojen na radio</string>
@@ -66,7 +64,6 @@
     <string name="meshtastic_service_notifications">Servisne obavijesti</string>
     <string name="location_disabled_warning">Lokacija mora biti uključena (visoka točnost) za pronalaženje novih uređaja putem bluetootha. Nakon toga ga možete ponovno isključiti.</string>
     <string name="about">O programu</string>
-    <string name="a_list_of_nodes_in_the_mesh">Popis čvorova u mesh mreži</string>
     <string name="text_messages">Tekstualne poruke</string>
     <string name="channel_invalid">Ovaj URL kanala je nevažeći i ne može se koristiti</string>
     <string name="debug_panel">Otklanjanje pogrešaka</string>

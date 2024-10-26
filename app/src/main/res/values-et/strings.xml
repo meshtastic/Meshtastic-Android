@@ -60,7 +60,6 @@
     <string name="new_channel_rcvd">Uue kanali URL vastu võetud</string>
     <string name="do_you_want_switch">Soovid minna kanalile \'%s\'?</string>
     <string name="permission_missing">Meshtastic vajab sinihamba kaudu uute seadmete tuvastamiseks asukoha kasutamise luba ja asukoht peab olema sisse lülitatud. Seejärel saad asukoha uuesti välja lülitada.</string>
-    <string name="radio_sleeping">Raadio oli unerežiimis, kanalit ei saanud vahetada</string>
     <string name="report_bug">Teata veast</string>
     <string name="report_a_bug">Teata veast</string>
     <string name="report_bug_text">Kas soovid kindlasti veast teatada? Pärast saada selgitus aadressile meshtastic.discourse.group, et saaksime selgitust leituga sobitada.</string>
@@ -74,7 +73,6 @@
     <string name="disconnected">Ühendus katkenud</string>
     <string name="device_sleeping">Seade on unerežiimis</string>
     <string name="connected_count">Ühendatud %1$s / %2$s</string>
-    <string name="list_of_nodes">Võrgus olevad seadmed</string>
     <string name="update_firmware">Värskenda püsivara</string>
     <string name="ip_address">IP-aadress:</string>
     <string name="connected">Ühendatud raadioga</string>
@@ -95,7 +93,6 @@
     <string name="meshtastic_service_notifications">Teenuste teated</string>
     <string name="location_disabled_warning">Bluetoothi ​​kaudu uute seadmete leidmiseks peab asukoht olema sisse lülitatud. Saate selle hiljem uuesti välja lülitada.</string>
     <string name="about">Teave</string>
-    <string name="a_list_of_nodes_in_the_mesh">Mesh-võrgu sõlmede loend</string>
     <string name="text_messages">Tekstsõnumid</string>
     <string name="channel_invalid">Kanali URL on kehtetu ja seda ei saa kasutada</string>
     <string name="debug_panel">Tõrkeotsingu paneel</string>
@@ -230,9 +227,6 @@
     <string name="battery">Aku</string>
     <string name="channel_utilization">Kanali kasutus</string>
     <string name="air_utilization">Eetri kasutus</string>
-    <string name="device">Seade</string>
-    <string name="metrics">Meetrika</string>
-    <string name="environment">Keskkond</string>
     <string name="temperature">Temperatuur</string>
     <string name="humidity">Niiskus</string>
     <string name="logs">Logi kirjed</string>

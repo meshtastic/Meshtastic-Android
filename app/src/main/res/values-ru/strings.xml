@@ -32,7 +32,6 @@
     <string name="new_channel_rcvd">URL нового канала получен</string>
     <string name="do_you_want_switch">Вы хотите переключиться на \'%s\' канал?</string>
     <string name="permission_missing">Требуемое разрешение отсутствует, Meshtastic не сможет работать должным образом. Пожалуйста, включите в настройках приложения.</string>
-    <string name="radio_sleeping">Радиомодуль в режиме сна, смена канала невозможна</string>
     <string name="report_bug">Сообщить об ошибке</string>
     <string name="report_a_bug">Сообщить об ошибке</string>
     <string name="report_bug_text">Вы уверены, что хотите сообщить об ошибке? После сообщения, пожалуйста, напишите в meshtastic.discourse.group, чтобы мы могли сопоставить отчет с тем, что вы нашли.</string>
@@ -46,7 +45,6 @@
     <string name="disconnected">Отключено</string>
     <string name="device_sleeping">Устройство спит</string>
     <string name="connected_count">Подключено: %1$s из %2$s онлайн</string>
-    <string name="list_of_nodes">Список узлов в сети</string>
     <string name="update_firmware">Обновите прошивку</string>
     <string name="ip_address">IP-адрес:</string>
     <string name="connected">Подключен к радио</string>
@@ -66,7 +64,6 @@
     <string name="meshtastic_service_notifications">Служебные уведомления</string>
     <string name="location_disabled_warning">Локация должна быть включена (высокая точность), чтобы найти новые устройства с помощью bluetooth. Вы можете выключить его позже.</string>
     <string name="about">О программе</string>
-    <string name="a_list_of_nodes_in_the_mesh">Список узлов в сети</string>
     <string name="text_messages">Текстовые сообщения</string>
     <string name="channel_invalid">Этот URL-адрес канала недействителен и не может быть использован</string>
     <string name="debug_panel">Панель отладки</string>

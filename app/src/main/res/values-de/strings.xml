@@ -32,7 +32,6 @@
     <string name="new_channel_rcvd">Neue Kanal-URL empfangen</string>
     <string name="do_you_want_switch">Möchten Sie zum Kanal \'%s\' wechseln?</string>
     <string name="permission_missing">Meshtastic benötigt Standortberechtigung und Standort muss eingeschaltet werden, um neue Geräte über Bluetooth zu finden. Sie können es später wieder deaktivieren.</string>
-    <string name="radio_sleeping">Das Funkgerät war im Schlafmodus, der Kanal konnte nicht geändert werden</string>
     <string name="report_bug">Fehler melden</string>
     <string name="report_a_bug">Fehler melden</string>
     <string name="report_bug_text">Bist du sicher, dass du einen Fehler melden möchtest? Nach dem Melden bitte auf meshtastic.discourse.group eine Nachricht veröffentlichen, damit wir die Übereinstimmung der Fehlermeldung und dessen, was Sie gefunden haben, feststellen können.</string>
@@ -46,7 +45,6 @@
     <string name="disconnected">Verbindung getrennt</string>
     <string name="device_sleeping">Gerät schläft</string>
     <string name="connected_count">Verbunden: %1$s von %2$s online</string>
-    <string name="list_of_nodes">Eine Liste der Knoten im Netzwerk</string>
     <string name="update_firmware">Firmware aktualisieren</string>
     <string name="ip_address">IP-Adresse:</string>
     <string name="connected">Mit Funkgerät verbunden</string>
@@ -66,7 +64,6 @@
     <string name="meshtastic_service_notifications">Dienst-Benachrichtigungen</string>
     <string name="location_disabled_warning">Standort muss eingeschaltet werden (hohe Genauigkeit), um neue Geräte über Bluetooth zu finden. Sie können es später wieder ausschalten.</string>
     <string name="about">Über</string>
-    <string name="a_list_of_nodes_in_the_mesh">Eine Liste der Knoten im Mesh</string>
     <string name="text_messages">Textnachrichten</string>
     <string name="channel_invalid">Diese Kanal-URL ist ungültig und kann nicht verwendet werden</string>
     <string name="debug_panel">Debug Anzeige</string>

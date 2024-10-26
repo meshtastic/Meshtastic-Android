@@ -23,7 +23,6 @@
     <string name="new_channel_rcvd">Gautas naujo kanalo URL</string>
     <string name="do_you_want_switch">Ar norite pereiti prie \'%s\' kanalo?</string>
     <string name="permission_missing">Meshtastic reikalauja vietos nustatymo leidimo, ir vietos nustatymas turi būti įjungtas, kad būtų galima rasti naujus įrenginius per „Bluetooth“. Vėliau jį galite išjungti.</string>
-    <string name="radio_sleeping">Radijas buvo miego režime, nepavyko pakeisti kanalo</string>
     <string name="report_bug">Pranešti apie klaidą</string>
     <string name="report_a_bug">Pranešti apie klaidą</string>
     <string name="report_bug_text">Ar tikrai norite pranešti apie klaidą? Po pranešimo prašome parašyti forume meshtastic.discourse.group, kad galėtume suderinti pranešimą su jūsų pastebėjimais.</string>
@@ -37,7 +36,6 @@
     <string name="disconnected">Atsijungta</string>
     <string name="device_sleeping">Įrenginys miega</string>
     <string name="connected_count">Prisijungta: %1$s iš %2$s prisijungimo</string>
-    <string name="list_of_nodes">Tinklo mazgų sąrašas</string>
     <string name="update_firmware">Atnaujinti Firmware</string>
     <string name="ip_address">IP adresas:</string>
     <string name="connected">Prisijungta prie radijo</string>
@@ -57,7 +55,6 @@
     <string name="meshtastic_service_notifications">Paslaugos pranešimai</string>
     <string name="location_disabled_warning">Vietos nustatymas (aukšto tikslumo) turi būti įjungtas, kad būtų galima rasti naujus įrenginius per \"bluetooth\". Vėliau jį galite išjungti.</string>
     <string name="about">Apie</string>
-    <string name="a_list_of_nodes_in_the_mesh">Tinklo mazgų sąrašas</string>
     <string name="text_messages">Teksto žinutės</string>
     <string name="channel_invalid">Šio kanalo URL yra neteisingas ir negali būti naudojamas</string>
     <string name="debug_panel">Derinimo skydelis</string>

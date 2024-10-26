@@ -32,7 +32,6 @@
     <string name="new_channel_rcvd">Új csatorna URL érkezett</string>
     <string name="do_you_want_switch">Átkapcsol a(z) \'%s\' csatornára?</string>
     <string name="permission_missing">Egy szükséges engedély hiányzik, ezért a Meshtastic nem fog tudni rendesen működni. Kérem engedélyezze az Android alkalmazások beállításai között.</string>
-    <string name="radio_sleeping">A rádió alvó üzemmódban volt, ezért nem lehetett csatornát váltani.</string>
     <string name="report_bug">Hiba jelentése</string>
     <string name="report_a_bug">Hiba jelentése</string>
     <string name="report_bug_text">Biztosan jelenteni akarja a hibát? Bejelentés után kérem írjon a meshtastic.discourse.group fórumba, hogy így össze tudjuk hangolni a jelentést azzal, amit talált.</string>
@@ -46,7 +45,6 @@
     <string name="disconnected">Szétkapcsolva</string>
     <string name="device_sleeping">Az eszköz alszik</string>
     <string name="connected_count">Kapcsolódva: %1$s a %2$s-ból(ből) elérhető</string>
-    <string name="list_of_nodes">Hálózati állomások listája</string>
     <string name="update_firmware">Firmware frissítés</string>
     <string name="ip_address">IP cím:</string>
     <string name="connected">Kapcsolódva a rádióhoz</string>
@@ -66,7 +64,6 @@
     <string name="meshtastic_service_notifications">Szolgáltatás értesítések</string>
     <string name="location_disabled_warning">Be kell kapcsolja a (nagy pontosságú) helyzet szolgáltatásokat az Android beállításokban</string>
     <string name="about">A programról</string>
-    <string name="a_list_of_nodes_in_the_mesh">A mesh hálózatban található állomások listája</string>
     <string name="text_messages">Szöveges üzenetek</string>
     <string name="channel_invalid">Ez a csatorna URL érvénytelen, ezért nem használható.</string>
     <string name="debug_panel">Hibakereső panel</string>
