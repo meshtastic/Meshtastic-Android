@@ -2,6 +2,7 @@ package com.geeksville.mesh.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.Portnums.PortNum
 import com.geeksville.mesh.TelemetryProtos.Telemetry
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class MetricsState(
@@ -45,7 +47,8 @@ data class TracerouteLogState(
 
 @HiltViewModel
 class MetricsViewModel @Inject constructor(
-    meshLogRepository: MeshLogRepository,
+    private val dispatchers: CoroutineDispatchers,
+    private val meshLogRepository: MeshLogRepository,
     private val radioConfigRepository: RadioConfigRepository,
 ) : ViewModel() {
     private val destNum = MutableStateFlow(0)
@@ -58,6 +61,10 @@ class MetricsViewModel @Inject constructor(
     }
 
     fun getUser(nodeNum: Int) = radioConfigRepository.getUser(nodeNum)
+
+    fun deleteLog(uuid: String) = viewModelScope.launch(dispatchers.io) {
+        meshLogRepository.deleteLog(uuid)
+    }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val tracerouteState = destNum.flatMapLatest { destNum ->

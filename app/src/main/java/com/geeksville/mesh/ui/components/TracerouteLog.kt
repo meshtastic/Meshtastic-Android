@@ -1,6 +1,8 @@
 package com.geeksville.mesh.ui.components
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,10 +15,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Card
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.PersonOff
@@ -41,6 +46,7 @@ import com.geeksville.mesh.model.getTracerouteResponse
 import com.geeksville.mesh.ui.theme.AppTheme
 import java.text.DateFormat
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TracerouteLogScreen(
     viewModel: MetricsViewModel = hiltViewModel(),
@@ -83,17 +89,47 @@ fun TracerouteLogScreen(
 
             val time = dateFormat.format(log.received_date)
             val (text, icon) = route.getTextAndIcon()
+            var expanded by remember { mutableStateOf(false) }
 
-            TracerouteItem(
-                icon = icon,
-                text = "$time - $text",
-                modifier = Modifier.clickable(enabled = result != null) {
-                    if (result != null) {
-                        showDialog = result.getTracerouteResponse(::getUsername)
+            Box {
+                TracerouteItem(
+                    icon = icon,
+                    text = "$time - $text",
+                    modifier = Modifier.combinedClickable(
+                        onLongClick = { expanded = true },
+                    ) {
+                        if (result != null) {
+                            showDialog = result.getTracerouteResponse(::getUsername)
+                        }
+                    }
+                )
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                ) {
+                    DeleteItem {
+                        viewModel.deleteLog(log.uuid)
+                        expanded = false
                     }
                 }
-            )
+            }
         }
+    }
+}
+
+@Composable
+private fun DeleteItem(onClick: () -> Unit) {
+    DropdownMenuItem(onClick = onClick) {
+        Icon(
+            imageVector = Icons.Default.Delete,
+            contentDescription = stringResource(id = R.string.delete),
+            tint = MaterialTheme.colors.error,
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = stringResource(id = R.string.delete),
+            color = MaterialTheme.colors.error,
+        )
     }
 }
 
