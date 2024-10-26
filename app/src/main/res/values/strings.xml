@@ -83,7 +83,6 @@
     <string name="new_channel_rcvd">New Channel URL received</string>
     <string name="do_you_want_switch">Do you want to switch to the \'%s\' channel?</string>
     <string name="permission_missing">Meshtastic needs location permission and location must be turned on to find new devices via Bluetooth. You can turn it off again afterwards.</string>
-    <string name="radio_sleeping">Radio was sleeping, could not change channel</string>
     <string name="report_bug">Report Bug</string>
     <string name="report_a_bug">Report a bug</string>
     <string name="report_bug_text">Are you sure you want to report a bug? After reporting, please post in meshtastic.discourse.group so we can match up the report with what you found.</string>
@@ -97,7 +96,6 @@
     <string name="disconnected">Disconnected</string>
     <string name="device_sleeping">Device sleeping</string>
     <string name="connected_count">Connected: %1$s of %2$s online</string>
-    <string name="list_of_nodes">A list of nodes in the network</string>
     <string name="update_firmware">Update Firmware</string>
     <string name="ip_address">IP Address:</string>
     <string name="connected">Connected to radio</string>
@@ -118,7 +116,6 @@
     <string name="meshtastic_service_notifications">Service notifications</string>
     <string name="location_disabled_warning">Location must be turned on to find new devices via Bluetooth. You can turn it off again afterwards.</string>
     <string name="about">About</string>
-    <string name="a_list_of_nodes_in_the_mesh">A list of nodes in the mesh</string>
     <string name="text_messages">Text messages</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
     <string name="debug_panel">Debug Panel</string>
@@ -253,9 +250,6 @@
     <string name="battery">Battery</string>
     <string name="channel_utilization">Channel Utilization</string>
     <string name="air_utilization">Air Utilization</string>
-    <string name="device">Device</string>
-    <string name="metrics">Metrics</string>
-    <string name="environment">Environment</string>
     <string name="temperature">Temperature</string>
     <string name="humidity">Humidity</string>
     <string name="logs">Logs</string>
