@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="node_filter_placeholder">Filter</string>
-    <string name="desc_node_filter_clear">vymazať filter uzlov</string>
+    <string name="desc_node_filter_clear">vyčistiť filter uzlov</string>
     <string name="node_filter_include_unknown">Vrátane neznámych</string>
     <string name="node_filter_show_details">Zobraziť detaily</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -227,7 +227,7 @@
     <string name="navigate_back">Navigovať späť</string>
     <string name="battery">Batéria</string>
     <string name="channel_utilization">Využitie kanálu</string>
-    <string name="air_utilization">Využitie vzduchu</string>
+    <string name="air_utilization">Využitie éteru</string>
     <string name="device">Zariadenie</string>
     <string name="metrics">Metriky</string>
     <string name="environment">Prostredie</string>
