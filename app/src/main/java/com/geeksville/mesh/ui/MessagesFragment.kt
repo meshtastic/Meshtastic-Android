@@ -36,19 +36,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
-import java.text.DateFormat
-import java.util.Date
-
-// return time if within 24 hours, otherwise date/time
-internal fun getShortDateTime(date: Date): String {
-    val isWithin24Hours = System.currentTimeMillis() - date.time <= 24 * 60 * 60 * 1000L
-
-    return if (isWithin24Hours) {
-        DateFormat.getTimeInstance(DateFormat.SHORT).format(date)
-    } else {
-        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(date)
-    }
-}
 
 internal fun FragmentManager.navigateToMessages(contactKey: String, contactName: String) {
     val messagesFragment = MessagesFragment().apply {

@@ -20,7 +20,6 @@ import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
-import java.util.Date
 
 @Composable
 internal fun MessageListView(
@@ -56,7 +55,7 @@ internal fun MessageListView(
             MessageItem(
                 shortName = msg.user.shortName.takeIf { msg.user.id != DataPacket.ID_LOCAL },
                 messageText = msg.text,
-                messageTime = getShortDateTime(Date(msg.time)),
+                messageTime = msg.time,
                 messageStatus = msg.status,
                 selected = selected,
                 onClick = { onClick(msg) },

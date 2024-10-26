@@ -143,14 +143,26 @@ data class Contact(
 )
 
 // return time if within 24 hours, otherwise date
-internal fun getShortDateTime(time: Long): String? {
-    val date = if (time != 0L) Date(time) else return null
+private fun getShortDate(time: Long): String {
+    val date = Date(time)
     val isWithin24Hours = System.currentTimeMillis() - date.time <= TimeUnit.DAYS.toMillis(1)
 
     return if (isWithin24Hours) {
         DateFormat.getTimeInstance(DateFormat.SHORT).format(date)
     } else {
         DateFormat.getDateInstance(DateFormat.SHORT).format(date)
+    }
+}
+
+// return time if within 24 hours, otherwise date/time
+private fun getShortDateTime(time: Long): String {
+    val date = Date(time)
+    val isWithin24Hours = System.currentTimeMillis() - date.time <= TimeUnit.DAYS.toMillis(1)
+
+    return if (isWithin24Hours) {
+        DateFormat.getTimeInstance(DateFormat.SHORT).format(date)
+    } else {
+        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(date)
     }
 }
 
@@ -316,7 +328,7 @@ class UIViewModel @Inject constructor(
                 contactKey = contactKey,
                 shortName = if (toBroadcast) "${data.channel}" else shortName,
                 longName = longName,
-                lastMessageTime = getShortDateTime(data.time),
+                lastMessageTime = getShortDate(data.time),
                 lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
                 unreadCount = packetRepository.getUnreadCount(contactKey),
                 messageCount = packetRepository.getMessageCount(contactKey),
@@ -337,7 +349,7 @@ class UIViewModel @Inject constructor(
                 receivedTime = it.received_time,
                 user = getUser(it.data.from),
                 text = it.data.text.orEmpty(),
-                time = it.data.time,
+                time = getShortDateTime(it.data.time),
                 read = it.read,
                 status = it.data.status,
                 routingError = it.routingError,

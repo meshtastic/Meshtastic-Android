@@ -31,7 +31,7 @@ data class Message(
     val receivedTime: Long,
     val user: MeshProtos.User,
     val text: String,
-    val time: Long,
+    val time: String,
     val read: Boolean,
     val status: MessageStatus?,
     val routingError: Int,
