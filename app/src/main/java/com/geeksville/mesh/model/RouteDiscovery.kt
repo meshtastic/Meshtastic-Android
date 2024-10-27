@@ -8,11 +8,14 @@ val MeshProtos.MeshPacket.fullRouteDiscovery: RouteDiscovery?
     get() = with(decoded) {
         if (hasDecoded() && !wantResponse && portnum == Portnums.PortNum.TRACEROUTE_APP) {
             runCatching { RouteDiscovery.parseFrom(payload).toBuilder() }.getOrNull()?.apply {
+                val fullRoute = listOf(to) + routeList + from
                 clearRoute()
-                addAllRoute(listOf(to) + routeList + from)
-                if (hopStart > 0 && snrBackList.size > 0) { // otherwise back route is invalid
-                    clearRouteBack()
-                    addAllRouteBack(listOf(from) + routeBackList + to)
+                addAllRoute(fullRoute)
+
+                val fullRouteBack = listOf(from) + routeBackList + to
+                clearRouteBack()
+                if (hopStart > 0 && snrBackCount > 0) { // otherwise back route is invalid
+                    addAllRouteBack(fullRouteBack)
                 }
             }?.build()
         } else {
