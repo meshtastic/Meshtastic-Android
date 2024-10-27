@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.MetricsViewModel
+import com.geeksville.mesh.model.fullRouteDiscovery
 import com.geeksville.mesh.model.getTracerouteResponse
 import com.geeksville.mesh.ui.theme.AppTheme
 import java.text.DateFormat
@@ -83,9 +84,7 @@ fun TracerouteLogScreen(
             val result = remember(state.requests) {
                 state.results.find { it.decoded.requestId == log.fromRadio.packet.id }
             }
-            val route = remember(result) {
-                result?.let { MeshProtos.RouteDiscovery.parseFrom(it.decoded.payload) }
-            }
+            val route = remember(result) { result?.fullRouteDiscovery }
 
             val time = dateFormat.format(log.received_date)
             val (text, icon) = route.getTextAndIcon()
@@ -170,17 +169,17 @@ private fun MeshProtos.RouteDiscovery?.getTextAndIcon(): Pair<String, ImageVecto
         stringResource(R.string.routing_error_no_response) to Icons.Default.PersonOff
     }
 
-    routeList.isEmpty() -> {
+    routeCount <= 2 -> {
         stringResource(R.string.traceroute_direct) to Icons.Default.Group
     }
 
-    routeList.size == routeBackList.size -> {
-        val hops = routeList.size
+    routeCount == routeBackCount -> {
+        val hops = routeCount - 2
         pluralStringResource(R.plurals.traceroute_hops, hops, hops) to Icons.Default.Groups
     }
 
     else -> {
-        val (towards, back) = routeList.size to routeBackList.size
+        val (towards, back) = maxOf(0, routeCount - 2) to maxOf(0, routeBackCount - 2)
         stringResource(R.string.traceroute_diff, towards, back) to Icons.Default.Groups
     }
 }
