@@ -35,39 +35,8 @@ However, if you must use 'raw' APKs you can get them from our [github releases](
 
 You can help translate the app into your native language using [Crowdin](https://crowdin.meshtastic.org/android).
 
-## Build instructions
+## Building the Android App
 
-If you would like to develop this application we'd love your help! These build instructions are brief and should be improved, please send a PR if you can.
-
-1. Clone the project
-```bash
-git clone https://github.com/meshtastic/Meshtastic-Android.git
-```
-2. Then open Meshtastic-Android directory and pull various submodules we depend on
-```bash
-cd Meshtastic-Android/
-git submodule update --init --recursive
-```
-3. Use [Android Studio](https://developer.android.com/studio) to build/debug
-
-Now you should be able to select "Run / Run" in the IDE and it will happily start running on your phone or the emulator.
-__Note:__ The emulators don't support bluetooth, so some features can not be used in that environment.
-
-## Analytics setup
-
-- analytics are included but can be disabled by the user on the settings screen
-
-- on dev devices
-
-```bash
-adb shell setprop debug.firebase.analytics.app com.geeksville.mesh
-adb shell setprop log.tag.FirebaseCrashlytics DEBUG
-```
-
-for verbose logging:
-
-```bash
-adb shell setprop log.tag.FA VERBOSE
-```
+https://meshtastic.org/docs/development/android/
 
 Copyright 2024, Meshtastic LLC. GPL-3.0 license
