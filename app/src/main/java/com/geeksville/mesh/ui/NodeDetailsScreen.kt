@@ -165,7 +165,7 @@ private fun NodeDetailsItemList(
             NavCard(
                 title = "Remote Administration",
                 icon = Icons.Default.Settings,
-                enabled = !metricsState.isManaged || !node.user.isLicensed
+                enabled = !metricsState.isManaged
             ) {
                 onNavigate("RadioConfig")
             }
