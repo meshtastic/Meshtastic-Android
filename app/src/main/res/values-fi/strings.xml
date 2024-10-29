@@ -1,5 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="node_filter_placeholder">Suodata</string>
+    <string name="desc_node_filter_clear">tyhjennä noden suodatin</string>
+    <string name="node_filter_include_unknown">Näytä tuntemattomat</string>
+    <string name="node_filter_show_details">Näytä lisätiedot</string>
+    <string name="node_sort_alpha">A-Z</string>
+    <string name="node_sort_channel">Kanava</string>
+    <string name="node_sort_distance">Etäisyys</string>
+    <string name="node_sort_hops_away">Hypyn päässä</string>
+    <string name="node_sort_last_heard">Viimeksi kuultu</string>
+    <string name="node_sort_via_mqtt">MQTT:n kautta</string>
+    <string name="unrecognized">Tuntematon</string>
+    <string name="message_status_enroute">Odottaa hyväksyntää</string>
+    <string name="message_status_queued">Jonossa lähetettäväksi</string>
+    <string name="routing_error_none">Hyväksy</string>
+    <string name="routing_error_no_route">Ei reittiä</string>
+    <string name="routing_error_got_nak">Vastaanotettu negatiivinen vahvistus</string>
+    <string name="routing_error_timeout">Aikakatkaisu</string>
+    <string name="routing_error_no_interface">Ei Käyttöliittymää</string>
+    <string name="routing_error_max_retransmit">Maksimi uudelleenlähetys saavutettu</string>
+    <string name="routing_error_no_channel">Ei Kanavaa</string>
+    <string name="routing_error_too_large">Paketti on liian suuri</string>
+    <string name="routing_error_no_response">Ei vastausta</string>
+    <string name="routing_error_bad_request">Viallinen pyyntö</string>
+    <string name="routing_error_duty_cycle_limit">Alueellinen käyttöjaksoraja saavutettu</string>
+    <string name="routing_error_not_authorized">Ei oikeuksia</string>
+    <string name="routing_error_pki_failed">Salattu Lähetys Epäonnistui</string>
+    <string name="routing_error_pki_unknown_pubkey">Tuntematon Julkinen Avain</string>
+    <string name="role_client">Sovellus yhdistetty tai itsenäinen viestintäväline.</string>
+    <string name="role_client_mute">Laite, joka ei välitä paketteja muista laitteista.</string>
+    <string name="role_router">Infrastruktuurin node verkon kattavuuden laajentamiseksi viestien välittämisen avulla. Näkyvä node listassa.</string>
+    <string name="role_repeater">Infrastruktuuri node verkon kattavuuden laajentamiseen välittämällä viestejä minimaalisella ylikuormituksella. Ei näy node listassa.</string>
+    <string name="role_tracker">Lähettää GPS-sijaintipaketit prioriteettina.</string>
+    <string name="role_sensor">Lähettää telemetriapaketteja prioriteettina.</string>
+    <string name="role_tak">Optimoitu ATAK-järjestelmän viestintään, vähentää rutiininomaisia lähetyksiä.</string>
+    <string name="role_client_hidden">Device that only broadcasts as needed for stealth or power savings.</string>
+    <string name="role_lost_and_found">Lähettää sijainnin oletuskanavana säännöllisesti viestiksi, jotta se voi auttaa laitteen löydössä.</string>
+    <string name="role_tak_tracker">Ottaa käyttöön automaattisen TAK PLI -lähetyksen ja vähentää rutiininomaisia lähetyksiä.</string>
     <string name="channel_name">Kanavan nimi</string>
     <string name="channel_options">Kanavan ominaisuudet</string>
     <string name="qr_code">QR koodi</string>
@@ -46,6 +83,7 @@
     <string name="app_too_old">Sovelluspäivitys vaaditaan</string>
     <string name="must_update">Sinun täytyy päivittää tämä sovellus sovelluskaupassa (tai Githubissa). Se on liian vanha keskustelemaan tämän radion ohjelmiston kanssa. Ole hyvä ja lue lisää aiheesta <a href="https://meshtastic.org/docs/software/android/installation">dokumenteistamme</a>.</string>
     <string name="none">Ei Mitään (Ei Käytössä)</string>
+    <string name="modem_config_turbo">Lyhyt Kantama / Turbo</string>
     <string name="modem_config_short">Lyhyt Kantama / Nopea</string>
     <string name="modem_config_medium">Keskipitkä Kantama / Nopea</string>
     <string name="modem_config_long">Pitkä Kantama / Nopea</string>
@@ -53,7 +91,7 @@
     <string name="modem_config_very_long">Erittäin Pitkä Kantama / Hidas</string>
     <string name="modem_config_unrecognized">TUNTEMATON</string>
     <string name="meshtastic_service_notifications">Palveluilmoitukset</string>
-    <string name="location_disabled_warning">Sijainnin on oltava päällä (tarkka) uusien laitteiden löytämiseksi Bluetoothin kautta. Voit sammuttaa sen jälkeen päin.</string>
+    <string name="location_disabled_warning">Sijainnin on oltava päällä uusien laitteiden löytämiseksi Bluetoothin kautta. Voit sammuttaa sen jälkeen päin.</string>
     <string name="about">Tietoja</string>
     <string name="text_messages">Tekstiviestit</string>
     <string name="channel_invalid">Kanavan URL on virheellinen eikä sitä voida käyttää</string>
@@ -116,6 +154,7 @@
     <string name="preferences_system_default">Järjestelmän oletus</string>
     <string name="resend">Lähetä uudestaan</string>
     <string name="shutdown">Sammuta</string>
+    <string name="cant_shutdown">Sammutusta ei tueta tällä laitteella</string>
     <string name="reboot">Käynnistä uudelleen</string>
     <string name="traceroute">Reitinselvitys</string>
     <string name="intro_show">Näytä Esittely</string>
@@ -138,6 +177,8 @@
     <string name="direct_message">Yksityisviesti</string>
     <string name="nodedb_reset">NodeDB resetointi</string>
     <string name="nodedb_reset_description">Tämä tyhjentää kaikki solmupisteet listalta.</string>
+    <string name="delivery_confirmed">Toimitus vahvistettu</string>
+    <string name="error">Virhe</string>
     <string name="ignore">Ignoroi</string>
     <string name="ignore_add">Lisää \'%s\' ignorointilistalle? Radiosi käynnistyy uudelleen tämän muutoksen tekemisen jälkeen.</string>
     <string name="ignore_remove">Poistetaanko \'%s\' ignorointilistalta? Radiosi käynnistyy uudelleen tämän muutoksen tekemisen jälkeen.</string>
@@ -149,6 +190,7 @@
     <string name="device_settings">Radion asetukset</string>
     <string name="module_settings">Moduulin asetukset</string>
     <string name="add">Lisää</string>
+    <string name="edit">Muokkaa</string>
     <string name="calculating">Lasketaan…</string>
     <string name="map_offline_manager">Offline hallinta</string>
     <string name="map_cache_size">Nykyinen välimuistin koko</string>
@@ -167,4 +209,32 @@
     <string name="waypoint_new">Uusi reittipiste</string>
     <string name="waypoint_received">Vastaanotettu reittipiste %s</string>
     <string name="error_duty_cycle">Duty Cycle -raja saavutettu. Viestien lähettäminen ei ole tällä hetkellä mahdollista. Yritä myöhemmin uudelleen.</string>
+    <string name="remove">Poista</string>
+    <string name="remove_node_text">Tämä node poistetaan luettelostasi, kunnes vastaanotat tietoja siitä uudelleen.</string>
+    <string name="mute">Mykistä</string>
+    <string name="mute_notifications">Mykistä ilmoitukset</string>
+    <string name="mute_8_hours">8 tuntia</string>
+    <string name="mute_1_week">1 viikko</string>
+    <string name="mute_always">Aina</string>
+    <string name="replace">Korvaa</string>
+    <string name="wifi_qr_code_scan">Skannaa WiFi QR koodi</string>
+    <string name="wifi_qr_code_error">Virheellinen WiFi-käyttöoikeustietojen QR-koodin muoto</string>
+    <string name="navigate_back">Siirry takaisin</string>
+    <string name="battery">Akku</string>
+    <string name="channel_utilization">Kanavan Käyttö</string>
+    <string name="air_utilization">Ilmantien Käyttö</string>
+    <string name="temperature">Lämpötila</string>
+    <string name="humidity">Kosteus</string>
+    <string name="logs">Lokit</string>
+    <string name="hops_away">Hypyn päässä</string>
+    <string name="info">Tiedot</string>
+    <string name="ch_util_definition">Hyödyntäminen nykyisen kanavan, mukaan lukien hyvin muodostettu TX, RX ja virheellisesti muodostettu RX (melu).</string>
+    <string name="air_util_definition">Viimeisen tunnin aikana käytetyn lähetyksen prosenttiosuus.</string>
+    <string name="iaq">IAQ</string>
+    <string name="encryption_psk">Jaettu avain</string>
+    <string name="encryption_psk_text">Suorat viestit käyttävät kanavan jaettua avainta.</string>
+    <string name="encryption_pkc">Julkisen Avaimen Salaus</string>
+    <string name="encryption_pkc_text">Suorat viestit käyttävät uutta julkisen avaimen infrastruktuuria salaukseen. Vaatii firmware version 2.5 tai uudemman.</string>
+    <string name="encryption_error">Julkinen avain ei täsmää</string>
+    <string name="encryption_error_text">Julkinen avain ei vastaa kirjattua avainta. Voit poistaa noden ja antaa sen vaihtaa avaimia uudelleen, mutta tämä saattaa merkitä vakavampaa turvallisuusongelmaa. Ota yhteyttä käyttäjään toisen luotetun kanavan kautta määrittääksesi, johtuiko avain tehtaan resetoinnista tai muusta tarkoituksellisesta toiminnosta.</string>
 </resources>

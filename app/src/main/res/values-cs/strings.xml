@@ -64,10 +64,10 @@
     <string name="report_a_bug">Nahlásit chybu</string>
     <string name="report_bug_text">Jste si jistý, že chcete nahlásit chybu? Po odeslání prosím přidejte zprávu do meshtastic.discourse.group abychom mohli přiřadit Vaši nahlášenou chybu k příspěvku.</string>
     <string name="report">Odeslat chybové hlášení</string>
-    <string name="not_paired_yet">Žádný vysílač zatím nebyl spárovaný</string>
+    <string name="not_paired_yet">Žádný vysílač zatím nebyl spárovaný.</string>
     <string name="change_radio">Změnit vysílač</string>
     <string name="pairing_completed">Párování bylo úspěšné, spouštím službu</string>
-    <string name="pairing_failed_try_again">Párování selhalo, prosím zkuste to znovu.</string>
+    <string name="pairing_failed_try_again">Párování selhalo, prosím zkuste to znovu</string>
     <string name="location_disabled">Přístup k poloze zařízení nebyl povolen, není možné poskytnout polohu zařízení do Mesh sítě.</string>
     <string name="share">Sdílet</string>
     <string name="disconnected">Odpojeno</string>
@@ -238,5 +238,5 @@
     <string name="encryption_pkc">Šifrování veřejného klíče</string>
     <string name="encryption_pkc_text">Přímé zprávy používají novou infrastrukturu veřejných klíčů pro šifrování. Vyžaduje firmware verze 2.5 nebo vyšší.</string>
     <string name="encryption_error">Neshoda veřejného klíče</string>
-    <string name="encryption_error_text">Veřejný klíč neodpovídá zaznamenanému klíč. Můžete odebrat uzel a nechat jej znovu vyměnit klíče, ale to může naznačovat závažnější bezpečnostní problém. Kontaktujte uživatele prostřednictvím jiného důvěryhodného kanálu, abyste zjistili, zda byla změna klíče způsobena resetováním továrního zařízení nebo jiným záměrným jednáním.</string>
+    <string name="encryption_error_text">Veřejný klíč neodpovídá zaznamenanému klíči. Můžete odebrat uzel a nechat jej znovu vyměnit klíče, ale to může naznačovat závažnější bezpečnostní problém. Kontaktujte uživatele prostřednictvím jiného důvěryhodného kanálu, abyste zjistili, zda byla změna klíče způsobena resetováním továrního zařízení nebo jiným záměrným jednáním.</string>
 </resources>
