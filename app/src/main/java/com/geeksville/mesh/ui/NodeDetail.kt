@@ -46,6 +46,7 @@ import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -56,9 +57,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.MetricsState
+import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
@@ -67,21 +71,21 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.ln
 
 @Composable
-fun NodeDetailsScreen(
+fun NodeDetailScreen(
     node: NodeEntity?,
-    metricsState: MetricsState,
+    viewModel: MetricsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
     onNavigate: (String) -> Unit,
-    setSelectedNode: (Int) -> Unit,
 ) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
     if (node != null) {
         LaunchedEffect(node.num) {
-            setSelectedNode(node.num)
+            viewModel.setSelectedNode(node.num)
         }
-
-        NodeDetailsItemList(
+        NodeDetailList(
             node = node,
-            metricsState = metricsState,
+            metricsState = state,
             onNavigate = onNavigate,
             modifier = modifier,
         )
@@ -97,7 +101,7 @@ fun NodeDetailsScreen(
 
 @Suppress("LongMethod")
 @Composable
-private fun NodeDetailsItemList(
+private fun NodeDetailList(
     node: NodeEntity,
     metricsState: MetricsState,
     modifier: Modifier = Modifier,
@@ -453,6 +457,6 @@ private fun NodeDetailsPreview(
     node: NodeEntity
 ) {
     AppTheme {
-        NodeDetailsItemList(node, MetricsState.Empty)
+        NodeDetailList(node, MetricsState.Empty)
     }
 }

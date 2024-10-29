@@ -36,8 +36,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
 import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
@@ -61,8 +64,10 @@ private val LEGEND_DATA = listOf(
 )
 
 @Composable
-fun SignalMetricsScreen(meshPackets: List<MeshPacket>) {
-
+fun SignalMetricsScreen(
+    viewModel: MetricsViewModel = hiltViewModel(),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
     var displayInfoDialog by remember { mutableStateOf(false) }
 
     Column {
@@ -81,14 +86,14 @@ fun SignalMetricsScreen(meshPackets: List<MeshPacket>) {
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.33f),
-            meshPackets = meshPackets.reversed(),
+            meshPackets = state.signalMetrics.reversed(),
             promptInfoDialog = { displayInfoDialog = true }
         )
 
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(meshPackets) { meshPacket -> SignalMetricsCard(meshPacket) }
+            items(state.signalMetrics) { meshPacket -> SignalMetricsCard(meshPacket) }
         }
     }
 }
