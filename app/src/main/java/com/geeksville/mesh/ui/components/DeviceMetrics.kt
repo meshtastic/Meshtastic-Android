@@ -34,8 +34,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
+import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.BatteryInfo
 import com.geeksville.mesh.ui.components.CommonCharts.X_AXIS_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
@@ -56,8 +59,10 @@ private val LEGEND_DATA = listOf(
 )
 
 @Composable
-fun DeviceMetricsScreen(telemetries: List<Telemetry>) {
-
+fun DeviceMetricsScreen(
+    viewModel: MetricsViewModel = hiltViewModel(),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
     var displayInfoDialog by remember { mutableStateOf(false) }
 
     Column {
@@ -76,14 +81,14 @@ fun DeviceMetricsScreen(telemetries: List<Telemetry>) {
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.33f),
-            telemetries.reversed(),
+            state.deviceMetrics.reversed(),
             promptInfoDialog = { displayInfoDialog = true }
         )
         /* Device Metric Cards */
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(telemetries) { telemetry -> DeviceMetricsCard(telemetry) }
+            items(state.deviceMetrics) { telemetry -> DeviceMetricsCard(telemetry) }
         }
     }
 }

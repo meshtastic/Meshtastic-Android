@@ -37,9 +37,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.components.CommonCharts.X_AXIS_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
@@ -69,15 +72,19 @@ private val LEGEND_DATA = listOf(
 )
 
 @Composable
-fun EnvironmentMetricsScreen(telemetries: List<Telemetry>, environmentDisplayFahrenheit: Boolean) {
+fun EnvironmentMetricsScreen(
+    viewModel: MetricsViewModel = hiltViewModel(),
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
     /* Convert Celsius to Fahrenheit */
     @Suppress("MagicNumber")
     fun celsiusToFahrenheit(celsius: Float): Float {
         return (celsius * 1.8F) + 32
     }
 
-    val processedTelemetries: List<Telemetry> = if (environmentDisplayFahrenheit) {
-        telemetries.map { telemetry ->
+    val processedTelemetries: List<Telemetry> = if (state.environmentDisplayFahrenheit) {
+        state.environmentMetrics.map { telemetry ->
             val temperatureFahrenheit =
                 celsiusToFahrenheit(telemetry.environmentMetrics.temperature)
             telemetry.copy {
@@ -86,7 +93,7 @@ fun EnvironmentMetricsScreen(telemetries: List<Telemetry>, environmentDisplayFah
             }
         }
     } else {
-        telemetries
+        state.environmentMetrics
     }
 
     var displayInfoDialog by remember { mutableStateOf(false) }
@@ -117,7 +124,7 @@ fun EnvironmentMetricsScreen(telemetries: List<Telemetry>, environmentDisplayFah
             items(processedTelemetries) { telemetry ->
                 EnvironmentMetricsCard(
                     telemetry,
-                    environmentDisplayFahrenheit
+                    state.environmentDisplayFahrenheit
                 )
             }
         }

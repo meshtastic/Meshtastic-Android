@@ -38,6 +38,7 @@ import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
@@ -129,20 +130,11 @@ class NavGraphFragment : ScreenFragment("NavGraph"), Logging {
 
                 AppCompatTheme {
                     val navController: NavHostController = rememberNavController()
-                    // Get current back stack entry
-                    // val backStackEntry by navController.currentBackStackEntryAsState()
-                    // Get the name of the current screen
-                    // val currentScreen = backStackEntry?.destination?.route?.let { route ->
-                    //     NavRoute.entries.find { it.name == route }?.title
-                    // }
-
                     Scaffold(
                         topBar = {
                             MeshAppBar(
                                 currentScreen = node?.user?.longName
                                     ?: stringResource(R.string.unknown_username),
-                                // canNavigateBack = navController.previousBackStackEntry != null,
-                                // navigateUp = { navController.navigateUp() },
                                 canNavigateBack = true,
                                 navigateUp = {
                                     if (navController.previousBackStackEntry != null) {
@@ -233,7 +225,7 @@ private fun MeshAppBar(
                 IconButton(onClick = navigateUp) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        null,
+                        contentDescription = stringResource(id = R.string.navigate_back),
                     )
                 }
             }
@@ -255,9 +247,6 @@ fun NavGraph(
 
     val radioConfigState by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val isWaiting = radioConfigState.responseState.isWaiting()
-
-    val metricsViewModel: MetricsViewModel = hiltViewModel()
-    val metricsState by metricsViewModel.state.collectAsStateWithLifecycle()
 
     if (isWaiting) {
         PacketResponseStateDialog(
@@ -282,27 +271,25 @@ fun NavGraph(
         modifier = modifier,
     ) {
         composable("NodeDetails") {
-            NodeDetailsScreen(
+            NodeDetailScreen(
                 node = node,
-                metricsState = metricsState,
-                onNavigate = { navController.navigate(route = it) },
-                setSelectedNode = metricsViewModel::setSelectedNode,
-            )
+            ) { navController.navigate(route = it) }
         }
         composable("DeviceMetrics") {
-            DeviceMetricsScreen(metricsState.deviceMetrics)
+            val parentEntry = remember { navController.getBackStackEntry("NodeDetails") }
+            DeviceMetricsScreen(hiltViewModel<MetricsViewModel>(parentEntry))
         }
         composable("EnvironmentMetrics") {
-            EnvironmentMetricsScreen(
-                metricsState.environmentMetrics,
-                metricsState.environmentDisplayFahrenheit,
-            )
-        }
-        composable("TracerouteList") {
-            TracerouteLogScreen(metricsViewModel)
+            val parentEntry = remember { navController.getBackStackEntry("NodeDetails") }
+            EnvironmentMetricsScreen(hiltViewModel<MetricsViewModel>(parentEntry))
         }
         composable("SignalMetrics") {
-            SignalMetricsScreen(metricsState.signalMetrics)
+            val parentEntry = remember { navController.getBackStackEntry("NodeDetails") }
+            SignalMetricsScreen(hiltViewModel<MetricsViewModel>(parentEntry))
+        }
+        composable("TracerouteList") {
+            val parentEntry = remember { navController.getBackStackEntry("NodeDetails") }
+            TracerouteLogScreen(hiltViewModel<MetricsViewModel>(parentEntry))
         }
         composable("RadioConfig") {
             RadioConfigScreen(
