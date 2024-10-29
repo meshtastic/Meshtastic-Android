@@ -143,8 +143,8 @@ data class Contact(
 )
 
 // return time if within 24 hours, otherwise date
-private fun getShortDate(time: Long): String {
-    val date = Date(time)
+private fun getShortDate(time: Long): String? {
+    val date = if (time != 0L) Date(time) else return null
     val isWithin24Hours = System.currentTimeMillis() - date.time <= TimeUnit.DAYS.toMillis(1)
 
     return if (isWithin24Hours) {
