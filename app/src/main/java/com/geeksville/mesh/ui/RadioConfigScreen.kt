@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
@@ -51,17 +52,38 @@ import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.config.EditDeviceProfileDialog
+import com.geeksville.mesh.ui.components.config.PacketResponseStateDialog
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun RadioConfigScreen(
     node: NodeEntity?,
-    viewModel: RadioConfigViewModel,
+    viewModel: RadioConfigViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
+    onNavigate: (String) -> Unit = {}
 ) {
     val isLocal = node?.num == viewModel.myNodeNum
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val isWaiting = state.responseState.isWaiting()
+    var isWaiting by remember { mutableStateOf(false) }
+
+    if (isWaiting) {
+        PacketResponseStateDialog(
+            state = state.responseState,
+            onDismiss = {
+                isWaiting = false
+                viewModel.clearPacketResponse()
+            },
+            onComplete = {
+                val route = state.route
+                if (ConfigRoute.entries.any { it.name == route } ||
+                    ModuleRoute.entries.any { it.name == route }) {
+                    isWaiting = false
+                    viewModel.clearPacketResponse()
+                    onNavigate(route)
+                }
+            },
+        )
+    }
 
     var deviceProfile by remember { mutableStateOf<DeviceProfile?>(null) }
     var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
@@ -115,6 +137,7 @@ fun RadioConfigScreen(
         isLocal = isLocal,
         modifier = modifier,
         onRouteClick = { route ->
+            isWaiting = true
             viewModel.setResponseStateLoading(route)
         },
         onImport = {
