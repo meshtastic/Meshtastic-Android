@@ -63,7 +63,6 @@ import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.moduleConfig
-import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.ui.components.DeviceMetricsScreen
 import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
 import com.geeksville.mesh.ui.components.SignalMetricsScreen
@@ -242,20 +241,13 @@ fun NavGraph(
     startDestination: String,
     modifier: Modifier = Modifier,
 ) {
-    val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
-    val connected = connectionState == ConnectionState.CONNECTED && node != null
-
-    val radioConfigState by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val isWaiting = radioConfigState.responseState.isWaiting()
-
-    if (isWaiting) {
+    val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    if (state.responseState.isWaiting()) {
         PacketResponseStateDialog(
-            state = radioConfigState.responseState,
-            onDismiss = {
-                viewModel.clearPacketResponse()
-            },
+            state = state.responseState,
+            onDismiss = viewModel::clearPacketResponse,
             onComplete = {
-                val route = radioConfigState.route
+                val route = state.route
                 if (ConfigRoute.entries.any { it.name == route } ||
                     ModuleRoute.entries.any { it.name == route }) {
                     navController.navigate(route = route)
@@ -294,14 +286,13 @@ fun NavGraph(
         composable("RadioConfig") {
             RadioConfigScreen(
                 node = node,
-                enabled = connected && !isWaiting,
                 viewModel = viewModel,
             )
         }
         composable(ConfigRoute.USER.name) {
             UserConfigItemList(
-                userConfig = radioConfigState.userConfig,
-                enabled = connected,
+                userConfig = state.userConfig,
+                enabled = state.connected,
                 onSaveClicked = { userInput ->
                     viewModel.setOwner(userInput)
                 }
@@ -309,19 +300,19 @@ fun NavGraph(
         }
         composable(ConfigRoute.CHANNELS.name) {
             ChannelSettingsItemList(
-                settingsList = radioConfigState.channelList,
-                modemPresetName = Channel(loraConfig = radioConfigState.radioConfig.lora).name,
-                enabled = connected,
+                settingsList = state.channelList,
+                modemPresetName = Channel(loraConfig = state.radioConfig.lora).name,
+                enabled = state.connected,
                 maxChannels = viewModel.maxChannels,
                 onPositiveClicked = { channelListInput ->
-                    viewModel.updateChannels(channelListInput, radioConfigState.channelList)
+                    viewModel.updateChannels(channelListInput, state.channelList)
                 },
             )
         }
         composable(ConfigRoute.DEVICE.name) {
             DeviceConfigItemList(
-                deviceConfig = radioConfigState.radioConfig.device,
-                enabled = connected,
+                deviceConfig = state.radioConfig.device,
+                enabled = state.connected,
                 onSaveClicked = { deviceInput ->
                     val config = config { device = deviceInput }
                     viewModel.setConfig(config)
@@ -337,15 +328,15 @@ fun NavGraph(
             )
             PositionConfigItemList(
                 location = currentPosition,
-                positionConfig = radioConfigState.radioConfig.position,
-                enabled = connected,
+                positionConfig = state.radioConfig.position,
+                enabled = state.connected,
                 onSaveClicked = { locationInput, positionInput ->
                     if (positionInput.fixedPosition) {
                         if (locationInput != currentPosition) {
                             viewModel.setFixedPosition(locationInput)
                         }
                     } else {
-                        if (radioConfigState.radioConfig.position.fixedPosition) {
+                        if (state.radioConfig.position.fixedPosition) {
                             // fixed position changed from enabled to disabled
                             viewModel.removeFixedPosition()
                         }
@@ -357,8 +348,8 @@ fun NavGraph(
         }
         composable(ConfigRoute.POWER.name) {
             PowerConfigItemList(
-                powerConfig = radioConfigState.radioConfig.power,
-                enabled = connected,
+                powerConfig = state.radioConfig.power,
+                enabled = state.connected,
                 onSaveClicked = { powerInput ->
                     val config = config { power = powerInput }
                     viewModel.setConfig(config)
@@ -367,8 +358,8 @@ fun NavGraph(
         }
         composable(ConfigRoute.NETWORK.name) {
             NetworkConfigItemList(
-                networkConfig = radioConfigState.radioConfig.network,
-                enabled = connected,
+                networkConfig = state.radioConfig.network,
+                enabled = state.connected,
                 onSaveClicked = { networkInput ->
                     val config = config { network = networkInput }
                     viewModel.setConfig(config)
@@ -377,8 +368,8 @@ fun NavGraph(
         }
         composable(ConfigRoute.DISPLAY.name) {
             DisplayConfigItemList(
-                displayConfig = radioConfigState.radioConfig.display,
-                enabled = connected,
+                displayConfig = state.radioConfig.display,
+                enabled = state.connected,
                 onSaveClicked = { displayInput ->
                     val config = config { display = displayInput }
                     viewModel.setConfig(config)
@@ -387,9 +378,9 @@ fun NavGraph(
         }
         composable(ConfigRoute.LORA.name) {
             LoRaConfigItemList(
-                loraConfig = radioConfigState.radioConfig.lora,
-                primarySettings = radioConfigState.channelList.getOrNull(0) ?: return@composable,
-                enabled = connected,
+                loraConfig = state.radioConfig.lora,
+                primarySettings = state.channelList.getOrNull(0) ?: return@composable,
+                enabled = state.connected,
                 onSaveClicked = { loraInput ->
                     val config = config { lora = loraInput }
                     viewModel.setConfig(config)
@@ -399,8 +390,8 @@ fun NavGraph(
         }
         composable(ConfigRoute.BLUETOOTH.name) {
             BluetoothConfigItemList(
-                bluetoothConfig = radioConfigState.radioConfig.bluetooth,
-                enabled = connected,
+                bluetoothConfig = state.radioConfig.bluetooth,
+                enabled = state.connected,
                 onSaveClicked = { bluetoothInput ->
                     val config = config { bluetooth = bluetoothInput }
                     viewModel.setConfig(config)
@@ -409,8 +400,8 @@ fun NavGraph(
         }
         composable(ConfigRoute.SECURITY.name) {
             SecurityConfigItemList(
-                securityConfig = radioConfigState.radioConfig.security,
-                enabled = connected,
+                securityConfig = state.radioConfig.security,
+                enabled = state.connected,
                 onConfirm = { securityInput ->
                     val config = config { security = securityInput }
                     viewModel.setConfig(config)
@@ -419,8 +410,8 @@ fun NavGraph(
         }
         composable(ModuleRoute.MQTT.name) {
             MQTTConfigItemList(
-                mqttConfig = radioConfigState.moduleConfig.mqtt,
-                enabled = connected,
+                mqttConfig = state.moduleConfig.mqtt,
+                enabled = state.connected,
                 onSaveClicked = { mqttInput ->
                     val config = moduleConfig { mqtt = mqttInput }
                     viewModel.setModuleConfig(config)
@@ -429,8 +420,8 @@ fun NavGraph(
         }
         composable(ModuleRoute.SERIAL.name) {
             SerialConfigItemList(
-                serialConfig = radioConfigState.moduleConfig.serial,
-                enabled = connected,
+                serialConfig = state.moduleConfig.serial,
+                enabled = state.connected,
                 onSaveClicked = { serialInput ->
                     val config = moduleConfig { serial = serialInput }
                     viewModel.setModuleConfig(config)
@@ -439,14 +430,14 @@ fun NavGraph(
         }
         composable(ModuleRoute.EXTERNAL_NOTIFICATION.name) {
             ExternalNotificationConfigItemList(
-                ringtone = radioConfigState.ringtone,
-                extNotificationConfig = radioConfigState.moduleConfig.externalNotification,
-                enabled = connected,
+                ringtone = state.ringtone,
+                extNotificationConfig = state.moduleConfig.externalNotification,
+                enabled = state.connected,
                 onSaveClicked = { ringtoneInput, extNotificationInput ->
-                    if (ringtoneInput != radioConfigState.ringtone) {
+                    if (ringtoneInput != state.ringtone) {
                         viewModel.setRingtone(ringtoneInput)
                     }
-                    if (extNotificationInput != radioConfigState.moduleConfig.externalNotification) {
+                    if (extNotificationInput != state.moduleConfig.externalNotification) {
                         val config = moduleConfig { externalNotification = extNotificationInput }
                         viewModel.setModuleConfig(config)
                     }
@@ -455,8 +446,8 @@ fun NavGraph(
         }
         composable(ModuleRoute.STORE_FORWARD.name) {
             StoreForwardConfigItemList(
-                storeForwardConfig = radioConfigState.moduleConfig.storeForward,
-                enabled = connected,
+                storeForwardConfig = state.moduleConfig.storeForward,
+                enabled = state.connected,
                 onSaveClicked = { storeForwardInput ->
                     val config = moduleConfig { storeForward = storeForwardInput }
                     viewModel.setModuleConfig(config)
@@ -465,8 +456,8 @@ fun NavGraph(
         }
         composable(ModuleRoute.RANGE_TEST.name) {
             RangeTestConfigItemList(
-                rangeTestConfig = radioConfigState.moduleConfig.rangeTest,
-                enabled = connected,
+                rangeTestConfig = state.moduleConfig.rangeTest,
+                enabled = state.connected,
                 onSaveClicked = { rangeTestInput ->
                     val config = moduleConfig { rangeTest = rangeTestInput }
                     viewModel.setModuleConfig(config)
@@ -475,8 +466,8 @@ fun NavGraph(
         }
         composable(ModuleRoute.TELEMETRY.name) {
             TelemetryConfigItemList(
-                telemetryConfig = radioConfigState.moduleConfig.telemetry,
-                enabled = connected,
+                telemetryConfig = state.moduleConfig.telemetry,
+                enabled = state.connected,
                 onSaveClicked = { telemetryInput ->
                     val config = moduleConfig { telemetry = telemetryInput }
                     viewModel.setModuleConfig(config)
@@ -485,14 +476,14 @@ fun NavGraph(
         }
         composable(ModuleRoute.CANNED_MESSAGE.name) {
             CannedMessageConfigItemList(
-                messages = radioConfigState.cannedMessageMessages,
-                cannedMessageConfig = radioConfigState.moduleConfig.cannedMessage,
-                enabled = connected,
+                messages = state.cannedMessageMessages,
+                cannedMessageConfig = state.moduleConfig.cannedMessage,
+                enabled = state.connected,
                 onSaveClicked = { messagesInput, cannedMessageInput ->
-                    if (messagesInput != radioConfigState.cannedMessageMessages) {
+                    if (messagesInput != state.cannedMessageMessages) {
                         viewModel.setCannedMessages(messagesInput)
                     }
-                    if (cannedMessageInput != radioConfigState.moduleConfig.cannedMessage) {
+                    if (cannedMessageInput != state.moduleConfig.cannedMessage) {
                         val config = moduleConfig { cannedMessage = cannedMessageInput }
                         viewModel.setModuleConfig(config)
                     }
@@ -501,8 +492,8 @@ fun NavGraph(
         }
         composable(ModuleRoute.AUDIO.name) {
             AudioConfigItemList(
-                audioConfig = radioConfigState.moduleConfig.audio,
-                enabled = connected,
+                audioConfig = state.moduleConfig.audio,
+                enabled = state.connected,
                 onSaveClicked = { audioInput ->
                     val config = moduleConfig { audio = audioInput }
                     viewModel.setModuleConfig(config)
@@ -511,8 +502,8 @@ fun NavGraph(
         }
         composable(ModuleRoute.REMOTE_HARDWARE.name) {
             RemoteHardwareConfigItemList(
-                remoteHardwareConfig = radioConfigState.moduleConfig.remoteHardware,
-                enabled = connected,
+                remoteHardwareConfig = state.moduleConfig.remoteHardware,
+                enabled = state.connected,
                 onSaveClicked = { remoteHardwareInput ->
                     val config = moduleConfig { remoteHardware = remoteHardwareInput }
                     viewModel.setModuleConfig(config)
@@ -521,8 +512,8 @@ fun NavGraph(
         }
         composable(ModuleRoute.NEIGHBOR_INFO.name) {
             NeighborInfoConfigItemList(
-                neighborInfoConfig = radioConfigState.moduleConfig.neighborInfo,
-                enabled = connected,
+                neighborInfoConfig = state.moduleConfig.neighborInfo,
+                enabled = state.connected,
                 onSaveClicked = { neighborInfoInput ->
                     val config = moduleConfig { neighborInfo = neighborInfoInput }
                     viewModel.setModuleConfig(config)
@@ -531,8 +522,8 @@ fun NavGraph(
         }
         composable(ModuleRoute.AMBIENT_LIGHTING.name) {
             AmbientLightingConfigItemList(
-                ambientLightingConfig = radioConfigState.moduleConfig.ambientLighting,
-                enabled = connected,
+                ambientLightingConfig = state.moduleConfig.ambientLighting,
+                enabled = state.connected,
                 onSaveClicked = { ambientLightingInput ->
                     val config = moduleConfig { ambientLighting = ambientLightingInput }
                     viewModel.setModuleConfig(config)
@@ -541,8 +532,8 @@ fun NavGraph(
         }
         composable(ModuleRoute.DETECTION_SENSOR.name) {
             DetectionSensorConfigItemList(
-                detectionSensorConfig = radioConfigState.moduleConfig.detectionSensor,
-                enabled = connected,
+                detectionSensorConfig = state.moduleConfig.detectionSensor,
+                enabled = state.connected,
                 onSaveClicked = { detectionSensorInput ->
                     val config = moduleConfig { detectionSensor = detectionSensorInput }
                     viewModel.setModuleConfig(config)
@@ -551,8 +542,8 @@ fun NavGraph(
         }
         composable(ModuleRoute.PAXCOUNTER.name) {
             PaxcounterConfigItemList(
-                paxcounterConfig = radioConfigState.moduleConfig.paxcounter,
-                enabled = connected,
+                paxcounterConfig = state.moduleConfig.paxcounter,
+                enabled = state.connected,
                 onSaveClicked = { paxcounterConfigInput ->
                     val config = moduleConfig { paxcounter = paxcounterConfigInput }
                     viewModel.setModuleConfig(config)

@@ -22,6 +22,7 @@ import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.ui.AdminRoute
 import com.geeksville.mesh.ui.ConfigRoute
 import com.geeksville.mesh.ui.ModuleRoute
@@ -45,6 +46,7 @@ import javax.inject.Inject
  * Data class that represents the current RadioConfig state.
  */
 data class RadioConfigState(
+    val connected: Boolean = false,
     val route: String = "",
     val metadata: MeshProtos.DeviceMetadata = MeshProtos.DeviceMetadata.getDefaultInstance(),
     val userConfig: MeshProtos.User = MeshProtos.User.getDefaultInstance(),
@@ -65,9 +67,6 @@ class RadioConfigViewModel @Inject constructor(
 ) : ViewModel(), Logging {
 
     private val meshService: IMeshService? get() = radioConfigRepository.meshService
-
-    // Connection state to our radio device
-    val connectionState get() = radioConfigRepository.connectionState
 
     private val _destNum = MutableStateFlow<Int?>(null)
     private val _destNode = MutableStateFlow<NodeEntity?>(null)
@@ -100,7 +99,8 @@ class RadioConfigViewModel @Inject constructor(
         radioConfigRepository.meshPacketFlow.onEach(::processPacketResponse)
             .launchIn(viewModelScope)
 
-        combine(connectionState, radioConfigState) { connState, configState ->
+        combine(radioConfigRepository.connectionState, radioConfigState) { connState, configState ->
+            _radioConfigState.update { it.copy(connected = connState == ConnectionState.CONNECTED) }
             if (connState.isDisconnected() && configState.responseState.isWaiting()) {
                 setResponseStateError(app.getString(R.string.disconnected))
             }
