@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.NodeEntity
@@ -55,11 +56,12 @@ import com.geeksville.mesh.ui.components.config.EditDeviceProfileDialog
 @Composable
 fun RadioConfigScreen(
     node: NodeEntity?,
-    enabled: Boolean,
     viewModel: RadioConfigViewModel,
     modifier: Modifier = Modifier,
 ) {
     val isLocal = node?.num == viewModel.myNodeNum
+    val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val isWaiting = state.responseState.isWaiting()
 
     var deviceProfile by remember { mutableStateOf<DeviceProfile?>(null) }
     var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
@@ -109,7 +111,7 @@ fun RadioConfigScreen(
     }
 
     RadioConfigItemList(
-        enabled = enabled,
+        enabled = state.connected && !isWaiting,
         isLocal = isLocal,
         modifier = modifier,
         onRouteClick = { route ->
