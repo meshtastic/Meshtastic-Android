@@ -12,16 +12,62 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.ConfigProtos.Config.PositionConfig
 import com.geeksville.mesh.Position
+import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.ui.components.BitwisePreference
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.SwitchPreference
+
+@Composable
+fun PositionConfigScreen(
+    viewModel: RadioConfigViewModel = hiltViewModel(),
+) {
+    val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+
+    val node by viewModel.destNode.collectAsStateWithLifecycle()
+    val currentPosition = Position(
+        latitude = node?.latitude ?: 0.0,
+        longitude = node?.longitude ?: 0.0,
+        altitude = node?.position?.altitude ?: 0,
+        time = 1, // ignore time for fixed_position
+    )
+
+    if (state.responseState.isWaiting()) {
+        PacketResponseStateDialog(
+            state = state.responseState,
+            onDismiss = viewModel::clearPacketResponse,
+        )
+    }
+
+    PositionConfigItemList(
+        location = currentPosition,
+        positionConfig = state.radioConfig.position,
+        enabled = state.connected,
+        onSaveClicked = { locationInput, positionInput ->
+            if (positionInput.fixedPosition) {
+                if (locationInput != currentPosition) {
+                    viewModel.setFixedPosition(locationInput)
+                }
+            } else {
+                if (state.radioConfig.position.fixedPosition) {
+                    // fixed position changed from enabled to disabled
+                    viewModel.removeFixedPosition()
+                }
+            }
+            val config = config { position = positionInput }
+            viewModel.setConfig(config)
+        }
+    )
+}
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable

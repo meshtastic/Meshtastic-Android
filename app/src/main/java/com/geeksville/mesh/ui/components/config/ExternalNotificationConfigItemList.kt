@@ -15,13 +15,46 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.ExternalNotificationConfig
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.model.RadioConfigViewModel
+import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.SwitchPreference
 import com.geeksville.mesh.ui.components.TextDividerPreference
+
+@Composable
+fun ExternalNotificationConfigScreen(
+    viewModel: RadioConfigViewModel = hiltViewModel(),
+) {
+    val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+
+    if (state.responseState.isWaiting()) {
+        PacketResponseStateDialog(
+            state = state.responseState,
+            onDismiss = viewModel::clearPacketResponse,
+        )
+    }
+
+    ExternalNotificationConfigItemList(
+        ringtone = state.ringtone,
+        extNotificationConfig = state.moduleConfig.externalNotification,
+        enabled = state.connected,
+        onSaveClicked = { ringtoneInput, extNotificationInput ->
+            if (ringtoneInput != state.ringtone) {
+                viewModel.setRingtone(ringtoneInput)
+            }
+            if (extNotificationInput != state.moduleConfig.externalNotification) {
+                val config = moduleConfig { externalNotification = extNotificationInput }
+                viewModel.setModuleConfig(config)
+            }
+        }
+    )
+}
 
 @Composable
 fun ExternalNotificationConfigItemList(

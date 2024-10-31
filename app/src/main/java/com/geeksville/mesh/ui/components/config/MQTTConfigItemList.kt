@@ -17,14 +17,41 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.MQTTConfig
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.model.RadioConfigViewModel
+import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.components.EditPasswordPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PositionPrecisionPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.SwitchPreference
+
+@Composable
+fun MQTTConfigScreen(
+    viewModel: RadioConfigViewModel = hiltViewModel(),
+) {
+    val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+
+    if (state.responseState.isWaiting()) {
+        PacketResponseStateDialog(
+            state = state.responseState,
+            onDismiss = viewModel::clearPacketResponse,
+        )
+    }
+
+    MQTTConfigItemList(
+        mqttConfig = state.moduleConfig.mqtt,
+        enabled = state.connected,
+        onSaveClicked = { mqttInput ->
+            val config = moduleConfig { mqtt = mqttInput }
+            viewModel.setModuleConfig(config)
+        }
+    )
+}
 
 @Composable
 fun MQTTConfigItemList(

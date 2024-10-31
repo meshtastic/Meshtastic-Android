@@ -54,43 +54,38 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.config
 import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.RadioConfigViewModel
-import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.components.DeviceMetricsScreen
 import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
 import com.geeksville.mesh.ui.components.SignalMetricsScreen
 import com.geeksville.mesh.ui.components.TracerouteLogScreen
-import com.geeksville.mesh.ui.components.config.AmbientLightingConfigItemList
-import com.geeksville.mesh.ui.components.config.AudioConfigItemList
-import com.geeksville.mesh.ui.components.config.BluetoothConfigItemList
-import com.geeksville.mesh.ui.components.config.CannedMessageConfigItemList
-import com.geeksville.mesh.ui.components.config.ChannelSettingsItemList
-import com.geeksville.mesh.ui.components.config.DetectionSensorConfigItemList
-import com.geeksville.mesh.ui.components.config.DeviceConfigItemList
-import com.geeksville.mesh.ui.components.config.DisplayConfigItemList
-import com.geeksville.mesh.ui.components.config.ExternalNotificationConfigItemList
-import com.geeksville.mesh.ui.components.config.LoRaConfigItemList
-import com.geeksville.mesh.ui.components.config.MQTTConfigItemList
-import com.geeksville.mesh.ui.components.config.NeighborInfoConfigItemList
-import com.geeksville.mesh.ui.components.config.NetworkConfigItemList
-import com.geeksville.mesh.ui.components.config.PacketResponseStateDialog
-import com.geeksville.mesh.ui.components.config.PaxcounterConfigItemList
-import com.geeksville.mesh.ui.components.config.PositionConfigItemList
-import com.geeksville.mesh.ui.components.config.PowerConfigItemList
-import com.geeksville.mesh.ui.components.config.RangeTestConfigItemList
-import com.geeksville.mesh.ui.components.config.RemoteHardwareConfigItemList
-import com.geeksville.mesh.ui.components.config.SecurityConfigItemList
-import com.geeksville.mesh.ui.components.config.SerialConfigItemList
-import com.geeksville.mesh.ui.components.config.StoreForwardConfigItemList
-import com.geeksville.mesh.ui.components.config.TelemetryConfigItemList
-import com.geeksville.mesh.ui.components.config.UserConfigItemList
+import com.geeksville.mesh.ui.components.config.AmbientLightingConfigScreen
+import com.geeksville.mesh.ui.components.config.AudioConfigScreen
+import com.geeksville.mesh.ui.components.config.BluetoothConfigScreen
+import com.geeksville.mesh.ui.components.config.CannedMessageConfigScreen
+import com.geeksville.mesh.ui.components.config.ChannelConfigScreen
+import com.geeksville.mesh.ui.components.config.DetectionSensorConfigScreen
+import com.geeksville.mesh.ui.components.config.DeviceConfigScreen
+import com.geeksville.mesh.ui.components.config.DisplayConfigScreen
+import com.geeksville.mesh.ui.components.config.ExternalNotificationConfigScreen
+import com.geeksville.mesh.ui.components.config.LoRaConfigScreen
+import com.geeksville.mesh.ui.components.config.MQTTConfigScreen
+import com.geeksville.mesh.ui.components.config.NeighborInfoConfigScreen
+import com.geeksville.mesh.ui.components.config.NetworkConfigScreen
+import com.geeksville.mesh.ui.components.config.PaxcounterConfigScreen
+import com.geeksville.mesh.ui.components.config.PositionConfigScreen
+import com.geeksville.mesh.ui.components.config.PowerConfigScreen
+import com.geeksville.mesh.ui.components.config.RangeTestConfigScreen
+import com.geeksville.mesh.ui.components.config.RemoteHardwareConfigScreen
+import com.geeksville.mesh.ui.components.config.SecurityConfigScreen
+import com.geeksville.mesh.ui.components.config.SerialConfigScreen
+import com.geeksville.mesh.ui.components.config.StoreForwardConfigScreen
+import com.geeksville.mesh.ui.components.config.TelemetryConfigScreen
+import com.geeksville.mesh.ui.components.config.UserConfigScreen
 import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -232,7 +227,7 @@ private fun MeshAppBar(
     )
 }
 
-@Suppress("LongMethod", "CyclomaticComplexMethod")
+@Suppress("LongMethod")
 @Composable
 fun NavGraph(
     node: NodeEntity?,
@@ -241,22 +236,6 @@ fun NavGraph(
     startDestination: String,
     modifier: Modifier = Modifier,
 ) {
-    val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(
-            state = state.responseState,
-            onDismiss = viewModel::clearPacketResponse,
-            onComplete = {
-                val route = state.route
-                if (ConfigRoute.entries.any { it.name == route } ||
-                    ModuleRoute.entries.any { it.name == route }) {
-                    navController.navigate(route = route)
-                    viewModel.clearPacketResponse()
-                }
-            },
-        )
-    }
-
     NavHost(
         navController = navController,
         startDestination = startDestination,
@@ -287,268 +266,76 @@ fun NavGraph(
             RadioConfigScreen(
                 node = node,
                 viewModel = viewModel,
-            )
+            ) { navController.navigate(route = it) }
         }
         composable(ConfigRoute.USER.name) {
-            UserConfigItemList(
-                userConfig = state.userConfig,
-                enabled = state.connected,
-                onSaveClicked = { userInput ->
-                    viewModel.setOwner(userInput)
-                }
-            )
+            UserConfigScreen(viewModel)
         }
         composable(ConfigRoute.CHANNELS.name) {
-            ChannelSettingsItemList(
-                settingsList = state.channelList,
-                modemPresetName = Channel(loraConfig = state.radioConfig.lora).name,
-                enabled = state.connected,
-                maxChannels = viewModel.maxChannels,
-                onPositiveClicked = { channelListInput ->
-                    viewModel.updateChannels(channelListInput, state.channelList)
-                },
-            )
+            ChannelConfigScreen(viewModel)
         }
         composable(ConfigRoute.DEVICE.name) {
-            DeviceConfigItemList(
-                deviceConfig = state.radioConfig.device,
-                enabled = state.connected,
-                onSaveClicked = { deviceInput ->
-                    val config = config { device = deviceInput }
-                    viewModel.setConfig(config)
-                }
-            )
+            DeviceConfigScreen(viewModel)
         }
         composable(ConfigRoute.POSITION.name) {
-            val currentPosition = Position(
-                latitude = node?.latitude ?: 0.0,
-                longitude = node?.longitude ?: 0.0,
-                altitude = node?.position?.altitude ?: 0,
-                time = 1, // ignore time for fixed_position
-            )
-            PositionConfigItemList(
-                location = currentPosition,
-                positionConfig = state.radioConfig.position,
-                enabled = state.connected,
-                onSaveClicked = { locationInput, positionInput ->
-                    if (positionInput.fixedPosition) {
-                        if (locationInput != currentPosition) {
-                            viewModel.setFixedPosition(locationInput)
-                        }
-                    } else {
-                        if (state.radioConfig.position.fixedPosition) {
-                            // fixed position changed from enabled to disabled
-                            viewModel.removeFixedPosition()
-                        }
-                    }
-                    val config = config { position = positionInput }
-                    viewModel.setConfig(config)
-                }
-            )
+            PositionConfigScreen(viewModel)
         }
         composable(ConfigRoute.POWER.name) {
-            PowerConfigItemList(
-                powerConfig = state.radioConfig.power,
-                enabled = state.connected,
-                onSaveClicked = { powerInput ->
-                    val config = config { power = powerInput }
-                    viewModel.setConfig(config)
-                }
-            )
+            PowerConfigScreen(viewModel)
         }
         composable(ConfigRoute.NETWORK.name) {
-            NetworkConfigItemList(
-                networkConfig = state.radioConfig.network,
-                enabled = state.connected,
-                onSaveClicked = { networkInput ->
-                    val config = config { network = networkInput }
-                    viewModel.setConfig(config)
-                }
-            )
+            NetworkConfigScreen(viewModel)
         }
         composable(ConfigRoute.DISPLAY.name) {
-            DisplayConfigItemList(
-                displayConfig = state.radioConfig.display,
-                enabled = state.connected,
-                onSaveClicked = { displayInput ->
-                    val config = config { display = displayInput }
-                    viewModel.setConfig(config)
-                }
-            )
+            DisplayConfigScreen(viewModel)
         }
         composable(ConfigRoute.LORA.name) {
-            LoRaConfigItemList(
-                loraConfig = state.radioConfig.lora,
-                primarySettings = state.channelList.getOrNull(0) ?: return@composable,
-                enabled = state.connected,
-                onSaveClicked = { loraInput ->
-                    val config = config { lora = loraInput }
-                    viewModel.setConfig(config)
-                },
-                hasPaFan = viewModel.hasPaFan,
-            )
+            LoRaConfigScreen(viewModel)
         }
         composable(ConfigRoute.BLUETOOTH.name) {
-            BluetoothConfigItemList(
-                bluetoothConfig = state.radioConfig.bluetooth,
-                enabled = state.connected,
-                onSaveClicked = { bluetoothInput ->
-                    val config = config { bluetooth = bluetoothInput }
-                    viewModel.setConfig(config)
-                }
-            )
+            BluetoothConfigScreen(viewModel)
         }
         composable(ConfigRoute.SECURITY.name) {
-            SecurityConfigItemList(
-                securityConfig = state.radioConfig.security,
-                enabled = state.connected,
-                onConfirm = { securityInput ->
-                    val config = config { security = securityInput }
-                    viewModel.setConfig(config)
-                }
-            )
+            SecurityConfigScreen(viewModel)
         }
         composable(ModuleRoute.MQTT.name) {
-            MQTTConfigItemList(
-                mqttConfig = state.moduleConfig.mqtt,
-                enabled = state.connected,
-                onSaveClicked = { mqttInput ->
-                    val config = moduleConfig { mqtt = mqttInput }
-                    viewModel.setModuleConfig(config)
-                }
-            )
+            MQTTConfigScreen(viewModel)
         }
         composable(ModuleRoute.SERIAL.name) {
-            SerialConfigItemList(
-                serialConfig = state.moduleConfig.serial,
-                enabled = state.connected,
-                onSaveClicked = { serialInput ->
-                    val config = moduleConfig { serial = serialInput }
-                    viewModel.setModuleConfig(config)
-                }
-            )
+            SerialConfigScreen(viewModel)
         }
         composable(ModuleRoute.EXTERNAL_NOTIFICATION.name) {
-            ExternalNotificationConfigItemList(
-                ringtone = state.ringtone,
-                extNotificationConfig = state.moduleConfig.externalNotification,
-                enabled = state.connected,
-                onSaveClicked = { ringtoneInput, extNotificationInput ->
-                    if (ringtoneInput != state.ringtone) {
-                        viewModel.setRingtone(ringtoneInput)
-                    }
-                    if (extNotificationInput != state.moduleConfig.externalNotification) {
-                        val config = moduleConfig { externalNotification = extNotificationInput }
-                        viewModel.setModuleConfig(config)
-                    }
-                }
-            )
+            ExternalNotificationConfigScreen(viewModel)
         }
         composable(ModuleRoute.STORE_FORWARD.name) {
-            StoreForwardConfigItemList(
-                storeForwardConfig = state.moduleConfig.storeForward,
-                enabled = state.connected,
-                onSaveClicked = { storeForwardInput ->
-                    val config = moduleConfig { storeForward = storeForwardInput }
-                    viewModel.setModuleConfig(config)
-                }
-            )
+            StoreForwardConfigScreen(viewModel)
         }
         composable(ModuleRoute.RANGE_TEST.name) {
-            RangeTestConfigItemList(
-                rangeTestConfig = state.moduleConfig.rangeTest,
-                enabled = state.connected,
-                onSaveClicked = { rangeTestInput ->
-                    val config = moduleConfig { rangeTest = rangeTestInput }
-                    viewModel.setModuleConfig(config)
-                }
-            )
+            RangeTestConfigScreen(viewModel)
         }
         composable(ModuleRoute.TELEMETRY.name) {
-            TelemetryConfigItemList(
-                telemetryConfig = state.moduleConfig.telemetry,
-                enabled = state.connected,
-                onSaveClicked = { telemetryInput ->
-                    val config = moduleConfig { telemetry = telemetryInput }
-                    viewModel.setModuleConfig(config)
-                }
-            )
+            TelemetryConfigScreen(viewModel)
         }
         composable(ModuleRoute.CANNED_MESSAGE.name) {
-            CannedMessageConfigItemList(
-                messages = state.cannedMessageMessages,
-                cannedMessageConfig = state.moduleConfig.cannedMessage,
-                enabled = state.connected,
-                onSaveClicked = { messagesInput, cannedMessageInput ->
-                    if (messagesInput != state.cannedMessageMessages) {
-                        viewModel.setCannedMessages(messagesInput)
-                    }
-                    if (cannedMessageInput != state.moduleConfig.cannedMessage) {
-                        val config = moduleConfig { cannedMessage = cannedMessageInput }
-                        viewModel.setModuleConfig(config)
-                    }
-                }
-            )
+            CannedMessageConfigScreen(viewModel)
         }
         composable(ModuleRoute.AUDIO.name) {
-            AudioConfigItemList(
-                audioConfig = state.moduleConfig.audio,
-                enabled = state.connected,
-                onSaveClicked = { audioInput ->
-                    val config = moduleConfig { audio = audioInput }
-                    viewModel.setModuleConfig(config)
-                }
-            )
+            AudioConfigScreen(viewModel)
         }
         composable(ModuleRoute.REMOTE_HARDWARE.name) {
-            RemoteHardwareConfigItemList(
-                remoteHardwareConfig = state.moduleConfig.remoteHardware,
-                enabled = state.connected,
-                onSaveClicked = { remoteHardwareInput ->
-                    val config = moduleConfig { remoteHardware = remoteHardwareInput }
-                    viewModel.setModuleConfig(config)
-                }
-            )
+            RemoteHardwareConfigScreen(viewModel)
         }
         composable(ModuleRoute.NEIGHBOR_INFO.name) {
-            NeighborInfoConfigItemList(
-                neighborInfoConfig = state.moduleConfig.neighborInfo,
-                enabled = state.connected,
-                onSaveClicked = { neighborInfoInput ->
-                    val config = moduleConfig { neighborInfo = neighborInfoInput }
-                    viewModel.setModuleConfig(config)
-                }
-            )
+            NeighborInfoConfigScreen(viewModel)
         }
         composable(ModuleRoute.AMBIENT_LIGHTING.name) {
-            AmbientLightingConfigItemList(
-                ambientLightingConfig = state.moduleConfig.ambientLighting,
-                enabled = state.connected,
-                onSaveClicked = { ambientLightingInput ->
-                    val config = moduleConfig { ambientLighting = ambientLightingInput }
-                    viewModel.setModuleConfig(config)
-                }
-            )
+            AmbientLightingConfigScreen(viewModel)
         }
         composable(ModuleRoute.DETECTION_SENSOR.name) {
-            DetectionSensorConfigItemList(
-                detectionSensorConfig = state.moduleConfig.detectionSensor,
-                enabled = state.connected,
-                onSaveClicked = { detectionSensorInput ->
-                    val config = moduleConfig { detectionSensor = detectionSensorInput }
-                    viewModel.setModuleConfig(config)
-                }
-            )
+            DetectionSensorConfigScreen(viewModel)
         }
         composable(ModuleRoute.PAXCOUNTER.name) {
-            PaxcounterConfigItemList(
-                paxcounterConfig = state.moduleConfig.paxcounter,
-                enabled = state.connected,
-                onSaveClicked = { paxcounterConfigInput ->
-                    val config = moduleConfig { paxcounter = paxcounterConfigInput }
-                    viewModel.setModuleConfig(config)
-                }
-            )
+            PaxcounterConfigScreen(viewModel)
         }
     }
 }

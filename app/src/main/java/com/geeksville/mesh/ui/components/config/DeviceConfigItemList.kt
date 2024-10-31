@@ -16,9 +16,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.R
+import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
@@ -40,6 +44,29 @@ private val DeviceConfig.Role.stringRes: Int
         DeviceConfig.Role.TAK_TRACKER -> R.string.role_tak_tracker
         else -> R.string.unrecognized
     }
+
+@Composable
+fun DeviceConfigScreen(
+    viewModel: RadioConfigViewModel = hiltViewModel(),
+) {
+    val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+
+    if (state.responseState.isWaiting()) {
+        PacketResponseStateDialog(
+            state = state.responseState,
+            onDismiss = viewModel::clearPacketResponse,
+        )
+    }
+
+    DeviceConfigItemList(
+        deviceConfig = state.radioConfig.device,
+        enabled = state.connected,
+        onSaveClicked = { deviceInput ->
+            val config = config { device = deviceInput }
+            viewModel.setConfig(config)
+        }
+    )
+}
 
 @Composable
 fun DeviceConfigItemList(

@@ -47,10 +47,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.dragContainer
@@ -144,6 +147,30 @@ fun ChannelSelection(
         enabled = enabled,
         checked = isSelected,
         onCheckedChange = onSelected,
+    )
+}
+
+@Composable
+fun ChannelConfigScreen(
+    viewModel: RadioConfigViewModel = hiltViewModel(),
+) {
+    val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+
+    if (state.responseState.isWaiting()) {
+        PacketResponseStateDialog(
+            state = state.responseState,
+            onDismiss = viewModel::clearPacketResponse,
+        )
+    }
+
+    ChannelSettingsItemList(
+        settingsList = state.channelList,
+        modemPresetName = Channel(loraConfig = state.radioConfig.lora).name,
+        enabled = state.connected,
+        maxChannels = viewModel.maxChannels,
+        onPositiveClicked = { channelListInput ->
+            viewModel.updateChannels(channelListInput, state.channelList)
+        },
     )
 }
 
