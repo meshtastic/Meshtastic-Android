@@ -53,7 +53,7 @@ fun TracerouteLogScreen(
     viewModel: MetricsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
 ) {
-    val state by viewModel.tracerouteState.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val dateFormat = remember {
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     }
@@ -80,9 +80,9 @@ fun TracerouteLogScreen(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 16.dp),
     ) {
-        items(state.requests, key = { it.uuid }) { log ->
-            val result = remember(state.requests) {
-                state.results.find { it.decoded.requestId == log.fromRadio.packet.id }
+        items(state.tracerouteRequests, key = { it.uuid }) { log ->
+            val result = remember(state.tracerouteRequests) {
+                state.tracerouteResults.find { it.decoded.requestId == log.fromRadio.packet.id }
             }
             val route = remember(result) { result?.fullRouteDiscovery }
 
