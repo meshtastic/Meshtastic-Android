@@ -907,8 +907,8 @@ class MeshService : Service(), Logging {
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
         if (haveNodeDB) {
             processReceivedMeshPacket(packet.toBuilder().apply {
-                // If the rxTime is invalid (earlier than build time), update with current time
-                if (packet.rxTime < BuildConfig.TIMESTAMP) setRxTime(currentSecond())
+                // If the rxTime was not set by the device, update with current time
+                if (packet.rxTime == 0) setRxTime(currentSecond())
             }.build())
             onNodeDBChanged()
         } else {
