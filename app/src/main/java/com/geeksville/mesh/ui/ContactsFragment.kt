@@ -8,8 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
@@ -209,8 +209,8 @@ fun ContactListView(
     val haptics = LocalHapticFeedback.current
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(6.dp),
+            .fillMaxSize(),
+        contentPadding = PaddingValues(6.dp),
     ) {
         items(contacts, key = { it.contactKey }) { contact ->
             val selected by remember { derivedStateOf { selectedList.contains(contact.contactKey) } }
