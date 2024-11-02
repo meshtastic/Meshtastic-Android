@@ -61,6 +61,7 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.ui.components.DeviceMetricsScreen
 import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
+import com.geeksville.mesh.ui.components.PositionLogScreen
 import com.geeksville.mesh.ui.components.SignalMetricsScreen
 import com.geeksville.mesh.ui.components.TracerouteLogScreen
 import com.geeksville.mesh.ui.components.config.AmbientLightingConfigScreen
@@ -249,6 +250,10 @@ fun NavGraph(
         composable("DeviceMetrics") {
             val parentEntry = remember { navController.getBackStackEntry("NodeDetails") }
             DeviceMetricsScreen(hiltViewModel<MetricsViewModel>(parentEntry))
+        }
+        composable("PositionLog") {
+            val parentEntry = remember { navController.getBackStackEntry("NodeDetails") }
+            PositionLogScreen(hiltViewModel<MetricsViewModel>(parentEntry))
         }
         composable("EnvironmentMetrics") {
             val parentEntry = remember { navController.getBackStackEntry("NodeDetails") }

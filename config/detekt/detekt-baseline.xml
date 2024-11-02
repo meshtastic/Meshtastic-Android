@@ -1,6 +1,12 @@
 <?xml version="1.0" ?>
 <SmellBaseline>
-  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <ManuallySuppressedIssues>
+    <ID>MaxLineLength:MetricsViewModel.kt$MetricsViewModel$writer.appendLine("$rxDateTime,\"$latitude\",\"$longitude\",\"$altitude\",\"$satsInView\",\"$speed\",\"$heading\"")</ID>
+    <ID>MaxLineLength:MetricsViewModel.kt$MetricsViewModel$writer.appendLine("\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\",\"satsInView\",\"speed\",\"heading\"")</ID>
+    <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1000L</ID>
+    <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-7</ID>
+    <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-5</ID>
+  </ManuallySuppressedIssues>
   <CurrentIssues>
     <ID>ChainWrapping:Channel.kt$Channel$&amp;&amp;</ID>
     <ID>ChainWrapping:CustomTileSource.kt$CustomTileSource.Companion.&lt;no name provided&gt;$+</ID>

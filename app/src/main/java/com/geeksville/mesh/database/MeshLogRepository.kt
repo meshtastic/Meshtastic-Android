@@ -71,6 +71,10 @@ class MeshLogRepository @Inject constructor(private val meshLogDaoLazy: dagger.L
         meshLogDao.deleteLog(uuid)
     }
 
+    suspend fun deleteLogs(nodeNum: Int, portNum: Int) = withContext(Dispatchers.IO) {
+        meshLogDao.deleteLogs(nodeNum, portNum)
+    }
+
     companion object {
         private const val MAX_ITEMS = 500
         private const val MAX_MESH_PACKETS = 10000
