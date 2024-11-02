@@ -120,7 +120,7 @@ private fun NodeDetailList(
         if (node.hasEnvironmentMetrics) {
             item {
                 PreferenceCategory("Environment")
-                EnvironmentMetrics(node, metricsState.environmentDisplayFahrenheit)
+                EnvironmentMetrics(node, metricsState.isFahrenheit)
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
@@ -161,7 +161,7 @@ private fun NodeDetailList(
             NavCard(
                 title = stringResource(R.string.traceroute_logs),
                 icon = Icons.Default.Route,
-                enabled = metricsState.hasTracerouteLogs
+                enabled = metricsState.hasTracerouteLogs()
             ) {
                 onNavigate("TracerouteList")
             }

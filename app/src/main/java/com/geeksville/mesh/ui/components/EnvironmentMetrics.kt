@@ -83,7 +83,7 @@ fun EnvironmentMetricsScreen(
         return (celsius * 1.8F) + 32
     }
 
-    val processedTelemetries: List<Telemetry> = if (state.environmentDisplayFahrenheit) {
+    val processedTelemetries: List<Telemetry> = if (state.isFahrenheit) {
         state.environmentMetrics.map { telemetry ->
             val temperatureFahrenheit =
                 celsiusToFahrenheit(telemetry.environmentMetrics.temperature)
@@ -124,7 +124,7 @@ fun EnvironmentMetricsScreen(
             items(processedTelemetries) { telemetry ->
                 EnvironmentMetricsCard(
                     telemetry,
-                    state.environmentDisplayFahrenheit
+                    state.isFahrenheit
                 )
             }
         }
