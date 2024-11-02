@@ -70,11 +70,10 @@ class MetricsViewModel @Inject constructor(
     val tracerouteState = destNum.flatMapLatest { destNum ->
         combine(
             meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP_VALUE),
-            meshLogRepository.getMeshPacketsFrom(destNum),
+            meshLogRepository.getMeshPacketsFrom(destNum, PortNum.TRACEROUTE_APP_VALUE),
         ) { request, response ->
-            val test = request.filter { it.hasValidTraceroute() }
             TracerouteLogState(
-                requests = test,
+                requests = request.filter { it.hasValidTraceroute() },
                 results = response,
             )
         }
