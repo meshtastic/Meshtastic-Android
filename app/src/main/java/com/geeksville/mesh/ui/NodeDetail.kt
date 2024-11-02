@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.ChargingStation
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyOff
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Power
@@ -135,7 +136,7 @@ private fun NodeDetailList(
 
         item {
             NavCard(
-                title = stringResource(R.string.device_metrics_logs),
+                title = stringResource(R.string.device_metrics_log),
                 icon = Icons.Default.ChargingStation,
                 enabled = metricsState.hasDeviceMetrics()
             ) {
@@ -143,7 +144,13 @@ private fun NodeDetailList(
             }
 
             NavCard(
-                title = stringResource(R.string.env_metrics_logs),
+                title = stringResource(R.string.position_log),
+                icon = Icons.Default.LocationOn,
+                enabled = metricsState.hasPositionLogs()
+            ) { onNavigate("PositionLog") }
+
+            NavCard(
+                title = stringResource(R.string.env_metrics_log),
                 icon = Icons.Default.Thermostat,
                 enabled = metricsState.hasEnvironmentMetrics()
             ) {
@@ -151,7 +158,7 @@ private fun NodeDetailList(
             }
 
             NavCard(
-                title = stringResource(R.string.sig_metrics_logs),
+                title = stringResource(R.string.sig_metrics_log),
                 icon = Icons.Default.SignalCellularAlt,
                 enabled = metricsState.hasSignalMetrics()
             ) {
@@ -159,7 +166,7 @@ private fun NodeDetailList(
             }
 
             NavCard(
-                title = stringResource(R.string.traceroute_logs),
+                title = stringResource(R.string.traceroute_log),
                 icon = Icons.Default.Route,
                 enabled = metricsState.hasTracerouteLogs()
             ) {

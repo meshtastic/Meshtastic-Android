@@ -36,4 +36,7 @@ interface MeshLogDao {
 
     @Query("DELETE FROM log WHERE uuid = :uuid")
     fun deleteLog(uuid: String)
+
+    @Query("DELETE FROM log WHERE from_num = :fromNum AND port_num = :portNum")
+    fun deleteLogs(fromNum: Int, portNum: Int)
 }
