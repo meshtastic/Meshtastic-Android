@@ -97,10 +97,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         spinner.isEnabled = !model.isManaged
 
         // Update the status string (highest priority messages first)
+        val regionUnset = region == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
         val info = model.myNodeInfo.value
         when (connectionState) {
             MeshService.ConnectionState.CONNECTED ->
-                if (region.number == 0) R.string.must_set_region else R.string.connected_to
+                if (regionUnset) R.string.must_set_region else R.string.connected_to
             MeshService.ConnectionState.DISCONNECTED -> R.string.not_connected
             MeshService.ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
             else -> null
