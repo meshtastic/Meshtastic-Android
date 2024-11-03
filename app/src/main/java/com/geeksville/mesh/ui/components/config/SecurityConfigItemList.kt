@@ -109,7 +109,7 @@ fun SecurityConfigItemList(
         item {
             SwitchPreference(title = "Managed Mode",
                 checked = securityInput.isManaged,
-                enabled = enabled,
+                enabled = enabled && securityInput.adminKeyCount > 0,
                 onCheckedChange = {
                     securityInput = securityInput.copy { isManaged = it }
                 })
