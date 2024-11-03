@@ -368,7 +368,7 @@ private fun EnvironmentMetrics(
             InfoCard(
                 icon = Icons.Default.Bolt,
                 text = "Voltage",
-                value = "%.1fV".format(voltage)
+                value = "%.2fV".format(voltage)
             )
         }
         if (current != 0f) {
@@ -416,7 +416,7 @@ private fun PowerMetrics(node: NodeEntity) = with(node.powerMetrics) {
             InfoCard(
                 icon = Icons.Default.Bolt,
                 text = "Channel 1",
-                value = "%.1fV".format(ch1Voltage)
+                value = "%.2fV".format(ch1Voltage)
             )
         }
         if (ch1Current != 0f) {
@@ -430,7 +430,7 @@ private fun PowerMetrics(node: NodeEntity) = with(node.powerMetrics) {
             InfoCard(
                 icon = Icons.Default.Bolt,
                 text = "Channel 2",
-                value = "%.1fV".format(ch2Voltage)
+                value = "%.2fV".format(ch2Voltage)
             )
         }
         if (ch2Current != 0f) {
@@ -444,7 +444,7 @@ private fun PowerMetrics(node: NodeEntity) = with(node.powerMetrics) {
             InfoCard(
                 icon = Icons.Default.Bolt,
                 text = "Channel 3",
-                value = "%.1fV".format(ch3Voltage)
+                value = "%.2fV".format(ch3Voltage)
             )
         }
         if (ch3Current != 0f) {
