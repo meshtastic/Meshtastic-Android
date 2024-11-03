@@ -49,7 +49,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeoutOrNull
-import java.util.*
+import java.util.Random
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
@@ -686,8 +687,10 @@ class MeshService : Service(), Logging {
                     // Handle new style user info
                     Portnums.PortNum.NODEINFO_APP_VALUE ->
                         if (!fromUs) {
-                            val u = MeshProtos.User.parseFrom(data.payload)
-                                .copy { if (packet.viaMqtt) longName = "$longName (MQTT)" }
+                            val u = MeshProtos.User.parseFrom(data.payload).copy {
+                                if (isLicensed) clearPublicKey()
+                                if (packet.viaMqtt) longName = "$longName (MQTT)"
+                            }
                             handleReceivedUser(packet.from, u, packet.channel)
                         }
 
@@ -1386,7 +1389,10 @@ class MeshService : Service(), Logging {
         // Just replace/add any entry
         updateNodeInfo(info.num) {
             if (info.hasUser()) {
-                it.user = info.user.copy { if (info.viaMqtt) longName = "$longName (MQTT)" }
+                it.user = info.user.copy {
+                    if (isLicensed) clearPublicKey()
+                    if (info.viaMqtt) longName = "$longName (MQTT)"
+                }
                 it.longName = info.user.longName
                 it.shortName = info.user.shortName
             }
