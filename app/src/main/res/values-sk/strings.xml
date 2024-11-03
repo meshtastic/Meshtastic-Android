@@ -27,14 +27,14 @@
     <string name="routing_error_not_authorized">Neautorizované</string>
     <string name="routing_error_pki_failed">Zlyhalo šifrované odosielanie</string>
     <string name="routing_error_pki_unknown_pubkey">Neznámy verejný kľúč</string>
-    <string name="role_client">Pripojená aplikácia alebo samostatné zariadenie na odosielanie správ.</string>
+    <string name="role_client">Pripojená aplikácia, alebo samostatné zariadenie na odosielanie správ.</string>
     <string name="role_client_mute">Zariadenie, ktoré nepreposiela pakety z ďalších zariadení.</string>
     <string name="role_router">Uzol infraštruktúry na rozšírenie pokrytia siete prenosom správ. Viditeľný v zozname uzlov.</string>
     <string name="role_repeater">Uzol infraštruktúry na rozšírenie pokrytia siete prenosom správ s minimálnou réžiou. Nezobrazuje sa v zozname uzlov.</string>
     <string name="role_tracker">Prioritne vysiela pakety polohy GPS.</string>
     <string name="role_sensor">Prioritne vysiela telemetrické pakety.</string>
     <string name="role_tak">Optimalizované pre systémovú komunikáciu ATAK, znižuje rutinné vysielanie.</string>
-    <string name="role_client_hidden">Zariadenie, ktoré vysiela len podľa potreby pre utajenie alebo úsporu energie.</string>
+    <string name="role_client_hidden">Zariadenie, ktoré vysiela len podľa potreby pre utajenie, alebo úsporu energie.</string>
     <string name="role_lost_and_found">Pravidelne vysiela polohu ako správu na predvolený kanál, aby pomohol pri obnove zariadenia.</string>
     <string name="role_tak_tracker">Umožňuje automatické vysielanie TAK PLI a znižuje rutinné vysielanie.</string>
     <string name="channel_name">Názov kanála</string>
@@ -127,7 +127,7 @@
     <string name="background_required">Poloha na pozadí</string>
     <string name="why_background_required">Pre túto možnosť musíte povoliť prístup ku polohe zariadenia v režime \"Vždy povolené\".\nTáto možnosť povolí aplikácii Meshtastic zistiť polohu Vášho zariadenia a odoslať ju členom Vašej siete aj keď je aplikácia Meshtastic vypnutá alebo sa nepoužíva.</string>
     <string name="required_permissions">Požadované oprávnenia</string>
-    <string name="provide_location_to_mesh">Odoslať polohu telefónu do siete</string>
+    <string name="provide_location_to_mesh">Poskytnúť polohu telefónu do siete</string>
     <string name="camera_required">Práva pre prístup k fotoaparátu</string>
     <string name="why_camera_required">Aplikácia Meshtastic potrebuje práva pre prístup ku fotoaparátu kvôli možnosti načítania QR kódov. Fotky ani videá nebudú ukladané na Vašom Android zariadení.</string>
     <string name="notification_required">Povoliť upozornenia</string>
