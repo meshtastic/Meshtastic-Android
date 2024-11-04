@@ -278,7 +278,7 @@ fun BoundingBox.requiredZoomLevel(): Double {
     val latLonHeight = topLeft.distanceToAsDouble(GeoPoint(bottomRight.latitude, topLeft.longitude))
     val requiredLatZoom = log2(360.0 / (latLonHeight / 111320))
     val requiredLonZoom = log2(360.0 / (latLonWidth / 111320))
-    return maxOf(requiredLatZoom, requiredLonZoom)
+    return maxOf(requiredLatZoom, requiredLonZoom) * 0.8
 }
 
 /**

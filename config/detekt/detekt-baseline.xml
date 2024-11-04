@@ -1,12 +1,6 @@
 <?xml version="1.0" ?>
 <SmellBaseline>
-  <ManuallySuppressedIssues>
-    <ID>MaxLineLength:MetricsViewModel.kt$MetricsViewModel$writer.appendLine("$rxDateTime,\"$latitude\",\"$longitude\",\"$altitude\",\"$satsInView\",\"$speed\",\"$heading\"")</ID>
-    <ID>MaxLineLength:MetricsViewModel.kt$MetricsViewModel$writer.appendLine("\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\",\"satsInView\",\"speed\",\"heading\"")</ID>
-    <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1000L</ID>
-    <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-7</ID>
-    <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-5</ID>
-  </ManuallySuppressedIssues>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
   <CurrentIssues>
     <ID>ChainWrapping:Channel.kt$Channel$&amp;&amp;</ID>
     <ID>ChainWrapping:CustomTileSource.kt$CustomTileSource.Companion.&lt;no name provided&gt;$+</ID>
@@ -251,6 +245,7 @@
     <ID>MagicNumber:LocationRepository.kt$LocationRepository$1000L</ID>
     <ID>MagicNumber:LocationRepository.kt$LocationRepository$30</ID>
     <ID>MagicNumber:LocationRepository.kt$LocationRepository$31</ID>
+    <ID>MagicNumber:LocationUtils.kt$0.8</ID>
     <ID>MagicNumber:LocationUtils.kt$110540</ID>
     <ID>MagicNumber:LocationUtils.kt$111320</ID>
     <ID>MagicNumber:LocationUtils.kt$180</ID>
@@ -266,7 +261,6 @@
     <ID>MagicNumber:MainActivity.kt$MainActivity$30000</ID>
     <ID>MagicNumber:MainActivity.kt$MainActivity$5</ID>
     <ID>MagicNumber:MapFragment.kt$0.5f</ID>
-    <ID>MagicNumber:MapFragment.kt$0.8</ID>
     <ID>MagicNumber:MapFragment.kt$1.3</ID>
     <ID>MagicNumber:MapFragment.kt$1.5</ID>
     <ID>MagicNumber:MapFragment.kt$1000</ID>
@@ -288,10 +282,10 @@
     <ID>MagicNumber:MeshService.kt$MeshService$32</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$60000</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$8</ID>
-    <ID>MagicNumber:MessagesFragment.kt$1000L</ID>
-    <ID>MagicNumber:MessagesFragment.kt$24</ID>
-    <ID>MagicNumber:MessagesFragment.kt$60</ID>
     <ID>MagicNumber:MessagesFragment.kt$MessagesFragment$234</ID>
+    <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1000L</ID>
+    <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-5</ID>
+    <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-7</ID>
     <ID>MagicNumber:MockInterface.kt$MockInterface$1.5f</ID>
     <ID>MagicNumber:MockInterface.kt$MockInterface$1000</ID>
     <ID>MagicNumber:MockInterface.kt$MockInterface$16</ID>
@@ -431,6 +425,8 @@
     <ID>MaxLineLength:MeshService.kt$MeshService.Companion$// generate a RECEIVED action filter string that includes either the portnumber as an int, or preferably a symbolic name from portnums.proto</ID>
     <ID>MaxLineLength:MeshServiceBroadcasts.kt$MeshServiceBroadcasts$context.sendBroadcast(intent)</ID>
     <ID>MaxLineLength:MeshServiceNotifications.kt$MeshServiceNotifications$// If running on really old versions of android (&lt;= 5.1.1) (possibly only cyanogen) we might encounter a bug with setting application specific icons</ID>
+    <ID>MaxLineLength:MetricsViewModel.kt$MetricsViewModel$writer.appendLine("$rxDateTime,\"$latitude\",\"$longitude\",\"$altitude\",\"$satsInView\",\"$speed\",\"$heading\"")</ID>
+    <ID>MaxLineLength:MetricsViewModel.kt$MetricsViewModel$writer.appendLine("\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\",\"satsInView\",\"speed\",\"heading\"")</ID>
     <ID>MaxLineLength:NodeInfo.kt$NodeInfo$prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE &amp;&amp; dist &lt; 1609 -&gt; "%.0f ft".format(dist.toDouble()*3.281)</ID>
     <ID>MaxLineLength:NodeInfo.kt$NodeInfo$prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE &amp;&amp; dist &gt;= 1609 -&gt; "%.1f mi".format(dist / 1609.34)</ID>
     <ID>MaxLineLength:NodeInfo.kt$NodeInfo$prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE &amp;&amp; dist &lt; 1000 -&gt; "%.0f m".format(dist.toDouble())</ID>
@@ -511,7 +507,7 @@
     <ID>MultiLineIfElse:Logging.kt$Logging$printlog(Log.ERROR, tag(), "$msg")</ID>
     <ID>MultiLineIfElse:MapFragment.kt$&lt;no name provided&gt;$showEditWaypointDialog = waypoint { latitudeI = (p.latitude * 1e7).toInt() longitudeI = (p.longitude * 1e7).toInt() }</ID>
     <ID>MultiLineIfElse:MapFragment.kt$CacheLayout( cacheEstimate = cacheEstimate, onExecuteJob = { startDownload() }, onCancelDownload = { downloadRegionBoundingBox = null map.overlays.removeAll { it is Polygon } map.invalidate() }, modifier = Modifier.align(Alignment.BottomCenter) )</ID>
-    <ID>MultiLineIfElse:MapFragment.kt$Column( modifier = Modifier .padding(top = 16.dp, end = 16.dp) .align(Alignment.TopEnd), verticalArrangement = Arrangement.spacedBy(8.dp), ) { MapButton( onClick = { showMapStyleDialog() }, drawableRes = R.drawable.ic_twotone_layers_24, contentDescription = R.string.map_style_selection, ) MapButton( onClick = { if (context.hasLocationPermission()) { map.toggleMyLocation() } else { requestPermissionAndToggleLauncher.launch(context.getLocationPermissions()) } }, enabled = hasGps, drawableRes = if (myLocationOverlay == null) { R.drawable.ic_twotone_my_location_24 } else { R.drawable.ic_twotone_location_disabled_24 }, contentDescription = null, ) }</ID>
+    <ID>MultiLineIfElse:MapFragment.kt$Column( modifier = Modifier .padding(top = 16.dp, end = 16.dp) .align(Alignment.TopEnd), verticalArrangement = Arrangement.spacedBy(8.dp), ) { MapButton( onClick = ::showMapStyleDialog, icon = Icons.Outlined.Layers, contentDescription = R.string.map_style_selection, ) MapButton( enabled = hasGps, icon = if (myLocationOverlay == null) { Icons.Outlined.MyLocation } else { Icons.Default.LocationDisabled }, contentDescription = null, ) { if (context.hasLocationPermission()) { map.toggleMyLocation() } else { requestPermissionAndToggleLauncher.launch(context.getLocationPermissions()) } } }</ID>
     <ID>MultiLineIfElse:MapViewWithLifecycle.kt$try { acquire() } catch (e: SecurityException) { errormsg("WakeLock permission exception: ${e.message}") } catch (e: IllegalStateException) { errormsg("WakeLock acquire() exception: ${e.message}") }</ID>
     <ID>MultiLineIfElse:MapViewWithLifecycle.kt$try { release() } catch (e: IllegalStateException) { errormsg("WakeLock release() exception: ${e.message}") }</ID>
     <ID>MultiLineIfElse:MeshService.kt$MeshService$getDataPacketById(packetId)?.let { p -&gt; if (p.status == m) return@handledLaunch packetRepository.get().updateMessageStatus(p, m) serviceBroadcasts.broadcastMessageStatus(packetId, m) }</ID>
@@ -608,13 +604,11 @@
     <ID>NoConsecutiveBlankLines:BluetoothInterface.kt$ </ID>
     <ID>NoConsecutiveBlankLines:BluetoothInterface.kt$BluetoothInterface$ </ID>
     <ID>NoConsecutiveBlankLines:BootCompleteReceiver.kt$ </ID>
-    <ID>NoConsecutiveBlankLines:CommonCharts.kt$ </ID>
     <ID>NoConsecutiveBlankLines:Constants.kt$ </ID>
     <ID>NoConsecutiveBlankLines:CustomTileSource.kt$ </ID>
     <ID>NoConsecutiveBlankLines:CustomTileSource.kt$CustomTileSource.Companion$ </ID>
     <ID>NoConsecutiveBlankLines:DebugLogFile.kt$ </ID>
     <ID>NoConsecutiveBlankLines:DeferredExecution.kt$ </ID>
-    <ID>NoConsecutiveBlankLines:EnvironmentMetrics.kt$ </ID>
     <ID>NoConsecutiveBlankLines:Exceptions.kt$ </ID>
     <ID>NoConsecutiveBlankLines:IRadioInterface.kt$ </ID>
     <ID>NoConsecutiveBlankLines:NOAAWmsTileSource.kt$NOAAWmsTileSource$ </ID>

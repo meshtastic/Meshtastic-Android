@@ -507,7 +507,7 @@ fun MapView(
             val geoPoints = model.nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
             val box = BoundingBox.fromGeoPoints(geoPoints)
             val center = GeoPoint(box.centerLatitude, box.centerLongitude)
-            val finalZoomLevel = minOf(box.requiredZoomLevel() * 0.8, maxZoomLevel)
+            val finalZoomLevel = minOf(box.requiredZoomLevel(), maxZoomLevel)
             controller.setCenter(center)
             controller.setZoom(finalZoomLevel)
         } else {
