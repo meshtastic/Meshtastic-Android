@@ -271,8 +271,11 @@ class MainActivity : AppCompatActivity(), Logging {
             }
 
             MeshServiceNotifications.OPEN_MESSAGE_ACTION -> {
-                val contactKey = intent.getStringExtra(MeshServiceNotifications.OPEN_MESSAGE_EXTRA_CONTACT_KEY)
-                showMessages(contactKey)
+                val contactKey =
+                    intent.getStringExtra(MeshServiceNotifications.OPEN_MESSAGE_EXTRA_CONTACT_KEY)
+                val contactName =
+                    intent.getStringExtra(MeshServiceNotifications.OPEN_MESSAGE_EXTRA_CONTACT_NAME)
+                showMessages(contactKey, contactName)
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
@@ -604,8 +607,11 @@ class MainActivity : AppCompatActivity(), Logging {
         binding.pager.currentItem = 5
     }
 
-    private fun showMessages(contactKey: String?) {
+    private fun showMessages(contactKey: String?, contactName: String?) {
         model.setCurrentTab(0)
+        if (contactKey != null && contactName != null) {
+            supportFragmentManager.navigateToMessages(contactKey, contactName)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

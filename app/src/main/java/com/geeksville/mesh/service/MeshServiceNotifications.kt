@@ -32,6 +32,8 @@ class MeshServiceNotifications(
         private const val FIFTEEN_MINUTES_IN_MILLIS = 15L * 60 * 1000
         const val OPEN_MESSAGE_ACTION = "com.geeksville.mesh.OPEN_MESSAGE_ACTION"
         const val OPEN_MESSAGE_EXTRA_CONTACT_KEY = "com.geeksville.mesh.OPEN_MESSAGE_EXTRA_CONTACT_KEY"
+        const val OPEN_MESSAGE_EXTRA_CONTACT_NAME =
+            "com.geeksville.mesh.OPEN_MESSAGE_EXTRA_CONTACT_NAME"
     }
 
     private val notificationManager: NotificationManager get() = context.notificationManager
@@ -169,7 +171,7 @@ class MeshServiceNotifications(
 
     fun updateMessageNotification(contactKey: String, name: String, message: String) =
         notificationManager.notify(
-            name.hashCode(), // show unique notifications,
+            contactKey.hashCode(), // show unique notifications,
             createMessageNotification(contactKey, name, message)
         )
 
@@ -189,12 +191,12 @@ class MeshServiceNotifications(
         )
     }
 
-    private fun openMessageIntent(contactKey: String? = null): PendingIntent {
+    private fun openMessageIntent(contactKey: String, contactName: String): PendingIntent {
         val intent = Intent(context, MainActivity::class.java)
         intent.action = OPEN_MESSAGE_ACTION
-        contactKey?.let {
-            intent.putExtra(OPEN_MESSAGE_EXTRA_CONTACT_KEY, it)
-        }
+        intent.putExtra(OPEN_MESSAGE_EXTRA_CONTACT_KEY, contactKey)
+        intent.putExtra(OPEN_MESSAGE_EXTRA_CONTACT_NAME, contactName)
+
         val pendingIntent = PendingIntent.getActivity(
             context,
             0,
@@ -269,7 +271,7 @@ class MeshServiceNotifications(
         }
         val person = Person.Builder().setName(name).build()
         with(messageNotificationBuilder) {
-            setContentIntent(openMessageIntent(contactKey))
+            setContentIntent(openMessageIntent(contactKey, name))
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_MESSAGE)
             setAutoCancel(true)
