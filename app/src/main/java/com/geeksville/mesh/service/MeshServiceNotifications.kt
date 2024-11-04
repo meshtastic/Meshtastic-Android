@@ -12,6 +12,7 @@ import android.media.RingtoneManager
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.core.app.Person
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.LocalStats
@@ -29,13 +30,16 @@ class MeshServiceNotifications(
 
     companion object {
         private const val FIFTEEN_MINUTES_IN_MILLIS = 15L * 60 * 1000
+        const val OPEN_MESSAGE_ACTION = "com.geeksville.mesh.OPEN_MESSAGE_ACTION"
+        const val OPEN_MESSAGE_EXTRA_CONTACT_KEY = "com.geeksville.mesh.OPEN_MESSAGE_EXTRA_CONTACT_KEY"
+        const val OPEN_MESSAGE_EXTRA_CONTACT_NAME =
+            "com.geeksville.mesh.OPEN_MESSAGE_EXTRA_CONTACT_NAME"
     }
 
     private val notificationManager: NotificationManager get() = context.notificationManager
 
     // We have two notification channels: one for general service status and another one for messages
     val notifyId = 101
-    private val messageNotifyId = 102
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(): String {
@@ -165,10 +169,10 @@ class MeshServiceNotifications(
         )
     }
 
-    fun updateMessageNotification(name: String, message: String) =
+    fun updateMessageNotification(contactKey: String, name: String, message: String) =
         notificationManager.notify(
-            messageNotifyId,
-            createMessageNotification(name, message)
+            contactKey.hashCode(), // show unique notifications,
+            createMessageNotification(contactKey, name, message)
         )
 
     fun showNewNodeSeenNotification(node: NodeEntity) {
@@ -185,6 +189,21 @@ class MeshServiceNotifications(
             Intent(context, MainActivity::class.java),
             PendingIntentCompat.FLAG_IMMUTABLE
         )
+    }
+
+    private fun openMessageIntent(contactKey: String, contactName: String): PendingIntent {
+        val intent = Intent(context, MainActivity::class.java)
+        intent.action = OPEN_MESSAGE_ACTION
+        intent.putExtra(OPEN_MESSAGE_EXTRA_CONTACT_KEY, contactKey)
+        intent.putExtra(OPEN_MESSAGE_EXTRA_CONTACT_NAME, contactName)
+
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            0,
+            intent,
+            PendingIntentCompat.FLAG_IMMUTABLE
+        )
+        return pendingIntent
     }
 
     private fun commonBuilder(channel: String): NotificationCompat.Builder {
@@ -246,22 +265,19 @@ class MeshServiceNotifications(
     }
 
     lateinit var messageNotificationBuilder: NotificationCompat.Builder
-    private fun createMessageNotification(name: String, message: String): Notification {
+    private fun createMessageNotification(contactKey: String, name: String, message: String): Notification {
         if (!::messageNotificationBuilder.isInitialized) {
             messageNotificationBuilder = commonBuilder(messageChannelId)
         }
+        val person = Person.Builder().setName(name).build()
         with(messageNotificationBuilder) {
+            setContentIntent(openMessageIntent(contactKey, name))
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_MESSAGE)
             setAutoCancel(true)
-            setContentTitle(name)
-            setContentText(message)
             setStyle(
-                NotificationCompat.BigTextStyle()
-                    .bigText(message),
+                NotificationCompat.MessagingStyle(person).addMessage(message, System.currentTimeMillis(), person)
             )
-            setWhen(System.currentTimeMillis())
-            setShowWhen(true)
         }
         return messageNotificationBuilder.build()
     }

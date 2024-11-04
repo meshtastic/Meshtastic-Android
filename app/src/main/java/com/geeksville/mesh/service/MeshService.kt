@@ -247,7 +247,7 @@ class MeshService : Service(), Logging {
         startPacketQueue()
     }
 
-    private fun updateMessageNotification(dataPacket: DataPacket) {
+    private fun updateMessageNotification(contactKey: String, dataPacket: DataPacket) {
         val message: String = when (dataPacket.dataType) {
             Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> dataPacket.text!!
             Portnums.PortNum.WAYPOINT_APP_VALUE -> {
@@ -256,7 +256,7 @@ class MeshService : Service(), Logging {
 
             else -> return
         }
-        serviceNotifications.updateMessageNotification(getSenderName(dataPacket), message)
+        serviceNotifications.updateMessageNotification(contactKey, getSenderName(dataPacket), message)
     }
 
     override fun onCreate() {
@@ -627,7 +627,7 @@ class MeshService : Service(), Logging {
             packetRepository.get().apply {
                 insert(packetToSave)
                 val isMuted = getContactSettings(contactKey).isMuted
-                if (updateNotification && !isMuted) updateMessageNotification(dataPacket)
+                if (updateNotification && !isMuted) updateMessageNotification(contactKey, dataPacket)
             }
         }
     }
