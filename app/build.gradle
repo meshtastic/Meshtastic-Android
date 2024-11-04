@@ -27,7 +27,7 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
-    compileSdk 34
+    compileSdk 35
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
