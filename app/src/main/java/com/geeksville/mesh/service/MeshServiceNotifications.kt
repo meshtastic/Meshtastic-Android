@@ -12,6 +12,7 @@ import android.media.RingtoneManager
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
+import androidx.core.app.Person
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.LocalStats
@@ -35,7 +36,6 @@ class MeshServiceNotifications(
 
     // We have two notification channels: one for general service status and another one for messages
     val notifyId = 101
-    private val messageNotifyId = 102
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(): String {
@@ -167,7 +167,7 @@ class MeshServiceNotifications(
 
     fun updateMessageNotification(name: String, message: String) =
         notificationManager.notify(
-            messageNotifyId,
+            name.hashCode(), // show unique notifications,
             createMessageNotification(name, message)
         )
 
@@ -250,18 +250,14 @@ class MeshServiceNotifications(
         if (!::messageNotificationBuilder.isInitialized) {
             messageNotificationBuilder = commonBuilder(messageChannelId)
         }
+        val person = Person.Builder().setName(name).build()
         with(messageNotificationBuilder) {
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_MESSAGE)
             setAutoCancel(true)
-            setContentTitle(name)
-            setContentText(message)
             setStyle(
-                NotificationCompat.BigTextStyle()
-                    .bigText(message),
+                NotificationCompat.MessagingStyle(person).addMessage(message, System.currentTimeMillis(), person)
             )
-            setWhen(System.currentTimeMillis())
-            setShowWhen(true)
         }
         return messageNotificationBuilder.build()
     }
