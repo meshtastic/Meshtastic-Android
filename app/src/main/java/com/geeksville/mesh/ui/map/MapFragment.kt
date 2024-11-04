@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
@@ -85,6 +86,7 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import com.geeksville.mesh.model.map.clustering.RadiusMarkerClusterer
 import com.geeksville.mesh.util.addCopyright
 import com.geeksville.mesh.util.addMapEventListener
+import com.geeksville.mesh.util.addScaleBarOverlay
 import com.geeksville.mesh.util.createLatLongGrid
 import java.io.File
 import java.text.DateFormat
@@ -230,6 +232,7 @@ fun MapView(
     var myLocationOverlay: MyLocationNewOverlay? by remember { mutableStateOf(null) }
 
     val context = LocalContext.current
+    val density = LocalDensity.current
     val mPrefs = remember { context.getSharedPreferences(prefsName, Context.MODE_PRIVATE) }
 
     val haptic = LocalHapticFeedback.current
@@ -441,6 +444,7 @@ fun MapView(
         }
 
         addCopyright() // Copyright is required for certain map sources
+        addScaleBarOverlay(density)
         createLatLongGrid(false)
 
         invalidate()

@@ -2,12 +2,17 @@ package com.geeksville.mesh.util
 
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Typeface
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.osmdroid.events.DelayedMapListener
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.CopyrightOverlay
+import org.osmdroid.views.overlay.ScaleBarOverlay
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 
 /**
@@ -42,6 +47,23 @@ fun MapView.createLatLongGrid(enabled: Boolean) {
         latLongGridOverlay.setLineWidth(3.0f)
         latLongGridOverlay.setLineColor(Color.GRAY)
         overlays.add(latLongGridOverlay)
+    }
+}
+
+fun MapView.addScaleBarOverlay(density: Density) {
+    if (overlays.none { it is ScaleBarOverlay }) {
+        val scaleBarOverlay = ScaleBarOverlay(this).apply {
+            setAlignBottom(true)
+            with(density) {
+                setScaleBarOffset(15.dp.toPx().toInt(), 40.dp.toPx().toInt())
+                setTextSize(12.sp.toPx())
+            }
+            textPaint.apply {
+                isAntiAlias = true
+                typeface = Typeface.DEFAULT_BOLD
+            }
+        }
+        overlays.add(scaleBarOverlay)
     }
 }
 
