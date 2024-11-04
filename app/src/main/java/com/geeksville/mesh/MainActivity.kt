@@ -270,6 +270,11 @@ class MainActivity : AppCompatActivity(), Logging {
                 // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
             }
 
+            MeshServiceNotifications.OPEN_MESSAGE_ACTION -> {
+                val contactKey = intent.getStringExtra(MeshServiceNotifications.OPEN_MESSAGE_EXTRA_CONTACT_KEY)
+                showMessages(contactKey)
+            }
+
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
                 showSettingsPage()
             }
@@ -597,6 +602,10 @@ class MainActivity : AppCompatActivity(), Logging {
 
     private fun showSettingsPage() {
         binding.pager.currentItem = 5
+    }
+
+    private fun showMessages(contactKey: String?) {
+        model.setCurrentTab(0)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
