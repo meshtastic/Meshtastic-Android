@@ -16,6 +16,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationDisabled
+import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -691,26 +695,25 @@ fun MapView(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 MapButton(
-                    onClick = { showMapStyleDialog() },
-                    drawableRes = R.drawable.ic_twotone_layers_24,
+                    onClick = ::showMapStyleDialog,
+                    icon = Icons.Outlined.Layers,
                     contentDescription = R.string.map_style_selection,
                 )
                 MapButton(
-                    onClick = {
-                        if (context.hasLocationPermission()) {
-                            map.toggleMyLocation()
-                        } else {
-                            requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
-                        }
-                    },
                     enabled = hasGps,
-                    drawableRes = if (myLocationOverlay == null) {
-                        R.drawable.ic_twotone_my_location_24
+                    icon = if (myLocationOverlay == null) {
+                        Icons.Outlined.MyLocation
                     } else {
-                        R.drawable.ic_twotone_location_disabled_24
+                        Icons.Default.LocationDisabled
                     },
                     contentDescription = null,
-                )
+                ) {
+                    if (context.hasLocationPermission()) {
+                        map.toggleMyLocation()
+                    } else {
+                        requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+                    }
+                }
             }
         }
     }

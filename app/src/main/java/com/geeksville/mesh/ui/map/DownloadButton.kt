@@ -8,10 +8,11 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.geeksville.mesh.R
 
@@ -36,8 +37,8 @@ internal fun DownloadButton(
             backgroundColor = MaterialTheme.colors.primary,
         ) {
             Icon(
-                painterResource(R.drawable.ic_twotone_download_24),
-                stringResource(R.string.map_download_region),
+                imageVector = Icons.Default.Download,
+                contentDescription = stringResource(R.string.map_download_region),
                 modifier = Modifier.scale(1.25f),
             )
         }
