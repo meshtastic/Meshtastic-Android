@@ -1,8 +1,6 @@
 package com.geeksville.mesh.ui.map
 
 import android.content.Context
-import android.graphics.Color
-import android.graphics.Paint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -66,7 +64,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
-import org.osmdroid.events.DelayedMapListener
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
@@ -80,14 +77,15 @@ import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.CopyrightOverlay
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
-import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import com.geeksville.mesh.model.map.clustering.RadiusMarkerClusterer
+import com.geeksville.mesh.util.addCopyright
+import com.geeksville.mesh.util.addMapEventListener
+import com.geeksville.mesh.util.createLatLongGrid
 import java.io.File
 import java.text.DateFormat
 
@@ -125,41 +123,6 @@ private fun MapView.UpdateMarkers(
     nodeClusterer.items.clear()
     nodeClusterer.items.addAll(nodeMarkers)
     nodeClusterer.invalidate()
-}
-
-/**
- * Adds copyright to map depending on what source is showing
- */
-private fun MapView.addCopyright() {
-    if (overlays.none { it is CopyrightOverlay }) {
-        val copyrightNotice: String = tileProvider.tileSource.copyrightNotice ?: return
-        val copyrightOverlay = CopyrightOverlay(context)
-        copyrightOverlay.setCopyrightNotice(copyrightNotice)
-        overlays.add(copyrightOverlay)
-    }
-}
-
-/**
- * Create LatLong Grid line overlay
- * @param enabled: turn on/off gridlines
- */
-private fun MapView.createLatLongGrid(enabled: Boolean) {
-    val latLongGridOverlay = LatLonGridlineOverlay2()
-    latLongGridOverlay.isEnabled = enabled
-    if (latLongGridOverlay.isEnabled) {
-        val textPaint = Paint().apply {
-            textSize = 40f
-            color = Color.GRAY
-            isAntiAlias = true
-            isFakeBoldText = true
-            textAlign = Paint.Align.CENTER
-        }
-        latLongGridOverlay.textPaint = textPaint
-        latLongGridOverlay.setBackgroundColor(Color.TRANSPARENT)
-        latLongGridOverlay.setLineWidth(3.0f)
-        latLongGridOverlay.setLineColor(Color.GRAY)
-        overlays.add(latLongGridOverlay)
-    }
 }
 
 //    private fun addWeatherLayer() {
@@ -244,21 +207,6 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
     }
     builder.setNegativeButton(R.string.cancel) { dialog, _ -> dialog.cancel() }
     builder.show()
-}
-
-private const val INACTIVITY_DELAY_MILLIS = 500L
-private fun MapView.addMapEventListener(onEvent: () -> Unit) {
-    addMapListener(DelayedMapListener(object : MapListener {
-        override fun onScroll(event: ScrollEvent): Boolean {
-            onEvent()
-            return true
-        }
-
-        override fun onZoom(event: ZoomEvent): Boolean {
-            onEvent()
-            return true
-        }
-    }, INACTIVITY_DELAY_MILLIS))
 }
 
 private const val MaxZoomLevel = 20.0
