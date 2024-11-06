@@ -23,6 +23,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
@@ -60,7 +61,6 @@ private fun RowScope.PositionText(text: String, weight: Float) {
     Text(
         text = text,
         modifier = Modifier.weight(weight),
-        fontSize = MaterialTheme.typography.caption.fontSize,
         textAlign = TextAlign.Center,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
@@ -70,7 +70,7 @@ private fun RowScope.PositionText(text: String, weight: Float) {
 private const val Weight10 = .10f
 private const val Weight15 = .15f
 private const val Weight20 = .20f
-private const val Weight35 = .35f
+private const val Weight40 = .40f
 
 @Composable
 private fun HeaderItem(compactWidth: Boolean) {
@@ -85,10 +85,10 @@ private fun HeaderItem(compactWidth: Boolean) {
         PositionText("Sats", Weight10)
         PositionText("Alt", Weight15)
         if (!compactWidth) {
-            PositionText("Speed", Weight10)
-            PositionText("Heading", Weight10)
+            PositionText("Speed", Weight15)
+            PositionText("Heading", Weight15)
         }
-        PositionText("Timestamp", Weight35)
+        PositionText("Timestamp", Weight40)
     }
 }
 
@@ -106,7 +106,7 @@ private fun PositionItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 2.dp, horizontal = 8.dp),
+            .padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         PositionText("%.5f".format(position.latitudeI * DegD), Weight20)
@@ -114,10 +114,10 @@ private fun PositionItem(
         PositionText(position.satsInView.toString(), Weight10)
         PositionText(position.altitude.metersIn(system).toString(system), Weight15)
         if (!compactWidth) {
-            PositionText("${position.groundSpeed} Km/h", Weight10)
-            PositionText("%.0f°".format(position.groundTrack * HeadingDeg), Weight10)
+            PositionText("${position.groundSpeed} Km/h", Weight15)
+            PositionText("%.0f°".format(position.groundTrack * HeadingDeg), Weight15)
         }
-        PositionText(dateFormat.format(position.time * SecondsToMillis), Weight35)
+        PositionText(dateFormat.format(position.time * SecondsToMillis), Weight40)
     }
 }
 
@@ -196,9 +196,15 @@ fun PositionLogScreen(
     BoxWithConstraints {
         val compactWidth = maxWidth < 600.dp
         Column {
-            HeaderItem(compactWidth)
-
-            PositionList(compactWidth, state.positionLogs, state.displayUnits)
+            val textStyle = if (compactWidth) {
+                MaterialTheme.typography.caption
+            } else {
+                LocalTextStyle.current
+            }
+            CompositionLocalProvider(LocalTextStyle provides textStyle) {
+                HeaderItem(compactWidth)
+                PositionList(compactWidth, state.positionLogs, state.displayUnits)
+            }
 
             ActionButtons(
                 clearButtonEnabled = clearButtonEnabled,
