@@ -45,7 +45,7 @@ fun signalInfo(
                     add("RSSI: %d SNR: %.1f".format(node.rssi, node.snr))
                 }
             }
-            add(hopsString)
+            if (node.hopsAway != 0) add(hopsString)
         }.joinToString(" | ")
     }
     return if (text.isNotEmpty()) {
