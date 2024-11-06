@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyOff
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Power
@@ -100,7 +101,6 @@ fun NodeDetailScreen(
     }
 }
 
-@Suppress("LongMethod")
 @Composable
 private fun NodeDetailList(
     node: NodeEntity,
@@ -135,50 +135,20 @@ private fun NodeDetailList(
         }
 
         item {
-            NavCard(
-                title = stringResource(R.string.device_metrics_log),
-                icon = Icons.Default.ChargingStation,
-                enabled = metricsState.hasDeviceMetrics()
-            ) {
-                onNavigate("DeviceMetrics")
-            }
+            PreferenceCategory(stringResource(id = R.string.logs))
+            LogNavigationList(metricsState, onNavigate)
+        }
 
-            NavCard(
-                title = stringResource(R.string.position_log),
-                icon = Icons.Default.LocationOn,
-                enabled = metricsState.hasPositionLogs()
-            ) { onNavigate("PositionLog") }
-
-            NavCard(
-                title = stringResource(R.string.env_metrics_log),
-                icon = Icons.Default.Thermostat,
-                enabled = metricsState.hasEnvironmentMetrics()
-            ) {
-                onNavigate("EnvironmentMetrics")
-            }
-
-            NavCard(
-                title = stringResource(R.string.sig_metrics_log),
-                icon = Icons.Default.SignalCellularAlt,
-                enabled = metricsState.hasSignalMetrics()
-            ) {
-                onNavigate("SignalMetrics")
-            }
-
-            NavCard(
-                title = stringResource(R.string.traceroute_log),
-                icon = Icons.Default.Route,
-                enabled = metricsState.hasTracerouteLogs()
-            ) {
-                onNavigate("TracerouteList")
-            }
-
-            NavCard(
-                title = "Remote Administration",
-                icon = Icons.Default.Settings,
-                enabled = !metricsState.isManaged
-            ) {
-                onNavigate("RadioConfig")
+        if (!metricsState.isManaged) {
+            item {
+                PreferenceCategory(stringResource(id = R.string.administration))
+                NavCard(
+                    title = stringResource(id = R.string.remote_admin),
+                    icon = Icons.Default.Settings,
+                    enabled = true
+                ) {
+                    onNavigate("RadioConfig")
+                }
             }
         }
     }
@@ -258,6 +228,57 @@ private fun NodeDetailsContent(node: NodeEntity) {
         icon = Icons.Default.History,
         value = formatAgo(node.lastHeard)
     )
+}
+
+@Composable
+fun LogNavigationList(state: MetricsState, onNavigate: (String) -> Unit) {
+    NavCard(
+        title = stringResource(R.string.device_metrics_log),
+        icon = Icons.Default.ChargingStation,
+        enabled = state.hasDeviceMetrics()
+    ) {
+        onNavigate("DeviceMetrics")
+    }
+
+    NavCard(
+        title = stringResource(R.string.node_map),
+        icon = Icons.Default.Map,
+        enabled = state.hasPositionLogs()
+    ) {
+        onNavigate("NodeMap")
+    }
+
+    NavCard(
+        title = stringResource(R.string.position_log),
+        icon = Icons.Default.LocationOn,
+        enabled = state.hasPositionLogs()
+    ) {
+        onNavigate("PositionLog")
+    }
+
+    NavCard(
+        title = stringResource(R.string.env_metrics_log),
+        icon = Icons.Default.Thermostat,
+        enabled = state.hasEnvironmentMetrics()
+    ) {
+        onNavigate("EnvironmentMetrics")
+    }
+
+    NavCard(
+        title = stringResource(R.string.sig_metrics_log),
+        icon = Icons.Default.SignalCellularAlt,
+        enabled = state.hasSignalMetrics()
+    ) {
+        onNavigate("SignalMetrics")
+    }
+
+    NavCard(
+        title = stringResource(R.string.traceroute_log),
+        icon = Icons.Default.Route,
+        enabled = state.hasTracerouteLogs()
+    ) {
+        onNavigate("TracerouteList")
+    }
 }
 
 @Composable
