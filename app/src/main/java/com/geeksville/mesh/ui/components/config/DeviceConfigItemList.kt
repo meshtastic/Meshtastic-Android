@@ -45,6 +45,17 @@ private val DeviceConfig.Role.stringRes: Int
         else -> R.string.unrecognized
     }
 
+private val DeviceConfig.RebroadcastMode.stringRes: Int
+    get() = when (this) {
+        DeviceConfig.RebroadcastMode.ALL -> R.string.rebroadcast_mode_all
+        DeviceConfig.RebroadcastMode.ALL_SKIP_DECODING -> R.string.rebroadcast_mode_all_skip_decoding
+        DeviceConfig.RebroadcastMode.LOCAL_ONLY -> R.string.rebroadcast_mode_local_only
+        DeviceConfig.RebroadcastMode.KNOWN_ONLY -> R.string.rebroadcast_mode_known_only
+        DeviceConfig.RebroadcastMode.NONE -> R.string.rebroadcast_mode_none
+        DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY -> R.string.rebroadcast_mode_core_portnums_only
+        else -> R.string.unrecognized
+    }
+
 @Composable
 fun DeviceConfigScreen(
     viewModel: RadioConfigViewModel = hiltViewModel(),
@@ -83,14 +94,13 @@ fun DeviceConfigItemList(
         item { PreferenceCategory(text = "Device Config") }
 
         item {
-            DropDownPreference(title = "Role",
-                summary = stringResource(id = deviceInput.role.stringRes),
+            DropDownPreference(
+                title = "Role",
                 enabled = enabled,
-                items = DeviceConfig.Role.entries
-                    .filter { it != DeviceConfig.Role.UNRECOGNIZED }
-                    .map { it to it.name },
                 selectedItem = deviceInput.role,
-                onItemSelected = { deviceInput = deviceInput.copy { role = it } })
+                onItemSelected = { deviceInput = deviceInput.copy { role = it } },
+                summary = stringResource(id = deviceInput.role.stringRes),
+            )
         }
         item { Divider() }
 
@@ -115,13 +125,13 @@ fun DeviceConfigItemList(
         }
 
         item {
-            DropDownPreference(title = "Rebroadcast mode",
+            DropDownPreference(
+                title = "Rebroadcast mode",
                 enabled = enabled,
-                items = DeviceConfig.RebroadcastMode.entries
-                    .filter { it != DeviceConfig.RebroadcastMode.UNRECOGNIZED }
-                    .map { it to it.name },
                 selectedItem = deviceInput.rebroadcastMode,
-                onItemSelected = { deviceInput = deviceInput.copy { rebroadcastMode = it } })
+                onItemSelected = { deviceInput = deviceInput.copy { rebroadcastMode = it } },
+                summary = stringResource(id = deviceInput.rebroadcastMode.stringRes),
+            )
         }
         item { Divider() }
 

@@ -23,6 +23,27 @@ import com.geeksville.mesh.R
 import com.google.protobuf.ProtocolMessageEnum
 
 @Composable
+fun <T : Enum<T>> DropDownPreference(
+    title: String,
+    enabled: Boolean,
+    selectedItem: T,
+    onItemSelected: (T) -> Unit,
+    modifier: Modifier = Modifier,
+    summary: String? = null,
+) {
+    DropDownPreference(
+        title = title,
+        enabled = enabled,
+        items = selectedItem.declaringJavaClass.enumConstants
+            ?.filter { it.name != "UNRECOGNIZED" }?.map { it to it.name } ?: emptyList(),
+        selectedItem = selectedItem,
+        onItemSelected = onItemSelected,
+        modifier = modifier,
+        summary = summary,
+    )
+}
+
+@Composable
 fun <T> DropDownPreference(
     title: String,
     enabled: Boolean,
