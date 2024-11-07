@@ -9,6 +9,10 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.geeksville.mesh.R
@@ -26,14 +30,44 @@ fun NodeMenu(
     isConnected: Boolean = false,
 ) {
     val isIgnored = ignoreIncomingList.contains(node.num)
-
+    var displayIgnoreDialog by remember { mutableStateOf(false) }
+    var displayRemoveDialog by remember { mutableStateOf(false) }
+    if (displayIgnoreDialog) {
+        SimpleAlertDialog(
+            title = R.string.ignore,
+            text = stringResource(
+                id = if (isIgnored) R.string.ignore_remove else R.string.ignore_add,
+                node.user.longName
+            ),
+            onConfirm = {
+                displayIgnoreDialog = false
+                onMenuItemAction(MenuItemAction.Ignore)
+            },
+            onDismiss = {
+                displayIgnoreDialog = false
+            }
+        )
+    }
+    if (displayRemoveDialog) {
+        SimpleAlertDialog(
+            title = R.string.remove,
+            text = R.string.remove_node_text,
+            onConfirm = {
+                displayRemoveDialog = false
+                onMenuItemAction(MenuItemAction.Remove)
+            },
+            onDismiss = {
+                displayRemoveDialog = false
+            }
+        )
+    }
     DropdownMenu(
         modifier = Modifier.background(MaterialTheme.colors.background.copy(alpha = 1f)),
         expanded = expanded,
         onDismissRequest = onDismissRequest,
     ) {
 
-        if (!isThisNode && !isConnected) {
+        if (!isThisNode && isConnected) {
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
@@ -69,7 +103,7 @@ fun NodeMenu(
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
-                    onMenuItemAction(MenuItemAction.Remove)
+                    displayRemoveDialog = true
                 },
                 content = { Text(stringResource(R.string.remove)) },
                 enabled = ignoreIncomingList.size < 3 || isIgnored
@@ -78,7 +112,7 @@ fun NodeMenu(
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
-                    onMenuItemAction(MenuItemAction.Ignore)
+                    displayIgnoreDialog = true
                 },
                 content = {
                     Text(stringResource(R.string.ignore))
@@ -86,8 +120,8 @@ fun NodeMenu(
                         colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary),
                         checked = isIgnored,
                         onCheckedChange = {
-                            onDismissRequest
-                            onMenuItemAction(MenuItemAction.Ignore)
+                            onDismissRequest()
+                            displayIgnoreDialog = true
                         },
                     )
                 },

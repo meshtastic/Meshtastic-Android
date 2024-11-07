@@ -14,26 +14,20 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.activityViewModels
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ar.com.hjg.pngj.PngHelperInternal.debug
 import com.geeksville.mesh.DataPacket
-import com.geeksville.mesh.R
-import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.components.MenuItemAction
 import com.geeksville.mesh.ui.components.NodeFilterTextField
-import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.components.rememberTimeTickWithLifecycle
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -103,49 +97,6 @@ fun NodesScreen(
 
     val currentTimeMillis = rememberTimeTickWithLifecycle()
 
-    var displayIgnoreDialogForNode: NodeEntity? by remember { mutableStateOf(null) }
-    var displayRemoveDialogForNode: NodeEntity? by remember { mutableStateOf(null) }
-    if (displayIgnoreDialogForNode != null) {
-        val isIgnored = state.ignoreIncomingList.contains(displayIgnoreDialogForNode!!.num)
-        SimpleAlertDialog(
-            title = R.string.ignore,
-            text = stringResource(
-                id = if (isIgnored) R.string.ignore_remove else R.string.ignore_add,
-                displayIgnoreDialogForNode?.user?.longName.orEmpty()
-            ),
-            onConfirm = {
-                model.ignoreIncomingList =
-                    state.ignoreIncomingList.toMutableList().apply {
-                        if (isIgnored) {
-                            debug("removed '${displayIgnoreDialogForNode!!.num}' from ignore list")
-                            remove(displayIgnoreDialogForNode!!.num)
-                        } else {
-                            debug("added '${displayIgnoreDialogForNode!!.num}' to ignore list")
-                            add(displayIgnoreDialogForNode!!.num)
-                        }
-                    }
-                displayIgnoreDialogForNode = null
-            },
-            onDismiss = {
-                displayIgnoreDialogForNode = null
-            }
-        )
-    }
-    if (displayRemoveDialogForNode != null) {
-        SimpleAlertDialog(
-            title = R.string.remove,
-            text = R.string.remove_node_text,
-            onConfirm = {
-                displayIgnoreDialogForNode?.let {
-                    model.removeNode(it.num)
-                }
-                displayRemoveDialogForNode = null
-            },
-            onDismiss = {
-                displayRemoveDialogForNode = null
-            }
-        )
-    }
     LazyColumn(
         state = listState,
         modifier = Modifier.fillMaxSize(),
@@ -167,6 +118,7 @@ fun NodesScreen(
         }
 
         items(nodes, key = { it.num }) { node ->
+            val isIgnored = state.ignoreIncomingList.contains(node.num)
             NodeItem(
                 thisNode = ourNode,
                 thatNode = node,
@@ -174,15 +126,24 @@ fun NodesScreen(
                 distanceUnits = state.distanceUnits,
                 tempInFahrenheit = state.tempInFahrenheit,
                 ignoreIncomingList = state.ignoreIncomingList,
-                isIgnored = state.ignoreIncomingList.contains(node.num),
                 menuItemActionClicked = { menuItem ->
                     when (menuItem) {
                         MenuItemAction.Remove -> {
-                            displayRemoveDialogForNode = node
+                            model.removeNode(node.num)
+                            debug("removing node ${node.num}")
                         }
 
                         MenuItemAction.Ignore -> {
-                            displayIgnoreDialogForNode = node
+                            model.ignoreIncomingList =
+                                state.ignoreIncomingList.toMutableList().apply {
+                                    if (isIgnored) {
+                                        remove(node.num)
+                                        debug("removing node ${node.num} from ignore list")
+                                    } else {
+                                        add(node.num)
+                                        debug("adding node ${node.num} to ignore list")
+                                    }
+                                }
                         }
 
                         MenuItemAction.DirectMessage -> {

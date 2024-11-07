@@ -77,7 +77,6 @@ fun NodeItem(
     gpsFormat: Int,
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
-    isIgnored: Boolean = false,
     ignoreIncomingList: List<Int> = emptyList(),
     menuItemActionClicked: (MenuItemAction) -> Unit = {},
     blinking: Boolean = false,
@@ -181,7 +180,9 @@ fun NodeItem(
                                         text = thatNode.user.shortName.ifEmpty { unknownShortName },
                                         fontWeight = FontWeight.Normal,
                                         fontSize = MaterialTheme.typography.button.fontSize,
-                                        textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
+                                        textDecoration = TextDecoration.LineThrough.takeIf {
+                                            ignoreIncomingList.contains(thatNode.num)
+                                        },
                                         textAlign = TextAlign.Center,
                                     )
                                 },
@@ -205,7 +206,11 @@ fun NodeItem(
                             modifier = Modifier.weight(1f),
                             text = longName,
                             style = style,
-                            textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
+                            textDecoration = TextDecoration.LineThrough.takeIf {
+                                ignoreIncomingList.contains(
+                                    thatNode.num
+                                )
+                            },
                             softWrap = true,
                         )
 
