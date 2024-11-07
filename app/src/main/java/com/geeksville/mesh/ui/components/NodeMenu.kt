@@ -106,7 +106,6 @@ fun NodeMenu(
                     displayRemoveDialog = true
                 },
                 content = { Text(stringResource(R.string.remove)) },
-                enabled = ignoreIncomingList.size < 3 || isIgnored
             )
             Divider()
             DropdownMenuItem(
