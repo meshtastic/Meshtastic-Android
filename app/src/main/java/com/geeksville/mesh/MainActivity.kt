@@ -337,6 +337,10 @@ class MainActivity : AppCompatActivity(), Logging {
             Intent.ACTION_MAIN -> {
             }
 
+            Intent.ACTION_SEND -> {
+
+            }
+
             else -> {
                 warn("Unexpected action $appLinkAction")
             }
