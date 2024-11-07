@@ -1,7 +1,6 @@
 package com.geeksville.mesh.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Checkbox
 import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Divider
@@ -81,17 +80,15 @@ fun NodeMenu(
                     onMenuItemAction(MenuItemAction.Ignore)
                 },
                 content = {
-                    Row {
-                        Checkbox(
-                            colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary),
-                            checked = isIgnored,
-                            onCheckedChange = {
-                                onDismissRequest
-                                onMenuItemAction(MenuItemAction.Ignore)
-                            },
-                        )
-                    }
                     Text(stringResource(R.string.ignore))
+                    Checkbox(
+                        colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary),
+                        checked = isIgnored,
+                        onCheckedChange = {
+                            onDismissRequest
+                            onMenuItemAction(MenuItemAction.Ignore)
+                        },
+                    )
                 },
                 enabled = ignoreIncomingList.size < 3 || isIgnored
             )
