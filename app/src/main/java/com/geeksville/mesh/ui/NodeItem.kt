@@ -83,6 +83,7 @@ fun NodeItem(
     blinking: Boolean = false,
     expanded: Boolean = false,
     currentTimeMillis: Long,
+    isConnected: Boolean = false,
 ) {
     val isUnknownUser = thatNode.isUnknownUser
     val unknownShortName = stringResource(id = R.string.unknown_node_short_name)
@@ -191,7 +192,8 @@ fun NodeItem(
                                 isThisNode = isThisNode,
                                 onMenuItemAction = menuItemActionClicked,
                                 expanded = menuExpanded,
-                                onDismissRequest = { menuExpanded = false }
+                                onDismissRequest = { menuExpanded = false },
+                                isConnected = isConnected
                             )
                         }
                         NodeKeyStatusIcon(

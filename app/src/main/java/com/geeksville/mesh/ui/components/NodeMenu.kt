@@ -23,16 +23,17 @@ fun NodeMenu(
     onMenuItemAction: (MenuItemAction) -> Unit,
     onDismissRequest: () -> Unit,
     expanded: Boolean = false,
+    isConnected: Boolean = false,
 ) {
     val isIgnored = ignoreIncomingList.contains(node.num)
 
     DropdownMenu(
-        modifier = Modifier.Companion.background(MaterialTheme.colors.background.copy(alpha = 1f)),
+        modifier = Modifier.background(MaterialTheme.colors.background.copy(alpha = 1f)),
         expanded = expanded,
         onDismissRequest = onDismissRequest,
     ) {
 
-        if (!isThisNode) {
+        if (!isThisNode && !isConnected) {
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()

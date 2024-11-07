@@ -209,6 +209,7 @@ fun NodesScreen(
                 blinking = node == focusedNode,
                 expanded = state.showDetails,
                 currentTimeMillis = currentTimeMillis,
+                isConnected = model.isConnected(),
             )
         }
     }
