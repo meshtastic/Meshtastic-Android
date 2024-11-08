@@ -58,6 +58,8 @@ import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.ui.components.MenuItemAction
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenu
@@ -82,7 +84,7 @@ fun NodeItem(
     blinking: Boolean = false,
     expanded: Boolean = false,
     currentTimeMillis: Long,
-    isConnected: Boolean = false,
+    connectionState: MeshService.ConnectionState? = ConnectionState.DISCONNECTED,
 ) {
     val isUnknownUser = thatNode.isUnknownUser
     val unknownShortName = stringResource(id = R.string.unknown_node_short_name)
@@ -194,7 +196,7 @@ fun NodeItem(
                                 onMenuItemAction = menuItemActionClicked,
                                 expanded = menuExpanded,
                                 onDismissRequest = { menuExpanded = false },
-                                isConnected = isConnected
+                                isConnected = connectionState == ConnectionState.CONNECTED,
                             )
                         }
                         NodeKeyStatusIcon(

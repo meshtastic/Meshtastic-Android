@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -119,6 +120,7 @@ fun NodesScreen(
 
         items(nodes, key = { it.num }) { node ->
             val isIgnored = state.ignoreIncomingList.contains(node.num)
+            val connectionState by model.connectionState.observeAsState()
             NodeItem(
                 thisNode = ourNode,
                 thatNode = node,
@@ -170,7 +172,7 @@ fun NodesScreen(
                 blinking = node == focusedNode,
                 expanded = state.showDetails,
                 currentTimeMillis = currentTimeMillis,
-                isConnected = model.isConnected(),
+                connectionState = connectionState,
             )
         }
     }
