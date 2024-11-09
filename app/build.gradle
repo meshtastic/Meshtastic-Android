@@ -32,8 +32,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdk 34
-        versionCode 30507 // format is Mmmss (where M is 1+the numeric major number
-        versionName "2.5.7"
+        versionCode 30508 // format is Mmmss (where M is 1+the numeric major number
+        versionName "2.5.8"
         testInstrumentationRunner "com.geeksville.mesh.TestRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
@@ -148,7 +148,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat-resources:$appcompat_version"
     implementation "androidx.emoji2:emoji2-emojipicker:1.5.0"
 
-    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.core:core-ktx:1.15.0'
     implementation 'androidx.core:core-location-altitude:1.0.0-alpha03'
     implementation 'androidx.fragment:fragment-ktx:1.8.5'
     implementation 'androidx.cardview:cardview:1.0.0'
@@ -184,7 +184,7 @@ dependencies {
     kspAndroidTest "com.google.dagger:hilt-compiler:$hilt_version"
 
     // Navigation
-    def nav_version = "2.8.2"
+    def nav_version = "2.8.3"
     implementation "androidx.navigation:navigation-compose:$nav_version"
     androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
 
@@ -249,7 +249,7 @@ dependencies {
     //noinspection GradleDependency
     implementation 'com.google.zxing:core:3.3.0' // <-- don't update
 
-    def work_version = '2.9.1'
+    def work_version = '2.10.0'
     // Work Request - used to delay boot event handling
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
