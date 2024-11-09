@@ -427,7 +427,7 @@ class RadioConfigViewModel @Inject constructor(
 
             ConfigRoute.CHANNELS -> {
                 getChannel(destNum, 0)
-                getConfig(destNum, ConfigRoute.LORA.configType)
+                getConfig(destNum, ConfigRoute.LORA.type)
                 // channel editor is synchronous, so we don't use requestIds as total
                 setResponseStateTotal(maxChannels + 1)
             }
@@ -438,17 +438,17 @@ class RadioConfigViewModel @Inject constructor(
                 if (route == ConfigRoute.LORA) {
                     getChannel(destNum, 0)
                 }
-                getConfig(destNum, route.configType)
+                getConfig(destNum, route.type)
             }
 
             is ModuleRoute -> {
                 if (route == ModuleRoute.CANNED_MESSAGE) {
                     getCannedMessages(destNum)
                 }
-                if (route == ModuleRoute.EXTERNAL_NOTIFICATION) {
+                if (route == ModuleRoute.EXT_NOTIFICATION) {
                     getRingtone(destNum)
                 }
-                getModuleConfig(destNum, route.configType)
+                getModuleConfig(destNum, route.type)
             }
         }
     }

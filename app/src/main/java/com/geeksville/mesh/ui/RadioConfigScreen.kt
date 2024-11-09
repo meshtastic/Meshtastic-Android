@@ -54,13 +54,18 @@ import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.config.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.components.config.PacketResponseStateDialog
 
+private fun getNavRouteFrom(routeName: String): Any? {
+    return ConfigRoute.entries.find { it.name == routeName }?.route
+        ?: ModuleRoute.entries.find { it.name == routeName }?.route
+}
+
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun RadioConfigScreen(
     node: NodeEntity?,
     viewModel: RadioConfigViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
-    onNavigate: (String) -> Unit = {}
+    onNavigate: (Any) -> Unit = {}
 ) {
     val isLocal = node?.num == viewModel.myNodeNum
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
@@ -74,9 +79,7 @@ fun RadioConfigScreen(
                 viewModel.clearPacketResponse()
             },
             onComplete = {
-                val route = state.route
-                if (ConfigRoute.entries.any { it.name == route } ||
-                    ModuleRoute.entries.any { it.name == route }) {
+                getNavRouteFrom(state.route)?.let { route ->
                     isWaiting = false
                     viewModel.clearPacketResponse()
                     onNavigate(route)
