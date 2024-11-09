@@ -10,10 +10,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
-import org.osmdroid.events.DelayedMapListener
-import org.osmdroid.events.MapListener
-import org.osmdroid.events.ScrollEvent
-import org.osmdroid.events.ZoomEvent
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.CopyrightOverlay
@@ -73,21 +69,6 @@ fun MapView.addScaleBarOverlay(density: Density) {
         }
         overlays.add(scaleBarOverlay)
     }
-}
-
-private const val INACTIVITY_DELAY_MILLIS = 500L
-fun MapView.addMapEventListener(onEvent: () -> Unit) {
-    addMapListener(DelayedMapListener(object : MapListener {
-        override fun onScroll(event: ScrollEvent): Boolean {
-            onEvent()
-            return true
-        }
-
-        override fun onZoom(event: ZoomEvent): Boolean {
-            onEvent()
-            return true
-        }
-    }, INACTIVITY_DELAY_MILLIS))
 }
 
 fun MapView.addPolyline(
