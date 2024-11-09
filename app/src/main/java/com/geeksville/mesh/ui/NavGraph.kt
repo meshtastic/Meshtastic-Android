@@ -120,7 +120,6 @@ class NavGraphFragment : ScreenFragment("NavGraph"), Logging {
             "NodeDetails" -> Route.NodeDetail(destNum!!)
             else -> Route.RadioConfig(destNum)
         }
-        model.setDestNum(destNum)
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)

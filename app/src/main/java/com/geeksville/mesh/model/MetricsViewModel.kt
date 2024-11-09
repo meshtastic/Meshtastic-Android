@@ -2,8 +2,10 @@ package com.geeksville.mesh.model
 
 import android.app.Application
 import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.MeshProtos.MeshPacket
@@ -14,12 +16,11 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.ui.Route
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -65,15 +66,16 @@ private fun MeshPacket.toPosition(): Position? = if (!decoded.wantResponse) {
 
 @HiltViewModel
 class MetricsViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val app: Application,
     private val dispatchers: CoroutineDispatchers,
     private val meshLogRepository: MeshLogRepository,
     private val radioConfigRepository: RadioConfigRepository,
 ) : ViewModel(), Logging {
-    private val destNum = MutableStateFlow(0)
+    private val destNum = savedStateHandle.toRoute<Route.NodeDetail>().destNum
 
     private fun MeshLog.hasValidTraceroute(): Boolean = with(fromRadio.packet) {
-        hasDecoded() && decoded.wantResponse && from == 0 && to == destNum.value
+        hasDecoded() && decoded.wantResponse && from == 0 && to == destNum
     }
 
     fun getUser(nodeNum: Int) = radioConfigRepository.getUser(nodeNum)
@@ -83,7 +85,7 @@ class MetricsViewModel @Inject constructor(
     }
 
     fun clearPosition() = viewModelScope.launch(dispatchers.io) {
-        meshLogRepository.deleteLogs(destNum.value, PortNum.POSITION_APP_VALUE)
+        meshLogRepository.deleteLogs(destNum, PortNum.POSITION_APP_VALUE)
     }
 
     private val _state = MutableStateFlow(MetricsState.Empty)
@@ -100,51 +102,37 @@ class MetricsViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
 
-        @OptIn(ExperimentalCoroutinesApi::class)
-        destNum.flatMapLatest { destNum ->
-            meshLogRepository.getTelemetryFrom(destNum).onEach { telemetry ->
-                _state.update { state ->
-                    state.copy(
-                        deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
-                        environmentMetrics = telemetry.filter {
-                            it.hasEnvironmentMetrics() && it.environmentMetrics.relativeHumidity >= 0f
-                        },
-                    )
-                }
+        meshLogRepository.getTelemetryFrom(destNum).onEach { telemetry ->
+            _state.update { state ->
+                state.copy(
+                    deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
+                    environmentMetrics = telemetry.filter {
+                        it.hasEnvironmentMetrics() && it.environmentMetrics.relativeHumidity >= 0f
+                    },
+                )
             }
         }.launchIn(viewModelScope)
 
-        @OptIn(ExperimentalCoroutinesApi::class)
-        destNum.flatMapLatest { destNum ->
-            meshLogRepository.getMeshPacketsFrom(destNum).onEach { meshPackets ->
-                _state.update { state ->
-                    state.copy(signalMetrics = meshPackets.filter { it.hasValidSignal() })
-                }
+        meshLogRepository.getMeshPacketsFrom(destNum).onEach { meshPackets ->
+            _state.update { state ->
+                state.copy(signalMetrics = meshPackets.filter { it.hasValidSignal() })
             }
         }.launchIn(viewModelScope)
 
-        @OptIn(ExperimentalCoroutinesApi::class)
-        destNum.flatMapLatest { destNum ->
-            combine(
-                meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP_VALUE),
-                meshLogRepository.getMeshPacketsFrom(destNum, PortNum.TRACEROUTE_APP_VALUE),
-            ) { request, response ->
-                _state.update { state ->
-                    state.copy(
-                        tracerouteRequests = request.filter { it.hasValidTraceroute() },
-                        tracerouteResults = response,
-                    )
-                }
+        combine(
+            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP_VALUE),
+            meshLogRepository.getMeshPacketsFrom(destNum, PortNum.TRACEROUTE_APP_VALUE),
+        ) { request, response ->
+            _state.update { state ->
+                state.copy(
+                    tracerouteRequests = request.filter { it.hasValidTraceroute() },
+                    tracerouteResults = response,
+                )
             }
         }.launchIn(viewModelScope)
 
-        @OptIn(ExperimentalCoroutinesApi::class)
-        destNum.flatMapLatest { destNum ->
-            meshLogRepository.getMeshPacketsFrom(destNum, PortNum.POSITION_APP_VALUE).onEach { packets ->
-                _state.update { state ->
-                    state.copy(positionLogs = packets.mapNotNull { it.toPosition() })
-                }
-            }
+        meshLogRepository.getMeshPacketsFrom(destNum, PortNum.POSITION_APP_VALUE).onEach { packets ->
+            _state.update { state -> state.copy(positionLogs = packets.mapNotNull { it.toPosition() }) }
         }.launchIn(viewModelScope)
 
         debug("MetricsViewModel created")
@@ -153,13 +141,6 @@ class MetricsViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         debug("MetricsViewModel cleared")
-    }
-
-    /**
-     * Used to set the Node for which the user will see charts for.
-     */
-    fun setSelectedNode(nodeNum: Int) {
-        destNum.value = nodeNum
     }
 
     /**
