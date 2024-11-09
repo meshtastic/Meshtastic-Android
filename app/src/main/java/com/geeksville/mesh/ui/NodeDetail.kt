@@ -47,7 +47,6 @@ import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -82,9 +81,6 @@ fun NodeDetailScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     if (node != null) {
-        LaunchedEffect(node.num) {
-            viewModel.setSelectedNode(node.num)
-        }
         NodeDetailList(
             node = node,
             metricsState = state,
