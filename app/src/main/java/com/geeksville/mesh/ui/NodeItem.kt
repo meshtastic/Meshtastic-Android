@@ -13,6 +13,7 @@ import androidx.compose.animation.core.repeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Card
@@ -56,7 +58,11 @@ import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.service.MeshService.ConnectionState
+import com.geeksville.mesh.ui.components.MenuItemAction
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
+import com.geeksville.mesh.ui.components.NodeMenu
 import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
@@ -73,11 +79,12 @@ fun NodeItem(
     gpsFormat: Int,
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
-    isIgnored: Boolean = false,
-    chipClicked: () -> Unit = {},
+    ignoreIncomingList: List<Int> = emptyList(),
+    menuItemActionClicked: (MenuItemAction) -> Unit = {},
     blinking: Boolean = false,
     expanded: Boolean = false,
     currentTimeMillis: Long,
+    connectionState: MeshService.ConnectionState? = ConnectionState.DISCONNECTED,
 ) {
     val isUnknownUser = thatNode.isUnknownUser
     val unknownShortName = stringResource(id = R.string.unknown_node_short_name)
@@ -154,26 +161,44 @@ fun NodeItem(
                             .fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Chip(
-                            modifier = Modifier
-                                .width(IntrinsicSize.Min)
-                                .defaultMinSize(minHeight = 32.dp, minWidth = 72.dp),
-                            colors = ChipDefaults.chipColors(
-                                backgroundColor = Color(nodeColor),
-                                contentColor = Color(textColor)
-                            ),
-                            onClick = { chipClicked() },
-                            content = {
-                                Text(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    text = thatNode.user.shortName.ifEmpty { unknownShortName },
-                                    fontWeight = FontWeight.Normal,
-                                    fontSize = MaterialTheme.typography.button.fontSize,
-                                    textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
-                                    textAlign = TextAlign.Center,
-                                )
-                            },
-                        )
+                        var menuExpanded by remember { mutableStateOf(false) }
+                        Box(
+                            modifier = Modifier.wrapContentSize(Alignment.TopStart)
+                        ) {
+                            Chip(
+                                modifier = Modifier
+                                    .width(IntrinsicSize.Min)
+                                    .defaultMinSize(minHeight = 32.dp, minWidth = 72.dp),
+                                colors = ChipDefaults.chipColors(
+                                    backgroundColor = Color(nodeColor),
+                                    contentColor = Color(textColor)
+                                ),
+                                onClick = {
+                                    menuExpanded = !menuExpanded
+                                },
+                                content = {
+                                    Text(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        text = thatNode.user.shortName.ifEmpty { unknownShortName },
+                                        fontWeight = FontWeight.Normal,
+                                        fontSize = MaterialTheme.typography.button.fontSize,
+                                        textDecoration = TextDecoration.LineThrough.takeIf {
+                                            ignoreIncomingList.contains(thatNode.num)
+                                        },
+                                        textAlign = TextAlign.Center,
+                                    )
+                                },
+                            )
+                            NodeMenu(
+                                node = thatNode,
+                                ignoreIncomingList = ignoreIncomingList,
+                                isThisNode = isThisNode,
+                                onMenuItemAction = menuItemActionClicked,
+                                expanded = menuExpanded,
+                                onDismissRequest = { menuExpanded = false },
+                                isConnected = connectionState == ConnectionState.CONNECTED,
+                            )
+                        }
                         NodeKeyStatusIcon(
                             hasPKC = thatNode.hasPKC,
                             mismatchKey = thatNode.mismatchKey,
@@ -183,7 +208,11 @@ fun NodeItem(
                             modifier = Modifier.weight(1f),
                             text = longName,
                             style = style,
-                            textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
+                            textDecoration = TextDecoration.LineThrough.takeIf {
+                                ignoreIncomingList.contains(
+                                    thatNode.num
+                                )
+                            },
                             softWrap = true,
                         )
 
