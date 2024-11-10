@@ -46,7 +46,8 @@ class MeshLogRepository @Inject constructor(private val meshLogDaoLazy: dagger.L
         nodeNum: Int,
         portNum: Int = Portnums.PortNum.UNKNOWN_APP_VALUE,
         maxItem: Int = MAX_MESH_PACKETS,
-    ): Flow<List<MeshLog>> = meshLogDao.getLogsFrom(nodeNum, portNum, maxItem)
+        oldestTime: Long = 0L
+    ): Flow<List<MeshLog>> = meshLogDao.getLogsFrom(nodeNum, portNum, maxItem, oldestTime)
         .distinctUntilChanged()
         .flowOn(Dispatchers.IO)
 
@@ -58,7 +59,8 @@ class MeshLogRepository @Inject constructor(private val meshLogDaoLazy: dagger.L
     fun getMeshPacketsFrom(
         nodeNum: Int,
         portNum: Int = Portnums.PortNum.UNKNOWN_APP_VALUE,
-    ): Flow<List<MeshPacket>> = getLogsFrom(nodeNum, portNum)
+        oldestTime: Long = 0L
+    ): Flow<List<MeshPacket>> = getLogsFrom(nodeNum, portNum, oldestTime = oldestTime)
         .mapLatest { list -> list.map { it.fromRadio.packet } }
         .flowOn(Dispatchers.IO)
 

@@ -143,8 +143,7 @@ class MetricsViewModel @Inject constructor(
 
         @OptIn(ExperimentalCoroutinesApi::class)
         destNum.flatMapLatest { destNum ->
-            // TODO need to pass the time param to getMeshPacketsFrom()
-            meshLogRepository.getMeshPacketsFrom(destNum).onEach { meshPackets ->
+            meshLogRepository.getMeshPacketsFrom(destNum, oldestTime = timeFrame.value.calculateOldestTime()).onEach { meshPackets ->
                 _state.update { state ->
                     state.copy(signalMetrics = meshPackets.filter { it.hasValidSignal() })
                 }
