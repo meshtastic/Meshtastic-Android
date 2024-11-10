@@ -2,6 +2,7 @@ package com.geeksville.mesh.model
 
 import android.app.Application
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
@@ -9,6 +10,7 @@ import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.Position
 import com.geeksville.mesh.Portnums.PortNum
+import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
@@ -54,6 +56,28 @@ data class MetricsState(
     }
 }
 
+/**
+ * Supported time frames used to display data.
+ */
+enum class TimeFrame(
+    val milliseconds: Long,
+    @StringRes val strRes: Int
+) {
+    TWENTY_FOUR_HOURS(86400000L, R.string.twenty_four_hours),
+    FORTY_EIGHT_HOURS(172800000L, R.string.forty_eight_hours),
+    ONE_WEEK(604800000L, R.string.one_week),
+    TWO_WEEKS(1209600000L, R.string.two_weeks),
+    ONE_MONTH(2629800000L, R.string.one_month),
+    MAX(0L, R.string.max);
+
+    fun calculateOldestTime() : Long {
+        return if (this == MAX)
+            MAX.milliseconds
+        else
+            System.currentTimeMillis() - this.milliseconds
+    }
+}
+
 private fun MeshPacket.hasValidSignal(): Boolean =
     rxTime > 0 && (rxSnr != 0f && rxRssi != 0) && (hopStart > 0 && hopStart - hopLimit == 0)
 
@@ -89,6 +113,9 @@ class MetricsViewModel @Inject constructor(
     private val _state = MutableStateFlow(MetricsState.Empty)
     val state: StateFlow<MetricsState> = _state
 
+    private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
+    val timeFrame: StateFlow<TimeFrame> = _timeFrame
+
     init {
         radioConfigRepository.deviceProfileFlow.onEach { profile ->
             val moduleConfig = profile.moduleConfig
@@ -102,7 +129,7 @@ class MetricsViewModel @Inject constructor(
 
         @OptIn(ExperimentalCoroutinesApi::class)
         destNum.flatMapLatest { destNum ->
-            meshLogRepository.getTelemetryFrom(destNum).onEach { telemetry ->
+            meshLogRepository.getTelemetryFrom(destNum, timeFrame.value.calculateOldestTime()).onEach { telemetry ->
                 _state.update { state ->
                     state.copy(
                         deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
@@ -116,6 +143,7 @@ class MetricsViewModel @Inject constructor(
 
         @OptIn(ExperimentalCoroutinesApi::class)
         destNum.flatMapLatest { destNum ->
+            // TODO need to pass the time param to getMeshPacketsFrom()
             meshLogRepository.getMeshPacketsFrom(destNum).onEach { meshPackets ->
                 _state.update { state ->
                     state.copy(signalMetrics = meshPackets.filter { it.hasValidSignal() })
@@ -160,6 +188,14 @@ class MetricsViewModel @Inject constructor(
      */
     fun setSelectedNode(nodeNum: Int) {
         destNum.value = nodeNum
+    }
+
+    fun setTimeFrame(timeFrame: TimeFrame) {
+        _timeFrame.value = timeFrame
+        /* Need to trigger retrieval of data */
+        val tmp = destNum.value
+        setSelectedNode(0)
+        setSelectedNode(tmp)
     }
 
     /**

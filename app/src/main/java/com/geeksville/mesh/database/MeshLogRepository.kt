@@ -32,9 +32,12 @@ class MeshLogRepository @Inject constructor(private val meshLogDaoLazy: dagger.L
             .toBuilder().setTime((log.received_date / MILLIS_TO_SECONDS).toInt()).build()
     }.getOrNull()
 
+    /**
+     * @param timeFrame the oldest [Telemetry] to get.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getTelemetryFrom(nodeNum: Int): Flow<List<Telemetry>> =
-        meshLogDao.getLogsFrom(nodeNum, Portnums.PortNum.TELEMETRY_APP_VALUE, MAX_MESH_PACKETS)
+    fun getTelemetryFrom(nodeNum: Int, timeFrame: Long): Flow<List<Telemetry>> =
+        meshLogDao.getLogsFrom(nodeNum, Portnums.PortNum.TELEMETRY_APP_VALUE, MAX_MESH_PACKETS, timeFrame)
             .distinctUntilChanged()
             .mapLatest { list -> list.mapNotNull(::parseTelemetryLog) }
             .flowOn(Dispatchers.IO)
