@@ -61,8 +61,8 @@ private enum class Metric(val min: Float, val max: Float) {
     fun difference() = max - min
 }
 private val LEGEND_DATA = listOf(
-    LegendData(nameRes = R.string.snr, color = METRICS_COLORS[Metric.SNR.ordinal]),
-    LegendData(nameRes = R.string.rssi, color = METRICS_COLORS[Metric.RSSI.ordinal])
+    LegendData(nameRes = R.string.rssi, color = METRICS_COLORS[Metric.RSSI.ordinal]),
+    LegendData(nameRes = R.string.snr, color = METRICS_COLORS[Metric.SNR.ordinal])
 )
 
 @Composable
