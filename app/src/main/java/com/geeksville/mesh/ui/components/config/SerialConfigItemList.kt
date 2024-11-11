@@ -135,7 +135,7 @@ fun SerialConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = serialInput != serialConfig,
+                enabled = enabled && serialInput != serialConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     serialInput = serialConfig

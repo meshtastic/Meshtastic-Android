@@ -94,7 +94,7 @@ fun BluetoothConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = bluetoothInput != bluetoothConfig,
+                enabled = enabled && bluetoothInput != bluetoothConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     bluetoothInput = bluetoothConfig

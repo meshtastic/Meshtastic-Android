@@ -73,6 +73,10 @@ fun NetworkConfigScreen(
     )
 }
 
+private fun extractWifiCredentials(qrCode: String) = Regex("""WIFI:S:(.*?);.*?P:(.*?);""")
+    .find(qrCode)?.destructured
+    ?.let { (ssid, password) -> ssid to password } ?: (null to null)
+
 @Composable
 fun NetworkConfigItemList(
     networkConfig: NetworkConfig,
@@ -86,11 +90,6 @@ fun NetworkConfigItemList(
     if (showScanErrorDialog) {
         ScanErrorDialog { showScanErrorDialog = false }
     }
-
-    fun extractWifiCredentials(qrCode: String) = Regex("""WIFI:S:(.*?);.*?P:(.*?);""")
-        .find(qrCode)?.destructured
-        ?.let { (ssid, password) -> ssid to password }
-        ?: (null to null)
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
@@ -258,7 +257,7 @@ fun NetworkConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = networkInput != networkConfig,
+                enabled = enabled && networkInput != networkConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     networkInput = networkConfig

@@ -146,7 +146,7 @@ fun SecurityConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = securityInput != securityConfig,
+                enabled = enabled && securityInput != securityConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     securityInput = securityConfig

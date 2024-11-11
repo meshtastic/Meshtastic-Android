@@ -251,7 +251,7 @@ fun ChannelSettingsItemList(
 
             item {
                 PreferenceFooter(
-                    enabled = isEditing,
+                    enabled = enabled && isEditing,
                     negativeText = R.string.cancel,
                     onNegativeClicked = {
                         focusManager.clearFocus()

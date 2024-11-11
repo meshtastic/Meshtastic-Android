@@ -157,7 +157,7 @@ fun DetectionSensorConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = detectionSensorInput != detectionSensorConfig,
+                enabled = enabled && detectionSensorInput != detectionSensorConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     detectionSensorInput = detectionSensorConfig

@@ -106,7 +106,7 @@ fun AmbientLightingConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = ambientLightingInput != ambientLightingConfig,
+                enabled = enabled && ambientLightingInput != ambientLightingConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     ambientLightingInput = ambientLightingConfig

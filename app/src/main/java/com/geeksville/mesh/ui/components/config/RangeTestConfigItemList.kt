@@ -86,7 +86,7 @@ fun RangeTestConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = rangeTestInput != rangeTestConfig,
+                enabled = enabled && rangeTestInput != rangeTestConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     rangeTestInput = rangeTestConfig

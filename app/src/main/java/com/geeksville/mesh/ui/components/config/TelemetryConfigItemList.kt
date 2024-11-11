@@ -162,7 +162,7 @@ fun TelemetryConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = telemetryInput != telemetryConfig,
+                enabled = enabled && telemetryInput != telemetryConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     telemetryInput = telemetryConfig

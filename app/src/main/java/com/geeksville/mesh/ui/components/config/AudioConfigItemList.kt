@@ -122,7 +122,7 @@ fun AudioConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = audioInput != audioConfig,
+                enabled = enabled && audioInput != audioConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     audioInput = audioConfig

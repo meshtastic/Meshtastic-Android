@@ -212,7 +212,7 @@ fun CannedMessageConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = cannedMessageInput != cannedMessageConfig || messagesInput != messages,
+                enabled = enabled && cannedMessageInput != cannedMessageConfig || messagesInput != messages,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     messagesInput = messages

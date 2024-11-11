@@ -117,7 +117,7 @@ fun StoreForwardConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = storeForwardInput != storeForwardConfig,
+                enabled = enabled && storeForwardInput != storeForwardConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     storeForwardInput = storeForwardConfig

@@ -128,7 +128,7 @@ fun PowerConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = powerInput != powerConfig,
+                enabled = enabled && powerInput != powerConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     powerInput = powerConfig

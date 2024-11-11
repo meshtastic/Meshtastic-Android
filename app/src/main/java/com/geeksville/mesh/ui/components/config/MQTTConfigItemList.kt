@@ -186,7 +186,7 @@ fun MQTTConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = mqttInput != mqttConfig,
+                enabled = enabled && mqttInput != mqttConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     mqttInput = mqttConfig

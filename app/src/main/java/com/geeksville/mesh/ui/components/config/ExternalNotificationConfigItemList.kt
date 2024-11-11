@@ -244,7 +244,7 @@ fun ExternalNotificationConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = externalNotificationInput != extNotificationConfig || ringtoneInput != ringtone,
+                enabled = enabled && externalNotificationInput != extNotificationConfig || ringtoneInput != ringtone,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     ringtoneInput = ringtone

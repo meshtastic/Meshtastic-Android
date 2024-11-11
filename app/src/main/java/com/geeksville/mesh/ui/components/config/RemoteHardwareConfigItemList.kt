@@ -96,7 +96,7 @@ fun RemoteHardwareConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = remoteHardwareInput != remoteHardwareConfig,
+                enabled = enabled && remoteHardwareInput != remoteHardwareConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     remoteHardwareInput = remoteHardwareConfig

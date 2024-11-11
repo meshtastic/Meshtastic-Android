@@ -117,7 +117,7 @@ fun UserConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = userInput != userConfig,
+                enabled = enabled && userInput != userConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     userInput = userConfig

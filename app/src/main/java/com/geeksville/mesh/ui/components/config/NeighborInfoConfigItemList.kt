@@ -82,7 +82,7 @@ fun NeighborInfoConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = neighborInfoInput != neighborInfoConfig,
+                enabled = enabled && neighborInfoInput != neighborInfoConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     neighborInfoInput = neighborInfoConfig

@@ -168,7 +168,7 @@ fun DisplayConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = displayInput != displayConfig,
+                enabled = enabled && displayInput != displayConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     displayInput = displayConfig

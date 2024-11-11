@@ -244,7 +244,7 @@ fun LoRaConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = loraInput != loraConfig,
+                enabled = enabled && loraInput != loraConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     loraInput = loraConfig

@@ -102,7 +102,7 @@ fun PaxcounterConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = paxcounterInput != paxcounterConfig,
+                enabled = enabled && paxcounterInput != paxcounterConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     paxcounterInput = paxcounterConfig

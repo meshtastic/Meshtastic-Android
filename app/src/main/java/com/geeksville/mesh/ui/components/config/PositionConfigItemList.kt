@@ -227,7 +227,7 @@ fun PositionConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = positionInput != positionConfig || locationInput != location,
+                enabled = enabled && positionInput != positionConfig || locationInput != location,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     locationInput = location
