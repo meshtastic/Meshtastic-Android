@@ -173,7 +173,7 @@ private fun DeviceMetricsChart(
 
                     lastX = (x1 + x2) / 2f
 
-                    quadraticBezierTo(x1, y1, lastX, (y1 + y2) / 2f)
+                    quadraticTo(x1, y1, lastX, (y1 + y2) / 2f)
                 }
             }
 

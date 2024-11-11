@@ -226,7 +226,7 @@ private fun EnvironmentMetricsChart(
                         moveTo(x1, y1)
                     }
                     lastTempX = (x1 + x2) / 2f
-                    quadraticBezierTo(
+                    quadraticTo(
                         x1, y1, lastTempX, (y1 + y2) / 2f
                     )
                 }
@@ -279,7 +279,7 @@ private fun EnvironmentMetricsChart(
                         moveTo(x1, y1)
                     }
                     lastHumidityX = (x1 + x2) / 2f
-                    quadraticBezierTo(
+                    quadraticTo(
                         x1, y1, lastHumidityX, (y1 + y2) / 2f
                     )
                 }
@@ -332,7 +332,7 @@ private fun EnvironmentMetricsChart(
                         moveTo(x1, y1)
                     }
                     lastIaqX = (x1 + x2) / 2f
-                    quadraticBezierTo(
+                    quadraticTo(
                         x1,
                         y1,
                         lastIaqX,
