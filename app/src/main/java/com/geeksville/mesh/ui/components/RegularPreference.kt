@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -103,7 +102,6 @@ fun RegularPreference(
             }
         }
         if (summary != null) {
-            Divider(modifier = Modifier.padding(vertical = 8.dp))
             Text(
                 text = summary,
                 style = MaterialTheme.typography.body2,

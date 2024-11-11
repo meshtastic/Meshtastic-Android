@@ -101,8 +101,8 @@ fun DeviceConfigItemList(
                 onItemSelected = { deviceInput = deviceInput.copy { role = it } },
                 summary = stringResource(id = deviceInput.role.stringRes),
             )
+            Divider()
         }
-        item { Divider() }
 
         item {
             EditTextPreference(title = "Redefine PIN_BUTTON",
@@ -132,8 +132,8 @@ fun DeviceConfigItemList(
                 onItemSelected = { deviceInput = deviceInput.copy { rebroadcastMode = it } },
                 summary = stringResource(id = deviceInput.rebroadcastMode.stringRes),
             )
+            Divider()
         }
-        item { Divider() }
 
         item {
             EditTextPreference(title = "NodeInfo broadcast interval (seconds)",
@@ -146,24 +146,26 @@ fun DeviceConfigItemList(
         }
 
         item {
-            SwitchPreference(title = "Double tap as button press",
+            SwitchPreference(
+                title = "Double tap as button press",
+                summary = stringResource(id = R.string.config_device_doubleTapAsButtonPress_summary),
                 checked = deviceInput.doubleTapAsButtonPress,
                 enabled = enabled,
-                onCheckedChange = {
-                    deviceInput = deviceInput.copy { doubleTapAsButtonPress = it }
-                })
+                onCheckedChange = { deviceInput = deviceInput.copy { doubleTapAsButtonPress = it } }
+            )
+            Divider()
         }
-        item { Divider() }
 
         item {
-            SwitchPreference(title = "Disable triple-click",
+            SwitchPreference(
+                title = "Disable triple-click",
+                summary = stringResource(id = R.string.config_device_disableTripleClick_summary),
                 checked = deviceInput.disableTripleClick,
                 enabled = enabled,
-                onCheckedChange = {
-                    deviceInput = deviceInput.copy { disableTripleClick = it }
-                })
+                onCheckedChange = { deviceInput = deviceInput.copy { disableTripleClick = it } }
+            )
+            Divider()
         }
-        item { Divider() }
 
         item {
             EditTextPreference(title = "POSIX Timezone",
@@ -182,18 +184,19 @@ fun DeviceConfigItemList(
         }
 
         item {
-            SwitchPreference(title = "Disable LED heartbeat",
+            SwitchPreference(
+                title = "Disable LED heartbeat",
+                summary = stringResource(id = R.string.config_device_ledHeartbeatDisabled_summary),
                 checked = deviceInput.ledHeartbeatDisabled,
                 enabled = enabled,
-                onCheckedChange = {
-                    deviceInput = deviceInput.copy { ledHeartbeatDisabled = it }
-                })
+                onCheckedChange = { deviceInput = deviceInput.copy { ledHeartbeatDisabled = it } }
+            )
+            Divider()
         }
-        item { Divider() }
 
         item {
             PreferenceFooter(
-                enabled = deviceInput != deviceConfig,
+                enabled = enabled && deviceInput != deviceConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     deviceInput = deviceConfig

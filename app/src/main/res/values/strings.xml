@@ -64,6 +64,10 @@
     <string name="rebroadcast_mode_none">Only permitted for SENSOR, TRACKER and TAK_TRACKER roles, this will inhibit all rebroadcasts, not unlike CLIENT_MUTE role.</string>
     <string name="rebroadcast_mode_core_portnums_only">Ignores packets from non-standard portnums such as: TAK, RangeTest, PaxCounter, etc. Only rebroadcasts packets with standard portnums: NodeInfo, Text, Position, Telemetry, and Routing.</string>
 
+    <string name="config_device_doubleTapAsButtonPress_summary">Treat double tap on supported accelerometers as a user button press.</string>
+    <string name="config_device_disableTripleClick_summary">Disables the triple-press of user button to enable or disable GPS.</string>
+    <string name="config_device_ledHeartbeatDisabled_summary">Controls the blinking LED on the device. For most devices this will control one of the up to 4 LEDs, the charger and GPS LEDs are not controllable.</string>
+
     <string name="elevation_suffix" translatable="false">MSL</string>
     <string name="channel_air_util" translatable="false">ChUtil %.1f%% AirUtilTX %.1f%%</string>
 
