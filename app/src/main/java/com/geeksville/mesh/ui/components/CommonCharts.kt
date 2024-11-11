@@ -36,6 +36,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
@@ -183,18 +184,20 @@ fun Legend(legendData: List<LegendData>, promptInfoDialog: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
     ) {
         Spacer(modifier = Modifier.weight(1f))
-        for (data in legendData) {
+        legendData.forEachIndexed { index, data ->
             LegendLabel(
                 text = stringResource(data.nameRes),
                 color = data.color,
                 isLine = data.isLine
             )
 
-            Spacer(modifier = Modifier.width(4.dp))
+            if (index != legendData.lastIndex) {
+                Spacer(modifier = Modifier.weight(1f))
+            }
         }
+        Spacer(modifier = Modifier.width(4.dp))
 
         Icon(
             imageVector = Icons.Default.Info,
@@ -275,4 +278,14 @@ private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
         color = MaterialTheme.colors.onSurface,
         fontSize = MaterialTheme.typography.button.fontSize,
     )
+}
+
+@Preview
+@Composable
+private fun LegendPreview() {
+    val data = listOf(
+        LegendData(nameRes = R.string.rssi, color = Color.Red),
+        LegendData(nameRes = R.string.snr, color = Color.Green)
+    )
+    Legend(legendData = data, promptInfoDialog = {})
 }

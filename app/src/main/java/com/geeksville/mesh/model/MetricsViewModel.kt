@@ -2,6 +2,7 @@ package com.geeksville.mesh.model
 
 import android.app.Application
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,6 +12,7 @@ import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.Position
 import com.geeksville.mesh.Portnums.PortNum
+import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
@@ -18,9 +20,11 @@ import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.ui.Route
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -52,6 +56,28 @@ data class MetricsState(
 
     companion object {
         val Empty = MetricsState()
+    }
+}
+
+/**
+ * Supported time frames used to display data.
+ */
+@Suppress("MagicNumber")
+enum class TimeFrame(
+    val milliseconds: Long,
+    @StringRes val strRes: Int
+) {
+    TWENTY_FOUR_HOURS(86400000L, R.string.twenty_four_hours),
+    FORTY_EIGHT_HOURS(172800000L, R.string.forty_eight_hours),
+    ONE_WEEK(604800000L, R.string.one_week),
+    TWO_WEEKS(1209600000L, R.string.two_weeks),
+    ONE_MONTH(2629800000L, R.string.one_month),
+    MAX(0L, R.string.max);
+
+    fun calculateOldestTime(): Long = if (this == MAX) {
+        MAX.milliseconds
+    } else {
+        System.currentTimeMillis() - this.milliseconds
     }
 }
 
@@ -91,6 +117,9 @@ class MetricsViewModel @Inject constructor(
     private val _state = MutableStateFlow(MetricsState.Empty)
     val state: StateFlow<MetricsState> = _state
 
+    private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
+    val timeFrame: StateFlow<TimeFrame> = _timeFrame
+
     init {
         radioConfigRepository.deviceProfileFlow.onEach { profile ->
             val moduleConfig = profile.moduleConfig
@@ -102,20 +131,27 @@ class MetricsViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
 
-        meshLogRepository.getTelemetryFrom(destNum).onEach { telemetry ->
-            _state.update { state ->
-                state.copy(
-                    deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
-                    environmentMetrics = telemetry.filter {
-                        it.hasEnvironmentMetrics() && it.environmentMetrics.relativeHumidity >= 0f
-                    },
-                )
+        @OptIn(ExperimentalCoroutinesApi::class)
+        _timeFrame.flatMapLatest { timeFrame ->
+            meshLogRepository.getTelemetryFrom(destNum, timeFrame.calculateOldestTime()).onEach { telemetry ->
+                _state.update { state ->
+                    state.copy(
+                        deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
+                        environmentMetrics = telemetry.filter {
+                            it.hasEnvironmentMetrics() && it.environmentMetrics.relativeHumidity >= 0f
+                        },
+                    )
+                }
             }
         }.launchIn(viewModelScope)
 
-        meshLogRepository.getMeshPacketsFrom(destNum).onEach { meshPackets ->
-            _state.update { state ->
-                state.copy(signalMetrics = meshPackets.filter { it.hasValidSignal() })
+        @OptIn(ExperimentalCoroutinesApi::class)
+        _timeFrame.flatMapLatest { timeFrame ->
+            val oldestTime = timeFrame.calculateOldestTime()
+            meshLogRepository.getMeshPacketsFrom(destNum, oldestTime = oldestTime).onEach { meshPackets ->
+                _state.update { state ->
+                    state.copy(signalMetrics = meshPackets.filter { it.hasValidSignal() })
+                }
             }
         }.launchIn(viewModelScope)
 
@@ -141,6 +177,10 @@ class MetricsViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         debug("MetricsViewModel cleared")
+    }
+
+    fun setTimeFrame(timeFrame: TimeFrame) {
+        _timeFrame.value = timeFrame
     }
 
     /**

@@ -19,6 +19,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -84,6 +85,15 @@ fun DeviceMetricsScreen(
             state.deviceMetrics.reversed(),
             promptInfoDialog = { displayInfoDialog = true }
         )
+
+        val selectedTimeFrame by viewModel.timeFrame.collectAsState()
+        MetricsTimeSelector(
+            selectedTimeFrame,
+            onOptionSelected = { viewModel.setTimeFrame(it) }
+        ) {
+            TimeLabel(stringResource(it.strRes))
+        }
+
         /* Device Metric Cards */
         LazyColumn(
             modifier = Modifier.fillMaxSize()
@@ -156,7 +166,7 @@ private fun DeviceMetricsChart(
                         center = Offset(x1, yChUtil)
                     )
 
-                    /* Air Utilization Transmit  */
+                    /* Air Utilization Transmit */
                     val airUtilRatio = telemetry.deviceMetrics.airUtilTx / MAX_PERCENT_VALUE
                     val yAirUtil = height - (airUtilRatio * height)
                     drawCircle(
