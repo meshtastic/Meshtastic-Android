@@ -70,9 +70,7 @@ class BTScanModel @Inject constructor(
                 }
 
                 // Include paired Bluetooth devices
-                ble.bondedDevices.forEach {
-                    addDevice(BLEDeviceListEntry(it))
-                }
+                ble.bondedDevices.map(::BLEDeviceListEntry).sortedBy { it.name }.forEach(::addDevice)
 
                 // Include Network Service Discovery
                 tcp.forEach { service ->
