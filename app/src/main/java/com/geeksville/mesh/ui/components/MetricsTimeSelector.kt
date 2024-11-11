@@ -165,7 +165,7 @@ private fun SelectedIndicator(state: TimeSelectorState) {
                 )
             )
             .shadow(4.dp, BACKGROUND_SHAPE)
-            .background(Color.White, BACKGROUND_SHAPE)
+            .background(MaterialTheme.colors.background, BACKGROUND_SHAPE)
     )
 }
 
