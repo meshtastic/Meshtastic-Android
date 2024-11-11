@@ -33,7 +33,7 @@ private fun formatTraceroutePath(nodesList: List<String>, snrList: List<Int>): S
         // use unknown SNR for entire route if snrList has invalid size
         List(nodesList.size - 1) { -128 }
     }.map { snr ->
-        val str = if (snr == -128) "?" else "${snr / 4}"
+        val str = if (snr == -128) "?" else "${snr / 4f}"
         "⇊ $str dB"
     }
 
