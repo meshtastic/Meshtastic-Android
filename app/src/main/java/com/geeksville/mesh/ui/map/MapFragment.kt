@@ -38,7 +38,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.R
@@ -54,11 +53,14 @@ import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.model.map.MarkerWithLabel
+import com.geeksville.mesh.model.map.clustering.RadiusMarkerClusterer
 import com.geeksville.mesh.ui.ScreenFragment
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.SqlTileWriterExt
+import com.geeksville.mesh.util.addCopyright
+import com.geeksville.mesh.util.addScaleBarOverlay
+import com.geeksville.mesh.util.createLatLongGrid
 import com.geeksville.mesh.util.formatAgo
-import com.geeksville.mesh.util.requiredZoomLevel
 import com.geeksville.mesh.util.zoomIn
 import com.geeksville.mesh.waypoint
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -76,18 +78,12 @@ import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourcePolicyException
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-import com.geeksville.mesh.model.map.clustering.RadiusMarkerClusterer
-import com.geeksville.mesh.util.addCopyright
-import com.geeksville.mesh.util.addMapEventListener
-import com.geeksville.mesh.util.addScaleBarOverlay
-import com.geeksville.mesh.util.createLatLongGrid
 import java.io.File
 import java.text.DateFormat
 
@@ -211,8 +207,6 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
     builder.show()
 }
 
-private const val MaxZoomLevel = 20.0
-
 @Composable
 fun MapView(
     model: UIViewModel = viewModel(),
@@ -240,8 +234,11 @@ fun MapView(
 
     val hasGps = remember { context.hasGps() }
 
-    val map = rememberMapViewWithLifecycle(context)
-    val state by model.mapState.collectAsStateWithLifecycle()
+    val cameraView = remember {
+        val geoPoints = model.nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
+        BoundingBox.fromGeoPoints(geoPoints)
+    }
+    val map = rememberMapViewWithLifecycle(cameraView)
 
     val nodeClusterer = remember { RadiusMarkerClusterer(context) }
 
@@ -370,11 +367,11 @@ fun MapView(
     }
 
     fun MapView.onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
+        val dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
         return waypoints.mapNotNull { waypoint ->
             val pt = waypoint.data.waypoint ?: return@mapNotNull null
             val lock = if (pt.lockedTo != 0) "\uD83D\uDD12" else ""
-            val time = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-                .format(waypoint.received_time)
+            val time = dateFormat.format(waypoint.received_time)
             val label = pt.name + " " + formatAgo((waypoint.received_time / 1000).toInt())
             val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
             MarkerWithLabel(this, label, emoji).apply {
@@ -452,20 +449,6 @@ fun MapView(
 
     with(map) {
         UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values), nodeClusterer)
-    }
-
-    fun MapView.zoomToNodes() {
-        if (state.center == null) {
-            val geoPoints = model.nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
-            val box = BoundingBox.fromGeoPoints(geoPoints)
-            val center = GeoPoint(box.centerLatitude, box.centerLongitude)
-            val finalZoomLevel = minOf(box.requiredZoomLevel(), maxZoomLevel)
-            controller.setCenter(center)
-            controller.setZoom(finalZoomLevel)
-        } else {
-            controller.setCenter(state.center)
-            controller.setZoom(state.zoom)
-        }
     }
 
     fun loadOnlineTileSourceBase(): ITileSource {
@@ -603,29 +586,9 @@ fun MapView(
             AndroidView(
                 factory = {
                     map.apply {
-                        // Required to get online tiles
-                        Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
                         setTileSource(loadOnlineTileSourceBase())
                         setDestroyMode(false) // keeps map instance alive when in the background
-                        isVerticalMapRepetitionEnabled = false // disables map repetition
-                        setMultiTouchControls(true)
-                        setScrollableAreaLimitLatitude( // bounds scrollable map
-                            overlayManager.tilesOverlay.bounds.actualNorth,
-                            overlayManager.tilesOverlay.bounds.actualSouth,
-                            0
-                        )
-                        // scales the map tiles to the display density of the screen
-                        isTilesScaledToDpi = true
-                        // sets the minimum zoom level (the furthest out you can zoom)
-                        minZoomLevel = 1.5
-                        maxZoomLevel = MaxZoomLevel
-                        // Disables default +/- button for zooming
-                        zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
                         addMapListener(boxOverlayListener)
-                        addMapEventListener {
-                            model.updateMapCenterAndZoom(projection.currentCenter, zoomLevelDouble)
-                        }
-                        zoomToNodes()
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
