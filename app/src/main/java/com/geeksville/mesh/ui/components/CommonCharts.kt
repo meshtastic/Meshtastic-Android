@@ -193,8 +193,9 @@ fun Legend(legendData: List<LegendData>, promptInfoDialog: () -> Unit) {
                 isLine = data.isLine
             )
 
-            if (index != legendData.lastIndex)
+            if (index != legendData.lastIndex) {
                 Spacer(modifier = Modifier.weight(1f))
+            }
         }
         Spacer(modifier = Modifier.width(4.dp))
 

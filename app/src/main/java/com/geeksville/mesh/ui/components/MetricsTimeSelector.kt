@@ -64,7 +64,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.TimeFrame
 
-
 private const val NO_OPTION_INDEX = -1
 
 private val TRACK_PADDING = 2.dp
@@ -78,7 +77,6 @@ private val OPTION_PADDING = 5.dp
 private const val PRESSED_UNSELECTED_ALPHA = .6f
 
 private val BACKGROUND_SHAPE = RoundedCornerShape(8.dp)
-
 
 /**
  * Provides the user with a set of time options they can choose from that controls
@@ -364,6 +362,7 @@ private class TimeSelectorState {
 /**
  * Works with bounds that may not be at 0,0.
  */
+@Suppress("ReturnCount")
 private suspend fun AwaitPointerEventScope.waitForUpOrCancellation(inBounds: Rect): PointerInputChange? {
     while (true) {
         val event = awaitPointerEvent(PointerEventPass.Main)
@@ -398,7 +397,6 @@ fun MetricsTimeSelectorPreview() {
                 ) {
                     TimeLabel(stringResource(it.strRes))
                 }
-
             }
         }
     }

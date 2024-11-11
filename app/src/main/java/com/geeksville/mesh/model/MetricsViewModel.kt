@@ -62,6 +62,7 @@ data class MetricsState(
 /**
  * Supported time frames used to display data.
  */
+@Suppress("MagicNumber")
 enum class TimeFrame(
     val milliseconds: Long,
     @StringRes val strRes: Int
@@ -73,11 +74,10 @@ enum class TimeFrame(
     ONE_MONTH(2629800000L, R.string.one_month),
     MAX(0L, R.string.max);
 
-    fun calculateOldestTime() : Long {
-        return if (this == MAX)
-            MAX.milliseconds
-        else
-            System.currentTimeMillis() - this.milliseconds
+    fun calculateOldestTime(): Long = if (this == MAX) {
+        MAX.milliseconds
+    } else {
+        System.currentTimeMillis() - this.milliseconds
     }
 }
 
