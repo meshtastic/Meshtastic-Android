@@ -204,8 +204,8 @@ class UIViewModel @Inject constructor(
 
     private val nodeFilterText = MutableStateFlow("")
     private val nodeSortOption = MutableStateFlow(NodeSortOption.LAST_HEARD)
-    private val includeUnknown = MutableStateFlow(false)
-    private val showDetails = MutableStateFlow(false)
+    private val includeUnknown = MutableStateFlow(preferences.getBoolean("include-unknown", false))
+    private val showDetails = MutableStateFlow(preferences.getBoolean("show-details", false))
 
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
@@ -213,10 +213,12 @@ class UIViewModel @Inject constructor(
 
     fun toggleShowDetails() {
         showDetails.value = !showDetails.value
+        preferences.edit { putBoolean("show-details", showDetails.value) }
     }
 
     fun toggleIncludeUnknown() {
         includeUnknown.value = !includeUnknown.value
+        preferences.edit { putBoolean("include-unknown", includeUnknown.value) }
     }
 
     val nodesUiState: StateFlow<NodesUiState> = combine(

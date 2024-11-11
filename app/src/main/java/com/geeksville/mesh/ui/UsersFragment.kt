@@ -14,19 +14,20 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.activityViewModels
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ar.com.hjg.pngj.PngHelperInternal.debug
 import com.geeksville.mesh.DataPacket
-import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.ui.components.MenuItemAction
 import com.geeksville.mesh.ui.components.NodeFilterTextField
 import com.geeksville.mesh.ui.components.rememberTimeTickWithLifecycle
 import com.geeksville.mesh.ui.theme.AppTheme
@@ -37,56 +38,6 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
     private val model: UIViewModel by activityViewModels()
 
-    private fun popup(node: NodeEntity) {
-        if (!model.isConnected()) return
-        val isOurNode = node.num == model.myNodeNum
-        val ignoreIncomingList = model.ignoreIncomingList
-
-        requireView().nodeMenu(
-            node = node,
-            ignoreIncomingList = ignoreIncomingList,
-            isOurNode = isOurNode,
-        ) {
-            when (itemId) {
-                R.id.direct_message -> {
-                    navigateToMessages(node)
-                }
-
-                R.id.request_position -> {
-                    model.requestPosition(node.num)
-                }
-
-                R.id.traceroute -> {
-                    model.requestTraceroute(node.num)
-                }
-
-                R.id.remove -> {
-                    model.removeNode(node.num)
-                }
-
-                R.id.ignore -> {
-                    model.ignoreIncomingList = ignoreIncomingList.toMutableList().apply {
-                        if (contains(node.num)) {
-                            debug("removed '${node.num}' from ignore list")
-                            remove(node.num)
-                        } else {
-                            debug("added '${node.num}' to ignore list")
-                            add(node.num)
-                        }
-                    }
-                }
-
-                R.id.more_details -> {
-                    navigateToRadioConfig(node.num)
-                }
-
-                R.id.request_userinfo -> {
-                    model.requestUserInfo(node.num)
-                }
-            }
-        }
-    }
-
     private fun navigateToMessages(node: NodeEntity) = node.user.let { user ->
         val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC // TODO use meta.hasPKC
         val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
@@ -95,7 +46,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         parentFragmentManager.navigateToMessages(contactKey, user.longName)
     }
 
-    private fun navigateToRadioConfig(nodeNum: Int) {
+    private fun navigateToNodeDetails(nodeNum: Int) {
         info("calling NodeDetails --> destNum: $nodeNum")
         parentFragmentManager.navigateToNavGraph(nodeNum, "NodeDetails")
     }
@@ -109,7 +60,11 @@ class UsersFragment : ScreenFragment("Users"), Logging {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
                 AppTheme {
-                    NodesScreen(model = model, chipClicked = ::popup)
+                    NodesScreen(
+                        model = model,
+                        navigateToMessages = ::navigateToMessages,
+                        navigateToNodeDetails = ::navigateToNodeDetails,
+                    )
                 }
             }
         }
@@ -118,11 +73,12 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 fun NodesScreen(
     model: UIViewModel = hiltViewModel(),
-    chipClicked: (NodeEntity) -> Unit,
+    navigateToMessages: (NodeEntity) -> Unit,
+    navigateToNodeDetails: (Int) -> Unit,
 ) {
-    val focusManager = LocalFocusManager.current
     val state by model.nodesUiState.collectAsStateWithLifecycle()
 
     val nodes by model.nodeList.collectAsStateWithLifecycle()
@@ -163,20 +119,60 @@ fun NodesScreen(
         }
 
         items(nodes, key = { it.num }) { node ->
+            val isIgnored = state.ignoreIncomingList.contains(node.num)
+            val connectionState by model.connectionState.observeAsState()
             NodeItem(
                 thisNode = ourNode,
                 thatNode = node,
                 gpsFormat = state.gpsFormat,
                 distanceUnits = state.distanceUnits,
                 tempInFahrenheit = state.tempInFahrenheit,
-                isIgnored = state.ignoreIncomingList.contains(node.num),
-                chipClicked = {
-                    focusManager.clearFocus()
-                    chipClicked(node)
+                ignoreIncomingList = state.ignoreIncomingList,
+                menuItemActionClicked = { menuItem ->
+                    when (menuItem) {
+                        MenuItemAction.Remove -> {
+                            model.removeNode(node.num)
+                            debug("removing node ${node.num}")
+                        }
+
+                        MenuItemAction.Ignore -> {
+                            model.ignoreIncomingList =
+                                state.ignoreIncomingList.toMutableList().apply {
+                                    if (isIgnored) {
+                                        remove(node.num)
+                                        debug("removing node ${node.num} from ignore list")
+                                    } else {
+                                        add(node.num)
+                                        debug("adding node ${node.num} to ignore list")
+                                    }
+                                }
+                        }
+
+                        MenuItemAction.DirectMessage -> {
+                            navigateToMessages(node)
+                        }
+
+                        MenuItemAction.RequestUserInfo -> {
+                            model.requestUserInfo(node.num)
+                        }
+
+                        MenuItemAction.RequestPosition -> {
+                            model.requestPosition(node.num)
+                        }
+
+                        MenuItemAction.TraceRoute -> {
+                            model.requestTraceroute(node.num)
+                        }
+
+                        MenuItemAction.MoreDetails -> {
+                            navigateToNodeDetails(node.num)
+                        }
+                    }
                 },
                 blinking = node == focusedNode,
                 expanded = state.showDetails,
                 currentTimeMillis = currentTimeMillis,
+                connectionState = connectionState,
             )
         }
     }

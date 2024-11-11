@@ -47,7 +47,6 @@ import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,14 +76,11 @@ fun NodeDetailScreen(
     node: NodeEntity?,
     viewModel: MetricsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
-    onNavigate: (String) -> Unit,
+    onNavigate: (Any) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     if (node != null) {
-        LaunchedEffect(node.num) {
-            viewModel.setSelectedNode(node.num)
-        }
         NodeDetailList(
             node = node,
             metricsState = state,
@@ -106,7 +102,7 @@ private fun NodeDetailList(
     node: NodeEntity,
     metricsState: MetricsState,
     modifier: Modifier = Modifier,
-    onNavigate: (String) -> Unit = {},
+    onNavigate: (Any) -> Unit = {},
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -147,7 +143,7 @@ private fun NodeDetailList(
                     icon = Icons.Default.Settings,
                     enabled = true
                 ) {
-                    onNavigate("RadioConfig")
+                    onNavigate(Route.RadioConfig(node.num))
                 }
             }
         }
@@ -231,13 +227,13 @@ private fun NodeDetailsContent(node: NodeEntity) {
 }
 
 @Composable
-fun LogNavigationList(state: MetricsState, onNavigate: (String) -> Unit) {
+fun LogNavigationList(state: MetricsState, onNavigate: (Any) -> Unit) {
     NavCard(
         title = stringResource(R.string.device_metrics_log),
         icon = Icons.Default.ChargingStation,
         enabled = state.hasDeviceMetrics()
     ) {
-        onNavigate("DeviceMetrics")
+        onNavigate(Route.DeviceMetrics)
     }
 
     NavCard(
@@ -245,7 +241,7 @@ fun LogNavigationList(state: MetricsState, onNavigate: (String) -> Unit) {
         icon = Icons.Default.Map,
         enabled = state.hasPositionLogs()
     ) {
-        onNavigate("NodeMap")
+        onNavigate(Route.NodeMap)
     }
 
     NavCard(
@@ -253,7 +249,7 @@ fun LogNavigationList(state: MetricsState, onNavigate: (String) -> Unit) {
         icon = Icons.Default.LocationOn,
         enabled = state.hasPositionLogs()
     ) {
-        onNavigate("PositionLog")
+        onNavigate(Route.PositionLog)
     }
 
     NavCard(
@@ -261,7 +257,7 @@ fun LogNavigationList(state: MetricsState, onNavigate: (String) -> Unit) {
         icon = Icons.Default.Thermostat,
         enabled = state.hasEnvironmentMetrics()
     ) {
-        onNavigate("EnvironmentMetrics")
+        onNavigate(Route.EnvironmentMetrics)
     }
 
     NavCard(
@@ -269,7 +265,7 @@ fun LogNavigationList(state: MetricsState, onNavigate: (String) -> Unit) {
         icon = Icons.Default.SignalCellularAlt,
         enabled = state.hasSignalMetrics()
     ) {
-        onNavigate("SignalMetrics")
+        onNavigate(Route.SignalMetrics)
     }
 
     NavCard(
@@ -277,7 +273,7 @@ fun LogNavigationList(state: MetricsState, onNavigate: (String) -> Unit) {
         icon = Icons.Default.Route,
         enabled = state.hasTracerouteLogs()
     ) {
-        onNavigate("TracerouteList")
+        onNavigate(Route.TracerouteLog)
     }
 }
 

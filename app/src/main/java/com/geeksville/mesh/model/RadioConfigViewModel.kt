@@ -3,8 +3,10 @@ package com.geeksville.mesh.model
 import android.app.Application
 import android.net.Uri
 import android.os.RemoteException
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
@@ -27,14 +29,17 @@ import com.geeksville.mesh.ui.AdminRoute
 import com.geeksville.mesh.ui.ConfigRoute
 import com.geeksville.mesh.ui.ModuleRoute
 import com.geeksville.mesh.ui.ResponseState
+import com.geeksville.mesh.ui.Route
 import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -62,23 +67,15 @@ data class RadioConfigState(
 
 @HiltViewModel
 class RadioConfigViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val app: Application,
     private val radioConfigRepository: RadioConfigRepository,
 ) : ViewModel(), Logging {
-
     private val meshService: IMeshService? get() = radioConfigRepository.meshService
 
-    private val _destNum = MutableStateFlow<Int?>(null)
+    private val destNum = savedStateHandle.toRoute<Route.RadioConfig>().destNum
     private val _destNode = MutableStateFlow<NodeEntity?>(null)
     val destNode: StateFlow<NodeEntity?> get() = _destNode
-
-    /**
-     * Sets the destination [NodeEntity] used in Radio Configuration.
-     * @param num Destination nodeNum (or null for our local [NodeEntity]).
-     */
-    fun setDestNum(num: Int?) {
-        _destNum.value = num
-    }
 
     private val requestIds = MutableStateFlow(hashSetOf<Int>())
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
@@ -88,7 +85,8 @@ class RadioConfigViewModel @Inject constructor(
     val currentDeviceProfile get() = _currentDeviceProfile.value
 
     init {
-        combine(_destNum, radioConfigRepository.nodeDBbyNum) { destNum, nodes ->
+        @OptIn(ExperimentalCoroutinesApi::class)
+        radioConfigRepository.nodeDBbyNum.mapLatest { nodes ->
             nodes[destNum] ?: nodes.values.firstOrNull()
         }.onEach { _destNode.value = it }.launchIn(viewModelScope)
 
@@ -427,7 +425,7 @@ class RadioConfigViewModel @Inject constructor(
 
             ConfigRoute.CHANNELS -> {
                 getChannel(destNum, 0)
-                getConfig(destNum, ConfigRoute.LORA.configType)
+                getConfig(destNum, ConfigRoute.LORA.type)
                 // channel editor is synchronous, so we don't use requestIds as total
                 setResponseStateTotal(maxChannels + 1)
             }
@@ -438,17 +436,17 @@ class RadioConfigViewModel @Inject constructor(
                 if (route == ConfigRoute.LORA) {
                     getChannel(destNum, 0)
                 }
-                getConfig(destNum, route.configType)
+                getConfig(destNum, route.type)
             }
 
             is ModuleRoute -> {
                 if (route == ModuleRoute.CANNED_MESSAGE) {
                     getCannedMessages(destNum)
                 }
-                if (route == ModuleRoute.EXTERNAL_NOTIFICATION) {
+                if (route == ModuleRoute.EXT_NOTIFICATION) {
                     getRingtone(destNum)
                 }
-                getModuleConfig(destNum, route.configType)
+                getModuleConfig(destNum, route.type)
             }
         }
     }
