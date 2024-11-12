@@ -16,11 +16,11 @@ class NetworkRepository @Inject constructor(
     val networkAvailable get() = connectivityManager.get().networkAvailable()
 
     val resolvedList
-        get() = nsdManagerLazy.get()?.serviceList(SERVICE_TYPE, SERVICE_NAME) ?: flowOf(emptyList())
+        get() = nsdManagerLazy.get()?.serviceList(SERVICE_TYPES, SERVICE_NAME) ?: flowOf(emptyList())
 
     companion object {
         // To find all available services use SERVICE_TYPE = "_services._dns-sd._udp"
         internal const val SERVICE_NAME = "Meshtastic"
-        internal const val SERVICE_TYPE = "_https._tcp."
+        internal val SERVICE_TYPES = listOf("_http._tcp.", "_meshtastic._tcp.")
     }
 }
