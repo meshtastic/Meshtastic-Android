@@ -8,17 +8,18 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
+import com.geeksville.mesh.util.metersIn
 import com.geeksville.mesh.util.toString
 
 @Composable
 fun ElevationInfo(
     modifier: Modifier = Modifier,
-    altitude: Float,
+    altitude: Int,
     system: DisplayUnits,
     suffix: String
 ) {
     val annotatedString = buildAnnotatedString {
-        append(altitude.toString(system))
+        append(altitude.metersIn(system).toString(system))
         MaterialTheme.typography.overline.toSpanStyle().let { style ->
             withStyle(style) {
                 append(" $suffix")
@@ -38,7 +39,7 @@ fun ElevationInfo(
 fun ElevationInfoPreview() {
     MaterialTheme {
         ElevationInfo(
-            altitude = 100.0f,
+            altitude = 100,
             system = DisplayUnits.METRIC,
             suffix = "ASL"
         )

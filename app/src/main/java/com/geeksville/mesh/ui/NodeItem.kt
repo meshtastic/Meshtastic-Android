@@ -46,7 +46,6 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.MeshProtos
@@ -60,7 +59,6 @@ import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
 import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
-import com.geeksville.mesh.util.metersIn
 import com.geeksville.mesh.util.toDistanceString
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -83,9 +81,9 @@ fun NodeItem(
     val longName = thatNode.user.longName.ifEmpty { stringResource(id = R.string.unknown_username) }
 
     val isThisNode = thisNode?.num == thatNode.num
-    val distance = thisNode?.distance(thatNode)?.let {
-        val system = DisplayConfig.DisplayUnits.forNumber(distanceUnits)
-        if (it == 0) null else it.toDistanceString(system)
+    val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
+    val distance = remember(thisNode, thatNode) {
+        thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
     }
     val (textColor, nodeColor) = thatNode.colors
 
@@ -274,15 +272,11 @@ fun NodeItem(
                                     )
                                 }
                             }
-                            val system =
-                                ConfigProtos.Config.DisplayConfig.DisplayUnits.forNumber(distanceUnits)
                             thatNode.validPosition?.let { position ->
-                                val altitude = position.altitude.metersIn(system)
-                                val elevationSuffix = stringResource(id = R.string.elevation_suffix)
                                 ElevationInfo(
-                                    altitude = altitude,
+                                    altitude = position.altitude,
                                     system = system,
-                                    suffix = elevationSuffix
+                                    suffix = stringResource(id = R.string.elevation_suffix)
                                 )
                             }
                         }
