@@ -65,6 +65,8 @@ fun DeviceMetricsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var displayInfoDialog by remember { mutableStateOf(false) }
+    val selectedTimeFrame by viewModel.timeFrame.collectAsState()
+    val data = state.deviceMetricsFiltered(selectedTimeFrame)
 
     Column {
 
@@ -82,11 +84,10 @@ fun DeviceMetricsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.33f),
-            state.deviceMetrics.reversed(),
+            data.reversed(),
             promptInfoDialog = { displayInfoDialog = true }
         )
 
-        val selectedTimeFrame by viewModel.timeFrame.collectAsState()
         MetricsTimeSelector(
             selectedTimeFrame,
             onOptionSelected = { viewModel.setTimeFrame(it) }
@@ -98,7 +99,7 @@ fun DeviceMetricsScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(state.deviceMetrics) { telemetry -> DeviceMetricsCard(telemetry) }
+            items(data) { telemetry -> DeviceMetricsCard(telemetry) }
         }
     }
 }
