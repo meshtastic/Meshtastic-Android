@@ -1,9 +1,3 @@
-@file:Suppress(
-    "LongMethod",
-    "MagicNumber",
-    "CyclomaticComplexMethod",
-)
-
 package com.geeksville.mesh.ui
 
 import androidx.compose.animation.animateColorAsState
@@ -52,14 +46,11 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.ui.components.MenuItemAction
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenu
@@ -68,9 +59,9 @@ import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
 import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
-import com.geeksville.mesh.util.metersIn
 import com.geeksville.mesh.util.toDistanceString
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun NodeItem(
@@ -84,16 +75,15 @@ fun NodeItem(
     blinking: Boolean = false,
     expanded: Boolean = false,
     currentTimeMillis: Long,
-    connectionState: MeshService.ConnectionState? = ConnectionState.DISCONNECTED,
+    isConnected: Boolean = false,
 ) {
-    val isUnknownUser = thatNode.isUnknownUser
-    val unknownShortName = stringResource(id = R.string.unknown_node_short_name)
+    val isIgnored = ignoreIncomingList.contains(thatNode.num)
     val longName = thatNode.user.longName.ifEmpty { stringResource(id = R.string.unknown_username) }
 
     val isThisNode = thisNode?.num == thatNode.num
-    val distance = thisNode?.distance(thatNode)?.let {
-        val system = DisplayConfig.DisplayUnits.forNumber(distanceUnits)
-        if (it == 0) null else it.toDistanceString(system)
+    val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
+    val distance = remember(thisNode, thatNode) {
+        thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
     }
     val (textColor, nodeColor) = thatNode.colors
 
@@ -101,28 +91,23 @@ fun NodeItem(
         MeshProtos.HardwareModel.UNSET -> MeshProtos.HardwareModel.UNSET.name
         else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
     }
-    val roleName = if (isUnknownUser) {
+    val roleName = if (thatNode.isUnknownUser) {
         DeviceConfig.Role.UNRECOGNIZED.name
     } else {
         thatNode.user.role.name
     }
-    val nodeId = thatNode.user.id.ifEmpty { "???" }
 
-    val highlight = Color(0x33FFFFFF)
     val bgColor by animateColorAsState(
-        targetValue = if (blinking) highlight else Color.Transparent,
+        targetValue = if (blinking) Color(color = 0x33FFFFFF) else Color.Transparent,
         animationSpec = repeatable(
             iterations = 6,
-            animation = tween(
-                durationMillis = 250,
-                easing = FastOutSlowInEasing
-            ),
+            animation = tween(durationMillis = 250, easing = FastOutSlowInEasing),
             repeatMode = RepeatMode.Reverse
         ),
         label = "blinking node"
     )
 
-    val style = if (isUnknownUser) {
+    val style = if (thatNode.isUnknownUser) {
         LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)
     } else {
         LocalTextStyle.current
@@ -179,7 +164,7 @@ fun NodeItem(
                                 content = {
                                     Text(
                                         modifier = Modifier.fillMaxWidth(),
-                                        text = thatNode.user.shortName.ifEmpty { unknownShortName },
+                                        text = thatNode.user.shortName.ifEmpty { "???" },
                                         fontWeight = FontWeight.Normal,
                                         fontSize = MaterialTheme.typography.button.fontSize,
                                         textDecoration = TextDecoration.LineThrough.takeIf {
@@ -196,7 +181,7 @@ fun NodeItem(
                                 onMenuItemAction = menuItemActionClicked,
                                 expanded = menuExpanded,
                                 onDismissRequest = { menuExpanded = false },
-                                isConnected = connectionState == ConnectionState.CONNECTED,
+                                isConnected = isConnected,
                             )
                         }
                         NodeKeyStatusIcon(
@@ -208,11 +193,7 @@ fun NodeItem(
                             modifier = Modifier.weight(1f),
                             text = longName,
                             style = style,
-                            textDecoration = TextDecoration.LineThrough.takeIf {
-                                ignoreIncomingList.contains(
-                                    thatNode.num
-                                )
-                            },
+                            textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                             softWrap = true,
                         )
 
@@ -291,15 +272,11 @@ fun NodeItem(
                                     )
                                 }
                             }
-                            val system =
-                                ConfigProtos.Config.DisplayConfig.DisplayUnits.forNumber(distanceUnits)
                             thatNode.validPosition?.let { position ->
-                                val altitude = position.altitude.metersIn(system)
-                                val elevationSuffix = stringResource(id = R.string.elevation_suffix)
                                 ElevationInfo(
-                                    altitude = altitude,
+                                    altitude = position.altitude,
                                     system = system,
-                                    suffix = elevationSuffix
+                                    suffix = stringResource(id = R.string.elevation_suffix)
                                 )
                             }
                         }
@@ -322,7 +299,7 @@ fun NodeItem(
                             )
                             Text(
                                 modifier = Modifier.weight(1f),
-                                text = nodeId,
+                                text = thatNode.user.id.ifEmpty { "???" },
                                 textAlign = TextAlign.End,
                                 fontSize = MaterialTheme.typography.button.fontSize,
                                 style = style,

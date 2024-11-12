@@ -465,7 +465,7 @@ class UIViewModel @Inject constructor(
     }
 
     // Connection state to our radio device
-    val connectionState get() = radioConfigRepository.connectionState.asLiveData()
+    val connectionState get() = radioConfigRepository.connectionState
     fun isConnected() = connectionState.value != MeshService.ConnectionState.DISCONNECTED
 
     private val _requestChannelUrl = MutableLiveData<Uri?>(null)
@@ -505,14 +505,21 @@ class UIViewModel @Inject constructor(
             updateLoraConfig { it.copy { region = value } }
         }
 
-    var ignoreIncomingList: MutableList<Int>
-        get() = config.lora.ignoreIncomingList
-        set(value) = updateLoraConfig {
-            it.copy {
-                ignoreIncoming.clear()
-                ignoreIncoming.addAll(value)
+    fun ignoreNode(nodeNum: Int) = updateLoraConfig {
+        it.copy {
+            val list = ignoreIncoming.toMutableList().apply {
+                if (contains(nodeNum)) {
+                    debug("removing node $nodeNum from ignore list")
+                    remove(nodeNum)
+                } else {
+                    debug("adding node $nodeNum to ignore list")
+                    add(nodeNum)
+                }
             }
+            ignoreIncoming.clear()
+            ignoreIncoming.addAll(list)
         }
+    }
 
     // managed mode disables all access to configuration
     val isManaged: Boolean get() = config.device.isManaged || config.security.isManaged

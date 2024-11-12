@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -22,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.activityViewModels
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import ar.com.hjg.pngj.PngHelperInternal.debug
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.NodeEntity
@@ -73,7 +71,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-@Suppress("LongMethod", "CyclomaticComplexMethod")
+@Suppress("LongMethod")
 fun NodesScreen(
     model: UIViewModel = hiltViewModel(),
     navigateToMessages: (NodeEntity) -> Unit,
@@ -97,6 +95,7 @@ fun NodesScreen(
     }
 
     val currentTimeMillis = rememberTimeTickWithLifecycle()
+    val connectionState by model.connectionState.collectAsStateWithLifecycle()
 
     LazyColumn(
         state = listState,
@@ -119,8 +118,6 @@ fun NodesScreen(
         }
 
         items(nodes, key = { it.num }) { node ->
-            val isIgnored = state.ignoreIncomingList.contains(node.num)
-            val connectionState by model.connectionState.observeAsState()
             NodeItem(
                 thisNode = ourNode,
                 thatNode = node,
@@ -130,49 +127,19 @@ fun NodesScreen(
                 ignoreIncomingList = state.ignoreIncomingList,
                 menuItemActionClicked = { menuItem ->
                     when (menuItem) {
-                        MenuItemAction.Remove -> {
-                            model.removeNode(node.num)
-                            debug("removing node ${node.num}")
-                        }
-
-                        MenuItemAction.Ignore -> {
-                            model.ignoreIncomingList =
-                                state.ignoreIncomingList.toMutableList().apply {
-                                    if (isIgnored) {
-                                        remove(node.num)
-                                        debug("removing node ${node.num} from ignore list")
-                                    } else {
-                                        add(node.num)
-                                        debug("adding node ${node.num} to ignore list")
-                                    }
-                                }
-                        }
-
-                        MenuItemAction.DirectMessage -> {
-                            navigateToMessages(node)
-                        }
-
-                        MenuItemAction.RequestUserInfo -> {
-                            model.requestUserInfo(node.num)
-                        }
-
-                        MenuItemAction.RequestPosition -> {
-                            model.requestPosition(node.num)
-                        }
-
-                        MenuItemAction.TraceRoute -> {
-                            model.requestTraceroute(node.num)
-                        }
-
-                        MenuItemAction.MoreDetails -> {
-                            navigateToNodeDetails(node.num)
-                        }
+                        MenuItemAction.Remove -> model.removeNode(node.num)
+                        MenuItemAction.Ignore -> model.ignoreNode(node.num)
+                        MenuItemAction.DirectMessage -> navigateToMessages(node)
+                        MenuItemAction.RequestUserInfo -> model.requestUserInfo(node.num)
+                        MenuItemAction.RequestPosition -> model.requestPosition(node.num)
+                        MenuItemAction.TraceRoute -> model.requestTraceroute(node.num)
+                        MenuItemAction.MoreDetails -> navigateToNodeDetails(node.num)
                     }
                 },
                 blinking = node == focusedNode,
                 expanded = state.showDetails,
                 currentTimeMillis = currentTimeMillis,
-                connectionState = connectionState,
+                isConnected = connectionState.isConnected(),
             )
         }
     }

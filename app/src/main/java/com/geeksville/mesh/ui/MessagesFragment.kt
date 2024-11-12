@@ -161,7 +161,7 @@ class MessagesFragment : Fragment(), Logging {
         }
 
         // If connection state _OR_ myID changes we have to fix our ability to edit outgoing messages
-        model.connectionState.observe(viewLifecycleOwner) {
+        model.connectionState.asLiveData().observe(viewLifecycleOwner) {
             // If we don't know our node ID and we are offline don't let user try to send
             val isConnected = model.isConnected()
             binding.textInputLayout.isEnabled = isConnected

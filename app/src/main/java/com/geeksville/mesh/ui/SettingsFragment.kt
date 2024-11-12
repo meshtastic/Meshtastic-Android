@@ -183,7 +183,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         // Only let user edit their name or set software update while connected to a radio
-        model.connectionState.observe(viewLifecycleOwner) {
+        model.connectionState.asLiveData().observe(viewLifecycleOwner) {
             updateNodeInfo()
         }
 
@@ -365,11 +365,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (devices == null) return
 
         var hasShownOurDevice = false
-        devices.values
-            // Display the device list in alphabetical order while keeping the "None (Disabled)"
-            // device (fullAddress == n) at the top
-            .sortedBy { dle -> if (dle.fullAddress == "n") "0" else dle.name }
-            .forEach { device ->
+        devices.values.forEach { device ->
             if (device.fullAddress == scanModel.selectedNotNull) {
                 hasShownOurDevice = true
             }
