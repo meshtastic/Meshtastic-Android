@@ -465,7 +465,7 @@ class UIViewModel @Inject constructor(
     }
 
     // Connection state to our radio device
-    val connectionState get() = radioConfigRepository.connectionState.asLiveData()
+    val connectionState get() = radioConfigRepository.connectionState
     fun isConnected() = connectionState.value != MeshService.ConnectionState.DISCONNECTED
 
     private val _requestChannelUrl = MutableLiveData<Uri?>(null)

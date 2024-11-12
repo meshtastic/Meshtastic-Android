@@ -27,6 +27,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.asLiveData
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.geeksville.mesh.android.*
 import com.geeksville.mesh.concurrent.handledLaunch
@@ -541,7 +542,7 @@ class MainActivity : AppCompatActivity(), Logging {
     override fun onStart() {
         super.onStart()
 
-        model.connectionState.observe(this) { state ->
+        model.connectionState.asLiveData().observe(this) { state ->
             onMeshConnectionChanged(state)
             updateConnectionStatusImage(state)
         }
@@ -619,7 +620,7 @@ class MainActivity : AppCompatActivity(), Logging {
         menuInflater.inflate(R.menu.menu_main, menu)
         model.actionBarMenu = menu
 
-        updateConnectionStatusImage(model.connectionState.value!!)
+        updateConnectionStatusImage(model.connectionState.value)
 
         return true
     }

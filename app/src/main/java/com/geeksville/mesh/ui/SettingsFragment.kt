@@ -183,7 +183,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         // Only let user edit their name or set software update while connected to a radio
-        model.connectionState.observe(viewLifecycleOwner) {
+        model.connectionState.asLiveData().observe(viewLifecycleOwner) {
             updateNodeInfo()
         }
 

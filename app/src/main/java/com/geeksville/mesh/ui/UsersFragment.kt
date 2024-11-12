@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -96,7 +95,7 @@ fun NodesScreen(
     }
 
     val currentTimeMillis = rememberTimeTickWithLifecycle()
-    val connectionState by model.connectionState.observeAsState()
+    val connectionState by model.connectionState.collectAsStateWithLifecycle()
 
     LazyColumn(
         state = listState,
@@ -140,7 +139,7 @@ fun NodesScreen(
                 blinking = node == focusedNode,
                 expanded = state.showDetails,
                 currentTimeMillis = currentTimeMillis,
-                connectionState = connectionState,
+                isConnected = connectionState.isConnected(),
             )
         }
     }
