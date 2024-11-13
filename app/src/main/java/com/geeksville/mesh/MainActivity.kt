@@ -260,8 +260,9 @@ class MainActivity : AppCompatActivity(), Logging {
                 val mainTab = tab?.position ?: 0
                 model.setCurrentTab(mainTab)
             }
-            override fun onTabUnselected(tab: TabLayout.Tab?) { }
-            override fun onTabReselected(tab: TabLayout.Tab?) { }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
 
         binding.composeView.setContent {
@@ -346,10 +347,18 @@ class MainActivity : AppCompatActivity(), Logging {
                     val json = Json
                     try {
                         val intentMessage: IntentMessage = json.decodeFromString(text)
-                        model.sendMessage(intentMessage.message, intentMessage.contactKey)
-                        showMessages(intentMessage.contactKey, intentMessage.contactName)
+                        if (intentMessage.autoSend) {
+                            model.sendMessage(intentMessage.message, intentMessage.contactKey)
+                            showMessages(intentMessage.contactKey, intentMessage.contactName)
+                        } else {
+                            showMessagesPreInit(
+                                intentMessage.contactKey,
+                                intentMessage.contactName,
+                                intentMessage.message
+                            )
+                        }
                     } catch (e: SerializationException) {
-                        errormsg("Failed to decode JSON: ${e.message}")
+                        debug("Failed to decode JSON: ${e.message}; falling back to default message")
                     }
                 }
             }
@@ -624,6 +633,13 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
+    private fun showMessagesPreInit(contactKey: String?, contactName: String?, message: String?) {
+        model.setCurrentTab(0)
+        if (contactKey != null && contactName != null && message != null) {
+            supportFragmentManager.navigateToPreInitMessages(contactKey, contactName, message)
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -654,10 +670,12 @@ class MainActivity : AppCompatActivity(), Logging {
                 getVersionInfo()
                 return true
             }
+
             R.id.connectStatusImage -> {
                 Toast.makeText(applicationContext, item.title, Toast.LENGTH_SHORT).show()
                 return true
             }
+
             R.id.debug -> {
                 val fragmentManager: FragmentManager = supportFragmentManager
                 val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
@@ -667,6 +685,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 fragmentTransaction.commit()
                 return true
             }
+
             R.id.stress_test -> {
                 fun postPing() {
                     // Send ping message and arrange delayed recursion.
@@ -684,10 +703,12 @@ class MainActivity : AppCompatActivity(), Logging {
                 }
                 return true
             }
+
             R.id.radio_config -> {
                 supportFragmentManager.navigateToNavGraph()
                 return true
             }
+
             R.id.save_messages_csv -> {
                 val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
@@ -697,18 +718,22 @@ class MainActivity : AppCompatActivity(), Logging {
                 createDocumentLauncher.launch(intent)
                 return true
             }
+
             R.id.theme -> {
                 chooseThemeDialog()
                 return true
             }
+
             R.id.preferences_language -> {
                 chooseLangDialog()
                 return true
             }
+
             R.id.show_intro -> {
                 startActivity(Intent(this, AppIntroduction::class.java))
                 return true
             }
+
             R.id.preferences_quick_chat -> {
                 val fragmentManager: FragmentManager = supportFragmentManager
                 val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
@@ -718,6 +743,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 fragmentTransaction.commit()
                 return true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
