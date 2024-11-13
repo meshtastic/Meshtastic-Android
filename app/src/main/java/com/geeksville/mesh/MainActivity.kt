@@ -64,6 +64,7 @@ import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
+import com.geeksville.mesh.model.IntentMessage
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.MeshServiceNotifications
@@ -92,6 +93,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
 import java.text.DateFormat
 import java.util.Date
 import javax.inject.Inject
@@ -338,7 +341,17 @@ class MainActivity : AppCompatActivity(), Logging {
             }
 
             Intent.ACTION_SEND -> {
-
+                val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+                if (text != null) {
+                    val json = Json
+                    try {
+                        val intentMessage: IntentMessage = json.decodeFromString(text)
+                        model.sendMessage(intentMessage.message, intentMessage.contactKey)
+                        showMessages(intentMessage.contactKey, intentMessage.contactName)
+                    } catch (e: SerializationException) {
+                        errormsg("Failed to decode JSON: ${e.message}")
+                    }
+                }
             }
 
             else -> {
