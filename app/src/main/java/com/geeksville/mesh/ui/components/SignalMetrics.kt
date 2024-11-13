@@ -71,6 +71,8 @@ fun SignalMetricsScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var displayInfoDialog by remember { mutableStateOf(false) }
+    val selectedTimeFrame by viewModel.timeFrame.collectAsState()
+    val data = state.signalMetricsFiltered(selectedTimeFrame)
 
     Column {
 
@@ -88,11 +90,10 @@ fun SignalMetricsScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.33f),
-            meshPackets = state.signalMetrics.reversed(),
+            meshPackets = data.reversed(),
             promptInfoDialog = { displayInfoDialog = true }
         )
 
-        val selectedTimeFrame by viewModel.timeFrame.collectAsState()
         MetricsTimeSelector(
             selectedTimeFrame,
             onOptionSelected = { viewModel.setTimeFrame(it) }
@@ -103,7 +104,7 @@ fun SignalMetricsScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
-            items(state.signalMetrics) { meshPacket -> SignalMetricsCard(meshPacket) }
+            items(data) { meshPacket -> SignalMetricsCard(meshPacket) }
         }
     }
 }

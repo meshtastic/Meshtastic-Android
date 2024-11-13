@@ -77,6 +77,8 @@ fun EnvironmentMetricsScreen(
     viewModel: MetricsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val selectedTimeFrame by viewModel.timeFrame.collectAsState()
+    val data = state.environmentMetricsFiltered(selectedTimeFrame)
 
     /* Convert Celsius to Fahrenheit */
     @Suppress("MagicNumber")
@@ -85,7 +87,7 @@ fun EnvironmentMetricsScreen(
     }
 
     val processedTelemetries: List<Telemetry> = if (state.isFahrenheit) {
-        state.environmentMetrics.map { telemetry ->
+        data.map { telemetry ->
             val temperatureFahrenheit =
                 celsiusToFahrenheit(telemetry.environmentMetrics.temperature)
             telemetry.copy {
@@ -94,7 +96,7 @@ fun EnvironmentMetricsScreen(
             }
         }
     } else {
-        state.environmentMetrics
+        data
     }
 
     var displayInfoDialog by remember { mutableStateOf(false) }
@@ -118,7 +120,6 @@ fun EnvironmentMetricsScreen(
             promptInfoDialog = { displayInfoDialog = true }
         )
 
-        val selectedTimeFrame by viewModel.timeFrame.collectAsState()
         MetricsTimeSelector(
             selectedTimeFrame,
             onOptionSelected = { viewModel.setTimeFrame(it) }
