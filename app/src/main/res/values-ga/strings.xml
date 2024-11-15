@@ -286,5 +286,5 @@
         <item quantity="many">%d céimeanna</item>
         <item quantity="other">%d céimeanna</item>
     </plurals>
-    <string name="traceroute_diff">Céimeanna i dtreo %d Céimeanna ar ais %d</string>
+    <string name="traceroute_diff">Céimeanna i dtreo %1$d Céimeanna ar ais %2$d</string>
 </resources>

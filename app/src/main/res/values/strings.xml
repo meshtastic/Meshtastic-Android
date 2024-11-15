@@ -303,7 +303,7 @@
         <item quantity="one">1 hop</item>
         <item quantity="other">%d hops</item>
     </plurals>
-    <string name="traceroute_diff">Hops towards %d Hops back %d</string>
+    <string name="traceroute_diff">Hops towards %1$d Hops back %2$d</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1W</string>

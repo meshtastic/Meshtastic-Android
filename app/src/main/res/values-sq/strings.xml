@@ -277,5 +277,5 @@
         <item quantity="one">1 hop</item>
         <item quantity="other">%d hops</item>
     </plurals>
-    <string name="traceroute_diff">Hops drejt %d Hops prapa %d</string>
+    <string name="traceroute_diff">Hops drejt %1$d Hops prapa %2$d</string>
 </resources>

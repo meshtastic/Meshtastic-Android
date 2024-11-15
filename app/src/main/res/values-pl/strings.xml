@@ -283,5 +283,5 @@
         <item quantity="many">%d skoki</item>
         <item quantity="other">%d skoków</item>
     </plurals>
-    <string name="traceroute_diff">Trasa do %d Trasa z %d</string>
+    <string name="traceroute_diff">Trasa do %1$d Trasa z %2$d</string>
 </resources>

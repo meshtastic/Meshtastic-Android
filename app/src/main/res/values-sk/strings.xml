@@ -283,5 +283,5 @@
         <item quantity="many">%d skokov</item>
         <item quantity="other">%d skokov</item>
     </plurals>
-    <string name="traceroute_diff">Počet skokov smerom k %d Počet skokov späť %d</string>
+    <string name="traceroute_diff">Počet skokov smerom k %1$d Počet skokov späť %2$d</string>
 </resources>
