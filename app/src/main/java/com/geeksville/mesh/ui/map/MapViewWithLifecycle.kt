@@ -20,6 +20,8 @@ import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.util.requiredZoomLevel
 import org.osmdroid.config.Configuration
+import org.osmdroid.tileprovider.tilesource.ITileSource
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
@@ -44,20 +46,26 @@ private fun PowerManager.WakeLock.safeRelease() {
     }
 }
 
+const val MAP_STYLE_ID = "map_style_id"
+
 private const val MinZoomLevel = 1.5
 private const val MaxZoomLevel = 20.0
 
 @Composable
-internal fun rememberMapViewWithLifecycle(box: BoundingBox): MapView {
+internal fun rememberMapViewWithLifecycle(
+    box: BoundingBox,
+    tileSource: ITileSource = TileSourceFactory.DEFAULT_TILE_SOURCE,
+): MapView {
     val zoom = box.requiredZoomLevel()
     val center = GeoPoint(box.centerLatitude, box.centerLongitude)
-    return rememberMapViewWithLifecycle(zoom, center)
+    return rememberMapViewWithLifecycle(zoom, center, tileSource)
 }
 
 @Composable
 internal fun rememberMapViewWithLifecycle(
     zoomLevel: Double = MinZoomLevel,
     mapCenter: GeoPoint = GeoPoint(0.0, 0.0),
+    tileSource: ITileSource = TileSourceFactory.DEFAULT_TILE_SOURCE,
 ): MapView {
     var savedZoom by rememberSaveable { mutableDoubleStateOf(zoomLevel) }
     var savedCenter by rememberSaveable(stateSaver = Saver(
@@ -72,13 +80,11 @@ internal fun rememberMapViewWithLifecycle(
 
             // Required to get online tiles
             Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
+            setTileSource(tileSource)
             isVerticalMapRepetitionEnabled = false // disables map repetition
             setMultiTouchControls(true)
-            setScrollableAreaLimitLatitude( // bounds scrollable map
-                overlayManager.tilesOverlay.bounds.actualNorth,
-                overlayManager.tilesOverlay.bounds.actualSouth,
-                0
-            )
+            val bounds = overlayManager.tilesOverlay.bounds // bounds scrollable map
+            setScrollableAreaLimitLatitude(bounds.actualNorth, bounds.actualSouth, 0)
             // scales the map tiles to the display density of the screen
             isTilesScaledToDpi = true
             // sets the minimum zoom level (the furthest out you can zoom)
