@@ -1394,8 +1394,8 @@ class MeshService : Service(), Logging {
                     if (isLicensed) clearPublicKey()
                     if (info.viaMqtt) longName = "$longName (MQTT)"
                 }
-                it.longName = info.user.longName
-                it.shortName = info.user.shortName
+                it.longName = it.user.longName
+                it.shortName = it.user.shortName
             }
 
             if (info.hasPosition()) {

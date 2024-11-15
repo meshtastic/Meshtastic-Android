@@ -69,7 +69,7 @@ interface NodeInfoDao {
                 ELSE hops_away
             END
         WHEN :sort = 'channel' THEN channel
-        WHEN :sort = 'via_mqtt' THEN long_name LIKE '%(MQTT)' -- viaMqtt
+        WHEN :sort = 'via_mqtt' THEN via_mqtt
         ELSE 0
     END ASC,
     last_heard DESC
