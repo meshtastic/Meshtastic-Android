@@ -27,9 +27,12 @@
     <string name="routing_error_not_authorized">Neautorizované</string>
     <string name="routing_error_pki_failed">Zlyhalo šifrované odosielanie</string>
     <string name="routing_error_pki_unknown_pubkey">Neznámy verejný kľúč</string>
+    <string name="routing_error_admin_bad_session_key">Zlý kľúč relácie</string>
+    <string name="routing_error_admin_public_key_unauthorized">Verejný kľúč neautorizovaný</string>
     <string name="role_client">Pripojená aplikácia, alebo samostatné zariadenie na odosielanie správ.</string>
     <string name="role_client_mute">Zariadenie, ktoré nepreposiela pakety z ďalších zariadení.</string>
     <string name="role_router">Uzol infraštruktúry na rozšírenie pokrytia siete prenosom správ. Viditeľný v zozname uzlov.</string>
+    <string name="role_router_client">Kombinácia ROUTER a CLIENT. Nie pre mobilné zariadenia.</string>
     <string name="role_repeater">Uzol infraštruktúry na rozšírenie pokrytia siete prenosom správ s minimálnou réžiou. Nezobrazuje sa v zozname uzlov.</string>
     <string name="role_tracker">Prioritne vysiela pakety polohy GPS.</string>
     <string name="role_sensor">Prioritne vysiela telemetrické pakety.</string>
@@ -37,6 +40,12 @@
     <string name="role_client_hidden">Zariadenie, ktoré vysiela len podľa potreby pre utajenie, alebo úsporu energie.</string>
     <string name="role_lost_and_found">Pravidelne vysiela polohu ako správu na predvolený kanál, aby pomohol pri obnove zariadenia.</string>
     <string name="role_tak_tracker">Umožňuje automatické vysielanie TAK PLI a znižuje rutinné vysielanie.</string>
+    <string name="rebroadcast_mode_all">Znovu odvysielať akúkoľvek pozorovanú správu, ak bola na našom súkromnom kanáli alebo z inej siete s rovnakými parametrami lora.</string>
+    <string name="rebroadcast_mode_all_skip_decoding">Rovnaké ako správanie ako ALL, ale preskočí dekódovanie paketov a jednoducho ich znovu vysiela. Dostupné iba v úlohe Opakovača. Nastavenie tejto možnosti na akékoľvek iné roly bude mať za následok správania sa ako ALL.</string>
+    <string name="rebroadcast_mode_local_only">Ignoruje pozorované správy z cudzích sietí, ktoré sú otvorené alebo tie, ktoré nedokáže dešifrovať. Opätovne vysiela správu iba na lokálnych primárnych / sekundárnych kanáloch uzlov.</string>
+    <string name="rebroadcast_mode_known_only">Ignoruje pozorované správy z cudzích sietí, ako napríklad LOCAL ONLY, ale ide o krok ďalej tým, že ignoruje aj správy z uzlov, ktoré ešte nie sú v známom zozname uzla.</string>
+    <string name="rebroadcast_mode_none">Povolené len pre role SENSOR, TRACKER a TAK_TRACKER, zamedzí to všetkým opätovným vysielaniam, na rozdiel od roly CLIENT_MUTE.</string>
+    <string name="rebroadcast_mode_core_portnums_only">Ignoruje pakety z neštandardných portov, ako sú: TAK, RangeTest, PaxCounter atď. Opätovne vysiela iba pakety so štandardnými portami: NodeInfo, Text, Position, Telemetry a Routing.</string>
     <string name="channel_name">Názov kanála</string>
     <string name="channel_options">Nastavenia kanála</string>
     <string name="qr_code">QR kód</string>
@@ -218,6 +227,12 @@
     <string name="mute_8_hours">8 hodín</string>
     <string name="mute_1_week">1 týždeň</string>
     <string name="mute_always">Vždy</string>
+    <plurals name="add_channel_from_qr">
+        <item quantity="one">Chcete pridať nový kanál?</item>
+        <item quantity="few">Chcete pridať %d nové kanále?</item>
+        <item quantity="many">Chcete pridať %d nových kanálov?</item>
+        <item quantity="other">Chcete pridať %d nové kanále?</item>
+    </plurals>
     <string name="replace">Nahradiť</string>
     <string name="wifi_qr_code_scan">Skenuj WiFi QR kód</string>
     <string name="wifi_qr_code_error">Neplatný formát QR kódu poverenia WiFi</string>
@@ -239,4 +254,34 @@
     <string name="encryption_pkc_text">Priame správy využívajú na šifrovanie novú infraštruktúru verejného kľúča. Vyžaduje verziu firmvéru 2.5 alebo vyššiu.</string>
     <string name="encryption_error">Nezhoda verejného kľúča</string>
     <string name="encryption_error_text">Verejný kľúč sa nezhoduje so zaznamenaným kľúčom. Môžete odstrániť uzol a nechať ho znova vymeniť kľúče, ale to môže naznačovať vážnejší bezpečnostný problém. Kontaktujte používateľa prostredníctvom iného dôveryhodného kanála a zistite, či bola zmena kľúča spôsobená obnovením továrenských nastavení alebo inou úmyselnou akciou.</string>
+    <string name="request_userinfo">Požiadať o informácie o užívateľovi</string>
+    <string name="meshtastic_new_nodes_notifications">Notifikácie nových uzlov</string>
+    <string name="more_details">Viac detailov</string>
+    <string name="snr">SNR</string>
+    <string name="snr_definition">Pomer signálu od šumu (SNR), miera používaná v komunikácii na kvantifikáciu úrovne požadovaného signálu k úrovni hluku pozadia. V Meshtastic a iných bezdrôtových systémoch znamená vyšší SNR jasnejší signál, ktorý môže zvýšiť spoľahlivosť a kvalitu prenosu údajov.</string>
+    <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Indikátor sily prijímaného signálu (RSSI), meranie používané na určenie úrovne výkonu prijatého skrz anténu. Vyššia hodnota RSSI vo všeobecnosti znamená silnejšie a stabilnejšie pripojenie.</string>
+    <string name="iaq_definition">(Kvalita vzduchu v interiéri) relatívna hodnota IAQ meraná prístrojom Bosch BME680. Rozsah hodnôt 0–500.</string>
+    <string name="device_metrics_log">Log metrík zariadenia</string>
+    <string name="node_map">Mapa uzlov</string>
+    <string name="position_log">Log pozície</string>
+    <string name="env_metrics_log">Log poveternostných metrík</string>
+    <string name="sig_metrics_log">Log metrík signálu</string>
+    <string name="administration">Administrácia</string>
+    <string name="remote_admin">Administrácia na diaľku</string>
+    <string name="bad">Zlý</string>
+    <string name="fair">Primeraný</string>
+    <string name="good">Dobrý</string>
+    <string name="none_quality">Žiadny</string>
+    <string name="signal">Signál</string>
+    <string name="signal_quality">Kvalita signálu</string>
+    <string name="traceroute_log">Log trasovania</string>
+    <string name="traceroute_direct">Priamo</string>
+    <plurals name="traceroute_hops">
+        <item quantity="one">1 skok</item>
+        <item quantity="few">%d skoky</item>
+        <item quantity="many">%d skokov</item>
+        <item quantity="other">%d skokov</item>
+    </plurals>
+    <string name="traceroute_diff">Počet skokov smerom k %d Počet skokov späť %d</string>
 </resources>
