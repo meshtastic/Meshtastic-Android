@@ -1,6 +1,7 @@
 package com.geeksville.mesh.model
 
 import android.app.Application
+import android.content.SharedPreferences
 import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
@@ -17,8 +18,10 @@ import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.entity.MeshLog
+import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.ui.Route
+import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -111,6 +114,7 @@ class MetricsViewModel @Inject constructor(
     private val dispatchers: CoroutineDispatchers,
     private val meshLogRepository: MeshLogRepository,
     private val radioConfigRepository: RadioConfigRepository,
+    private val preferences: SharedPreferences,
 ) : ViewModel(), Logging {
     private val destNum = savedStateHandle.toRoute<Route.NodeDetail>().destNum
 
@@ -119,6 +123,7 @@ class MetricsViewModel @Inject constructor(
     }
 
     fun getUser(nodeNum: Int) = radioConfigRepository.getUser(nodeNum)
+    val tileSource get() = CustomTileSource.getTileSource(preferences.getInt(MAP_STYLE_ID, 0))
 
     fun deleteLog(uuid: String) = viewModelScope.launch(dispatchers.io) {
         meshLogRepository.deleteLog(uuid)

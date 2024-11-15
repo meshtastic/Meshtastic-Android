@@ -28,6 +28,7 @@ import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -43,10 +44,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.osmdroid.util.GeoPoint
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
@@ -119,15 +118,6 @@ data class NodesUiState(
 ) {
     companion object {
         val Empty = NodesUiState()
-    }
-}
-
-data class MapState(
-    val center: GeoPoint? = null,
-    val zoom: Double = 0.0,
-) {
-    companion object {
-        val Empty = MapState()
     }
 }
 
@@ -259,11 +249,9 @@ class UIViewModel @Inject constructor(
 
     val nodesWithPosition get() = nodeDB.nodeDBbyNum.value.values.filter { it.validPosition != null }
 
-    private val _mapState = MutableStateFlow(MapState.Empty)
-    val mapState: StateFlow<MapState> get() = _mapState
-
-    fun updateMapCenterAndZoom(center: GeoPoint, zoom: Double) =
-        _mapState.update { it.copy(center = center, zoom = zoom) }
+    var mapStyleId: Int
+        get() = preferences.getInt(MAP_STYLE_ID, 0)
+        set(value) = preferences.edit { putInt(MAP_STYLE_ID, value) }
 
     fun getUser(userId: String?) = nodeDB.getUser(userId ?: DataPacket.ID_BROADCAST)
 

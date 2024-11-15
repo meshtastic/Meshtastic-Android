@@ -28,7 +28,7 @@ fun NodeMapScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val geoPoints = state.positionLogs.map { GeoPoint(it.latitudeI * DegD, it.longitudeI * DegD) }
     val cameraView = remember { BoundingBox.fromGeoPoints(geoPoints) }
-    val mapView = rememberMapViewWithLifecycle(cameraView)
+    val mapView = rememberMapViewWithLifecycle(cameraView, viewModel.tileSource)
 
     AndroidView(
         modifier = Modifier.fillMaxSize(),

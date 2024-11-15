@@ -214,10 +214,6 @@ fun MapView(
     // UI Elements
     var cacheEstimate by remember { mutableStateOf("") }
 
-    // constants
-    val prefsName = "org.geeksville.osm.prefs"
-    val mapStyleId = "map_style_id"
-
     var zoomLevelMin by remember { mutableDoubleStateOf(0.0) }
     var zoomLevelMax by remember { mutableDoubleStateOf(0.0) }
 
@@ -225,20 +221,33 @@ fun MapView(
     var downloadRegionBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
     var myLocationOverlay: MyLocationNewOverlay? by remember { mutableStateOf(null) }
 
+    var showDownloadButton: Boolean by remember { mutableStateOf(false) }
+    var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
+    var showCurrentCacheInfo by remember { mutableStateOf(false) }
+
     val context = LocalContext.current
     val density = LocalDensity.current
-    val mPrefs = remember { context.getSharedPreferences(prefsName, Context.MODE_PRIVATE) }
 
     val haptic = LocalHapticFeedback.current
     fun performHapticFeedback() = haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
     val hasGps = remember { context.hasGps() }
 
+    fun loadOnlineTileSourceBase(): ITileSource {
+        val id = model.mapStyleId
+        debug("mapStyleId from prefs: $id")
+        return CustomTileSource.getTileSource(id).also {
+            zoomLevelMax = it.maximumZoomLevel.toDouble()
+            showDownloadButton =
+                if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
+        }
+    }
+
     val cameraView = remember {
         val geoPoints = model.nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
         BoundingBox.fromGeoPoints(geoPoints)
     }
-    val map = rememberMapViewWithLifecycle(cameraView)
+    val map = rememberMapViewWithLifecycle(cameraView, loadOnlineTileSourceBase())
 
     val nodeClusterer = remember { RadiusMarkerClusterer(context) }
 
@@ -280,10 +289,6 @@ fun MapView(
 
     val nodes by model.nodeList.collectAsStateWithLifecycle()
     val waypoints by model.waypoints.collectAsStateWithLifecycle(emptyMap())
-
-    var showDownloadButton: Boolean by remember { mutableStateOf(false) }
-    var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
-    var showCurrentCacheInfo by remember { mutableStateOf(false) }
 
     val markerIcon = remember {
         AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24)
@@ -451,16 +456,6 @@ fun MapView(
         UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values), nodeClusterer)
     }
 
-    fun loadOnlineTileSourceBase(): ITileSource {
-        val id = mPrefs.getInt(mapStyleId, 0)
-        debug("mapStyleId from prefs: $id")
-        return CustomTileSource.getTileSource(id).also {
-            zoomLevelMax = it.maximumZoomLevel.toDouble()
-            showDownloadButton =
-                if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
-        }
-    }
-
     /**
      * Creates Box overlay showing what area can be downloaded
      */
@@ -536,10 +531,10 @@ fun MapView(
         val builder = MaterialAlertDialogBuilder(context)
         val mapStyles: Array<CharSequence> = CustomTileSource.mTileSources.values.toTypedArray()
 
-        val mapStyleInt = mPrefs.getInt(mapStyleId, 0)
+        val mapStyleInt = model.mapStyleId
         builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
             debug("Set mapStyleId pref to $which")
-            mPrefs.edit().putInt(mapStyleId, which).apply()
+            model.mapStyleId = which
             dialog.dismiss()
             map.setTileSource(loadOnlineTileSourceBase())
         }
@@ -586,7 +581,6 @@ fun MapView(
             AndroidView(
                 factory = {
                     map.apply {
-                        setTileSource(loadOnlineTileSourceBase())
                         setDestroyMode(false) // keeps map instance alive when in the background
                         addMapListener(boxOverlayListener)
                     }
