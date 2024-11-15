@@ -67,6 +67,7 @@
     <string name="config_device_doubleTapAsButtonPress_summary">Treat double tap on supported accelerometers as a user button press.</string>
     <string name="config_device_disableTripleClick_summary">Disables the triple-press of user button to enable or disable GPS.</string>
     <string name="config_device_ledHeartbeatDisabled_summary">Controls the blinking LED on the device. For most devices this will control one of the up to 4 LEDs, the charger and GPS LEDs are not controllable.</string>
+    <string name="config_device_transmitOverLora_summary">Whether in addition to sending it to MQTT and the PhoneAPI, our NeighborInfo should be transmitted over LoRa. Not available on a channel with default key and name.</string>
 
     <string name="elevation_suffix" translatable="false">MSL</string>
     <string name="channel_air_util" translatable="false">ChUtil %.1f%% AirUtilTX %.1f%%</string>

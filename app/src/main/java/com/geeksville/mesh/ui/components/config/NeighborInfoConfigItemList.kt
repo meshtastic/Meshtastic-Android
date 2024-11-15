@@ -11,10 +11,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ModuleConfigProtos
+import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.moduleConfig
@@ -78,6 +80,19 @@ fun NeighborInfoConfigItemList(
                 onValueChanged = {
                     neighborInfoInput = neighborInfoInput.copy { updateInterval = it }
                 })
+        }
+
+        item {
+            SwitchPreference(
+                title = "Transmit over LoRa",
+                summary = stringResource(id = R.string.config_device_transmitOverLora_summary),
+                checked = neighborInfoInput.transmitOverLora,
+                enabled = enabled,
+                onCheckedChange = {
+                    neighborInfoInput = neighborInfoInput.copy { transmitOverLora = it }
+                }
+            )
+            Divider()
         }
 
         item {
