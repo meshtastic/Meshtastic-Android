@@ -131,7 +131,7 @@ private fun formatPositionTime(
     val sixMonthsAgo = currentTime - 180.days.inWholeMilliseconds
     val isOlderThanSixMonths = position.time * SecondsToMillis > sixMonthsAgo
     val timeText = if (isOlderThanSixMonths) {
-        stringResource(id = R.string.unknown)
+        stringResource(id = R.string.unknown_age)
     } else {
         dateFormat.format(position.time * SecondsToMillis)
     }
