@@ -17,8 +17,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
@@ -55,6 +55,8 @@ import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.metersIn
 import com.geeksville.mesh.util.toString
 import java.text.DateFormat
+import kotlin.time.Duration.Companion.days
+
 
 @Composable
 private fun RowScope.PositionText(text: String, weight: Float) {
@@ -117,8 +119,24 @@ private fun PositionItem(
             PositionText("${position.groundSpeed} Km/h", Weight15)
             PositionText("%.0f°".format(position.groundTrack * HeadingDeg), Weight15)
         }
-        PositionText(dateFormat.format(position.time * SecondsToMillis), Weight40)
+        PositionText(formatPositionTime(position, dateFormat), Weight40)
     }
+}
+
+@Composable
+private fun formatPositionTime(
+    position: MeshProtos.Position,
+    dateFormat: DateFormat
+): String {
+    val currentTime = System.currentTimeMillis()
+    val sixMonthsAgo = currentTime - 180.days.inWholeMilliseconds
+    val isOlderThanSixMonths = position.time * SecondsToMillis > sixMonthsAgo
+    val timeText = if (isOlderThanSixMonths) {
+        stringResource(id = R.string.unknown)
+    } else {
+        dateFormat.format(position.time * SecondsToMillis)
+    }
+    return timeText
 }
 
 @OptIn(ExperimentalLayoutApi::class)
