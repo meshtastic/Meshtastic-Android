@@ -57,7 +57,6 @@ import com.geeksville.mesh.util.toString
 import java.text.DateFormat
 import kotlin.time.Duration.Companion.days
 
-
 @Composable
 private fun RowScope.PositionText(text: String, weight: Float) {
     Text(
