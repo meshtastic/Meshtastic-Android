@@ -25,9 +25,12 @@ import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -180,7 +183,13 @@ class MetricsViewModel @Inject constructor(
         }.launchIn(viewModelScope)
 
         meshLogRepository.getMeshPacketsFrom(destNum, PortNum.POSITION_APP_VALUE).onEach { packets ->
-            _state.update { state -> state.copy(positionLogs = packets.mapNotNull { it.toPosition() }) }
+            val distinctPositions =
+                packets.mapNotNull { it.toPosition() }.asFlow().distinctUntilChanged { old, new ->
+                    old.time == new.time || (old.latitudeI == new.latitudeI && old.longitudeI == new.longitudeI)
+                }.toList()
+            _state.update { state ->
+                state.copy(positionLogs = distinctPositions)
+            }
         }.launchIn(viewModelScope)
 
         debug("MetricsViewModel created")
