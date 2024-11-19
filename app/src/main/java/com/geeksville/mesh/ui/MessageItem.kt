@@ -155,9 +155,8 @@ internal fun MessageItem(
                 }
             }
         }
-        if (!fromLocal) {
-            TapBackRow()
-        }
+
+        TapBackRow(fromLocal)
     }
 }
 

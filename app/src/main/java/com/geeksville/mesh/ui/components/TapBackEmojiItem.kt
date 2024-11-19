@@ -92,7 +92,9 @@ fun TapBackEmojiItem(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TapBackRow() {
+fun TapBackRow(
+    fromLocal: Boolean,
+) {
     var showEmojiPickerView by remember { mutableStateOf(false) }
     var emojis by remember { mutableStateOf(listOf<String>()) }
     if (showEmojiPickerView) {
@@ -105,19 +107,23 @@ fun TapBackRow() {
         )
     }
     FlowRow {
-        TapBackEmojiItem(
-            emoji = "\uD83D\uDE42",
-            isAddEmojiItem = true,
-            emojiTapped = {
-                showEmojiPickerView = true
-            }
-        )
+        if (!fromLocal) {
+            TapBackEmojiItem(
+                emoji = "\uD83D\uDE42",
+                isAddEmojiItem = true,
+                emojiTapped = {
+                    showEmojiPickerView = true
+                }
+            )
+        }
         reduceEmojis(emojis).entries.forEach { entry ->
             TapBackEmojiItem(
                 emoji = entry.key,
                 emojiCount = entry.value,
                 emojiTapped = {
-                    emojis = emojis.toMutableList().apply { remove(entry.key) }
+                    if (!fromLocal) {
+                        emojis = emojis.toMutableList().apply { remove(entry.key) }
+                    }
                 }
             )
         }
