@@ -34,7 +34,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted.Companion.Eagerly
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
@@ -186,8 +186,8 @@ class UIViewModel @Inject constructor(
     private val _channels = MutableStateFlow(channelSet {})
     val channels: StateFlow<AppOnlyProtos.ChannelSet> get() = _channels
 
-    private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
-    val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
+    val quickChatActions get() = quickChatActionRepository.getAllActions()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val _focusedNode = MutableStateFlow<NodeEntity?>(null)
     val focusedNode: StateFlow<NodeEntity?> = _focusedNode
@@ -230,7 +230,7 @@ class UIViewModel @Inject constructor(
         )
     }.stateIn(
         scope = viewModelScope,
-        started = Eagerly,
+        started = SharingStarted.WhileSubscribed(5_000),
         initialValue = NodesUiState.Empty,
     )
 
@@ -239,7 +239,7 @@ class UIViewModel @Inject constructor(
         nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
     }.stateIn(
         scope = viewModelScope,
-        started = Eagerly,
+        started = SharingStarted.WhileSubscribed(5_000),
         initialValue = emptyList(),
     )
 
@@ -270,11 +270,6 @@ class UIViewModel @Inject constructor(
         radioConfigRepository.moduleConfigFlow.onEach { config ->
             _moduleConfig.value = config
         }.launchIn(viewModelScope)
-        viewModelScope.launch {
-            quickChatActionRepository.getAllActions().collect { actions ->
-                _quickChatActions.value = actions
-            }
-        }
         radioConfigRepository.channelSetFlow.onEach { channelSet ->
             _channels.value = channelSet
         }.launchIn(viewModelScope)
@@ -327,7 +322,7 @@ class UIViewModel @Inject constructor(
         }
     }.stateIn(
         scope = viewModelScope,
-        started = Eagerly,
+        started = SharingStarted.WhileSubscribed(5_000),
         initialValue = emptyList(),
     )
 
@@ -699,39 +694,16 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun addQuickChatAction(name: String, value: String, mode: QuickChatAction.Mode) {
-        viewModelScope.launch(Dispatchers.Main) {
-            val action = QuickChatAction(0, name, value, mode, _quickChatActions.value.size)
-            quickChatActionRepository.insert(action)
-        }
+    fun addQuickChatAction(action: QuickChatAction) = viewModelScope.launch(Dispatchers.IO) {
+        quickChatActionRepository.upsert(action)
     }
 
-    fun deleteQuickChatAction(action: QuickChatAction) {
-        viewModelScope.launch(Dispatchers.Main) {
-            quickChatActionRepository.delete(action)
-        }
-    }
-
-    fun updateQuickChatAction(
-        action: QuickChatAction,
-        name: String?,
-        message: String?,
-        mode: QuickChatAction.Mode?
-    ) {
-        viewModelScope.launch(Dispatchers.Main) {
-            val newAction = QuickChatAction(
-                action.uuid,
-                name ?: action.name,
-                message ?: action.message,
-                mode ?: action.mode,
-                action.position
-            )
-            quickChatActionRepository.update(newAction)
-        }
+    fun deleteQuickChatAction(action: QuickChatAction) = viewModelScope.launch(Dispatchers.IO) {
+        quickChatActionRepository.delete(action)
     }
 
     fun updateActionPositions(actions: List<QuickChatAction>) {
-        viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch(Dispatchers.IO) {
             for (position in actions.indices) {
                 quickChatActionRepository.setItemPosition(actions[position].uuid, position)
             }
