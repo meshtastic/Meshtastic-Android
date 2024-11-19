@@ -115,7 +115,6 @@
     <ID>FinalNewline:PreferenceCategory.kt$com.geeksville.mesh.ui.components.PreferenceCategory.kt</ID>
     <ID>FinalNewline:PreviewParameterProviders.kt$com.geeksville.mesh.ui.preview.PreviewParameterProviders.kt</ID>
     <ID>FinalNewline:ProbeTableProvider.kt$com.geeksville.mesh.repository.usb.ProbeTableProvider.kt</ID>
-    <ID>FinalNewline:QuickChatActionDao.kt$com.geeksville.mesh.database.dao.QuickChatActionDao.kt</ID>
     <ID>FinalNewline:QuickChatActionRepository.kt$com.geeksville.mesh.database.QuickChatActionRepository.kt</ID>
     <ID>FinalNewline:RadioNotConnectedException.kt$com.geeksville.mesh.service.RadioNotConnectedException.kt</ID>
     <ID>FinalNewline:RadioRepositoryModule.kt$com.geeksville.mesh.repository.radio.RadioRepositoryModule.kt</ID>
@@ -219,7 +218,7 @@
     <ID>MagicNumber:ContactsFragment.kt$ContactsFragment.ActionModeCallback$8</ID>
     <ID>MagicNumber:ContextServices.kt$33</ID>
     <ID>MagicNumber:DataPacket.kt$DataPacket.CREATOR$16</ID>
-    <ID>MagicNumber:DebugFragment.kt$DebugFragment$3</ID>
+    <ID>MagicNumber:DebugFragment.kt$3</ID>
     <ID>MagicNumber:DeviceVersion.kt$DeviceVersion$100</ID>
     <ID>MagicNumber:DeviceVersion.kt$DeviceVersion$10000</ID>
     <ID>MagicNumber:DownloadButton.kt$1.25f</ID>
@@ -262,7 +261,6 @@
     <ID>MagicNumber:MainActivity.kt$MainActivity$5</ID>
     <ID>MagicNumber:MapFragment.kt$0.5f</ID>
     <ID>MagicNumber:MapFragment.kt$1.3</ID>
-    <ID>MagicNumber:MapFragment.kt$1.5</ID>
     <ID>MagicNumber:MapFragment.kt$1000</ID>
     <ID>MagicNumber:MapFragment.kt$1024.0</ID>
     <ID>MagicNumber:MapFragment.kt$128205</ID>
@@ -341,14 +339,12 @@
     <ID>MagicNumber:NodeInfo.kt$Position.Companion$1000</ID>
     <ID>MagicNumber:NodeInfo.kt$Position.Companion$1e-7</ID>
     <ID>MagicNumber:NodeInfo.kt$Position.Companion$1e7</ID>
-    <ID>MagicNumber:NodeMenu.kt$3</ID>
     <ID>MagicNumber:PacketRepository.kt$PacketRepository$500</ID>
     <ID>MagicNumber:PacketResponseStateDialog.kt$100</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$21972</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$32809</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$6790</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$9114</ID>
-    <ID>MagicNumber:QuickChatSettingsFragment.kt$QuickChatSettingsFragment$3</ID>
     <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$10</ID>
     <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$100</ID>
     <ID>MagicNumber:SafeBluetooth.kt$SafeBluetooth$1000</ID>
@@ -577,7 +573,6 @@
     <ID>NewLineAtEndOfFile:PreferenceCategory.kt$com.geeksville.mesh.ui.components.PreferenceCategory.kt</ID>
     <ID>NewLineAtEndOfFile:PreviewParameterProviders.kt$com.geeksville.mesh.ui.preview.PreviewParameterProviders.kt</ID>
     <ID>NewLineAtEndOfFile:ProbeTableProvider.kt$com.geeksville.mesh.repository.usb.ProbeTableProvider.kt</ID>
-    <ID>NewLineAtEndOfFile:QuickChatActionDao.kt$com.geeksville.mesh.database.dao.QuickChatActionDao.kt</ID>
     <ID>NewLineAtEndOfFile:QuickChatActionRepository.kt$com.geeksville.mesh.database.QuickChatActionRepository.kt</ID>
     <ID>NewLineAtEndOfFile:RadioNotConnectedException.kt$com.geeksville.mesh.service.RadioNotConnectedException.kt</ID>
     <ID>NewLineAtEndOfFile:RadioRepositoryModule.kt$com.geeksville.mesh.repository.radio.RadioRepositoryModule.kt</ID>
@@ -602,7 +597,6 @@
     <ID>NoBlankLineBeforeRbrace:OnlineTileSourceAuth.kt$OnlineTileSourceAuth$ </ID>
     <ID>NoBlankLineBeforeRbrace:PositionTest.kt$PositionTest$ </ID>
     <ID>NoBlankLineBeforeRbrace:PreviewParameterProviders.kt$NodeInfoPreviewParameterProvider$ </ID>
-    <ID>NoBlankLineBeforeRbrace:QuickChatActionDao.kt$QuickChatActionDao$ </ID>
     <ID>NoConsecutiveBlankLines:AppIntroduction.kt$AppIntroduction$ </ID>
     <ID>NoConsecutiveBlankLines:AppPrefs.kt$ </ID>
     <ID>NoConsecutiveBlankLines:BluetoothInterface.kt$ </ID>
@@ -637,7 +631,6 @@
     <ID>NoWildcardImports:MockInterface.kt$import com.geeksville.mesh.*</ID>
     <ID>NoWildcardImports:PreferenceFooter.kt$import androidx.compose.foundation.layout.*</ID>
     <ID>NoWildcardImports:PreferenceFooter.kt$import androidx.compose.material.*</ID>
-    <ID>NoWildcardImports:QuickChatActionDao.kt$import androidx.room.*</ID>
     <ID>NoWildcardImports:SafeBluetooth.kt$import android.bluetooth.*</ID>
     <ID>NoWildcardImports:SafeBluetooth.kt$import kotlinx.coroutines.*</ID>
     <ID>NoWildcardImports:SettingsFragment.kt$import com.geeksville.mesh.android.*</ID>
@@ -761,7 +754,6 @@
     <ID>WildcardImport:MockInterface.kt$import com.geeksville.mesh.*</ID>
     <ID>WildcardImport:PreferenceFooter.kt$import androidx.compose.foundation.layout.*</ID>
     <ID>WildcardImport:PreferenceFooter.kt$import androidx.compose.material.*</ID>
-    <ID>WildcardImport:QuickChatActionDao.kt$import androidx.room.*</ID>
     <ID>WildcardImport:SafeBluetooth.kt$import android.bluetooth.*</ID>
     <ID>WildcardImport:SafeBluetooth.kt$import kotlinx.coroutines.*</ID>
     <ID>WildcardImport:SettingsFragment.kt$import com.geeksville.mesh.android.*</ID>
