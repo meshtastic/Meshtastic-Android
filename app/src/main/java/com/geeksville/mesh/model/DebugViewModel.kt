@@ -7,8 +7,9 @@ import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.entity.MeshLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,15 +17,10 @@ import javax.inject.Inject
 class DebugViewModel @Inject constructor(
     private val meshLogRepository: MeshLogRepository,
 ) : ViewModel(), Logging {
-
-    private val _meshLog = MutableStateFlow<List<MeshLog>>(emptyList())
-    val meshLog: StateFlow<List<MeshLog>> = _meshLog
+    val meshLog: StateFlow<List<MeshLog>> = meshLogRepository.getAllLogs()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     init {
-        viewModelScope.launch {
-            meshLogRepository.getAllLogs().collect { _meshLog.value = it }
-        }
-
         debug("DebugViewModel created")
     }
 
