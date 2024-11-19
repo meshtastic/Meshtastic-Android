@@ -1,6 +1,9 @@
 package com.geeksville.mesh.database.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.Transaction
+import androidx.room.Upsert
 import com.geeksville.mesh.database.entity.QuickChatAction
 import kotlinx.coroutines.flow.Flow
 
@@ -10,8 +13,8 @@ interface QuickChatActionDao {
     @Query("Select * from quick_chat order by position asc")
     fun getAll(): Flow<List<QuickChatAction>>
 
-    @Insert
-    fun insert(action: QuickChatAction)
+    @Upsert
+    fun upsert(action: QuickChatAction)
 
     @Query("Delete from quick_chat")
     fun deleteAll()
@@ -25,13 +28,9 @@ interface QuickChatActionDao {
         decrementPositionsAfter(action.position)
     }
 
-    @Update
-    fun update(action: QuickChatAction)
-
     @Query("Update quick_chat set position=:position WHERE uuid=:uuid")
     fun updateActionPosition(uuid: Long, position: Int)
 
     @Query("Update quick_chat set position=position-1 where position>=:position")
     fun decrementPositionsAfter(position: Int)
-
 }
