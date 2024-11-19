@@ -7,6 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -41,10 +43,14 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.components.AutoLinkText
+import com.geeksville.mesh.ui.components.TapBackEmojiItem
 import com.geeksville.mesh.ui.theme.AppTheme
 
 @Suppress("LongMethod")
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(
+    ExperimentalMaterialApi::class, ExperimentalFoundationApi::class,
+    ExperimentalLayoutApi::class
+)
 @Composable
 internal fun MessageItem(
     shortName: String?,
@@ -66,86 +72,96 @@ internal fun MessageItem(
     } else {
         Modifier.padding(start = 8.dp, top = 8.dp, end = 48.dp, bottom = 6.dp)
     }
-
-    Card(
-        modifier = Modifier
-            .background(color = if (selected) Color.Gray else MaterialTheme.colors.background)
-            .fillMaxWidth()
-            .then(messageModifier),
-        elevation = 4.dp,
-        shape = RoundedCornerShape(topStart, topEnd, 12.dp, 12.dp),
-    ) {
-        Surface(
-            modifier = modifier.combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick,
-            ),
-            color = colorResource(id = messageColor),
+    Column {
+        Card(
+            modifier = Modifier
+                .background(color = if (selected) Color.Gray else MaterialTheme.colors.background)
+                .fillMaxWidth()
+                .then(messageModifier),
+            elevation = 4.dp,
+            shape = RoundedCornerShape(topStart, topEnd, 12.dp, 12.dp),
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            Surface(
+                modifier = modifier.combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                ),
+                color = colorResource(id = messageColor),
             ) {
-                if (shortName != null) {
-                    Chip(
-                        onClick = onChipClick,
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .width(72.dp),
-                    ) {
-                        Text(
-                            text = shortName,
-                            modifier = Modifier.fillMaxWidth(),
-                            fontSize = MaterialTheme.typography.button.fontSize,
-                            fontWeight = FontWeight.Normal,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-                Column(
-                    modifier = Modifier.padding(top = 8.dp),
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    if (shortName != null) {
+                        Chip(
+                            onClick = onChipClick,
+                            modifier = Modifier
+                                .padding(end = 8.dp)
+                                .width(72.dp),
+                        ) {
+                            Text(
+                                text = shortName,
+                                modifier = Modifier.fillMaxWidth(),
+                                fontSize = MaterialTheme.typography.button.fontSize,
+                                fontWeight = FontWeight.Normal,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    }
+                    Column(
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
 //                    Text(
 //                        text = longName ?: stringResource(id = R.string.unknown_username),
 //                        color = MaterialTheme.colors.onSurface,
 //                        fontSize = MaterialTheme.typography.button.fontSize,
 //                    )
-                    AutoLinkText(
-                        text = messageText.orEmpty(),
-                        style = LocalTextStyle.current.copy(
-                            color = LocalContentColor.current,
-                        ),
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = messageTime,
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = MaterialTheme.typography.caption.fontSize,
+                        AutoLinkText(
+                            text = messageText.orEmpty(),
+                            style = LocalTextStyle.current.copy(
+                                color = LocalContentColor.current,
+                            ),
                         )
-                        AnimatedVisibility(visible = fromLocal) {
-                            Icon(
-                                imageVector = when (messageStatus) {
-                                    MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
-                                    MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
-                                    MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
-                                    MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
-                                    MessageStatus.ERROR -> Icons.TwoTone.CloudOff
-                                    else -> Icons.TwoTone.Warning
-                                },
-                                contentDescription = stringResource(R.string.message_delivery_status),
-                                modifier = Modifier
-                                    .padding(start = 8.dp)
-                                    .clickable { onStatusClick() },
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = messageTime,
+                                color = MaterialTheme.colors.onSurface,
+                                fontSize = MaterialTheme.typography.caption.fontSize,
                             )
+                            AnimatedVisibility(visible = fromLocal) {
+                                Icon(
+                                    imageVector = when (messageStatus) {
+                                        MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
+                                        MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
+                                        MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
+                                        MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
+                                        MessageStatus.ERROR -> Icons.TwoTone.CloudOff
+                                        else -> Icons.TwoTone.Warning
+                                    },
+                                    contentDescription = stringResource(R.string.message_delivery_status),
+                                    modifier = Modifier
+                                        .padding(start = 8.dp)
+                                        .clickable { onStatusClick() },
+                                )
+                            }
                         }
                     }
                 }
+            }
+        }
+        if (!fromLocal) {
+            FlowRow {
+                TapBackEmojiItem(
+                    emoji = "\uD83D\uDE42",
+                    isAddEmojiItem = true,
+                    emojiTapped = {}
+                )
             }
         }
     }
