@@ -19,8 +19,8 @@ class NetworkRepositoryModule {
         }
 
         @Provides
-        fun provideNsdManager(application: Application): NsdManager? {
-            return application.getSystemService(Context.NSD_SERVICE) as NsdManager?
+        fun provideNsdManager(application: Application): NsdManager {
+            return application.getSystemService(Context.NSD_SERVICE) as NsdManager
         }
     }
 }
