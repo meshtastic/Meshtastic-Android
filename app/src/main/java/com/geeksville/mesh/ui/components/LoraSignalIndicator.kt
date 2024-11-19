@@ -2,7 +2,9 @@ package com.geeksville.mesh.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -38,45 +40,23 @@ private enum class Quality(
     GOOD(R.string.good, Icons.Default.SignalCellular4Bar, Color.Green)
 }
 
+/**
+ * Displays the `snr` and `rssi` with color depending on the value respectively.
+ */
 @Composable
-fun Snr(snr: Float) {
-    val color: Color = if (snr > SNR_GOOD_THRESHOLD) {
-        Quality.GOOD.color
-    } else if (snr > SNR_FAIR_THRESHOLD) {
-        Quality.FAIR.color
-    } else {
-        Quality.BAD.color
+fun SnrAndRssi(snr: Float, rssi: Int){
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Snr(snr)
+        Rssi(rssi)
     }
-
-    Text(
-        text = "%s %.2fdB".format(
-            stringResource(id = R.string.snr),
-            snr
-        ),
-            color = color,
-            fontSize = MaterialTheme.typography.button.fontSize
-        )
 }
 
-@Composable
-fun Rssi(rssi: Int) {
-    val color: Color = if (rssi > RSSI_GOOD_THRESHOLD) {
-        Quality.GOOD.color
-    } else if (rssi > RSSI_FAIR_THRESHOLD) {
-        Quality.FAIR.color
-    } else {
-        Quality.BAD.color
-    }
-    Text(
-        text = "%s %ddB".format(
-            stringResource(id = R.string.rssi),
-            rssi
-        ),
-        color = color,
-        fontSize = MaterialTheme.typography.button.fontSize
-    )
-}
-
+/**
+ * Displays a signal indicator based on `snr` and `rssi`.
+ */
 @Composable
 fun LoraSignalIndicator(snr: Float, rssi: Int) {
 
@@ -96,6 +76,45 @@ fun LoraSignalIndicator(snr: Float, rssi: Int) {
         )
         Text(text = "${stringResource(R.string.signal)} ${stringResource(quality.nameRes)}")
     }
+}
+
+@Composable
+private fun Snr(snr: Float) {
+    val color: Color = if (snr > SNR_GOOD_THRESHOLD) {
+        Quality.GOOD.color
+    } else if (snr > SNR_FAIR_THRESHOLD) {
+        Quality.FAIR.color
+    } else {
+        Quality.BAD.color
+    }
+
+    Text(
+        text = "%s %.2fdB".format(
+            stringResource(id = R.string.snr),
+            snr
+        ),
+        color = color,
+        fontSize = MaterialTheme.typography.button.fontSize
+    )
+}
+
+@Composable
+private fun Rssi(rssi: Int) {
+    val color: Color = if (rssi > RSSI_GOOD_THRESHOLD) {
+        Quality.GOOD.color
+    } else if (rssi > RSSI_FAIR_THRESHOLD) {
+        Quality.FAIR.color
+    } else {
+        Quality.BAD.color
+    }
+    Text(
+        text = "%s %ddB".format(
+            stringResource(id = R.string.rssi),
+            rssi
+        ),
+        color = color,
+        fontSize = MaterialTheme.typography.button.fontSize
+    )
 }
 
 private fun determineSignalQuality(snr: Float, rssi: Int): Quality = when {
