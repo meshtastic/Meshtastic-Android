@@ -8,7 +8,6 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -43,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.components.AutoLinkText
-import com.geeksville.mesh.ui.components.TapBackEmojiItem
+import com.geeksville.mesh.ui.components.TapBackRow
 import com.geeksville.mesh.ui.theme.AppTheme
 
 @Suppress("LongMethod")
@@ -72,6 +71,7 @@ internal fun MessageItem(
     } else {
         Modifier.padding(start = 8.dp, top = 8.dp, end = 48.dp, bottom = 6.dp)
     }
+
     Column {
         Card(
             modifier = Modifier
@@ -156,13 +156,7 @@ internal fun MessageItem(
             }
         }
         if (!fromLocal) {
-            FlowRow {
-                TapBackEmojiItem(
-                    emoji = "\uD83D\uDE42",
-                    isAddEmojiItem = true,
-                    emojiTapped = {}
-                )
-            }
+            TapBackRow()
         }
     }
 }
