@@ -67,7 +67,6 @@
     <string name="change_channel">Chanje kanal</string>
     <string name="are_you_sure_channel">Èske ou sèten ou vle chanje kanal? Tout kominikasyon ak lòt nœuds elektwonik yo ap kanpe jiskaske ou pataje nouvo paramèt kanal yo.</string>
     <string name="new_channel_rcvd">Nouvo kanal URL resevwa</string>
-    <string name="do_you_want_switch">Eske ou vle chanje a kanal \'%s\'?</string>
     <string name="permission_missing">Manke pèmisyon obligatwa, Meshtastic p ap ka fonksyone byen. Tanpri ale bay pèmisyon an nan paramèt aplikasyon android ou.</string>
     <string name="report_bug">Rapòte yon pwoblèm</string>
     <string name="report_a_bug">Rapòte pwoblèm</string>
@@ -225,10 +224,6 @@
     <string name="mute_8_hours">8 èdtan</string>
     <string name="mute_1_week">1 semèn</string>
     <string name="mute_always">Toujou</string>
-    <plurals name="add_channel_from_qr">
-        <item quantity="one">Eske ou vle ajoute yon nouvo kanal?</item>
-        <item quantity="other">Eske ou vle ajoute %d nouvo kanal?</item>
-    </plurals>
     <string name="replace">Ranplase</string>
     <string name="wifi_qr_code_scan">Skan QR Kòd WiFi</string>
     <string name="wifi_qr_code_error">Fòma QR Kòd Kredi WiFi Invalid</string>

@@ -19,7 +19,6 @@
     <string name="change_channel">채널 변경</string>
     <string name="are_you_sure_channel">채널 변경을 원하세요? 채널 설정이 공유되기 전까지 다른 노드와의 통신은 중단됩니다.</string>
     <string name="new_channel_rcvd">새로운 채널 URL 수신</string>
-    <string name="do_you_want_switch">\'%s\' 채널로 변경할 까요?</string>
     <string name="permission_missing">Meshtastic 작동에 필요한 권한을 얻지 못했습니다. 정상적으로 작동하지 않을 수도 있습니다. 스마트폰 설정에서 권한 허용 설정해주세요.</string>
     <string name="report_bug">버그 보고</string>
     <string name="report_a_bug">버그 보고</string>

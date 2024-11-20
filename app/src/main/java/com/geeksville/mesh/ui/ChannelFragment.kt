@@ -85,7 +85,6 @@ import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.AdaptiveTwoPane
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.PreferenceFooter
-import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.components.config.ChannelCard
 import com.geeksville.mesh.ui.components.config.ChannelSelection
 import com.geeksville.mesh.ui.components.config.EditChannelDialog
@@ -147,11 +146,10 @@ fun ChannelScreen(
     val channelUrl = channelSet.getChannelUrl()
     val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
-    var scannedChannelSet by remember { mutableStateOf<ChannelSet?>(null) }
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
             try {
-                scannedChannelSet = Uri.parse(result.contents).toChannelSet()
+                viewModel.requestChannelSet(Uri.parse(result.contents).toChannelSet())
             } catch (ex: Throwable) {
                 errormsg("Channel url error: ${ex.message}")
                 viewModel.showSnackbar(R.string.channel_invalid)
@@ -266,17 +264,6 @@ fun ChannelScreen(
             .show()
     }
 
-    if (scannedChannelSet != null) {
-        val incoming = scannedChannelSet ?: return
-        /* Prompt the user to modify channels after scanning a QR code. */
-        ScannedQrCodeDialog(
-            channels = channels,
-            incoming = incoming,
-            onDismiss = { scannedChannelSet = null },
-            onConfirm = { newChannelSet -> installSettings(newChannelSet) }
-        )
-    }
-
     var showEditChannelDialog: Int? by remember { mutableStateOf(null) }
 
     if (showEditChannelDialog != null) {
@@ -375,7 +362,7 @@ fun ChannelScreen(
                     IconButton(onClick = {
                         when {
                             isError -> valueState = channelUrl
-                            !isUrlEqual -> viewModel.setRequestChannelUrl(channelUrl)
+                            !isUrlEqual -> viewModel.requestChannelSet(channels)
                             else -> {
                                 // track how many times users share channels
                                 GeeksvilleApplication.analytics.track(

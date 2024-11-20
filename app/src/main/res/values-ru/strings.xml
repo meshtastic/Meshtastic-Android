@@ -58,7 +58,6 @@
     <string name="change_channel">Смена канала</string>
     <string name="are_you_sure_channel">Вы уверены, что хотите изменить канал? Связь с другими устройствами будет прервана, пока вы не поделитесь новыми настройками канала.</string>
     <string name="new_channel_rcvd">URL нового канала получен</string>
-    <string name="do_you_want_switch">Вы хотите переключиться на \'%s\' канал?</string>
     <string name="permission_missing">Требуемое разрешение отсутствует, Meshtastic не сможет работать должным образом. Пожалуйста, включите в настройках приложения.</string>
     <string name="report_bug">Сообщить об ошибке</string>
     <string name="report_a_bug">Сообщить об ошибке</string>

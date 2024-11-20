@@ -451,18 +451,18 @@ class UIViewModel @Inject constructor(
     val connectionState get() = radioConfigRepository.connectionState
     fun isConnected() = connectionState.value != MeshService.ConnectionState.DISCONNECTED
 
-    private val _requestChannelUrl = MutableLiveData<Uri?>(null)
-    val requestChannelUrl: LiveData<Uri?> get() = _requestChannelUrl
+    private val _requestChannelSet = MutableStateFlow<AppOnlyProtos.ChannelSet?>(null)
+    val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?> get() = _requestChannelSet
 
-    fun setRequestChannelUrl(channelUrl: Uri) {
-        _requestChannelUrl.value = channelUrl
+    fun requestChannelSet(channelSet: AppOnlyProtos.ChannelSet) {
+        _requestChannelSet.value = channelSet
     }
 
     /**
      * Called immediately after activity observes requestChannelUrl
      */
     fun clearRequestChannelUrl() {
-        _requestChannelUrl.value = null
+        _requestChannelSet.value = null
     }
 
     fun showSnackbar(resString: Any) {
@@ -538,24 +538,14 @@ class UIViewModel @Inject constructor(
     }
 
     /**
-     * Set the radio config (also updates our saved copy in preferences). By default, this will replace
-     * all channels in the existing radio config. Otherwise, it will append all [ChannelSettings] that
-     * are unique in [channelSet] to the existing radio config.
+     * Set the radio config (also updates our saved copy in preferences).
      */
-    fun setChannels(channelSet: AppOnlyProtos.ChannelSet, overwrite: Boolean = true) = viewModelScope.launch {
-        val newRadioSettings: List<ChannelSettings> = if (overwrite) {
-            channelSet.settingsList
-        } else {
-            // To guarantee consistent ordering, using a LinkedHashSet which iterates through it's
-            // entries according to the order an item was *first* inserted.
-            // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-linked-hash-set/
-            LinkedHashSet(channels.value.settingsList + channelSet.settingsList).toList()
-        }
+    fun setChannels(channelSet: AppOnlyProtos.ChannelSet) = viewModelScope.launch {
+        getChannelList(channelSet.settingsList, channels.value.settingsList).forEach(::setChannel)
+        radioConfigRepository.replaceAllSettings(channelSet.settingsList)
 
-        getChannelList(newRadioSettings, channels.value.settingsList).forEach(::setChannel)
-        radioConfigRepository.replaceAllSettings(newRadioSettings)
         val newConfig = config { lora = channelSet.loraConfig }
-        if (overwrite && config.lora != newConfig.lora) setConfig(newConfig)
+        if (config.lora != newConfig.lora) setConfig(newConfig)
     }
 
     val provideLocation = object : MutableLiveData<Boolean>(preferences.getBoolean("provide-location", false)) {

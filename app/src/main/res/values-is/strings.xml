@@ -21,7 +21,6 @@
     <string name="change_channel">Skipta um rás</string>
     <string name="are_you_sure_channel">Ertu viss um að þú viljir skipta um rás? Öll samskipti við aðrar nóður mun ljúka þar til þú deilir nýjum stillingum fyrir rás.</string>
     <string name="new_channel_rcvd">Ný slóð fyrir rás móttekin</string>
-    <string name="do_you_want_switch">Viltu skipta yfir á \'%s\' rás?</string>
     <string name="permission_missing">Meshtastic þarf leyfi til að nota staðsetningu símans og verður að vera kveikt á staðsetningu til að finna nýjan búnað yfir Blátönn. Þú getur slökkt á henni að því loknu.</string>
     <string name="report_bug">Tilkynna villu</string>
     <string name="report_a_bug">Tilkynna villu</string>

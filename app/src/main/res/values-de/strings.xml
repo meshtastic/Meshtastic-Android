@@ -58,7 +58,6 @@
     <string name="change_channel">Kanal wechseln</string>
     <string name="are_you_sure_channel">Möchten Sie wirklich den Kanal wechseln? Die gesamte Kommunikation mit anderen Knoten wird unterbrochen, bis Sie die neuen Kanaleinstellungen freigeben.</string>
     <string name="new_channel_rcvd">Neue Kanal-URL empfangen</string>
-    <string name="do_you_want_switch">Möchten Sie zum Kanal \'%s\' wechseln?</string>
     <string name="permission_missing">Meshtastic benötigt Standortberechtigung und Standort muss eingeschaltet werden, um neue Geräte über Bluetooth zu finden. Sie können es später wieder deaktivieren.</string>
     <string name="report_bug">Fehler melden</string>
     <string name="report_a_bug">Fehler melden</string>

@@ -58,7 +58,6 @@
     <string name="change_channel">切換頻道</string>
     <string name="are_you_sure_channel">您確定要更改頻道嗎？在您分享新的頻道設定之前，與其他節點的所有通訊都將停止。</string>
     <string name="new_channel_rcvd">收到新的頻道 URL</string>
-    <string name="do_you_want_switch">您要切換到 \'%s\' 頻道嗎？</string>
     <string name="permission_missing">Meshtastic 需要位置權限並啟用位置信息才能通過藍牙查找新設備。找到之後可以再關閉這權限。</string>
     <string name="report_bug">回報BUG</string>
     <string name="report_a_bug">回報問題</string>

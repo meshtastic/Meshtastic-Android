@@ -23,7 +23,6 @@
     <string name="change_channel">Verander kanaal</string>
     <string name="are_you_sure_channel">Ben je zeker van kanaal te willen veranderen? Alle communicatie met andere nodes wordt gestopt tot je de nieuwe instellingen deelt.</string>
     <string name="new_channel_rcvd">Nieuw kanaal URL ontvangen</string>
-    <string name="do_you_want_switch">Wil je veranderen naar kanaal \'%s\' ?</string>
     <string name="permission_missing">Een vereiste toelating ontbreekt, Meshtastic kan niet goed werken. Graag aanzetten in Instellingen.</string>
     <string name="report_bug">Rapporteer Bug</string>
     <string name="report_a_bug">Rapporteer een Bug</string>

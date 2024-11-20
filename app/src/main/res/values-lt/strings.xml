@@ -21,7 +21,6 @@
     <string name="change_channel">Pakeisti kanalą</string>
     <string name="are_you_sure_channel">Ar tikrai norite pakeisti kanalą? Visi ryšiai su kitais mazgais bus nutraukti, kol nepasidalinsite naujais kanalo nustatymais.</string>
     <string name="new_channel_rcvd">Gautas naujo kanalo URL</string>
-    <string name="do_you_want_switch">Ar norite pereiti prie \'%s\' kanalo?</string>
     <string name="permission_missing">Meshtastic reikalauja vietos nustatymo leidimo, ir vietos nustatymas turi būti įjungtas, kad būtų galima rasti naujus įrenginius per „Bluetooth“. Vėliau jį galite išjungti.</string>
     <string name="report_bug">Pranešti apie klaidą</string>
     <string name="report_a_bug">Pranešti apie klaidą</string>

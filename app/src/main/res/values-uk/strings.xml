@@ -30,7 +30,6 @@
     <string name="change_channel">Змінити канал</string>
     <string name="are_you_sure_channel">Ви впевнені, що хочете змінити канал? Усі зв’язки з іншими вузлами припиниться, доки ви не поділитеся новими налаштуваннями каналу.</string>
     <string name="new_channel_rcvd">Отримано URL-адресу нового каналу</string>
-    <string name="do_you_want_switch">Ви хочете підключитися до \'%s\' каналу?</string>
     <string name="permission_missing">Meshtastic потрібний дозвіл до геоданих для пошуку нових пристроїв через Bluetooth. Ви можете вимкнути його пізніше.</string>
     <string name="report_bug">Повідомити про помилку</string>
     <string name="report_a_bug">Повідомити про помилку</string>

@@ -21,7 +21,6 @@
     <string name="change_channel">שנה ערוץ</string>
     <string name="are_you_sure_channel">בטוח שתרצה לשנות ערוץ? כל תקשורת עם מכשירים אחרים תיפסק עד שתשתף להם את הגדרות הערוץ החדשות.</string>
     <string name="new_channel_rcvd">התקבל כתובת ערוץ חדשה</string>
-    <string name="do_you_want_switch">תרצה לשנות לערוץ \'%s\'?</string>
     <string name="permission_missing">משטסטיק צריך גישה למיקום ועל מיקום להיות דולק בכדי למצוא מכשירי בלוטוס. ניתן לכבות חזרה לאחר מכן.</string>
     <string name="report_bug">דווח על באג</string>
     <string name="report_a_bug">דווח על באג</string>

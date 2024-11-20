@@ -58,7 +58,6 @@
     <string name="change_channel">Změnit kanál</string>
     <string name="are_you_sure_channel">Jste si jistý, že chcete změnit kanál? Veškerá komunikace s ostatními vysílači přestane fungovat až do momentu distribuce stejného nastavení na ostatní vysílače.</string>
     <string name="new_channel_rcvd">Nová URL kanálu přijata</string>
-    <string name="do_you_want_switch">Chcete se připojit ke kanálu \'%s\' ?</string>
     <string name="permission_missing">Chybí požadovaná oprávnění, Meshtastic nebude fungovat správně. Prosím změntě oprávnění pro aplikaci.</string>
     <string name="report_bug">Nahlášení chyby</string>
     <string name="report_a_bug">Nahlásit chybu</string>

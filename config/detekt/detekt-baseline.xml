@@ -400,7 +400,6 @@
     <ID>MaxLineLength:MQTTRepository.kt$MQTTRepository.Companion$*</ID>
     <ID>MaxLineLength:MainActivity.kt$/* UI design material setup instructions: https://material.io/develop/android/docs/getting-started/ dark theme (or use system eventually) https://material.io/develop/android/theming/dark/ NavDrawer is a standard draw which can be dragged in from the left or the menu icon inside the app title. Fragments: SettingsFragment shows "Settings" username shortname bluetooth pairing list (eventually misc device settings that are not channel related) Channel fragment "Channel" qr code, copy link button ch number misc other settings (eventually a way of choosing between past channels) ChatFragment "Messages" a text box to enter new texts a scrolling list of rows. each row is a text and a sender info layout NodeListFragment "Users" a node info row for every node ViewModels: BTScanModel starts/stops bt scan and provides list of devices (manages entire scan lifecycle) MeshModel contains: (manages entire service relationship) current received texts current radio macaddr current node infos (updated dynamically) eventually use bottom navigation bar to switch between, Members, Chat, Channel, Settings. https://material.io/develop/android/components/bottom-navigation-view/ use numbers of # chat messages and # of members in the badges. (per this recommendation to not use top tabs: https://ux.stackexchange.com/questions/102439/android-ux-when-to-use-bottom-navigation-and-when-to-use-tabs ) eventually: make a custom theme: https://github.com/material-components/material-components-android/tree/master/material-theme-builder */</ID>
     <ID>MaxLineLength:MainActivity.kt$MainActivity$/* This problem can occur if we unbind, but there is already an onConnected job waiting to run. That job runs and then makes meshService != null again I think I've fixed this by cancelling connectionJob. We'll see! */</ID>
-    <ID>MaxLineLength:MainActivity.kt$MainActivity$// If our app is too old/new, we probably don't understand the new DeviceConfig messages, so we don't read them until here</ID>
     <ID>MaxLineLength:MainActivity.kt$MainActivity$// Old samsung phones have a race condition andthis might rarely fail. Which is probably find because the bind will be sufficient most of the time</ID>
     <ID>MaxLineLength:MainActivity.kt$MainActivity$// We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel</ID>
     <ID>MaxLineLength:MainActivity.kt$MainActivity$// pager.offscreenPageLimit = 0 // Don't keep any offscreen pages around, because we want to make sure our bluetooth scanning stops</ID>
@@ -622,10 +621,6 @@
     <ID>NoWildcardImports:BluetoothInterface.kt$import com.geeksville.mesh.service.*</ID>
     <ID>NoWildcardImports:DeviceVersionTest.kt$import org.junit.Assert.*</ID>
     <ID>NoWildcardImports:ExampleUnitTest.kt$import org.junit.Assert.*</ID>
-    <ID>NoWildcardImports:MainActivity.kt$import android.content.*</ID>
-    <ID>NoWildcardImports:MainActivity.kt$import com.geeksville.mesh.android.*</ID>
-    <ID>NoWildcardImports:MainActivity.kt$import com.geeksville.mesh.service.*</ID>
-    <ID>NoWildcardImports:MainActivity.kt$import com.geeksville.mesh.ui.*</ID>
     <ID>NoWildcardImports:MeshService.kt$import com.geeksville.mesh.*</ID>
     <ID>NoWildcardImports:MeshService.kt$import com.geeksville.mesh.util.*</ID>
     <ID>NoWildcardImports:MockInterface.kt$import com.geeksville.mesh.*</ID>
@@ -745,10 +740,6 @@
     <ID>WildcardImport:BluetoothInterface.kt$import com.geeksville.mesh.service.*</ID>
     <ID>WildcardImport:DeviceVersionTest.kt$import org.junit.Assert.*</ID>
     <ID>WildcardImport:ExampleUnitTest.kt$import org.junit.Assert.*</ID>
-    <ID>WildcardImport:MainActivity.kt$import android.content.*</ID>
-    <ID>WildcardImport:MainActivity.kt$import com.geeksville.mesh.android.*</ID>
-    <ID>WildcardImport:MainActivity.kt$import com.geeksville.mesh.service.*</ID>
-    <ID>WildcardImport:MainActivity.kt$import com.geeksville.mesh.ui.*</ID>
     <ID>WildcardImport:MeshService.kt$import com.geeksville.mesh.*</ID>
     <ID>WildcardImport:MeshService.kt$import com.geeksville.mesh.util.*</ID>
     <ID>WildcardImport:MockInterface.kt$import com.geeksville.mesh.*</ID>

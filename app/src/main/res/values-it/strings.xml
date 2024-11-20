@@ -67,7 +67,6 @@
     <string name="change_channel">Cambia canale</string>
     <string name="are_you_sure_channel">Sei sicuro di voler cambiare canale ? Tutte le comunicazioni con gli altri nodi termineranno fino a quando non condividi le impostazioni del nuovo canale.</string>
     <string name="new_channel_rcvd">Ricevuta URL del Nuovo Canale</string>
-    <string name="do_you_want_switch">Passare al canale \'%s\' ?</string>
     <string name="permission_missing">Meshtastic necessita dei permessi di geolocalizzazione e la geolocalizzazione deve essere attiva per cercare nuovi dispositivi via Bluetooth. È possibile disattivarla successivamente.</string>
     <string name="report_bug">Segnala Bug</string>
     <string name="report_a_bug">Segnalazione di bug</string>
@@ -225,10 +224,6 @@
     <string name="mute_8_hours">8 ore</string>
     <string name="mute_1_week">1 settimana</string>
     <string name="mute_always">Sempre</string>
-    <plurals name="add_channel_from_qr">
-        <item quantity="one">Si desidera aggiungere un nuovo canale?</item>
-        <item quantity="other">Si desidera aggiungere %d nuovi canali?</item>
-    </plurals>
     <string name="replace">Sostituisci</string>
     <string name="wifi_qr_code_scan">Scansiona codice QR WiFi</string>
     <string name="wifi_qr_code_error">Formato codice QR delle Credenziali WiFi non valido</string>

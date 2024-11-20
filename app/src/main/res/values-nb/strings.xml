@@ -58,7 +58,6 @@
     <string name="change_channel">Endre kanal</string>
     <string name="are_you_sure_channel">Er du sikker på at du vil endre kanalen? All kommunikasjon med andre noder vil stanse, intill du deler de nye kanalinstillingene.</string>
     <string name="new_channel_rcvd">Ny kanal URL mottatt</string>
-    <string name="do_you_want_switch">Vil du bytte til \'%s\' kanal?</string>
     <string name="permission_missing">En påkrevet tilgang mangler, Meshtastic vil ikke fungere korrekt.  Vennligst slå på i Android appliksjonsinstillinger.</string>
     <string name="report_bug">Rapporter Feil</string>
     <string name="report_a_bug">Rapporter en feil</string>

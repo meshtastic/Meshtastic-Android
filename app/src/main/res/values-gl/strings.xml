@@ -30,7 +30,6 @@
     <string name="change_channel">Cambiar canle</string>
     <string name="are_you_sure_channel">Seguro que queres cambiar a canle? Toda comunicación con outros nodos vai parar ata que compartas a nova configuración da canle.</string>
     <string name="new_channel_rcvd">Novo enlace de canle recibida</string>
-    <string name="do_you_want_switch">Queres cambiar ao canle \'%s\'?</string>
     <string name="permission_missing">Meshtástic precisa permisos de ubicación e ten que estar prendida para atopar novos dispositivos vía Bluetooth. Podes apagala despois.</string>
     <string name="report_bug">Reportar erro</string>
     <string name="report_a_bug">Reporta un erro</string>
