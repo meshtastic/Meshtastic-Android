@@ -94,14 +94,15 @@ fun TapBackEmojiItem(
 @Composable
 fun TapBackRow(
     fromLocal: Boolean,
+    emojis: List<String> = emptyList(),
+    onSendTapBack: (String) -> Unit = { _ -> },
 ) {
     var showEmojiPickerView by remember { mutableStateOf(false) }
-    var emojis by remember { mutableStateOf(listOf<String>()) }
     if (showEmojiPickerView) {
         EmojiPickerView(
             emojiSelected = {
                 showEmojiPickerView = false
-                emojis = emojis.toMutableList().apply { add(it) }
+                onSendTapBack(it)
             },
             dismissPickerView = { showEmojiPickerView = false }
         )
@@ -121,9 +122,7 @@ fun TapBackRow(
                 emoji = entry.key,
                 emojiCount = entry.value,
                 emojiTapped = {
-                    if (!fromLocal) {
-                        emojis = emojis.toMutableList().apply { remove(entry.key) }
-                    }
+                    onSendTapBack(entry.key)
                 }
             )
         }

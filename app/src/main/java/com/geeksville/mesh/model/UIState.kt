@@ -328,16 +328,21 @@ class UIViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey).mapLatest { list ->
-        list.map {
+        val emojis = list.filter { it.data.emoji != 0 }
+//        val replies = list.filter { it.data.emoji == 0 && it.data.replyId != 0 }
+        val messages = list.filter { it.data.replyId == 0 && it.data.emoji == 0 }
+        messages.map { dataPacket ->
             Message(
-                uuid = it.uuid,
-                receivedTime = it.received_time,
-                user = getUser(it.data.from),
-                text = it.data.text.orEmpty(),
-                time = getShortDateTime(it.data.time),
-                read = it.read,
-                status = it.data.status,
-                routingError = it.routingError,
+                uuid = dataPacket.uuid,
+                messageId = dataPacket.data.id,
+                receivedTime = dataPacket.received_time,
+                user = getUser(dataPacket.data.from),
+                text = dataPacket.data.text.orEmpty(),
+                time = getShortDateTime(dataPacket.data.time),
+                read = dataPacket.read,
+                status = dataPacket.data.status,
+                routingError = dataPacket.routingError,
+                emojis = emojis.filter { it.data.replyId == dataPacket.data.id }.mapNotNull { it.data.text },
             )
         }
     }
@@ -363,6 +368,21 @@ class UIViewModel @Inject constructor(
         val dest = if (channel != null) contactKey.substring(1) else contactKey
 
         val p = DataPacket(dest, channel ?: 0, str)
+        sendDataPacket(p)
+    }
+
+    fun sendTapBack(str: String, messageId: Int, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
+        // contactKey: unique contact key filter (channel)+(nodeId)
+        val channel = contactKey[0].digitToIntOrNull()
+        val dest = if (channel != null) contactKey.substring(1) else contactKey
+
+        val p = DataPacket(
+            to = dest,
+            channel = channel ?: 0,
+            text = str,
+            emoji = 1,
+            replyId = messageId,
+        )
         sendDataPacket(p)
     }
 

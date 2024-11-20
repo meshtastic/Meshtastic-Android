@@ -155,6 +155,9 @@ class MessagesFragment : Fragment(), Logging {
                         onLongClick = ::onLongClick,
                         onChipClick = ::openNodeInfo,
                         onUnreadChanged = { model.clearUnreadCount(contactKey, it) },
+                        onSendTapBack = { emoji, messageId ->
+                            model.sendTapBack(emoji, messageId, contactKey)
+                        }
                     )
                 }
             }

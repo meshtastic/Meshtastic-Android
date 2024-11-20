@@ -28,6 +28,7 @@ val Routing.Error.stringRes: Int
 
 data class Message(
     val uuid: Long,
+    val messageId: Int,
     val receivedTime: Long,
     val user: MeshProtos.User,
     val text: String,
@@ -35,6 +36,7 @@ data class Message(
     val read: Boolean,
     val status: MessageStatus?,
     val routingError: Int,
+    val emojis: List<String>,
 ) {
     private fun getStatusStringRes(value: Int): Int {
         val error = Routing.Error.forNumber(value) ?: Routing.Error.UNRECOGNIZED

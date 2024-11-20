@@ -62,6 +62,8 @@ internal fun MessageItem(
     onLongClick: () -> Unit = {},
     onChipClick: () -> Unit = {},
     onStatusClick: () -> Unit = {},
+    emojis: List<String> = emptyList(),
+    onSendTapBack: (String) -> Unit = { _, -> },
 ) {
     val fromLocal = shortName == null
     val messageColor = if (fromLocal) R.color.colorMyMsg else R.color.colorMsg
@@ -156,7 +158,7 @@ internal fun MessageItem(
             }
         }
 
-        TapBackRow(fromLocal)
+        TapBackRow(fromLocal, emojis = emojis, onSendTapBack = onSendTapBack)
     }
 }
 

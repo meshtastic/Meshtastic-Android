@@ -582,6 +582,8 @@ class MeshService : Service(), Logging {
                 id = packet.id,
                 dataType = data.portnumValue,
                 bytes = data.payload.toByteArray(),
+                emoji = data.emoji,
+                replyId = data.replyId,
                 hopLimit = packet.hopLimit,
                 channel = if (packet.pkiEncrypted) DataPacket.PKC_CHANNEL_INDEX else packet.channel,
             )
@@ -645,6 +647,7 @@ class MeshService : Service(), Logging {
 
                 // We ignore most messages that we sent
                 val fromUs = myInfo.myNodeNum == packet.from
+                val isEmoji = packet.decoded.emoji != 0
 
                 debug("Received data from $fromId, portnum=${data.portnum} ${bytes.size} bytes")
 
@@ -657,7 +660,7 @@ class MeshService : Service(), Logging {
 
                 when (data.portnumValue) {
                     Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
-                        if (fromUs) return
+                        if (fromUs && !isEmoji) return
 
                         // TODO temporary solution to Range Test spam, may be removed in the future
                         val isRangeTest = rangeTestRegex.matches(data.payload.toStringUtf8())

@@ -29,6 +29,7 @@ internal fun MessageListView(
     onLongClick: (Message) -> Unit,
     onChipClick: (Message) -> Unit,
     onUnreadChanged: (Long) -> Unit,
+    onSendTapBack: (String, Int) -> Unit,
 ) {
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = messages.indexOfLast { !it.read }.coerceAtLeast(0)
@@ -61,7 +62,9 @@ internal fun MessageListView(
                 onClick = { onClick(msg) },
                 onLongClick = { onLongClick(msg) },
                 onChipClick = { onChipClick(msg) },
-                onStatusClick = { showStatusDialog = msg }
+                onStatusClick = { showStatusDialog = msg },
+                emojis = msg.emojis,
+                onSendTapBack = { emoji -> onSendTapBack(emoji, msg.messageId) }
             )
         }
     }
