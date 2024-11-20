@@ -3,7 +3,6 @@ package com.geeksville.mesh
 import android.net.Uri
 import com.geeksville.mesh.model.getChannelUrl
 import com.geeksville.mesh.model.primaryChannel
-import com.geeksville.mesh.model.shouldAddChannels
 import com.geeksville.mesh.model.toChannelSet
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -47,9 +46,8 @@ class ChannelSetTest {
     fun handleAddInFragment() {
         val url = Uri.parse("https://meshtastic.org/e/#CgMSAQESBggBQANIAQ?add=true")
         val cs = url.toChannelSet()
-        val shouldAdd = url.shouldAddChannels()
-        Assert.assertEquals("LongFast", cs.primaryChannel!!.name)
-        Assert.assertTrue(shouldAdd)
+        Assert.assertEquals("Custom", cs.primaryChannel!!.name)
+        Assert.assertFalse(cs.hasLoraConfig())
     }
 
     /** properly parse channel config when `?add=true` is in the query parameters */
@@ -57,8 +55,7 @@ class ChannelSetTest {
     fun handleAddInQueryParams() {
         val url = Uri.parse("https://meshtastic.org/e/?add=true#CgMSAQESBggBQANIAQ")
         val cs = url.toChannelSet()
-        val shouldAdd = url.shouldAddChannels()
-        Assert.assertEquals("LongFast", cs.primaryChannel!!.name)
-        Assert.assertTrue(shouldAdd)
+        Assert.assertEquals("Custom", cs.primaryChannel!!.name)
+        Assert.assertFalse(cs.hasLoraConfig())
     }
 }

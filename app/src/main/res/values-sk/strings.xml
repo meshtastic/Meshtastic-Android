@@ -67,7 +67,6 @@
     <string name="change_channel">Zmeniť kanál</string>
     <string name="are_you_sure_channel">Ste si istý, že chcete zmeniť kanál? Všetka komunikácia s ostatnými uzlovými bodmi prestane, až kým budete zdieľať nové nastavenia kanálu.</string>
     <string name="new_channel_rcvd">Prijatá nová URL kanálu</string>
-    <string name="do_you_want_switch">Chcete sa prepnúť na kanál \'%s\'?</string>
     <string name="permission_missing">Aplikácia Meshtastic nemá pridelené požadované oprávnenie a pravdepodobne nebude fungovať správne. Prosím povoľte tieto oprávnenia v nastaveniach aplikácie.</string>
     <string name="report_bug">Nahlásiť chybu</string>
     <string name="report_a_bug">Nahlásiť chybu</string>
@@ -227,12 +226,6 @@
     <string name="mute_8_hours">8 hodín</string>
     <string name="mute_1_week">1 týždeň</string>
     <string name="mute_always">Vždy</string>
-    <plurals name="add_channel_from_qr">
-        <item quantity="one">Chcete pridať nový kanál?</item>
-        <item quantity="few">Chcete pridať %d nové kanále?</item>
-        <item quantity="many">Chcete pridať %d nových kanálov?</item>
-        <item quantity="other">Chcete pridať %d nové kanále?</item>
-    </plurals>
     <string name="replace">Nahradiť</string>
     <string name="wifi_qr_code_scan">Skenuj WiFi QR kód</string>
     <string name="wifi_qr_code_error">Neplatný formát QR kódu poverenia WiFi</string>

@@ -30,7 +30,6 @@
     <string name="change_channel">Cambia el canal</string>
     <string name="are_you_sure_channel">¿Estás seguro de que quieres cambiar el canal? Toda comunicación con otros nodos se detendrá hasta que compartas la nueva configuración del canal.</string>
     <string name="new_channel_rcvd">Nueva URL de canal recibida</string>
-    <string name="do_you_want_switch">¿Quieres cambiar al canal de \'%s\'?</string>
     <string name="permission_missing">Meshtastic necesita permiso de ubicación y la ubicación debe estar encendida para encontrar nuevos dispositivos a través de Bluetooth. Puedes apagarla después.</string>
     <string name="report_bug">Informar de un fallo</string>
     <string name="report_a_bug">Informar de un fallo</string>

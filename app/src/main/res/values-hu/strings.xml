@@ -30,7 +30,6 @@
     <string name="change_channel">Csatorna váltás</string>
     <string name="are_you_sure_channel">Biztosan csatornát akarsz váltani? Összes kommunikáció a többi állomással megszakad, amíg nem osztja meg velük az új csatorna beállításokat.</string>
     <string name="new_channel_rcvd">Új csatorna URL érkezett</string>
-    <string name="do_you_want_switch">Átkapcsol a(z) \'%s\' csatornára?</string>
     <string name="permission_missing">Egy szükséges engedély hiányzik, ezért a Meshtastic nem fog tudni rendesen működni. Kérem engedélyezze az Android alkalmazások beállításai között.</string>
     <string name="report_bug">Hiba jelentése</string>
     <string name="report_a_bug">Hiba jelentése</string>

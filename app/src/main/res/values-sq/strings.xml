@@ -67,7 +67,6 @@
     <string name="change_channel">Ndërro kanalin radio</string>
     <string name="are_you_sure_channel">Je i sigurtë për ndërrimin e kanalit radio? I gjithë komunikimi me nyjet e tjera do të përfundojë derisa të shprëndani parametrat e reja të kanalit radio.</string>
     <string name="new_channel_rcvd">Ju keni një kanal radio të ri URL</string>
-    <string name="do_you_want_switch">Dëshiron të kalosh në këtë kanal radio? \'%s\' ?</string>
     <string name="permission_missing">Meshtastic ka nevojë për leje vendndodhjeje dhe vendndodhja duhet të jetë e aktivizuar për të gjetur paisje të reja përmes Bluetooth. Mund ta fikni përsëri pas kësaj.</string>
     <string name="report_bug">Raporto Bug</string>
     <string name="report_a_bug">Raporto një bug</string>
@@ -225,10 +224,6 @@
     <string name="mute_8_hours">8 orë</string>
     <string name="mute_1_week">1 javë</string>
     <string name="mute_always">Gjithmonë</string>
-    <plurals name="add_channel_from_qr">
-        <item quantity="one">A dëshironi të shtoni një kanal të ri?</item>
-        <item quantity="other">A dëshironi të shtoni %d kanale të reja?</item>
-    </plurals>
     <string name="replace">Zëvendëso</string>
     <string name="wifi_qr_code_scan">Skano QR kodi WiFi</string>
     <string name="wifi_qr_code_error">Formati i gabuar i kodit QR të kredencialeve WiFi</string>

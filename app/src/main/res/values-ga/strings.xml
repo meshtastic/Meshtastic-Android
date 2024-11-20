@@ -67,7 +67,6 @@
     <string name="change_channel">Athraigh cainéal</string>
     <string name="are_you_sure_channel">An bhfuil tú cinnte gur mhaith leat an cainéal a athrú? Stopfaidh gach cumarsáid le nóid eile go dtí go roinnfidh tú na socruithe nua cainéil.</string>
     <string name="new_channel_rcvd">URL Cainéal nua faighte</string>
-    <string name="do_you_want_switch">Ar mhaith leat aistriú go dtí an cainéal \'%s\'?</string>
     <string name="permission_missing">Tá cead riachtanach ar iarraidh, ní bheidh Meshtastic in ann oibriú i gceart. Cumasaigh i socruithe feidhmchláir le do thoil.</string>
     <string name="report_bug">Tuairiscigh fabht</string>
     <string name="report_a_bug">Tuairiscigh fabht</string>
@@ -228,13 +227,6 @@
     <string name="mute_8_hours">8 uair an chloig</string>
     <string name="mute_1_week">1 seachtain</string>
     <string name="mute_always">I gcónaí</string>
-    <plurals name="add_channel_from_qr">
-        <item quantity="one">An bhfuil tú ag iarraidh cainéal nua a chur leis?</item>
-        <item quantity="two">An bhfuil tú ag iarraidh %d cainéil nua a chur leis?</item>
-        <item quantity="few">An bhfuil tú ag iarraidh %d cainéil nua a chur leis?</item>
-        <item quantity="many">An bhfuil tú ag iarraidh %d cainéil nua a chur leis?</item>
-        <item quantity="other">An bhfuil tú ag iarraidh %d cainéil nua a chur leis?</item>
-    </plurals>
     <string name="replace">Ionad</string>
     <string name="wifi_qr_code_scan">Scan QR cód WiFi</string>
     <string name="wifi_qr_code_error">Formáid QR cód Creidiúnachtaí WiFi neamhbhailí</string>

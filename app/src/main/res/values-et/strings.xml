@@ -58,7 +58,6 @@
     <string name="change_channel">Vaheta kanalit</string>
     <string name="are_you_sure_channel">Kas soovid kindlasti kanalit vahetada? Kõik ühendused katkevad seniks, kuni oled uued kanalite seadeid jaganud.</string>
     <string name="new_channel_rcvd">Uued kanalid vastu võetud</string>
-    <string name="do_you_want_switch">Kas soovid minna kanalile \'%s\'?</string>
     <string name="permission_missing">Meshtastic vajab sinihamba kaudu uute seadmete tuvastamiseks luba asukoha kasutamiseks,  asukoht peab olema sisse lülitatud. Hiljem saad asukoha uuesti välja lülitada.</string>
     <string name="report_bug">Teata veast</string>
     <string name="report_a_bug">Teata veast</string>
@@ -216,10 +215,6 @@
     <string name="mute_8_hours">8 tundi</string>
     <string name="mute_1_week">1 nädal</string>
     <string name="mute_always">Alati</string>
-    <plurals name="add_channel_from_qr">
-        <item quantity="one">Kas soovite lisada uue kanali?</item>
-        <item quantity="other">Kas soovite lisada %d uut kanalit?</item>
-    </plurals>
     <string name="replace">Asenda</string>
     <string name="wifi_qr_code_scan">Skaneeri WiFi QR kood</string>
     <string name="wifi_qr_code_error">Vigane WiFi tõendi QR koodi vorming</string>

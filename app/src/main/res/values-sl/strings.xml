@@ -21,7 +21,6 @@
     <string name="change_channel">Zamenjava kanala</string>
     <string name="are_you_sure_channel">Ali ste prepričani, da želite spremeniti kanal? Vsa komunikacija z drugimi vozlišči se ustavi, dokler ne delite novih nastavitev kanala.</string>
     <string name="new_channel_rcvd">Prejet je bil novi URL kanala</string>
-    <string name="do_you_want_switch">Ali želite preklopiti na kanal \'%s\'?</string>
     <string name="permission_missing">Meshtastic potrebuje dovoljenje za lokacijo in za iskanje novih naprav prek povezave Bluetooth mora biti lokacija vklopljena. Pozneje jo lahko znova izklopite.</string>
     <string name="report_bug">Prijavi napako</string>
     <string name="report_a_bug">Prijavite napako</string>

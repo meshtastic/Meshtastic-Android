@@ -30,7 +30,6 @@
     <string name="change_channel">Promjena kanala</string>
     <string name="are_you_sure_channel">Jeste li sigurni da želite promijeniti kanal? Sva komunikacija s drugim čvorovima prekinut će se dok ne podijelite nove postavke kanala.</string>
     <string name="new_channel_rcvd">Primljen je URL novog kanala</string>
-    <string name="do_you_want_switch">Želite li prijeći na kanal \'%s\'?</string>
     <string name="permission_missing">Meshtastic treba dopuštenje za lokaciju i lokacija mora biti uključena kako bi pronašao nove uređaje putem Bluetootha. Nakon toga ga možete ponovno isključiti.</string>
     <string name="report_bug">Prijavi grešku</string>
     <string name="report_a_bug">Prijavi grešku</string>

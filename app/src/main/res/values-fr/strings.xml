@@ -58,7 +58,6 @@
     <string name="change_channel">Changer de canal</string>
     <string name="are_you_sure_channel">Êtes-vous sûr de vouloir modifier le canal ? Toutes les communications avec les autres nœuds s\'arrêteront jusqu\'à ce que vous partagiez les nouveaux paramètres du canal.</string>
     <string name="new_channel_rcvd">Nouvel URL canal reçu</string>
-    <string name="do_you_want_switch">Voulez-vous basculer sur le canal \'%s\' ?</string>
     <string name="permission_missing">Une permission indispensable manque, Meshtastic ne peut pas fonctionner. Veuillez modifier dans Réglages.</string>
     <string name="report_bug">Rapporter Bogue</string>
     <string name="report_a_bug">Rapporter un Bogue</string>

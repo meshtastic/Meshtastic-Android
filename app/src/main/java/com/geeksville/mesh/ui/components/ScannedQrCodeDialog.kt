@@ -51,13 +51,16 @@ fun ScannedQrCodeDialog(
     onDismiss: () -> Unit,
     onConfirm: (ChannelSet) -> Unit
 ) {
-    var shouldReplace by remember { mutableStateOf(true) }
+    var shouldReplace by remember { mutableStateOf(incoming.hasLoraConfig()) }
 
     val channelSet = remember(shouldReplace) {
         if (shouldReplace) {
             incoming
         } else {
             channels.copy {
+                // To guarantee consistent ordering, using a LinkedHashSet which iterates through
+                // it's entries according to the order an item was *first* inserted.
+                // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-linked-hash-set/
                 val result = LinkedHashSet(settings + incoming.settingsList)
                 settings.clear()
                 settings.addAll(result)
@@ -134,6 +137,7 @@ fun ScannedQrCodeDialog(
                             modifier = Modifier
                                 .height(48.dp)
                                 .weight(1f),
+                            enabled = incoming.hasLoraConfig(),
                             colors = if (shouldReplace) selectedColors else unselectedColors,
                         ) { Text(text = stringResource(R.string.replace)) }
                     }

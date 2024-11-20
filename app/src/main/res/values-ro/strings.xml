@@ -21,7 +21,6 @@
     <string name="change_channel">Schimbă canalul</string>
     <string name="are_you_sure_channel">Ești sigur că vrei să schimbi canalul? Toate comunicațiile cu alte noduri vor fi oprite până când setezi aceleași detalii pe alte noduri.</string>
     <string name="new_channel_rcvd">Am primit un nou URL de canal</string>
-    <string name="do_you_want_switch">Vrei să faci schimbul \'%s\' canalului?</string>
     <string name="permission_missing">O permisiune necesară lipsește, Meshtastic nu o să funcționeze corespunzător.  Te rugăm activează-o în setările Android.</string>
     <string name="report_bug">Raportează Bug</string>
     <string name="report_a_bug">Raportează un bug</string>

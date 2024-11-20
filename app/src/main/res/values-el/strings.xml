@@ -58,7 +58,6 @@
     <string name="change_channel">Αλλαγή καναλιού</string>
     <string name="are_you_sure_channel">Είστε βέβαιοι ότι θέλετε να αλλάξετε κανάλι? Η επικοινωνία με άλλες συσκευές θα σταματήσεις μέχρι να μοιραστείτε τις ρυθμίσεις του νέου καναλιού.</string>
     <string name="new_channel_rcvd">Λήψη URL νέου καναλιού</string>
-    <string name="do_you_want_switch">Θέλετε να αλλάξετε ‘%s’ κανάλι?</string>
     <string name="permission_missing">Λείπει μια απαιτούμενη άδεια, Meshtastic δεν θα λειτοργεί σωστά.  Ενεργοποιήστε τις ρυθμίσεις εφαρμογής Android.</string>
     <string name="report_bug">Αναφορά Σφάλματος</string>
     <string name="report_a_bug">Αναφέρετε ένα σφάλμα</string>

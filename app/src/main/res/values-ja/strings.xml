@@ -67,7 +67,6 @@
     <string name="change_channel">チャンネルの変更</string>
     <string name="are_you_sure_channel">チャンネルを変更しますか？新しいチャンネル設定をシェアするまで他のノードとの通信はすべて停止します。</string>
     <string name="new_channel_rcvd">新しいチャンネルURLを受信しました</string>
-    <string name="do_you_want_switch">\'%s\チャンネルに変更しますか？</string>
     <string name="permission_missing">必要なアクセス権限が拒否されているため、アプリが正常に動作しません。設定により権限を許可してください。</string>
     <string name="report_bug">バグ報告</string>
     <string name="report_a_bug">バグの報告</string>
@@ -224,9 +223,6 @@
     <string name="mute_8_hours"></string>
     <string name="mute_1_week">8時間</string>
     <string name="mute_always">常時</string>
-    <plurals name="add_channel_from_qr">
-        <item quantity="other">%d の新しいチャンネルを追加しますか？</item>
-    </plurals>
     <string name="replace">置き換え</string>
     <string name="wifi_qr_code_scan">WiFiのQRコードをスキャン</string>
     <string name="wifi_qr_code_error">WiFi認証QRコードの形式が無効です</string>

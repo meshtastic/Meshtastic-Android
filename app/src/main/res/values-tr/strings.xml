@@ -58,7 +58,6 @@
     <string name="change_channel">Kanalı değiştir</string>
     <string name="are_you_sure_channel">Kanalı değiştirmek istediğinizden emin misiniz? Yeni kanal ayarlarını paylaşana dek tüm cihazlar ile iletişim sonlanacak.</string>
     <string name="new_channel_rcvd">Yeni Kanal Adresi(URL) alındı</string>
-    <string name="do_you_want_switch">\'%s\' kanalına geçmek istiyor musunuz?</string>
     <string name="permission_missing">Meshtastic\'in konum iznine ihtiyacı var ve Bluetooth ile yeni cihazlar bulmak için konumun açık olması gerekiyor. Daha sonra isterseniz kapatabilirsiniz.</string>
     <string name="report_bug">Hata Bildir</string>
     <string name="report_a_bug">Hata Bildir</string>

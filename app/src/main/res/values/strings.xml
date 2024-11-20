@@ -93,7 +93,6 @@
     <string name="change_channel">Change channel</string>
     <string name="are_you_sure_channel">Are you sure you want to change the channel? All communication with other nodes will stop until you share the new channel settings.</string>
     <string name="new_channel_rcvd">New Channel URL received</string>
-    <string name="do_you_want_switch">Do you want to switch to the \'%s\' channel?</string>
     <string name="permission_missing">Meshtastic needs location permission and location must be turned on to find new devices via Bluetooth. You can turn it off again afterwards.</string>
     <string name="report_bug">Report Bug</string>
     <string name="report_a_bug">Report a bug</string>
@@ -251,10 +250,6 @@
     <string name="mute_8_hours">8 hours</string>
     <string name="mute_1_week">1 week</string>
     <string name="mute_always">Always</string>
-    <plurals name="add_channel_from_qr">
-        <item quantity="one">Do you want to add a new channel?</item>
-        <item quantity="other">Do you want to add %d new channels?</item>
-    </plurals>
     <string name="replace">Replace</string>
     <string name="wifi_qr_code_scan">Scan WiFi QR code</string>
     <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>

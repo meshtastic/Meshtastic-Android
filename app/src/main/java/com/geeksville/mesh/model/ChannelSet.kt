@@ -11,9 +11,9 @@ import com.journeyapps.barcodescanner.BarcodeEncoder
 import java.net.MalformedURLException
 import kotlin.jvm.Throws
 
-internal const val URL_PREFIX = "https://meshtastic.org/e/#"
-private const val MESHTASTIC_DOMAIN = "meshtastic.org"
-private const val MESHTASTIC_CHANNEL_CONFIG_PATH = "/e/"
+private const val MESHTASTIC_HOST = "meshtastic.org"
+private const val MESHTASTIC_PATH = "/e/"
+internal const val URL_PREFIX = "https://$MESHTASTIC_HOST$MESHTASTIC_PATH#"
 private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
 
 /**
@@ -23,37 +23,21 @@ private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PAD
 @Throws(MalformedURLException::class)
 fun Uri.toChannelSet(): ChannelSet {
     if (fragment.isNullOrBlank() ||
-        !host.equals(MESHTASTIC_DOMAIN, true) ||
-        !path.equals(MESHTASTIC_CHANNEL_CONFIG_PATH, true)
+        !host.equals(MESHTASTIC_HOST, true) ||
+        !path.equals(MESHTASTIC_PATH, true)
     ) {
         throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")
     }
 
     // Older versions of Meshtastic clients (Apple/web) included `?add=true` within the URL fragment.
     // This gracefully handles those cases until the newer version are generally available/used.
-    return ChannelSet.parseFrom(Base64.decode(fragment!!.substringBefore('?'), BASE64FLAGS))
-}
-
-/**
- * Return a [Boolean] if the URL indicates the associated [ChannelSet] should be added to the
- * existing configuration.
- * @throws MalformedURLException when not recognized as a valid Meshtastic URL
- */
-@Throws(MalformedURLException::class)
-fun Uri.shouldAddChannels(): Boolean {
-    if (fragment.isNullOrBlank() ||
-        !host.equals(MESHTASTIC_DOMAIN, true) ||
-        !path.equals(MESHTASTIC_CHANNEL_CONFIG_PATH, true)
-    ) {
-        throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")
-    }
-
-    // Older versions of Meshtastic clients (Apple/web) included `?add=true` within the URL fragment.
-    // This gracefully handles those cases until the newer version are generally available/used.
-    return fragment?.substringAfter('?', "")
+    val url = ChannelSet.parseFrom(Base64.decode(fragment!!.substringBefore('?'), BASE64FLAGS))
+    val shouldAdd = fragment?.substringAfter('?', "")
         ?.takeUnless { it.isBlank() }
         ?.equals("add=true")
         ?: getBooleanQueryParameter("add", false)
+
+    return url.toBuilder().apply { if (shouldAdd) clearLoraConfig() }.build()
 }
 
 /**

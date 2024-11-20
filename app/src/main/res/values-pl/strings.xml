@@ -67,7 +67,6 @@
     <string name="change_channel">Zmień kanał</string>
     <string name="are_you_sure_channel">Czy na pewno chcesz zmienić kanał? Komunikacja z innymi węzłami komunikacyjnymi zostanie wstrzymana do czasu udostępnienia nowych ustawień kanału.</string>
     <string name="new_channel_rcvd">Otrzymano nowy URL kanału</string>
-    <string name="do_you_want_switch">Chcesz przełączyć na \'%s\' kanał?</string>
     <string name="permission_missing">Meshtastic potrzebuje zezwolenia na lokalizacje. Lokalizacja musi być włączona, aby można było znaleźć nowe urządzenia przez Bluetooth. Możesz je później wyłączyć.</string>
     <string name="report_bug">Zgłoś błąd</string>
     <string name="report_a_bug">Zgłoś błąd</string>
@@ -227,12 +226,6 @@
     <string name="mute_8_hours">8 godzin</string>
     <string name="mute_1_week">1 tydzień</string>
     <string name="mute_always">Na zawsze</string>
-    <plurals name="add_channel_from_qr">
-        <item quantity="one">Czy chcesz dodać nowy kanał?</item>
-        <item quantity="few">Czy chcesz dodać %d nowe kanały?</item>
-        <item quantity="many">Czy chcesz dodać %d nowych kanałów?</item>
-        <item quantity="other">Czy chcesz dodać %d nowych kanałów?</item>
-    </plurals>
     <string name="replace">Zastąp</string>
     <string name="wifi_qr_code_scan">Skanuj kod QR Wi-Fi</string>
     <string name="wifi_qr_code_error">Nieprawidłowy format kodu QR</string>
