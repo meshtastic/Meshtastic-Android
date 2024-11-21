@@ -41,7 +41,30 @@ private enum class Quality(
 }
 
 /**
- * Displays the `snr` and `rssi` with color depending on the value respectively.
+ * Displays the `snr` and `rssi` color coded based on the signal quality, along with
+ * a human readable description and related icon.
+ */
+@Composable
+fun NodeSignalQuality(snr: Float, rssi: Int) {
+    val quality = determineSignalQuality(snr, rssi)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Snr(snr)
+        Rssi(rssi)
+        Text(text = "${stringResource(R.string.signal)} ${stringResource(quality.nameRes)}")
+        Icon(
+            imageVector = quality.imageVector,
+            contentDescription = stringResource(R.string.signal_quality),
+            tint = quality.color
+        )
+    }
+}
+
+/**
+ * Displays the `snr` and `rssi` with color depending on the values respectively.
  */
 @Composable
 fun SnrAndRssi(snr: Float, rssi: Int){
@@ -55,7 +78,7 @@ fun SnrAndRssi(snr: Float, rssi: Int){
 }
 
 /**
- * Displays a signal indicator based on `snr` and `rssi`.
+ * Displays a human readable description and icon representing the signal quality.
  */
 @Composable
 fun LoraSignalIndicator(snr: Float, rssi: Int) {
