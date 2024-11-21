@@ -18,6 +18,7 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
+import com.geeksville.mesh.database.entity.TapBack
 
 @Database(
     entities = [
@@ -26,7 +27,8 @@ import com.geeksville.mesh.database.entity.QuickChatAction
         Packet::class,
         ContactSettings::class,
         MeshLog::class,
-        QuickChatAction::class
+        QuickChatAction::class,
+        TapBack::class,
     ],
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
@@ -39,8 +41,9 @@ import com.geeksville.mesh.database.entity.QuickChatAction
         AutoMigration(from = 10, to = 11),
         AutoMigration(from = 11, to = 12),
         AutoMigration(from = 12, to = 13, spec = AutoMigration12to13::class),
+        AutoMigration(from = 13, to = 14), // add TapBack
     ],
-    version = 13,
+    version = 14,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)

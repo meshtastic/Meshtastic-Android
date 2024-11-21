@@ -4,6 +4,7 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.Routing
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
+import com.geeksville.mesh.database.entity.TapBack
 
 val Routing.Error.stringRes: Int
     get() = when (this) {
@@ -36,7 +37,7 @@ data class Message(
     val read: Boolean,
     val status: MessageStatus?,
     val routingError: Int,
-    val emojis: List<String>,
+    val emojis: List<TapBack>,
 ) {
     private fun getStatusStringRes(value: Int): Int {
         val error = Routing.Error.forNumber(value) ?: Routing.Error.UNRECOGNIZED

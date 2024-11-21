@@ -17,6 +17,7 @@ import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
@@ -25,6 +26,7 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
+import com.geeksville.mesh.database.entity.TapBack
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
@@ -327,10 +329,7 @@ class UIViewModel @Inject constructor(
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey).mapLatest { list ->
-        val emojis = list.filter { it.data.emoji != 0 }
-//        val replies = list.filter { it.data.emoji == 0 && it.data.replyId != 0 }
-        val messages = list.filter { it.data.replyId == 0 && it.data.emoji == 0 }
+    fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey).mapLatest { messages ->
         messages.map { dataPacket ->
             Message(
                 uuid = dataPacket.uuid,
@@ -342,7 +341,7 @@ class UIViewModel @Inject constructor(
                 read = dataPacket.read,
                 status = dataPacket.data.status,
                 routingError = dataPacket.routingError,
-                emojis = emojis.filter { it.data.replyId == dataPacket.data.id }.mapNotNull { it.data.text },
+                emojis = packetRepository.getTapBacksForMessage(dataPacket.data.id).orEmpty(),
             )
         }
     }
@@ -371,18 +370,12 @@ class UIViewModel @Inject constructor(
         sendDataPacket(p)
     }
 
-    fun sendTapBack(str: String, messageId: Int, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
+    fun sendTapBack(emoji: String, messageId: Int, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
-
-        val p = DataPacket(
-            to = dest,
-            channel = channel ?: 0,
-            text = str,
-            emoji = 1,
-            replyId = messageId,
-        )
+        val p = DataPacket(dest, channel ?: 0, emoji)
+        // todo actually add the tapback - not sure how to add `replyId = messageId` and "emoji=1" to the packet
         sendDataPacket(p)
     }
 

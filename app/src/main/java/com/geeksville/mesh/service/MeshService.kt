@@ -9,32 +9,61 @@ import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.app.ServiceCompat
 import androidx.core.location.LocationCompat
-import com.geeksville.mesh.*
+import com.geeksville.mesh.AdminProtos
+import com.geeksville.mesh.AppOnlyProtos
+import com.geeksville.mesh.BuildConfig
+import com.geeksville.mesh.ChannelProtos
+import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.CoroutineDispatchers
+import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
+import com.geeksville.mesh.MeshUser
+import com.geeksville.mesh.MessageStatus
+import com.geeksville.mesh.ModuleConfigProtos
+import com.geeksville.mesh.MyNodeInfo
+import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.PaxcountProtos
+import com.geeksville.mesh.Portnums
+import com.geeksville.mesh.Position
+import com.geeksville.mesh.R
+import com.geeksville.mesh.StoreAndForwardProtos
+import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.concurrent.handledLaunch
+import com.geeksville.mesh.config
+import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.database.entity.TapBack
 import com.geeksville.mesh.database.entity.toNodeInfo
+import com.geeksville.mesh.fromRadio
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.getTracerouteResponse
+import com.geeksville.mesh.position
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.network.MQTTRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
-import com.geeksville.mesh.util.*
+import com.geeksville.mesh.telemetry
+import com.geeksville.mesh.user
+import com.geeksville.mesh.util.anonymize
+import com.geeksville.mesh.util.toOneLineString
+import com.geeksville.mesh.util.toPIIString
+import com.geeksville.mesh.util.toRemoteExceptions
 import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
 import dagger.Lazy
@@ -171,6 +200,7 @@ class MeshService : Service(), Logging {
                 numOnlineNodes,
                 numNodes
             )
+
             ConnectionState.DISCONNECTED -> getString(R.string.disconnected)
             ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
         }
@@ -257,7 +287,11 @@ class MeshService : Service(), Logging {
 
             else -> return
         }
-        serviceNotifications.updateMessageNotification(contactKey, getSenderName(dataPacket), message)
+        serviceNotifications.updateMessageNotification(
+            contactKey,
+            getSenderName(dataPacket),
+            message
+        )
     }
 
     override fun onCreate() {
@@ -438,6 +472,7 @@ class MeshService : Service(), Logging {
                 val n = hexStr.toLong(16).toInt()
                 nodeDBbyNodeNum[n] ?: throw IdNotFoundException(id)
             }
+
             else -> throw InvalidNodeIdException(id)
         }
     }
@@ -582,8 +617,6 @@ class MeshService : Service(), Logging {
                 id = packet.id,
                 dataType = data.portnumValue,
                 bytes = data.payload.toByteArray(),
-                emoji = data.emoji,
-                replyId = data.replyId,
                 hopLimit = packet.hopLimit,
                 channel = if (packet.pkiEncrypted) DataPacket.PKC_CHANNEL_INDEX else packet.channel,
             )
@@ -606,6 +639,20 @@ class MeshService : Service(), Logging {
         Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
         Portnums.PortNum.WAYPOINT_APP_VALUE,
     )
+
+    private fun rememberTapBack(data: MeshProtos.Data) {
+        val tapBack = TapBack(
+            messageId = data.replyId,
+            userId = toNodeID(data.source),
+            emoji = data.payload.toStringUtf8(),
+            timestamp = System.currentTimeMillis(),
+        )
+        serviceScope.handledLaunch {
+            packetRepository.get().apply {
+                insertTapBack(tapBack)
+            }
+        }
+    }
 
     private fun rememberDataPacket(dataPacket: DataPacket, updateNotification: Boolean = true) {
         if (dataPacket.dataType !in rememberDataType) return
@@ -630,7 +677,10 @@ class MeshService : Service(), Logging {
             packetRepository.get().apply {
                 insert(packetToSave)
                 val isMuted = getContactSettings(contactKey).isMuted
-                if (updateNotification && !isMuted) updateMessageNotification(contactKey, dataPacket)
+                if (updateNotification && !isMuted) updateMessageNotification(
+                    contactKey,
+                    dataPacket
+                )
             }
         }
     }
@@ -647,7 +697,6 @@ class MeshService : Service(), Logging {
 
                 // We ignore most messages that we sent
                 val fromUs = myInfo.myNodeNum == packet.from
-                val isEmoji = packet.decoded.emoji != 0
 
                 debug("Received data from $fromId, portnum=${data.portnum} ${bytes.size} bytes")
 
@@ -660,8 +709,11 @@ class MeshService : Service(), Logging {
 
                 when (data.portnumValue) {
                     Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
-                        if (fromUs && !isEmoji) return
-
+                        if (data.emoji != 0) {
+                            rememberTapBack(data)
+                            return
+                        }
+                        if (fromUs) return
                         // TODO temporary solution to Range Test spam, may be removed in the future
                         val isRangeTest = rangeTestRegex.matches(data.payload.toStringUtf8())
                         if (!moduleConfig.rangeTest.enabled && isRangeTest) return
@@ -1308,10 +1360,14 @@ class MeshService : Service(), Logging {
                 MeshProtos.FromRadio.MODULECONFIG_FIELD_NUMBER -> handleModuleConfig(proto.moduleConfig)
                 MeshProtos.FromRadio.QUEUESTATUS_FIELD_NUMBER -> handleQueueStatus(proto.queueStatus)
                 MeshProtos.FromRadio.METADATA_FIELD_NUMBER -> handleMetadata(proto.metadata)
-                MeshProtos.FromRadio.MQTTCLIENTPROXYMESSAGE_FIELD_NUMBER -> handleMqttProxyMessage(proto.mqttClientProxyMessage)
+                MeshProtos.FromRadio.MQTTCLIENTPROXYMESSAGE_FIELD_NUMBER -> handleMqttProxyMessage(
+                    proto.mqttClientProxyMessage
+                )
+
                 MeshProtos.FromRadio.CLIENTNOTIFICATION_FIELD_NUMBER -> {
                     handleClientNotification(proto.clientNotification)
                 }
+
                 else -> errormsg("Unexpected FromRadio variant")
             }
         } catch (ex: InvalidProtocolBufferException) {
@@ -1609,7 +1665,10 @@ class MeshService : Service(), Logging {
                 newNodes.clear() // Just to save RAM ;-)
 
                 serviceScope.handledLaunch {
-                    radioConfigRepository.installNodeDB(myNodeInfo!!, nodeDBbyNodeNum.values.toList())
+                    radioConfigRepository.installNodeDB(
+                        myNodeInfo!!,
+                        nodeDBbyNodeNum.values.toList()
+                    )
                 }
 
                 haveNodeDB = true // we now have nodes from real hardware
@@ -1666,14 +1725,16 @@ class MeshService : Service(), Logging {
                     handleReceivedPosition(mi.myNodeNum, position)
                 }
 
-                sendToRadio(newMeshPacketTo(idNum).buildMeshPacket(
-                    channel = if (destNum == null) 0 else nodeDBbyNodeNum[destNum]?.channel ?: 0,
-                    priority = MeshPacket.Priority.BACKGROUND,
-                ) {
-                    portnumValue = Portnums.PortNum.POSITION_APP_VALUE
-                    payload = position.toByteString()
-                    this.wantResponse = wantResponse
-                })
+                sendToRadio(
+                    newMeshPacketTo(idNum).buildMeshPacket(
+                        channel = if (destNum == null) 0 else nodeDBbyNodeNum[destNum]?.channel
+                            ?: 0,
+                        priority = MeshPacket.Priority.BACKGROUND,
+                    ) {
+                        portnumValue = Portnums.PortNum.POSITION_APP_VALUE
+                        payload = position.toByteString()
+                        this.wantResponse = wantResponse
+                    })
             }
         } catch (ex: BLEException) {
             warn("Ignoring disconnected radio during gps location update")
@@ -1947,26 +2008,31 @@ class MeshService : Service(), Logging {
                 removeByNodenum = nodeNum
             })
         }
+
         override fun requestUserInfo(destNum: Int) = toRemoteExceptions {
             if (destNum != myNodeNum) {
-                sendToRadio(newMeshPacketTo(destNum
-                ).buildMeshPacket(
-                    channel = nodeDBbyNodeNum[destNum]?.channel ?: 0
-                ) {
-                    portnumValue = Portnums.PortNum.NODEINFO_APP_VALUE
-                    wantResponse = true
-                    payload = nodeDBbyNodeNum[myNodeNum]!!.user.toByteString()
-                })
+                sendToRadio(
+                    newMeshPacketTo(
+                        destNum
+                    ).buildMeshPacket(
+                        channel = nodeDBbyNodeNum[destNum]?.channel ?: 0
+                    ) {
+                        portnumValue = Portnums.PortNum.NODEINFO_APP_VALUE
+                        wantResponse = true
+                        payload = nodeDBbyNodeNum[myNodeNum]!!.user.toByteString()
+                    })
             }
         }
+
         override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
-                channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
-                priority = MeshPacket.Priority.BACKGROUND,
-            ) {
-                portnumValue = Portnums.PortNum.POSITION_APP_VALUE
-                wantResponse = true
-            })
+            sendToRadio(
+                newMeshPacketTo(destNum).buildMeshPacket(
+                    channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                    priority = MeshPacket.Priority.BACKGROUND,
+                ) {
+                    portnumValue = Portnums.PortNum.POSITION_APP_VALUE
+                    wantResponse = true
+                })
         }
 
         override fun setFixedPosition(destNum: Int, position: Position) = toRemoteExceptions {
@@ -1988,14 +2054,15 @@ class MeshService : Service(), Logging {
         }
 
         override fun requestTraceroute(requestId: Int, destNum: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
-                wantAck = true,
-                id = requestId,
-                channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
-            ) {
-                portnumValue = Portnums.PortNum.TRACEROUTE_APP_VALUE
-                wantResponse = true
-            })
+            sendToRadio(
+                newMeshPacketTo(destNum).buildMeshPacket(
+                    wantAck = true,
+                    id = requestId,
+                    channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                ) {
+                    portnumValue = Portnums.PortNum.TRACEROUTE_APP_VALUE
+                    wantResponse = true
+                })
         }
 
         override fun requestShutdown(requestId: Int, destNum: Int) = toRemoteExceptions {

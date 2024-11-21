@@ -39,8 +39,6 @@ data class DataPacket(
     var time: Long = System.currentTimeMillis(), // msecs since 1970
     var id: Int = 0, // 0 means unassigned
     var status: MessageStatus? = MessageStatus.UNKNOWN,
-    var emoji: Int = 0,
-    var replyId: Int = 0,
     var hopLimit: Int = 0,
     var channel: Int = 0, // channel index
 ) : Parcelable {
@@ -58,18 +56,6 @@ data class DataPacket(
         bytes = text.encodeToByteArray(),
         dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
         channel = channel
-    )
-
-    /**
-     * Syntactic sugar to make it easy to create emoji tapbacks
-     */
-    constructor(to: String?, channel: Int, text: String, emoji: Int, replyId: Int) : this(
-        to = to,
-        bytes = text.encodeToByteArray(),
-        dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-        channel = channel,
-        emoji = emoji,
-        replyId = replyId
     )
 
     /**
@@ -108,8 +94,6 @@ data class DataPacket(
         parcel.readParcelableCompat(MessageStatus::class.java.classLoader),
         parcel.readInt(),
         parcel.readInt(),
-        parcel.readInt(),
-        parcel.readInt(),
     )
 
     override fun equals(other: Any?): Boolean {
@@ -126,8 +110,6 @@ data class DataPacket(
         if (dataType != other.dataType) return false
         if (!bytes!!.contentEquals(other.bytes!!)) return false
         if (status != other.status) return false
-        if (emoji != other.emoji) return false
-        if (replyId != other.replyId) return false
         if (hopLimit != other.hopLimit) return false
 
         return true
@@ -141,8 +123,6 @@ data class DataPacket(
         result = 31 * result + dataType
         result = 31 * result + bytes!!.contentHashCode()
         result = 31 * result + status.hashCode()
-        result = 31 * result + emoji.hashCode()
-        result = 31 * result + replyId
         result = 31 * result + hopLimit
         result = 31 * result + channel
         return result
@@ -156,8 +136,6 @@ data class DataPacket(
         parcel.writeLong(time)
         parcel.writeInt(id)
         parcel.writeParcelable(status, flags)
-        parcel.writeInt(emoji)
-        parcel.writeInt(replyId)
         parcel.writeInt(hopLimit)
         parcel.writeInt(channel)
     }
@@ -175,8 +153,6 @@ data class DataPacket(
         time = parcel.readLong()
         id = parcel.readInt()
         status = parcel.readParcelableCompat(MessageStatus::class.java.classLoader)
-        emoji = parcel.readInt()
-        replyId = parcel.readInt()
         hopLimit = parcel.readInt()
         channel = parcel.readInt()
     }

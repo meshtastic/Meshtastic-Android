@@ -11,6 +11,7 @@ import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.database.entity.ContactSettings
 import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.database.entity.TapBack
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -177,4 +178,10 @@ interface PacketDao {
         }
         upsertContactSettings(contactList)
     }
+
+    @Query("SELECT * FROM tapbacks WHERE messageId = :messageId")
+    fun getTapBacksForMessage(messageId: Int): List<TapBack>?
+
+    @Insert
+    fun insertTapBack(tapBack: TapBack)
 }

@@ -6,6 +6,7 @@ import com.geeksville.mesh.Portnums.PortNum
 import com.geeksville.mesh.database.dao.PacketDao
 import com.geeksville.mesh.database.entity.ContactSettings
 import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.database.entity.TapBack
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -48,6 +49,13 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
 
     suspend fun updateMessageId(d: DataPacket, id: Int) = withContext(Dispatchers.IO) {
         packetDao.updateMessageId(d, id)
+    }
+
+    suspend fun insertTapBack(tapBack: TapBack) = withContext(Dispatchers.IO) {
+        packetDao.insertTapBack(tapBack)
+    }
+    suspend fun getTapBacksForMessage(messageId: Int) = withContext(Dispatchers.IO) {
+        packetDao.getTapBacksForMessage(messageId)
     }
 
     suspend fun getPacketById(requestId: Int) = withContext(Dispatchers.IO) {

@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
+import com.geeksville.mesh.database.entity.TapBack
 import com.geeksville.mesh.ui.components.AutoLinkText
 import com.geeksville.mesh.ui.components.TapBackRow
 import com.geeksville.mesh.ui.theme.AppTheme
@@ -62,7 +63,7 @@ internal fun MessageItem(
     onLongClick: () -> Unit = {},
     onChipClick: () -> Unit = {},
     onStatusClick: () -> Unit = {},
-    emojis: List<String> = emptyList(),
+    emojis: List<TapBack> = emptyList(),
     onSendTapBack: (String) -> Unit = { _, -> },
 ) {
     val fromLocal = shortName == null
@@ -157,7 +158,6 @@ internal fun MessageItem(
                 }
             }
         }
-
         TapBackRow(fromLocal, emojis = emojis, onSendTapBack = onSendTapBack)
     }
 }

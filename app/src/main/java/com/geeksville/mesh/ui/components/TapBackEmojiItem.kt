@@ -30,12 +30,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.emoji2.emojipicker.EmojiPickerView
 import androidx.emoji2.emojipicker.RecentEmojiProviderAdapter
+import com.geeksville.mesh.database.entity.TapBack
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.CustomRecentEmojiProvider
 
@@ -94,9 +96,20 @@ fun TapBackEmojiItem(
 @Composable
 fun TapBackRow(
     fromLocal: Boolean,
-    emojis: List<String> = emptyList(),
+    emojis: List<TapBack> = emptyList(),
     onSendTapBack: (String) -> Unit = { _ -> },
 ) {
+    val emojiList by remember {
+        mutableStateOf(
+            reduceEmojis(
+                if (fromLocal) {
+                    emojis.map { it.emoji }
+                } else {
+                    emojis.map { it.emoji }.reversed()
+                }
+            ).entries
+        )
+    }
     var showEmojiPickerView by remember { mutableStateOf(false) }
     if (showEmojiPickerView) {
         EmojiPickerView(
@@ -107,17 +120,20 @@ fun TapBackRow(
             dismissPickerView = { showEmojiPickerView = false }
         )
     }
-    FlowRow {
-        if (!fromLocal) {
-            TapBackEmojiItem(
-                emoji = "\uD83D\uDE42",
-                isAddEmojiItem = true,
-                emojiTapped = {
-                    showEmojiPickerView = true
-                }
-            )
-        }
-        reduceEmojis(emojis).entries.forEach { entry ->
+    @Composable
+    fun AddEmojiItem() {
+        TapBackEmojiItem(
+            emoji = "\uD83D\uDE42",
+            isAddEmojiItem = true,
+            emojiTapped = {
+                showEmojiPickerView = true
+            }
+        )
+    }
+
+    @Composable
+    fun EmojiList() {
+        emojiList.forEach { entry ->
             TapBackEmojiItem(
                 emoji = entry.key,
                 emojiCount = entry.value,
@@ -125,6 +141,24 @@ fun TapBackRow(
                     onSendTapBack(entry.key)
                 }
             )
+        }
+    }
+
+    if (fromLocal) {
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.End
+        ) {
+            EmojiList()
+            AddEmojiItem()
+        }
+    } else {
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Start
+        ) {
+            AddEmojiItem()
+            EmojiList()
         }
     }
 }
@@ -181,5 +215,29 @@ fun TapBackEmojiPreview() {
             TapBackEmojiItem(emoji = "\uD83D\uDE42", emojiCount = 2)
             TapBackEmojiItem(emoji = "\uD83D\uDE42", isAddEmojiItem = true)
         }
+    }
+}
+
+@Preview
+@Composable
+fun TapBackRowPreview() {
+    AppTheme {
+
+        TapBackRow(
+            fromLocal = true, emojis = listOf(
+                TapBack(
+                    messageId = 1,
+                    userId = "1",
+                    emoji = "\uD83D\uDE42",
+                    timestamp = 1L
+                ),
+                TapBack(
+                    messageId = 1,
+                    userId = "1",
+                    emoji = "\uD83D\uDE42",
+                    timestamp = 1L
+                ),
+            )
+        )
     }
 }
