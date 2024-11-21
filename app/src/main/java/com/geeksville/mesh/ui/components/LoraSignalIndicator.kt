@@ -67,7 +67,7 @@ fun NodeSignalQuality(snr: Float, rssi: Int) {
  * Displays the `snr` and `rssi` with color depending on the values respectively.
  */
 @Composable
-fun SnrAndRssi(snr: Float, rssi: Int){
+fun SnrAndRssi(snr: Float, rssi: Int) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
