@@ -28,6 +28,7 @@ import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -380,6 +381,12 @@ class UIViewModel @Inject constructor(
             meshService?.send(p)
         } catch (ex: RemoteException) {
             errormsg("Send DataPacket error: ${ex.message}")
+        }
+    }
+
+    fun sendTapback(emoji: String, replyId: Int, contactKey: String) {
+        viewModelScope.launch {
+            radioConfigRepository.onServiceAction(ServiceAction.Tapback(emoji, replyId, contactKey))
         }
     }
 

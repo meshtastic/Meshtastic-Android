@@ -58,6 +58,10 @@ import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 
+sealed class ServiceAction {
+    data class Tapback(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
+}
+
 /**
  * Handles all the communication with android apps.  Also keeps an internal model
  * of the network state.
@@ -279,6 +283,11 @@ class MeshService : Service(), Logging {
             .launchIn(serviceScope)
         radioConfigRepository.channelSetFlow.onEach { channelSet = it }
             .launchIn(serviceScope)
+        radioConfigRepository.serviceAction.onEach { action ->
+            when (action) {
+                is ServiceAction.Tapback -> sendTapback(action)
+            }
+        }.launchIn(serviceScope)
 
         loadSettings() // Load our last known node DB
 
@@ -1722,6 +1731,21 @@ class MeshService : Service(), Logging {
         if (p.dataType in rememberDataType) {
             offlineSentPackets.add(p)
         }
+    }
+
+    private fun sendTapback(tapback: ServiceAction.Tapback) = toRemoteExceptions {
+        // contactKey: unique contact key filter (channel)+(nodeId)
+        val channel = tapback.contactKey[0].digitToInt()
+        val destNum = tapback.contactKey.substring(1)
+
+        sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
+            channel = channel,
+            priority = MeshPacket.Priority.BACKGROUND,
+        ) {
+            replyId = tapback.replyId
+            portnumValue = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE
+            payload = ByteString.copyFrom(tapback.emoji.encodeToByteArray())
+        })
     }
 
     private val binder = object : IMeshService.Stub() {

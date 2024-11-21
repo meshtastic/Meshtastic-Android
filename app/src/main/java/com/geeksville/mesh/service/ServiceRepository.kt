@@ -68,4 +68,11 @@ class ServiceRepository @Inject constructor() : Logging {
     fun clearTracerouteResponse() {
         setTracerouteResponse(null)
     }
+
+    private val _serviceAction = MutableSharedFlow<ServiceAction>()
+    val serviceAction: SharedFlow<ServiceAction> get() = _serviceAction
+
+    suspend fun onServiceAction(action: ServiceAction) {
+        _serviceAction.emit(action)
+    }
 }

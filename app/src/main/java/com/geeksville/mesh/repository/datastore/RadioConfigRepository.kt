@@ -16,6 +16,7 @@ import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.NodeDB
 import com.geeksville.mesh.model.getChannelUrl
 import com.geeksville.mesh.service.MeshService.ConnectionState
+import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -175,6 +176,12 @@ class RadioConfigRepository @Inject constructor(
 
     suspend fun emitMeshPacket(packet: MeshPacket) = coroutineScope {
         serviceRepository.emitMeshPacket(packet)
+    }
+
+    val serviceAction: SharedFlow<ServiceAction> get() = serviceRepository.serviceAction
+
+    suspend fun onServiceAction(action: ServiceAction) = coroutineScope {
+        serviceRepository.onServiceAction(action)
     }
 
     val tracerouteResponse: StateFlow<String?> get() = serviceRepository.tracerouteResponse
