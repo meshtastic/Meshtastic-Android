@@ -10,6 +10,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.ui.components.NodeSignalQuality
 import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 
@@ -21,7 +22,7 @@ fun signalInfo(
     modifier: Modifier = Modifier,
     node: NodeEntity,
     isThisNode: Boolean
-): Boolean {
+) {
     val text = if (isThisNode) {
         stringResource(R.string.channel_air_util).format(
             node.deviceMetrics.channelUtilization,
@@ -40,24 +41,22 @@ fun signalInfo(
             if (node.channel > 0) {
                 add("ch:${node.channel}")
             }
-            if (node.hopsAway <= 0) {
-                if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
-                    add("RSSI: %d SNR: %.1f".format(node.rssi, node.snr))
-                }
-            }
             if (node.hopsAway != 0) add(hopsString)
         }.joinToString(" | ")
     }
-    return if (text.isNotEmpty()) {
+    if (text.isNotEmpty()) {
         Text(
             modifier = modifier,
             text = text,
             color = MaterialTheme.colors.onSurface,
             fontSize = MaterialTheme.typography.button.fontSize
         )
-        true
-    } else {
-        false
+    }
+    /* We only know the Signal Quality from direct nodes aka 0 hop. */
+    if (node.hopsAway <= 0) {
+        if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
+            NodeSignalQuality(node.snr, node.rssi)
+        }
     }
 }
 

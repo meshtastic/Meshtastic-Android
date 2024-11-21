@@ -266,13 +266,7 @@ private fun SignalMetricsCard(meshPacket: MeshPacket) {
                             Spacer(modifier = Modifier.height(8.dp))
 
                             /* SNR and RSSI */
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Snr(meshPacket.rxSnr)
-                                Rssi(meshPacket.rxRssi)
-                            }
+                            SnrAndRssi(meshPacket.rxSnr, meshPacket.rxRssi)
                         }
                     }
 
