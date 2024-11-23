@@ -16,7 +16,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.util.DistanceUnit
 import com.geeksville.mesh.util.toDistanceString
-import java.util.Locale
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -38,7 +37,7 @@ fun PositionPrecisionPreference(
     onValueChanged: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val unit = remember { DistanceUnit.getFromLocale(Locale.getDefault()) }
+    val unit = remember { DistanceUnit.getFromLocale() }
 
     Column(modifier = modifier) {
         SwitchPreference(

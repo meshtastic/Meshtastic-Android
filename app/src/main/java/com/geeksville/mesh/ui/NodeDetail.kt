@@ -31,8 +31,10 @@ import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.ChargingStation
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Height
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyOff
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Numbers
@@ -40,16 +42,19 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.Router
+import androidx.compose.material.icons.filled.Scale
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Work
+import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -60,6 +65,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.MetricsState
@@ -67,7 +73,9 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.util.DistanceUnit
 import com.geeksville.mesh.util.formatAgo
+import com.geeksville.mesh.util.thenIf
 import java.util.concurrent.TimeUnit
 import kotlin.math.ln
 
@@ -282,6 +290,7 @@ private fun InfoCard(
     icon: ImageVector,
     text: String,
     value: String,
+    rotateIcon: Float = 0f,
 ) {
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -299,7 +308,9 @@ private fun InfoCard(
             Icon(
                 imageVector = icon,
                 contentDescription = text,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier
+                    .size(24.dp)
+                    .thenIf(rotateIcon != 0f) { rotate(rotateIcon) },
             )
             Text(
                 text = text,
@@ -311,7 +322,11 @@ private fun InfoCard(
                 text = value,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.h5
+                style = if (value.length < 7) {
+                    MaterialTheme.typography.h5
+                } else {
+                    MaterialTheme.typography.h6
+                },
             )
         }
     }
@@ -334,7 +349,7 @@ private fun formatUptime(seconds: Long): String {
 }
 
 @OptIn(ExperimentalLayoutApi::class)
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun EnvironmentMetrics(
     node: NodeEntity,
@@ -402,6 +417,37 @@ private fun EnvironmentMetrics(
                 value = iaq.toString()
             )
         }
+        if (distance != 0f) {
+            InfoCard(
+                icon = Icons.Default.Height,
+                text = "Distance",
+                value = "%.0f mm".format(distance)
+            )
+        }
+        if (lux != 0f) {
+            InfoCard(
+                icon = Icons.Default.LightMode,
+                text = "Lux",
+                value = "%.0f".format(lux)
+            )
+        }
+        if (hasWindSpeed()) {
+            @Suppress("MagicNumber")
+            val normalizedBearing = (windDirection % 360 + 360) % 360
+            InfoCard(
+                icon = Icons.Outlined.Navigation,
+                text = "Wind",
+                value = windSpeed.toSpeedString(),
+                rotateIcon = normalizedBearing.toFloat(),
+            )
+        }
+        if (weight != 0f) {
+            InfoCard(
+                icon = Icons.Default.Scale,
+                text = "Weight",
+                value = "%.2f kg".format(weight)
+            )
+        }
     }
 }
 
@@ -411,6 +457,12 @@ private fun Float.toTempString(isFahrenheit: Boolean) = if (isFahrenheit) {
     "%.0f°F".format(fahrenheit)
 } else {
     "%.0f°C".format(this)
+}
+
+@Suppress("MagicNumber")
+private fun Float.toSpeedString() = when (DistanceUnit.getFromLocale()) {
+    DisplayUnits.METRIC -> "%.0f km/h".format(this * 3.6)
+    else -> "%.0f mph".format(this * 2.23694f)
 }
 
 // Magnus-Tetens approximation

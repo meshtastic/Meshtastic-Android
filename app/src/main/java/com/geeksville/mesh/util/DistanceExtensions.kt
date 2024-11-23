@@ -17,7 +17,7 @@ enum class DistanceUnit(
     ;
 
     companion object {
-        fun getFromLocale(locale: Locale): DisplayConfig.DisplayUnits {
+        fun getFromLocale(locale: Locale = Locale.getDefault()): DisplayConfig.DisplayUnits {
             return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
                 when (LocaleData.getMeasurementSystem(ULocale.forLocale(locale))) {
                     LocaleData.MeasurementSystem.SI -> DisplayConfig.DisplayUnits.METRIC
