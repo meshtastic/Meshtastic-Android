@@ -125,7 +125,6 @@ fun ChannelScreen(
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-    val clipboardManager = LocalClipboardManager.current
 
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val enabled = connectionState == MeshService.ConnectionState.CONNECTED && !viewModel.isManaged
@@ -138,22 +137,21 @@ fun ChannelScreen(
     /* Holds selections made by the user for QR generation. */
     val channelSelections = rememberSaveable(
         saver = listSaver(
-            save = { stateList -> stateList.toList() },
+            save = { it.toList() },
             restore = { it.toMutableStateList() }
         )
     ) { mutableStateListOf(elements = Array(size = 8, init = { true })) }
 
-    val channelUrl = channelSet.getChannelUrl()
+    val selectedChannelSet = channelSet.copy {
+        val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+        settings.clear()
+        settings.addAll(result)
+    }
     val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
-            try {
-                viewModel.requestChannelSet(Uri.parse(result.contents).toChannelSet())
-            } catch (ex: Throwable) {
-                errormsg("Channel url error: ${ex.message}")
-                viewModel.showSnackbar(R.string.channel_invalid)
-            }
+            viewModel.requestChannelUrl(Uri.parse(result.contents))
         }
     }
 
@@ -340,64 +338,10 @@ fun ChannelScreen(
         }
 
         item {
-            var valueState by remember(channelUrl) { mutableStateOf(channelUrl) }
-            val isError = valueState != channelUrl
-
-            OutlinedTextField(
-                value = valueState.toString(),
-                onValueChange = {
-                    try {
-                        valueState = Uri.parse(it)
-                        channelSet = valueState.toChannelSet()
-                    } catch (ex: Throwable) {
-                        // channelSet failed to update, isError true
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
+            EditChannelUrl(
                 enabled = enabled,
-                label = { Text("URL") },
-                isError = isError,
-                trailingIcon = {
-                    val isUrlEqual = channelUrl == channels.getChannelUrl()
-                    IconButton(onClick = {
-                        when {
-                            isError -> valueState = channelUrl
-                            !isUrlEqual -> viewModel.requestChannelSet(channels)
-                            else -> {
-                                // track how many times users share channels
-                                GeeksvilleApplication.analytics.track(
-                                    "share",
-                                    DataPair("content_type", "channel")
-                                )
-                                clipboardManager.setText(AnnotatedString(channelUrl.toString()))
-                            }
-                        }
-                    }) {
-                        Icon(
-                            imageVector = when {
-                                isError -> Icons.TwoTone.Close
-                                !isUrlEqual -> Icons.TwoTone.Check
-                                else -> Icons.TwoTone.ContentCopy
-                            },
-                            contentDescription = when {
-                                isError -> "Error"
-                                !isUrlEqual -> stringResource(R.string.send)
-                                else -> "Copy"
-                            },
-                            tint = if (isError) {
-                                MaterialTheme.colors.error
-                            } else {
-                                LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
-                            }
-                        )
-                    }
-                },
-                maxLines = 1,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                channelUrl = selectedChannelSet.getChannelUrl(),
+                onConfirm = viewModel::requestChannelUrl
             )
         }
 
@@ -413,21 +357,20 @@ fun ChannelScreen(
                 })
         }
 
-        if (isEditing) item {
-            PreferenceFooter(
-                enabled = enabled,
-                onCancelClicked = {
-                    focusManager.clearFocus()
-                    showChannelEditor = false
-                    channelSet = channels
-                },
-                onSaveClicked = {
-                    focusManager.clearFocus()
-                    // viewModel.setRequestChannelUrl(channelUrl)
-                    sendButton()
-                })
-        } else {
-            item {
+        item {
+            if (isEditing) {
+                PreferenceFooter(
+                    enabled = enabled,
+                    onCancelClicked = {
+                        focusManager.clearFocus()
+                        showChannelEditor = false
+                        channelSet = channels
+                    },
+                    onSaveClicked = {
+                        focusManager.clearFocus()
+                        sendButton()
+                    })
+            } else {
                 PreferenceFooter(
                     enabled = enabled,
                     negativeText = R.string.reset,
@@ -438,12 +381,88 @@ fun ChannelScreen(
                     positiveText = R.string.scan,
                     onPositiveClicked = {
                         focusManager.clearFocus()
-                        // viewModel.setRequestChannelUrl(channelUrl)
                         if (context.hasCameraPermission()) zxingScan() else requestPermissionAndScan()
                     })
             }
         }
     }
+}
+
+@Suppress("LongMethod")
+@Composable
+private fun EditChannelUrl(
+    enabled: Boolean,
+    channelUrl: Uri,
+    modifier: Modifier = Modifier,
+    onConfirm: (Uri) -> Unit
+) {
+    val focusManager = LocalFocusManager.current
+    val clipboardManager = LocalClipboardManager.current
+
+    var valueState by remember(channelUrl) { mutableStateOf(channelUrl) }
+    var isError by remember { mutableStateOf(false) }
+
+    OutlinedTextField(
+        value = valueState.toString(),
+        onValueChange = {
+            isError = runCatching {
+                valueState = Uri.parse(it)
+                valueState.toChannelSet()
+            }.isFailure
+        },
+        modifier = modifier.fillMaxWidth(),
+        enabled = enabled,
+        label = { Text("URL") },
+        isError = isError,
+        trailingIcon = {
+            val isUrlEqual = valueState == channelUrl
+            IconButton(onClick = {
+                when {
+                    isError -> {
+                        isError = false
+                        valueState = channelUrl
+                    }
+
+                    !isUrlEqual -> {
+                        onConfirm(valueState)
+                        valueState = channelUrl
+                    }
+
+                    else -> {
+                        // track how many times users share channels
+                        GeeksvilleApplication.analytics.track(
+                            "share", DataPair("content_type", "channel")
+                        )
+                        clipboardManager.setText(AnnotatedString(valueState.toString()))
+                    }
+                }
+            }) {
+                Icon(
+                    imageVector = when {
+                        isError -> Icons.TwoTone.Close
+                        !isUrlEqual -> Icons.TwoTone.Check
+                        else -> Icons.TwoTone.ContentCopy
+                    },
+                    contentDescription = when {
+                        isError -> stringResource(R.string.share)
+                        !isUrlEqual -> stringResource(R.string.send)
+                        else -> stringResource(R.string.share)
+                    },
+                    tint = if (isError) {
+                        MaterialTheme.colors.error
+                    } else {
+                        LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+                    }
+                )
+            }
+        },
+        maxLines = 1,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+    )
 }
 
 @Composable

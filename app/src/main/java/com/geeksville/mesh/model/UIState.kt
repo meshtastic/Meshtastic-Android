@@ -461,8 +461,11 @@ class UIViewModel @Inject constructor(
     private val _requestChannelSet = MutableStateFlow<AppOnlyProtos.ChannelSet?>(null)
     val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?> get() = _requestChannelSet
 
-    fun requestChannelSet(channelSet: AppOnlyProtos.ChannelSet) {
-        _requestChannelSet.value = channelSet
+    fun requestChannelUrl(url: Uri) = runCatching {
+        _requestChannelSet.value = url.toChannelSet()
+    }.onFailure { ex ->
+        errormsg("Channel url error: ${ex.message}")
+        showSnackbar(R.string.channel_invalid)
     }
 
     /**
