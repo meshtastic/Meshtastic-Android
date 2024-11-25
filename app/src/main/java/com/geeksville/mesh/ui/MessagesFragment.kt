@@ -140,8 +140,8 @@ class MessagesFragment : Fragment(), Logging {
             sendMessageInputText()
         }
 
-        // max payload length should be 237 bytes but anything over 235 bytes crashes the radio
-        binding.messageInputText.filters += Utf8ByteLengthFilter(234)
+        // max payload length should be 237 bytes but anything over 200 becomes less reliable
+        binding.messageInputText.filters += Utf8ByteLengthFilter(200)
 
         binding.messageListView.setContent {
             val messages by model.getMessagesFrom(contactKey).collectAsStateWithLifecycle(listOf())
