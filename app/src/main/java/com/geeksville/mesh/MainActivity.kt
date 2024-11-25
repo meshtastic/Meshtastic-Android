@@ -48,7 +48,6 @@ import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceRepository
@@ -303,12 +302,7 @@ class MainActivity : AppCompatActivity(), Logging {
         when (appLinkAction) {
             Intent.ACTION_VIEW -> {
                 debug("Asked to open a channel URL - ask user if they want to switch to that channel.  If so send the config to the radio")
-                try {
-                    appLinkData?.let { model.requestChannelSet(it.toChannelSet()) }
-                } catch (ex: Throwable) {
-                    errormsg("Channel url error: ${ex.message}")
-                    showSnackbar("${getString(R.string.channel_invalid)}: ${ex.message}")
-                }
+                appLinkData?.let(model::requestChannelUrl)
 
                 // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
             }
