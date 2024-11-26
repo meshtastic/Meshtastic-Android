@@ -258,9 +258,8 @@ class MainActivity : AppCompatActivity(), Logging {
                 val mainTab = tab?.position ?: 0
                 model.setCurrentTab(mainTab)
             }
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
+            override fun onTabUnselected(tab: TabLayout.Tab?) { }
+            override fun onTabReselected(tab: TabLayout.Tab?) { }
         })
 
         binding.composeView.setContent {
@@ -653,12 +652,10 @@ class MainActivity : AppCompatActivity(), Logging {
                 getVersionInfo()
                 return true
             }
-
             R.id.connectStatusImage -> {
                 Toast.makeText(applicationContext, item.title, Toast.LENGTH_SHORT).show()
                 return true
             }
-
             R.id.debug -> {
                 val fragmentManager: FragmentManager = supportFragmentManager
                 val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
@@ -668,7 +665,6 @@ class MainActivity : AppCompatActivity(), Logging {
                 fragmentTransaction.commit()
                 return true
             }
-
             R.id.stress_test -> {
                 fun postPing() {
                     // Send ping message and arrange delayed recursion.
@@ -686,12 +682,10 @@ class MainActivity : AppCompatActivity(), Logging {
                 }
                 return true
             }
-
             R.id.radio_config -> {
                 supportFragmentManager.navigateToNavGraph()
                 return true
             }
-
             R.id.save_messages_csv -> {
                 val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
@@ -701,22 +695,18 @@ class MainActivity : AppCompatActivity(), Logging {
                 createDocumentLauncher.launch(intent)
                 return true
             }
-
             R.id.theme -> {
                 chooseThemeDialog()
                 return true
             }
-
             R.id.preferences_language -> {
                 chooseLangDialog()
                 return true
             }
-
             R.id.show_intro -> {
                 startActivity(Intent(this, AppIntroduction::class.java))
                 return true
             }
-
             R.id.preferences_quick_chat -> {
                 val fragmentManager: FragmentManager = supportFragmentManager
                 val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
@@ -726,7 +716,6 @@ class MainActivity : AppCompatActivity(), Logging {
                 fragmentTransaction.commit()
                 return true
             }
-
             else -> super.onOptionsItemSelected(item)
         }
     }
