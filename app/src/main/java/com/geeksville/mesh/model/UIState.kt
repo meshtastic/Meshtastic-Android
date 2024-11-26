@@ -48,6 +48,7 @@ import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.MeshLogRepository
+import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
 import com.geeksville.mesh.database.entity.MyNodeEntity
@@ -165,7 +166,7 @@ data class Contact(
 @HiltViewModel
 class UIViewModel @Inject constructor(
     private val app: Application,
-    private val nodeDB: NodeDB,
+    private val nodeDB: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: MeshLogRepository,

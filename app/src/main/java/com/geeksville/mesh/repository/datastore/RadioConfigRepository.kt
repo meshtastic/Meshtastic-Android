@@ -30,7 +30,7 @@ import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.deviceProfile
-import com.geeksville.mesh.model.NodeDB
+import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.model.getChannelUrl
 import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.service.ServiceAction
@@ -48,7 +48,7 @@ import javax.inject.Inject
  */
 class RadioConfigRepository @Inject constructor(
     private val serviceRepository: ServiceRepository,
-    private val nodeDB: NodeDB,
+    private val nodeDB: NodeRepository,
     private val channelSetRepository: ChannelSetRepository,
     private val localConfigRepository: LocalConfigRepository,
     private val moduleConfigRepository: ModuleConfigRepository,
