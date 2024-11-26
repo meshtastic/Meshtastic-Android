@@ -105,7 +105,6 @@ class ShareFragment : ScreenFragment("Messages"), Logging {
     }
 }
 
-
 @Composable
 fun ShareContactListView(
     contacts: List<Contact>,
