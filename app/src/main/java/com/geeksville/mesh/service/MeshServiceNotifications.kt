@@ -36,9 +36,7 @@ import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.android.notificationManager
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.util.PendingIntentCompat
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.geeksville.mesh.util.formatUptime
 
 @Suppress("TooManyFunctions")
 class MeshServiceNotifications(
@@ -150,37 +148,29 @@ class MeshServiceNotifications(
         }
     }
 
-    private fun formatStatsString(stats: LocalStats?, currentStatsUpdatedAtMillis: Long?): String {
-        val updatedAt = "Next update at: ${
-            currentStatsUpdatedAtMillis?.let {
-                val date = Date(it + FIFTEEN_MINUTES_IN_MILLIS) // Add 15 minutes in milliseconds
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                dateFormat.format(date)
-            } ?: "???"
-        }"
-        val statsJoined = stats?.allFields?.mapNotNull { (k, v) ->
-            if (k.name == "num_online_nodes" || k.name == "num_total_nodes") {
-                return@mapNotNull null
-            }
-            "${
+    private fun LocalStats?.formatToString(): String = this?.allFields?.mapNotNull { (k, v) ->
+        when (k.name) {
+            "num_online_nodes", "num_total_nodes" -> return@mapNotNull null
+            "uptime_seconds" -> "Uptime: ${formatUptime(v as Int)}"
+            "channel_utilization" -> "ChUtil: %.2f%%".format(v)
+            "air_util_tx" -> "AirUtilTX: %.2f%%".format(v)
+            else -> "${
                 k.name.replace('_', ' ').split(" ")
                     .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
-            }=$v"
-        }?.joinToString("\n") ?: "No Local Stats"
-        return "$updatedAt\n$statsJoined"
-    }
+            }: $v"
+        }
+    }?.joinToString("\n") ?: "No Local Stats"
 
     fun updateServiceStateNotification(
         summaryString: String? = null,
         localStats: LocalStats? = null,
         currentStatsUpdatedAtMillis: Long? = null,
     ) {
-        val statsString = formatStatsString(localStats, currentStatsUpdatedAtMillis)
         notificationManager.notify(
             notifyId,
             createServiceStateNotification(
                 name = summaryString.orEmpty(),
-                message = statsString,
+                message = localStats.formatToString(),
                 nextUpdateAt = currentStatsUpdatedAtMillis?.plus(FIFTEEN_MINUTES_IN_MILLIS)
             )
         )

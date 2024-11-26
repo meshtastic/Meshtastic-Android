@@ -92,8 +92,8 @@ import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.DistanceUnit
 import com.geeksville.mesh.util.formatAgo
+import com.geeksville.mesh.util.formatUptime
 import com.geeksville.mesh.util.thenIf
-import java.util.concurrent.TimeUnit
 import kotlin.math.ln
 
 @Composable
@@ -347,22 +347,6 @@ private fun InfoCard(
             )
         }
     }
-}
-
-private fun formatUptime(seconds: Int): String = formatUptime(seconds.toLong())
-
-private fun formatUptime(seconds: Long): String {
-    val days = TimeUnit.SECONDS.toDays(seconds)
-    val hours = TimeUnit.SECONDS.toHours(seconds) % TimeUnit.DAYS.toHours(1)
-    val minutes = TimeUnit.SECONDS.toMinutes(seconds) % TimeUnit.HOURS.toMinutes(1)
-    val secs = seconds % TimeUnit.MINUTES.toSeconds(1)
-
-    return listOfNotNull(
-        "${days}d".takeIf { days > 0 },
-        "${hours}h".takeIf { hours > 0 },
-        "${minutes}m".takeIf { minutes > 0 },
-        "${secs}s".takeIf { secs > 0 },
-    ).joinToString(" ")
 }
 
 @OptIn(ExperimentalLayoutApi::class)
