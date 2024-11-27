@@ -35,7 +35,6 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.android.notificationManager
 import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.util.PendingIntentCompat
 import com.geeksville.mesh.util.formatUptime
 
 @Suppress("TooManyFunctions")
@@ -194,7 +193,7 @@ class MeshServiceNotifications(
             context,
             0,
             Intent(context, MainActivity::class.java),
-            PendingIntentCompat.FLAG_IMMUTABLE
+            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
     }
 
@@ -208,7 +207,7 @@ class MeshServiceNotifications(
             context,
             0,
             intent,
-            PendingIntentCompat.FLAG_IMMUTABLE
+            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         return pendingIntent
     }
