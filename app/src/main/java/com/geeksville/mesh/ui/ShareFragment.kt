@@ -51,7 +51,6 @@ class ShareFragment : ScreenFragment("Messages"), Logging {
         debug("calling MessagesFragment filter:${contact.contactKey}")
         parentFragmentManager.navigateToPreInitMessages(
             contact.contactKey,
-            contact.longName,
             arguments?.getString("message").toString()
         )
     }
