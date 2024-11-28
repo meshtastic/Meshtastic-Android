@@ -58,7 +58,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
         val contactKey = "$channel${user.id}"
         info("calling MessagesFragment filter: $contactKey")
-        parentFragmentManager.navigateToMessages(contactKey, user.longName)
+        parentFragmentManager.navigateToMessages(contactKey)
     }
 
     private fun navigateToNodeDetails(nodeNum: Int) {

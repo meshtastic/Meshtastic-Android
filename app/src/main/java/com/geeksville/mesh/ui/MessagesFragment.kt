@@ -34,14 +34,12 @@ import androidx.core.view.allViews
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.geeksville.mesh.DataPacket
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.databinding.MessagesFragmentBinding
 import com.geeksville.mesh.model.Message
@@ -54,9 +52,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
-internal fun FragmentManager.navigateToMessages(contactKey: String, contactName: String) {
+internal fun FragmentManager.navigateToMessages(contactKey: String) {
     val messagesFragment = MessagesFragment().apply {
-        arguments = bundleOf("contactKey" to contactKey, "contactName" to contactName)
+        arguments = bundleOf("contactKey" to contactKey)
     }
     beginTransaction()
         .add(R.id.mainActivityLayout, messagesFragment)
@@ -125,22 +123,20 @@ class MessagesFragment : Fragment(), Logging {
         }
 
         contactKey = arguments?.getString("contactKey").toString()
-        val contactName = arguments?.getString("contactName").toString()
-        binding.toolbar.title = contactName
-        val channelNumber = contactKey[0].digitToIntOrNull()
-        if (channelNumber == DataPacket.PKC_CHANNEL_INDEX) {
-            binding.toolbar.title = "$contactName🔒"
-        } else if (channelNumber != null && contactKey.substring(1) != DataPacket.ID_BROADCAST) {
-            lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    model.channels.collect { channels ->
-                        val channelName =
-                            channels.getChannel(channelNumber)?.name ?: "Unknown Channel"
-                        val subtitle = "(ch: $channelNumber - $channelName)"
-                        binding.toolbar.subtitle = subtitle
-                    }
-                }
-            }
+        val channelIndex = contactKey[0].digitToIntOrNull()
+        val nodeId = contactKey.substring(1)
+        val channelName = channelIndex?.let { model.channels.value.getChannel(it)?.name }
+            ?: "Unknown Channel"
+
+        binding.toolbar.title = when (nodeId) {
+            DataPacket.ID_BROADCAST -> channelName
+            else -> model.getUser(nodeId).longName
+        }
+
+        if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
+            binding.toolbar.title = "${binding.toolbar.title}🔒"
+        } else if (nodeId != DataPacket.ID_BROADCAST) {
+            binding.toolbar.subtitle = "(ch: $channelIndex - $channelName)"
         }
 
         fun sendMessageInputText() {

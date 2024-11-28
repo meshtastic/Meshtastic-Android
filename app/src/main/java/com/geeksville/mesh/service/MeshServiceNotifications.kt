@@ -46,8 +46,6 @@ class MeshServiceNotifications(
         private const val FIFTEEN_MINUTES_IN_MILLIS = 15L * 60 * 1000
         const val OPEN_MESSAGE_ACTION = "com.geeksville.mesh.OPEN_MESSAGE_ACTION"
         const val OPEN_MESSAGE_EXTRA_CONTACT_KEY = "com.geeksville.mesh.OPEN_MESSAGE_EXTRA_CONTACT_KEY"
-        const val OPEN_MESSAGE_EXTRA_CONTACT_NAME =
-            "com.geeksville.mesh.OPEN_MESSAGE_EXTRA_CONTACT_NAME"
     }
 
     private val notificationManager: NotificationManager get() = context.notificationManager
@@ -197,11 +195,10 @@ class MeshServiceNotifications(
         )
     }
 
-    private fun openMessageIntent(contactKey: String, contactName: String): PendingIntent {
+    private fun openMessageIntent(contactKey: String): PendingIntent {
         val intent = Intent(context, MainActivity::class.java)
         intent.action = OPEN_MESSAGE_ACTION
         intent.putExtra(OPEN_MESSAGE_EXTRA_CONTACT_KEY, contactKey)
-        intent.putExtra(OPEN_MESSAGE_EXTRA_CONTACT_NAME, contactName)
 
         val pendingIntent = PendingIntent.getActivity(
             context,
@@ -277,7 +274,7 @@ class MeshServiceNotifications(
         }
         val person = Person.Builder().setName(name).build()
         with(messageNotificationBuilder) {
-            setContentIntent(openMessageIntent(contactKey, name))
+            setContentIntent(openMessageIntent(contactKey))
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_MESSAGE)
             setAutoCancel(true)

@@ -70,7 +70,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             onLongClick(contact)
         } else {
             debug("calling MessagesFragment filter:${contact.contactKey}")
-            parentFragmentManager.navigateToMessages(contact.contactKey, contact.longName)
+            parentFragmentManager.navigateToMessages(contact.contactKey)
         }
     }
 
