@@ -278,13 +278,14 @@ class MessagesFragment : Fragment(), Logging {
                 }
                 R.id.resendButton -> lifecycleScope.launch {
                     debug("User clicked resendButton")
-                    var resendText = getSelectedMessagesText()
+                    val resendText = getSelectedMessagesText()
                     binding.messageInputText.setText(resendText)
                     mode.finish()
                 }
                 R.id.copyButton -> lifecycleScope.launch {
-                    var copyText = getSelectedMessagesText()
-                    val clipboardManager = requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val copyText = getSelectedMessagesText()
+                    val clipboardManager =
+                        requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     clipboardManager.setPrimaryClip(ClipData.newPlainText("message text", copyText))
                     requireActivity().toast(getString(R.string.copied))
                     mode.finish()
