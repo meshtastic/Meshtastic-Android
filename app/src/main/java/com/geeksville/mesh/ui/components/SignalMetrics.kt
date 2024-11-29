@@ -47,7 +47,7 @@ import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
 import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
 import com.geeksville.mesh.ui.components.CommonCharts.LEFT_LABEL_SPACING
-import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
+import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 
 private val METRICS_COLORS = listOf(Color.Green, Color.Blue)
 
@@ -122,8 +122,8 @@ private fun SignalMetricsChart(
     }
 
     TimeLabels(
-        oldest = meshPackets.first().rxTime * MS_PER_SEC,
-        newest = meshPackets.last().rxTime * MS_PER_SEC
+        oldest = meshPackets.first().rxTime,
+        newest = meshPackets.last().rxTime
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -257,7 +257,7 @@ private fun SignalMetricsCard(meshPacket: MeshPacket) {
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = TIME_FORMAT.format(time),
+                                    text = DATE_TIME_FORMAT.format(time),
                                     style = TextStyle(fontWeight = FontWeight.Bold),
                                     fontSize = MaterialTheme.typography.button.fontSize
                                 )

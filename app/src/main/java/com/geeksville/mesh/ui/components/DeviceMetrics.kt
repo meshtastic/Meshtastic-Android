@@ -1,6 +1,7 @@
 package com.geeksville.mesh.ui.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,8 +12,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
@@ -31,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -40,10 +44,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.model.MetricsViewModel
+import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.BatteryInfo
 import com.geeksville.mesh.ui.components.CommonCharts.X_AXIS_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
-import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
+import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.theme.Orange
 
 private val DEVICE_METRICS_COLORS = listOf(Color.Green, Color.Magenta, Color.Cyan)
@@ -85,6 +90,7 @@ fun DeviceMetricsScreen(
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.33f),
             data.reversed(),
+            selectedTimeFrame,
             promptInfoDialog = { displayInfoDialog = true }
         )
 
@@ -109,23 +115,41 @@ fun DeviceMetricsScreen(
 private fun DeviceMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
+    selectedTime: TimeFrame,
     promptInfoDialog: () -> Unit
 ) {
 
     ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty()) return
 
+    val (oldest, newest) = remember(key1 = telemetries) {
+        Pair(
+            telemetries.minBy { it.time },
+            telemetries.maxBy { it.time }
+        )
+    }
+    val timeDiff = newest.time - oldest.time
+
     TimeLabels(
-        oldest = telemetries.first().time * MS_PER_SEC,
-        newest = telemetries.last().time * MS_PER_SEC
+        oldest = oldest.time,
+        newest = newest.time
     )
 
     Spacer(modifier = Modifier.height(16.dp))
 
     val graphColor = MaterialTheme.colors.onSurface
     val spacing = X_AXIS_SPACING
+    val scrollState = rememberScrollState()
 
-    Box(contentAlignment = Alignment.TopStart) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+    val dp by remember(key1 = selectedTime) { mutableStateOf(selectedTime.dp(screenWidth)) }
+
+    Box(
+        contentAlignment = Alignment.TopStart,
+        modifier = Modifier
+            .horizontalScroll(scrollState)
+    ) {
 
         /*
          * The order of the colors are with respect to the ChUtil.
@@ -133,15 +157,22 @@ private fun DeviceMetricsChart(
          * 50 - 100 Red
          */
         ChartOverlay(
-            modifier,
+            modifier.width(dp),
             graphColor,
             lineColors = listOf(graphColor, Orange, Color.Red, graphColor, graphColor),
             minValue = 0f,
             maxValue = 100f
         )
 
+        TimeOverlay(
+            modifier.width(dp),
+            oldest = oldest.time,
+            newest = newest.time,
+            selectedTime.lineInterval()
+        )
+
         /* Plot Battery Line, ChUtil, and AirUtilTx */
-        Canvas(modifier = modifier) {
+        Canvas(modifier = modifier.width(dp)) {
 
             val height = size.height
             val width = size.width - 28.dp.toPx()
@@ -157,6 +188,16 @@ private fun DeviceMetricsChart(
 
                     val x1 = spacing + i * spacePerEntry
                     val y1 = height - (leftRatio * height)
+
+                    // Proving out linking the x value to time
+                    val xRatio = (telemetry.time - oldest.time).toFloat() / timeDiff
+                    val xTest = xRatio * width
+                    drawCircle(
+                        color = Color.Green,
+                        radius = 2.dp.toPx(),
+                        center = Offset(xTest, height/2)
+                    )
+                    // -------
 
                     /* Channel Utilization */
                     val chUtilRatio = telemetry.deviceMetrics.channelUtilization / MAX_PERCENT_VALUE
@@ -176,6 +217,7 @@ private fun DeviceMetricsChart(
                         center = Offset(x1, yAirUtil)
                     )
 
+                    // TODO don't forget about x2
                     val x2 = spacing + (i + 1) * spacePerEntry
                     val y2 = height - (rightRatio * height)
                     if (i == 0) {
@@ -229,7 +271,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = TIME_FORMAT.format(time),
+                            text = DATE_TIME_FORMAT.format(time),
                             style = TextStyle(fontWeight = FontWeight.Bold),
                             fontSize = MaterialTheme.typography.button.fontSize
                         )

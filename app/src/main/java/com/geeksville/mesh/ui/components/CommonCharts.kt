@@ -42,15 +42,18 @@ import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
 import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
-import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
+import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.components.CommonCharts.LEFT_LABEL_SPACING
+import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
+import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 import java.text.DateFormat
 
 object CommonCharts {
-    val TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
+    val DATE_TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
+    val TIME_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM)
     const val X_AXIS_SPACING = 8f
     const val LEFT_LABEL_SPACING = 36
-    const val MS_PER_SEC = 1000.0f
+    const val MS_PER_SEC = 1000L
     const val LINE_LIMIT = 4
     const val TEXT_PAINT_ALPHA = 192
 }
@@ -144,13 +147,78 @@ fun ChartOverlay(
 }
 
 /**
+ * Draws the vertical lines to help the user relate the plotted data within a time frame.
+ */
+@Composable
+fun TimeOverlay(
+    modifier: Modifier,
+    oldest: Int,
+    newest: Int,
+    timeInterval: Long
+) {
+
+    // TODO should this behavior stay??
+    if (timeInterval == 0L)
+        return
+
+    val range = newest - oldest
+    val density = LocalDensity.current
+    val lineColor = MaterialTheme.colors.onSurface
+    Canvas(modifier = modifier) {
+
+        val height = size.height
+        val width = size.width - 28.dp.toPx()
+
+        /* Cut out the time remaining in order to place the lines on the dot. */
+        val timeRemaining = oldest % timeInterval
+        var current = oldest.toLong()
+        current -= timeRemaining
+        current += timeInterval
+
+        val textPaint = Paint().apply {
+            color = lineColor.toArgb()
+            textAlign = Paint.Align.LEFT
+            textSize = density.run { 12.dp.toPx() }
+            typeface = setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD))
+            alpha = TEXT_PAINT_ALPHA
+        }
+
+        /* Vertical Lines with labels */
+
+        drawContext.canvas.nativeCanvas.apply {
+            while (current <= newest) {
+                val ratio = (current - oldest).toFloat() / range
+                val x = (ratio * width)
+                drawLine(
+                    start = Offset(x, 0f),
+                    end = Offset(x, height),
+                    color = lineColor,
+                    strokeWidth = 1.dp.toPx(),
+                    cap = StrokeCap.Round,
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(LINE_ON, LINE_OFF), 0f)
+                )
+                // TODO might also need to add a date label
+
+                drawText(
+                    TIME_FORMAT.format(current * MS_PER_SEC),
+                    x,
+                    0f,
+                    textPaint
+                )
+                current += timeInterval
+            }
+        }
+    }
+}
+
+/**
  * Draws the `oldest` and `newest` times for the respective telemetry data.
- * Expects time in milliseconds
+ * Expects time in seconds.
  */
 @Composable
 fun TimeLabels(
-    oldest: Float,
-    newest: Float
+    oldest: Int,
+    newest: Int
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -158,14 +226,14 @@ fun TimeLabels(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = TIME_FORMAT.format(oldest),
+            text = DATE_TIME_FORMAT.format(oldest * MS_PER_SEC),
             modifier = Modifier.wrapContentWidth(),
             style = TextStyle(fontWeight = FontWeight.Bold),
             fontSize = 12.sp,
         )
         Spacer(modifier = Modifier.weight(1f))
         Text(
-            text = TIME_FORMAT.format(newest),
+            text = DATE_TIME_FORMAT.format(newest * MS_PER_SEC),
             modifier = Modifier.wrapContentWidth(),
             style = TextStyle(fontWeight = FontWeight.Bold),
             fontSize = 12.sp

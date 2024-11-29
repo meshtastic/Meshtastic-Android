@@ -4,6 +4,8 @@ import android.app.Application
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.annotation.StringRes
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -99,6 +101,47 @@ enum class TimeFrame(
     } else {
         System.currentTimeMillis() / 1000 - this.seconds
     }
+
+    /**
+     * The time interval to draw the vertical lines representing
+     * time on the x-axis.
+     *
+     * @return seconds epoch seconds
+     */
+    fun lineInterval() : Long {
+        return when (this.ordinal) {
+            TWENTY_FOUR_HOURS.ordinal,
+            FORTY_EIGHT_HOURS.ordinal ->
+                TimeUnit.HOURS.toSeconds(1)
+            ONE_WEEK.ordinal,
+            TWO_WEEKS.ordinal ->
+                TimeUnit.DAYS.toSeconds(1)
+            FOUR_WEEKS.ordinal,
+            MAX.ordinal ->
+                TimeUnit.DAYS.toSeconds(7)
+            else ->
+                MAX.seconds
+        }
+    }
+
+    fun dp(screenWidth: Int) : Dp {
+        // TODO I don't think these static numbers will work.
+        //  How can the DP be determined based on the screens width and the amount of data points.
+        return when (this.ordinal) {
+            TWENTY_FOUR_HOURS.ordinal,
+            FORTY_EIGHT_HOURS.ordinal ->
+                (screenWidth * 18).dp
+            ONE_WEEK.ordinal,
+            TWO_WEEKS.ordinal ->
+                (screenWidth * 5).dp
+            FOUR_WEEKS.ordinal,
+            MAX.ordinal ->
+                (screenWidth * 2).dp
+            else ->
+                screenWidth.dp
+        }
+    }
+
 }
 
 private fun MeshPacket.hasValidSignal(): Boolean =
