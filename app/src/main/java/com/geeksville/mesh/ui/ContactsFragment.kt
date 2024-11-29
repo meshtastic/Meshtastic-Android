@@ -127,6 +127,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             mode.menuInflater.inflate(R.menu.menu_messages, menu)
             menu.findItem(R.id.resendButton).isVisible = false
+            menu.findItem(R.id.copyButton).isVisible = false
             mode.title = "1"
             return true
         }
