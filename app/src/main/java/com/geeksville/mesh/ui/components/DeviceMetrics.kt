@@ -46,7 +46,6 @@ import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.BatteryInfo
-import com.geeksville.mesh.ui.components.CommonCharts.X_AXIS_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.theme.Orange
@@ -138,7 +137,6 @@ private fun DeviceMetricsChart(
     Spacer(modifier = Modifier.height(16.dp))
 
     val graphColor = MaterialTheme.colors.onSurface
-    val spacing = X_AXIS_SPACING
     val scrollState = rememberScrollState()
 
     val configuration = LocalConfiguration.current
@@ -176,30 +174,15 @@ private fun DeviceMetricsChart(
             Canvas(modifier = modifier.width(dp)) {
 
                 val height = size.height
-                val width = size.width - 28.dp.toPx()
-                val spacePerEntry = (width - spacing) / telemetries.size
+                val width = size.width
                 val dataPointRadius = 2.dp.toPx()
-                var lastX: Float
                 val strokePath = Path().apply {
                     for (i in telemetries.indices) {
                         val telemetry = telemetries[i]
-                        val nextTelemetry = telemetries.getOrNull(i + 1) ?: telemetries.last()
-                        val leftRatio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
-                        val rightRatio =
-                            nextTelemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
 
-                        val x1 = spacing + i * spacePerEntry
-                        val y1 = height - (leftRatio * height)
-
-                        // Proving out linking the x value to time
-                        val xRatio = (telemetry.time - oldest.time).toFloat() / timeDiff
-                        val xTest = xRatio * width
-                        drawCircle(
-                            color = Color.Green,
-                            radius = 2.dp.toPx(),
-                            center = Offset(xTest, height / 2)
-                        )
-                        // -------
+                        /* x-value for all three */
+                        val x1Ratio = (telemetry.time - oldest.time).toFloat() / timeDiff
+                        val x1 = x1Ratio * width
 
                         /* Channel Utilization */
                         val chUtilRatio =
@@ -220,16 +203,22 @@ private fun DeviceMetricsChart(
                             center = Offset(x1, yAirUtil)
                         )
 
-                        // TODO don't forget about x2
-                        val x2 = spacing + (i + 1) * spacePerEntry
-                        val y2 = height - (rightRatio * height)
+                        /* Battery line */
+                        val nextTelemetry = telemetries.getOrNull(i + 1) ?: telemetries.last()
+                        val y1Ratio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
+                        val y1 = height - (y1Ratio * height)
+
+                        val x2Ratio = (nextTelemetry.time - oldest.time).toFloat() / timeDiff
+                        val x2 = x2Ratio * width
+
+                        val y2Ratio = nextTelemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
+                        val y2 = height - (y2Ratio * height)
+
                         if (i == 0) {
                             moveTo(x1, y1)
                         }
 
-                        lastX = (x1 + x2) / 2f
-
-                        quadraticTo(x1, y1, lastX, (y1 + y2) / 2f)
+                        quadraticTo(x1, y1, (x1 + x2) / 2f, (y1 + y2) / 2f)
                     }
                 }
 
