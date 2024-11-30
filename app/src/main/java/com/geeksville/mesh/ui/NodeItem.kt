@@ -69,6 +69,7 @@ import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.ui.components.MenuItemAction
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenu
+import com.geeksville.mesh.ui.components.SignalInfo
 import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
@@ -235,8 +236,9 @@ fun NodeItem(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    signalInfo(
+                    SignalInfo(
                         node = thatNode,
                         isThisNode = isThisNode
                     )

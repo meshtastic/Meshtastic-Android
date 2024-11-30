@@ -19,10 +19,14 @@ package com.geeksville.mesh.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -61,17 +65,23 @@ private enum class Quality(
  * Displays the `snr` and `rssi` color coded based on the signal quality, along with
  * a human readable description and related icon.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun NodeSignalQuality(snr: Float, rssi: Int) {
+fun NodeSignalQuality(snr: Float, rssi: Int, modifier: Modifier = Modifier) {
     val quality = determineSignalQuality(snr, rssi)
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+    FlowRow(
+        modifier = modifier,
+        maxLines = 1,
     ) {
         Snr(snr)
+        Spacer(Modifier.width(8.dp))
         Rssi(rssi)
-        Text(text = "${stringResource(R.string.signal)} ${stringResource(quality.nameRes)}")
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = "${stringResource(R.string.signal)} ${stringResource(quality.nameRes)}",
+            fontSize = MaterialTheme.typography.button.fontSize
+        )
+        Spacer(Modifier.width(8.dp))
         Icon(
             imageVector = quality.imageVector,
             contentDescription = stringResource(R.string.signal_quality),
@@ -129,10 +139,7 @@ private fun Snr(snr: Float) {
     }
 
     Text(
-        text = "%s %.2fdB".format(
-            stringResource(id = R.string.snr),
-            snr
-        ),
+        text = "%s %.2fdB".format(stringResource(id = R.string.snr), snr),
         color = color,
         fontSize = MaterialTheme.typography.button.fontSize
     )
@@ -148,10 +155,7 @@ private fun Rssi(rssi: Int) {
         Quality.BAD.color
     }
     Text(
-        text = "%s %ddB".format(
-            stringResource(id = R.string.rssi),
-            rssi
-        ),
+        text = "%s %ddBm".format(stringResource(id = R.string.rssi), rssi),
         color = color,
         fontSize = MaterialTheme.typography.button.fontSize
     )
