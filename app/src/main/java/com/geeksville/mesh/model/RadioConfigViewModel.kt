@@ -68,6 +68,7 @@ import javax.inject.Inject
  * Data class that represents the current RadioConfig state.
  */
 data class RadioConfigState(
+    val isLocal: Boolean = false,
     val connected: Boolean = false,
     val route: String = "",
     val metadata: MeshProtos.DeviceMetadata = MeshProtos.DeviceMetadata.getDefaultInstance(),
@@ -119,6 +120,10 @@ class RadioConfigViewModel @Inject constructor(
             if (connState.isDisconnected() && configState.responseState.isWaiting()) {
                 setResponseStateError(app.getString(R.string.disconnected))
             }
+        }.launchIn(viewModelScope)
+
+        radioConfigRepository.myNodeInfo.onEach { ni ->
+            _radioConfigState.update { it.copy(isLocal = destNum == null || destNum == ni?.myNodeNum) }
         }.launchIn(viewModelScope)
 
         debug("RadioConfigViewModel created")

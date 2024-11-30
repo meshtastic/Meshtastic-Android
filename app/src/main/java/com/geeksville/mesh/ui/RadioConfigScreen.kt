@@ -34,8 +34,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
@@ -65,7 +65,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
-import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.config.EditDeviceProfileDialog
@@ -79,12 +78,10 @@ private fun getNavRouteFrom(routeName: String): Any? {
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun RadioConfigScreen(
-    node: NodeEntity?,
     viewModel: RadioConfigViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
     onNavigate: (Any) -> Unit = {}
 ) {
-    val isLocal = node?.num == viewModel.myNodeNum
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
 
@@ -140,7 +137,7 @@ fun RadioConfigScreen(
                     val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                         addCategory(Intent.CATEGORY_OPENABLE)
                         type = "application/*"
-                        putExtra(Intent.EXTRA_TITLE, "${node!!.num.toUInt()}.cfg")
+                        putExtra(Intent.EXTRA_TITLE, "device_profile.cfg")
                     }
                     exportConfigLauncher.launch(intent)
                 }
@@ -154,7 +151,7 @@ fun RadioConfigScreen(
 
     RadioConfigItemList(
         enabled = state.connected && !isWaiting,
-        isLocal = isLocal,
+        isLocal = state.isLocal,
         modifier = modifier,
         onRouteClick = { route ->
             isWaiting = true

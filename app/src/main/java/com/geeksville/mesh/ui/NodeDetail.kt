@@ -98,14 +98,14 @@ import kotlin.math.ln
 
 @Composable
 fun NodeDetailScreen(
-    node: NodeEntity?,
     viewModel: MetricsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
     onNavigate: (Any) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    if (node != null) {
+    if (state.node != null) {
+        val node = state.node ?: return
         NodeDetailList(
             node = node,
             metricsState = state,
