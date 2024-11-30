@@ -18,7 +18,7 @@
     <string name="routing_error_got_nak">Otrzymano negatywne potwierdzenie</string>
     <string name="routing_error_timeout">Upłynął limit czasu</string>
     <string name="routing_error_no_interface">Brak interfejsu</string>
-    <string name="routing_error_max_retransmit">Osiągnięto maksymalną liczbę retransmisji</string>
+    <string name="routing_error_max_retransmit">Przekroczono czas lub liczbę retransmisji</string>
     <string name="routing_error_no_channel">Brak kanału</string>
     <string name="routing_error_too_large">Pakiet jest zbyt duży</string>
     <string name="routing_error_no_response">Brak odpowiedzi</string>

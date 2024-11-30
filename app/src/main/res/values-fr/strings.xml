@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="node_filter_placeholder">Filtrer</string>
+    <string name="node_filter_placeholder">Filtre</string>
     <string name="desc_node_filter_clear">Effacer le filtre de nœud</string>
     <string name="node_filter_include_unknown">Inclure inconnu</string>
     <string name="node_filter_show_details">Afficher les détails</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Canal</string>
     <string name="node_sort_distance">Distance</string>
-    <string name="node_sort_hops_away">Passer au suivant</string>
+    <string name="node_sort_hops_away">Nœuds intermédiaires</string>
     <string name="node_sort_last_heard">Dernière écoute</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="unrecognized">Non reconnu</string>
@@ -15,7 +15,7 @@
     <string name="message_status_queued">En attente d\'envoi</string>
     <string name="routing_error_none">Confirmé</string>
     <string name="routing_error_no_route">Pas de routage</string>
-    <string name="routing_error_got_nak">Sans accusé de réception</string>
+    <string name="routing_error_got_nak">Accusé de réception négatif</string>
     <string name="routing_error_timeout">Délai dépassé</string>
     <string name="routing_error_no_interface">Aucune interface</string>
     <string name="routing_error_max_retransmit">Retransmission maximale atteinte</string>
@@ -40,8 +40,8 @@
     <string name="role_client_hidden">Appareil qui ne diffuse que si nécessaire pour économiser en énergie ou en furtivité.</string>
     <string name="role_lost_and_found">Diffuse la localisation comme message vers le canal par défaut régulièrement afin d\'aider à la récupération de l\'appareil.</string>
     <string name="role_tak_tracker">Active les diffusions automatiques de TAK PLI et réduit les diffusions de routine.</string>
-    <string name="rebroadcast_mode_all">Rebroadcast any observed message, if it was on our private channel or from another mesh with the same lora parameters.</string>
-    <string name="rebroadcast_mode_all_skip_decoding">Same as behavior as ALL but skips packet decoding and simply rebroadcasts them. Only available in Repeater role. Setting this on any other roles will result in ALL behavior.</string>
+    <string name="rebroadcast_mode_all">Rediffuse tout message observé, si il était sur notre canal privé ou depuis un autre maillage avec les mêmes paramètres lora.</string>
+    <string name="rebroadcast_mode_all_skip_decoding">Identique au comportement de TOUS mais ignore le décodage des paquets et les rediffuse simplement. Uniquement disponible pour le rôle Répéteur. Définir cela sur tout autre rôle entraînera le comportement de TOUS.</string>
     <string name="rebroadcast_mode_local_only">Ignores observed messages from foreign meshes that are open or those which it cannot decrypt. Only rebroadcasts message on the nodes local primary / secondary channels.</string>
     <string name="rebroadcast_mode_known_only">Ignores observed messages from foreign meshes like LOCAL ONLY, but takes it step further by also ignoring messages from nodes not already in the node\'s known list.</string>
     <string name="rebroadcast_mode_none">Only permitted for SENSOR, TRACKER and TAK_TRACKER roles, this will inhibit all rebroadcasts, not unlike CLIENT_MUTE role.</string>
@@ -246,31 +246,31 @@
     <string name="encryption_error">Les messages directs utilisent la nouvelle infrastructure de clé publique pour le chiffrement. Nécessite une version de firmware 2.5 ou plus.</string>
     <string name="encryption_error_text">La clé publique ne correspond pas à la clé enregistrée. Vous pouvez supprimer le nœud et le laisser à nouveau échanger les clés, mais cela peut indiquer un problème de sécurité plus grave. Contactez l\'utilisateur à travers un autre canal de confiance, pour déterminer si le changement de clé est dû à une réinitialisation d\'usine ou à une autre action intentionnelle.</string>
     <string name="request_userinfo">Demander les informations de l\'utilisateur</string>
-    <string name="meshtastic_new_nodes_notifications">New node notifications</string>
-    <string name="more_details">More details</string>
+    <string name="meshtastic_new_nodes_notifications">Notifications de nouveaux nœuds</string>
+    <string name="more_details">Plus de détails</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Signal-to-Noise Ratio, a measure used in communications to quantify the level of a desired signal to the level of background noise. In Meshtastic and other wireless systems, a higher SNR indicates a clearer signal that can enhance the reliability and quality of data transmission.</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Received Signal Strength Indicator, a measurement used to determine the power level being received by the antenna. A higher RSSI value generally indicates a stronger and more stable connection.</string>
     <string name="iaq_definition">(Indoor Air Quality) relative scale IAQ value as measured by Bosch BME680. Value Range 0–500.</string>
     <string name="device_metrics_log">Device Metrics Log</string>
-    <string name="node_map">Node Map</string>
+    <string name="node_map">Carte des nœuds</string>
     <string name="position_log">Position Log</string>
     <string name="env_metrics_log">Environment Metrics Log</string>
     <string name="sig_metrics_log">Signal Metrics Log</string>
     <string name="administration">Administration</string>
-    <string name="remote_admin">Remote Administration</string>
-    <string name="bad">Bad</string>
-    <string name="fair">Fair</string>
-    <string name="good">Good</string>
-    <string name="none_quality">None</string>
+    <string name="remote_admin">Administration à distance</string>
+    <string name="bad">Mauvais</string>
+    <string name="fair">Passable</string>
+    <string name="good">Bon</string>
+    <string name="none_quality">Aucun</string>
     <string name="signal">Signal</string>
-    <string name="signal_quality">Signal Quality</string>
+    <string name="signal_quality">Qualité du signal</string>
     <string name="traceroute_log">Traceroute Log</string>
     <string name="traceroute_direct">Direct</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 hop</item>
         <item quantity="other">%d hops</item>
     </plurals>
-    <string name="traceroute_diff">Hops towards %1$d Hops back %2$d</string>
+    <string name="traceroute_diff">Sauts vers %1$d Sauts retour %2$d</string>
 </resources>
