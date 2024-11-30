@@ -61,6 +61,15 @@ internal fun FragmentManager.navigateToMessages(contactKey: String) {
         .addToBackStack(null)
         .commit()
 }
+internal fun FragmentManager.navigateToPreInitMessages(contactKey: String, message: String) {
+    val messagesFragment = MessagesFragment().apply {
+        arguments = bundleOf("contactKey" to contactKey, "message" to message)
+    }
+    beginTransaction()
+        .add(R.id.mainActivityLayout, messagesFragment)
+        .addToBackStack(null)
+        .commit()
+}
 
 @AndroidEntryPoint
 class MessagesFragment : Fragment(), Logging {
@@ -123,6 +132,9 @@ class MessagesFragment : Fragment(), Logging {
         }
 
         contactKey = arguments?.getString("contactKey").toString()
+        if (arguments?.getString("message") != null) {
+            binding.messageInputText.setText(arguments?.getString("message").toString())
+        }
         val channelIndex = contactKey[0].digitToIntOrNull()
         val nodeId = contactKey.substring(1)
         val channelName = channelIndex?.let { model.channels.value.getChannel(it)?.name }

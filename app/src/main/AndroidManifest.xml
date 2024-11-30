@@ -154,6 +154,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
             <intent-filter android:autoVerify="true">
                 <!-- The QR codes to share channel settings are shared as meshtastic URLS
 
@@ -222,6 +228,7 @@
                 <action android:name="com.atakmap.app.component" />
             </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

@@ -79,6 +79,7 @@ import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.map.MapFragment
 import com.geeksville.mesh.ui.navigateToMessages
 import com.geeksville.mesh.ui.navigateToNavGraph
+import com.geeksville.mesh.ui.navigateToShareMessage
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.LanguageUtils
@@ -335,6 +336,13 @@ class MainActivity : AppCompatActivity(), Logging {
             }
 
             Intent.ACTION_MAIN -> {
+            }
+
+            Intent.ACTION_SEND -> {
+                val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+                if (text != null) {
+                    shareMessages(text)
+                }
             }
 
             else -> {
@@ -604,6 +612,13 @@ class MainActivity : AppCompatActivity(), Logging {
         model.setCurrentTab(0)
         if (contactKey != null) {
             supportFragmentManager.navigateToMessages(contactKey)
+        }
+    }
+
+    private fun shareMessages(message: String?) {
+        model.setCurrentTab(0)
+        if (message != null) {
+            supportFragmentManager.navigateToShareMessage(message)
         }
     }
 
