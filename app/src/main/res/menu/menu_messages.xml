@@ -38,4 +38,9 @@
         android:icon="@drawable/ic_twotone_select_all_24"
         android:title="@string/select_all"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/copyButton"
+        android:icon="@drawable/ic_twotone_content_copy_24"
+        android:title="@string/copy"
+        app:showAsAction="ifRoom" />
 </menu>

@@ -17,6 +17,9 @@
 
 package com.geeksville.mesh.ui
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -40,6 +43,7 @@ import androidx.lifecycle.lifecycleScope
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.toast
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.databinding.MessagesFragmentBinding
 import com.geeksville.mesh.model.Message
@@ -284,17 +288,18 @@ class MessagesFragment : Fragment(), Logging {
                         actionMode?.title = selectedList.size.toString()
                     }
                 }
-
                 R.id.resendButton -> lifecycleScope.launch {
                     debug("User clicked resendButton")
-                    var resendText = ""
-                    selectedList.forEach {
-                        resendText = resendText + it.text + System.lineSeparator()
-                    }
-                    if (resendText != "") {
-                        resendText = resendText.substring(0, resendText.length - 1)
-                    }
+                    val resendText = getSelectedMessagesText()
                     binding.messageInputText.setText(resendText)
+                    mode.finish()
+                }
+                R.id.copyButton -> lifecycleScope.launch {
+                    val copyText = getSelectedMessagesText()
+                    val clipboardManager =
+                        requireActivity().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    clipboardManager.setPrimaryClip(ClipData.newPlainText("message text", copyText))
+                    requireActivity().toast(getString(R.string.copied))
                     mode.finish()
                 }
             }
@@ -312,5 +317,16 @@ class MessagesFragment : Fragment(), Logging {
             parentFragmentManager.popBackStack()
             model.focusUserNode(node)
         }
+    }
+
+    private fun getSelectedMessagesText(): String {
+        var messageText = ""
+        selectedList.forEach {
+            messageText = messageText + it.text + System.lineSeparator()
+        }
+        if (messageText != "") {
+            messageText = messageText.substring(0, messageText.length - 1)
+        }
+        return messageText
     }
 }
