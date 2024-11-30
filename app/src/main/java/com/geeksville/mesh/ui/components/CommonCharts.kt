@@ -86,6 +86,7 @@ fun ChartHeader(amount: Int) {
  * @param lineColors A list of 5 `Color`s for the chart lines, 0 being the lowest line on the chart.
  * @param leaveSpace When true the lines will leave space for Y labels on the left side of the graph.
  */
+@Deprecated("Will soon be replaced with YAxisLabels() and HorizontalLines()", level = DeprecationLevel.WARNING)
 @Composable
 fun ChartOverlay(
     modifier: Modifier,
@@ -147,10 +148,53 @@ fun ChartOverlay(
 }
 
 /**
+ * Draws labels on the Y-axis with respect to the range. Defined by (`maxValue` - `minValue`).
+ */
+@Composable
+fun YAxisLabels(
+    modifier: Modifier,
+    labelColor: Color,
+    minValue: Float,
+    maxValue: Float,
+) {
+    val range = maxValue - minValue
+    val verticalSpacing = range / LINE_LIMIT
+    val density = LocalDensity.current
+    Canvas(modifier = modifier) {
+
+        val height = size.height
+
+        /* Y Labels */
+        val textPaint = Paint().apply {
+            color = labelColor.toArgb()
+            textAlign = Paint.Align.LEFT
+            textSize = density.run { 12.dp.toPx() }
+            typeface = setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD))
+            alpha = TEXT_PAINT_ALPHA
+        }
+
+        drawContext.canvas.nativeCanvas.apply {
+            var label = minValue
+            for (i in 0..LINE_LIMIT) {
+                val ratio = (label - minValue) / range
+                val y = height - (ratio * height)
+                drawText(
+                    "${label.toInt()}",
+                    0f,
+                    y + 4.dp.toPx(),
+                    textPaint
+                )
+                label += verticalSpacing
+            }
+        }
+    }
+}
+
+/**
  * Draws the vertical lines to help the user relate the plotted data within a time frame.
  */
 @Composable
-fun TimeOverlay(
+fun TimeAxisOverlay(
     modifier: Modifier,
     oldest: Int,
     newest: Int,
