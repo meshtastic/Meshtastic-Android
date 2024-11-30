@@ -148,6 +148,44 @@ fun ChartOverlay(
 }
 
 /**
+ * Draws chart lines with respect to the Y-axis range; defined by (`maxValue` - `minValue`).
+ *
+ * @param lineColors A list of 5 `Color`s for the chart lines, 0 being the lowest line on the chart.
+ */
+@Composable
+fun HorizontalLinesOverlay(
+    modifier: Modifier,
+    lineColors: List<Color>,
+    minValue: Float,
+    maxValue: Float,
+) {
+    val range = maxValue - minValue
+    val verticalSpacing = range / LINE_LIMIT
+    Canvas(modifier = modifier) {
+
+        val lineStart = 0f
+        val height = size.height
+        val width = size.width
+
+        /* Horizontal Lines */
+        var lineY = minValue
+        for (i in 0..LINE_LIMIT) {
+            val ratio = (lineY - minValue) / range
+            val y = height - (ratio * height)
+            drawLine(
+                start = Offset(lineStart, y),
+                end = Offset(width, y),
+                color = lineColors[i],
+                strokeWidth = 1.dp.toPx(),
+                cap = StrokeCap.Round,
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(LINE_ON, LINE_OFF), 0f)
+            )
+            lineY += verticalSpacing
+        }
+    }
+}
+
+/**
  * Draws labels on the Y-axis with respect to the range. Defined by (`maxValue` - `minValue`).
  */
 @Composable

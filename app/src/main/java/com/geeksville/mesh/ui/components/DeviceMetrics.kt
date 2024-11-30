@@ -145,101 +145,111 @@ private fun DeviceMetricsChart(
     val screenWidth = configuration.screenWidthDp
     val dp by remember(key1 = selectedTime) { mutableStateOf(selectedTime.dp(screenWidth)) }
 
-    Box(
-        contentAlignment = Alignment.TopStart,
-        modifier = Modifier
-            .horizontalScroll(scrollState)
-    ) {
+    Row {
+        Box(
+            contentAlignment = Alignment.TopStart,
+            modifier = Modifier
+                .horizontalScroll(scrollState)
+                .weight(1f)
+        ) {
 
-        /*
-         * The order of the colors are with respect to the ChUtil.
-         * 25 - 49  Orange
-         * 50 - 100 Red
-         */
-        ChartOverlay(
-            modifier.width(dp),
+            /*
+             * The order of the colors are with respect to the ChUtil.
+             * 25 - 49  Orange
+             * 50 - 100 Red
+             */
+            HorizontalLinesOverlay(
+                modifier.width(dp),
+                lineColors = listOf(graphColor, Orange, Color.Red, graphColor, graphColor),
+                minValue = 0f,
+                maxValue = 100f
+            )
+
+            TimeAxisOverlay(
+                modifier.width(dp),
+                oldest = oldest.time,
+                newest = newest.time,
+                selectedTime.lineInterval()
+            )
+
+            /* Plot Battery Line, ChUtil, and AirUtilTx */
+            Canvas(modifier = modifier.width(dp)) {
+
+                val height = size.height
+                val width = size.width - 28.dp.toPx()
+                val spacePerEntry = (width - spacing) / telemetries.size
+                val dataPointRadius = 2.dp.toPx()
+                var lastX: Float
+                val strokePath = Path().apply {
+                    for (i in telemetries.indices) {
+                        val telemetry = telemetries[i]
+                        val nextTelemetry = telemetries.getOrNull(i + 1) ?: telemetries.last()
+                        val leftRatio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
+                        val rightRatio =
+                            nextTelemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
+
+                        val x1 = spacing + i * spacePerEntry
+                        val y1 = height - (leftRatio * height)
+
+                        // Proving out linking the x value to time
+                        val xRatio = (telemetry.time - oldest.time).toFloat() / timeDiff
+                        val xTest = xRatio * width
+                        drawCircle(
+                            color = Color.Green,
+                            radius = 2.dp.toPx(),
+                            center = Offset(xTest, height / 2)
+                        )
+                        // -------
+
+                        /* Channel Utilization */
+                        val chUtilRatio =
+                            telemetry.deviceMetrics.channelUtilization / MAX_PERCENT_VALUE
+                        val yChUtil = height - (chUtilRatio * height)
+                        drawCircle(
+                            color = DEVICE_METRICS_COLORS[Device.CH_UTIL.ordinal],
+                            radius = dataPointRadius,
+                            center = Offset(x1, yChUtil)
+                        )
+
+                        /* Air Utilization Transmit */
+                        val airUtilRatio = telemetry.deviceMetrics.airUtilTx / MAX_PERCENT_VALUE
+                        val yAirUtil = height - (airUtilRatio * height)
+                        drawCircle(
+                            color = DEVICE_METRICS_COLORS[Device.AIR_UTIL.ordinal],
+                            radius = dataPointRadius,
+                            center = Offset(x1, yAirUtil)
+                        )
+
+                        // TODO don't forget about x2
+                        val x2 = spacing + (i + 1) * spacePerEntry
+                        val y2 = height - (rightRatio * height)
+                        if (i == 0) {
+                            moveTo(x1, y1)
+                        }
+
+                        lastX = (x1 + x2) / 2f
+
+                        quadraticTo(x1, y1, lastX, (y1 + y2) / 2f)
+                    }
+                }
+
+                /* Battery Line */
+                drawPath(
+                    path = strokePath,
+                    color = DEVICE_METRICS_COLORS[Device.BATTERY.ordinal],
+                    style = Stroke(
+                        width = dataPointRadius,
+                        cap = StrokeCap.Round
+                    )
+                )
+            }
+        }
+        YAxisLabels(
+            modifier = modifier.weight(.1f),
             graphColor,
-            lineColors = listOf(graphColor, Orange, Color.Red, graphColor, graphColor),
             minValue = 0f,
             maxValue = 100f
         )
-
-        TimeOverlay(
-            modifier.width(dp),
-            oldest = oldest.time,
-            newest = newest.time,
-            selectedTime.lineInterval()
-        )
-
-        /* Plot Battery Line, ChUtil, and AirUtilTx */
-        Canvas(modifier = modifier.width(dp)) {
-
-            val height = size.height
-            val width = size.width - 28.dp.toPx()
-            val spacePerEntry = (width - spacing) / telemetries.size
-            val dataPointRadius = 2.dp.toPx()
-            var lastX: Float
-            val strokePath = Path().apply {
-                for (i in telemetries.indices) {
-                    val telemetry = telemetries[i]
-                    val nextTelemetry = telemetries.getOrNull(i + 1) ?: telemetries.last()
-                    val leftRatio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
-                    val rightRatio = nextTelemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
-
-                    val x1 = spacing + i * spacePerEntry
-                    val y1 = height - (leftRatio * height)
-
-                    // Proving out linking the x value to time
-                    val xRatio = (telemetry.time - oldest.time).toFloat() / timeDiff
-                    val xTest = xRatio * width
-                    drawCircle(
-                        color = Color.Green,
-                        radius = 2.dp.toPx(),
-                        center = Offset(xTest, height/2)
-                    )
-                    // -------
-
-                    /* Channel Utilization */
-                    val chUtilRatio = telemetry.deviceMetrics.channelUtilization / MAX_PERCENT_VALUE
-                    val yChUtil = height - (chUtilRatio * height)
-                    drawCircle(
-                        color = DEVICE_METRICS_COLORS[Device.CH_UTIL.ordinal],
-                        radius = dataPointRadius,
-                        center = Offset(x1, yChUtil)
-                    )
-
-                    /* Air Utilization Transmit */
-                    val airUtilRatio = telemetry.deviceMetrics.airUtilTx / MAX_PERCENT_VALUE
-                    val yAirUtil = height - (airUtilRatio * height)
-                    drawCircle(
-                        color = DEVICE_METRICS_COLORS[Device.AIR_UTIL.ordinal],
-                        radius = dataPointRadius,
-                        center = Offset(x1, yAirUtil)
-                    )
-
-                    // TODO don't forget about x2
-                    val x2 = spacing + (i + 1) * spacePerEntry
-                    val y2 = height - (rightRatio * height)
-                    if (i == 0) {
-                        moveTo(x1, y1)
-                    }
-
-                    lastX = (x1 + x2) / 2f
-
-                    quadraticTo(x1, y1, lastX, (y1 + y2) / 2f)
-                }
-            }
-
-            /* Battery Line */
-            drawPath(
-                path = strokePath,
-                color = DEVICE_METRICS_COLORS[Device.BATTERY.ordinal],
-                style = Stroke(
-                    width = dataPointRadius,
-                    cap = StrokeCap.Round
-                )
-            )
-        }
     }
     Spacer(modifier = Modifier.height(16.dp))
 
