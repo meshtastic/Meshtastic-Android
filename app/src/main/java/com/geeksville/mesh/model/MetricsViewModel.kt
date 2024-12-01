@@ -21,6 +21,8 @@ import android.app.Application
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.annotation.StringRes
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -119,6 +121,48 @@ enum class TimeFrame(
         MAX.seconds
     } else {
         System.currentTimeMillis() / 1000 - this.seconds
+    }
+
+    /**
+     * The time interval to draw the vertical lines representing
+     * time on the x-axis.
+     *
+     * @return seconds epoch seconds
+     */
+    fun lineInterval(): Long {
+        return when (this.ordinal) {
+            TWENTY_FOUR_HOURS.ordinal,
+            FORTY_EIGHT_HOURS.ordinal ->
+                TimeUnit.HOURS.toSeconds(1)
+            ONE_WEEK.ordinal,
+            TWO_WEEKS.ordinal ->
+                TimeUnit.DAYS.toSeconds(1)
+            else ->
+                TimeUnit.DAYS.toSeconds(7)
+        }
+    }
+
+    /**
+     * Calculates the needed [Dp] depending on the amount of time being plotted.
+     *
+     * @param time in seconds
+     */
+    fun dp(screenWidth: Int, time: Long): Dp {
+
+        val timePerScreen = when (this.ordinal) {
+            TWENTY_FOUR_HOURS.ordinal,
+            FORTY_EIGHT_HOURS.ordinal ->
+                TimeUnit.HOURS.toSeconds(1)
+            ONE_WEEK.ordinal,
+            TWO_WEEKS.ordinal ->
+                TimeUnit.DAYS.toSeconds(1)
+            else ->
+                TimeUnit.DAYS.toSeconds(7)
+        }
+
+        val multiplier = time / timePerScreen
+        val dp = (screenWidth * multiplier).toInt().dp
+        return dp.takeIf { it != 0.dp } ?: screenWidth.dp
     }
 }
 

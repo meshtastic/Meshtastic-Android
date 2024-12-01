@@ -63,7 +63,7 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.components.CommonCharts.X_AXIS_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
-import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
+import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 
 private val ENVIRONMENT_METRICS_COLORS = listOf(Color.Red, Color.Blue, Color.Green)
 private enum class Environment {
@@ -170,8 +170,8 @@ private fun EnvironmentMetricsChart(
         return
     }
     TimeLabels(
-        oldest = telemetries.first().time * MS_PER_SEC,
-        newest = telemetries.last().time * MS_PER_SEC
+        oldest = telemetries.first().time,
+        newest = telemetries.last().time
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -428,7 +428,7 @@ private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahre
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = TIME_FORMAT.format(time),
+                            text = DATE_TIME_FORMAT.format(time),
                             style = TextStyle(fontWeight = FontWeight.Bold),
                             fontSize = MaterialTheme.typography.button.fontSize
                         )
