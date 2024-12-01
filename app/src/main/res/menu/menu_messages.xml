@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (c) 2024 Meshtastic LLC
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/muteButton"
         android:icon="@drawable/ic_twotone_volume_off_24"
         android:title="@string/mute"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/resendButton"
-        android:icon="@drawable/ic_twotone_content_paste_go_24"
-        android:title="@string/resend"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/deleteButton"

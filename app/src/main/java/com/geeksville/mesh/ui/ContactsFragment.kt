@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui
 
 import android.os.Bundle
@@ -53,7 +70,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             onLongClick(contact)
         } else {
             debug("calling MessagesFragment filter:${contact.contactKey}")
-            parentFragmentManager.navigateToMessages(contact.contactKey, contact.longName)
+            parentFragmentManager.navigateToMessages(contact.contactKey)
         }
     }
 
@@ -109,7 +126,6 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
     private inner class ActionModeCallback : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             mode.menuInflater.inflate(R.menu.menu_messages, menu)
-            menu.findItem(R.id.resendButton).isVisible = false
             mode.title = "1"
             return true
         }

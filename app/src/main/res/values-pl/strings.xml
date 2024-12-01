@@ -18,7 +18,7 @@
     <string name="routing_error_got_nak">Otrzymano negatywne potwierdzenie</string>
     <string name="routing_error_timeout">Upłynął limit czasu</string>
     <string name="routing_error_no_interface">Brak interfejsu</string>
-    <string name="routing_error_max_retransmit">Osiągnięto maksymalną liczbę retransmisji</string>
+    <string name="routing_error_max_retransmit">Przekroczono czas lub liczbę retransmisji</string>
     <string name="routing_error_no_channel">Brak kanału</string>
     <string name="routing_error_too_large">Pakiet jest zbyt duży</string>
     <string name="routing_error_no_response">Brak odpowiedzi</string>
@@ -42,7 +42,7 @@
     <string name="role_tak_tracker">Umożliwia automatyczne transmisje TAK PLI i zmniejsza liczbę nadmiarowych transmisji.</string>
     <string name="rebroadcast_mode_all">Przekazuje ponownie każdy odebrany pakiet, niezależnie od tego, czy został wysłany na nasz prywatny kanał, czy z innej sieci Mesh o tych samych parametrach radia.</string>
     <string name="rebroadcast_mode_all_skip_decoding">To samo zachowanie co ALL, ale pomija dekodowanie pakietów i po prostu je retransmituje. Dostępne tylko w roli REPEATER. Ustawienie tego w innych rolach spowoduje zachowanie jak ALL.</string>
-    <string name="rebroadcast_mode_local_only">Ignoruje odebrane pakiety z obcych sieci Mesh, które są otwarte lub których nie może odszyfrować. Retransmituje wiadomość tylko na lokalnych kanałach primary / secondary.</string>
+    <string name="rebroadcast_mode_local_only">Ignoruje odebrane pakiety z obcych sieci Mesh, które są otwarte lub których nie można odszyfrować. Retransmituje wiadomość tylko na lokalnych kanałach primary / secondary.</string>
     <string name="rebroadcast_mode_known_only">Ignoruje odebrane pakiety z obcych sieci, podobnie jak LOCAL_ONLY, ale idzie o krok dalej, ignorując również pakiety z węzłów, które nie znajdują się jeszcze na liście znanych węzłów.</string>
     <string name="rebroadcast_mode_none">Dozwolone wyłącznie dla ról SENSOR, TRACKER i TAK_TRACKER. Spowoduje to zablokowanie wszystkich retransmisji, podobnie jak rola CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only">Ignoruje niestandardowe pakiety (non-standard portnums) takie jak: TAK, RangeTest, PaxCounter, itp. Przekazuje dalej jedynie standardowe pakiety (standard portnums): NodeInfo, Text, Position, Telemetry oraz Routing.</string>
@@ -104,7 +104,7 @@
     <string name="text_messages">Wiadomości tekstowe</string>
     <string name="channel_invalid">Ten adres URL kanału jest nieprawidłowy i nie można go użyć</string>
     <string name="debug_panel">Panel debugowania</string>
-    <string name="debug_last_messages">Ostatnie 500 wiadomości</string>
+    <string name="debug_last_messages">Ostatnie 500 zdarzeń</string>
     <string name="clear">Czyść</string>
     <string name="updating_firmware">Aktualizuję oprogramowanie, poczekaj chwilę…</string>
     <string name="update_successful">Aktualizacja zakończona sukcesem</string>
@@ -235,7 +235,7 @@
     <string name="air_utilization">Wykorzystanie eteru</string>
     <string name="temperature">Temperatura</string>
     <string name="humidity">Wilgotność</string>
-    <string name="logs">Logi</string>
+    <string name="logs">Rejestry zdarzeń (logs)</string>
     <string name="hops_away">Skoków</string>
     <string name="info">Informacja</string>
     <string name="ch_util_definition">Wykorzystanie dla bieżącego kanału, w tym prawidłowego TX/RX oraz zniekształconego RX (czyli szumu).</string>
@@ -254,21 +254,21 @@
     <string name="snr_definition">Współczynnik sygnału do szumu (Signal-to-Noise Ratio) - miara stosowana w komunikacji do określania poziomu pożądanego sygnału w stosunku do poziomu szumu tła. W Meshtastic i innych systemach bezprzewodowych wyższy współczynnik SNR oznacza czystszy sygnał, który może zwiększyć niezawodność i jakość transmisji danych.</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Received Signal Strength Indicator - miara używana do określenia poziomu mocy odbieranej przez antenę. Wyższa wartość RSSI zazwyczaj oznacza silniejsze i bardziej stabilne połączenie.</string>
-    <string name="iaq_definition">(Jakość powietrza w pomieszczeniach) wartość względna w skali IAQ mierzona urządzeniem BME680. Zakres wartości: 0–500.</string>
-    <string name="device_metrics_log">Log telemetrii urządzenia</string>
+    <string name="iaq_definition">Jakość powietrza w pomieszczeniach (Indoor Air Quality) - wartość względna w skali IAQ mierzona czujnikiem BME680. Zakres wartości: 0–500.</string>
+    <string name="device_metrics_log">Historia telemetrii</string>
     <string name="node_map">Ślad na mapie</string>
-    <string name="position_log">Log pozycji</string>
-    <string name="env_metrics_log">Log danych środowiskowych</string>
-    <string name="sig_metrics_log">Log danych dot. sygnału</string>
+    <string name="position_log">Historia pozycji</string>
+    <string name="env_metrics_log">Historia danych otoczenia</string>
+    <string name="sig_metrics_log">Historia danych sygnału</string>
     <string name="administration">Zarządzanie</string>
     <string name="remote_admin">Zdalne zarządzanie</string>
-    <string name="bad">Zły</string>
-    <string name="fair">Wystarczający</string>
-    <string name="good">Dobry</string>
-    <string name="none_quality">Brak</string>
-    <string name="signal">Sygnał</string>
+    <string name="bad">zły</string>
+    <string name="fair">wystarczający</string>
+    <string name="good">dobry</string>
+    <string name="none_quality">brak</string>
+    <string name="signal">Sygnał:</string>
     <string name="signal_quality">Jakość sygnału</string>
-    <string name="traceroute_log">Log sprawdzania trasy</string>
+    <string name="traceroute_log">Historia sprawdzania trasy</string>
     <string name="traceroute_direct">Bezpośrednio</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 skok</item>
@@ -276,5 +276,6 @@
         <item quantity="many">%d skoki</item>
         <item quantity="other">%d skoków</item>
     </plurals>
-    <string name="traceroute_diff">Trasa do %1$d Trasa z %2$d</string>
+    <string name="traceroute_diff">Skoki do: %1$d. Skoki od: %2$d</string>
+    <string name="copy">Kopiuj</string>
 </resources>

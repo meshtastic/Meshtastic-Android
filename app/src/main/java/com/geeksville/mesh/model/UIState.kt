@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.model
 
 import android.app.Application
@@ -12,13 +29,26 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.*
+import com.geeksville.mesh.AppOnlyProtos
+import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config
+import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.Portnums
+import com.geeksville.mesh.Position
+import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.channel
+import com.geeksville.mesh.channelSet
+import com.geeksville.mesh.channelSettings
+import com.geeksville.mesh.config
+import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.MeshLogRepository
+import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
 import com.geeksville.mesh.database.entity.MyNodeEntity
@@ -30,6 +60,8 @@ import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
+import com.geeksville.mesh.util.getShortDate
+import com.geeksville.mesh.util.getShortDateTime
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -50,11 +82,8 @@ import kotlinx.coroutines.withContext
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
-import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -133,35 +162,11 @@ data class Contact(
     val isMuted: Boolean,
 )
 
-// return time if within 24 hours, otherwise date
-private fun getShortDate(time: Long): String? {
-    val date = if (time != 0L) Date(time) else return null
-    val isWithin24Hours = System.currentTimeMillis() - date.time <= TimeUnit.DAYS.toMillis(1)
-
-    return if (isWithin24Hours) {
-        DateFormat.getTimeInstance(DateFormat.SHORT).format(date)
-    } else {
-        DateFormat.getDateInstance(DateFormat.SHORT).format(date)
-    }
-}
-
-// return time if within 24 hours, otherwise date/time
-private fun getShortDateTime(time: Long): String {
-    val date = Date(time)
-    val isWithin24Hours = System.currentTimeMillis() - date.time <= TimeUnit.DAYS.toMillis(1)
-
-    return if (isWithin24Hours) {
-        DateFormat.getTimeInstance(DateFormat.SHORT).format(date)
-    } else {
-        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(date)
-    }
-}
-
 @Suppress("LongParameterList")
 @HiltViewModel
 class UIViewModel @Inject constructor(
     private val app: Application,
-    private val nodeDB: NodeDB,
+    private val nodeDB: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: MeshLogRepository,
@@ -189,9 +194,6 @@ class UIViewModel @Inject constructor(
 
     val quickChatActions get() = quickChatActionRepository.getAllActions()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-
-    private val _focusedNode = MutableStateFlow<NodeEntity?>(null)
-    val focusedNode: StateFlow<NodeEntity?> = _focusedNode
 
     private val nodeFilterText = MutableStateFlow("")
     private val nodeSortOption = MutableStateFlow(NodeSortOption.LAST_HEARD)
@@ -461,8 +463,11 @@ class UIViewModel @Inject constructor(
     private val _requestChannelSet = MutableStateFlow<AppOnlyProtos.ChannelSet?>(null)
     val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?> get() = _requestChannelSet
 
-    fun requestChannelSet(channelSet: AppOnlyProtos.ChannelSet) {
-        _requestChannelSet.value = channelSet
+    fun requestChannelUrl(url: Uri) = runCatching {
+        _requestChannelSet.value = url.toChannelSet()
+    }.onFailure { ex ->
+        errormsg("Channel url error: ${ex.message}")
+        showSnackbar(R.string.channel_invalid)
     }
 
     /**
@@ -719,11 +724,6 @@ class UIViewModel @Inject constructor(
 
     fun setCurrentTab(tab: Int) {
         _currentTab.value = tab
-    }
-
-    fun focusUserNode(node: NodeEntity?) {
-        _currentTab.value = 1
-        _focusedNode.value = node
     }
 
     fun setNodeFilterText(text: String) {

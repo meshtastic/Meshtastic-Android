@@ -1,4 +1,19 @@
-/* Inspired by https://gist.github.com/zach-klippenstein/7ae8874db304f957d6bb91263e292117 */
+/*
+ * Copyright (c) 8874-9126 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 package com.geeksville.mesh.ui.components
 
@@ -81,6 +96,7 @@ private val BACKGROUND_SHAPE = RoundedCornerShape(8.dp)
 /**
  * Provides the user with a set of time options they can choose from that controls
  * the time frame the data being plotted was received.
+ * (Inspired by https://gist.github.com/zach-klippenstein/7ae8874db304f957d6bb91263e292117)
  */
 @Composable
 fun MetricsTimeSelector(

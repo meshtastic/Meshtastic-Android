@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 @file:Suppress("TooManyFunctions")
 
 package com.geeksville.mesh.ui
@@ -75,20 +92,20 @@ import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.DistanceUnit
 import com.geeksville.mesh.util.formatAgo
+import com.geeksville.mesh.util.formatUptime
 import com.geeksville.mesh.util.thenIf
-import java.util.concurrent.TimeUnit
 import kotlin.math.ln
 
 @Composable
 fun NodeDetailScreen(
-    node: NodeEntity?,
     viewModel: MetricsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
     onNavigate: (Any) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    if (node != null) {
+    if (state.node != null) {
+        val node = state.node ?: return
         NodeDetailList(
             node = node,
             metricsState = state,
@@ -330,22 +347,6 @@ private fun InfoCard(
             )
         }
     }
-}
-
-private fun formatUptime(seconds: Int): String = formatUptime(seconds.toLong())
-
-private fun formatUptime(seconds: Long): String {
-    val days = TimeUnit.SECONDS.toDays(seconds)
-    val hours = TimeUnit.SECONDS.toHours(seconds) % TimeUnit.DAYS.toHours(1)
-    val minutes = TimeUnit.SECONDS.toMinutes(seconds) % TimeUnit.HOURS.toMinutes(1)
-    val secs = seconds % TimeUnit.MINUTES.toSeconds(1)
-
-    return listOfNotNull(
-        "${days}d".takeIf { days > 0 },
-        "${hours}h".takeIf { hours > 0 },
-        "${minutes}m".takeIf { minutes > 0 },
-        "${secs}s".takeIf { secs > 0 },
-    ).joinToString(" ")
 }
 
 @OptIn(ExperimentalLayoutApi::class)

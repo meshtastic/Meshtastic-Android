@@ -1,4 +1,21 @@
-package com.geeksville.mesh.ui
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.geeksville.mesh.ui.components
 
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -10,7 +27,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.ui.components.NodeSignalQuality
 import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 
@@ -18,7 +34,7 @@ const val MAX_VALID_SNR = 100F
 const val MAX_VALID_RSSI = 0
 
 @Composable
-fun signalInfo(
+fun SignalInfo(
     modifier: Modifier = Modifier,
     node: NodeEntity,
     isThisNode: Boolean
@@ -42,7 +58,7 @@ fun signalInfo(
                 add("ch:${node.channel}")
             }
             if (node.hopsAway != 0) add(hopsString)
-        }.joinToString(" | ")
+        }.joinToString(" ")
     }
     if (text.isNotEmpty()) {
         Text(
@@ -64,7 +80,7 @@ fun signalInfo(
 @Preview(showBackground = true)
 fun SignalInfoSimplePreview() {
     AppTheme {
-        signalInfo(
+        SignalInfo(
             node = NodeEntity(
                 num = 1,
                 lastHeard = 0,
@@ -85,7 +101,7 @@ fun SignalInfoPreview(
     node: NodeEntity
 ) {
     AppTheme {
-        signalInfo(
+        SignalInfo(
             node = node,
             isThisNode = false
         )
@@ -99,7 +115,7 @@ fun SignalInfoSelfPreview(
     node: NodeEntity
 ) {
     AppTheme {
-        signalInfo(
+        SignalInfo(
             node = node,
             isThisNode = true
         )

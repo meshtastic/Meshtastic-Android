@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.service
 
 import android.annotation.SuppressLint
@@ -433,7 +450,6 @@ class MeshService : Service(), Logging {
     }
 
     private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
-    private val rangeTestRegex = Regex("seq (\\d{1,10})")
 
     // Map a userid to a node/ node num, or throw an exception if not found
     // We prefer to find nodes based on their assigned IDs, but if no ID has been assigned to a node, we can also find it based on node number
@@ -666,12 +682,6 @@ class MeshService : Service(), Logging {
 
                 when (data.portnumValue) {
                     Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
-                        if (fromUs) return
-
-                        // TODO temporary solution to Range Test spam, may be removed in the future
-                        val isRangeTest = rangeTestRegex.matches(data.payload.toStringUtf8())
-                        if (!moduleConfig.rangeTest.enabled && isRangeTest) return
-
                         debug("Received CLEAR_TEXT from $fromId")
                         rememberDataPacket(dataPacket)
                     }
@@ -683,7 +693,6 @@ class MeshService : Service(), Logging {
                         rememberDataPacket(dataPacket, u.expire > currentSecond())
                     }
 
-                    // Handle new style position info
                     Portnums.PortNum.POSITION_APP_VALUE -> {
                         val u = MeshProtos.Position.parseFrom(data.payload)
                         // debug("position_app ${packet.from} ${u.toOneLineString()}")
@@ -694,7 +703,6 @@ class MeshService : Service(), Logging {
                         }
                     }
 
-                    // Handle new style user info
                     Portnums.PortNum.NODEINFO_APP_VALUE ->
                         if (!fromUs) {
                             val u = MeshProtos.User.parseFrom(data.payload).copy {
