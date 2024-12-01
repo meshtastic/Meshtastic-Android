@@ -239,10 +239,6 @@ fun TimeAxisOverlay(
     timeInterval: Long
 ) {
 
-    // TODO should this behavior stay??
-    if (timeInterval == 0L)
-        return
-
     val range = newest - oldest
     val density = LocalDensity.current
     val lineColor = MaterialTheme.colors.onSurface

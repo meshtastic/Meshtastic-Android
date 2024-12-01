@@ -141,7 +141,9 @@ private fun DeviceMetricsChart(
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
-    val dp by remember(key1 = selectedTime) { mutableStateOf(selectedTime.dp(screenWidth)) }
+    val dp by remember(key1 = selectedTime) {
+        mutableStateOf(selectedTime.dp(screenWidth, time = (newest.time - oldest.time).toLong()))
+    }
 
     Row {
         Box(

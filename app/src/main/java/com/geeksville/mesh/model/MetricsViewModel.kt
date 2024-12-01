@@ -116,30 +116,32 @@ enum class TimeFrame(
             ONE_WEEK.ordinal,
             TWO_WEEKS.ordinal ->
                 TimeUnit.DAYS.toSeconds(1)
-            FOUR_WEEKS.ordinal,
-            MAX.ordinal ->
-                TimeUnit.DAYS.toSeconds(7)
             else ->
-                MAX.seconds
+                TimeUnit.DAYS.toSeconds(7)
         }
     }
 
-    fun dp(screenWidth: Int) : Dp {
-        // TODO I don't think these static numbers will work.
-        //  How can the DP be determined based on the screens width and the amount of data points.
-        return when (this.ordinal) {
+    /**
+     * Calculates the needed [Dp] depending on the amount of time being plotted.
+     *
+     * @param time in seconds
+     */
+    fun dp(screenWidth: Int, time: Long) : Dp {
+
+        val timePerScreen = when (this.ordinal) {
             TWENTY_FOUR_HOURS.ordinal,
             FORTY_EIGHT_HOURS.ordinal ->
-                (screenWidth * 18).dp
+                TimeUnit.HOURS.toSeconds(1)
             ONE_WEEK.ordinal,
             TWO_WEEKS.ordinal ->
-                (screenWidth * 5).dp
-            FOUR_WEEKS.ordinal,
-            MAX.ordinal ->
-                (screenWidth * 2).dp
+                TimeUnit.DAYS.toSeconds(1)
             else ->
-                screenWidth.dp
+                TimeUnit.DAYS.toSeconds(7)
         }
+
+        val multiplier = time / timePerScreen
+        val dp = (screenWidth * multiplier).toInt().dp
+        return dp.takeIf { it != 0.dp } ?: screenWidth.dp
     }
 
 }
