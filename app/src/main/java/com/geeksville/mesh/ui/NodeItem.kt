@@ -70,7 +70,6 @@ import com.geeksville.mesh.ui.components.MenuItemAction
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenu
 import com.geeksville.mesh.ui.components.SignalInfo
-import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
 import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
@@ -131,16 +130,6 @@ fun NodeItem(
 
     val (detailsShown, showDetails) = remember { mutableStateOf(expanded) }
 
-    var showEncryptionDialog by remember { mutableStateOf(false) }
-    if (showEncryptionDialog) {
-        val (title, text) = when {
-            thatNode.mismatchKey -> R.string.encryption_error to R.string.encryption_error_text
-            thatNode.hasPKC -> R.string.encryption_pkc to R.string.encryption_pkc_text
-            else -> R.string.encryption_psk to R.string.encryption_psk_text
-        }
-        SimpleAlertDialog(title, text) { showEncryptionDialog = false }
-    }
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -200,7 +189,7 @@ fun NodeItem(
                         hasPKC = thatNode.hasPKC,
                         mismatchKey = thatNode.mismatchKey,
                         modifier = Modifier.size(32.dp)
-                    ) { showEncryptionDialog = true }
+                    )
                     Text(
                         modifier = Modifier.weight(1f),
                         text = longName,
