@@ -17,12 +17,6 @@
 
 package com.geeksville.mesh.ui
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.repeatable
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -87,7 +81,6 @@ fun NodeItem(
     tempInFahrenheit: Boolean,
     ignoreIncomingList: List<Int> = emptyList(),
     menuItemActionClicked: (MenuItemAction) -> Unit = {},
-    blinking: Boolean = false,
     expanded: Boolean = false,
     currentTimeMillis: Long,
     isConnected: Boolean = false,
@@ -112,16 +105,6 @@ fun NodeItem(
         thatNode.user.role.name
     }
 
-    val bgColor by animateColorAsState(
-        targetValue = if (blinking) Color(color = 0x33FFFFFF) else Color.Transparent,
-        animationSpec = repeatable(
-            iterations = 6,
-            animation = tween(durationMillis = 250, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "blinking node"
-    )
-
     val style = if (thatNode.isUnknownUser) {
         LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)
     } else {
@@ -142,8 +125,7 @@ fun NodeItem(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
-                    .background(bgColor),
+                    .padding(8.dp),
             ) {
                 Row(
                     modifier = Modifier

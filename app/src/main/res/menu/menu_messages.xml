@@ -24,11 +24,6 @@
         android:title="@string/mute"
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/resendButton"
-        android:icon="@drawable/ic_twotone_content_paste_go_24"
-        android:title="@string/resend"
-        app:showAsAction="ifRoom" />
-    <item
         android:id="@+id/deleteButton"
         android:icon="@drawable/ic_twotone_delete_24"
         android:title="@string/delete"
@@ -37,10 +32,5 @@
         android:id="@+id/selectAllButton"
         android:icon="@drawable/ic_twotone_select_all_24"
         android:title="@string/select_all"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/copyButton"
-        android:icon="@drawable/ic_twotone_content_copy_24"
-        android:title="@string/copy"
         app:showAsAction="ifRoom" />
 </menu>

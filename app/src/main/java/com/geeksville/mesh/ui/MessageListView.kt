@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -24,6 +25,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,12 +43,12 @@ import kotlinx.coroutines.flow.debounce
 @Composable
 internal fun MessageListView(
     messages: List<Message>,
-    selectedList: List<Message>,
-    onClick: (Message) -> Unit,
-    onLongClick: (Message) -> Unit,
-    onChipClick: (Message) -> Unit,
+    selectedIds: MutableState<Set<Long>>,
     onUnreadChanged: (Long) -> Unit,
+    contentPadding: PaddingValues,
+    onClick: (Message) -> Unit = {}
 ) {
+    val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = messages.indexOfLast { !it.read }.coerceAtLeast(0)
     )
@@ -60,14 +62,20 @@ internal fun MessageListView(
         SimpleAlertDialog(title = title, text = text) { showStatusDialog = null }
     }
 
+    fun toggle(uuid: Long) = if (selectedIds.value.contains(uuid)) {
+        selectedIds.value -= uuid
+    } else {
+        selectedIds.value += uuid
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         state = listState,
         reverseLayout = true,
-        // contentPadding = PaddingValues(8.dp)
+        contentPadding = contentPadding
     ) {
         items(messages, key = { it.uuid }) { msg ->
-            val selected by remember { derivedStateOf { selectedList.contains(msg) } }
+            val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
 
             MessageItem(
                 shortName = msg.user.shortName.takeIf { msg.user.id != DataPacket.ID_LOCAL },
@@ -75,9 +83,9 @@ internal fun MessageListView(
                 messageTime = msg.time,
                 messageStatus = msg.status,
                 selected = selected,
-                onClick = { onClick(msg) },
-                onLongClick = { onLongClick(msg) },
-                onChipClick = { onChipClick(msg) },
+                onClick = { if (inSelectionMode) toggle(msg.uuid) },
+                onLongClick = { toggle(msg.uuid) },
+                onChipClick = { onClick(msg) },
                 onStatusClick = { showStatusDialog = msg }
             )
         }

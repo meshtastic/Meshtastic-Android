@@ -29,7 +29,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -100,16 +99,6 @@ fun NodesScreen(
     val ourNode by model.ourNodeInfo.collectAsStateWithLifecycle()
 
     val listState = rememberLazyListState()
-    val focusedNode by model.focusedNode.collectAsStateWithLifecycle()
-    LaunchedEffect(focusedNode) {
-        focusedNode?.let { node ->
-            val index = nodes.indexOfFirst { it.num == node.num }
-            if (index != -1) {
-                listState.animateScrollToItem(index)
-            }
-            model.focusUserNode(null)
-        }
-    }
 
     val currentTimeMillis = rememberTimeTickWithLifecycle()
     val connectionState by model.connectionState.collectAsStateWithLifecycle()
@@ -153,7 +142,6 @@ fun NodesScreen(
                         MenuItemAction.MoreDetails -> navigateToNodeDetails(node.num)
                     }
                 },
-                blinking = node == focusedNode,
                 expanded = state.showDetails,
                 currentTimeMillis = currentTimeMillis,
                 isConnected = connectionState.isConnected(),

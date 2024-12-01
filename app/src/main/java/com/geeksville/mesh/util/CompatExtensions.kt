@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.util
 
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -29,14 +28,6 @@ import android.os.Parcelable
 import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import androidx.core.os.ParcelCompat
-
-object PendingIntentCompat {
-    val FLAG_IMMUTABLE = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-        PendingIntent.FLAG_IMMUTABLE
-    } else {
-        0
-    }
-}
 
 inline fun <reified T : Parcelable> Parcel.readParcelableCompat(loader: ClassLoader?): T? =
     ParcelCompat.readParcelable(this, loader, T::class.java)

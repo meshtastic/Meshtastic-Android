@@ -182,6 +182,9 @@ enum class AdminRoute(@StringRes val title: Int) {
 
 sealed interface Route {
     @Serializable
+    data class Messages(val contactKey: String, val message: String = "") : Route
+
+    @Serializable
     data class RadioConfig(val destNum: Int? = null) : Route
     @Serializable data object User : Route
     @Serializable data object Channels : Route
