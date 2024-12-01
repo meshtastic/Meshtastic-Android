@@ -108,7 +108,7 @@ enum class TimeFrame(
      *
      * @return seconds epoch seconds
      */
-    fun lineInterval() : Long {
+    fun lineInterval(): Long {
         return when (this.ordinal) {
             TWENTY_FOUR_HOURS.ordinal,
             FORTY_EIGHT_HOURS.ordinal ->
@@ -126,7 +126,7 @@ enum class TimeFrame(
      *
      * @param time in seconds
      */
-    fun dp(screenWidth: Int, time: Long) : Dp {
+    fun dp(screenWidth: Int, time: Long): Dp {
 
         val timePerScreen = when (this.ordinal) {
             TWENTY_FOUR_HOURS.ordinal,
@@ -143,7 +143,6 @@ enum class TimeFrame(
         val dp = (screenWidth * multiplier).toInt().dp
         return dp.takeIf { it != 0.dp } ?: screenWidth.dp
     }
-
 }
 
 private fun MeshPacket.hasValidSignal(): Boolean =

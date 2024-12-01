@@ -236,7 +236,7 @@ private fun DeviceMetricsChart(
             }
         }
         YAxisLabels(
-            modifier = modifier.weight(.1f),
+            modifier = modifier.weight(weight = .1f),
             graphColor,
             minValue = 0f,
             maxValue = 100f

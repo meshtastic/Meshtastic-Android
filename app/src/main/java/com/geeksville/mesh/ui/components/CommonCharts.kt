@@ -60,6 +60,7 @@ private val TIME_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.MEDI
 private val DATE_FORMAT: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
 private const val LINE_ON = 10f
 private const val LINE_OFF = 20f
+private const val DATE_Y = 32f
 
 data class LegendData(val nameRes: Int, val color: Color, val isLine: Boolean = false)
 
@@ -286,7 +287,7 @@ fun TimeAxisOverlay(
                 drawText(
                     DATE_FORMAT.format(current * MS_PER_SEC),
                     x,
-                    32f,
+                    DATE_Y,
                     textPaint
                 )
                 current += timeInterval
