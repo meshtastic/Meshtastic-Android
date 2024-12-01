@@ -278,5 +278,4 @@
     </plurals>
     <string name="traceroute_diff">Skoki do: %1$d. Skoki od: %2$d</string>
     <string name="copy">Kopiuj</string>
-    <string name="copied">Skopiowano</string>
 </resources>

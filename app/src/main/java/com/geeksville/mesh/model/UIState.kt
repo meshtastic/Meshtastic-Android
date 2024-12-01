@@ -195,9 +195,6 @@ class UIViewModel @Inject constructor(
     val quickChatActions get() = quickChatActionRepository.getAllActions()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    private val _focusedNode = MutableStateFlow<NodeEntity?>(null)
-    val focusedNode: StateFlow<NodeEntity?> = _focusedNode
-
     private val nodeFilterText = MutableStateFlow("")
     private val nodeSortOption = MutableStateFlow(NodeSortOption.LAST_HEARD)
     private val includeUnknown = MutableStateFlow(preferences.getBoolean("include-unknown", false))
@@ -727,11 +724,6 @@ class UIViewModel @Inject constructor(
 
     fun setCurrentTab(tab: Int) {
         _currentTab.value = tab
-    }
-
-    fun focusUserNode(node: NodeEntity?) {
-        _currentTab.value = 1
-        _focusedNode.value = node
     }
 
     fun setNodeFilterText(text: String) {

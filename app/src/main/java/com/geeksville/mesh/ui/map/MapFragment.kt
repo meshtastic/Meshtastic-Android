@@ -334,11 +334,11 @@ fun MapView(
                 position = nodePosition
                 icon = markerIcon
 
-                setOnLongClickListener {
-                    performHapticFeedback()
-                    model.focusUserNode(node)
-                    true
-                }
+//                setOnLongClickListener {
+//                    performHapticFeedback()
+//                    TODO NodeMenu?
+//                    true
+//                }
                 setNodeColors(node.colors)
                 setPrecisionBits(p.precisionBits)
             }
