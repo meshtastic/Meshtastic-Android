@@ -45,12 +45,10 @@ import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.components.CommonCharts.LEFT_LABEL_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
-import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
 import java.text.DateFormat
 
 object CommonCharts {
     val DATE_TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
-    val TIME_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM)
     const val X_AXIS_SPACING = 8f
     const val LEFT_LABEL_SPACING = 36
     const val MS_PER_SEC = 1000L
@@ -58,6 +56,8 @@ object CommonCharts {
     const val TEXT_PAINT_ALPHA = 192
 }
 
+private val TIME_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM)
+private val DATE_FORMAT: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
 private const val LINE_ON = 10f
 private const val LINE_OFF = 20f
 
@@ -262,7 +262,6 @@ fun TimeAxisOverlay(
         }
 
         /* Vertical Lines with labels */
-
         drawContext.canvas.nativeCanvas.apply {
             while (current <= newest) {
                 val ratio = (current - oldest).toFloat() / range
@@ -275,12 +274,19 @@ fun TimeAxisOverlay(
                     cap = StrokeCap.Round,
                     pathEffect = PathEffect.dashPathEffect(floatArrayOf(LINE_ON, LINE_OFF), 0f)
                 )
-                // TODO might also need to add a date label
 
+                /* Time */
                 drawText(
                     TIME_FORMAT.format(current * MS_PER_SEC),
                     x,
                     0f,
+                    textPaint
+                )
+                /* Date */
+                drawText(
+                    DATE_FORMAT.format(current * MS_PER_SEC),
+                    x,
+                    32f,
                     textPaint
                 )
                 current += timeInterval
