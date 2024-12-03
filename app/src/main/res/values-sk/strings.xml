@@ -40,8 +40,8 @@
     <string name="role_client_hidden">Zariadenie, ktoré vysiela len podľa potreby pre utajenie, alebo úsporu energie.</string>
     <string name="role_lost_and_found">Pravidelne vysiela polohu ako správu na predvolený kanál, aby pomohol pri obnove zariadenia.</string>
     <string name="role_tak_tracker">Umožňuje automatické vysielanie TAK PLI a znižuje rutinné vysielanie.</string>
-    <string name="rebroadcast_mode_all">Znovu odvysielať akúkoľvek pozorovanú správu, ak bola na našom súkromnom kanáli alebo z inej siete s rovnakými parametrami lora.</string>
-    <string name="rebroadcast_mode_all_skip_decoding">Rovnaké ako správanie ako ALL, ale preskočí dekódovanie paketov a jednoducho ich znovu vysiela. Dostupné iba v úlohe Opakovača. Nastavenie tejto možnosti na akékoľvek iné roly bude mať za následok správania sa ako ALL.</string>
+    <string name="rebroadcast_mode_all">Preposiela akúkoľvek pozorovanú správu, ak bola na našom súkromnom kanáli alebo z inej siete s rovnakými parametrami lora.</string>
+    <string name="rebroadcast_mode_all_skip_decoding">Rovnaké ako správanie ako ALL, ale preskočí dekódovanie paketov a jednoducho ich prepošle. Dostupné iba v úlohe Opakovača. Nastavenie tejto možnosti na akékoľvek iné roly bude mať za následok správania sa ako ALL.</string>
     <string name="rebroadcast_mode_local_only">Ignoruje pozorované správy z cudzích sietí, ktoré sú otvorené alebo tie, ktoré nedokáže dešifrovať. Opätovne vysiela správu iba na lokálnych primárnych / sekundárnych kanáloch uzlov.</string>
     <string name="rebroadcast_mode_known_only">Ignoruje pozorované správy z cudzích sietí, ako napríklad LOCAL ONLY, ale ide o krok ďalej tým, že ignoruje aj správy z uzlov, ktoré ešte nie sú v známom zozname uzla.</string>
     <string name="rebroadcast_mode_none">Povolené len pre role SENSOR, TRACKER a TAK_TRACKER, zamedzí to všetkým opätovným vysielaniam, na rozdiel od roly CLIENT_MUTE.</string>
@@ -55,7 +55,7 @@
     <string name="unknown_username">Neznáme užívateľské meno</string>
     <string name="send">Odoslať</string>
     <string name="send_text">Odoslať text</string>
-    <string name="warning_not_paired">K tomuto telefónu ste ešte nespárovalii žiadne zariadenie kompatibilné s Meshtastic. Prosím spárujte zariadenie a nastavte svoje užívateľské meno. Táto open-source aplikácia je v alpha testovacej fáze, ak nájdete chybu, prosím popíšte ju na fóre: meshtastic.discourse.group.\n\n Pre viac informácií navštívte web stránku - www.meshtastic.org.</string>
+    <string name="warning_not_paired">K tomuto telefónu ste ešte nespárovali žiadne zariadenie kompatibilné s Meshtastic. Prosím spárujte zariadenie a nastavte svoje užívateľské meno. Táto open-source aplikácia je v alpha testovacej fáze, ak nájdete chybu, prosím popíšte ju na fóre: meshtastic.discourse.group.\n\n Pre viac informácií navštívte web stránku - www.meshtastic.org.</string>
     <string name="you">Vy</string>
     <string name="your_name">Vaše meno</string>
     <string name="analytics_okay">Anonymné štatistiky používania a správy o zlyhaní.</string>
