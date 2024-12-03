@@ -311,4 +311,5 @@
     <string name="not_selected">Not Selected</string>
     <string name="unknown_age">Unknown Age</string>
     <string name="copy">Copy</string>
+    <string name="alert_bell_text">Alert Bell Character!</string>
 </resources>

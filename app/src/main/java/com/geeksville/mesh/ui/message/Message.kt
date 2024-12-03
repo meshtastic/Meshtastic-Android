@@ -360,10 +360,17 @@ private fun QuickChatRow(
     modifier: Modifier = Modifier,
     onClick: (QuickChatAction) -> Unit
 ) {
+    val alertAction = QuickChatAction(
+        name = "🔔",
+        message = "🔔 ${stringResource(R.string.alert_bell_text)} \u0007",
+        mode = QuickChatAction.Mode.Append,
+        position = -1
+    )
+
     LazyRow(
         modifier = modifier,
     ) {
-        items(actions, key = { it.uuid }) { action ->
+        items(listOf(alertAction) + actions, key = { it.uuid }) { action ->
             Button(
                 onClick = { onClick(action) },
                 modifier = Modifier.padding(horizontal = 4.dp),
