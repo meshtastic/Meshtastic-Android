@@ -77,7 +77,7 @@ import com.geeksville.mesh.ui.SettingsFragment
 import com.geeksville.mesh.ui.UsersFragment
 import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.map.MapFragment
-import com.geeksville.mesh.ui.navigateToMessages
+import com.geeksville.mesh.ui.message.navigateToMessages
 import com.geeksville.mesh.ui.navigateToNavGraph
 import com.geeksville.mesh.ui.navigateToShareMessage
 import com.geeksville.mesh.ui.theme.AppTheme

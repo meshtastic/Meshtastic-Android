@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui
+package com.geeksville.mesh.ui.message.components
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,14 +35,13 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.model.Message
-import com.geeksville.mesh.ui.components.ReactionRow
 import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 
 @Composable
-internal fun MessageListView(
+internal fun MessageList(
     messages: List<Message>,
     selectedIds: MutableState<Set<Long>>,
     onUnreadChanged: (Long) -> Unit,

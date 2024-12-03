@@ -44,6 +44,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.components.MenuItemAction
 import com.geeksville.mesh.ui.components.NodeFilterTextField
 import com.geeksville.mesh.ui.components.rememberTimeTickWithLifecycle
+import com.geeksville.mesh.ui.message.navigateToMessages
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 

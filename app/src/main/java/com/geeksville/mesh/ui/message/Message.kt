@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui
+package com.geeksville.mesh.ui.message
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -90,6 +90,7 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
+import com.geeksville.mesh.ui.message.components.MessageList
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -247,7 +248,7 @@ internal fun MessageScreen(
         }
     ) { innerPadding ->
         if (messages.isNotEmpty()) {
-            MessageListView(
+            MessageList(
                 messages = messages,
                 selectedIds = selectedIds,
                 onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },

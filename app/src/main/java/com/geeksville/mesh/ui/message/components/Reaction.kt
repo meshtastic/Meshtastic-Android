@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.components
+package com.geeksville.mesh.ui.message.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.database.entity.Reaction
+import com.geeksville.mesh.ui.components.EmojiPicker
 import com.geeksville.mesh.ui.theme.AppTheme
 
 @Composable
