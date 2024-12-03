@@ -131,7 +131,8 @@ class NavGraphFragment : ScreenFragment("NavGraph"), Logging {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val destNum = arguments?.getInt("destNum")
+        @Suppress("DEPRECATION")
+        val destNum = arguments?.getSerializable("destNum") as? Int
         val startDestination: Any = when (arguments?.getString("startDestination")) {
             "NodeDetails" -> Route.NodeDetail(destNum!!)
             else -> Route.RadioConfig(destNum)
