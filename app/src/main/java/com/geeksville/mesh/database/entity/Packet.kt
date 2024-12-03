@@ -18,10 +18,36 @@
 package com.geeksville.mesh.database.entity
 
 import androidx.room.ColumnInfo
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import androidx.room.Relation
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.MeshProtos.User
+import com.geeksville.mesh.model.Message
+import com.geeksville.mesh.util.getShortDateTime
+
+data class PacketEntity(
+    @Embedded val packet: Packet,
+    @Relation(entity = ReactionEntity::class, parentColumn = "packet_id", entityColumn = "reply_id")
+    val reactions: List<ReactionEntity> = emptyList(),
+) {
+    suspend fun toMessage(getUser: suspend (userId: String?) -> User) = with(packet) {
+        Message(
+            uuid = uuid,
+            receivedTime = received_time,
+            user = getUser(data.from),
+            text = data.text.orEmpty(),
+            time = getShortDateTime(data.time),
+            read = read,
+            status = data.status,
+            routingError = routingError,
+            packetId = packetId,
+            emojis = reactions.toReaction(getUser),
+        )
+    }
+}
 
 @Entity(
     tableName = "packet",
@@ -42,6 +68,7 @@ data class Packet(
     @ColumnInfo(name = "data") val data: DataPacket,
     @ColumnInfo(name = "packet_id", defaultValue = "0") val packetId: Int = 0,
     @ColumnInfo(name = "routing_error", defaultValue = "-1") var routingError: Int = -1,
+    @ColumnInfo(name = "reply_id", defaultValue = "0") val replyId: Int = 0,
 )
 
 @Entity(tableName = "contact_settings")
@@ -51,3 +78,37 @@ data class ContactSettings(
 ) {
     val isMuted get() = System.currentTimeMillis() <= muteUntil
 }
+
+data class Reaction(
+    val replyId: Int,
+    val user: User,
+    val emoji: String,
+    val timestamp: Long,
+)
+
+@Entity(
+    tableName = "reactions",
+    primaryKeys = ["reply_id", "user_id", "emoji"],
+    indices = [
+        Index(value = ["reply_id"]),
+    ],
+)
+data class ReactionEntity(
+    @ColumnInfo(name = "reply_id") val replyId: Int,
+    @ColumnInfo(name = "user_id") val userId: String,
+    val emoji: String,
+    val timestamp: Long,
+)
+
+private suspend fun ReactionEntity.toReaction(
+    getUser: suspend (userId: String?) -> User
+) = Reaction(
+    replyId = replyId,
+    user = getUser(userId),
+    emoji = emoji,
+    timestamp = timestamp,
+)
+
+private suspend fun List<ReactionEntity>.toReaction(
+    getUser: suspend (userId: String?) -> User
+) = this.map { it.toReaction(getUser) }

@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui.map
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +24,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -58,15 +56,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.emoji2.emojipicker.EmojiPickerView
-import androidx.emoji2.emojipicker.RecentEmojiProviderAdapter
 import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.components.EditTextPreference
+import com.geeksville.mesh.ui.components.EmojiPicker
 import com.geeksville.mesh.ui.theme.AppTheme
-import com.geeksville.mesh.util.CustomRecentEmojiProvider
 import com.geeksville.mesh.waypoint
 
 @Suppress("LongMethod")
@@ -184,31 +179,9 @@ internal fun EditWaypointDialog(
             }
         },
     ) else {
-        Column(
-            verticalArrangement = Arrangement.Bottom
-        ) {
-            BackHandler {
-                showEmojiPickerView = false
-            }
-
-            AndroidView(
-                factory = { context ->
-                    EmojiPickerView(context).apply {
-                        clipToOutline = true
-                        setRecentEmojiProvider(
-                            RecentEmojiProviderAdapter(CustomRecentEmojiProvider(context))
-                        )
-                        setOnEmojiPickedListener { emoji ->
-                            showEmojiPickerView = false
-                            waypointInput = waypointInput.copy { icon = emoji.emoji.codePointAt(0) }
-                        }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.4f)
-                    .background(MaterialTheme.colors.background)
-            )
+        EmojiPicker(onDismiss = { showEmojiPickerView = false }) {
+            showEmojiPickerView = false
+            waypointInput = waypointInput.copy { icon = it.codePointAt(0) }
         }
     }
 }
