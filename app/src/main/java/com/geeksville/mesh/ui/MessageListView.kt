@@ -35,6 +35,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.model.Message
+import com.geeksville.mesh.ui.components.ReactionRow
 import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
@@ -45,8 +46,8 @@ internal fun MessageListView(
     messages: List<Message>,
     selectedIds: MutableState<Set<Long>>,
     onUnreadChanged: (Long) -> Unit,
-    onSendTapBack: (String, Int) -> Unit,
     contentPadding: PaddingValues,
+    onSendReaction: (String, Int) -> Unit,
     onClick: (Message) -> Unit = {}
 ) {
     val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
@@ -76,20 +77,20 @@ internal fun MessageListView(
         contentPadding = contentPadding
     ) {
         items(messages, key = { it.uuid }) { msg ->
+            val fromLocal = msg.user.id == DataPacket.ID_LOCAL
             val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
 
+            ReactionRow(fromLocal, msg.emojis) { onSendReaction(it, msg.packetId) }
             MessageItem(
-                shortName = msg.user.shortName.takeIf { msg.user.id != DataPacket.ID_LOCAL },
+                shortName = msg.user.shortName.takeIf { !fromLocal },
                 messageText = msg.text,
                 messageTime = msg.time,
                 messageStatus = msg.status,
                 selected = selected,
-                onClick = { onClick(msg) },
-                onLongClick = { onLongClick(msg) },
-                onChipClick = { onChipClick(msg) },
-                onStatusClick = { showStatusDialog = msg },
-                emojis = msg.emojis,
-                onSendTapBack = { emoji -> onSendTapBack(emoji, msg.messageId) }
+                onClick = { if (inSelectionMode) toggle(msg.uuid) },
+                onLongClick = { toggle(msg.uuid) },
+                onChipClick = { onClick(msg) },
+                onStatusClick = { showStatusDialog = msg }
             )
         }
     }

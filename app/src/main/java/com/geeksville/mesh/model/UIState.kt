@@ -37,7 +37,6 @@ import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
-import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Position
@@ -56,14 +55,12 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
-import com.geeksville.mesh.database.entity.TapBack
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import com.geeksville.mesh.util.getShortDate
-import com.geeksville.mesh.util.getShortDateTime
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -332,22 +329,8 @@ class UIViewModel @Inject constructor(
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey).mapLatest { messages ->
-        messages.map { dataPacket ->
-            Message(
-                uuid = dataPacket.uuid,
-                messageId = dataPacket.data.id,
-                receivedTime = dataPacket.received_time,
-                user = getUser(dataPacket.data.from),
-                text = dataPacket.data.text.orEmpty(),
-                time = getShortDateTime(dataPacket.data.time),
-                read = dataPacket.read,
-                status = dataPacket.data.status,
-                routingError = dataPacket.routingError,
-                emojis = packetRepository.getTapBacksForMessage(dataPacket.data.id).orEmpty(),
-            )
-        }
-    }
+    fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey)
+        .mapLatest { list -> list.map { it.toMessage(::getUser) } }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->
@@ -373,15 +356,6 @@ class UIViewModel @Inject constructor(
         sendDataPacket(p)
     }
 
-    fun sendTapBack(emoji: String, messageId: Int, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
-        // contactKey: unique contact key filter (channel)+(nodeId)
-        val channel = contactKey[0].digitToIntOrNull()
-        val dest = if (channel != null) contactKey.substring(1) else contactKey
-        val p = DataPacket(dest, channel ?: 0, emoji)
-        // todo actually add the tapback - not sure how to add `replyId = messageId` and "emoji=1" to the packet
-        sendDataPacket(p)
-    }
-
     fun sendWaypoint(wpt: MeshProtos.Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
@@ -399,10 +373,8 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun sendTapback(emoji: String, replyId: Int, contactKey: String) {
-        viewModelScope.launch {
-            radioConfigRepository.onServiceAction(ServiceAction.Tapback(emoji, replyId, contactKey))
-        }
+    fun sendReaction(emoji: String, replyId: Int, contactKey: String) = viewModelScope.launch {
+        radioConfigRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey))
     }
 
     fun requestTraceroute(destNum: Int) {

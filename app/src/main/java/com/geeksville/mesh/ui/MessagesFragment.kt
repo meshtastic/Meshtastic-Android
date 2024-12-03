@@ -251,7 +251,8 @@ internal fun MessageScreen(
                 messages = messages,
                 selectedIds = selectedIds,
                 onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
-                contentPadding = innerPadding
+                contentPadding = innerPadding,
+                onSendReaction = { emoji, id -> viewModel.sendReaction(emoji, id, contactKey) },
             ) {
                 // TODO onCLick()
             }

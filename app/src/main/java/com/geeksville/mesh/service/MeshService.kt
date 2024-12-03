@@ -43,7 +43,7 @@ import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
-import com.geeksville.mesh.database.entity.TapBack
+import com.geeksville.mesh.database.entity.ReactionEntity
 import com.geeksville.mesh.database.entity.toNodeInfo
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.getTracerouteResponse
@@ -77,7 +77,7 @@ import javax.inject.Inject
 import kotlin.math.absoluteValue
 
 sealed class ServiceAction {
-    data class Tapback(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
+    data class Reaction(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
 }
 
 /**
@@ -303,7 +303,7 @@ class MeshService : Service(), Logging {
             .launchIn(serviceScope)
         radioConfigRepository.serviceAction.onEach { action ->
             when (action) {
-                is ServiceAction.Tapback -> sendTapback(action)
+                is ServiceAction.Reaction -> sendReaction(action)
             }
         }.launchIn(serviceScope)
 
@@ -631,18 +631,14 @@ class MeshService : Service(), Logging {
         Portnums.PortNum.WAYPOINT_APP_VALUE,
     )
 
-    private fun rememberTapBack(data: MeshProtos.Data) {
-        val tapBack = TapBack(
-            messageId = data.replyId,
-            userId = toNodeID(data.source),
-            emoji = data.payload.toStringUtf8(),
+    private fun rememberReaction(packet: MeshPacket) = serviceScope.handledLaunch {
+        val reaction = ReactionEntity(
+            replyId = packet.decoded.replyId,
+            userId = toNodeID(packet.from),
+            emoji = packet.decoded.payload.toByteArray().decodeToString(),
             timestamp = System.currentTimeMillis(),
         )
-        serviceScope.handledLaunch {
-            packetRepository.get().apply {
-                insertTapBack(tapBack)
-            }
-        }
+        packetRepository.get().insertReaction(reaction)
     }
 
     private fun rememberDataPacket(dataPacket: DataPacket, updateNotification: Boolean = true) {
@@ -697,8 +693,13 @@ class MeshService : Service(), Logging {
 
                 when (data.portnumValue) {
                     Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
-                        debug("Received CLEAR_TEXT from $fromId")
-                        rememberDataPacket(dataPacket)
+                        if (data.emoji != 0) {
+                            debug("Received EMOJI from $fromId")
+                            rememberReaction(packet)
+                        } else {
+                            debug("Received CLEAR_TEXT from $fromId")
+                            rememberDataPacket(dataPacket)
+                        }
                     }
 
                     Portnums.PortNum.WAYPOINT_APP_VALUE -> {
@@ -1756,19 +1757,22 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private fun sendTapback(tapback: ServiceAction.Tapback) = toRemoteExceptions {
+    private fun sendReaction(reaction: ServiceAction.Reaction) = toRemoteExceptions {
         // contactKey: unique contact key filter (channel)+(nodeId)
-        val channel = tapback.contactKey[0].digitToInt()
-        val destNum = tapback.contactKey.substring(1)
+        val channel = reaction.contactKey[0].digitToInt()
+        val destNum = reaction.contactKey.substring(1)
 
-        sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
+        val packet = newMeshPacketTo(destNum).buildMeshPacket(
             channel = channel,
             priority = MeshPacket.Priority.BACKGROUND,
         ) {
-            replyId = tapback.replyId
+            emoji = 1
+            replyId = reaction.replyId
             portnumValue = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE
-            payload = ByteString.copyFrom(tapback.emoji.encodeToByteArray())
-        })
+            payload = ByteString.copyFrom(reaction.emoji.encodeToByteArray())
+        }
+        sendToRadio(packet)
+        rememberReaction(packet.copy { from = myNodeNum })
     }
 
     private val binder = object : IMeshService.Stub() {

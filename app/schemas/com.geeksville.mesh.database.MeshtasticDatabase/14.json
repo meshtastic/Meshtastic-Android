@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 14,
-    "identityHash": "39c7546c92fbdd0c05e7cfed2a4eed98",
+    "identityHash": "b610881191518f933ee6bb694d12d0a2",
     "entities": [
       {
         "tableName": "my_node",
@@ -202,7 +202,7 @@
       },
       {
         "tableName": "packet",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `myNodeNum` INTEGER NOT NULL DEFAULT 0, `port_num` INTEGER NOT NULL, `contact_key` TEXT NOT NULL, `received_time` INTEGER NOT NULL, `read` INTEGER NOT NULL DEFAULT 1, `data` TEXT NOT NULL, `packet_id` INTEGER NOT NULL DEFAULT 0, `routing_error` INTEGER NOT NULL DEFAULT -1)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `myNodeNum` INTEGER NOT NULL DEFAULT 0, `port_num` INTEGER NOT NULL, `contact_key` TEXT NOT NULL, `received_time` INTEGER NOT NULL, `read` INTEGER NOT NULL DEFAULT 1, `data` TEXT NOT NULL, `packet_id` INTEGER NOT NULL DEFAULT 0, `routing_error` INTEGER NOT NULL DEFAULT -1, `reply_id` INTEGER NOT NULL DEFAULT 0)",
         "fields": [
           {
             "fieldPath": "uuid",
@@ -261,6 +261,13 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "-1"
+          },
+          {
+            "fieldPath": "replyId",
+            "columnName": "reply_id",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -449,24 +456,18 @@
         "foreignKeys": []
       },
       {
-        "tableName": "tapbacks",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `messageId` INTEGER NOT NULL, `userId` TEXT NOT NULL, `emoji` TEXT NOT NULL, `timestamp` INTEGER NOT NULL)",
+        "tableName": "reactions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reply_id` INTEGER NOT NULL, `user_id` TEXT NOT NULL, `emoji` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, PRIMARY KEY(`reply_id`, `user_id`, `emoji`))",
         "fields": [
           {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "messageId",
-            "columnName": "messageId",
+            "fieldPath": "replyId",
+            "columnName": "reply_id",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
             "fieldPath": "userId",
-            "columnName": "userId",
+            "columnName": "user_id",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -484,19 +485,31 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": true,
+          "autoGenerate": false,
           "columnNames": [
-            "id"
+            "reply_id",
+            "user_id",
+            "emoji"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_reactions_reply_id",
+            "unique": false,
+            "columnNames": [
+              "reply_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_reactions_reply_id` ON `${TABLE_NAME}` (`reply_id`)"
+          }
+        ],
         "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '39c7546c92fbdd0c05e7cfed2a4eed98')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b610881191518f933ee6bb694d12d0a2')"
     ]
   }
 }

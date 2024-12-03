@@ -1,6 +1,22 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui.components
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -8,7 +24,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
@@ -33,23 +48,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
-import androidx.emoji2.emojipicker.EmojiPickerView
-import androidx.emoji2.emojipicker.RecentEmojiProviderAdapter
-import com.geeksville.mesh.database.entity.TapBack
+import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.ui.theme.AppTheme
-import com.geeksville.mesh.util.CustomRecentEmojiProvider
 
 @Composable
-fun TapBackEmojiItem(
+private fun ReactionItem(
     emoji: String,
     isAddEmojiItem: Boolean = false,
     emojiCount: Int = 1,
-    emojiTapped: () -> Unit = {},
+    onClick: () -> Unit = {},
 ) {
     BadgedBox(
-        modifier = Modifier.padding(8.dp),
+        modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
         badge = {
             if (emojiCount > 1) {
                 Badge(
@@ -66,8 +78,8 @@ fun TapBackEmojiItem(
     ) {
         Surface(
             modifier = Modifier
-                .clickable { emojiTapped() },
-            color = MaterialTheme.colors.primary,
+                .clickable { onClick() },
+            color = MaterialTheme.colors.surface,
             shape = RoundedCornerShape(32.dp),
             elevation = 4.dp,
         ) {
@@ -94,39 +106,39 @@ fun TapBackEmojiItem(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TapBackRow(
+fun ReactionRow(
     fromLocal: Boolean,
-    emojis: List<TapBack> = emptyList(),
-    onSendTapBack: (String) -> Unit = { _ -> },
+    reactions: List<Reaction> = emptyList(),
+    onSendReaction: (String) -> Unit = {}
 ) {
-    val emojiList by remember {
+    val emojiList by remember(reactions) {
         mutableStateOf(
             reduceEmojis(
                 if (fromLocal) {
-                    emojis.map { it.emoji }
+                    reactions.map { it.emoji }
                 } else {
-                    emojis.map { it.emoji }.reversed()
+                    reactions.map { it.emoji }.reversed()
                 }
             ).entries
         )
     }
-    var showEmojiPickerView by remember { mutableStateOf(false) }
-    if (showEmojiPickerView) {
-        EmojiPickerView(
-            emojiSelected = {
-                showEmojiPickerView = false
-                onSendTapBack(it)
+    var showEmojiPickerDialog by remember { mutableStateOf(false) }
+    if (showEmojiPickerDialog) {
+        EmojiPickerDialog(
+            onConfirm = {
+                showEmojiPickerDialog = false
+                onSendReaction(it)
             },
-            dismissPickerView = { showEmojiPickerView = false }
+            onDismiss = { showEmojiPickerDialog = false }
         )
     }
     @Composable
     fun AddEmojiItem() {
-        TapBackEmojiItem(
+        ReactionItem(
             emoji = "\uD83D\uDE42",
             isAddEmojiItem = true,
-            emojiTapped = {
-                showEmojiPickerView = true
+            onClick = {
+                showEmojiPickerDialog = true
             }
         )
     }
@@ -134,106 +146,71 @@ fun TapBackRow(
     @Composable
     fun EmojiList() {
         emojiList.forEach { entry ->
-            TapBackEmojiItem(
+            ReactionItem(
                 emoji = entry.key,
                 emojiCount = entry.value,
-                emojiTapped = {
-                    onSendTapBack(entry.key)
+                onClick = {
+                    onSendReaction(entry.key)
                 }
             )
         }
     }
 
-    if (fromLocal) {
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            EmojiList()
-            AddEmojiItem()
-        }
-    } else {
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Start
-        ) {
-            AddEmojiItem()
-            EmojiList()
-        }
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = if (fromLocal) Arrangement.End else Arrangement.Start
+    ) {
+        EmojiList()
+        AddEmojiItem()
     }
 }
 
-fun reduceEmojis(emojis: List<String>): Map<String, Int> {
-    return emojis.groupingBy { it }.eachCount()
-}
+fun reduceEmojis(emojis: List<String>): Map<String, Int> = emojis.groupingBy { it }.eachCount()
 
-@Suppress("MagicNumber")
 @Composable
-fun EmojiPickerView(
-    emojiSelected: (String) -> Unit,
-    dismissPickerView: () -> Unit = {},
+fun EmojiPickerDialog(
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit = {},
 ) {
     Dialog(
-        onDismissRequest = { dismissPickerView() }
+        onDismissRequest = onDismiss,
     ) {
-        Column(
-            verticalArrangement = Arrangement.Bottom
-        ) {
-            BackHandler {
-                dismissPickerView()
-            }
-            AndroidView(
-                factory = { context ->
-                    EmojiPickerView(context).apply {
-                        clipToOutline = true
-                        setRecentEmojiProvider(
-                            RecentEmojiProviderAdapter(CustomRecentEmojiProvider(context))
-                        )
-                        setOnEmojiPickedListener { emoji ->
-                            dismissPickerView()
-                            emojiSelected(emoji.emoji)
-                        }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.4f)
-                    .background(MaterialTheme.colors.background)
-            )
-        }
+        EmojiPicker(
+            onConfirm = onConfirm,
+            onDismiss = onDismiss,
+        )
     }
 }
 
 @PreviewLightDark
 @Composable
-fun TapBackEmojiPreview() {
+fun ReactionItemPreview() {
     AppTheme {
         Column(
             modifier = Modifier.background(MaterialTheme.colors.background)
         ) {
-            TapBackEmojiItem(emoji = "\uD83D\uDE42")
-            TapBackEmojiItem(emoji = "\uD83D\uDE42", emojiCount = 2)
-            TapBackEmojiItem(emoji = "\uD83D\uDE42", isAddEmojiItem = true)
+            ReactionItem(emoji = "\uD83D\uDE42")
+            ReactionItem(emoji = "\uD83D\uDE42", emojiCount = 2)
+            ReactionItem(emoji = "\uD83D\uDE42", isAddEmojiItem = true)
         }
     }
 }
 
 @Preview
 @Composable
-fun TapBackRowPreview() {
+fun ReactionRowPreview() {
     AppTheme {
-
-        TapBackRow(
-            fromLocal = true, emojis = listOf(
-                TapBack(
-                    messageId = 1,
-                    userId = "1",
+        ReactionRow(
+            fromLocal = true, reactions = listOf(
+                Reaction(
+                    replyId = 1,
+                    user = MeshProtos.User.getDefaultInstance(),
                     emoji = "\uD83D\uDE42",
                     timestamp = 1L
                 ),
-                TapBack(
-                    messageId = 1,
-                    userId = "1",
+                Reaction(
+                    replyId = 1,
+                    user = MeshProtos.User.getDefaultInstance(),
                     emoji = "\uD83D\uDE42",
                     timestamp = 1L
                 ),
