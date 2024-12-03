@@ -79,7 +79,7 @@ internal fun MessageList(
             val fromLocal = msg.user.id == DataPacket.ID_LOCAL
             val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
 
-            ReactionRow(fromLocal, msg.emojis) { onSendReaction(it, msg.packetId) }
+            ReactionRow(fromLocal, msg.emojis) {} // TODO
             MessageItem(
                 shortName = msg.user.shortName.takeIf { !fromLocal },
                 messageText = msg.text,
@@ -89,7 +89,8 @@ internal fun MessageList(
                 onClick = { if (inSelectionMode) toggle(msg.uuid) },
                 onLongClick = { toggle(msg.uuid) },
                 onChipClick = { onClick(msg) },
-                onStatusClick = { showStatusDialog = msg }
+                onStatusClick = { showStatusDialog = msg },
+                onSendReaction = { onSendReaction(it, msg.packetId) },
             )
         }
     }

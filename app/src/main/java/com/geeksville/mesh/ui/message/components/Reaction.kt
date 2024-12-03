@@ -23,25 +23,26 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Badge
 import androidx.compose.material.BadgedBox
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.Add
+import androidx.compose.material.icons.filled.EmojiEmotions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
@@ -55,14 +56,38 @@ import com.geeksville.mesh.ui.components.EmojiPicker
 import com.geeksville.mesh.ui.theme.AppTheme
 
 @Composable
+fun ReactionButton(
+    modifier: Modifier = Modifier,
+    onClick: (String) -> Unit = {}
+) {
+    var showEmojiPickerDialog by remember { mutableStateOf(false) }
+    if (showEmojiPickerDialog) {
+        EmojiPickerDialog(
+            onConfirm = {
+                showEmojiPickerDialog = false
+                onClick(it)
+            },
+            onDismiss = { showEmojiPickerDialog = false }
+        )
+    }
+    IconButton(onClick = { showEmojiPickerDialog = true }) {
+        Icon(
+            imageVector = Icons.Default.EmojiEmotions,
+            contentDescription = "emoji",
+            modifier = modifier.size(16.dp),
+            tint = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
+        )
+    }
+}
+
+@Composable
 private fun ReactionItem(
     emoji: String,
-    isAddEmojiItem: Boolean = false,
     emojiCount: Int = 1,
     onClick: () -> Unit = {},
 ) {
     BadgedBox(
-        modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
+        modifier = Modifier.padding(start = 2.dp, top = 8.dp, end = 2.dp, bottom = 4.dp),
         badge = {
             if (emojiCount > 1) {
                 Badge(
@@ -84,23 +109,12 @@ private fun ReactionItem(
             shape = RoundedCornerShape(32.dp),
             elevation = 4.dp,
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (isAddEmojiItem) {
-                    Icon(
-                        imageVector = Icons.TwoTone.Add,
-                        contentDescription = null,
-                        modifier = Modifier.padding(start = 8.dp),
-                    )
-                }
-                Text(
-                    text = emoji,
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .clip(CircleShape),
-                )
-            }
+            Text(
+                text = emoji,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .clip(CircleShape),
+            )
         }
     }
 }
@@ -123,29 +137,13 @@ fun ReactionRow(
             ).entries
         )
     }
-    var showEmojiPickerDialog by remember { mutableStateOf(false) }
-    if (showEmojiPickerDialog) {
-        EmojiPickerDialog(
-            onConfirm = {
-                showEmojiPickerDialog = false
-                onSendReaction(it)
-            },
-            onDismiss = { showEmojiPickerDialog = false }
-        )
-    }
-    @Composable
-    fun AddEmojiItem() {
-        ReactionItem(
-            emoji = "\uD83D\uDE42",
-            isAddEmojiItem = true,
-            onClick = {
-                showEmojiPickerDialog = true
-            }
-        )
-    }
 
-    @Composable
-    fun EmojiList() {
+    FlowRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = if (fromLocal) Arrangement.End else Arrangement.Start
+    ) {
         emojiList.forEach { entry ->
             ReactionItem(
                 emoji = entry.key,
@@ -155,14 +153,6 @@ fun ReactionRow(
                 }
             )
         }
-    }
-
-    FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (fromLocal) Arrangement.End else Arrangement.Start
-    ) {
-        EmojiList()
-        AddEmojiItem()
     }
 }
 
@@ -192,7 +182,7 @@ fun ReactionItemPreview() {
         ) {
             ReactionItem(emoji = "\uD83D\uDE42")
             ReactionItem(emoji = "\uD83D\uDE42", emojiCount = 2)
-            ReactionItem(emoji = "\uD83D\uDE42", isAddEmojiItem = true)
+            ReactionButton()
         }
     }
 }
