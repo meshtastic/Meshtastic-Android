@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -66,6 +67,7 @@ import com.geeksville.mesh.ui.BatteryInfo
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.theme.Orange
+import java.util.concurrent.TimeUnit
 
 private val DEVICE_METRICS_COLORS = listOf(Color.Green, Color.Magenta, Color.Cyan)
 private const val MAX_PERCENT_VALUE = 100f
@@ -242,14 +244,61 @@ private fun DeviceMetricsChart(
                 }
 
                 /* Battery Line */
-                drawPath(
-                    path = strokePath,
-                    color = DEVICE_METRICS_COLORS[Device.BATTERY.ordinal],
-                    style = Stroke(
-                        width = dataPointRadius,
-                        cap = StrokeCap.Round
+//                drawPath(
+//                    path = strokePath,
+//                    color = DEVICE_METRICS_COLORS[Device.BATTERY.ordinal],
+//                    style = Stroke(
+//                        width = dataPointRadius,
+//                        cap = StrokeCap.Round
+//                    )
+//                )
+
+                // TODO this works to draw lines only according to it's time
+                //  Can this be made into a function that could be reused for other graphs???
+                var index = 0
+                var timeBreak = false
+                while (index < telemetries.size) {
+                    val testPath = Path().apply {
+                        while(index < telemetries.size) {
+                            val telemetry = telemetries[index]
+                            val nextTelemetry = telemetries.getOrNull(index + 1) ?: telemetries.last()
+
+                            /* Check to see if we have a significant time break between telemetries. */
+                            if (nextTelemetry.time - telemetry.time > TimeUnit.HOURS.toSeconds(2)) {
+                                timeBreak = true
+                                index++
+                                break
+                            }
+
+                            val x1Ratio = (telemetry.time - oldest.time).toFloat() / timeDiff
+                            val x1 = x1Ratio * width
+                            val y1Ratio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
+                            val y1 = height - (y1Ratio * height)
+
+                            val x2Ratio = (nextTelemetry.time - oldest.time).toFloat() / timeDiff
+                            val x2 = x2Ratio * width
+                            val y2Ratio = nextTelemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
+                            val y2 = height - (y2Ratio * height)
+
+                            if (timeBreak || index == 0) {
+                                timeBreak = false
+                                moveTo(x1, y1)
+                            }
+
+                            quadraticTo(x1, y1, (x1 + x2) / 2f, (y1 + y2) / 2f)
+
+                            index++
+                        }
+                    }
+                    drawPath(
+                        path = testPath,
+                        color = DEVICE_METRICS_COLORS[Device.BATTERY.ordinal],
+                        style = Stroke(
+                            width = dataPointRadius,
+                            cap = StrokeCap.Round
+                        )
                     )
-                )
+                }
             }
         }
         YAxisLabels(
