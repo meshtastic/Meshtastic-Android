@@ -133,7 +133,7 @@
     <ID>FinalNewline:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
     <ID>ForbiddenComment:MapFragment.kt$// TODO: Accept filename input param from user</ID>
     <ID>ForbiddenComment:SafeBluetooth.kt$SafeBluetooth$// TODO: display some kind of UI about restarting BLE</ID>
-    <ID>FunctionNaming:PacketDao.kt$PacketDao$@Query("DELETE FROM packet WHERE uuid=:uuid") fun _delete(uuid: Long)</ID>
+    <ID>FunctionNaming:PacketDao.kt$PacketDao$@Query("DELETE FROM packet WHERE uuid=:uuid") suspend fun _delete(uuid: Long)</ID>
     <ID>FunctionNaming:QuickChatActionDao.kt$QuickChatActionDao$@Query("Delete from quick_chat where uuid=:uuid") fun _delete(uuid: Long)</ID>
     <ID>FunctionParameterNaming:LocationUtils.kt$_degIn: Double</ID>
     <ID>FunctionParameterNaming:LocationUtils.kt$lat_a: Double</ID>
@@ -231,7 +231,6 @@
     <ID>MagicNumber:EditListPreference.kt$12</ID>
     <ID>MagicNumber:EditListPreference.kt$12345</ID>
     <ID>MagicNumber:EditListPreference.kt$67890</ID>
-    <ID>MagicNumber:EditWaypointDialog.kt$0.4f</ID>
     <ID>MagicNumber:EditWaypointDialog.kt$123</ID>
     <ID>MagicNumber:EditWaypointDialog.kt$128169</ID>
     <ID>MagicNumber:EditWaypointDialog.kt$128205</ID>
@@ -284,7 +283,6 @@
     <ID>MagicNumber:MeshService.kt$MeshService$32</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$60000</ID>
     <ID>MagicNumber:MeshService.kt$MeshService$8</ID>
-    <ID>MagicNumber:MessagesFragment.kt$MessagesFragment$200</ID>
     <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1000L</ID>
     <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-5</ID>
     <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-7</ID>
@@ -369,7 +367,6 @@
     <ID>MagicNumber:TCPInterface.kt$TCPInterface$500</ID>
     <ID>MagicNumber:UIState.kt$4</ID>
     <ID>MatchingDeclarationName:AnalyticsClient.kt$AnalyticsProvider</ID>
-    <ID>MatchingDeclarationName:CompatExtensions.kt$PendingIntentCompat</ID>
     <ID>MatchingDeclarationName:DistanceExtensions.kt$DistanceUnit</ID>
     <ID>MatchingDeclarationName:LocationUtils.kt$GPSFormat</ID>
     <ID>MatchingDeclarationName:MeshServiceStarter.kt$ServiceStarter : Worker</ID>
@@ -484,7 +481,6 @@
     <ID>MultiLineIfElse:Channel.kt$Channel$when (loraConfig.modemPreset) { ModemPreset.SHORT_TURBO -&gt; "ShortTurbo" ModemPreset.SHORT_FAST -&gt; "ShortFast" ModemPreset.SHORT_SLOW -&gt; "ShortSlow" ModemPreset.MEDIUM_FAST -&gt; "MediumFast" ModemPreset.MEDIUM_SLOW -&gt; "MediumSlow" ModemPreset.LONG_FAST -&gt; "LongFast" ModemPreset.LONG_SLOW -&gt; "LongSlow" ModemPreset.LONG_MODERATE -&gt; "LongMod" ModemPreset.VERY_LONG_SLOW -&gt; "VLongSlow" else -&gt; "Invalid" }</ID>
     <ID>MultiLineIfElse:ChannelFragment.kt$channelSet = copy { settings.add(it) }</ID>
     <ID>MultiLineIfElse:ChannelFragment.kt$channelSet = copy { settings[index] = it }</ID>
-    <ID>MultiLineIfElse:ChannelFragment.kt$item { PreferenceFooter( enabled = enabled, onCancelClicked = { focusManager.clearFocus() showChannelEditor = false channelSet = channels }, onSaveClicked = { focusManager.clearFocus() // viewModel.setRequestChannelUrl(channelUrl) sendButton() }) }</ID>
     <ID>MultiLineIfElse:ChannelOption.kt$when (bandwidth) { 31 -&gt; .03125f 62 -&gt; .0625f 200 -&gt; .203125f 400 -&gt; .40625f 800 -&gt; .8125f 1600 -&gt; 1.6250f else -&gt; bandwidth / 1000f }</ID>
     <ID>MultiLineIfElse:ContextServices.kt$MaterialAlertDialogBuilder(this) .setTitle(title) .setMessage(rationale) .setNeutralButton(R.string.cancel) { _, _ -&gt; } .setPositiveButton(R.string.accept) { _, _ -&gt; invokeFun() } .show()</ID>
     <ID>MultiLineIfElse:ContextServices.kt$invokeFun()</ID>
@@ -610,7 +606,6 @@
     <ID>NoConsecutiveBlankLines:IRadioInterface.kt$ </ID>
     <ID>NoConsecutiveBlankLines:NOAAWmsTileSource.kt$NOAAWmsTileSource$ </ID>
     <ID>NoConsecutiveBlankLines:NodeInfo.kt$ </ID>
-    <ID>NoConsecutiveBlankLines:PositionTest.kt$ </ID>
     <ID>NoConsecutiveBlankLines:PreviewParameterProviders.kt$ </ID>
     <ID>NoConsecutiveBlankLines:SafeBluetooth.kt$ </ID>
     <ID>NoConsecutiveBlankLines:SafeBluetooth.kt$SafeBluetooth$ </ID>
@@ -629,7 +624,6 @@
     <ID>NoWildcardImports:SafeBluetooth.kt$import android.bluetooth.*</ID>
     <ID>NoWildcardImports:SafeBluetooth.kt$import kotlinx.coroutines.*</ID>
     <ID>NoWildcardImports:SettingsFragment.kt$import com.geeksville.mesh.android.*</ID>
-    <ID>NoWildcardImports:UIState.kt$import com.geeksville.mesh.*</ID>
     <ID>NoWildcardImports:UsbRepository.kt$import kotlinx.coroutines.flow.*</ID>
     <ID>OptionalAbstractKeyword:SyncContinuation.kt$Continuation$abstract</ID>
     <ID>ParameterListWrapping:AppPrefs.kt$FloatPref$(thisRef: AppPrefs, prop: KProperty&lt;Float&gt;)</ID>
@@ -641,7 +635,6 @@
     <ID>RethrowCaughtException:SyncContinuation.kt$Continuation$throw ex</ID>
     <ID>ReturnCount:ChannelOption.kt$internal fun LoRaConfig.radioFreq(channelNum: Int): Float</ID>
     <ID>ReturnCount:MainActivity.kt$MainActivity$override fun onOptionsItemSelected(item: MenuItem): Boolean</ID>
-    <ID>ReturnCount:MeshService.kt$MeshService$private fun handleReceivedData(packet: MeshPacket)</ID>
     <ID>ReturnCount:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
     <ID>SpacingAroundColon:PreviewParameterProviders.kt$NodeInfoPreviewParameterProvider$:</ID>
     <ID>SpacingAroundCurly:AppPrefs.kt$FloatPref$}</ID>
@@ -652,7 +645,6 @@
     <ID>SpacingAroundRangeOperator:BatteryInfo.kt$..</ID>
     <ID>StringTemplate:NodeInfo.kt$Position$${time}</ID>
     <ID>SwallowedException:BluetoothInterface.kt$BluetoothInterface$ex: CancellationException</ID>
-    <ID>SwallowedException:ChannelFragment.kt$ex: Throwable</ID>
     <ID>SwallowedException:ChannelSet.kt$ex: Throwable</ID>
     <ID>SwallowedException:DeviceVersion.kt$DeviceVersion$e: Exception</ID>
     <ID>SwallowedException:Exceptions.kt$ex: Throwable</ID>
@@ -672,7 +664,6 @@
     <ID>TooGenericExceptionCaught:BTScanModel.kt$BTScanModel$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:BluetoothInterface.kt$BluetoothInterface$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:ChannelFragment.kt$ex: Exception</ID>
-    <ID>TooGenericExceptionCaught:ChannelFragment.kt$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:ChannelSet.kt$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:DeviceVersion.kt$DeviceVersion$e: Exception</ID>
     <ID>TooGenericExceptionCaught:Exceptions.kt$ex: Throwable</ID>
@@ -748,7 +739,6 @@
     <ID>WildcardImport:SafeBluetooth.kt$import android.bluetooth.*</ID>
     <ID>WildcardImport:SafeBluetooth.kt$import kotlinx.coroutines.*</ID>
     <ID>WildcardImport:SettingsFragment.kt$import com.geeksville.mesh.android.*</ID>
-    <ID>WildcardImport:UIState.kt$import com.geeksville.mesh.*</ID>
     <ID>WildcardImport:UsbRepository.kt$import kotlinx.coroutines.flow.*</ID>
   </CurrentIssues>
 </SmellBaseline>
