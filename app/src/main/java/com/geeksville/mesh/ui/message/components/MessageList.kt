@@ -34,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import kotlinx.coroutines.FlowPreview
@@ -63,6 +64,12 @@ internal fun MessageList(
         SimpleAlertDialog(title = title, text = text) { showStatusDialog = null }
     }
 
+    var showReactionDialog by remember { mutableStateOf<List<Reaction>?>(null) }
+    if (showReactionDialog != null) {
+        val reactions = showReactionDialog ?: return
+        ReactionDialog(reactions) { showReactionDialog = null }
+    }
+
     fun toggle(uuid: Long) = if (selectedIds.value.contains(uuid)) {
         selectedIds.value -= uuid
     } else {
@@ -79,7 +86,7 @@ internal fun MessageList(
             val fromLocal = msg.user.id == DataPacket.ID_LOCAL
             val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
 
-            ReactionRow(fromLocal, msg.emojis) {} // TODO
+            ReactionRow(fromLocal, msg.emojis) { showReactionDialog = msg.emojis }
             MessageItem(
                 shortName = msg.user.shortName.takeIf { !fromLocal },
                 messageText = msg.text,

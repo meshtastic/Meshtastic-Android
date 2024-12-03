@@ -56,8 +56,21 @@ fun EmojiPicker(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(fraction = 0.4f)
                 .background(MaterialTheme.colors.background)
         )
     }
+}
+
+@Composable
+fun EmojiPickerDialog(
+    onDismiss: () -> Unit = {},
+    onConfirm: (String) -> Unit
+) = BottomSheetDialog(
+    onDismiss = onDismiss,
+    modifier = Modifier.fillMaxHeight(fraction = .4f),
+) {
+    EmojiPicker(
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
+    )
 }

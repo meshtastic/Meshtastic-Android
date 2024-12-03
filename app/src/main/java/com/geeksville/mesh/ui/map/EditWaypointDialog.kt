@@ -60,7 +60,7 @@ import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.components.EditTextPreference
-import com.geeksville.mesh.ui.components.EmojiPicker
+import com.geeksville.mesh.ui.components.EmojiPickerDialog
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.waypoint
 
@@ -179,7 +179,7 @@ internal fun EditWaypointDialog(
             }
         },
     ) else {
-        EmojiPicker(onDismiss = { showEmojiPickerView = false }) {
+        EmojiPickerDialog(onDismiss = { showEmojiPickerView = false }) {
             showEmojiPickerView = false
             waypointInput = waypointInput.copy { icon = it.codePointAt(0) }
         }
