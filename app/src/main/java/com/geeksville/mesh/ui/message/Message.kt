@@ -67,6 +67,7 @@ import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.pluralStringResource
@@ -387,6 +388,7 @@ private fun TextInput(
     maxSize: Int = 200,
     onClick: (String) -> Unit = {}
 ) = Column(modifier) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     var isFocused by remember { mutableStateOf(false) }
 
     Row(
@@ -417,6 +419,7 @@ private fun TextInput(
                 if (message.value.text.isNotEmpty()) {
                     onClick(message.value.text)
                     message.value = TextFieldValue("")
+                    keyboardController?.hide()
                 }
             },
             modifier = Modifier.size(48.dp),
