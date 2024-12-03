@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui
 
 import android.app.Activity
@@ -17,8 +34,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
@@ -48,7 +65,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
-import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.config.EditDeviceProfileDialog
@@ -62,12 +78,10 @@ private fun getNavRouteFrom(routeName: String): Any? {
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun RadioConfigScreen(
-    node: NodeEntity?,
     viewModel: RadioConfigViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
     onNavigate: (Any) -> Unit = {}
 ) {
-    val isLocal = node?.num == viewModel.myNodeNum
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
 
@@ -123,7 +137,7 @@ fun RadioConfigScreen(
                     val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                         addCategory(Intent.CATEGORY_OPENABLE)
                         type = "application/*"
-                        putExtra(Intent.EXTRA_TITLE, "${node!!.num.toUInt()}.cfg")
+                        putExtra(Intent.EXTRA_TITLE, "device_profile.cfg")
                     }
                     exportConfigLauncher.launch(intent)
                 }
@@ -137,7 +151,7 @@ fun RadioConfigScreen(
 
     RadioConfigItemList(
         enabled = state.connected && !isWaiting,
-        isLocal = isLocal,
+        isLocal = state.isLocal,
         modifier = modifier,
         onRouteClick = { route ->
             isWaiting = true

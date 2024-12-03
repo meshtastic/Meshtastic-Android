@@ -1,11 +1,22 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.repeatable
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,7 +63,7 @@ import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.ui.components.MenuItemAction
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenu
-import com.geeksville.mesh.ui.components.SimpleAlertDialog
+import com.geeksville.mesh.ui.components.SignalInfo
 import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
 import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
@@ -70,7 +81,6 @@ fun NodeItem(
     tempInFahrenheit: Boolean,
     ignoreIncomingList: List<Int> = emptyList(),
     menuItemActionClicked: (MenuItemAction) -> Unit = {},
-    blinking: Boolean = false,
     expanded: Boolean = false,
     currentTimeMillis: Long,
     isConnected: Boolean = false,
@@ -95,16 +105,6 @@ fun NodeItem(
         thatNode.user.role.name
     }
 
-    val bgColor by animateColorAsState(
-        targetValue = if (blinking) Color(color = 0x33FFFFFF) else Color.Transparent,
-        animationSpec = repeatable(
-            iterations = 6,
-            animation = tween(durationMillis = 250, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "blinking node"
-    )
-
     val style = if (thatNode.isUnknownUser) {
         LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)
     } else {
@@ -112,16 +112,6 @@ fun NodeItem(
     }
 
     val (detailsShown, showDetails) = remember { mutableStateOf(expanded) }
-
-    var showEncryptionDialog by remember { mutableStateOf(false) }
-    if (showEncryptionDialog) {
-        val (title, text) = when {
-            thatNode.mismatchKey -> R.string.encryption_error to R.string.encryption_error_text
-            thatNode.hasPKC -> R.string.encryption_pkc to R.string.encryption_pkc_text
-            else -> R.string.encryption_psk to R.string.encryption_psk_text
-        }
-        SimpleAlertDialog(title, text) { showEncryptionDialog = false }
-    }
 
     Card(
         modifier = Modifier
@@ -135,8 +125,7 @@ fun NodeItem(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
-                    .background(bgColor),
+                    .padding(8.dp),
             ) {
                 Row(
                     modifier = Modifier
@@ -182,7 +171,7 @@ fun NodeItem(
                         hasPKC = thatNode.hasPKC,
                         mismatchKey = thatNode.mismatchKey,
                         modifier = Modifier.size(32.dp)
-                    ) { showEncryptionDialog = true }
+                    )
                     Text(
                         modifier = Modifier.weight(1f),
                         text = longName,
@@ -218,8 +207,9 @@ fun NodeItem(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    signalInfo(
+                    SignalInfo(
                         node = thatNode,
                         isThisNode = isThisNode
                     )

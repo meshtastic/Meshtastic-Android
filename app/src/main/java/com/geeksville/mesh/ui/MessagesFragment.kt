@@ -1,45 +1,103 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.view.ActionMode
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.toMutableStateList
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
-import androidx.core.view.allViews
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.asLiveData
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.geeksville.mesh.DataPacket
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.QuickChatAction
-import com.geeksville.mesh.databinding.MessagesFragmentBinding
-import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
+import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.theme.AppTheme
-import com.geeksville.mesh.util.Utf8ByteLengthFilter
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 
-internal fun FragmentManager.navigateToMessages(contactKey: String, contactName: String) {
+internal fun FragmentManager.navigateToMessages(contactKey: String, message: String = "") {
     val messagesFragment = MessagesFragment().apply {
-        arguments = bundleOf("contactKey" to contactKey, "contactName" to contactName)
+        arguments = bundleOf("contactKey" to contactKey, "message" to message)
     }
     beginTransaction()
         .add(R.id.mainActivityLayout, messagesFragment)
@@ -49,246 +107,345 @@ internal fun FragmentManager.navigateToMessages(contactKey: String, contactName:
 
 @AndroidEntryPoint
 class MessagesFragment : Fragment(), Logging {
-
-    private val actionModeCallback: ActionModeCallback = ActionModeCallback()
-    private var actionMode: ActionMode? = null
-    private var _binding: MessagesFragmentBinding? = null
-
-    // This property is only valid between onCreateView and onDestroyView.
-    private val binding get() = _binding!!
-
     private val model: UIViewModel by activityViewModels()
-
-    private lateinit var contactKey: String
-
-    private val selectedList = emptyList<Message>().toMutableStateList()
-
-    private fun onClick(message: Message) {
-        if (actionMode != null) {
-            onLongClick(message)
-        }
-    }
-
-    private fun onLongClick(message: Message) {
-        if (actionMode == null) {
-            actionMode = (activity as AppCompatActivity).startSupportActionMode(actionModeCallback)
-        }
-        selectedList.apply {
-            if (contains(message)) remove(message) else add(message)
-        }
-        if (selectedList.isEmpty()) {
-            // finish action mode when no items selected
-            actionMode?.finish()
-        } else {
-            // show total items selected on action mode title
-            actionMode?.title = selectedList.size.toString()
-        }
-    }
-
-    override fun onPause() {
-        actionMode?.finish()
-        super.onPause()
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = MessagesFragmentBinding.inflate(inflater, container, false)
-        return binding.root
+        val contactKey = arguments?.getString("contactKey").toString()
+        val message = arguments?.getString("message").toString()
+
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setBackgroundColor(ContextCompat.getColor(context, R.color.colorAdvancedBackground))
+            setContent {
+                AppTheme {
+                    MessageScreen(
+                        contactKey = contactKey,
+                        message = message,
+                        viewModel = model,
+                    ) { parentFragmentManager.popBackStack() }
+                }
+            }
+        }
+    }
+}
+
+sealed class MessageMenuAction {
+    data object ClipboardCopy : MessageMenuAction()
+    data object Delete : MessageMenuAction()
+    data object Dismiss : MessageMenuAction()
+    data object SelectAll : MessageMenuAction()
+}
+
+@Suppress("LongMethod", "CyclomaticComplexMethod")
+@Composable
+internal fun MessageScreen(
+    contactKey: String,
+    message: String,
+    viewModel: UIViewModel = hiltViewModel(),
+    onNavigateBack: () -> Unit
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val clipboardManager = LocalClipboardManager.current
+
+    val channelIndex = contactKey[0].digitToIntOrNull()
+    val nodeId = contactKey.substring(1)
+    val channelName = channelIndex?.let { viewModel.channels.value.getChannel(it)?.name }
+        ?: "Unknown Channel"
+
+    val title = when (nodeId) {
+        DataPacket.ID_BROADCAST -> channelName
+        else -> viewModel.getUser(nodeId).longName
     }
 
-    @Suppress("LongMethod", "CyclomaticComplexMethod")
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+//    if (channelIndex != DataPacket.PKC_CHANNEL_INDEX && nodeId != DataPacket.ID_BROADCAST) {
+//        subtitle = "(ch: $channelIndex - $channelName)"
+//    }
 
-        binding.toolbar.setNavigationOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
+    val selectedIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
+    val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
 
-        contactKey = arguments?.getString("contactKey").toString()
-        val contactName = arguments?.getString("contactName").toString()
-        binding.toolbar.title = contactName
-        val channelNumber = contactKey[0].digitToIntOrNull()
-        if (channelNumber == DataPacket.PKC_CHANNEL_INDEX) {
-            binding.toolbar.title = "$contactName🔒"
-        } else if (channelNumber != null && contactKey.substring(1) != DataPacket.ID_BROADCAST) {
-            lifecycleScope.launch {
-                repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    model.channels.collect { channels ->
-                        val channelName =
-                            channels.getChannel(channelNumber)?.name ?: "Unknown Channel"
-                        val subtitle = "(ch: $channelNumber - $channelName)"
-                        binding.toolbar.subtitle = subtitle
-                    }
-                }
-            }
-        }
+    val connState by viewModel.connectionState.collectAsStateWithLifecycle()
+    val quickChat by viewModel.quickChatActions.collectAsStateWithLifecycle()
+    val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(listOf())
 
-        fun sendMessageInputText() {
-            val str = binding.messageInputText.text.toString().trim()
-            if (str.isNotEmpty()) {
-                model.sendMessage(str, contactKey)
-            }
-            binding.messageInputText.setText("") // blow away the string the user just entered
-            // requireActivity().hideKeyboard()
-        }
+    val messageInput = rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue(message))
+    }
 
-        binding.sendButton.setOnClickListener {
-            debug("User clicked sendButton")
-            sendMessageInputText()
-        }
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    if (showDeleteDialog) {
+        DeleteMessageDialog(
+            size = selectedIds.value.size,
+            onConfirm = {
+                viewModel.deleteMessages(selectedIds.value.toList())
+                selectedIds.value = emptySet()
+                showDeleteDialog = false
+            },
+            onDismiss = { showDeleteDialog = false }
+        )
+    }
 
-        // max payload length should be 237 bytes but anything over 235 bytes crashes the radio
-        binding.messageInputText.filters += Utf8ByteLengthFilter(234)
+    Scaffold(
+        topBar = {
+            if (inSelectionMode) {
+                ActionModeTopBar(selectedIds.value) { action ->
+                    when (action) {
+                        MessageMenuAction.ClipboardCopy -> coroutineScope.launch {
+                            val copiedText = messages
+                                .filter { it.uuid in selectedIds.value }
+                                .joinToString("\n") { it.text }
 
-        binding.messageListView.setContent {
-            val messages by model.getMessagesFrom(contactKey).collectAsStateWithLifecycle(listOf())
-
-            AppTheme {
-                if (messages.isNotEmpty()) {
-                    MessageListView(
-                        messages = messages,
-                        selectedList = selectedList,
-                        onClick = ::onClick,
-                        onLongClick = ::onLongClick,
-                        onChipClick = ::openNodeInfo,
-                        onUnreadChanged = { model.clearUnreadCount(contactKey, it) },
-                        onSendTapBack = { emoji, messageId ->
-                            model.sendTapBack(emoji, messageId, contactKey)
+                            clipboardManager.setText(AnnotatedString(copiedText))
+                            selectedIds.value = emptySet()
                         }
-                    )
-                }
-            }
-        }
 
-        // If connection state _OR_ myID changes we have to fix our ability to edit outgoing messages
-        model.connectionState.asLiveData().observe(viewLifecycleOwner) {
-            // If we don't know our node ID and we are offline don't let user try to send
-            val isConnected = model.isConnected()
-            binding.textInputLayout.isEnabled = isConnected
-            binding.sendButton.isEnabled = isConnected
-            for (subView: View in binding.quickChatLayout.allViews) {
-                if (subView is Button) {
-                    subView.isEnabled = isConnected
-                }
-            }
-        }
+                        MessageMenuAction.Delete -> {
+                            showDeleteDialog = true
+                        }
 
-        model.quickChatActions.asLiveData().observe(viewLifecycleOwner) { actions ->
-            actions?.let {
-                // This seems kinda hacky it might be better to replace with a recycler view
-                binding.quickChatLayout.removeAllViews()
-                for (action in actions) {
-                    val button = Button(context)
-                    button.text = action.name
-                    button.isEnabled = model.isConnected()
-                    if (action.mode == QuickChatAction.Mode.Instant) {
-                        button.backgroundTintList =
-                            ContextCompat.getColorStateList(requireActivity(), R.color.colorMyMsg)
-                    }
-                    button.setOnClickListener {
-                        if (action.mode == QuickChatAction.Mode.Append) {
-                            val originalText = binding.messageInputText.text ?: ""
-                            val needsSpace =
-                                !originalText.endsWith(' ') && originalText.isNotEmpty()
-                            val newText = buildString {
-                                append(originalText)
-                                if (needsSpace) append(' ')
-                                append(action.message)
+                        MessageMenuAction.Dismiss -> selectedIds.value = emptySet()
+                        MessageMenuAction.SelectAll -> {
+                            if (selectedIds.value.size == messages.size) {
+                                selectedIds.value = emptySet()
+                            } else {
+                                selectedIds.value = messages.map { it.uuid }.toSet()
                             }
-                            binding.messageInputText.setText(newText)
-                            binding.messageInputText.setSelection(newText.length)
-                        } else {
-                            model.sendMessage(action.message, contactKey)
                         }
                     }
-                    binding.quickChatLayout.addView(button)
                 }
+            } else {
+                MessageTopBar(title, channelIndex, onNavigateBack)
+            }
+        },
+        bottomBar = {
+            val isConnected = connState.isConnected()
+            Column(
+                modifier = Modifier
+                    .background(MaterialTheme.colors.background)
+                    .padding(start = 8.dp, end = 8.dp, bottom = 4.dp),
+            ) {
+                QuickChatRow(isConnected, quickChat) { action ->
+                    if (action.mode == QuickChatAction.Mode.Append) {
+                        val originalText = messageInput.value.text
+                        val needsSpace = !originalText.endsWith(' ') && originalText.isNotEmpty()
+                        val newText = buildString {
+                            append(originalText)
+                            if (needsSpace) append(' ')
+                            append(action.message)
+                        }
+                        messageInput.value = TextFieldValue(newText, TextRange(newText.length))
+                    } else {
+                        viewModel.sendMessage(action.message, contactKey)
+                    }
+                }
+                TextInput(isConnected, messageInput) { viewModel.sendMessage(it, contactKey) }
+            }
+        }
+    ) { innerPadding ->
+        if (messages.isNotEmpty()) {
+            MessageListView(
+                messages = messages,
+                selectedIds = selectedIds,
+                onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
+                contentPadding = innerPadding
+            ) {
+                // TODO onCLick()
             }
         }
     }
+}
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        actionMode?.finish()
-        actionMode = null
-        _binding = null
-    }
+@Composable
+private fun DeleteMessageDialog(
+    size: Int,
+    onConfirm: () -> Unit = {},
+    onDismiss: () -> Unit = {},
+) {
+    val deleteMessagesString = pluralStringResource(R.plurals.delete_messages, size, size)
 
-    private inner class ActionModeCallback : ActionMode.Callback {
-        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            mode.menuInflater.inflate(R.menu.menu_messages, menu)
-            menu.findItem(R.id.muteButton).isVisible = false
-            mode.title = "1"
-            return true
-        }
-
-        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            return false
-        }
-
-        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            when (item.itemId) {
-                R.id.deleteButton -> {
-                    val deleteMessagesString = resources.getQuantityString(
-                        R.plurals.delete_messages,
-                        selectedList.size,
-                        selectedList.size
-                    )
-                    MaterialAlertDialogBuilder(requireContext())
-                        .setMessage(deleteMessagesString)
-                        .setPositiveButton(getString(R.string.delete)) { _, _ ->
-                            debug("User clicked deleteButton")
-                            model.deleteMessages(selectedList.map { it.uuid })
-                            mode.finish()
-                        }
-                        .setNeutralButton(R.string.cancel) { _, _ ->
-                        }
-                        .show()
-                }
-                R.id.selectAllButton -> lifecycleScope.launch {
-                    model.getMessagesFrom(contactKey).firstOrNull()?.let { messages ->
-                        if (selectedList.size == messages.size) {
-                            // if all selected -> unselect all
-                            selectedList.clear()
-                            mode.finish()
-                        } else {
-                            // else --> select all
-                            selectedList.clear()
-                            selectedList.addAll(messages)
-                        }
-                        actionMode?.title = selectedList.size.toString()
-                    }
-                }
-
-                R.id.resendButton -> lifecycleScope.launch {
-                    debug("User clicked resendButton")
-                    var resendText = ""
-                    selectedList.forEach {
-                        resendText = resendText + it.text + System.lineSeparator()
-                    }
-                    if (resendText != "") {
-                        resendText = resendText.substring(0, resendText.length - 1)
-                    }
-                    binding.messageInputText.setText(resendText)
-                    mode.finish()
-                }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        shape = RoundedCornerShape(16.dp),
+        backgroundColor = MaterialTheme.colors.background,
+        text = {
+            Text(
+                text = deleteMessagesString,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(stringResource(R.string.delete))
             }
-            return true
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
         }
+    )
+}
 
-        override fun onDestroyActionMode(mode: ActionMode) {
-            selectedList.clear()
-            actionMode = null
+@Composable
+private fun ActionModeTopBar(
+    selectedList: Set<Long>,
+    onAction: (MessageMenuAction) -> Unit,
+) = TopAppBar(
+    title = { Text(text = selectedList.size.toString()) },
+    navigationIcon = {
+        IconButton(onClick = { onAction(MessageMenuAction.Dismiss) }) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(id = R.string.clear),
+            )
+        }
+    },
+    actions = {
+        IconButton(onClick = { onAction(MessageMenuAction.ClipboardCopy) }) {
+            Icon(
+                imageVector = Icons.Default.ContentCopy,
+                contentDescription = stringResource(id = R.string.copy)
+            )
+        }
+        IconButton(onClick = { onAction(MessageMenuAction.Delete) }) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = stringResource(id = R.string.delete)
+            )
+        }
+        IconButton(onClick = { onAction(MessageMenuAction.SelectAll) }) {
+            Icon(
+                imageVector = Icons.Default.SelectAll,
+                contentDescription = stringResource(id = R.string.select_all)
+            )
+        }
+    },
+    backgroundColor = MaterialTheme.colors.primary,
+)
+
+@Composable
+private fun MessageTopBar(
+    title: String,
+    channelIndex: Int?,
+    onNavigateBack: () -> Unit
+) = TopAppBar(
+    title = { Text(text = title) },
+    navigationIcon = {
+        IconButton(onClick = onNavigateBack) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(id = R.string.navigate_back),
+            )
+        }
+    },
+    actions = {
+        if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
+            NodeKeyStatusIcon(hasPKC = true, mismatchKey = false)
         }
     }
+)
 
-    private fun openNodeInfo(msg: Message) = lifecycleScope.launch {
-        model.nodeList.firstOrNull()?.find { it.user.id == msg.user.id }?.let { node ->
-            parentFragmentManager.popBackStack()
-            model.focusUserNode(node)
+@Composable
+private fun QuickChatRow(
+    enabled: Boolean,
+    actions: List<QuickChatAction>,
+    modifier: Modifier = Modifier,
+    onClick: (QuickChatAction) -> Unit
+) {
+    LazyRow(
+        modifier = modifier,
+    ) {
+        items(actions, key = { it.uuid }) { action ->
+            Button(
+                onClick = { onClick(action) },
+                modifier = Modifier.padding(horizontal = 4.dp),
+                enabled = enabled,
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = colorResource(id = R.color.colorMyMsg),
+                )
+            ) {
+                Text(
+                    text = action.name,
+                )
+            }
         }
+    }
+}
+
+@Composable
+private fun TextInput(
+    enabled: Boolean,
+    message: MutableState<TextFieldValue>,
+    modifier: Modifier = Modifier,
+    maxSize: Int = 200,
+    onClick: (String) -> Unit = {}
+) = Column(modifier) {
+    var isFocused by remember { mutableStateOf(false) }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        TextField(
+            value = message.value,
+            onValueChange = {
+                if (it.text.toByteArray().size <= maxSize) {
+                    message.value = it
+                }
+            },
+            modifier = Modifier
+                .weight(1f)
+                .onFocusEvent { isFocused = it.isFocused },
+            enabled = enabled,
+            placeholder = { Text(stringResource(id = R.string.send_text)) },
+            maxLines = 3,
+            shape = RoundedCornerShape(24.dp),
+            colors = TextFieldDefaults.textFieldColors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+            )
+        )
+        Spacer(Modifier.width(8.dp))
+        Button(
+            onClick = {
+                if (message.value.text.isNotEmpty()) {
+                    onClick(message.value.text)
+                    message.value = TextFieldValue("")
+                }
+            },
+            modifier = Modifier.size(48.dp),
+            enabled = enabled,
+            shape = CircleShape,
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Default.Send,
+                contentDescription = stringResource(id = R.string.send_text),
+                modifier = Modifier.scale(scale = 1.5f),
+            )
+        }
+    }
+    if (isFocused) {
+        Text(
+            text = "${message.value.text.toByteArray().size}/$maxSize",
+            style = MaterialTheme.typography.caption,
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(top = 4.dp, end = 72.dp)
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun TextInputPreview() {
+    AppTheme {
+        TextInput(
+            enabled = true,
+            message = remember { mutableStateOf(TextFieldValue("")) },
+        )
     }
 }

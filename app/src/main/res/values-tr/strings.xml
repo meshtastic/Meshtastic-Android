@@ -27,9 +27,12 @@
     <string name="routing_error_not_authorized">Yetkisiz</string>
     <string name="routing_error_pki_failed">Şifreli Gönderme Başarısız</string>
     <string name="routing_error_pki_unknown_pubkey">Bilinmeyen Genel Anahtar</string>
+    <string name="routing_error_admin_bad_session_key">Hatalı oturum anahtarı</string>
+    <string name="routing_error_admin_public_key_unauthorized">Genel Anahtar yetkisiz</string>
     <string name="role_client">Uygulamaya bağlı veya bağımsız mesajlaşma cihazı.</string>
     <string name="role_client_mute">Diğer cihazlardan gelen paketleri tekrarlamayan cihaz.</string>
     <string name="role_router">Mesajları tekrarlayarak ağ kapsamını genişletmek için altyapı düğümü. Düğümler listesinde görünür.</string>
+    <string name="role_router_client">Hem ROUTER hem de CLIENT\'ın bir kombinasyonu. Mobil cihazlar için değildir.</string>
     <string name="role_repeater">Mesajları minimum ek yük ile tekrarlayarak ağ kapsamını genişletmek için altyapı düğümü. Düğümler listesinde görünmez.</string>
     <string name="role_tracker">Öncelikli olarak konum paketlerini yayınlar.</string>
     <string name="role_sensor">Öncelikli olarak telemetri paketlerini yayınlar.</string>
@@ -37,6 +40,12 @@
     <string name="role_client_hidden">Gizlilik veya güç tasarrufu için sadece gerektiğinde yayın yapan cihaz.</string>
     <string name="role_lost_and_found">Cihazın kurtarılmasına yardımcı olmak için konumunu düzenli olarak varsayılan kanala mesaj olarak gönderir.</string>
     <string name="role_tak_tracker">Rutin yayınları azaltarak otomatik TAK PLI yayınlarını etkinleştirir.</string>
+    <string name="rebroadcast_mode_all">Tespit edilen herhangi bir mesajı, özel kanalımızdaysa veya aynı LoRa parametrelerine sahip başka bir ağdan geliyorsa yeniden yayınlayın.</string>
+    <string name="rebroadcast_mode_all_skip_decoding">ALL ile aynı davranış, ancak paketleri çözmeksizin yeniden yayınlar. Yalnızca Repeater rolünde kullanılabilir. Bunu başka herhangi bir rolde ayarlamak ALL davranışıyla sonuçlanacaktır.</string>
+    <string name="rebroadcast_mode_local_only">Açık olan veya şifresini çözemediği yabancı ağlardan geldiği tespit edilen mesajları yok sayar. Yalnızca düğümlerin yerel birincil / ikincil kanallarında mesajı yeniden yayınlar.</string>
+    <string name="rebroadcast_mode_known_only">LOCAL ONLY gibi yabancı ağlardan geldiği tespit edilen mesajları yok sayar, ancak düğümün bilinen listesinde bulunmayan düğümlerden gelen mesajları da yok sayarak bir adım daha ileri gider.</string>
+    <string name="rebroadcast_mode_none">Yalnızca SENSOR, TRACKER ve TAK_TRACKER rolleri için izin verilir, CLIENT_MUTE rolünden farklı olarak tüm yeniden yayınları engeller.</string>
+    <string name="rebroadcast_mode_core_portnums_only">TAK, RangeTest, PaxCounter gibi standart olmayan portnum\'ları yok sayarken sadece standart portnum\'lar olan NodeInfo, Text, Position, Telemetry ve Routing\'i yeniden yayınlar.</string>
     <string name="channel_name">Kanal Adı</string>
     <string name="channel_options">Kanal Seçenekleri</string>
     <string name="qr_code">Karekod</string>
@@ -227,7 +236,7 @@
     <string name="logs">Kayıtlar</string>
     <string name="hops_away">Atlama Üzerinden</string>
     <string name="info">Bilgi</string>
-    <string name="ch_util_definition">Utilization for the current channel, including well formed TX, RX and malformed RX (aka noise).</string>
+    <string name="ch_util_definition">İyi biçimlendirilmiş TX ve RX ile hatalı biçimlendirilmiş RX (gürültü) dahil olmak üzere mevcut kanal için kullanım.</string>
     <string name="air_util_definition">Son bir saat içinde kullanılan iletim için yayın süresi yüzdesi.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Paylaşılan Anahtar</string>
@@ -236,4 +245,32 @@
     <string name="encryption_pkc_text">Doğrudan mesajlar şifreleme için yeni genel anahtar alt yapısını kullanmaktadır. Bu bağlamda 2.5 ve üstü firmware yüklemeniz gerekmektedir.</string>
     <string name="encryption_error">Genel Anahtar Uyuşmazlığı</string>
     <string name="encryption_error_text">Genel anahtar, kayıtlı anahtarla eşleşmiyor. Düğümü kaldırabilir ve tekrar anahtar değişimi yapmasına izin verebilirsiniz, ancak bu daha ciddi bir güvenlik sorununa işaret edebilir. Anahtar değişikliğinin fabrika ayarlarına sıfırlamadan veya başka bir kasıtlı eylemden kaynaklanıp kaynaklanmadığını belirlemek için başka bir güvenilir kanal aracılığıyla kullanıcıyla iletişime geçiniz.</string>
+    <string name="request_userinfo">Kullanıcı bilgisi iste</string>
+    <string name="meshtastic_new_nodes_notifications">Yeni düğüm bildirimleri</string>
+    <string name="more_details">Daha fazla detay</string>
+    <string name="snr">SNR</string>
+    <string name="snr_definition">Sinyal-Gürültü Oranı, iletişimde istenen bir sinyalin seviyesini arka plan gürültüsü seviyesine mukayese ölçmek için kullanılan bir ölçüdür. Meshtastic ve diğer kablosuz sistemlerde, daha yüksek bir SNR, veri iletiminin güvenilirliğini ve kalitesini artırabilecek daha net bir sinyale işaret eder.</string>
+    <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Alınan Sinyal Gücü Göstergesi, anten tarafından alınan güç seviyesini belirlemek için kullanılan bir ölçüdür. Daha yüksek bir RSSI değeri genellikle daha güçlü ve daha istikrarlı bir bağlantıya işaret eder.</string>
+    <string name="iaq_definition">(İç Hava Kalitesi) Bosch BME680 tarafından ölçülen bağıl ölçekli IAQ değeri. Değer Aralığı 0–500.</string>
+    <string name="device_metrics_log">Cihaz Ölçüm Kayıtları</string>
+    <string name="node_map">Düğüm Haritası</string>
+    <string name="position_log">Konum Kayıtları</string>
+    <string name="env_metrics_log">Çevre Ölçüm Kayıtları</string>
+    <string name="sig_metrics_log">Sinyal Seviyesi Kayıtları</string>
+    <string name="administration">Yönetim</string>
+    <string name="remote_admin">Uzaktan Yönetim</string>
+    <string name="bad">Kötü</string>
+    <string name="fair">İdare Eder</string>
+    <string name="good">İyi</string>
+    <string name="none_quality">Yok</string>
+    <string name="signal">Sinyal</string>
+    <string name="signal_quality">Sinyal Kalitesi</string>
+    <string name="traceroute_log">Yol İzleme Kayıtları</string>
+    <string name="traceroute_direct">Doğrudan</string>
+    <plurals name="traceroute_hops">
+        <item quantity="one">1 atlama</item>
+        <item quantity="other">%d atlama</item>
+    </plurals>
+    <string name="traceroute_diff">İleri atlama %1$d Geri atlama %2$d</string>
 </resources>

@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.service
 
 import android.app.Notification
@@ -18,10 +35,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.android.notificationManager
 import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.util.PendingIntentCompat
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.geeksville.mesh.util.formatUptime
 
 @Suppress("TooManyFunctions")
 class MeshServiceNotifications(
@@ -32,8 +46,6 @@ class MeshServiceNotifications(
         private const val FIFTEEN_MINUTES_IN_MILLIS = 15L * 60 * 1000
         const val OPEN_MESSAGE_ACTION = "com.geeksville.mesh.OPEN_MESSAGE_ACTION"
         const val OPEN_MESSAGE_EXTRA_CONTACT_KEY = "com.geeksville.mesh.OPEN_MESSAGE_EXTRA_CONTACT_KEY"
-        const val OPEN_MESSAGE_EXTRA_CONTACT_NAME =
-            "com.geeksville.mesh.OPEN_MESSAGE_EXTRA_CONTACT_NAME"
     }
 
     private val notificationManager: NotificationManager get() = context.notificationManager
@@ -133,37 +145,29 @@ class MeshServiceNotifications(
         }
     }
 
-    private fun formatStatsString(stats: LocalStats?, currentStatsUpdatedAtMillis: Long?): String {
-        val updatedAt = "Next update at: ${
-            currentStatsUpdatedAtMillis?.let {
-                val date = Date(it + FIFTEEN_MINUTES_IN_MILLIS) // Add 15 minutes in milliseconds
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                dateFormat.format(date)
-            } ?: "???"
-        }"
-        val statsJoined = stats?.allFields?.mapNotNull { (k, v) ->
-            if (k.name == "num_online_nodes" || k.name == "num_total_nodes") {
-                return@mapNotNull null
-            }
-            "${
+    private fun LocalStats?.formatToString(): String = this?.allFields?.mapNotNull { (k, v) ->
+        when (k.name) {
+            "num_online_nodes", "num_total_nodes" -> return@mapNotNull null
+            "uptime_seconds" -> "Uptime: ${formatUptime(v as Int)}"
+            "channel_utilization" -> "ChUtil: %.2f%%".format(v)
+            "air_util_tx" -> "AirUtilTX: %.2f%%".format(v)
+            else -> "${
                 k.name.replace('_', ' ').split(" ")
                     .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
-            }=$v"
-        }?.joinToString("\n") ?: "No Local Stats"
-        return "$updatedAt\n$statsJoined"
-    }
+            }: $v"
+        }
+    }?.joinToString("\n") ?: "No Local Stats"
 
     fun updateServiceStateNotification(
         summaryString: String? = null,
         localStats: LocalStats? = null,
         currentStatsUpdatedAtMillis: Long? = null,
     ) {
-        val statsString = formatStatsString(localStats, currentStatsUpdatedAtMillis)
         notificationManager.notify(
             notifyId,
             createServiceStateNotification(
                 name = summaryString.orEmpty(),
-                message = statsString,
+                message = localStats.formatToString(),
                 nextUpdateAt = currentStatsUpdatedAtMillis?.plus(FIFTEEN_MINUTES_IN_MILLIS)
             )
         )
@@ -187,21 +191,20 @@ class MeshServiceNotifications(
             context,
             0,
             Intent(context, MainActivity::class.java),
-            PendingIntentCompat.FLAG_IMMUTABLE
+            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
     }
 
-    private fun openMessageIntent(contactKey: String, contactName: String): PendingIntent {
+    private fun openMessageIntent(contactKey: String): PendingIntent {
         val intent = Intent(context, MainActivity::class.java)
         intent.action = OPEN_MESSAGE_ACTION
         intent.putExtra(OPEN_MESSAGE_EXTRA_CONTACT_KEY, contactKey)
-        intent.putExtra(OPEN_MESSAGE_EXTRA_CONTACT_NAME, contactName)
 
         val pendingIntent = PendingIntent.getActivity(
             context,
             0,
             intent,
-            PendingIntentCompat.FLAG_IMMUTABLE
+            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
         return pendingIntent
     }
@@ -271,7 +274,7 @@ class MeshServiceNotifications(
         }
         val person = Person.Builder().setName(name).build()
         with(messageNotificationBuilder) {
-            setContentIntent(openMessageIntent(contactKey, name))
+            setContentIntent(openMessageIntent(contactKey))
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_MESSAGE)
             setAutoCancel(true)

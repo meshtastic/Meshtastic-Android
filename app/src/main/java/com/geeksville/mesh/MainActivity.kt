@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh
 
 import android.app.Activity
@@ -48,7 +65,6 @@ import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceRepository
@@ -63,6 +79,7 @@ import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.map.MapFragment
 import com.geeksville.mesh.ui.navigateToMessages
 import com.geeksville.mesh.ui.navigateToNavGraph
+import com.geeksville.mesh.ui.navigateToShareMessage
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.LanguageUtils
@@ -303,12 +320,7 @@ class MainActivity : AppCompatActivity(), Logging {
         when (appLinkAction) {
             Intent.ACTION_VIEW -> {
                 debug("Asked to open a channel URL - ask user if they want to switch to that channel.  If so send the config to the radio")
-                try {
-                    appLinkData?.let { model.requestChannelSet(it.toChannelSet()) }
-                } catch (ex: Throwable) {
-                    errormsg("Channel url error: ${ex.message}")
-                    showSnackbar("${getString(R.string.channel_invalid)}: ${ex.message}")
-                }
+                appLinkData?.let(model::requestChannelUrl)
 
                 // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
             }
@@ -316,9 +328,7 @@ class MainActivity : AppCompatActivity(), Logging {
             MeshServiceNotifications.OPEN_MESSAGE_ACTION -> {
                 val contactKey =
                     intent.getStringExtra(MeshServiceNotifications.OPEN_MESSAGE_EXTRA_CONTACT_KEY)
-                val contactName =
-                    intent.getStringExtra(MeshServiceNotifications.OPEN_MESSAGE_EXTRA_CONTACT_NAME)
-                showMessages(contactKey, contactName)
+                showMessages(contactKey)
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
@@ -326,6 +336,13 @@ class MainActivity : AppCompatActivity(), Logging {
             }
 
             Intent.ACTION_MAIN -> {
+            }
+
+            Intent.ACTION_SEND -> {
+                val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+                if (text != null) {
+                    shareMessages(text)
+                }
             }
 
             else -> {
@@ -591,10 +608,17 @@ class MainActivity : AppCompatActivity(), Logging {
         binding.pager.currentItem = 5
     }
 
-    private fun showMessages(contactKey: String?, contactName: String?) {
+    private fun showMessages(contactKey: String?) {
         model.setCurrentTab(0)
-        if (contactKey != null && contactName != null) {
-            supportFragmentManager.navigateToMessages(contactKey, contactName)
+        if (contactKey != null) {
+            supportFragmentManager.navigateToMessages(contactKey)
+        }
+    }
+
+    private fun shareMessages(message: String?) {
+        model.setCurrentTab(0)
+        if (message != null) {
+            supportFragmentManager.navigateToShareMessage(message)
         }
     }
 

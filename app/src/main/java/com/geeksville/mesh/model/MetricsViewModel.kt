@@ -1,9 +1,28 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.model
 
 import android.app.Application
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.annotation.StringRes
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,17 +37,20 @@ import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.entity.MeshLog
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.ui.Route
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
@@ -46,6 +68,7 @@ data class MetricsState(
     val isManaged: Boolean = true,
     val isFahrenheit: Boolean = false,
     val displayUnits: DisplayUnits = DisplayUnits.METRIC,
+    val node: NodeEntity? = null,
     val deviceMetrics: List<Telemetry> = emptyList(),
     val environmentMetrics: List<Telemetry> = emptyList(),
     val signalMetrics: List<MeshPacket> = emptyList(),
@@ -99,6 +122,48 @@ enum class TimeFrame(
     } else {
         System.currentTimeMillis() / 1000 - this.seconds
     }
+
+    /**
+     * The time interval to draw the vertical lines representing
+     * time on the x-axis.
+     *
+     * @return seconds epoch seconds
+     */
+    fun lineInterval(): Long {
+        return when (this.ordinal) {
+            TWENTY_FOUR_HOURS.ordinal,
+            FORTY_EIGHT_HOURS.ordinal ->
+                TimeUnit.HOURS.toSeconds(1)
+            ONE_WEEK.ordinal,
+            TWO_WEEKS.ordinal ->
+                TimeUnit.DAYS.toSeconds(1)
+            else ->
+                TimeUnit.DAYS.toSeconds(7)
+        }
+    }
+
+    /**
+     * Calculates the needed [Dp] depending on the amount of time being plotted.
+     *
+     * @param time in seconds
+     */
+    fun dp(screenWidth: Int, time: Long): Dp {
+
+        val timePerScreen = when (this.ordinal) {
+            TWENTY_FOUR_HOURS.ordinal,
+            FORTY_EIGHT_HOURS.ordinal ->
+                TimeUnit.HOURS.toSeconds(1)
+            ONE_WEEK.ordinal,
+            TWO_WEEKS.ordinal ->
+                TimeUnit.DAYS.toSeconds(1)
+            else ->
+                TimeUnit.DAYS.toSeconds(7)
+        }
+
+        val multiplier = time / timePerScreen
+        val dp = (screenWidth * multiplier).toInt().dp
+        return dp.takeIf { it != 0.dp } ?: screenWidth.dp
+    }
 }
 
 private fun MeshPacket.hasValidSignal(): Boolean =
@@ -143,6 +208,13 @@ class MetricsViewModel @Inject constructor(
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
     init {
+        @OptIn(ExperimentalCoroutinesApi::class)
+        radioConfigRepository.nodeDBbyNum
+            .mapLatest { nodes -> nodes[destNum] }
+            .distinctUntilChanged()
+            .onEach { node -> _state.update { state -> state.copy(node = node) } }
+            .launchIn(viewModelScope)
+
         radioConfigRepository.deviceProfileFlow.onEach { profile ->
             val moduleConfig = profile.moduleConfig
             _state.update { state ->

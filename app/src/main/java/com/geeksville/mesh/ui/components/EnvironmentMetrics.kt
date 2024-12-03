@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui.components
 
 import androidx.compose.foundation.Canvas
@@ -46,7 +63,7 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.components.CommonCharts.X_AXIS_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
-import com.geeksville.mesh.ui.components.CommonCharts.TIME_FORMAT
+import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 
 private val ENVIRONMENT_METRICS_COLORS = listOf(Color.Red, Color.Blue, Color.Green)
 private enum class Environment {
@@ -153,8 +170,8 @@ private fun EnvironmentMetricsChart(
         return
     }
     TimeLabels(
-        oldest = telemetries.first().time * MS_PER_SEC,
-        newest = telemetries.last().time * MS_PER_SEC
+        oldest = telemetries.first().time,
+        newest = telemetries.last().time
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -411,7 +428,7 @@ private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahre
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = TIME_FORMAT.format(time),
+                            text = DATE_TIME_FORMAT.format(time),
                             style = TextStyle(fontWeight = FontWeight.Bold),
                             fontSize = MaterialTheme.typography.button.fontSize
                         )

@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.repository.datastore
 
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
@@ -13,9 +30,10 @@ import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.deviceProfile
-import com.geeksville.mesh.model.NodeDB
+import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.model.getChannelUrl
 import com.geeksville.mesh.service.MeshService.ConnectionState
+import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -30,7 +48,7 @@ import javax.inject.Inject
  */
 class RadioConfigRepository @Inject constructor(
     private val serviceRepository: ServiceRepository,
-    private val nodeDB: NodeDB,
+    private val nodeDB: NodeRepository,
     private val channelSetRepository: ChannelSetRepository,
     private val localConfigRepository: LocalConfigRepository,
     private val moduleConfigRepository: ModuleConfigRepository,
@@ -175,6 +193,12 @@ class RadioConfigRepository @Inject constructor(
 
     suspend fun emitMeshPacket(packet: MeshPacket) = coroutineScope {
         serviceRepository.emitMeshPacket(packet)
+    }
+
+    val serviceAction: SharedFlow<ServiceAction> get() = serviceRepository.serviceAction
+
+    suspend fun onServiceAction(action: ServiceAction) = coroutineScope {
+        serviceRepository.onServiceAction(action)
     }
 
     val tracerouteResponse: StateFlow<String?> get() = serviceRepository.tracerouteResponse

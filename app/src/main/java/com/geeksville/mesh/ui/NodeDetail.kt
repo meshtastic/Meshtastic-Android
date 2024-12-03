@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 @file:Suppress("TooManyFunctions")
 
 package com.geeksville.mesh.ui
@@ -31,8 +48,10 @@ import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.ChargingStation
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Height
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyOff
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Numbers
@@ -40,16 +59,19 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.Router
+import androidx.compose.material.icons.filled.Scale
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Work
+import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -60,6 +82,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.MetricsState
@@ -67,20 +90,22 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.util.DistanceUnit
 import com.geeksville.mesh.util.formatAgo
-import java.util.concurrent.TimeUnit
+import com.geeksville.mesh.util.formatUptime
+import com.geeksville.mesh.util.thenIf
 import kotlin.math.ln
 
 @Composable
 fun NodeDetailScreen(
-    node: NodeEntity?,
     viewModel: MetricsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
     onNavigate: (Any) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    if (node != null) {
+    if (state.node != null) {
+        val node = state.node ?: return
         NodeDetailList(
             node = node,
             metricsState = state,
@@ -282,6 +307,7 @@ private fun InfoCard(
     icon: ImageVector,
     text: String,
     value: String,
+    rotateIcon: Float = 0f,
 ) {
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -299,7 +325,9 @@ private fun InfoCard(
             Icon(
                 imageVector = icon,
                 contentDescription = text,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier
+                    .size(24.dp)
+                    .thenIf(rotateIcon != 0f) { rotate(rotateIcon) },
             )
             Text(
                 text = text,
@@ -311,30 +339,18 @@ private fun InfoCard(
                 text = value,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.h5
+                style = if (value.length < 7) {
+                    MaterialTheme.typography.h5
+                } else {
+                    MaterialTheme.typography.h6
+                },
             )
         }
     }
 }
 
-private fun formatUptime(seconds: Int): String = formatUptime(seconds.toLong())
-
-private fun formatUptime(seconds: Long): String {
-    val days = TimeUnit.SECONDS.toDays(seconds)
-    val hours = TimeUnit.SECONDS.toHours(seconds) % TimeUnit.DAYS.toHours(1)
-    val minutes = TimeUnit.SECONDS.toMinutes(seconds) % TimeUnit.HOURS.toMinutes(1)
-    val secs = seconds % TimeUnit.MINUTES.toSeconds(1)
-
-    return listOfNotNull(
-        "${days}d".takeIf { days > 0 },
-        "${hours}h".takeIf { hours > 0 },
-        "${minutes}m".takeIf { minutes > 0 },
-        "${secs}s".takeIf { secs > 0 },
-    ).joinToString(" ")
-}
-
 @OptIn(ExperimentalLayoutApi::class)
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun EnvironmentMetrics(
     node: NodeEntity,
@@ -402,6 +418,37 @@ private fun EnvironmentMetrics(
                 value = iaq.toString()
             )
         }
+        if (distance != 0f) {
+            InfoCard(
+                icon = Icons.Default.Height,
+                text = "Distance",
+                value = "%.0f mm".format(distance)
+            )
+        }
+        if (lux != 0f) {
+            InfoCard(
+                icon = Icons.Default.LightMode,
+                text = "Lux",
+                value = "%.0f".format(lux)
+            )
+        }
+        if (hasWindSpeed()) {
+            @Suppress("MagicNumber")
+            val normalizedBearing = (windDirection % 360 + 360) % 360
+            InfoCard(
+                icon = Icons.Outlined.Navigation,
+                text = "Wind",
+                value = windSpeed.toSpeedString(),
+                rotateIcon = normalizedBearing.toFloat(),
+            )
+        }
+        if (weight != 0f) {
+            InfoCard(
+                icon = Icons.Default.Scale,
+                text = "Weight",
+                value = "%.2f kg".format(weight)
+            )
+        }
     }
 }
 
@@ -411,6 +458,12 @@ private fun Float.toTempString(isFahrenheit: Boolean) = if (isFahrenheit) {
     "%.0f°F".format(fahrenheit)
 } else {
     "%.0f°C".format(this)
+}
+
+@Suppress("MagicNumber")
+private fun Float.toSpeedString() = when (DistanceUnit.getFromLocale()) {
+    DisplayUnits.METRIC -> "%.0f km/h".format(this * 3.6)
+    else -> "%.0f mph".format(this * 2.23694f)
 }
 
 // Magnus-Tetens approximation

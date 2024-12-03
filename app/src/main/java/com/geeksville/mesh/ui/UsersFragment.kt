@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui
 
 import android.os.Bundle
@@ -12,7 +29,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
@@ -41,7 +57,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
         val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
         val contactKey = "$channel${user.id}"
         info("calling MessagesFragment filter: $contactKey")
-        parentFragmentManager.navigateToMessages(contactKey, user.longName)
+        parentFragmentManager.navigateToMessages(contactKey)
     }
 
     private fun navigateToNodeDetails(nodeNum: Int) {
@@ -83,16 +99,6 @@ fun NodesScreen(
     val ourNode by model.ourNodeInfo.collectAsStateWithLifecycle()
 
     val listState = rememberLazyListState()
-    val focusedNode by model.focusedNode.collectAsStateWithLifecycle()
-    LaunchedEffect(focusedNode) {
-        focusedNode?.let { node ->
-            val index = nodes.indexOfFirst { it.num == node.num }
-            if (index != -1) {
-                listState.animateScrollToItem(index)
-            }
-            model.focusUserNode(null)
-        }
-    }
 
     val currentTimeMillis = rememberTimeTickWithLifecycle()
     val connectionState by model.connectionState.collectAsStateWithLifecycle()
@@ -136,7 +142,6 @@ fun NodesScreen(
                         MenuItemAction.MoreDetails -> navigateToNodeDetails(node.num)
                     }
                 },
-                blinking = node == focusedNode,
                 expanded = state.showDetails,
                 currentTimeMillis = currentTimeMillis,
                 isConnected = connectionState.isConnected(),

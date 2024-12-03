@@ -15,11 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.radio
+package com.geeksville.mesh.util
 
-import java.io.Closeable
+import androidx.compose.ui.Modifier
 
-interface IRadioInterface : Closeable {
-    fun handleSendToRadio(p: ByteArray)
-}
-
+/**
+ * Conditionally applies the [action] to the receiver [Modifier], if [precondition] is true.
+ * Returns the receiver as-is otherwise.
+ */
+inline fun Modifier.thenIf(precondition: Boolean, action: Modifier.() -> Modifier): Modifier =
+    if (precondition) action() else this
