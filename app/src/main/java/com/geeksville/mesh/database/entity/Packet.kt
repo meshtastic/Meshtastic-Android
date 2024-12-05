@@ -33,18 +33,18 @@ data class PacketEntity(
     @Relation(entity = ReactionEntity::class, parentColumn = "packet_id", entityColumn = "reply_id")
     val reactions: List<ReactionEntity> = emptyList(),
 ) {
-    suspend fun toMessage(getUser: suspend (userId: String?) -> User) = with(packet) {
+    suspend fun toMessage(getNode: suspend (userId: String?) -> NodeEntity) = with(packet) {
         Message(
             uuid = uuid,
             receivedTime = received_time,
-            user = getUser(data.from),
+            node = getNode(data.from),
             text = data.text.orEmpty(),
             time = getShortDateTime(data.time),
             read = read,
             status = data.status,
             routingError = routingError,
             packetId = packetId,
-            emojis = reactions.toReaction(getUser),
+            emojis = reactions.toReaction(getNode),
         )
     }
 }
@@ -101,14 +101,14 @@ data class ReactionEntity(
 )
 
 private suspend fun ReactionEntity.toReaction(
-    getUser: suspend (userId: String?) -> User
+    getNode: suspend (userId: String?) -> NodeEntity
 ) = Reaction(
     replyId = replyId,
-    user = getUser(userId),
+    user = getNode(userId).user,
     emoji = emoji,
     timestamp = timestamp,
 )
 
 private suspend fun List<ReactionEntity>.toReaction(
-    getUser: suspend (userId: String?) -> User
-) = this.map { it.toReaction(getUser) }
+    getNode: suspend (userId: String?) -> NodeEntity
+) = this.map { it.toReaction(getNode) }

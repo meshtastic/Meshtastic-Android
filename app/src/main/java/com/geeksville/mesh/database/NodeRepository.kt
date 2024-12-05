@@ -67,6 +67,12 @@ class NodeRepository @Inject constructor(
         .conflate()
         .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, emptyMap())
 
+    fun getNode(userId: String): NodeEntity = nodeDBbyNum.value.values.find { it.user.id == userId }
+        ?: NodeEntity(
+            num = DataPacket.idToDefaultNodeNum(userId) ?: 0,
+            user = getUser(userId),
+        )
+
     fun getUser(nodeNum: Int): MeshProtos.User = getUser(DataPacket.nodeNumToDefaultId(nodeNum))
 
     fun getUser(userId: String): MeshProtos.User =

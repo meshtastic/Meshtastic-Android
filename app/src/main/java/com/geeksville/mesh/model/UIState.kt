@@ -255,6 +255,7 @@ class UIViewModel @Inject constructor(
         get() = preferences.getInt(MAP_STYLE_ID, 0)
         set(value) = preferences.edit { putInt(MAP_STYLE_ID, value) }
 
+    fun getNode(userId: String?) = nodeDB.getNode(userId ?: DataPacket.ID_BROADCAST)
     fun getUser(userId: String?) = nodeDB.getUser(userId ?: DataPacket.ID_BROADCAST)
 
     private val _snackbarText = MutableLiveData<Any?>(null)
@@ -330,7 +331,7 @@ class UIViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey)
-        .mapLatest { list -> list.map { it.toMessage(::getUser) } }
+        .mapLatest { list -> list.map { it.toMessage(::getNode) } }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->
